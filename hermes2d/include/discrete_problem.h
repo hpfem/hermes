@@ -489,12 +489,6 @@ namespace Hermes
       /// Element usage flag: iempty[i] == true if the current state does not posses an active element in the i-th space.
       Hermes::vector<bool> isempty;
 
-      /// A conversion table of user's (string) element markers and the internal (int) ones.
-      Mesh::ElementMarkersConversion* element_markers_conversion;
-
-      /// A conversion table of user's (string) boundary markers and the internal (int) ones.
-      Mesh::BoundaryMarkersConversion* boundary_markers_conversion;
-
       /// Instance of the class Geom used in the calculation of integration order.
       Geom<Hermes::Ord> geom_ord;
 

@@ -247,7 +247,7 @@ namespace Hermes
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
         mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
-        marker = mesh->element_markers_conversion.get_internal_marker(el_marker);
+        marker = mesh->element_markers_conversion.get_internal_marker(el_marker).marker;
 
         if(nv == 4) {
           Mesh::check_triangle(i, v0, v1, v2);
@@ -287,7 +287,7 @@ namespace Hermes
           // This functions check if the user-supplied marker on this element has been
           // already used, and if not, inserts it in the appropriate structure.
           mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
-          marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker);
+          marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker).marker;
 
           en->marker = marker;
 
@@ -475,7 +475,7 @@ namespace Hermes
         for (unsigned i = 0; i < e->nvert; i++)
           if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
             const char* nl = first ? "\n" : ",\n";  first = false;
-            fprintf(f, "%s  { %d, %d, \"%s\" }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).c_str());
+            fprintf(f, "%s  { %d, %d, \"%s\" }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
           }
           fprintf(f, "\n}\n\n");
 
@@ -490,18 +490,18 @@ namespace Hermes
                 }
                 if (!first) fprintf(f, "\n}\n\n");
 
-                // save refinements
-                unsigned temp = mesh->seq;
-                mesh->seq = mesh->nbase;
-                first = true;
-                for_all_base_elements(e, mesh)
-                  save_refinements(mesh, f, e, e->id, first);
-                if (!first) fprintf(f, "\n}\n\n");
+          // save refinements
+          unsigned temp = mesh->seq;
+          mesh->seq = mesh->nbase;
+          first = true;
+          for_all_base_elements(e, mesh)
+            save_refinements(mesh, f, e, e->id, first);
+          if (!first) fprintf(f, "\n}\n\n");
 
-                mesh->seq = temp;
-                fclose(f);
+          mesh->seq = temp;
+          fclose(f);
 
-                return true;
+          return true;
     }
   }
 }

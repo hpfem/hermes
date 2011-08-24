@@ -78,15 +78,7 @@ namespace Hermes
 
       /// Destructor.
       ~WeakForm();
-
-      Mesh::ElementMarkersConversion* get_element_markers_conversion() { 
-        return element_markers_conversion; 
-      };
-
-      Mesh::BoundaryMarkersConversion* get_boundary_markers_conversion() { 
-        return boundary_markers_conversion; 
-      };
-
+      
       /// Adds volumetric matrix form.
       void add_matrix_form(MatrixFormVol<Scalar>* mfv);
 
@@ -139,62 +131,6 @@ namespace Hermes
         Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage = false);
 
       bool** get_blocks(bool force_diagonal_blocks);
-      
-      /// Returns a read-only pointer to previously added volumetric matrix form.
-      const MatrixFormVol<Scalar>* get_matrix_form(unsigned int i)
-      {
-        if (i >= mfvol.size()) error("WeakForm::get_matrix_form: There are only %d forms, requested form #%d.", mfvol.size(), i);
-        return mfvol[i];
-      }
-      
-      /// Returns a read-only pointer to previously added surface matrix form.
-      const MatrixFormSurf<Scalar>* get_matrix_form_surf(unsigned int i)
-      {
-        if (i >= mfsurf.size()) error("WeakForm::get_matrix_form_surf: There are only %d forms, requested form #%d.", mfsurf.size(), i);
-        return mfsurf[i];
-      }
-      
-      /// Returns a read-only pointer to previously added volumetric vector form.
-      const VectorFormVol<Scalar>* get_vector_form(unsigned int i)
-      {
-        if (i >= vfvol.size()) error("WeakForm::get_vector_form: There are only %d forms, requested form #%d.", vfvol.size(), i);
-        return vfvol[i];
-      }
-      
-      /// Returns a read-only pointer to previously added surface vector form.
-      const VectorFormSurf<Scalar>* get_vector_form_surf(unsigned int i)
-      {
-        if (i >= vfsurf.size()) error("WeakForm::get_vector_form_surf: There are only %d forms, requested form #%d.", vfsurf.size(), i);
-        return vfsurf[i];
-      }
-      
-      /// Returns a read-only pointer to previously added multicomponent volumetric matrix form.
-      const MultiComponentMatrixFormVol<Scalar>* get_multicomponent_matrix_form(unsigned int i)
-      {
-        if (i >= mfvol_mc.size()) error("WeakForm::get_multicomponent_matrix_form: There are only %d forms, requested form #%d.", mfvol_mc.size(), i);
-        return mfvol_mc[i];
-      }
-      
-      /// Returns a read-only pointer to previously added multicomponent surface matrix form.
-      const MultiComponentMatrixFormSurf<Scalar>* get_multicomponent_matrix_form_surf(unsigned int i)
-      {
-        if (i >= mfsurf_mc.size()) error("WeakForm::get_multicomponent_matrix_form_surf: There are only %d forms, requested form #%d.", mfsurf_mc.size(), i);
-        return mfsurf_mc[i];
-      }
-      
-      /// Returns a read-only pointer to previously added multicomponent volumetric vector form.
-      const MultiComponentVectorFormVol<Scalar>* get_multicomponent_vector_form(unsigned int i)
-      {
-        if (i >= vfvol_mc.size()) error("WeakForm::get_multicomponent_vector_form: There are only %d forms, requested form #%d.", vfvol_mc.size(), i);
-        return vfvol_mc[i];
-      }
-      
-      /// Returns a read-only pointer to previously added multicomponent surface vector form.
-      const MultiComponentVectorFormSurf<Scalar>* get_multicomponent_vector_form_surf(unsigned int i)
-      {
-        if (i >= vfsurf_mc.size()) error("WeakForm::get_multicomponent_vector_form_surf: There are only %d forms, requested form #%d.", vfsurf_mc.size(), i);
-        return vfsurf_mc[i];
-      }
 
     protected:
       double current_time;
@@ -229,14 +165,6 @@ namespace Hermes
       /// Holds multicomponent surface vector forms.
       Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
 
-      /// To be called only by the constructor of DiscreteProblem.
-      void set_markers_conversion(Mesh::ElementMarkersConversion* element_markers_conversion, 
-        Mesh::BoundaryMarkersConversion* boundary_markers_conversion)
-      {
-        this->element_markers_conversion = element_markers_conversion;
-        this->boundary_markers_conversion = boundary_markers_conversion;
-      }
-
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
 
@@ -245,10 +173,6 @@ namespace Hermes
 
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
         Mesh* m1, Mesh* m2, Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
-
-      Mesh::ElementMarkersConversion* element_markers_conversion;
-
-      Mesh::BoundaryMarkersConversion* boundary_markers_conversion;
 
       friend class DiscreteProblem<Scalar>;
       friend class RungeKutta<Scalar>;

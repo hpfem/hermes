@@ -152,7 +152,7 @@ namespace Hermes
 
                 if (en->bnd)
                   if(this->essential_bcs != NULL)
-                    if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker)) != NULL)
+                    if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker).marker) != NULL)
                       nd->dof = this->H2D_CONSTRAINED_DOF;
                     else 
                     {
@@ -254,7 +254,7 @@ namespace Hermes
 
       // Obtain linear part of the projection.
       // If the BC on this part of the boundary is constant.
-      EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
+      EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
 
       if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
@@ -295,7 +295,7 @@ namespace Hermes
             surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
             // If the BC on this part of the boundary is constant.
-            EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker));
+            EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
 
             if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
               rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)

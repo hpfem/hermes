@@ -178,7 +178,7 @@ namespace Hermes
           {
             if (elems[i].id < 0) continue;
             char text[2000];
-            sprintf(text, "%s", mesh->get_element_markers_conversion().get_user_marker(elems[i].type).c_str());
+            sprintf(text, "%s", mesh->get_element_markers_conversion().get_user_marker(elems[i].type).marker.c_str());
             draw_text(transform_x(elems[i].x), transform_y(elems[i].y), text, 0);
           }
         }

@@ -270,7 +270,7 @@ namespace Hermes
       if(marker == HERMES_ANY)
         set_uniform_order_internal(Ord2(order,order), -1234);
       else
-        set_uniform_order_internal(Ord2(order,order), mesh->element_markers_conversion.get_internal_marker(marker));
+        set_uniform_order_internal(Ord2(order,order), mesh->element_markers_conversion.get_internal_marker(marker).marker);
 
       // since space changed, enumerate basis functions
       this->assign_dofs();
@@ -724,7 +724,7 @@ namespace Hermes
         {
           if (e->en[i]->bnd)
             if(essential_bcs != NULL)
-              if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker)) != NULL)
+              if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != NULL)
               {
                 j = e->next_vert(i);
                 ndata[e->vn[i]->id].n = 0;
@@ -834,7 +834,7 @@ namespace Hermes
 
         if (nd->dof != H2D_UNASSIGNED_DOF && en->bnd)
           if(essential_bcs != NULL)
-            if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker)) != NULL)
+            if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != NULL)
             {
               int order = get_edge_order_internal(en);
               surf_pos->marker = en->marker;

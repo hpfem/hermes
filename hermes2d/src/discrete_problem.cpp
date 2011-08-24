@@ -108,13 +108,6 @@ namespace Hermes
       // Create global enumeration of dof and fill the ndof variable.
       ndof = Space<Scalar>::assign_dofs(spaces);
 
-      // Update the weak formulation with the user-supplied string markers
-      // according to the conversion table contained in the mesh.
-      element_markers_conversion = &spaces[0]->get_mesh()->element_markers_conversion;
-      boundary_markers_conversion = &spaces[0]->get_mesh()->boundary_markers_conversion;
-      wf->set_markers_conversion(&spaces[0]->get_mesh()->element_markers_conversion, 
-        &spaces[0]->get_mesh()->boundary_markers_conversion);
-
       // There is a special function that sets a DiscreteProblem to be FVM.
       // Purpose is that this constructor looks cleaner and is simpler.
       this->is_fvm = false;
@@ -1151,7 +1144,7 @@ namespace Hermes
       }
 
       // Assemble surface integrals now: loop through surfaces of the element.
-      for (int isurf = 0; isurf < e[0]->get_num_surf(); isurf++)
+      for (int isurf = 0; isurf < rep_element->get_num_surf(); isurf++)
       {
         assemble_surface_integrals(stage, mat, rhs, force_diagonal_blocks,
           block_weights, spss, refmap, u_ext,           surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf],
@@ -1191,10 +1184,26 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < mfv->areas.size(); ss++)
         {
-          if ((mfv->areas[ss] == HERMES_ANY) || (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss])))
+          if(mfv->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).marker == marker); 
+
+            bool marker_on_space_n = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).valid;
+            if(marker_on_space_n)
+              marker_on_space_n = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).marker == marker);
+
+            if (marker_on_space_m && marker_on_space_n)
+            {
+              assemble_this_form = true;
+              break;
+            }
           }
         }
         if (!assemble_this_form)
@@ -1349,20 +1358,6 @@ namespace Hermes
         MultiComponentMatrixFormVol<Scalar>* mfv = stage.mfvol_mc[ww];
         if(fabs(mfv->scaling_factor) < 1e-12) continue;
 
-        // Assemble this form only if one of its areas is HERMES_ANY
-        // of if the element marker coincides with one of the form's areas.
-        bool assemble_this_form = false;
-        for (unsigned int ss = 0; ss < mfv->areas.size(); ss++)
-        {
-          if ((mfv->areas[ss] == HERMES_ANY) || 
-            (marker == element_markers_conversion->get_internal_marker(mfv->areas[ss])))
-          {
-            assemble_this_form = true;
-            break;
-          }
-        }
-        if (assemble_this_form == false) continue;
-
         // If a block scaling table is provided, and if the scaling coefficient
         // A_mn for this block is zero, then the form does not need to be assembled.
         Hermes::vector<double> block_scaling_coeffs;
@@ -1376,6 +1371,35 @@ namespace Hermes
         // Assemble the local stiffness matrix for the form mfv.
         unsigned int m = mfv->coordinates[0].first;
         unsigned int n = mfv->coordinates[0].second;
+        
+        // Assemble this form only if one of its areas is HERMES_ANY
+        // of if the element marker coincides with one of the form's areas.
+        bool assemble_this_form = false;
+        for (unsigned int ss = 0; ss < mfv->areas.size(); ss++)
+        {
+          if(mfv->areas[ss] == HERMES_ANY)
+          {
+            assemble_this_form = true;
+            break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).marker == marker); 
+
+            bool marker_on_space_n = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).valid;
+            if(marker_on_space_n)
+              marker_on_space_n = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).marker == marker);
+
+            if (marker_on_space_m && marker_on_space_n)
+            {
+              assemble_this_form = true;
+              break;
+            }
+          }
+        }
+        if (assemble_this_form == false) continue;
 
         if(mfv->sym)
           for(unsigned int coordinate_i = 0; coordinate_i < mfv->coordinates.size(); coordinate_i++)
@@ -1470,11 +1494,22 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < vfv->areas.size(); ss++)
         {
-          if ((vfv->areas[ss] == HERMES_ANY) || 
-            (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss])))
+          if(vfv->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfv->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfv->areas[ss]).marker == marker); 
+
+            if (marker_on_space_m)
+            {
+              assemble_this_form = true;
+              break;
+            }
           }
         }
         if (assemble_this_form == false) continue;
@@ -1526,21 +1561,32 @@ namespace Hermes
         MultiComponentVectorFormVol<Scalar>* vfv = stage.vfvol_mc[ww];
         if (fabs(vfv->scaling_factor) < 1e-12) continue;
 
+        unsigned int m = vfv->coordinates[0];
+        
         // Assemble this form only if one of its areas is HERMES_ANY
         // of if the element marker coincides with one of the form's areas.
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < vfv->areas.size(); ss++)
         {
-          if ((vfv->areas[ss] == HERMES_ANY) || 
-            (marker == element_markers_conversion->get_internal_marker(vfv->areas[ss])))
+          if(vfv->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
           }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfv->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfv->areas[ss]).marker == marker); 
+
+            if (marker_on_space_m)
+            {
+              assemble_this_form = true;
+              break;
+            }
+          }
         }
         if (assemble_this_form == false) continue;
-
-        unsigned int m = vfv->coordinates[0];
 
         for (unsigned int i = 0; i < al[m]->cnt; i++)
         {
@@ -1582,8 +1628,15 @@ namespace Hermes
         {
           nat[j] = true;
           if(spaces[j]->get_essential_bcs() != NULL)
-            if(spaces[j]->get_essential_bcs()->get_boundary_condition(boundary_markers_conversion->get_user_marker(marker)) != NULL)
+          {
+            if(spaces[j]->get_mesh()->get_boundary_markers_conversion().get_user_marker(marker).valid)
+            {
+              if(spaces[j]->get_essential_bcs()->get_boundary_condition(spaces[j]->get_mesh()->get_boundary_markers_conversion().get_user_marker(marker).marker) != NULL)
+                nat[j] = false;
+            }
+            else
               nat[j] = false;
+          }
         }
         spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);
       }
@@ -2214,11 +2267,26 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < mfs->areas.size(); ss++)
         {
-          if ((mfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(mfs->areas[ss]))
-            || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE))
+          if(mfs->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker); 
+
+            bool marker_on_space_n = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
+            if(marker_on_space_n)
+              marker_on_space_n = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker);
+
+            if (marker_on_space_m && marker_on_space_n)
+            {
+              assemble_this_form = true;
+              break;
+            }
           }
         }
         if (assemble_this_form == false)
@@ -2293,11 +2361,26 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < mfs->areas.size(); ss++)
         {
-          if ((mfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(mfs->areas[ss]))
-            || (mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE))
+          if(mfs->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker); 
+
+            bool marker_on_space_n = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
+            if(marker_on_space_n)
+              marker_on_space_n = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker);
+
+            if (marker_on_space_m && marker_on_space_n)
+            {
+              assemble_this_form = true;
+              break;
+            }
           }
         }
         if (assemble_this_form == false)
@@ -2372,11 +2455,22 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < vfs->areas.size(); ss++)
         {
-          if ((vfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(vfs->areas[ss]))
-            || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE))
+          if(vfs->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfs->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfs->areas[ss]).marker == marker); 
+
+            if (marker_on_space_m)
+            {
+              assemble_this_form = true;
+              break;
+            }
           }
         }
         if (assemble_this_form == false)
@@ -2427,11 +2521,22 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < vfs->areas.size(); ss++)
         {
-          if ((vfs->areas[ss] == HERMES_ANY) || (marker == boundary_markers_conversion->get_internal_marker(vfs->areas[ss]))
-            || (vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE))
+          if(vfs->areas[ss] == HERMES_ANY)
           {
             assemble_this_form = true;
             break;
+          }
+          else
+          {
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfs->areas[ss]).valid;
+            if(marker_on_space_m)
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfs->areas[ss]).marker == marker); 
+
+            if (marker_on_space_m)
+            {
+              assemble_this_form = true;
+              break;
+            }
           }
         }
         if (assemble_this_form == false)

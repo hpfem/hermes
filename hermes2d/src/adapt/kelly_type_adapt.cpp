@@ -192,7 +192,7 @@ namespace Hermes
               continue;
             
             if (error_estimators_vol[iest]->area != HERMES_ANY)
-              if (element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area) != ee[i]->marker)
+              if (!element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).valid || element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).marker != ee[i]->marker)
                 continue;
             
             err += eval_volumetric_estimator(error_estimators_vol[iest], rm);
@@ -210,7 +210,9 @@ namespace Hermes
               {
                 if (error_estimators_surf[iest]->area != HERMES_ANY)
                 {
-                  int imarker = boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest]->area);
+                  if(!boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest]->area).valid)
+                    continue;
+                  int imarker = boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest]->area).marker;
                   
                   if (imarker == H2D_DG_INNER_EDGE_INT)
                     continue;
@@ -320,7 +322,10 @@ namespace Hermes
                   // Scale the error estimate by the scaling function dependent on the element diameter
                   // (use the central element's diameter).
                   if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                    central_err *= interface_scaling_fns[i]->value(ee[i]->get_diameter(), element_markers_conversion.get_user_marker(ee[i]->marker));
+                    if(!element_markers_conversion.get_user_marker(ee[i]->marker).valid)
+                      error("Marker not valid.");
+                    else
+                      central_err *= interface_scaling_fns[i]->value(ee[i]->get_diameter(), element_markers_conversion.get_user_marker(ee[i]->marker).marker);
 
                   // In the case this edge will be ignored when calculating the error for the element on
                   // the other side, add the now computed error to that element as well.
@@ -331,7 +336,10 @@ namespace Hermes
                     // Scale the error estimate by the scaling function dependent on the element diameter
                     // (use the diameter of the element on the other side).
                     if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                      neighb_err *= interface_scaling_fns[i]->value(neighb->get_diameter(), element_markers_conversion.get_user_marker(neighb->marker));
+                      if(!element_markers_conversion.get_user_marker(neighb->marker).valid)
+                      error("Marker not valid.");
+                    else
+                      neighb_err *= interface_scaling_fns[i]->value(neighb->get_diameter(), element_markers_conversion.get_user_marker(neighb->marker).marker);
 
                     errors_components[i] += central_err + neighb_err;
                     total_error += central_err + neighb_err;

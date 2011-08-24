@@ -159,17 +159,16 @@ namespace Hermes
       {
         this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, tri_markers[i]);
 
-        e = create_triangle(this->element_markers_conversion.get_internal_marker(tri_markers[i]), &nodes[tris[i][0]], &nodes[tris[i][1]],
+        e = create_triangle(this->element_markers_conversion.get_internal_marker(tri_markers[i]).marker, &nodes[tris[i][0]], &nodes[tris[i][1]],
                             &nodes[tris[i][2]], NULL);
       }
         
-
       // create quads
       for (int i = 0; i < nq; i++)
       {
         this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, quad_markers[i]);
        
-        e = create_quad(this->element_markers_conversion.get_internal_marker(quad_markers[i]), &nodes[quads[i][0]], &nodes[quads[i][1]],
+        e = create_quad(this->element_markers_conversion.get_internal_marker(quad_markers[i]).marker, &nodes[quads[i][0]], &nodes[quads[i][1]],
                         &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
       }
 
@@ -182,7 +181,7 @@ namespace Hermes
 
         this->boundary_markers_conversion.insert_marker(this->boundary_markers_conversion.min_marker_unused, boundary_markers[i]);
 
-        en->marker = this->boundary_markers_conversion.get_internal_marker(boundary_markers[i]);
+        en->marker = this->boundary_markers_conversion.get_internal_marker(boundary_markers[i]).marker;
 
         nodes[mark[i][0]].bnd = 1;
         nodes[mark[i][1]].bnd = 1;
@@ -747,7 +746,7 @@ namespace Hermes
           {
             bool marker_matched = false;
             for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
-              if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(markers[marker_i]))
+              if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(markers[marker_i]).marker)
                 marker_matched = true;
             if(marker_matched)
               rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
@@ -769,7 +768,7 @@ namespace Hermes
 
       else 
       {
-        rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker);
+        rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker).marker;
         rtb_aniso = aniso;
 
         // refinement: refine all elements to quad elements.
@@ -783,7 +782,7 @@ namespace Hermes
           for_all_active_elements(e, this)
             for (unsigned int j = 0; j < e->nvert; j++) 
             {
-              if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker)) 
+              if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker).marker) 
               {
                 rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
               }
@@ -1843,34 +1842,33 @@ namespace Hermes
       return;
     }
 
-    std::string Mesh::MarkersConversion::get_user_marker(int internal_marker)
+    Mesh::MarkersConversion::StringValid Mesh::MarkersConversion::get_user_marker(int internal_marker)
     {
       if(internal_marker == H2D_DG_INNER_EDGE_INT)
-        return
-        H2D_DG_INNER_EDGE;
+        return StringValid(H2D_DG_INNER_EDGE, true);
 
       if(internal_marker == H2D_DG_BOUNDARY_EDGE_INT)
-        return
-        H2D_DG_BOUNDARY_EDGE;
+        return StringValid(H2D_DG_INNER_EDGE, true);
 
       if(conversion_table.find(internal_marker) == conversion_table.end())
-        error("MarkersConversions class asked for a non existing marker %d", internal_marker);
-      return conversion_table.find(internal_marker)->second;
+        return StringValid("-999", false);
+
+     return StringValid(conversion_table.find(internal_marker)->second, true);
+
     }
 
-    int Mesh::MarkersConversion::get_internal_marker(std::string user_marker)
+    Mesh::MarkersConversion::IntValid Mesh::MarkersConversion::get_internal_marker(std::string user_marker)
     {
       if(user_marker == H2D_DG_INNER_EDGE)
-        return
-        H2D_DG_INNER_EDGE_INT;
+        return IntValid(H2D_DG_INNER_EDGE_INT, true);
 
       if(user_marker == H2D_DG_BOUNDARY_EDGE)
-        return
-        H2D_DG_BOUNDARY_EDGE_INT;
+        return IntValid(H2D_DG_BOUNDARY_EDGE_INT, true);
 
       if(conversion_table_inverse.find(user_marker) == conversion_table_inverse.end())
-        error("MarkersConversions class asked for a non existing marker %s", user_marker.c_str());
-      return conversion_table_inverse.find(user_marker)->second;
+        return IntValid(-999, false);
+
+     return IntValid(conversion_table_inverse.find(user_marker)->second, true);
     }
 
     void Mesh::convert_triangles_to_base(Element *e)

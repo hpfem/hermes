@@ -345,12 +345,30 @@ namespace Hermes
         /// present, and if not, it inserts the std::pair.
         void insert_marker(int internal_marker, std::string user_marker);
 
+        /// Struct for return type of get_user_marker().
+        struct StringValid
+        {
+          StringValid() {};
+          StringValid(std::string marker, bool valid) : marker(marker), valid(valid) {};
+          std::string marker;
+          bool valid;
+        };
+
+        /// Struct for return type of get_internal_marker().
+        struct IntValid
+        {
+          IntValid() {};
+          IntValid(int marker, bool valid) : marker(marker), valid(valid) {};
+          int marker;
+          bool valid;
+        };
+
         /// Lookup functions.
         /// Find a user marker for this internal marker.
-        std::string get_user_marker(int internal_marker);
+        StringValid get_user_marker(int internal_marker);
 
         /// Find an internal marker for this user_marker.
-        int get_internal_marker(std::string user_marker);
+        IntValid get_internal_marker(std::string user_marker);
 
         enum MarkersConversionType {
           HERMES_ELEMENT_MARKERS_CONVERSION = 0,
