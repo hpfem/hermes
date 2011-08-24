@@ -36,9 +36,9 @@ namespace Hermes
     bool NoxDiscreteProblem<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
     {
       EpetraVector<Scalar> xx(x);  // wrap our structures around core Epetra objects
-      EpetraVector<Scalar> rhs(f);  /// \todo proc se xx obaluje kdyz se zase vynda
+      EpetraVector<Scalar> rhs(f); 
 
-      rhs.zero();
+      rhs.zero(); 
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
@@ -55,15 +55,15 @@ namespace Hermes
       assert(jac != NULL);
 
       EpetraVector<Scalar> xx(x);			// wrap our structures around core Epetra objects
-      EpetraMatrix<Scalar> jacobian(*jac);
+      EpetraMatrix<Scalar> jacob(*jac);
 
-      jacobian.zero();
+      jacob.zero();
 
       Scalar* coeff_vec = new Scalar[xx.length()];
-      xx.extract(coeff_vec);
-      this->dp->assemble(coeff_vec, &jacobian, NULL); // NULL is for the right-hand side.
+      xx.extract(coeff_vec);  
+      this->dp->assemble(coeff_vec, &jacob, NULL); // NULL is for the right-hand side.
       delete [] coeff_vec;
-      //jacobian.finish();
+      //jacob.finish();
 
       return true;
     }
@@ -82,7 +82,6 @@ namespace Hermes
       this->dp->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
       delete [] coeff_vec;
       //jacobian.finish();
-      /// \todo neni to stejne jako vypocet jacobianu?
 
       precond->create(&jacobian);
       precond->compute();
@@ -122,52 +121,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar> *problem, unsigned message_type, const char* ls_type, const char* nl_dir, 
-      double ls_tolerance,
-      const char* precond_type,
-      unsigned flag_absresid,
-      double abs_resid,
-      unsigned flag_relresid,
-      double rel_resid,
-      int max_iters,
-      double update,
-      int ls_max_iters,
-      int ls_sizeof_krylov_subspace,
-      NOX::Abstract::Vector::NormType norm_type,
-      NOX::StatusTest::NormF::ScaleType stype,
-      double wrms_rtol,
-      double wrms_atol,
-      unsigned flag_update,
-      unsigned flag_wrms
-      ) : NonlinearSolver<Scalar>(problem),ndp(problem)
-    {
-
-      // default values
-      this->nl_dir = nl_dir;
-      output_flags = message_type;
-      // linear solver settings
-      this->ls_type = ls_type;
-      this->ls_max_iters = ls_max_iters;
-      this->ls_tolerance = ls_tolerance;
-      this->ls_sizeof_krylov_subspace = ls_sizeof_krylov_subspace;
-      this->precond_type = precond_type;
-      // convergence test
-      this->conv.max_iters = max_iters;
-      this->conv.abs_resid = abs_resid;
-      this->conv.rel_resid = rel_resid;
-      this->conv.norm_type = norm_type;
-      this->conv.stype = stype;
-      this->conv.update = update;
-      this->conv.wrms_rtol = wrms_rtol;
-      this->conv.wrms_atol = wrms_atol;
-
-      this->conv_flag.absresid = flag_absresid;
-      this->conv_flag.relresid = flag_relresid;
-      this->conv_flag.update = flag_update;
-      this->conv_flag.wrms = flag_wrms;
-    }
-
-    template<typename Scalar>
     NoxSolver<Scalar>::~NoxSolver()
     {
       // FIXME: this does not destroy the "interface_", and Trilinos 
@@ -179,7 +132,7 @@ namespace Hermes
     void NoxDiscreteProblem<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
       precond = pc;
-      this->dp->create_sparse_structure(&jacobian); /// \todo nevytvari se dvakrat? (v uritych pripadech)
+      this->dp->create_sparse_structure(&jacobian); 
     }
 
     template<typename Scalar>
@@ -195,31 +148,6 @@ namespace Hermes
     {
       this->precond_yes = true;
       precond_type = pc;
-    }
-
-    template<>
-    void NoxSolver<double>::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver)
-    {
-      const NOX::Epetra::Group &f_grp =
-        dynamic_cast<const NOX::Epetra::Group &>(solver->getSolutionGroup());
-      const Epetra_Vector &f_sln =
-        (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
-      // extract solution
-      int n = this->dp->get_num_dofs();
-      delete [] sln_vector;
-      sln_vector = new double[n];
-      memset(sln_vector, 0, n * sizeof(double));
-      f_sln.ExtractCopy(sln_vector);
-    }
-
-    template<>
-    void NoxSolver<std::complex<double> >::get_final_solution(Teuchos::RCP<NOX::Solver::Generic> & solver)
-    {
-      // extract solution
-      int n = this->dp->get_num_dofs();
-      delete [] sln_vector;
-      sln_vector = new std::complex<double>[n];
-      memset(sln_vector, 0, n * sizeof(std::complex<double>));
     }
 
     template<typename Scalar>
@@ -394,7 +322,17 @@ namespace Hermes
           achieved_tol = final_pars->sublist("Direction").sublist(nl_dir).sublist("Linear Solver").sublist("Output").get("Achieved Tolerance", 0.0);
 
           // Get the Epetra_Vector with the final solution from the solver
-          get_final_solution(solver);
+          const NOX::Epetra::Group &f_grp =
+            dynamic_cast<const NOX::Epetra::Group &>(solver->getSolutionGroup());
+          const Epetra_Vector &f_sln =
+            (dynamic_cast<const NOX::Epetra::Vector &>(f_grp.getX())).getEpetraVector();
+          // extract solution
+          int n = this->dp->get_num_dofs();
+          delete [] this->sln_vector;
+          this->sln_vector = new double[n];
+          memset(this->sln_vector, 0, n * sizeof(double));
+          f_sln.ExtractCopy(this->sln_vector);
+
           success = true;
         }
         else { // not converged
@@ -404,7 +342,7 @@ namespace Hermes
         return success;
     }
     template class HERMES_API NoxSolver<double>;
-    template class HERMES_API NoxSolver<std::complex<double> >;
+    //template class HERMES_API NoxSolver<std::complex<double> >;
   }
 }
 #endif
