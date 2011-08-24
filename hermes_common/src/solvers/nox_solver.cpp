@@ -218,9 +218,10 @@ namespace Hermes
         /// \todo Parametrize me.
         ls_pars.set("Max Age Of Prec", 999);
 
-        Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcp(&ndp);
-        Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcp(&ndp);
-        Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcp(&ndp);
+
+        Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcpFromRef(ndp);
+        Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcpFromRef(ndp);
+        Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(ndp);
         Teuchos::RCP<Epetra_RowMatrix> jac_mat;
         Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
 
@@ -231,7 +232,7 @@ namespace Hermes
           if(precond == Teuchos::null) 
           {
             Teuchos::RCP<NOX::Epetra::MatrixFree> mf = 
-              Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, Teuchos::rcp(&ndp), init_sln));
+              Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, Teuchos::rcpFromRef(ndp), init_sln));
             i_jac = mf;
             lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
               i_jac, mf, init_sln));
@@ -246,7 +247,7 @@ namespace Hermes
         else {  // not Matrix<Scalar> Free
           // Create the Epetra_RowMatrix.
           jac_mat = Teuchos::rcp(ndp.get_jacobian()->mat);
-          i_jac = Teuchos::rcp(&ndp);
+          i_jac = Teuchos::rcpFromRef(ndp); /// \todo proc? to uz prece je ne?
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
             i_jac, jac_mat, init_sln));
         }
@@ -304,7 +305,6 @@ namespace Hermes
 
         // Create the method
         Teuchos::RCP<NOX::Solver::Generic> solver = NOX::Solver::buildSolver(grp, cmb, final_pars);
-
 
         /// Solve.
         NOX::StatusTest::StatusType status = solver->solve();

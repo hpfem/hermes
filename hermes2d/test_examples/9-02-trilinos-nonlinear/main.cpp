@@ -165,8 +165,9 @@ int main(int argc, char* argv[])
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver<double> nox_solver(&dp2, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
-                       flag_relresid, rel_resid, max_iters);
+  // TODO nstavit NoxSolver<double> nox_solver(&dp2, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
+  //                  flag_relresid, rel_resid, max_iters);
+  NoxSolver<double> nox_solver(&dp2);
 
   // Choose preconditioning.
   RCP<Precond<double> > pc = rcp(new MlPrecond<double>("sa"));

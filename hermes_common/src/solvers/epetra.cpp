@@ -326,6 +326,7 @@ namespace Hermes
     {
       _F_;
       this->vec = (Epetra_Vector *) &v;
+      this->vec_im = NULL;
       this->std_map = (Epetra_BlockMap *) &v.Map();
       this->size = v.MyLength();
       this->owner = false;
@@ -355,7 +356,8 @@ namespace Hermes
     {
       _F_;
       for (unsigned int i = 0; i < this->size; i++) (*vec)[i] = 0.0;
-      for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
+      if (vec_im)
+        for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
     }
 
     template<typename Scalar>
