@@ -36,6 +36,13 @@ namespace Hermes
       /// @param filename [in] The name of the file.
       /// @param mesh [out] The mesh.
       virtual bool load(const char *file_name, Mesh *mesg) = 0;
+
+    protected: 
+      static bool is_twin_nurbs(Element* e, int i)
+      {
+        // on internal edges, where there are two Nurbs', we only save one of them
+        return e->cm->nurbs[i]->twin && e->en[i]->ref == 2;
+      }
     };
   }
 }

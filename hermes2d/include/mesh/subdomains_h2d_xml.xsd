@@ -38,6 +38,7 @@
 												<attribute name="number" type="integer" use="required" />
 											</complexType>
 										</element>
+                    <element minOccurs="0" maxOccurs="1" name="refinements" type="mesh:refinements_type" />
 									</sequence>
 									<attribute name="name" type="string" use="required" />
 								</complexType>

@@ -432,12 +432,6 @@ namespace Hermes
       }
     }
 
-    static bool is_twin_nurbs(Element* e, int i)
-    {
-      // on internal edges, where there are two Nurbs', we only save one of them
-      return e->cm->nurbs[i]->twin && e->en[i]->ref == 2;
-    }
-
     bool MeshReaderH2D::save(const char* filename, Mesh *mesh)
     {
       int i, mrk;

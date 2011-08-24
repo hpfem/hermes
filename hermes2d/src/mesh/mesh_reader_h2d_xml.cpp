@@ -35,7 +35,95 @@ namespace Hermes
     {
       mesh->free();
       std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh (XMLMesh::mesh_(filename));
-      return load<XMLMesh::mesh>(parsed_xml_mesh, mesh);
+      if(!load<XMLMesh::mesh>(parsed_xml_mesh, mesh))
+        return false;
+
+      // refinements.
+      if (parsed_xml_mesh->refinements().present() && parsed_xml_mesh->refinements()->refinement().size() > 0)
+      {
+        // perform initial refinements
+        for (unsigned int i = 0; i < parsed_xml_mesh->refinements()->refinement().size(); i++)
+        {
+          int element_id = parsed_xml_mesh->refinements()->refinement().at(i).element_id();
+          int refinement_type;
+          if(parsed_xml_mesh->refinements()->refinement().at(i).refinement_type().present())
+            refinement_type = parsed_xml_mesh->refinements()->refinement().at(i).refinement_type().get();
+          else
+            refinement_type = 0;
+          mesh->refine_element_id(element_id, refinement_type);
+        }
+      }
+    }
+
+    bool MeshReaderH2DXML::save(const char *filename, Mesh *mesh)
+    {
+      // Utility pointer.
+      Element* e;
+
+      // save vertices
+      XMLMesh::vertices_type vertices;
+      for (int i = 0; i < mesh->ntopvert; i++)
+      {
+        std::ostringstream x_stream;
+        x_stream << mesh->nodes[i].x;
+
+        std::ostringstream y_stream;
+        y_stream << mesh->nodes[i].y;
+        
+        vertices.vertex().push_back(std::auto_ptr<XMLMesh::vertex>(new XMLMesh::vertex(x_stream.str(), y_stream.str())));
+      }
+
+      // save elements
+      XMLMesh::elements_type elements;
+      for (int i = 0; i < mesh->get_num_base_elements(); i++)
+      {
+        e = mesh->get_element_fast(i);
+        if (e->used)
+          if (e->is_triangle())
+            elements.element().push_back(std::auto_ptr<XMLMesh::triangle_type>(new XMLMesh::triangle_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str())));
+          else
+            elements.element().push_back(std::auto_ptr<XMLMesh::quad_type>(new XMLMesh::quad_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->vn[3]->id)));
+      }
+      // save boundary markers
+      XMLMesh::boundary_edges_type boundary_edges;
+      for_all_base_elements(e, mesh)
+        for (unsigned i = 0; i < e->nvert; i++)
+          if (mesh->get_base_edge_node(e, i)->marker)
+            boundary_edges.boundary_edge().push_back(std::auto_ptr<XMLMesh::boundary_edge>(new XMLMesh::boundary_edge(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str())));
+
+      // save curved edges
+      XMLMesh::curves_type curves;
+      for_all_base_elements(e, mesh)
+        if (e->is_curved())
+          for (unsigned i = 0; i < e->nvert; i++)
+            if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) 
+              if(e->cm->nurbs[i]->arc)
+                save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i], curves);
+              else
+                save_nurbs(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i], curves);
+
+      // save refinements
+      XMLMesh::refinements_type refinements;
+      unsigned temp = mesh->seq;
+      mesh->seq = mesh->nbase;
+      for_all_base_elements(e, mesh)
+        save_refinements(mesh, e, e->id, refinements);
+
+      mesh->seq = temp;
+
+      XMLMesh::mesh xmlmesh(vertices, elements, boundary_edges);
+      xmlmesh.curves().set(curves);
+      xmlmesh.refinements().set(refinements);
+
+      ::xml_schema::namespace_info namespace_info("XMLMesh", "../../include/mesh/mesh_h2d_xml.xsd");
+      ::xml_schema::namespace_infomap namespace_info_map;
+      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("mesh", namespace_info));
+
+      std::ofstream out(filename);
+      XMLMesh::mesh_(out, xmlmesh, namespace_info_map);
+      out.close();
+
+      return true;
     }
 
     bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<Mesh *> meshes)
@@ -46,7 +134,8 @@ namespace Hermes
       Mesh global_mesh;
       std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename));
 
-      load<XMLSubdomains::domain>(parsed_xml_domain, &global_mesh);
+      if(!load<XMLSubdomains::domain>(parsed_xml_domain, &global_mesh))
+        return false;
 
       // Subdomains //
       unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
@@ -324,6 +413,22 @@ namespace Hermes
           for_all_elements(e, meshes[subdomains_i])
             if (e->cm != NULL)
               e->cm->update_refmap_coeffs(e);
+
+          // refinements.
+          if (parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().size() > 0)
+          {
+            // perform initial refinements
+            for (unsigned int i = 0; i < parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().size(); i++)
+            {
+              int element_id = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).element_id();
+              int refinement_type;
+              if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).refinement_type().present())
+                refinement_type = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).refinement_type().get();
+              else
+                refinement_type = 0;
+              meshes[subdomains_i]->refine_element_id(element_id, refinement_type);
+            }
+          }
 
           meshes[subdomains_i]->seq = g_mesh_seq++;
         }
@@ -681,6 +786,56 @@ namespace Hermes
       nurbs->ref = 0;
 
       return nurbs;
+    }
+    
+    void MeshReaderH2DXML::save_refinements(Mesh *mesh, Element* e, int id, XMLMesh::refinements_type & refinements)
+    {
+      if (e->active) 
+        return;
+      if (e->bsplit())
+      {
+        refinements.refinement().push_back(std::auto_ptr<XMLMesh::refinement>(new XMLMesh::refinement(id)));
+        refinements.refinement().back().refinement_type() = 0;
+        int sid = mesh->seq; mesh->seq += 4;
+        for (int i = 0; i < 4; i++)
+          save_refinements(mesh, e->sons[i], sid+i, refinements);
+      }
+      else if (e->hsplit())
+      {
+        refinements.refinement().push_back(std::auto_ptr<XMLMesh::refinement>(new XMLMesh::refinement(id)));
+        refinements.refinement().back().refinement_type() = 1;
+        int sid = mesh->seq; mesh->seq += 2;
+        save_refinements(mesh, e->sons[0], sid, refinements);
+        save_refinements(mesh, e->sons[1], sid+1, refinements);
+      }
+      else
+      {
+        refinements.refinement().push_back(std::auto_ptr<XMLMesh::refinement>(new XMLMesh::refinement(id)));
+        refinements.refinement().back().refinement_type() = 2;
+        int sid = mesh->seq; mesh->seq += 2;
+        save_refinements(mesh, e->sons[2], sid, refinements);
+        save_refinements(mesh, e->sons[3], sid+1, refinements);
+      }
+    }
+
+    void MeshReaderH2DXML::save_arc(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
+    {
+      curves.arc().push_back(std::auto_ptr<XMLMesh::arc>(new XMLMesh::arc(p1, p2, nurbs->angle)));
+    }
+
+    void MeshReaderH2DXML::save_nurbs(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
+    {
+      XMLMesh::NURBS nurbs_xml(p1, p2, nurbs->degree);
+
+      int inner = nurbs->np - 2;
+      int outer = nurbs->nk - inner;
+      
+      for (int i = 1; i < nurbs->np-1; i++)
+        nurbs_xml.inner_point().push_back(std::auto_ptr<XMLMesh::inner_point>(new XMLMesh::inner_point(nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2])));
+
+      int max = nurbs->nk - (nurbs->degree + 1);
+      for (int i = nurbs->degree+1; i < max; i++)
+        nurbs_xml.knot().push_back(std::auto_ptr<XMLMesh::knot>(new XMLMesh::knot(nurbs->kv[i])));
     }
   }
 }

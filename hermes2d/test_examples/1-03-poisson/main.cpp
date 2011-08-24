@@ -50,6 +50,10 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
+  
+  // This is here basically to show off that we can save a mesh with refinements and load it back again.
+  mloader.save("domain2.xml", &mesh);
+  mloader.load("domain2.xml", &mesh);
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper", 

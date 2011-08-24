@@ -47,6 +47,9 @@ namespace Hermes
       /// This method loads a single mesh from a file.
       virtual bool load(const char *file_name, Mesh *mesh);
 
+      /// This method saves a single mesh to a file.
+      bool save(const char *filename, Mesh *mesh);
+
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///            also the order is determined by the order in the file.
@@ -67,6 +70,15 @@ namespace Hermes
       /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
       template<typename T>
       Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2);
+
+      /// Saves all refinements done on the mesh.
+      void save_refinements(Mesh *mesh, Element* e, int id, XMLMesh::refinements_type & refinements);
+
+      /// Saves one circular arc.
+      void save_arc(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves);
+
+      /// Saves one general NURBS curve.
+      void save_nurbs(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves);
     };
   }
 }
