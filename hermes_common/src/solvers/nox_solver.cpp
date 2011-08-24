@@ -93,16 +93,8 @@ namespace Hermes
     template<typename Scalar>
     NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem),ndp(problem)
     {
-
-
       // default values
-      nl_dir = "Newton";
-      output_flags = NOX::Utils::Error;
       // linear solver settings
-      ls_type = "GMRES";
-      ls_max_iters = 800;
-      ls_tolerance = 1e-8;
-      ls_sizeof_krylov_subspace = 50;
       precond_type = "None";
       // convergence test
       conv.max_iters = 10;
@@ -118,6 +110,31 @@ namespace Hermes
       conv_flag.relresid = 0;
       conv_flag.update = 0;
       conv_flag.wrms = 0;
+
+      nl_pars = Teuchos::rcp(new Teuchos::ParameterList);
+      nl_pars->sublist("Printing").set("Output Information", NOX::Utils::Error);
+
+      // Sublist for line search
+      Teuchos::ParameterList &search_pars = nl_pars->sublist("Line Search");
+      search_pars.set("Method", "Full Step");
+
+      // Sublist for direction
+      Teuchos::ParameterList &dir_pars = nl_pars->sublist("Direction");
+      dir_pars.set("Method", "Newton");
+      Teuchos::ParameterList &newton_pars = dir_pars.sublist("Newton");
+
+      if(strcmp("Newton", "Newton") == 0)
+        newton_pars.set("Forcing Term Method", "Constant");
+
+      // Sublist for linear solver for the Newton method
+      Teuchos::ParameterList &ls_pars = newton_pars.sublist("Linear Solver");
+      ls_pars.set("Aztec Solver", "GMRES");
+      ls_pars.set("Max Iterations", 800);
+      ls_pars.set("Tolerance", 1e-8);
+      ls_pars.set("Size of Krylov Subspace", 50);
+      /// \todo parametrize me.
+      ls_pars.set("Preconditioner Reuse Policy", "Recompute");
+      ls_pars.set("Output Frequency", AZ_all);
     }
 
     template<typename Scalar>
@@ -162,38 +179,16 @@ namespace Hermes
       NOX::Epetra::Vector init_sln(*temp_init_sln.vec);
 
       // Create the top level parameter list
-      Teuchos::RCP<Teuchos::ParameterList> nl_pars_ptr = Teuchos::rcp(new Teuchos::ParameterList);
-      Teuchos::ParameterList &nl_pars = *nl_pars_ptr.get();
 
       // Set the nonlinear solver method
-      nl_pars.set("Nonlinear Solver", "Line Search Based");
+      nl_pars->set("Nonlinear Solver", "Line Search Based");
 
       // Set the printing parameters in the "Printing" sublist
-      Teuchos::ParameterList &print_pars = nl_pars.sublist("Printing");
-      print_pars.set("Output Information", output_flags);
+      Teuchos::ParameterList &print_pars = nl_pars->sublist("Printing");
 
-      // Sublist for line search
-      Teuchos::ParameterList &search_pars = nl_pars.sublist("Line Search");
-      search_pars.set("Method", "Full Step");
 
-      // Sublist for direction
-      Teuchos::ParameterList &dir_pars = nl_pars.sublist("Direction");
-      dir_pars.set("Method", nl_dir);
-      Teuchos::ParameterList &newton_pars = dir_pars.sublist(nl_dir);
 
-      if(strcmp(nl_dir, "Newton") == 0)
-        newton_pars.set("Forcing Term Method", "Constant");
-
-      // Sublist for linear solver for the Newton method
-      Teuchos::ParameterList &ls_pars = newton_pars.sublist("Linear Solver");
-      ls_pars.set("Aztec Solver", ls_type);
-      ls_pars.set("Max Iterations", ls_max_iters);
-      ls_pars.set("Tolerance", ls_tolerance);
-      ls_pars.set("Size of Krylov Subspace", ls_sizeof_krylov_subspace);
-      /// \todo parametrize me.
-      ls_pars.set("Preconditioner Reuse Policy", "Recompute");
-      ls_pars.set("Output Frequency", AZ_all);
-
+      Teuchos::ParameterList &ls_pars = nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver");
       // precond stuff
       Teuchos::RCP<Precond<Scalar> > precond = ndp.get_precond();
       if(this->precond_yes == false)
@@ -301,7 +296,7 @@ namespace Hermes
         cmb->addStatusTest(converged);
         cmb->addStatusTest(maxiters);
 
-        Teuchos::RCP<Teuchos::ParameterList> final_pars = nl_pars_ptr;
+        Teuchos::RCP<Teuchos::ParameterList> final_pars = nl_pars;
 
         // Create the method
         Teuchos::RCP<NOX::Solver::Generic> solver = NOX::Solver::buildSolver(grp, cmb, final_pars);
@@ -318,8 +313,8 @@ namespace Hermes
         {
           num_iters = solver->getNumIterations();
           residual = solver->getSolutionGroup().getNormF();
-          num_lin_iters = final_pars->sublist("Direction").sublist(nl_dir).sublist("Linear Solver").sublist("Output").get("Total Number of Linear Iterations", -1);
-          achieved_tol = final_pars->sublist("Direction").sublist(nl_dir).sublist("Linear Solver").sublist("Output").get("Achieved Tolerance", 0.0);
+          num_lin_iters = final_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").sublist("Output").get("Total Number of Linear Iterations", -1);
+          achieved_tol = final_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").sublist("Output").get("Achieved Tolerance", 0.0);
 
           // Get the Epetra_Vector with the final solution from the solver
           const NOX::Epetra::Group &f_grp =
