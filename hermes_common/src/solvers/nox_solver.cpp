@@ -25,16 +25,18 @@ namespace Hermes
     static Epetra_SerialComm seq_comm;
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::prealloc_jacobian()
+    NoxDiscreteProblem<Scalar>::NoxDiscreteProblem(DiscreteProblemInterface<Scalar>* problem) : dp(problem)
     {
-      this->dp->create_sparse_structure(&jacobian);
+      this->precond = Teuchos::null;  /// \todo mozna lepsi inicializace
+      if(!this->dp->is_matrix_free()) 
+        this->dp->create_sparse_structure(&jacobian); /// \todo zjistit k cemu je to dobry a co je promena jacobian
     }
 
     template<typename Scalar>
-    bool NoxSolver<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
+    bool NoxDiscreteProblem<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
     {
       EpetraVector<Scalar> xx(x);  // wrap our structures around core Epetra objects
-      EpetraVector<Scalar> rhs(f);
+      EpetraVector<Scalar> rhs(f);  /// \todo proc se xx obaluje kdyz se zase vynda
 
       rhs.zero();
 
@@ -47,7 +49,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxSolver<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
+    bool NoxDiscreteProblem<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
     {
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
       assert(jac != NULL);
@@ -67,7 +69,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxSolver<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
+    bool NoxDiscreteProblem<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
       Teuchos::ParameterList *precParams)
     {
       assert(precond != Teuchos::null);
@@ -80,6 +82,7 @@ namespace Hermes
       this->dp->assemble(coeff_vec, &jacobian, NULL);  // NULL is for the right-hand side.
       delete [] coeff_vec;
       //jacobian.finish();
+      /// \todo neni to stejne jako vypocet jacobianu?
 
       precond->create(&jacobian);
       precond->compute();
@@ -89,12 +92,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem)
+    NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem),ndp(problem)
     {
-      if(!this->dp->is_matrix_free()) 
-        prealloc_jacobian();
 
-      this->precond = Teuchos::null;
 
       // default values
       nl_dir = "Newton";
@@ -139,12 +139,8 @@ namespace Hermes
       double wrms_atol,
       unsigned flag_update,
       unsigned flag_wrms
-      ) : NonlinearSolver<Scalar>(problem)
+      ) : NonlinearSolver<Scalar>(problem),ndp(problem)
     {
-      if(!this->dp->is_matrix_free()) 
-        prealloc_jacobian();
-
-      this->precond = Teuchos::null;
 
       // default values
       this->nl_dir = nl_dir;
@@ -180,11 +176,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NoxDiscreteProblem<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+    {
+      precond = pc;
+      this->dp->create_sparse_structure(&jacobian); /// \todo nevytvari se dvakrat? (v uritych pripadech)
+    }
+
+    template<typename Scalar>
     void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
       this->precond_yes = true;
-      precond = pc;
-      prealloc_jacobian();
+      ndp.set_precond(pc);
+      /// \todo zjistit jak je to s preconditionerem
     }
 
     template<typename Scalar>
@@ -264,7 +267,7 @@ namespace Hermes
       ls_pars.set("Output Frequency", AZ_all);
 
       // precond stuff
-      Teuchos::RCP<Precond<Scalar> > precond = this->get_precond();
+      Teuchos::RCP<Precond<Scalar> > precond = ndp.get_precond();
       if(this->precond_yes == false)
         ls_pars.set("Preconditioner", "None");
       else 
@@ -287,9 +290,9 @@ namespace Hermes
         /// \todo Parametrize me.
         ls_pars.set("Max Age Of Prec", 999);
 
-        Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcp(this);
-        Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcp(this);
-        Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcp(this);
+        Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcp(&ndp);
+        Teuchos::RCP<NOX::Epetra::Interface::Jacobian> i_jac = Teuchos::rcp(&ndp);
+        Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcp(&ndp);
         Teuchos::RCP<Epetra_RowMatrix> jac_mat;
         Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
 
@@ -300,7 +303,7 @@ namespace Hermes
           if(precond == Teuchos::null) 
           {
             Teuchos::RCP<NOX::Epetra::MatrixFree> mf = 
-              Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, Teuchos::rcp(this), init_sln));
+              Teuchos::rcp(new NOX::Epetra::MatrixFree(print_pars, Teuchos::rcp(&ndp), init_sln));
             i_jac = mf;
             lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
               i_jac, mf, init_sln));
@@ -314,8 +317,8 @@ namespace Hermes
         }
         else {  // not Matrix<Scalar> Free
           // Create the Epetra_RowMatrix.
-          jac_mat = Teuchos::rcp(this->get_jacobian()->mat);
-          i_jac = Teuchos::rcp(this);
+          jac_mat = Teuchos::rcp(ndp.get_jacobian()->mat);
+          i_jac = Teuchos::rcp(&ndp);
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
             i_jac, jac_mat, init_sln));
         }
