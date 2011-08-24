@@ -103,7 +103,7 @@ namespace Hermes {
       virtual void alloc(unsigned int ndofs);
       virtual void free();
       virtual Scalar get(unsigned int idx) { return (*vec)[idx]; }
-      virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); }
+      virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); } ///< \todo this can't be used with complex numbers
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
