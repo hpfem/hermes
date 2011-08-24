@@ -1,4 +1,4 @@
-project(9-02-trilinos-nonlinear)
+project(P09-02-trilinos-nonlinear)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp)
 

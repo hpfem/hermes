@@ -1,15 +1,16 @@
 #include "hermes2d.h"
 
-/* Right-hand side */
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
 
-class CustomRightHandSide: public HermesFunction
+class CustomRightHandSide : public Hermes2DFunction<double>
 {
 public:
-  CustomRightHandSide() : HermesFunction() {};
+  CustomRightHandSide() : Hermes2DFunction<double>() {};
 
   virtual double value(double x, double y) const;
 
-  virtual Ord ord(Ord x, Ord y) const;
+  virtual Hermes::Ord ord(Ord x, Ord y) const;
 
   template<typename Real>
   Real u(Real x, Real y) const;
@@ -35,36 +36,36 @@ public:
 
 /* Exact solution */
 
-class CustomExactSolution : public ExactSolutionScalar
+class CustomExactSolution : public ExactSolutionScalar<double>
 {
 public:
   CustomExactSolution(Mesh* mesh)
-             : ExactSolutionScalar(mesh) {};
+             : ExactSolutionScalar<double>(mesh) {};
 
   double value(double x, double y) const;
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const;
+  virtual void derivatives (double x, double y, double& dx, double& dy) const;
 
   virtual Ord ord(Ord x, Ord y) const;
 };
 
 /* Initial solution */
 
-class CustomInitialSolution : public ExactSolutionScalar
+class CustomInitialSolution : public ExactSolutionScalar<double>
 {
 public:
   CustomInitialSolution(Mesh* mesh)
-               : ExactSolutionScalar(mesh) {};
+               : ExactSolutionScalar<double>(mesh) {};
 
   double value(double x, double y) const;
 
-  virtual void derivatives (double x, double y, scalar& dx, scalar& dy) const;
+  virtual void derivatives (double x, double y, double& dx, double& dy) const;
 
   virtual Ord ord(Ord x, Ord y) const;
 };
 
 /* Weak form */
-class CustomWeakForm : public WeakForm
+class CustomWeakForm : public WeakForm<double>
 {
 public:
   CustomWeakForm(bool JFNK = false, bool precondition_jacobian = false, bool precondition_jacobian_approx = false);
@@ -72,25 +73,25 @@ public:
   ~CustomWeakForm() {}
 
 private:
-  class JacobianFormVol : public WeakForm::MatrixFormVol
+  class JacobianFormVol : public MatrixFormVol<double>
   {
   public:
-    JacobianFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM) {};
+    JacobianFormVol(int i, int j) : MatrixFormVol<double>(i, j, HERMES_ANY, HERMES_SYM) {};
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const;
+    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
-  class ResidualFormVol : public WeakForm::VectorFormVol
+  class ResidualFormVol : public VectorFormVol<double>
   {
   public:
-    ResidualFormVol(int i, CustomRightHandSide* rhs) : WeakForm::VectorFormVol(i), rhs(rhs) {};
+    ResidualFormVol(int i, CustomRightHandSide* rhs) : VectorFormVol<double>(i), rhs(rhs) {};
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                         Geom<double> *e, ExtData<scalar> *ext) const;
+    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
+                         Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
                     Geom<Ord> *e, ExtData<Ord> *ext) const;
@@ -100,13 +101,13 @@ private:
     CustomRightHandSide* rhs;
   };
 
-  class PrecondFormVol : public WeakForm::MatrixFormVol
+  class PrecondFormVol : public MatrixFormVol<double>
   {
   public:
-    PrecondFormVol(int i, int j) : WeakForm::MatrixFormVol(i, j, HERMES_ANY, HERMES_SYM) {};
+    PrecondFormVol(int i, int j) : MatrixFormVol<double>(i, j, HERMES_ANY, HERMES_SYM) {};
 
-    virtual scalar value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                 Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const;
+    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                 Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
             Geom<Ord> *e, ExtData<Ord> *ext) const;

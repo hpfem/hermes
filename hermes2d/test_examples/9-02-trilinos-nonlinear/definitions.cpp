@@ -49,20 +49,20 @@ Real CustomRightHandSide::dudxy(Real x, Real y) const
 template<typename Real>
 Real CustomRightHandSide::k(Real x, Real y) const 
 {  
-  return 1.0 / sqrt(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)));  
+  return 1.0 / Hermes::sqrt(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)));  
 }
 
 template<typename Real>
 Real CustomRightHandSide::kx(Real x, Real y) const 
 {  
-  return -0.5 * pow(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)), -1.5) *
+  return -0.5 * Hermes::pow(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)), -1.5) *
                    (2.0 * dudx(x,y) * dudxx(x,y) + 2.0 * dudy(x,y) * dudxy(x,y));  
 }
 
 template<typename Real>
 Real CustomRightHandSide::ky(Real x, Real y) const 
 {
-  return -0.5 * pow(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)), -1.5) *
+  return -0.5 * Hermes::pow(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)), -1.5) *
                    (2.0 * dudx(x,y) * dudxy(x,y) + 2.0 * dudy(x,y) * dudyy(x,y));  
 }
 
@@ -72,7 +72,7 @@ double CustomExactSolution::value(double x, double y) const
   return  x * y * (1-x) * (1-y);
 }
 
-void CustomExactSolution::derivatives (double x, double y, scalar& dx, scalar& dy) const 
+void CustomExactSolution::derivatives (double x, double y, double& dx, double& dy) const 
 {
   dx = (1- 2*x) * y * (1 - y);
   dy = (1- 2*y) * x * (1 - x);
@@ -89,7 +89,7 @@ double CustomInitialSolution::value(double x, double y) const
   return  0;
 }
 
-void CustomInitialSolution::derivatives (double x, double y, scalar& dx, scalar& dy) const 
+void CustomInitialSolution::derivatives (double x, double y, double& dx, double& dy) const 
 {
   dx = 0;
   dy = 0;
@@ -115,15 +115,15 @@ CustomWeakForm::CustomWeakForm(bool JFNK, bool precondition_jacobian, bool preco
     add_matrix_form(new PrecondFormVol(0, 0));
 }
 
-scalar CustomWeakForm::JacobianFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                                              Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
+double CustomWeakForm::JacobianFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                                              Func<double> *v, Geom<double> *e, ExtData<double> *ext) const 
 {
-  scalar result = 0;
+  double result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * ( -0.5 * pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -1.5) * 
+    result += wt[i] * ( -0.5 * Hermes::pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -1.5) * 
                        (2.0 * u_ext[0]->dx[i] * u->dx[i] + 2.0 * u_ext[0]->dx[i] * u->dx[i])
                        * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]) +
-                       (pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -0.5))
+                       (Hermes::pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -0.5))
                        * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]) );
   return result;
 }
@@ -136,13 +136,13 @@ Ord CustomWeakForm::JacobianFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], 
 }
 
 
-scalar CustomWeakForm::ResidualFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *v, 
-                                              Geom<double> *e, ExtData<scalar> *ext) const 
+double CustomWeakForm::ResidualFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
+                                              Geom<double> *e, ExtData<double> *ext) const 
 {
-  Func<scalar>* u = u_ext[0];
-  scalar result = 0;
+  Func<double>* u = u_ext[0];
+  double result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * ((pow(1.0 + sqr(u->dx[i]) + sqr(u->dy[i]), -0.5)) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
+    result += wt[i] * ((Hermes::pow(1.0 + sqr(u->dx[i]) + sqr(u->dy[i]), -0.5)) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i])
                        - rhs->value(e->x[i], e->y[i]) * v->val[i] );
   return result;
 }
@@ -155,10 +155,10 @@ Ord CustomWeakForm::ResidualFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], 
 }
 
 
-scalar CustomWeakForm::PrecondFormVol::value(int n, double *wt, Func<scalar> *u_ext[], Func<double> *u, 
-                                             Func<double> *v, Geom<double> *e, ExtData<scalar> *ext) const 
+double CustomWeakForm::PrecondFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+                                             Func<double> *v, Geom<double> *e, ExtData<double> *ext) const 
 {
-  scalar result = 0;
+  double result = 0;
   for (int i = 0; i < n; i++)
     result += wt[i] * ( u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
   return result;
