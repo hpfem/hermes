@@ -513,6 +513,7 @@ namespace Hermes
 
       // Test whether areas of corresponding elements are the same.
       double *areas = new double [base_elem_num];
+      memset(areas, 0, base_elem_num*sizeof(double));
       if (areas == NULL) error("Not enough memory in Traverse::begin().");
       // Read base element areas from the first mesh,
       // Also get minimum element area.
@@ -533,7 +534,7 @@ namespace Hermes
         counter = 0;
         for_all_base_elements(e, meshes[i])
         {
-          if (fabs(areas[counter] - e->get_area()) > tolerance) 
+          if (fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0) 
           {
             printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
             error("Meshes not compatible in Traverse::begin().");
