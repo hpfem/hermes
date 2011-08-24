@@ -2267,7 +2267,7 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < mfs->areas.size(); ss++)
         {
-          if(mfs->areas[ss] == HERMES_ANY)
+          if(mfs->areas[ss] == HERMES_ANY || mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)
           {
             assemble_this_form = true;
             break;
@@ -2361,7 +2361,7 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < mfs->areas.size(); ss++)
         {
-          if(mfs->areas[ss] == HERMES_ANY)
+          if(mfs->areas[ss] == HERMES_ANY || mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)
           {
             assemble_this_form = true;
             break;
@@ -2455,7 +2455,7 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < vfs->areas.size(); ss++)
         {
-          if(vfs->areas[ss] == HERMES_ANY)
+          if(vfs->areas[ss] == HERMES_ANY || vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)
           {
             assemble_this_form = true;
             break;
@@ -2521,7 +2521,7 @@ namespace Hermes
         bool assemble_this_form = false;
         for (unsigned int ss = 0; ss < vfs->areas.size(); ss++)
         {
-          if(vfs->areas[ss] == HERMES_ANY)
+          if(vfs->areas[ss] == HERMES_ANY || vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)
           {
             assemble_this_form = true;
             break;

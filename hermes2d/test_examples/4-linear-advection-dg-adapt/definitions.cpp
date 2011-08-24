@@ -117,7 +117,7 @@ private:
   class VectorFormSurface : public Hermes::Hermes2D::VectorFormSurf<double>
   {
   public:
-    VectorFormSurface(int i, std::string left_bottom_bnd_part) : Hermes::Hermes2D::VectorFormSurf<double>(i, H2D_DG_BOUNDARY_EDGE), left_bottom_bnd_part(left_bottom_bnd_part) { }
+    VectorFormSurface(int i, std::string left_bottom_bnd_part) : Hermes::Hermes2D::VectorFormSurf<double>(i, left_bottom_bnd_part) { }
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const {
       double result = 0;
@@ -125,7 +125,7 @@ private:
         double x = e->x[i], y = e->y[i];
         double a_dot_n = static_cast<CustomWeakForm*>(wf)->calculate_a_dot_v(x, y, e->nx[i], e->ny[i]);
         // Function values for Dirichlet boundary conditions.
-        result += -wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(0, g<double,double>(wf->get_boundary_markers_conversion()->get_user_marker(e->edge_marker), x, y), a_dot_n) * v->val[i];
+        result += -wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(0, 1, a_dot_n) * v->val[i];
       }
       return result;
     }
@@ -141,14 +141,6 @@ private:
     Real F(Real x, Real y) const{
       return Real(0);
     }
-
-    template<typename Real, typename Scalar>
-    Scalar g(std::string ess_bdy_marker, Real x, Real y) const {
-      if (ess_bdy_marker == left_bottom_bnd_part) return 1; else return 0;
-    }
-
-    // Member.
-    std::string left_bottom_bnd_part;
   };
 
   double calculate_a_dot_v(double x, double y, double vx, double vy) const {
