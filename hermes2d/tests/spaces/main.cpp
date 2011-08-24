@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
         surf_pos.base = mesh_lshape.get_element_fast(element_ids_boundary[bc_i][refinement_i]);
         if(bc_i == 0) {
           surf_pos.surf_num = 0;
-          surf_pos.marker = mesh_lshape.get_boundary_markers_conversion().get_internal_marker("Bottom");
+          surf_pos.marker = mesh_lshape.get_boundary_markers_conversion().get_internal_marker("Bottom").marker;
         }
         if(bc_i == 1) {
           // This would be for NURBS boundaries, there is a separate test for this.
@@ -84,11 +84,11 @@ int main(int argc, char* argv[])
         }
         if(bc_i == 2) {
           surf_pos.surf_num = 0;
-          surf_pos.marker = mesh_lshape.get_boundary_markers_conversion().get_internal_marker("Inner");
+          surf_pos.marker = mesh_lshape.get_boundary_markers_conversion().get_internal_marker("Inner").marker;
         }
         if(bc_i == 3) {
           surf_pos.surf_num = 3;
-          surf_pos.marker = mesh_lshape.get_boundary_markers_conversion().get_internal_marker("Left");
+          surf_pos.marker = mesh_lshape.get_boundary_markers_conversion().get_internal_marker("Left").marker;
         }
         surf_pos.lo = surf_pos.hi = 0;
 
