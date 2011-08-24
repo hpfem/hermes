@@ -82,6 +82,7 @@ namespace Hermes {
     {
     private: 
       NoxDiscreteProblem<Scalar> ndp;
+      Teuchos::RCP<Teuchos::ParameterList> nl_pars;
     public:
       /// Constructor.
       NoxSolver(DiscreteProblemInterface<Scalar> *problem);
@@ -102,7 +103,7 @@ namespace Hermes {
       ///  Parameters = 0x8, Details = 0x10, OuterIterationStatusTest = 0x20, LinearSolverDetails = 0x40, 
       ///  TestDetails = 0x80, StepperIteration = 0x0100, StepperDetails = 0x0200, StepperParameters = 0x0400, 
       ///  Debug = 0x01000
-      void set_output_flags(int flags) { output_flags = flags; }
+      void set_output_flags(int flags) {nl_pars->sublist("Printing").set("Output Information", flags);}
 
       /// \name linear solver setters
       ///@{ 
@@ -114,13 +115,21 @@ namespace Hermes {
       /// - "TFQMR" - Transpose-free quasi-minimal reasidual. 
       /// - "BiCGStab" - Bi-conjugate gradient with stabilization. 
       /// - "LU" - Sparse direct solve (single processor only).
-      void set_ls_type(const char *type) { ls_type = type; }
+      void set_ls_type(const char *type){
+        nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Aztec Solver",type);
+      }
       /// maximum number of iterations in the linear solve. 
-      void set_ls_max_iters(int iters) { ls_max_iters = iters; }
+      void set_ls_max_iters(int iters) { 
+        nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Iterations",iters);
+      }
       /// Tolerance used by AztecOO to determine if an iterative linear solve has converged. 
-      void set_ls_tolerance(double tolerance) { ls_tolerance = tolerance; }
+      void set_ls_tolerance(double tolerance) { 
+        nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Tolerance",tolerance);
+      }
       /// When using restarted GMRES this sets the maximum size of the Krylov subspace.
-      void set_ls_sizeof_krylov_subspace(int size) { ls_sizeof_krylov_subspace = size; }
+      void set_ls_sizeof_krylov_subspace(int size) { 
+        nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace",size);
+      }
       ///@}
 
       /// \name convergence params
@@ -165,13 +174,6 @@ namespace Hermes {
       double residual;
       int num_lin_iters;
       double achieved_tol;  
-      const char *nl_dir;
-
-      int output_flags;
-      const char *ls_type;
-      int ls_max_iters;
-      double ls_tolerance;
-      int ls_sizeof_krylov_subspace;
 
       const char* precond_type;
 
