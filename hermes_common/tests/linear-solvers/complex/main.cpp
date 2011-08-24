@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     PetscVector<std::complex<double> > rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    PetscLinearSolver solver(&mat, &rhs);
+    PetscLinearSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
 sln = solver.get_sln_vector();
 #endif
@@ -267,7 +267,7 @@ sln = solver.get_sln_vector();
     PetscVector<std::complex<double> > rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    PetscLinearSolver solver(&mat, &rhs);
+    PetscLinearSolver<std::complex<double> > solver(&mat, &rhs);
     solve(solver, n);
 sln = solver.get_sln_vector();
 #endif
