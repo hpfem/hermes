@@ -16,4 +16,6 @@ add_subdirectory("7-3-05-newton-heat-rk")
 #add_subdirectory("8-01-eigenvalue")
 
 # Still in the old forms.
-#add_subdirectory("9-05-trilinos-coupled")
+IF(WITH_TRILINOS)
+  add_subdirectory("9-02-trilinos-nonlinear")
+ENDIF(WITH_TRILINOS)
