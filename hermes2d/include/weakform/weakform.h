@@ -132,7 +132,6 @@ namespace Hermes
 
       bool** get_blocks(bool force_diagonal_blocks);
 
-    protected:
       double current_time;
 
       unsigned int neq;
@@ -165,6 +164,7 @@ namespace Hermes
       /// Holds multicomponent surface vector forms.
       Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
 
+    protected:
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
 
