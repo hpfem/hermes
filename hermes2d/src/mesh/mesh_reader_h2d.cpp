@@ -412,23 +412,23 @@ namespace Hermes
     {
       if (nurbs->arc)
       {
-        fprintf(f, "  { %d, %d, %.16g }", p1, p2, nurbs->angle);
+        fprintf(f, "  [ %d, %d, %.16g ]", p1, p2, nurbs->angle);
       }
       else
       {
         int inner = nurbs->np - 2;
         int outer = nurbs->nk - inner;
-        fprintf(f, "  { %d, %d, %d, { ", p1, p2, nurbs->degree);
+        fprintf(f, "  ú %d, %d, %d, ú ", p1, p2, nurbs->degree);
         for (int i = 1; i < nurbs->np-1; i++)
-          fprintf(f, "{ %.16g, %.16g, %.16g }%s ",
+          fprintf(f, "ú %.16g, %.16g, %.16g ]%s ",
           nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2],
           i < nurbs->np-2 ? "," : "");
 
-        fprintf(f, "}, { ");
+        fprintf(f, "], [ ");
         int max = nurbs->nk - (nurbs->degree+1);
         for (int i = nurbs->degree+1; i < max; i++)
           fprintf(f, "%.16g%s", nurbs->kv[i], i < max-1 ? "," : "");
-        fprintf(f, "} }");
+        fprintf(f, "] ]");
       }
     }
 
@@ -449,35 +449,35 @@ namespace Hermes
       //fprintf(f, "# hermes2d saved mesh\n\n");
 
       // save vertices
-      fprintf(f, "vertices =\n{\n");
+      fprintf(f, "vertices =\n[\n");
       for (i = 0; i < mesh->ntopvert; i++)
-        fprintf(f, "  { %.16g, %.16g }%s\n", mesh->nodes[i].x, mesh->nodes[i].y, (i < mesh->ntopvert-1 ? "," : ""));
+        fprintf(f, "  [ %.16g, %.16g ]%s\n", mesh->nodes[i].x, mesh->nodes[i].y, (i < mesh->ntopvert-1 ? "," : ""));
 
       // save elements
-      fprintf(f, "}\n\nelements =\n{");
+      fprintf(f, "]\n\nelements =\n[");
       bool first = true;
       for (i = 0; i < mesh->get_num_base_elements(); i++)
       {
         const char* nl = first ? "\n" : ",\n";  first = false;
         e = mesh->get_element_fast(i);
         if (!e->used)
-          fprintf(f, "%s  { }", nl);
+          fprintf(f, "%s  [ ]", nl);
         else if (e->is_triangle())
-          fprintf(f, "%s  { %d, %d, %d, %d }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->marker);
+          fprintf(f, "%s  [ %d, %d, %d, \"%s\" ]", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str());
         else
-          fprintf(f, "%s  { %d, %d, %d, %d, %d }", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id, e->marker);
+          fprintf(f, "%s  [ %d, %d, %d, %d, \"%s\" ]", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str());
       }
 
       // save boundary markers
-      fprintf(f, "\n}\n\nboundaries =\n{");
+      fprintf(f, "\n]\n\nboundaries =\n[");
       first = true;
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->nvert; i++)
           if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
             const char* nl = first ? "\n" : ",\n";  first = false;
-            fprintf(f, "%s  { %d, %d, \"%s\" }", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
+            fprintf(f, "%s  [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
           }
-          fprintf(f, "\n}\n\n");
+          fprintf(f, "\n]\n\n");
 
           // save curved edges
           first = true;
@@ -485,10 +485,10 @@ namespace Hermes
             if (e->is_curved())
               for (unsigned i = 0; i < e->nvert; i++)
                 if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
-                  fprintf(f, first ? "curves =\n{\n" : ",\n");  first = false;
+                  fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
                   save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
                 }
-                if (!first) fprintf(f, "\n}\n\n");
+                if (!first) fprintf(f, "\n]\n\n");
 
           // save refinements
           unsigned temp = mesh->seq;
@@ -496,7 +496,7 @@ namespace Hermes
           first = true;
           for_all_base_elements(e, mesh)
             save_refinements(mesh, f, e, e->id, first);
-          if (!first) fprintf(f, "\n}\n\n");
+          if (!first) fprintf(f, "\n]\n\n");
 
           mesh->seq = temp;
           fclose(f);
