@@ -3,158 +3,56 @@
   xmlns:domain="XMLSubdomains"
 	xmlns:element="XMLMesh"
 	xsi:schemaLocation="XMLSubdomains ../../../include/mesh/subdomains_h2d_xml.xsd">
-  <variables>
-    <variable name="L" value="12.0" />
-    <variable name="H" value="5.0" />
-    <variable name="EPS" value="0.1" />
-    <variable name="S1minusA" value="2.1464466094" />
-    <variable name="S1plusA" value="2.8535533906" />
-    <variable name="S2minusA" value="2.1464466094" />
-    <variable name="S2plusA" value="2.8535533906" />
-    <variable name="S2minusAplusEPS" value="2.2464466094" />
-    <variable name="S2plusAplusEPS" value="2.9535533906" />
-    <variable name="Ldiv3" value="4.0" />
-    <variable name="TwiceLdiv3" value="8.0" />
-  </variables>
-
   <vertices>
     <vertex x="0" y="0" />
-    <vertex x="S1minusA" y="0" />
-    <vertex x="S1plusA" y="0" />
-    <vertex x="Ldiv3" y="0" />
-    <vertex x="TwiceLdiv3" y="0" />
-    <vertex x="L" y="0" />
-    <vertex x="0" y="S2minusA" />
-    <vertex x="S1minusA" y="S2minusAplusEPS" />
-    <vertex x="S1plusA" y="S2minusAplusEPS" />
-    <vertex x="Ldiv3" y="S2minusA" />
-    <vertex x="TwiceLdiv3" y="S2minusA" />
-    <vertex x="L" y="S2minusA" />
-    <vertex x="0" y="S2plusA" />
-    <vertex x="S1minusA" y="S2plusAplusEPS" />
-    <vertex x="S1plusA" y="S2plusAplusEPS" />
-    <vertex x="Ldiv3" y="S2plusA" />
-    <vertex x="TwiceLdiv3" y="S2plusA" />
-    <vertex x="L" y="S2plusA" />
-    <vertex x="0" y="H" />
-    <vertex x="S1minusA" y="H" />
-    <vertex x="S1plusA" y="H" />
-    <vertex x="Ldiv3" y="H" />
-    <vertex x="TwiceLdiv3" y="H" />
-    <vertex x="L" y="H" />
+    <vertex x="6" y="0" />
+    <vertex x="6" y="6" />
+    <vertex x="0" y="6" />
+    <vertex x="2" y="2" />
+    <vertex x="4" y="2" />
+    <vertex x="4" y="4" />
+    <vertex x="2" y="4" />
   </vertices>
 
   <elements>
-    <element:quad v1="0" v2="1" v3="7" v4="6" marker="elt" />
-    <element:quad v1="1" v2="2" v3="8" v4="7" marker="elt" />
-    <element:quad v1="2" v2="3" v3="9" v4="8" marker="elt" />
-    <element:quad v1="3" v2="4" v3="10" v4="9" marker="elt" />
-    <element:quad v1="4" v2="5" v3="11" v4="10" marker="elt" />
-    <element:quad v1="6" v2="7" v3="13" v4="12" marker="elt" />
-    <element:quad v1="8" v2="9" v3="15" v4="14" marker="elt" />
-    <element:quad v1="9" v2="10" v3="16" v4="15" marker="elt" />
-    <element:quad v1="10" v2="11" v3="17" v4="16" marker="elt" />
-    <element:quad v1="12" v2="13" v3="19" v4="18" marker="elt" />
-    <element:quad v1="13" v2="14" v3="20" v4="19" marker="elt" />
-    <element:quad v1="14" v2="15" v3="21" v4="20" marker="elt" />
-    <element:quad v1="15" v2="16" v3="22" v4="21" marker="elt" />
-    <element:quad v1="16" v2="17" v3="23" v4="22" marker="elt" />
-    <element:quad v1="7" v2="8" v3="14" v4="13" marker="hole" />
+    <element:quad v1="0" v2="1" v3="5" v4="4" marker="Outside" />
+    <element:quad v1="1" v2="2" v3="6" v4="5" marker="Outside" />
+    <element:quad v1="2" v2="3" v3="7" v4="6" marker="Outside" />
+    <element:quad v1="3" v2="0" v3="4" v4="7" marker="Outside" />
+    <element:quad v1="4" v2="5" v3="6" v4="7" marker="Inner Circle" />
 	</elements>
 
   <boundary_edges>
-    <boundary_edge v1="0" v2="1" marker="b1" />
-		<boundary_edge v1="1" v2="2" marker="b1" />
-		<boundary_edge v1="2" v2="3" marker="b1" />
-		<boundary_edge v1="3" v2="4" marker="b1" />
-		<boundary_edge v1="4" v2="5" marker="b1" />
-		<boundary_edge v1="5" v2="11" marker="b1" />
-		<boundary_edge v1="11" v2="17" marker="b1" />
-		<boundary_edge v1="17" v2="23" marker="b1" />
-		<boundary_edge v1="23" v2="22" marker="b1" />
-		<boundary_edge v1="22" v2="21" marker="b1" />
-		<boundary_edge v1="21" v2="20" marker="b1" />
-		<boundary_edge v1="20" v2="19" marker="b1" />
-		<boundary_edge v1="19" v2="18" marker="b1"/>
-		<boundary_edge v1="18" v2="12" marker="b1"/>
-		<boundary_edge v1="12" v2="6" marker="b1" />
-		<boundary_edge v1="6" v2="0" marker="b1" />
-    <boundary_edge v1="7" v2="13" marker="b2" />
-		<boundary_edge v1="13" v2="14" marker="b2"/>
-		<boundary_edge v1="14" v2="8" marker="b2" />
-		<boundary_edge v1="8" v2="7" marker="b2" />
+    <boundary_edge v1="0" v2="1" marker="Outer" />
+		<boundary_edge v1="1" v2="2" marker="Outlet" />
+		<boundary_edge v1="2" v2="3" marker="Outer" />
+		<boundary_edge v1="3" v2="0" marker="Inlet" />
+    
+    <boundary_edge v1="4" v2="5" marker="Inner" />
+		<boundary_edge v1="5" v2="6" marker="Inner" />
+		<boundary_edge v1="6" v2="7" marker="Inner" />
+		<boundary_edge v1="7" v2="4" marker="Inner" />
 	</boundary_edges> 
   
   <curves>
-    <arc v1="7" v2="8" angle="90" />
-		<arc v1="8" v2="14" angle="90" />
-    <arc v1="14" v2="13" angle="90" />
-		<arc v1="13" v2="7" angle="90" />
+    <arc v1="4" v2="5" angle="90" />
+		<arc v1="5" v2="6" angle="90" />
+    <arc v1="6" v2="7" angle="90" />
+		<arc v1="7" v2="4" angle="90" />
   </curves>
   
 	<subdomains>
-		<subdomain name="Whole domain" />
-		<subdomain name="Domain without the hole" >
-			<vertex_number number="0" />
-      <vertex_number number="1" />
-			<vertex_number number="2" />
-			<vertex_number number="3" />
-			<vertex_number number="4" />
-			<vertex_number number="5" />
-			<vertex_number number="6" />
-			<vertex_number number="7" />
-			<vertex_number number="8" />
-			<vertex_number number="9" />
-			<vertex_number number="10" />
-			<vertex_number number="11" />
-			<vertex_number number="12" />
-			<vertex_number number="13" />
-			<vertex_number number="14" />
-			<vertex_number number="15" />
-      <vertex_number number="16" />
-			<vertex_number number="17" />
-			<vertex_number number="18" />
-			<vertex_number number="19" />
-			<vertex_number number="20" />
-			<vertex_number number="21" />
-			<vertex_number number="22" />
-			<vertex_number number="23" />
-			
-      <element_number number="0" />
-      <element_number number="1" />
-      <element_number number="2" />
-      <element_number number="3" />
-      <element_number number="4" />
-      <element_number number="5" />
-      <element_number number="6" />
-      <element_number number="7" />
-      <element_number number="8" />
-      <element_number number="9" />
-      <element_number number="10" />
-      <element_number number="11" />
-      <element_number number="12" />
-      <element_number number="13" />
-			
+		<subdomain name="Whole domain">
       <boundary_edge_number number="0" />
       <boundary_edge_number number="1" />
 			<boundary_edge_number number="2" />
 			<boundary_edge_number number="3" />
-			<boundary_edge_number number="4" />
-      <boundary_edge_number number="5" />
-			<boundary_edge_number number="6" />
-			<boundary_edge_number number="7" />
-			<boundary_edge_number number="8" />
-			<boundary_edge_number number="9" />
-			<boundary_edge_number number="10" />
-			<boundary_edge_number number="11" />
-			<boundary_edge_number number="12" />
-      <boundary_edge_number number="13" />
-			<boundary_edge_number number="14" />
-			<boundary_edge_number number="15" />
-			<boundary_edge_number number="16" />
-			<boundary_edge_number number="17" />
-			<boundary_edge_number number="18" />
-      <boundary_edge_number number="19" />
+    </subdomain>
+		<subdomain name="Domain without the inner circle">
+			<element_number number="0" />
+      <element_number number="1" />
+      <element_number number="2" />
+      <element_number number="3" />
 		</subdomain>
 	</subdomains>
 </domain:domain>
