@@ -263,6 +263,7 @@ namespace Hermes
       strcat(outname, ".eps");
 
       fprintf(f, "set output '%s'\n", (char*)outname);
+      delete [] outname;
 
       fprintf(f, "set size 0.8, 0.8\n");
 
@@ -320,11 +321,11 @@ namespace Hermes
     }
 
     PNGGraph::PNGGraph( const char* title, const char* x_axis_name, const char* y_axis_name, const double lines_width,
-      double plot_width, double plot_height )
+      double plot_width, double plot_height ) : GnuplotGraph(title, x_axis_name, y_axis_name, lines_width)
     {
       std::stringstream sstm;
       sstm << "set terminal png font arial 12 size " << plot_width << "," << plot_height << " crop enhanced\n";
-      GnuplotGraph(title, x_axis_name, y_axis_name, lines_width, sstm.str());
+      terminal_str = sstm.str();
     }
   }
 }
