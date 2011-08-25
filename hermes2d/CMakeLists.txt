@@ -159,6 +159,7 @@ project(hermes2d)
 		src/space/space_hcurl.cpp 
 		src/space/space_l2.cpp
 		src/space/space_hdiv.cpp
+    src/space/space_h2d_xml.cpp 
 
 		src/views/base_view.cpp 
 		src/views/mesh_view.cpp 
