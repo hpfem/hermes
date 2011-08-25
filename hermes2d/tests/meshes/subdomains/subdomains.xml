@@ -2,7 +2,7 @@
 <domain:domain xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:domain="XMLSubdomains"
 	xmlns:element="XMLMesh"
-	xsi:schemaLocation="XMLSubdomains ../../../include/mesh/subdomains_h2d_xml.xsd">
+	xsi:schemaLocation="XMLSubdomains ../../../xml_schemas/subdomains_h2d_xml.xsd">
   <variables>
     <variable name="a" value="1.0" />
     <variable name="two_a" value="2.0" />

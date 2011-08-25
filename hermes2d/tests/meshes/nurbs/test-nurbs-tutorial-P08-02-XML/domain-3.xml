@@ -3,7 +3,7 @@
 <mesh:mesh xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:mesh="XMLMesh"
 	xmlns:element="XMLMesh"
-	xsi:schemaLocation="XMLMesh ../../../../include/mesh/mesh_h2d_xml.xsd">
+	xsi:schemaLocation="XMLMesh ../../../../xml_schemas/mesh_h2d_xml.xsd">
   <vertices>
     <vertex x="0" y="0" />
 		<vertex x="2.0" y="0" />

@@ -98,6 +98,14 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
+  Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+  
+  DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
+  dp.set_adaptivity_cache();
+    
+  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+  Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
@@ -105,12 +113,12 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    dp.set_spaces(ref_space);
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize reference problem.
     info("Solving on reference mesh.");
-    DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
 
     // Time measurement.
     cpu_time.tick();
@@ -120,8 +128,6 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    Hermes::Hermes2D::Solution<std::complex<double> > sln;
-    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
     // For iterative solver.
     if (matrix_solver_type == SOLVER_AZTECOO)
     {
@@ -161,9 +167,6 @@ int main(int argc, char* argv[])
     // Clean up.
     delete [] coeff_vec;
     delete adaptivity;
-    if (done == false)
-      delete ref_space->get_mesh();
-    delete ref_space;
 
     // Increase counter.
     as++;
