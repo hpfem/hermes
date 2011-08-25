@@ -57,7 +57,7 @@ namespace Hermes
     void Space<Scalar>::free()
     {
       _F_;
-      free_extra_data();
+      free_bc_data();
       if (nsize) { ::free(ndata); ndata=NULL; }
       if (esize) { ::free(edata); edata=NULL; }
     }
@@ -615,25 +615,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::set_seq(int seq_)
-    {
-      seq = seq_;
-      return seq;
-    }
-
-    template<typename Scalar>
-    void Space<Scalar>::propagate_zero_orders(Element* e)
-    {
-      _F_;
-      warn_if(get_element_order(e->id) != 0, "zeroing order of an element ID:%d, original order (H:%d; V:%d)", e->id, H2D_GET_H_ORDER(get_element_order(e->id)), H2D_GET_V_ORDER(get_element_order(e->id)));
-      set_element_order_internal(e->id, 0);
-      if (!e->active)
-        for (int i = 0; i < 4; i++)
-          if (e->sons[i] != NULL)
-            propagate_zero_orders(e->sons[i]);
-    }
-
-    template<typename Scalar>
     void Space<Scalar>::distribute_orders(Mesh* mesh, int* parents)
     {
       _F_;
@@ -662,12 +643,6 @@ namespace Hermes
       resize_tables();
 
       Element* e;
-      /** \todo Find out whether the following code this is crucial.
-      *  If uncommented, this enforces 0 order for all sons if the base element has 0 order.
-      *  In this case, an element with 0 order means an element which is left out from solution. */
-      //for_all_base_elements(e, mesh)
-      //  if (get_element_order(e->id) == 0)
-      //    propagate_zero_orders(e);
 
       //check validity of orders
       for_all_active_elements(e, mesh)
@@ -689,7 +664,7 @@ namespace Hermes
       assign_edge_dofs();
       assign_bubble_dofs();
 
-      free_extra_data();
+      free_bc_data();
       update_essential_bc_values();
       update_constraints();
       post_assign();
@@ -839,7 +814,7 @@ namespace Hermes
               int order = get_edge_order_internal(en);
               surf_pos->marker = en->marker;
               nd->edge_bc_proj = get_bc_projection(surf_pos, order);
-              extra_data.push_back(nd->edge_bc_proj);
+              bc_data.push_back(nd->edge_bc_proj);
 
               int i = surf_pos->surf_num, j = e->next_vert(i);
               ndata[e->vn[i]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
@@ -882,13 +857,99 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::free_extra_data()
+    void Space<Scalar>::free_bc_data()
     {
       _F_;
-      for (unsigned int i = 0; i < extra_data.size(); i++)
-        delete [] (Scalar*) extra_data[i];
-      extra_data.clear();
+      for (unsigned int i = 0; i < bc_data.size(); i++)
+        delete [] (Scalar*) bc_data[i];
+      bc_data.clear();
     }
+
+    template<typename Scalar>
+    bool Space<Scalar>::save(const char *filename) const
+    {
+      /*
+      // construct_refined_space
+      _F_;
+      Mesh* ref_mesh = new Mesh;
+      ref_mesh->copy(coarse->get_mesh());
+      ref_mesh->refine_all_elements(refinement_type);
+
+      Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
+
+      return ref_space;
+
+
+      // H1Space::dup
+      H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
+
+      // Set all elements not to have changed from the adaptation.
+      Element *e;
+      for_all_active_elements(e, space->get_mesh())
+        space->edata[e->id].changed_in_last_adaptation = false;
+
+      space->copy_orders(this, order_increase);
+      return space;
+
+
+      template<typename Scalar>
+    void Space<Scalar>::copy_orders_recurrent(Element* e, int order)
+    {
+      _F_;
+      if (e->active)
+        edata[e->id].order = order;
+      else
+        for (int i = 0; i < 4; i++)
+          if (e->sons[i] != NULL)
+            copy_orders_recurrent(e->sons[i], order);
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::copy_orders(const Space<Scalar>* space, int inc)
+    {
+      _F_;
+      Element* e;
+      resize_tables();
+      for_all_active_elements(e, space->get_mesh())
+      {
+        int o = space->get_element_order(e->id);
+        if (o < 0) error("Source space has an uninitialized order (element id = %d)", e->id);
+
+        int mo = shapeset->get_max_order();
+        int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
+        int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(o) + inc, mo));
+        int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + inc, mo));
+        o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
+
+        copy_orders_recurrent(mesh->get_element(e->id), o);
+        if(space->edata[e->id].changed_in_last_adaptation)
+        {
+          if(mesh->get_element(e->id)->active)
+            edata[e->id].changed_in_last_adaptation = true;
+          else
+            for(unsigned int i = 0; i < 4; i++)
+              if(mesh->get_element(e->id)->sons[i] != NULL)
+                if(mesh->get_element(e->id)->sons[i]->active)
+                  edata[mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
+        }
+
+        Element * e;
+      }
+      
+      seq = g_space_seq++;
+
+      // since space changed, enumerate basis functions
+      this->assign_dofs();
+    }
+
+
+
+
+
+    */
+      return true;
+    }
+    
 
     template class HERMES_API Space<double>;
     template class HERMES_API Space<std::complex<double> >;

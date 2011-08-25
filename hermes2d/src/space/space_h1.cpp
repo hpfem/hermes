@@ -498,7 +498,7 @@ namespace Hermes
           typename Space<Scalar>::BaseComponent* edge_dofs;
           nd = &this->ndata[mid_vn->id];
           nd->baselist = merge_baselists(bl[0], nc[0], bl[1], nc[1], en, edge_dofs, nd->ncomponents);
-          this->extra_data.push_back(nd->baselist);
+          this->bc_data.push_back(nd->baselist);
 
           // set edge node coefs to function values of the edge functions
           double mid = (ei[i]->lo + ei[i]->hi) * 0.5;
@@ -603,7 +603,7 @@ namespace Hermes
         *fixv = fixed_vertices[i].value;
         typename Space<Scalar>::NodeData* nd = &this->ndata[fixed_vertices[i].id];
         nd->vertex_bc_coef = fixv;
-        this->extra_data.push_back(fixv);
+        this->bc_data.push_back(fixv);
       }
     }
 

@@ -294,7 +294,7 @@ namespace Hermes
       double*  chol_p;
 
       /// Used for bc projection.
-      Hermes::vector<void*> extra_data;
+      Hermes::vector<void*> bc_data;
 
       void precalculate_projection_matrix(int nv, double**& mat, double*& p);
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
@@ -309,14 +309,11 @@ namespace Hermes
       /// the DOFs have been assigned.
       virtual void post_assign();
 
-      void free_extra_data();
-
-      void propagate_zero_orders(Element* e);
-
-    public:
+      void free_bc_data();
+    
+public:
       /// Internal. Used by DiscreteProblem to detect changes in the space.
       int get_seq() const;
-      int set_seq(int seq_);
 
       /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
       /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
@@ -336,6 +333,9 @@ namespace Hermes
 
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
+
+      /// Saves this space into a file.
+      bool save(const char *filename) const;
     };
   }
 }
