@@ -6,6 +6,13 @@ project(hermes2d)
 	else(WIN32)
 		execute_process(COMMAND "${PROJECT_SOURCE_DIR}/include/mesh/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/include/mesh/" OUTPUT_QUIET)
 	endif(WIN32)
+  
+  SET(H2D_XML_SCHEMAS_DIRECTORY "\"${PROJECT_SOURCE_DIR}/include/mesh\"")
+  
+  configure_file(
+		config.h.cmake
+		include/config.h
+	)
 
 	# Determine which version (debug x release) to build.
 	if (NOT H2D_DEBUG AND NOT H2D_RELEASE)

@@ -45,7 +45,7 @@ namespace Hermes
       virtual ~MeshReaderH2DXML();
 
       /// This method loads a single mesh from a file.
-      virtual bool load(const char *file_name, Mesh *mesh);
+      virtual bool load(const char *filename, Mesh *mesh);
 
       /// This method saves a single mesh to a file.
       bool save(const char *filename, Mesh *mesh);
@@ -53,7 +53,10 @@ namespace Hermes
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///            also the order is determined by the order in the file.
-      bool load(const char *file_name, Hermes::vector<Mesh *> meshes);
+      bool load(const char *filename, Hermes::vector<Mesh *> meshes);
+      
+      /// This method saves multiple meshes according to subdomains in the vector meshes.
+      bool save(const char *filename, Hermes::vector<Mesh *> meshes);
 
     protected:
       /// Internal method loading contents of parsed_xml_entity into mesh.

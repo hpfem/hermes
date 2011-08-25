@@ -27,6 +27,9 @@ int main(int argc, char* argv[])
     for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
       meshes[meshes_i]->refine_all_elements();
 
+  mloader.save("subdomains2.xml", meshes);
+  mloader.load("subdomains2.xml", meshes);
+
   // Initialize essential boundary conditions.
   DefaultEssentialBCConst<double> bc_essential_whole_domain(Hermes::vector<std::string>("Bottom Left", "Bottom Right", "Top Left", "Top Right"), 0.0);
   EssentialBCs<double> bcs_whole_domain(&bc_essential_whole_domain);
@@ -48,9 +51,15 @@ int main(int argc, char* argv[])
   int ndof_complement = space_complement.get_num_dofs();
 
   if(ndof_whole_domain == 225 && ndof_bottom_left_corner == 56 && ndof_complement == 161)
+  {
+    info("Success!");
     return TEST_SUCCESS;
+  }
   else
+  {
+    info("Failure!");
     return TEST_FAILURE;
+  }
 
   return 0;
 }

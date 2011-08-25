@@ -24,6 +24,7 @@
 #define __H2D_COMMON_H_
 
 #include "hermes_common.h"
+#include "config.h"
 
 namespace Hermes
 {

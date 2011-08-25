@@ -34,6 +34,7 @@ namespace Hermes
     bool MeshReaderH2DXML::load(const char *filename, Mesh *mesh)
     {
       mesh->free();
+
       std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh (XMLMesh::mesh_(filename));
       if(!load<XMLMesh::mesh>(parsed_xml_mesh, mesh))
         return false;
@@ -115,9 +116,12 @@ namespace Hermes
       xmlmesh.curves().set(curves);
       xmlmesh.refinements().set(refinements);
 
-      ::xml_schema::namespace_info namespace_info("XMLMesh", "../../include/mesh/mesh_h2d_xml.xsd");
+      std::string mesh_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      mesh_schema_location.append("/mesh_h2d_xml.xsd");
+      ::xml_schema::namespace_info namespace_info_mesh("XMLMesh", mesh_schema_location);
+
       ::xml_schema::namespace_infomap namespace_info_map;
-      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("mesh", namespace_info));
+      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("mesh", namespace_info_mesh));
 
       std::ofstream out(filename);
       XMLMesh::mesh_(out, xmlmesh, namespace_info_map);
@@ -132,6 +136,7 @@ namespace Hermes
         meshes.at(meshes_i)->free();
 
       Mesh global_mesh;
+
       std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename));
 
       if(!load<XMLSubdomains::domain>(parsed_xml_domain, &global_mesh))
@@ -433,6 +438,170 @@ namespace Hermes
           meshes[subdomains_i]->seq = g_mesh_seq++;
         }
       }
+      return true;
+    }
+
+    bool MeshReaderH2DXML::save(const char *filename, Hermes::vector<Mesh *> meshes)
+    {
+      // For mapping of physical coordinates onto top vertices.
+      std::map<std::pair<double, double>, unsigned int> points_to_vertices;
+      // For mapping of vertex pairs onto boundary edges.
+      std::map<std::pair<unsigned int, unsigned int>, unsigned int> vertices_to_boundaries;
+      // For mapping of vertex pairs onto curves.
+      std::map<std::pair<unsigned int, unsigned int>, bool> vertices_to_curves;
+
+      // Global vertices list.
+      XMLMesh::vertices_type vertices;
+      // Global elements list.
+      XMLMesh::elements_type elements;
+      // Global boudnary edges list.
+      XMLMesh::boundary_edges_type boundary_edges;
+      // Global curves list.
+      XMLMesh::curves_type curves;
+
+      // Subdomains.
+      XMLSubdomains::subdomains subdomains;
+      
+      for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
+      {
+        // Create a subdomain.
+        XMLSubdomains::subdomain subdomain("A subdomain");
+        
+        // Refinements.
+        XMLMesh::refinements_type refinements;
+
+        // Mapping of top vertices of subdomains to the global mesh.
+        std::map<unsigned int, unsigned int> vertices_to_vertices;
+
+        // Utility pointer.
+        Element* e;
+
+        // save vertices
+        for (int i = 0; i < meshes[meshes_i]->ntopvert; i++)
+        {
+          // Look for the coordinates of this vertex.
+          // If found, then insert the pair <this vertex number, the found vertex number> into vertices_to_vertices dictionary.
+          // If not, insert.
+          if(points_to_vertices.find(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y)) != points_to_vertices.end())
+            vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, points_to_vertices.find(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y))->second));
+          else
+          {
+            vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, points_to_vertices.size()));
+            points_to_vertices.insert(std::pair<std::pair<double, double>, unsigned int>(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y), points_to_vertices.size()));
+            std::ostringstream x_stream;
+            x_stream << meshes[meshes_i]->nodes[vertices_to_vertices.find(i)->second].x;
+
+            std::ostringstream y_stream;
+            y_stream << meshes[meshes_i]->nodes[vertices_to_vertices.find(i)->second].y;
+        
+            vertices.vertex().push_back(std::auto_ptr<XMLMesh::vertex>(new XMLMesh::vertex(x_stream.str(), y_stream.str())));
+          }
+          subdomain.vertex_number().push_back(vertices_to_vertices.find(i)->second);
+        }
+
+        // save elements
+        for (int i = 0; i < meshes[meshes_i]->get_num_base_elements(); i++)
+        {
+          e = meshes[meshes_i]->get_element_fast(i);
+          if (e->used)
+          {
+            if (e->is_triangle())
+            {
+              bool present = false;
+              for(unsigned int elements_i = 0; elements_i < elements.element().size(); elements_i++)
+                if(dynamic_cast<XMLMesh::triangle_type*>(&elements.element().at(elements_i)) != NULL)
+                  if(dynamic_cast<XMLMesh::triangle_type*>(&elements.element().at(elements_i))->v1() == vertices_to_vertices.find(e->vn[0]->id)->second &&
+                    dynamic_cast<XMLMesh::triangle_type*>(&elements.element().at(elements_i))->v2() == vertices_to_vertices.find(e->vn[1]->id)->second &&
+                    dynamic_cast<XMLMesh::triangle_type*>(&elements.element().at(elements_i))->v3() == vertices_to_vertices.find(e->vn[2]->id)->second)
+                    {
+                      present = true;
+                      break;
+                    }
+             
+              if(!present)
+                elements.element().push_back(XMLMesh::triangle_type(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str()));
+            }
+            else
+            {
+              bool present = false;
+              for(unsigned int elements_i = 0; elements_i < elements.element().size(); elements_i++)
+                if(dynamic_cast<XMLMesh::quad_type*>(&elements.element().at(elements_i)) != NULL)
+                  if(dynamic_cast<XMLMesh::quad_type*>(&elements.element().at(elements_i))->v1() == vertices_to_vertices.find(e->vn[0]->id)->second &&
+                    dynamic_cast<XMLMesh::quad_type*>(&elements.element().at(elements_i))->v2() == vertices_to_vertices.find(e->vn[1]->id)->second &&
+                    dynamic_cast<XMLMesh::quad_type*>(&elements.element().at(elements_i))->v3() == vertices_to_vertices.find(e->vn[2]->id)->second &&
+                    dynamic_cast<XMLMesh::quad_type*>(&elements.element().at(elements_i))->v4() == vertices_to_vertices.find(e->vn[3]->id)->second)
+                    {
+                      present = true;
+                      break;
+                    }
+             
+                if(!present)
+                  elements.element().push_back(XMLMesh::quad_type(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), vertices_to_vertices.find(e->vn[3]->id)->second));
+              }
+            subdomain.element_number().push_back(e->id);
+          }
+        }
+      
+        // save boundary markers
+        for_all_base_elements(e, meshes[meshes_i])
+          for (unsigned i = 0; i < e->nvert; i++)
+            // Not internal internal markers.
+            if (meshes[meshes_i]->get_base_edge_node(e, i)->marker)
+            {
+              if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
+              {
+                vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), boundary_edges.boundary_edge().size()));
+                boundary_edges.boundary_edge().push_back(XMLMesh::boundary_edge(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker.c_str()));
+              }
+              subdomain.boundary_edge_number().push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
+            }
+
+        // save curved edges
+        for_all_base_elements(e, meshes[meshes_i])
+          if (e->is_curved())
+            for (unsigned i = 0; i < e->nvert; i++)
+              if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
+                if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
+                {
+                  if(e->cm->nurbs[i]->arc)
+                    save_arc(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i], curves);
+                  else
+                    save_nurbs(meshes[meshes_i], vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i], curves);
+                  vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
+                }
+
+        // save refinements
+        unsigned temp = meshes[meshes_i]->seq;
+        meshes[meshes_i]->seq = meshes[meshes_i]->nbase;
+        for_all_base_elements(e, meshes[meshes_i])
+          save_refinements(meshes[meshes_i], e, e->id, refinements);
+
+        meshes[meshes_i]->seq = temp;
+
+        subdomain.refinements().set(refinements);
+        subdomains.subdomain().push_back(subdomain);
+      }
+
+      
+      XMLSubdomains::domain xmldomain(vertices, elements, boundary_edges, subdomains);
+      xmldomain.curves().set(curves);
+
+      std::string mesh_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      mesh_schema_location.append("/mesh_h2d_xml.xsd");
+      ::xml_schema::namespace_info namespace_info_mesh("XMLMesh", mesh_schema_location);
+      
+      std::string domain_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      domain_schema_location.append("/subdomains_h2d_xml.xsd");
+      ::xml_schema::namespace_info namespace_info_domain("XMLSubdomains", domain_schema_location);
+
+      ::xml_schema::namespace_infomap namespace_info_map;
+      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("mesh", namespace_info_mesh));
+      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("domain", namespace_info_domain));
+
+      std::ofstream out(filename);
+      XMLSubdomains::domain_(out, xmldomain, namespace_info_map);
+      out.close();
+
       return true;
     }
 
