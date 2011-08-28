@@ -3,3 +3,5 @@ xsdcxx cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suff
 mv -f ../include/mesh/*.cpp ../src/mesh
 xsdcxx cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --generate-serialization --output-dir ../include/space space_h2d_xml.xsd
 mv -f ../include/space/*.cpp ../src/space
+xsdcxx cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --generate-serialization --output-dir ../include/function solution_h2d_xml.xsd
+mv -f ../include/function/*.cpp ../src/function

@@ -286,7 +286,7 @@ namespace Hermes
           int* shape_inxs; ///< Used shape indices
           int num_shapes; ///< A number of used shape indices.
           Hermes::vector<TrfShapeExp>& svals; ///< A precalculated shape-function values. Empty is not defined.
-          Scalar* shape_coefs; ///< Coefficients of shape indices of a projection.
+          Scalar* shape_coeffs; ///< Coefficients of shape indices of a projection.
           int max_quad_order; ///< An encoded maximum order of the projection. If triangle, the vertical order is equal to the horizontal order.
         };
 

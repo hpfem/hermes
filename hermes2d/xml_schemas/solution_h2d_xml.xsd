@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<schema targetNamespace="XMLSolution" xmlns="http://www.w3.org/2001/XMLSchema">
+  <element name="solution">
+    <complexType>
+      <sequence>
+        <element minOccurs="1" maxOccurs="unbounded" name="mono_coeffs">
+          <complexType>
+            <attribute name="id" type="integer" use="required" />
+            <attribute name="real" type="decimal" use="required" />
+            <attribute name="imaginary" type="decimal" />
+          </complexType>
+        </element>
+        <element minOccurs="1" maxOccurs="unbounded" name="elem_orders">
+          <complexType>
+            <attribute name="id" type="integer" use="required" />
+            <attribute name="order" type="integer" use="required" />
+          </complexType>
+        </element>
+        <element minOccurs="1" maxOccurs="unbounded" name="component">
+          <complexType>
+            <sequence>
+              <element minOccurs="1" maxOccurs="unbounded" name="elem_coeffs">
+                <complexType>
+                  <attribute name="id" type="integer" use="required" />
+                  <attribute name="coeff" type="integer" use="required" />
+                </complexType>
+              </element>
+            </sequence>
+            <attribute name="component_number" type="integer" />
+          </complexType>
+        </element>
+        <element minOccurs="1" maxOccurs="1" name="sln_vector">
+          <complexType>
+            <sequence>
+              <element minOccurs="1" maxOccurs="unbounded" name="sln_coeff">
+                <complexType>
+                  <attribute name="id" type="integer" use="required" />
+                  <attribute name="real" type="decimal" use="required" />
+                  <attribute name="imaginary" type="decimal" />
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+      <attribute name="num_components" type="integer" use="required" />
+      <attribute name="num_elems" type="integer" use="required" />
+      <attribute name="num_coeffs" type="integer" use="required" />
+      <attribute name="num_dofs" type="integer" use="required" />
+    </complexType>
+  </element>
+</schema>

@@ -105,7 +105,7 @@ namespace Hermes
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to a binary file. On Linux, if `compress` is true, the file is
       /// compressed with gzip and a ".gz" suffix added to the file name.
-      void save(const char* filename, bool compress = true);
+      void save(const char* filename) const;
 
       /// Loads the solution from a file previously created by Solution::save(). This completely
       /// restores the solution in the memory. The file name has to include the ".gz" suffix,
@@ -205,17 +205,17 @@ namespace Hermes
       Element* elems[4][4];
       int cur_elem, oldest[4];
 
-      Scalar* mono_coefs;  ///< monomial coefficient array
-      int* elem_coefs[2];  ///< array of pointers into mono_coefs
+      Scalar* mono_coeffs;  ///< monomial coefficient array
+      int* elem_coeffs[2];  ///< array of pointers into mono_coeffs
       int* elem_orders;    ///< stored element orders
-      int num_coefs, num_elems;
+      int num_coeffs, num_elems;
       int num_dofs;
 
       void transform_values(int order, struct Function<Scalar>::Node* node, int newmask, int oldmask, int np);
 
       virtual void precalculate(int order, int mask);
 
-      Scalar* dxdy_coefs[2][6];
+      Scalar* dxdy_coeffs[2][6];
 
       Scalar* dxdy_buffer;
 

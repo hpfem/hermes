@@ -15,6 +15,16 @@
 
 #include "exact_solution.h"
 
+// This is here mainly because XSD uses its own error, therefore it has to be undefined here.
+#ifdef error(...)
+#undef error(...)
+#endif
+#include "solution_h2d_xml.h"
+// This is here mainly because XSD uses its own error, therefore it had to be undefined previously.
+#ifndef error(...)
+#define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
+#endif
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -90,11 +100,11 @@ namespace Hermes
         for(int j = 0; j < 4; j++)
           tables[i][j] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
 
-      mono_coefs = NULL;
-      elem_coefs[0] = elem_coefs[1] = NULL;
+      mono_coeffs = NULL;
+      elem_coeffs[0] = elem_coeffs[1] = NULL;
       elem_orders = NULL;
       dxdy_buffer = NULL;
-      num_coefs = num_elems = 0;
+      num_coeffs = num_elems = 0;
       num_dofs = -1;
 
       this->set_quad_2d(&g_quad_2d_std);
@@ -152,12 +162,12 @@ namespace Hermes
       own_mesh = sln->own_mesh;
       sln->own_mesh = false;
 
-      mono_coefs = sln->mono_coefs;        sln->mono_coefs = NULL;
-      elem_coefs[0] = sln->elem_coefs[0];  sln->elem_coefs[0] = NULL;
-      elem_coefs[1] = sln->elem_coefs[1];  sln->elem_coefs[1] = NULL;
+      mono_coeffs = sln->mono_coeffs;        sln->mono_coeffs = NULL;
+      elem_coeffs[0] = sln->elem_coeffs[0];  sln->elem_coeffs[0] = NULL;
+      elem_coeffs[1] = sln->elem_coeffs[1];  sln->elem_coeffs[1] = NULL;
       elem_orders = sln->elem_orders;      sln->elem_orders = NULL;
       dxdy_buffer = sln->dxdy_buffer;      sln->dxdy_buffer = NULL;
-      num_coefs = sln->num_coefs;          sln->num_coefs = 0;
+      num_coeffs = sln->num_coeffs;          sln->num_coeffs = 0;
       num_elems = sln->num_elems;          sln->num_elems = 0;
 
       sln_type = sln->sln_type;
@@ -188,16 +198,16 @@ namespace Hermes
 
       if (sln->sln_type == HERMES_SLN) // standard solution: copy coefficient arrays
       {
-        num_coefs = sln->num_coefs;
+        num_coeffs = sln->num_coeffs;
         num_elems = sln->num_elems;
 
-        mono_coefs = new Scalar[num_coefs];
-        memcpy(mono_coefs, sln->mono_coefs, sizeof(Scalar) * num_coefs);
+        mono_coeffs = new Scalar[num_coeffs];
+        memcpy(mono_coeffs, sln->mono_coeffs, sizeof(Scalar) * num_coeffs);
 
         for (int l = 0; l < this->num_components; l++) 
         {
-          elem_coefs[l] = new int[num_elems];
-          memcpy(elem_coefs[l], sln->elem_coefs[l], sizeof(int) * num_elems);
+          elem_coeffs[l] = new int[num_elems];
+          memcpy(elem_coeffs[l], sln->elem_coeffs[l], sizeof(int) * num_elems);
         }
 
         elem_orders = new int[num_elems];
@@ -213,9 +223,9 @@ namespace Hermes
       }
       else // Const, exact handled differently.
         error("Undefined or exact solutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
-      
-        space = sln->space;
-      
+
+      space = sln->space;
+
       this->element = NULL;
     }
 
@@ -243,13 +253,13 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::free()
     {
-      if (mono_coefs  != NULL) { delete [] mono_coefs;   mono_coefs = NULL;  }
+      if (mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
       if (elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
       if (dxdy_buffer != NULL) { delete [] dxdy_buffer;  dxdy_buffer = NULL; }
 
       for (int i = 0; i < this->num_components; i++)
-        if (elem_coefs[i] != NULL)
-        { delete [] elem_coefs[i];  elem_coefs[i] = NULL; }
+        if (elem_coeffs[i] != NULL)
+        { delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
 
         if (own_mesh == true && this->mesh != NULL)
         {
@@ -384,7 +394,7 @@ namespace Hermes
         error("Provided 'space' and 'pss' must have the same shapesets.");
 
       free();
-      
+
       if(this->sln_vector != NULL)
         delete [] this->sln_vector;
       this->sln_vector = new Scalar[space->get_num_dofs()];
@@ -410,15 +420,15 @@ namespace Hermes
       memset(elem_orders, 0, sizeof(int) * num_elems);
       for (int l = 0; l < this->num_components; l++) 
       {
-        if(elem_coefs[l] != NULL)
-          delete [] elem_coefs[l];
-        elem_coefs[l] = new int[num_elems];
-        memset(elem_coefs[l], 0, sizeof(int) * num_elems);
+        if(elem_coeffs[l] != NULL)
+          delete [] elem_coeffs[l];
+        elem_coeffs[l] = new int[num_elems];
+        memset(elem_coeffs[l], 0, sizeof(int) * num_elems);
       }
 
-      // obtain element orders, allocate mono_coefs
+      // obtain element orders, allocate mono_coeffs
       Element* e;
-      num_coefs = 0;
+      num_coeffs = 0;
       for_all_active_elements(e, this->mesh)
       {
         this->mode = e->get_mode();
@@ -433,18 +443,18 @@ namespace Hermes
         // Hcurl: actual order of functions is one higher than element order
         if ((space->get_shapeset())->get_num_components() == 2) o++;
 
-        num_coefs += this->mode ? sqr(o+1) : (o+1)*(o+2)/2;
+        num_coeffs += this->mode ? sqr(o+1) : (o+1)*(o+2)/2;
         elem_orders[e->id] = o;
       }
-      num_coefs *= this->num_components;
-      if(mono_coefs != NULL)
-        delete [] mono_coefs;
-      mono_coefs = new Scalar[num_coefs];
+      num_coeffs *= this->num_components;
+      if(mono_coeffs != NULL)
+        delete [] mono_coeffs;
+      mono_coeffs = new Scalar[num_coeffs];
 
       // express the solution on elements as a linear combination of monomials
       Quad2D* quad = &g_quad_2d_cheb;
       pss->set_quad_2d(quad);
-      Scalar* mono = mono_coefs;
+      Scalar* mono = mono_coeffs;
       for_all_active_elements(e, this->mesh)
       {
         this->mode = e->get_mode();
@@ -460,7 +470,7 @@ namespace Hermes
         {
           // obtain solution values for the current element
           Scalar* val = mono;
-          elem_coefs[l][e->id] = (int) (mono - mono_coefs);
+          elem_coeffs[l][e->id] = (int) (mono - mono_coeffs);
           memset(val, 0, sizeof(Scalar)*np);
           for (unsigned int k = 0; k < al.cnt; k++)
           {
@@ -486,7 +496,7 @@ namespace Hermes
       init_dxdy_buffer();
       this->element = NULL;
     }
-    
+
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
       Hermes::vector<Space<Scalar>*> spaces,
@@ -608,8 +618,8 @@ namespace Hermes
     {
       if (sln_type == HERMES_SLN)
       {
-        for (int i = 0; i < num_coefs; i++)
-          mono_coefs[i] *= coef;
+        for (int i = 0; i < num_coeffs; i++)
+          mono_coeffs[i] *= coef;
       }
       else if (sln_type == HERMES_EXACT)
         dynamic_cast<ExactSolution<Scalar>*>(this)->exact_multiplicator *= coef;
@@ -618,7 +628,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    static void make_dx_coefs(int mode, int o, Scalar* mono, Scalar* result)
+    static void make_dx_coeffs(int mode, int o, Scalar* mono, Scalar* result)
     {
       int i, j, k;
       for (i = 0; i <= o; i++) {
@@ -631,7 +641,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    static void make_dy_coefs(int mode, int o, Scalar* mono, Scalar* result)
+    static void make_dy_coeffs(int mode, int o, Scalar* mono, Scalar* result)
     {
       int i, j;
       if (mode) {
@@ -706,14 +716,14 @@ namespace Hermes
 
         for (int i = 0, m = 0; i < this->num_components; i++)
         {
-          Scalar* mono = mono_coefs + elem_coefs[i][e->id];
-          dxdy_coefs[i][0] = mono;
+          Scalar* mono = mono_coeffs + elem_coeffs[i][e->id];
+          dxdy_coeffs[i][0] = mono;
 
-          make_dx_coefs(this->mode, o, mono, dxdy_coefs[i][1] = dxdy_buffer+m);  m += n;
-          make_dy_coefs(this->mode, o, mono, dxdy_coefs[i][2] = dxdy_buffer+m);  m += n;
-          make_dx_coefs(this->mode, o, dxdy_coefs[i][1], dxdy_coefs[i][3] = dxdy_buffer+m);  m += n;
-          make_dy_coefs(this->mode, o, dxdy_coefs[i][2], dxdy_coefs[i][4] = dxdy_buffer+m);  m += n;
-          make_dx_coefs(this->mode, o, dxdy_coefs[i][2], dxdy_coefs[i][5] = dxdy_buffer+m);  m += n;
+          make_dx_coeffs(this->mode, o, mono, dxdy_coeffs[i][1] = dxdy_buffer+m);  m += n;
+          make_dy_coeffs(this->mode, o, mono, dxdy_coeffs[i][2] = dxdy_buffer+m);  m += n;
+          make_dx_coeffs(this->mode, o, dxdy_coeffs[i][1], dxdy_coeffs[i][3] = dxdy_buffer+m);  m += n;
+          make_dy_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][4] = dxdy_buffer+m);  m += n;
+          make_dx_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][5] = dxdy_buffer+m);  m += n;
         }
       }
       else if (sln_type == HERMES_EXACT)
@@ -928,7 +938,7 @@ namespace Hermes
               else
               {
                 // calculate the solution values using Horner's scheme
-                Scalar* mono = dxdy_coefs[l][k];
+                Scalar* mono = dxdy_coeffs[l][k];
                 for (i = 0; i <= o; i++)
                 {
                   set_vec_num(np, tx, *mono++);
@@ -1025,150 +1035,182 @@ namespace Hermes
       this->cur_node = node;
     }
 
-
-    //// save & load ///////////////////////////////////////////////////////////////////////////////////
-
-    template<typename Scalar>
-    void Solution<Scalar>::save(const char* filename, bool compress)
+    template<>
+    void Solution<double>::save(const char* filename) const
     {
-      int i;
+      if (sln_type == HERMES_EXACT) 
+        error("Exact solution cannot be saved to a file.");
+      if (sln_type == HERMES_UNDEF) 
+        error("Cannot save -- uninitialized solution.");
 
-      if (sln_type == HERMES_EXACT) error("Exact solution cannot be saved to a file.");
-      if (sln_type == HERMES_UNDEF) error("Cannot save -- uninitialized solution.");
-
-      // open the stream
-      std::string fname = filename;
-      if (compress) fname += ".gz";
-      FILE* f = fopen(fname.c_str(), "wb");
-      if (f == NULL) error("Could not open %s for writing.", filename);
-
-      if (compress)
+      try
       {
-        fclose(f);
-        std::stringstream cmdline;
-        cmdline << "gzip > " << filename << ".gz";
-        f = popen(cmdline.str().c_str(), "w");
-        if (f == NULL) error("Could not create compressed stream (command line: %s).", cmdline.str().c_str());
+        XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, this->num_elems, this->num_coeffs, this->num_dofs);
+
+        for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
+          xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i]));
+
+        for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+          xmlsolution.elem_orders().push_back(XMLSolution::elem_orders(elems_i, elem_orders[elems_i]));
+
+        for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
+        {
+          xmlsolution.component().push_back(XMLSolution::component());
+          xmlsolution.component().back().component_number() = component_i;
+          for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+            xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
+        }
+
+        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
+          xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i]));
+        
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
       }
-
-      // write header
-      hermes_fwrite("H2DS\001\000\000\000", 1, 8, f);
-      int ssize = sizeof(Scalar);
-      hermes_fwrite(&ssize, sizeof(int), 1, f);
-      hermes_fwrite(&this->num_components, sizeof(int), 1, f);
-      hermes_fwrite(&num_elems, sizeof(int), 1, f);
-      hermes_fwrite(&num_coefs, sizeof(int), 1, f);
-
-      // write monomial coefficients
-      hermes_fwrite(mono_coefs, sizeof(Scalar), num_coefs, f);
-
-      // write element orders
-      char* temp_orders = new char[num_elems];
-      for (i = 0; i < num_elems; i++) 
+      catch (const xml_schema::exception& e)
       {
-        temp_orders[i] = elem_orders[i];
+        std::cerr << e << endl;
+        std::exit(1);
       }
-      hermes_fwrite(temp_orders, sizeof(char), num_elems, f);
-      delete [] temp_orders;
-
-      // write element coef table
-      for (i = 0; i < this->num_components; i++)
-        hermes_fwrite(elem_coefs[i], sizeof(int), num_elems, f);
-
-      /*
-      // write the mesh
-      this->mesh->save_raw(f);
-      */
-
-      if (compress) pclose(f); else fclose(f);
+      return;
     }
 
-
-    template<typename Scalar>
-    void Solution<Scalar>::load(const char* filename)
+    template<>
+    void Solution<std::complex<double> >::save(const char* filename) const
     {
-      int i;
+      if (sln_type == HERMES_EXACT) 
+        error("Exact solution cannot be saved to a file.");
+      if (sln_type == HERMES_UNDEF) 
+        error("Cannot save -- uninitialized solution.");
 
+      try
+      {
+        XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, this->num_elems, this->num_coeffs, this->num_dofs);
+
+        for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
+        {
+          xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i].real()));
+          xmlsolution.mono_coeffs().back().imaginary() = mono_coeffs[coeffs_i].imag();
+        }
+
+        for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+          xmlsolution.elem_orders().push_back(XMLSolution::elem_orders(elems_i, elem_orders[elems_i]));
+
+        for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
+        {
+          xmlsolution.component().push_back(XMLSolution::component());
+          xmlsolution.component().back().component_number() = component_i;
+          for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+            xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
+        }
+        
+        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
+        {
+          xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i].real()));
+          xmlsolution.sln_vector().sln_coeff().back().imaginary() = this->sln_vector[sln_coeff_i].imag();
+        }
+        
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        std::cerr << e << endl;
+        std::exit(1);
+      }
+      return;
+    }
+
+    template<>
+    void Solution<double>::load(const char* filename)
+    {
       free();
       sln_type = HERMES_SLN;
 
-      int len = strlen(filename);
-      bool compressed = (len > 3 && !strcmp(filename + len - 3, ".gz"));
-
-      // open the stream
-      FILE* f = fopen(filename, "rb");
-      if (f == NULL) error("Could not open %s", filename);
-
-      if (compressed)
+      try
       {
-        fclose(f);
-        std::stringstream cmdline;
-        cmdline << "gunzip < " << filename << ".gz";
-        f = popen(cmdline.str().c_str(), "r");
-        if (f == NULL) error("Could not read from compressed stream (command line: %s).", cmdline.str().c_str());
+        std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
+
+        this->num_coeffs = parsed_xml_solution->num_coeffs();
+        this->num_elems = parsed_xml_solution->num_elems();
+        this->num_components = parsed_xml_solution->num_components();
+        this->num_dofs = parsed_xml_solution->num_dofs();
+
+        for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
+          this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).real();
+
+        for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
+          this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).order();
+
+        for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
+          for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
+            this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).coeff();
+
+        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
+          this->sln_vector[parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).id()] = parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).real();
+
+        init_dxdy_buffer();
       }
-
-      // load header
-      struct 
+      catch (const xml_schema::exception& e)
       {
-        char magic[4];
-        int  ver, ss, nc, ne, nf;
-      } hdr;
-      hermes_fread(&hdr, sizeof(hdr), 1, f);
-
-      // some checks
-      if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'S')
-        error("Not a Hermes2D solution file.");
-      if (hdr.ver > 1)
-        error("Unsupported file version.");
-
-      // load monomial coefficients
-      num_coefs = hdr.nf;
-      if (hdr.ss == sizeof(double))
-      {
-        double* temp = new double[num_coefs];
-        hermes_fread(temp, sizeof(double), num_coefs, f);
-
-        mono_coefs = new Scalar[num_coefs];
-        for (i = 0; i < num_coefs; i++)
-          mono_coefs[i] = temp[i];
-        delete [] temp;
+        std::cerr << e << endl;
+        std::exit(1);
       }
-      else
-        error("Corrupt solution file.");
-
-      // load element orders
-      num_elems = hdr.ne;
-      char* temp_orders = new char[num_elems];
-      hermes_fread(temp_orders, sizeof(char), num_elems, f);
-      elem_orders = new int[num_elems];
-      for (i = 0; i < num_elems; i++)
-        elem_orders[i] = temp_orders[i];
-      delete [] temp_orders;
-
-      // load element coef table
-      this->num_components = hdr.nc;
-      for (i = 0; i < this->num_components; i++)
-      {
-        elem_coefs[i] = new int[num_elems];
-        hermes_fread(elem_coefs[i], sizeof(int), num_elems, f);
-      }
-
-      /*
-      // load the mesh
-      this->mesh = new Mesh;
-      this->mesh->load_raw(f);
-      //printf("Loading mesh from file and setting own_mesh = true.\n");
-      own_mesh = true;
-      */
-
-      if (compressed) pclose(f); else fclose(f);
-
-      init_dxdy_buffer();
+      return;
     }
 
+    template<>
+    void Solution<std::complex<double> >::load(const char* filename)
+    {
+      free();
+      sln_type = HERMES_SLN;
 
-    //// getting solution values in arbitrary points ///////////////////////////////////////////////////////////////
+      try
+      {
+        std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
+
+        this->num_coeffs = parsed_xml_solution->num_coeffs();
+        this->num_elems = parsed_xml_solution->num_elems();
+        this->num_components = parsed_xml_solution->num_components();
+
+        for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
+          this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = std::complex<double>(parsed_xml_solution->mono_coeffs().at(coeffs_i).real(), parsed_xml_solution->mono_coeffs().at(coeffs_i).imaginary().get());
+
+        for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
+          this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).order();
+
+        for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
+          for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
+            this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).coeff();
+
+        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
+          this->sln_vector[parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).id()] = std::complex<double>(parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).real(), parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).imaginary().get());
+
+        init_dxdy_buffer();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        std::cerr << e << endl;
+        std::exit(1);
+      }
+      return;
+    }
 
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
@@ -1176,7 +1218,7 @@ namespace Hermes
       set_active_element(e);
 
       int o = elem_orders[e->id];
-      Scalar* mono = dxdy_coefs[component][item];
+      Scalar* mono = dxdy_coeffs[component][item];
       Scalar result = 0.0;
       int k = 0;
       for (int i = 0; i <= o; i++)
@@ -1224,10 +1266,10 @@ namespace Hermes
           double2x2 mat;
           double3x2 mat2;
           double xx, yy;
-           
+
           this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
           this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
-             
+
           Scalar vx = get_ref_value(e, xi1, xi2, a, 1);
           Scalar vy = get_ref_value(e, xi1, xi2, a, 2);
           Scalar vxx = get_ref_value(e, xi1, xi2, a, 3);

@@ -14,6 +14,17 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "space.h"
+
+// This is here mainly because XSD uses its own error, therefore it has to be undefined here.
+#ifdef error(...)
+#undef error(...)
+#endif
+#include "space_h2d_xml.h"
+// This is here mainly because XSD uses its own error, therefore it had to be undefined previously.
+#ifndef error(...)
+#define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
+#endif
+
 namespace Hermes
 {
   namespace Hermes2D

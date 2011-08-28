@@ -522,7 +522,7 @@ namespace Hermes
           nd->baselist = merge_baselists(bl[0], nc[0], bl[1], nc[1], en, edge_dofs, nd->ncomponents);
           this->bc_data.push_back(nd->baselist);
 
-          // set edge node coefs to function values of the edge functions
+          // set edge node coeffs to function values of the edge functions
           double mid = (ei[i]->lo + ei[i]->hi) * 0.5;
           nd = &this->ndata[en->id];
           for (k = 0; k < nd->n; k++, edge_dofs++)

@@ -118,6 +118,7 @@ project(hermes2d)
 		src/function/solution.cpp 
 		src/function/filter.cpp
 		src/function/mesh_function.cpp
+    src/function/solution_h2d_xml.cpp
 
 		src/mesh/refmap.cpp 
 		src/mesh/curved.cpp

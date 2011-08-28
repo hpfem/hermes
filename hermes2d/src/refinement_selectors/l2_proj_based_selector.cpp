@@ -340,7 +340,7 @@ namespace Hermes
           for(int i = 0; i < elem_proj.num_shapes; i++) 
           {
             int shape_inx = elem_proj.shape_inxs[i];
-            proj_value += elem_proj.shape_coefs[i] * elem_proj.svals[shape_inx][H2D_L2FE_VALUE][gip_inx];
+            proj_value += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_L2FE_VALUE][gip_inx];
           }
 
           //get value of ref. solution

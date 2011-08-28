@@ -298,9 +298,9 @@ namespace Hermes
           for(int i = 0; i < elem_proj.num_shapes; i++) 
           {
             int shape_inx = elem_proj.shape_inxs[i];
-            proj_value0 += elem_proj.shape_coefs[i] * elem_proj.svals[shape_inx][H2D_HCFE_VALUE0][gip_inx];
-            proj_value1 += elem_proj.shape_coefs[i] * elem_proj.svals[shape_inx][H2D_HCFE_VALUE1][gip_inx];
-            proj_curl += elem_proj.shape_coefs[i] * elem_proj.svals[shape_inx][H2D_HCFE_CURL][gip_inx];
+            proj_value0 += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_HCFE_VALUE0][gip_inx];
+            proj_value1 += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_HCFE_VALUE1][gip_inx];
+            proj_curl += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_HCFE_CURL][gip_inx];
           }
 
           ////DEBUG-BEGIN
@@ -310,9 +310,9 @@ namespace Hermes
           //for(int i = 0; i < elem_proj.num_shapes; i++) 
           {
             //  int shape_inx = elem_proj.shape_inxs[i];
-            //  proj_value0A += elem_proj.shape_coefs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 0);
-            //  proj_value1A += elem_proj.shape_coefs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 1);
-            //  proj_curlA += elem_proj.shape_coefs[i] * (shapeset->get_dx_value(shape_inx, ref_x, ref_y, 1) - shapeset->get_dy_value(shape_inx, ref_x, ref_y, 0));
+            //  proj_value0A += elem_proj.shape_coeffs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 0);
+            //  proj_value1A += elem_proj.shape_coeffs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 1);
+            //  proj_curlA += elem_proj.shape_coeffs[i] * (shapeset->get_dx_value(shape_inx, ref_x, ref_y, 1) - shapeset->get_dy_value(shape_inx, ref_x, ref_y, 0));
             //}
             //error_if(std::abs(proj_value0 - proj_value0A) > 1E-15
             //  || std::abs(proj_value1 - proj_value1A) > 1E-15
