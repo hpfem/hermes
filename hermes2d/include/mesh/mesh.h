@@ -520,6 +520,10 @@ namespace Hermes
       Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm);
       Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm);
       void refine_element(Element* e, int refinement);
+
+      /// Vector for storing refinements in order to be able to save/load meshes with identical element IDs.
+      /// Refinement "-1" stands for unrefinement.
+      Hermes::vector<std::pair<unsigned int, int> > refinements;
   
       /// Refines a quad element into four quads, or two quads (horizontally or 
       /// vertically. If mesh != NULL, the new elements are incorporated into

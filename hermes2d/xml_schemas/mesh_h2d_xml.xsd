@@ -132,7 +132,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
       <element minOccurs="0" maxOccurs="unbounded" name="refinement">
         <complexType>
           <attribute name="element_id" type="integer" use="required" />
-          <attribute name="refinement_type" type="integer"/>
+          <attribute name="refinement_type" type="integer" use="required" />
         </complexType>
       </element>
     </sequence>

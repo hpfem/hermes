@@ -5,6 +5,7 @@
 #
 
 CMake.vars
+*.h2d
 .*
 *.o
 *.o.*

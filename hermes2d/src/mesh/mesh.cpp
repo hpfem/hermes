@@ -581,6 +581,7 @@ namespace Hermes
 
     void Mesh::unrefine_element_internal(Element* e)
     {
+      this->refinements.push_back(std::pair<unsigned int, int>(e->id, -1));
       assert(!e->active);
       unsigned int i;
       int s1, s2;
@@ -626,6 +627,8 @@ namespace Hermes
 
     void Mesh::refine_element(Element* e, int refinement)
     {
+      this->refinements.push_back(std::pair<unsigned int, int>(e->id, refinement));
+
       if (e->is_triangle()) 
       {
         if (refinement == 3) 
@@ -973,8 +976,6 @@ namespace Hermes
       return true;
     }
 
-
-
     void Mesh::copy(const Mesh* mesh)
     {
       unsigned int i;
@@ -985,6 +986,8 @@ namespace Hermes
       // copy nodes and elements
       HashTable::copy(mesh);
       elements.copy(mesh->elements);
+
+      this->refinements = mesh->refinements;
 
       Element* e;
       for_all_elements(e, this)
@@ -1107,6 +1110,8 @@ namespace Hermes
 
         elements.free();
         HashTable::free();
+
+        this->refinements.clear();
     }
 
     void Mesh::copy_converted(Mesh* mesh)

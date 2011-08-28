@@ -36,7 +36,7 @@
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
-const double time_step = 3e+2;                    // Time step in seconds.
+double time_step = 3e+2;                    // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
-
+      
   // Initialize the FE problem.
   DiscreteProblem<double> dp(&wf, &space);
 
@@ -116,8 +116,19 @@ int main(int argc, char* argv[])
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&dp, &bt, matrix_solver_type);
 
+  // Look for a saved solution on the disk.
+  Continuity<double> continuity(Continuity<double>::onlyTime);
+
+  if(!continuity.have_record_available())
+  {
+    continuity.get_last_record()->load_mesh(&mesh);
+    continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh, &bcs, P_INIT);
+    continuity.get_last_record()->load_solutions(Hermes::vector<Solution<double>*>(sln_time_new, sln_time_prev));
+    continuity.get_last_record()->load_time_step_length(time_step);
+    current_time = continuity.get_last_record()->get_time();
+  }
+
   // Time stepping loop:
-  int ts = 1;
   do 
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
@@ -132,6 +143,16 @@ int main(int argc, char* argv[])
       error("Runge-Kutta time step failed, try to decrease time step size.");
     }
 
+    // Save a current state on the disk.
+    if(current_time > 0)
+    {
+      continuity.add_record(current_time + time_step);
+      continuity.get_last_record()->save_mesh(&mesh);
+      continuity.get_last_record()->save_space(&space);
+      continuity.get_last_record()->save_solutions(Hermes::vector<Solution<double>*>(sln_time_new, sln_time_prev));
+      continuity.get_last_record()->save_time_step_length(time_step);
+    }
+
     // Show the new time level solution.
     char title[100];
     sprintf(title, "Time %3.2f s", current_time);
@@ -143,7 +164,6 @@ int main(int argc, char* argv[])
 
     // Increase current time and time step counter.
     current_time += time_step;
-    ts++;
   } 
   while (current_time < T_FINAL);
 

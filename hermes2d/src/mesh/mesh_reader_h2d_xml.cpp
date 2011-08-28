@@ -49,12 +49,11 @@ namespace Hermes
           for (unsigned int i = 0; i < parsed_xml_mesh->refinements()->refinement().size(); i++)
           {
             int element_id = parsed_xml_mesh->refinements()->refinement().at(i).element_id();
-            int refinement_type;
-            if(parsed_xml_mesh->refinements()->refinement().at(i).refinement_type().present())
-              refinement_type = parsed_xml_mesh->refinements()->refinement().at(i).refinement_type().get();
+            int refinement_type = parsed_xml_mesh->refinements()->refinement().at(i).refinement_type();
+            if(refinement_type == -1)
+              mesh->unrefine_element_id(element_id);
             else
-              refinement_type = 0;
-            mesh->refine_element_id(element_id, refinement_type);
+              mesh->refine_element_id(element_id, refinement_type);
           }
         }
       }
@@ -114,12 +113,8 @@ namespace Hermes
 
       // save refinements
       XMLMesh::refinements_type refinements;
-      unsigned temp = mesh->seq;
-      mesh->seq = mesh->nbase;
-      for_all_base_elements(e, mesh)
-        save_refinements(mesh, e, e->id, refinements);
-
-      mesh->seq = temp;
+      for(unsigned int refinement_i = 0; refinement_i < mesh->refinements.size(); refinement_i++)
+        refinements.refinement().push_back(XMLMesh::refinement(mesh->refinements[refinement_i].first, mesh->refinements[refinement_i].second));
 
       XMLMesh::mesh xmlmesh(vertices, elements, boundary_edges);
       xmlmesh.curves().set(curves);
@@ -437,12 +432,11 @@ namespace Hermes
               for (unsigned int i = 0; i < parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().size(); i++)
               {
                 int element_id = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).element_id();
-                int refinement_type;
-                if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).refinement_type().present())
-                  refinement_type = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).refinement_type().get();
+                int refinement_type = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().at(i).refinement_type();
+                if(refinement_type == -1)
+                  meshes[subdomains_i]->unrefine_element_id(element_id);
                 else
-                  refinement_type = 0;
-                meshes[subdomains_i]->refine_element_id(element_id, refinement_type);
+                  meshes[subdomains_i]->refine_element_id(element_id, refinement_type);
               }
             }
 
@@ -588,12 +582,8 @@ namespace Hermes
                 }
 
         // save refinements
-        unsigned temp = meshes[meshes_i]->seq;
-        meshes[meshes_i]->seq = meshes[meshes_i]->nbase;
-        for_all_base_elements(e, meshes[meshes_i])
-          save_refinements(meshes[meshes_i], e, e->id, refinements);
-
-        meshes[meshes_i]->seq = temp;
+        for(unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
+          refinements.refinement().push_back(XMLMesh::refinement(meshes[meshes_i]->refinements[refinement_i].first, meshes[meshes_i]->refinements[refinement_i].second));
 
         subdomain.refinements().set(refinements);
         subdomains.subdomain().push_back(subdomain);
@@ -974,36 +964,6 @@ namespace Hermes
       return nurbs;
     }
     
-    void MeshReaderH2DXML::save_refinements(Mesh *mesh, Element* e, int id, XMLMesh::refinements_type & refinements)
-    {
-      if (e->active) 
-        return;
-      if (e->bsplit())
-      {
-        refinements.refinement().push_back(std::auto_ptr<XMLMesh::refinement>(new XMLMesh::refinement(id)));
-        refinements.refinement().back().refinement_type() = 0;
-        int sid = mesh->seq; mesh->seq += 4;
-        for (int i = 0; i < 4; i++)
-          save_refinements(mesh, e->sons[i], sid+i, refinements);
-      }
-      else if (e->hsplit())
-      {
-        refinements.refinement().push_back(XMLMesh::refinement(id));
-        refinements.refinement().back().refinement_type() = 1;
-        int sid = mesh->seq; mesh->seq += 2;
-        save_refinements(mesh, e->sons[0], sid, refinements);
-        save_refinements(mesh, e->sons[1], sid+1, refinements);
-      }
-      else
-      {
-        refinements.refinement().push_back(XMLMesh::refinement(id));
-        refinements.refinement().back().refinement_type() = 2;
-        int sid = mesh->seq; mesh->seq += 2;
-        save_refinements(mesh, e->sons[2], sid, refinements);
-        save_refinements(mesh, e->sons[3], sid+1, refinements);
-      }
-    }
-
     void MeshReaderH2DXML::save_arc(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
     {
       curves.arc().push_back(XMLMesh::arc(p1, p2, nurbs->angle));

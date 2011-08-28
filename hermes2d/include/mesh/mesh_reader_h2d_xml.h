@@ -74,9 +74,6 @@ namespace Hermes
       template<typename T>
       Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2);
 
-      /// Saves all refinements done on the mesh.
-      void save_refinements(Mesh *mesh, Element* e, int id, XMLMesh::refinements_type & refinements);
-
       /// Saves one circular arc.
       void save_arc(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves);
 

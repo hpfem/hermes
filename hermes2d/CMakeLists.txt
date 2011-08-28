@@ -106,6 +106,8 @@ project(hermes2d)
 		src/asmlist.cpp
 		src/newton_solver.cpp
 		src/picard_solver.cpp
+    
+    src/calculation_continuity.cpp
 
 		src/adapt/adapt.cpp
 		src/adapt/kelly_type_adapt.cpp

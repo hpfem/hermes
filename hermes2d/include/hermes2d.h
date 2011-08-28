@@ -22,6 +22,7 @@
 
 #include "newton_solver.h"
 #include "picard_solver.h"
+#include "calculation_continuity.h"
 
 #include "boundary_conditions/essential_boundary_conditions.h"
 
