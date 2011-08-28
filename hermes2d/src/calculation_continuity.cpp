@@ -19,6 +19,7 @@
 #include "space_hdiv.h"
 #include "space_hcurl.h"
 #include "space_l2.h"
+#include <fstream>
 
 namespace Hermes
 {
@@ -43,7 +44,7 @@ namespace Hermes
         break;
       }
 
-      ifstream ifile(ss.str());
+      std::ifstream ifile(ss.str().c_str());
       if(ifile)
       {
         while(!ifile.eof())
@@ -85,7 +86,7 @@ namespace Hermes
     {
       if(last_record != NULL)
       {
-        ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
+        std::ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
         if(ofile)
         {
           ofile << time << ' ' << number << std::endl;
@@ -102,7 +103,7 @@ namespace Hermes
     {
       if(last_record != NULL)
       {
-        ofstream ofile("onlyTime.h2d", std::ios_base::app);
+        std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
         if(ofile)
         {
           ofile << time << std::endl;
@@ -119,7 +120,7 @@ namespace Hermes
     {
       if(last_record != NULL)
       {
-        ofstream ofile("onlyNumber.h2d", std::ios_base::app);
+        std::ofstream ofile("onlyNumber.h2d", std::ios_base::app);
         if(ofile)
         {
           ofile << number << std::endl;
@@ -221,7 +222,7 @@ namespace Hermes
     {
       std::stringstream filename;
       filename << Continuity<Scalar>::timeStepFileName << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
-      std::ofstream out(filename.str());
+      std::ofstream out(filename.str().c_str());
       out << time_step_length_to_save;
       out.close();
     }
@@ -231,7 +232,7 @@ namespace Hermes
     {
       std::stringstream filename;
       filename << Continuity<Scalar>::errorFileName << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
-      std::ofstream out(filename.str());
+      std::ofstream out(filename.str().c_str());
       out << error;
       out.close();
     }
@@ -290,7 +291,7 @@ namespace Hermes
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init = 1, Shapeset* shapeset = NULL)
+    void Continuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
     {
       std::stringstream filename;
       filename << Continuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
@@ -410,6 +411,7 @@ namespace Hermes
     {
       errorFileName = errorFileNameToSet;
     }
+
     template class HERMES_API Continuity<double>;
     template class HERMES_API Continuity<std::complex<double> >;
   }
