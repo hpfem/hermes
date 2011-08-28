@@ -3,15 +3,13 @@
   <element name="space">
     <complexType>
       <sequence>
-        <element minOccurs="1" maxOccurs="unbounded" name="element_order">
+        <element minOccurs="1" maxOccurs="unbounded" name="element_data">
           <complexType>
             <attribute name="element_id" type="integer" use="required" />
             <attribute name="order" type="integer" use="required" />
-          </complexType>
-        </element>
-        <element minOccurs="0" maxOccurs="unbounded" name="element_not_changed_in_last_adaptation">
-          <complexType>
-            <attribute name="element_id" type="integer" use="required" />
+            <attribute name="bdof" type="integer" use="required" />
+            <attribute name="n" type="integer" use="required" />
+            <attribute name="changed_in_last_adaptation" type="boolean" use="required" />
           </complexType>
         </element>
       </sequence>

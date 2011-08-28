@@ -102,6 +102,28 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    H1Space<Scalar>* H1Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+      H1Space<Scalar>* space = new H1Space(mesh, essential_bcs, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
+    H1Space<Scalar>* H1Space<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+      H1Space<Scalar>* space = new H1Space(mesh, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
     void H1Space<Scalar>::assign_vertex_dofs()
     {
       _F_;

@@ -51,6 +51,10 @@ namespace Hermes
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
+      static H1Space<Scalar>* load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init = 1, Shapeset* shapeset = NULL);
+
+      static H1Space<Scalar>* load(const char *filename, Mesh* mesh, int p_init = 1, Shapeset* shapeset = NULL);
+
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);

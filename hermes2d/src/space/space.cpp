@@ -868,9 +868,51 @@ namespace Hermes
     template<typename Scalar>
     bool Space<Scalar>::save(const char *filename) const
     {
+      XMLSpace::space xmlspace;
+
+      // Utility pointer.
+      Element *e;
+      for_all_elements(e, this->get_mesh())
+        xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n, this->edata[e->id].changed_in_last_adaptation));
+
+      std::string space_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      space_schema_location.append("/space_h2d_xml.xsd");
+      ::xml_schema::namespace_info namespace_info_space("XMLSpace", space_schema_location);
+
+      ::xml_schema::namespace_infomap namespace_info_map;
+      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("space", namespace_info_space));
+
+      std::ofstream out(filename);
+      XMLSpace::space_(out, xmlspace, namespace_info_map);
+      out.close();
+
       return true;
     }
     
+    template<typename Scalar>
+    void Space<Scalar>::load(const char *filename, Space<Scalar>* space) 
+    {
+      try
+      {
+        std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename));
+
+        // Element data //
+        unsigned int elem_data_count = parsed_xml_space->element_data().size();
+        for (unsigned int elem_data_i = 0; elem_data_i < elem_data_count; elem_data_i++)
+        {
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].order = parsed_xml_space->element_data().at(elem_data_i).order();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bdof();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
+        }
+      }
+      catch (const xml_schema::exception& e)
+      {
+        std::cerr << e << endl;
+        std::exit(1);
+      }
+      return;
+    }
 
     template class HERMES_API Space<double>;
     template class HERMES_API Space<std::complex<double> >;

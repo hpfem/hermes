@@ -38,6 +38,8 @@ namespace Hermes
       virtual ~L2Space();
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
+      
+      static L2Space<Scalar>* load(const char *filename, Mesh* mesh, int p_init = 0, Shapeset* shapeset = NULL);
 
       virtual int get_edge_order(Element* e, int edge) {
         // There are no continuity constraints on shape functions in L2.

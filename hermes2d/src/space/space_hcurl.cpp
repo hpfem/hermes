@@ -101,6 +101,28 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    HcurlSpace<Scalar>* HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+      HcurlSpace<Scalar>* space = new HcurlSpace(mesh, essential_bcs, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
+    HcurlSpace<Scalar>* HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+      HcurlSpace<Scalar>* space = new HcurlSpace(mesh, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
     void HcurlSpace<Scalar>::set_shapeset(Shapeset *shapeset)
     {
       if(shapeset->get_id() < 20 && shapeset->get_id() > 9)

@@ -97,6 +97,28 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    HdivSpace<Scalar>* HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+      HdivSpace<Scalar>* space = new HdivSpace(mesh, essential_bcs, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
+    HdivSpace<Scalar>* HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+      HdivSpace<Scalar>* space = new HdivSpace(mesh, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
     void HdivSpace<Scalar>::set_shapeset(Shapeset *shapeset)
     {
       if(shapeset->get_id() < 30 && shapeset->get_id() > 19)

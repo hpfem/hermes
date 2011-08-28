@@ -69,8 +69,13 @@ int main(int argc, char* argv[])
       {
         // Create a space and record its DOFs.
         EssentialBCs<double> bcs(&(bc_essential[bc_i]));
-        H1Space<double> space(&mesh_lshape, &bcs, poly_order_i);
-        dofs.push_back(space.get_num_dofs());
+        H1Space<double>* space = new H1Space<double>(&mesh_lshape, &bcs, poly_order_i);
+
+        space->save("space.xml");
+
+        space = H1Space<double>::load("asdf.xml", &mesh_lshape, &bcs, poly_order_i);
+
+        dofs.push_back(space->get_num_dofs());
 
         SurfPos surf_pos;
         surf_pos.base = mesh_lshape.get_element_fast(element_ids_boundary[bc_i][refinement_i]);
@@ -92,7 +97,7 @@ int main(int argc, char* argv[])
         }
         surf_pos.lo = surf_pos.hi = 0;
 
-        bc_values.push_back(space.get_bc_projection(&surf_pos, 3));
+        bc_values.push_back(space->get_bc_projection(&surf_pos, 3));
       }
 
       // L2Spaces from order 0.

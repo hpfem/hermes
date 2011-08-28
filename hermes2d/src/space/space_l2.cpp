@@ -74,6 +74,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    L2Space<Scalar>* L2Space<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    {
+      _F_;
+
+      L2Space<Scalar>* space = new L2Space(mesh, p_init, shapeset);
+
+      Space<Scalar>::load(filename, space);
+
+      return space;
+    }
+
+    template<typename Scalar>
     void L2Space<Scalar>::set_shapeset(Shapeset *shapeset)
     {
       if(shapeset->get_id() < 40 && shapeset->get_id() > 29)
