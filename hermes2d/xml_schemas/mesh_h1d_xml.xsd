@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<schema targetNamespace="XMLMesh" xmlns:mesh="XMLMesh"
+xmlns="http://www.w3.org/2001/XMLSchema">
+  <element name="mesh">
+    <complexType>
+      <sequence>
+        <element minOccurs="2" maxOccurs="unbounded" name="vertex" >
+          <complexType>
+            <attribute name="x" type="decimal" />
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+</schema>
