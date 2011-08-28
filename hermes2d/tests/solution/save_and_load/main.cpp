@@ -1,29 +1,7 @@
 #define HERMES_REPORT_ALL
 #include "definitions.h"
 
-// This example shows how to solve a simple PDE that describes stationary 
-// heat transfer in an object consisting of two materials (aluminum and 
-// copper). The object is heated by constant volumetric heat sources
-// (generated, for example, by a DC electric current). The temperature 
-// on the boundary is fixed. We will learn how to:
-//
-//   - load the mesh,
-//   - perform initial refinements,
-//   - create a H1 space over the mesh,
-//   - define weak formulation,
-//   - initialize matrix solver,
-//   - assemble and solve the matrix system,
-//   - output the solution and element orders in VTK format 
-//     (to be visualized, e.g., using Paraview),
-//   - visualize the solution using Hermes' native OpenGL-based functionality.
-//
-// PDE: Poisson equation -div(LAMBDA grad u) - VOLUME_HEAT_SRC = 0.
-//
-// Boundary conditions: Dirichlet u(x, y) = FIXED_BDY_TEMP on the boundary.
-//
-// Geometry: L-Shape domain (see file domain.mesh). 
-//
-// The following parameters can be changed:
+// This test makes sure that saving / loading of Solution instances works.
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization. 
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
@@ -45,7 +23,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("../domain.xml", &mesh);
+  mloader.load("domain.xml", &mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i=0; i < INIT_REF_NUM; i++) 
@@ -95,7 +73,7 @@ int main(int argc, char* argv[])
   delete [] coeff_vec;
 
   bool success = true;
-  if (std::abs(sum + 0.357318) > 1e-4) success = false;
+  if (std::abs(sum - 698.249) > 1e-2) success = false;
 
   if (success == true) 
   {

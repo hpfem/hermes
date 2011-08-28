@@ -215,18 +215,18 @@ namespace Hermes
             {
               using namespace std;
 
-              os << endl;
+              os << std::endl;
               os << setw(12) << "target group" << setw(10) << "chi" << setw(10) << "nu";
-              os << setw(10) << "Sigma_f" << endl; 
+              os << setw(10) << "Sigma_f" << std::endl; 
 
               MaterialPropertyMap1::const_iterator data_elem = matprop.chi.begin();
               for ( ; data_elem != matprop.chi.end(); ++data_elem)
               {
                 string mat = data_elem->first;
 
-                os << setw(80) << setfill('-') << ' ' << endl << setfill(' ');
-                os << setw(40) << mat << endl;
-                os << setw(80) << setfill('-') << ' ' << endl << setfill(' ');
+                os << setw(80) << setfill('-') << ' ' << std::endl << setfill(' ');
+                os << setw(40) << mat << std::endl;
+                os << setw(80) << setfill('-') << ' ' << std::endl << setfill(' ');
                 for (unsigned int gto = 0; gto < matprop.G; gto++)
                 {
                   os << setw(6) << gto << setw(6) << ' ';
@@ -234,11 +234,11 @@ namespace Hermes
                   os << setw(10) << matprop.get_nu(mat)[gto];
                   os << setw(10) << matprop.get_Sigma_f(mat)[gto];
 
-                  os << endl;
+                  os << std::endl;
                 }
               }
 
-              os << endl;
+              os << std::endl;
               return os;
             }
           }
@@ -474,19 +474,19 @@ namespace Hermes
             {
               using namespace std;
 
-              os << static_cast<const Common::MaterialPropertyMaps&>(matprop) << endl;
+              os << static_cast<const Common::MaterialPropertyMaps&>(matprop) << std::endl;
 
               os << setw(12) << "target group" << setw(10) << "D" << setw(10) << "Sigma_r";
-              os << setw(10) << "ext. src" << setw(22) << "Sigma_s" << endl; 
+              os << setw(10) << "ext. src" << setw(22) << "Sigma_s" << std::endl; 
 
               MaterialPropertyMap1::const_iterator data_elem = matprop.Sigma_r.begin();
               for ( ; data_elem != matprop.Sigma_r.end(); ++data_elem)
               {
                 string mat = data_elem->first;
 
-                os << setw(80) << setfill('-') << ' ' << endl << setfill(' ');
-                os << setw(40) << mat << endl;
-                os << setw(80) << setfill('-') << ' ' << endl << setfill(' ');
+                os << setw(80) << setfill('-') << ' ' << std::endl << setfill(' ');
+                os << setw(40) << mat << std::endl;
+                os << setw(80) << setfill('-') << ' ' << std::endl << setfill(' ');
                 for (unsigned int gto = 0; gto < matprop.G; gto++)
                 {
                   os << setw(6) << gto << setw(6) << ' ';
@@ -501,11 +501,11 @@ namespace Hermes
                   for (unsigned int gfrom = 0; gfrom < matprop.G; gfrom++)
                     os << setw(8) << matprop.get_Sigma_s(mat)[gto][gfrom];
 
-                  os << endl;
+                  os << std::endl;
                 }
               }
 
-              return os << endl;
+              return os << std::endl;
             }
           }
         }

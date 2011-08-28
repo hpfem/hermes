@@ -60,7 +60,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
     }
@@ -453,7 +453,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
     }
@@ -859,7 +859,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
 

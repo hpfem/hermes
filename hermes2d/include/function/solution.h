@@ -103,13 +103,11 @@ namespace Hermes
       void enable_transform(bool enable = true);
 
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
-      /// element orders) to a binary file. On Linux, if `compress` is true, the file is
-      /// compressed with gzip and a ".gz" suffix added to the file name.
+      /// element orders) to an XML file.
       void save(const char* filename) const;
 
       /// Loads the solution from a file previously created by Solution::save(). This completely
-      /// restores the solution in the memory. The file name has to include the ".gz" suffix,
-      /// in which case the file is piped through gzip to decompress the data (Linux only).
+      /// restores the solution in the memory.
       void load(const char* filename);
 
       /// Returns solution value or derivatives at element e, in its reference domain point (xi1, xi2).

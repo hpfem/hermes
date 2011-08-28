@@ -25,6 +25,8 @@
 #define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
 #endif
 
+#include <iostream>
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -919,7 +921,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
       return;

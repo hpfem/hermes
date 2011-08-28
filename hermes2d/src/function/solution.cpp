@@ -25,6 +25,8 @@
 #define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
 #endif
 
+#include <iostream>
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -1077,7 +1079,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
       return;
@@ -1131,7 +1133,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
       return;
@@ -1152,6 +1154,15 @@ namespace Hermes
         this->num_components = parsed_xml_solution->num_components();
         this->num_dofs = parsed_xml_solution->num_dofs();
 
+        this->mono_coeffs = new double[num_coeffs];
+
+        for(unsigned int component_i = 0; component_i < num_components; component_i++)
+          elem_coeffs[component_i] = new int[num_elems];
+        
+        this->elem_orders = new int[num_elems];
+        this->sln_vector = new double[num_dofs];
+        
+
         for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
           this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).real();
 
@@ -1169,7 +1180,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
       return;
@@ -1189,6 +1200,14 @@ namespace Hermes
         this->num_elems = parsed_xml_solution->num_elems();
         this->num_components = parsed_xml_solution->num_components();
 
+        this->mono_coeffs = new std::complex<double>[num_coeffs];
+        
+        for(unsigned int component_i = 0; component_i < num_components; component_i++)
+          elem_coeffs[component_i] = new int[num_elems];
+        
+        this->elem_orders = new int[num_elems];
+        this->sln_vector = new std::complex<double>[num_dofs];
+
         for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
           this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = std::complex<double>(parsed_xml_solution->mono_coeffs().at(coeffs_i).real(), parsed_xml_solution->mono_coeffs().at(coeffs_i).imaginary().get());
 
@@ -1206,7 +1225,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << endl;
+        std::cerr << e << std::endl;
         std::exit(1);
       }
       return;
