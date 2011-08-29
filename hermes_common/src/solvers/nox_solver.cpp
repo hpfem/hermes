@@ -207,27 +207,24 @@ namespace Hermes
     bool NoxSolver<Scalar>::solve(Scalar* coeff_vec)
     {
       // Put the initial coeff_vec into the inner structure for the initial guess.
-      /// \todo Put this into a separate method.
       Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
       temp_init_sln.alloc(this->dp->get_num_dofs());
       for (int i = 0; i < this->dp->get_num_dofs(); i++)
         temp_init_sln.set(i, coeff_vec[i]);
       NOX::Epetra::Vector init_sln(*temp_init_sln.vec);
 
-
-
-      // Set the printing parameters in the "Printing" sublist
+      // prepare variables
+      // print settings
       Teuchos::ParameterList &print_pars = nl_pars->sublist("Printing");
-
-
-
+      // linear system settings
       Teuchos::ParameterList &ls_pars = nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver");
+      // preconditioner
       Teuchos::RCP<Precond<Scalar> > precond = ndp.get_precond();
-
-
+      //linear system     
       Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
-
+      // problem
       Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcpFromRef(ndp);
+      // jacobian matrix
       Teuchos::RCP<Epetra_RowMatrix> jac_mat;
 
       // Create linear system 
@@ -310,9 +307,10 @@ namespace Hermes
       cmb->addStatusTest(converged);
       cmb->addStatusTest(maxiters);
 
+      // Output parameters
       Teuchos::RCP<Teuchos::ParameterList> final_pars = nl_pars;
 
-      // Create the method
+      // Create the solver
       Teuchos::RCP<NOX::Solver::Generic> solver = NOX::Solver::buildSolver(grp, cmb, final_pars);
 
       /// Solve.
@@ -325,6 +323,7 @@ namespace Hermes
       bool success;
       if(status == NOX::StatusTest::Converged) 
       {
+        // get result informations
         num_iters = solver->getNumIterations();
         residual = solver->getSolutionGroup().getNormF();
         num_lin_iters = final_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").sublist("Output").get("Total Number of Linear Iterations", -1);
@@ -351,7 +350,7 @@ namespace Hermes
       return success;
     }
     template class HERMES_API NoxSolver<double>;
-    //template class HERMES_API NoxSolver<std::complex<double> >;
+    //template class HERMES_API NoxSolver<std::complex<double> >; //complex version of nox solver is not implemented 
   }
 }
 #endif

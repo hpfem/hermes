@@ -162,7 +162,7 @@ namespace Hermes {
 
       ///Preconditioner Reuse Policy. Sets how and when the preconditioner should be computed. 
       ///This flag supports native Aztec, Ifpack and ML preconditioners. 
-      /// \pram[in] pc_reuse
+      /// \param[in] pc_reuse
       /// - "Rebuild" - The "Rebuild" option always completely destroys and then rebuilds the preconditioner each time a linear solve is requested. 
       /// - "Reuse" - The group/linear solver will not recompute the preconditioner even if the group's solution vector changes.
       /// It just blindly reuses what has been constructed. This turns off control of preconditioner recalculation. 
