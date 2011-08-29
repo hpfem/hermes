@@ -4,12 +4,25 @@ xmlns="http://www.w3.org/2001/XMLSchema">
   <element name="mesh">
     <complexType>
       <sequence>
+        <element minOccurs="0" maxOccurs="1" name="variables"
+          type="mesh:variables_type" />
         <element minOccurs="2" maxOccurs="unbounded" name="vertex" >
           <complexType>
-            <attribute name="x" type="decimal" use="required"/>
+            <attribute name="x" type="string" use="required"/>
+            <attribute name="marker" type="string"/>
           </complexType>
         </element>
       </sequence>
     </complexType>
   </element>
+  <complexType name="variables_type">
+    <sequence>
+      <element minOccurs="0" maxOccurs="unbounded" name="variable">
+        <complexType>
+          <attribute name="name" type="string" use="required" />
+          <attribute name="value" type="decimal" use="required" />
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
 </schema>

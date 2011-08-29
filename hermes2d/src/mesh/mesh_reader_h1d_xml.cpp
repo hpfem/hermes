@@ -16,6 +16,7 @@
 #include "mesh.h"
 #include "mesh_reader_h1d_xml.h"
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
@@ -38,16 +39,13 @@ namespace Hermes
       try
       {
         std::auto_ptr<XMLMesh1D::mesh> parsed_xml_mesh(XMLMesh1D::mesh_(filename));
-        double a = parsed_xml_mesh->vertex().at(0).x();
-        double b = parsed_xml_mesh->vertex().at(0).x();
-        for(unsigned int vertex_i = 0; vertex_i < parsed_xml_mesh->vertex().size(); vertex_i++)
-        {
-          if(parsed_xml_mesh->vertex().at(vertex_i).x() > b)
-            b = parsed_xml_mesh->vertex().at(vertex_i).x();
-          if(parsed_xml_mesh->vertex().at(vertex_i).x() < a)
-            a = parsed_xml_mesh->vertex().at(vertex_i).x();
-        }
         
+        // Variables //
+        unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->variable().size() : 0;
+        std::map<std::string, double> variables;
+        for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
+          variables.insert(std::make_pair<std::string, double>(parsed_xml_mesh->variables()->variable().at(variables_i).name(), parsed_xml_mesh->variables()->variable().at(variables_i).value()));
+
         // Vertices //
         int vertices_count = parsed_xml_mesh->vertex().size();
 
@@ -57,8 +55,11 @@ namespace Hermes
           size *= 2;
         mesh->init(size);
 
+        double a = std::numeric_limits<double>::infinity();
+        double b = -std::numeric_limits<double>::infinity();
+        
         // Create top-level vertex nodes.
-        for (int vertices_i = 0; vertices_i < 2 *vertices_count; vertices_i++)
+        for (int vertices_i = 0; vertices_i < 2 * vertices_count; vertices_i++)
         {
           Node* node = mesh->nodes.add();
           assert(node->id == vertices_i);
@@ -69,38 +70,95 @@ namespace Hermes
           node->next_hash = NULL;
 
           // variables matching.
-          double x = parsed_xml_mesh->vertex().at(vertices_i).x();
-          double y;
-          if(vertices_i < vertices_count)
-            y = 0;
-          else
-            y = (b-a) / 100;
+          std::string x = parsed_xml_mesh->vertex().at(vertices_i % vertices_count).x();
+          double x_value;
+
+          // variables lookup.
+          bool x_found = false;
+          if(variables.find(x) != variables.end())
+          {
+            x_value = variables.find(x)->second;
+            x_found = true;
+          }
+         
+          // test of value if no variable found.
+          if(!x_found)
+            if(std::strtod(x.c_str(), NULL) != 0.0)
+              x_value = std::strtod(x.c_str(), NULL);
+            else
+            {
+              // This is a hard part, to find out if it is really zero.
+              int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
+              for(int i = 0; i < dot_position; i++)
+                if(strncmp(x.c_str() + i, "0", 1) != 0)
+                  error("Wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
+              for(int i = dot_position + 1; i < x.length(); i++)
+                if(strncmp(x.c_str() + i, "0", 1) != 0)
+                  error("Wrong syntax in the x coordinate of vertex no. %i.", vertices_i % vertices_count + 1);
+              x_value = std::strtod(x.c_str(), NULL);
+            }
 
           // assignment.
-          node->x = x;
-          node->y = y;
+          node->x = x_value;
+          if(x_value > b)
+            b = x_value;
+          if(x_value < a)
+            a = x_value;
+
+          if(vertices_i < vertices_count)
+            node->y = 0;
+          else
+            node->y = 1;
         }
         mesh->ntopvert = 2 * vertices_count;
 
+        Node* node;
+        for_all_nodes(node, mesh)
+          if(node->y == 0)
+            node->y = 0;
+          else
+            node->y = (b-a) / 100;
+
         // Elements //
         mesh->nbase = mesh->nactive = mesh->ninitial = vertices_count - 1;
-
         
-        mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, "H1DMarker");
-
         Element* e;
-        for (int element_i = 0; element_i < vertices_count; element_i++)
+        for (int element_i = 0; element_i < vertices_count - 1; element_i++)
         {
-          e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker("H1DMarker").marker, 
+          mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, "H1DMarker");
+          
+          int element_marker;
+          if(parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().present())
+          {
+            mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().get());
+            element_marker = mesh->element_markers_conversion.get_internal_marker(parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().get()).marker;
+          }
+          else
+            element_marker = mesh->element_markers_conversion.get_internal_marker("H1DMarker").marker;
+
+          e = mesh->create_quad(element_marker, 
             &mesh->nodes[element_i], 
             &mesh->nodes[element_i + 1],
             &mesh->nodes[element_i + vertices_count + 1],
             &mesh->nodes[element_i + vertices_count],
             NULL);
+          
+          mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Unused");
+                  
+          node = mesh->peek_edge_node(element_i, element_i + 1);
+          node->bnd = 1;
+          node->marker = mesh->boundary_markers_conversion.get_internal_marker("Unused").marker;
+          mesh->nodes[element_i].bnd = 1;
+          mesh->nodes[element_i + 1].bnd = 1;
+
+          node = mesh->peek_edge_node(vertices_count + element_i, vertices_count + element_i + 1);
+          node->bnd = 1;
+          node->marker = mesh->boundary_markers_conversion.get_internal_marker("Unused").marker;
+          mesh->nodes[vertices_count + element_i].bnd = 1;
+          mesh->nodes[vertices_count + element_i + 1].bnd = 1;
         }
 
         // Boundaries //
-
         Node* en;
         int v1_1 = 0;
         int v2_1 = vertices_count;
@@ -110,16 +168,16 @@ namespace Hermes
         en = mesh->peek_edge_node(v1_1, v2_1);
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "H1DBndMarker");
-        int marker = mesh->boundary_markers_conversion.get_internal_marker("H1DBndMarker").marker;
+        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Left");
+        int marker = mesh->boundary_markers_conversion.get_internal_marker("Left").marker;
         en->marker = marker;
         en->bnd = 1;
 
         en = mesh->peek_edge_node(v1_2, v2_2);
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "H1DBndMarker");
-        marker = mesh->boundary_markers_conversion.get_internal_marker("H1DBndMarker").marker;
+        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Right");
+        marker = mesh->boundary_markers_conversion.get_internal_marker("Right").marker;
         en->marker = marker;
         en->bnd = 1;
 
