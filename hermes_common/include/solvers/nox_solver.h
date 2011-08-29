@@ -48,6 +48,7 @@ namespace Hermes {
     public: 
       NoxDiscreteProblem(DiscreteProblemInterface<Scalar> * problem);
 
+      /// \brief Setter for preconditioner.
       void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
       /// \brief Accessor for preconditioner.
       Teuchos::RCP<Precond<Scalar> > get_precond() { return precond; }
@@ -68,9 +69,9 @@ namespace Hermes {
 
     private:
       DiscreteProblemInterface<Scalar> * dp;
-      /// \brief Jacobian (optional). \todo k cemu to je a kde se to pouziva
+      /// \brief Jacobian (optional). 
       EpetraMatrix<Scalar> jacobian;
-      /// \brief Preconditioner (optional). \todo proc to je to tady
+      /// \brief Preconditioner (optional). 
       Teuchos::RCP<Precond<Scalar> > precond; 
     };
 
@@ -174,8 +175,6 @@ namespace Hermes {
       double residual;
       int num_lin_iters;
       double achieved_tol;  
-
-      const char* precond_type;
 
       // convergence params
       struct conv_t {
