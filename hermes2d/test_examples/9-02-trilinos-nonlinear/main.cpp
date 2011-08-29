@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
   nox_solver.set_conv_iters(max_iters);
 
   // Choose preconditioning.
-  RCP<Precond<double> > pc = rcp(new MlPrecond<double>("sa"));
+  MlPrecond<double> pc("sa");
   if (PRECOND)
   {
     if (JFNK) nox_solver.set_precond(pc);
