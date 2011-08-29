@@ -130,10 +130,8 @@ namespace Hermes
       ls_pars.set("Max Iterations", 800);
       ls_pars.set("Tolerance", 1e-8);
       ls_pars.set("Size of Krylov Subspace", 50);
-      /// \todo parametrize me.
       ls_pars.set("Preconditioner Reuse Policy", "Recompute");
       ls_pars.set("Output Frequency", AZ_all);
-      /// \todo Parametrize me.
       ls_pars.set("Max Age Of Prec", 999);
     }
 
@@ -192,6 +190,17 @@ namespace Hermes
     void NoxSolver<Scalar>::set_ls_sizeof_krylov_subspace(int size) 
     { 
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace",size);
+    }
+
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_precond_reuse(const char * pc_reuse)
+    {
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner Reuse Policy", pc_reuse);
+    }
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_precond_max_age(int max_age)
+    {
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Age Of Prec", max_age);
     }
 
     template<typename Scalar>

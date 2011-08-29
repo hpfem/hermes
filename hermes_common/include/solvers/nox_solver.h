@@ -158,7 +158,25 @@ namespace Hermes {
         conv.wrms_rtol = rtol;
         conv.wrms_atol = atol;
       }
+      ///@}
 
+      ///Preconditioner Reuse Policy. Sets how and when the preconditioner should be computed. 
+      ///This flag supports native Aztec, Ifpack and ML preconditioners. 
+      /// \pram[in] pc_reuse
+      /// - "Rebuild" - The "Rebuild" option always completely destroys and then rebuilds the preconditioner each time a linear solve is requested. 
+      /// - "Reuse" - The group/linear solver will not recompute the preconditioner even if the group's solution vector changes.
+      /// It just blindly reuses what has been constructed. This turns off control of preconditioner recalculation. 
+      /// This is a dangerous condition but can really speed up the computations if the user knows what they are doing. We don't recommend users trying this. 
+      /// - "Recompute" - Recomputes the preconditioner, but will try to efficiently reuse any objects that don't need to be destroyed. 
+      /// How efficient the "Recompute" option is depends on the type of preconditioner. 
+      /// For example if we are using ILU from the Ifpack library, we would like to not destroy and reallocate the graph each solve. 
+      /// With this option, we tell Ifpack to reuse the graph from last time - 
+      /// e.g the sparisty pattern has not changed between applications of the preconditioner. (default)
+      void set_precond_reuse(const char * pc_reuse);
+      /// Max Age Of Preconditioner
+      /// \param[in] max_age If the "Preconditioner Reuse Policy" is set to "Reuse", 
+      /// this integer tells the linear system how many times to reuse the preconditioner before rebuilding it. (default 999)
+      void set_precond_max_age(int max_age);
       /// Set user defined preconditioner
       /// \param[in] pc preconditioner
       virtual void set_precond(Precond<Scalar> &pc);
