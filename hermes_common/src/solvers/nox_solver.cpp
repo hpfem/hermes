@@ -164,6 +164,35 @@ namespace Hermes
     {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner",pc);
     }
+    
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_output_flags(int flags)
+    {
+      nl_pars->sublist("Printing").set("Output Information", flags);
+    }
+
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_ls_type(const char *type){
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Aztec Solver",type);
+    }
+
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_ls_max_iters(int iters)
+    { 
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Iterations",iters);
+    }
+
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_ls_tolerance(double tolerance) 
+    { 
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Tolerance",tolerance);
+    }
+
+    template<typename Scalar>
+    void NoxSolver<Scalar>::set_ls_sizeof_krylov_subspace(int size) 
+    { 
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace",size);
+    }
 
     template<typename Scalar>
     bool NoxSolver<Scalar>::solve(Scalar* coeff_vec)
