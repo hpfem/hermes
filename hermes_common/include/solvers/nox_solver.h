@@ -167,7 +167,15 @@ namespace Hermes {
         conv.wrms_atol = atol;
       }
 
-      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
+      /// Set user defined preconditioner
+      /// \param[in] pc preconditioner
+      virtual void set_precond(Precond<Scalar> &pc);
+      /// Set preconditioner
+      /// \param[in] pc name of preconditioner
+      /// - "None" - No preconditioning. (default) 
+      /// - "AztecOO" - AztecOO internal preconditioner. 
+      /// - "New Ifpack" - Ifpack internal preconditioner. 
+      /// - "ML" - Multi level preconditioner
       virtual void set_precond(const char *pc);
 
     protected:
