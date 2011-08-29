@@ -93,8 +93,6 @@ namespace Hermes
     NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem),ndp(problem)
     {
       // default values
-      // linear solver settings
-      precond_type = "None";
       // convergence test
       conv.max_iters = 10;
       conv.abs_resid = 1.0e-6;
@@ -154,9 +152,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+    void NoxSolver<Scalar>::set_precond(Precond<Scalar> &pc)
     {
-      ndp.set_precond(pc);
+      Teuchos::RCP<Precond<Scalar> > tpc = Teuchos::rcpFromRef(pc);
+      ndp.set_precond(tpc);
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner", "User Defined");
     }
 
