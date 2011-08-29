@@ -410,6 +410,7 @@ namespace Hermes
 
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
+      friend class MeshReaderH1DXML;
       friend class MeshReaderExodusII;
       friend class DiscreteProblem<double>;
       friend class DiscreteProblem<std::complex<double> >;

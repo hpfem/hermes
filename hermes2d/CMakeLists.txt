@@ -130,7 +130,9 @@ project(hermes2d)
 		src/mesh/hash.cpp 
 		src/mesh/mesh_reader_h2d.cpp
 		src/mesh/mesh_reader_h2d_xml.cpp
+    src/mesh/mesh_reader_h1d_xml.cpp
 		src/mesh/mesh_h2d_xml.cpp
+    src/mesh/mesh_h1d_xml.cpp
 		src/mesh/subdomains_h2d_xml.cpp
 		src/mesh/mesh.cpp
 		src/mesh/traverse.cpp

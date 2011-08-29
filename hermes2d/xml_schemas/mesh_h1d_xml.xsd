@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<schema targetNamespace="XMLMesh" xmlns:mesh="XMLMesh"
+<schema targetNamespace="XMLMesh1D" xmlns:mesh="XMLMesh1D"
 xmlns="http://www.w3.org/2001/XMLSchema">
   <element name="mesh">
     <complexType>
       <sequence>
         <element minOccurs="2" maxOccurs="unbounded" name="vertex" >
           <complexType>
-            <attribute name="x" type="decimal" />
+            <attribute name="x" type="decimal" use="required"/>
           </complexType>
         </element>
       </sequence>
