@@ -38,10 +38,11 @@
 namespace Hermes {
   namespace Solvers {
 
-    /// \brief discrete problem uses in NOX solver
+    /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
     template <typename Scalar>
-    class HERMES_API NoxDiscreteProblem : public NOX::Epetra::Interface::Required, 
+    class HERMES_API NoxDiscreteProblem : 
+      public NOX::Epetra::Interface::Required, 
       public NOX::Epetra::Interface::Jacobian,
       public NOX::Epetra::Interface::Preconditioner
     {
