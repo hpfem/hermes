@@ -16,7 +16,7 @@ const bool JFNK = false;                          // true = jacobian-free method
 const int PRECOND = 2;                            // Preconditioning by jacobian (1) or approximation of jacobian (2)
                                                   // in case of JFNK,
                                                   // Default ML proconditioner in case of Newton.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
@@ -39,28 +39,26 @@ int max_iters = 100;                              // Max number of iterations.
 
 int main(int argc, char* argv[])
 {
-  // Instantiate a class with global functions.
-  Hermes2D hermes2d;
-
   // Time measurement.
   TimePeriod cpu_time;
   cpu_time.tick();
 
   // Load the mesh.
   Mesh mesh;
-  H2DReader mloader;
+  MeshReaderH2D mloader;
   mloader.load("../square.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i=0; i < INIT_REF_NUM; i++)
+    mesh.refine_all_elements();
 
   // Initialize boundary conditions.
-  DefaultEssentialBCConst bc("Bdy", 0.0);
-  EssentialBCs bcs(&bc);
+  DefaultEssentialBCConst<double> bc("Bdy", 0.0);
+  EssentialBCs<double> bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space space(&mesh, &bcs, P_INIT);
-  int ndof = Space::get_num_dofs(&space);
+  H1Space<double> space(&mesh, &bcs, P_INIT);
+  int ndof = Space<double>::get_num_dofs(&space);
   info("ndof: %d", ndof);
 
   info("Assembling by DiscreteProblem, solving by Umfpack:");
@@ -72,26 +70,26 @@ int main(int argc, char* argv[])
   CustomWeakForm wf1;
 
   // Initialize the discrete problem.
-  DiscreteProblem dp1(&wf1, &space);
-
+  DiscreteProblem<double> dp1(&wf1, &space);
+  
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix* matrix = create_matrix(matrix_solver);
-  Vector* rhs = create_vector(matrix_solver);
-  Solver* solver = create_linear_solver(matrix_solver, matrix, rhs);
+  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
+  Vector<double>* rhs = create_vector<double>(matrix_solver_type);
+  LinearSolver<double>* solver = create_linear_solver<double>(matrix_solver_type, matrix, rhs);
 
   // Initialize the solution.
-  Solution sln1;
+  Solution<double> sln1;
 
-  if (matrix_solver == SOLVER_AZTECOO) 
+  if (matrix_solver_type == SOLVER_AZTECOO) 
   {
-    ((AztecOOSolver*) solver)->set_solver(iterative_method);
-    ((AztecOOSolver*) solver)->set_precond(preconditioner);
+    (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
+    (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
-  }
+  } 
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  scalar* coeff_vec = new scalar[ndof];
+  double* coeff_vec = new double[ndof];
   // We can start with a zero vector.
   memset(coeff_vec, 0, ndof * sizeof(double));
   // Or we can project the initial condition to obtain the initial
@@ -100,14 +98,17 @@ int main(int argc, char* argv[])
   //CustomInitialSolution sln_tmp(&mesh);
   //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
-  // Perform Newton's iteration.
-  bool verbose = true;
-  bool jacobian_changed = true;
-  if (!hermes2d.solve_newton(coeff_vec, &dp1, solver, matrix, rhs, jacobian_changed,
-      NEWTON_TOL, NEWTON_MAX_ITER, verbose)) error("Newton's iteration failed.");
+  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+  Hermes::Hermes2D::Solution<double> sln;
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp1, matrix_solver_type);
+  newton.set_verbose_output(true);
+  if (!newton.solve(coeff_vec)) 
+    error("Newton's iteration failed.");
+  else
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
   // Translate the resulting coefficient vector into the Solution sln1.
-  Solution::vector_to_solution(coeff_vec, &space, &sln1);
+  Solution<double>::vector_to_solution(coeff_vec, &space, &sln1);
 
   // Cleanup.
   delete(matrix);
@@ -126,7 +127,7 @@ int main(int argc, char* argv[])
   // coefficient vector.
   info("Projecting to obtain initial vector for the Newton's method.");
   CustomInitialSolution sln_tmp(&mesh);
-  OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
+  OGProjection<double>::project_global(&space, &sln_tmp, coeff_vec, matrix_solver_type);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();
@@ -135,16 +136,18 @@ int main(int argc, char* argv[])
   CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
 
   // Initialize DiscreteProblem.
-  DiscreteProblem dp2(&wf2, &space);
+  DiscreteProblem<double> dp2(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver nox_solver(&dp2, message_type, "GMRES", "Newton", ls_tolerance, "", flag_absresid, abs_resid, 
-                       flag_relresid, rel_resid, max_iters);
-  nox_solver.set_init_sln(coeff_vec);
+  NoxSolver<double> nox_solver(&dp2);
+  nox_solver.set_output_flags(message_type);
+  nox_solver.set_ls_tolerance(ls_tolerance);
+  nox_solver.set_conv_rel_resid(rel_resid);
+  nox_solver.set_conv_iters(max_iters);
 
   // Choose preconditioning.
-  RCP<Precond> pc = rcp(new MlPrecond("sa"));
+  MlPrecond<double> pc("sa");
   if (PRECOND)
   {
     if (JFNK) nox_solver.set_precond(pc);
@@ -153,10 +156,10 @@ int main(int argc, char* argv[])
 
   // Solve the nonlinear problem using NOX.
   info("Assembling by DiscreteProblem, solving by NOX.");
-  Solution sln2;
-  if (nox_solver.solve())
+  Solution<double> sln2;
+  if (nox_solver.solve(coeff_vec))
   {
-    Solution::vector_to_solution(nox_solver.get_solution(), &space, &sln2);
+    Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
     info("Number of nonlin iterations: %d (norm of residual: %g)", 
          nox_solver.get_num_iters(), nox_solver.get_residual());
     info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
@@ -170,9 +173,9 @@ int main(int argc, char* argv[])
 
   // Calculate errors.
   CustomExactSolution ex(&mesh);
-  double rel_err_1 = hermes2d.calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver].c_str(), rel_err_1, time1);
-  double rel_err_2 = hermes2d.calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
+  double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
+  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver_type].c_str(), rel_err_1, time1);
+  double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
   info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   info("Coordinate ( 0.6,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.6));
