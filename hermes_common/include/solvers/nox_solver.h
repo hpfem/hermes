@@ -48,6 +48,7 @@ namespace Hermes {
     public: 
       NoxDiscreteProblem(DiscreteProblemInterface<Scalar> * problem);
 
+      /// \brief Setter for preconditioner.
       void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
       /// \brief Accessor for preconditioner.
       Teuchos::RCP<Precond<Scalar> > get_precond() { return precond; }
@@ -68,9 +69,9 @@ namespace Hermes {
 
     private:
       DiscreteProblemInterface<Scalar> * dp;
-      /// \brief Jacobian (optional). \todo k cemu to je a kde se to pouziva
+      /// \brief Jacobian (optional). 
       EpetraMatrix<Scalar> jacobian;
-      /// \brief Preconditioner (optional). \todo proc to je to tady
+      /// \brief Preconditioner (optional). 
       Teuchos::RCP<Precond<Scalar> > precond; 
     };
 
@@ -82,6 +83,7 @@ namespace Hermes {
     {
     private: 
       NoxDiscreteProblem<Scalar> ndp;
+      Teuchos::RCP<Teuchos::ParameterList> nl_pars;
     public:
       /// Constructor.
       NoxSolver(DiscreteProblemInterface<Scalar> *problem);
@@ -102,7 +104,7 @@ namespace Hermes {
       ///  Parameters = 0x8, Details = 0x10, OuterIterationStatusTest = 0x20, LinearSolverDetails = 0x40, 
       ///  TestDetails = 0x80, StepperIteration = 0x0100, StepperDetails = 0x0200, StepperParameters = 0x0400, 
       ///  Debug = 0x01000
-      void set_output_flags(int flags) { output_flags = flags; }
+      void set_output_flags(int flags);
 
       /// \name linear solver setters
       ///@{ 
@@ -114,13 +116,13 @@ namespace Hermes {
       /// - "TFQMR" - Transpose-free quasi-minimal reasidual. 
       /// - "BiCGStab" - Bi-conjugate gradient with stabilization. 
       /// - "LU" - Sparse direct solve (single processor only).
-      void set_ls_type(const char *type) { ls_type = type; }
+      void set_ls_type(const char *type);
       /// maximum number of iterations in the linear solve. 
-      void set_ls_max_iters(int iters) { ls_max_iters = iters; }
+      void set_ls_max_iters(int iters);
       /// Tolerance used by AztecOO to determine if an iterative linear solve has converged. 
-      void set_ls_tolerance(double tolerance) { ls_tolerance = tolerance; }
+      void set_ls_tolerance(double tolerance);
       /// When using restarted GMRES this sets the maximum size of the Krylov subspace.
-      void set_ls_sizeof_krylov_subspace(int size) { ls_sizeof_krylov_subspace = size; }
+      void set_ls_sizeof_krylov_subspace(int size);
       ///@}
 
       /// \name convergence params
@@ -156,8 +158,34 @@ namespace Hermes {
         conv.wrms_rtol = rtol;
         conv.wrms_atol = atol;
       }
+      ///@}
 
-      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
+      ///Preconditioner Reuse Policy. Sets how and when the preconditioner should be computed. 
+      ///This flag supports native Aztec, Ifpack and ML preconditioners. 
+      /// \param[in] pc_reuse
+      /// - "Rebuild" - The "Rebuild" option always completely destroys and then rebuilds the preconditioner each time a linear solve is requested. 
+      /// - "Reuse" - The group/linear solver will not recompute the preconditioner even if the group's solution vector changes.
+      /// It just blindly reuses what has been constructed. This turns off control of preconditioner recalculation. 
+      /// This is a dangerous condition but can really speed up the computations if the user knows what they are doing. We don't recommend users trying this. 
+      /// - "Recompute" - Recomputes the preconditioner, but will try to efficiently reuse any objects that don't need to be destroyed. 
+      /// How efficient the "Recompute" option is depends on the type of preconditioner. 
+      /// For example if we are using ILU from the Ifpack library, we would like to not destroy and reallocate the graph each solve. 
+      /// With this option, we tell Ifpack to reuse the graph from last time - 
+      /// e.g the sparisty pattern has not changed between applications of the preconditioner. (default)
+      void set_precond_reuse(const char * pc_reuse);
+      /// Max Age Of Preconditioner
+      /// \param[in] max_age If the "Preconditioner Reuse Policy" is set to "Reuse", 
+      /// this integer tells the linear system how many times to reuse the preconditioner before rebuilding it. (default 999)
+      void set_precond_max_age(int max_age);
+      /// Set user defined preconditioner
+      /// \param[in] pc preconditioner
+      virtual void set_precond(Precond<Scalar> &pc);
+      /// Set preconditioner
+      /// \param[in] pc name of preconditioner
+      /// - "None" - No preconditioning. (default) 
+      /// - "AztecOO" - AztecOO internal preconditioner. 
+      /// - "New Ifpack" - Ifpack internal preconditioner. 
+      /// - "ML" - Multi level preconditioner
       virtual void set_precond(const char *pc);
 
     protected:
@@ -165,15 +193,6 @@ namespace Hermes {
       double residual;
       int num_lin_iters;
       double achieved_tol;  
-      const char *nl_dir;
-
-      int output_flags;
-      const char *ls_type;
-      int ls_max_iters;
-      double ls_tolerance;
-      int ls_sizeof_krylov_subspace;
-
-      const char* precond_type;
 
       // convergence params
       struct conv_t {
