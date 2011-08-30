@@ -217,7 +217,7 @@ namespace Hermes
 
         init_dxdy_buffer();
 
-        if(this->sln_vector == NULL)
+        if(this->sln_vector != NULL)
           delete [] this->sln_vector;
         this->sln_vector = new Scalar[sln->space->get_num_dofs()];
         for(int i = 0; i < sln->space->get_num_dofs(); i++)
