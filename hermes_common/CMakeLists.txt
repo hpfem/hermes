@@ -40,7 +40,7 @@ project(hermes_common)
 		
 		src/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
 		
-		src/solvers/dpinterface.cpp
+		src/solvers/dp_interface.cpp
 		src/solvers/linear_solver.cpp
 		src/solvers/nonlinear_solver.cpp
 		src/solvers/nox_solver.cpp

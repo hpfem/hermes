@@ -19,7 +19,7 @@
 /*! \file dpinterface.cpp
 \brief Interface for DiscreteProblem required by NoxProblemInterface.
 */
-#include "dpinterface.h"
+#include "dp_interface.h"
 
 /// \todo If there are really no bodies, delete this file.
 namespace Hermes 

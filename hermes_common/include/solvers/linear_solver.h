@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_SOLVER_H_
 
 #include "precond.h"
-#include "dpinterface.h"
+#include "dp_interface.h"
 
 #ifdef HAVE_TEUCHOS
 #include <Teuchos_RefCountPtr.hpp>

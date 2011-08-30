@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_NONLINEAR_SOLVER_H_
 
 #include "precond.h"
-#include "dpinterface.h"
+#include "dp_interface.h"
 
 namespace Hermes
 {

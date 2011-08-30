@@ -22,14 +22,12 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 2;                             // Initial polynomial degree of all mesh elements.
-const double NEWTON_TOL = 1e-6;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 4;                             // Initial polynomial degree of all mesh elements.
 
-const bool JFNK = false;                          // true = jacobian-free method,
+const bool JFNK = true;                          // true = jacobian-free method,
                                                   // false = Newton.
-const int PRECOND = 2;                            // Preconditioning by jacobian (1) or approximation of jacobian (2)
+const int PRECOND = 1;                            // Preconditioning by jacobian (1) or approximation of jacobian (2)
                                                   // in case of JFNK,
                                                   // Default ML proconditioner in case of Newton.
 MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -43,7 +41,7 @@ const char* preconditioner = "least-squares";     // Name of the preconditioner 
                                                   // Possibilities: none, jacobi, neumann, least-squares, or a
                                                   //  preconditioner from IFPACK (see solver/aztecoo.h)
 // NOX parameters.
-unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
+unsigned message_type = 0;//NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
                                                   // NOX error messages, see NOX_Utils.h.
 
 double ls_tolerance = 1e-5;                       // Tolerance for linear system.
