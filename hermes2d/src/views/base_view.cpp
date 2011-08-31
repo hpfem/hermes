@@ -106,11 +106,11 @@ namespace Hermes
         if (base_index >= 0)
         {
           if (base_index < ndof) coeffs[base_index] = 1.0;
-          Solution<std::complex<double>>::vector_to_solution(coeffs, space, sln, pss, false);
+          Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss, false);
         }
         else
         {
-          Solution<std::complex<double>>::vector_to_solution(coeffs, space, sln, pss, true);
+          Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss, true);
         }
 
         Hermes::Hermes2D::RealFilter filter(sln);
