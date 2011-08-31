@@ -49,10 +49,6 @@ namespace Hermes
 
         void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
 
-        void load_data(const char* filename);
-        void save_data(const char* filename);
-        void save_numbered(const char* format, int number);
-
       protected:
         Vectorizer<Scalar> vec;
 

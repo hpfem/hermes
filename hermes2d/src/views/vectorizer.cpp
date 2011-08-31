@@ -910,63 +910,6 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Vectorizer<Scalar>::save_data(const char* filename)
-      {
-        FILE* f = fopen(filename, "wb");
-        if (f == NULL) error("Could not open %s for writing.", filename);
-        this->lock_data();
-
-        if (fwrite("H2DV\001\000\000\000", 1, 8, f) != 8 ||
-          fwrite(&this->nv, sizeof(int), 1, f) != 1 ||
-          fwrite(this->verts, sizeof(double4), this->nv, f) != (unsigned) this->nv ||
-          fwrite(&this->nt, sizeof(int), 1, f) != 1 ||
-          fwrite(this->tris, sizeof(int3), this->nt, f) != (unsigned) this->nt ||
-          fwrite(&this->ne, sizeof(int), 1, f) != 1 ||
-          fwrite(this->edges, sizeof(int3), this->ne, f) != (unsigned) this->ne ||
-          fwrite(&this->nd, sizeof(int), 1, f) != 1 ||
-          fwrite(this->dashes, sizeof(int2), this->nd, f) != (unsigned) this->nd)
-        {
-          error("Error writing data to %s", filename);
-        }
-
-        this->unlock_data();
-        fclose(f);
-      }
-
-      template<typename Scalar>
-      void Vectorizer<Scalar>::load_data(const char* filename)
-      {
-        FILE* f = fopen(filename, "rb");
-        if (f == NULL) error("Could not open %s for reading.", filename);
-        this->lock_data();
-
-        struct { char magic[4]; int ver; } hdr;
-        if (fread(&hdr, sizeof(hdr), 1, f) != 1)
-          error("Error reading %s", filename);
-
-        if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'V')
-          error("File %s is not a Hermes2D Vectorizer<Scalar>file.", filename);
-        if (hdr.ver > 1)
-          error("File %s -- unsupported file version.", filename);
-
-#define read_array(array, type, n, c, what) \
-  if (fread(&n, sizeof(int), 1, f) != 1) \
-  error("Error reading the number of " what " from %s", filename); \
-  lin_init_array(array, type, c, n); \
-  if (fread(array, sizeof(type), n, f) != (unsigned) n) \
-  error("Error reading " what " from %s", filename);
-
-        read_array(this->verts, double4, this->nv, this->cv, "vertices");
-        read_array(this->tris,  int3,    this->nt, this->ct, "triangles");
-        read_array(this->edges, int3,    this->ne, this->ce, "edges");
-        read_array(this->dashes, int2,   this->nd, this->cd, "dashes");
-
-        find_min_max();
-        this->unlock_data();
-        fclose(f);
-      }
-
-      template<typename Scalar>
       Vectorizer<Scalar>::~Vectorizer()
       {
         lin_free_array(verts, this->nv, this->cv);

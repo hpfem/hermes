@@ -1320,28 +1320,6 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Linearizer<Scalar>::save_data(const char* filename)
-      {
-        FILE* f = fopen(filename, "wb");
-        if (f == NULL) error("Could not open %s for writing.", filename);
-        lock_data();
-
-        if (fwrite("H2DL\001\000\000\000", 1, 8, f) != 8 ||
-          fwrite(&nv, sizeof(int), 1, f) != 1 ||
-          fwrite(verts, sizeof(double3), nv, f) != (unsigned) nv ||
-          fwrite(&nt, sizeof(int), 1, f) != 1 ||
-          fwrite(tris, sizeof(int3), nt, f) != (unsigned) nt ||
-          fwrite(&ne, sizeof(int), 1, f) != 1 ||
-          fwrite(edges, sizeof(int3), ne, f) != (unsigned) ne)
-        {
-          error("Error writing data to %s", filename);
-        }
-
-        unlock_data();
-        fclose(f);
-      }
-
-      template<typename Scalar>
       void Linearizer<Scalar>::save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char *quantity_name,
         bool mode_3D, int item, double eps, double max_abs,
         MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp,
@@ -1406,38 +1384,6 @@ namespace Hermes
           fprintf(f, "%g\n", this->verts[i][2]);
         }
 
-        unlock_data();
-        fclose(f);
-      }
-
-      template<typename Scalar>
-      void Linearizer<Scalar>::load_data(const char* filename)
-      {
-        FILE* f = fopen(filename, "rb");
-        if (f == NULL) error("Could not open %s for reading.", filename);
-        lock_data();
-
-        struct { char magic[4]; int ver; } hdr;
-        if (fread(&hdr, sizeof(hdr), 1, f) != 1)
-          error("Error reading %s", filename);
-
-        if (hdr.magic[0] != 'H' || hdr.magic[1] != '2' || hdr.magic[2] != 'D' || hdr.magic[3] != 'L')
-          error("File %s is not a Hermes2D Linearizer<Scalar> file.", filename);
-        if (hdr.ver > 1)
-          error("File %s -- unsupported file version.", filename);
-
-#define read_array(array, type, n, c, what) \
-  if (fread(&n, sizeof(int), 1, f) != 1) \
-  error("Error reading the number of " what " from %s", filename); \
-  lin_init_array(array, type, c, n); \
-  if (fread(array, sizeof(type), n, f) != (unsigned) n) \
-  error("Error reading " what " from %s", filename);
-
-        read_array(verts, double3, nv, cv, "vertices");
-        read_array(tris,  int3,    nt, ct, "triangles");
-        read_array(edges, int3,    ne, ce, "edges");
-
-        find_min_max();
         unlock_data();
         fclose(f);
       }

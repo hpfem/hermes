@@ -445,47 +445,6 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void VectorView<Scalar>::load_data(const char* filename)
-      {
-        //get data
-        vec.load_data(filename);
-        vec.lock_data();
-        vec.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
-        vec.unlock_data();
-
-        if (range_auto) 
-        {
-          range_min = vec.get_min_value();
-          range_max = vec.get_max_value();
-        }
-
-        create();
-        update_layout();
-        reset_view(false);
-        refresh();
-
-        wait_for_draw();
-      }
-
-      template<typename Scalar>
-      void VectorView<Scalar>::save_data(const char* filename)
-      {
-        vec.lock_data();
-        if (vec.get_num_triangles() <= 0)
-          error("No data to save.");
-        vec.unlock_data();
-        vec.save_data(filename);
-      }
-
-      template<typename Scalar>
-      void VectorView<Scalar>::save_numbered(const char* format, int number)
-      {
-        char buffer[1000];
-        sprintf(buffer, format, number);
-        save_data(buffer);
-      }
-
-      template<typename Scalar>
       const char* VectorView<Scalar>::get_help_text() const
       {
         return

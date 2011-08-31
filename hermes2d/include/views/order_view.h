@@ -51,10 +51,6 @@ namespace Hermes
 
         void show(Space<Scalar>* space);
 
-        void load_data(const char* filename);
-        void save_data(const char* filename);
-        void save_numbered(const char* format, int number);
-
       protected:
 
         Orderizer ord;

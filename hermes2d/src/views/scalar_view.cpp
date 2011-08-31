@@ -1756,47 +1756,7 @@ namespace Hermes
 
         View::on_reshape(width, height);
       }
-
-
-      //// load & save ///////////////////////////////////////////////////////////////////////////////////
-
-      template<typename Scalar>
-      void ScalarView<Scalar>::load_data(const char* filename)
-      {
-        lin.lock_data();
-        lin.load_data(filename);
-        update_mesh_info();
-        lin.unlock_data();
-
-        create();
-        update_layout();
-        reset_view(false);
-        refresh();
-        wait_for_draw();
-      }
-
-
-      template<typename Scalar>
-      void ScalarView<Scalar>::save_data(const char* filename)
-      {
-        int num_tris;
-        lin.load_data(filename);
-        num_tris = lin.get_num_triangles();
-        lin.unlock_data();
-        if (num_tris <= 0)
-          error("No data to save.");
-        lin.save_data(filename);
-      }
-
-
-      template<typename Scalar>
-      void ScalarView<Scalar>::save_numbered(const char* format, int number)
-      {
-        char buffer[1000];
-        sprintf(buffer, format, number);
-        save_data(buffer);
-      }
-
+      
       template<typename Scalar>
       void ScalarView<Scalar>::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
       {

@@ -108,12 +108,6 @@ namespace Hermes
         virtual void calc_vertices_aabb(double* min_x, double* max_x, 
           double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
-        /// Saves data in a binary format.
-        virtual void save_data(const char* filename);
-
-        /// Loads data in a binary format.
-        virtual void load_data(const char* filename);
-
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
         virtual void save_solution_vtk(MeshFunction<Scalar>* meshfn, const char* file_name, const char* quantity_name,
           bool mode_3D = true, int item = H2D_FN_VAL_0, 

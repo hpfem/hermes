@@ -78,10 +78,6 @@ namespace Hermes
 
 
       public:
-        void load_data(const char* filename);
-        void save_data(const char* filename);
-        void save_numbered(const char* format, int number);
-
         void export_mesh_edges_svg(const char* filename, float width_mm = 100.0f); ///< Exports mesh edges to SVG format. Height is calculated from input vertices. Function locks data.
 
 #define SVG_HEADER "<?xml version=\"1.0\" standalone=\"no\"?>\n"\

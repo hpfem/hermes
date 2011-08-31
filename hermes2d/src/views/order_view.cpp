@@ -268,42 +268,6 @@ namespace Hermes
         }
       }
 
-
-      template<typename Scalar>
-      void OrderView<Scalar>::load_data(const char* filename)
-      {
-        ord.load_data(filename);
-        ord.lock_data();
-        ord.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
-        init_order_palette(ord.get_vertices());
-        ord.unlock_data();
-
-        create();
-        update_layout();
-        reset_view(false);
-        refresh();
-        wait_for_draw();
-      }
-
-
-      template<typename Scalar>
-      void OrderView<Scalar>::save_data(const char* filename)
-      {
-        if (ord.get_num_triangles() <= 0)
-          error("No data to save.");
-        ord.save_data(filename);
-      }
-
-
-      template<typename Scalar>
-      void OrderView<Scalar>::save_numbered(const char* format, int number)
-      {
-        char buffer[1000];
-        sprintf(buffer, format, number);
-        save_data(buffer);
-      }
-
-
       template<typename Scalar>
       const char* OrderView<Scalar>::get_help_text() const
       {
