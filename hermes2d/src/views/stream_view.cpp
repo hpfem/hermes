@@ -24,8 +24,8 @@ namespace Hermes
   {
     namespace Views
     {
-      template<typename Scalar>
-      StreamView<Scalar>::StreamView(const char* title, WinGeom* wg)
+      
+      StreamView::StreamView(const char* title, WinGeom* wg)
         : View(title, wg)
       {
         lines = false;
@@ -38,8 +38,8 @@ namespace Hermes
         root = NULL;
       }
 
-      template<typename Scalar>
-      StreamView<Scalar>::StreamView(char* title, WinGeom* wg)
+      
+      StreamView::StreamView(char* title, WinGeom* wg)
         : View(title, wg)
       {
         lines = false;
@@ -52,19 +52,20 @@ namespace Hermes
         root = NULL;
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps)
+      
+      void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps)
       {
+        this->vec = new Vectorizer(xsln, ysln);
         if (xsln == ysln)
           error("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
         show(xsln, ysln, marker, step, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 
-      template<typename Scalar>
-      bool StreamView<Scalar>::is_in_triangle(int idx, double x, double y, double3& bar)
+      
+      bool StreamView::is_in_triangle(int idx, double x, double y, double3& bar)
       {
-        double4* vert = vec.get_vertices();
-        int3* xtris = vec.get_triangles();
+        double4* vert = vec->get_vertices();
+        int3* xtris = vec->get_triangles();
         int3& tri = xtris[idx];
         double x1 = vert[tri[0]][0], x2 = vert[tri[1]][0], x3 = vert[tri[2]][0];
         double y1 = vert[tri[0]][1], y2 = vert[tri[1]][1], y3 = vert[tri[2]][1];
@@ -80,11 +81,11 @@ namespace Hermes
           return false;
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max)
+      
+      void StreamView::add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max)
       {
-        double4* vert = vec.get_vertices();
-        int3* xtris = vec.get_triangles();
+        double4* vert = vec->get_vertices();
+        int3* xtris = vec->get_triangles();
         if (father->leaf == true)
         {
           father->elements[father->num_elem++] = e_idx;
@@ -124,25 +125,25 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::build_tree()
+      
+      void StreamView::build_tree()
       {
         root->leaf = true;
         root->level = 0;
         root->num_elem = 0;
-        for (int i = 0; i < vec.get_num_triangles(); i++)
+        for (int i = 0; i < vec->get_num_triangles(); i++)
         {
           add_element_to_tree(root, i, root_x_min, root_x_max, root_y_min, root_y_max);
         }
       }
 
-      template<typename Scalar>
-      int StreamView<Scalar>::find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar)
+      
+      int StreamView::find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar)
       {
         if (father->leaf == true)
         {
-          double4* vert = vec.get_vertices();
-          int3* xtris = vec.get_triangles();
+          double4* vert = vec->get_vertices();
+          int3* xtris = vec->get_triangles();
           for (int idx = 0; idx < father->num_elem; idx++)
           {
             int i = father->elements[idx];
@@ -167,11 +168,11 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      bool StreamView<Scalar>::get_solution_values(double x, double y, double& xval, double& yval)
+      
+      bool StreamView::get_solution_values(double x, double y, double& xval, double& yval)
       {
-        double4* vert = vec.get_vertices();
-        int3* xtris = vec.get_triangles();
+        double4* vert = vec->get_vertices();
+        int3* xtris = vec->get_triangles();
         double3 bar;
         int e_idx;
         if ((e_idx = find_triangle_in_tree(x, y, root, root_x_min, root_x_max, root_y_min, root_y_max, bar)) == -1) return false;
@@ -181,8 +182,8 @@ namespace Hermes
         return true;
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::delete_tree(Node* father)
+      
+      void StreamView::delete_tree(Node* father)
       {
         if (father->leaf == false)
         {
@@ -192,8 +193,8 @@ namespace Hermes
         delete [] father;
       }
 
-      template<typename Scalar>
-      int StreamView<Scalar>::create_streamline(double x_start, double y_start, int idx)
+      
+      int StreamView::create_streamline(double x_start, double y_start, int idx)
       {
         double ODE_EPS = 1e-5;
         double tau = initial_tau;
@@ -298,11 +299,11 @@ namespace Hermes
         return 0;
       }
 
-      template<typename Scalar>
-      int StreamView<Scalar>::find_initial_edge(int num_edges, int3* edges)
+      
+      int StreamView::find_initial_edge(int num_edges, int3* edges)
       {
         int i, j;
-        double4* vert = vec.get_vertices();
+        double4* vert = vec->get_vertices();
         for (i = 0; i < num_edges; i++)
         {
           if (edges[i][2] == 0) // not visited yet
@@ -327,13 +328,13 @@ namespace Hermes
           return edge - edges;
       }
       
-      template<typename Scalar>
-      void StreamView<Scalar>::find_initial_points(int marker, double step, double2*& initial_points)
+      
+      void StreamView::find_initial_points(int marker, double step, double2*& initial_points)
       {
         int k = 0;
-        int ne = vec.get_num_edges();
-        int3* edges = vec.get_edges();
-        double4* vert = vec.get_vertices();
+        int ne = vec->get_num_edges();
+        int3* edges = vec->get_edges();
+        double4* vert = vec->get_vertices();
         int3* bnd_edges = new int3[ne];
         for (int i = 0; i < ne; i++)
         {
@@ -386,22 +387,23 @@ namespace Hermes
         delete [] bnd_edges;
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, int marker, double step, double eps, int xitem, int yitem)
+      
+      void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem)
       {
-        vec.process_solution(xsln, xitem, ysln, yitem, eps);
+        vec = new Vectorizer(xsln, ysln);
+        vec->process_solution(xitem, yitem, eps);
 
-        vec.lock_data();
+        vec->lock_data();
         if (range_auto) 
         {
-          range_min = vec.get_min_value();
-          range_max = vec.get_max_value();
+          range_min = vec->get_min_value();
+          range_max = vec->get_max_value();
         }
-        vec.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
+        vec->calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
 
         // create streamlines
-        double4* vert = vec.get_vertices();
-        for (int i = 0; i < vec.get_num_vertices(); i++)
+        double4* vert = vec->get_vertices();
+        for (int i = 0; i < vec->get_num_vertices(); i++)
         {
           if (vert[i][0] < root_x_min) root_x_min = vert[i][0];
           if (vert[i][0] > root_x_max) root_x_max = vert[i][0];
@@ -412,7 +414,7 @@ namespace Hermes
         initial_tau = std::max(root_x_max - root_x_min, root_y_max - root_y_min) / 100;
         max_tau = initial_tau * 10;
         min_tau = initial_tau / 50;
-        max_mag = vec.get_max_value();
+        max_mag = vec->get_max_value();
 
         Hermes::TimePeriod cpu_time;
         root = new Node;
@@ -431,7 +433,7 @@ namespace Hermes
 
         delete [] initial_points;
 
-        vec.unlock_data();
+        vec->unlock_data();
 
         create();
         update_layout();
@@ -440,11 +442,11 @@ namespace Hermes
         wait_for_draw();
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::add_streamline(double x, double y)
+      
+      void StreamView::add_streamline(double x, double y)
       {
         if (root == NULL)
-          error("Function add_streamline must be called after StreamView<Scalar>::show().");
+          error("Function add_streamline must be called after StreamView::show().");
         Hermes::TimePeriod cpu_time;
         streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
         streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
@@ -457,8 +459,8 @@ namespace Hermes
       static int n_vert(int i) { return (i+1) % 3; }
       static int p_vert(int i) { return (i+2) % 3; }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::on_display()
+      
+      void StreamView::on_display()
       {
         set_ortho_projection();
         glDisable(GL_LIGHTING);
@@ -468,10 +470,10 @@ namespace Hermes
 
 
         // transform all vertices
-        vec.lock_data();
+        vec->lock_data();
         int i;
-        int nv = vec.get_num_vertices();
-        double4* vert = vec.get_vertices();
+        int nv = vec->get_num_vertices();
+        double4* vert = vec->get_vertices();
         double2* tvert = new double2[nv];
 
         for (i = 0; i < nv; i++)
@@ -482,19 +484,19 @@ namespace Hermes
 
         // value range
         double min = range_min, max = range_max;
-        if (range_auto) { min = vec.get_min_value(); max = vec.get_max_value(); }
+        if (range_auto) { min = vec->get_min_value(); max = vec->get_max_value(); }
         double irange = 1.0 / (max - min);
         // special case: constant solution
         if (fabs(min - max) < 1e-8) { irange = 1.0; min -= 0.5; }
 
         // draw all triangles
-        int3* xtris = vec.get_triangles();
+        int3* xtris = vec->get_triangles();
 
         glEnable(GL_TEXTURE_1D);
         glBindTexture(GL_TEXTURE_1D, gl_pallete_tex_id);
         glBegin(GL_TRIANGLES);
         glColor3f(0.95f, 0.95f, 0.95f);
-        for (i = 0; i < vec.get_num_triangles(); i++)
+        for (i = 0; i < vec->get_num_triangles(); i++)
         {
           double mag = sqrt(sqr(vert[xtris[i][0]][2]) + sqr(vert[xtris[i][0]][3]));
           glTexCoord2d((mag -min) * irange * tex_scale + tex_shift, 0.0);
@@ -514,8 +516,8 @@ namespace Hermes
         // draw all edges
         glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        int3* edges = vec.get_edges();
-        for (i = 0; i < vec.get_num_edges(); i++)
+        int3* edges = vec->get_edges();
+        for (i = 0; i < vec->get_num_edges(); i++)
         {
           if (lines || edges[i][2] != 0)
           {
@@ -540,17 +542,17 @@ namespace Hermes
         }
 
         delete [] tvert;
-        vec.unlock_data();
+        vec->unlock_data();
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::on_mouse_move(int x, int y)
+      
+      void StreamView::on_mouse_move(int x, int y)
       {
         View::on_mouse_move(x, y);
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::on_key_down(unsigned char key, int x, int y)
+      
+      void StreamView::on_key_down(unsigned char key, int x, int y)
       {
         switch (key)
         {
@@ -589,8 +591,8 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void StreamView<Scalar>::on_left_mouse_down(int x, int y)
+      
+      void StreamView::on_left_mouse_down(int x, int y)
       {
         View::on_left_mouse_down(x, y);
 
@@ -607,8 +609,8 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      const char* StreamView<Scalar>::get_help_text() const
+      
+      const char* StreamView::get_help_text() const
       {
         return
           "StreamView\n\n"
@@ -627,18 +629,16 @@ namespace Hermes
           "  Esc, Q - quit";
       }
 
-      template<typename Scalar>
-      StreamView<Scalar>::~StreamView()
+      
+      StreamView::~StreamView()
       {
         delete_tree(root);
         for (int i = 0; i < num_stream; i++)
           delete [] streamlines[i];
         delete [] streamlines;
         delete [] streamlength;
+        delete vec;
       }
-
-      template class HERMES_API StreamView<double>;
-      template class HERMES_API StreamView<std::complex<double> >;
     }
   }
 }

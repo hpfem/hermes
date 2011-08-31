@@ -35,22 +35,22 @@ namespace Hermes
       ///
       /// VectorView is a visualization window for all vector-valued PDE solutions.
       ///
-      template<typename Scalar>
       class HERMES_API VectorView : public View
       {
       public:
 
         VectorView(const char* title = "VectorView", WinGeom* wg = NULL);
         VectorView(char* title, WinGeom* wg = NULL);
+        ~VectorView();
 
-        void show(MeshFunction<Scalar>* vsln, double eps = HERMES_EPS_NORMAL);
-        void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps = HERMES_EPS_NORMAL);
-        void show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem);
+        void show(MeshFunction<double>* vsln, double eps = HERMES_EPS_NORMAL);
+        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps = HERMES_EPS_NORMAL);
+        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem);
 
         void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
 
       protected:
-        Vectorizer<Scalar> vec;
+        Vectorizer* vec;
 
         double gx, gy, gs;
         bool hexa; ///< false - quad grid, true - hexa grid

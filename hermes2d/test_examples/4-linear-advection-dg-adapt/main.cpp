@@ -106,7 +106,7 @@ int main(int argc, char* args[])
   // Initialize the weak formulation.
   CustomWeakForm wf(BDY_BOTTOM_LEFT);
 
-  ScalarView<double> view1("Solution", new WinGeom(900, 0, 450, 350));
+  ScalarView view1("Solution", new WinGeom(900, 0, 450, 350));
   view1.fix_scale_width(60);
 
   int as = 1; bool done = false;

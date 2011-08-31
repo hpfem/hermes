@@ -26,6 +26,7 @@
 #include "vector_base_view.h"
 #include "space.h"
 #include "precalc.h"
+#include "filter.h"
 
 namespace Hermes
 {
@@ -54,16 +55,32 @@ namespace Hermes
       }
 
 
-      template<typename Scalar>
-      void VectorBaseView<Scalar>::update_solution()
+      template<>
+      void VectorBaseView<double>::update_solution()
       {
-        Scalar* coeffs = new Scalar[ndof + 1];
-        memset(coeffs, 0, sizeof(Scalar) * (ndof + 1));
+        double* coeffs = new double[ndof + 1];
+        memset(coeffs, 0, sizeof(double) * (ndof + 1));
         if (base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
-        Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss);
+        Solution<double>::vector_to_solution(coeffs, space, sln, pss);
 
-        VectorView<Scalar>::show(sln,  sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
+        VectorView::show(sln, sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
+        update_title();
+
+        delete [] coeffs;
+      }
+      template<>
+      void VectorBaseView<std::complex<double> >::update_solution()
+      {
+        std::complex<double> * coeffs = new std::complex<double> [ndof + 1];
+        memset(coeffs, 0, sizeof(std::complex<double> ) * (ndof + 1));
+        if (base_index >= -1 && base_index < ndof)
+          coeffs[base_index + 1] = 1.0;
+        Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss);
+
+        Hermes::Hermes2D::RealFilter filter(sln);
+
+        this->VectorView::show(&filter, &filter, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();
 
         delete [] coeffs;
@@ -97,7 +114,7 @@ namespace Hermes
           break;
 
         default:
-          VectorView<Scalar>::on_special_key(key, x, y);
+          VectorView::on_special_key(key, x, y);
         }
       }
 

@@ -177,6 +177,7 @@ project(hermes2d)
 		src/views/view_data.cpp 
 		src/views/view_support.cpp
 		src/views/linearizer.cpp
+    src/views/linearizer_base.cpp
 		src/views/orderizer.cpp
 		src/views/vectorizer.cpp
 

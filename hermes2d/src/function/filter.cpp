@@ -274,7 +274,7 @@ namespace Hermes
     template<typename Scalar>
     void SimpleFilter<Scalar>::precalculate(int order, int mask)
     {
-      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
+      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))  
         error("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
@@ -335,6 +335,66 @@ namespace Hermes
       return result;
     }
 
+    ComplexFilter::ComplexFilter(MeshFunction<std::complex<double> >* solution, int item) : Filter<double>()
+    {
+      this->num = 1;
+      this->sln_complex = solution;
+    }
+
+    void ComplexFilter::precalculate(int order, int mask)
+    {
+      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))  
+        error("Filter not defined for derivatives.");
+
+      Quad2D* quad = this->quads[this->cur_quad];
+      int np = quad->get_num_points(order);
+      struct Function<double>::Node* node = this->new_node(H2D_FN_VAL, np);
+
+      // precalculate solution
+      this->sln_complex->set_quad_order(order, this->item);
+
+      for (int j = 0; j < this->num_components; j++)
+      {
+        // obtain corresponding tables
+        int a = 0, b = 0, mask = item;
+        if (mask >= 0x40) 
+        {
+          a = 1; 
+          mask >>= 6; 
+        }
+        while (!(mask & 1)) 
+        { 
+          mask >>= 1; 
+          b++; 
+        }
+        std::complex<double>* tab = this->sln_complex->get_values(this->num_components == 1 ? a : j, b);
+
+        // apply the filter
+        filter_fn(np, tab, node->values[j][0]);
+      }
+
+      if(this->nodes->present(order)) 
+      {
+        assert(this->nodes->get(order) == this->cur_node);
+        ::free(this->nodes->get(order));
+      }
+      this->nodes->add(node, order);
+      this->cur_node = node;
+    }
+
+    double ComplexFilter::get_pt_value(double x, double y, int it)
+    {
+      if (it & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
+        error("Filter not defined for derivatives.");
+      std::complex<double> val = this->sln_complex->get_pt_value(x, y, it);
+
+      double result;
+
+      // apply the filter
+      filter_fn(1, &val, &result);
+
+      return result;
+    }
 
     template<typename Scalar>
     DXDYFilter<Scalar>::DXDYFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions) : Filter<Scalar>(solutions)
@@ -488,35 +548,30 @@ namespace Hermes
     };
 
 
-    void RealFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
+    void RealFilter::filter_fn(int n, std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = v1.at(0)[i].real();
+        result[i] = values[i].real();
     };
 
-    RealFilter::RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-      : SimpleFilter<std::complex<double> >(solutions, items)
+    RealFilter::RealFilter(MeshFunction<std::complex<double> >* solution, int item)
+      : ComplexFilter(solution, item)
     {
-      if (solutions.size() > 1)
-        error("RealFilter only supports one MeshFunction.");
     };
 
 
-    void ImagFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
+    void ImagFilter::filter_fn(int n, std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = v1.at(0)[i].imag();
+        result[i] = values[i].imag();
     };
 
-    ImagFilter::ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-      : SimpleFilter<std::complex<double> >(solutions, items)
+    ImagFilter::ImagFilter(MeshFunction<std::complex<double> >* solution, int item)
+      : ComplexFilter(solution, item)
     {
-      if (solutions.size() > 1)
-        error("RealFilter only supports one MeshFunction.");
     };
 
-
-    void AbsFilter::filter_fn(int n,  Hermes::vector<std::complex<double>*> v1, double* result)
+    void AbsFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
     {
       for (int i = 0; i < n; i++)
         result[i] = sqrt(sqr(v1.at(0)[i].real()) + sqr(v1.at(0)[i].imag()));

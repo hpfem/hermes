@@ -51,7 +51,6 @@ namespace Hermes
       ///
       /// ScalarView is a visualization window for all Scalar-valued PDE solutions.
       ///
-      template<typename Scalar>
       class HERMES_API ScalarView : public View
       {
       public:
@@ -63,8 +62,8 @@ namespace Hermes
         ScalarView(char* title, WinGeom* wg = NULL);
         virtual ~ScalarView();
 
-        void show(MeshFunction<Scalar>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-          MeshFunction<Scalar>* xdisp = NULL, MeshFunction<Scalar>* ydisp = NULL, double dmult = 1.0);
+        void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+          MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0);
 
         void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
 
@@ -85,7 +84,7 @@ namespace Hermes
   "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
 #define SVG_UNIT_MM 3.543307 /* size of 1 mm in SVG px */
 
-        Linearizer<Scalar> lin;
+        Linearizer* lin;
 
       protected:
         /// Information about a vertex node.

@@ -34,22 +34,17 @@
 #define CONT_CHANGE 1.0E-2 ///< A change of a contour in GUI
 #define D3DV_SCALE_STEP_COEF 1.1 ///< A scale coefficient for changing contours and scaling along the Y-axis using keyboard.
 
-
 namespace Hermes
 {
   namespace Hermes2D
   {
     namespace Views
     {
-      template<typename Scalar>
-      const int ScalarView<Scalar>::fovy = 50;
-      template<typename Scalar>
-      const double ScalarView<Scalar>::znear = 0.05;
-      template<typename Scalar>
-      const double ScalarView<Scalar>::zfar = 10;
+      const int ScalarView::fovy = 50;
+      const double ScalarView::znear = 0.05;
+      const double ScalarView::zfar = 10;
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::init()
+      void ScalarView::init()
       {
         pmode = mode3d = false;
         normals = NULL;
@@ -73,8 +68,8 @@ namespace Hermes
       }
 
 #ifndef _MSC_VER
-      template<typename Scalar>
-      ScalarView<Scalar>::ScalarView(const char* title, WinGeom* wg) :
+      
+      ScalarView::ScalarView(const char* title, WinGeom* wg) :
       View(title, wg),
         vertex_nodes(0),
         pointed_vertex_node(NULL),
@@ -93,8 +88,7 @@ namespace Hermes
       }
 #endif
 
-      template<typename Scalar>
-      ScalarView<Scalar>::ScalarView(char* title, WinGeom* wg) :
+      ScalarView::ScalarView(char* title, WinGeom* wg) :
       View(title, wg),
         vertex_nodes(0),
         pointed_vertex_node(NULL),
@@ -112,8 +106,7 @@ namespace Hermes
         init();
       }
 
-      template<typename Scalar>
-      ScalarView<Scalar>::~ScalarView()
+      ScalarView::~ScalarView()
       {
         delete[] normals;
         vertex_nodes.clear();
@@ -128,8 +121,7 @@ namespace Hermes
 # endif
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_create(int output_id)
+      void ScalarView::on_create(int output_id)
       {
         View::on_create(output_id);
 
@@ -150,8 +142,7 @@ namespace Hermes
 # endif
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_close()
+      void ScalarView::on_close()
       {
         //GUI cleanup
 # ifdef ENABLE_VIEWER_GUI
@@ -194,8 +185,7 @@ namespace Hermes
         View::on_close();
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::create_setup_bar()
+      void ScalarView::create_setup_bar()
       {
 #ifdef ENABLE_VIEWER_GUI
         char buffer[1024];
@@ -227,16 +217,20 @@ namespace Hermes
 #endif
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::show(MeshFunction<Scalar>* sln, double eps, int item,
-        MeshFunction<Scalar>* xdisp, MeshFunction<Scalar>* ydisp, double dmult)
+      void ScalarView::show(MeshFunction<double>* sln, double eps, int item,
+        MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
       {
         // For preservation of the sln's active element. Will be set back after the visualization.
         Element* active_element = sln->get_active_element();
-        lin.lock_data();
 
-        double max_abs = range_auto ? -1.0 : std::max(fabs(range_min), fabs(range_max));
-        lin.process_solution(sln, item, eps, max_abs, xdisp, ydisp, dmult);
+        lin = new Linearizer(sln);
+        if(!range_auto)
+          lin->set_max_absolute_value(std::max(fabs(range_min), fabs(range_max)));
+
+        lin->set_displacement(xdisp, ydisp, dmult);
+        lin->lock_data();
+
+        lin->process_solution(item, eps); 
         update_mesh_info();
 
         // Initialize mesh nodes for displaying and selection.
@@ -245,7 +239,7 @@ namespace Hermes
         // Initialize element info.
         init_element_info(sln->get_mesh());
 
-        lin.unlock_data();
+        lin->unlock_data();
 
         create();
         update_layout();
@@ -257,11 +251,11 @@ namespace Hermes
 
         verbose("Showing data in view \"%s\"", title.c_str());
         verbose(" Used value range [%g; %g]", range_min, range_max);
-        verbose(" Value range of data: [%g, %g]", lin.get_min_value(), lin.get_max_value());
+        verbose(" Value range of data: [%g, %g]", lin->get_min_value(), lin->get_max_value());
 
         // Now we reset the active element if it was set before the MeshFunction sln entered this method.
         // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
-        if(dynamic_cast<Solution<Scalar>*>(sln) != NULL)
+        if(dynamic_cast<Solution<double>*>(sln) != NULL)
           if(active_element != NULL)
             // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
             // there is nothing to restore to.
@@ -269,8 +263,7 @@ namespace Hermes
               sln->set_active_element(active_element);
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::show_linearizer_data(double eps, int item)
+      void ScalarView::show_linearizer_data(double eps, int item)
       {
         double max_abs = range_auto ? -1.0 : std::max(fabs(range_min), fabs(range_max));
 
@@ -286,15 +279,14 @@ namespace Hermes
 
         verbose("Showing data in view \"%s\"", title.c_str());
         verbose(" Used value range [%g; %g]", range_min, range_max);
-        verbose(" Value range of data: [%g, %g]", lin.get_min_value(), lin.get_max_value());
+        verbose(" Value range of data: [%g, %g]", lin->get_min_value(), lin->get_max_value());
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::update_mesh_info() 
+      void ScalarView::update_mesh_info() 
       {
         // Calculate normals if necessary.
         if (mode3d)
-          calculate_normals(lin.get_vertices(), lin.get_num_vertices(), lin.get_triangles(), lin.get_num_triangles());
+          calculate_normals(lin->get_vertices(), lin->get_num_vertices(), lin->get_triangles(), lin->get_num_triangles());
         else 
         {
           delete[] normals;
@@ -302,8 +294,8 @@ namespace Hermes
         }
 
         // Get a range of vertex values (or use the range set by the user).
-        double vert_min = lin.get_min_value();
-        double vert_max = lin.get_max_value();
+        double vert_min = lin->get_min_value();
+        double vert_max = lin->get_max_value();
         // Special case: constant function; offset the lower limit of range so that the domain is drawn under the
         // function and also the scale is drawn correctly.
         if ((vert_max - vert_min) < 1e-8) 
@@ -324,12 +316,12 @@ namespace Hermes
           value_irange = 1.0 / (range_max - range_min);
 
         // Calculate the axes-aligned bounding box in the xy-plane.
-        lin.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
+        lin->calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
 
         // Calculate average value.
         value_range_avg = 0.0;
-        double3* verts = lin.get_vertices();
-        const int num_verts = lin.get_num_vertices();
+        double3* verts = lin->get_vertices();
+        const int num_verts = lin->get_num_vertices();
         for(int i = 0; i < num_verts; i++)
           if (verts[i][2] > range_max)
             value_range_avg += range_max;
@@ -342,14 +334,12 @@ namespace Hermes
           lin_updated = true;
       }
 
-      template<typename Scalar>
-      bool ScalarView<Scalar>::compare_vertex_nodes_x(const VertexNodeInfo& a, const VertexNodeInfo& b)
+      bool ScalarView::compare_vertex_nodes_x(const VertexNodeInfo& a, const VertexNodeInfo& b)
       {
         return a.x < b.x;
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::init_vertex_nodes(Mesh* mesh)
+      void ScalarView::init_vertex_nodes(Mesh* mesh)
       {
         //clear all selections
         pointed_vertex_node = NULL;
@@ -394,12 +384,11 @@ namespace Hermes
         std::sort(vertex_nodes.begin(), vertex_nodes.end(), compare_vertex_nodes_x);
       }
 
-      template<typename Scalar>
-      typename ScalarView<Scalar>::VertexNodeInfo* ScalarView<Scalar>::find_nearest_node_in_range(float x, float y, float radius)
+      ScalarView::VertexNodeInfo* ScalarView::find_nearest_node_in_range(float x, float y, float radius)
       {
         VertexNodeInfo node_info(-1, x - radius, y); //right side of the widget
-        typename Hermes::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
-        typename Hermes::vector<VertexNodeInfo>::iterator found_nearest = vertex_nodes.end();
+        Hermes::vector<VertexNodeInfo>::iterator found_iter = std::lower_bound(vertex_nodes.begin(), vertex_nodes.end(), node_info, compare_vertex_nodes_x);
+        Hermes::vector<VertexNodeInfo>::iterator found_nearest = vertex_nodes.end();
         float found_nearest_dist = -1;
         while (found_iter != vertex_nodes.end() && abs(found_iter->x - x) <= radius)
         {
@@ -421,8 +410,7 @@ namespace Hermes
           return NULL;
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_single_vertex_node(const VertexNodeInfo& node)
+      void ScalarView::draw_single_vertex_node(const VertexNodeInfo& node)
       {
         //prepare environment
         glPushMatrix();
@@ -458,8 +446,7 @@ namespace Hermes
         glPopMatrix();
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_vertex_nodes()
+      void ScalarView::draw_vertex_nodes()
       {
         //create widgets
         create_nodes_widgets();
@@ -471,7 +458,7 @@ namespace Hermes
 
         //draw selected nodes
         glDisable(GL_BLEND);
-        typename Hermes::vector<VertexNodeInfo>::const_iterator iter = vertex_nodes.begin();
+        Hermes::vector<VertexNodeInfo>::const_iterator iter = vertex_nodes.begin();
         while (iter != vertex_nodes.end())
         {
           if (iter->selected)
@@ -493,8 +480,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::create_nodes_widgets()
+      void ScalarView::create_nodes_widgets()
       {
         //pointed node
         if (pointed_node_widget == 0)
@@ -562,8 +548,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::init_element_info(Mesh* mesh)
+      void ScalarView::init_element_info(Mesh* mesh)
       {
         //cleanup
         element_infos.clear();
@@ -599,8 +584,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_element_infos_2d()
+      void ScalarView::draw_element_infos_2d()
       {
         //create widgets
         create_element_info_widgets();
@@ -612,7 +596,7 @@ namespace Hermes
         glDisable(GL_BLEND);
 
         //draw element IDs
-        typename Hermes::vector<ElementInfo>::const_iterator iter = element_infos.begin();
+        Hermes::vector<ElementInfo>::const_iterator iter = element_infos.begin();
         while (iter != element_infos.end())
         {
           //check element dimension in pixels
@@ -652,8 +636,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::create_element_info_widgets()
+      void ScalarView::create_element_info_widgets()
       {
         if (element_id_widget == 0)
         {
@@ -684,8 +667,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::show_contours(double step, double orig)
+      void ScalarView::show_contours(double step, double orig)
       {
         if (step == 0.0) error("'step' cannot be zero.");
         contours = true;
@@ -695,7 +677,6 @@ namespace Hermes
         refresh();
       }
 
-
       static double my_ceil(double x)
       {
         double y = ceil(x);
@@ -703,9 +684,7 @@ namespace Hermes
         return y + 1.0;
       }
 
-
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_tri_contours(double3* vert, int3* tri)
+      void ScalarView::draw_tri_contours(double3* vert, int3* tri)
       {
         // sort the vertices by their value, keep track of the permutation sign
         int i, idx[3], perm = 0;
@@ -758,8 +737,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::prepare_gl_geometry()
+      void ScalarView::prepare_gl_geometry()
       {
         if (lin_updated)
         {
@@ -768,10 +746,10 @@ namespace Hermes
           try 
           {
             //get input data
-            int vert_cnt = lin.get_num_vertices();
-            double3* verts = lin.get_vertices();
-            int tri_cnt = lin.get_num_triangles();
-            int3* tris = lin.get_triangles();
+            int vert_cnt = lin->get_num_vertices();
+            double3* verts = lin->get_vertices();
+            int tri_cnt = lin->get_num_triangles();
+            int3* tris = lin->get_triangles();
 
             //check if extension is supported
             if (!GLEW_ARB_vertex_buffer_object)
@@ -865,8 +843,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_values_2d()
+      void ScalarView::draw_values_2d()
       {
         assert_msg(gl_pallete_tex_id != 0, "Palette GL texture ID is zero, palette not set");
 
@@ -886,9 +863,9 @@ namespace Hermes
         if (gl_coord_buffer == 0 || gl_index_buffer == 0)
         { //render using the safe but slow methoold and slow method
           //obtain data
-          int tri_cnt = lin.get_num_triangles();
-          const double3* vert = lin.get_vertices();
-          const int3* tris = lin.get_triangles();
+          int tri_cnt = lin->get_num_triangles();
+          const double3* vert = lin->get_vertices();
+          const int3* tris = lin->get_triangles();
 
           //render
           glBegin(GL_TRIANGLES);
@@ -939,8 +916,7 @@ namespace Hermes
         glMatrixMode(GL_MODELVIEW);
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_edges_2d() 
+      void ScalarView::draw_edges_2d() 
       {
         glColor3fv(edges_color);
         bool displayed = false;
@@ -954,8 +930,8 @@ namespace Hermes
           GLenum err = glGetError();
           if (err == GL_NO_ERROR) {//render edges
             unsigned int buffer_inx = 0;
-            int3* edges = lin.get_edges();
-            int edge_cnt = lin.get_num_edges();
+            int3* edges = lin->get_edges();
+            int edge_cnt = lin->get_num_edges();
             for (int i = 0; i < edge_cnt; i++) //TODO: we could draw only left-right, top-bottom ones
             {
               const int3 &edge = edges[i];
@@ -1002,16 +978,15 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_normals_3d() 
+      void ScalarView::draw_normals_3d() 
       {
         double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
 
         glPushAttrib(GL_ENABLE_BIT);
         glPushMatrix();
 
-        const int num_vert = lin.get_num_vertices();
-        double3* vert = lin.get_vertices();
+        const int num_vert = lin->get_num_vertices();
+        double3* vert = lin->get_vertices();
 
         glDisable(GL_LIGHTING);
         glDisable(GL_TEXTURE_1D);
@@ -1032,19 +1007,17 @@ namespace Hermes
         glPopAttrib();
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_gl_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
+      void ScalarView::draw_gl_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
       {
-        double3* verts = viewer->lin.get_vertices();
+        double3* verts = viewer->lin->get_vertices();
         glVertex2d(verts[inx_vert_a][0], verts[inx_vert_a][1]);
         glVertex2d(verts[inx_vert_b][0], verts[inx_vert_b][1]);
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only)
+      void ScalarView::draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only)
       {
-        int3* edges = lin.get_edges();
-        int edge_cnt = lin.get_num_edges();
+        int3* edges = lin->get_edges();
+        int edge_cnt = lin->get_num_edges();
         for (int i = 0; i < edge_cnt; i++) //TODO: we could draw only left-right, top-bottom ones
         {
           const int3 &edge = edges[i];
@@ -1052,7 +1025,6 @@ namespace Hermes
             draw_single_edge(edge[0], edge[1], this, param);
         }
       }
-
 
 #define V0    vertices_min_x - xctr, range_min - yctr, -(vertices_min_y - zctr)
 #define V1    vertices_max_x - xctr, range_min - yctr, -(vertices_min_y - zctr)
@@ -1062,8 +1034,8 @@ namespace Hermes
 #define V5    vertices_max_x - xctr, range_max - yctr, -(vertices_min_y - zctr)
 #define V6    vertices_max_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
 #define V7    vertices_min_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_aabb()
+      
+      void ScalarView::draw_aabb()
       {
         // Axis-aligned bounding box of the model.
         GLdouble aabb[] =
@@ -1100,16 +1072,15 @@ namespace Hermes
         glPopMatrix();
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_display()
+      void ScalarView::on_display()
       {
         int i, j;
 
         // lock and get data
-        lin.lock_data();
-        double3* vert = lin.get_vertices();
-        int3* tris = lin.get_triangles();
-        int3* edges = lin.get_edges();
+        lin->lock_data();
+        double3* vert = lin->get_vertices();
+        int3* tris = lin->get_triangles();
+        int3* edges = lin->get_edges();
 
         glPolygonMode(GL_FRONT_AND_BACK, pmode ? GL_LINE : GL_FILL);
 
@@ -1143,7 +1114,7 @@ namespace Hermes
           {
             glColor3fv(cont_color);
             glBegin(GL_LINES);
-            for (i = 0; i < lin.get_num_triangles(); i++)
+            for (i = 0; i < lin->get_num_triangles(); i++)
             {
               if (finite(vert[tris[i][0]][2]) && finite(vert[tris[i][1]][2]) && finite(vert[tris[i][2]][2]))
               {
@@ -1204,7 +1175,7 @@ namespace Hermes
           glPolygonOffset(1.0, 1.0);
           glBegin(GL_TRIANGLES);
           double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
-          for (i = 0; i < lin.get_num_triangles(); i++)
+          for (i = 0; i < lin->get_num_triangles(); i++)
           {
             for (j = 0; j < 3; j++)
             {
@@ -1225,7 +1196,7 @@ namespace Hermes
           {
             glColor3fv(edges_color);
             glBegin(GL_LINES);
-            for (i = 0; i < lin.get_num_edges(); i++)
+            for (i = 0; i < lin->get_num_edges(); i++)
             {
               glVertex3d((vert[edges[i][0]][0] - xctr) * xzscale,
                 (vert[edges[i][0]][2] - yctr) * yscale,
@@ -1244,7 +1215,7 @@ namespace Hermes
           {
             glColor3fv(edges_color);
             glBegin(GL_LINES);
-            for (i = 0; i < lin.get_num_edges(); i++)
+            for (i = 0; i < lin->get_num_edges(); i++)
             {
               // Outline of the domain boundary at the bottom of the plot or at the bottom user-defined limit
               double y_coord = (range_min - yctr) * yscale;
@@ -1261,7 +1232,7 @@ namespace Hermes
           }
         }
 
-        lin.unlock_data();
+        lin->unlock_data();
 
         // Draw TW.
 #ifdef ENABLE_VIEWER_GUI
@@ -1279,8 +1250,7 @@ namespace Hermes
         x *= l; y *= l; z *= l;
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::calculate_normals(double3* vert, int num_verts, int3* tris, int num_tris)
+      void ScalarView::calculate_normals(double3* vert, int num_verts, int3* tris, int num_tris)
       {
         if (normals != NULL)
           delete [] normals;
@@ -1314,8 +1284,7 @@ namespace Hermes
           normalize(normals[i][0], normals[i][1], normals[i][2]);
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::update_layout() 
+      void ScalarView::update_layout() 
       {
         View::update_layout();
         // (x,y,-z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
@@ -1326,8 +1295,7 @@ namespace Hermes
         zctr = (vertices_max_y + vertices_min_y) / 2.0;
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::reset_view(bool force_reset) 
+      void ScalarView::reset_view(bool force_reset) 
       {
         if (force_reset || view_not_reset) { // Reset 3d view.
           xrot = 40.0; yrot = 0.0;
@@ -1364,7 +1332,6 @@ namespace Hermes
         View::reset_view(force_reset); // Reset 2d view.
       }
 
-
       // This function calculates the distance that the model (3D plot of the solution over the whole solution domain) must be
       // translated along the z-axis of the eye coordinate system, so that it fills the actual viewport without being clipped.
       // The only case when the model will be clipped is when the user defines his own vertical range limits - unfortunately,
@@ -1377,8 +1344,8 @@ namespace Hermes
       //  3. Compute the distance (along z-axis) from the origin to the center of perspective projection of the point with the
       //      biggest horizontal (x-axis) distance from the origin.
       //  4. Take the bigger of the two distances and reverse sign (since we will translate the model, not the camera)
-      template<typename Scalar>
-      double ScalarView<Scalar>::calculate_ztrans_to_fit_view()
+      
+      double ScalarView::calculate_ztrans_to_fit_view()
       {
         // Axis-aligned bounding box of the model (homogeneous coordinates in the model space), divided into the bottom and top base.
         GLdouble aabb[2][16] =
@@ -1447,8 +1414,7 @@ namespace Hermes
         return -optimal_viewpoint_pos;
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::set_vertical_scaling(double sc)
+      void ScalarView::set_vertical_scaling(double sc)
       {
         if (mode3d)
           yscale *= sc;
@@ -1457,8 +1423,7 @@ namespace Hermes
         refresh();
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::set_min_max_range(double min, double max)
+      void ScalarView::set_min_max_range(double min, double max)
       {
         /// \todo allow settin min = max, in which case draw the corresponding contour.
         if (fabs(max-min) < 1e-8) 
@@ -1469,8 +1434,7 @@ namespace Hermes
         View::set_min_max_range(min, max);
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::init_lighting()
+      void ScalarView::init_lighting()
       {
         float light_specular[] = {  1.0f, 1.0f, 1.0f, 1.0f };
         float light_ambient[]  = {  0.1f, 0.1f, 0.1f, 1.0f };
@@ -1501,9 +1465,7 @@ namespace Hermes
         }
       }
 
-
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_key_down(unsigned char key, int x, int y)
+      void ScalarView::on_key_down(unsigned char key, int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventKeyboardGLUT(key, x, y))
@@ -1554,32 +1516,32 @@ namespace Hermes
               dragging = scaling = false;
               if (mode3d) 
               {
-                lin.lock_data();
+                lin->lock_data();
                 if (normals == NULL)
-                  calculate_normals(lin.get_vertices(), lin.get_num_vertices(), lin.get_triangles(), lin.get_num_triangles());
-                lin.unlock_data();
+                  calculate_normals(lin->get_vertices(), lin->get_num_vertices(), lin->get_triangles(), lin->get_num_triangles());
+                lin->unlock_data();
               }
               refresh();
               break;
             }
 
           case '*':
-            lin.lock_data();
+            lin->lock_data();
             if (mode3d)
               yscale *= D3DV_SCALE_STEP_COEF;
             else if (contours)
               cont_step *= D3DV_SCALE_STEP_COEF;
-            lin.unlock_data();
+            lin->unlock_data();
             refresh();
             break;
 
           case '/':
-            lin.lock_data();
+            lin->lock_data();
             if (mode3d)
               yscale /= D3DV_SCALE_STEP_COEF;
             else if (contours)
               cont_step /= D3DV_SCALE_STEP_COEF;
-            lin.unlock_data();
+            lin->unlock_data();
             refresh();
             break;
 
@@ -1590,8 +1552,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_special_key(int key, int x, int y)
+      void ScalarView::on_special_key(int key, int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventSpecialGLUT(key, x, y))
@@ -1600,9 +1561,7 @@ namespace Hermes
         }
       }
 
-
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_mouse_move(int x, int y)
+      void ScalarView::on_mouse_move(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         if (mode3d && (dragging || scaling || panning)) 
@@ -1656,8 +1615,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_left_mouse_down(int x, int y)
+      void ScalarView::on_left_mouse_down(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_LEFT_BUTTON, GLUT_DOWN, x, y))
@@ -1666,8 +1624,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_left_mouse_up(int x, int y)
+      void ScalarView::on_left_mouse_up(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_LEFT_BUTTON, GLUT_UP, x, y))
@@ -1676,8 +1633,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_right_mouse_down(int x, int y)
+      void ScalarView::on_right_mouse_down(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_RIGHT_BUTTON, GLUT_DOWN, x, y))
@@ -1716,8 +1672,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_right_mouse_up(int x, int y)
+      void ScalarView::on_right_mouse_up(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_RIGHT_BUTTON, GLUT_UP, x, y))
@@ -1726,8 +1681,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_middle_mouse_down(int x, int y)
+      void ScalarView::on_middle_mouse_down(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_MIDDLE_BUTTON, GLUT_DOWN, x, y))
@@ -1738,8 +1692,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_middle_mouse_up(int x, int y)
+      void ScalarView::on_middle_mouse_up(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_MIDDLE_BUTTON, GLUT_UP, x, y))
@@ -1748,8 +1701,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::on_reshape(int width, int height)
+      void ScalarView::on_reshape(int width, int height)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         VIEWER_GUI(TwWindowSize(width, height));
@@ -1757,13 +1709,13 @@ namespace Hermes
         View::on_reshape(width, height);
       }
       
-      template<typename Scalar>
-      void ScalarView<Scalar>::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
+      
+      void ScalarView::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
       {
         assert_msg(param != NULL, "Param parameter equals to NULL");
 
         SVGExportParams* pars = (SVGExportParams*)param;
-        double3* verts = viewer->lin.get_vertices();
+        double3* verts = viewer->lin->get_vertices();
 
         //transform coordinates
         double3 vert_a, vert_b;
@@ -1778,10 +1730,9 @@ namespace Hermes
         fprintf(pars->fout, "<path d=\"M %g %g L %g %g\"/>\n", vert_a[0], vert_a[1], vert_b[0], vert_b[1]);
       }
 
-      template<typename Scalar>
-      void ScalarView<Scalar>::export_mesh_edges_svg(const char* filename, float width_mm)
+      void ScalarView::export_mesh_edges_svg(const char* filename, float width_mm)
       {
-        lin.lock_data();
+        lin->lock_data();
 
         //get AABB
         double width = vertices_max_x - vertices_min_x, height = vertices_max_y - vertices_min_y;
@@ -1811,12 +1762,10 @@ namespace Hermes
         fprintf(fout, "</svg>\n");
         fclose(fout);
 
-        lin.unlock_data();
+        lin->unlock_data();
       }
 
-
-      template<typename Scalar>
-      const char* ScalarView<Scalar>::get_help_text() const
+      const char* ScalarView::get_help_text() const
       {
         return
           "ScalarView\n\n"
@@ -1844,8 +1793,6 @@ namespace Hermes
           "  * - increase Z scale\n"
           "  / - decrease Z scale";
       }
-      template class HERMES_API ScalarView<double>;
-      template class HERMES_API ScalarView<std::complex<double> >;
     }
   }
 }

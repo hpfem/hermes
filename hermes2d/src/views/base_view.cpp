@@ -25,6 +25,7 @@
 #include <GL/freeglut.h>
 #include "hermes2d_common_defs.h"
 #include "base_view.h"
+#include "filter.h"
 
 namespace Hermes
 {
@@ -34,7 +35,7 @@ namespace Hermes
     {
       template<typename Scalar>
       BaseView<Scalar>::BaseView(const char* title, WinGeom* wg)
-        : ScalarView<Scalar>((char*) title, wg)
+        : ScalarView((char*) title, wg)
       {
         pss = NULL;
         sln = NULL;
@@ -45,7 +46,7 @@ namespace Hermes
 
       template<typename Scalar>
       BaseView<Scalar>::BaseView(char* title, WinGeom* wg)
-        : ScalarView<Scalar>(title, wg)
+        : ScalarView(title, wg)
       {
         pss = NULL;
         sln = NULL;
@@ -77,22 +78,44 @@ namespace Hermes
         if (space != NULL) { delete space; space = NULL; }
       }
 
-      template<typename Scalar>
-      void BaseView<Scalar>::update_solution()
+      template<>
+      void BaseView<double>::update_solution()
       {
-        Scalar* coeffs = new Scalar[ndof];
-        memset(coeffs, 0, sizeof(Scalar) * ndof);
+        double* coeffs = new double[ndof];
+        memset(coeffs, 0, sizeof(double) * ndof);
         if (base_index >= 0)
         {
           if (base_index < ndof) coeffs[base_index] = 1.0;
-          Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss, false);
+          Solution<double>::vector_to_solution(coeffs, space, sln, pss, false);
         }
         else
         {
-          Solution<Scalar>::vector_to_solution(coeffs, space, sln, pss, true);
+          Solution<double>::vector_to_solution(coeffs, space, sln, pss, true);
         }
 
-        ScalarView<Scalar>::show(sln, eps, item);
+        ScalarView::show(sln, eps, item);
+        update_title();
+
+        delete [] coeffs;
+      }
+      template<>
+      void BaseView<std::complex<double> >::update_solution()
+      {
+        std::complex<double>* coeffs = new std::complex<double>[ndof];
+        memset(coeffs, 0, sizeof(std::complex<double>) * ndof);
+        if (base_index >= 0)
+        {
+          if (base_index < ndof) coeffs[base_index] = 1.0;
+          Solution<std::complex<double>>::vector_to_solution(coeffs, space, sln, pss, false);
+        }
+        else
+        {
+          Solution<std::complex<double>>::vector_to_solution(coeffs, space, sln, pss, true);
+        }
+
+        Hermes::Hermes2D::RealFilter filter(sln);
+
+        ScalarView::show(&filter, eps, item);
         update_title();
 
         delete [] coeffs;
@@ -124,7 +147,7 @@ namespace Hermes
           break;
 
         default:
-          ScalarView<Scalar>::on_special_key(key, x, y);
+          ScalarView::on_special_key(key, x, y);
         }
       }
 

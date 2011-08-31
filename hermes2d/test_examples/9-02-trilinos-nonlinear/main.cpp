@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   cpu_time.tick(HERMES_SKIP);
  
   // Show UMFPACK solution.
-  Views::ScalarView<double> view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
+  Views::ScalarView view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
   view1.show(&sln1);
 
   // Calculate error.
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
   info("Solution 2 (NOX): exact H1 error: %g%% (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
 
   // Show NOX solution.
-  Views::ScalarView<double> view2("Solution 2", new Views::WinGeom(510, 0, 500, 400));
+  Views::ScalarView view2("Solution 2", new Views::WinGeom(510, 0, 500, 400));
   view2.show(&sln2);
 
   // Wait for all views to be closed.

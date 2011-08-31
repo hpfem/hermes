@@ -59,13 +59,14 @@ namespace Hermes
 
       } quad_ord;
 
-      Orderizer::Orderizer() : Linearizer<double>()
+      Orderizer::Orderizer() : LinearizerBase()
       {
+        verts = NULL;
         ltext = NULL;
         lvert = NULL;
         lbox = NULL;
 
-        nl = cl1 = cl2 = cl3 = 0;
+        label_count = cl1 = cl2 = cl3 = 0;
 
         for (int i = 0, p = 0; i <= 10; i++)
         {
@@ -82,106 +83,27 @@ namespace Hermes
         }
       }
 
-      void Orderizer::process_space(Space<double>* space)
+      int Orderizer::add_vertex()
       {
-        // sanity check
-        if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
-
-        if (!space->is_up_to_date())
-          error("The space is not up to date.");
-
-        int type = 1;
-
-        nv = nt = ne = nl = 0;
-        del_slot = -1;
-
-        // estimate the required number of vertices and triangles
-        Mesh* mesh = space->get_mesh();
-        if (mesh == NULL) 
+        if (this->vertex_count >= this->vertex_size)
         {
-          error("Mesh is NULL in Orderizer:process_solution().");
+          this->vertex_size *= 2;
+          verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
+          this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
         }
-        int nn = mesh->get_num_active_elements();
-        int ev = 77 * nn, et = 64 * nn, ee = 16 * nn, el = nn + 10;
-
-        // reuse or allocate vertex, triangle and edge arrays
-        lin_init_array(verts, double3, cv, ev);
-        lin_init_array(tris, int3, ct, et);
-        lin_init_array(edges, int3, ce, ee);
-        lin_init_array(lvert, int, cl1, el);
-        lin_init_array(ltext, char*, cl2, el);
-        lin_init_array(lbox, double2, cl3, el);
-        info = NULL;
-
-        int oo, o[6];
-
-        RefMap refmap;
-        refmap.set_quad_2d(&quad_ord);
-
-        // make a mesh illustrating the distribution of polynomial orders over the space
-        Element* e;
-        for_all_active_elements(e, mesh)
-        {
-          oo = o[4] = o[5] = space->get_element_order(e->id);
-          for (unsigned int k = 0; k < e->nvert; k++)
-            o[k] = space->get_edge_order(e, k);
-
-          refmap.set_active_element(e);
-          double* x = refmap.get_phys_x(type);
-          double* y = refmap.get_phys_y(type);
-
-          double3* pt = quad_ord.get_points(type);
-          int np = quad_ord.get_num_points(type);
-          int id[80];
-          assert(np <= 80);
-
-#define make_vert(index, x, y, val) \
-          { (index) = add_vertex(); \
-          verts[index][0] = (x); \
-          verts[index][1] = (y); \
-          verts[index][2] = (val); }
-
-          int mode = e->get_mode();
-          if (e->is_quad())
-          {
-            o[4] = H2D_GET_H_ORDER(oo);
-            o[5] = H2D_GET_V_ORDER(oo);
-          }
-          make_vert(lvert[nl], x[0], y[0], o[4]);
-
-          for (int i = 1; i < np; i++)
-            make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
-
-          for (int i = 0; i < num_elem[mode][type]; i++)
-            add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]]);
-
-          for (int i = 0; i < num_edge[mode][type]; i++)
-          {
-            if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
-              ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
-              (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
-            {
-              add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
-            }
-          }
-
-          double xmin = 1e100, ymin = 1e100, xmax = -1e100, ymax = -1e100;
-          for (unsigned int k = 0; k < e->nvert; k++)
-          {
-            if (e->vn[k]->x < xmin) xmin = e->vn[k]->x;
-            if (e->vn[k]->x > xmax) xmax = e->vn[k]->x;
-            if (e->vn[k]->y < ymin) ymin = e->vn[k]->y;
-            if (e->vn[k]->y > ymax) ymax = e->vn[k]->y;
-          }
-          lbox[nl][0] = xmax - xmin;
-          lbox[nl][1] = ymax - ymin;
-          ltext[nl++] = labels[o[4]][o[5]];
-        }
-
-        refmap.set_quad_2d(&g_quad_2d_std);
+        return this->vertex_count++;
       }
 
-      void Orderizer::process_space(Space<std::complex<double> >* space)
+      void Orderizer::make_vert(int & index, double x, double y, double val)
+      {
+        index = add_vertex();
+        verts[index][0] = x; 
+        verts[index][1] = y; 
+        verts[index][2] = val; 
+      }
+
+      template<typename Scalar>
+      void Orderizer::process_space(Space<Scalar>* space)
       {
         // sanity check
         if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
@@ -190,9 +112,7 @@ namespace Hermes
           error("The space is not up to date.");
 
         int type = 1;
-
-        nv = nt = ne = nl = 0;
-        del_slot = -1;
+        label_count = 0;
 
         // estimate the required number of vertices and triangles
         Mesh* mesh = space->get_mesh();
@@ -201,16 +121,26 @@ namespace Hermes
           error("Mesh is NULL in Orderizer:process_solution().");
         }
         int nn = mesh->get_num_active_elements();
-        int ev = 77 * nn, et = 64 * nn, ee = 16 * nn, el = nn + 10;
+        vertex_size = 77 * nn;
+        triangle_size = 64 * nn;
+        edges_size = 16 * nn;
+        label_size = nn + 10;
+        cl1 = cl2 = cl3 = label_size;
 
         // reuse or allocate vertex, triangle and edge arrays
-        lin_init_array(verts, double3, cv, ev);
-        lin_init_array(tris, int3, ct, et);
-        lin_init_array(edges, int3, ce, ee);
-        lin_init_array(lvert, int, cl1, el);
-        lin_init_array(ltext, char*, cl2, el);
-        lin_init_array(lbox, double2, cl3, el);
+        if (verts == NULL)
+          verts = (double3*) malloc(sizeof(double3) * vertex_size);
+        if (tris == NULL)
+          tris = (int3*) malloc(sizeof(int3) * triangle_size);
+        if (edges == NULL)
+          edges = (int3*) malloc(sizeof(int3) * edges_size);
         info = NULL;
+        if (lvert == NULL)
+          lvert = (int*) malloc(sizeof(int) * label_size);
+        if (ltext == NULL)
+          ltext = (char**) malloc(sizeof(char*) * label_size);
+        if (lbox == NULL)
+          lbox = (double2*) malloc(sizeof(double2) * label_size);
 
         int oo, o[6];
 
@@ -234,33 +164,27 @@ namespace Hermes
           int id[80];
           assert(np <= 80);
 
-#define make_vert(index, x, y, val) \
-          { (index) = add_vertex(); \
-          verts[index][0] = (x); \
-          verts[index][1] = (y); \
-          verts[index][2] = (val); }
-
           int mode = e->get_mode();
           if (e->is_quad())
           {
             o[4] = H2D_GET_H_ORDER(oo);
             o[5] = H2D_GET_V_ORDER(oo);
           }
-          make_vert(lvert[nl], x[0], y[0], o[4]);
+          make_vert(lvert[label_count], x[0], y[0], o[4]);
 
           for (int i = 1; i < np; i++)
             make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
 
           for (int i = 0; i < num_elem[mode][type]; i++)
-            add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]]);
+            LinearizerBase::add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]]);
 
           for (int i = 0; i < num_edge[mode][type]; i++)
           {
             if (e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
               ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
-              (x[ord_edge[mode][type][i][0] + 1] <  x[ord_edge[mode][type][i][1] + 1])))
+              (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
             {
-              add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
+              LinearizerBase::add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
             }
           }
 
@@ -272,9 +196,9 @@ namespace Hermes
             if (e->vn[k]->y < ymin) ymin = e->vn[k]->y;
             if (e->vn[k]->y > ymax) ymax = e->vn[k]->y;
           }
-          lbox[nl][0] = xmax - xmin;
-          lbox[nl][1] = ymax - ymin;
-          ltext[nl++] = labels[o[4]][o[5]];
+          lbox[label_count][0] = xmax - xmin;
+          lbox[label_count][1] = ymax - ymin;
+          ltext[label_count++] = labels[o[4]][o[5]];
         }
 
         refmap.set_quad_2d(&g_quad_2d_std);
@@ -282,25 +206,28 @@ namespace Hermes
 
       Orderizer::~Orderizer()
       {
-        lin_free_array(lvert, nl, cl1);
-        lin_free_array(ltext, nl, cl2);
-        lin_free_array(lbox, nl, cl3);
+        if (lvert != NULL) 
+        {
+          ::free(lvert);
+          lvert = NULL;
+        }
+        if (ltext != NULL) 
+        {
+          ::free(ltext);
+          ltext = NULL;
+        }
+        if (lbox != NULL) 
+        {
+          ::free(lbox);
+          lbox = NULL;
+        }
       }
 
-      void Orderizer::save_orders_vtk(Space<double>* space, const char* file_name)
+      template<typename Scalar>
+      void Orderizer::save_orders_vtk(Space<Scalar>* space, const char* file_name)
       {
-        // Create an Orderizer. This class creates a triangular mesh 
-        // with "solution values" that represent the polynomial 
-        // degrees of mesh elements. 
-        Orderizer ord;
+        process_space(space);
 
-        // Create a piecewise-linear approximation, and save it to a file in VTK format.
-        ord.process_space(space);
-        ord.save_data_vtk(file_name);
-      }
-
-      void Orderizer::save_data_vtk(const char* file_name)
-      {
         FILE* f = fopen(file_name, "wb");
         if (f == NULL) error("Could not open %s for writing.", file_name);
         lock_data();
@@ -312,24 +239,24 @@ namespace Hermes
         fprintf(f, "DATASET UNSTRUCTURED_GRID\n");
 
         // Output vertices.
-        fprintf(f, "POINTS %d %s\n", this->nv, "float");
-        for (int i=0; i < this->nv; i++) 
+        fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
+        for (int i=0; i < this->vertex_count; i++) 
         {
           fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
         }
 
         // Output elements.
         fprintf(f, "\n");
-        fprintf(f, "CELLS %d %d\n", this->nt, 4 * this->nt);
-        for (int i=0; i < this->nt; i++) 
+        fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
+        for (int i=0; i < this->triangle_count; i++) 
         {
           fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
         }
 
         // Output cell types.
         fprintf(f, "\n");
-        fprintf(f, "CELL_TYPES %d\n", this->nt);
-        for (int i=0; i < this->nt; i++) 
+        fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
+        for (int i=0; i < this->triangle_count; i++) 
         {
           fprintf(f, "5\n");    // The "5" means triangle in VTK.
         }
@@ -337,10 +264,10 @@ namespace Hermes
         // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp 
         // for how it is done for vectors.
         fprintf(f, "\n");
-        fprintf(f, "POINT_DATA %d\n", this->nv);
+        fprintf(f, "POINT_DATA %d\n", this->vertex_count);
         fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (int i=0; i < this->nv; i++) 
+        for (int i=0; i < this->vertex_count; i++) 
         {
           fprintf(f, "%g\n", this->verts[i][2]);
         }
@@ -348,6 +275,34 @@ namespace Hermes
         unlock_data();
         fclose(f);
       }
+
+      int Orderizer::get_labels(int*& lvert, char**& ltext, double2*& lbox) const
+      { 
+        lvert = this->lvert; 
+        ltext = this->ltext; 
+        lbox = this->lbox; 
+        return label_count; 
+      }
+
+      void Orderizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
+      {
+        assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
+        calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
+      }
+      
+      double3* Orderizer::get_vertices()
+      {
+        return this->verts;
+      }
+      int Orderizer::get_num_vertices()
+      {
+        return this->vertex_count;
+      }
+      
+      template HERMES_API void Orderizer::save_orders_vtk<double>(Space<double>* space, const char* file_name);
+      template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(Space<std::complex<double> >* space, const char* file_name);
+      template HERMES_API void Orderizer::process_space<double>(Space<double>* space);
+      template HERMES_API void Orderizer::process_space<std::complex<double> >(Space<std::complex<double> >* space);
     }
   }
 }

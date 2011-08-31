@@ -25,8 +25,8 @@ namespace Hermes
   {
     namespace Views
     {
-      template<typename Scalar>
-      VectorView<Scalar>::VectorView(const char* title, WinGeom* wg)
+      
+      VectorView::VectorView(const char* title, WinGeom* wg)
         : View(title, wg)
       {
         gx = gy = 0.0;
@@ -38,8 +38,8 @@ namespace Hermes
         length_coef = 1.0;
       }
 
-      template<typename Scalar>
-      VectorView<Scalar>::VectorView(char* title, WinGeom* wg)
+      
+      VectorView::VectorView(char* title, WinGeom* wg)
         : View(title, wg)
       {
         gx = gy = 0.0;
@@ -51,31 +51,38 @@ namespace Hermes
         length_coef = 1.0;
       }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::show(MeshFunction<Scalar>* vsln, double eps)
+      VectorView::~VectorView()
       {
+        delete vec;
+      }
+      
+      void VectorView::show(MeshFunction<double>* vsln, double eps)
+      {
+        vec = new Vectorizer(vsln, vsln);
         if (vsln->get_num_components() < 2)
           error("The single-argument version of show() is only for vector-valued solutions.");
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps)
+      
+      void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps)
       {
+        vec = new Vectorizer(xsln, ysln);
         if (xsln == ysln)
           error("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
         show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::show(MeshFunction<Scalar>* xsln, MeshFunction<Scalar>* ysln, double eps, int xitem, int yitem)
+      
+      void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem)
       {
-        vec.lock_data();
-        vec.process_solution(xsln, xitem, ysln, yitem, eps);
-        if (range_auto) { range_min = vec.get_min_value();
-        range_max = vec.get_max_value(); }
-        vec.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
-        vec.unlock_data();
+        vec = new Vectorizer(xsln, ysln);
+        vec->lock_data();
+        vec->process_solution(xitem, yitem, eps);
+        if (range_auto) { range_min = vec->get_min_value();
+        range_max = vec->get_max_value(); }
+        vec->calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
+        vec->unlock_data();
 
         create();
         update_layout();
@@ -89,8 +96,8 @@ namespace Hermes
       static int n_vert(int i) { return (i+1) % 3; }
       static int p_vert(int i) { return (i+2) % 3; }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
+      
+      void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if (mode == 1)
           glColor3f(0.0f,0.0f,0.0f);
@@ -177,8 +184,8 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::on_display()
+      
+      void VectorView::on_display()
       {
         set_ortho_projection();
         glDisable(GL_LIGHTING);
@@ -193,10 +200,10 @@ namespace Hermes
         double max_length = 0.0;
 
         // transform all vertices
-        vec.lock_data();
+        vec->lock_data();
         int i;
-        int nv = vec.get_num_vertices();
-        double4* vert = vec.get_vertices();
+        int nv = vec->get_num_vertices();
+        double4* vert = vec->get_vertices();
         double2* tvert = new double2[nv];
 
         for (i = 0; i < nv; i++)
@@ -212,19 +219,19 @@ namespace Hermes
 
         // value range
         double min = range_min, max = range_max;
-        if (range_auto) { min = vec.get_min_value(); max = vec.get_max_value(); }
+        if (range_auto) { min = vec->get_min_value(); max = vec->get_max_value(); }
         double irange = 1.0 / (max - min);
         // special case: constant solution
         if (fabs(min - max) < 1e-8) { irange = 1.0; min -= 0.5; }
 
         // draw all triangles
-        int3* xtris = vec.get_triangles();
+        int3* xtris = vec->get_triangles();
 
         if (mode != 1) glEnable(GL_TEXTURE_1D);
         glBindTexture(GL_TEXTURE_1D, gl_pallete_tex_id);
         glBegin(GL_TRIANGLES);
         glColor3f(0.95f, 0.95f, 0.95f);
-        for (i = 0; i < vec.get_num_triangles(); i++)
+        for (i = 0; i < vec->get_num_triangles(); i++)
         {
           double mag = sqrt(sqr(vert[xtris[i][0]][2]) + sqr(vert[xtris[i][0]][3]));
           glTexCoord2d((mag -min) * irange * tex_scale + tex_shift, 0.0);
@@ -245,8 +252,8 @@ namespace Hermes
         /*if (mode == 0) glColor3f(0.3, 0.3, 0.3);
         else*/ glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        int3* edges = vec.get_edges();
-        for (i = 0; i < vec.get_num_edges(); i++)
+        int3* edges = vec->get_edges();
+        for (i = 0; i < vec->get_num_edges(); i++)
         {
           if (lines || edges[i][2] != 0)
           {
@@ -262,8 +269,8 @@ namespace Hermes
           glEnable(GL_LINE_STIPPLE);
           glLineStipple(1, 0xCCCC);
           glBegin(GL_LINES);
-          int2* dashes = vec.get_dashes();
-          for (i = 0; i < vec.get_num_dashes(); i++)
+          int2* dashes = vec->get_dashes();
+          for (i = 0; i < vec->get_num_dashes(); i++)
           {
             glVertex2d(tvert[dashes[i][0]][0], tvert[dashes[i][0]][1]);
             glVertex2d(tvert[dashes[i][1]][0], tvert[dashes[i][1]][1]);
@@ -275,7 +282,7 @@ namespace Hermes
         // draw arrows
         if (mode != 2)
         {
-          for (i = 0; i < vec.get_num_triangles(); i++)
+          for (i = 0; i < vec->get_num_triangles(); i++)
           {
             double miny = 1e100;
             int idx = -1, k, l1, l2, r2, r1, s;
@@ -384,11 +391,11 @@ namespace Hermes
         }
 
         delete [] tvert;
-        vec.unlock_data();
+        vec->unlock_data();
       }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::on_mouse_move(int x, int y)
+      
+      void VectorView::on_mouse_move(int x, int y)
       {
         if (dragging)
         {
@@ -398,8 +405,8 @@ namespace Hermes
         View::on_mouse_move(x, y);
       }
 
-      template<typename Scalar>
-      void VectorView<Scalar>::on_key_down(unsigned char key, int x, int y)
+      
+      void VectorView::on_key_down(unsigned char key, int x, int y)
       {
         switch (key)
         {
@@ -444,8 +451,8 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      const char* VectorView<Scalar>::get_help_text() const
+      
+      const char* VectorView::get_help_text() const
       {
         return
           "VectorView\n\n"
@@ -465,9 +472,6 @@ namespace Hermes
           "  F1 - this help\n"
           "  Esc, Q - quit";
       }
-
-      template class HERMES_API VectorView<double>;
-      template class HERMES_API VectorView<std::complex<double> >;
     }
   }
 }

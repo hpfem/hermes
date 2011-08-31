@@ -127,6 +127,24 @@ namespace Hermes
 
     };
 
+    /// ComplexFilter is used to transform complex solutions into its real parts.
+    ///
+    class HERMES_API ComplexFilter : public Filter<double>
+    {
+    public:
+      ComplexFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
+      
+      virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
+
+    protected:
+      MeshFunction<std::complex<double> >* sln_complex;
+
+      int item;
+
+      virtual void filter_fn(int n, std::complex<double>* values, double* result) = 0;
+
+      virtual void precalculate(int order, int mask);
+    };
 
     /// DXDYFilter is a more advanced version of SimpleFilter. It allows combining derivatives
     /// of the inputs and also, unlike SimpleFilter, it defines derivatives of the filtered
@@ -215,25 +233,25 @@ namespace Hermes
     };
 
     /// Removes the imaginary part from a function.
-    class HERMES_API RealFilter : public SimpleFilter<std::complex<double> >
+    class HERMES_API RealFilter : public ComplexFilter
     {
     public:
-      RealFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      RealFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
 
     protected:
-      virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
+      virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
 
     /// ImagFilter puts the imaginary part of the input function to the Real part of the
     /// output, allowing it to be visualized.
-    class HERMES_API ImagFilter : public SimpleFilter<std::complex<double> >
+    class HERMES_API ImagFilter : public ComplexFilter
     {
     public:
-      ImagFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      ImagFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
 
     protected:
-      virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
+      virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
 

@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  Views::ScalarView<std::complex<double> > sview("Solution", new Views::WinGeom(0, 0, 600, 350));
+  Views::ScalarView sview("Solution", new Views::WinGeom(0, 0, 600, 350));
   sview.show_mesh(false);
   Views::OrderView<std::complex<double> > oview("Polynomial orders", new Views::WinGeom(610, 0, 520, 350));
 
@@ -151,7 +151,9 @@ int main(int argc, char* argv[])
     OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type); 
 
     // View the coarse mesh solution and polynomial orders.
-    sview.show(&sln);
+    RealFilter real_filter(&sln);
+    sview.show(&real_filter);
+
     oview.show(&space);
 
     // Calculate element errors and total error estimate.
@@ -194,7 +196,9 @@ int main(int argc, char* argv[])
 
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
-  sview.show(&ref_sln);
+
+  RealFilter real_filter(&ref_sln);
+  sview.show(&real_filter);
 
   // Wait for all views to be closed.
   Views::View::wait();
