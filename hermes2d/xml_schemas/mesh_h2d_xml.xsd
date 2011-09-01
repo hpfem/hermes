@@ -10,8 +10,8 @@ xmlns="http://www.w3.org/2001/XMLSchema">
         type="mesh:vertices_type" />
         <element minOccurs="1" maxOccurs="1" name="elements"
         type="mesh:elements_type" />
-        <element minOccurs="1" maxOccurs="1" name="boundary_edges"
-        type="mesh:boundary_edges_type" />
+        <element minOccurs="1" maxOccurs="1" name="edges"
+        type="mesh:edges_type" />
         <element minOccurs="0" maxOccurs="1" name="curves"
         type="mesh:curves_type" />
         <element minOccurs="0" maxOccurs="1" name="refinements"
@@ -71,10 +71,10 @@ xmlns="http://www.w3.org/2001/XMLSchema">
       </complexContent>
     </complexType>
     
-  <complexType name="boundary_edges_type">
+  <complexType name="edges_type">
     <sequence>
       <element minOccurs="0" maxOccurs="unbounded"
-      name="boundary_edge">
+      name="edge">
         <complexType>
           <attribute name="v1" type="integer" use="required" />
           <attribute name="v2" type="integer" use="required" />

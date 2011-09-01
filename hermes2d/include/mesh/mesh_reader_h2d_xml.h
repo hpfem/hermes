@@ -59,10 +59,11 @@ namespace Hermes
       bool save(const char *filename, Hermes::vector<Mesh *> meshes);
 
     protected:
-      /// Internal method loading contents of parsed_xml_entity into mesh.
-      /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
-      template<typename T>
-      bool load(std::auto_ptr<T> & parsed_xml_entity, Mesh *mesh);
+      /// Internal method loading contents of parsed_xml_mesh into mesh.
+      bool load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, Mesh *mesh);
+      
+      /// Internal method loading contents of parsed_xml_domain's domain into mesh.
+      bool load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is, std::map<unsigned int, unsigned int>& element_is, std::map<unsigned int, unsigned int>& edge_is);
 
       /// Loads one circular arc.
       /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.

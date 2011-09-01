@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <schema targetNamespace="XMLSubdomains"
 	xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:mesh="XMLMesh">
+	xmlns:mesh="XMLMesh"
+  xmlns:subdomains="XMLSubdomains">
 	<import namespace="XMLMesh" 
   schemaLocation="mesh_h2d_xml.xsd"/>	
   <element name="domain">
@@ -10,11 +11,11 @@
         <element minOccurs="0" maxOccurs="1" name="variables"
         type="mesh:variables_type" />
         <element minOccurs="1" maxOccurs="1" name="vertices"
-        type="mesh:vertices_type" />
+        type="subdomains:vertices_type" />
         <element minOccurs="1" maxOccurs="1" name="elements"
-        type="mesh:elements_type" />
-        <element minOccurs="1" maxOccurs="1" name="boundary_edges"
-        type="mesh:boundary_edges_type" />
+        type="subdomains:elements_type" />
+        <element minOccurs="1" maxOccurs="1" name="edges"
+        type="subdomains:edges_type" />
         <element minOccurs="0" maxOccurs="1" name="curves"
         type="mesh:curves_type" />
 				<element name="subdomains">
@@ -23,19 +24,25 @@
 							<element minOccurs="1" maxOccurs="unbounded" name="subdomain">
 								<complexType mixed="true">
 									<sequence>
-										<element minOccurs="0" maxOccurs="unbounded" name="vertex_number">
+										<element minOccurs="0" maxOccurs="1" name="vertices">
 											<complexType>
-												<attribute name="number" type="integer" use="required" />
+                        <sequence>
+                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                        </sequence>
 											</complexType>
 										</element>
-										<element minOccurs="0" maxOccurs="unbounded" name="element_number">
+										<element minOccurs="0" maxOccurs="1" name="elements">
 											<complexType>
-												<attribute name="number" type="integer" use="required" />
+                        <sequence>
+                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                        </sequence>
 											</complexType>
 										</element>										
-										<element minOccurs="0" maxOccurs="unbounded" name="boundary_edge_number">
+										<element minOccurs="0" maxOccurs="1" name="edges">
 											<complexType>
-												<attribute name="number" type="integer" use="required" />
+												<sequence>
+                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                        </sequence>
 											</complexType>
 										</element>
                     <element minOccurs="0" maxOccurs="1" name="refinements" type="mesh:refinements_type" />
@@ -49,4 +56,60 @@
       </sequence>
     </complexType>
   </element>
+  
+    <complexType name="vertices_type">
+    <sequence>
+      <element minOccurs="3" maxOccurs="unbounded" name="vertex">
+        <complexType>
+          <attribute name="x" type="string" use="required" />
+          <attribute name="y" type="string" use="required" />
+          <attribute name="i" type="integer" use="required" />
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+	  
+	<element name="element" abstract="true" type="subdomains:element_type" />
+  <element name="triangle" substitutionGroup="subdomains:element" type="subdomains:triangle_type" />
+  <element name="quad" substitutionGroup="subdomains:element" type="subdomains:quad_type" />
+	
+  <complexType name="elements_type">
+    <sequence>
+      <element ref="subdomains:element" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+		
+    <complexType name="element_type" abstract="true">
+      <attribute name="v1" type="integer" use="required" />
+      <attribute name="v2" type="integer" use="required" />
+      <attribute name="v3" type="integer" use="required" />
+      <attribute name="marker" type="string" use="required" />
+      <attribute name="i" type="integer" use="required" />
+    </complexType>
+    <complexType name="triangle_type">
+      <complexContent>
+        <extension base="subdomains:element_type" />
+      </complexContent>
+    </complexType>
+    <complexType name="quad_type">
+      <complexContent>
+        <extension base="subdomains:element_type">
+          <attribute name="v4" type="integer" use="required" />
+        </extension>
+      </complexContent>
+    </complexType>
+    
+  <complexType name="edges_type">
+    <sequence>
+      <element minOccurs="0" maxOccurs="unbounded"
+      name="edge">
+        <complexType>
+          <attribute name="v1" type="integer" use="required" />
+          <attribute name="v2" type="integer" use="required" />
+          <attribute name="marker" type="string" use="required" />
+          <attribute name="i" type="integer" use="required" />
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
 </schema>

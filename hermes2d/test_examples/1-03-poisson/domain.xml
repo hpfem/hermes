@@ -28,16 +28,16 @@
 		<element:quad v1="2" v2="3" v3="6" v4="5" marker="Aluminum" />
   </elements>
 
-  <boundary_edges>
-    <boundary_edge v1="0" v2="1" marker="Bottom" />
-		<boundary_edge v1="1" v2="4" marker="Outer" />
-		<boundary_edge v1="3" v2="0" marker="Inner" />
-		<boundary_edge v1="4" v2="7" marker="Outer" />
-		<boundary_edge v1="7" v2="6" marker="Outer" />
-		<boundary_edge v1="2" v2="3" marker="Inner" />
-		<boundary_edge v1="6" v2="5" marker="Outer" />
-		<boundary_edge v1="5" v2="2" marker="Left" />
-	</boundary_edges>
+  <edges>
+    <edge v1="0" v2="1" marker="Bottom" />
+		<edge v1="1" v2="4" marker="Outer" />
+		<edge v1="3" v2="0" marker="Inner" />
+		<edge v1="4" v2="7" marker="Outer" />
+		<edge v1="7" v2="6" marker="Outer" />
+		<edge v1="2" v2="3" marker="Inner" />
+		<edge v1="6" v2="5" marker="Outer" />
+		<edge v1="5" v2="2" marker="Left" />
+	</edges>
 
   <curves>
     <arc v1="4" v2="7" angle="45" />
