@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schema targetNamespace="XMLVTKSln" xmlns:sln="XMLVTKSln" xmlns="http://www.w3.org/2001/XMLSchema">  
+  <element name="VTKFile">
+    <complexType>
+      <sequence>
+        <element name="UnstructuredGrid">
+          <complexType>
+            <sequence>
+              <element name="Piece">
+                <complexType>
+                  <sequence>
+                    <element name="PointData">
+                      <complexType>
+                        <sequence>
+                          <element name="DataArray">
+                            <complexType>
+                              <simpleContent>
+                                <extension base="string">
+                                  <attribute name="type" type="string" use="required" />
+                                  <attribute name="Name" type="string" use="required" />
+                                  <attribute name="format" type="string" use="required" />
+                                </extension>
+                              </simpleContent>
+                            </complexType>
+                          </element>
+                        </sequence>
+                        <attribute name="Scalars" type="string" use="required" />
+                      </complexType>
+                    </element>
+                    <element name="CellData" type="string" />
+                    <element name="Points">
+                      <complexType>
+                        <sequence>
+                          <element name="DataArray">
+                            <complexType>
+                              <simpleContent>
+                                <extension base="string">
+                                  <attribute name="type" type="string" use="required" />
+                                  <attribute name="NumberOfComponents" type="unsignedByte" use="required" />
+                                  <attribute name="format" type="string" use="required" />
+                                </extension>
+                              </simpleContent>
+                            </complexType>
+                          </element>
+                        </sequence>
+                      </complexType>
+                    </element>
+                    <element name="Cells">
+                      <complexType>
+                        <sequence>
+                          <element maxOccurs="unbounded" name="DataArray">
+                            <complexType>
+                              <simpleContent>
+                                <extension base="string">
+                                  <attribute name="type" type="string" use="required" />
+                                  <attribute name="Name" type="string" use="required" />
+                                  <attribute name="format" type="string" use="required" />
+                                </extension>
+                              </simpleContent>
+                            </complexType>
+                          </element>
+                        </sequence>
+                      </complexType>
+                    </element>
+                  </sequence>
+                  <attribute name="NumberOfPoints" type="unsignedByte" use="required" />
+                  <attribute name="NumberOfCells" type="unsignedByte" use="required" />
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+      <attribute name="type" type="string" use="required" />
+      <attribute name="version" type="decimal" use="required" />
+      <attribute name="byte_order" type="string" use="required" />
+      <attribute name="compressor" type="string" use="required" />
+    </complexType>
+  </element>
+</schema>

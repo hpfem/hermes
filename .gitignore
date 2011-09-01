@@ -51,6 +51,7 @@ config_real.cmake
 *tlog
 *.obj
 *.sln
+*.opensdf
 CMake.vars
 *.dll
 *.ilk
