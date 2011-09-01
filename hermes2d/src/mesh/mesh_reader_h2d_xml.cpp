@@ -34,12 +34,14 @@ namespace Hermes
     bool MeshReaderH2DXML::load(const char *filename, Mesh *mesh)
     {
       mesh->free();
+        
+      std::map<unsigned int, unsigned int> vertex_is;
 
       try
       {
         std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh(XMLMesh::mesh_(filename));
 
-        if(!load(parsed_xml_mesh, mesh))
+        if(!load(parsed_xml_mesh, mesh, vertex_is))
           return false;
 
         // refinements.
@@ -79,7 +81,7 @@ namespace Hermes
         std::ostringstream y_stream;
         y_stream << mesh->nodes[i].y;
 
-        vertices.vertex().push_back(std::auto_ptr<XMLMesh::vertex>(new XMLMesh::vertex(x_stream.str(), y_stream.str())));
+        vertices.vertex().push_back(std::auto_ptr<XMLMesh::vertex>(new XMLMesh::vertex(x_stream.str(), y_stream.str(), i)));
       }
 
       // save elements
@@ -159,7 +161,6 @@ namespace Hermes
 
         for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
         {
-          // May also be "elements_numbers_count" or "edge_numbers_count", these three are supposed to be zero iff all are.
           unsigned int vertex_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().size() : 0;
           unsigned int element_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().size() : 0;
           unsigned int edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges()->i().size() : 0;
@@ -466,7 +467,7 @@ namespace Hermes
       std::map<std::pair<unsigned int, unsigned int>, bool> vertices_to_curves;
 
       // Global vertices list.
-      XMLSubdomains::vertices_type vertices;
+      XMLMesh::vertices_type vertices;
       // Global elements list.
       XMLSubdomains::elements_type elements;
       // Global boudnary edges list.
@@ -510,7 +511,7 @@ namespace Hermes
             std::ostringstream y_stream;
             y_stream << meshes[meshes_i]->nodes[vertices_to_vertices.find(i)->second].y;
         
-            vertices.vertex().push_back(std::auto_ptr<XMLSubdomains::vertex>(new XMLSubdomains::vertex(x_stream.str(), y_stream.str(), i)));
+            vertices.vertex().push_back(std::auto_ptr<XMLMesh::vertex>(new XMLMesh::vertex(x_stream.str(), y_stream.str(), i)));
           }
           subdomain.vertices()->i().push_back(vertices_to_vertices.find(i)->second);
         }
@@ -620,7 +621,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, Mesh *mesh)
+    bool MeshReaderH2DXML::load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is)
     {
       try
       {
@@ -653,6 +654,10 @@ namespace Hermes
           // variables matching.
           std::string x = parsed_xml_mesh->vertices().vertex().at(vertex_i).x();
           std::string y = parsed_xml_mesh->vertices().vertex().at(vertex_i).y();
+          
+          // insert into the map.
+          vertex_is.insert(std::pair<unsigned int, unsigned int>(parsed_xml_mesh->vertices().vertex().at(vertex_i).i(), vertex_i));
+
           double x_value;
           double y_value;
 
@@ -728,16 +733,16 @@ namespace Hermes
 
           if(dynamic_cast<XMLMesh::quad_type*>(element) != NULL)
             e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker(element->marker()).marker, 
-            &mesh->nodes[dynamic_cast<XMLMesh::quad_type*>(element)->v1()], 
-            &mesh->nodes[dynamic_cast<XMLMesh::quad_type*>(element)->v2()],
-            &mesh->nodes[dynamic_cast<XMLMesh::quad_type*>(element)->v3()],
-            &mesh->nodes[dynamic_cast<XMLMesh::quad_type*>(element)->v4()],
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::quad_type*>(element)->v1())->second], 
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::quad_type*>(element)->v2())->second],
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::quad_type*>(element)->v3())->second],
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::quad_type*>(element)->v4())->second],
             NULL);
           else
             e = mesh->create_triangle(mesh->element_markers_conversion.get_internal_marker(element->marker()).marker, 
-            &mesh->nodes[dynamic_cast<XMLMesh::triangle_type*>(element)->v1()], 
-            &mesh->nodes[dynamic_cast<XMLMesh::triangle_type*>(element)->v2()],
-            &mesh->nodes[dynamic_cast<XMLMesh::triangle_type*>(element)->v3()],
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::triangle_type*>(element)->v1())->second], 
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::triangle_type*>(element)->v2())->second],
+            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::triangle_type*>(element)->v3())->second],
             NULL);
         }
 
@@ -747,8 +752,8 @@ namespace Hermes
         Node* en;
         for (unsigned int edge_i = 0; edge_i < edges_count; edge_i++)
         {
-          int v1 = parsed_xml_mesh->edges().edge().at(edge_i).v1();
-          int v2 = parsed_xml_mesh->edges().edge().at(edge_i).v2();
+          int v1 = vertex_is.find(parsed_xml_mesh->edges().edge().at(edge_i).v1())->second;
+          int v2 = vertex_is.find(parsed_xml_mesh->edges().edge().at(edge_i).v2())->second;
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
@@ -799,18 +804,17 @@ namespace Hermes
           Nurbs* nurbs;
           if(curves_i < arc_count)
           {
-
             // read the end point indices
-            p1 = parsed_xml_mesh->curves()->arc().at(curves_i).v1();
-            p2 = parsed_xml_mesh->curves()->arc().at(curves_i).v2();
+            p1 = vertex_is.find(parsed_xml_mesh->curves()->arc().at(curves_i).v1())->second;
+            p2 = vertex_is.find(parsed_xml_mesh->curves()->arc().at(curves_i).v2())->second;
 
             nurbs = load_arc(mesh, parsed_xml_mesh, curves_i, &en, p1, p2);
           }
           else
           {
             // read the end point indices
-            p1 = parsed_xml_mesh->curves()->NURBS().at(curves_i - arc_count).v1();
-            p2 = parsed_xml_mesh->curves()->NURBS().at(curves_i - arc_count).v2();
+            p1 = vertex_is.find(parsed_xml_mesh->curves()->NURBS().at(curves_i - arc_count).v1())->second;
+            p2 = vertex_is.find(parsed_xml_mesh->curves()->NURBS().at(curves_i - arc_count).v2())->second;
             nurbs = load_nurbs(mesh, parsed_xml_mesh, curves_i - arc_count, &en, p1, p2);
           }
 

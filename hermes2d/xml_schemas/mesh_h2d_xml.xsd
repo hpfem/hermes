@@ -37,6 +37,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
         <complexType>
           <attribute name="x" type="string" use="required" />
           <attribute name="y" type="string" use="required" />
+          <attribute name="i" type="integer" use="required" />
         </complexType>
       </element>
     </sequence>

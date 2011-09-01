@@ -60,7 +60,7 @@ namespace Hermes
 
     protected:
       /// Internal method loading contents of parsed_xml_mesh into mesh.
-      bool load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, Mesh *mesh);
+      bool load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is);
       
       /// Internal method loading contents of parsed_xml_domain's domain into mesh.
       bool load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is, std::map<unsigned int, unsigned int>& element_is, std::map<unsigned int, unsigned int>& edge_is);

@@ -11,7 +11,7 @@
         <element minOccurs="0" maxOccurs="1" name="variables"
         type="mesh:variables_type" />
         <element minOccurs="1" maxOccurs="1" name="vertices"
-        type="subdomains:vertices_type" />
+        type="mesh:vertices_type" />
         <element minOccurs="1" maxOccurs="1" name="elements"
         type="subdomains:elements_type" />
         <element minOccurs="1" maxOccurs="1" name="edges"
@@ -56,19 +56,7 @@
       </sequence>
     </complexType>
   </element>
-  
-    <complexType name="vertices_type">
-    <sequence>
-      <element minOccurs="3" maxOccurs="unbounded" name="vertex">
-        <complexType>
-          <attribute name="x" type="string" use="required" />
-          <attribute name="y" type="string" use="required" />
-          <attribute name="i" type="integer" use="required" />
-        </complexType>
-      </element>
-    </sequence>
-  </complexType>
-	  
+    
 	<element name="element" abstract="true" type="subdomains:element_type" />
   <element name="triangle" substitutionGroup="subdomains:element" type="subdomains:triangle_type" />
   <element name="quad" substitutionGroup="subdomains:element" type="subdomains:quad_type" />

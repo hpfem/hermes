@@ -11,14 +11,14 @@
 
   <vertices>
 	<!-- Contains all examples how it is possible to write a zero. -->
-    <vertex x="0.00000000000000000000" y="m_a" />
-		<vertex x="a" y="m_a" />
-		<vertex x="m_a" y="0" />
-		<vertex x="." y=".00" />
-		<vertex x="a" y=".00000000" />
-		<vertex x="m_a" y="a" />
-		<vertex x="0.000" y="a" />
-		<vertex x="b" y="b" />
+    <vertex x="0.00000000000000000000" y="m_a" i="0"/>
+		<vertex x="a" y="m_a" i="1"/>
+		<vertex x="m_a" y="0" i="2"/>
+		<vertex x="." y=".00" i="3"/>
+		<vertex x="a" y=".00000000" i="4"/>
+		<vertex x="m_a" y="a" i="5"/>
+		<vertex x="0.000" y="a" i="6"/>
+		<vertex x="b" y="b" i="7"/>
   </vertices>
 
   <elements>
