@@ -295,7 +295,7 @@ namespace Hermes
         return result;
       }
 
-      // This is to make the form usable in rk_time_step().
+      // This is to make the form usable in rk_time_step_newton().
       template<typename Scalar>
       MatrixFormVol<Scalar>* DefaultJacobianAdvection<Scalar>::clone() 
       {
@@ -697,7 +697,7 @@ namespace Hermes
         return result;
       }
 
-      // This is to make the form usable in rk_time_step().
+      // This is to make the form usable in rk_time_step_newton().
       template<typename Scalar>
       MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone() 
       {

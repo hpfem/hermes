@@ -46,7 +46,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-        // This is to make the form usable in rk_time_step().
+        // This is to make the form usable in rk_time_step_newton().
         virtual MatrixFormVol<Scalar>* clone();
 
       private:
@@ -75,7 +75,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
-        // This is to make the form usable in rk_time_step().
+        // This is to make the form usable in rk_time_step_newton().
         virtual VectorFormVol<Scalar>* clone();
 
       private:

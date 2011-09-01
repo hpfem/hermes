@@ -176,7 +176,7 @@ namespace Hermes
         return planar_part * Ord(order_increase);
       }
 
-      // This is to make the form usable in rk_time_step().
+      // This is to make the form usable in rk_time_step_newton().
       template<typename Scalar>
       VectorFormVol<Scalar>* DefaultResidualMagnetostatics<Scalar>::clone() 
       {
@@ -223,7 +223,7 @@ namespace Hermes
     return result;
     }
 
-    // This is to make the form usable in rk_time_step().
+    // This is to make the form usable in rk_time_step_newton().
     MatrixFormVol<Scalar>* clone() 
     {
     return new DefaultLinearMagnetostaticsVelocity(*this);
@@ -272,7 +272,7 @@ namespace Hermes
     return planar_part * Ord(order_increase);
     }
 
-    // This is to make the form usable in rk_time_step().
+    // This is to make the form usable in rk_time_step_newton().
     VectorFormVol<Scalar>* clone() 
     {
     return new DefaultResidualLinearMagnetostatics(*this);
@@ -332,7 +332,7 @@ namespace Hermes
     return result;
     }
 
-    // This is to make the form usable in rk_time_step().
+    // This is to make the form usable in rk_time_step_newton().
     VectorFormVol<Scalar>* clone() 
     {
     return new DefaultLinearMagnetostaticsRemanence(*this);

@@ -596,7 +596,7 @@ namespace Hermes
                     return matrix_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual MatrixFormSurf<Scalar>* clone() {
                   return new Jacobian(*this);
                 }
@@ -634,7 +634,7 @@ namespace Hermes
                     return vector_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual VectorFormSurf<Scalar>* clone() {
                   return new Residual(*this);
                 }
@@ -679,7 +679,7 @@ namespace Hermes
                     return  matrix_form<Hermes::Ord, Hermes::Ord> (n, wt, u_ext, u, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual MatrixFormVol<Scalar>* clone() {
                   return new Jacobian(*this);
                 }
@@ -722,7 +722,7 @@ namespace Hermes
                     return vector_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual VectorFormVol<Scalar>* clone() {
                   return new Residual(*this);
                 }
@@ -768,7 +768,7 @@ namespace Hermes
                     return  matrix_form<Hermes::Ord, Hermes::Ord> (n, wt, u_ext, u, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual MatrixFormVol<Scalar>* clone() {
                   return new Jacobian(*this);
                 }
@@ -823,7 +823,7 @@ namespace Hermes
                     return vector_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual VectorFormVol<Scalar>* clone() {
                   return new OuterIterationForm(*this);
                 }
@@ -868,7 +868,7 @@ namespace Hermes
                     return vector_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual VectorFormVol<Scalar>* clone() {
                   return new Residual(*this);
                 }
@@ -914,7 +914,7 @@ namespace Hermes
                     return  matrix_form<Hermes::Ord, Hermes::Ord> (n, wt, u_ext, u, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual MatrixFormVol<Scalar>* clone() {
                   return new Jacobian(*this);
                 }
@@ -958,7 +958,7 @@ namespace Hermes
                     return vector_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual VectorFormVol<Scalar>* clone() {
                   return new Residual(*this);
                 }
@@ -1004,7 +1004,7 @@ namespace Hermes
                     return vector_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
                 }
 
-                // This is to make the form usable in rk_time_step().
+                // This is to make the form usable in rk_time_step_newton().
                 virtual VectorFormVol<Scalar>* clone() {
                   return new LinearForm(*this);
                 }

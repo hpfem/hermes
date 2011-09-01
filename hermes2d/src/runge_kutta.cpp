@@ -68,7 +68,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
                                           Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn, 
                                           bool freeze_jacobian, bool block_diagonal_jacobian, 
                                           bool verbose, double newton_tol, int newton_max_iter,
@@ -80,13 +80,13 @@ namespace Hermes
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
       error_fns.push_back(error_fn);
-      return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
+      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new, 
         error_fns, freeze_jacobian, block_diagonal_jacobian, verbose, newton_tol, newton_max_iter,
         newton_damping_coeff, newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, 
                                           Hermes::vector<Solution<Scalar>*> slns_time_prev, 
                                           Hermes::vector<Solution<Scalar>*> slns_time_new, 
                                           Hermes::vector<Solution<Scalar>*> error_fns, 
@@ -97,7 +97,7 @@ namespace Hermes
     {
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
       if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
-        error("rk_time_step(): R-K method must be embedded if temporal error estimate is requested.");
+        error("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       // All Spaces of the problem.
       Hermes::vector<Space<Scalar>*> stage_spaces_vector;
@@ -301,7 +301,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, 
                                           Hermes::vector<Solution<Scalar>*> slns_time_prev, 
                                           Hermes::vector<Solution<Scalar>*> slns_time_new, 
                                           bool freeze_jacobian, bool block_diagonal_jacobian, 
@@ -309,14 +309,14 @@ namespace Hermes
                                           double newton_damping_coeff, 
                                           double newton_max_allowed_residual_norm) 
     {
-      return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
+      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new, 
                           Hermes::vector<Solution<Scalar>*>(), freeze_jacobian, block_diagonal_jacobian, 
                           verbose, newton_tol, newton_max_iter, newton_damping_coeff, 
                           newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
                                           Solution<Scalar>* sln_time_new, 
                                           bool freeze_jacobian, bool block_diagonal_jacobian,
                                           bool verbose, double newton_tol, int newton_max_iter,
@@ -327,7 +327,7 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
-      return rk_time_step(current_time, time_step, slns_time_prev, slns_time_new, 
+      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new, 
                           error_fns, freeze_jacobian, block_diagonal_jacobian, verbose, newton_tol, 
                           newton_max_iter, newton_damping_coeff, newton_max_allowed_residual_norm);
     }
