@@ -75,23 +75,16 @@ namespace Hermes
     class HERMES_API Solution : public MeshFunction<Scalar>
     {
     public:
-
-      virtual void init();
       Solution();
       Solution(Mesh *mesh);
       Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
       Solution (Space<Scalar>* s, Scalar* coeff_vec);
       virtual ~Solution();
-      virtual void free();
 
       void assign(Solution* sln);
       Solution& operator = (Solution& sln) { assign(&sln); return *this; }
 
       void copy(const Solution<Scalar>* sln);
-
-      virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
-
-      int get_edge_fn_order(int edge, Space<Scalar>* space, Element* e = NULL);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss = NULL);
@@ -139,7 +132,6 @@ namespace Hermes
       /// Returns space type.
       SpaceType get_space_type() const { return space_type; };
 
-    public:
       /// Internal.
       virtual void set_active_element(Element* e);
 
@@ -168,12 +160,27 @@ namespace Hermes
       /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
 
-      /// In case this is valid.
-      Space<Scalar>* get_space();
+      /// In case there is a space this solution belongs to, this returns the seq number of the space.
+      /// This is used to check if the pointer returned by get_space() points to the same space, or if the space has changed.
+      int get_space_seq();
 
-      /// In case this is valid.
-      Scalar* sln_vector;
+      /// In case this is valid it returns a pointer to the space this solution belongs to.
+      /// Only use when get_space() == get_space_seq();
+      Space<Scalar>* get_space();
+      
+      /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
+      /// Only use when get_space() == get_space_seq();
+      Scalar* get_sln_vector();
+
+      virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
+      
     protected:
+      virtual void init();
+      
+      virtual void free();
+            
+      /// In case this is valid it is a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
+      Scalar* sln_vector;
 
       /// Converts a coefficient vector into a Solution.
       virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
@@ -185,8 +192,11 @@ namespace Hermes
       SolutionType sln_type;
       SpaceType space_type;
 
-      /// In case this is valid.
+      /// In case this is valid it contains a pointer to the space this solution belongs to.
       Space<Scalar>* space;
+
+      /// In case there is a space this solution belongs to, this is the seq number of the space.
+      int space_seq;
 
       bool transform;
 

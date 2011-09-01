@@ -160,7 +160,12 @@ namespace Hermes
       free();
 
       this->mesh = sln->mesh;
+      // Solution vector and space setting.
       this->sln_vector = sln->sln_vector;
+      space = sln->space;
+      space_type = sln->get_space_type();
+      space_seq = sln->get_space_seq();
+      
       own_mesh = sln->own_mesh;
       sln->own_mesh = false;
 
@@ -173,8 +178,6 @@ namespace Hermes
       num_elems = sln->num_elems;          sln->num_elems = 0;
 
       sln_type = sln->sln_type;
-      space = sln->space;
-      space_type = sln->get_space_type();
       this->num_components = sln->num_components;
 
       memset(sln->tables, 0, sizeof(sln->tables));
@@ -227,6 +230,7 @@ namespace Hermes
         error("Undefined or exact solutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
 
       space = sln->space;
+      space_seq = sln->space_seq;
 
       this->element = NULL;
     }
@@ -403,9 +407,9 @@ namespace Hermes
       for(int i = 0; i < space->get_num_dofs(); i++)
         this->sln_vector[i] = coeffs[i];
 
-      space_type = space->get_type();
-
+      this->space_type = space->get_type();
       this->space = space;
+      this->space_seq = space->get_seq();
 
       this->num_components = pss->get_num_components();
       sln_type = HERMES_SLN;
@@ -861,20 +865,6 @@ namespace Hermes
             node->values[1][0][i] = - (*m)[0][1]*vx + (*m)[0][0]*vy;
           }
         }
-      }
-    }
-
-    template<typename Scalar>
-    int Solution<Scalar>::get_edge_fn_order(int edge, Space<Scalar>* space, Element* e)
-    {
-      if (e == NULL) e = this->element;
-
-      if (sln_type == HERMES_SLN && space != NULL) 
-      {
-        return space->get_edge_order(e, edge);
-      } else 
-      {
-        return Function<Scalar>::get_edge_fn_order(edge);
       }
     }
 
@@ -1406,7 +1396,31 @@ namespace Hermes
         return space;
       else
       {
-        warning("Solution<Scalar>::get_space() called with an instance where FEM space is not defined.");
+        error("Solution<Scalar>::get_space() called with an instance where FEM space is not defined.");
+        return NULL;
+      }
+    }
+
+    template<typename Scalar>
+    int Solution<Scalar>::get_space_seq()
+    {
+      if(this->sln_type == HERMES_SLN)
+        return space_seq;
+      else
+      {
+        error("Solution<Scalar>::get_space_seq() called with an instance where FEM space is not defined.");
+        return NULL;
+      }
+    }
+
+    template<typename Scalar>
+    Scalar* Solution<Scalar>::get_sln_vector()
+    {
+      if(this->sln_type == HERMES_SLN)
+        return sln_vector;
+      else
+      {
+        error("Solution<Scalar>::get_sln_vector() called with an instance where FEM space is not defined.");
         return NULL;
       }
     }

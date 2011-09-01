@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
   // you need to correct these numbers.
   double sum = 0;
   for (int i=0; i < ndof; i++)
-    sum += sln.sln_vector[i];
+    sum += sln.get_sln_vector()[i];
   printf("coefficient sum = %g\n", sum);
 
   // Clean up.

@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
   // Look for a saved solution on the disk.
   Continuity<double> continuity(Continuity<double>::onlyTime);
 
-  if(!continuity.have_record_available())
+  if(continuity.have_record_available())
   {
     continuity.get_last_record()->load_mesh(&mesh);
     continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh, &bcs, P_INIT);
