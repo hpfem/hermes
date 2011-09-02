@@ -95,7 +95,7 @@ int main(int argc, char* args[])
   cpu_time.tick();
 
   // Display the mesh.
-  OrderView<double> oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
+  OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
   oview.show(&space);
   BaseView<double> bview("Distribution of polynomial orders", new WinGeom(450, 0, 440, 350));
   bview.show(&space);

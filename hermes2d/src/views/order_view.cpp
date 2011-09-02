@@ -33,8 +33,8 @@ namespace Hermes
   {
     namespace Views
     {
-      template<typename Scalar>
-      OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
+      
+      OrderView::OrderView(const char* title, WinGeom* wg)
         : View(title, wg)
       {
         b_scale = true;
@@ -44,22 +44,7 @@ namespace Hermes
         scale_box_skip = 9;
       }
 
-      /*
-      #ifndef _MSC_VER
-      OrderView<Scalar>::OrderView(const char* title, WinGeom* wg)
-      : View(title, wg)
-      {
-      b_scale = true;
-      b_orders = false;
-      scale_width = 36;
-      scale_box_height = 25;
-      scale_box_skip = 9;
-      }
-      #endif
-      */
-
-      template<typename Scalar>
-      OrderView<Scalar>::OrderView(char* title, WinGeom* wg)
+      OrderView::OrderView(char* title, WinGeom* wg)
         : View(title, wg)
       {
         b_scale = true;
@@ -83,10 +68,9 @@ namespace Hermes
         0xc83737,
         0xff0000
       };
-
-
+      
       template<typename Scalar>
-      void OrderView<Scalar>::show(Space<Scalar>* space)
+      void OrderView::show(Space<Scalar>* space)
       {
         if (!space->is_up_to_date())
           error("The space is not up to date.");
@@ -104,8 +88,7 @@ namespace Hermes
         wait_for_draw();
       }
 
-      template<typename Scalar>
-      void OrderView<Scalar>::init_order_palette(double3* vert) 
+      void OrderView::init_order_palette(double3* vert) 
       {
         int min = 1, max = (int) vert[0][2];
         for (int i = 0; i < ord.get_num_vertices(); i++)
@@ -138,10 +121,8 @@ namespace Hermes
         scale_height = num_boxes * scale_box_height + (num_boxes-1) * scale_box_skip;
         order_min = min;
       }
-
-
-      template<typename Scalar>
-      void OrderView<Scalar>::on_display()
+      
+      void OrderView::on_display()
       {
         set_ortho_projection();
         glDisable(GL_TEXTURE_1D);
@@ -214,23 +195,18 @@ namespace Hermes
         delete [] tvert;
         ord.unlock_data();
       }
-
-
-      template<typename Scalar>
-      int OrderView<Scalar>::measure_scale_labels()
+      
+      int OrderView::measure_scale_labels()
       {
         return 0;
       }
 
-      template<typename Scalar>
-      void OrderView<Scalar>::scale_dispatch()
+      void OrderView::scale_dispatch()
       {
         draw_discrete_scale(num_boxes, box_names, order_colors + order_min);
       }
 
-
-      template<typename Scalar>
-      void OrderView<Scalar>::on_key_down(unsigned char key, int x, int y)
+      void OrderView::on_key_down(unsigned char key, int x, int y)
       {
         switch (key)
         {
@@ -268,8 +244,7 @@ namespace Hermes
         }
       }
 
-      template<typename Scalar>
-      const char* OrderView<Scalar>::get_help_text() const
+      const char* OrderView::get_help_text() const
       {
         return
           "OrderView\n\n"
@@ -285,8 +260,8 @@ namespace Hermes
           "  Esc, Q - quit";
       }
 
-      template class HERMES_API OrderView<double>;
-      template class HERMES_API OrderView<std::complex<double> >;
+      template HERMES_API void OrderView::show<double>(Space<double>* space);
+      template HERMES_API void OrderView::show<std::complex<double> >(Space<std::complex<double> >* space);
     }
   }
 }

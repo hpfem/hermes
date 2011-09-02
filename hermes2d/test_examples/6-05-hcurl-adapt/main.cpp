@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
   // Initialize views.
   Views::VectorView v_view("Solution (magnitude)", new Views::WinGeom(0, 0, 460, 350));
   v_view.set_min_max_range(0, 1.5);
-  Views::OrderView<std::complex<double> >  o_view("Polynomial orders", new Views::WinGeom(470, 0, 400, 350));
+  Views::OrderView  o_view("Polynomial orders", new Views::WinGeom(470, 0, 400, 350));
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est, 

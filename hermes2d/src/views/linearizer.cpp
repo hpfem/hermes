@@ -624,7 +624,6 @@ namespace Hermes
         ::free(info);
       }
       
-      
       void Linearizer::find_min_max()
       {
         // find min & max vertex values

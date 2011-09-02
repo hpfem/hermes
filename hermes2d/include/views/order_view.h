@@ -38,7 +38,6 @@ namespace Hermes
       ///
       /// OrderView is a tool for displaying the polynomial degrees of the elements in a space.
       ///
-      template<typename Scalar>
       class HERMES_API OrderView : public View
       {
       public:
@@ -49,6 +48,7 @@ namespace Hermes
         //#endif
         OrderView(char* title, WinGeom* wg = NULL);
 
+        template<typename Scalar>
         void show(Space<Scalar>* space);
 
       protected:
