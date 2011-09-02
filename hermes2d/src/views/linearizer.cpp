@@ -258,6 +258,10 @@ namespace Hermes
                 if (finite(v) && fabs(v) > max) max = fabs(v);
               }
 
+            // This is just to make some sense.
+            if(fabs(max) < 1E-10)
+              max = 1E-10;
+
             // obtain physical element coordinates
               
             RefMap* refmap = sln->get_refmap();
@@ -671,6 +675,8 @@ namespace Hermes
           this->vertex_size *= 2;
           verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
           this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
+          this->hash_table = (int*) realloc(hash_table, sizeof(int) * vertex_size);
+          memset(this->hash_table + this->vertex_size / 2, 0xff, sizeof(int) * this->vertex_size / 2);
         }
         return this->vertex_count++;
       }
