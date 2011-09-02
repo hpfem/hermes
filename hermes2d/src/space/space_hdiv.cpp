@@ -97,25 +97,60 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>* HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       _F_;
-      HdivSpace<Scalar>* space = new HdivSpace(mesh, essential_bcs, p_init, shapeset);
+      
+      this->mesh = mesh;
 
-      Space<Scalar>::load(filename, space);
+      if (shapeset == NULL)
+      {
+        this->shapeset = new HdivShapeset;
+        this->own_shapeset = true;
+      }
+      else
+        this->shapeset = shapeset;
 
-      return space;
+      if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
+
+      if (!hdiv_proj_ref++)
+      {
+        this->precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
+      }
+
+      this->proj_mat = hdiv_proj_mat;
+      this->chol_p   = hdiv_chol_p;
+
+
+      Space<Scalar>::load(filename, essential_bcs);
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>* HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
       _F_;
-      HdivSpace<Scalar>* space = new HdivSpace(mesh, p_init, shapeset);
+      this->mesh = mesh;
 
-      Space<Scalar>::load(filename, space);
+      if (shapeset == NULL)
+      {
+        this->shapeset = new HdivShapeset;
+        this->own_shapeset = true;
+      }
+      else
+        this->shapeset = shapeset;
 
-      return space;
+      if (this->shapeset->get_num_components() < 2) error("HdivSpace requires a vector shapeset.");
+
+      if (!hdiv_proj_ref++)
+      {
+        this->precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
+      }
+
+      this->proj_mat = hdiv_proj_mat;
+      this->chol_p   = hdiv_chol_p;
+
+
+      Space<Scalar>::load(filename);
     }
 
     template<typename Scalar>

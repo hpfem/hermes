@@ -101,25 +101,56 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    HcurlSpace<Scalar>* HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       _F_;
-      HcurlSpace<Scalar>* space = new HcurlSpace(mesh, essential_bcs, p_init, shapeset);
+      
+      this->mesh = mesh;
 
-      Space<Scalar>::load(filename, space);
+      if (shapeset == NULL)
+      {
+        this->shapeset = new HcurlShapeset;
+        this->own_shapeset = true;
+      }
+      else
+        this->shapeset = shapeset;
 
-      return space;
+      if (this->shapeset->get_num_components() < 2) 
+        error("HcurlSpace requires a vector shapeset.");
+
+      if (!hcurl_proj_ref++)
+        this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
+
+      this->proj_mat = hcurl_proj_mat;
+      this->chol_p   = hcurl_chol_p;
+
+      Space<Scalar>::load(filename, essential_bcs);
     }
 
     template<typename Scalar>
-    HcurlSpace<Scalar>* HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
       _F_;
-      HcurlSpace<Scalar>* space = new HcurlSpace(mesh, p_init, shapeset);
+      this->mesh = mesh;
 
-      Space<Scalar>::load(filename, space);
+      if (shapeset == NULL)
+      {
+        this->shapeset = new HcurlShapeset;
+        this->own_shapeset = true;
+      }
+      else
+        this->shapeset = shapeset;
 
-      return space;
+      if (this->shapeset->get_num_components() < 2) 
+        error("HcurlSpace requires a vector shapeset.");
+
+      if (!hcurl_proj_ref++)
+        this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
+
+      this->proj_mat = hcurl_proj_mat;
+      this->chol_p   = hcurl_chol_p;
+
+      Space<Scalar>::load(filename);
     }
 
     template<typename Scalar>

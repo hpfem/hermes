@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
   if(continuity.have_record_available())
   {
     continuity.get_last_record()->load_mesh(&mesh);
-    continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh, &bcs, P_INIT);
+    continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh, &bcs);
     continuity.get_last_record()->load_solutions(Hermes::vector<Solution<double>*>(sln_time_new, sln_time_prev));
     continuity.get_last_record()->load_time_step_length(time_step);
     current_time = continuity.get_last_record()->get_time();

@@ -258,65 +258,99 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<int> p_inits, Hermes::vector<Shapeset*> shapesets)
+    void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
     {
+      if(shapesets == Hermes::vector<Shapeset*>())
+        for(unsigned int i = 0; i < spaces.size(); i++)
+          shapesets.push_back(NULL);
+
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         std::stringstream filename;
         filename << Continuity<Scalar>::spaceFileName << i << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
+
+        spaces[i]->free();
+
         switch(space_types[i])
         {
         case HERMES_H1_SPACE:
-          if(essential_bcs[i] == NULL)
-            spaces[i] = H1Space<Scalar>::load(filename.str().c_str(), meshes[i], p_inits[i], shapesets[i]);
-          else
-            spaces[i] = H1Space<Scalar>::load(filename.str().c_str(), meshes[i], essential_bcs[i], p_inits[i], shapesets[i]);
+          dynamic_cast<H1Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]);
           break;
         case HERMES_HCURL_SPACE:
-          if(essential_bcs[i] == NULL)
-            spaces[i] = HcurlSpace<Scalar>::load(filename.str().c_str(), meshes[i], p_inits[i], shapesets[i]);
-          else
-            spaces[i] = HcurlSpace<Scalar>::load(filename.str().c_str(), meshes[i], essential_bcs[i], p_inits[i], shapesets[i]);
+          dynamic_cast<HcurlSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]);
           break;
         case HERMES_HDIV_SPACE:
-          if(essential_bcs[i] == NULL)
-            spaces[i] = HdivSpace<Scalar>::load(filename.str().c_str(), meshes[i], p_inits[i], shapesets[i]);
-          else
-            spaces[i] = HdivSpace<Scalar>::load(filename.str().c_str(), meshes[i], essential_bcs[i], p_inits[i], shapesets[i]);
+          dynamic_cast<HdivSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]);
           break;
         case HERMES_L2_SPACE:
-          spaces[i] = L2Space<Scalar>::load(filename.str().c_str(), meshes[i], p_inits[i], shapesets[i]);
+          dynamic_cast<L2Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
           break;
         }
       }
     }
+    
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapesets)
+    {
+      if(shapesets == Hermes::vector<Shapeset*>())
+        for(unsigned int i = 0; i < spaces.size(); i++)
+          shapesets.push_back(NULL);
+
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        std::stringstream filename;
+        filename << Continuity<Scalar>::spaceFileName << i << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
+        
+        spaces[i]->free();
+        
+        switch(space_types[i])
+        {
+        case HERMES_H1_SPACE:
+          dynamic_cast<H1Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
+          break;
+        case HERMES_HCURL_SPACE:
+          dynamic_cast<HcurlSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
+          break;
+        case HERMES_HDIV_SPACE:
+          dynamic_cast<HdivSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
+          break;
+        case HERMES_L2_SPACE:
+          dynamic_cast<L2Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
+          break;
+        }
+      }
+    }
+    
+    template<typename Scalar>
+    void Continuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       std::stringstream filename;
       filename << Continuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
+
+      space->free();
+
       switch(space_type)
       {
       case HERMES_H1_SPACE:
         if(essential_bcs == NULL)
-          space = H1Space<Scalar>::load(filename.str().c_str(), mesh, p_init, shapeset);
+          dynamic_cast<H1Space<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
         else
-          space = H1Space<Scalar>::load(filename.str().c_str(), mesh, essential_bcs, p_init, shapeset);
+          dynamic_cast<H1Space<Scalar>*>(space)->load(filename.str().c_str(), mesh, essential_bcs, shapeset);
         break;
       case HERMES_HCURL_SPACE:
         if(essential_bcs == NULL)
-          space = HcurlSpace<Scalar>::load(filename.str().c_str(), mesh, p_init, shapeset);
+          dynamic_cast<HcurlSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
         else
-          space = HcurlSpace<Scalar>::load(filename.str().c_str(), mesh, essential_bcs, p_init, shapeset);
+          dynamic_cast<HcurlSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, essential_bcs, shapeset);
         break;
       case HERMES_HDIV_SPACE:
         if(essential_bcs == NULL)
-          space = HdivSpace<Scalar>::load(filename.str().c_str(), mesh, p_init, shapeset);
+          dynamic_cast<HdivSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
         else
-          space = HdivSpace<Scalar>::load(filename.str().c_str(), mesh, essential_bcs, p_init, shapeset);
+          dynamic_cast<HdivSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, essential_bcs, shapeset);
         break;
       case HERMES_L2_SPACE:
-        space = L2Space<Scalar>::load(filename.str().c_str(), mesh, p_init, shapeset);
+        dynamic_cast<L2Space<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
         break;
       }
     }

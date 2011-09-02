@@ -44,9 +44,9 @@ namespace Hermes
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
-      static HdivSpace<Scalar>* load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init = 1, Shapeset* shapeset = NULL);
+      void load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset = NULL);
 
-      static HdivSpace<Scalar>* load(const char *filename, Mesh* mesh, int p_init = 1, Shapeset* shapeset = NULL);
+      void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
       virtual void set_shapeset(Shapeset* shapeset);
 

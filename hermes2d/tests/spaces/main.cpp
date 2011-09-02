@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 
         space->save("space.xml");
 
-        space = H1Space<double>::load("space.xml", &mesh_lshape, &bcs, poly_order_i);
+        space->load("space.xml", &mesh_lshape, &bcs);
 
         dofs.push_back(space->get_num_dofs());
 

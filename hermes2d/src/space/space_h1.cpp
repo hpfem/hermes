@@ -102,25 +102,49 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    H1Space<Scalar>* H1Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    void H1Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       _F_;
-      H1Space<Scalar>* space = new H1Space(mesh, essential_bcs, p_init, shapeset);
 
-      Space<Scalar>::load(filename, space);
+      this->mesh = mesh;
 
-      return space;
+      if (shapeset == NULL)
+      {
+        this->shapeset = new H1Shapeset;
+        this->own_shapeset = true;
+      }
+      else
+        shapeset = shapeset;
+
+      if (!h1_proj_ref++)
+        this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
+      this->proj_mat = h1_proj_mat;
+      this->chol_p   = h1_chol_p;
+
+      Space<Scalar>::load(filename, essential_bcs);
     }
 
     template<typename Scalar>
-    H1Space<Scalar>* H1Space<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    void H1Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
       _F_;
-      H1Space<Scalar>* space = new H1Space(mesh, p_init, shapeset);
+      
+      this->mesh = mesh;
 
-      Space<Scalar>::load(filename, space);
+      if (shapeset == NULL)
+      {
+        this->shapeset = new H1Shapeset;
+        this->own_shapeset = true;
+      }
+      else
+        shapeset = shapeset;
 
-      return space;
+      if (!h1_proj_ref++)
+        this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
+      this->proj_mat = h1_proj_mat;
+      this->chol_p   = h1_chol_p;
+
+      Space<Scalar>::load(filename);
     }
 
     template<typename Scalar>

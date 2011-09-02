@@ -74,15 +74,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    L2Space<Scalar>* L2Space<Scalar>::load(const char *filename, Mesh* mesh, int p_init, Shapeset* shapeset)
+    void L2Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
       _F_;
 
-      L2Space<Scalar>* space = new L2Space(mesh, p_init, shapeset);
+      this->mesh = mesh;
 
-      Space<Scalar>::load(filename, space);
+      if (shapeset == NULL)
+      {
+        this->shapeset = new L2Shapeset;
+        this->own_shapeset = true;
+      }
+      else
+        this->shapeset = shapeset;
 
-      return space;
+      ldata = NULL;
+      lsize = 0;
+
+      Space<Scalar>::load(filename);
     }
 
     template<typename Scalar>

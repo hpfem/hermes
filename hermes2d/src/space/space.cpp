@@ -526,7 +526,8 @@ namespace Hermes
       for_all_active_elements(e, space->get_mesh())
       {
         int o = space->get_element_order(e->id);
-        if (o < 0) error("Source space has an uninitialized order (element id = %d)", e->id);
+        if (o < 0) 
+          error("Source space has an uninitialized order (element id = %d)", e->id);
 
         int mo = shapeset->get_max_order();
         int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
@@ -903,8 +904,18 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void Space<Scalar>::load(const char *filename, Space<Scalar>* space) 
+    void Space<Scalar>::load(const char *filename, EssentialBCs<Scalar>* essential_bcs) 
     {
+      this->essential_bcs = essential_bcs;
+    
+      if(essential_bcs != NULL)
+        for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+          for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+            if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end())
+              error("A boundary condition defined on a non-existent marker.");
+
+      this->resize_tables();
+
       try
       {
         std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename));
@@ -913,10 +924,10 @@ namespace Hermes
         unsigned int elem_data_count = parsed_xml_space->element_data().size();
         for (unsigned int elem_data_i = 0; elem_data_i < elem_data_count; elem_data_i++)
         {
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].order = parsed_xml_space->element_data().at(elem_data_i).order();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bdof();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].order = parsed_xml_space->element_data().at(elem_data_i).order();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bdof();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
         }
       }
       catch (const xml_schema::exception& e)
@@ -924,6 +935,8 @@ namespace Hermes
         std::cerr << e << std::endl;
         std::exit(1);
       }
+
+      this->assign_dofs();
       return;
     }
 
