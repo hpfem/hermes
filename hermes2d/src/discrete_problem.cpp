@@ -2368,13 +2368,13 @@ namespace Hermes
           }
           else
           {
-            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
             if(marker_on_space_m)
-              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker); 
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker); 
 
-            bool marker_on_space_n = this->spaces[n]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
+            bool marker_on_space_n = this->spaces[n]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
             if(marker_on_space_n)
-              marker_on_space_n = (this->spaces[n]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker);
+              marker_on_space_n = (this->spaces[n]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker);
 
             if (marker_on_space_m && marker_on_space_n)
             {
@@ -2528,9 +2528,9 @@ namespace Hermes
           }
           else
           {
-            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfs->areas[ss]).valid;
+            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(vfs->areas[ss]).valid;
             if(marker_on_space_m)
-              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfs->areas[ss]).marker == marker); 
+              marker_on_space_m = (this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(vfs->areas[ss]).marker == marker); 
 
             if (marker_on_space_m)
             {
