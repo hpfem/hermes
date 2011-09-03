@@ -28,7 +28,8 @@ namespace Hermes
     NoxDiscreteProblem<Scalar>::NoxDiscreteProblem(DiscreteProblemInterface<Scalar>* problem) : dp(problem)
     {
       this->precond = Teuchos::null;
-      this->dp->create_sparse_structure(&jacobian);
+      if(!this->dp->is_matrix_free()) 
+        this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
@@ -147,6 +148,7 @@ namespace Hermes
     void NoxDiscreteProblem<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
       precond = pc;
+      this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
