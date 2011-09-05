@@ -907,6 +907,7 @@ namespace Hermes
     void Space<Scalar>::load(const char *filename, EssentialBCs<Scalar>* essential_bcs) 
     {
       this->essential_bcs = essential_bcs;
+      this->mesh_seq == this->mesh->get_seq();
     
       if(essential_bcs != NULL)
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)

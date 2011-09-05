@@ -101,7 +101,7 @@ namespace Hermes
 
       /// Loads the solution from a file previously created by Solution::save(). This completely
       /// restores the solution in the memory.
-      void load(const char* filename);
+      void load(const char* filename, Mesh* mesh);
 
       /// Returns solution value or derivatives at element e, in its reference domain point (xi1, xi2).
       /// 'item' controls the returned value: 0 = value, 1 = dx, 2 = dy, 3 = dxx, 4 = dyy, 5 = dxy.

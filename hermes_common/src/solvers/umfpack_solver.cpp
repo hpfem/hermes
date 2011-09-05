@@ -177,6 +177,7 @@ namespace Hermes
     void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v) 
     {
       _F_;
+
       if (v != 0.0)   // ignore zero values.
       {
         // Find m-th row in the n-th column.

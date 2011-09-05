@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
   sln.save("solution.xml");
-  sln.load("solution.xml");
+  sln.load("solution.xml", &mesh);
 
   // Actual test. The values of 'sum' depend on the
   // current shapeset. If you change the shapeset,

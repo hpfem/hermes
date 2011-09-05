@@ -60,7 +60,7 @@ namespace Hermes
       
       void MeshView::show(Mesh* mesh)
       {
-        ZeroFunction sln(mesh);
+        ZeroSolution sln(mesh);
         if (mesh == NULL) error("mesh == NULL in MeshView::show().");
         if (mesh->get_max_element_id() == 0) error("Attempt to visualize empty mesh in MeshView::show().");
 

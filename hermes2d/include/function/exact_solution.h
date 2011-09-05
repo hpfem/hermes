@@ -94,23 +94,31 @@ namespace Hermes
       virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
     };
 
-    class ZeroFunction : public ExactSolutionScalar<double>
+    template<typename Scalar>
+    class HERMES_API ConstantSolution : public ExactSolutionScalar<Scalar>
     {
     public:
-      ZeroFunction(Mesh* mesh) : ExactSolutionScalar<double>(mesh) {};
+      ConstantSolution(Mesh* mesh, Scalar constant);
 
-      virtual double value (double x, double y) const {
-        return 0.0; 
-      };
+      virtual Scalar value (double x, double y) const;
 
-      virtual void derivatives (double x, double y, double& dx, double& dy) const {
-        dx = 0;
-        dy = 0;
-      };
+      virtual void derivatives (double x, double y, double& dx, double& dy) const;
 
-      virtual Ord ord(Ord x, Ord y) const {
-        return Ord(0);
-      }
+      virtual Ord ord(Ord x, Ord y) const;
+    protected:
+      Scalar constant;
+    };
+
+    class HERMES_API ZeroSolution : public ExactSolutionScalar<double>
+    {
+    public:
+      ZeroSolution(Mesh* mesh);
+
+      virtual double value (double x, double y) const;
+
+      virtual void derivatives (double x, double y, double& dx, double& dy) const;
+
+      virtual Ord ord(Ord x, Ord y) const;
     };
   }
 }

@@ -183,7 +183,6 @@ namespace Hermes
       memset(sln->tables, 0, sizeof(sln->tables));
     }
 
-
     template<typename Scalar>
     void Solution<Scalar>::copy(const Solution<Scalar>* sln)
     {
@@ -255,7 +254,6 @@ namespace Hermes
           }
     }
 
-
     template<typename Scalar>
     void Solution<Scalar>::free()
     {
@@ -286,7 +284,6 @@ namespace Hermes
           this->sln_vector = NULL;
         }
     }
-
 
     template<typename Scalar>
     Solution<Scalar>::~Solution()
@@ -868,7 +865,6 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void Solution<Scalar>::precalculate(int order, int mask)
     {
@@ -1130,10 +1126,11 @@ namespace Hermes
     }
 
     template<>
-    void Solution<double>::load(const char* filename)
+    void Solution<double>::load(const char* filename, Mesh* mesh)
     {
       free();
       sln_type = HERMES_SLN;
+      this->mesh = mesh;
 
       try
       {
@@ -1177,10 +1174,11 @@ namespace Hermes
     }
 
     template<>
-    void Solution<std::complex<double> >::load(const char* filename)
+    void Solution<std::complex<double> >::load(const char* filename, Mesh* mesh)
     {
       free();
       sln_type = HERMES_SLN;
+      this->mesh = mesh;
 
       try
       {

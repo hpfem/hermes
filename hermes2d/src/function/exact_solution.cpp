@@ -50,6 +50,40 @@ namespace Hermes
       return 2;
     }
 
+    template<typename Scalar>
+    ConstantSolution<Scalar>::ConstantSolution(Mesh* mesh, Scalar constant) : ExactSolutionScalar<Scalar>(mesh), constant(constant) {};
+
+    template<typename Scalar>
+    Scalar ConstantSolution<Scalar>::value (double x, double y) const {
+      return constant;
+    };
+
+    template<typename Scalar>
+    void ConstantSolution<Scalar>::derivatives (double x, double y, double& dx, double& dy) const {
+      dx = 0;
+      dy = 0;
+    };
+
+    template<typename Scalar>
+    Ord ConstantSolution<Scalar>::ord(Ord x, Ord y) const {
+      return Ord(0);
+    }
+
+    ZeroSolution::ZeroSolution(Mesh* mesh) : ExactSolutionScalar<double>(mesh) {};
+
+    double ZeroSolution::value (double x, double y) const {
+      return 0.0; 
+    };
+
+    void ZeroSolution::derivatives (double x, double y, double& dx, double& dy) const {
+      dx = 0;
+      dy = 0;
+    };
+
+    Ord ZeroSolution::ord(Ord x, Ord y) const {
+      return Ord(0);
+    }
+
     template HERMES_API class ExactSolutionScalar<double>;
     template HERMES_API class ExactSolutionScalar<std::complex<double> >;
     template HERMES_API class ExactSolutionVector<double>;

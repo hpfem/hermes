@@ -105,8 +105,8 @@ namespace Hermes
       Linearizer::Linearizer(MeshFunction<double>* sln) : LinearizerBase(auto_max), sln(sln), dmult(1.0), component(0), value_type(0)
       {
         verts = NULL;
-        xdisp = new ZeroFunction(sln->get_mesh());
-        ydisp = new ZeroFunction(sln->get_mesh());
+        xdisp = new ZeroSolution(sln->get_mesh());
+        ydisp = new ZeroSolution(sln->get_mesh());
       }
 
       void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,

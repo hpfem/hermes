@@ -26,7 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Continuity<Scalar>::Continuity(IdentificationMethod identification_method) : last_record(NULL), record_available(false), identification_method(identification_method)
+    Continuity<Scalar>::Continuity(IdentificationMethod identification_method) : last_record(NULL), record_available(false), identification_method(identification_method), num(0)
     {
       double last_time;
       unsigned int last_number;
@@ -64,6 +64,7 @@ namespace Hermes
             record_available = true;
             break;
           }
+          num++;
         }
         ifile.close();
         switch(identification_method)
@@ -101,14 +102,11 @@ namespace Hermes
     template<typename Scalar>
     void Continuity<Scalar>::add_record(double time)
     {
-      if(last_record != NULL)
+      std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
+      if(ofile)
       {
-        std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
-        if(ofile)
-        {
-          ofile << time << std::endl;
-          ofile.close();
-        }
+        ofile << time << std::endl;
+        ofile.close();
       }
       Continuity<Scalar>::Record* record = new Continuity<Scalar>::Record(time);
       this->time_records.insert(std::pair<double, Continuity<Scalar>::Record*>(time, record));
@@ -154,9 +152,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename Continuity<Scalar>::Record* Continuity<Scalar>::get_last_record()
+    typename Continuity<Scalar>::Record* Continuity<Scalar>::get_last_record() const
     {
       return this->last_record;
+    }
+
+    template<typename Scalar>
+    int Continuity<Scalar>::get_num() const
+    {
+      return this->num;
     }
 
     template<typename Scalar>
@@ -356,21 +360,23 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions)
+    void Continuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Mesh*> meshes)
     {
+      if(solutions.size() != meshes.size())
+        error("Argument count does not agree in Continuity::Record::load_solutions().");
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         std::stringstream filename;
         filename << Continuity<Scalar>::solutionFileName << i << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
-        solutions[i]->load(filename.str().c_str());
+        solutions[i]->load(filename.str().c_str(), meshes[i]);
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_solution(Solution<Scalar>* solution)
+    void Continuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, Mesh* mesh)
     {
       std::stringstream filename;
       filename << Continuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
-      solution->load(filename.str().c_str());
+      solution->load(filename.str().c_str(), mesh);
     }
     
     template<typename Scalar>

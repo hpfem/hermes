@@ -91,9 +91,9 @@ namespace Hermes
         void load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
         /// Loads vector of solutions.
-        void load_solutions(Hermes::vector<Solution<Scalar>*> solutions);
+        void load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Mesh*> meshes);
         /// Loads one solution.
-        void load_solution(Solution<Scalar>* solution);
+        void load_solution(Solution<Scalar>* solution, Mesh* mesh);
 
         /// Loads the time step length.
         void load_time_step_length(double & time_step_length);
@@ -104,7 +104,7 @@ namespace Hermes
         /// Returns time.
         double get_time();
 
-        /// Returns time.
+        /// Returns the number of the current record.
         unsigned int get_number();
 
       private:
@@ -143,7 +143,10 @@ namespace Hermes
       bool have_record_available();
 
       /// Returns a pointer to the last record.
-      Record* get_last_record();
+      Record* get_last_record() const;
+
+      /// Returns the count of records.
+      int get_num() const;
 
     private:
       /// Names for the file stored.
@@ -177,6 +180,9 @@ namespace Hermes
 
       /// Determines the identification method.
       IdentificationMethod identification_method;
+
+      /// Count of records.
+      int num;
 
       friend class Record;
     };
