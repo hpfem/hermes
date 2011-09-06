@@ -226,11 +226,11 @@ namespace Hermes
       /// should be refined uniformly, 1 if it is a quad and should be split
       /// horizontally, 2 if it is a quad and should be split vertically,
       /// and 3 if it is a triangle and should be split into three quads.
-      void refine_by_criterion(int (*criterion)(Element* e), int depth);
+      void refine_by_criterion(int (*criterion)(Element* e), int depth, bool mark_as_initial = false);
 
       /// Performs repeated refinements of elements containing the given vertex.
       /// A mesh graded towards the vertex is created.
-      void refine_towards_vertex(int vertex_id, int depth);
+      void refine_towards_vertex(int vertex_id, int depth, bool mark_as_initial = false);
 
       /// Performs repeated refinements of elements touching a part of the
       /// boundary marked by 'marker'. Elements touching both by an edge or
