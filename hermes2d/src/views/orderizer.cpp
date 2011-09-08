@@ -113,6 +113,9 @@ namespace Hermes
 
         int type = 1;
         label_count = 0;
+        vertex_count = 0;
+        triangle_count = 0;
+        edges_count = 0;
 
         // estimate the required number of vertices and triangles
         Mesh* mesh = space->get_mesh();
@@ -128,19 +131,13 @@ namespace Hermes
         cl1 = cl2 = cl3 = label_size;
 
         // reuse or allocate vertex, triangle and edge arrays
-        if (verts == NULL)
-          verts = (double3*) malloc(sizeof(double3) * vertex_size);
-        if (tris == NULL)
-          tris = (int3*) malloc(sizeof(int3) * triangle_size);
-        if (edges == NULL)
-          edges = (int3*) malloc(sizeof(int3) * edges_size);
+        verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
+        tris = (int3*) realloc(tris, sizeof(int3) * triangle_size);
+        edges = (int3*) realloc(edges, sizeof(int3) * edges_size);
         info = NULL;
-        if (lvert == NULL)
-          lvert = (int*) malloc(sizeof(int) * label_size);
-        if (ltext == NULL)
-          ltext = (char**) malloc(sizeof(char*) * label_size);
-        if (lbox == NULL)
-          lbox = (double2*) malloc(sizeof(double2) * label_size);
+        lvert = (int*) realloc(lvert, sizeof(int) * label_size);
+        ltext = (char**) realloc(ltext, sizeof(char*) * label_size);
+        lbox = (double2*) realloc(lbox, sizeof(double2) * label_size);
 
         int oo, o[6];
 
