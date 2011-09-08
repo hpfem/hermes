@@ -33,10 +33,10 @@ namespace Hermes
       {
       public:
 
-        Vectorizer(MeshFunction<double>* xsln, MeshFunction<double>* ysln);
+        Vectorizer();
         ~Vectorizer();
 
-        void process_solution(int xitem, int yitem, double eps);
+        void process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem, int yitem, double eps);
         
         int get_num_vertices();
         double4* get_vertices();

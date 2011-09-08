@@ -38,13 +38,13 @@ namespace Hermes
       {
       public:
 
-        Linearizer(MeshFunction<double>* sln);
+        Linearizer();
         ~Linearizer();
 
-        void process_solution(int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
-        void save_solution_vtk(const char* filename, const char* quantity_name,
+        void save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char* quantity_name,
           bool mode_3D = true, int item = H2D_FN_VAL_0, 
           double eps = HERMES_EPS_NORMAL);
 
@@ -62,6 +62,9 @@ namespace Hermes
 
         double cmax;
 
+        /// Information if user-supplied displacement functions have been provided.
+        bool user_xdisp, user_ydisp;
+        /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
         MeshFunction<double> *xdisp, *ydisp;
         double dmult;
 

@@ -26,7 +26,7 @@ namespace Hermes
     {
       
       StreamView::StreamView(const char* title, WinGeom* wg)
-        : View(title, wg)
+        : View(title, wg), vec(NULL)
       {
         lines = false;
         pmode = false;
@@ -40,7 +40,7 @@ namespace Hermes
 
       
       StreamView::StreamView(char* title, WinGeom* wg)
-        : View(title, wg)
+        : View(title, wg), vec(NULL)
       {
         lines = false;
         pmode = false;
@@ -55,12 +55,12 @@ namespace Hermes
       
       void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps)
       {
-        this->vec = new Vectorizer(xsln, ysln);
+        if(this->vec == NULL)
+          this->vec = new Vectorizer;
         if (xsln == ysln)
           error("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
         show(xsln, ysln, marker, step, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
-
       
       bool StreamView::is_in_triangle(int idx, double x, double y, double3& bar)
       {
@@ -390,8 +390,9 @@ namespace Hermes
       
       void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem)
       {
-        vec = new Vectorizer(xsln, ysln);
-        vec->process_solution(xitem, yitem, eps);
+        if(vec == NULL)
+          vec = new Vectorizer;
+        vec->process_solution(xsln, ysln, xitem, yitem, eps);
 
         vec->lock_data();
         if (range_auto) 

@@ -27,7 +27,7 @@ namespace Hermes
     {
       
       VectorView::VectorView(const char* title, WinGeom* wg)
-        : View(title, wg)
+        : View(title, wg), vec(NULL)
       {
         gx = gy = 0.0;
         gs = 20.0;
@@ -40,7 +40,7 @@ namespace Hermes
 
       
       VectorView::VectorView(char* title, WinGeom* wg)
-        : View(title, wg)
+        : View(title, wg), vec(NULL)
       {
         gx = gy = 0.0;
         gs = 20.0;
@@ -58,7 +58,8 @@ namespace Hermes
       
       void VectorView::show(MeshFunction<double>* vsln, double eps)
       {
-        vec = new Vectorizer(vsln, vsln);
+        if(vec == NULL)
+          vec = new Vectorizer;
         if (vsln->get_num_components() < 2)
           error("The single-argument version of show() is only for vector-valued solutions.");
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
@@ -67,7 +68,8 @@ namespace Hermes
       
       void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps)
       {
-        vec = new Vectorizer(xsln, ysln);
+        if(vec == NULL)
+          vec = new Vectorizer;
         if (xsln == ysln)
           error("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
         show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
@@ -76,9 +78,10 @@ namespace Hermes
       
       void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem)
       {
-        vec = new Vectorizer(xsln, ysln);
+        if(vec == NULL)
+          vec = new Vectorizer;
         vec->lock_data();
-        vec->process_solution(xitem, yitem, eps);
+        vec->process_solution(xsln, ysln, xitem, yitem, eps);
         if (range_auto) { range_min = vec->get_min_value();
         range_max = vec->get_max_value(); }
         vec->calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);

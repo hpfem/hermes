@@ -82,9 +82,9 @@ int main(int argc, char* argv[])
   // VTK output.
   if (VTK_VISUALIZATION) {
     // Output solution in VTK format.
-    Hermes::Hermes2D::Views::Linearizer lin(&sln);
+    Hermes::Hermes2D::Views::Linearizer lin;
     bool mode_3D = true;
-    lin.save_solution_vtk("sln.vtk", "Temperature", mode_3D);
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
     info("Solution in VTK format saved to file %s.", "sln.vtk");
 
     // Output mesh and element orders in VTK format.

@@ -70,7 +70,7 @@ namespace Hermes
 #ifndef _MSC_VER
       
       ScalarView::ScalarView(const char* title, WinGeom* wg) :
-      View(title, wg),
+      View(title, wg), lin(NULL),
         vertex_nodes(0),
         pointed_vertex_node(NULL),
         allow_node_selection(false),
@@ -89,7 +89,7 @@ namespace Hermes
 #endif
 
       ScalarView::ScalarView(char* title, WinGeom* wg) :
-      View(title, wg),
+      View(title, wg), lin(NULL),
         vertex_nodes(0),
         pointed_vertex_node(NULL),
         allow_node_selection(false),
@@ -110,6 +110,8 @@ namespace Hermes
       {
         delete[] normals;
         vertex_nodes.clear();
+        if(lin != NULL)
+          delete lin;
 
 # ifdef ENABLE_VIEWER_GUI
         if (tw_wnd_id != TW_WND_ID_NONE)
@@ -223,14 +225,16 @@ namespace Hermes
         // For preservation of the sln's active element. Will be set back after the visualization.
         Element* active_element = sln->get_active_element();
 
-        lin = new Linearizer(sln);
+        if(lin == NULL)
+          lin = new Linearizer;
+
         if(!range_auto)
           lin->set_max_absolute_value(std::max(fabs(range_min), fabs(range_max)));
 
         lin->set_displacement(xdisp, ydisp, dmult);
         lin->lock_data();
 
-        lin->process_solution(item, eps); 
+        lin->process_solution(sln, item, eps); 
         update_mesh_info();
 
         // Initialize mesh nodes for displaying and selection.
@@ -1332,19 +1336,6 @@ namespace Hermes
         View::reset_view(force_reset); // Reset 2d view.
       }
 
-      // This function calculates the distance that the model (3D plot of the solution over the whole solution domain) must be
-      // translated along the z-axis of the eye coordinate system, so that it fills the actual viewport without being clipped.
-      // The only case when the model will be clipped is when the user defines his own vertical range limits - unfortunately,
-      // the values beyond these limits are now still included in the displayed model, so the user may e.g. zoom-out to see them
-      // - try the benchmark 'screen' for instance...
-      // The algorithm essentially performs zooming without changing the field of view of the perspective projection and works as follows:
-      //  1. Apply all transformations to the bounding box of the model at the origin.
-      //  2. Compute the distance (along z-axis) from the origin to the center of perspective projection of the point with the
-      //      biggest vertical (y-axis) distance from the origin.
-      //  3. Compute the distance (along z-axis) from the origin to the center of perspective projection of the point with the
-      //      biggest horizontal (x-axis) distance from the origin.
-      //  4. Take the bigger of the two distances and reverse sign (since we will translate the model, not the camera)
-      
       double ScalarView::calculate_ztrans_to_fit_view()
       {
         // Axis-aligned bounding box of the model (homogeneous coordinates in the model space), divided into the bottom and top base.

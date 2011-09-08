@@ -31,7 +31,7 @@ namespace Hermes
 
       class Quad2DLin;
 
-      Vectorizer::Vectorizer(MeshFunction<double>* xsln, MeshFunction<double>* ysln) : LinearizerBase(), xsln(xsln), ysln(ysln), component_x(0), value_type_x(0), component_y(0), value_type_y(0)
+      Vectorizer::Vectorizer() : LinearizerBase(), component_x(0), value_type_x(0), component_y(0), value_type_y(0)
       {
         verts = NULL;
         dashes = NULL;
@@ -335,7 +335,7 @@ namespace Hermes
 
       }
 
-      void Vectorizer::process_solution(int xitem, int yitem, double eps)
+      void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem, int yitem, double eps)
       {
         // sanity check
         if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
@@ -344,6 +344,8 @@ namespace Hermes
         Hermes::TimePeriod cpu_time;
 
         // initialization
+        this->xsln = xsln;
+        this->ysln = ysln;
         this->xitem = xitem;
         this->yitem = yitem;
         this->eps = eps;

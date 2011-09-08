@@ -32,7 +32,7 @@ namespace Hermes
     namespace Views
     {
       MeshView::MeshView(const char* title, WinGeom* wg)
-        : View(title, wg)
+        : View(title, wg), lin(NULL)
       {
         nodes = elems = NULL;
         b_scale = false;
@@ -42,7 +42,7 @@ namespace Hermes
       }
 
       MeshView::MeshView(char* title, WinGeom* wg)
-        : View(title, wg)
+        : View(title, wg), lin(NULL)
       {
         nodes = elems = NULL;
         b_scale = false;
@@ -55,7 +55,8 @@ namespace Hermes
       {
         if (nodes != NULL) delete [] nodes;
         if (elems != NULL) delete [] elems;
-        delete this->lin;
+        if(lin != NULL)
+          delete this->lin;
       }
       
       void MeshView::show(Mesh* mesh)
@@ -66,9 +67,10 @@ namespace Hermes
 
         this->mesh = mesh;
 
-        this->lin = new Linearizer(&sln);
+        if(lin == NULL)
+          lin = new Linearizer();
 
-        lin->process_solution();
+        lin->process_solution(&sln);
         lin->lock_data();
         lin->calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
         lin->unlock_data();
@@ -104,6 +106,7 @@ namespace Hermes
         refresh();
         reset_view(false);
         wait_for_draw();
+        delete lin;
       }
 
       void MeshView::on_display()

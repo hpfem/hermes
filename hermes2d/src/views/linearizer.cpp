@@ -102,11 +102,13 @@ namespace Hermes
       double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
       double3** lin_tables[2]      = { lin_tables_tri, lin_tables_quad };
 
-      Linearizer::Linearizer(MeshFunction<double>* sln) : LinearizerBase(auto_max), sln(sln), dmult(1.0), component(0), value_type(0)
+      Linearizer::Linearizer() : LinearizerBase(auto_max), dmult(1.0), component(0), value_type(0)
       {
         verts = NULL;
-        xdisp = new ZeroSolution(sln->get_mesh());
-        ydisp = new ZeroSolution(sln->get_mesh());
+        xdisp = NULL;
+        user_xdisp = false;
+        ydisp = NULL;
+        user_ydisp = false;
       }
 
       void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
@@ -490,18 +492,30 @@ namespace Hermes
       void Linearizer::set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
       {
         if(xdisp != NULL)
+        {
+          user_xdisp = true;
           this->xdisp = xdisp;
+        }
         if(ydisp != NULL)
+        {
+          user_ydisp = true;
           this->ydisp = ydisp;
+        }
         this->dmult = dmult;
       }
 
-      void Linearizer::process_solution(int item, double eps)
+      void Linearizer::process_solution(MeshFunction<double>* sln, int item, double eps)
       {
         lock_data();
         Hermes::TimePeriod time_period;
 
         // initialization
+        this->sln = sln;
+        if(!user_xdisp)
+          xdisp = new ZeroSolution(sln->get_mesh());
+        if(!user_ydisp)
+          ydisp = new ZeroSolution(sln->get_mesh());
+
         this->item = item;
         this->eps = eps;
 
@@ -620,8 +634,14 @@ namespace Hermes
 
         // select old quadratrues
         sln->set_quad_2d(old_quad);
-        xdisp->set_quad_2d(old_quad_x);
-        ydisp->set_quad_2d(old_quad_y);
+        if(user_xdisp)
+          xdisp->set_quad_2d(old_quad_x);
+        else
+          delete xdisp;
+        if(user_ydisp)
+          ydisp->set_quad_2d(old_quad_y);
+        else
+          delete ydisp;
 
         // clean up
         ::free(hash_table);
@@ -701,10 +721,11 @@ namespace Hermes
         free();
       }
 
-      void Linearizer::save_solution_vtk(const char* filename, const char *quantity_name,
+      void Linearizer::save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char *quantity_name,
         bool mode_3D, int item, double eps)
       {
-        process_solution(item, eps);
+        this->sln = sln;
+        process_solution(sln, item, eps);
 
         FILE* f = fopen(filename, "wb");
         if (f == NULL) error("Could not open %s for writing.", filename);
