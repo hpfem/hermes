@@ -226,7 +226,7 @@ namespace Hermes
           this->sln_vector[i] = sln->sln_vector[i];
       }
       else // Const, exact handled differently.
-        error("Undefined or exact solutions can not be copied into an instance of Solution already coming from computation,\nuse ExactSolutionND = sln.");
+        error("Undefined or exact solutions can not be copied into an instance of Solution already coming from computation.");
 
       space = sln->space;
       space_seq = sln->space_seq;
