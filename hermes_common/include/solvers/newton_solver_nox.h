@@ -19,8 +19,8 @@
 /*! \file newton_solver_nox.h
 \brief NOX (nonliner) solver interface.
 */
-#ifndef __HERMES_COMMON_NOX_SOLVER_H_
-#define __HERMES_COMMON_NOX_SOLVER_H_
+#ifndef __HERMES_COMMON_NEWTON_SOLVER_NOX_H_
+#define __HERMES_COMMON_NEWTON_SOLVER_NOX_H_
 
 #include "linear_solver.h"
 #include "nonlinear_solver.h"
