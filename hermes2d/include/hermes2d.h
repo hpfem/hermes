@@ -91,6 +91,7 @@
 #include "adapt/kelly_type_adapt.h"
 #include "neighbor.h"
 #include "ogprojection.h"
+#include "ogprojection_nox.h"
 
 #include "runge_kutta.h"
 #include "spline.h"
