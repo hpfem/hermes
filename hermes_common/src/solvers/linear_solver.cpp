@@ -25,7 +25,7 @@
 #include "amesos_solver.h"
 #include "petsc_solver.h"
 #include "mumps_solver.h"
-#include "nox_solver.h"
+#include "newton_solver_nox.h"
 #include "aztecoo_solver.h"
 
 using namespace Hermes::Algebra;

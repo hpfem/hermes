@@ -43,7 +43,7 @@ project(hermes_common)
 		src/solvers/dp_interface.cpp
 		src/solvers/linear_solver.cpp
 		src/solvers/nonlinear_solver.cpp
-		src/solvers/nox_solver.cpp
+		src/solvers/newton_solver_nox.cpp
 		src/solvers/epetra.cpp
 		src/solvers/aztecoo_solver.cpp
 		src/solvers/amesos_solver.cpp

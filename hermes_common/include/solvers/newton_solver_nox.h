@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file nox_solver.h
+/*! \file newton_solver_nox.h
 \brief NOX (nonliner) solver interface.
 */
 #ifndef __HERMES_COMMON_NOX_SOLVER_H_
