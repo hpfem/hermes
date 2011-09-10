@@ -186,6 +186,7 @@ project(hermes2d)
 		src/neighbor.cpp
 		src/graph.cpp
 		src/ogprojection.cpp
+		src/ogprojection_nox.cpp
 		src/hermes2d_common_defs.cpp  
 		src/discrete_problem.cpp
 		src/runge_kutta.cpp
