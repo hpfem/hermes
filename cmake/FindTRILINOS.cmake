@@ -13,12 +13,14 @@ SET(TRILINOS_INCLUDE_SEARCH_PATH
 	/usr/include
 	/usr/local/include/
   /usr/include/trilinos
+  ${TRILINOS_ROOT}/include
 )
 
 SET(TRILINOS_LIB_SEARCH_PATH
 	/usr/lib64
 	/usr/lib
 	/usr/local/lib/
+        ${TRILINOS_ROOT}/lib
 )
 FIND_PATH(AMESOS_INCLUDE_PATH       Amesos.h                       ${TRILINOS_INCLUDE_SEARCH_PATH})
 FIND_PATH(AZTECOO_INCLUDE_PATH      AztecOO.h                      ${TRILINOS_INCLUDE_SEARCH_PATH})
@@ -34,28 +36,23 @@ FIND_PATH(LOCA_EPETRA_INCLUDE_PATH  LOCA_Epetra.H                  ${TRILINOS_IN
 FIND_PATH(NOX_EPETRA_INCLUDE_PATH   NOX_Epetra.H                   ${TRILINOS_INCLUDE_SEARCH_PATH})
 FIND_PATH(EPETRAEXT_INCLUDE_PATH    EpetraExt_Version.h            ${TRILINOS_INCLUDE_SEARCH_PATH})
 
-FIND_LIBRARY(AMESOS_LIBRARY         NAMES  amesos trilinos_amesos  ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(AZTECOO_LIBRARY        NAMES aztecoo trilinos_aztecoo ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(EPETRA_LIBRARY         NAMES epetra trilinos_epetra   ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(IFPACK_LIBRARY         NAMES ifpack trilinos_ifpack   ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(LOCA_LIBRARY           NAMES loca trilinos_loca       ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(ML_LIBRARY             NAMES ml trilinos_ml           ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(NOX_LIBRARY            NAMES nox trilinos_nox         ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(TEUCHOS_LIBRARY        NAMES teuchos trilinos_teuchos ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(KOMPLEX_LIBRARY        NAMES komplex trilinos_komplex ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(AMESOS_LIBRARY         NAMES amesos trilinos_amesos   PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(AZTECOO_LIBRARY        NAMES aztecoo trilinos_aztecoo PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(EPETRA_LIBRARY         NAMES epetra trilinos_epetra   PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(IFPACK_LIBRARY         NAMES ifpack trilinos_ifpack   PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(LOCA_LIBRARY           NAMES loca trilinos_loca       PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(ML_LIBRARY             NAMES ml trilinos_ml           PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(NOX_LIBRARY            NAMES nox trilinos_nox         PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(TEUCHOS_LIBRARY        NAMES teuchos trilinos_teuchos PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(KOMPLEX_LIBRARY        NAMES komplex trilinos_komplex PATHS ${TRILINOS_LIB_SEARCH_PATH})
 
-FIND_LIBRARY(LOCA_EPETRA_LIBRARY    NAMES locaepetra trilinos_locaepetra          ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(NOX_EPETRA_LIBRARY     NAMES noxepetra trilinos_noxepetra            ${TRILINOS_LIB_SEARCH_PATH})
-FIND_LIBRARY(EPETRAEXT_LIBRARY      NAMES epetraext trilinos_epetraext            ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(LOCA_EPETRA_LIBRARY    NAMES locaepetra trilinos_locaepetra          PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(NOX_EPETRA_LIBRARY     NAMES noxepetra trilinos_noxepetra            PATHS ${TRILINOS_LIB_SEARCH_PATH})
+FIND_LIBRARY(EPETRAEXT_LIBRARY      NAMES epetraext trilinos_epetraext            PATHS ${TRILINOS_LIB_SEARCH_PATH})
 
 # Experimental
 if(WITH_ZOLTAN)
-	FIND_PATH(ZOLTAN_INCLUDE_PATH       zoltan.h             ${MY_TRILINOS_INC_DIRS})
-
-	FIND_LIBRARY(ZOLTAN_LIBRARY         zoltan               ${MY_TRILINOS_LIB_DIRS})
-
 	FIND_PATH(ZOLTAN_INCLUDE_PATH       zoltan.h             ${TRILINOS_INCLUDE_SEARCH_PATH})
-
 	FIND_LIBRARY(ZOLTAN_LIBRARY         zoltan               ${TRILINOS_LIB_SEARCH_PATH})
 endif(WITH_ZOLTAN)
 
