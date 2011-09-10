@@ -41,13 +41,13 @@ namespace Hermes {
     /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
     template <typename Scalar>
-    class HERMES_API NoxDiscreteProblem : 
+    class HERMES_API DiscreteProblemNOX : 
       public NOX::Epetra::Interface::Required, 
       public NOX::Epetra::Interface::Jacobian,
       public NOX::Epetra::Interface::Preconditioner
     {
     public: 
-      NoxDiscreteProblem(DiscreteProblemInterface<Scalar> * problem);
+      DiscreteProblemNOX(DiscreteProblemInterface<Scalar> * problem);
 
       /// \brief Setter for preconditioner.
       void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
@@ -80,16 +80,16 @@ namespace Hermes {
     /// \note complex numbers is not implemented yet
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API NoxSolver : public NonlinearSolver<Scalar>
+    class HERMES_API NewtonSolverNOX : public NonlinearSolver<Scalar>
     {
     private: 
-      NoxDiscreteProblem<Scalar> ndp;
+      DiscreteProblemNOX<Scalar> ndp;
       Teuchos::RCP<Teuchos::ParameterList> nl_pars;
     public:
       /// Constructor.
-      NoxSolver(DiscreteProblemInterface<Scalar> *problem);
+      NewtonSolverNOX(DiscreteProblemInterface<Scalar> *problem);
 
-      virtual ~NoxSolver();
+      virtual ~NewtonSolverNOX();
 
       virtual bool solve(Scalar* coeff_vec);
 

@@ -25,7 +25,7 @@ namespace Hermes
     static Epetra_SerialComm seq_comm;
 
     template<typename Scalar>
-    NoxDiscreteProblem<Scalar>::NoxDiscreteProblem(DiscreteProblemInterface<Scalar>* problem) : dp(problem)
+    DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(DiscreteProblemInterface<Scalar>* problem) : dp(problem)
     {
       this->precond = Teuchos::null;
       if(!this->dp->is_matrix_free()) 
@@ -33,7 +33,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxDiscreteProblem<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
+    bool DiscreteProblemNOX<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
     {
       EpetraVector<Scalar> xx(x);  // wrap our structures around core Epetra objects
       EpetraVector<Scalar> rhs(f); 
@@ -49,7 +49,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxDiscreteProblem<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
+    bool DiscreteProblemNOX<Scalar>::computeJacobian(const Epetra_Vector &x, Epetra_Operator &op)
     {
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
       assert(jac != NULL);
@@ -69,7 +69,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NoxDiscreteProblem<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
+    bool DiscreteProblemNOX<Scalar>::computePreconditioner(const Epetra_Vector &x, Epetra_Operator &m,
       Teuchos::ParameterList *precParams)
     {
       assert(precond != Teuchos::null);
@@ -91,7 +91,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NoxSolver<Scalar>::NoxSolver(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem),ndp(problem)
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem),ndp(problem)
     {
       // default values
       // convergence test
@@ -137,7 +137,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NoxSolver<Scalar>::~NoxSolver()
+    NewtonSolverNOX<Scalar>::~NewtonSolverNOX()
     {
       // FIXME: this does not destroy the "interface_", and Trilinos 
       // complains at closing main.cpp.
@@ -145,14 +145,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NoxDiscreteProblem<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+    void DiscreteProblemNOX<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
       precond = pc;
       this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_precond(Precond<Scalar> &pc)
+    void NewtonSolverNOX<Scalar>::set_precond(Precond<Scalar> &pc)
     {
       Teuchos::RCP<Precond<Scalar> > tpc = Teuchos::rcpFromRef(pc);
       ndp.set_precond(tpc);
@@ -160,53 +160,53 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_precond(const char *pc)
+    void NewtonSolverNOX<Scalar>::set_precond(const char *pc)
     {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner",pc);
     }
     
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_output_flags(int flags)
+    void NewtonSolverNOX<Scalar>::set_output_flags(int flags)
     {
       nl_pars->sublist("Printing").set("Output Information", flags);
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_ls_type(const char *type){
+    void NewtonSolverNOX<Scalar>::set_ls_type(const char *type){
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Aztec Solver",type);
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_ls_max_iters(int iters)
+    void NewtonSolverNOX<Scalar>::set_ls_max_iters(int iters)
     { 
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Iterations",iters);
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_ls_tolerance(double tolerance) 
+    void NewtonSolverNOX<Scalar>::set_ls_tolerance(double tolerance) 
     { 
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Tolerance",tolerance);
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_ls_sizeof_krylov_subspace(int size) 
+    void NewtonSolverNOX<Scalar>::set_ls_sizeof_krylov_subspace(int size) 
     { 
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace",size);
     }
 
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_precond_reuse(const char * pc_reuse)
+    void NewtonSolverNOX<Scalar>::set_precond_reuse(const char * pc_reuse)
     {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner Reuse Policy", pc_reuse);
     }
     template<typename Scalar>
-    void NoxSolver<Scalar>::set_precond_max_age(int max_age)
+    void NewtonSolverNOX<Scalar>::set_precond_max_age(int max_age)
     {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Age Of Prec", max_age);
     }
 
     template<typename Scalar>
-    bool NoxSolver<Scalar>::solve(Scalar* coeff_vec)
+    bool NewtonSolverNOX<Scalar>::solve(Scalar* coeff_vec)
     {
       // Put the initial coeff_vec into the inner structure for the initial guess.
       Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
@@ -351,8 +351,8 @@ namespace Hermes
       }
       return success;
     }
-    template class HERMES_API NoxSolver<double>;
-    //template class HERMES_API NoxSolver<std::complex<double> >; //complex version of nox solver is not implemented 
+    template class HERMES_API NewtonSolverNOX<double>;
+    //template class HERMES_API NewtonSolverNOX<std::complex<double> >; //complex version of nox solver is not implemented 
   }
 }
 #endif

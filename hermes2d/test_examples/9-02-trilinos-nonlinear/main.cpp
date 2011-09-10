@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
   // Initialize the NOX solver with the vector "coeff_vec".
   info("Initializing NOX.");
-  NoxSolver<double> nox_solver(&dp2);
+  NewtonSolverNOX<double> nox_solver(&dp2);
   nox_solver.set_output_flags(message_type);
   nox_solver.set_ls_tolerance(ls_tolerance);
   nox_solver.set_conv_rel_resid(rel_resid);
