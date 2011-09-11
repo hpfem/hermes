@@ -285,7 +285,7 @@ project(hermes)
 			# versions (they only reside in different directories), so we can't globally
 			# set the architecture-specific include directory here, but rather on a 
 			# per-target basis.
-			include_directories(${COMMON_PETSC_INCLUDE_DIRS})
+			include_directories(${PETSC_INCLUDE_DIRS})
 			include_directories(${PETSC_CPLX_INCLUDE_DIRS})
 			set(PETSC_LIBRARIES ${PETSC_CPLX_LIBRARIES})
 		endif(WITH_PETSC)
