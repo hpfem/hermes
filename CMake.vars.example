@@ -1,19 +1,31 @@
 # This is a sample CMake.vars file for Hermes.
-# Search paths.
-set(GLUT_ROOT "d:/hpfem/hermes/dependencies/glut")
-set(GLEW_ROOT "d:/hpfem/hermes/dependencies/glew")
-set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies/pthread")
-set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies/umfpack")
-set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies/clapack")
-set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
 
-# Target (installation) path.
-set(TARGET_ROOT "d:/hpfem/hermes/dependencies")
+# Some search paths.
+if (WIN32)
+  set(GLUT_ROOT "d:/hpfem/hermes/dependencies/glut")
+  set(GLEW_ROOT "d:/hpfem/hermes/dependencies/glew")
+  set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies/pthread")
+  set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies/umfpack")
+  set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies/clapack")
+  # Target (installation) path.
+  set(TARGET_ROOT "d:/hpfem/hermes/dependencies")
+else()
+  #set(GLUT_ROOT "/usr/lib/")
+  #set(GLEW_ROOT "/usr/lib/")
+  #set(PTHREAD_ROOT "/usr/lib/")
+  #set(UMFPACK_ROOT "/usr/lib/")
+  #set(CLAPACK_ROOT "/usr/lib/")
+endif()
 
-# Turn off Python.
+# Python.
 set(WITH_PYTHON NO)
 
-# Turn on Trilinos
+# Trilinos
+if (WIN32) 
+  set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
+else() 
+  set(TRILINOS_ROOT "~/solvers/trilinos")
+endif()
 SET(WITH_TRILINOS YES)
 
 # Experimental
