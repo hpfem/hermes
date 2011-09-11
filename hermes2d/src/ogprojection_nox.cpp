@@ -52,10 +52,43 @@ namespace Hermes
       Scalar* coeff_vec = new Scalar[ndof];
       memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
-      // Perform Newton's iteration.
+      // Define NOX parameters.
+      const bool TRILINOS_JFNK = true;                  // true = Jacobian-free method (for NOX),
+							// false = Newton (for NOX).
+      const bool PRECOND = true;                        // Preconditioning by jacobian in case of JFNK (for NOX),
+							// default ML preconditioner in case of Newton.
+      const char* iterative_method = "GMRES";           // Name of the iterative method employed by AztecOO (ignored
+							// by the other solvers). 
+							// Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
+      const char* preconditioner = "AztecOO";           // Name of the preconditioner employed by AztecOO 
+							// Possibilities: None" - No preconditioning. 
+							// "AztecOO" - AztecOO internal preconditioner.
+							// "New Ifpack" - Ifpack internal preconditioner.
+							// "ML" - Multi level preconditione
+      unsigned message_type = NOX::Utils::Error | NOX::Utils::Warning | NOX::Utils::OuterIteration | NOX::Utils::InnerIteration | NOX::Utils::Parameters | NOX::Utils::LinearSolverDetails;
+							// NOX error messages, see NOX_Utils.h.
+      double ls_tolerance = 1e-5;                       // Tolerance for linear system.
+      unsigned flag_absresid = 0;                       // Flag for absolute value of the residuum.
+      double abs_resid = 1.0e-3;                        // Tolerance for absolute value of the residuum.
+      unsigned flag_relresid = 1;                       // Flag for relative value of the residuum.
+      double rel_resid = 1.0e-2;                        // Tolerance for relative value of the residuum.
+      int max_iters = 100;                              // Max number of iterations.
+
+      // Initialize NOX.
       NewtonSolverNOX<Scalar> newton_nox(&dp);
-      // No output for the Newton's loop.
+ 
+      // Set NOX parameters.
       newton_nox.set_verbose_output(false);
+      newton_nox.set_output_flags(message_type);
+      newton_nox.set_ls_type(iterative_method);
+      newton_nox.set_ls_tolerance(ls_tolerance);
+      newton_nox.set_conv_iters(max_iters);
+      if (flag_absresid)
+        newton_nox.set_conv_abs_resid(abs_resid);
+      if (flag_relresid)
+        newton_nox.set_conv_rel_resid(rel_resid);
+
+      // Perform Newton's iteration via NOX
       if (!newton_nox.solve(coeff_vec)) 
         error("Newton's iteration (NOX) failed.");
 
