@@ -362,17 +362,18 @@ namespace Hermes
         triangle_size = std::max(64 * nn, 20000);
         edges_size = std::max(24 * nn, 7500);
 
-        // reuse or allocate vertex, triangle and edge arrays
-        if (verts == NULL)
-          verts = (double4*) malloc(sizeof(double4) * vertex_size);
-        if (tris == NULL)
-          tris = (int3*) malloc(sizeof(int3) * triangle_size);
-        if (edges == NULL)
-          edges = (int3*) malloc(sizeof(int3) * edges_size);
-        if (dashes == NULL)
-          dashes = (int2*) malloc(sizeof(int2) * dashes_size);
-        info = (int4*) malloc(sizeof(int4) * vertex_size);
+        vertex_count=0;
+        triangle_count=0;
+        edges_count=0;
+        dashes_count=0;
 
+        // reuse or allocate vertex, triangle and edge arrays
+        verts = (double4*) malloc(sizeof(double4) * vertex_size);
+        tris = (int3*) malloc(sizeof(int3) * triangle_size);
+        edges = (int3*) malloc(sizeof(int3) * edges_size);
+        dashes = (int2*) malloc(sizeof(int2) * dashes_size);
+        info = (int4*) malloc(sizeof(int4) * vertex_size);
+        
         // initialize the hash table
         hash_table = (int*) malloc(sizeof(int) * vertex_size);
         memset(hash_table, 0xff, sizeof(int) * vertex_size);
