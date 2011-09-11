@@ -351,8 +351,10 @@ namespace Hermes
       }
       return success;
     }
+    template class HERMES_API DiscreteProblemNOX<double>;
+    // template class HERMES_API DiscreteProblemNOX<std::complex<double> >; //complex version of nox solver is not implemented
     template class HERMES_API NewtonSolverNOX<double>;
-    //template class HERMES_API NewtonSolverNOX<std::complex<double> >; //complex version of nox solver is not implemented 
+    // template class HERMES_API NewtonSolverNOX<std::complex<double> >; //complex version of nox solver is not implemented
   }
 }
 #endif

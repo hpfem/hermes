@@ -53,7 +53,7 @@ namespace Hermes
       memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
       // Perform Newton's iteration.
-      NewtonSolverNOX<Scalar> newton_nox(&dp, matrix_solver_type);
+      NewtonSolverNOX<Scalar> newton_nox(&dp);
       // No output for the Newton's loop.
       newton_nox.set_verbose_output(false);
       if (!newton_nox.solve(coeff_vec)) 
@@ -294,7 +294,7 @@ namespace Hermes
     }
 
     template class HERMES_API OGProjectionNOX<double>;
-    template class HERMES_API OGProjectionNOX<std::complex<double> >;
+    // template class HERMES_API OGProjectionNOX<std::complex<double> >; //complex version of nox solver is not implemented
   }
 }
 
