@@ -35,7 +35,7 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> spaces, WeakForm<Scalar>* wf,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
+      Scalar* target_vec)
     {
       _F_;
       unsigned int n = spaces.size();
@@ -68,7 +68,7 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type, Hermes::vector<ProjNormType> proj_norms)
+      Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms)
     {
       _F_;
       int n = spaces.size();
@@ -149,25 +149,24 @@ namespace Hermes
         }
       }
 
-      project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      project_internal(spaces, proj_wf, target_vec);
       
       delete proj_wf;
     }
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type, Hermes::vector<ProjNormType> proj_norms)
+      Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms)
     {
       Hermes::vector<MeshFunction<Scalar>*> mesh_fns;
       for(unsigned int i = 0; i < source_sols.size(); i++)
         mesh_fns.push_back(source_sols[i]);
-      project_global(spaces, mesh_fns, target_vec, matrix_solver_type, proj_norms);
+      project_global(spaces, mesh_fns, target_vec, proj_norms);
     }
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type,
-      ProjNormType proj_norm)
+      Scalar* target_vec, ProjNormType proj_norm)
     {
       Hermes::vector<Space<Scalar>*> spaces;
       spaces.push_back(space);
@@ -175,12 +174,12 @@ namespace Hermes
       source_meshfns.push_back(source_meshfn);
       Hermes::vector<ProjNormType> proj_norms;
       proj_norms.push_back(proj_norm);
-      project_global(spaces, source_meshfns, target_vec, matrix_solver_type, proj_norms);
+      project_global(spaces, source_meshfns, target_vec, proj_norms);
     }
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
-      Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver_type,
+      Hermes::vector<Solution<Scalar>*> sols_dest,
       Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {
       _F_;
@@ -190,7 +189,7 @@ namespace Hermes
       for (unsigned int i = 0; i < sols_src.size(); i++)
         ref_slns_mf.push_back(static_cast<MeshFunction<Scalar>*>(sols_src[i]));
 
-      OGProjectionNOX<Scalar>::project_global(spaces, ref_slns_mf, target_vec, matrix_solver_type, proj_norms);
+      OGProjectionNOX<Scalar>::project_global(spaces, ref_slns_mf, target_vec, proj_norms);
 
       if(delete_old_meshes)
         for(unsigned int i = 0; i < sols_src.size(); i++) 
@@ -207,7 +206,6 @@ namespace Hermes
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Space<Scalar>* space,
       Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
-      Hermes::MatrixSolverType matrix_solver_type,
       ProjNormType proj_norm)
     {
       Hermes::vector<Space<Scalar>*> spaces;
@@ -220,14 +218,14 @@ namespace Hermes
       if(proj_norm != HERMES_UNSET_NORM)
         proj_norms.push_back(proj_norm);
 
-      project_global(spaces, sols_src, sols_dest, matrix_solver_type, proj_norms);
+      project_global(spaces, sols_src, sols_dest, proj_norms);
     }
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
       Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
       Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
+      Scalar* target_vec)
     {
       _F_;
       unsigned int n = spaces.size();
@@ -249,7 +247,7 @@ namespace Hermes
         proj_wf->add_vector_form(custom_projection_residual[i]);
       }
 
-      project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      project_internal(spaces, proj_wf, target_vec);
       
       delete proj_wf;
     }
@@ -258,11 +256,11 @@ namespace Hermes
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<Space<Scalar> *> spaces,
                                               Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
                                               Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-                                              Hermes::vector<Solution<Scalar> *> sols_dest, Hermes::MatrixSolverType matrix_solver)
+                                              Hermes::vector<Solution<Scalar> *> sols_dest)
     {
       _F_
       Scalar* target_vec = new Scalar[Space<Scalar>::get_num_dofs(spaces)];
-      OGProjectionNOX<Scalar>::project_global(spaces, custom_projection_jacobian, custom_projection_residual, target_vec, matrix_solver);
+      OGProjectionNOX<Scalar>::project_global(spaces, custom_projection_jacobian, custom_projection_residual, target_vec);
       Solution<Scalar>::vector_to_solutions(target_vec, spaces, sols_dest);
       delete [] target_vec;
     }
@@ -271,7 +269,7 @@ namespace Hermes
     void OGProjectionNOX<Scalar>::project_global(Space<Scalar>* space,
                                               MatrixFormVol<Scalar>* custom_projection_jacobian,
                                               VectorFormVol<Scalar>* custom_projection_residual,
-                                              Solution<Scalar>* sol_dest, Hermes::MatrixSolverType matrix_solver)
+                                              Solution<Scalar>* sol_dest)
     {
       _F_
       Hermes::vector<Space<Scalar>*> space_vector;
@@ -289,8 +287,7 @@ namespace Hermes
       project_global(space_vector,
                      custom_projection_jacobian_vector,
                      custom_projection_residual_vector,
-                     sol_dest_vector, 
-                     matrix_solver);
+                     sol_dest_vector);
     }
 
     template class HERMES_API OGProjectionNOX<double>;
