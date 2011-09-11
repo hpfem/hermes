@@ -106,7 +106,6 @@ namespace Hermes
         refresh();
         reset_view(false);
         wait_for_draw();
-        delete lin;
       }
 
       void MeshView::on_display()
