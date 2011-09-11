@@ -37,7 +37,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
+    //const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
     template<typename Scalar>
     class HERMES_API OGProjectionNOX
