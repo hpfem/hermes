@@ -22,7 +22,7 @@
 #include "forms.h"
 #include "weakform/weakform.h"
 
-#include "epetra.h"
+//#include "epetra.h"
 #if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 #include <NOX.H>
 #ifdef _POSIX_C_SOURCE
