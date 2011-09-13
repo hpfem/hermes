@@ -78,7 +78,9 @@ namespace Hermes
       /// Constructor.
       /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
       /// as an initial guess for the Newton's method, instead zero vector will be used.
-      RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, bool start_from_zero_K_vector = false, bool residual_as_vector = true);
+      RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          bool start_from_zero_K_vector = false, bool residual_as_vector = true,
+          Hermes::vector<int> *stationary_spaces = NULL);
 
       /// Destructor.
       ~RungeKutta();
@@ -185,8 +187,14 @@ namespace Hermes
 
       /// Number of previous calls to rk_time_step_newton().
       unsigned int iteration;
+
+
+
     private:
       MatrixSolverType matrix_solver_type;
+
+      /// Spaces (by indices) that do not contain time derivative term
+      Hermes::vector<int> *stationary_spaces;
     };
   }
 }
