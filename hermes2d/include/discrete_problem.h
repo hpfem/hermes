@@ -24,6 +24,7 @@
 #include "function/function.h"
 #include "neighbor.h"
 #include "refinement_selectors/selector.h"
+#include "exceptions.h"
 
 namespace Hermes
 {

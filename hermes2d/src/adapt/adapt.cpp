@@ -40,9 +40,10 @@ namespace Hermes
       have_coarse_solutions(false),
       have_reference_solutions(false)
     {
+      _F_
       // sanity check
       if (proj_norms.size() > 0 && spaces.size() != proj_norms.size())
-        error("Mismatched numbers of spaces and projection types in Adapt<Scalar>::Adapt().");
+        throw Exceptions::LengthException(1,2,spaces.size(),proj_norms.size());
 
       this->num = spaces.size();
 
@@ -95,6 +96,8 @@ namespace Hermes
       have_coarse_solutions(false),
       have_reference_solutions(false)
     {
+      _F_
+      if (space == NULL) throw Exceptions::NullException(1);
       spaces.push_back(space);
 
       this->num = 1;
@@ -140,9 +143,14 @@ namespace Hermes
     bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double thr, int strat,
       int regularize, double to_be_processed)
     {
+      _F_
       error_if(!have_errors, "element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
-      error_if(refinement_selectors == Hermes::vector<RefinementSelectors::Selector<Scalar> *>(), "selector not provided");
-      if (spaces.size() != refinement_selectors.size()) error("Wrong number of refinement selectors.");
+
+      if (refinement_selectors.empty())
+        throw Exceptions::NullException(1);
+      if (spaces.size() != refinement_selectors.size())
+        throw Exceptions::LengthException(1,refinement_selectors.size(),spaces.size());
+
       Hermes::TimePeriod cpu_time;
 
       //get meshes
@@ -454,7 +462,9 @@ namespace Hermes
     double Adapt<Scalar>::calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      if (num != 1) EXIT("Wrong number of solutions.");
+      _F_
+      if (num != 1) 
+        throw Exceptions::LengthException(1,1,num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
     }
 
@@ -463,6 +473,11 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
+      _F_
+      if (slns.size() != num)
+        throw Exceptions::LengthException(1,slns.size(),num);
+      if (rslns.size() != num)
+        throw Exceptions::LengthException(2,rslns.size(),num);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }
 
@@ -470,7 +485,9 @@ namespace Hermes
     double Adapt<Scalar>::calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      if (num != 1) EXIT("Wrong number of solutions.");
+      _F_
+      if (num != 1) 
+        throw Exceptions::LengthException(1,1,num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
     }
 
@@ -479,6 +496,11 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
+      _F_
+      if (slns.size() != num)
+        throw Exceptions::LengthException(1,slns.size(),num);
+      if (rslns.size() != num)
+        throw Exceptions::LengthException(2,rslns.size(),num);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }
 
@@ -486,6 +508,9 @@ namespace Hermes
     bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat,
       int regularize, double to_be_processed)
     {
+      _F_
+      if (refinement_selector==NULL)
+        throw Exceptions::NullException(1);
       Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
       refinement_selectors.push_back(refinement_selector);
       return adapt(refinement_selectors, thr, strat, regularize, to_be_processed);

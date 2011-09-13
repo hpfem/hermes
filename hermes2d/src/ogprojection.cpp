@@ -69,6 +69,10 @@ namespace Hermes
     {
       _F_;
       int n = spaces.size();
+
+      if (n!=source_meshfns.size()) throw Exceptions::LengthException(1,2,n,source_meshfns.size());
+      if (target_vec==NULL) throw Exceptions::NullException(3);
+      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1,5,n,proj_norms.size());
       
       // this is needed since spaces may have their DOFs enumerated only locally.
       ndof = Space<Scalar>::assign_dofs(spaces);
@@ -233,10 +237,11 @@ namespace Hermes
       unsigned int n_biforms = custom_projection_jacobian.size();
       if (n_biforms == 0)
         error("Please use the simpler version of project_global with the argument Hermes::vector<ProjNormType> proj_norms if you do not provide your own projection norm.");
-      if (n_biforms != custom_projection_residual.size())
-        error("Mismatched numbers of projection forms in project_global().");
+
       if (n != n_biforms)
-        error("Mismatched numbers of projected functions and projection forms in project_global().");
+        throw Exceptions::LengthException(1,2,n);
+      if (n_biforms != custom_projection_residual.size())
+        throw Exceptions::LengthException(2,3,n_biforms,custom_projection_residual.size());
 
       // Define local projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
