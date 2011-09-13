@@ -30,7 +30,7 @@ namespace Hermes
   namespace Exceptions
   {
     /// \brief Exception interface
-    class Exception
+    class HERMES_API Exception
     {
       public:
         /// \brief Init exception with default message.
@@ -52,7 +52,7 @@ namespace Hermes
 
     /// \brief Null parameter exception.
     /// Exception occurs when some parameter is Null or empty and it shouldn't be.
-    class NullException : public Exception
+    class HERMES_API NullException : public Exception
     {
       public:
         /// Constructor
@@ -61,26 +61,26 @@ namespace Hermes
         /// Null item is passed in vector or array.
         /// \param[in] paramnIdx index of parameter.
         /// \param[in] elementIdx index of null item in array parameter.
-        NullException(int paramIdx,int itemIdx);
+        NullException(int paramIdx, int itemIdx);
         /// \return index of null parameter.
         int getParamIdx() const;
         /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
         int getItemIdx() const;
         ~NullException();
       private:
-        int paramIdx,itemIdx;
+        int paramIdx, itemIdx;
     };
 
     /// \brief Parameter length parameter exception.
     /// Exception occurs when some parameter has wrong length.
-    class LengthException : public Exception
+    class HERMES_API LengthException : public Exception
     {
       public:
         /// One parameter has wrong length.
         /// \param[in] paramnIdx index wrong parameter.
         /// \param[in] wrong actual length of parameter.
         /// \param[in] right right length of parameter.
-        LengthException(int paramIdx,int wrong, int right);
+        LengthException(int paramIdx, int wrong, int right);
         /// Two parameters should have same length and they dont have.
         /// \param[in] fstParamnIdx index first parameter.
         /// \param[in] sndParamnIdx index second parameter.
@@ -97,7 +97,7 @@ namespace Hermes
         int getExpectedLength() const;
         ~LengthException();
       private:
-        int fstParamIdx,sndParamIdx,wrong,right;
+        int fstParamIdx, sndParamIdx, wrong, right;
     };
   }
 }
