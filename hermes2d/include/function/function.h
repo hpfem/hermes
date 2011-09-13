@@ -18,6 +18,7 @@
 
 #include "transformable.h"
 #include "../quadrature/quad.h"
+#include "exceptions.h"
 
 namespace Hermes
 {
@@ -288,6 +289,7 @@ namespace Hermes
 
       void replace_cur_node(Node* node)
       {
+        if (node == NULL) throw Exceptions::NullException(1);
         if (cur_node != NULL) {
           total_mem -= cur_node->size;
           ::free(cur_node);

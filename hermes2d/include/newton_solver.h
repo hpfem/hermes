@@ -24,6 +24,7 @@
 
 #include "hermes2d_common_defs.h"
 #include "discrete_problem.h"
+#include "exceptions.h"
 
 
 namespace Hermes
