@@ -59,8 +59,18 @@ namespace Hermes
     NullException::NullException(int paramIdx)
     {
       this->paramIdx=paramIdx;
+      this->itemIdx=-1;
       char * msg = new char[27];
       sprintf(msg,"Parameter number %d is NULL",paramIdx);
+      message=msg;
+    }
+
+    NullException::NullException(int paramIdx,int itemIdx)
+    {
+      this->paramIdx=paramIdx;
+      this->itemIdx=itemIdx;      
+      char * msg = new char[55];
+      sprintf(msg,"Element number %d of parameter number %d is NULL",itemIdx,paramIdx);
       message=msg;
     }
 
@@ -68,6 +78,12 @@ namespace Hermes
     {
       return paramIdx;
     }
+
+    int NullException::getItemIdx() const
+    {
+      return itemIdx;
+    }
+
     NullException::~NullException(){
       delete message;
     }

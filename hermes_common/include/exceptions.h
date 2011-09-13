@@ -56,13 +56,19 @@ namespace Hermes
     {
       public:
         /// Constructor
-        /// \param[in] paramnIdx index null parameter.
+        /// \param[in] paramnIdx index of null parameter.
         NullException(int paramIdx);
+        /// Null item is passed in vector or array.
+        /// \param[in] paramnIdx index of parameter.
+        /// \param[in] elementIdx index of null item in array parameter.
+        NullException(int paramIdx,int itemIdx);
         /// \return index of null parameter.
         int getParamIdx() const;
+        /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
+        int getItemIdx() const;
         ~NullException();
       private:
-        int paramIdx;
+        int paramIdx,itemIdx;
     };
 
     /// \brief Parameter length parameter exception.
