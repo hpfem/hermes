@@ -53,6 +53,7 @@ public:
 
 	// dump the call stack objects to standard error
 	void dump();
+  const char * getLastFunc();
 
 protected:
 	CallStackObj **stack;

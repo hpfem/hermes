@@ -27,11 +27,13 @@ namespace Hermes
     Exception::Exception()
     {
       message=NULL;
+      func=callstack.getLastFunc();
     }
     
     Exception::Exception(const char * msg)
     {
       message=msg;
+      func=callstack.getLastFunc();
     }
 
     void Exception::printMsg() const
@@ -40,6 +42,13 @@ namespace Hermes
         fprintf(stderr,"%s\n",message);
       else
         fprintf(stderr,"Default exception\n");
+      if (func)
+        fprintf(stderr,"in %s\n",func);
+    }
+
+    const char * Exception::getFuncName() const
+    {
+      return func;
     }
 
     const char * Exception::getMsg() const

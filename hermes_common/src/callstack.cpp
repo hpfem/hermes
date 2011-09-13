@@ -106,3 +106,10 @@ void CallStack::dump()
     fprintf(stderr, "No call stack available.\n");
   }
 }
+const char * CallStack::getLastFunc()
+{
+  if (size>0)
+    return stack[size-1]->func;
+  else
+    return NULL;
+}

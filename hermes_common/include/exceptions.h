@@ -23,6 +23,7 @@
 #define __HERMES_COMMON_EXCEPTIONS_H_
 
 #include<stdio.h>
+#include"callstack.h"
 
 namespace Hermes
 {
@@ -41,9 +42,12 @@ namespace Hermes
         void printMsg() const;
         /// \brief get pointer to error message
         const char * getMsg() const;
+        /// \return name of function where exception was created.
+        const char * getFuncName() const;
       protected:
         const char * message;
-
+      private:
+        const char * func;
     };
 
     /// \brief Null parameter exception.
