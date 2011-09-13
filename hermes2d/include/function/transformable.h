@@ -17,6 +17,7 @@
 #define __H2D_TRANSFORM_H
 
 #include "../hermes2d_common_defs.h"
+#include "exceptions.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -67,7 +68,7 @@ namespace Hermes
       /// sets an internal variable that can be later retrieved by get_active_element().
       /// In Solution it selects the element to retrieve solution values for, etc.
       /// \param e [in] Element associated with the function being represented by the class.
-      virtual void set_active_element(Element* e) { element = e; }
+      virtual void set_active_element(Element* e);
 
       /// \return The element associated with the function being represented by the class.
       Element* get_active_element() const { return element; }

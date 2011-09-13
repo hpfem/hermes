@@ -19,6 +19,7 @@
 #include "function.h"
 #include "../mesh/refmap.h"
 #include "../mesh/mesh.h"
+#include "exceptions.h"
 
 namespace Hermes
 {

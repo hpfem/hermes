@@ -34,6 +34,8 @@ namespace Hermes
     DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces) : wf(wf), wf_seq(-1), spaces(spaces)
     {
       _F_;
+      if (wf==NULL) throw Exceptions::NullException(1);
+      if (spaces.empty()) throw Exceptions::NullException(2);
       init();
     }
 
@@ -42,6 +44,8 @@ namespace Hermes
       : wf(wf), wf_seq(-1)
     {
       _F_;
+      if (wf==NULL) throw Exceptions::NullException(1);
+      if (space==NULL) throw Exceptions::NullException(2);
       spaces.push_back(space);
       init();
     }
@@ -625,10 +629,6 @@ namespace Hermes
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
 
-      // Check that the block scaling table have proper dimension.
-      if (block_weights != NULL)
-        if (block_weights->get_size() != wf->get_neq())
-          error ("Bad dimension of block scaling table in DiscreteProblem<Scalar>::assemble().");
     }
 
     template<typename Scalar>
@@ -679,6 +679,10 @@ namespace Hermes
 
       // Sanity checks.
       assemble_sanity_checks(block_weights);
+      // Check that the block scaling table have proper dimension.
+      if (block_weights != NULL)
+        if (block_weights->get_size() != wf->get_neq())
+          throw Exceptions::LengthException(6, block_weights->get_size(), wf->get_neq());
 
       // Time measurement.
       profiling.current_record.reset();

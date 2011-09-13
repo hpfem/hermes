@@ -25,6 +25,7 @@
 #include "../integrals/l2.h"
 #include "../mesh/element_to_refine.h"
 #include "../refinement_selectors/selector.h"
+#include "exceptions.h"
 
 namespace Hermes
 {

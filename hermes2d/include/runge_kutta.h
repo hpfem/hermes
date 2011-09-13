@@ -18,6 +18,7 @@
 
 #include "hermes2d_common_defs.h"
 #include "weakform/weakform.h"
+#include "exceptions.h"
 namespace Hermes
 {
   namespace Hermes2D

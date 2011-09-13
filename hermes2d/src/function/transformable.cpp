@@ -47,6 +47,12 @@ namespace Hermes
       { H2D_IDENTIFY_TRF }              // identity
     };
 
+    void Transformable::set_active_element(Element* e)
+    {
+      _F_
+      if (e==NULL) throw Exceptions::NullException(1);
+      element = e;
+    }
 
     void Transformable::set_transform(uint64_t idx)
     {

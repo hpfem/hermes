@@ -75,6 +75,8 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {      
+      _F_
+      if(coeff_vec==NULL) throw Exceptions::NullException(1);
       // Delete the old solution vector, if there is any.
       if(this->sln_vector != NULL)
       {
