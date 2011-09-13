@@ -23,7 +23,11 @@ namespace Hermes
 {
   namespace Exceptions
   {
-    
+
+    Exception::Exception()
+    {
+      message=NULL;
+    }
     
     Exception::Exception(const char * msg)
     {
@@ -43,7 +47,7 @@ namespace Hermes
       return message;
     }
 
-    NullException::NullException(int paramIdx):Exception(NULL)
+    NullException::NullException(int paramIdx)
     {
       this->paramIdx=paramIdx;
       char * msg = new char[27];
@@ -55,5 +59,57 @@ namespace Hermes
     {
       return paramIdx;
     }
+    NullException::~NullException(){
+      delete message;
+    }
+    
+    LengthException::LengthException(int paramIdx,int wrong, int right)
+    {
+      fstParamIdx=paramIdx;
+      this->wrong=wrong;
+      this->right=right;
+      this->sndParamIdx=-1;
+      char * msg = new char[60];
+      sprintf(msg,"Parameter number %d have length %d and should have %d",fstParamIdx,wrong,right);
+      message=msg;
+    }
+
+    LengthException::LengthException(int fstParamIdx, int sndParmIdx, int first, int second)
+    {
+      this->fstParamIdx=fstParamIdx;
+      this->sndParamIdx=sndParamIdx;
+      this->wrong=first;
+      this->right=second;
+      char * msg = new char[60];
+      sprintf(msg,"Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
+            fstParamIdx,wrong,sndParamIdx,right);
+      message=msg;
+    }
+
+    int LengthException::getFirstParamIdx() const
+    {
+      return fstParamIdx;
+    }
+
+    int LengthException::getSecondParamIdx() const
+    {
+      return sndParamIdx;
+    }
+
+    int LengthException::getFirstLength() const
+    {
+      return wrong;
+    }
+
+    int LengthException::getExpectedLength() const
+    {
+      return right;
+    }
+
+    LengthException::~LengthException()
+    {
+      delete message;
+    }
+
   }
 }

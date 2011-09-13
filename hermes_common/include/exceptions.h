@@ -32,7 +32,9 @@ namespace Hermes
     class Exception
     {
       public:
-        /// init exception with message
+        /// \brief Init exception with default message.
+        Exception();
+        /// Init exception with message.
         /// \param[in] msg message
         Exception(const char * msg);
         /// \brief print error message to stderr
@@ -45,7 +47,7 @@ namespace Hermes
     };
 
     /// \brief Null parameter exception.
-    /// Exception occurs when some parameter is Null and it shouldn't be.
+    /// Exception occurs when some parameter is Null or empty and it shouldn't be.
     class NullException : public Exception
     {
       public:
@@ -54,8 +56,38 @@ namespace Hermes
         NullException(int paramIdx);
         /// \return index of null parameter.
         int getParamIdx() const;
+        ~NullException();
       private:
         int paramIdx;
+    };
+
+    /// \brief Parameter length parameter exception.
+    /// Exception occurs when some parameter has wrong length.
+    class LengthException : public Exception
+    {
+      public:
+        /// One parameter has wrong length.
+        /// \param[in] paramnIdx index wrong parameter.
+        /// \param[in] wrong actual length of parameter.
+        /// \param[in] right right length of parameter.
+        LengthException(int paramIdx,int wrong, int right);
+        /// Two parameters should have same length and they dont have.
+        /// \param[in] fstParamnIdx index first parameter.
+        /// \param[in] sndParamnIdx index second parameter.
+        /// \param[in] first actual length of first parameter.
+        /// \param[in] second actual length of second parameter.
+        LengthException(int fstParamIdx, int sndParmIdx, int first, int second);
+        /// \return index of first wrong parameter.
+        int getFirstParamIdx() const;
+        /// \return index of second wrong parameter. Returns -1 when only one parameter is wrong.
+        int getSecondParamIdx() const;
+        /// \return length of first parameter.
+        int getFirstLength() const;
+        /// \return expected length of first parameter.
+        int getExpectedLength() const;
+        ~LengthException();
+      private:
+        int fstParamIdx,sndParamIdx,wrong,right;
     };
   }
 }
