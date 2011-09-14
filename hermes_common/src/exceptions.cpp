@@ -136,5 +136,24 @@ namespace Hermes
       delete message;
     }
 
+    LinearSolverException::LinearSolverException()
+    {
+      char * msg= new char[22];
+      sprintf(msg,"Linear solver failed.");
+      message=msg;
+    }
+
+    LinearSolverException::LinearSolverException(const char * reason)
+    {
+      char * msg= new char[34+strlen(reason)];
+      sprintf(msg,"Linear solver failed because:\"%s\"",reason);
+      message=msg;
+    }
+
+    LinearSolverException::~LinearSolverException()
+    {
+      delete message;
+    }
+
   }
 }

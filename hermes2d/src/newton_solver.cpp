@@ -326,9 +326,7 @@ namespace Hermes
 
         // Solve the linear system.
         if(!linear_solver->solve()) {
-          if (this->verbose_output) 
-            info ("Matrix<Scalar> solver failed. Returning false.\n");
-          break;
+          throw Exceptions::LinearSolverException();
         }
 
         // Add \deltaY^{n+1} to Y^n.

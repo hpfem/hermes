@@ -24,6 +24,7 @@
 
 #include<stdio.h>
 #include"callstack.h"
+#include<string.h>
 
 namespace Hermes
 {
@@ -98,6 +99,18 @@ namespace Hermes
         ~LengthException();
       private:
         int fstParamIdx, sndParamIdx, wrong, right;
+    };
+
+    /// \brief Linear solver failed.
+    class HERMES_API LinearSolverException : public Exception
+    {
+      public:
+        /// \brief Linear solver failed from unknown reason.
+        LinearSolverException();
+        /// Linear solver failed from spevific reason.
+        /// \param[in] reasen specification of solver fail.
+        LinearSolverException(const char * reason);
+        ~LinearSolverException();
     };
   }
 }
