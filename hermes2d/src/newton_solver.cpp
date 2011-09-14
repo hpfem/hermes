@@ -283,13 +283,7 @@ namespace Hermes
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
         {
-          if (this->verbose_output)
-          {
-            info("Current residual norm: %g", residual_norm);
-            info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
-            info("Newton solve not successful, returning false.");
-          }
-          break;
+          throw Exceptions::ValueException("residual norm",residual_norm,max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, return 'true'.
@@ -336,9 +330,7 @@ namespace Hermes
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {
-          if (this->verbose_output) 
-            info("Maximum allowed number of Newton iterations exceeded, returning false.");
-          break;
+          throw Exceptions::ValueException("newton iterations",it,newton_max_iter);
         }
       }
 
