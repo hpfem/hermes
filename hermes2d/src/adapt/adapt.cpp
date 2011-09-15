@@ -48,8 +48,7 @@ namespace Hermes
       this->num = spaces.size();
 
       // sanity checks
-      error_if(this->num <= 0, "Too few components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
-      error_if(this->num > H2D_MAX_COMPONENTS, "Too many components (%d), only %d supported.", this->num, H2D_MAX_COMPONENTS);
+      if ((this->num <= 0) || (this->num > H2D_MAX_COMPONENTS)) throw Exceptions::ValueException("components",this->num,0,H2D_MAX_COMPONENTS);
 
       // reset values
       memset(errors, 0, sizeof(errors));

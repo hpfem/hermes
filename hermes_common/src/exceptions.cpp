@@ -136,5 +136,63 @@ namespace Hermes
       delete message;
     }
 
+    LinearSolverException::LinearSolverException()
+    {
+      char * msg= new char[22];
+      sprintf(msg,"Linear solver failed.");
+      message=msg;
+    }
+
+    LinearSolverException::LinearSolverException(const char * reason)
+    {
+      char * msg= new char[34+strlen(reason)];
+      sprintf(msg,"Linear solver failed because:\"%s\"",reason);
+      message=msg;
+    }
+
+    LinearSolverException::~LinearSolverException()
+    {
+      delete message;
+    }
+    
+    ValueException::ValueException(const char * name,double value,double allowed)
+    {
+      char * msg= new char[55+strlen(name)];
+      if (value>allowed)
+        sprintf(msg,"Variable %s is %f but maximum allowed value is %f",name,value,allowed);
+      else
+        sprintf(msg,"Variable %s is %f but minimum allowed value is %f",name,value,allowed);
+      message=msg;
+      this->value=value;
+      this->allowed=allowed;
+    }
+
+    ValueException::ValueException(const char * name,double value,double min,double max)
+    {
+      char * msg= new char[50+strlen(name)];
+      sprintf(msg,"Variable %s is %f allowed range is %f -- %f",name,value,min,max);
+      message=msg;
+      this->value=value;
+      if (value>min)
+        this->allowed=max;
+      else
+        this->allowed=min;
+    }
+
+    double ValueException::getValue() const
+    {
+      return value;
+    }
+
+    double ValueException::getAllowed() const
+    {
+      return allowed;
+    }
+
+    ValueException::~ValueException()
+    {
+      delete message;
+    }
+
   }
 }
