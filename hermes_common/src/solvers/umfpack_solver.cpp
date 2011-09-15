@@ -943,11 +943,7 @@ namespace Hermes
 
       int status;
 
-      if ( !setup_factorization() )
-      {
-        warning("LU factorization could not be completed.");
-        return false;
-      }
+      if ( !setup_factorization() ) throw Exceptions::LinearSolverException("LU factorization could not be completed.");
 
       if(sln)
         delete [] sln;

@@ -24,6 +24,7 @@
 
 #include<stdio.h>
 #include"callstack.h"
+#include<string.h>
 
 namespace Hermes
 {
@@ -98,6 +99,42 @@ namespace Hermes
         ~LengthException();
       private:
         int fstParamIdx, sndParamIdx, wrong, right;
+    };
+
+    /// \brief Linear solver failed.
+    class HERMES_API LinearSolverException : public Exception
+    {
+      public:
+        /// \brief Linear solver failed from unknown reason.
+        LinearSolverException();
+        /// Linear solver failed from spevific reason.
+        /// \param[in] reasen specification of solver fail.
+        LinearSolverException(const char * reason);
+        ~LinearSolverException();
+    };
+    
+    /// \brief Value is out of allowed range
+    class HERMES_API ValueException : public Exception
+    {
+      public:
+        /// Value is greather or lower than allowed.
+        /// \param[in] name name of variable
+        /// \param[in] value value of variable
+        /// \param[in] allowed allowed value (maximum or minimum)
+        ValueException(const char * name,double value,double allowed);
+        /// Value is out of range.
+        /// \param[in] name name of variable.
+        /// \param[in] value value of variable.
+        /// \param[in] min minimum allowed value. 
+        /// \param[in] max minimum allowed value. 
+        ValueException(const char * name,double value,double min,double max);
+        /// \return bad value of variable.
+        double getValue() const;
+        /// return allowed value of variable.
+        double getAllowed() const;
+        ~ValueException();
+      private:
+        double value,allowed;
     };
   }
 }
