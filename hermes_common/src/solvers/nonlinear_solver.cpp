@@ -45,10 +45,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NonlinearSolver<Scalar>::solve(Scalar* coeff_vec)
+    void NonlinearSolver<Scalar>::solve(Scalar* coeff_vec)
     {
       error("An abstract class's method has been called.");
-      return false;
+      return;
     }
 
     template<typename Scalar>

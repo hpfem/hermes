@@ -203,18 +203,22 @@ namespace Hermes
       while (true)
       {
         // Perform Newton's iteration to solve the Picard's linear problem.
-        if (!newton.solve(this->sln_vector, tol, max_iter))
-	{
+        try
+        {
+          newton.solve(this->sln_vector, tol, max_iter);
+        }
+        catch (Exceptions::Exception e)
+        {
           warn("Newton's iteration in the Picard's method failed.");
           delete [] last_iter_vector;
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
           if (anderson_is_on) 
-	  {
+          {
             for (int i = 0; i < num_last_vectors_used; i++) delete [] previous_vectors[i];
             delete [] previous_vectors;
             delete [] anderson_coeffs;
           }
-          return false;
+          throw e;
         }
         for (int i = 0; i < ndof; i++) this->sln_vector[i] = newton.get_sln_vector()[i];
 

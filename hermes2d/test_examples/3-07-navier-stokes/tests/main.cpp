@@ -141,13 +141,16 @@ int main(int argc, char* argv[])
     bool verbose = true;
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     newton.set_verbose_output(verbose);
-    if (!newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER)) 
-      error("Newton's iteration failed.");
-    else
-    {
-      Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
-      Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
+    try{
+      newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER);
     }
+    catch(Hermes::Exceptions::Exception e)
+    {
+      e.printMsg();
+      error("Newton's iteration failed.");
+    }
+    Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
+    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
   }
 
   delete [] coeff_vec;

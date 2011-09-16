@@ -44,7 +44,7 @@ namespace Hermes
 
       /// Solve with default tolerances.
       /// Calls solve(Scalar*, bool) with residual_as_function = 'false'.
-      virtual bool solve(Scalar* coeff_vec);
+      virtual void solve(Scalar* coeff_vec);
 
       /// Solve with default tolerances.
       /// \param[in] residual_as_function Translate the residual vector into a residual function (or multiple functions)
@@ -53,19 +53,19 @@ namespace Hermes
       ///                                 since in the FE space not all components in the residual vector have the same weight.
       ///                                 On the other hand, this is slower as it requires global norm calculation, and thus
       ///                                 numerical integration over the entire domain. Therefore this option is off by default.
-      virtual bool solve(Scalar* coeff_vec, bool residual_as_function);
+      virtual void solve(Scalar* coeff_vec, bool residual_as_function);
 
       /// Solve with user-defined tolerances.
       /// \param[in] residual_as_function See the method solve(Scalar*, bool).
-      bool solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
+      void solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
 
       /// A solve() method where the jacobian is reused.
       /// Version with default tolerances.
-      bool solve_keep_jacobian(Scalar* coeff_vec, bool residual_as_function = false);
+      void solve_keep_jacobian(Scalar* coeff_vec, bool residual_as_function = false);
 
       /// A solve() method where the jacobian is reused.
       /// Version with user-defined tolerances.
-      bool solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
+      void solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
