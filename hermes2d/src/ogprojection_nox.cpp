@@ -89,8 +89,7 @@ namespace Hermes
         newton_nox.set_conv_rel_resid(rel_resid);
 
       // Perform Newton's iteration via NOX
-      if (!newton_nox.solve(coeff_vec)) 
-        error("Newton's iteration (NOX) failed.");
+      newton_nox.solve(coeff_vec);
 
       delete [] coeff_vec;
 

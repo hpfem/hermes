@@ -34,6 +34,7 @@
 # undef _XOPEN_SOURCE	// pyconfig.h included by NOX_Epetra defines it
 #endif
 #include <NOX_Epetra.H>
+#include "exceptions.h"
 
 namespace Hermes {
   namespace Solvers {
@@ -91,7 +92,7 @@ namespace Hermes {
 
       virtual ~NewtonSolverNOX();
 
-      virtual bool solve(Scalar* coeff_vec);
+      virtual void solve(Scalar* coeff_vec);
 
       virtual int get_num_iters() { return num_iters; }
       virtual double get_residual()  { return residual; }
