@@ -1,5 +1,6 @@
 #define HERMES_REPORT_ALL
 #include "../definitions.h"
+#include "exceptions.h"
 
 // This test makes sure that example 03-poisson works correctly.
 // CAUTION: This test will fail when any changes to the shapeset
@@ -54,10 +55,15 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
-  if (!newton.solve(coeff_vec)) 
+  try{
+    newton.solve(coeff_vec);
+  }
+  catch(Hermes::Exceptions::Exception e)
+  {
+    e.printMsg();
     error("Newton's iteration failed.");
-  else
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  }
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
   // Actual test. The values of 'sum' depend on the
   // current shapeset. If you change the shapeset,

@@ -134,10 +134,15 @@ int main(int argc, char* argv[])
       newton.set_iterative_method(iterative_method);
       newton.set_preconditioner(preconditioner);
     }
-    if (!newton.solve(coeff_vec)) 
+    try{
+      newton.solve(coeff_vec);
+    }
+    catch(Hermes::Exceptions::Exception e)
+    {
+      e.printMsg();
       error("Newton's iteration failed.");
-    else
-      Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
+    }
+    Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");

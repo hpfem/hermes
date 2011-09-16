@@ -206,7 +206,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NewtonSolverNOX<Scalar>::solve(Scalar* coeff_vec)
+    void NewtonSolverNOX<Scalar>::solve(Scalar* coeff_vec)
     {
       // Put the initial coeff_vec into the inner structure for the initial guess.
       Hermes::Algebra::EpetraVector<Scalar> temp_init_sln;
@@ -322,7 +322,6 @@ namespace Hermes
       if(!this->dp->is_matrix_free())
         jac_mat.release();	// release the ownership (we take care of jac_mat by ourselves)
 
-      bool success;
       if(status == NOX::StatusTest::Converged) 
       {
         // get result informations
@@ -343,13 +342,11 @@ namespace Hermes
         memset(this->sln_vector, 0, n * sizeof(double));
         f_sln.ExtractCopy(this->sln_vector);
 
-        success = true;
       }
       else { // not converged
         num_iters = -1;
-        success = false;
+        throw Exceptions::Exception("Nox solver did not converge");
       }
-      return success;
     }
     template class HERMES_API DiscreteProblemNOX<double>;
     // template class HERMES_API DiscreteProblemNOX<std::complex<double> >; //complex version of nox solver is not implemented

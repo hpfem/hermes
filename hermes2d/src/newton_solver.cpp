@@ -61,19 +61,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec)
+    void NewtonSolver<Scalar>::solve(Scalar* coeff_vec)
     {
-      return solve(coeff_vec, 1E-8, 100, false);
+      solve(coeff_vec, 1E-8, 100, false);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, bool residual_as_function)
+    void NewtonSolver<Scalar>::solve(Scalar* coeff_vec, bool residual_as_function)
     {
-      return solve(coeff_vec, 1E-8, 100, residual_as_function);
+      solve(coeff_vec, 1E-8, 100, residual_as_function);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
+    void NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {      
       _F_
       if(coeff_vec==NULL) throw Exceptions::NullException(1);
@@ -148,13 +148,7 @@ namespace Hermes
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
         {
-          if (this->verbose_output)
-          {
-            info("Current residual norm: %g", residual_norm);
-            info("Maximum allowed residual norm: %g", max_allowed_residual_norm);
-            info("Newton solve not successful, returning false.");
-          }
-          break;
+          throw Exceptions::ValueException("residual norm",residual_norm,max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, return 'true'.
@@ -176,7 +170,7 @@ namespace Hermes
           
           static_cast<DiscreteProblem<Scalar>*>(this->dp)->temp_enable_adaptivity_cache();
 
-          return true;
+          return;
         }
         
         this->timer->tick();
@@ -193,9 +187,12 @@ namespace Hermes
         
         // Solve the linear system.
         if(!linear_solver->solve()) {
-          if (this->verbose_output) 
-            info ("Matrix<Scalar> solver failed. Returning false.\n");
-          break;
+          if (delete_timer)
+          {
+            delete this->timer;
+            this->timer = NULL;
+          }
+          throw Exceptions::LinearSolverException();
         }
         
         // Add \deltaY^{n+1} to Y^n.
@@ -205,34 +202,27 @@ namespace Hermes
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {
-          if (this->verbose_output) 
-            info("Maximum allowed number of Newton iterations exceeded, returning false.");
-          break;
+          if (delete_timer)
+          {
+            delete this->timer;
+            this->timer = NULL;
+          }
+          throw Exceptions::ValueException("iterations",it,newton_max_iter);
         }
         
         this->timer->tick();
         solve_time += this->timer->last();
       }
-      // Return false.
-      // All 'bad' situations end here. 
-      
-      if (delete_timer)
-      {
-        delete this->timer;
-        this->timer = NULL;
-      }
-      
-      return false;
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, bool residual_as_function)
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, bool residual_as_function)
     {
-      return solve_keep_jacobian(coeff_vec, 1E-8, 100, residual_as_function);
+      solve_keep_jacobian(coeff_vec, 1E-8, 100, residual_as_function);
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
@@ -294,7 +284,7 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          return true;
+          return;
         }
 
         // Assemble and keep the jacobian if this has not been done before.
@@ -333,10 +323,6 @@ namespace Hermes
           throw Exceptions::ValueException("newton iterations",it,newton_max_iter);
         }
       }
-
-      // Return false.
-      // All 'bad' situations end here.
-      return false;
     }
 
     template<typename Scalar>

@@ -42,7 +42,7 @@ namespace Hermes
 
       /// Basic solve method.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
-      virtual bool solve(Scalar* coeff_vec);
+      virtual void solve(Scalar* coeff_vec);
 
       Scalar *get_sln_vector();
 

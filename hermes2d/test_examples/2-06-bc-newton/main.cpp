@@ -74,10 +74,15 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
-  if (!newton.solve(coeff_vec)) 
+  try{
+    newton.solve(coeff_vec);
+  }
+  catch(Hermes::Exceptions::Exception e)
+  {
+    e.printMsg();
     error("Newton's iteration failed.");
-  else
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  }
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
   // VTK output.
   if (VTK_VISUALIZATION) {
