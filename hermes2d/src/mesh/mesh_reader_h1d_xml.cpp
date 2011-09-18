@@ -39,7 +39,7 @@ namespace Hermes
       try
       {
         std::auto_ptr<XMLMesh1D::mesh> parsed_xml_mesh(XMLMesh1D::mesh_(filename));
-        
+
         // Variables //
         unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->variable().size() : 0;
         std::map<std::string, double> variables;
@@ -57,7 +57,7 @@ namespace Hermes
 
         double a = std::numeric_limits<double>::infinity();
         double b = -std::numeric_limits<double>::infinity();
-        
+
         // Create top-level vertex nodes.
         for (int vertices_i = 0; vertices_i < 2 * vertices_count; vertices_i++)
         {
@@ -66,7 +66,7 @@ namespace Hermes
           node->ref = TOP_LEVEL_REF;
           node->type = HERMES_TYPE_VERTEX;
           node->bnd = 0;
-          node->p1 = node->p2 = -1;          
+          node->p1 = node->p2 = -1;
           node->next_hash = NULL;
 
           // variables matching.
@@ -80,7 +80,7 @@ namespace Hermes
             x_value = variables.find(x)->second;
             x_found = true;
           }
-         
+
           // test of value if no variable found.
           if(!x_found)
             if(std::strtod(x.c_str(), NULL) != 0.0)
@@ -121,12 +121,12 @@ namespace Hermes
 
         // Elements //
         mesh->nbase = mesh->nactive = mesh->ninitial = vertices_count - 1;
-        
+
         Element* e;
         for (int element_i = 0; element_i < vertices_count - 1; element_i++)
         {
           mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, "H1DMarker");
-          
+
           int element_marker;
           if(parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().present())
           {
@@ -136,15 +136,15 @@ namespace Hermes
           else
             element_marker = mesh->element_markers_conversion.get_internal_marker("H1DMarker").marker;
 
-          e = mesh->create_quad(element_marker, 
-            &mesh->nodes[element_i], 
+          e = mesh->create_quad(element_marker,
+            &mesh->nodes[element_i],
             &mesh->nodes[element_i + 1],
             &mesh->nodes[element_i + vertices_count + 1],
             &mesh->nodes[element_i + vertices_count],
             NULL);
-          
+
           mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Unused");
-                  
+
           node = mesh->peek_edge_node(element_i, element_i + 1);
           node->bnd = 1;
           node->marker = mesh->boundary_markers_conversion.get_internal_marker("Unused").marker;

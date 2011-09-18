@@ -8,7 +8,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace RefinementSelectors 
+    namespace RefinementSelectors
     {
       HcurlShapeset HcurlProjBasedSelector::default_shapeset;
 
@@ -18,12 +18,12 @@ namespace Hermes
         : ProjBasedSelector<std::complex<double> >(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(), Range<int>(0, H2DRS_MAX_HCURL_ORDER))
         , precalc_rvals_curl(NULL) {}
 
-      HcurlProjBasedSelector::~HcurlProjBasedSelector() 
+      HcurlProjBasedSelector::~HcurlProjBasedSelector()
       {
         delete[] precalc_rvals_curl;
       }
 
-      void HcurlProjBasedSelector::set_current_order_range(Element* element) 
+      void HcurlProjBasedSelector::set_current_order_range(Element* element)
       {
         current_max_order = this->max_order;
         if (current_max_order == H2DRS_DEFAULT_ORDER)
@@ -33,12 +33,12 @@ namespace Hermes
         current_min_order = 0;
       }
 
-      void HcurlProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) 
+      void HcurlProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals)
       {
         //for all transformations
         bool done = false;
         int inx_trf = 0;
-        while (!done && inx_trf < H2D_TRF_NUM) 
+        while (!done && inx_trf < H2D_TRF_NUM)
         {
           //prepare data for processing
           const Trf& trf = trfs[inx_trf];
@@ -49,7 +49,7 @@ namespace Hermes
 
           //for all shapes
           const int num_shapes = (int)shapes.size();
-          for(int i = 0; i < num_shapes; i++) 
+          for(int i = 0; i < num_shapes; i++)
           {
             int inx_shape = shapes[i].inx;
             TrfShapeExp& shape_exp = trf_svals[inx_shape];
@@ -58,7 +58,7 @@ namespace Hermes
             shape_exp.allocate(H2D_HCFE_NUM, num_gip_points);
 
             //for all GIP points
-            for(int k = 0; k < num_gip_points; k++) 
+            for(int k = 0; k < num_gip_points; k++)
             {
               //transform coordinates
               double ref_x = gip_points[k][H2D_GIP2D_X] * trf.m[0] + trf.t[0];
@@ -74,7 +74,7 @@ namespace Hermes
           //move to the next transformation
           if (inx_trf == H2D_TRF_IDENTITY)
             done = true;
-          else 
+          else
           {
             inx_trf++;
             if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
@@ -84,25 +84,25 @@ namespace Hermes
         error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
       }
 
-      void HcurlProjBasedSelector::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) 
+      void HcurlProjBasedSelector::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals)
       {
         //calculate values
         precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals);
 
         //calculate orthonormal basis
         const int num_shapes = (int)shapes.size();
-        for(int i = 0; i < num_shapes; i++) 
+        for(int i = 0; i < num_shapes; i++)
         {
           const int inx_shape_i = shapes[i].inx;
 
           //orthogonalize
-          for(int j = 0; j < i; j++) 
+          for(int j = 0; j < i; j++)
           {
             const int inx_shape_j = shapes[j].inx;
 
             //calculate product of non-transformed functions
             double product = 0.0;
-            for(int k = 0; k < num_gip_points; k++) 
+            for(int k = 0; k < num_gip_points; k++)
             {
               double sum = 0.0;
               sum += svals[H2D_TRF_IDENTITY][inx_shape_i][H2D_HCFE_VALUE0][k] * svals[H2D_TRF_IDENTITY][inx_shape_j][H2D_HCFE_VALUE0][k];
@@ -114,10 +114,10 @@ namespace Hermes
             //for all transformations
             int inx_trf = 0;
             bool done = false;
-            while (!done && inx_trf < H2D_TRF_NUM) 
+            while (!done && inx_trf < H2D_TRF_NUM)
             {
               //for all integration points
-              for(int k = 0; k < num_gip_points; k++) 
+              for(int k = 0; k < num_gip_points; k++)
               {
                 svals[inx_trf][inx_shape_i][H2D_HCFE_VALUE0][k] -= product * svals[inx_trf][inx_shape_j][H2D_HCFE_VALUE0][k];
                 svals[inx_trf][inx_shape_i][H2D_HCFE_VALUE1][k] -= product * svals[inx_trf][inx_shape_j][H2D_HCFE_VALUE1][k];
@@ -127,7 +127,7 @@ namespace Hermes
               //move to the next transformation
               if (inx_trf == H2D_TRF_IDENTITY)
                 done = true;
-              else 
+              else
               {
                 inx_trf++;
                 if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
@@ -140,7 +140,7 @@ namespace Hermes
           //normalize
           //calculate norm
           double norm_squared = 0.0;
-          for(int k = 0; k < num_gip_points; k++) 
+          for(int k = 0; k < num_gip_points; k++)
           {
             double sum = 0.0;
             sum += sqr(svals[H2D_TRF_IDENTITY][inx_shape_i][H2D_HCFE_VALUE0][k]);
@@ -154,10 +154,10 @@ namespace Hermes
           //for all transformations: normalize
           int inx_trf = 0;
           bool done = false;
-          while (!done && inx_trf < H2D_TRF_NUM) 
+          while (!done && inx_trf < H2D_TRF_NUM)
           {
             //for all integration points
-            for(int k = 0; k < num_gip_points; k++) 
+            for(int k = 0; k < num_gip_points; k++)
             {
               svals[inx_trf][inx_shape_i][H2D_HCFE_VALUE0][k] /= norm;
               svals[inx_trf][inx_shape_i][H2D_HCFE_VALUE1][k] /= norm;
@@ -167,7 +167,7 @@ namespace Hermes
             //move to the next transformation
             if (inx_trf == H2D_TRF_IDENTITY)
               done = true;
-            else 
+            else
             {
               inx_trf++;
               if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
@@ -178,7 +178,7 @@ namespace Hermes
         }
       }
 
-      std::complex<double>** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution<std::complex<double> >* rsln, Element* element, int intr_gip_order) 
+      std::complex<double>** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution<std::complex<double> >* rsln, Element* element, int intr_gip_order)
       {
         //set element and integration order
         rsln->set_active_element(element);
@@ -206,23 +206,23 @@ namespace Hermes
       }
 
       double** HcurlProjBasedSelector::build_projection_matrix(double3* gip_points, int num_gip_points,
-        const int* shape_inx, const int num_shapes) 
+        const int* shape_inx, const int num_shapes)
       {
         //allocate
         double** matrix = new_matrix<double>(num_shapes, num_shapes);
 
         //calculate products
         int inx_row = 0;
-        for(int i = 0; i < num_shapes; i++, inx_row += num_shapes) 
+        for(int i = 0; i < num_shapes; i++, inx_row += num_shapes)
         {
           double* matrix_row = matrix[i];
           int shape0_inx = shape_inx[i];
-          for(int k = 0; k < num_shapes; k++) 
+          for(int k = 0; k < num_shapes; k++)
           {
             int shape1_inx = shape_inx[k];
 
             double value = 0.0;
-            for(int j = 0; j < num_gip_points; j++) 
+            for(int j = 0; j < num_gip_points; j++)
             {
               double gip_x = gip_points[j][H2D_GIP2D_X], gip_y = gip_points[j][H2D_GIP2D_Y];
               double value0[2] = { shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0), shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 1) };
@@ -244,11 +244,11 @@ namespace Hermes
         return matrix;
       }
 
-      std::complex<double> HcurlProjBasedSelector::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape) 
+      std::complex<double> HcurlProjBasedSelector::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape)
       {
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
         std::complex<double> total_value = 0;
-        for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++) 
+        for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           //get location and transform it
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
@@ -284,18 +284,18 @@ namespace Hermes
         return total_value;
       }
 
-      double HcurlProjBasedSelector::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj) 
+      double HcurlProjBasedSelector::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj)
       {
         double total_error_squared = 0;
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
-        for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++) 
+        for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           //get location and transform it
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
 
           //calculate value of projected solution
           std::complex<double> proj_value0 = 0, proj_value1 = 0, proj_curl = 0;
-          for(int i = 0; i < elem_proj.num_shapes; i++) 
+          for(int i = 0; i < elem_proj.num_shapes; i++)
           {
             int shape_inx = elem_proj.shape_inxs[i];
             proj_value0 += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_HCFE_VALUE0][gip_inx];
@@ -307,7 +307,7 @@ namespace Hermes
           //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
           //double ref_y = gip_pt[H2D_GIP2D_Y] * sub_trf.trf->m[1] + sub_trf.trf->t[1];
           //std::complex<double> proj_value0A = 0, proj_value1A = 0, proj_curlA = 0;
-          //for(int i = 0; i < elem_proj.num_shapes; i++) 
+          //for(int i = 0; i < elem_proj.num_shapes; i++)
           {
             //  int shape_inx = elem_proj.shape_inxs[i];
             //  proj_value0A += elem_proj.shape_coeffs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 0);

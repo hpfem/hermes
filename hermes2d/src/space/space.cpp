@@ -116,19 +116,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_max_dof() const 
-    { 
+    int Space<Scalar>::get_max_dof() const
+    {
       return next_dof - stride;
     }
 
     template<typename Scalar>
-    Shapeset* Space<Scalar>::get_shapeset() const 
+    Shapeset* Space<Scalar>::get_shapeset() const
     {
       return shapeset;
     }
 
     template<typename Scalar>
-    Mesh* Space<Scalar>::get_mesh() const 
+    Mesh* Space<Scalar>::get_mesh() const
     {
       return mesh;
     }
@@ -197,9 +197,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, 
-                                                          int order_increase, 
-                                                          int refinement_type) 
+    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse,
+                                                          int order_increase,
+                                                          int refinement_type)
     {
       _F_;
       Mesh* ref_mesh = new Mesh;
@@ -212,7 +212,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time) 
+    void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time)
     {
       int n = spaces.size();
       for (int i = 0; i < n; i++) {
@@ -230,7 +230,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces) 
+    int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
     {
       _F_;
       int ndof = 0;
@@ -241,13 +241,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Space<Scalar>* space) 
+    int Space<Scalar>::get_num_dofs(Space<Scalar>* space)
     {
       return space->get_num_dofs();
     }
 
     template<typename Scalar>
-    int Space<Scalar>::assign_dofs(Hermes::vector<Space<Scalar>*> spaces) 
+    int Space<Scalar>::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
     {
       _F_;
       int n = spaces.size();
@@ -390,7 +390,7 @@ namespace Hermes
         }
         else
           set_element_order_internal(e->id, std::max<int>
-          (H2D_MAKE_QUAD_ORDER(horizontal_min_order, vertical_min_order), 
+          (H2D_MAKE_QUAD_ORDER(horizontal_min_order, vertical_min_order),
           H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + horizontal_order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + vertical_order_change)));
       }
       assign_dofs();
@@ -406,7 +406,7 @@ namespace Hermes
       {
         bool found = true;
         for (unsigned int i = 0; i < 4; i++)
-          if (e->sons[i] != NULL && 
+          if (e->sons[i] != NULL &&
             (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < this->mesh->ninitial))
             )
           { found = false; break; }
@@ -428,7 +428,7 @@ namespace Hermes
             {
               if(this->mesh->get_element_fast(list[i])->sons[sons_i]->is_triangle())
                 order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id);
-              else 
+              else
               {
                 h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
                 v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[sons_i]->id));
@@ -436,7 +436,7 @@ namespace Hermes
             }
           }
         }
-        else 
+        else
         {
           if (this->mesh->get_element_fast(list[i])->hsplit())
           {
@@ -445,7 +445,7 @@ namespace Hermes
             {
               if(this->mesh->get_element_fast(list[i])->sons[0]->is_triangle())
                 order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id);
-              else 
+              else
               {
                 h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id));
                 v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[0]->id));
@@ -455,21 +455,21 @@ namespace Hermes
             {
               if(this->mesh->get_element_fast(list[i])->sons[1]->is_triangle())
                 order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id);
-              else 
+              else
               {
                 h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id));
                 v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[1]->id));
               }
             }
           }
-          else 
+          else
           {
             num_sons = 2;
             if(this->mesh->get_element_fast(list[i])->sons[2]->active)
             {
               if(this->mesh->get_element_fast(list[i])->sons[2]->is_triangle())
                 order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id);
-              else 
+              else
               {
                 h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id));
                 v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[2]->id));
@@ -479,7 +479,7 @@ namespace Hermes
             {
               if(this->mesh->get_element_fast(list[i])->sons[3]->is_triangle())
                 order += this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id);
-              else 
+              else
               {
                 h_order += H2D_GET_H_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id));
                 v_order += H2D_GET_V_ORDER(this->get_element_order(this->mesh->get_element_fast(list[i])->sons[3]->id));
@@ -526,7 +526,7 @@ namespace Hermes
       for_all_active_elements(e, space->get_mesh())
       {
         int o = space->get_element_order(e->id);
-        if (o < 0) 
+        if (o < 0)
           error("Source space has an uninitialized order (element id = %d)", e->id);
 
         int mo = shapeset->get_max_order();
@@ -549,7 +549,7 @@ namespace Hermes
 
         Element * e;
       }
-      
+
       seq = g_space_seq++;
 
       // since space changed, enumerate basis functions
@@ -623,7 +623,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_seq() const 
+    int Space<Scalar>::get_seq() const
     {
       return seq;
     }
@@ -902,13 +902,13 @@ namespace Hermes
 
       return true;
     }
-    
+
     template<typename Scalar>
-    void Space<Scalar>::load(const char *filename, EssentialBCs<Scalar>* essential_bcs) 
+    void Space<Scalar>::load(const char *filename, EssentialBCs<Scalar>* essential_bcs)
     {
       this->essential_bcs = essential_bcs;
       this->mesh_seq == this->mesh->get_seq();
-    
+
       if(essential_bcs != NULL)
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)

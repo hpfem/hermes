@@ -95,11 +95,11 @@ namespace Hermes
           Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
           ExtData<Hermes::Ord> *ext) const;
 
-      
+
       protected:
         /// Norm used.
         ProjNormType projNormType;
-        
+
         /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
@@ -135,7 +135,7 @@ namespace Hermes
       *  \param[in] bi_ord A bilinear form which calculates order. */
       void set_error_form(int i, int j, MatrixFormVolError* form);
       void set_error_form(MatrixFormVolError* form);   ///< i = j = 0
-      
+
       void set_norm_form(int i, int j, MatrixFormVolError* form);
       void set_norm_form(MatrixFormVolError* form);   ///< i = j = 0
 
@@ -280,7 +280,7 @@ namespace Hermes
 
       MatrixFormVolError* error_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS]; ///< Bilinear forms to calculate error.
       MatrixFormVolError* norm_form[H2D_MAX_COMPONENTS][H2D_MAX_COMPONENTS];  ///< Bilinear forms to calculate norm (set to error_form by default).
-      
+
       /// Calculates error between a coarse solution and a reference solution and sorts components according to the error.
       /** If overridden, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
       *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
@@ -333,7 +333,7 @@ namespace Hermes
 
     private:
       /// A functor that compares elements accoring to their error. Used by std::sort().
-      class CompareElements 
+      class CompareElements
       {
       private:
         double** errors; ///< A 2D array of squared errors: the first index is an index of component, the second index is an element ID.

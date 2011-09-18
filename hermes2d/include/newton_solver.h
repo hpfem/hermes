@@ -75,18 +75,18 @@ namespace Hermes
 
       /// Call NonlinearSolver::set_preconditioner() and set the method to the linear solver (if applicable).
       virtual void set_preconditioner(const char* preconditioner_name);
-      
+
       /// Get times accumulated by this instance of NewtonSolver.
       double get_setup_time() const { return setup_time; }
       double get_assemble_time() const { return assemble_time; }
       double get_solve_time() const { return solve_time; }
-      
+
       /// Attach an external timer to which this instance of NewtonSolver will accumulate time spent in it.
       void attach_timer(TimePeriod *timer) { this->timer = timer; reset_times(); }
-      
+
       /// Reset times to zero.
       void reset_times() { setup_time = assemble_time = solve_time = 0.; }
-      
+
     protected:
       /// Jacobian.
       SparseMatrix<Scalar>* jacobian;
@@ -104,12 +104,12 @@ namespace Hermes
       /// By default set to 1E6.
       /// Possible to change via method set_max_allowed_residual_norm().
       static double max_allowed_residual_norm;
-      
+
       /// Times spent in individual phases of the computation.
       double setup_time;
       double assemble_time;
       double solve_time;
-      
+
       /// Pointer to an external timer to which this instance of NewtonSolver accumulates time spent in it.
       TimePeriod *timer;
     };

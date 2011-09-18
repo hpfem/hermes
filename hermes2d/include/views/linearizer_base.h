@@ -29,7 +29,7 @@ namespace Hermes
   namespace Hermes2D
   {
     namespace Views
-    {  
+    {
       const double HERMES_EPS_LOW      = 0.007;
       const double HERMES_EPS_NORMAL   = 0.0004;
       const double HERMES_EPS_HIGH     = 0.0001;
@@ -94,13 +94,13 @@ namespace Hermes
         int get_num_triangles();
         int3* get_edges();
         int get_num_edges();
-      
+
       protected:
         LinearizerBase(bool auto_max = true);
         ~LinearizerBase();
 
         void process_edge(int iv1, int iv2, int marker);
-        
+
         double max;
 
         bool auto_max;
@@ -127,7 +127,7 @@ namespace Hermes
         int hash(int p1, int p2);
 
         mutable pthread_mutex_t data_mutex;
-        
+
         /// Calculates AABB from an array of X-axis and Y-axis coordinates. The distance between values in the array is stride bytes.
         static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y);
       };

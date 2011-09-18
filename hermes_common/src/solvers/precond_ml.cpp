@@ -19,9 +19,9 @@
 #ifdef HAVE_ML
 #include "precond_ml.h"
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Preconditioners 
+  namespace Preconditioners
   {
     template<typename Scalar>
     MlPrecond<Scalar>::MlPrecond(const char *type)

@@ -76,7 +76,7 @@ void Hermes::Error::h_mem_check(int line, const char *func, const char *file, vo
 {
   //va_list params;
 
-  if (var == NULL) 
+  if (var == NULL)
   {
     //report_w_loc("FATAL: ", file, line, func, "Out of memory.", params);
     report_w_loc("FATAL: ", file, line, func, "Out of memory.", NULL);

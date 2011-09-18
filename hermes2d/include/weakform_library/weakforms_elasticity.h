@@ -75,10 +75,10 @@ namespace Hermes
         DefaultResidualElasticity_0_0(unsigned int i, double lambda, double mu);
         DefaultResidualElasticity_0_0(unsigned int i, std::string area, double lambda, double mu);
 
-        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, ExtData<Scalar> *ext) const;
 
-        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, 
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
       private:
@@ -92,10 +92,10 @@ namespace Hermes
         DefaultResidualElasticity_0_1(unsigned int i, double lambda, double mu);
         DefaultResidualElasticity_0_1(unsigned int i, std::string area, double lambda, double mu);
 
-        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, ExtData<Scalar> *ext) const;
 
-        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, 
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
       private:
@@ -109,10 +109,10 @@ namespace Hermes
         DefaultResidualElasticity_1_0(unsigned int i, double lambda, double mu);
         DefaultResidualElasticity_1_0(unsigned int i, std::string area, double lambda, double mu);
 
-        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, ExtData<Scalar> *ext) const;
 
-        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, 
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
       private:
@@ -126,10 +126,10 @@ namespace Hermes
         DefaultResidualElasticity_1_1(unsigned int i, double lambda, double mu);
         DefaultResidualElasticity_1_1(unsigned int i, std::string area, double lambda, double mu);
 
-        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, ExtData<Scalar> *ext) const;
 
-        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, 
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
       private:
@@ -154,7 +154,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      class HERMES_API DefaultJacobianElasticity_00_11 
+      class HERMES_API DefaultJacobianElasticity_00_11
         : public MultiComponentMatrixFormVol<Scalar>
       {
       public:

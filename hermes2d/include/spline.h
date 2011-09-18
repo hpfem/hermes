@@ -26,16 +26,16 @@ namespace Hermes
     {
     public:
       /// Constructor (general case).
-      CubicSpline(Hermes::vector<double> points, Hermes::vector<double> values, 
-        double bc_left, double bc_right, 
+      CubicSpline(Hermes::vector<double> points, Hermes::vector<double> values,
+        double bc_left, double bc_right,
         bool first_der_left = true, bool first_der_right = true,
         bool extend_der_left = true, bool extend_der_right = true);
 
       CubicSpline(double const_value);
 
       /// Destructor.
-      ~CubicSpline() { 
-        if (coeffs != NULL) 
+      ~CubicSpline() {
+        if (coeffs != NULL)
           delete [] coeffs;
         points.clear();
         values.clear();
@@ -56,9 +56,9 @@ namespace Hermes
       /// One-dimensional function derivative integration order.
       Hermes::Ord derivative(Hermes::Ord x) const {return Hermes::Ord(2);};
 
-      /// Plots the spline in format for Pylab (just pairs 
-      /// x-coordinate and value per line). The interval of definition 
-      /// of the spline will be extended by "extension" both to the left 
+      /// Plots the spline in format for Pylab (just pairs
+      /// x-coordinate and value per line). The interval of definition
+      /// of the spline will be extended by "extension" both to the left
       /// and to the right. This allows the user to see how the code will
       /// handle the spline if used for points that lie outside of its
       /// interval of definition. If plot_value == false, derivative is plotted.
@@ -85,10 +85,10 @@ namespace Hermes
       /// first_der_left == false means that the left BC is the second derivative.
       /// (same on the right)
       bool first_der_left, first_der_right;
-      /// If extend_der_left == true then the spline is extended to the left of the 
-      /// interval of definition as a linear function whose slope matches the derivative 
+      /// If extend_der_left == true then the spline is extended to the left of the
+      /// interval of definition as a linear function whose slope matches the derivative
       /// at the left-most point. Otherwise the spline is extended as a constant value
-      /// that matches the spline value at the left-most point. Analogously for the 
+      /// that matches the spline value at the left-most point. Analogously for the
       /// flag extend_der_right.
       bool extrapolate_der_left, extrapolate_der_right;
 

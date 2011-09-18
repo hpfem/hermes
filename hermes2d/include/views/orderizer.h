@@ -40,12 +40,12 @@ namespace Hermes
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
         template<typename Scalar>
         void save_orders_vtk(Space<Scalar>* space, const char* file_name);
-        
+
         int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
-        
-        void calc_vertices_aabb(double* min_x, double* max_x, 
+
+        void calc_vertices_aabb(double* min_x, double* max_x,
           double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
-        
+
         int get_num_vertices();
         double3* get_vertices();
       protected:
@@ -63,7 +63,7 @@ namespace Hermes
         void add_edge(int iv1, int iv2, int marker);
 
         int add_vertex();
-        
+
         void make_vert(int & index, double x, double y, double val);
       };
     }

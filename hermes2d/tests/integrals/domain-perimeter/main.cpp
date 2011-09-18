@@ -13,14 +13,14 @@ using std::cout;
 using std::endl;
 
 //******************************************************************************
-//  This is a very basic test for computing the perimeter of a domain. 
+//  This is a very basic test for computing the perimeter of a domain.
 //  The user can experiment with existing cases or contribute a new case.
-//  The latter may require an additional mesh file to be created and named 
-//  domain.meshX where X should be an integer following the largest already 
+//  The latter may require an additional mesh file to be created and named
+//  domain.meshX where X should be an integer following the largest already
 //  used in the provided set of domain.meshX files in this directory. The
 //  header in the existing mesh files should be helpful.
 
-//  To add more domains to test, edit the CMakeLists.txt file. Note: The 
+//  To add more domains to test, edit the CMakeLists.txt file. Note: The
 //  boundary markers must be 1, 2, 3, or 4, others will be skipped.
 
 //******************************************************************************
@@ -35,7 +35,7 @@ const int INIT_REF_NUM = 2; // Number of initial uniform mesh refinements.
 // Helper functions
 
 //------------------------------------------------------------------------------
-// Compute marked boundary length 
+// Compute marked boundary length
 //
 double CalculateBoundaryLength(Mesh* mesh, int bdryMarker)
 {
@@ -103,8 +103,8 @@ int main(int argc, char* argv[])
   // Create H1 space with a default shapeset.
   H1Space<double> space(&mesh, P_INIT);
 
-  // FIXME: This Solution is artificial here and it should be removed. The 
-  // function CalculateBoundaryLength() should only take a pointer to Mesh and 
+  // FIXME: This Solution is artificial here and it should be removed. The
+  // function CalculateBoundaryLength() should only take a pointer to Mesh and
   // a boundary marker as parameters.
   //Solution sln;
   //sln.set_zero(&mesh);
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 
   double l4 = CalculateBoundaryLength(&mesh, 4);
   info("Length of boundary 4 = %g\n", l4);
-  
+
   double perimeter = l1 + l2 + l3 + l4;
   info("Computed perimeter = %10.15f\n", perimeter);
 
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
     printf("Failure!\n");
     return TEST_FAILURE;
   }
- 
+
 
   return 0;
 }

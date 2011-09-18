@@ -125,7 +125,7 @@ namespace Hermes
             sln->set_quad_order(1, item);
             val = sln->get_values(component, value_type);
             if (auto_max)
-              for (i = 0; i < lin_np_tri[1]; i++) 
+              for (i = 0; i < lin_np_tri[1]; i++)
               {
                 double v = val[i];
                 if (finite(v) && fabs(v) > max) max = fabs(v);
@@ -140,7 +140,7 @@ namespace Hermes
             ydisp->set_quad_order(1, H2D_FN_VAL);
             double* dx = xdisp->get_fn_values();
             double* dy = ydisp->get_fn_values();
-            for (i = 0; i < lin_np_tri[1]; i++) 
+            for (i = 0; i < lin_np_tri[1]; i++)
             {
               phx[i] += dmult*dx[i];
               phy[i] += dmult*dy[i];
@@ -182,9 +182,9 @@ namespace Hermes
             // do the same for the curvature
             for (i = 0; i < 3; i++)
               if (sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1.5e-3))
-              { 
+              {
                 split = true;
-                break; 
+                break;
               }
 
             // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
@@ -199,7 +199,7 @@ namespace Hermes
           // split the triangle if the error is too large, otherwise produce a linear triangle
           if (split)
           {
-            for (i = 0; i < 3; i++) 
+            for (i = 0; i < 3; i++)
             {
               midval[0][i] = phx[idx[i]];
               midval[1][i] = phy[idx[i]];
@@ -254,7 +254,7 @@ namespace Hermes
             sln->set_quad_order(1, item);
             val = sln->get_values(component, value_type);
             if (auto_max)
-              for (i = 0; i < lin_np_quad[1]; i++) 
+              for (i = 0; i < lin_np_quad[1]; i++)
               {
                 double v = val[i];
                 if (finite(v) && fabs(v) > max) max = fabs(v);
@@ -265,7 +265,7 @@ namespace Hermes
               max = 1E-10;
 
             // obtain physical element coordinates
-              
+
             RefMap* refmap = sln->get_refmap();
             phx = refmap->get_phys_x(1);
             phy = refmap->get_phys_y(1);
@@ -274,7 +274,7 @@ namespace Hermes
             ydisp->set_quad_order(1, H2D_FN_VAL);
             double* dx = xdisp->get_fn_values();
             double* dy = ydisp->get_fn_values();
-            for (i = 0; i < lin_np_quad[1]; i++) 
+            for (i = 0; i < lin_np_quad[1]; i++)
             {
               phx[i] += dmult*dx[i];
               phy[i] += dmult*dy[i];
@@ -319,7 +319,7 @@ namespace Hermes
               split = (!finite(err) || err > max*4*eps) ? 3 : 0;
 
               // decide whether to split horizontally or vertically only
-              if (level > 0 && split) 
+              if (level > 0 && split)
               {
                 if (herr > 5*verr)
                   split = 1; // h-split
@@ -355,7 +355,7 @@ namespace Hermes
           // split the quad if the error is too large, otherwise produce two linear triangles
           if (split)
           {
-            for (i = 0; i < 5; i++) 
+            for (i = 0; i < 5; i++)
             {
               midval[0][i] = phx[idx[i]];
               midval[1][i] = phy[idx[i]];
@@ -388,7 +388,7 @@ namespace Hermes
               process_quad(mid3, mid4, mid2, iv3, level+1, val, phx, phy, quad_indices[4]);
               sln->pop_transform();
             }
-            else 
+            else
               if (split == 1) // h-split
               {
                 sln->push_transform(4);
@@ -425,7 +425,7 @@ namespace Hermes
           add_triangle(iv2, iv3, iv0);
         }
       }
-      
+
       void Linearizer::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2)
       {
         // count the number of hanging mid-edge vertices
@@ -488,7 +488,7 @@ namespace Hermes
           add_triangle(iv0, iv1, iv2);
         }
       }
-      
+
       void Linearizer::set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
       {
         if(xdisp != NULL)
@@ -522,13 +522,13 @@ namespace Hermes
         // get the component and desired value from item.
         if (item >= 0x40)
         {
-          component = 1; 
-          item >>= 6; 
+          component = 1;
+          item >>= 6;
         }
-        while (!(item & 1)) 
-        { 
+        while (!(item & 1))
+        {
           item >>= 1;
-          value_type++; 
+          value_type++;
         }
 
         int nn = this->sln->get_mesh()->get_num_elements();
@@ -557,7 +557,7 @@ namespace Hermes
         old_quad_x = xdisp->get_quad_2d();
         xdisp->set_quad_2d(&g_quad_lin);
         old_quad_y = ydisp->get_quad_2d();
-        ydisp->set_quad_2d(&g_quad_lin); 
+        ydisp->set_quad_2d(&g_quad_lin);
 
         // create all top-level vertices (corresponding to vertex nodes), with
         // all parent-son relations preserved; this is necessary for regularization to
@@ -577,7 +577,7 @@ namespace Hermes
         trfs[0] = sln;
         trfs[1] = xdisp;
         trfs[2] = ydisp;
-        
+
         // Init multi-mesh traversal.
         Traverse trav;
         trav.begin(3, meshes, trfs);
@@ -585,16 +585,16 @@ namespace Hermes
         // Loop through all elements.
         Element **e;
         // Loop through all elements.
-        while ((e = trav.get_next_state(NULL, NULL)) != NULL) 
+        while ((e = trav.get_next_state(NULL, NULL)) != NULL)
         {
           sln->set_quad_order(0, item);
           double* val = sln->get_values(component, value_type);
-          if (val == NULL) 
+          if (val == NULL)
             error("Item not defined in the solution.");
 
           xdisp->set_quad_order(0, H2D_FN_VAL);
           ydisp->set_quad_order(0, H2D_FN_VAL);
-          
+
           double *dx = xdisp->get_fn_values();
           double *dy = ydisp->get_fn_values();
 
@@ -602,7 +602,7 @@ namespace Hermes
           for (unsigned int i = 0; i < e[0]->nvert; i++)
           {
             double f = val[i];
-            if (this->auto_max && finite(f) && fabs(f) > this->max) 
+            if (this->auto_max && finite(f) && fabs(f) > this->max)
               this->max = fabs(f);
 
             double x_disp = sln->get_refmap()->get_phys_x(0)[i];
@@ -647,7 +647,7 @@ namespace Hermes
         ::free(hash_table);
         ::free(info);
       }
-      
+
       void Linearizer::find_min_max()
       {
         // find min & max vertex values
@@ -660,7 +660,7 @@ namespace Hermes
         }
       }
 
-      int Linearizer::get_vertex(int p1, int p2, double x, double y, double value) 
+      int Linearizer::get_vertex(int p1, int p2, double x, double y, double value)
       {
         // search for an existing vertex
         if (p1 > p2) std::swap(p1, p2);
@@ -709,7 +709,7 @@ namespace Hermes
 
       void Linearizer::free()
       {
-        if (verts != NULL) 
+        if (verts != NULL)
         {
           ::free(verts);
           verts = NULL;
@@ -739,7 +739,7 @@ namespace Hermes
 
         // Output vertices.
         fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
-        for (int i=0; i < this->vertex_count; i++) 
+        for (int i=0; i < this->vertex_count; i++)
         {
           if (mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
           else fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
@@ -748,7 +748,7 @@ namespace Hermes
         // Output elements.
         fprintf(f, "\n");
         fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++) 
+        for (int i=0; i < this->triangle_count; i++)
         {
           fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
         }
@@ -756,7 +756,7 @@ namespace Hermes
         // Output cell types.
         fprintf(f, "\n");
         fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++) 
+        for (int i=0; i < this->triangle_count; i++)
         {
           fprintf(f, "5\n");    // The "5" means triangle in VTK.
         }
@@ -766,7 +766,7 @@ namespace Hermes
         fprintf(f, "POINT_DATA %d\n", this->vertex_count);
         fprintf(f, "SCALARS %s %s %d\n", quantity_name, "float", 1);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (int i=0; i < this->vertex_count; i++) 
+        for (int i=0; i < this->vertex_count; i++)
         {
           fprintf(f, "%g\n", this->verts[i][2]);
         }
@@ -775,7 +775,7 @@ namespace Hermes
         fclose(f);
       }
 
-      void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
+      void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);

@@ -24,28 +24,28 @@
 #include"superlu_solver.h"
 #include <slu_ddefs.h>
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Solvers 
+  namespace Solvers
 {
     template <>
-    void  SuperLUSolver<double>::solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R, 
-      double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X, 
-      double *recip_pivot_growth, double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, 
+    void  SuperLUSolver<double>::solver_driver (superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r, int *etree, char *equed, double *R,
+      double *C, SuperMatrix *L, SuperMatrix *U, void *work, int lwork, SuperMatrix *B, SuperMatrix *X,
+      double *recip_pivot_growth, double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat,
       int *info)
     {
       dgssvx(options, A, perm_c, perm_r, etree, equed, R, C, L, U, work, lwork, B, X, recip_pivot_growth, rcond, ferr, berr, (mem_usage_t*) mem_usage, stat, info);
     }
 
     template <>
-    void SuperLUSolver<double>::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, SuperLuType<double>::Scalar *nzval, 
+    void SuperLUSolver<double>::create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, SuperLuType<double>::Scalar *nzval,
       int *rowind, int *colptr, Stype_t stype, Dtype_t dtype, Mtype_t mtype)
     {
       dCreate_CompCol_Matrix (A, m, n, nnz, nzval, rowind, colptr, stype, dtype, mtype);
     }
 
     template<>
-    void SuperLUSolver<double>::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<double>::Scalar *x, 
+    void SuperLUSolver<double>::create_dense_matrix (SuperMatrix *X, int m, int n, SuperLuType<double>::Scalar *x,
       int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype)
     {
       dCreate_Dense_Matrix (X, m, n, (double*) x, ldx, stype, dtype, mtype);

@@ -26,10 +26,10 @@
 
 namespace Hermes
 {
-  /// \brief Butcher's tables type. 
+  /// \brief Butcher's tables type.
   /// The last number in the name always means order,
   /// the one before last (if provided) is the number of stages.
-  enum ButcherTableType 
+  enum ButcherTableType
   {
     /* EXPLICIT METHODS */
 
@@ -64,9 +64,9 @@ namespace Hermes
 
     /* EMBEDDED IMPLICIT METHODS */
 
-    Implicit_ESDIRK_TRBDF2_3_23_embedded,    ///< From the paper Analysis and implementation 
+    Implicit_ESDIRK_TRBDF2_3_23_embedded,    ///< From the paper Analysis and implementation
     ///< of TR-BDF2 by Hosea and Shampine.
-    Implicit_ESDIRK_TRX2_3_23_embedded,      ///< From the paper Analysis and implementation 
+    Implicit_ESDIRK_TRX2_3_23_embedded,      ///< From the paper Analysis and implementation
     ///< of TR-BDF2 by Hosea and Shampine.
     Implicit_SDIRK_CASH_3_23_embedded,       ///< From the paper Diagonally Implicit Runge-Kutta Formulae
     ///< with Error Estimates by J.R. Cash
@@ -76,20 +76,20 @@ namespace Hermes
     ///< with Error Estimates by J.R. Cash
     Implicit_SDIRK_CASH_5_34_embedded,       ///< From the paper Diagonally Implicit Runge-Kutta Formulae
     ///< with Error Estimates by J.R. Cash
-    Implicit_DIRK_ISMAIL_7_45_embedded       ///< Implicit embedded DIRK method pair of orders four in five (from the paper 
-    ///< Fudziah Ismail et all: Embedded Pair of Diagonally Implicit Runge-Kutta  
+    Implicit_DIRK_ISMAIL_7_45_embedded       ///< Implicit embedded DIRK method pair of orders four in five (from the paper
+    ///< Fudziah Ismail et all: Embedded Pair of Diagonally Implicit Runge-Kutta
     ///< Method for Solving Ordinary Differential Equations). The method has
     ///< 7 stages but the first one is explicit.
   };
 
   /// \brief General square table of real numbers.
-  class HERMES_API Table 
+  class HERMES_API Table
   {
   public:
     Table();
     Table(unsigned int size);
-    virtual void alloc(unsigned int size); 
-    unsigned int get_size(); 
+    virtual void alloc(unsigned int size);
+    unsigned int get_size();
     double get_A(unsigned int i, unsigned int j);
     void set_A(unsigned int i, unsigned int j, double val);
 
@@ -111,7 +111,7 @@ namespace Hermes
     double get_C(unsigned int i);
     void set_B(unsigned int i, double val);
     void set_B2(unsigned int i, double val);
-    void set_C(unsigned int i, double val); 
+    void set_C(unsigned int i, double val);
     bool is_explicit();
     bool is_diagonally_implicit();
     bool is_fully_implicit();

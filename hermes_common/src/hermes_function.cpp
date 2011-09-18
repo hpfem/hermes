@@ -120,7 +120,7 @@ namespace Hermes
     }
   };
 
-    
+
   template<typename Scalar>
   Hermes2DFunction<Scalar>::Hermes2DFunction()
   {
@@ -288,7 +288,7 @@ namespace Hermes
       return Ord(99);
     }
   };
-    
+
   template class HERMES_API Hermes1DFunction<double>;
   template class HERMES_API Hermes1DFunction<std::complex<double> >;
   template class HERMES_API Hermes2DFunction<double>;

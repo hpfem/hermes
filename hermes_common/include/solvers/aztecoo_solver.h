@@ -63,7 +63,7 @@ namespace Hermes {
 #ifdef HAVE_TEUCHOS
       virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
 #else
-      virtual void set_precond(Precond<Scalar> *pc) 
+      virtual void set_precond(Precond<Scalar> *pc)
 #endif
       { this->precond_yes = true; this->pc = pc; }
 

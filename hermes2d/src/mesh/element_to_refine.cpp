@@ -84,7 +84,7 @@ namespace Hermes
           error_if(!stream.is_open(), "Unable to open the stream \"%s\" for writing.", filename);
           write_header(mode);
         }
-        else 
+        else
         {
           //read header
           bool header_ok = read_header(mode);
@@ -95,7 +95,7 @@ namespace Hermes
             stream.open(filename, mode);
         }
       }
-      else 
+      else
       {
         //open stream
         stream.open(filename, mode);
@@ -124,7 +124,7 @@ namespace Hermes
       assert_msg((mode & std::ios_base::binary) != 0, "Binary mode supported only.");
 
       //decode
-      try 
+      try
       {
         //read header tag
         stream >> TagChecker(H2DER_START_TAG) >> std::skipws >> TagChecker(H2DER_BIN_TAG) >> std::skipws;
@@ -141,7 +141,7 @@ namespace Hermes
     {
       if (value == 0)
         return 1;
-      else 
+      else
       {
         int value_abs = abs(value);
         double byte_len = ceil((log2(value_abs) + 1) / 8);
@@ -159,7 +159,7 @@ namespace Hermes
     {
       if (little_endian)
         stream.write((const char*)integer_ptr, num_bytes);
-      else 
+      else
       {
         const char* integer_ptr_c = (const char*)integer_ptr;
         for(unsigned i = sizeof(int) - 1; i > (sizeof(int) - num_bytes - 1); i--)
@@ -192,7 +192,7 @@ namespace Hermes
       return result;
     }
 
-    HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream, 
+    HERMES_API ElementToRefineStream& operator<<(ElementToRefineStream& stream,
       const std::vector<ElementToRefine>& elem_refs)
     {
       //calculate range of values
@@ -267,7 +267,7 @@ namespace Hermes
     {
       int pos = (int)stream.stream.tellg();
       //read tag
-      try 
+      try
       {
         stream.stream >> TagChecker(ElementToRefineStream::H2DER_VECTOR_TAG);
       }

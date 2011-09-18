@@ -24,7 +24,7 @@ namespace Hermes
   {
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, Hermes::MatrixSolverType matrix_solver_type, bool start_from_zero_K_vector, bool residual_as_vector)
-      : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()), 
+      : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()),
       stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), residual_as_vector(residual_as_vector), iteration(0) , matrix_solver_type(matrix_solver_type)
     {
       _F_
@@ -65,16 +65,16 @@ namespace Hermes
       Scalar* source_vec, Scalar* target_vec)
     {
       int size = matrix->get_size();
-      for (int i = 0; i < num_blocks; i++) 
+      for (int i = 0; i < num_blocks; i++)
       {
         matrix->multiply_with_vector(source_vec + i*size, target_vec + i*size);
       }
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
-                                          Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn, 
-                                          bool freeze_jacobian, bool block_diagonal_jacobian, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
+                                          Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn,
+                                          bool freeze_jacobian, bool block_diagonal_jacobian,
                                           bool verbose, double newton_tol, int newton_max_iter,
                                           double newton_damping_coeff, double newton_max_allowed_residual_norm)
     {
@@ -84,19 +84,19 @@ namespace Hermes
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
       error_fns.push_back(error_fn);
-      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new, 
+      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
         error_fns, freeze_jacobian, block_diagonal_jacobian, verbose, newton_tol, newton_max_iter,
         newton_damping_coeff, newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, 
-                                          Hermes::vector<Solution<Scalar>*> slns_time_prev, 
-                                          Hermes::vector<Solution<Scalar>*> slns_time_new, 
-                                          Hermes::vector<Solution<Scalar>*> error_fns, 
-                                          bool freeze_jacobian, bool block_diagonal_jacobian, 
-                                          bool verbose, double newton_tol, 
-                                          int newton_max_iter, double newton_damping_coeff, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
+                                          Hermes::vector<Solution<Scalar>*> slns_time_prev,
+                                          Hermes::vector<Solution<Scalar>*> slns_time_new,
+                                          Hermes::vector<Solution<Scalar>*> error_fns,
+                                          bool freeze_jacobian, bool block_diagonal_jacobian,
+                                          bool verbose, double newton_tol,
+                                          int newton_max_iter, double newton_damping_coeff,
                                           double newton_max_allowed_residual_norm)
     {
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
@@ -115,17 +115,17 @@ namespace Hermes
       int ndof = dp->get_num_dofs();
 
       // Creates the stage weak formulation.
-      create_stage_wf(dp->get_spaces().size(), current_time, time_step, 
+      create_stage_wf(dp->get_spaces().size(), current_time, time_step,
                       slns_time_prev, block_diagonal_jacobian);
 
       // Set the correct time to the essential boundary conditions.
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
         Space<Scalar>::update_essential_bc_values(dp->get_spaces(), current_time + bt->get_C(stage_i)*time_step);
 
-      // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian 
-      // matrix of the term coming from the left-hand side of the RK formula k_i = f(...). This is 
+      // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian
+      // matrix of the term coming from the left-hand side of the RK formula k_i = f(...). This is
       // a block-diagonal mass matrix. The corresponding part of the residual is obtained by multiplying
-      // this block mass matrix with the tensor vector K. Next, matrix_right and vector_right are the Jacobian 
+      // this block mass matrix with the tensor vector K. Next, matrix_right and vector_right are the Jacobian
       // matrix and residula vector coming from the function f(...). Of course the RK equation is assumed
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
@@ -139,7 +139,7 @@ namespace Hermes
       Hermes::vector<bool> add_dir_lift;
       for (unsigned int i = 0; i < num_stages; i++)
       {
-        for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++) 
+        for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++)
         {
           residuals_vector.push_back(new Solution<Scalar>(dp->get_space(sln_i)->get_mesh()));
           add_dir_lift.push_back(false);
@@ -153,7 +153,7 @@ namespace Hermes
       memset(vector_left, 0, num_stages * ndof * sizeof(Scalar));
 
       // Assemble the block-diagonal mass matrix M of size ndof times ndof.
-      // The corresponding part of the global residual vector is obtained 
+      // The corresponding part of the global residual vector is obtained
       // just by multiplication with the stage vector K.
       // FIXME: This should not be repeated if spaces have not changed.
       stage_dp_left.assemble(matrix_left, NULL);
@@ -161,7 +161,7 @@ namespace Hermes
       // The Newton's loop.
       double residual_norm;
       int it = 1;
-      while (true) 
+      while (true)
       {
         // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
         prepare_u_ext_vec(time_step);
@@ -186,31 +186,31 @@ namespace Hermes
         if (residual_as_vector)
           // Calculate the l2-norm of residual vector.
           residual_norm = Global<Scalar>::get_l2_norm(vector_right);
-        else 
+        else
         {
           // Translate residual vector into residual functions.
           Hermes::vector<bool> add_dir_lift_vector;
           add_dir_lift_vector.reserve(1);
           add_dir_lift_vector.push_back(add_dir_lift);
-          Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(), 
+          Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(),
             residuals_vector, add_dir_lift_vector);
           residual_norm = Global<Scalar>::calc_norms(residuals_vector);
         }
 
         // Info for the user.
-        if (it == 1) 
+        if (it == 1)
         {
-          if(verbose) 
+          if(verbose)
             info("---- Newton initial residual norm: %g", residual_norm);
         }
         else
-          if(verbose) 
+          if(verbose)
             info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
-        if (residual_norm > newton_max_allowed_residual_norm) 
+        if (residual_norm > newton_max_allowed_residual_norm)
         {
-          if (verbose) 
+          if (verbose)
           {
             info("Current residual norm: %g", residual_norm);
             info("Maximum allowed residual norm: %g", newton_max_allowed_residual_norm);
@@ -221,18 +221,18 @@ namespace Hermes
 
         // If residual norm is within tolerance, or the maximum number
         // of iteration has been reached, or the problem is linear, then quit.
-        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1) 
+        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
           break;
 
         bool rhs_only = (freeze_jacobian && it > 1);
-        if (!rhs_only) 
+        if (!rhs_only)
         {
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
           stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
 
-          // Adding the block mass matrix M to matrix_right. This completes the 
+          // Adding the block mass matrix M to matrix_right. This completes the
           // resulting tensor Jacobian.
           matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
           matrix_right->finish();
@@ -241,7 +241,7 @@ namespace Hermes
           solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
 
         // Solve the linear system.
-        if(!solver->solve()) 
+        if(!solver->solve())
           error ("Matrix solver failed.\n");
 
         // Add \deltaK^{n+1} to K^n.
@@ -253,18 +253,18 @@ namespace Hermes
       }
 
       // If max number of iterations was exceeded, fail.
-      if (it >= newton_max_iter) 
+      if (it >= newton_max_iter)
       {
-        if (verbose) 
+        if (verbose)
           info("Maximum allowed number of Newton iterations exceeded, returning false.");
         return false;
       }
 
       // Project previous time level solution on the stage space,
-      // to be able to add them together. The result of the projection 
+      // to be able to add them together. The result of the projection
       // will be stored in the vector coeff_vec.
-      // FIXME - this projection is slow and it is not needed when the 
-      //         spaces are the same (if spatial adaptivity does not take place). 
+      // FIXME - this projection is slow and it is not needed when the
+      //         spaces are the same (if spatial adaptivity does not take place).
       Scalar* coeff_vec = new Scalar[ndof];
       OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
 
@@ -277,12 +277,12 @@ namespace Hermes
 
       // If error_fn is not NULL, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
-      if (error_fns != Hermes::vector<Solution<Scalar>*>()) 
+      if (error_fns != Hermes::vector<Solution<Scalar>*>())
       {
-        for (int i = 0; i < ndof; i++) 
+        for (int i = 0; i < ndof; i++)
         {
           coeff_vec[i] = 0;
-          for (unsigned int j = 0; j < num_stages; j++) 
+          for (unsigned int j = 0; j < num_stages; j++)
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
           coeff_vec[i] *= time_step;
         }
@@ -290,11 +290,11 @@ namespace Hermes
       }
 
       // Delete stage spaces.
-      for (unsigned int i = 0; i < num_stages; i++) 
+      for (unsigned int i = 0; i < num_stages; i++)
         delete stage_spaces_vector[i];
 
       // Delete all residuals.
-      for (unsigned int i = 0; i < num_stages; i++) 
+      for (unsigned int i = 0; i < num_stages; i++)
         delete residuals_vector[i];
 
       // Clean up.
@@ -305,40 +305,40 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, 
-                                          Hermes::vector<Solution<Scalar>*> slns_time_prev, 
-                                          Hermes::vector<Solution<Scalar>*> slns_time_new, 
-                                          bool freeze_jacobian, bool block_diagonal_jacobian, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
+                                          Hermes::vector<Solution<Scalar>*> slns_time_prev,
+                                          Hermes::vector<Solution<Scalar>*> slns_time_new,
+                                          bool freeze_jacobian, bool block_diagonal_jacobian,
                                           bool verbose, double newton_tol, int newton_max_iter,
-                                          double newton_damping_coeff, 
-                                          double newton_max_allowed_residual_norm) 
+                                          double newton_damping_coeff,
+                                          double newton_max_allowed_residual_norm)
     {
-      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new, 
-                          Hermes::vector<Solution<Scalar>*>(), freeze_jacobian, block_diagonal_jacobian, 
-                          verbose, newton_tol, newton_max_iter, newton_damping_coeff, 
+      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
+                          Hermes::vector<Solution<Scalar>*>(), freeze_jacobian, block_diagonal_jacobian,
+                          verbose, newton_tol, newton_max_iter, newton_damping_coeff,
                           newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev, 
-                                          Solution<Scalar>* sln_time_new, 
+    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
+                                          Solution<Scalar>* sln_time_new,
                                           bool freeze_jacobian, bool block_diagonal_jacobian,
                                           bool verbose, double newton_tol, int newton_max_iter,
-                                          double newton_damping_coeff, double newton_max_allowed_residual_norm) 
+                                          double newton_damping_coeff, double newton_max_allowed_residual_norm)
     {
       Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
       slns_time_prev.push_back(sln_time_prev);
       Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
-      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new, 
-                          error_fns, freeze_jacobian, block_diagonal_jacobian, verbose, newton_tol, 
+      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
+                          error_fns, freeze_jacobian, block_diagonal_jacobian, verbose, newton_tol,
                           newton_max_iter, newton_damping_coeff, newton_max_allowed_residual_norm);
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time, double time_step, 
-                                             Hermes::vector<Solution<Scalar>*> slns_time_prev, 
+    void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time, double time_step,
+                                             Hermes::vector<Solution<Scalar>*> slns_time_prev,
                                              bool block_diagonal_jacobian)
     {
       // Clear the WeakForms.
@@ -346,10 +346,10 @@ namespace Hermes
       stage_wf_right.delete_all();
 
       // First let's do the mass matrix (only one block ndof times ndof).
-      for(unsigned int component_i = 0; component_i < size; component_i++) 
+      for(unsigned int component_i = 0; component_i < size; component_i++)
       {
-        if(dp->get_spaces()[component_i]->get_type() == HERMES_H1_SPACE 
-           || dp->get_spaces()[component_i]->get_type() == HERMES_L2_SPACE) 
+        if(dp->get_spaces()[component_i]->get_type() == HERMES_H1_SPACE
+           || dp->get_spaces()[component_i]->get_type() == HERMES_L2_SPACE)
         {
           MatrixFormVolL2<Scalar>* proj_form = new MatrixFormVolL2<Scalar>(component_i, component_i);
           proj_form->areas.push_back(HERMES_ANY);
@@ -357,8 +357,8 @@ namespace Hermes
           proj_form->u_ext_offset = 0;
           stage_wf_left.add_matrix_form(proj_form);
         }
-        if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE 
-           || dp->get_spaces()[component_i]->get_type() == HERMES_HCURL_SPACE) 
+        if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE
+           || dp->get_spaces()[component_i]->get_type() == HERMES_HCURL_SPACE)
         {
           MatrixFormVolHCurl<Scalar>* proj_form = new MatrixFormVolHCurl<Scalar>(component_i, component_i);
           proj_form->areas.push_back(HERMES_ANY);
@@ -368,9 +368,9 @@ namespace Hermes
         }
       }
 
-      // In the rest we will take the stationary jacobian and residual forms 
+      // In the rest we will take the stationary jacobian and residual forms
       // (right-hand side) and use them to create a block Jacobian matrix of
-      // size (num_stages*ndof times num_stages*ndof) and a block residual 
+      // size (num_stages*ndof times num_stages*ndof) and a block residual
       // vector of length num_stages*ndof.
 
       // Original weak formulation.
@@ -387,12 +387,12 @@ namespace Hermes
       // to the Butcher's table, enhance them with additional
       // external solutions, and anter them as blocks to the
       // new stage Jacobian. If block_diagonal_jacobian = true
-      // then only diagonal blocks are considered. 
-      for (unsigned int m = 0; m < mfvol_base.size(); m++) 
+      // then only diagonal blocks are considered.
+      for (unsigned int m = 0; m < mfvol_base.size(); m++)
       {
-        for (unsigned int i = 0; i < num_stages; i++) 
+        for (unsigned int i = 0; i < num_stages; i++)
         {
-          for (unsigned int j = 0; j < num_stages; j++) 
+          for (unsigned int j = 0; j < num_stages; j++)
           {
             if (block_diagonal_jacobian && i != j) continue;
 
@@ -420,11 +420,11 @@ namespace Hermes
       // Duplicate matrix surface forms, enhance them with
       // additional external solutions, and anter them as
       // blocks of the stage Jacobian.
-      for (unsigned int m = 0; m < mfsurf_base.size(); m++) 
+      for (unsigned int m = 0; m < mfsurf_base.size(); m++)
       {
-        for (unsigned int i = 0; i < num_stages; i++) 
+        for (unsigned int i = 0; i < num_stages; i++)
         {
-          for (unsigned int j = 0; j < num_stages; j++) 
+          for (unsigned int j = 0; j < num_stages; j++)
           {
             if (block_diagonal_jacobian && i != j) continue;
 
@@ -452,9 +452,9 @@ namespace Hermes
       // Duplicate vector volume forms, enhance them with
       // additional external solutions, and anter them as
       // blocks of the stage residual.
-      for (unsigned int m = 0; m < vfvol_base.size(); m++) 
+      for (unsigned int m = 0; m < vfvol_base.size(); m++)
       {
-        for (unsigned int i = 0; i < num_stages; i++) 
+        for (unsigned int i = 0; i < num_stages; i++)
         {
           VectorFormVol<Scalar>* vfv_i = vfvol_base[m]->clone();
 
@@ -477,9 +477,9 @@ namespace Hermes
       // Duplicate vector surface forms, enhance them with
       // additional external solutions, and anter them as
       // blocks of the stage residual.
-      for (unsigned int m = 0; m < vfsurf_base.size(); m++) 
+      for (unsigned int m = 0; m < vfsurf_base.size(); m++)
       {
-        for (unsigned int i = 0; i < num_stages; i++) 
+        for (unsigned int i = 0; i < num_stages; i++)
         {
           VectorFormSurf<Scalar>* vfs_i = vfsurf_base[m]->clone();
 
@@ -504,12 +504,12 @@ namespace Hermes
     void RungeKutta<Scalar>::prepare_u_ext_vec(double time_step)
     {
       unsigned int ndof = dp->get_num_dofs();
-      for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++) 
+      for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
       {
         unsigned int running_space_ndofs = 0;
-        for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++) 
+        for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++)
         {
-          for (int idx = 0; idx < dp->get_space(space_i)->get_num_dofs(); idx++) 
+          for (int idx = 0; idx < dp->get_space(space_i)->get_num_dofs(); idx++)
           {
             Scalar increment = 0;
             for (unsigned int stage_j = 0; stage_j < num_stages; stage_j++)

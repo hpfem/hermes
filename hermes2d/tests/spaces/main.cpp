@@ -22,8 +22,8 @@ class BCNonConst : public DefaultEssentialBCNonConst<double>
 public:
   BCNonConst(std::string marker, ExactSolutionScalar<double>* exact_solution) : DefaultEssentialBCNonConst<double>(marker, exact_solution) {};
 
-  double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const 
-  { 
+  double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
+  {
     return exact_solution->value(x, y);
   }
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
   // Known values (tested Element IDs etc.).
   Hermes::vector<Hermes::vector<int> > element_ids_boundary(
-    Hermes::vector<int>(4, 21, 101), 
+    Hermes::vector<int>(4, 21, 101),
     Hermes::vector<int>(13, 46, 170),
     Hermes::vector<int>(17, 72, 293),
     Hermes::vector<int>(19, 71, 291));
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
       bc_values_out << bc_values[bc_values_out_i][value_i] << std::endl;
   bc_values_out.close();
   */
-  
+
   // Test itself.
   std::ifstream dofs_in("test_dofs.txt");
   int dofs_test;

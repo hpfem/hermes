@@ -142,7 +142,7 @@ public:
       Geom<double> *e, ExtData<double> *ext) const
     {
       double result = 0;
-      for(int i = 0; i < n; i++) 
+      for(int i = 0; i < n; i++)
       {
         double x = e->x[i], y = e->y[i];
         result += wt[i] * v->val[i] * func_val(cur_test_case->poly_matrix(), cur_test_case->quad_order(), x, y);
@@ -206,9 +206,9 @@ Mesh* init_mesh(bool tri) {
 }
 
 /// Initialize internal data structures: H1 space.
-bool init_h1(bool tri) 
+bool init_h1(bool tri)
 {
-  try 
+  try
   {
     // Shapeset, cache and mesh.
     H1Shapeset* h1_shapeset = new H1Shapeset();
@@ -226,7 +226,7 @@ bool init_h1(bool tri)
 
     return true;
   }
-  catch (std::exception& e) 
+  catch (std::exception& e)
   {
     info("failed: %s", e.what());
     return false;
@@ -234,9 +234,9 @@ bool init_h1(bool tri)
 }
 
 /// Initialize internal data structures: L2 space.
-bool init_l2(bool tri) 
+bool init_l2(bool tri)
 {
-  try 
+  try
   {
     // Shapeset, cache and mesh.
     L2Shapeset* l2_shapeset = new L2Shapeset();
@@ -254,7 +254,7 @@ bool init_l2(bool tri)
 
     return true;
   }
-  catch (std::exception& e) 
+  catch (std::exception& e)
   {
     info("failed: %s", e.what());
     return false;
@@ -262,7 +262,7 @@ bool init_l2(bool tri)
 }
 
 /// Prints failure matrix.
-void show_fail_matrix(int** fail_matrix, const std::string& space_name, const int max_quad_order) 
+void show_fail_matrix(int** fail_matrix, const std::string& space_name, const int max_quad_order)
 {
   const int max_order_h = H2D_GET_H_ORDER(max_quad_order), max_order_v = H2D_GET_V_ORDER(max_quad_order);
 #define NUMBER_W 2 ///< A size of a cell in the table.
@@ -285,7 +285,7 @@ void show_fail_matrix(int** fail_matrix, const std::string& space_name, const in
   }
 
   // Print body.
-  for(int i = 0; i <= max_order_v; i++) 
+  for(int i = 0; i <= max_order_v; i++)
   {
     // Build row head.
     std::stringstream str;
@@ -293,10 +293,10 @@ void show_fail_matrix(int** fail_matrix, const std::string& space_name, const in
     str << buff_number;
 
     // Build row body.
-    for(int k = 0; k <= max_order_h; k++) 
+    for(int k = 0; k <= max_order_h; k++)
     {
       str << '|';
-      if (fail_matrix[i][k] == H2D_TEST_NOT_DONE) 
+      if (fail_matrix[i][k] == H2D_TEST_NOT_DONE)
       {
         for(int j = 0; j < NUMBER_W; j++)
           str << '-';
@@ -321,7 +321,7 @@ void show_fail_matrix(int** fail_matrix, const std::string& space_name, const in
 }
 
 /// Test reference solution whether its values matche values of the polynom in the test case.
-bool test_ref_solution(Solution<double>& rsln) 
+bool test_ref_solution(Solution<double>& rsln)
 {
   verbose("Testing reference solution");
 
@@ -336,7 +336,7 @@ bool test_ref_solution(Solution<double>& rsln)
     // Set element.
     rsln.set_active_element(element);
     int rsln_order = rsln.get_fn_order();
-    if (rsln_order < H2D_GET_H_ORDER(test_quad_order) || rsln_order < H2D_GET_V_ORDER(test_quad_order)) 
+    if (rsln_order < H2D_GET_H_ORDER(test_quad_order) || rsln_order < H2D_GET_V_ORDER(test_quad_order))
     {
       verbose(" Failed: reference solution order (%d/%d) is lower than test case order (%d/%d) at element #%d", rsln_order, rsln_order, H2D_GET_H_ORDER(test_quad_order), H2D_GET_V_ORDER(test_quad_order), element->id);
       return true;
@@ -369,18 +369,18 @@ bool test_ref_solution(Solution<double>& rsln)
 }
 
 /// Test.
-bool test(bool tri, const std::string& space_name, int min_order, int max_order = H2DRS_MAX_ORDER) 
+bool test(bool tri, const std::string& space_name, int min_order, int max_order = H2DRS_MAX_ORDER)
 {
   bool failed = false;
 
   // Prepare cases.
   int min_quad_order = -1, max_quad_order = -1;
-  if (tri) 
+  if (tri)
   {
     min_quad_order = H2D_MAKE_QUAD_ORDER(min_order, 0);
     max_quad_order = H2D_MAKE_QUAD_ORDER(max_order, 0);
   }
-  else 
+  else
   {
     min_quad_order = H2D_MAKE_QUAD_ORDER(min_order, min_order);
     max_quad_order = H2D_MAKE_QUAD_ORDER(max_order, max_order);
@@ -405,7 +405,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
   Solver* solver = create_linear_solver(matrix_solver, mat, rhs);
   */
   // Process cases.
-  do 
+  do
   {
     int test_result = H2D_TEST_SUCCESS;
 
@@ -470,15 +470,15 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
     verbose("Testing candidates");
     const std::vector<OptimumSelector<double>::Cand>& candidates = selector->get_candidates();
     std::vector<OptimumSelector<double>::Cand>::const_iterator cand = candidates.begin();
-    while (cand != candidates.end()) 
+    while (cand != candidates.end())
     {
-      if (cur_test_case->should_match(*cand) && Hermes::abs(cand->error) > numerical_zero) 
+      if (cur_test_case->should_match(*cand) && Hermes::abs(cand->error) > numerical_zero)
         test_result |= H2D_CAND_FAILED;
       cand++;
     }
     if (test_result == H2D_TEST_SUCCESS)
       verbose("Test success");
-    else 
+    else
     {
       verbose("Test failed!");
       failed = true;
@@ -496,7 +496,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
 }
 
 /// Test entry-point.
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   // Check input parameters.
   bool tri = false;

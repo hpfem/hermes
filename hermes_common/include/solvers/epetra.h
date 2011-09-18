@@ -30,9 +30,9 @@
 #include <Epetra_CrsGraph.h>
 #include <Epetra_CrsMatrix.h>
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Solvers 
+  namespace Solvers
   {
     template <typename Scalar> class AmesosSolver;
     template <typename Scalar> class AztecOOSolver;

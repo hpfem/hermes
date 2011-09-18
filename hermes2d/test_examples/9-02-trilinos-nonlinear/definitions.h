@@ -78,10 +78,10 @@ private:
   public:
     JacobianFormVol(int i, int j) : MatrixFormVol<double>(i, j, HERMES_ANY, HERMES_SYM) {};
 
-    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
                  Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 
@@ -90,10 +90,10 @@ private:
   public:
     ResidualFormVol(int i, CustomRightHandSide* rhs) : VectorFormVol<double>(i), rhs(rhs) {};
 
-    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
+    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
                          Geom<double> *e, ExtData<double> *ext) const;
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, 
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                     Geom<Ord> *e, ExtData<Ord> *ext) const;
 
   private:
@@ -106,10 +106,10 @@ private:
   public:
     PrecondFormVol(int i, int j) : MatrixFormVol<double>(i, j, HERMES_ANY, HERMES_SYM) {};
 
-    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, 
+    virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
                  Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
-    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, 
+    virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext) const;
   };
 };

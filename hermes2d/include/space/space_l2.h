@@ -38,7 +38,7 @@ namespace Hermes
       virtual ~L2Space();
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
-      
+
       /// Loads this space from a file.
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
@@ -52,7 +52,7 @@ namespace Hermes
       virtual SpaceType get_type() const { return HERMES_L2_SPACE; }
 
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
-      
+
       // FIXME: This function should probably not be used at all.
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 

@@ -40,7 +40,7 @@ namespace Hermes
 
       int View::screenshot_no = 1;
 
-      void View::init() 
+      void View::init()
       {
         jitter_x = jitter_y = 0.0;
         dragging = scaling = false;
@@ -79,14 +79,14 @@ namespace Hermes
         output_id(-1),
         gl_pallete_tex_id(0)
       {
-        if (wg == NULL) 
+        if (wg == NULL)
         {
           output_x = H2D_DEFAULT_X_POS;
           output_y = H2D_DEFAULT_Y_POS;
           output_width = H2D_DEFAULT_WIDTH;
           output_height = H2D_DEFAULT_HEIGHT;
         }
-        else 
+        else
         {
           output_x = wg->x;
           output_y = wg->y;
@@ -107,14 +107,14 @@ namespace Hermes
         output_id(-1),
         gl_pallete_tex_id(0)
       {
-        if (wg == NULL) 
+        if (wg == NULL)
         {
           output_x = H2D_DEFAULT_X_POS;
           output_y = H2D_DEFAULT_Y_POS;
           output_width = H2D_DEFAULT_WIDTH;
           output_height = H2D_DEFAULT_HEIGHT;
         }
-        else 
+        else
         {
           output_x = wg->x;
           output_y = wg->y;
@@ -153,16 +153,16 @@ namespace Hermes
         wait(HERMES_WAIT_CLOSE, text);
       }
 
-      void View::wait(ViewWaitEvent wait_event, const char* text) 
+      void View::wait(ViewWaitEvent wait_event, const char* text)
       {
         //prepare message
         std::stringstream str;
         str << "  << ";
         if (text != NULL)
           str << text;
-        else 
+        else
         {
-          switch(wait_event) 
+          switch(wait_event)
           {
           case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
           case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
@@ -172,7 +172,7 @@ namespace Hermes
         str << " >>" << std::endl;
 
         //do something
-        switch(wait_event) 
+        switch(wait_event)
         {
         case HERMES_WAIT_CLOSE: wait_for_all_views_close(str.str().c_str()); break;
         case HERMES_WAIT_KEYPRESS: wait_for_any_key(str.str().c_str()); break;
@@ -180,7 +180,7 @@ namespace Hermes
         }
       }
 
-      void View::refresh() 
+      void View::refresh()
       {
         bool do_refresh = true;
         view_sync.enter();
@@ -191,9 +191,9 @@ namespace Hermes
           refresh_view(output_id);
       }
 
-      void View::reset_view(bool force_reset) 
+      void View::reset_view(bool force_reset)
       {
-        if (force_reset || view_not_reset) 
+        if (force_reset || view_not_reset)
         {
           double mesh_width  = vertices_max_x - vertices_min_x;
           double mesh_height = vertices_max_y - vertices_min_y;
@@ -404,7 +404,7 @@ namespace Hermes
           int oldv = pos_vert, oldh = pos_horz;
           pos_horz = (x > output_width/2);
           pos_vert = (y < output_height/2);
-          if (pos_horz != oldh || pos_vert != oldv) 
+          if (pos_horz != oldh || pos_vert != oldv)
           {
             update_layout();
             refresh();
@@ -488,7 +488,7 @@ namespace Hermes
           {
             // There used to be a type called default, but it caused some weird behavior.
             /*
-            switch(pal_type) 
+            switch(pal_type)
             {
             case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
             case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
@@ -497,7 +497,7 @@ namespace Hermes
             default: error("Invalid palette type");
             }
             */
-            switch(pal_type) 
+            switch(pal_type)
             {
             case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
             case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
@@ -702,7 +702,7 @@ namespace Hermes
 
       void View::set_min_max_range(double min, double max)
       {
-        if (max < min) 
+        if (max < min)
         {
           std::swap(min, max);
           warn("Upper bound set below the lower bound: reversing to (%f,%f).", min, max);
@@ -1061,7 +1061,7 @@ namespace Hermes
 
           const float* color = boxcolors[numboxes-1-i];
           float bcolor[3] = { color[0], color[1], color[2] };
-          if (scale_focused) 
+          if (scale_focused)
           {
             bcolor[0] = color[0]*0.7f + 1.0f*0.3f;
             bcolor[1] = color[1]*0.7f + 1.0f*0.3f;

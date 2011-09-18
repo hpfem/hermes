@@ -90,7 +90,7 @@ namespace Hermes
             ysln->set_quad_order(1, yitem);
             xval = xsln->get_values(component_x, value_type_x);
             yval = ysln->get_values(component_y, value_type_y);
-            for (i = 0; i < lin_np_tri[1]; i++) 
+            for (i = 0; i < lin_np_tri[1]; i++)
             {
               double m = (sqrt(sqr(xval[i]) + sqr(yval[i])));
               if (finite(m) && fabs(m) > max) max = fabs(m);
@@ -154,7 +154,7 @@ namespace Hermes
           if (split)
           {
             if (curved)
-              for (i = 0; i < 3; i++) 
+              for (i = 0; i < 3; i++)
               {
                 midval[0][i] = phx[idx[i]];
                 midval[1][i] = phy[idx[i]];
@@ -177,7 +177,7 @@ namespace Hermes
         // no splitting: output a linear triangle
         add_triangle(iv0, iv1, iv2);
       }
-      
+
       void Vectorizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
         double* xval, double* yval, double* phx, double* phy, int* idx)
       {
@@ -198,7 +198,7 @@ namespace Hermes
             ysln->set_quad_order(1, yitem);
             xval = xsln->get_values(component_x, value_type_x);
             yval = ysln->get_values(component_y, value_type_y);
-            for (i = 0; i < lin_np_quad[1]; i++) 
+            for (i = 0; i < lin_np_quad[1]; i++)
             {
               double m = sqrt(sqr(xval[i]) + sqr(yval[i]));
               if (finite(m) && fabs(m) > max) max = fabs(m);
@@ -226,7 +226,7 @@ namespace Hermes
 
           // determine whether or not to split the element
           bool split;
-          
+
           //if eps > 1, the user wants a fixed number of refinements (no adaptivity)
           if (eps >= 1.0)
             split = (level < eps);
@@ -272,7 +272,7 @@ namespace Hermes
           if (split)
           {
             if (curved)
-              for (i = 0; i < 5; i++) 
+              for (i = 0; i < 5; i++)
               {
                 midval[0][i] = phx[idx[i]];
                 midval[1][i] = phy[idx[i]];
@@ -306,7 +306,7 @@ namespace Hermes
           add_triangle(iv2, iv3, iv0);
         }
       }
-      
+
       void Vectorizer::process_dash(int iv1, int iv2)
       {
         int mid = this->peek_vertex(iv1, iv2);
@@ -373,7 +373,7 @@ namespace Hermes
         edges = (int3*) malloc(sizeof(int3) * edges_size);
         dashes = (int2*) malloc(sizeof(int2) * dashes_size);
         info = (int4*) malloc(sizeof(int4) * vertex_size);
-        
+
         // initialize the hash table
         hash_table = (int*) malloc(sizeof(int) * vertex_size);
         memset(hash_table, 0xff, sizeof(int) * vertex_size);
@@ -389,24 +389,24 @@ namespace Hermes
         // get the component and desired value from item.
         if (xitem >= 0x40)
         {
-          component_x = 1; 
-          xitem >>= 6; 
+          component_x = 1;
+          xitem >>= 6;
         }
-        while (!(xitem & 1)) 
-        { 
+        while (!(xitem & 1))
+        {
           xitem >>= 1;
-          value_type_x++; 
+          value_type_x++;
         }
         // get the component and desired value from item.
         if (yitem >= 0x40)
         {
-          component_y = 1; 
-          yitem >>= 6; 
+          component_y = 1;
+          yitem >>= 6;
         }
-        while (!(yitem & 1)) 
-        { 
+        while (!(yitem & 1))
+        {
           yitem >>= 1;
-          value_type_y++; 
+          value_type_y++;
         }
 
         Mesh** meshes = new Mesh*[2];
@@ -471,13 +471,13 @@ namespace Hermes
             double px = ref[i][0];
             double py = ref[i][1];
             // for odd edges (1, 3) we check x coordinate after ctm transformation, if it's the same (1 or -1) in both meshes => bold
-            if (i & 1) 
+            if (i & 1)
             {
               if ((xctm->m[0]*px + xctm->t[0] == r[i]) && (yctm->m[0]*px + yctm->t[0] == r[i]))
                 bold = true;
             }
             // for even edges (0, 4) we check y coordinate after ctm transformation, if it's the same (-1 or 1) in both meshes => bold
-            else 
+            else
             {
               if ((xctm->m[1]*py + xctm->t[1] == r[i]) && (yctm->m[1]*py + yctm->t[1] == r[i]))
                 bold = true;
@@ -512,7 +512,7 @@ namespace Hermes
         ::free(this->info);
 
       }
-      
+
       Vectorizer::~Vectorizer()
       {
         if(verts != NULL)
@@ -527,7 +527,7 @@ namespace Hermes
         }
       }
 
-      void Vectorizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
+      void Vectorizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         assert_msg(verts!= NULL, "Cannot calculate AABB from NULL vertices");
         LinearizerBase::calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), this->vertex_count, min_x, max_x, min_y, max_y);

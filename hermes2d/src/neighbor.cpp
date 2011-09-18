@@ -27,7 +27,7 @@ namespace Hermes
       central_el(el),
       neighb_el(NULL),
       quad(&g_quad_2d_std)
-    { 
+    {
       assert_msg(central_el != NULL && central_el->active == 1,
         "You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
@@ -59,14 +59,14 @@ namespace Hermes
         {
           // Copy current array of transformations into new memory location.
           Transformations *tmp = new Transformations(ns.central_transformations.get(j));
-          this->central_transformations.add(tmp, j); 
+          this->central_transformations.add(tmp, j);
         }
       for(unsigned int j = 0; j < ns.neighbor_transformations.get_size(); j++)
         if (ns.neighbor_transformations.present(j))
         {
           // Copy current array of transformations into new memory location.
           Transformations *tmp = new Transformations(ns.neighbor_transformations.get(j));
-          this->neighbor_transformations.add(tmp, j); 
+          this->neighbor_transformations.add(tmp, j);
         }
 
       assert_msg(central_el != NULL && central_el->active == 1,
@@ -92,29 +92,29 @@ namespace Hermes
       neighbor_edges.clear();
       neighbors.clear();
       clear_supported_shapes();
-            
+
       for(unsigned int i = 0; i < central_transformations.get_size(); i++)
         if (this->central_transformations.present(i))
           delete this->central_transformations.get(i);
-      for(unsigned int i = 0; i < neighbor_transformations.get_size(); i++)  
+      for(unsigned int i = 0; i < neighbor_transformations.get_size(); i++)
         if (this->neighbor_transformations.present(i))
-          delete this->neighbor_transformations.get(i);  
+          delete this->neighbor_transformations.get(i);
     }
 
     template<typename Scalar>
     void NeighborSearch<Scalar>::reset_neighb_info()
     {
       _F_;
-      
+
       // Reset transformations.
       for(unsigned int i = 0; i < n_neighbors; i++)
       {
         if (this->central_transformations.present(i))
           this->central_transformations.get(i)->reset();
         if (this->neighbor_transformations.present(i))
-          this->neighbor_transformations.get(i)->reset();  
+          this->neighbor_transformations.get(i)->reset();
       }
-             
+
       // Reset information about the neighborhood's active state.
       active_segment = 0;
       active_edge = 0;
@@ -125,7 +125,7 @@ namespace Hermes
       neighbor_edges.clear();
       neighbors.clear();
       n_neighbors = 0;
-          
+
       neighborhood_type = H2D_DG_NOT_INITIALIZED;
     }
 
@@ -224,13 +224,13 @@ namespace Hermes
       _F_;
       Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
       // Inter-element edge.
-      if(is_inter_edge(edge, transformations)) 
+      if(is_inter_edge(edge, transformations))
       {
         set_active_edge(edge);
         update_according_to_sub_idx(transformations);
       }
       // Intra-element edge.
-      else 
+      else
       {
         neighb_el = central_el;
 
@@ -255,7 +255,7 @@ namespace Hermes
     {
       _F_;
       Hermes::vector<unsigned int> transformations_backwards;
-      while (sub_idx > 0) 
+      while (sub_idx > 0)
       {
         transformations_backwards.push_back((sub_idx - 1) & 7);
         sub_idx = (sub_idx - 1) >> 3;
@@ -277,7 +277,7 @@ namespace Hermes
 
       // Triangles.
       for(unsigned int i = 0; i < transformations.size(); i++)
-        if(central_el->get_mode() == HERMES_MODE_TRIANGLE) 
+        if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
         {
           if ((edge == 0 && (transformations[i] == 2 || transformations[i] == 3)) ||
             (edge == 1 && (transformations[i] == 0 || transformations[i] == 3)) ||
@@ -285,7 +285,7 @@ namespace Hermes
             return false;
         }
         // Quads.
-        else 
+        else
         {
           if ((edge == 0 && (transformations[i] == 2 || transformations[i] == 3 || transformations[i] == 5)) ||
             (edge == 1 && (transformations[i] == 0 || transformations[i] == 3 || transformations[i] == 6)) ||
@@ -300,12 +300,12 @@ namespace Hermes
     void NeighborSearch<Scalar>::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
     {
       _F_;
-      if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP) 
+      if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP)
       {
         if (!neighbor_transformations.present(0)) // in case of neighborhood_type == H2D_DG_NO_TRANSF
-          neighbor_transformations.add(new Transformations, 0); 
+          neighbor_transformations.add(new Transformations, 0);
         Transformations *tr = neighbor_transformations.get(0);
-        
+
         for(unsigned int i = 0; i < transformations.size(); i++)
           // Triangles.
           if(central_el->get_mode() == HERMES_MODE_TRIANGLE)
@@ -339,15 +339,15 @@ namespace Hermes
       Hermes::vector<unsigned int> neighbors_not_to_be_deleted;
 
       // We basically identify the neighbors that are not compliant with the current sub-element mapping on the central element.
-      for(unsigned int neighbor_i = 0; neighbor_i < n_neighbors; neighbor_i++) 
+      for(unsigned int neighbor_i = 0; neighbor_i < n_neighbors; neighbor_i++)
       {
         bool deleted = false;
-        
+
         Transformations* current_transforms = central_transformations.get(neighbor_i);
-        
+
         for(unsigned int level = 0; level < std::min((unsigned int)transformations.size(), current_transforms->num_levels); level++)
           // If the found neighbor is not a neighbor of this subelement.
-          if(!compatible_transformations(current_transforms->transf[level], transformations[level], active_edge)) 
+          if(!compatible_transformations(current_transforms->transf[level], transformations[level], active_edge))
           {
             deleted = true;
             break;
@@ -359,13 +359,13 @@ namespace Hermes
       }
 
       // Now for the compliant ones, we need to adjust the transformations.
-      for(unsigned int neighbors_not_to_be_deleted_i = 0; neighbors_not_to_be_deleted_i < neighbors_not_to_be_deleted.size(); neighbors_not_to_be_deleted_i++) 
+      for(unsigned int neighbors_not_to_be_deleted_i = 0; neighbors_not_to_be_deleted_i < neighbors_not_to_be_deleted.size(); neighbors_not_to_be_deleted_i++)
       {
         unsigned int neighbor_i = neighbors_not_to_be_deleted[neighbors_not_to_be_deleted_i];
-                 
+
         Transformations* central_transforms = central_transformations.get(neighbor_i);
-        
-        for(unsigned int level = 0; level < transformations.size(); level++) 
+
+        for(unsigned int level = 0; level < transformations.size(); level++)
         {
           // We want to use the transformations from assembling, because set_active_edge only uses bsplit.
           // But we have to be careful, if the original central element transformation was anisotropic and adjacent to the current active edge
@@ -376,7 +376,7 @@ namespace Hermes
             (active_edge == 1 && transformations[level] == 7) ||
             (active_edge == 2 && transformations[level] == 5) ||
             (active_edge == 3 && transformations[level] == 6))
-            ) 
+            )
           {
             central_transforms->transf[level] = transformations[level];
             // Also if the transformation count is already bigger than central_transforms->num_levels, we need to raise it.
@@ -384,11 +384,11 @@ namespace Hermes
               central_transforms->num_levels = level + 1;
           }
           // If we are already on a bigger (i.e. ~ way up) neighbor.
-          if(central_transforms->num_levels == level + 1) 
+          if(central_transforms->num_levels == level + 1)
           {
             if (!neighbor_transformations.present(neighbor_i))
               neighbor_transformations.add(new Transformations, neighbor_i);
-            
+
             Transformations* neighbor_transforms = neighbor_transformations.get(neighbor_i);
 
             // Triangles.
@@ -427,7 +427,7 @@ namespace Hermes
       _F_;
       if(a == b)
         return true;
-      if(edge == 0) 
+      if(edge == 0)
       {
         if ((a == 0 && (b == 6 || b == 4)) ||
           (a == 1 && (b == 7 || b == 4)))
@@ -435,7 +435,7 @@ namespace Hermes
         else
           return false;
       }
-      if(edge == 1) 
+      if(edge == 1)
       {
         if ((a == 1 && (b == 4 || b == 7)) ||
           (a == 2 && (b == 5 || b == 7)))
@@ -443,7 +443,7 @@ namespace Hermes
         else
           return false;
       }
-      if(edge == 2) 
+      if(edge == 2)
       {
         if ((a == 2 && (b == 7 || b == 5)) ||
           (a == 3 && (b == 6 || b == 5)))
@@ -451,7 +451,7 @@ namespace Hermes
         else
           return false;
       }
-      if(edge == 3) 
+      if(edge == 3)
       {
         if ((a == 3 && (b == 5 || b == 6)) ||
           (a == 0 && (b == 4 || b == 6)))
@@ -473,8 +473,8 @@ namespace Hermes
       // Test for active element.
       if(transformations.empty())
         return;
-      
-      for(unsigned int i = 0; i < n_neighbors; i++) 
+
+      for(unsigned int i = 0; i < n_neighbors; i++)
       {
         // Find the index where the additional subelement mapping (on top of the initial one from assembling) starts.
         unsigned int j = 0;
@@ -488,7 +488,7 @@ namespace Hermes
         central_transformations.get(i)->strip_initial_transformations(j);
       }
     }
-    
+
     template<typename Scalar>
     void NeighborSearch<Scalar>::Transformations::strip_initial_transformations(unsigned int number_of_stripped)
     {
@@ -510,17 +510,17 @@ namespace Hermes
       _F_;
       for(unsigned int i = position; i < n_neighbors - 1; i++)
         central_transformations.get(i)->copy_from(central_transformations.get(i + 1));
-      
+
       if (central_transformations.present(n_neighbors - 1)) // may not be true when position == n_neighbors - 1
         central_transformations.get(n_neighbors - 1)->reset();
-        
+
       for(unsigned int i = position; i < n_neighbors - 1; i++)
       {
         if (neighbor_transformations.present(i + 1))
         {
           if (!neighbor_transformations.present(i))
             neighbor_transformations.add(new Transformations, i);
-          
+
           neighbor_transformations.get(i)->copy_from(neighbor_transformations.get(i + 1));
         }
       }
@@ -595,30 +595,30 @@ namespace Hermes
             // Add to the array of neighbor_transformations one that transforms central el. to its parent completely
             // adjacent to the single big neighbor.
             assert(n_neighbors == 0);
-            
+
             neighbor_transformations.add(new Transformations, n_neighbors);
             Transformations *neighbor_transforms = neighbor_transformations.get(n_neighbors);
-            
+
             neighbor_transforms->num_levels = n_parents;
 
             // Go back through the intermediate inactive parents down to the central element and stack corresponding
             // neighbor_transformations into the array 'neighbor_transformations'.
-            for(int j = n_parents - 1; j > 0; j-- ) 
+            for(int j = n_parents - 1; j > 0; j-- )
             {
               n = mesh->peek_vertex_node(par_mid_vertices[j]->id, p1);
-              if(n == NULL) 
+              if(n == NULL)
               {
                 neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
                 p1 = par_mid_vertices[j]->id;
               }
-              else 
+              else
               {
-                if(n->id == par_mid_vertices[j-1]->id) 
+                if(n->id == par_mid_vertices[j-1]->id)
                 {
                   neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
                   p2 = par_mid_vertices[j]->id;
                 }
-                else 
+                else
                 {
                   neighbor_transforms->transf[n_parents - j - 1] = neighbor_edge.local_num_of_edge;
                   p1 = par_mid_vertices[j]->id;
@@ -705,12 +705,12 @@ namespace Hermes
                   neighbor_edge.local_num_of_edge = k;
                   break;
                 }
-                
+
               if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
 
               central_transformations.add(new Transformations, n_neighbors);
               Transformations *tr = central_transformations.get(n_neighbors);
-              
+
               // Construct the transformation path to the current neighbor.
               for(unsigned int k = 0; k < n_sons; k++)
                 tr->transf[k] = sons[k];
@@ -752,7 +752,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(const ExtendedShapeset & other) 
+    NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(const ExtendedShapeset & other)
     {
       this->central_al = new AsmList<Scalar>(*other.central_al);
       this->cnt = other.cnt;
@@ -823,21 +823,21 @@ namespace Hermes
       this->neighb_el = this->neighbors[index];
       this->neighbor_edge = this->neighbor_edges[index];
     }
-      
+
     template<typename Scalar>
     Element* NeighborSearch<Scalar>::get_neighb_el()
-    { 
+    {
       _F_;
       return this->neighb_el;
     }
-      
+
     template<typename Scalar>
     typename NeighborSearch<Scalar>::NeighborEdgeInfo NeighborSearch<Scalar>::get_neighbor_edge()
     {
       _F_;
       return this->neighbor_edge;
     }
-      
+
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_n_trans(unsigned int index)
     {
@@ -850,35 +850,35 @@ namespace Hermes
 
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2)
-    { 
+    {
       _F_;
       if (!this->central_transformations.present(index_1))
         error("Out of bounds of central_transformations.");
       if (index_2 >= (unsigned) Transformations::max_level)
         error("Trying to access transformation deeper than allowed.");
-      
+
       return this->central_transformations.get(index_1)->transf[index_2];
     }
-      
+
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index)
-    { 
+    {
       _F_;
-      if (this->neighbor_transformations.present(index))        
+      if (this->neighbor_transformations.present(index))
         return this->neighbor_transformations.get(index)->num_levels;
       else
         return 0;
     }
-      
+
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2)
-    { 
+    {
       _F_;
       if (!this->neighbor_transformations.present(index_1))
         error("Out of bounds of neighbor_transformations.");
       if (index_2 >= (unsigned) Transformations::max_level)
         error("Trying to access transformation deeper than allowed.");
-      
+
       return this->neighbor_transformations.get(index_1)->transf[index_2];
     }
 

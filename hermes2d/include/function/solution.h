@@ -123,7 +123,7 @@ namespace Hermes
       /// enough for calculations. Since it searches for an element sequentinally, it is extremelly
       /// slow. Prefer Solution::get_ref_value if possible.
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
-      
+
       /// Multiplies the function represented by this class by the given coefficient.
       void multiply(Scalar coef);
 
@@ -168,18 +168,18 @@ namespace Hermes
       /// In case this is valid it returns a pointer to the space this solution belongs to.
       /// Only use when get_space() == get_space_seq();
       Space<Scalar>* get_space();
-      
+
       /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
       /// Only use when get_space() == get_space_seq();
       Scalar* get_sln_vector();
 
       virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
-      
+
     protected:
       virtual void init();
-      
+
       virtual void free();
-            
+
       /// In case this is valid it is a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
       Scalar* sln_vector;
 

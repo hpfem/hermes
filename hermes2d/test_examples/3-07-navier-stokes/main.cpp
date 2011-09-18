@@ -43,10 +43,10 @@ using namespace Hermes::Hermes2D;
 // tutorial for comparisons.
 const bool STOKES = false;
 
-#define PRESSURE_IN_L2                      
+#define PRESSURE_IN_L2
 
 // Initial polynomial degree for velocity components.
-const int P_INIT_VEL = 2;                         
+const int P_INIT_VEL = 2;
 
 // Initial polynomial degree for pressure.
 // Note: P_INIT_VEL should always be greater than
@@ -72,7 +72,7 @@ const double H = 5;                               // Domain height (necessary to
 
 // Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
 // Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
-Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;  
+Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
 
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-  ZeroInitialCondition xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh); 
+  ZeroInitialCondition xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh);
 
   // Initialize weak formulation.
   WeakForm<double>* wf;
@@ -155,9 +155,9 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space))];
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-    Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-    coeff_vec, matrix_solver_type, 
+  OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space),
+    Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
+    coeff_vec, matrix_solver_type,
     Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   // Time-stepping loop:
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.
-    if (current_time <= STARTUP_TIME) 
+    if (current_time <= STARTUP_TIME)
     {
       info("Updating time-dependent essential BC.");
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
     }
     Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
-    
+
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", current_time);
     vview.set_title(title);

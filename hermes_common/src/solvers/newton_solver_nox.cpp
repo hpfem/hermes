@@ -18,9 +18,9 @@
 #include "newton_solver_nox.h"
 #if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Solvers 
+  namespace Solvers
   {
     static Epetra_SerialComm seq_comm;
 
@@ -28,7 +28,7 @@ namespace Hermes
     DiscreteProblemNOX<Scalar>::DiscreteProblemNOX(DiscreteProblemInterface<Scalar>* problem) : dp(problem)
     {
       this->precond = Teuchos::null;
-      if(!this->dp->is_matrix_free()) 
+      if(!this->dp->is_matrix_free())
         this->dp->create_sparse_structure(&jacobian);
     }
 
@@ -36,9 +36,9 @@ namespace Hermes
     bool DiscreteProblemNOX<Scalar>::computeF(const Epetra_Vector &x, Epetra_Vector &f, FillType flag)
     {
       EpetraVector<Scalar> xx(x);  // wrap our structures around core Epetra objects
-      EpetraVector<Scalar> rhs(f); 
+      EpetraVector<Scalar> rhs(f);
 
-      rhs.zero(); 
+      rhs.zero();
 
       Scalar* coeff_vec = new Scalar[xx.length()];
       xx.extract(coeff_vec);
@@ -60,7 +60,7 @@ namespace Hermes
       jacob.zero();
 
       Scalar* coeff_vec = new Scalar[xx.length()];
-      xx.extract(coeff_vec);  
+      xx.extract(coeff_vec);
       this->dp->assemble(coeff_vec, &jacob, NULL); // NULL is for the right-hand side.
       delete [] coeff_vec;
       //jacob.finish();
@@ -139,7 +139,7 @@ namespace Hermes
     template<typename Scalar>
     NewtonSolverNOX<Scalar>::~NewtonSolverNOX()
     {
-      // FIXME: this does not destroy the "interface_", and Trilinos 
+      // FIXME: this does not destroy the "interface_", and Trilinos
       // complains at closing main.cpp.
       this->dp->invalidate_matrix();
     }
@@ -164,7 +164,7 @@ namespace Hermes
     {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner",pc);
     }
-    
+
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_output_flags(int flags)
     {
@@ -178,19 +178,19 @@ namespace Hermes
 
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_ls_max_iters(int iters)
-    { 
+    {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Iterations",iters);
     }
 
     template<typename Scalar>
-    void NewtonSolverNOX<Scalar>::set_ls_tolerance(double tolerance) 
-    { 
+    void NewtonSolverNOX<Scalar>::set_ls_tolerance(double tolerance)
+    {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Tolerance",tolerance);
     }
 
     template<typename Scalar>
-    void NewtonSolverNOX<Scalar>::set_ls_sizeof_krylov_subspace(int size) 
-    { 
+    void NewtonSolverNOX<Scalar>::set_ls_sizeof_krylov_subspace(int size)
+    {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace",size);
     }
 
@@ -222,21 +222,21 @@ namespace Hermes
       Teuchos::ParameterList &ls_pars = nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver");
       // preconditioner
       Teuchos::RCP<Precond<Scalar> > precond = ndp.get_precond();
-      //linear system     
+      //linear system
       Teuchos::RCP<NOX::Epetra::LinearSystemAztecOO> lin_sys;
       // problem
       Teuchos::RCP<NOX::Epetra::Interface::Required> i_req = Teuchos::rcpFromRef(ndp);
       // jacobian matrix
       Teuchos::RCP<Epetra_RowMatrix> jac_mat;
 
-      // Create linear system 
-      if(this->dp->is_matrix_free()) 
+      // Create linear system
+      if(this->dp->is_matrix_free())
       {
-        if(precond == Teuchos::null) 
+        if(precond == Teuchos::null)
         { //Matrix free without preconditioner
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req, init_sln));
         }
-        else 
+        else
         { //Matrix free with preconditioner
           Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(ndp);
           lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, i_req,
@@ -255,54 +255,54 @@ namespace Hermes
         else
         { //Matrix  with preconditioner
           Teuchos::RCP<NOX::Epetra::Interface::Preconditioner> i_prec = Teuchos::rcpFromRef(ndp);
-          lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars, 
+          lin_sys = Teuchos::rcp(new NOX::Epetra::LinearSystemAztecOO(print_pars, ls_pars,
             i_jac, jac_mat, i_prec, precond, init_sln));
         }
       }
 
       // Create the Group
-      Teuchos::RCP<NOX::Epetra::Group> grp = 
+      Teuchos::RCP<NOX::Epetra::Group> grp =
         Teuchos::rcp(new NOX::Epetra::Group(print_pars, i_req, init_sln, lin_sys));
 
       // Create convergence tests
       Teuchos::RCP<NOX::StatusTest::Combo> converged =
         Teuchos::rcp(new NOX::StatusTest::Combo(NOX::StatusTest::Combo::AND));
 
-      if(conv_flag.absresid) 
+      if(conv_flag.absresid)
       {
         Teuchos::RCP<NOX::StatusTest::NormF> absresid =
           Teuchos::rcp(new NOX::StatusTest::NormF(conv.abs_resid, conv.norm_type, conv.stype));
         converged->addStatusTest(absresid);
       }
 
-      if(conv_flag.relresid) 
+      if(conv_flag.relresid)
       {
-        Teuchos::RCP<NOX::StatusTest::NormF> relresid = 
+        Teuchos::RCP<NOX::StatusTest::NormF> relresid =
           Teuchos::rcp(new NOX::StatusTest::NormF(*grp.get(), conv.rel_resid));
         converged->addStatusTest(relresid);
       }
 
-      if(conv_flag.update) 
+      if(conv_flag.update)
       {
-        Teuchos::RCP<NOX::StatusTest::NormUpdate> update = 
+        Teuchos::RCP<NOX::StatusTest::NormUpdate> update =
           Teuchos::rcp(new NOX::StatusTest::NormUpdate(conv.update));
         converged->addStatusTest(update);
       }
 
-      if(conv_flag.wrms) 
+      if(conv_flag.wrms)
       {
         Teuchos::RCP<NOX::StatusTest::NormWRMS> wrms =
           Teuchos::rcp(new NOX::StatusTest::NormWRMS(conv.wrms_rtol, conv.wrms_atol));
         converged->addStatusTest(wrms);
       }
 
-      Teuchos::RCP<NOX::StatusTest::MaxIters> maxiters = 
+      Teuchos::RCP<NOX::StatusTest::MaxIters> maxiters =
         Teuchos::rcp(new NOX::StatusTest::MaxIters(conv.max_iters));
 
-      Teuchos::RCP<NOX::StatusTest::FiniteValue> fv = 
+      Teuchos::RCP<NOX::StatusTest::FiniteValue> fv =
         Teuchos::rcp(new NOX::StatusTest::FiniteValue);
 
-      Teuchos::RCP<NOX::StatusTest::Combo> cmb = 
+      Teuchos::RCP<NOX::StatusTest::Combo> cmb =
         Teuchos::rcp(new NOX::StatusTest::Combo(NOX::StatusTest::Combo::OR));
 
       cmb->addStatusTest(fv);
@@ -322,7 +322,7 @@ namespace Hermes
       if(!this->dp->is_matrix_free())
         jac_mat.release();	// release the ownership (we take care of jac_mat by ourselves)
 
-      if(status == NOX::StatusTest::Converged) 
+      if(status == NOX::StatusTest::Converged)
       {
         // get result informations
         num_iters = solver->getNumIterations();

@@ -10,12 +10,12 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace RefinementSelectors 
+    namespace RefinementSelectors
     {
 
-      HERMES_API const char* get_cand_list_str(const CandList cand_list) 
+      HERMES_API const char* get_cand_list_str(const CandList cand_list)
       {
-        switch(cand_list) 
+        switch(cand_list)
         {
         case H2D_P_ISO: return "P_ISO";
         case H2D_P_ANISO: return "P_ANISO";
@@ -29,9 +29,9 @@ namespace Hermes
         }
       }
 
-      HERMES_API bool is_hp(const CandList cand_list) 
+      HERMES_API bool is_hp(const CandList cand_list)
       {
-        switch(cand_list) 
+        switch(cand_list)
         {
         case H2D_P_ISO:
         case H2D_P_ANISO:
@@ -45,9 +45,9 @@ namespace Hermes
         }
       }
 
-      HERMES_API bool is_p_aniso(const CandList cand_list) 
+      HERMES_API bool is_p_aniso(const CandList cand_list)
       {
-        switch(cand_list) 
+        switch(cand_list)
         {
         case H2D_P_ISO: return false;
         case H2D_P_ANISO: return true;
@@ -70,7 +70,7 @@ namespace Hermes
         opt_apply_exp_dof(false),
         cand_list(cand_list),
         conv_exp(conv_exp),
-        shapeset(shapeset) 
+        shapeset(shapeset)
       {
         error_if(shapeset == NULL, "Shapeset is NULL.");
 
@@ -80,15 +80,15 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices) 
+      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices)
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
         const int num_bubbles = shapeset->get_num_bubbles(quad_order);
         int* bubble_inxs = shapeset->get_bubble_indices(quad_order);
-        for(int j = 0; j < num_bubbles; j++) 
+        for(int j = 0; j < num_bubbles; j++)
         {
           int inx_bubble = bubble_inxs[j];
-          if (used_shape_index.find(inx_bubble) == used_shape_index.end()) 
+          if (used_shape_index.find(inx_bubble) == used_shape_index.end())
           {
             used_shape_index[inx_bubble] = true;
             indices.push_back(ShapeInx(order_h, order_v, inx_bubble, H2DST_BUBBLE));
@@ -97,7 +97,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order) 
+      void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order)
       {
         Hermes::vector<ShapeInx> &indices = shape_indices[mode];
         int* next_order = this->next_order_shape[mode];
@@ -122,15 +122,15 @@ namespace Hermes
         //for all orders
         max_shape_inx = 0;
         int examined_shape = 0;
-        for(int i = order_range.lower(); i <= order_range.upper(); i++) 
+        for(int i = order_range.lower(); i <= order_range.upper(); i++)
         {
           //vertex functions
-          if (vertex_order.is_in_closed(i)) 
+          if (vertex_order.is_in_closed(i))
           {
-            for (int i = 0; i < num_edges; i++) 
+            for (int i = 0; i < num_edges; i++)
             {
               int inx = shapeset->get_vertex_index(i);
-              if (inx >= 0) 
+              if (inx >= 0)
               {
                 used_shape_index[inx] = true;
                 indices.push_back(ShapeInx(1, 1, inx, H2DST_VERTEX));
@@ -140,15 +140,15 @@ namespace Hermes
           }
 
           //edge functions
-          if (edge_bubble_order.is_in_closed(i)) 
+          if (edge_bubble_order.is_in_closed(i))
           {
             //edge functions
-            if (mode == HERMES_MODE_QUAD) 
+            if (mode == HERMES_MODE_QUAD)
             {
-              for (int j = 0; j < num_edges; j++) 
+              for (int j = 0; j < num_edges; j++)
               {
                 int inx = shapeset->get_edge_index(j, 0, i);
-                if (inx >= 0) 
+                if (inx >= 0)
                 {
                   used_shape_index[inx] = true;
                   if ((j&1) == 0) //horizontal edge
@@ -159,12 +159,12 @@ namespace Hermes
                 }
               }
             }
-            else 
+            else
             {
-              for (int j = 0; j < num_edges; j++) 
+              for (int j = 0; j < num_edges; j++)
               {
                 int inx = shapeset->get_edge_index(j, 0, i);
-                if (inx >= 0) 
+                if (inx >= 0)
                 {
                   used_shape_index[inx] = true;
                   indices.push_back(ShapeInx(i, i, inx, H2DST_TRI_EDGE));
@@ -174,14 +174,14 @@ namespace Hermes
             }
 
             //bubble functions
-            if (mode == HERMES_MODE_QUAD) 
+            if (mode == HERMES_MODE_QUAD)
             {
               //NOTE: shapeset returns a set of all possible bubble functions and it is not possible to identify which is the smallest
               // order of an element which contains this function, e.g., in a case of a Hcurl and an element of an order 1/1, it returns
               // a list that contains a function of poly-order 2/0. Also, order of indices is not given.
               int order = i;
               unsigned num_indices_prev = indices.size();
-              for(int order_other = edge_bubble_order.lower(); order_other <= order; order_other++) 
+              for(int order_other = edge_bubble_order.lower(); order_other <= order; order_other++)
               {
                 add_bubble_shape_index(order, order_other, used_shape_index, indices);
                 add_bubble_shape_index(order_other, order, used_shape_index, indices);
@@ -195,10 +195,10 @@ namespace Hermes
               int order = i;
               int num_bubbles = shapeset->get_num_bubbles(order);
               int* bubble_inxs = shapeset->get_bubble_indices(order);
-              for(int j = 0; j < num_bubbles; j++) 
+              for(int j = 0; j < num_bubbles; j++)
               {
                 int inx_bubble = bubble_inxs[j];
-                if (used_shape_index.find(inx_bubble) == used_shape_index.end()) 
+                if (used_shape_index.find(inx_bubble) == used_shape_index.end())
                 {
                   used_shape_index[inx_bubble] = true;
                   indices.push_back(ShapeInx(order, order, inx_bubble, H2DST_BUBBLE));
@@ -211,7 +211,7 @@ namespace Hermes
             next_order[i] = (int)indices.size();
 
             //update maximum
-            while(examined_shape < next_order[i]) 
+            while(examined_shape < next_order[i])
             {
               max_shape_inx = std::max(max_shape_inx, indices[examined_shape].inx);
               examined_shape++;
@@ -223,7 +223,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      int OptimumSelector<Scalar>::calc_num_shapes(int mode, int order_h, int order_v, int allowed_type_mask) 
+      int OptimumSelector<Scalar>::calc_num_shapes(int mode, int order_h, int order_v, int allowed_type_mask)
       {
         //test whether the evaluation is necessary
         bool full_eval = false;
@@ -235,14 +235,14 @@ namespace Hermes
           full_eval |= has_bubble_shape[mode];
 
         //evaluate
-        if (full_eval) 
+        if (full_eval)
         {
           Hermes::vector<ShapeInx>& shapes = shape_indices[mode];
           int num = 0;
           typename Hermes::vector<ShapeInx>::const_iterator shape = shapes.begin();
-          while (shape != shapes.end()) 
+          while (shape != shapes.end())
           {
-            if (((int)shape->type & allowed_type_mask) != 0) 
+            if (((int)shape->type & allowed_type_mask) != 0)
             {
               if ((order_h == H2DRS_ORDER_ANY || shape->order_h <= order_h) && (order_v == H2DRS_ORDER_ANY || shape->order_v <= order_v))
                 num++;
@@ -256,7 +256,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::append_candidates_split(const int start_quad_order, const int last_quad_order, const int split, bool iso_p) 
+      void OptimumSelector<Scalar>::append_candidates_split(const int start_quad_order, const int last_quad_order, const int split, bool iso_p)
       {
         //check whether end orders are not lower than start orders
         if (last_quad_order < 0 || start_quad_order < 0)
@@ -270,7 +270,7 @@ namespace Hermes
         //initialize orders
         int quad_orders[H2D_MAX_ELEMENT_SONS];
         OrderPermutator quad_perms[H2D_MAX_ELEMENT_SONS];
-        for(int i = 0; i < num_sons; i++) 
+        for(int i = 0; i < num_sons; i++)
         {
           quad_orders[i] = start_quad_order;
           quad_perms[i] = OrderPermutator(start_quad_order, last_quad_order, iso_p, &quad_orders[i]);
@@ -280,7 +280,7 @@ namespace Hermes
 
         //generate permutations of orders
         bool quit = false;
-        while(!quit) 
+        while(!quit)
         {
           do { //create permutation of son 0
             candidates.push_back(Cand(split, quad_orders));
@@ -291,7 +291,7 @@ namespace Hermes
 
           //increment orders of other sons
           int inx_son = 1;
-          while (inx_son < num_sons && !quad_perms[inx_son].next()) 
+          while (inx_son < num_sons && !quad_perms[inx_son].next())
           {
             quad_perms[inx_son].reset(); //reset order of the son
             inx_son++;
@@ -302,7 +302,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order) 
+      void OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order)
       {
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
         int max_p_order_h = H2D_GET_H_ORDER(max_p_quad_order), max_p_order_v = H2D_GET_V_ORDER(max_p_quad_order);
@@ -319,7 +319,7 @@ namespace Hermes
         bool iso_p = false;
         int start_quad_order = quad_order;
         int last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_p_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(max_p_order_v, order_v+H2DRS_MAX_ORDER_INC));
-        switch(cand_list) 
+        switch(cand_list)
         {
         case H2D_H_ISO:
         case H2D_H_ANISO: last_quad_order = start_quad_order; break; //no P-candidates except the original candidate
@@ -334,7 +334,7 @@ namespace Hermes
         int start_order_h = std::max(current_min_order, (order_h+1) / 2), start_order_v = std::max(current_min_order, (order_v+1) / 2);
         start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, std::min(start_order_h + H2DRS_MAX_ORDER_INC, order_h)), std::min(max_ha_order_v, std::min(start_order_v + H2DRS_MAX_ORDER_INC, order_v)));
-        switch(cand_list) 
+        switch(cand_list)
         {
         case H2D_H_ISO:
         case H2D_H_ANISO:
@@ -348,14 +348,14 @@ namespace Hermes
 
         //generate all ANISO-candidates
         if (!tri && e->iro_cache < 8 /** \todo Find and why is iro_cache compared with the number 8. What does the number 8 mean? */
-          && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO)) 
+          && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO))
         {
           iso_p = false;
           int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v+1) / 2));
           int last_quad_order_hz = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_quad_order)+H2DRS_MAX_ORDER_INC));
           int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h+1) / 2), order_v);
           int last_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_quad_order)+H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, order_v+H2DRS_MAX_ORDER_INC));
-          switch(cand_list) 
+          switch(cand_list)
           {
           case H2D_H_ANISO:
             last_quad_order_hz = start_quad_order_hz = quad_order;
@@ -380,10 +380,10 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::update_cands_info(CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const 
+      void OptimumSelector<Scalar>::update_cands_info(CandsInfo& info_h, CandsInfo& info_p, CandsInfo& info_aniso) const
       {
         typename Hermes::vector<Cand>::const_iterator cand = candidates.begin();
-        while (cand != candidates.end()) 
+        while (cand != candidates.end())
         {
           CandsInfo* info = NULL;
           if (cand->split == H2D_REFINEMENT_H) info = &info_h;
@@ -393,14 +393,14 @@ namespace Hermes
 
           //evaluate elements of candidates
           const int num_elems = cand->get_num_elems();
-          for(int i = 0; i < num_elems; i++) 
+          for(int i = 0; i < num_elems; i++)
           {
             int elem_order_h = H2D_GET_H_ORDER(cand->p[i]), elem_order_v = H2D_GET_V_ORDER(cand->p[i]);
             if (elem_order_h != elem_order_v)
               info->uniform_orders = false;
             if (info->min_quad_order < 0 || info->max_quad_order < 0)
               info->min_quad_order = info->max_quad_order = H2D_MAKE_QUAD_ORDER(elem_order_h, elem_order_v);
-            else 
+            else
             {
               info->min_quad_order = H2D_MAKE_QUAD_ORDER(std::min(H2D_GET_H_ORDER(info->min_quad_order), elem_order_h), std::min(H2D_GET_V_ORDER(info->min_quad_order), elem_order_v));
               info->max_quad_order = H2D_MAKE_QUAD_ORDER(std::max(H2D_GET_H_ORDER(info->max_quad_order), elem_order_h), std::max(H2D_GET_V_ORDER(info->max_quad_order), elem_order_v));
@@ -413,21 +413,21 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_cands_dof(Element* e, Solution<Scalar>* rsln) 
+      void OptimumSelector<Scalar>::evaluate_cands_dof(Element* e, Solution<Scalar>* rsln)
       {
         bool tri = e->is_triangle();
 
-        for (unsigned i = 0; i < candidates.size(); i++) 
+        for (unsigned i = 0; i < candidates.size(); i++)
         {
           Cand& c = candidates[i];
           if (tri) { //triangle
-            switch(c.split) 
+            switch(c.split)
             {
             case H2D_REFINEMENT_H:
               {
                 const int central = 3; //central triangle
                 c.dofs = 0;
-                for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++) 
+                for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
                 {
                   c.dofs += calc_num_shapes(HERMES_MODE_TRIANGLE, H2D_GET_H_ORDER(c.p[j]), H2DRS_ORDER_ANY, H2DST_ANY);
                   if (j != central)
@@ -447,7 +447,7 @@ namespace Hermes
             }
           }
           else { //quad
-            switch(c.split) 
+            switch(c.split)
             {
             case H2D_REFINEMENT_H:
               c.dofs = 0;
@@ -489,7 +489,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error) 
+      void OptimumSelector<Scalar>::evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error)
       {
         evaluate_cands_error(e, rsln, avg_error, dev_error);
         evaluate_cands_dof(e, rsln);
@@ -497,17 +497,17 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_cands_score(Element* e) 
+      void OptimumSelector<Scalar>::evaluate_cands_score(Element* e)
       {
         //calculate score of candidates
         Cand& unrefined = candidates[0];
         const int num_cands = (int)candidates.size();
         unrefined.score = 0;
         const double unrefined_dofs_exp = std::pow(unrefined.dofs, conv_exp);
-        for (int i = 1; i < num_cands; i++) 
+        for (int i = 1; i < num_cands; i++)
         {
           Cand& cand = candidates[i];
-          if (cand.error < unrefined.error && cand.dofs > unrefined.dofs) 
+          if (cand.error < unrefined.error && cand.dofs > unrefined.dofs)
           {
             double delta_dof_exp = std::pow(cand.dofs - unrefined.dofs, conv_exp);
             if (opt_apply_exp_dof)
@@ -520,13 +520,13 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::compare_cand_score(const Cand& a, const Cand& b) 
+      bool OptimumSelector<Scalar>::compare_cand_score(const Cand& a, const Cand& b)
       {
         return a.score > b.score;
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::select_best_candidate(Element* e, const double avg_error, const double dev_error, int* selected_cand, int* selected_h_cand) 
+      void OptimumSelector<Scalar>::select_best_candidate(Element* e, const double avg_error, const double dev_error, int* selected_cand, int* selected_h_cand)
       {
         // select an above-average candidate with the steepest error decrease
 
@@ -539,7 +539,7 @@ namespace Hermes
         int imax = 1, h_imax = 1;
         if (opt_symmetric_mesh) { //prefer symmetric mesh
           //find first valid score that diffres from the next scores
-          while ((imax+1) < num_cands && std::abs(candidates[imax].score - candidates[imax+1].score) < H2DRS_SCORE_DIFF_ZERO) 
+          while ((imax+1) < num_cands && std::abs(candidates[imax].score - candidates[imax+1].score) < H2DRS_SCORE_DIFF_ZERO)
           {
             //find the first candidate with a different score
             Cand& cand_current = candidates[imax];
@@ -568,11 +568,11 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) 
+      bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement)
       {
         //make an uniform order in a case of a triangle
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
-        if (element->is_triangle()) 
+        if (element->is_triangle())
         {
           assert_msg(order_v == 0, "Element %d is a triangle but order_v (%d) is not zero", element->id, order_v);
           order_v = order_h;
@@ -625,7 +625,7 @@ namespace Hermes
         //modify orders in a case of a triangle such that order_v is zero
         if (element->is_triangle())
         {
-          for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++) 
+          for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
           {
             assert_msg(H2D_GET_V_ORDER(refinement.p[i]) == 0 || H2D_GET_H_ORDER(refinement.p[i]) == H2D_GET_V_ORDER(refinement.p[i]), "Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.p[i]), H2D_GET_V_ORDER(refinement.p[i]), i);
             refinement.p[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.p[i]), 0);
@@ -641,22 +641,22 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) 
+      void OptimumSelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders)
       {
         assert_msg(refinement != H2D_REFINEMENT_P, "P-candidate not supported for updating shared orders");
         const int num_sons = get_refin_sons(refinement);
-        if (suggested_quad_orders != NULL) 
+        if (suggested_quad_orders != NULL)
         {
           for(int i = 0; i < num_sons; i++)
             tgt_quad_orders[i] = suggested_quad_orders[i];
         }
-        else 
+        else
         {
           //calculate new quad_orders
           int quad_order = orig_quad_order;
           if (cand_list != H2D_H_ISO && cand_list != H2D_H_ANISO) { //H_ISO and H_ANISO has to keep given order
             int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
-            switch(refinement) 
+            switch(refinement)
             {
             case H2D_REFINEMENT_H:
               order_h = std::max(1, (order_h+1)/2);
@@ -684,9 +684,9 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::set_option(const SelOption option, bool enable) 
+      void OptimumSelector<Scalar>::set_option(const SelOption option, bool enable)
       {
-        switch(option) 
+        switch(option)
         {
         case H2D_PREFER_SYMMETRIC_MESH: opt_symmetric_mesh = enable; break;
         case H2D_APPLY_CONV_EXP_DOF: opt_apply_exp_dof = enable; break;

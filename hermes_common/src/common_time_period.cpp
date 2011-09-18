@@ -19,8 +19,8 @@
 /*! \file common_time_period.cpp
     \brief File containing the class TimePeriod and relevant definitions for measuring time.
 */
-#include <math.h> 
-#include <time.h> 
+#include <math.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -31,7 +31,7 @@
 
 namespace Hermes
 {
-  TimePeriod::TimePeriod(const char *name) : period_name(name == NULL ? "unnamed" : name) 
+  TimePeriod::TimePeriod(const char *name) : period_name(name == NULL ? "unnamed" : name)
   {
     //initialization
 #ifdef WIN32 //Windows
@@ -44,16 +44,16 @@ namespace Hermes
     tick_reset();
   }
 
-  TimePeriod::SysTime TimePeriod::get_time() const 
+  TimePeriod::SysTime TimePeriod::get_time() const
   {
 #ifdef WIN32 //Windows
-    if (frequency > 0) 
+    if (frequency > 0)
     {
       LARGE_INTEGER ticks;
       QueryPerformanceCounter(&ticks);
       return ticks.QuadPart;
     }
-    else 
+    else
     {
       return clock();
     }
@@ -68,7 +68,7 @@ namespace Hermes
 #endif
   }
 
-  double TimePeriod::period_in_seconds(const SysTime& begin, const SysTime& end) const 
+  double TimePeriod::period_in_seconds(const SysTime& begin, const SysTime& end) const
   {
 #ifdef WIN32 //Windows
     uint64_t period = end - begin;
@@ -79,7 +79,7 @@ namespace Hermes
 #else //Linux
     int sec_corr = 0;
     long period_nsec = end.tv_nsec - begin.tv_nsec;
-    if (period_nsec < 0) 
+    if (period_nsec < 0)
     {
       sec_corr += -1;
       period_nsec += 1000000000UL;
@@ -89,30 +89,30 @@ namespace Hermes
 #endif
   }
 
-  const TimePeriod& TimePeriod::tick(TimerPeriodTickType type) 
+  const TimePeriod& TimePeriod::tick(TimerPeriodTickType type)
   {
     SysTime cur_time = get_time();
-    if (type == HERMES_ACCUMULATE) 
+    if (type == HERMES_ACCUMULATE)
     {
       double secs = period_in_seconds(last_time, cur_time);
       accum += secs;
       last_period = secs;
     }
-    else 
+    else
       last_period = 0.0;
 
     last_time = cur_time;
     return *this;
   }
 
-  const TimePeriod& TimePeriod::tick_reset() 
+  const TimePeriod& TimePeriod::tick_reset()
   {
     tick(HERMES_SKIP);
     reset();
     return *this;
   }
 
-  const TimePeriod& TimePeriod::reset() 
+  const TimePeriod& TimePeriod::reset()
   {
     accum = 0;
     last_time = get_time();
@@ -120,11 +120,11 @@ namespace Hermes
     return *this;
   }
 
-  std::string TimePeriod::to_string(double secs) const 
+  std::string TimePeriod::to_string(double secs) const
   {
     if (secs < 0)
       return "NO TIME";
-    else 
+    else
     {
       int hours = (int) secs / (3600);
       int mins = (int) fmod(secs, 3600) / 60;
@@ -141,7 +141,7 @@ namespace Hermes
     }
   }
 
-  std::ostream& operator<<(std::ostream& stream, const TimePeriod& period) 
+  std::ostream& operator<<(std::ostream& stream, const TimePeriod& period)
   {
     stream << period.accumulated_str();
     return stream;

@@ -33,7 +33,7 @@ namespace Hermes
   {
     namespace Views
     {
-      
+
       OrderView::OrderView(const char* title, WinGeom* wg)
         : View(title, wg)
       {
@@ -68,7 +68,7 @@ namespace Hermes
         0xc83737,
         0xff0000
       };
-      
+
       template<typename Scalar>
       void OrderView::show(Space<Scalar>* space)
       {
@@ -88,7 +88,7 @@ namespace Hermes
         wait_for_draw();
       }
 
-      void OrderView::init_order_palette(double3* vert) 
+      void OrderView::init_order_palette(double3* vert)
       {
         int min = 1, max = (int) vert[0][2];
         for (int i = 0; i < ord.get_num_vertices(); i++)
@@ -102,13 +102,13 @@ namespace Hermes
         char* buf = text_buffer;
         for (int i = 0; i < num_boxes; i++)
         {
-          if (pal_type == H2DV_PT_DEFAULT) 
+          if (pal_type == H2DV_PT_DEFAULT)
           {
             order_colors[i+min][0] = (float) (order_palette[i+min] >> 16) / 0xff;
             order_colors[i+min][1] = (float) ((order_palette[i+min] >> 8) & 0xff) / 0xff;
             order_colors[i+min][2] = (float) (order_palette[i+min] & 0xff) / 0xff;
           }
-          else 
+          else
           {
             get_palette_color((i + min) / (double)H2DV_MAX_VIEWABLE_ORDER, &order_colors[i+min][0]);
           }
@@ -121,7 +121,7 @@ namespace Hermes
         scale_height = num_boxes * scale_box_height + (num_boxes-1) * scale_box_skip;
         order_min = min;
       }
-      
+
       void OrderView::on_display()
       {
         set_ortho_projection();
@@ -195,7 +195,7 @@ namespace Hermes
         delete [] tvert;
         ord.unlock_data();
       }
-      
+
       int OrderView::measure_scale_labels()
       {
         return 0;
@@ -222,7 +222,7 @@ namespace Hermes
 
         case 'p':
           {
-            switch(pal_type) 
+            switch(pal_type)
             {
             case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
             case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;

@@ -24,7 +24,7 @@ namespace Hermes
   {
     namespace Views
     {
-      /// \brief "Vectorizer" is a Linearizer for vector solutions. 
+      /// \brief "Vectorizer" is a Linearizer for vector solutions.
       /// The only difference is that linearized vertices are vector-valued. Also, regularization of the
       /// resulting mesh is not attempted. The class can handle different meshes in
       /// both X and Y components.
@@ -37,10 +37,10 @@ namespace Hermes
         ~Vectorizer();
 
         void process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem, int yitem, double eps);
-        
+
         int get_num_vertices();
         double4* get_vertices();
-        
+
         int2* get_dashes();
         int get_num_dashes();
 
@@ -52,7 +52,7 @@ namespace Hermes
         MeshFunction<double>*xsln, *ysln;
         int xitem, component_x, value_type_x;
         int yitem, component_y, value_type_y;
-        
+
         double4* verts;  ///< vertices: (x, y, xvalue, yvalue) quadruples
         int2* dashes;
 

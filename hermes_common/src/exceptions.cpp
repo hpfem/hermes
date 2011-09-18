@@ -5,10 +5,10 @@
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
-// by the Free Software Foundation; either version 2 of the License, 
+// by the Free Software Foundation; either version 2 of the License,
 // or (at your option) any later version.
 //
-// Hermes2D is distributed in the hope that it will be useful, 
+// Hermes2D is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -29,7 +29,7 @@ namespace Hermes
       message=NULL;
       func=callstack.getLastFunc();
     }
-    
+
     Exception::Exception(const char * msg)
     {
       message=msg;
@@ -68,7 +68,7 @@ namespace Hermes
     NullException::NullException(int paramIdx, int itemIdx)
     {
       this->paramIdx=paramIdx;
-      this->itemIdx=itemIdx;      
+      this->itemIdx=itemIdx;
       char * msg = new char[55];
       sprintf(msg, "Element number %d of parameter number %d is NULL", itemIdx, paramIdx);
       message=msg;
@@ -87,7 +87,7 @@ namespace Hermes
     NullException::~NullException(){
       delete message;
     }
-    
+
     LengthException::LengthException(int paramIdx, int wrong, int right)
     {
       fstParamIdx=paramIdx;
@@ -106,7 +106,7 @@ namespace Hermes
       this->wrong=first;
       this->right=second;
       char * msg = new char[60];
-      sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same", 
+      sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
             fstParamIdx, wrong, sndParamIdx, right);
       message=msg;
     }
@@ -154,7 +154,7 @@ namespace Hermes
     {
       delete message;
     }
-    
+
     ValueException::ValueException(const char * name,double value,double allowed)
     {
       char * msg= new char[55+strlen(name)];

@@ -12,7 +12,7 @@ const int P_INIT = 2;
 const int INIT_REF_NUM = 2;
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;  
+Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
 
 int main(int argc, char* argv[])
 {

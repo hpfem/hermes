@@ -82,7 +82,7 @@ namespace Hermes
 
         /// Loads vector of spaces.
         void load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
-        
+
         /// Loads vector of spaces.
         /// Version without essential BCs.
         void load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
@@ -129,11 +129,11 @@ namespace Hermes
       /// Add a record.
       /// See records.
       void add_record(double time, unsigned int number);
-      
+
       /// Add a record.
       /// See time_records.
       void add_record(double time);
-      
+
       /// Add a record.
       /// See numbered_records.
       void add_record(unsigned int number);
@@ -165,10 +165,10 @@ namespace Hermes
 
       /// For time dependent adaptive problems.
       std::map<std::pair<double, unsigned int>, Record*> records;
-      
+
       /// Just for time dependent problems.
       std::map<double, Record*> time_records;
-      
+
       /// Possibly for adaptive solution of elliptic problems.
       std::map<unsigned int, Record*> numbered_records;
 

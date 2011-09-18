@@ -22,54 +22,54 @@ using namespace Hermes::Algebra::DenseMatrixOperations;
 
 namespace Hermes
 {
-  Table::Table() 
+  Table::Table()
   {
     this->size = 0;
     this->A = NULL;
   }
 
-  Table::Table(unsigned int size) 
+  Table::Table(unsigned int size)
   {
     // Size.
     this->size = size;
     // A array.
     this->A = new_matrix<double>(size, size);
-    for (unsigned int i = 0; i < size; i++) 
+    for (unsigned int i = 0; i < size; i++)
     {
       for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
     }
   }
 
-  void Table::alloc(unsigned int size) 
+  void Table::alloc(unsigned int size)
   {
     // Size.
     this->size = size;
     // A array.
     this->A = new_matrix<double>(size, size);
-    for (unsigned int i = 0; i < size; i++) 
+    for (unsigned int i = 0; i < size; i++)
     {
       for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
     }
   }
 
-  unsigned int Table::get_size() 
+  unsigned int Table::get_size()
   {
     return this->size;
   }
 
-  double Table::get_A(unsigned int i, unsigned int j) 
+  double Table::get_A(unsigned int i, unsigned int j)
   {
     if (i > size || j > size) error("Invalid access to a Butcher's table.");
     return this->A[i][j];
   }
 
-  void Table::set_A(unsigned int i, unsigned int j, double val) 
+  void Table::set_A(unsigned int i, unsigned int j, double val)
   {
     if (i > size || j > size) error("Invalid access to a Butcher's table.");
     this->A[i][j] = val;
   }
 
-  ButcherTable::ButcherTable() : Table() 
+  ButcherTable::ButcherTable() : Table()
   {
     this->B = NULL;
     this->B2 = NULL;
@@ -87,17 +87,17 @@ namespace Hermes
     // C array.
     this->C = new double[size];
     for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
-  } 
+  }
 
   ButcherTable::ButcherTable(ButcherTableType butcher_table)
   {
-    switch (butcher_table) 
+    switch (butcher_table)
     {
 
       /* EXPLICIT METHODS */
 
       // Explicit Euler.
-    case Explicit_RK_1: 
+    case Explicit_RK_1:
       this->alloc(1);
       this->set_B(0, 1.);
       break;
@@ -113,7 +113,7 @@ namespace Hermes
       break;
 
       // Explicit RK-3.
-    case Explicit_RK_3: 
+    case Explicit_RK_3:
       this->alloc(3);
       this->set_A(1, 0, 1./2.);
       this->set_A(2, 0, -1.);
@@ -126,7 +126,7 @@ namespace Hermes
       break;
 
       // Explicit RK-4.
-    case Explicit_RK_4: 
+    case Explicit_RK_4:
       this->alloc(4);
       this->set_A(1, 0, 1./2.);
       this->set_A(2, 1, 1./2.);
@@ -143,7 +143,7 @@ namespace Hermes
       /* IMPLICIT METHODS */
 
       // Implicit Euler.
-    case Implicit_RK_1: 
+    case Implicit_RK_1:
       this->alloc(1);
       this->set_A(0, 0, 1.);
       this->set_B(0, 1.);
@@ -151,7 +151,7 @@ namespace Hermes
       break;
 
       // Implicit Crank Nicolson.
-    case Implicit_Crank_Nicolson_2_2: 
+    case Implicit_Crank_Nicolson_2_2:
       this->alloc(2);
       this->set_A(0, 0, 1./2.);
       this->set_A(0, 1, 1./2.);
@@ -161,7 +161,7 @@ namespace Hermes
       break;
 
       // Implicit SIRK-22 (second-order).
-    case Implicit_SIRK_2_2: 
+    case Implicit_SIRK_2_2:
       this->alloc(2);
       this->set_A(0, 0, (5. - 3.*sqrt(2.))/4.);
       this->set_A(0, 1, (7. - 5.*sqrt(2.))/4.);
@@ -170,11 +170,11 @@ namespace Hermes
       this->set_B(0, (1. + 1.*sqrt(2.))/4.);
       this->set_B(1, (3. - 1.*sqrt(2.))/4.);
       this->set_C(0, 3. - 2.*sqrt(2.));
-      this->set_C(1, 1.);  
+      this->set_C(1, 1.);
       break;
 
       // Implicit ESIRK-22 (second-order).
-    case Implicit_ESIRK_2_2: 
+    case Implicit_ESIRK_2_2:
       this->alloc(2);
       this->set_A(0, 0, (9. - 6.*sqrt(2.))/4.);
       this->set_A(0, 1, (-3. + 2.*sqrt(2.))/4.);
@@ -182,11 +182,11 @@ namespace Hermes
       this->set_A(1, 1, (-1. + 2.*sqrt(2.))/4.);
       this->set_B(0, 2. - sqrt(2.0));
       this->set_B(1, -1. + sqrt(2.0));
-      this->set_C(1, 1.);  
+      this->set_C(1, 1.);
       break;
 
       // Implicit SDIRK-2-2 (second-order).
-    case Implicit_SDIRK_2_2: 
+    case Implicit_SDIRK_2_2:
       this->alloc(2);
       this->set_A(0, 0, 1. - 1./sqrt(2.));
       this->set_A(1, 0, 1./sqrt(2.));
@@ -194,11 +194,11 @@ namespace Hermes
       this->set_B(0, 1./sqrt(2.));
       this->set_B(1, 1. - 1./sqrt(2.));
       this->set_C(0, 1. - 1./sqrt(2.));
-      this->set_C(1, 1.);  
+      this->set_C(1, 1.);
       break;
 
       // Implicit Lobatto IIIA (second-order).
-    case Implicit_Lobatto_IIIA_2_2: 
+    case Implicit_Lobatto_IIIA_2_2:
       this->alloc(2);
       this->set_A(1, 0, 1./2.);
       this->set_A(1, 1, 1./2.);
@@ -208,7 +208,7 @@ namespace Hermes
       break;
 
       // Implicit Lobatto IIIB (second-order).
-    case Implicit_Lobatto_IIIB_2_2: 
+    case Implicit_Lobatto_IIIB_2_2:
       this->alloc(2);
       this->set_A(0, 0, 1./2.);
       this->set_A(0, 1, 1./2.);
@@ -219,7 +219,7 @@ namespace Hermes
       break;
 
       // Implicit Lobatto IIIC (second-order).
-    case Implicit_Lobatto_IIIC_2_2: 
+    case Implicit_Lobatto_IIIC_2_2:
       this->alloc(2);
       this->set_A(0, 0, 1./2.);
       this->set_A(0, 1, -1./2.);
@@ -231,7 +231,7 @@ namespace Hermes
       break;
 
       // Implicit Lobatto IIIA (fourth-order).
-    case Implicit_Lobatto_IIIA_3_4: 
+    case Implicit_Lobatto_IIIA_3_4:
       this->alloc(3);
       this->set_A(1, 0, 5./24.);
       this->set_A(2, 0, 1./6.);
@@ -247,7 +247,7 @@ namespace Hermes
       break;
 
       // Implicit Lobatto IIIB (fourth-order).
-    case Implicit_Lobatto_IIIB_3_4: 
+    case Implicit_Lobatto_IIIB_3_4:
       this->alloc(3);
       this->set_A(0, 0, 1./6.);
       this->set_A(1, 0, 1./6.);
@@ -263,7 +263,7 @@ namespace Hermes
       break;
 
       // Implicit Lobatto IIIC (fourth-order).
-    case Implicit_Lobatto_IIIC_3_4: 
+    case Implicit_Lobatto_IIIC_3_4:
       this->alloc(3);
       this->set_A(0, 0, 1./6.);
       this->set_A(1, 0, 1./6.);
@@ -282,14 +282,14 @@ namespace Hermes
       break;
 
       // Implicit Radau IIA (fifth-order).
-    case Implicit_Radau_IIA_3_5: 
+    case Implicit_Radau_IIA_3_5:
       this->alloc(3);
       this->set_A(0, 0, (88. - 7*sqrt((double)6)) / 360 );
       this->set_A(1, 0, (296 + 169 * sqrt((double)6)) / 1800 );
       this->set_A(2, 0, (16. - sqrt((double)6)) / 36 );
       this->set_A(0, 1, (296 - 169 * sqrt((double)6)) / 1800);
       this->set_A(1, 1, (88. + 7*sqrt((double)6)) / 360);
-      this->set_A(2, 1, (16. + sqrt((double)6)) / 36); 
+      this->set_A(2, 1, (16. + sqrt((double)6)) / 36);
       this->set_A(0, 2, (-2. + 3 * sqrt((double)6)) / 225 );
       this->set_A(1, 2, (-2. - 3 * sqrt((double)6)) / 225 );
       this->set_A(2, 2, 1./9.);
@@ -302,7 +302,7 @@ namespace Hermes
       break;
 
       // Implicit SDIRK-5-4 (fourth-order).
-    case Implicit_SDIRK_5_4: 
+    case Implicit_SDIRK_5_4:
       this->alloc(5);
       this->set_A(0, 0, 1./4.);
       this->set_A(1, 0, 1./2.);
@@ -325,16 +325,16 @@ namespace Hermes
       this->set_B(3, -85./12.);
       this->set_B(4, 1./4.);
       this->set_C(0, 1./4.);
-      this->set_C(1, 3./4.);  
-      this->set_C(2, 11./20.);  
-      this->set_C(3, 1./2.);  
-      this->set_C(4, 1.);  
+      this->set_C(1, 3./4.);
+      this->set_C(2, 11./20.);
+      this->set_C(3, 1./2.);
+      this->set_C(4, 1.);
       break;
 
       /* EMBEDDED EXPLICIT METHODS */
 
       // Explicit Heun-Euler.
-    case Explicit_HEUN_EULER_2_12_embedded: 
+    case Explicit_HEUN_EULER_2_12_embedded:
       this->alloc(2);
       this->set_A(1, 0, 1.0);
       this->set_B(0, 0.5);
@@ -346,7 +346,7 @@ namespace Hermes
       break;
 
       // Explicit Bogacki-Shampine.
-    case Explicit_BOGACKI_SHAMPINE_4_23_embedded: 
+    case Explicit_BOGACKI_SHAMPINE_4_23_embedded:
       this->alloc(4);
       this->set_A(1, 0, 1./2.);
       this->set_A(3, 0, 2./9.);
@@ -367,7 +367,7 @@ namespace Hermes
       break;
 
       // Explicit Fehlberg.
-    case Explicit_FEHLBERG_6_45_embedded: 
+    case Explicit_FEHLBERG_6_45_embedded:
       this->alloc(6);
       this->set_A(1, 0, 1./4.);
       this->set_A(2, 0, 3./32.);
@@ -403,7 +403,7 @@ namespace Hermes
       break;
 
       // Explicit Cash-Karp.
-    case Explicit_CASH_KARP_6_45_embedded: 
+    case Explicit_CASH_KARP_6_45_embedded:
       this->alloc(6);
       this->set_A(1, 0, 1./5.);
       this->set_A(2, 0, 3./40.);
@@ -440,7 +440,7 @@ namespace Hermes
       break;
 
       // Explicit Dormand-Prince.
-    case Explicit_DORMAND_PRINCE_7_45_embedded: 
+    case Explicit_DORMAND_PRINCE_7_45_embedded:
       this->alloc(7);
       this->set_A(1, 0, 1./5.);
       this->set_A(2, 0, 3./40.);
@@ -682,13 +682,13 @@ namespace Hermes
     }
   }
 
-  void ButcherTable::alloc(unsigned int size) 
+  void ButcherTable::alloc(unsigned int size)
   {
     // Size.
     this->size = size;
     // A array.
     this->A = new_matrix<double>(size, size);
-    for (unsigned int i = 0; i < size; i++) 
+    for (unsigned int i = 0; i < size; i++)
     {
       for (unsigned int j = 0; j < size; j++) this->A[i][j] = 0;
     }
@@ -703,37 +703,37 @@ namespace Hermes
     for (unsigned int j = 0; j < size; j++) this->C[j] = 0;
   }
 
-  double ButcherTable::get_B(unsigned int i) 
+  double ButcherTable::get_B(unsigned int i)
   {
     if (i > size) error("Invalid access to a Butcher's table.");
     return this->B[i];
   }
 
-  double ButcherTable::get_B2(unsigned int i) 
+  double ButcherTable::get_B2(unsigned int i)
   {
     if (i > size) error("Invalid access to a Butcher's table.");
     return this->B2[i];
   }
 
-  double ButcherTable::get_C(unsigned int i) 
+  double ButcherTable::get_C(unsigned int i)
   {
     if (i > size) error("Invalid access to a Butcher's table.");
     return this->C[i];
   }
 
-  void ButcherTable::set_B(unsigned int i, double val) 
+  void ButcherTable::set_B(unsigned int i, double val)
   {
     if (i > size) error("Invalid access to a Butcher's table.");
     this->B[i] = val;
   }
 
-  void ButcherTable::set_B2(unsigned int i, double val) 
+  void ButcherTable::set_B2(unsigned int i, double val)
   {
     if (i > size) error("Invalid access to a Butcher's table.");
     this->B2[i] = val;
   }
 
-  void ButcherTable::set_C(unsigned int i, double val) 
+  void ButcherTable::set_C(unsigned int i, double val)
   {
     if (i > size) error("Invalid access to a Butcher's table.");
     this->C[i] = val;
@@ -742,9 +742,9 @@ namespace Hermes
   bool ButcherTable::is_explicit()
   {
     bool result = true;
-    for (unsigned int i = 0; i<size; i++) 
+    for (unsigned int i = 0; i<size; i++)
     {
-      for (unsigned int j = 0; j<size; j++) 
+      for (unsigned int j = 0; j<size; j++)
       {
         double val_ij = get_A(i, j);
         if (j >= i && fabs(val_ij) > 1e-12) result = false;
@@ -752,14 +752,14 @@ namespace Hermes
     }
 
     return result;
-  } 
+  }
 
   bool ButcherTable::is_diagonally_implicit()
   {
     bool result = true;
-    for (unsigned int i = 0; i < size; i++) 
+    for (unsigned int i = 0; i < size; i++)
     {
-      for (unsigned int j = 0; j < size; j++) 
+      for (unsigned int j = 0; j < size; j++)
       {
         double val_ij = get_A(i, j);
         if (j > i && fabs(val_ij) > 1e-12) result = false;
@@ -767,14 +767,14 @@ namespace Hermes
     }
 
     return result;
-  } 
+  }
 
   bool ButcherTable::is_fully_implicit()
   {
     bool result = false;
-    for (unsigned int i = 0; i < size; i++) 
+    for (unsigned int i = 0; i < size; i++)
     {
-      for (unsigned int j = 0; j < size; j++) 
+      for (unsigned int j = 0; j < size; j++)
       {
         double val_ij = get_A(i, j);
         if (j > i && fabs(val_ij) > 1e-12) result = true;
@@ -782,7 +782,7 @@ namespace Hermes
     }
 
     return result;
-  } 
+  }
 
   bool ButcherTable::is_embedded()
   {
@@ -796,11 +796,11 @@ namespace Hermes
   void ButcherTable::switch_B_rows()
   {
     // Test whether nonzero B2 row exists.
-    if (this->is_embedded() == false) 
+    if (this->is_embedded() == false)
       error("ButcherTable::switch_B_rows(): Zero B2 row detected.");
 
     // Switch B rows.
-    for (unsigned int i = 0; i < size; i++) 
+    for (unsigned int i = 0; i < size; i++)
     {
       double tmp = B[i];
       B[i] = B2[i];

@@ -201,7 +201,7 @@ namespace Hermes
       filename << Continuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
       space->save(filename.str().c_str());
     }
-    
+
 
     template<typename Scalar>
     void Continuity<Scalar>::Record::save_solutions(Hermes::vector<Solution<Scalar>*> solutions)
@@ -220,7 +220,7 @@ namespace Hermes
       filename << Continuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
       solution->save(filename.str().c_str());
     }
-    
+
     template<typename Scalar>
     void Continuity<Scalar>::Record::save_time_step_length(double time_step_length_to_save)
     {
@@ -260,7 +260,7 @@ namespace Hermes
       filename << Continuity<Scalar>::meshFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
       reader.load(filename.str().c_str(), mesh);
     }
-    
+
     template<typename Scalar>
     void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
     {
@@ -292,7 +292,7 @@ namespace Hermes
         }
       }
     }
-    
+
     template<typename Scalar>
     void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapesets)
     {
@@ -304,9 +304,9 @@ namespace Hermes
       {
         std::stringstream filename;
         filename << Continuity<Scalar>::spaceFileName << i << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
-        
+
         spaces[i]->free();
-        
+
         switch(space_types[i])
         {
         case HERMES_H1_SPACE:
@@ -324,7 +324,7 @@ namespace Hermes
         }
       }
     }
-    
+
     template<typename Scalar>
     void Continuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
@@ -358,7 +358,7 @@ namespace Hermes
         break;
       }
     }
-    
+
     template<typename Scalar>
     void Continuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Mesh*> meshes)
     {
@@ -378,7 +378,7 @@ namespace Hermes
       filename << Continuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t=" << this->time << (std::string)"n=" << this->number << (std::string)".h2d";
       solution->load(filename.str().c_str(), mesh);
     }
-    
+
     template<typename Scalar>
     void Continuity<Scalar>::Record::load_time_step_length(double & time_step_length)
     {

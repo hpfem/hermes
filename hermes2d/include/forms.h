@@ -76,7 +76,7 @@ namespace Hermes
       /// NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
       /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
       /// expected from a continuous function.
-      virtual ~Func() { }; 
+      virtual ~Func() { };
 
       /// Methods designed for discontinuous functions, return errors here.
       virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
@@ -185,7 +185,7 @@ namespace Hermes
 
       /// Constructor.
       Geom();
-      
+
       /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
       virtual ~Geom() {};
 
@@ -205,7 +205,7 @@ namespace Hermes
     /// Small class which contains information about the element on the other side of an interface.
     ///
     /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
-    /// instance is not touched - it must be destroyed separately. You may call the overriden methods 
+    /// instance is not touched - it must be destroyed separately. You may call the overriden methods
     /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
     ///
     template<typename T>
@@ -214,11 +214,11 @@ namespace Hermes
     public:
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
-      
+
       int get_neighbor_marker() const;
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
-      
+
       virtual void free() { wrapped_geom->free(); delete wrapped_geom; }
       virtual void free_ord() { delete wrapped_geom; }
 

@@ -60,7 +60,7 @@ namespace Hermes
 
     void PrecalcShapeset::handle_overflow_idx()
     {
-      if(overflow_nodes != NULL) 
+      if(overflow_nodes != NULL)
       {
         for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
           if(overflow_nodes->present(i))
@@ -76,13 +76,13 @@ namespace Hermes
       // Key creation.
       unsigned key = cur_quad | (mode << 3) | ((unsigned) (max_index[mode] - index) << 4);
 
-      if(master_pss == NULL) 
+      if(master_pss == NULL)
       {
         if(!tables.present(key))
           tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
         sub_tables = tables.get(key);
       }
-      else 
+      else
       {
         if(!master_pss->tables.present(key))
           master_pss->tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
@@ -135,7 +135,7 @@ namespace Hermes
       {
         for (k = 0; k < 6; k++)
         {
-          if (newmask & idx2mask[k][j]) 
+          if (newmask & idx2mask[k][j])
           {
             if (oldmask & idx2mask[k][j])
               memcpy(node->values[j][k], cur_node->values[j][k], np * sizeof(double));
@@ -146,7 +146,7 @@ namespace Hermes
           }
         }
       }
-      if(nodes->present(order)) 
+      if(nodes->present(order))
       {
         assert(nodes->get(order) == cur_node);
         ::free(nodes->get(order));
@@ -161,9 +161,9 @@ namespace Hermes
       if (master_pss != NULL) return;
 
       for(unsigned int i = 0; i < tables.get_size(); i++)
-        if(tables.present(i)) 
+        if(tables.present(i))
         {
-          for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables.get(i)->begin(); it != tables.get(i)->end(); it++) 
+          for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables.get(i)->begin(); it != tables.get(i)->end(); it++)
           {
             for(unsigned int k = 0; k < it->second->get_size(); k++)
               if(it->second->present(k))
@@ -173,7 +173,7 @@ namespace Hermes
           delete tables.get(i);
         }
 
-        if(overflow_nodes != NULL) 
+        if(overflow_nodes != NULL)
         {
           for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
             if(overflow_nodes->present(i))

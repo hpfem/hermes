@@ -76,7 +76,7 @@ namespace Hermes
       ///
       NeighborSearch(Element* el, Mesh* mesh);
       NeighborSearch(const NeighborSearch& ns);
-      
+
       /// Destructor.
       ~NeighborSearch();
 
@@ -153,7 +153,7 @@ namespace Hermes
       /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
       ///
       ExtendedShapeset* create_extended_asmlist(Space<Scalar>* space, AsmList<Scalar>* al);
-      ExtendedShapeset* create_extended_asmlist_multicomponent(Space<Scalar>* space, AsmList<Scalar>* al); 
+      ExtendedShapeset* create_extended_asmlist_multicomponent(Space<Scalar>* space, AsmList<Scalar>* al);
 
       /*** Methods for working with quadrature on the active edge. ***/
 
@@ -183,7 +183,7 @@ namespace Hermes
       /// \return pointer to the vector of neighboring elements.
       ///
       Hermes::vector<Element*>* get_neighbors() { return &neighbors; }
-      
+
       /// Frees the memory occupied by the extended shapeset.
       void clear_supported_shapes() {
         if (supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
@@ -241,7 +241,7 @@ namespace Hermes
 
         friend class NeighborSearch; // Only a NeighborSearch is allowed to create an ExtendedShapeset.
       };
-      
+
       /*** Neighborhood information. ***/
       /// Structure containing all the needed information about the active edge from the neighbor's side.
       class NeighborEdgeInfo
@@ -264,69 +264,69 @@ namespace Hermes
 
       /// Sets the active segment, neighbor element, and neighbor edge accordingly.
       void set_active_segment(unsigned int index);
-      
+
       /// Returns the current neighbor element according to the current active segment.
       Element* get_neighb_el();
-      
+
       /// Returns the current active neighbor edge according to the current active segment.
       NeighborEdgeInfo get_neighbor_edge();
-      
+
       /// Returns the number(depth) of the current central transformation according to the current active segment.
       unsigned int get_central_n_trans(unsigned int index);
-      
+
       /// Returns the current central transformations according to the current active segment.
       unsigned int get_central_transformations(unsigned int index_1, unsigned int index_2);
-      
+
       /// Returns the number(depth) of the current neighbor transformation according to the current active segment.
       unsigned int get_neighbor_n_trans(unsigned int index);
-      
+
       /// Returns the current neighbor transformations according to the current active segment.
       unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2);
-      
+
       /// Transformations of an element to one of its neighbors.
       struct Transformations
       {
         static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
                                                                        ///< in a go-down neighborhood) - see Transformable::push_transform.
-        
+
         unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.
         unsigned int num_levels;          ///< Number of transformation levels actually used in \c transf.
-        
+
         Transformations() : num_levels(0) { memset(transf, 0, max_level * sizeof(int)); }
         Transformations(const Transformations* t) { copy_from(t); }
         Transformations(const Hermes::vector<unsigned int>& t) { copy_from(t); }
-        
+
         void copy_from(const Hermes::vector<unsigned int>& t)
         {
           num_levels = std::min<unsigned int>(t.size(), max_level);
           std::copy( t.begin(), t.begin()+num_levels, transf);
         }
-        
+
         void copy_from(const Transformations* t)
         {
           num_levels = t->num_levels;
           memcpy(transf, t->transf, max_level * sizeof(unsigned int));
         }
-        
+
         void copy_to(Hermes::vector<unsigned int>* t)
         {
           t->assign(transf, transf+num_levels);
         }
-        
+
         void reset()
         {
           memset(transf, 0, num_levels * sizeof(unsigned int));
           num_levels = 0;
         }
-        
+
         void strip_initial_transformations(unsigned int number_of_stripped);
-        
+
         void apply_on(Transformable* tr) const
         {
           for(unsigned int i = 0; i < num_levels; i++)
             tr->push_transform(transf[i]);
         }
-        
+
         void apply_on(const Hermes::vector<Transformable*>& tr) const
         {
           for(Hermes::vector<Transformable*>::const_iterator it = tr.begin(); it != tr.end(); ++it)
@@ -334,7 +334,7 @@ namespace Hermes
               (*it)->push_transform(transf[i]);
         }
       };
-      
+
 
     private:
 
@@ -346,7 +346,7 @@ namespace Hermes
                                                                   ///< (in a go-down neighborhood; stored as on \c Transformation structure
                                                                   ///< for each neighbor).
       LightArray< Transformations* > neighbor_transformations;    ///< Array of transformations of the neighbor to the central element (go-up).
-      
+
       uint64_t original_central_el_transform;                  ///< Sub-element transformation of any function that comes from the
                                                                ///< assembly, before transforms from \c transformations are pushed to it.
 

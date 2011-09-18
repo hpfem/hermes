@@ -160,7 +160,7 @@ namespace Hermes
       int first(int idx = 0) {
         int index = idx;
         while (get(index).used == false) {
-          index++; 
+          index++;
           if (index >= nitems) return INVALID_IDX;
         }
         return index;
@@ -175,7 +175,7 @@ namespace Hermes
       int next(int idx = 0) {
         int index = idx + 1;
         while (get(index).used == false) {
-          index++; 
+          index++;
           if (index >= nitems) return INVALID_IDX;
         }
         return index;
@@ -191,7 +191,7 @@ namespace Hermes
         int index = idx;
         if (index > nitems - 1) index = nitems - 1;
         while (get(index).used == false) {
-          index--; 
+          index--;
           if (index < 0) return INVALID_IDX;
         }
         return index;
@@ -207,7 +207,7 @@ namespace Hermes
         int index = idx - 1;
         if (index > nitems - 1) index = nitems - 1;
         while (get(index).used == false) {
-          index--; 
+          index--;
           if (index < 0) return INVALID_IDX;
         }
         return index;
@@ -321,8 +321,8 @@ namespace Hermes
         return;
       }
 
-      unsigned int get_size() const { 
-        return size; 
+      unsigned int get_size() const {
+        return size;
       }
 
       /// Checks the id position for presence.
@@ -335,7 +335,7 @@ namespace Hermes
       /// After successful check for presence, the value can be retrieved.
       TYPE& get(unsigned int id) const {
         assert(id < size);
-        return pages[id >> page_bits][id & page_mask]; 
+        return pages[id >> page_bits][id & page_mask];
       }
 
     };

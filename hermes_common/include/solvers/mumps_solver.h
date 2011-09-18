@@ -69,7 +69,7 @@ namespace Hermes {
 
     /** \brief Matrix used with MUMPS solver */
     template <typename Scalar>
-    class MumpsMatrix : public SparseMatrix<Scalar> 
+    class MumpsMatrix : public SparseMatrix<Scalar>
     {
     public:
       MumpsMatrix();
@@ -91,7 +91,7 @@ namespace Hermes {
       virtual void add_matrix(MumpsMatrix* mat);
       /// Add matrix to diagonal.
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
-      /// @param[in] mat added matrix 
+      /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<MumpsMatrix*>(mat));
@@ -113,7 +113,7 @@ namespace Hermes {
 
     protected:
       /// MUMPS specific data structures for storing the system matrix (CSC format).
-      unsigned int nnz;          ///< Number of non-zero elements. 
+      unsigned int nnz;          ///< Number of non-zero elements.
       int *irn;         ///< Row indices.
       int *jcn;         ///< Column indices.
       typename mumps_type<Scalar>::mumps_Scalar *Ax; ///< Matrix entries (column-wise).
@@ -190,7 +190,7 @@ namespace Hermes {
       bool check_status();
 
       /// (Re)initialize a MUMPS instance.
-      /// @return true on succes 
+      /// @return true on succes
       /// \sa #check_status()
       bool reinit();
       /// True if solver is inited.

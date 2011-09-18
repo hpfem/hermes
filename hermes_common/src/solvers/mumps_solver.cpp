@@ -28,11 +28,11 @@
 
 using namespace Hermes::Error;
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Algebra 
+  namespace Algebra
   {
-    extern "C" 
+    extern "C"
     {
       extern void dmumps_c(DMUMPS_STRUC_C *mumps_param_ptr);
       extern void zmumps_c(ZMUMPS_STRUC_C *mumps_param_ptr);
@@ -43,18 +43,18 @@ namespace Hermes
 
     /// Binary search for the location of a particular CSC/CSR matrix entry.
     ///
-    /// Typically, we search for the index into Ax that corresponds to a given 
-    /// row (CSC) or column (CSR) ('idx') among indices of nonzero values in 
+    /// Typically, we search for the index into Ax that corresponds to a given
+    /// row (CSC) or column (CSR) ('idx') among indices of nonzero values in
     /// a particular column (CSC) or row (CSR) ('Ai').
     ///
-    static int find_position(int *Ai, int Alen, int idx) 
+    static int find_position(int *Ai, int Alen, int idx)
     {
       _F_;
       assert (idx >= 0);
 
       register int lo = 0, hi = Alen - 1, mid;
 
-      while (1) 
+      while (1)
       {
         mid = (lo + hi) >> 1;
 
@@ -62,7 +62,7 @@ namespace Hermes
         else if (idx > Ai[mid]) lo = mid + 1;
         else break;
 
-        // Sparse matrix entry not found (raise an error when trying to add 
+        // Sparse matrix entry not found (raise an error when trying to add
         // value to this position, return 0 when obtaining value there).
         if (lo > hi){
           mid = -1;
@@ -107,7 +107,7 @@ namespace Hermes
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i, pos = 0;
-      for (i = 0; i < this->size; i++) 
+      for (i = 0; i < this->size; i++)
       {
         Ap[i] = pos;
         pos += sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
@@ -128,7 +128,7 @@ namespace Hermes
       {
         irn[i] = 1;
         jcn[i] = 1;
-      }  
+      }
     }
 
     template<typename Scalar>
@@ -182,7 +182,7 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
-      if (pos < 0) 
+      if (pos < 0)
         error("Sparse matrix entry not found");
       // Add offset to the n-th column.
       pos += Ap[n];
@@ -204,9 +204,9 @@ namespace Hermes
     /// Add a number to each diagonal entry.
 
     template<typename Scalar>
-    void MumpsMatrix<Scalar>::add_to_diagonal(Scalar v) 
+    void MumpsMatrix<Scalar>::add_to_diagonal(Scalar v)
     {
-      for (unsigned int i = 0; i < this->size; i++) 
+      for (unsigned int i = 0; i < this->size; i++)
       {
         add(i, i, v);
       }
@@ -219,7 +219,7 @@ namespace Hermes
     {
       _F_;
       // TODO
-      switch (fmt) 
+      switch (fmt)
       {
       case DF_NATIVE:
       case DF_PLAIN_ASCII:
@@ -246,7 +246,7 @@ namespace Hermes
 
           return true;
 
-      case DF_HERMES_BIN: 
+      case DF_HERMES_BIN:
         {
           hermes_fwrite("HERMESX\001", 1, 8, file);
           int ssize = sizeof(Scalar);
@@ -298,10 +298,10 @@ namespace Hermes
     {
       _F_;
       int ndof = mat->get_size();
-      if (this->get_size() != (unsigned int) num_stages * ndof) 
+      if (this->get_size() != (unsigned int) num_stages * ndof)
         error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
-      for (int i = 0; i < num_stages; i++) 
+      for (int i = 0; i < num_stages; i++)
       {
         this->add_as_block(ndof*i, ndof*i, mat);
       }
@@ -404,12 +404,12 @@ namespace Hermes
         for (int j=ap[i];j<ap[i+1];j++) jcn[j]=i;
       }
       this->Ap[this->size]=ap[this->size];
-      for (unsigned int i = 0; i < nnz; i++) 
+      for (unsigned int i = 0; i < nnz; i++)
       {
         mumps_assign_Scalar(this->Ax[i],ax[i]);
         this->Ai[i] = ai[i];
         irn[i]=ai[i];
-      } 
+      }
     }
     // Duplicates a matrix (including allocation).
     template<typename Scalar>
@@ -506,7 +506,7 @@ namespace Hermes
     void MumpsVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
     {
       _F_;
-      for (unsigned int i = 0; i < n; i++) 
+      for (unsigned int i = 0; i < n; i++)
       {
         v[idx[i]] += y[i];
       }
@@ -516,7 +516,7 @@ namespace Hermes
     bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     {
       _F_;
-      switch (fmt) 
+      switch (fmt)
       {
       case DF_NATIVE:
       case DF_PLAIN_ASCII:
@@ -538,7 +538,7 @@ namespace Hermes
         fprintf(file, " ];\n");
         return true;
 
-      case DF_HERMES_BIN: 
+      case DF_HERMES_BIN:
         {
           hermes_fwrite("HERMESR\001", 1, 8, file);
           int ssize = sizeof(Scalar);
@@ -589,7 +589,7 @@ namespace Hermes
     bool MumpsSolver<Scalar>::check_status()
     {
       _F_;
-      switch (param.INFOG(1)) 
+      switch (param.INFOG(1))
       {
       case 0: return true; // no error
       case -1: warning("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
@@ -605,7 +605,7 @@ namespace Hermes
       _F_;
       if (inited)
       {
-        // If there is already an instance of MUMPS running, 
+        // If there is already an instance of MUMPS running,
         // terminate it.
         param.job = JOB_END;
         mumps_c(&param);
@@ -652,7 +652,7 @@ namespace Hermes
       // Initial values for some fields of the MUMPS_STRUC structure that may be accessed
       // before MUMPS has been initialized.
       param.rhs = NULL;
-      param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING 
+      param.INFOG(33) = -999; // see the case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING
       // in setup_factorization()
     }
 
@@ -680,7 +680,7 @@ namespace Hermes
 
       Hermes::TimePeriod tmr;
 
-      // Prepare the MUMPS data structure with input for the solver driver 
+      // Prepare the MUMPS data structure with input for the solver driver
       // (according to the chosen factorization reuse strategy), as well as
       // the system matrix.
       if ( !setup_factorization() )
@@ -697,7 +697,7 @@ namespace Hermes
 
       ret = check_status();
 
-      if (ret) 
+      if (ret)
       {
         delete [] this->sln;
         this->sln = new Scalar[m->size];
@@ -719,16 +719,16 @@ namespace Hermes
     {
       _F_;
       // When called for the first time, all three phases (analysis, factorization,
-      // solution) must be performed. 
+      // solution) must be performed.
       int eff_fact_scheme = this->factorization_scheme;
       if (!inited)
-        if( this->factorization_scheme == HERMES_REUSE_MATRIX_REORDERING || 
+        if( this->factorization_scheme == HERMES_REUSE_MATRIX_REORDERING ||
           this->factorization_scheme == HERMES_REUSE_FACTORIZATION_COMPLETELY )
           eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
 
       switch (eff_fact_scheme)
       {
-      case HERMES_FACTORIZE_FROM_SCRATCH: 
+      case HERMES_FACTORIZE_FROM_SCRATCH:
         // (Re)initialize new instance.
         reinit();
 
@@ -739,18 +739,18 @@ namespace Hermes
 
         break;
       case HERMES_REUSE_MATRIX_REORDERING:
-        // Let MUMPS reuse results of the symbolic analysis and perform 
-        // scaling during each factorization (values 1-8 may be set here, 
-        // corresponding to different scaling algorithms during factorization; 
+        // Let MUMPS reuse results of the symbolic analysis and perform
+        // scaling during each factorization (values 1-8 may be set here,
+        // corresponding to different scaling algorithms during factorization;
         // see the MUMPS documentation for details).
-        param.ICNTL(8) = 7; 
+        param.ICNTL(8) = 7;
         param.job = JOB_FACTORIZE_SOLVE;
 
         break;
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
         // Perform scaling along with reordering during the symbolic analysis phase
         // and then reuse it during subsequent factorizations. New instance of MUMPS
-        // has to be created before the analysis phase. 
+        // has to be created before the analysis phase.
         if (param.INFOG(33) != -2)
         {
           reinit();

@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 
   // Solutions for the Newton's iteration and time stepping.
   info("Setting initial conditions.");
-  ZeroInitialCondition xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh); 
+  ZeroInitialCondition xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh);
 
   // Initialize weak formulation.
   WeakForm<double>* wf;
@@ -117,9 +117,9 @@ int main(int argc, char* argv[])
   // coefficient vector for the Newton's method.
   double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space))];
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), 
-    Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time), 
-    coeff_vec, matrix_solver_type, 
+  OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space),
+    Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
+    coeff_vec, matrix_solver_type,
     Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   // Time-stepping loop:
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     info("---- Time step %d, time = %g:", ts, current_time);
 
     // Update time-dependent essential BCs.
-    if (current_time <= STARTUP_TIME) 
+    if (current_time <= STARTUP_TIME)
     {
       info("Updating time-dependent essential BC.");
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);

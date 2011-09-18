@@ -57,11 +57,11 @@ namespace Hermes
 
       // if norms were not set by the user, set them to defaults
       // according to spaces
-      if (proj_norms.size() == 0) 
+      if (proj_norms.size() == 0)
       {
-        for (int i = 0; i < this->num; i++) 
+        for (int i = 0; i < this->num; i++)
         {
-          switch (spaces[i]->get_type()) 
+          switch (spaces[i]->get_type())
           {
           case HERMES_H1_SPACE: proj_norms.push_back(HERMES_H1_NORM); break;
           case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
@@ -108,9 +108,9 @@ namespace Hermes
 
       // if norms were not set by the user, set them to defaults
       // according to spaces
-      if (proj_norm == HERMES_UNSET_NORM) 
+      if (proj_norm == HERMES_UNSET_NORM)
       {
-        switch (space->get_type()) 
+        switch (space->get_type())
         {
         case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
@@ -155,10 +155,10 @@ namespace Hermes
       //get meshes
       int max_id = -1;
       Mesh* meshes[H2D_MAX_COMPONENTS];
-      for (int j = 0; j < this->num; j++) 
+      for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->spaces[j]->get_mesh();
-        if (rsln[j] != NULL) 
+        if (rsln[j] != NULL)
         {
           rsln[j]->set_quad_2d(&g_quad_2d_std);
           rsln[j]->enable_transform(false);
@@ -171,9 +171,9 @@ namespace Hermes
       int** idx = new int*[max_id];
       for(int i = 0; i < max_id; i++)
         idx[i] = new int[num];
-      
+
       Element* e;
-      for (int i = 0; i < this->num; i++) 
+      for (int i = 0; i < this->num; i++)
         for_all_active_elements(e, this->spaces[i]->get_mesh())
           this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
 
@@ -201,14 +201,14 @@ namespace Hermes
         int id, comp, inx_element;
 
         //get element identification
-        if (priority_queue.empty()) 
+        if (priority_queue.empty())
         {
           id = regular_queue[inx_regular_element].id;
           comp = regular_queue[inx_regular_element].comp;
           inx_element = inx_regular_element;
           inx_regular_element++;
         }
-        else 
+        else
         {
           id = priority_queue.front().id;
           comp = priority_queue.front().comp;
@@ -223,13 +223,13 @@ namespace Hermes
         Mesh* mesh = meshes[comp];
         Element* e = mesh->get_element(id);
 
-        if (!should_ignore_element(inx_element, mesh, e)) 
+        if (!should_ignore_element(inx_element, mesh, e))
         {
           //check if adaptivity loop should end
-          if (inx_element >= 0) 
+          if (inx_element >= 0)
           {
             //prepare error threshold for strategy 1
-            if (first_regular_element) 
+            if (first_regular_element)
             {
               error_squared_threshod = thr * err_squared;
               first_regular_element = false;
@@ -259,7 +259,7 @@ namespace Hermes
           bool refined = refinement_selectors[comp]->select_refinement(e, current, rsln[comp], elem_ref);
 
           //add to a list of elements that are going to be refined
-          if (can_refine_element(mesh, e, refined, elem_ref) ) 
+          if (can_refine_element(mesh, e, refined, elem_ref) )
           {
             idx[id][comp] = (int)elem_inx_to_proc.size();
             elem_inx_to_proc.push_back(elem_ref);
@@ -267,13 +267,13 @@ namespace Hermes
             processed_error_squared += err_squared;
             spaces[comp]->edata[elem_ref.id].changed_in_last_adaptation = true;
           }
-          else 
+          else
           {
             debug_log("Element (id:%d, comp:%d) not changed", e->id, comp);
             num_not_changed++;
           }
         }
-        else 
+        else
         {
           num_ignored_elem++;
         }
@@ -295,7 +295,7 @@ namespace Hermes
 
       //fix refinement if multimesh is used
       fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, refinement_selectors);
-      
+
       for(int i = 0; i < max_id; i++)
         delete [] idx[i];
       delete [] idx;
@@ -462,7 +462,7 @@ namespace Hermes
       unsigned int error_flags)
     {
       _F_
-      if (num != 1) 
+      if (num != 1)
         throw Exceptions::LengthException(1,1,num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
     }
@@ -485,7 +485,7 @@ namespace Hermes
       unsigned int error_flags)
     {
       _F_
-      if (num != 1) 
+      if (num != 1)
         throw Exceptions::LengthException(1,1,num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
     }
@@ -517,10 +517,10 @@ namespace Hermes
 
     template<typename Scalar>
     void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
-      int** idx, Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors) 
+      int** idx, Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors)
     {
       int num_elem_to_proc = elems_to_refine.size();
-      for(int inx = 0; inx < num_elem_to_proc; inx++) 
+      for(int inx = 0; inx < num_elem_to_proc; inx++)
       {
         ElementToRefine& elem_ref = elems_to_refine[inx];
         int current_quad_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
@@ -554,11 +554,11 @@ namespace Hermes
             suggested_orders = elem_ref.q;
 
           //update orders
-          for (int j = 0; j < this->num; j++) 
+          for (int j = 0; j < this->num; j++)
           {
             if (j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if components share the mesh
               // change currently processed refinement
-              if (elem_ref.split != selected_refinement) 
+              if (elem_ref.split != selected_refinement)
               {
                 elem_ref.split = selected_refinement;
                 refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref.split, elem_ref.p, suggested_orders);
@@ -566,10 +566,10 @@ namespace Hermes
 
               // change other refinements
               int ii = idx[elem_ref.id][j];
-              if (ii >= 0) 
+              if (ii >= 0)
               {
                 ElementToRefine& elem_ref_ii = elems_to_refine[ii];
-                if (elem_ref_ii.split != selected_refinement) 
+                if (elem_ref_ii.split != selected_refinement)
                 {
                   elem_ref_ii.split = selected_refinement;
                   refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_ii.split, elem_ref_ii.p, suggested_orders);
@@ -589,14 +589,14 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::get_element_error_squared(int component, int id) const
-    { 
-      error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est()."); 
-      return errors[component][id]; 
+    {
+      error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est().");
+      return errors[component][id];
     };
 
     template<typename Scalar>
-    const Hermes::vector<typename Adapt<Scalar>::ElementReference>& Adapt<Scalar>::get_regular_queue() const 
-    { 
+    const Hermes::vector<typename Adapt<Scalar>::ElementReference>& Adapt<Scalar>::get_regular_queue() const
+    {
       return regular_queue;
     };
 
@@ -609,16 +609,16 @@ namespace Hermes
     template<typename Scalar>
     bool Adapt<Scalar>::can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const
     {
-      return refined; 
+      return refined;
     };
 
     template<typename Scalar>
-    void Adapt<Scalar>::homogenize_shared_mesh_orders(Mesh** meshes) 
+    void Adapt<Scalar>::homogenize_shared_mesh_orders(Mesh** meshes)
     {
       Element* e;
-      for (int i = 0; i < this->num; i++) 
+      for (int i = 0; i < this->num; i++)
       {
-        for_all_active_elements(e, meshes[i]) 
+        for_all_active_elements(e, meshes[i])
         {
           int current_quad_order = this->spaces[i]->get_element_order(e->id);
           int current_order_h = H2D_GET_H_ORDER(current_quad_order), current_order_v = H2D_GET_V_ORDER(current_quad_order);
@@ -637,7 +637,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const 
+    const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const
     {
       return last_refinements;
     }
@@ -646,12 +646,12 @@ namespace Hermes
     void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
     {
       for (std::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
-        elem_ref != elems_to_refine.end(); elem_ref++) 
+        elem_ref != elems_to_refine.end(); elem_ref++)
         apply_refinement(*elem_ref);
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref) 
+    void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
       Space<Scalar>* space = this->spaces[elem_ref.comp];
       Mesh* mesh = space->get_mesh();
@@ -664,7 +664,7 @@ namespace Hermes
         space->set_element_order_internal(elem_ref.id, elem_ref.p[0]);
         space->edata[elem_ref.id].changed_in_last_adaptation = true;
       }
-      else if (elem_ref.split == H2D_REFINEMENT_H) 
+      else if (elem_ref.split == H2D_REFINEMENT_H)
       {
         if (e->active)
           mesh->refine_element_id(elem_ref.id);
@@ -674,7 +674,7 @@ namespace Hermes
           space->edata[e->sons[j]->id].changed_in_last_adaptation = true;
         }
       }
-      else 
+      else
       {
         if (e->active)
           mesh->refine_element_id(elem_ref.id, elem_ref.split);
@@ -758,12 +758,12 @@ namespace Hermes
             for (int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
             {
               if (e->sons[i] != NULL && ((!e->sons[i]->active) || (e->sons[i]->is_curved())))
-              { 
-                found = false;  
-                break; 
+              {
+                found = false;
+                break;
               }
             }
-            
+
             if (found)
             {
               double sum_squared = 0.0;
@@ -777,7 +777,7 @@ namespace Hermes
                   if (oo > max) max = oo;
                 }
               }
-              
+
               if ((sum_squared < thr * errors[regular_queue[0].comp][regular_queue[0].id]))
                 //if ((sum < 0.1 * thr))
               {
@@ -820,7 +820,7 @@ namespace Hermes
     {
       set_error_form(0, 0, form);
     }
-    
+
     template<typename Scalar>
     void Adapt<Scalar>::set_norm_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
     {
@@ -975,13 +975,13 @@ namespace Hermes
       Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
       Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];
 
-      for (i = 0; i < n; i++) 
+      for (i = 0; i < n; i++)
       {
         slns_original[i] = this->sln[i];
         this->sln[i] = slns[i];
         sln[i]->set_quad_2d(&g_quad_2d_std);
       }
-      for (i = 0; i < n; i++) 
+      for (i = 0; i < n; i++)
       {
         rslns_original[i] = this->rsln[i];
         this->rsln[i] = rslns[i];
@@ -996,7 +996,7 @@ namespace Hermes
       Transformable **tr = new Transformable *[2 * num];
       Traverse trav;
       num_act_elems = 0;
-      for (i = 0; i < num; i++) 
+      for (i = 0; i < num; i++)
       {
         meshes[i] = sln[i]->get_mesh();
         meshes[i + num] = rsln[i]->get_mesh();
@@ -1006,7 +1006,7 @@ namespace Hermes
         num_act_elems += sln[i]->get_mesh()->get_num_active_elements();
 
         int max = meshes[i]->get_max_element_id();
-        if(solutions_for_adapt) 
+        if(solutions_for_adapt)
         {
           if (errors[i] != NULL) delete [] errors[i];
           errors[i] = new double[max];
@@ -1025,13 +1025,13 @@ namespace Hermes
       // Calculate error.
       Element **ee;
       trav.begin(2 * num, meshes, tr);
-      while ((ee = trav.get_next_state(NULL, NULL)) != NULL) 
+      while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
       {
-        for (i = 0; i < num; i++) 
+        for (i = 0; i < num; i++)
         {
-          for (j = 0; j < num; j++) 
+          for (j = 0; j < num; j++)
           {
-            if (error_form[i][j] != NULL) 
+            if (error_form[i][j] != NULL)
             {
               double err, nrm;
               err = eval_error(error_form[i][j], sln[i], sln[j], rsln[i], rsln[j]);
@@ -1050,16 +1050,16 @@ namespace Hermes
       trav.finish();
 
       // Store the calculation for each solution component separately.
-      if(component_errors != NULL) 
+      if(component_errors != NULL)
       {
         component_errors->clear();
-        for (int i = 0; i < num; i++) 
+        for (int i = 0; i < num; i++)
         {
           if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
             component_errors->push_back(sqrt(errors_components[i]));
           else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
             component_errors->push_back(sqrt(errors_components[i]/norms[i]));
-          else 
+          else
           {
             error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
             return -1.0;
@@ -1071,11 +1071,11 @@ namespace Hermes
       error_time = tmr.accumulated();
 
       // Make the error relative if needed.
-      if(solutions_for_adapt) 
+      if(solutions_for_adapt)
       {
-        if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL) 
+        if ((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
         {
-          for (int i = 0; i < this->num; i++) 
+          for (int i = 0; i < this->num; i++)
           {
             Element* e;
             for_all_active_elements(e, meshes[i])
@@ -1093,14 +1093,14 @@ namespace Hermes
       }
 
       // Prepare an ordered list of elements according to an error.
-      if(solutions_for_adapt) 
+      if(solutions_for_adapt)
       {
         fill_regular_queue(meshes);
         have_errors = true;
       }
-      else 
+      else
       {
-        for (i = 0; i < n; i++) 
+        for (i = 0; i < n; i++)
         {
           this->sln[i] = slns_original[i];
           this->rsln[i] = rslns_original[i];
@@ -1118,7 +1118,7 @@ namespace Hermes
         return sqrt(total_error);
       else if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
         return sqrt(total_error / total_norm);
-      else 
+      else
       {
         error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
         return -1.0;
@@ -1138,24 +1138,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::CompareElements::CompareElements(double** errors): errors(errors) 
+    Adapt<Scalar>::CompareElements::CompareElements(double** errors): errors(errors)
     {
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::CompareElements::operator()(const ElementReference& e1,const ElementReference& e2) const 
+    bool Adapt<Scalar>::CompareElements::operator()(const ElementReference& e1,const ElementReference& e2) const
     {
       return errors[e1.comp][e1.id] > errors[e2.comp][e2.id];
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fill_regular_queue(Mesh** meshes) 
+    void Adapt<Scalar>::fill_regular_queue(Mesh** meshes)
     {
       assert_msg(num_act_elems > 0, "Number of active elements (%d) is invalid.", num_act_elems);
 
       //prepare space for queue (it is assumed that it will only grow since we can just split)
       regular_queue.clear();
-      if (num_act_elems < (int)regular_queue.capacity()) 
+      if (num_act_elems < (int)regular_queue.capacity())
       {
         Hermes::vector<ElementReference> empty_refs;
         regular_queue.swap(empty_refs); //deallocate

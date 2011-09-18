@@ -43,36 +43,36 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
   MEM_CHECK(vv);
 
   *d = 1.0;
-  for (i = 0; i < n; i++) 
+  for (i = 0; i < n; i++)
   {
     big=0.0;
     for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
     if (big == 0.0) EXIT("Singular matrix in routine LUDCMP!");
     vv[i] = 1.0 / big;
   }
-  for (j = 0; j < n; j++) 
+  for (j = 0; j < n; j++)
   {
-    for (i = 0; i < j; i++) 
+    for (i = 0; i < j; i++)
     {
       sum = a[i][j];
       for (k = 0; k < i; k++) sum -= a[i][k]*a[k][j];
       a[i][j] = sum;
     }
     big = 0.0;
-    for (i = j; i < n; i++) 
+    for (i = j; i < n; i++)
     {
       sum = a[i][j];
       for (k = 0; k < j; k++) sum -= a[i][k]*a[k][j];
       a[i][j] = sum;
-      if ((dum = vv[i]*fabs(sum)) >= big) 
+      if ((dum = vv[i]*fabs(sum)) >= big)
       {
         big = dum;
         imax = i;
       }
     }
-    if (j != imax) 
+    if (j != imax)
     {
-      for (k = 0; k < n; k++) 
+      for (k = 0; k < n; k++)
       {
         dum = a[imax][k];
         a[imax][k] = a[j][k];
@@ -83,7 +83,7 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
     }
     indx[j] = imax;
     if (a[j][j] == 0.0) a[j][j] = HERMES_TINY;
-    if (j != n-1) 
+    if (j != n-1)
     {
       dum = 1.0 / (a[j][j]);
       for (i = j+1; i < n; i++) a[i][j] *= dum;
@@ -96,14 +96,14 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
 {
   _F_;
   int i, j, k;
-  for (i = 0; i < n; i++) 
+  for (i = 0; i < n; i++)
   {
-    for (j = i; j < n; j++) 
+    for (j = i; j < n; j++)
     {
       double sum = a[i][j];
       k = i;
       while (--k >= 0) sum -= a[i][k] * a[j][k];
-      if (i == j) 
+      if (i == j)
       {
         if (sum <= 0.0) EXIT("CHOLDC failed!");
         else p[i] = sqrt(sum);
@@ -163,7 +163,7 @@ template<typename Scalar>
 void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
   _F_;
-  if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE) 
+  if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE)
   {
     Page *new_page = new Page;
     MEM_CHECK(new_page);
@@ -180,7 +180,7 @@ int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, in
   _F_;
   // gather all pages in the buffer, deleting them along the way
   int *end = buffer;
-  while (page != NULL) 
+  while (page != NULL)
   {
     memcpy(end, page->idx, sizeof(int) * page->count);
     end += page->count;
@@ -213,7 +213,7 @@ template<typename Scalar>
 SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type)
 {
   _F_;
-  switch (matrix_solver_type) 
+  switch (matrix_solver_type)
   {
   case Hermes::SOLVER_AMESOS:
     {
@@ -233,7 +233,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #endif
       break;
     }
-  case Hermes::SOLVER_MUMPS: 
+  case Hermes::SOLVER_MUMPS:
     {
 #ifdef WITH_MUMPS
       return new MumpsMatrix<Scalar>;
@@ -242,7 +242,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #endif
       break;
     }
-  case Hermes::SOLVER_PETSC: 
+  case Hermes::SOLVER_PETSC:
     {
 #ifdef WITH_PETSC
       return new PetscMatrix<Scalar>;
@@ -251,7 +251,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #endif
       break;
     }
-  case Hermes::SOLVER_UMFPACK: 
+  case Hermes::SOLVER_UMFPACK:
     {
 #ifdef WITH_UMFPACK
       return new UMFPackMatrix<Scalar>;
@@ -260,7 +260,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #endif
       break;
     }
-  case Hermes::SOLVER_SUPERLU: 
+  case Hermes::SOLVER_SUPERLU:
     {
 #ifdef WITH_SUPERLU
       return new SuperLUMatrix<Scalar>;
@@ -269,7 +269,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #endif
       break;
     }
-  default: 
+  default:
     error("Unknown matrix solver requested.");
   }
   return NULL;
@@ -279,7 +279,7 @@ template<typename Scalar>
 Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type)
 {
   _F_;
-  switch (matrix_solver_type) 
+  switch (matrix_solver_type)
   {
   case Hermes::SOLVER_AMESOS:
     {
@@ -299,7 +299,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #endif
       break;
     }
-  case Hermes::SOLVER_MUMPS: 
+  case Hermes::SOLVER_MUMPS:
     {
 #ifdef WITH_MUMPS
       return new MumpsVector<Scalar>;
@@ -308,7 +308,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #endif
       break;
     }
-  case Hermes::SOLVER_PETSC: 
+  case Hermes::SOLVER_PETSC:
     {
 #ifdef WITH_PETSC
       return new PetscVector<Scalar>;
@@ -317,7 +317,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #endif
       break;
     }
-  case Hermes::SOLVER_UMFPACK: 
+  case Hermes::SOLVER_UMFPACK:
     {
 #ifdef WITH_UMFPACK
       return new UMFPackVector<Scalar>;
@@ -326,7 +326,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #endif
       break;
     }
-  case Hermes::SOLVER_SUPERLU: 
+  case Hermes::SOLVER_SUPERLU:
     {
 #ifdef WITH_SUPERLU
       return new SuperLUVector<Scalar>;
@@ -335,7 +335,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #endif
       break;
     }
-  default: 
+  default:
     error("Unknown matrix solver requested.");
   }
   return NULL;

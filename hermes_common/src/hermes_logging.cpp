@@ -27,10 +27,10 @@
 
 #ifndef HERMES_NO_LOGO
 /// Generates a logo when the library is loaded and the logo is enabled (a preprocessor directive ::HERMES_NO_LOGO). \internal \ingroup g_logging
-class HermesLogoMessage 
+class HermesLogoMessage
 {
 public:
-  HermesLogoMessage() 
+  HermesLogoMessage()
   {
     printf("\n------------------------------------------------\n");
     printf("  This application uses Hermes,  a C++ library \n");
@@ -48,13 +48,13 @@ static Hermes::Logging::LoggerMonitor logger_monitor;
 
 static std::map<std::string, bool> logger_written;
 
-void Hermes::Logging::hermes_exit_if(bool cond, int code) 
+void Hermes::Logging::hermes_exit_if(bool cond, int code)
 {
   if (cond)
     exit(code);
 }
 
-bool Hermes::Logging::write_console(const char code, const bool emphasize, const char* text) 
+bool Hermes::Logging::write_console(const char code, const bool emphasize, const char* text)
 {
 #ifdef WIN32 //Windows platform
   HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -75,7 +75,7 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
   }
   WORD console_attrs = 0;
   bool console_bold = false;
-  switch(code) 
+  switch(code)
   {
   case HERMES_EC_ERROR:
   case HERMES_EC_ASSERT: console_attrs |= console_attr_red; break;
@@ -111,7 +111,7 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
   //console color code
   int console_attrs = 0;
   bool console_bold = false;
-  switch(code) 
+  switch(code)
   {
   case HERMES_EC_ERROR:
   case HERMES_EC_ASSERT: console_attrs |= FOREGROUND_RED; break;
@@ -138,9 +138,9 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
 #endif
 }
 
-bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::HermesLogEventInfo& info, const char* msg, ...) 
+bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::HermesLogEventInfo& info, const char* msg, ...)
 {
-  if (cond) 
+  if (cond)
   {
     logger_monitor.enter();
 
@@ -151,17 +151,17 @@ bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::He
     bool new_block = true;
     char text[BUF_SZ];
     char* text_contents = text + 1;
-    if (msg[0] == '!') 
+    if (msg[0] == '!')
     {
       emphasize = true;
       msg++;
     }
-    if (msg[0] == ' ') 
+    if (msg[0] == ' ')
     {
       text[0] = ' ';
       new_block = false;
     }
-    else 
+    else
     {
       if (info.code == 'E')
         Teuchos::show_stacktrace();
@@ -185,7 +185,7 @@ bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::He
     printf("\n"); //write a new line
 
     //print to file
-    if (info.log_file != NULL) 
+    if (info.log_file != NULL)
     {
       FILE* file = fopen(info.log_file, "at");
       if (file != NULL)
@@ -203,7 +203,7 @@ bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::He
         //build a long version of location
         std::ostringstream location;
         location << '(';
-        if (info.src_function != NULL) 
+        if (info.src_function != NULL)
         {
           location << info.src_function;
           if (info.src_file != NULL)
@@ -249,5 +249,5 @@ void Hermes::Logging::hermes_fread(void* ptr, size_t size, size_t nitems, FILE* 
 }
 
 Hermes::Logging::HermesLogEventInfo::HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
-  : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line) 
+  : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line)
 {}

@@ -45,14 +45,14 @@ namespace Hermes
 
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char* quantity_name,
-          bool mode_3D = true, int item = H2D_FN_VAL_0, 
+          bool mode_3D = true, int item = H2D_FN_VAL_0,
           double eps = HERMES_EPS_NORMAL);
 
         void set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult = 1.0);
-        
-        void calc_vertices_aabb(double* min_x, double* max_x, 
+
+        void calc_vertices_aabb(double* min_x, double* max_x,
           double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
-        
+
         int get_num_vertices();
         double3* get_vertices();
       protected:
@@ -69,7 +69,7 @@ namespace Hermes
         double dmult;
 
         double3* verts;  ///< vertices: (x, y, value) triplets
-       
+
         /// What kind of information do we want to get out of the solution.
         int item, component, value_type;
 
@@ -86,7 +86,7 @@ namespace Hermes
           double* val, double* phx, double* phy, int* indices);
 
         void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
-        
+
         void find_min_max();
       };
     }

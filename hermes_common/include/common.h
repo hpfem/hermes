@@ -86,35 +86,35 @@ typedef double double3x2[3][2];
 typedef double double3x3[3][3];
 
 template<typename Scalar>
-class Scalar2 
-{ 
-  Scalar val[2]; 
+class Scalar2
+{
+  Scalar val[2];
 
 public:
-  Scalar2(Scalar v1, Scalar v2) 
-  { 
-    val[0] = v1; val[1] = v2; 
+  Scalar2(Scalar v1, Scalar v2)
+  {
+    val[0] = v1; val[1] = v2;
   }
 
-  Scalar& operator[] (int idx) 
-  { 
+  Scalar& operator[] (int idx)
+  {
     assert(idx >= 0 && idx < 2);
     return val[idx];
   }
 };
 template<typename Scalar>
 class Scalar3
-{ 
-  Scalar val[3]; 
+{
+  Scalar val[3];
 
 public:
-  Scalar3(Scalar v1, Scalar v2, Scalar v3) 
-  { 
-    val[0] = v1; val[1] = v2, val[2] = v3; 
+  Scalar3(Scalar v1, Scalar v2, Scalar v3)
+  {
+    val[0] = v1; val[1] = v2, val[2] = v3;
   }
 
-  Scalar& operator[] (int idx) 
-  { 
+  Scalar& operator[] (int idx)
+  {
     assert(idx >= 0 && idx < 3);
     return val[idx];
   }
@@ -143,10 +143,10 @@ typedef unsigned __int64 uint64_t;
 
 namespace Hermes
 {
-  enum MatrixSolverType 
+  enum MatrixSolverType
   {
-    SOLVER_UMFPACK = 0, 
-    SOLVER_PETSC, 
+    SOLVER_UMFPACK = 0,
+    SOLVER_PETSC,
     SOLVER_MUMPS,
     SOLVER_SUPERLU,
     SOLVER_AMESOS,
@@ -184,7 +184,7 @@ namespace Hermes
   // For internal use.
   const int HERMES_ANY_INT = -1234;
   /// This defines the edge types used by discontinuous Galerkin weak forms.
-  const std::string H2D_DG_BOUNDARY_EDGE = "-12345";  ///< This is to be used by weak forms on the boundary. 
+  const std::string H2D_DG_BOUNDARY_EDGE = "-12345";  ///< This is to be used by weak forms on the boundary.
   ///< It complements H2D_ANY in that it ensures the forms are evaluated also on non-natural
   ///< boundaries (essential conditions may be enforced weakly in some DG methods).
   const std::string H2D_DG_INNER_EDGE = "-1234567";    ///< This is to be used by weak forms specifying numerical flux through interior edges.
@@ -193,7 +193,7 @@ namespace Hermes
   // For internal use.
   const int H2D_DG_INNER_EDGE_INT = -1234567;
   const int H2D_DG_BOUNDARY_EDGE_INT = -12345;
-  
+
   // For internal use (inside Geom<Ord>).
   const int HERMES_DUMMY_ELEM_MARKER = -9999;
   const int HERMES_DUMMY_EDGE_MARKER = -8888;
@@ -213,27 +213,27 @@ namespace Hermes
     /// This class makes command line arguments available to any other method in Hermes.
     class HERMES_API CommandLineArgs
     {
-    public:  
+    public:
       CommandLineArgs() {};
 
       int m_argc;
       char** m_argv;
 
-      void set(int argc_in, char** argv_in) { 
-        m_argc = argc_in; 
-        m_argv = argv_in; 
+      void set(int argc_in, char** argv_in) {
+        m_argc = argc_in;
+        m_argv = argv_in;
       }
-      bool check() { 
+      bool check() {
         return (m_argc > 0);
       }
       void missing_error() {
-        error("Command line arguments have not been set."); 
+        error("Command line arguments have not been set.");
       }
-      int& get_argc() { 
-        return m_argc; 
+      int& get_argc() {
+        return m_argc;
       }
-      char**& get_argv() { 
-        return m_argv; 
+      char**& get_argv() {
+        return m_argv;
       }
     };
   }
@@ -279,7 +279,7 @@ namespace Hermes
   /// Throws an exception std::runtime_error. Used by Python wrappers.
   /** \param[in] text A text (a cause) of the exception. */
   extern HERMES_API void throw_exception(char *text);
-  
+
   // Common return values for tests.
   #define TEST_SUCCESS    0
   #define TEST_FAILURE    -1

@@ -20,7 +20,7 @@ MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
-                                                  // by the other solvers). 
+                                                  // by the other solvers).
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers).
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 
   // Initialize the discrete problem.
   DiscreteProblem<double> dp1(&wf1, &space);
-  
+
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
   Vector<double>* rhs = create_vector<double>(matrix_solver_type);
@@ -80,12 +80,12 @@ int main(int argc, char* argv[])
   // Initialize the solution.
   Solution<double> sln1;
 
-  if (matrix_solver_type == SOLVER_AZTECOO) 
+  if (matrix_solver_type == SOLVER_AZTECOO)
   {
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
-  } 
+  }
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
- 
+
   // TRILINOS PART:
 
   // Project the initial condition to obtain the initial
@@ -171,9 +171,9 @@ int main(int argc, char* argv[])
     error("NOX failed.");
   }
   Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
-  info("Number of nonlin iterations: %d (norm of residual: %g)", 
+  info("Number of nonlin iterations: %d (norm of residual: %g)",
        nox_solver.get_num_iters(), nox_solver.get_residual());
-  info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
+  info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
        nox_solver.get_num_lin_iters(), nox_solver.get_achieved_tol());
 
   // CPU time needed by NOX.

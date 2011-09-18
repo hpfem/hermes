@@ -13,7 +13,7 @@ public:
 
 /* Custom non-constant Dirichlet condition */
 
-class CustomDirichletCondition : public Hermes::Hermes2D::EssentialBoundaryCondition<double> 
+class CustomDirichletCondition : public Hermes::Hermes2D::EssentialBoundaryCondition<double>
 {
 public:
   CustomDirichletCondition(Hermes::vector<std::string> markers, double A, double B, double C);

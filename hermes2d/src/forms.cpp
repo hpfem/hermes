@@ -63,7 +63,7 @@ namespace Hermes
       if (attribute != NULL && other_attribute != NULL)
       {
         assert_msg(other_attribute != NULL, "Unable to subtract a function expansion, the desired attribute is NULL in the other function.");
-        for(int i = 0; i < num_gip; i++) 
+        for(int i = 0; i < num_gip; i++)
           attribute[i] -= other_attribute[i];
       }
     }
@@ -95,16 +95,16 @@ namespace Hermes
     template<typename T>
     void Func<T>::add(T* attribute, T* other_attribute)
     {
-      if (attribute != NULL && other_attribute != NULL) 
+      if (attribute != NULL && other_attribute != NULL)
       {
         assert_msg(other_attribute != NULL, "Unable to add a function expansion, the desired attribute is NULL in the other function.");
-        for(int i = 0; i < num_gip; i++) 
+        for(int i = 0; i < num_gip; i++)
           attribute[i] += other_attribute[i];
       }
     }
 
     template<typename T>
-    void Func<T>::free_ord() 
+    void Func<T>::free_ord()
     {
       delete val;
       val = val0 = val1 = NULL;
@@ -196,15 +196,15 @@ namespace Hermes
     }
 
     template<typename T>
-    void DiscontinuousFunc<T>::free_fn() 
+    void DiscontinuousFunc<T>::free_fn()
     {
-      if (fn_central != NULL) 
+      if (fn_central != NULL)
       {
         fn_central->free_fn();
         delete fn_central;
         fn_central = NULL;
       }
-      if (fn_neighbor != NULL) 
+      if (fn_neighbor != NULL)
       {
         fn_neighbor->free_fn();
         delete fn_neighbor;
@@ -213,15 +213,15 @@ namespace Hermes
     }
 
     template<typename T>
-    void DiscontinuousFunc<T>::free_ord() 
+    void DiscontinuousFunc<T>::free_ord()
     {
-      if (fn_central != NULL) 
+      if (fn_central != NULL)
       {
         fn_central->free_ord();
         delete fn_central;
         fn_central = NULL;
       }
-      if (fn_neighbor != NULL) 
+      if (fn_neighbor != NULL)
       {
         fn_neighbor->free_ord();
         delete fn_neighbor;
@@ -293,19 +293,19 @@ namespace Hermes
     template<typename T>
     int InterfaceGeom<T>::get_neighbor_marker() const
     {
-      return neighb_marker; 
+      return neighb_marker;
     }
 
     template<typename T>
-    int InterfaceGeom<T>::get_neighbor_id() const 
-    { 
-      return neighb_id; 
+    int InterfaceGeom<T>::get_neighbor_id() const
+    {
+      return neighb_id;
     }
 
     template<typename T>
-    T InterfaceGeom<T>::get_neighbor_diam() const 
-    { 
-      return neighb_diam; 
+    T InterfaceGeom<T>::get_neighbor_diam() const
+    {
+      return neighb_diam;
     }
 
     Geom<Hermes::Ord>* init_geom_ord()
@@ -328,7 +328,7 @@ namespace Hermes
       e->diam = diam;
       e->edge_marker = HERMES_DUMMY_EDGE_MARKER;
       e->elem_marker = HERMES_DUMMY_ELEM_MARKER;
-      
+
       return e;
     }
 
@@ -361,7 +361,7 @@ namespace Hermes
       e->ty = new double [np];
       e->nx = new double [np];
       e->ny = new double [np];
-      for (int i = 0; i < np; i++) 
+      for (int i = 0; i < np; i++)
       {
         e->tx[i] = tan[i][0];  e->ty[i] =   tan[i][1];
         e->nx[i] = tan[i][1];  e->ny[i] = - tan[i][0];
@@ -404,7 +404,7 @@ namespace Hermes
       Func<double>* u = new Func<double>(np, nc);
 
       // H1 space.
-      if (space_type == HERMES_H1_SPACE) 
+      if (space_type == HERMES_H1_SPACE)
       {
         u->val = new double [np];
         u->dx  = new double [np];
@@ -422,7 +422,7 @@ namespace Hermes
 #endif
 
         double2x2 *m;
-        if(rm->is_jacobian_const()) 
+        if(rm->is_jacobian_const())
         {
           m = new double2x2[np];
           double2x2 const_inv_ref_map;
@@ -432,7 +432,7 @@ namespace Hermes
           const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
           const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
 
-          for(int i = 0; i < np; i++) 
+          for(int i = 0; i < np; i++)
           {
             m[i][0][0] = const_inv_ref_map[0][0];
             m[i][0][1] = const_inv_ref_map[0][1];
@@ -473,7 +473,7 @@ namespace Hermes
           delete [] m;
       }
       // Hcurl space.
-      else if (space_type == HERMES_HCURL_SPACE) 
+      else if (space_type == HERMES_HCURL_SPACE)
       {
         u->val0 = new double [np];
         u->val1 = new double [np];
@@ -484,7 +484,7 @@ namespace Hermes
         double *dx1 = fu->get_dx_values(1);
         double *dy0 = fu->get_dy_values(0);
         double2x2 *m;
-        if(rm->is_jacobian_const()) 
+        if(rm->is_jacobian_const())
         {
           m = new double2x2[np];
           double2x2 const_inv_ref_map;
@@ -494,7 +494,7 @@ namespace Hermes
           const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
           const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
 
-          for(int i = 0; i < np; i++) 
+          for(int i = 0; i < np; i++)
           {
             m[i][0][0] = const_inv_ref_map[0][0];
             m[i][0][1] = const_inv_ref_map[0][1];
@@ -504,7 +504,7 @@ namespace Hermes
         }
         else
           m = rm->get_inv_ref_map(order);
-        for (int i = 0; i < np; i++, m++) 
+        for (int i = 0; i < np; i++, m++)
         {
           u->val0[i] = (fn0[i] * (*m)[0][0] + fn1[i] * (*m)[0][1]);
           u->val1[i] = (fn0[i] * (*m)[1][0] + fn1[i] * (*m)[1][1]);
@@ -516,7 +516,7 @@ namespace Hermes
           delete [] m;
       }
       // Hdiv space.
-      else if (space_type == HERMES_HDIV_SPACE) 
+      else if (space_type == HERMES_HDIV_SPACE)
       {
         u->val0 = new double [np];
         u->val1 = new double [np];
@@ -526,7 +526,7 @@ namespace Hermes
         double *dx0 = fu->get_dx_values(0);
         double *dy1 = fu->get_dy_values(1);
         double2x2 *m;
-        if(rm->is_jacobian_const()) 
+        if(rm->is_jacobian_const())
         {
           m = new double2x2[np];
           double2x2 const_inv_ref_map;
@@ -536,7 +536,7 @@ namespace Hermes
           const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
           const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
 
-          for(int i = 0; i < np; i++) 
+          for(int i = 0; i < np; i++)
           {
             m[i][0][0] = const_inv_ref_map[0][0];
             m[i][0][1] = const_inv_ref_map[0][1];
@@ -546,7 +546,7 @@ namespace Hermes
         }
         else
           m = rm->get_inv_ref_map(order);
-        for (int i = 0; i < np; i++, m++) 
+        for (int i = 0; i < np; i++, m++)
         {
           u->val0[i] = (  fn0[i] * (*m)[1][1] - fn1[i] * (*m)[1][0]);
           u->val1[i] = (- fn0[i] * (*m)[0][1] + fn1[i] * (*m)[0][0]);
@@ -557,7 +557,7 @@ namespace Hermes
           delete [] m;
       }
       // L2 Space.
-      else if (space_type == HERMES_L2_SPACE) 
+      else if (space_type == HERMES_L2_SPACE)
       {
         // Same as for H1, except that we currently do not have
         // second derivatives of L2 shape functions for triangles.
@@ -570,7 +570,7 @@ namespace Hermes
         double *dy = fu->get_dy_values();
 
         double2x2 *m;
-        if(rm->is_jacobian_const()) 
+        if(rm->is_jacobian_const())
         {
           m = new double2x2[np];
           double2x2 const_inv_ref_map;
@@ -580,7 +580,7 @@ namespace Hermes
           const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
           const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
 
-          for(int i = 0; i < np; i++) 
+          for(int i = 0; i < np; i++)
           {
             m[i][0][0] = const_inv_ref_map[0][0];
             m[i][0][1] = const_inv_ref_map[0][1];
@@ -591,7 +591,7 @@ namespace Hermes
         else
           m = rm->get_inv_ref_map(order);
 
-        for (int i = 0; i < np; i++, m++) 
+        for (int i = 0; i < np; i++, m++)
         {
           u->val[i] = fn[i];
           u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
@@ -622,7 +622,7 @@ namespace Hermes
       int np = quad->get_num_points(order);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
-      if (u->nc == 1) 
+      if (u->nc == 1)
       {
         u->val = new Scalar [np];
         u->dx  = new Scalar [np];
@@ -631,7 +631,7 @@ namespace Hermes
         memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
       }
-      else if (u->nc == 2) 
+      else if (u->nc == 2)
       {
         u->val0 = new Scalar [np];
         u->val1 = new Scalar [np];
@@ -675,7 +675,7 @@ namespace Hermes
       int np = quad->get_num_points(order);
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
-      if (u->nc == 1) 
+      if (u->nc == 1)
       {
         u->val = new Scalar [np];
         u->dx  = new Scalar [np];
@@ -688,9 +688,9 @@ namespace Hermes
         memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
-        if (space_type == HERMES_H1_SPACE) 
+        if (space_type == HERMES_H1_SPACE)
         {
-          if(sln_type == HERMES_SLN) 
+          if(sln_type == HERMES_SLN)
           {
             Scalar *dxx = fu->get_dxx_values();
             Scalar *dyy = fu->get_dyy_values();
@@ -700,7 +700,7 @@ namespace Hermes
         }
 #endif
       }
-      else if (u->nc == 2) 
+      else if (u->nc == 2)
       {
         u->val0 = new Scalar [np];
         u->val1 = new Scalar [np];

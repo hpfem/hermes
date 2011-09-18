@@ -63,7 +63,7 @@ namespace Hermes {
       virtual void add_matrix(PetscMatrix* mat);
       /// Add matrix to diagonal.
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
-      /// @param[in] mat added matrix 
+      /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, PetscMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
         add_to_diagonal_blocks(num_stages,dynamic_cast<PetscMatrix<Scalar>*>(mat));

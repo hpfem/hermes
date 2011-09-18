@@ -28,9 +28,9 @@
 #include <Ifpack_ICT.h>
 #include <Ifpack_Graph_Epetra_CrsGraph.h>
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Preconditioners 
+  namespace Preconditioners
 {
     template<typename Scalar>
     IfpackPrecond<Scalar>::IfpackPrecond(const char *cls, const char *type)
@@ -93,18 +93,18 @@ namespace Hermes
       EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
       assert(mt != NULL);
       mat = mt;
-      if (strcmp(cls, "point-relax") == 0) 
+      if (strcmp(cls, "point-relax") == 0)
       {
         create_point_relax(mat, type);
         apply_params();
         initialize();
       }
-      else if (strcmp(cls, "block-relax") == 0) 
+      else if (strcmp(cls, "block-relax") == 0)
       {
         create_block_relax(mat, type);
         apply_params();
       }
-      else if (strcmp(cls, "add-schwartz") == 0) 
+      else if (strcmp(cls, "add-schwartz") == 0)
       {
         create_add_schwartz(mat, type, overlap);
         apply_params();
@@ -141,19 +141,19 @@ namespace Hermes
     template<typename Scalar>
     void IfpackPrecond<Scalar>::create_add_schwartz(EpetraMatrix<Scalar> *a, const char *name, int overlap)
     {
-      if (strcasecmp(name, "ilu") == 0) 
+      if (strcasecmp(name, "ilu") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ILU>(a->mat, overlap);
       }
-      else if (strcasecmp(name, "ilut") == 0) 
+      else if (strcasecmp(name, "ilut") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ILUT>(a->mat, overlap);
       }
-      else if (strcasecmp(name, "ic") == 0) 
+      else if (strcasecmp(name, "ic") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_IC>(a->mat, overlap);
       }
-      else if (strcasecmp(name, "ict") == 0) 
+      else if (strcasecmp(name, "ict") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ICT>(a->mat, overlap);
       }

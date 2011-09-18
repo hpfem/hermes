@@ -382,7 +382,7 @@ namespace Hermes
         if ((fabs((exact1 - result1) / exact1) < 1e-8) &&
           (fabs((exact2 - result2) / exact2) < 1e-8)) break;
       }
-      if (o >= 10) 
+      if (o >= 10)
       {
         warn("Element #%d is too distorted (iro ~ %d).", element->id, o);
       }
@@ -432,7 +432,7 @@ namespace Hermes
         dxx = ref_map_shapeset.get_dxx_value(indices[i], xi1, xi2, 0);
         dxy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0);
         dyy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0);
-        
+
         k[0][0] += coeffs[i][0] * dxx;
         k[0][1] += coeffs[i][1] * dxx;
         k[1][0] += coeffs[i][0] * dxy;
@@ -534,7 +534,7 @@ namespace Hermes
       for (it = nodes.begin(); it != nodes.end(); it++)
         free_node(it->second);
       nodes.clear();
-      if (overflow != NULL) 
+      if (overflow != NULL)
       {
         free_node(overflow); overflow = NULL;
       }

@@ -253,7 +253,7 @@ namespace Hermes
         };
         NodeData() : dof(0), edge_bc_proj(NULL) {}
       };
-      
+
       class ElementData
       {
       public:
@@ -310,7 +310,7 @@ namespace Hermes
       virtual void post_assign();
 
       void free_bc_data();
-    
+
 public:
       /// Internal. Used by DiscreteProblem to detect changes in the space.
       int get_seq() const;
@@ -320,11 +320,11 @@ public:
       virtual SpaceType get_type() const = 0;
 
       /// Create globally refined space.
-      static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, 
-                                                                      int order_increase = 1, 
+      static Hermes::vector<Space<Scalar>*>* construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse,
+                                                                      int order_increase = 1,
                                                                       int refinement_type = 0);
 
-      static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1, 
+      static Space<Scalar>* construct_refined_space(Space<Scalar>* coarse, int order_increase = 1,
                                                     int refinement_type = 0);
 
       static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);

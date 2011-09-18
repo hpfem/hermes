@@ -70,7 +70,7 @@ namespace Hermes
 
           if (!(istr >> dummy_dbl))
             vCP.push_back(atof(m->vars_[m->vars_[m->curv_inner_pts[id]][i]][0].c_str()));
-          else 
+          else
             vCP.push_back(atof(m->vars_[m->curv_inner_pts[id]][i].c_str()));
         }
         inner = vCP.size()/3;
@@ -213,7 +213,7 @@ namespace Hermes
 
         int* idx = new int[nv-1];
         std::string el_marker;
-        if (!nv) { 
+        if (!nv) {
           mesh->elements.skip_slot();
           continue;
         }
@@ -227,7 +227,7 @@ namespace Hermes
           idx[2] = m.en3[i];
 
           el_marker = m.e_mtl[i];
-        } 
+        }
         else {
           idx[0] = m.en1[i];
           idx[1] = m.en2[i];

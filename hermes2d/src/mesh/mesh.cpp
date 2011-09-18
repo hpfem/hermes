@@ -27,7 +27,7 @@ namespace Hermes
       {
         // store the element pointer in a free slot of 'elem'
         if (elem[0] == NULL) elem[0] = e;
-        else 
+        else
         {
           if (elem[1] == NULL) elem[1] = e;
           else {assert_msg(false, "No free slot 'elem'");}
@@ -162,12 +162,12 @@ namespace Hermes
         e = create_triangle(this->element_markers_conversion.get_internal_marker(tri_markers[i]).marker, &nodes[tris[i][0]], &nodes[tris[i][1]],
                             &nodes[tris[i][2]], NULL);
       }
-        
+
       // create quads
       for (int i = 0; i < nq; i++)
       {
         this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, quad_markers[i]);
-       
+
         e = create_quad(this->element_markers_conversion.get_internal_marker(quad_markers[i]).marker, &nodes[quads[i][0]], &nodes[quads[i][1]],
                         &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
       }
@@ -176,7 +176,7 @@ namespace Hermes
       for (int i = 0; i < nm; i++)
       {
         Node* en = peek_edge_node(mark[i][0], mark[i][1]);
-        if (en == NULL) 
+        if (en == NULL)
           error("Boundary data error (edge does not exist)");
 
         this->boundary_markers_conversion.insert_marker(this->boundary_markers_conversion.min_marker_unused, boundary_markers[i]);
@@ -254,7 +254,7 @@ namespace Hermes
       return e;
     }
 
-    Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, 
+    Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3,
       CurvMap* cm)
     {
       // create a new element
@@ -372,7 +372,7 @@ namespace Hermes
       sons[3]->vn[2]->bnd = bnd[0];
 
       //set pointers to parent element for sons
-      for(int i = 0; i < 4; i++) 
+      for(int i = 0; i < 4; i++)
       {
         if(sons[i] != NULL) sons[i]->parent = e;
       }
@@ -381,7 +381,7 @@ namespace Hermes
       memcpy(e->sons, sons, 4 * sizeof(Element*));
 
       // If sons_out != NULL, copy son pointers there.
-      if (sons_out != NULL) 
+      if (sons_out != NULL)
       {
         for(int i = 0; i < 3; i++) sons_out[i] = sons[i];
       }
@@ -573,7 +573,7 @@ namespace Hermes
       memcpy(e->sons, sons, sizeof(sons));
 
       // If sons_out != NULL, copy son pointers there.
-      if (sons_out != NULL) 
+      if (sons_out != NULL)
       {
         for(int i = 0; i < 4; i++) sons_out[i] = sons[i];
       }
@@ -629,13 +629,13 @@ namespace Hermes
     {
       this->refinements.push_back(std::pair<unsigned int, int>(e->id, refinement));
 
-      if (e->is_triangle()) 
+      if (e->is_triangle())
       {
-        if (refinement == 3) 
+        if (refinement == 3)
         {
           refine_triangle_to_quads(this, e);
         }
-        else 
+        else
         {
           this->refine_triangle_to_triangles(e);
         }
@@ -672,9 +672,9 @@ namespace Hermes
     {
       Element* e;
       elements.set_append_only(true);
-      for (int r, i = 0; i < depth; i++) 
+      for (int r, i = 0; i < depth; i++)
       {
-        for_all_active_elements(e, this) 
+        for_all_active_elements(e, this)
         {
           if ((r = criterion(e)) >= 0)
             refine_element_id(e->id, r);
@@ -707,9 +707,9 @@ namespace Hermes
     static int rtb_criterion(Element* e)
     {
       unsigned int i;
-      for (i = 0; i < e->nvert; i++) 
+      for (i = 0; i < e->nvert; i++)
       {
-        if (e->en[i]->marker == rtb_marker || rtb_vert[e->vn[i]->id]) 
+        if (e->en[i]->marker == rtb_marker || rtb_vert[e->vn[i]->id])
         {
           break;
         }
@@ -750,7 +750,7 @@ namespace Hermes
 
         Element* e;
         for_all_active_elements(e, this)
-          for (unsigned int j = 0; j < e->nvert; j++) 
+          for (unsigned int j = 0; j < e->nvert; j++)
           {
             bool marker_matched = false;
             for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
@@ -774,7 +774,7 @@ namespace Hermes
         for(std::map<int, std::string>::iterator it = this->boundary_markers_conversion.conversion_table.begin(); it != this->boundary_markers_conversion.conversion_table.end(); it++)
           refine_towards_boundary(it->second, depth, aniso, mark_as_initial);
 
-      else 
+      else
       {
         rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker).marker;
         rtb_aniso = aniso;
@@ -788,9 +788,9 @@ namespace Hermes
 
           Element* e;
           for_all_active_elements(e, this)
-            for (unsigned int j = 0; j < e->nvert; j++) 
+            for (unsigned int j = 0; j < e->nvert; j++)
             {
-              if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker).marker) 
+              if (e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker).marker)
               {
                 rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
               }
@@ -828,8 +828,8 @@ namespace Hermes
       {
         bool found = true;
         for (unsigned int i = 0; i < 4; i++)
-          if (e->sons[i] != NULL && 
-            (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < ninitial))  
+          if (e->sons[i] != NULL &&
+            (!e->sons[i]->active || (keep_initial_refinements && e->sons[i]->id < ninitial))
             )
           { found = false; break; }
 
@@ -902,7 +902,7 @@ namespace Hermes
         error("Triangular element #%d: all vertices lie on the same line.", i);
 
       // checking positive orientation. If not positive, swapping vertices
-      if (!is_convex(v1->x - v0->x, v1->y - v0->y, v2->x - v0->x, v2->y - v0->y)) 
+      if (!is_convex(v1->x - v0->x, v1->y - v0->y, v2->x - v0->x, v2->y - v0->y))
       {
         warn("Triangular element #%d not positively oriented, swapping vertices.", i);
         std::swap(v1, v2);
@@ -962,13 +962,13 @@ namespace Hermes
         n->x *= x_ref;
         n->y *= y_ref;
       }
-      
+
       // If curvilinear, there is more to do.
       bool curved = false;
       Element* e;
-      for_all_elements(e, this) 
+      for_all_elements(e, this)
       {
-        if (e->cm != NULL) 
+        if (e->cm != NULL)
         {
           for(unsigned int i = 0; i < e->nvert; i++)
             if(e->cm->nurbs[i] != NULL)
@@ -1111,7 +1111,7 @@ namespace Hermes
         if (e->is_curved())
           enew->cm = new CurvMap(e->cm);
       }
-      
+
       this->boundary_markers_conversion = mesh->boundary_markers_conversion;
       this->element_markers_conversion = mesh->element_markers_conversion;
 
@@ -1348,7 +1348,7 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true) 
+        if (e->cm->toplevel == true)
         {	
           for (unsigned int n = 0; n < e->nvert; n++)
           {
@@ -1361,7 +1361,7 @@ namespace Hermes
         }
         else
           // one level refinement.
-          if (e->parent->cm->toplevel == true) 
+          if (e->parent->cm->toplevel == true)
           {	
             for (unsigned int n = 0; n < e->nvert; n++)
             {
@@ -1374,7 +1374,7 @@ namespace Hermes
           }
           else
             // two level refinements.
-            if (e->parent->parent->cm->toplevel == true) 
+            if (e->parent->parent->cm->toplevel == true)
             {	
               for (unsigned int n = 0; n < e->nvert; n++)
               {
@@ -1387,7 +1387,7 @@ namespace Hermes
             }
             else
               // three level refinements.
-              if (e->parent->parent->parent->cm->toplevel == true) 
+              if (e->parent->parent->parent->cm->toplevel == true)
               {	
                 for (unsigned int n = 0; n < e->nvert; n++)
                 {
@@ -1400,7 +1400,7 @@ namespace Hermes
               }
               else
                 // four level refinements.
-                if (e->parent->parent->parent->parent->cm->toplevel == true) 
+                if (e->parent->parent->parent->parent->cm->toplevel == true)
                 {	
                   for (unsigned int n = 0; n < e->nvert; n++)
                   {
@@ -1595,7 +1595,7 @@ namespace Hermes
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
-      if (mesh != NULL) 
+      if (mesh != NULL)
       {
         mesh->nactive += 2;
         e->unref_all_nodes(mesh);
@@ -1611,7 +1611,7 @@ namespace Hermes
       sons[2]->en[1]->bnd = bnd[2];  sons[2]->en[1]->marker = mrk[2];
 
       //set pointers to parent element for sons
-      for(int i = 0; i < 3; i++) 
+      for(int i = 0; i < 3; i++)
       {
         if(sons[i] != NULL) sons[i]->parent = e;
       }
@@ -1620,7 +1620,7 @@ namespace Hermes
       memcpy(e->sons, sons, 3 * sizeof(Element*));
 
       // If sons_out != NULL, copy son pointers there.
-      if (sons_out != NULL) 
+      if (sons_out != NULL)
       {
         for(int i = 0; i < 3; i++) sons_out[i] = sons[i];
       }
@@ -1859,7 +1859,7 @@ namespace Hermes
       if(user_marker != "")
         if(conversion_table_inverse.find(user_marker) != conversion_table_inverse.end())
           return;
-      if(conversion_table.size() == 0 || conversion_table.find(internal_marker) == conversion_table.end()) 
+      if(conversion_table.size() == 0 || conversion_table.find(internal_marker) == conversion_table.end())
       {
         conversion_table.insert(std::pair<int, std::string>(internal_marker, user_marker));
         conversion_table_inverse.insert(std::pair<std::string, int>(user_marker, internal_marker));
@@ -1917,7 +1917,7 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true) 
+        if (e->cm->toplevel == true)
         {	
           for (unsigned int n = 0; n < e->nvert; n++)
           {
@@ -1930,7 +1930,7 @@ namespace Hermes
         }
         else
           // one level refinement.
-          if (e->parent->cm->toplevel == true) 
+          if (e->parent->cm->toplevel == true)
           {	
             for (unsigned int n = 0; n < e->nvert; n++)
             {
@@ -1943,7 +1943,7 @@ namespace Hermes
           }
           else
             // two level refinements.
-            if (e->parent->parent->cm->toplevel == true) 
+            if (e->parent->parent->cm->toplevel == true)
             {	
               for (unsigned int n = 0; n < e->nvert; n++)
               {
@@ -1956,7 +1956,7 @@ namespace Hermes
             }
             else
               // three level refinements.
-              if (e->parent->parent->parent->cm->toplevel == true) 
+              if (e->parent->parent->parent->cm->toplevel == true)
               {	
                 for (unsigned int n = 0; n < e->nvert; n++)
                 {
@@ -1969,7 +1969,7 @@ namespace Hermes
               }
               else
                 // four level refinements.
-                if (e->parent->parent->parent->parent->cm->toplevel == true) 
+                if (e->parent->parent->parent->parent->cm->toplevel == true)
                 {	
                   for (unsigned int n = 0; n < e->nvert; n++)
                   {
@@ -2067,9 +2067,9 @@ namespace Hermes
 
       // now the original edge nodes may no longer exist...
       // set correct boundary status and markers for the new nodes
-      enew->en[0]->bnd = bnd[0];  
-      enew->en[1]->bnd = bnd[1];    
-      enew->en[2]->bnd = bnd[2];    
+      enew->en[0]->bnd = bnd[0];
+      enew->en[1]->bnd = bnd[1];
+      enew->en[2]->bnd = bnd[2];
       enew->en[0]->marker = mrk[0];
       enew->en[1]->marker = mrk[1];
       enew->en[2]->marker = mrk[2];
@@ -2095,7 +2095,7 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true) 
+        if (e->cm->toplevel == true)
         {	
           for (unsigned int n = 0; n < e->nvert; n++)
           {
@@ -2108,7 +2108,7 @@ namespace Hermes
         }
         else
           // one level refinement.
-          if (e->parent->cm->toplevel == true) 
+          if (e->parent->cm->toplevel == true)
           {	
             for (unsigned int n = 0; n < e->nvert; n++)
             {
@@ -2121,7 +2121,7 @@ namespace Hermes
           }
           else
             // two level refinements.
-            if (e->parent->parent->cm->toplevel == true) 
+            if (e->parent->parent->cm->toplevel == true)
             {	
               for (unsigned int n = 0; n < e->nvert; n++)
               {
@@ -2134,7 +2134,7 @@ namespace Hermes
             }
             else
               // three level refinements.
-              if (e->parent->parent->parent->cm->toplevel == true) 
+              if (e->parent->parent->parent->cm->toplevel == true)
               {	
                 for (unsigned int n = 0; n < e->nvert; n++)
                 {
@@ -2147,7 +2147,7 @@ namespace Hermes
               }
               else
                 // four level refinements.
-                if (e->parent->parent->parent->parent->cm->toplevel == true) 
+                if (e->parent->parent->parent->parent->cm->toplevel == true)
                 {	
                   for (unsigned int n = 0; n < e->nvert; n++)
                   {
@@ -2161,8 +2161,8 @@ namespace Hermes
       }
 
       // FIXME:
-      if (rtb_aniso) 
-        for (unsigned int i = 0; i < e->nvert; i++) 
+      if (rtb_aniso)
+        for (unsigned int i = 0; i < e->nvert; i++)
           refinement_angle[i] = refinement_angle[i]*2;
 
       // deactivate this element and unregister from its nodes
@@ -2182,7 +2182,7 @@ namespace Hermes
         {
           if (fabs(refinement_angle[i] - 0.0) > 1e-4)
           {
-            create_new = true; 
+            create_new = true;
           }
         }
 
@@ -2191,7 +2191,7 @@ namespace Hermes
         {
           cm = new CurvMap;
           memset(cm, 0, sizeof(CurvMap));
-        }  
+        }
 
         for (idx = 0; idx < 4; idx++)
           if (fabs(refinement_angle[idx] - 0.0) > 1e-4)
@@ -2263,10 +2263,10 @@ namespace Hermes
 
       // now the original edge nodes may no longer exist...
       // set correct boundary status and markers for the new nodes
-      enew->en[0]->bnd = bnd[0];  
-      enew->en[1]->bnd = bnd[1];    
-      enew->en[2]->bnd = bnd[2];   
-      enew->en[3]->bnd = bnd[3]; 
+      enew->en[0]->bnd = bnd[0];
+      enew->en[1]->bnd = bnd[1];
+      enew->en[2]->bnd = bnd[2];
+      enew->en[3]->bnd = bnd[3];
       enew->en[0]->marker = mrk[0];
       enew->en[1]->marker = mrk[1];
       enew->en[2]->marker = mrk[2];
@@ -2293,7 +2293,7 @@ namespace Hermes
       if (e->is_curved() && (!e_inter))
       {
         // for base element.
-        if (e->cm->toplevel == true) 
+        if (e->cm->toplevel == true)
         {	
           for (unsigned int n = 0; n < e->nvert; n++)
           {
@@ -2306,7 +2306,7 @@ namespace Hermes
         }
         else
           // one level refinement.
-          if (e->parent->cm->toplevel == true) 
+          if (e->parent->cm->toplevel == true)
           {	
             for (unsigned int n = 0; n < e->nvert; n++)
             {
@@ -2319,7 +2319,7 @@ namespace Hermes
           }
           else
             // two level refinements.
-            if (e->parent->parent->cm->toplevel == true) 
+            if (e->parent->parent->cm->toplevel == true)
             {	
               for (unsigned int n = 0; n < e->nvert; n++)
               {
@@ -2332,7 +2332,7 @@ namespace Hermes
             }
             else
               // three level refinements.
-              if (e->parent->parent->parent->cm->toplevel == true) 
+              if (e->parent->parent->parent->cm->toplevel == true)
               {	
                 for (unsigned int n = 0; n < e->nvert; n++)
                 {
@@ -2345,7 +2345,7 @@ namespace Hermes
               }
               else
                 // four level refinements.
-                if (e->parent->parent->parent->parent->cm->toplevel == true) 
+                if (e->parent->parent->parent->parent->cm->toplevel == true)
                 {	
                   for (unsigned int n = 0; n < e->nvert; n++)
                   {

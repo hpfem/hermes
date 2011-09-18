@@ -22,7 +22,7 @@ namespace Hermes
     template<typename Scalar> double*  H1Space<Scalar>::h1_chol_p   = NULL;
     template<typename Scalar> int      H1Space<Scalar>::h1_proj_ref = 0;
 
-    template<typename Scalar> 
+    template<typename Scalar>
     void H1Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
     {
       if (shapeset == NULL)
@@ -128,7 +128,7 @@ namespace Hermes
     void H1Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
       _F_;
-      
+
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -200,17 +200,17 @@ namespace Hermes
                   if(this->essential_bcs != NULL)
                     if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker).marker) != NULL)
                       nd->dof = this->H2D_CONSTRAINED_DOF;
-                    else 
+                    else
                     {
                       nd->dof = this->next_dof;
                       this->next_dof += ndofs * this->stride;
                     }
-                  else 
+                  else
                   {
                     nd->dof = this->next_dof;
                     this->next_dof += ndofs * this->stride;
                   }
-                else 
+                else
                 {
                   nd->dof = this->next_dof;
                   this->next_dof += ndofs * this->stride;
@@ -385,7 +385,7 @@ namespace Hermes
         edge_dofs = current;
 
         // (reserve space only if the edge dofs are not in the list yet)
-        if (this->ndata[edge->id].dof != min->dof) 
+        if (this->ndata[edge->id].dof != min->dof)
         {
           current += this->ndata[edge->id].n;
         }

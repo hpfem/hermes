@@ -294,9 +294,9 @@ namespace Hermes
       void refine_quad_to_triangles(Element* e);
 
       /// Refines one quad element into four quad elements.
-      /// The difference between refine_quad_to_quads() and refine_quad() 
-      /// is that all the internal edges of the former's son elements are  
-      /// straight edges. 
+      /// The difference between refine_quad_to_quads() and refine_quad()
+      /// is that all the internal edges of the former's son elements are
+      /// straight edges.
       void refine_quad_to_quads(Element* e, int refinement = 0);
 
       void convert_element_to_base_id(int id);
@@ -385,7 +385,7 @@ namespace Hermes
         /// Inverse tables, so that it is possible to search using either
         /// the internal representation, or the user std::string value.
         std::map<std::string, int> conversion_table_inverse;
-        
+
         friend class Space<double>;
         friend class Space<std::complex<double> >;
         friend class Mesh;
@@ -424,7 +424,7 @@ namespace Hermes
     public:
       ElementMarkersConversion &get_element_markers_conversion() { return element_markers_conversion; };
       BoundaryMarkersConversion &get_boundary_markers_conversion() { return boundary_markers_conversion; };
-  
+
       /*  node and son numbering on a triangle:
 
         -Triangle to triangles refinement
@@ -454,11 +454,11 @@ namespace Hermes
 
                         vn[2]                                     vn[2]
 
-                          *                                        *                                 
-                          / \                                      / \                                   
-                        /   \                                    /   \    
-                        /     \                                  /     \  
-                      /       \                          vn[3] * son[2]* vn[1]    
+                          *                                        *
+                          / \                                      / \
+                        /   \                                    /   \
+                        /     \                                  /     \
+                      /       \                          vn[3] * son[2]* vn[1]
                       /         \                       vn[3] *  \     /  * vn[2]
             en[2]   *           *   en[1]                   / \  \   /  / \
                     /             \                         /   \ vn[0] /   \
@@ -466,9 +466,9 @@ namespace Hermes
                   /                 \                     /       \   /       \
                 /         *         \                   /   vn[2] * * vn[3]   \
                 /                     \                 /          | |          \
-              /                       \               /  son[0]   | |  son[1]   \      
-              /                         \             /            | |            \           
-            *-------------*-------------*           *-------------* *-------------*          
+              /                       \               /  son[0]   | |  son[1]   \
+              /                         \             /            | |            \
+            *-------------*-------------*           *-------------* *-------------*
                                                   vn[0]      vn[1]   vn[0]        vn[1]
         vn[0]           en[0]           vn[1]
 
@@ -525,11 +525,11 @@ namespace Hermes
       /// Vector for storing refinements in order to be able to save/load meshes with identical element IDs.
       /// Refinement "-1" stands for unrefinement.
       Hermes::vector<std::pair<unsigned int, int> > refinements;
-  
-      /// Refines a quad element into four quads, or two quads (horizontally or 
+
+      /// Refines a quad element into four quads, or two quads (horizontally or
       /// vertically. If mesh != NULL, the new elements are incorporated into
-      /// the mesh. The option mesh == NULL is used to perform adaptive numerical 
-      /// quadrature. If sons_out != NULL, pointers to the new elements will be 
+      /// the mesh. The option mesh == NULL is used to perform adaptive numerical
+      /// quadrature. If sons_out != NULL, pointers to the new elements will be
       /// saved there.
       void refine_quad(Element* e, int refinement, Element** sons_out = NULL);
       void refine_triangle_to_triangles(Element* e, Element** sons = NULL);

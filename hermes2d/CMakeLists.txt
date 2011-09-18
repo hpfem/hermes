@@ -6,9 +6,9 @@ project(hermes2d)
 	else(WIN32)
 		execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
 	endif(WIN32)
-  
+
   SET(H2D_XML_SCHEMAS_DIRECTORY "\"${PROJECT_SOURCE_DIR}/xml_schemas\"")
-  
+
   configure_file(
 		config.h.cmake
 		include/config.h
@@ -16,7 +16,7 @@ project(hermes2d)
 
 	# Determine which version (debug x release) to build.
 	if (NOT H2D_DEBUG AND NOT H2D_RELEASE)
-		message(FATAL_ERROR "WITH_H2D is set to YES, but no versions are specified. 
+		message(FATAL_ERROR "WITH_H2D is set to YES, but no versions are specified.
 												 Re-run with H2D_DEBUG and/or H2D_RELEASE set to YES.")
 	endif (NOT H2D_DEBUG AND NOT H2D_RELEASE)
 
@@ -29,7 +29,7 @@ project(hermes2d)
 		if(H2D_DEBUG)
 			set(HERMES2D_DEBUG "hermes2d-debug")
 			set(HERMES2D ${HERMES2D_DEBUG})
-			# set(CMAKE_BUILD_TYPE Debug) 
+			# set(CMAKE_BUILD_TYPE Debug)
 		# This does not work with multi-version configurations,
 		# because it is linked to the project (i.e. we would have
 		# to have separate projects for Debug and Release)
@@ -106,7 +106,7 @@ project(hermes2d)
 		src/asmlist.cpp
 		src/newton_solver.cpp
 		src/picard_solver.cpp
-    
+
     src/calculation_continuity.cpp
 
 		src/adapt/adapt.cpp
@@ -117,17 +117,17 @@ project(hermes2d)
 		src/function/transformable.cpp
 		src/function/function.cpp
 		src/function/exact_solution.cpp
-		src/function/solution.cpp 
+		src/function/solution.cpp
 		src/function/filter.cpp
 		src/function/mesh_function.cpp
     src/function/solution_h2d_xml.cpp
 
-		src/mesh/refmap.cpp 
+		src/mesh/refmap.cpp
 		src/mesh/curved.cpp
-		src/mesh/refinement_type.cpp 
+		src/mesh/refinement_type.cpp
 		src/mesh/element_to_refine.cpp
-		src/mesh/mesh_reader_exodusii.cpp 
-		src/mesh/hash.cpp 
+		src/mesh/mesh_reader_exodusii.cpp
+		src/mesh/hash.cpp
 		src/mesh/mesh_reader_h2d.cpp
 		src/mesh/mesh_reader_h2d_xml.cpp
     src/mesh/mesh_reader_h1d_xml.cpp
@@ -141,53 +141,53 @@ project(hermes2d)
 		src/quadrature/limit_order.cpp
 		src/quadrature/quad_std.cpp
 
-		src/refinement_selectors/selector.cpp 
-		src/refinement_selectors/order_permutator.cpp 
-		src/refinement_selectors/optimum_selector.cpp 
-		src/refinement_selectors/proj_based_selector.cpp 
-		src/refinement_selectors/l2_proj_based_selector.cpp 
-		src/refinement_selectors/h1_proj_based_selector.cpp 
+		src/refinement_selectors/selector.cpp
+		src/refinement_selectors/order_permutator.cpp
+		src/refinement_selectors/optimum_selector.cpp
+		src/refinement_selectors/proj_based_selector.cpp
+		src/refinement_selectors/l2_proj_based_selector.cpp
+		src/refinement_selectors/h1_proj_based_selector.cpp
 		src/refinement_selectors/hcurl_proj_based_selector.cpp
 
-		src/shapeset/shapeset.cpp 
-		src/shapeset/shapeset_h1_ortho.cpp 
-		src/shapeset/shapeset_h1_jacobi.cpp 
+		src/shapeset/shapeset.cpp
+		src/shapeset/shapeset_h1_ortho.cpp
+		src/shapeset/shapeset_h1_jacobi.cpp
 		src/shapeset/shapeset_h1_quad.cpp
-		src/shapeset/shapeset_hc_legendre.cpp 
+		src/shapeset/shapeset_hc_legendre.cpp
 		src/shapeset/shapeset_hc_gradleg.cpp
 		src/shapeset/shapeset_hd_legendre.cpp
 		src/shapeset/shapeset_l2_legendre.cpp
-		src/shapeset/precalc.cpp 
+		src/shapeset/precalc.cpp
 
-		src/space/space.cpp 
-		src/space/space_h1.cpp 
-		src/space/space_hcurl.cpp 
+		src/space/space.cpp
+		src/space/space_h1.cpp
+		src/space/space_hcurl.cpp
 		src/space/space_l2.cpp
 		src/space/space_hdiv.cpp
-    src/space/space_h2d_xml.cpp 
+    src/space/space_h2d_xml.cpp
 
-		src/views/base_view.cpp 
-		src/views/mesh_view.cpp 
-		src/views/order_view.cpp 
-		src/views/scalar_view.cpp 
-		src/views/stream_view.cpp 
-		src/views/vector_base_view.cpp 
-		src/views/vector_view.cpp 
-		src/views/view.cpp 
-		src/views/view_data.cpp 
+		src/views/base_view.cpp
+		src/views/mesh_view.cpp
+		src/views/order_view.cpp
+		src/views/scalar_view.cpp
+		src/views/stream_view.cpp
+		src/views/vector_base_view.cpp
+		src/views/vector_view.cpp
+		src/views/view.cpp
+		src/views/view_data.cpp
 		src/views/view_support.cpp
 		src/views/linearizer.cpp
     src/views/linearizer_base.cpp
 		src/views/orderizer.cpp
 		src/views/vectorizer.cpp
 
-		src/weakform/weakform.cpp 
+		src/weakform/weakform.cpp
 
 		src/neighbor.cpp
 		src/graph.cpp
 		src/ogprojection.cpp
 		src/ogprojection_nox.cpp
-		src/hermes2d_common_defs.cpp  
+		src/hermes2d_common_defs.cpp
 		src/discrete_problem.cpp
 		src/runge_kutta.cpp
 		src/spline.cpp
@@ -250,7 +250,7 @@ project(hermes2d)
 
 		set_target_properties(${HERMES_LIB} PROPERTIES COMPILE_FLAGS ${_FLAGS})
 
-		target_link_libraries(  ${HERMES_LIB} 
+		target_link_libraries(  ${HERMES_LIB}
 			${HERMES_COMMON_LIB}
 			${GLUT_LIBRARY} ${GLEW_LIBRARY}
 			${ANTTWEAKBAR_LIBRARY}
@@ -263,7 +263,7 @@ project(hermes2d)
 	endmacro(BUILD_2D_LIB)
 
 	# Build and install:
-  
+
 	if(MSVC)
     if(H2D_DEBUG)
       set(FLAGS "${DEBUG_FLAGS}")

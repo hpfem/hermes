@@ -71,7 +71,7 @@ namespace Hermes
     void Transformable::push_transform(int son)
     {
       assert(element != NULL);
-      if (top >= H2D_MAX_TRN_LEVEL) 
+      if (top >= H2D_MAX_TRN_LEVEL)
         error("Too deep transform.");
 
       Trf* mat = stack + (++top);

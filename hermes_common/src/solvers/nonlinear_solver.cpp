@@ -52,15 +52,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar *NonlinearSolver<Scalar>::get_sln_vector() 
+    Scalar *NonlinearSolver<Scalar>::get_sln_vector()
     {
-      return sln_vector; 
+      return sln_vector;
     }
 
     template<typename Scalar>
     double NonlinearSolver<Scalar>::get_time()
     {
-      return time; 
+      return time;
     }
 
     template<typename Scalar>

@@ -37,7 +37,7 @@ namespace Hermes
       /// @param mesh [out] The mesh.
       virtual bool load(const char *filename, Mesh *mesg) = 0;
 
-    protected: 
+    protected:
       static bool is_twin_nurbs(Element* e, int i)
       {
         // on internal edges, where there are two Nurbs', we only save one of them

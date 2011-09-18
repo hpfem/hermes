@@ -529,12 +529,12 @@ namespace Hermes
       }
       // take one mesh at a time and compare element areas to the areas[] array
       double tolerance = min_elem_area/100.;
-      for (int i = 1; i < n; i++) 
+      for (int i = 1; i < n; i++)
       {
         counter = 0;
         for_all_base_elements(e, meshes[i])
         {
-          if (fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0) 
+          if (fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0)
           {
             printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
             error("Meshes not compatible in Traverse::begin().");
@@ -610,10 +610,10 @@ namespace Hermes
       // are we at the bottom?
       bool leaf = true;
       for (i = 0; i < num; i++)
-        if (!e[i]->active) 
-        { 
-          leaf = false; 
-          break; 
+        if (!e[i]->active)
+        {
+          leaf = false;
+          break;
         }
 
       // if yes, store the element transformation indices
@@ -651,7 +651,7 @@ namespace Hermes
         {
           for (i = 0; i < num; i++)
           {
-            if (e[i]->active) 
+            if (e[i]->active)
             {
               e_new[i] = e[i];
               idx_new[i] = (idx[i] << 3) + son + 1;
@@ -679,11 +679,11 @@ namespace Hermes
             move_to_son(&cr_new, cr, son);
             for (i = 0; i < num; i++)
             {
-              if (e[i]->active) 
+              if (e[i]->active)
               {
                 e_new[i] = e[i];
                 idx_new[i] = (idx[i] << 3) + son + 1;
-              } else 
+              } else
               {
                 e_new[i] = e[i]->sons[sons[i][son] & 3];
                 move_to_son(&(er_new[i]), er+i, sons[i][son]);
@@ -707,11 +707,11 @@ namespace Hermes
             j = (son == 4 || son == 6) ? 0 : 2;
             for (i = 0; i < num; i++)
             {
-              if (e[i]->active) 
+              if (e[i]->active)
               {
                 e_new[i] = e[i];
                 idx_new[i] = (idx[i] << 3) + son + 1;
-              } else 
+              } else
               {
                 e_new[i] = e[i]->sons[sons[i][j] & 3];
                 move_to_son(&(er_new[i]), er+i, sons[i][j]);
@@ -729,7 +729,7 @@ namespace Hermes
           {
             if (e[i]->active)
               e_new[i] = e[i];
-            else 
+            else
             {
               e_new[i] = e[i]->sons[sons[i][0] & 3];
               move_to_son(&(er_new[i]), er+i, sons[i][0]);
@@ -739,7 +739,7 @@ namespace Hermes
           union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
         }
       }
-      
+
       delete [] e_new;
       delete [] er_new;
       delete [] sons;
@@ -776,7 +776,7 @@ namespace Hermes
         tri = base->is_triangle();
         union_recurrent(&cr, e, er, idx, unimesh->get_element(id));
       }
-      
+
       delete [] e;
       delete [] er;
       delete [] idx;

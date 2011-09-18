@@ -68,7 +68,7 @@ namespace Hermes
       }
 
 #ifndef _MSC_VER
-      
+
       ScalarView::ScalarView(const char* title, WinGeom* wg) :
       View(title, wg), lin(NULL),
         vertex_nodes(0),
@@ -136,7 +136,7 @@ namespace Hermes
             tw_wnd_id = TwGetCurrentWndID();
             create_setup_bar();
           }
-          else 
+          else
           {
             error("TW init failed: %s", TwGetLastError());
           }
@@ -172,12 +172,12 @@ namespace Hermes
           glDeleteLists(element_id_widget, 1);
           element_id_widget = 0;
         }
-        if (gl_coord_buffer != 0) 
+        if (gl_coord_buffer != 0)
         {
           glDeleteBuffersARB(1, &gl_coord_buffer);
           gl_coord_buffer = 0;
         }
-        if (gl_index_buffer != 0) 
+        if (gl_index_buffer != 0)
         {
           glDeleteBuffersARB(1, &gl_index_buffer);
           gl_index_buffer = 0;
@@ -234,7 +234,7 @@ namespace Hermes
         lin->set_displacement(xdisp, ydisp, dmult);
         lin->lock_data();
 
-        lin->process_solution(sln, item, eps); 
+        lin->process_solution(sln, item, eps);
         update_mesh_info();
 
         // Initialize mesh nodes for displaying and selection.
@@ -286,12 +286,12 @@ namespace Hermes
         verbose(" Value range of data: [%g, %g]", lin->get_min_value(), lin->get_max_value());
       }
 
-      void ScalarView::update_mesh_info() 
+      void ScalarView::update_mesh_info()
       {
         // Calculate normals if necessary.
         if (mode3d)
           calculate_normals(lin->get_vertices(), lin->get_num_vertices(), lin->get_triangles(), lin->get_num_triangles());
-        else 
+        else
         {
           delete[] normals;
           normals = NULL;
@@ -302,13 +302,13 @@ namespace Hermes
         double vert_max = lin->get_max_value();
         // Special case: constant function; offset the lower limit of range so that the domain is drawn under the
         // function and also the scale is drawn correctly.
-        if ((vert_max - vert_min) < 1e-8) 
+        if ((vert_max - vert_min) < 1e-8)
         {
           is_constant = true;
           vert_min -= 0.5;
         }
 
-        if (range_auto) 
+        if (range_auto)
         {
           range_min = vert_min;
           range_max = vert_max;
@@ -747,7 +747,7 @@ namespace Hermes
         {
           lin_updated = false;
 
-          try 
+          try
           {
             //get input data
             int vert_cnt = lin->get_num_vertices();
@@ -760,7 +760,7 @@ namespace Hermes
               throw std::runtime_error("ARB_vertex_buffer_object not supported");
 
             //reallocate indices
-            if (gl_index_buffer == 0 || tri_cnt > max_gl_tris) 
+            if (gl_index_buffer == 0 || tri_cnt > max_gl_tris)
             {
               if (gl_index_buffer == 0)
                 glGenBuffersARB(1, &gl_index_buffer);
@@ -771,7 +771,7 @@ namespace Hermes
                 throw std::runtime_error("unable to allocate vertex buffer: " + err);
               max_gl_tris = tri_cnt;
             }
-            else 
+            else
             {
               glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, gl_index_buffer);
             }
@@ -799,7 +799,7 @@ namespace Hermes
             glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB);
 
             //reallocate vertices
-            if (gl_coord_buffer == 0 || vert_cnt > max_gl_verts) 
+            if (gl_coord_buffer == 0 || vert_cnt > max_gl_verts)
             {
               if (gl_coord_buffer == 0)
                 glGenBuffersARB(1, &gl_coord_buffer);
@@ -810,7 +810,7 @@ namespace Hermes
                 throw std::runtime_error("unable to allocate coord buffer: " + err);
               max_gl_verts = vert_cnt;
             }
-            else 
+            else
             {
               glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_coord_buffer);
             }
@@ -824,7 +824,7 @@ namespace Hermes
             glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
 
             //allocate edge indices
-            if (gl_edge_inx_buffer == 0) 
+            if (gl_edge_inx_buffer == 0)
             {
               glGenBuffersARB(1, &gl_edge_inx_buffer);
               glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_edge_inx_buffer);
@@ -893,7 +893,7 @@ namespace Hermes
           glEnd();
         }
         else { //render using vertex buffer object
-          if (gl_tri_cnt > 0) 
+          if (gl_tri_cnt > 0)
           {
             //bind vertices
             glBindBufferARB(GL_ARRAY_BUFFER_ARB, gl_coord_buffer);
@@ -920,7 +920,7 @@ namespace Hermes
         glMatrixMode(GL_MODELVIEW);
       }
 
-      void ScalarView::draw_edges_2d() 
+      void ScalarView::draw_edges_2d()
       {
         glColor3fv(edges_color);
         bool displayed = false;
@@ -946,7 +946,7 @@ namespace Hermes
               }
 
               //render buffer if it is full or if this is the last edge processed
-              if (buffer_inx == (2*H2DV_GL_MAX_EDGE_BUFFER) || (buffer_inx > 0 && i == (edge_cnt-1))) 
+              if (buffer_inx == (2*H2DV_GL_MAX_EDGE_BUFFER) || (buffer_inx > 0 && i == (edge_cnt-1)))
               {
                 glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
 
@@ -982,7 +982,7 @@ namespace Hermes
         }
       }
 
-      void ScalarView::draw_normals_3d() 
+      void ScalarView::draw_normals_3d()
       {
         double normal_xzscale = 1.0 / xzscale, normal_yscale = 1.0 / yscale;
 
@@ -997,7 +997,7 @@ namespace Hermes
         glScaled(1, 1, -1);
         glColor3f(0.8f, 0.5f, 0.5f);
         glBegin(GL_LINES);
-        for(int i = 0; i < num_vert; i++) 
+        for(int i = 0; i < num_vert; i++)
         {
           double x = (vert[i][0] - xctr) * xzscale;
           double y = (vert[i][2] - yctr) * yscale;
@@ -1038,7 +1038,7 @@ namespace Hermes
 #define V5    vertices_max_x - xctr, range_max - yctr, -(vertices_min_y - zctr)
 #define V6    vertices_max_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
 #define V7    vertices_min_x - xctr, range_max - yctr, -(vertices_max_y - zctr)
-      
+
       void ScalarView::draw_aabb()
       {
         // Axis-aligned bounding box of the model.
@@ -1156,7 +1156,7 @@ namespace Hermes
           // Initialize light and material.
           init_lighting();
 
-          if (do_zoom_to_fit) 
+          if (do_zoom_to_fit)
           {
             // If the user presses 'c' to center the view automatically, calculate how far to move
             // the visualized model away from the viewer so that it is completely visible in current window.
@@ -1215,7 +1215,7 @@ namespace Hermes
           // Draw the whole bounding box or only the boundary edges.
           if (show_aabb)
             draw_aabb();
-          else 
+          else
           {
             glColor3fv(edges_color);
             glBegin(GL_LINES);
@@ -1288,7 +1288,7 @@ namespace Hermes
           normalize(normals[i][0], normals[i][1], normals[i][2]);
       }
 
-      void ScalarView::update_layout() 
+      void ScalarView::update_layout()
       {
         View::update_layout();
         // (x,y,-z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
@@ -1299,7 +1299,7 @@ namespace Hermes
         zctr = (vertices_max_y + vertices_min_y) / 2.0;
       }
 
-      void ScalarView::reset_view(bool force_reset) 
+      void ScalarView::reset_view(bool force_reset)
       {
         if (force_reset || view_not_reset) { // Reset 3d view.
           xrot = 40.0; yrot = 0.0;
@@ -1376,7 +1376,7 @@ namespace Hermes
         // As far as I know, OpenGL can only perform 4x4 matrix multiplication, so we find the 8 transformed bounding box corners by
         // first multiplying the transformation matrix with a matrix having as its 4 columns the coordinates of the bottom base corners
         // and then with a matrix created from the top base corners.
-        for (int i = 0; i < 2; i++) 
+        for (int i = 0; i < 2; i++)
         {
           glPushMatrix();
           glMultMatrixd(aabb[i]);
@@ -1385,7 +1385,7 @@ namespace Hermes
 
           // Go through the transformed corners and find the biggest distance of its perspective projection center to the origin.
           GLdouble *coord_ptr = &aabb_base[0];
-          for (int j = 0; j < 4; j++) 
+          for (int j = 0; j < 4; j++)
           {
             double perspective_center_to_origin_dist = fabs(coord_ptr[0]) / tan_fovx_half + coord_ptr[2];
             if (perspective_center_to_origin_dist > optimal_viewpoint_pos)
@@ -1417,7 +1417,7 @@ namespace Hermes
       void ScalarView::set_min_max_range(double min, double max)
       {
         /// \todo allow settin min = max, in which case draw the corresponding contour.
-        if (fabs(max-min) < 1e-8) 
+        if (fabs(max-min) < 1e-8)
         {
           warn("Range (%f,%f) is too narrow: adjusted to (%f,%f)", min, max, min-0.5, max);
           min -= 0.5;
@@ -1450,7 +1450,7 @@ namespace Hermes
 
         glShadeModel(GL_SMOOTH);
         glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
-        if (GLEW_EXT_separate_specular_color) 
+        if (GLEW_EXT_separate_specular_color)
         {
           glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
         }
@@ -1505,7 +1505,7 @@ namespace Hermes
             {
               mode3d = !mode3d;
               dragging = scaling = false;
-              if (mode3d) 
+              if (mode3d)
               {
                 lin->lock_data();
                 if (normals == NULL)
@@ -1555,9 +1555,9 @@ namespace Hermes
       void ScalarView::on_mouse_move(int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        if (mode3d && (dragging || scaling || panning)) 
+        if (mode3d && (dragging || scaling || panning))
         {
-          if (dragging) 
+          if (dragging)
           {
             yrot += 0.4 * (x - mouse_x);
             xrot += 0.4 * (y - mouse_y);
@@ -1565,13 +1565,13 @@ namespace Hermes
             if (xrot < -90) xrot = -90;
             else if (xrot > 90) xrot = 90;
           }
-          else if (scaling) 
+          else if (scaling)
           {
             ztrans += 0.01 * (mouse_y - y);
             if (ztrans > -0.25) ztrans = -0.25;
             else if (ztrans < -7) ztrans = -7;
           }
-          else 
+          else
           {
             xtrans += 0.002 * (x - mouse_x);
             ytrans += 0.002 * (mouse_y - y);
@@ -1582,13 +1582,13 @@ namespace Hermes
           mouse_y = y;
           return;
         }
-        else 
+        else
         {
           VIEWER_GUI_CALLBACK(TwEventMouseMotionGLUT(x, y))
           {
-            if (!mode3d && show_edges && !dragging && !scaling && !panning) 
+            if (!mode3d && show_edges && !dragging && !scaling && !panning)
             {
-              if (allow_node_selection) 
+              if (allow_node_selection)
               {
                 VertexNodeInfo* found_node = find_nearest_node_in_range((float)untransform_x(x), (float)untransform_y(y), (float)(node_pixel_radius / scale));
                 if (found_node != pointed_vertex_node)
@@ -1598,7 +1598,7 @@ namespace Hermes
                 pointed_vertex_node = NULL;
               refresh();
             }
-            else 
+            else
             {
               View::on_mouse_move(x, y);
             }
@@ -1699,8 +1699,8 @@ namespace Hermes
 
         View::on_reshape(width, height);
       }
-      
-      
+
+
       void ScalarView::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
       {
         assert_msg(param != NULL, "Param parameter equals to NULL");

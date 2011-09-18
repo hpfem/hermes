@@ -24,7 +24,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace WeakFormsHcurl 
+    namespace WeakFormsHcurl
     {
       /* Default volumetric matrix form \int_{area} const_coeff * function_coeff(x, y) * E \cdot F d\bfx
       const_coeff... constant number
@@ -102,13 +102,13 @@ namespace Hermes
       class HERMES_API DefaultVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        DefaultVectorFormVol<Scalar>(int i, std::string area = HERMES_ANY, 
+        DefaultVectorFormVol<Scalar>(int i, std::string area = HERMES_ANY,
           Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
           Hermes2DFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
           Hermes2DFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas, 
+        DefaultVectorFormVol<Scalar>(int i, Hermes::vector<std::string> areas,
           Scalar const_coeff0 = 1.0, Scalar const_coeff1 = 1.0,
           Hermes2DFunction<Scalar>* f_coeff0 = HERMES_DEFAULT_FUNCTION,
           Hermes2DFunction<Scalar>* f_coeff1 = HERMES_DEFAULT_FUNCTION,
@@ -180,7 +180,7 @@ namespace Hermes
           GeomType gt = HERMES_PLANAR);
 
         DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, 
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualCurlCurl();

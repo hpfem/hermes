@@ -6748,7 +6748,7 @@ namespace Hermes
 
     };
 
-    static int gradleg_tri_bubble_indices_all_orders[] = 
+    static int gradleg_tri_bubble_indices_all_orders[] =
     {
      66, 67, 68,
      69, 70, 71, 93, 94,

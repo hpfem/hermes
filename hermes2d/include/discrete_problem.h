@@ -125,7 +125,7 @@ namespace Hermes
       void initialize_refmaps(Hermes::vector<RefMap*>& refmap);
 
       /// Initialize a state, returns a non-NULL Element.
-      Element* init_state(Stage<Scalar>& stage, Hermes::vector<PrecalcShapeset*>& spss, 
+      Element* init_state(Stage<Scalar>& stage, Hermes::vector<PrecalcShapeset*>& spss,
         Hermes::vector<RefMap*>& refmap, Element** e, Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Assembling.
@@ -134,8 +134,8 @@ namespace Hermes
       /// antries are created in diagonal blocks even if corresponding matrix weak
       /// forms do not exist. This is useful if the matrix is later to be merged with
       /// a matrix that has nonzeros in these blocks. The Table serves for optional
-      /// weighting of matrix blocks in systems. The parameter add_dir_lift decides 
-      /// whether Dirichlet lift will be added while coeff_vec is converted into 
+      /// weighting of matrix blocks in systems. The parameter add_dir_lift decides
+      /// whether Dirichlet lift will be added while coeff_vec is converted into
       /// Solutions.
       void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
         bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
@@ -145,124 +145,124 @@ namespace Hermes
       void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
         bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
 
-      /// Light version passing NULL for the coefficient vector. External solutions 
+      /// Light version passing NULL for the coefficient vector. External solutions
       /// are initialized with zeros.
-      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false, 
+      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
         Table* block_weights = NULL);
 
-      /// Light version passing NULL for the coefficient vector. External solutions 
+      /// Light version passing NULL for the coefficient vector. External solutions
       /// are initialized with zeros.
       /// Without the matrix.
-      void assemble(Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false, 
+      void assemble(Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
         Table* block_weights = NULL);
 
       /// Assemble one stage.
-      void assemble_one_stage(Stage<Scalar>& stage, 
+      void assemble_one_stage(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext);
 
       /// Assemble one state.
-      void assemble_one_state(Stage<Scalar>& stage, 
+      void assemble_one_state(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, Element** e, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, Element** e,
         bool* bnd, SurfPos* surf_pos, Element* trav_base);
 
       /// Assemble volume matrix forms.
-      void assemble_volume_matrix_forms(Stage<Scalar>& stage, 
+      void assemble_volume_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
         int marker, Hermes::vector<AsmList<Scalar>*>& al);
       /// Assemble multicomponent volume matrix forms.
-      void assemble_multicomponent_volume_matrix_forms(Stage<Scalar>& stage, 
+      void assemble_multicomponent_volume_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
         int marker, Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Assemble volume vector forms.
-      void assemble_volume_vector_forms(Stage<Scalar>& stage, 
+      void assemble_volume_vector_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
         int marker, Hermes::vector<AsmList<Scalar>*>& al);
       /// Assemble multicomponent volume vector forms.
-      void assemble_multicomponent_volume_vector_forms(Stage<Scalar>& stage, 
+      void assemble_multicomponent_volume_vector_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
         int marker, Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Assemble surface and DG forms.
-      void assemble_surface_integrals(Stage<Scalar>& stage, 
+      void assemble_surface_integrals(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
       /// Assemble surface matrix forms.
-      void assemble_surface_matrix_forms(Stage<Scalar>& stage, 
+      void assemble_surface_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base);
       /// Assemble multicomponent surface matrix forms.
-      void assemble_multicomponent_surface_matrix_forms(Stage<Scalar>& stage, 
+      void assemble_multicomponent_surface_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base);
 
       /// Assemble surface vector forms.
-      void assemble_surface_vector_forms(Stage<Scalar>& stage, 
+      void assemble_surface_vector_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base);
       /// Assemble multicomponent surface vector forms.
-      void assemble_multicomponent_surface_vector_forms(Stage<Scalar>& stage, 
+      void assemble_multicomponent_surface_vector_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base);
 
       /// Assemble DG forms.
-      void assemble_DG_forms(Stage<Scalar>& stage, 
+      void assemble_DG_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
       /// Assemble one DG neighbor.
-      void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, Stage<Scalar>& stage, 
+      void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
-        std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
       /// Assemble DG matrix forms.
-      void assemble_DG_matrix_forms(Stage<Scalar>& stage, 
+      void assemble_DG_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, std::map<unsigned int, PrecalcShapeset*> npss,
-        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
       /// Assemble multicomponent DG matrix forms.
-      void assemble_multicomponent_DG_matrix_forms(Stage<Scalar>& stage, 
+      void assemble_multicomponent_DG_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
         Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, std::map<unsigned int, PrecalcShapeset*> npss,
-        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
       /// Assemble DG vector forms.
-      void assemble_DG_vector_forms(Stage<Scalar>& stage, 
+      void assemble_DG_vector_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
       /// Assemble multicomponent DG vector forms.
-      void assemble_multicomponent_DG_vector_forms(Stage<Scalar>& stage, 
+      void assemble_multicomponent_DG_vector_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext, 
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, 
+        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
+        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
       void invalidate_matrix();
@@ -283,12 +283,12 @@ namespace Hermes
 
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
-      /// Main function for the evaluation of volumetric matrix forms. 
+      /// Main function for the evaluation of volumetric matrix forms.
       /// Evaluates weak form on element given by the RefMap.
       /// Calls the function calc_order_matrix_form_vol to get the integration order.
       Scalar eval_form(MatrixFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv);
-      /// Main function for the evaluation of multicomponent volumetric matrix forms. 
+      /// Main function for the evaluation of multicomponent volumetric matrix forms.
       void eval_form(MultiComponentMatrixFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, Hermes::vector<Scalar>& result);
 
@@ -300,9 +300,9 @@ namespace Hermes
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv);
 
       /// Elementary function used in eval_form() in adaptive mode for volumetric matrix forms.
-      Scalar eval_form_subelement(int order, MatrixFormVol<Scalar>* mfv, 
+      Scalar eval_form_subelement(int order, MatrixFormVol<Scalar>* mfv,
         Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, 
+        PrecalcShapeset* fu, PrecalcShapeset* fv,
         RefMap* ru, RefMap* rv);
 
       /// Vector<Scalar> volume forms. The functions provide the same functionality as the
@@ -317,26 +317,26 @@ namespace Hermes
       int calc_order_vector_form_vol(MultiComponentVectorFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv);
 
-      Scalar eval_form_subelement(int order, VectorFormVol<Scalar>* vfv, 
+      Scalar eval_form_subelement(int order, VectorFormVol<Scalar>* vfv,
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv);
 
       /// Matrix<Scalar> surface forms. The functions provide the same functionality as the
       /// parallel ones for matrix volume forms.
-      Scalar eval_form(MatrixFormSurf<Scalar>* mfs, 
-        Hermes::vector<Solution<Scalar>*> u_ext, 
+      Scalar eval_form(MatrixFormSurf<Scalar>* mfs,
+        Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos);
-      void eval_form(MultiComponentMatrixFormSurf<Scalar>* mfs, 
-        Hermes::vector<Solution<Scalar>*> u_ext, 
+      void eval_form(MultiComponentMatrixFormSurf<Scalar>* mfs,
+        Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result);
 
-      int calc_order_matrix_form_surf(MatrixFormSurf<Scalar>* mfs, 
+      int calc_order_matrix_form_surf(MatrixFormSurf<Scalar>* mfs,
         Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, 
+        PrecalcShapeset* fu, PrecalcShapeset* fv,
         RefMap* ru, RefMap* rv, SurfPos* surf_pos);
-      int calc_order_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>* mfs, 
+      int calc_order_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>* mfs,
         Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, 
+        PrecalcShapeset* fu, PrecalcShapeset* fv,
         RefMap* ru, RefMap* rv, SurfPos* surf_pos);
 
       Scalar eval_form_subelement(int order, MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
@@ -344,11 +344,11 @@ namespace Hermes
 
       /// Vector<Scalar> surface forms. The functions provide the same functionality as the
       /// parallel ones for matrix volume forms.
-      Scalar eval_form(VectorFormSurf<Scalar>* vfs, 
-        Hermes::vector<Solution<Scalar>*> u_ext, 
+      Scalar eval_form(VectorFormSurf<Scalar>* vfs,
+        Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
-      void eval_form(MultiComponentVectorFormSurf<Scalar>* vfs, 
-        Hermes::vector<Solution<Scalar>*> u_ext, 
+      void eval_form(MultiComponentVectorFormSurf<Scalar>* vfs,
+        Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result);
 
       int calc_order_vector_form_surf(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
@@ -371,12 +371,12 @@ namespace Hermes
 
       /// Evaluates DG matrix forms on an edge between elements identified by ru_actual, rv.
       Scalar eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv, 
+        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv,
         bool neighbor_supp_u, bool neighbor_supp_v,
         SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
       /// Evaluates multicomponent DG matrix forms on an edge between elements identified by ru_actual, rv.
       void eval_dg_form(MultiComponentMatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv, 
+        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv,
         bool neighbor_supp_u, bool neighbor_supp_v,
         SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v, Hermes::vector<Scalar>& result);
 
@@ -391,11 +391,11 @@ namespace Hermes
 
       /// Evaluates DG vector forms on an edge between elements identified by ru_actual, rv.
       Scalar eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, 
+        PrecalcShapeset* fv, RefMap* rv,
         SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
       /// Evaluates multicomponent DG vector forms on an edge between elements identified by ru_actual, rv.
       void eval_dg_form(MultiComponentVectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, 
+        PrecalcShapeset* fv, RefMap* rv,
         SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v, Hermes::vector<Scalar>& result);
 
       /// Initialize orders of external functions for volumetric forms.
@@ -410,18 +410,18 @@ namespace Hermes
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
 
       /// Initialize external functions for volumetric / surface forms.
-      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,  
+      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
         RefMap* rm, const int order);
 
       /// Initialize external functions for DG forms.
-      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext, 
+      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
         int order);
 
       /// Uses assembling_caches to get (possibly cached) precalculated shapeset function values.
       Func<double>* get_fn(PrecalcShapeset* fu, RefMap* rm, const int order);
 
-      /// Uses assembling_caches to get (possibly chached) dummy function for calculation of the integration order.  
+      /// Uses assembling_caches to get (possibly chached) dummy function for calculation of the integration order.
       Func<Hermes::Ord>* get_fn_ord(const int order);
 
       /// Initialize all caches.
@@ -522,12 +522,12 @@ namespace Hermes
 
       /// Turn on Runge-Kutta specific handling of external functions.
       bool RungeKutta;
-      
+
       /// Number of spaces in the original problem in a Runge-Kutta method.
       int RK_original_spaces_count;
 
       /// Class handling various caches used in assembling.
-      class AssemblingCaches 
+      class AssemblingCaches
       {
       public:
         /// Basic constructor.
@@ -557,7 +557,7 @@ namespace Hermes
         };
 
         /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
-        struct CompareConst 
+        struct CompareConst
         {
           bool operator()(KeyConst a, KeyConst b) const;
         };
@@ -570,7 +570,7 @@ namespace Hermes
 
         /// The same setup for elements with non-constant jacobians.
         /// This cache is deleted with every change of the state in assembling.
-        struct KeyNonConst 
+        struct KeyNonConst
         {
           int index;
           int order;
@@ -588,7 +588,7 @@ namespace Hermes
         };
 
         /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
-        struct CompareNonConst 
+        struct CompareNonConst
         {
           bool operator()(KeyNonConst a, KeyNonConst b) const;
         };
@@ -615,7 +615,7 @@ namespace Hermes
         /// For caching of values calculated on the previous reference space during adaptivity.
         /// The vector cache, coordinates are : [Space][Element id on Space][DOF on Space].
         Scalar*** previous_reference_dp_cache_vector;
-        
+
         /// For caching of values calculated on the previous reference space during adaptivity.
         /// Current size of the [Element id on Space_1] dimension in previous_reference_dp_cache_matrix.
         unsigned int** cache_matrix_size;

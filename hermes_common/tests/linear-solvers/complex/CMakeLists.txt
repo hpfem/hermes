@@ -14,7 +14,7 @@ if(WITH_PETSC)
 endif(WITH_PETSC)
 
 if(WITH_UMFPACK)
-  add_test(test-umfpack-solver-cplx-1 ${BIN} umfpack) 
+  add_test(test-umfpack-solver-cplx-1 ${BIN} umfpack)
   add_test(test-umfpack-solver-cplx-b-1 ${BIN} umfpack-block)
 endif(WITH_UMFPACK)
 

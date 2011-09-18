@@ -27,31 +27,31 @@
 /// Definition of the global CallStack instance.
 CallStack callstack;
 
-CallStackObj::CallStackObj(int ln, const char *func, const char *file) 
+CallStackObj::CallStackObj(int ln, const char *func, const char *file)
 {
   this->line = ln;
   this->func = func;
   this->file = file;
 
   // add this object to the call stack
-  if (callstack.size < callstack.max_size) 
+  if (callstack.size < callstack.max_size)
   {
     callstack.stack[callstack.size] = this;
     callstack.size++;
   }
 }
 
-CallStackObj::~CallStackObj() 
+CallStackObj::~CallStackObj()
 {
   // remove the object only if it is on the top of the call stack
-  if (callstack.size > 0 && callstack.stack[callstack.size - 1] == this) 
+  if (callstack.size > 0 && callstack.stack[callstack.size - 1] == this)
   {
     callstack.size--;
     callstack.stack[callstack.size] = NULL;
   }
 }
 
-static void sighandler(int signo) 
+static void sighandler(int signo)
 {
   const char *sig_name[64];
 
@@ -63,7 +63,7 @@ static void sighandler(int signo)
   exit(EXIT_FAILURE);
 }
 
-void callstack_initialize() 
+void callstack_initialize()
 {
   // install our signal handlers
 #ifdef HERMES_USE_TEUCHOS_STACKTRACE
@@ -74,11 +74,11 @@ void callstack_initialize()
 #endif
 }
 
-void callstack_finalize() 
+void callstack_finalize()
 {
 }
 
-CallStack::CallStack(int max_size) 
+CallStack::CallStack(int max_size)
 {
   this->max_size = max_size;
   this->size = 0;
@@ -88,20 +88,20 @@ CallStack::CallStack(int max_size)
   callstack_initialize();
 }
 
-CallStack::~CallStack() 
+CallStack::~CallStack()
 {
   delete [] stack;
 }
 
-void CallStack::dump() 
+void CallStack::dump()
 {
-  if (size > 0) 
+  if (size > 0)
   {
     fprintf(stderr, "Call stack:\n");
     for (int i = size - 1; i >= 0; i--)
       fprintf(stderr, "  %s:%d: %s\n", stack[i]->file, stack[i]->line, stack[i]->func);
   }
-  else 
+  else
   {
     fprintf(stderr, "No call stack available.\n");
   }

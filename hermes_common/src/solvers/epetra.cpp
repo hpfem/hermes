@@ -27,9 +27,9 @@
 
 using namespace Hermes::Error;
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Algebra 
+  namespace Algebra
   {
     /// \brief A communicator for Epetra objects (serial version).
     static Epetra_SerialComm seq_comm;
@@ -125,7 +125,7 @@ namespace Hermes
     void EpetraMatrix<double>::free()
     {
       _F_;
-      if (owner) 
+      if (owner)
       {
         delete mat; mat = NULL;
         delete grph; grph = NULL;
@@ -137,7 +137,7 @@ namespace Hermes
     void EpetraMatrix<std::complex<double> >::free()
     {
       _F_;
-      if (owner) 
+      if (owner)
       {
         delete mat; mat = NULL;
         delete mat_im; mat_im = NULL;
@@ -154,8 +154,8 @@ namespace Hermes
       Hermes::vector<double> vals(n_entries);
       Hermes::vector<int> idxs(n_entries);
       mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
-      for (int i = 0; i < n_entries; i++) 
-        if (idxs[i] == (int)n) 
+      for (int i = 0; i < n_entries; i++)
+        if (idxs[i] == (int)n)
           return vals[i];
       return 0.0;
     }
@@ -223,9 +223,9 @@ namespace Hermes
 
     /// Add a number to each diagonal entry.
     template<typename Scalar>
-    void EpetraMatrix<Scalar>::add_to_diagonal(Scalar v) 
+    void EpetraMatrix<Scalar>::add_to_diagonal(Scalar v)
     {
-      for (unsigned int i=0; i < this->size; i++) 
+      for (unsigned int i=0; i < this->size; i++)
       {
         add(i, i, v);
       }
@@ -236,10 +236,10 @@ namespace Hermes
     {
       _F_;
       int ndof = mat_block->get_size();
-      if (this->get_size() != (unsigned int) num_stages * ndof) 
+      if (this->get_size() != (unsigned int) num_stages * ndof)
         error("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
 
-      for (int i = 0; i < num_stages; i++) 
+      for (int i = 0; i < num_stages; i++)
       {
         this->add_as_block(ndof*i, ndof*i, mat_block);
       }
@@ -248,7 +248,7 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat)
     {
-      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() )) 
+      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() ))
         error("Incompatible matrix sizes in Epetra<Scalar>::add_as_block()");
       unsigned int block_size=mat->get_size();
       for (unsigned int r=0;r<block_size;r++)
@@ -372,7 +372,7 @@ namespace Hermes
     void EpetraVector<Scalar>::free()
     {
       _F_;
-      if(this->owner) 
+      if(this->owner)
       {
         delete std_map; std_map = NULL;
         delete vec; vec = NULL;

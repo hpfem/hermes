@@ -50,7 +50,7 @@ public:
   InitialCondition(Mesh* mesh, double constant_value) : ExactSolutionScalar<double>(mesh), constant_value(constant_value) {};
 
   virtual double value (double x, double y) const {
-    return constant_value; 
+    return constant_value;
   };
 
   virtual void derivatives (double x, double y, double& dx, double& dy) const {

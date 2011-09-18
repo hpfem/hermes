@@ -49,7 +49,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::get_l2_norm(Vector<Scalar>* vec) 
+    double Global<Scalar>::get_l2_norm(Vector<Scalar>* vec)
     {
       _F_;
       Scalar val = 0;
@@ -172,7 +172,7 @@ namespace Hermes
       }
       // Calculate the resulting norm.
       double result = 0;
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
         result += norms[i] * norms[i];
       return sqrt(result);
     }
@@ -196,7 +196,7 @@ namespace Hermes
       }
       // Calculate the resulting error.
       double result = 0;
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
         result += errors[i] * errors[i];
       return sqrt(result);
     }

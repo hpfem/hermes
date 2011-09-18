@@ -28,9 +28,9 @@
 
 using namespace Hermes::Error;
 
-namespace Hermes 
+namespace Hermes
 {
-  namespace Solvers 
+  namespace Solvers
   {
     template<typename Scalar> Amesos AmesosSolver<Scalar>::factory;
 
@@ -41,9 +41,9 @@ namespace Hermes
       _F_;
       solver = factory.Create(solver_type, problem);
       assert(solver != NULL);
-      // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver, 
+      // WARNING: Amesos does not use RCP to allocate the Amesos_BaseSolver,
       //          so don't forget to delete it!
-      //          ( Amesos.cpp, line 88, called from factory.Create(): 
+      //          ( Amesos.cpp, line 88, called from factory.Create():
       //            return new Amesos_Klu(LinearProblem); )
     }
 
@@ -84,7 +84,7 @@ namespace Hermes
 
       assert(m->size == rhs->size);
 
-      Hermes::TimePeriod tmr;  
+      Hermes::TimePeriod tmr;
 
       problem.SetOperator(m->mat);
       problem.SetRHS(rhs->vec);
@@ -98,7 +98,7 @@ namespace Hermes
       }
 
       int status = solver->Solve();
-      if (status != 0) 
+      if (status != 0)
       {
         error("AmesosSolver: Solution failed.");
         return false;
@@ -126,7 +126,7 @@ namespace Hermes
 
       assert(m->size == rhs->size);
 
-      Hermes::TimePeriod tmr;  
+      Hermes::TimePeriod tmr;
 
       error("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
@@ -137,7 +137,7 @@ namespace Hermes
       }
 
       int status = solver->Solve();
-      if (status != 0) 
+      if (status != 0)
       {
         error("AmesosSolver: Solution failed.");
         return false;
@@ -160,7 +160,7 @@ namespace Hermes
       _F_;
       // Perform both factorization phases for the first time.
       int eff_fact_scheme;
-      if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && 
+      if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH &&
         solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
@@ -181,7 +181,7 @@ namespace Hermes
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
         status = solver->NumericFactorization();
-        if (status != 0) 
+        if (status != 0)
         {
           warning("Numeric factorization failed.");
           return false;

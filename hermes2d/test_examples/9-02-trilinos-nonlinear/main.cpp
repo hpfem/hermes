@@ -4,9 +4,9 @@
 
 using namespace Teuchos;
 
-//  The purpose of this example is to show how to use Trilinos for nonlinear PDE problems. It 
-//  compares performance of the Newton's method in Hermes (assembling via the DiscreteProblem 
-//  class and matrix problem solution via UMFpack) with the performance of the Trilinos/NOX 
+//  The purpose of this example is to show how to use Trilinos for nonlinear PDE problems. It
+//  compares performance of the Newton's method in Hermes (assembling via the DiscreteProblem
+//  class and matrix problem solution via UMFpack) with the performance of the Trilinos/NOX
 //  solver (using the Hermes DiscreteProblem class to assemble discrete problems).
 //
 //  PDE:  - \nabla (k \nabla u) - f = 0
@@ -34,7 +34,7 @@ MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 const char* iterative_method = "bicgstab";        // Name of the iterative method employed by AztecOO (ignored
-                                                  // by the other solvers). 
+                                                  // by the other solvers).
                                                   // Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
 const char* preconditioner = "least-squares";     // Name of the preconditioner employed by AztecOO (ignored by
                                                   // the other solvers).
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 
   // Initialize the discrete problem.
   DiscreteProblem<double> dp1(&wf1, &space);
-  
+
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
   Vector<double>* rhs = create_vector<double>(matrix_solver_type);
@@ -94,12 +94,12 @@ int main(int argc, char* argv[])
   // Initialize the solution.
   Solution<double> sln1;
 
-  if (matrix_solver_type == SOLVER_AZTECOO) 
+  if (matrix_solver_type == SOLVER_AZTECOO)
   {
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
     // Using default iteration parameters (see solver/aztecoo.h).
-  } 
+  }
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
- 
+
   // Show UMFPACK solution.
   Views::ScalarView view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
   view1.show(&sln1);
@@ -194,9 +194,9 @@ int main(int argc, char* argv[])
     error("NOX failed.");
   }
   Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
-  info("Number of nonlin iterations: %d (norm of residual: %g)", 
+  info("Number of nonlin iterations: %d (norm of residual: %g)",
        nox_solver.get_num_iters(), nox_solver.get_residual());
-  info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)", 
+  info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
        nox_solver.get_num_lin_iters(), nox_solver.get_achieved_tol());
 
   // CPU time needed by NOX.

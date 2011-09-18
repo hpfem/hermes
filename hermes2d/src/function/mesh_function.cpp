@@ -58,7 +58,7 @@ namespace Hermes
 
     template<typename Scalar>
     void MeshFunction<Scalar>::reinit()
-    { 
+    {
       this->free();
       init();
     }
@@ -130,13 +130,13 @@ namespace Hermes
 
     template<typename Scalar>
     void MeshFunction<Scalar>::force_transform(MeshFunction<Scalar>* mf)
-    { 
+    {
       Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::update_refmap()
-    { 
+    {
       refmap->force_transform(this->sub_idx, this->ctm);
     }
 
@@ -145,7 +145,7 @@ namespace Hermes
     {
       this->sub_idx = sub_idx;
       this->ctm = ctm;
-    }    
+    }
 
     template class HERMES_API MeshFunction<double>;
     template class HERMES_API MeshFunction<std::complex<double> >;

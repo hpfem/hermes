@@ -33,7 +33,7 @@ project(hermes)
 	# Reporting and logging:
 		set(REPORT_WITH_LOGO        YES)  #logo will be shown
 		set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-		set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives. 
+		set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives.
 																			#The runtime control is intended just for Python wrappers.
 		set(REPORT_ALL              NO)   #do not report all events, just selected ones
 		set(REPORT_WARNING          YES)  #warnings will be reported
@@ -45,7 +45,7 @@ project(hermes)
 		#set(REPORT_DEBUG           NO)   #debug events will depend on version which is compiled
 
   # Installation path:
-    set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib, 
+    set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
                                             #for include files /usr/local/include
 	#### Solvers ###
 	# Standard UMFPACK
@@ -56,11 +56,11 @@ project(hermes)
 		# First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
 		# and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
 		# for in system directories. If SUPERLU_MT is set to YES, the multithreaded version of
-		# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or 
-		# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if 
+		# SuperLU will be used. In this case, there should be either superlu_mt_PTHREAD.a and/or
+		# superlu_mt_OPENMP.a libraries present in the search path (the former will be chosen if
 		# WITH_OPENMP is set to NO, the latter otherwise). There should also be a subdirectory
 		# SLU_MT in the include directory since SuperLU_MT uses different versions of the same-named
-		# header files as the serial library. 
+		# header files as the serial library.
 		set(WITH_SUPERLU            NO)
 		set(SUPERLU_ROOT            /opt/SuperLU_4.0/)
 		set(SUPERLU_MT              NO)
@@ -74,7 +74,7 @@ project(hermes)
 
 	# MUMPS
 		# Sequential version of MUMPS may be enabled by setting YES on the following line
-		# and pointing to the package installation directory with MUMPS_ROOT. To enable the 
+		# and pointing to the package installation directory with MUMPS_ROOT. To enable the
 		# parallel version, setting WITH_MPI to YES in addition to that should suffice. If link
 		# problems arise, it may be that the automatically found SCALAPACK libraries (reported
 		# during the CMake configuration phase) do not match those used when compiling MUMPS.
@@ -99,10 +99,10 @@ project(hermes)
 		# (tells the linker to use parallel versions of the selected solvers, if available):
 		#
 		# Enable OpenMP for shared memory processing.
-		#  
+		#
 		set(WITH_OPENMP             NO)
 
-		# If MPI is enabled, the MPI library installed on the system should be found by 
+		# If MPI is enabled, the MPI library installed on the system should be found by
 		# CMake automatically. If the found library doesn't match the one used to compile the
 		# particular MPI-dependent package, the other two options should be used to specify it.
 		#
@@ -189,7 +189,7 @@ project(hermes)
 					set(HERMES_COMMON_LIB_RELEASE ${HERMES_COMMON_LIB})
 				endif(${HXD}_RELEASE)
 			endif(MSVC)
-		endif (WITH_${HXD})   
+		endif (WITH_${HXD})
 	endmacro(DETERMINE_HERMES_COMMON_RELEASE_DEBUG)
 
 	# Enable debugging symbols for all files all the time:
@@ -206,7 +206,7 @@ project(hermes)
 
 	# Enabling multiprocessor build on MSVC
 	if(MSVC)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") 
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 	endif(MSVC)
 
 	# This overrides CXX flags for MSVC
@@ -252,8 +252,8 @@ project(hermes)
 
 		if(MSVC)
 			if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-					# The search for CLAPACK and associated libraries will be performed 
-					# every time the project is configured in MSVC (TODO: Find out if 
+					# The search for CLAPACK and associated libraries will be performed
+					# every time the project is configured in MSVC (TODO: Find out if
 					# CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
 					# could be cached to improve subsequent configuration performance).
 					find_package(CLAPACK REQUIRED)
@@ -269,21 +269,21 @@ project(hermes)
 								
 						# If no error occured, LAPACK library has been found. Save the path to
 						# it to cache, so that it will not be searched for during next 'cmake .'
-						set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES} 
+						set(LAPACK_LIBRARIES  ${LAPACK_LIBRARIES}
 										CACHE STRING  "Path to LAPACK/BLAS libraries.")
-						set(LAPACK_FOUND      YES 
+						set(LAPACK_FOUND      YES
 										CACHE STRING  "Have LAPACK/BLAS libraries been found?")
 				endif (NOT LAPACK_FOUND)
 				
 				add_definitions(-DWITH_BLAS)	
 			endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
-		endif(MSVC)  
+		endif(MSVC)
 
 		if(WITH_PETSC)
 			find_package(PETSC REQUIRED)
-			# For some header files, PETSc uses the same name for both real and complex 
+			# For some header files, PETSc uses the same name for both real and complex
 			# versions (they only reside in different directories), so we can't globally
-			# set the architecture-specific include directory here, but rather on a 
+			# set the architecture-specific include directory here, but rather on a
 			# per-target basis.
 			include_directories(${PETSC_INCLUDE_DIRS})
 			include_directories(${PETSC_CPLX_INCLUDE_DIRS})
@@ -293,7 +293,7 @@ project(hermes)
 		if(WITH_MUMPS)
 			find_package(MUMPS REQUIRED)
 			if(WITH_MPI)
-				find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS 
+				find_package(SCALAPACK REQUIRED) # parallel version of MUMPS needs ScaLapack+BLACS
 			endif(WITH_MPI)
 			include_directories(${MUMPS_INCLUDE_DIR})
 			set(MUMPS_LIBRARIES ${MUMPS_CPLX_LIBRARIES})

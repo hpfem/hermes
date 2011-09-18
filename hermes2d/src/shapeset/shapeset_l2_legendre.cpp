@@ -4004,7 +4004,7 @@ namespace Hermes
     #define oo H2D_MAKE_QUAD_ORDER
     #define XX(a,b) oo(a,b), oo(a,b)
 
-    int leg_quad_index_to_order[] = 
+    int leg_quad_index_to_order[] =
     {
       oo(0,0),   oo(0,1),   oo(0,2),   oo(0,3),   oo(0,4),   oo(0,5),   oo(0,6),   oo(0,7),   oo(0,8),   oo(0,9),   oo(0,10),
       oo(1,0),   oo(1,1),   oo(1,2),   oo(1,3),   oo(1,4),   oo(1,5),   oo(1,6),   oo(1,7),   oo(1,8),   oo(1,9),   oo(1,10),
@@ -5498,7 +5498,7 @@ namespace Hermes
     };
 
 
-    int leg_tri_index_to_order[] = 
+    int leg_tri_index_to_order[] =
     {
       0,   1,   1,   2,   2,   3,   3,   4,   4,   5,  5,   6,   6,   7,   7,   8,   8,   9,   9,   10,  10,
       2,   3,   3,   4,   4,   5,  5,   6,   6,   7,   7,   8,   8,   9,   9,   10,  10,

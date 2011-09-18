@@ -9,7 +9,7 @@ using Hermes::Ord;
 class CustomExactSolution : public ExactSolutionScalar<double>
 {
 public:
-  CustomExactSolution(Mesh* mesh) : ExactSolutionScalar<double>(mesh) 
+  CustomExactSolution(Mesh* mesh) : ExactSolutionScalar<double>(mesh)
   {
   }
 
@@ -25,7 +25,7 @@ public:
 class CustomFunction : public Hermes::Hermes2DFunction<double>
 {
 public:
-  CustomFunction() : Hermes::Hermes2DFunction<double>() 
+  CustomFunction() : Hermes::Hermes2DFunction<double>()
   {
   }
 

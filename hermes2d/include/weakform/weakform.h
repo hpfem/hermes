@@ -78,7 +78,7 @@ namespace Hermes
 
       /// Destructor.
       ~WeakForm();
-      
+
       /// Adds volumetric matrix form.
       void add_matrix_form(MatrixFormVol<Scalar>* mfv);
 
@@ -222,14 +222,14 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      MatrixFormVol(unsigned int i, unsigned int j, 
-        std::string area = HERMES_ANY, SymFlag sym = HERMES_NONSYM, 
+      MatrixFormVol(unsigned int i, unsigned int j,
+        std::string area = HERMES_ANY, SymFlag sym = HERMES_NONSYM,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor..
-      MatrixFormVol(unsigned int i, unsigned int j, 
-        Hermes::vector<std::string> areas, SymFlag sym = HERMES_NONSYM, 
+      MatrixFormVol(unsigned int i, unsigned int j,
+        Hermes::vector<std::string> areas, SymFlag sym = HERMES_NONSYM,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
@@ -251,12 +251,12 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY, 
+      MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor..
-      MatrixFormSurf(unsigned int i, unsigned int j, Hermes::vector<std::string> areas, 
+      MatrixFormSurf(unsigned int i, unsigned int j, Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
@@ -276,12 +276,12 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      VectorFormVol(unsigned int i, std::string area = HERMES_ANY, 
+      VectorFormVol(unsigned int i, std::string area = HERMES_ANY,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor..
-      VectorFormVol(unsigned int i, Hermes::vector<std::string> areas, 
+      VectorFormVol(unsigned int i, Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
@@ -289,10 +289,10 @@ namespace Hermes
 
       unsigned int i;
 
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, 
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         ExtData<Hermes::Ord> *ext) const;
     };
 
@@ -301,12 +301,12 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      VectorFormSurf(unsigned int i, std::string area = HERMES_ANY, 
+      VectorFormSurf(unsigned int i, std::string area = HERMES_ANY,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor..
-      VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas, 
+      VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
@@ -314,10 +314,10 @@ namespace Hermes
 
       unsigned int i;
 
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, 
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
     };
 
@@ -333,13 +333,13 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,  
+      MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
         std::string area = HERMES_ANY, SymFlag sym = HERMES_NONSYM,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor..
-      MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,  
+      MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
         Hermes::vector<std::string> areas, SymFlag sym = HERMES_NONSYM,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
@@ -360,13 +360,13 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, 
-        std::string area = HERMES_ANY, 
+      MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
+        std::string area = HERMES_ANY,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor.
-      MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, 
+      MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
         Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
@@ -387,13 +387,13 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates, 
-        std::string area = HERMES_ANY, 
+      MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates,
+        std::string area = HERMES_ANY,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor.
-      MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates, 
+      MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates,
         Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
@@ -402,10 +402,10 @@ namespace Hermes
 
       Hermes::vector<unsigned int> coordinates;
 
-      virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+      virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const = 0;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, 
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         ExtData<Hermes::Ord> *ext) const = 0;
     };
 
@@ -414,13 +414,13 @@ namespace Hermes
     {
     public:
       /// One area constructor.
-      MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, 
-        std::string area = HERMES_ANY, 
+      MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
+        std::string area = HERMES_ANY,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       /// Multiple areas constructor.
-      MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, 
+      MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
         Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
@@ -429,10 +429,10 @@ namespace Hermes
 
       Hermes::vector<unsigned int> coordinates;
 
-      virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, 
+      virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const = 0;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, 
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const = 0;
     };
 

@@ -78,14 +78,14 @@ typedef long long unsigned bfd_vma;
 #endif
 
 
-namespace 
+namespace
 {
 
 
   /* This struct is used to pass information between
   addr2str() and process_section().
   */
-  struct line_data 
+  struct line_data
   {
 #ifdef HAVE_TEUCHOS_BFD
     asymbol **symbol_table;     /* Symbol table.  */
@@ -110,12 +110,12 @@ namespace
   */
   std::string remove_leading_whitespace(const std::string &str)
   {
-    if (str.length() && is_whitespace_char(str[0])) 
+    if (str.length() && is_whitespace_char(str[0]))
     {
       int first_nonwhitespace_index = 0;
-      for (int i = 0; i < static_cast<int>(str.length()); ++i) 
+      for (int i = 0; i < static_cast<int>(str.length()); ++i)
       {
-        if (!is_whitespace_char(str[i])) 
+        if (!is_whitespace_char(str[i]))
         {
           first_nonwhitespace_index = i;
           break;
@@ -131,17 +131,17 @@ namespace
   std::string read_line_from_file(std::string filename, unsigned int line_number)
   {
     std::ifstream in(filename.c_str());
-    if (!in.is_open()) 
+    if (!in.is_open())
     {
       return "";
     }
-    if (line_number == 0) 
+    if (line_number == 0)
     {
       return "Line number must be positive";
     }
     unsigned int n = 0;
     std::string line;
-    while (n < line_number) 
+    while (n < line_number)
     {
       if (in.eof())
         return "Line not found";
@@ -191,19 +191,19 @@ namespace
 #ifdef HAVE_CXXABI
     std::string s;
 
-    if (name.length() == 0) 
+    if (name.length() == 0)
     {
       s = "??";
-    } else 
+    } else
     {
       int status = 0;
       char *d = 0;
       d = abi::__cxa_demangle(name.c_str(), 0, 0, &status);
-      if (d) 
+      if (d)
       {
         s = d;
         free(d);
-      } else 
+      } else
       {
         s = name + "()";
       }
@@ -228,25 +228,25 @@ namespace
   void process_section(bfd *abfd, asection *section, void *_data)
   {
     line_data *data = (line_data*)_data;
-    if (data->line_found) 
+    if (data->line_found)
     {
       // If we already found the line, exit
       return;
     }
-    if ((bfd_get_section_flags(abfd, section) & SEC_ALLOC) == 0) 
+    if ((bfd_get_section_flags(abfd, section) & SEC_ALLOC) == 0)
     {
       return;
     }
 
     bfd_vma section_vma = bfd_get_section_vma(abfd, section);
-    if (data->addr < section_vma) 
+    if (data->addr < section_vma)
     {
       // If the addr lies above the section, exit
       return;
     }
 
     bfd_size_type section_size = bfd_section_size(abfd, section);
-    if (data->addr >= section_vma + section_size) 
+    if (data->addr >= section_vma + section_size)
     {
       // If the addr lies below the section, exit
       return;
@@ -284,7 +284,7 @@ namespace
     long n_symbols;
     unsigned int symbol_size;
     n_symbols = bfd_read_minisymbols(abfd, false, tmp, &symbol_size);
-    if (n_symbols == 0) 
+    if (n_symbols == 0)
     {
       // If the bfd_read_minisymbols() already allocated the table, we need
       // to free it first:
@@ -294,7 +294,7 @@ namespace
       n_symbols = bfd_read_minisymbols(abfd, true, tmp, &symbol_size);
     }
 
-    if (n_symbols < 0) 
+    if (n_symbols < 0)
     {
       // bfd_read_minisymbols() failed
       return 1;
@@ -348,27 +348,27 @@ namespace
     std::string s;
     // Do the printing --- print as much information as we were able to
     // find out
-    if (!data.line_found) 
+    if (!data.line_found)
     {
       // If we didn't find the line, at least print the address itself
       s = format("  File unknown, address: 0x%llx",
         (long long unsigned int) addr);
-    } else 
+    } else
     {
       std::string name=demangle_function_name(data.function_name);
-      if (data.filename.length() > 0) 
+      if (data.filename.length() > 0)
       {
         // Nicely format the filename + function name + line
         s = format("  File \"%s\", line %u, in %s", data.filename.c_str(),
           data.line, name.c_str());
         const std::string line_text = remove_leading_whitespace(
           read_line_from_file(data.filename, data.line));
-        if (line_text != "") 
+        if (line_text != "")
         {
           s += "\n    ";
           s += line_text;
         }
-      } else 
+      } else
       {
         // The file is unknown (and data.line == 0 in this case), so the
         // only meaningful thing to print is the function name:
@@ -379,7 +379,7 @@ namespace
     return s;
   }
 
-  struct match_data 
+  struct match_data
   {
     bfd_vma addr;
 
@@ -399,13 +399,13 @@ namespace
     size_t size, void *_data)
   {
     struct match_data *data = (struct match_data *)_data;
-    for (int i=0; i < info->dlpi_phnum; i++) 
+    for (int i=0; i < info->dlpi_phnum; i++)
     {
-      if (info->dlpi_phdr[i].p_type == PT_LOAD) 
+      if (info->dlpi_phdr[i].p_type == PT_LOAD)
       {
         ElfW(Addr) min_addr = info->dlpi_addr + info->dlpi_phdr[i].p_vaddr;
         ElfW(Addr) max_addr = min_addr + info->dlpi_phdr[i].p_memsz;
-        if ((data->addr >= min_addr) && (data->addr < max_addr)) 
+        if ((data->addr >= min_addr) && (data->addr < max_addr))
         {
           data->filename = info->dlpi_name;
           data->addr_in_file = data->addr - info->dlpi_addr;
@@ -439,7 +439,7 @@ namespace
     bfd_init();
 #endif
     // Loop over the stack
-    for (int i=stack_depth; i >= 0; i--) 
+    for (int i=stack_depth; i >= 0; i--)
     {
       // Iterate over all loaded shared libraries (see dl_iterate_phdr(3) -
       // Linux man page for more documentation)
@@ -453,13 +453,13 @@ namespace
       match.addr_in_file = match.addr;
 #endif
 
-      if (match.filename.length() > 0) 
+      if (match.filename.length() > 0)
       {
         // This happens for shared libraries (like /lib/libc.so.6, or any
         // other shared library that the project uses). 'match.filename'
         // then contains the full path to the .so library.
         full_stacktrace_str += addr2str(match.filename, match.addr_in_file);
-      } else 
+      } else
       {
         // The 'addr_in_file' is from the current executable binary, that
         // one can find at '/proc/self/exe'. So we'll use that.

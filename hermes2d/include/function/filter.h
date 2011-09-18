@@ -39,7 +39,7 @@ namespace Hermes
       Filter() {};
 
       Filter(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
-      
+
       Filter(const Hermes::vector<Solution<Scalar>*>& solutions);
 
       virtual ~Filter();
@@ -133,7 +133,7 @@ namespace Hermes
     {
     public:
       ComplexFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
-      
+
       virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
     protected:
@@ -159,14 +159,14 @@ namespace Hermes
       DXDYFilter() {};
 
       DXDYFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
-      
+
       DXDYFilter(const Hermes::vector<Solution<Scalar>*>& solutions);
 
       void init(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
 
-      virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) { 
-        error("Not implemented yet"); 
-        return 0; 
+      virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) {
+        error("Not implemented yet");
+        return 0;
       }
 
     protected:
@@ -201,7 +201,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API DiffFilter : public SimpleFilter<Scalar>
     {
-    public: 
+    public:
       DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
     protected:
@@ -213,7 +213,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API SumFilter : public SimpleFilter<Scalar>
     {
-    public: 
+    public:
       SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
     protected:
@@ -225,7 +225,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API SquareFilter : public SimpleFilter<Scalar>
     {
-    public: 
+    public:
       SquareFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
     protected:
@@ -258,7 +258,7 @@ namespace Hermes
     /// Computes the absolute value of a complex solution.
     class HERMES_API AbsFilter : public SimpleFilter<std::complex<double> >
     {
-    public: 
+    public:
       AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
     protected:
@@ -305,7 +305,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API LinearFilter : public Filter<Scalar>
     {
-    public: 
+    public:
       LinearFilter(MeshFunction<Scalar>* old);
 
       LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac = 1);

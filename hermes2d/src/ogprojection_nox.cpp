@@ -41,14 +41,14 @@ namespace Hermes
       unsigned int n = spaces.size();
 
       // sanity checks
-      for (unsigned int i = 0; i < n; i++) 
-        if(spaces[i] == NULL) 
+      for (unsigned int i = 0; i < n; i++)
+        if(spaces[i] == NULL)
           error("this->spaces[%d] == NULL in project_internal().", i);
 
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, spaces);
 
-      // Initial coefficient vector for the Newton's method.  
+      // Initial coefficient vector for the Newton's method.
       Scalar* coeff_vec = new Scalar[ndof];
       memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
@@ -58,10 +58,10 @@ namespace Hermes
       const bool PRECOND = true;                        // Preconditioning by jacobian in case of JFNK (for NOX),
 							// default ML preconditioner in case of Newton.
       const char* iterative_method = "GMRES";           // Name of the iterative method employed by AztecOO (ignored
-							// by the other solvers). 
+							// by the other solvers).
 							// Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-      const char* preconditioner = "AztecOO";           // Name of the preconditioner employed by AztecOO 
-							// Possibilities: None" - No preconditioning. 
+      const char* preconditioner = "AztecOO";           // Name of the preconditioner employed by AztecOO
+							// Possibilities: None" - No preconditioning.
 							// "AztecOO" - AztecOO internal preconditioner.
 							// "New Ifpack" - Ifpack internal preconditioner.
 							// "ML" - Multi level preconditione
@@ -76,7 +76,7 @@ namespace Hermes
 
       // Initialize NOX.
       NewtonSolverNOX<Scalar> newton_nox(&dp);
- 
+
       // Set NOX parameters.
       newton_nox.set_verbose_output(false);
       newton_nox.set_output_flags(message_type);
@@ -94,7 +94,7 @@ namespace Hermes
       delete [] coeff_vec;
 
       if (target_vec != NULL)
-        for (int i = 0; i < ndof; i++) 
+        for (int i = 0; i < ndof; i++)
           target_vec[i] = newton_nox.get_sln_vector()[i];
     }
 
@@ -104,7 +104,7 @@ namespace Hermes
     {
       _F_;
       int n = spaces.size();
-      
+
       // this is needed since spaces may have their DOFs enumerated only locally.
       ndof = Space<Scalar>::assign_dofs(spaces);
       int ndof_start_running = 0;
@@ -141,19 +141,19 @@ namespace Hermes
 
       // define temporary projection weak form
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
-      
+
       // For error detection.
       bool* found = new bool[n];
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
         found[i] = false;
 
       for (int i = 0; i < n; i++)
       {
         ProjNormType norm = HERMES_UNSET_NORM;
-        if (proj_norms == Hermes::vector<ProjNormType>()) 
+        if (proj_norms == Hermes::vector<ProjNormType>())
         {
           SpaceType space_type = spaces[i]->get_type();
-          switch (space_type) 
+          switch (space_type)
           {
           case HERMES_H1_SPACE: norm = HERMES_H1_NORM; break;
           case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
@@ -182,7 +182,7 @@ namespace Hermes
       }
 
       project_internal(spaces, proj_wf, target_vec);
-      
+
       delete proj_wf;
     }
 
@@ -224,7 +224,7 @@ namespace Hermes
       OGProjectionNOX<Scalar>::project_global(spaces, ref_slns_mf, target_vec, proj_norms);
 
       if(delete_old_meshes)
-        for(unsigned int i = 0; i < sols_src.size(); i++) 
+        for(unsigned int i = 0; i < sols_src.size(); i++)
         {
           delete sols_src[i]->get_mesh();
           sols_src[i]->own_mesh = false;
@@ -273,17 +273,17 @@ namespace Hermes
 
       // Define local projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
-      for (unsigned int i = 0; i < n; i++) 
+      for (unsigned int i = 0; i < n; i++)
       {
         proj_wf->add_matrix_form(custom_projection_jacobian[i]);
         proj_wf->add_vector_form(custom_projection_residual[i]);
       }
 
       project_internal(spaces, proj_wf, target_vec);
-      
+
       delete proj_wf;
     }
-    
+
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<Space<Scalar> *> spaces,
                                               Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
@@ -306,16 +306,16 @@ namespace Hermes
       _F_
       Hermes::vector<Space<Scalar>*> space_vector;
       space_vector.push_back(space);
-      
+
       Hermes::vector<MatrixFormVol<Scalar>*> custom_projection_jacobian_vector;
       custom_projection_jacobian_vector.push_back(custom_projection_jacobian);
-      
+
       Hermes::vector<VectorFormVol<Scalar>*> custom_projection_residual_vector;
       custom_projection_residual_vector.push_back(custom_projection_residual);
-      
+
       Hermes::vector<Solution<Scalar>*> sol_dest_vector;
       sol_dest_vector.push_back(sol_dest);
-      
+
       project_global(space_vector,
                      custom_projection_jacobian_vector,
                      custom_projection_residual_vector,

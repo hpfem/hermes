@@ -165,7 +165,7 @@ namespace Hermes
       space = sln->space;
       space_type = sln->get_space_type();
       space_seq = sln->get_space_seq();
-      
+
       own_mesh = sln->own_mesh;
       sln->own_mesh = false;
 
@@ -208,7 +208,7 @@ namespace Hermes
         mono_coeffs = new Scalar[num_coeffs];
         memcpy(mono_coeffs, sln->mono_coeffs, sizeof(Scalar) * num_coeffs);
 
-        for (int l = 0; l < this->num_components; l++) 
+        for (int l = 0; l < this->num_components; l++)
         {
           elem_coeffs[l] = new int[num_elems];
           memcpy(elem_coeffs[l], sln->elem_coeffs[l], sizeof(int) * num_elems);
@@ -239,9 +239,9 @@ namespace Hermes
     {
       for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
-          if(tables[i][j] != NULL) 
+          if(tables[i][j] != NULL)
           {
-            for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++) 
+            for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++)
             {
               for(unsigned int l = 0; l < it->second->get_size(); l++)
                 if(it->second->present(l))
@@ -327,10 +327,10 @@ namespace Hermes
 
       // loop through all chebyshev points
       double** mat = new_matrix<double>(n, n);
-      for (k = o, row = 0; k >= 0; k--) 
+      for (k = o, row = 0; k >= 0; k--)
       {
         y = o ? cos(k * M_PI / o) : 1.0;
-        for (l = o; l >= (this->mode ? 0 : o-k); l--, row++) 
+        for (l = o; l >= (this->mode ? 0 : o-k); l--, row++)
         {
           x = o ? cos(l * M_PI / o) : 1.0;
 
@@ -425,7 +425,7 @@ namespace Hermes
         delete [] elem_orders;
       elem_orders = new int[num_elems];
       memset(elem_orders, 0, sizeof(int) * num_elems);
-      for (int l = 0; l < this->num_components; l++) 
+      for (int l = 0; l < this->num_components; l++)
       {
         if(elem_coeffs[l] != NULL)
           delete [] elem_coeffs[l];
@@ -441,7 +441,7 @@ namespace Hermes
         this->mode = e->get_mode();
         o = space->get_element_order(e->id);
         o = std::max(H2D_GET_H_ORDER(o), H2D_GET_V_ORDER(o));
-        for (unsigned int k = 0; k < e->nvert; k++) 
+        for (unsigned int k = 0; k < e->nvert; k++)
         {
           int eo = space->get_edge_order(e, k);
           if (eo > o) o = eo;
@@ -695,7 +695,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::init_dxdy_buffer()
     {
-      if (dxdy_buffer != NULL) 
+      if (dxdy_buffer != NULL)
       {
         delete [] dxdy_buffer;
         dxdy_buffer = NULL;
@@ -718,9 +718,9 @@ namespace Hermes
       // if not found, free the oldest one and use its slot
       if (cur_elem >= 4)
       {
-        if(tables[this->cur_quad][oldest[this->cur_quad]] != NULL) 
+        if(tables[this->cur_quad][oldest[this->cur_quad]] != NULL)
         {
-          for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[this->cur_quad][oldest[this->cur_quad]]->begin(); it != tables[this->cur_quad][oldest[this->cur_quad]]->end(); it++) 
+          for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[this->cur_quad][oldest[this->cur_quad]]->begin(); it != tables[this->cur_quad][oldest[this->cur_quad]]->end(); it++)
           {
             for(unsigned int l = 0; l < it->second->get_size(); l++)
               if(it->second->present(l))
@@ -1027,7 +1027,7 @@ namespace Hermes
           {
             Scalar2<Scalar> dx (0.0, 0.0 ), dy ( 0.0, 0.0 );
             Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x[i], y[i], dx, dy);
-            for (j = 0; j < 2; j++) 
+            for (j = 0; j < 2; j++)
             {
               node->values[j][0][i] = val[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
               node->values[j][1][i] = dx[j] * (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_multiplicator;
@@ -1043,7 +1043,7 @@ namespace Hermes
           "the solution on its right-hand side.");
       }
 
-      if(this->nodes->present(order)) 
+      if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
         ::free(this->nodes->get(order));
@@ -1055,9 +1055,9 @@ namespace Hermes
     template<>
     void Solution<double>::save(const char* filename) const
     {
-      if (sln_type == HERMES_EXACT) 
+      if (sln_type == HERMES_EXACT)
         error("Exact solution cannot be saved to a file.");
-      if (sln_type == HERMES_UNDEF) 
+      if (sln_type == HERMES_UNDEF)
         error("Cannot save -- uninitialized solution.");
 
       try
@@ -1080,7 +1080,7 @@ namespace Hermes
 
         for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
           xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i]));
-        
+
         std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
@@ -1103,9 +1103,9 @@ namespace Hermes
     template<>
     void Solution<std::complex<double> >::save(const char* filename) const
     {
-      if (sln_type == HERMES_EXACT) 
+      if (sln_type == HERMES_EXACT)
         error("Exact solution cannot be saved to a file.");
-      if (sln_type == HERMES_UNDEF) 
+      if (sln_type == HERMES_UNDEF)
         error("Cannot save -- uninitialized solution.");
 
       try
@@ -1128,13 +1128,13 @@ namespace Hermes
           for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
-        
+
         for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
         {
           xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i].real()));
           xmlsolution.sln_vector().sln_coeff().back().imaginary() = this->sln_vector[sln_coeff_i].imag();
         }
-        
+
         std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
@@ -1174,10 +1174,10 @@ namespace Hermes
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
           elem_coeffs[component_i] = new int[num_elems];
-        
+
         this->elem_orders = new int[num_elems];
         this->sln_vector = new double[num_dofs];
-        
+
 
         for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
           this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).real();
@@ -1218,10 +1218,10 @@ namespace Hermes
         this->num_components = parsed_xml_solution->num_components();
 
         this->mono_coeffs = new std::complex<double>[num_coeffs];
-        
+
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
           elem_coeffs[component_i] = new int[num_elems];
-        
+
         this->elem_orders = new int[num_elems];
         this->sln_vector = new std::complex<double>[num_dofs];
 

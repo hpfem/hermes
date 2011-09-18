@@ -36,7 +36,7 @@ namespace Hermes
 
       HdivSpace(Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
-      
+
       /// Common code for the constructors.
       void init(Shapeset* shapeset, Ord2 p_init);
 

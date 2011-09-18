@@ -24,7 +24,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace WeakFormsH1 
+    namespace WeakFormsH1
     {
       /* Default volumetric matrix form \int_{area} const_coeff * function_coeff(x, y) * u * v \bfx
       const_coeff... constant number
@@ -104,10 +104,10 @@ namespace Hermes
       class HERMES_API DefaultJacobianAdvection : public MatrixFormVol<Scalar>
       {
       public:
-        DefaultJacobianAdvection(int i, int j, std::string area = HERMES_ANY, 
+        DefaultJacobianAdvection(int i, int j, std::string area = HERMES_ANY,
           Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE, GeomType gt = HERMES_PLANAR);
 
-        DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas, 
+        DefaultJacobianAdvection(int i, int j, Hermes::vector<std::string> areas,
           Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE,
           GeomType gt = HERMES_PLANAR);
 
@@ -202,7 +202,7 @@ namespace Hermes
         DefaultResidualDiffusion(int i, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
           GeomType gt = HERMES_PLANAR);
 
-        DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE, 
+        DefaultResidualDiffusion(int i, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
           GeomType gt = HERMES_PLANAR);
 
         ~DefaultResidualDiffusion();
@@ -231,7 +231,7 @@ namespace Hermes
       class HERMES_API DefaultResidualAdvection : public VectorFormVol<Scalar>
       {
       public:
-        DefaultResidualAdvection(int i, std::string area = HERMES_ANY, 
+        DefaultResidualAdvection(int i, std::string area = HERMES_ANY,
           Hermes1DFunction<Scalar>* coeff_1 = HERMES_ONE, Hermes1DFunction<Scalar>* coeff_2 = HERMES_ONE,
           GeomType gt = HERMES_PLANAR);
         DefaultResidualAdvection(int i, Hermes::vector<std::string> areas,

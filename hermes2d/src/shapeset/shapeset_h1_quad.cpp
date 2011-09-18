@@ -4462,7 +4462,7 @@ namespace Hermes
 #define oo H2D_MAKE_QUAD_ORDER
 #define XX(a,b) oo(a,b), oo(a,b)
 
-    int simple_quad_index_to_order[] = 
+    int simple_quad_index_to_order[] =
     {
       oo(1,1),   oo(1,1),   oo(1,2),   XX(1,3),   oo(1,4),   XX(1,5),   oo(1,6),   XX(1,7),   oo(1,8),   XX(1,9),   oo(1,10),
       oo(1,1),   oo(1,1),   oo(1,2),   XX(1,3),   oo(1,4),   XX(1,5),   oo(1,6),   XX(1,7),   oo(1,8),   XX(1,9),   oo(1,10),

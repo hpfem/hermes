@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
   }
 
   // Define exact solution.
-  CustomExactSolution exact_sln(&mesh);  
+  CustomExactSolution exact_sln(&mesh);
 
   // Initialize the weak formulation.
   Hermes1DFunction<double> lambda(1.0);
@@ -92,19 +92,19 @@ int main(int argc, char* argv[])
     int ndof_ref = ref_space->get_num_dofs();
 
     info("---- Adaptivity step %d (%d DOF):", as, ndof_ref);
-    
+
     info("Solving on reference mesh.");
 
     // Assemble the discrete problem.
     DiscreteProblem<double> dp(&wf, ref_space);
 
-    // Initial coefficient vector for the Newton's method.  
+    // Initial coefficient vector for the Newton's method.
     double* coeff_vec = new double[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(double));
 
     NewtonSolver<double> newton(&dp, matrix_solver);
     newton.set_verbose_output(false);
-    
+
     Solution<double> ref_sln;
     try{
       newton.solve(coeff_vec);
@@ -134,24 +134,24 @@ int main(int argc, char* argv[])
 
     // If err_est too large, adapt the mesh. The NDOF test must be here, so that the solution may be visualized
     // after ending due to this criterion.
-    if (err_exact_rel < ERR_STOP || space.get_num_dofs() >= NDOF_STOP) 
+    if (err_exact_rel < ERR_STOP || space.get_num_dofs() >= NDOF_STOP)
       done = true;
     else
       done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
-   
+
     // Increase the counter of adaptivity steps.
-    if (done == false)  
+    if (done == false)
       as++;
 
     // Clean up.
     delete [] coeff_vec;
-    
-    if(done == false) 
+
+    if(done == false)
       delete ref_space->get_mesh();
     delete ref_space;
   }
   while (done == false);
-  
+
   if (space.get_mesh()->get_num_active_elements() == 1)
   {
     info("Success!");

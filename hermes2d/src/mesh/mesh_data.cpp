@@ -22,7 +22,7 @@ namespace Hermes
     MeshData::MeshData(const std::string &mesh_file) : mesh_file_(mesh_file)
     {
     }
-    
+
     MeshData::~MeshData() {}
 
     MeshData::MeshData(const MeshData &m) : mesh_file_(m.mesh_file_), n_vert(m.n_vert), n_el(m.n_el), n_bdy(m.n_bdy), n_curv(m.n_curv), n_ref(m.n_ref)
@@ -130,7 +130,7 @@ namespace Hermes
       str.assign(temp);
     }
 
-    std::string MeshData::restore(std::string &str) 
+    std::string MeshData::restore(std::string &str)
     {
       std::string temp;
 
@@ -183,31 +183,31 @@ namespace Hermes
 
             if (word == "vertices")
             {
-              isVert = true; 
+              isVert = true;
               isElt = false; isBdy = false; isCurv = false; isRef = false; isVar = false;
               counter = -1;
             }
             else if (word == "elements")
             {
-              isElt = true; 
+              isElt = true;
               isVert = false; isBdy = false; isCurv = false; isRef = false; isVar = false;
               counter = -1;
             }
             else if (word == "boundaries")
             {
-              isBdy = true; 
+              isBdy = true;
               isVert = false; isElt = false; isCurv = false; isRef = false; isVar = false;
               counter = -1;
             }
             else if (word == "curves")
             {
-              isCurv = true; 
+              isCurv = true;
               isVert = false; isElt = false; isBdy = false; isRef = false; isVar = false;
               counter = -1;
             }
             else if (word == "refinements")
             {
-              isRef = true; 
+              isRef = true;
               isVert = false; isElt = false; isBdy = false; isCurv = false; isVar = false;
               counter = -1;
             }
@@ -275,7 +275,7 @@ namespace Hermes
 
               if (!(istr >> dummy_int))
                 ref_elt.push_back(atoi(vars_[restore(word)][0].c_str()));
-              else 
+              else
                 ref_elt.push_back(atoi(word.c_str()));
 
               ++counter;

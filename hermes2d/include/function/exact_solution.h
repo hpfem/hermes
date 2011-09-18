@@ -63,7 +63,7 @@ namespace Hermes
         return value (x, y);
       };
 
-      /// Function returning the integration order that 
+      /// Function returning the integration order that
       /// should be used when integrating the function.
       virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
     };
@@ -89,7 +89,7 @@ namespace Hermes
         return value (x, y);
       };
 
-      /// Function returning the integration order that 
+      /// Function returning the integration order that
       /// should be used when integrating the function.
       virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
     };

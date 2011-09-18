@@ -25,7 +25,7 @@ namespace Hermes
   {
     namespace Views
     {
-      
+
       VectorView::VectorView(const char* title, WinGeom* wg)
         : View(title, wg), vec(NULL)
       {
@@ -38,7 +38,7 @@ namespace Hermes
         length_coef = 1.0;
       }
 
-      
+
       VectorView::VectorView(char* title, WinGeom* wg)
         : View(title, wg), vec(NULL)
       {
@@ -55,7 +55,7 @@ namespace Hermes
       {
         delete vec;
       }
-      
+
       void VectorView::show(MeshFunction<double>* vsln, double eps)
       {
         if(vec == NULL)
@@ -65,7 +65,7 @@ namespace Hermes
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 
-      
+
       void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps)
       {
         if(vec == NULL)
@@ -75,7 +75,7 @@ namespace Hermes
         show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 
-      
+
       void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem)
       {
         if(vec == NULL)
@@ -99,7 +99,7 @@ namespace Hermes
       static int n_vert(int i) { return (i+1) % 3; }
       static int p_vert(int i) { return (i+2) % 3; }
 
-      
+
       void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if (mode == 1)
@@ -187,7 +187,7 @@ namespace Hermes
         }
       }
 
-      
+
       void VectorView::on_display()
       {
         set_ortho_projection();
@@ -322,7 +322,7 @@ namespace Hermes
             bool shift = hexa && (s & 1);
 
             // if there are two points with min y-coordinate, switch to the next segment
-            if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1])) 
+            if ((tvert[l1][1] == tvert[l2][1]) || (tvert[r1][1] == tvert[r2][1]))
             {
               if (tvert[l1][1] == tvert[l2][1])
               {l1 = l2; l2 = r2;}
@@ -377,13 +377,13 @@ namespace Hermes
                 lry += gt;
               }
               // change segment
-              if (lry >= tvert[l2][1]) 
+              if (lry >= tvert[l2][1])
               {
                 l1 = l2; l2 = r2;
                 ml = (tvert[l1][0] - tvert[l2][0])/(tvert[l1][1] - tvert[l2][1]);
                 lx = tvert[l1][0] + ml * (lry - (tvert[l1][1]));
               }
-              else 
+              else
               {
                 r1 = r2; r2 = l2;
                 mr = (tvert[r1][0] - tvert[r2][0])/(tvert[r1][1] - tvert[r2][1]);
@@ -397,7 +397,7 @@ namespace Hermes
         vec->unlock_data();
       }
 
-      
+
       void VectorView::on_mouse_move(int x, int y)
       {
         if (dragging)
@@ -408,7 +408,7 @@ namespace Hermes
         View::on_mouse_move(x, y);
       }
 
-      
+
       void VectorView::on_key_down(unsigned char key, int x, int y)
       {
         switch (key)
@@ -454,7 +454,7 @@ namespace Hermes
         }
       }
 
-      
+
       const char* VectorView::get_help_text() const
       {
         return

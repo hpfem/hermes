@@ -93,10 +93,10 @@ namespace Hermes
     /// Projection norms.
     enum ProjNormType
     {
-      HERMES_L2_NORM, 
-      HERMES_H1_NORM, 
-      HERMES_H1_SEMINORM, 
-      HERMES_HCURL_NORM, 
+      HERMES_L2_NORM,
+      HERMES_H1_NORM,
+      HERMES_H1_SEMINORM,
+      HERMES_HCURL_NORM,
       HERMES_HDIV_NORM,
       /// Used for passing to projecting functions.
       HERMES_UNSET_NORM
@@ -124,11 +124,11 @@ namespace Hermes
       // ref_sln (because the abs. error is divided
       // by the norm of the latter).
       static double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
-      
+
       static double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
 
       static double calc_norm(MeshFunction<Scalar>* sln, int norm_type);
-      
+
       /// Calculate norm of a (possibly vector-valued) solution.
       /// Take norm from spaces where these solutions belong.
       static double calc_norms(Hermes::vector<Solution<Scalar>*> slns);

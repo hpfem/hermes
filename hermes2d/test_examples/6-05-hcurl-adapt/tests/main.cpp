@@ -15,7 +15,7 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 // to the maximum poly order of the tangential component, and polynomials
 // of degree P_INIT + 1 are present in element interiors. P_INIT = 0
 // is for Whitney elements.
-const int P_INIT = 2;                             
+const int P_INIT = 2;
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 
 // This is a quantitative parameter of the adapt(...) function and
@@ -147,10 +147,10 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type); 
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate and exact error."); 
+    info("Calculating error estimate and exact error.");
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", 
+    info("ndof_coarse: %d, ndof_fine: %d",
       space.get_num_dofs(), ref_space->get_num_dofs());
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else 
+    else
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);

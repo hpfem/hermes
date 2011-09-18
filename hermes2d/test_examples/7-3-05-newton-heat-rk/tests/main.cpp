@@ -15,21 +15,21 @@ const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of N
 MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
-// Choose one of the following time-integration methods, or define your own Butcher's table. The last number 
+// Choose one of the following time-integration methods, or define your own Butcher's table. The last number
 // in the name of each method is its order. The one before last, if present, is the number of stages.
 // Explicit methods:
 //   Explicit_RK_1, Explicit_RK_2, Explicit_RK_3, Explicit_RK_4.
-// Implicit methods: 
-//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2, 
-//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4, 
+// Implicit methods:
+//   Implicit_RK_1, Implicit_Crank_Nicolson_2_2, Implicit_SIRK_2_2, Implicit_ESIRK_2_2, Implicit_SDIRK_2_2,
+//   Implicit_Lobatto_IIIA_2_2, Implicit_Lobatto_IIIB_2_2, Implicit_Lobatto_IIIC_2_2, Implicit_Lobatto_IIIA_3_4,
 //   Implicit_Lobatto_IIIB_3_4, Implicit_Lobatto_IIIC_3_4, Implicit_Radau_IIA_3_5, Implicit_SDIRK_5_4.
 // Embedded explicit methods:
 //   Explicit_HEUN_EULER_2_12_embedded, Explicit_BOGACKI_SHAMPINE_4_23_embedded, Explicit_FEHLBERG_6_45_embedded,
 //   Explicit_CASH_KARP_6_45_embedded, Explicit_DORMAND_PRINCE_7_45_embedded.
 // Embedded implicit methods:
-//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded, 
-//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded, 
-//   Implicit_DIRK_ISMAIL_7_45_embedded. 
+//   Implicit_SDIRK_CASH_3_23_embedded, Implicit_ESDIRK_TRBDF2_3_23_embedded, Implicit_ESDIRK_TRX2_3_23_embedded,
+//   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded,
+//   Implicit_DIRK_ISMAIL_7_45_embedded.
 
 ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
 
@@ -66,9 +66,9 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   double current_time = 0;
 
-  CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO, 
+  CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
                           &current_time, TEMP_INIT, T_FINAL);
-  
+
   // Initialize boundary conditions.
  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
  Hermes::Hermes2D::EssentialBCs<double>bcs(&bc_essential);
@@ -86,15 +86,15 @@ int main(int argc, char* argv[])
 
   // Time stepping loop:
   int ts = 1;
-  do 
+  do
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).", 
+    info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).",
          current_time, time_step, bt.get_size());
     bool freeze_jacobian = true;
     bool verbose = true;
-    if (!runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev, 
-                                  sln_time_new, freeze_jacobian, verbose)) 
+    if (!runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
+                                  sln_time_new, freeze_jacobian, verbose))
       error("Runge-Kutta time step failed, try to decrease time step size.");
 
     // Copy solution for the new time step.
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     // Increase current time and time step counter.
     current_time += time_step;
     ts++;
-  } 
+  }
   while (current_time < T_FINAL);
 
   /* Begin test */
@@ -122,12 +122,12 @@ int main(int argc, char* argv[])
   if (fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-6) success = false;
   if (fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-6) success = false;
 
-  if (success) 
+  if (success)
   {
     printf("Success!\n");
     return TEST_SUCCESS;
   }
-  else 
+  else
   {
     printf("Failure!\n");
     return TEST_FAILURE;

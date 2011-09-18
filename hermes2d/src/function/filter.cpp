@@ -32,7 +32,7 @@ namespace Hermes
         this->sln[i] = solutions.at(i);
       this->init();
     }
-    
+
     template<typename Scalar>
     Filter<Scalar>::Filter(const Hermes::vector<Solution<Scalar>*>& solutions) : MeshFunction<Scalar>()
     {
@@ -69,7 +69,7 @@ namespace Hermes
       for (int i = 1; i < num; i++)
 
       {
-        if (meshes[i] == NULL) 
+        if (meshes[i] == NULL)
         {
           warn("You may be initializing a Filter with Solution that is missing a Mesh.");
           error("this->meshes[%d] is NULL in Filter<Scalar>::init().", i);
@@ -124,7 +124,7 @@ namespace Hermes
       }
       else
       {
-        for (int i = 0; i < num; i++) 
+        for (int i = 0; i < num; i++)
         {
           this->sln[i]->set_active_element(unidata[i][e->id].e);
           this->sln[i]->set_transform(unidata[i][e->id].idx);
@@ -132,7 +132,7 @@ namespace Hermes
         }
       }
 
-      for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++) 
+      for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
       {
         for(unsigned int l = 0; l < it->second->get_size(); l++)
           if(it->second->present(l))
@@ -152,7 +152,7 @@ namespace Hermes
     {
       for (int i = 0; i < num; i++)
       {
-        for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++) 
+        for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
         {
           for(unsigned int l = 0; l < it->second->get_size(); l++)
             if(it->second->present(l))
@@ -161,7 +161,7 @@ namespace Hermes
         }
         tables[i].clear();
       }
-      
+
       if (unimesh)
       {
         delete this->mesh;
@@ -274,7 +274,7 @@ namespace Hermes
     template<typename Scalar>
     void SimpleFilter<Scalar>::precalculate(int order, int mask)
     {
-      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))  
+      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
         error("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
@@ -306,7 +306,7 @@ namespace Hermes
         filter_fn(np, values, node->values[j][0]);
       }
 
-      if(this->nodes->present(order)) 
+      if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
         ::free(this->nodes->get(order));
@@ -343,7 +343,7 @@ namespace Hermes
 
     void ComplexFilter::precalculate(int order, int mask)
     {
-      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))  
+      if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
         error("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
@@ -357,15 +357,15 @@ namespace Hermes
       {
         // obtain corresponding tables
         int a = 0, b = 0, mask = item;
-        if (mask >= 0x40) 
+        if (mask >= 0x40)
         {
-          a = 1; 
-          mask >>= 6; 
+          a = 1;
+          mask >>= 6;
         }
-        while (!(mask & 1)) 
-        { 
-          mask >>= 1; 
-          b++; 
+        while (!(mask & 1))
+        {
+          mask >>= 1;
+          b++;
         }
         std::complex<double>* tab = this->sln_complex->get_values(this->num_components == 1 ? a : j, b);
 
@@ -373,7 +373,7 @@ namespace Hermes
         filter_fn(np, tab, node->values[j][0]);
       }
 
-      if(this->nodes->present(order)) 
+      if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
         ::free(this->nodes->get(order));
@@ -462,7 +462,7 @@ namespace Hermes
         filter_fn(np, values_vector, dx_vector, dy_vector, node->values[j][0], node->values[j][1], node->values[j][2]);
       }
 
-      if(this->nodes->present(order)) 
+      if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
         ::free(this->nodes->get(order));
@@ -492,7 +492,7 @@ namespace Hermes
 
     template<typename Scalar>
     MagFilter<Scalar>::MagFilter(MeshFunction<Scalar>* sln1, int item1)
-      : SimpleFilter<Scalar>(Hermes::vector<MeshFunction<Scalar>*>(sln1, sln1), 
+      : SimpleFilter<Scalar>(Hermes::vector<MeshFunction<Scalar>*>(sln1, sln1),
       Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
     {
       if (sln1->get_num_components() < 2)
@@ -513,7 +513,7 @@ namespace Hermes
     template<typename Scalar>
     void SumFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
     {
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
       {
         result[i] = 0;
         for (unsigned int j = 0; j < values.size(); j++)
@@ -632,7 +632,7 @@ namespace Hermes
         node->values[0][0][i] = 1.0/sqrt(2.0) * sqrt(sqr(tx - ty) + sqr(ty - tz) + sqr(tz - tx) + 6*sqr(txy));
       }
 
-      if(this->nodes->present(order)) 
+      if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == cur_node);
         ::free(this->nodes->get(order));
@@ -691,7 +691,7 @@ namespace Hermes
 
       }
 
-      if(this->nodes->present(order)) 
+      if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
         ::free(this->nodes->get(order));

@@ -33,7 +33,7 @@
 #endif
 
 /// Holds data for one call stack object.
-class HERMES_API CallStackObj 
+class HERMES_API CallStackObj
 {
 public:
 	CallStackObj(int ln, const char *func, const char *file);
@@ -45,7 +45,7 @@ public:
 };
 
 /// Call stack class.
-class HERMES_API CallStack 
+class HERMES_API CallStack
 {
 public:
 	CallStack(int max_size = 32);

@@ -18,7 +18,7 @@ MatrixSolverType matrix_solver = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESO
                                                   // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Problem parameters.
-const double const_f = 1.0;  
+const double const_f = 1.0;
 
 int main(int argc, char* argv[])
 {
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
   Vector<double>* rhs = create_vector<double>(matrix_solver);
   LinearSolver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
-  // Initial coefficient vector for the Newton's method.  
+  // Initial coefficient vector for the Newton's method.
   double* coeff_vec = new double[ndof];
   memset(coeff_vec, 0, ndof*sizeof(double));
 
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   double value[4] = {0.102569, 0.167907, 0.174203, 0.109630};
   if (strcasecmp(argv[1], "2") == 0)
   {
-    value[0] = 0.062896; 
+    value[0] = 0.062896;
     value[1] = 0.096658;
     value[2] = 0.114445;
     value[3] = 0.081221;
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 
   if (strcasecmp(argv[1], "3") == 0)
   {
-    value[0] = 0.048752; 
+    value[0] = 0.048752;
     value[1] = 0.028585;
     value[2] = 0.028585;
     value[3] = 0.048752;
@@ -109,15 +109,15 @@ int main(int argc, char* argv[])
   bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if (Hermes::abs(value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6) 
+    if (Hermes::abs(value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6)
       success = false;
   }
-  if (success) 
+  if (success)
   {
     printf("Success!\n");
     return TEST_SUCCESS;
   }
-  else 
+  else
   {
     printf("Failure!\n");
     return TEST_FAILURE;

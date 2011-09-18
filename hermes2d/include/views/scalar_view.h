@@ -213,7 +213,7 @@ namespace Hermes
 
         double3* normals;
 
-        
+
         /// This function calculates the distance that the model (3D plot of the solution over the whole solution domain) must be
         /// translated along the z-axis of the eye coordinate system, so that it fills the actual viewport without being clipped.
         /// The only case when the model will be clipped is when the user defines his own vertical range limits - unfortunately,

@@ -100,7 +100,7 @@ namespace Hermes
     void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       _F_;
-      
+
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -182,17 +182,17 @@ namespace Hermes
             if(this->essential_bcs != NULL)
               if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(en->marker).marker) != NULL)
                 this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
-              else 
+              else
               {
                 this->ndata[en->id].dof = this->next_dof;
                 this->next_dof += ndofs * this->stride;
               }
-            else 
+            else
             {
               this->ndata[en->id].dof = this->next_dof;
               this->next_dof += ndofs * this->stride;
             }
-          else 
+          else
           {
             this->ndata[en->id].dof = this->next_dof;
             this->next_dof += ndofs * this->stride;

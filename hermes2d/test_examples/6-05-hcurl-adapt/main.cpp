@@ -68,7 +68,7 @@ const double ERR_STOP = 1.0;
 const int NDOF_STOP = 60000;
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  
+MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;
 
 // Problem parameters.
 const double MU_R   = 1.0;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
   Views::OrderView  o_view("Polynomial orders", new Views::WinGeom(470, 0, 400, 350));
 
   // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est, 
+  SimpleGraph graph_dof_est, graph_cpu_est,
     graph_dof_exact, graph_cpu_exact;
 
   // Adaptivity loop:
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     // Time measurement.
     cpu_time.tick();
 
-    // Initial coefficient vector for the Newton's method.  
+    // Initial coefficient vector for the Newton's method.
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type); 
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type);
 
     // View the coarse mesh solution and polynomial orders.
     RealFilter real_filter(&sln);
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
     o_view.show(&space);
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate and exact error."); 
+    info("Calculating error estimate and exact error.");
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", 
+    info("ndof_coarse: %d, ndof_fine: %d",
       space.get_num_dofs(), ref_space->get_num_dofs());
     info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
-    else 
+    else
     {
       info("Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);

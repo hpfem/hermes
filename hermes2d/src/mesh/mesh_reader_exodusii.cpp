@@ -132,7 +132,7 @@ namespace Hermes
 
         if (n_elem_nodes == 3) n_tri += n_elems_in_blk;
         else if (n_elem_nodes == 4) n_quad += n_elems_in_blk;
-        else 
+        else
         {
           error("Unknown type of element");
           return false;
@@ -142,7 +142,7 @@ namespace Hermes
       std::string *tri_markers = n_tri > 0 ? new std::string [n_tri] : NULL;
       int4 *quad = n_quad > 0 ? new int4 [n_quad] : NULL;		// quads
       std::string *quad_markers = n_quad > 0 ? new std::string [n_quad] : NULL;
-      
+
       int n_els = n_tri + n_quad;								// total number of elements
       int **els = n_els > 0 ? new int * [n_els] : NULL;		// elements
       int *el_nv = n_els > 0 ? new int [n_els] : NULL;		// number of vertices for each element

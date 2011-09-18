@@ -97,9 +97,9 @@ namespace Hermes
       void Orderizer::make_vert(int & index, double x, double y, double val)
       {
         index = add_vertex();
-        verts[index][0] = x; 
-        verts[index][1] = y; 
-        verts[index][2] = val; 
+        verts[index][0] = x;
+        verts[index][1] = y;
+        verts[index][2] = val;
       }
 
       template<typename Scalar>
@@ -119,7 +119,7 @@ namespace Hermes
 
         // estimate the required number of vertices and triangles
         Mesh* mesh = space->get_mesh();
-        if (mesh == NULL) 
+        if (mesh == NULL)
         {
           error("Mesh is NULL in Orderizer:process_solution().");
         }
@@ -203,17 +203,17 @@ namespace Hermes
 
       Orderizer::~Orderizer()
       {
-        if (lvert != NULL) 
+        if (lvert != NULL)
         {
           ::free(lvert);
           lvert = NULL;
         }
-        if (ltext != NULL) 
+        if (ltext != NULL)
         {
           ::free(ltext);
           ltext = NULL;
         }
-        if (lbox != NULL) 
+        if (lbox != NULL)
         {
           ::free(lbox);
           lbox = NULL;
@@ -237,7 +237,7 @@ namespace Hermes
 
         // Output vertices.
         fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
-        for (int i=0; i < this->vertex_count; i++) 
+        for (int i=0; i < this->vertex_count; i++)
         {
           fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
         }
@@ -245,7 +245,7 @@ namespace Hermes
         // Output elements.
         fprintf(f, "\n");
         fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++) 
+        for (int i=0; i < this->triangle_count; i++)
         {
           fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
         }
@@ -253,18 +253,18 @@ namespace Hermes
         // Output cell types.
         fprintf(f, "\n");
         fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++) 
+        for (int i=0; i < this->triangle_count; i++)
         {
           fprintf(f, "5\n");    // The "5" means triangle in VTK.
         }
 
-        // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp 
+        // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
         // for how it is done for vectors.
         fprintf(f, "\n");
         fprintf(f, "POINT_DATA %d\n", this->vertex_count);
         fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (int i=0; i < this->vertex_count; i++) 
+        for (int i=0; i < this->vertex_count; i++)
         {
           fprintf(f, "%g\n", this->verts[i][2]);
         }
@@ -274,19 +274,19 @@ namespace Hermes
       }
 
       int Orderizer::get_labels(int*& lvert, char**& ltext, double2*& lbox) const
-      { 
-        lvert = this->lvert; 
-        ltext = this->ltext; 
-        lbox = this->lbox; 
-        return label_count; 
+      {
+        lvert = this->lvert;
+        ltext = this->ltext;
+        lbox = this->lbox;
+        return label_count;
       }
 
-      void Orderizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const 
+      void Orderizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }
-      
+
       double3* Orderizer::get_vertices()
       {
         return this->verts;
@@ -295,7 +295,7 @@ namespace Hermes
       {
         return this->vertex_count;
       }
-      
+
       template HERMES_API void Orderizer::save_orders_vtk<double>(Space<double>* space, const char* file_name);
       template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(Space<std::complex<double> >* space, const char* file_name);
       template HERMES_API void Orderizer::process_space<double>(Space<double>* space);

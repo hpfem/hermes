@@ -42,12 +42,12 @@ namespace Hermes
       }
       LinearizerBase::~LinearizerBase()
       {
-        if (tris != NULL) 
+        if (tris != NULL)
         {
           ::free(tris);
           tris = NULL;
         }
-        if (edges != NULL) 
+        if (edges != NULL)
         {
           ::free(edges);
           edges = NULL;
@@ -66,11 +66,11 @@ namespace Hermes
         else
           add_edge(iv1, iv2, marker);
       }
-      
+
 
       void LinearizerBase::add_edge(int iv1, int iv2, int marker)
       {
-        if (edges_count >= edges_size) 
+        if (edges_count >= edges_size)
           edges = (int3*) realloc(edges, sizeof(int3) * (edges_size = edges_size * 3 / 2));
         edges[edges_count][0] = iv1;
         edges[edges_count][1] = iv2;
@@ -94,7 +94,7 @@ namespace Hermes
       void LinearizerBase::add_triangle(int iv0, int iv1, int iv2)
       {
         int index;
-        if (triangle_count >= triangle_size) 
+        if (triangle_count >= triangle_size)
         {
           tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size = triangle_size * 2));
           verbose("Linearizer::add_triangle(): realloc to %d", triangle_size);
@@ -123,24 +123,24 @@ namespace Hermes
         return;
       }
 
-      double LinearizerBase::get_min_value() const 
+      double LinearizerBase::get_min_value() const
       {
-        return min_val; 
+        return min_val;
       }
 
-      double LinearizerBase::get_max_value() const 
-      { 
-        return max_val; 
+      double LinearizerBase::get_max_value() const
+      {
+        return max_val;
       }
 
-      void LinearizerBase::calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y) 
+      void LinearizerBase::calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y)
       {
         *min_x = *max_x = *x;
         *min_y = *max_y = *y;
 
         uint8_t* ptr_x = (uint8_t*)x;
         uint8_t* ptr_y = (uint8_t*)y;
-        for(int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride) 
+        for(int i = 0; i < num; i++, ptr_x += stride, ptr_y += stride)
         {
           *min_x = std::min(*min_x, *((double*)ptr_x));
           *min_y = std::min(*min_y, *((double*)ptr_y));
@@ -148,7 +148,7 @@ namespace Hermes
           *max_y = std::max(*max_y, *((double*)ptr_y));
         }
       }
-      
+
       int3* LinearizerBase::get_triangles()
       {
         return this->tris;

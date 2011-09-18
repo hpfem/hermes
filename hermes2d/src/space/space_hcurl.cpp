@@ -104,7 +104,7 @@ namespace Hermes
     void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       _F_;
-      
+
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -115,7 +115,7 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) 
+      if (this->shapeset->get_num_components() < 2)
         error("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
@@ -141,7 +141,7 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) 
+      if (this->shapeset->get_num_components() < 2)
         error("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
@@ -197,7 +197,7 @@ namespace Hermes
       Node* en;
       for_all_edge_nodes(en, this->mesh)
       {
-        if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL) 
+        if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
         {
           int ndofs = this->get_edge_order_internal(en) + 1;
           this->ndata[en->id].n = ndofs;
@@ -205,17 +205,17 @@ namespace Hermes
             if(this->essential_bcs != NULL)
               if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(en->marker).marker) != NULL)
                 this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
-              else 
+              else
               {
                 this->ndata[en->id].dof = this->next_dof;
                 this->next_dof += ndofs * this->stride;
               }
-            else 
+            else
             {
               this->ndata[en->id].dof = this->next_dof;
               this->next_dof += ndofs * this->stride;
             }
-          else 
+          else
           {
             this->ndata[en->id].dof = this->next_dof;
             this->next_dof += ndofs * this->stride;

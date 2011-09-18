@@ -42,12 +42,12 @@ namespace Hermes {
     /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
     template <typename Scalar>
-    class HERMES_API DiscreteProblemNOX : 
-      public NOX::Epetra::Interface::Required, 
+    class HERMES_API DiscreteProblemNOX :
+      public NOX::Epetra::Interface::Required,
       public NOX::Epetra::Interface::Jacobian,
       public NOX::Epetra::Interface::Preconditioner
     {
-    public: 
+    public:
       DiscreteProblemNOX(DiscreteProblemInterface<Scalar> * problem);
 
       /// \brief Setter for preconditioner.
@@ -71,10 +71,10 @@ namespace Hermes {
 
     private:
       DiscreteProblemInterface<Scalar> * dp;
-      /// \brief Jacobian (optional). 
+      /// \brief Jacobian (optional).
       EpetraMatrix<Scalar> jacobian;
-      /// \brief Preconditioner (optional). 
-      Teuchos::RCP<Precond<Scalar> > precond; 
+      /// \brief Preconditioner (optional).
+      Teuchos::RCP<Precond<Scalar> > precond;
     };
 
     /// \brief Encapsulation of NOX nonlinear solver.
@@ -83,7 +83,7 @@ namespace Hermes {
     template <typename Scalar>
     class HERMES_API NewtonSolverNOX : public NonlinearSolver<Scalar>
     {
-    private: 
+    private:
       DiscreteProblemNOX<Scalar> ndp;
       Teuchos::RCP<Teuchos::ParameterList> nl_pars;
     public:
@@ -102,26 +102,26 @@ namespace Hermes {
       /// setting of output flags.
       /// \param flags[in] output flags, sum of NOX::Utils::MsgType enum
       /// \par
-      ///  %Error = 0, Warning = 0x1, OuterIteration = 0x2, InnerIteration = 0x4, 
-      ///  Parameters = 0x8, Details = 0x10, OuterIterationStatusTest = 0x20, LinearSolverDetails = 0x40, 
-      ///  TestDetails = 0x80, StepperIteration = 0x0100, StepperDetails = 0x0200, StepperParameters = 0x0400, 
+      ///  %Error = 0, Warning = 0x1, OuterIteration = 0x2, InnerIteration = 0x4,
+      ///  Parameters = 0x8, Details = 0x10, OuterIterationStatusTest = 0x20, LinearSolverDetails = 0x40,
+      ///  TestDetails = 0x80, StepperIteration = 0x0100, StepperDetails = 0x0200, StepperParameters = 0x0400,
       ///  Debug = 0x01000
       void set_output_flags(int flags);
 
       /// \name linear solver setters
-      ///@{ 
-      
+      ///@{
+
       ///Determine the iterative technique used in the solve. The following options are valid:
-      /// - "GMRES" - Restarted generalized minimal residual (default). 
-      /// - "CG" - Conjugate gradient. 
-      /// - "CGS" - Conjugate gradient squared. 
-      /// - "TFQMR" - Transpose-free quasi-minimal reasidual. 
-      /// - "BiCGStab" - Bi-conjugate gradient with stabilization. 
+      /// - "GMRES" - Restarted generalized minimal residual (default).
+      /// - "CG" - Conjugate gradient.
+      /// - "CGS" - Conjugate gradient squared.
+      /// - "TFQMR" - Transpose-free quasi-minimal reasidual.
+      /// - "BiCGStab" - Bi-conjugate gradient with stabilization.
       /// - "LU" - Sparse direct solve (single processor only).
       void set_ls_type(const char *type);
-      /// maximum number of iterations in the linear solve. 
+      /// maximum number of iterations in the linear solve.
       void set_ls_max_iters(int iters);
-      /// Tolerance used by AztecOO to determine if an iterative linear solve has converged. 
+      /// Tolerance used by AztecOO to determine if an iterative linear solve has converged.
       void set_ls_tolerance(double tolerance);
       /// When using restarted GMRES this sets the maximum size of the Krylov subspace.
       void set_ls_sizeof_krylov_subspace(int size);
@@ -129,7 +129,7 @@ namespace Hermes {
 
       /// \name convergence params
       /// @{
-      
+
       /// Type of norm
       /// - NOX::Abstract::Vector::OneNorm \f[ \|x\| = \sum_{i=1}^n \| x_i \| \f]
       /// - NOX::Abstract::Vector::TwoNorm \f[ \|x\| = \sqrt{\sum_{i=1}^n \| x_i^2 \|} \f]
@@ -154,7 +154,7 @@ namespace Hermes {
       /// Convergence test based on the weighted root mean square norm of the solution update between iterations.
       /// \param[in] rtol denotes the relative error tolerance, specified via rtol in the constructor
       /// \param[in] atol denotes the absolution error tolerance, specified via atol in the constructor.
-      void set_conv_wrms(double rtol, double atol) 
+      void set_conv_wrms(double rtol, double atol)
       {
         conv_flag.wrms = 1;
         conv.wrms_rtol = rtol;
@@ -162,21 +162,21 @@ namespace Hermes {
       }
       ///@}
 
-      ///Preconditioner Reuse Policy. Sets how and when the preconditioner should be computed. 
-      ///This flag supports native Aztec, Ifpack and ML preconditioners. 
+      ///Preconditioner Reuse Policy. Sets how and when the preconditioner should be computed.
+      ///This flag supports native Aztec, Ifpack and ML preconditioners.
       /// \param[in] pc_reuse
-      /// - "Rebuild" - The "Rebuild" option always completely destroys and then rebuilds the preconditioner each time a linear solve is requested. 
+      /// - "Rebuild" - The "Rebuild" option always completely destroys and then rebuilds the preconditioner each time a linear solve is requested.
       /// - "Reuse" - The group/linear solver will not recompute the preconditioner even if the group's solution vector changes.
-      /// It just blindly reuses what has been constructed. This turns off control of preconditioner recalculation. 
-      /// This is a dangerous condition but can really speed up the computations if the user knows what they are doing. We don't recommend users trying this. 
-      /// - "Recompute" - Recomputes the preconditioner, but will try to efficiently reuse any objects that don't need to be destroyed. 
-      /// How efficient the "Recompute" option is depends on the type of preconditioner. 
-      /// For example if we are using ILU from the Ifpack library, we would like to not destroy and reallocate the graph each solve. 
-      /// With this option, we tell Ifpack to reuse the graph from last time - 
+      /// It just blindly reuses what has been constructed. This turns off control of preconditioner recalculation.
+      /// This is a dangerous condition but can really speed up the computations if the user knows what they are doing. We don't recommend users trying this.
+      /// - "Recompute" - Recomputes the preconditioner, but will try to efficiently reuse any objects that don't need to be destroyed.
+      /// How efficient the "Recompute" option is depends on the type of preconditioner.
+      /// For example if we are using ILU from the Ifpack library, we would like to not destroy and reallocate the graph each solve.
+      /// With this option, we tell Ifpack to reuse the graph from last time -
       /// e.g the sparisty pattern has not changed between applications of the preconditioner. (default)
       void set_precond_reuse(const char * pc_reuse);
       /// Max Age Of Preconditioner
-      /// \param[in] max_age If the "Preconditioner Reuse Policy" is set to "Reuse", 
+      /// \param[in] max_age If the "Preconditioner Reuse Policy" is set to "Reuse",
       /// this integer tells the linear system how many times to reuse the preconditioner before rebuilding it. (default 999)
       void set_precond_max_age(int max_age);
       /// Set user defined preconditioner
@@ -184,9 +184,9 @@ namespace Hermes {
       virtual void set_precond(Precond<Scalar> &pc);
       /// Set preconditioner
       /// \param[in] pc name of preconditioner
-      /// - "None" - No preconditioning. (default) 
-      /// - "AztecOO" - AztecOO internal preconditioner. 
-      /// - "New Ifpack" - Ifpack internal preconditioner. 
+      /// - "None" - No preconditioning. (default)
+      /// - "AztecOO" - AztecOO internal preconditioner.
+      /// - "New Ifpack" - Ifpack internal preconditioner.
       /// - "ML" - Multi level preconditioner
       virtual void set_precond(const char *pc);
 
@@ -194,7 +194,7 @@ namespace Hermes {
       int num_iters;
       double residual;
       int num_lin_iters;
-      double achieved_tol;  
+      double achieved_tol;
 
       // convergence params
       struct conv_t {

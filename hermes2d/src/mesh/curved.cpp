@@ -73,9 +73,9 @@ namespace Hermes
     }
 
     // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
-    // as well as the unit normal and unit tangential vectors. This is done using 
+    // as well as the unit normal and unit tangential vectors. This is done using
     // the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
-    void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
+    void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x,
       double& y, double& n_x, double& n_y, double& t_x, double& t_y)
     {
       _F_;
@@ -105,7 +105,7 @@ namespace Hermes
         n_x = t_y;
         n_y = -t_x;
       }
-      else 
+      else
       {
         // Circular arc.
         if(nurbs->arc)
@@ -129,8 +129,8 @@ namespace Hermes
           y /= sum;
 
           // Normal and tangential vectors.
-          // FIXME; This calculation is artificial and it assumes that 
-          // the NURBS is a circular arc. This should be done in the 
+          // FIXME; This calculation is artificial and it assumes that
+          // the NURBS is a circular arc. This should be done in the
           // same way for all NURBS.
 
           // End points, midpoint.
@@ -215,8 +215,8 @@ namespace Hermes
           n_y = r_21 * n_x_ref + r_22 * n_y_ref;
 
           /*
-          // Calculate normal at point corresponding to the 
-          // position of parameter 't' between 0 and 1. 
+          // Calculate normal at point corresponding to the
+          // position of parameter 't' between 0 and 1.
           n_x = normal_A[0] + t * (normal_B[0] - normal_A[0]);
           n_y = normal_A[1] + t * (normal_B[1] - normal_A[1]);
           double size_n = sqrt(sqr(n_x) + sqr(n_y));
@@ -228,7 +228,7 @@ namespace Hermes
           t_x = -n_y;
           t_y = n_x;
 
-          // Correcting sign so that the normal points outside 
+          // Correcting sign so that the normal points outside
           // if the angle is negative.
           if (nurbs->angle < 0)
           {
@@ -238,9 +238,9 @@ namespace Hermes
             t_y *= -1;
           }
         }
-        // General NURBS. 
+        // General NURBS.
         // FIXME - calculation of normal and tangential vectors needs to be added.
-        else 
+        else
         {
           double3* cp = nurbs->pt;
           x = y = 0.0;
@@ -274,7 +274,7 @@ namespace Hermes
     }
 
     //// non-polynomial reference map //////////////////////////////////////////////////////////////////////////////////
-    const double2 CurvMap::ref_vert[2][4] = 
+    const double2 CurvMap::ref_vert[2][4] =
     {
       { { -1.0, -1.0 }, { 1.0, -1.0 }, { -1.0, 1.0 }, {  0.0, 0.0 } },
       { { -1.0, -1.0 }, { 1.0, -1.0 }, {  1.0, 1.0 }, { -1.0, 1.0 } }
@@ -394,7 +394,7 @@ namespace Hermes
       _F_;
       int order = ref_map_shapeset.get_max_order();
       int n = order - 1; // number of edge basis functions
-      
+
       if (!edge_proj_matrix)
         edge_proj_matrix = new_matrix<double>(n, n);
 
@@ -565,7 +565,7 @@ namespace Hermes
       {
         int nb = ref_map_shapeset.get_num_bubbles(order);
         int *indices = ref_map_shapeset.get_bubble_indices(order);
-        
+
         bubble_proj_matrix_quad = calculate_bubble_projection_matrix(nb, indices);
 
         // cholesky factorization of the matrix
@@ -934,7 +934,7 @@ namespace Hermes
         delete [] coeffs;
         coeffs = NULL;
       }
-      
+
       if (toplevel)
         for (int i = 0; i < 4; i++)
           if (nurbs[i] != NULL)

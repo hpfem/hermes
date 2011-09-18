@@ -22,9 +22,9 @@
 #include "dp_interface.h"
 
 /// \todo If there are really no bodies, delete this file.
-namespace Hermes 
+namespace Hermes
 {
-  namespace Solvers 
+  namespace Solvers
   {
   }
 }

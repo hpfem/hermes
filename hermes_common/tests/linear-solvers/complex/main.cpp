@@ -14,7 +14,7 @@ using namespace Hermes::Solvers;
 // Max row length in input file.
 #define MAX_ROW_LEN	1024
 
-class MatrixEntry 
+class MatrixEntry
 {
 public:
   MatrixEntry() { }
@@ -28,17 +28,17 @@ public:
   std::complex<double>  value;
 };
 
-void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp) 
+void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp)
 {
   std::map<unsigned int, MatrixEntry>::iterator itr;
 
   std::cout << msg << std::endl;
 
   for(itr=mp.begin(); itr != mp.end(); ++itr)
-    std::cout << " " << (int) itr->first << ": " << 
-    (int) itr->second.m << " " << 
-    (int) itr->second.n << " " << 
-    (std::complex<double>) itr->second.value << 
+    std::cout << " " << (int) itr->first << ": " <<
+    (int) itr->second.m << " " <<
+    (int) itr->second.n << " " <<
+    (std::complex<double>) itr->second.value <<
     std::endl;
 
   std::cout << std::endl;
@@ -83,7 +83,7 @@ bool read_n_nums(char *row, int n, double values[]) {
 }
 
 int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
-  std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, std::complex<double> > &rhs, bool &cplx_2_real) 
+  std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, std::complex<double> > &rhs, bool &cplx_2_real)
 {
   FILE *file = fopen(file_name, "r");
   if (file == NULL) return TEST_FAILURE;
@@ -93,15 +93,15 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
     STATE_MATRIX,
     STATE_RHS,
     STATE_NNZ
-  } 
+  }
   state = STATE_N;
 
   // Variables needed to turn complex matrix into real.
-  int k = 0; 
+  int k = 0;
   int l = 0;
   double* rhs_buffer = NULL;
 
-  double buffer[4]; 
+  double buffer[4];
   char row[MAX_ROW_LEN];
   while (fgets(row, MAX_ROW_LEN, file) != NULL) {
     switch (state) {
@@ -111,21 +111,21 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
           n = 2*((int) buffer[0]);
           rhs_buffer = new double[n];
           for (int i = 0; i < n; i++) {
-            rhs_buffer[i] = 0.0;              
+            rhs_buffer[i] = 0.0;
           }
-        }   
+        }
         else
           n = (int) buffer[0];
 
         state = STATE_NNZ;
-      } 
+      }
       break;
 
     case STATE_NNZ:
       if (read_n_nums(row, 1, buffer))
         nnz = (int) buffer[0];
 
-      state = STATE_MATRIX; 
+      state = STATE_MATRIX;
       break;
 
     case STATE_MATRIX:
@@ -157,8 +157,8 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
   return TEST_SUCCESS;
 }
 
-void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, std::complex<double> > &ar_rhs, 
-  SparseMatrix<std::complex<double> > *mat, Vector<std::complex<double> > *rhs) 
+void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, std::complex<double> > &ar_rhs,
+  SparseMatrix<std::complex<double> > *mat, Vector<std::complex<double> > *rhs)
 {
     mat->prealloc(n);
     for (std::map<unsigned int, MatrixEntry>::iterator it = ar_mat.begin(); it != ar_mat.end(); it++) {
@@ -339,7 +339,7 @@ sln = solver.get_sln_vector();
       AmesosSolver<std::complex<double> > solver("Klu", &mat, &rhs);
       solve(solver, n);
 sln = solver.get_sln_vector();
-    } 
+    }
 #endif
   }
   else if (strcasecmp(argv[1], "mumps") == 0) {
@@ -363,7 +363,7 @@ sln = solver.get_sln_vector();
     solve(solver, n);
 sln = solver.get_sln_vector();
 #endif
-  }  
+  }
   else
     ret = TEST_FAILURE;
 
@@ -378,5 +378,5 @@ std::cout << sln[0] << sln[1] << sln[2];
   if (ret == TEST_FAILURE)
     printf("Failure!\n");
   else
-    printf("Success!\n");      
+    printf("Success!\n");
 }

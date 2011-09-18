@@ -38,7 +38,7 @@ namespace Hermes
 
       // check to see if we already have the quadrature
       for (i = 0; i < 4; i++)
-        if (quads[i] == quad_2d) 
+        if (quads[i] == quad_2d)
         {
           cur_quad = i;
           return;
