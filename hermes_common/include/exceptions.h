@@ -69,6 +69,7 @@ namespace Hermes
         /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
         int getItemIdx() const;
         ~NullException();
+        NullException(const NullException & e);
       private:
         int paramIdx, itemIdx;
     };
@@ -98,6 +99,7 @@ namespace Hermes
         /// \return expected length of first parameter.
         int getExpectedLength() const;
         ~LengthException();
+        LengthException(const LengthException & e);
       private:
         int fstParamIdx, sndParamIdx, wrong, right;
     };
@@ -112,6 +114,7 @@ namespace Hermes
         /// \param[in] reasen specification of solver fail.
         LinearSolverException(const char * reason);
         ~LinearSolverException();
+        LinearSolverException(const LinearSolverException & e);
     };
     
     /// \brief Value is out of allowed range
@@ -134,6 +137,7 @@ namespace Hermes
         /// return allowed value of variable.
         double getAllowed() const;
         ~ValueException();
+        ValueException(const ValueException & e);
       private:
         double value,allowed;
     };
