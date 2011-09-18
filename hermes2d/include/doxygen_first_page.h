@@ -170,13 +170,13 @@ Relevant file is traverse.h in <b>mesh</b> directory (see <a href="dirs.html">di
 
 <h3>View classes</h3>
 
-<img src="classHermes_1_1Views_1_1View.png" width=1100>
+<img src="classHermes_1_1Hermes2D_1_1Views_1_1View.png" width=90%>
 
 Relevant files are located in the <b>views</b> directory (see <a href="dirs.html">directory list</a>)
 
 <h3>Linearizer classes</h3>
 
-<img src="classHermes_1_1Views_1_1Linearizer.png">
+<img src="classHermes_1_1Hermes2D_1_1Views_1_1LinearizerBase.png">
 
 Relevant files are located in the <b>views</b> directory (see <a href="dirs.html">directory list</a>)
 */
