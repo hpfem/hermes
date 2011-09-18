@@ -46,26 +46,24 @@ namespace Hermes
     //     is not necessary when no adaptivity in space takes place and the
     //     two spaces are the same (but it is done anyway).
     //
-    // (4) Enable all other matrix solvers, so far UMFPack is hardwired here.
-    //
-    // (5) We do not take advantage of the fact that all blocks in the
+    // (4) We do not take advantage of the fact that all blocks in the
     //     Jacobian matrix have the same structure. Thus it is enough to
     //     assemble the matrix M (one block) and copy the sparsity structure
     //     into all remaining nonzero blocks (and diagonal blocks). Right
     //     now, the sparsity structure is created expensively in each block
     //     again.
     //
-    // (6) If space does not change, the sparsity does not change. Right now
+    // (5) If space does not change, the sparsity does not change. Right now
     //     we discard everything at the end of every time step, we should not
     //     do it.
     //
-    // (7) If the problem does not depend explicitly on time, then all the blocks
+    // (6) If the problem does not depend explicitly on time, then all the blocks
     //     in the Jacobian matrix of the stationary residual are the same up
     //     to a multiplicative constant. Thus they do not have to be aassembled
     //     from scratch.
     //
     //
-    // (8) In practice, Butcher's tables are being transformed to the
+    // (7) In practice, Butcher's tables are being transformed to the
     //     Jordan canonical form (I think) for better performance. This
     //     can be found, I think, in newer Butcher's papers or presentation
     //     (he has them online), and possibly in his book.
