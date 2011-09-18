@@ -85,7 +85,7 @@ namespace Hermes
     }
 
     NullException::~NullException(){
-      delete message;
+      delete[] message;
     }
     
     LengthException::LengthException(int paramIdx, int wrong, int right)
@@ -99,13 +99,13 @@ namespace Hermes
       message=msg;
     }
 
-    LengthException::LengthException(int fstParamIdx, int sndParmIdx, int first, int second)
+    LengthException::LengthException(int fstParamIdx, int sndParamIdx, int first, int second)
     {
       this->fstParamIdx=fstParamIdx;
       this->sndParamIdx=sndParamIdx;
       this->wrong=first;
       this->right=second;
-      char * msg = new char[60];
+      char * msg = new char[110];
       sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same", 
             fstParamIdx, wrong, sndParamIdx, right);
       message=msg;
@@ -133,7 +133,7 @@ namespace Hermes
 
     LengthException::~LengthException()
     {
-      delete message;
+      delete[]message;
     }
 
     LinearSolverException::LinearSolverException()
@@ -152,7 +152,7 @@ namespace Hermes
 
     LinearSolverException::~LinearSolverException()
     {
-      delete message;
+      delete[] message;
     }
     
     ValueException::ValueException(const char * name,double value,double allowed)
@@ -169,7 +169,7 @@ namespace Hermes
 
     ValueException::ValueException(const char * name,double value,double min,double max)
     {
-      char * msg= new char[50+strlen(name)];
+      char * msg= new char[70+strlen(name)];
       sprintf(msg,"Variable %s is %f allowed range is %f -- %f",name,value,min,max);
       message=msg;
       this->value=value;
@@ -191,7 +191,7 @@ namespace Hermes
 
     ValueException::~ValueException()
     {
-      delete message;
+      delete[] message;
     }
 
   }

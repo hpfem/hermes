@@ -45,6 +45,7 @@ namespace Hermes
         const char * getMsg() const;
         /// \return name of function where exception was created.
         const char * getFuncName() const;
+        virtual ~Exception(){};
       protected:
         const char * message;
       private:
@@ -87,7 +88,7 @@ namespace Hermes
         /// \param[in] sndParamnIdx index second parameter.
         /// \param[in] first actual length of first parameter.
         /// \param[in] second actual length of second parameter.
-        LengthException(int fstParamIdx, int sndParmIdx, int first, int second);
+        LengthException(int fstParamIdx, int sndParamIdx, int first, int second);
         /// \return index of first wrong parameter.
         int getFirstParamIdx() const;
         /// \return index of second wrong parameter. Returns -1 when only one parameter is wrong.
