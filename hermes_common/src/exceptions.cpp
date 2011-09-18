@@ -88,6 +88,14 @@ namespace Hermes
       delete[] message;
     }
 
+    NullException::NullException(const NullException & e){
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg,e.getMsg());
+      message=msg;
+      paramIdx=e.getParamIdx();
+      itemIdx=e.getItemIdx();
+    }
+
     LengthException::LengthException(int paramIdx, int wrong, int right)
     {
       fstParamIdx = paramIdx;
@@ -136,6 +144,17 @@ namespace Hermes
       delete[]message;
     }
 
+    LengthException::LengthException(const LengthException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg,e.getMsg());
+      message=msg;
+      this->fstParamIdx=e.getFirstParamIdx();
+      this->sndParamIdx=e.getSecondParamIdx();
+      this->wrong=e.getFirstLength();
+      this->right=e.getExpectedLength();
+    }
+
     LinearSolverException::LinearSolverException()
     {
       char * msg =  new char[22];
@@ -155,7 +174,14 @@ namespace Hermes
       delete[] message;
     }
 
-    ValueException::ValueException(const char * name, double value, double allowed)
+    LinearSolverException::LinearSolverException(const LinearSolverException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg,e.getMsg());
+      message=msg;
+    }
+    
+    ValueException::ValueException(const char * name,double value,double allowed)
     {
       char * msg =  new char[55 + strlen(name)];
       if (value>allowed)
@@ -192,6 +218,15 @@ namespace Hermes
     ValueException::~ValueException()
     {
       delete[] message;
+    }
+
+    ValueException::ValueException(const ValueException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg,e.getMsg());
+      message=msg;
+      this->value=e.getValue();
+      this->allowed=e.getAllowed();
     }
 
   }
