@@ -353,6 +353,7 @@ namespace Hermes
       _F_
       // sanity check
       if (space == NULL) throw Exceptions::NullException(1);
+      if (vec == NULL) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
       Scalar* coeffs = new Scalar [vec->length()];
