@@ -2385,7 +2385,7 @@ namespace Hermes
     };
 
 
-    static int std_np_2d_tri[g_max_tri+1 + 3*g_max_tri + 3] =
+    static int std_np_2d_tri[g_max_tri + 1 + 3*g_max_tri + 3] =
     {
       sizeof(std_pts_0_2d_tri) / sizeof(double3),
       sizeof(std_pts_1_2d_tri) / sizeof(double3),
@@ -2410,7 +2410,7 @@ namespace Hermes
       sizeof(std_pts_20_2d_tri) / sizeof(double3)
     };
 
-    static double3* std_tables_2d_tri[g_max_tri+1 + 3*g_max_tri + 3]=
+    static double3* std_tables_2d_tri[g_max_tri + 1 + 3*g_max_tri + 3]=
     {
       std_pts_0_2d_tri, std_pts_1_2d_tri,
       std_pts_2_2d_tri, std_pts_3_2d_tri,
@@ -2467,8 +2467,8 @@ namespace Hermes
       return result;
     }
 
-    static double3* std_tables_2d_quad[g_max_quad+1 + 4 * g_max_quad + 4];
-    static int std_np_2d_quad[g_max_quad+1 + 4 * g_max_quad + 4];
+    static double3* std_tables_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
+    static int std_np_2d_quad[g_max_quad + 1 + 4 * g_max_quad + 4];
 
     static double3** std_tables_2d[2] =
     {
@@ -2509,8 +2509,8 @@ namespace Hermes
       max_order[0] = g_max_tri;   safe_max_order[0] = g_max_tri - 1; // 20th rule has points outside.
       max_order[1] = g_max_quad;  safe_max_order[1] = g_max_quad;
 
-      num_tables[0] = max_order[0]+1 + 3 * max_order[0] + 3;
-      num_tables[1] = max_order[1]+1 + 4 * max_order[1] + 4;
+      num_tables[0] = max_order[0] + 1 + 3 * max_order[0] + 3;
+      num_tables[1] = max_order[1] + 1 + 4 * max_order[1] + 4;
 
       // create quad tables and edge tables
       int i, j, k, l;
@@ -2520,8 +2520,8 @@ namespace Hermes
         {
           for (j = 0; j < 3; j++)
           {
-            k = max_order[0]+1 + 3*i + j;
-            l = j < 2 ? j+1 : 0;
+            k = max_order[0] + 1 + 3*i + j;
+            l = j < 2 ? j + 1 : 0;
             std_tables_2d_tri[k] = make_edge_table(ref_vert[0][j], ref_vert[0][l], std_np_2d_tri[k], i);
           }
         }
@@ -2531,8 +2531,8 @@ namespace Hermes
           std_tables_2d_quad[i] = make_quad_table(i, std_np_2d_quad[i]);
           for (j = 0; j < 4; j++)
           {
-            k = max_order[1]+1 + 4*i + j;
-            l = j < 3 ? j+1 : 0;
+            k = max_order[1] + 1 + 4*i + j;
+            l = j < 3 ? j + 1 : 0;
             std_tables_2d_quad[k] = make_edge_table(ref_vert[1][j], ref_vert[1][l], std_np_2d_quad[k], i);
           }
         }
@@ -2549,7 +2549,7 @@ namespace Hermes
       if (!--quad_pt_ref)
       {
         for (i = 0; i <= 3 * max_order[0] + 2; i++)
-          delete [] std_tables_2d_tri[max_order[0]+1 + i];
+          delete [] std_tables_2d_tri[max_order[0] + 1 + i];
 
         for (i = 0; i <= 5 * max_order[1] + 4; i++)
           delete [] std_tables_2d_quad[i];

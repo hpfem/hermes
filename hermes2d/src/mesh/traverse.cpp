@@ -351,7 +351,7 @@ namespace Hermes
                   else if (s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
-                    ns->trans[i] = son+1;
+                    ns->trans[i] = son + 1;
                   }
                   // ..we move to the son.
                   else
@@ -411,7 +411,7 @@ namespace Hermes
                     else if (s->e[i]->active)
                     {
                       ns->e[i] = s->e[i];
-                      ns->trans[i] = son+1;
+                      ns->trans[i] = son + 1;
                     }
                     else
                     {
@@ -445,7 +445,7 @@ namespace Hermes
                     else if (s->e[i]->active)
                     {
                       ns->e[i] = s->e[i];
-                      ns->trans[i] = son+1;
+                      ns->trans[i] = son + 1;
                     }
                     else
                     {
@@ -686,7 +686,7 @@ namespace Hermes
               } else
               {
                 e_new[i] = e[i]->sons[sons[i][son] & 3];
-                move_to_son(&(er_new[i]), er+i, sons[i][son]);
+                move_to_son(&(er_new[i]), er + i, sons[i][son]);
                 if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
               }
             }
@@ -714,7 +714,7 @@ namespace Hermes
               } else
               {
                 e_new[i] = e[i]->sons[sons[i][j] & 3];
-                move_to_son(&(er_new[i]), er+i, sons[i][j]);
+                move_to_son(&(er_new[i]), er + i, sons[i][j]);
                 if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
               }
             }
@@ -732,7 +732,7 @@ namespace Hermes
             else
             {
               e_new[i] = e[i]->sons[sons[i][0] & 3];
-              move_to_son(&(er_new[i]), er+i, sons[i][0]);
+              move_to_son(&(er_new[i]), er + i, sons[i][0]);
               if (e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
             }
           }

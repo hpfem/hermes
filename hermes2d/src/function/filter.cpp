@@ -295,7 +295,7 @@ namespace Hermes
           if (mask >= 0x40) { a = 1; mask >>= 6; }
           while (!(mask & 1)) { mask >>= 1; b++; }
           tab[i] = this->sln[i]->get_values(this->num_components == 1 ? a : j, b);
-          if (tab[i] == NULL) error("Value of 'item%d' is incorrect in filter definition.", i+1);
+          if (tab[i] == NULL) error("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
 
         Hermes::vector<Scalar*> values;

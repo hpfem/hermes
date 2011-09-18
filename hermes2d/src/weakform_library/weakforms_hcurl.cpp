@@ -34,7 +34,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
-        (int i, int j, Hermes::vector<std::string> areas,Scalar const_coeff,
+        (int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff,
         Hermes2DFunction<Scalar>* f_coeff, SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {

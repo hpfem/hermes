@@ -96,16 +96,16 @@ namespace Hermes
         wait_for_draw();
       }
 
-      static int n_vert(int i) { return (i+1) % 3; }
-      static int p_vert(int i) { return (i+2) % 3; }
+      static int n_vert(int i) { return (i + 1) % 3; }
+      static int p_vert(int i) { return (i + 2) % 3; }
 
 
       void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if (mode == 1)
-          glColor3f(0.0f,0.0f,0.0f);
+          glColor3f(0.0f, 0.0f, 0.0f);
         else
-          glColor3f(0.5f,0.5f,0.5f);
+          glColor3f(0.5f, 0.5f, 0.5f);
 
         // magnitude
         double Real_mag = sqrt(sqr(xval) + sqr(yval));
@@ -120,7 +120,7 @@ namespace Hermes
 
         if ((mag)/(max - min) < 1e-5)
         {
-          glTranslated(x,y,0.0);
+          glTranslated(x, y, 0.0);
 
           glBegin(GL_QUADS);
           glVertex2d( width,  width);
@@ -133,12 +133,12 @@ namespace Hermes
         {
 
           glBegin(GL_LINES);
-          glVertex2d(x,y);
+          glVertex2d(x, y);
           glVertex2d(xnew, ynew);
           glEnd();
 
-          glTranslated(x,y,0.0);
-          glRotated(atan2(-yval,xval) * 180.0/M_PI, 0.0, 0.0, 1.0);
+          glTranslated(x, y, 0.0);
+          glRotated(atan2(-yval, xval) * 180.0/M_PI, 0.0, 0.0, 1.0);
 
           glBegin(GL_TRIANGLES);
           glVertex2d(length + 3 * width,  0.0);
@@ -169,12 +169,12 @@ namespace Hermes
           {
 
             glBegin(GL_LINES);
-            glVertex2d(x,y);
+            glVertex2d(x, y);
             glVertex2d(xnew, ynew);
             glEnd();
 
-            glTranslated(x - 1, y,0.0);
-            glRotated(atan2(-yval,xval) * 180.0/M_PI, 0.0, 0.0, 1.0);
+            glTranslated(x - 1, y, 0.0);
+            glRotated(atan2(-yval, xval) * 180.0/M_PI, 0.0, 0.0, 1.0);
 
             glBegin(GL_TRIANGLES);
             glVertex2d(length + 3 * width,  0.0);
@@ -310,10 +310,10 @@ namespace Hermes
             double a[2], b[2], c[2], d[2];
             for (int n = 0; n < 2; n++)
             {
-              a[n] = (tvert[l1][1] - tvert[l2][1])*(vert[r1][2 +n] - vert[r2][2+n]) - (vert[l1][2+n] - vert[l2][2+n])*(tvert[r1][1] - tvert[r2][1]);
-              b[n] = (vert[l1][2+n] - vert[l2][2+n])*(tvert[r1][0] - tvert[r2][0]) - (tvert[l1][0] - tvert[l2][0])*(vert[r1][2+n] - vert[r2][2+n]);
+              a[n] = (tvert[l1][1] - tvert[l2][1])*(vert[r1][2 +n] - vert[r2][2 + n]) - (vert[l1][2 + n] - vert[l2][2 + n])*(tvert[r1][1] - tvert[r2][1]);
+              b[n] = (vert[l1][2 + n] - vert[l2][2 + n])*(tvert[r1][0] - tvert[r2][0]) - (tvert[l1][0] - tvert[l2][0])*(vert[r1][2 + n] - vert[r2][2 + n]);
               c[n] = (tvert[l1][0] - tvert[l2][0])*(tvert[r1][1] - tvert[r2][1]) - (tvert[l1][1] - tvert[l2][1])*(tvert[r1][0] - tvert[r2][0]);
-              d[n] = -a[n] * tvert[l1][0] - b[n] * tvert[l1][1] - c[n] * vert[l1][2+n];
+              d[n] = -a[n] * tvert[l1][0] - b[n] * tvert[l1][1] - c[n] * vert[l1][2 + n];
               a[n] /= c[n]; b[n] /= c[n]; d[n] /= c[n];
             }
 

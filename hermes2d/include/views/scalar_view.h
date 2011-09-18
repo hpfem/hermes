@@ -155,7 +155,7 @@ namespace Hermes
 
         bool lin_updated; ///< true, if lin now contains new values
 
-        unsigned int gl_coord_buffer; ///< Vertex coordinate buffer. (x,y,t)
+        unsigned int gl_coord_buffer; ///< Vertex coordinate buffer. (x, y, t)
         unsigned int gl_index_buffer; ///< Index data buffer.
         unsigned int gl_edge_inx_buffer; ///< A buffer for edge indices. The side of the buffer is H2DV_GL_MAX_EDGE_BUFFER pairs of indids.
         int max_gl_verts; ///< A maximum allocated number of vertices

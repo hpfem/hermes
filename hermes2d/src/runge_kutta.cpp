@@ -31,9 +31,9 @@ namespace Hermes
       if (dp==NULL) throw Exceptions::NullException(1);
       if (bt==NULL) throw Exceptions::NullException(2);
 
-      matrix_right=create_matrix<Scalar>(matrix_solver_type);
-      matrix_left=create_matrix<Scalar>(matrix_solver_type);
-      vector_right=create_vector<Scalar>(matrix_solver_type);
+      matrix_right = create_matrix<Scalar>(matrix_solver_type);
+      matrix_left = create_matrix<Scalar>(matrix_solver_type);
+      vector_right = create_vector<Scalar>(matrix_solver_type);
       // Create matrix solver.
       solver = create_linear_solver(matrix_solver_type, matrix_right, vector_right);
 
@@ -41,7 +41,7 @@ namespace Hermes
       // the 'K_i' vectors in the usual R-K notation.
       K_vector = new Scalar[num_stages * dp->get_num_dofs()];
 
-      // Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
+      // Vector u_ext_vec will represent h \sum_{j = 1}^s a_{ij} K_i.
       u_ext_vec = new Scalar[num_stages * dp->get_num_dofs()];
 
       // Vector for the left part of the residual.
@@ -163,7 +163,7 @@ namespace Hermes
       int it = 1;
       while (true)
       {
-        // Prepare vector h\sum_{j=1}^s a_{ij} K_j.
+        // Prepare vector h\sum_{j = 1}^s a_{ij} K_j.
         prepare_u_ext_vec(time_step);
 
         // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
@@ -179,7 +179,7 @@ namespace Hermes
         vector_right->add_vector(vector_left);
 
         // Multiply the residual vector with -1 since the matrix
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         vector_right->change_sign();
 
         // Measure the residual norm.
@@ -244,7 +244,7 @@ namespace Hermes
         if(!solver->solve())
           error ("Matrix solver failed.\n");
 
-        // Add \deltaK^{n+1} to K^n.
+        // Add \deltaK^{n + 1} to K^n.
         for (unsigned int i = 0; i < num_stages*ndof; i++)
           K_vector[i] += newton_damping_coeff * solver->get_sln_vector()[i];
 
@@ -268,7 +268,7 @@ namespace Hermes
       Scalar* coeff_vec = new Scalar[ndof];
       OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
 
-      // Calculate new time level solution in the stage space (u_{n+1} = u_n + h \sum_{j=1}^s b_j k_j).
+      // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
         for (unsigned int j = 0; j < num_stages; j++)
           coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j * ndof + i];

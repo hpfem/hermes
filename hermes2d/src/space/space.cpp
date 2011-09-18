@@ -71,8 +71,8 @@ namespace Hermes
     {
       _F_;
       free_bc_data();
-      if (nsize) { ::free(ndata); ndata=NULL; }
-      if (esize) { ::free(edata); edata=NULL; }
+      if (nsize) { ::free(ndata); ndata = NULL; }
+      if (esize) { ::free(edata); edata = NULL; }
     }
 
     template<typename Scalar>
@@ -234,7 +234,7 @@ namespace Hermes
     {
       _F_;
       int ndof = 0;
-      for (unsigned int i=0; i<spaces.size(); i++) {
+      for (unsigned int i = 0; i<spaces.size(); i++) {
         ndof += spaces[i]->get_num_dofs();
       }
       return ndof;
@@ -281,9 +281,9 @@ namespace Hermes
     {
       _F_;
       if(marker == HERMES_ANY)
-        set_uniform_order_internal(Ord2(order,order), -1234);
+        set_uniform_order_internal(Ord2(order, order), -1234);
       else
-        set_uniform_order_internal(Ord2(order,order), mesh->element_markers_conversion.get_internal_marker(marker).marker);
+        set_uniform_order_internal(Ord2(order, order), mesh->element_markers_conversion.get_internal_marker(marker).marker);
 
       // since space changed, enumerate basis functions
       this->assign_dofs();
@@ -633,7 +633,7 @@ namespace Hermes
     {
       _F_;
       int num = mesh->get_max_element_id();
-      int* orders = new int[num+1];
+      int* orders = new int[num + 1];
       Element* e;
       for_all_active_elements(e, mesh)
       {

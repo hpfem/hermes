@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
-  for (int i=0; i < INIT_REF_NUM; i++)
+  for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
 
   // Initialize the weak formulation.

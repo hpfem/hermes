@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   //mloader.load("../lshape3t.mesh", &mesh);  // triangles
 
   // Perform initial mesh refinemets.
-  for (int i=0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
 
   // Initialize boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner_horizontal",

@@ -131,8 +131,8 @@ namespace Hermes {
       /// @{
 
       /// Type of norm
-      /// - NOX::Abstract::Vector::OneNorm \f[ \|x\| = \sum_{i=1}^n \| x_i \| \f]
-      /// - NOX::Abstract::Vector::TwoNorm \f[ \|x\| = \sqrt{\sum_{i=1}^n \| x_i^2 \|} \f]
+      /// - NOX::Abstract::Vector::OneNorm \f[ \|x\| = \sum_{i = 1}^n \| x_i \| \f]
+      /// - NOX::Abstract::Vector::TwoNorm \f[ \|x\| = \sqrt{\sum_{i = 1}^n \| x_i^2 \|} \f]
       /// - NOX::Abstract::Vector::MaxNorm \f[ \|x\| = \max_i \| x_i \| \f]
       void set_norm_type(NOX::Abstract::Vector::NormType type)  { conv.norm_type = type; }
       /// Determines whether to scale the norm by the problem size.

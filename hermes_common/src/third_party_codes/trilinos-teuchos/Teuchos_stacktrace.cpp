@@ -162,7 +162,7 @@ namespace
     char *str;
     // The integer assignment is merely a warning proof.
     int abc = vasprintf(&str, fmt, argptr);
-    std::string s=str;
+    std::string s = str;
     free(str);
 
     va_end(argptr);
@@ -257,7 +257,7 @@ namespace
 
     // Finds the line corresponding to the offset
 
-    const char *filename=NULL, *function_name=NULL;
+    const char *filename = NULL, *function_name = NULL;
     data->line_found = bfd_find_nearest_line(abfd, section, data->symbol_table,
       offset, &filename, &function_name, &data->line);
 
@@ -355,7 +355,7 @@ namespace
         (long long unsigned int) addr);
     } else
     {
-      std::string name=demangle_function_name(data.function_name);
+      std::string name = demangle_function_name(data.function_name);
       if (data.filename.length() > 0)
       {
         // Nicely format the filename + function name + line
@@ -399,7 +399,7 @@ namespace
     size_t size, void *_data)
   {
     struct match_data *data = (struct match_data *)_data;
-    for (int i=0; i < info->dlpi_phnum; i++)
+    for (int i = 0; i < info->dlpi_phnum; i++)
     {
       if (info->dlpi_phdr[i].p_type == PT_LOAD)
       {
@@ -439,7 +439,7 @@ namespace
     bfd_init();
 #endif
     // Loop over the stack
-    for (int i=stack_depth; i >= 0; i--)
+    for (int i = stack_depth; i >= 0; i--)
     {
       // Iterate over all loaded shared libraries (see dl_iterate_phdr(3) -
       // Linux man page for more documentation)

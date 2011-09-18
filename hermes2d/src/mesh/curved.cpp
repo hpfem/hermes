@@ -52,21 +52,21 @@ namespace Hermes
       _F_;
       if (k == 0)
       {
-        return (t >= knot[i] && t <= knot[i+1] && knot[i] < knot[i+1]) ? 1.0 : 0.0;
+        return (t >= knot[i] && t <= knot[i + 1] && knot[i] < knot[i + 1]) ? 1.0 : 0.0;
       }
       else
       {
         double N1 = nurbs_basis_fn(i, k-1, t, knot);
-        double N2 = nurbs_basis_fn(i+1, k-1, t, knot);
+        double N2 = nurbs_basis_fn(i + 1, k-1, t, knot);
 
         double result = 0.0;
-        if (knot[i+k] != knot[i])
+        if (knot[i + k] != knot[i])
         {
-          result += ((t - knot[i]) / (knot[i+k] - knot[i])) * N1;
+          result += ((t - knot[i]) / (knot[i + k] - knot[i])) * N1;
         }
-        if (knot[i+k+1] != knot[i+1])
+        if (knot[i + k+1] != knot[i + 1])
         {
-          result += ((knot[i+k+1] - t) / (knot[i+k+1] - knot[i+1])) * N2;
+          result += ((knot[i + k+1] - t) / (knot[i + k+1] - knot[i + 1])) * N2;
         }
         return result;
       }
@@ -287,10 +287,10 @@ namespace Hermes
       int vb = e->next_vert(edge);
       nurbs_edge(e, nurbs, edge, t, x, y, n_x, n_y, t_x, t_y);
 
-      x -= 0.5 * ((1-t) * (e->vn[va]->x) + (1+t) * (e->vn[vb]->x));
-      y -= 0.5 * ((1-t) * (e->vn[va]->y) + (1+t) * (e->vn[vb]->y));
+      x -= 0.5 * ((1-t) * (e->vn[va]->x) + (1 + t) * (e->vn[vb]->x));
+      y -= 0.5 * ((1-t) * (e->vn[va]->y) + (1 + t) * (e->vn[vb]->y));
 
-      double k = 4.0 / ((1-t) * (1+t));
+      double k = 4.0 / ((1-t) * (1 + t));
       x *= k;
       y *= k;
     }
@@ -364,15 +364,15 @@ namespace Hermes
       nurbs_edge(e, nurbs[2], 2, -xi_1, ex[2], ey[2], n_x, n_y, t_x, t_y);
       nurbs_edge(e, nurbs[3], 3, -xi_2, ex[3], ey[3], n_x, n_y, t_x, t_y);
 
-      x = (1-xi_2)/2.0 * ex[0] + (1+xi_1)/2.0 * ex[1] +
-        (1+xi_2)/2.0 * ex[2] + (1-xi_1)/2.0 * ex[3] -
-        (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->x - (1+xi_1)*(1-xi_2)/4.0 * e->vn[1]->x -
-        (1+xi_1)*(1+xi_2)/4.0 * e->vn[2]->x - (1-xi_1)*(1+xi_2)/4.0 * e->vn[3]->x;
+      x = (1-xi_2)/2.0 * ex[0] + (1 + xi_1)/2.0 * ex[1] +
+        (1 + xi_2)/2.0 * ex[2] + (1-xi_1)/2.0 * ex[3] -
+        (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->x - (1 + xi_1)*(1-xi_2)/4.0 * e->vn[1]->x -
+        (1 + xi_1)*(1 + xi_2)/4.0 * e->vn[2]->x - (1-xi_1)*(1 + xi_2)/4.0 * e->vn[3]->x;
 
-      y = (1-xi_2)/2.0 * ey[0] + (1+xi_1)/2.0 * ey[1] +
-        (1+xi_2)/2.0 * ey[2] + (1-xi_1)/2.0 * ey[3] -
-        (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->y - (1+xi_1)*(1-xi_2)/4.0 * e->vn[1]->y -
-        (1+xi_1)*(1+xi_2)/4.0 * e->vn[2]->y - (1-xi_1)*(1+xi_2)/4.0 * e->vn[3]->y;
+      y = (1-xi_2)/2.0 * ey[0] + (1 + xi_1)/2.0 * ey[1] +
+        (1 + xi_2)/2.0 * ey[2] + (1-xi_1)/2.0 * ey[3] -
+        (1-xi_1)*(1-xi_2)/4.0 * e->vn[0]->y - (1 + xi_1)*(1-xi_2)/4.0 * e->vn[1]->y -
+        (1 + xi_1)*(1 + xi_2)/4.0 * e->vn[2]->y - (1-xi_1)*(1 + xi_2)/4.0 * e->vn[3]->y;
     }
 
 
@@ -411,7 +411,7 @@ namespace Hermes
             double fi = 0;
             double fj = 0;
             double x = pt[k][0];
-            switch(i+2)
+            switch(i + 2)
             {
             case 0:
               fi = lob0(x);
@@ -450,7 +450,7 @@ namespace Hermes
               fi = lob11(x);
               break;
             }
-            switch(j+2)
+            switch(j + 2)
             {
             case 0:
               fj = lob0(x);
@@ -501,7 +501,7 @@ namespace Hermes
       choldc(edge_proj_matrix, n, edge_p);
     }
 
-    // calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i,j < n, n is the number of bubble functions
+    // calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
     double** CurvMap::calculate_bubble_projection_matrix(int nb, int* indices)
     {
       _F_;
@@ -577,7 +577,7 @@ namespace Hermes
 
     //// edge part of projection based interpolation ///////////////////////////////////////////////////
 
-    // compute point (x,y) in reference element, edge vector (v1, v2)
+    // compute point (x, y) in reference element, edge vector (v1, v2)
     void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v)
     {
       _F_;
@@ -591,7 +591,7 @@ namespace Hermes
       for (int i = 0; i < 2; i++)
       {
         v[i] = b[i] - a[i];
-        x[i] = a[i] + (t+1.0)/2.0 * v[i];
+        x[i] = a[i] + (t + 1.0)/2.0 * v[i];
       }
       double lenght = sqrt(v[0] * v[0] + v[1] * v[1]);
       v[0] /= lenght; v[1] /= lenght;
@@ -635,7 +635,7 @@ namespace Hermes
         calc_ref_map(e, nurbs, x[0], x[1], fn[j]);
 
         for (k = 0; k < 2; k++)
-          fn[j][k] = fn[j][k] - (fa[k] + (t+1)/2.0 * (fb[k] - fa[k]));
+          fn[j][k] = fn[j][k] - (fa[k] + (t + 1)/2.0 * (fb[k] - fa[k]));
       }
 
       double2* result = proj + e->nvert + edge * (order - 1);
@@ -647,7 +647,7 @@ namespace Hermes
           {
             double t = pt[j][0];
             double fi = 0;
-            switch(i+2)
+            switch(i + 2)
             {
             case 0:
               fi = lob0(t);
@@ -721,7 +721,7 @@ namespace Hermes
         {
           // edge basis functions in all integration points
           double* ed;
-          int index_e = ref_map_shapeset.get_edge_index(k,0,ii+2);
+          int index_e = ref_map_shapeset.get_edge_index(k, 0, ii + 2);
           ref_map_pss.set_active_shape(index_e);
           ref_map_pss.set_quad_order(mo2);
           ed = ref_map_pss.get_fn_values();

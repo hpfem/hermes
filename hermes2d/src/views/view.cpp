@@ -705,7 +705,7 @@ namespace Hermes
         if (max < min)
         {
           std::swap(min, max);
-          warn("Upper bound set below the lower bound: reversing to (%f,%f).", min, max);
+          warn("Upper bound set below the lower bound: reversing to (%f, %f).", min, max);
         }
         view_sync.enter();
         range_min = min;
@@ -750,7 +750,7 @@ namespace Hermes
         glDisable(GL_TEXTURE_1D);
         glDisable(GL_LIGHTING);
 
-        glRasterPos2d((int) (x+0.5), (int) (y+0.5));
+        glRasterPos2d((int) (x + 0.5), (int) (y + 0.5));
         glutBitmapString(font, (const unsigned char*) text);
       }
 
@@ -782,15 +782,15 @@ namespace Hermes
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glColor4f(1.0f, 1.0f, 1.0f, 0.65f);
         glBegin(GL_QUADS);
-        glVertex2d(x, y+height+2*b);
-        glVertex2d(x+width+2*b, y+height+2*b);
-        glVertex2d(x+width+2*b, y);
+        glVertex2d(x, y + height + 2*b);
+        glVertex2d(x + width + 2*b, y + height + 2*b);
+        glVertex2d(x + width + 2*b, y);
         glVertex2d(x, y);
         glEnd();
 
         glDisable(GL_BLEND);
         glColor3f(0, 0, 0);
-        draw_text(x+b, y+b+7, text);
+        draw_text(x + b, y + b+7, text);
       }
 
       char* View::get_screenshot_file_name()
@@ -923,9 +923,9 @@ namespace Hermes
       int View::measure_scale_labels()
       {
         int result = 0;
-        for (int i = 0; i <= scale_numticks+1; i++)
+        for (int i = 0; i <= scale_numticks + 1; i++)
         {
-          double value = range_min + (double) i * (range_max - range_min) / (scale_numticks+1);
+          double value = range_min + (double) i * (range_max - range_min) / (scale_numticks + 1);
           if (fabs(value) < 1e-8) value = 0.0;
           char text[50];
           sprintf(text, scale_fmt, value);
@@ -1003,7 +1003,7 @@ namespace Hermes
         glBegin(GL_LINES);
         for (i = 0; i < scale_numticks; i++)
         {
-          y0 = scale_y + scale_height - (double) (i+1) * scale_height / (scale_numticks+1);
+          y0 = scale_y + scale_height - (double) (i + 1) * scale_height / (scale_numticks + 1);
           glVertex2d(scale_x, y0);
           glVertex2d(scale_x + 0.2 * scale_width + 1, y0);
           glVertex2d(scale_x + 0.8 * scale_width, y0);
@@ -1012,13 +1012,13 @@ namespace Hermes
         glEnd();
 
         // labels
-        for (i = 0; i <= scale_numticks+1; i++)
+        for (i = 0; i <= scale_numticks + 1; i++)
         {
-          double value = range_min + (double) i * (range_max - range_min) / (scale_numticks+1);
+          double value = range_min + (double) i * (range_max - range_min) / (scale_numticks + 1);
           if (fabs(value) < 1e-8) value = 0.0;
           char text[50];
           sprintf(text, scale_fmt, value);
-          y0 = scale_y + scale_height - (double) i * scale_height / (scale_numticks+1);
+          y0 = scale_y + scale_height - (double) i * scale_height / (scale_numticks + 1);
           if (righttext)
             draw_text(scale_x + scale_width + 8, y0, text);
           else
@@ -1041,9 +1041,9 @@ namespace Hermes
         glColor4f(1.0f, 1.0f, 1.0f, 0.65f);
         glBegin(GL_QUADS);
         glVertex2d(scale_x - b, scale_y - b);
-        glVertex2d(scale_x - b, scale_y + scale_height + b+1);
-        glVertex2d(scale_x + scale_width + b+1, scale_y + scale_height + b+1);
-        glVertex2d(scale_x + scale_width + b+1, scale_y - b);
+        glVertex2d(scale_x - b, scale_y + scale_height + b + 1);
+        glVertex2d(scale_x + scale_width + b + 1, scale_y + scale_height + b + 1);
+        glVertex2d(scale_x + scale_width + b + 1, scale_y - b);
         glEnd();
 
         // boxes
@@ -1070,10 +1070,10 @@ namespace Hermes
 
           glColor3f(bcolor[0], bcolor[1], bcolor[2]);
           glBegin(GL_QUADS);
-          glVertex2d(scale_x+1, y+1);
-          glVertex2d(scale_x+1, y + scale_box_height);
+          glVertex2d(scale_x + 1, y + 1);
+          glVertex2d(scale_x + 1, y + scale_box_height);
           glVertex2d(scale_x + scale_width, y + scale_box_height);
-          glVertex2d(scale_x + scale_width, y+1);
+          glVertex2d(scale_x + scale_width, y + 1);
           glEnd();
 
           if ((color[0] + color[1] + color[2]) / 3 > 0.5)
@@ -1084,7 +1084,7 @@ namespace Hermes
           int a = scale_x + scale_width/2;
           int b = y + scale_box_height/2;
           draw_text(a, b, boxnames[numboxes-1-i], 0);
-          draw_text(a+1, b, boxnames[numboxes-1-i], 0);
+          draw_text(a + 1, b, boxnames[numboxes-1-i], 0);
 
           y += scale_box_height + scale_box_skip;
         }

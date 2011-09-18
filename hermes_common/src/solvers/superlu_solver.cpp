@@ -36,7 +36,7 @@ namespace Hermes
     template <>
     void SuperLu<double>::sequ(SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info)
     {
-      dsequ (A,r,c,rowcnd, colcnd,amax,info);
+      dsequ (A, r, c, rowcnd, colcnd, amax, info);
     }
 
     template <>
@@ -83,7 +83,7 @@ namespace Hermes
     template <>
     int SuperLu<double>::querySpace (SuperMatrix *a, SuperMatrix *b, mem_usage_t *mu)
     {
-      return dquerySpace (a, b,mu);
+      return dquerySpace (a, b, mu);
     }
 #endif
   }
@@ -249,7 +249,7 @@ namespace Hermes
           {
             fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
             Hermes::Helpers::fprint_num(file, Ax[i]);
-            fprintf(file,"\n");
+            fprintf(file, "\n");
           }
           fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
@@ -262,7 +262,7 @@ namespace Hermes
           hermes_fwrite(&ssize, sizeof(int), 1, file);
           hermes_fwrite(&this->size, sizeof(int), 1, file);
           hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(Ap, sizeof(int),this->size + 1, file);
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
           hermes_fwrite(Ai, sizeof(int), nnz, file);
           hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
           return true;
@@ -296,7 +296,7 @@ namespace Hermes
     void SuperLUMatrix<Scalar>::add_matrix(SuperLUMatrix<Scalar>* mat)
     {
       _F_;
-      add_as_block(0,0,mat);
+      add_as_block(0, 0, mat);
     }
 
     template<typename Scalar>
@@ -318,15 +318,15 @@ namespace Hermes
     {
       _F_;
       int idx;
-      for (unsigned int col=0;col<mat->get_size();col++)
+      for (unsigned int col = 0;col<mat->get_size();col++)
       {
-        for (unsigned int n=mat->Ap[col];n<mat->Ap[col+1];n++)
+        for (unsigned int n = mat->Ap[col];n<mat->Ap[col + 1];n++)
         {
-          idx=find_position(Ai + Ap[col+j], Ap[col + 1 + j] - Ap[col+j],mat->Ai[n]+i);
+          idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
           if (idx<0)
             error("Sparse matrix entry not found");
-          idx += Ap[col+j];
-          Ax[idx]+=mat->Ax[n];
+          idx += Ap[col + j];
+          Ax[idx] +=mat->Ax[n];
         }
       }
     }
@@ -337,15 +337,15 @@ namespace Hermes
     void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
     {
       _F_;
-      for(unsigned int i=0;i<this->size;i++)
+      for(unsigned int i = 0;i<this->size;i++)
       {
-        vector_out[i]=0;
+        vector_out[i] = 0;
       }
-      for (unsigned int c=0;c<this->size;c++)
+      for (unsigned int c = 0;c<this->size;c++)
       {
-        for (unsigned int i=Ap[c];i<Ap[c+1];i++)
+        for (unsigned int i = Ap[c];i<Ap[c + 1];i++)
         {
-          vector_out[c]+=vector_in[Ai[i]]*Ax[i];
+          vector_out[c] +=vector_in[Ai[i]]*Ax[i];
         }
       }
     }
@@ -355,10 +355,10 @@ namespace Hermes
     void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value)
     {
       _F_;
-      int n=nnz;
-      for(int i=0;i<n;i++)
+      int n = nnz;
+      for(int i = 0;i<n;i++)
       {
-        Ax[i]=Ax[i]*value;
+        Ax[i] = Ax[i]*value;
       }
     }
     // Creates matrix using size, nnz, and the three arrays.
@@ -369,11 +369,11 @@ namespace Hermes
       _F_;
       this->nnz = nnz;
       this->size = size;
-      this->Ap = new unsigned int[this->size+1]; assert(this->Ap != NULL);
+      this->Ap = new unsigned int[this->size + 1]; assert(this->Ap != NULL);
       this->Ai = new int[nnz];    assert(this->Ai != NULL);
       this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
 
-      for (unsigned int i = 0; i < this->size+1; i++)
+      for (unsigned int i = 0; i < this->size + 1; i++)
       {
         this->Ap[i] = ap[i];
       }
@@ -389,21 +389,21 @@ namespace Hermes
     SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate()
     {
       _F_;
-      SuperLUMatrix<Scalar> * nmat=new SuperLUMatrix<Scalar>();
+      SuperLUMatrix<Scalar> * nmat = new SuperLUMatrix<Scalar>();
 
       nmat->nnz = nnz;
       nmat->size = this->size;
-      nmat->Ap = new unsigned int[this->size+1]; assert(nmat->Ap != NULL);
+      nmat->Ap = new unsigned int[this->size + 1]; assert(nmat->Ap != NULL);
       nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
       nmat->Ax = new Scalar[nnz]; assert(nmat->Ax != NULL);
       for (unsigned int i = 0;i<nnz;i++)
       {
-        nmat->Ai[i]=Ai[i];
-        nmat->Ax[i]=Ax[i];
+        nmat->Ai[i] = Ai[i];
+        nmat->Ax[i] = Ax[i];
       }
-      for (unsigned int i = 0;i<this->size+1;i++)
+      for (unsigned int i = 0;i<this->size + 1;i++)
       {
-        nmat->Ap[i]=Ap[i];
+        nmat->Ap[i] = Ap[i];
       }
       return nmat;
     }
@@ -564,7 +564,7 @@ namespace Hermes
     template<typename Scalar>
     SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
-      ,local_Ax(NULL),local_rhs(NULL)
+      , local_Ax(NULL), local_rhs(NULL)
     {
       _F_;
       R = NULL;
@@ -618,16 +618,16 @@ namespace Hermes
       has_A = has_B = inited = false;
     }
 
-    inline SuperLuType<std::complex<double> >::Scalar to_superlu(SuperLuType<std::complex<double> >::Scalar &a,std::complex<double>b)
+    inline SuperLuType<std::complex<double> >::Scalar to_superlu(SuperLuType<std::complex<double> >::Scalar &a, std::complex<double>b)
     {
-      a.r=b.real();
-      a.i=b.imag();
+      a.r = b.real();
+      a.i = b.imag();
       return a;
     }
 
-    inline SuperLuType<double>::Scalar to_superlu(SuperLuType<double>::Scalar &a,double b)
+    inline SuperLuType<double>::Scalar to_superlu(SuperLuType<double>::Scalar &a, double b)
     {
-      a=b;
+      a = b;
       return a;
     }
 
@@ -700,13 +700,13 @@ namespace Hermes
           memcpy(local_Ai, m->Ai, m->nnz * sizeof(int));
 
           if (local_Ap) delete [] local_Ap;
-          local_Ap = new int [m->size+1];
-          memcpy(local_Ap, m->Ap, (m->size+1) * sizeof(int));
+          local_Ap = new int [m->size + 1];
+          memcpy(local_Ap, m->Ap, (m->size + 1) * sizeof(int));
 
           if (local_Ax) delete [] local_Ax;
           local_Ax = new typename SuperLuType<Scalar>::Scalar[m->nnz];
-          for (unsigned int i=0;i<m->nnz;i++)
-            to_superlu(local_Ax[i],m->Ax[i]);
+          for (unsigned int i = 0;i<m->nnz;i++)
+            to_superlu(local_Ax[i], m->Ax[i]);
 
           // Create new general (non-symmetric), column-major, non-supernodal, size X size matrix.
           create_csc_matrix(&A, m->size, m->size, m->nnz, local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
@@ -720,8 +720,8 @@ namespace Hermes
 
       if (local_rhs) delete [] local_rhs;
       local_rhs = new typename SuperLuType<Scalar>::Scalar[rhs->size];
-      for (unsigned int i=0;i<rhs->size;i++)
-        to_superlu(local_rhs[i],rhs->v[i]);
+      for (unsigned int i = 0;i<rhs->size;i++)
+        to_superlu(local_rhs[i], rhs->v[i]);
 
       create_dense_matrix(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
 
@@ -743,7 +743,7 @@ namespace Hermes
         // Get column permutation vector perm_c[], according to the first argument:
         //  0: natural ordering
         //  1: minimum degree ordering on structure of A'*A
-        //  2: minimum degree ordering on structure of A'+A
+        //  2: minimum degree ordering on structure of A' + A
         //  3: approximate minimum degree for unsymmetric matrices
         get_perm_c(1, &A, perm_c);
       }
@@ -751,7 +751,7 @@ namespace Hermes
       /*
       // Compute reciprocal pivot growth, estimate reciprocal condition number of A, solve,
       // perform iterative refinement of the solution and estimate forward and backward error.
-      // Memory usage will be acquired at the end. If A is singular, info will be set to A->ncol+1.
+      // Memory usage will be acquired at the end. If A is singular, info will be set to A->ncol + 1.
       //
       slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
       &L, &U, &B, &X, &rpivot_growth, &rcond, &ferr, &berr,
@@ -761,7 +761,7 @@ namespace Hermes
       // ... OR ...
 
       // Estimate reciprocal condition number of A and solve the system. If A is singular, info
-      // will be set to A->ncol+1.
+      // will be set to A->ncol + 1.
       //
       slu_mt_solver_driver( &options, &A, perm_c, perm_r, &AC, &equed, R, C,
         &L, &U, &B, &X, NULL, &rcond, NULL, NULL,
@@ -892,7 +892,7 @@ namespace Hermes
 #else
         options.Fact = SamePattern;
 #endif
-        // L,U matrices may be reused without reallocating.
+        // L, U matrices may be reused without reallocating.
         // SLU_DESTROY_L(&L);
         // SLU_DESTROY_U(&U);
         break;
@@ -1177,7 +1177,7 @@ namespace Hermes
             SLU_MULT(Xmat[i], R[i]);
         }
 
-        /* Set INFO = A->ncol+1 if the matrix is singular to
+        /* Set INFO = A->ncol + 1 if the matrix is singular to
         working precision.*/
         char param[1]; param[0] = 'E';
         if ( rcond && *rcond < SLU_LAMCH_(param) ) *info = A->ncol + 1;

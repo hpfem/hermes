@@ -29,8 +29,8 @@ namespace Hermes
 
         //clear matrix cache
         for(int m = 0; m < H2D_NUM_MODES; m++)
-          for(int i = 0; i < H2DRS_MAX_ORDER+1; i++)
-            for(int k = 0; k < H2DRS_MAX_ORDER+1; k++)
+          for(int i = 0; i < H2DRS_MAX_ORDER + 1; i++)
+            for(int k = 0; k < H2DRS_MAX_ORDER + 1; k++)
               proj_matrix_cache[m][i][k] = NULL;
 
         //allocate caches
@@ -46,8 +46,8 @@ namespace Hermes
       {
         //delete matrix cache
         for(int m = 0; m < H2D_NUM_MODES; m++)
-          for(int i = 0; i < H2DRS_MAX_ORDER+1; i++)
-            for(int k = 0; k < H2DRS_MAX_ORDER+1; k++)
+          for(int i = 0; i < H2DRS_MAX_ORDER + 1; i++)
+            for(int k = 0; k < H2DRS_MAX_ORDER + 1; k++)
             {
               if (proj_matrix_cache[m][i][k] != NULL)
                 delete[] proj_matrix_cache[m][i][k];
@@ -126,7 +126,7 @@ namespace Hermes
               {
                 error_squared = 0.0;
                 for (int j = 0; j < 2; j++)
-                  error_squared += anisoerr[(c.split == H2D_REFINEMENT_ANISO_H) ? j : j+2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
+                  error_squared += anisoerr[(c.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
                 error_squared *= 0.5;  //element of a candidate occupies 1/2 of the reference domain defined over a candidate
               }
               break;
@@ -172,9 +172,9 @@ namespace Hermes
       template<typename Scalar>
       void ProjBasedSelector<Scalar>::calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const  typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4])
       {
-        assert_msg(info_h.is_empty() || (H2D_GET_H_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of H-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_h.max_quad_order), H2D_GET_V_ORDER(info_h.max_quad_order));
-        assert_msg(info_p.is_empty() || (H2D_GET_H_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of P-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_p.max_quad_order), H2D_GET_V_ORDER(info_p.max_quad_order));
-        assert_msg(info_aniso.is_empty() || (H2D_GET_H_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of ANISO-candidate is %d but order (H:%d,V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_aniso.max_quad_order), H2D_GET_V_ORDER(info_aniso.max_quad_order));
+        assert_msg(info_h.is_empty() || (H2D_GET_H_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of H-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_h.max_quad_order), H2D_GET_V_ORDER(info_h.max_quad_order));
+        assert_msg(info_p.is_empty() || (H2D_GET_H_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of P-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_p.max_quad_order), H2D_GET_V_ORDER(info_p.max_quad_order));
+        assert_msg(info_aniso.is_empty() || (H2D_GET_H_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of ANISO-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_aniso.max_quad_order), H2D_GET_V_ORDER(info_aniso.max_quad_order));
 
         int mode = e->get_mode();
 
@@ -260,8 +260,8 @@ namespace Hermes
         //ANISO-candidates
         if (!info_aniso.is_empty())
         {
-          const int sons[4][2] = { {0,1}, {3,2}, {0,3}, {1,2} }; //indices of sons for sub-areas
-          const int tr[4][2]   = { {6,7}, {6,7}, {4,5}, {4,5} }; //indices of ref. domain transformations for sub-areas
+          const int sons[4][2] = { {0, 1}, {3, 2}, {0, 3}, {1, 2} }; //indices of sons for sub-areas
+          const int tr[4][2]   = { {6, 7}, {6, 7}, {4, 5}, {4, 5} }; //indices of ref. domain transformations for sub-areas
           for(int version = 0; version < 4; version++) { // 2 elements for vertical split, 2 elements for horizontal split
             Trf* sub_trfs[2] = { &trfs[tr[version][0]], &trfs[tr[version][1]] };
             Element* sub_domains[2] = { base_element->sons[sons[version][0]], base_element->sons[sons[version][1]] };

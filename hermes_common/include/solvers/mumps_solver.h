@@ -94,7 +94,7 @@ namespace Hermes {
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
-        add_to_diagonal_blocks(num_stages,dynamic_cast<MumpsMatrix*>(mat));
+        add_to_diagonal_blocks(num_stages, dynamic_cast<MumpsMatrix*>(mat));
       }
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix

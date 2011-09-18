@@ -61,7 +61,7 @@ namespace Hermes
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
-        add_to_diagonal_blocks(num_stages,dynamic_cast<CSCMatrix<Scalar>*>(mat));
+        add_to_diagonal_blocks(num_stages, dynamic_cast<CSCMatrix<Scalar>*>(mat));
       }
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
@@ -111,7 +111,7 @@ namespace Hermes
       int *Ai;
       /// Index to Ax/Ai, where each column starts.
       int *Ap;
-      /// Number of non-zero entries (= Ap[size]).
+      /// Number of non-zero entries ( =  Ap[size]).
       unsigned int nnz;
 
     };

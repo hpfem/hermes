@@ -26,14 +26,14 @@ namespace Hermes
 
     Exception::Exception()
     {
-      message=NULL;
-      func=callstack.getLastFunc();
+      message = NULL;
+      func = callstack.getLastFunc();
     }
 
     Exception::Exception(const char * msg)
     {
-      message=msg;
-      func=callstack.getLastFunc();
+      message = msg;
+      func = callstack.getLastFunc();
     }
 
     void Exception::printMsg() const
@@ -58,20 +58,20 @@ namespace Hermes
 
     NullException::NullException(int paramIdx)
     {
-      this->paramIdx=paramIdx;
-      this->itemIdx=-1;
+      this->paramIdx = paramIdx;
+      this->itemIdx = -1;
       char * msg = new char[27];
       sprintf(msg, "Parameter number %d is NULL", paramIdx);
-      message=msg;
+      message = msg;
     }
 
     NullException::NullException(int paramIdx, int itemIdx)
     {
-      this->paramIdx=paramIdx;
-      this->itemIdx=itemIdx;
+      this->paramIdx = paramIdx;
+      this->itemIdx = itemIdx;
       char * msg = new char[55];
       sprintf(msg, "Element number %d of parameter number %d is NULL", itemIdx, paramIdx);
-      message=msg;
+      message = msg;
     }
 
     int NullException::getParamIdx() const
@@ -90,25 +90,25 @@ namespace Hermes
 
     LengthException::LengthException(int paramIdx, int wrong, int right)
     {
-      fstParamIdx=paramIdx;
-      this->wrong=wrong;
-      this->right=right;
-      this->sndParamIdx=-1;
+      fstParamIdx = paramIdx;
+      this->wrong = wrong;
+      this->right = right;
+      this->sndParamIdx = -1;
       char * msg = new char[60];
       sprintf(msg, "Parameter number %d have length %d and should have %d", fstParamIdx, wrong, right);
-      message=msg;
+      message = msg;
     }
 
     LengthException::LengthException(int fstParamIdx, int sndParmIdx, int first, int second)
     {
-      this->fstParamIdx=fstParamIdx;
-      this->sndParamIdx=sndParamIdx;
-      this->wrong=first;
-      this->right=second;
+      this->fstParamIdx = fstParamIdx;
+      this->sndParamIdx = sndParamIdx;
+      this->wrong = first;
+      this->right = second;
       char * msg = new char[60];
       sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
             fstParamIdx, wrong, sndParamIdx, right);
-      message=msg;
+      message = msg;
     }
 
     int LengthException::getFirstParamIdx() const
@@ -138,16 +138,16 @@ namespace Hermes
 
     LinearSolverException::LinearSolverException()
     {
-      char * msg= new char[22];
-      sprintf(msg,"Linear solver failed.");
-      message=msg;
+      char * msg =  new char[22];
+      sprintf(msg, "Linear solver failed.");
+      message = msg;
     }
 
     LinearSolverException::LinearSolverException(const char * reason)
     {
-      char * msg= new char[34+strlen(reason)];
-      sprintf(msg,"Linear solver failed because:\"%s\"",reason);
-      message=msg;
+      char * msg =  new char[34 + strlen(reason)];
+      sprintf(msg, "Linear solver failed because:\"%s\"", reason);
+      message = msg;
     }
 
     LinearSolverException::~LinearSolverException()
@@ -155,28 +155,28 @@ namespace Hermes
       delete message;
     }
 
-    ValueException::ValueException(const char * name,double value,double allowed)
+    ValueException::ValueException(const char * name, double value, double allowed)
     {
-      char * msg= new char[55+strlen(name)];
+      char * msg =  new char[55 + strlen(name)];
       if (value>allowed)
-        sprintf(msg,"Variable %s is %f but maximum allowed value is %f",name,value,allowed);
+        sprintf(msg, "Variable %s is %f but maximum allowed value is %f", name, value, allowed);
       else
-        sprintf(msg,"Variable %s is %f but minimum allowed value is %f",name,value,allowed);
-      message=msg;
-      this->value=value;
-      this->allowed=allowed;
+        sprintf(msg, "Variable %s is %f but minimum allowed value is %f", name, value, allowed);
+      message = msg;
+      this->value = value;
+      this->allowed = allowed;
     }
 
-    ValueException::ValueException(const char * name,double value,double min,double max)
+    ValueException::ValueException(const char * name, double value, double min, double max)
     {
-      char * msg= new char[50+strlen(name)];
-      sprintf(msg,"Variable %s is %f allowed range is %f -- %f",name,value,min,max);
-      message=msg;
-      this->value=value;
+      char * msg =  new char[50 + strlen(name)];
+      sprintf(msg, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
+      message = msg;
+      this->value = value;
       if (value>min)
-        this->allowed=max;
+        this->allowed = max;
       else
-        this->allowed=min;
+        this->allowed = min;
     }
 
     double ValueException::getValue() const

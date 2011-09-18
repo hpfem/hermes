@@ -73,13 +73,13 @@ namespace Hermes
       {
         // chebyshev point
         int o = (ebias == 0) ? order + 1 : order;
-        double p = cos((i+1) * M_PI / o);
+        double p = cos((i + 1) * M_PI / o);
         double r = (p + 1.0) * 0.5;
         double s = 1.0 - r;
 
         // matrix row
         for (j = 0; j < n; j++)
-          a[i][j] = get_value(0, idx[j+ebias], p, -1.0, component);
+          a[i][j] = get_value(0, idx[j + ebias], p, -1.0, component);
 
         // rhs
         b[i] = c * get_value(0, idx[order], lo*s + hi*r, -1.0, component) - f_lo*s - f_hi*r;
@@ -117,9 +117,9 @@ namespace Hermes
         while (index >= table_size) table_size *= 2;
 
         // reallocate the table
-        verbose("Shapeset::get_constrained_edge_combination(): realloc to table_size=%d", table_size);
+        verbose("Shapeset::get_constrained_edge_combination(): realloc to table_size = %d", table_size);
         comb_table = (double**) realloc(comb_table, table_size * sizeof(double*));
-        memset(comb_table + old_size, 0,(table_size - old_size) * sizeof(double*));
+        memset(comb_table + old_size, 0, (table_size - old_size) * sizeof(double*));
       }
 
       // do we have the required linear combination yet?
@@ -161,7 +161,7 @@ namespace Hermes
       sum = 0.0;
       shape_fn_t* table = shape_table[n][mode][component];
       for (i = 0; i < nc; i++)
-        sum += comb[i] * table[get_edge_index(edge, ori, i+ebias)](x, y);
+        sum += comb[i] * table[get_edge_index(edge, ori, i + ebias)](x, y);
 
       return sum;
     }

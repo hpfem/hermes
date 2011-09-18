@@ -34,7 +34,7 @@ void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp)
 
   std::cout << msg << std::endl;
 
-  for(itr=mp.begin(); itr != mp.end(); ++itr)
+  for(itr = mp.begin(); itr != mp.end(); ++itr)
     std::cout << " " << (int) itr->first << ": " <<
     (int) itr->second.m << " " <<
     (int) itr->second.n << " " <<
@@ -44,12 +44,12 @@ void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp)
   std::cout << std::endl;
 }
 
-void show_rhs(const char *msg, std::map<unsigned int,std::complex<double> > mp) {
+void show_rhs(const char *msg, std::map<unsigned int, std::complex<double> > mp) {
   std::map<unsigned int, std::complex<double> >::iterator itr;
 
   std::cout << msg << std::endl;
 
-  for(itr=mp.begin(); itr != mp.end(); ++itr)
+  for(itr = mp.begin(); itr != mp.end(); ++itr)
     std::cout << " " << (int) itr->first << ": " << (std::complex<double>) itr->second << std::endl;
 
   std::cout << std::endl;
@@ -222,7 +222,7 @@ void solve(LinearSolver<std::complex<double> > &solver, int n) {
       if(sln[i].imag() < 0.0)
         std::cout << std::endl << sln[i].real() << sln[i].imag();
       else
-        std::cout << std::endl << sln[i].real() << '+' << sln[i].imag();
+        std::cout << std::endl << sln[i].real() << ' + ' << sln[i].imag();
   }
   else
     printf("Unable to solve.\n");
@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
   std::map<unsigned int, MatrixEntry> ar_mat;
   std::map<unsigned int, std::complex<double> > ar_rhs;
 
-  if (argc == 3 && strcasecmp(argv[2],"complex-matrix-to-real") == 0)
+  if (argc == 3 && strcasecmp(argv[2], "complex-matrix-to-real") == 0)
     cplx_2_real = true;
   else
     cplx_2_real = false;

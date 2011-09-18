@@ -2,12 +2,12 @@
 
 double CustomRightHandSide::value(double x, double y) const
 {
-  return - kx(x,y) * dudx(x,y) - ky(x,y) * dudy(x,y) - k(x,y) * (dudxx(x,y) + dudyy(x,y));
+  return - kx(x, y) * dudx(x, y) - ky(x, y) * dudy(x, y) - k(x, y) * (dudxx(x, y) + dudyy(x, y));
 }
 
 Ord CustomRightHandSide::ord(Ord x, Ord y) const
 {
-  return - kx(x,y) * dudx(x,y) - ky(x,y) * dudy(x,y) - k(x,y) * (dudxx(x,y) + dudyy(x,y));
+  return - kx(x, y) * dudx(x, y) - ky(x, y) * dudy(x, y) - k(x, y) * (dudxx(x, y) + dudyy(x, y));
 }
 
 template<typename Real>
@@ -49,21 +49,21 @@ Real CustomRightHandSide::dudxy(Real x, Real y) const
 template<typename Real>
 Real CustomRightHandSide::k(Real x, Real y) const
 {
-  return 1.0 / Hermes::sqrt(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)));
+  return 1.0 / Hermes::sqrt(1.0 + sqr(dudx(x, y)) + sqr(dudy(x, y)));
 }
 
 template<typename Real>
 Real CustomRightHandSide::kx(Real x, Real y) const
 {
-  return -0.5 * Hermes::pow(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)), -1.5) *
-                   (2.0 * dudx(x,y) * dudxx(x,y) + 2.0 * dudy(x,y) * dudxy(x,y));
+  return -0.5 * Hermes::pow(1.0 + sqr(dudx(x, y)) + sqr(dudy(x, y)), -1.5) *
+                   (2.0 * dudx(x, y) * dudxx(x, y) + 2.0 * dudy(x, y) * dudxy(x, y));
 }
 
 template<typename Real>
 Real CustomRightHandSide::ky(Real x, Real y) const
 {
-  return -0.5 * Hermes::pow(1.0 + sqr(dudx(x,y)) + sqr(dudy(x,y)), -1.5) *
-                   (2.0 * dudx(x,y) * dudxy(x,y) + 2.0 * dudy(x,y) * dudyy(x,y));
+  return -0.5 * Hermes::pow(1.0 + sqr(dudx(x, y)) + sqr(dudy(x, y)), -1.5) *
+                   (2.0 * dudx(x, y) * dudxy(x, y) + 2.0 * dudy(x, y) * dudyy(x, y));
 }
 
 

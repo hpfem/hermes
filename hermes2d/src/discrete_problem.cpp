@@ -417,7 +417,7 @@ namespace Hermes
 
           if(is_DG)
           {
-            // Number of edges (= number of vertices).
+            // Number of edges ( =  number of vertices).
             int num_edges = e[0]->get_num_surf();
 
             // Allocation an array of arrays of neighboring elements for every mesh x edge.

@@ -8,8 +8,8 @@
 *  \{
 *  \brief This test tests projection of a candidate in H1 space on a quad.
 *
-*  For each combination of orders it creates a polynom \f$ p(x,y) = \sum_h \sum_v a_{h,v} x^h y^v \f$.
-*  The test ensures that all coefficients \f$a_{h,v}\f$ are not zero. The polynom is defined
+*  For each combination of orders it creates a polynom \f$ p(x, y) = \sum_h \sum_v a_{h, v} x^h y^v \f$.
+*  The test ensures that all coefficients \f$a_{h, v}\f$ are not zero. The polynom is defined
 *  in the reference domain.
 *  Then, it creates a mesh which consist of a single element. The order of the element is
 *  \f$(h-1, v-1)\f$ where \f$h\f$ is a current horizontal order and \f$v\f$ is current vertical order.
@@ -180,7 +180,7 @@ Mesh* init_mesh(bool tri) {
   Mesh* mesh = new Mesh();
   if (tri) {
     const int vertex_num = 3, tria_num = 1, quad_num = 0, marker_num = 3;
-    double2 vertex_array[3] = {{-1,-1}, { 1,-1}, {-1, 1}};
+    double2 vertex_array[3] = {{-1, -1}, { 1, -1}, {-1, 1}};
     int3 tria_array[1] = {{0, 1, 2}};
     std::string tria_markers[1] = {"0"};
     int4 *quad_array = NULL;
@@ -192,7 +192,7 @@ Mesh* init_mesh(bool tri) {
   }
   else {
     const int vertex_num = 4, tria_num = 0, quad_num = 1, marker_num = 4;
-    double2 vertex_array[4] = {{-1,-1}, { 1,-1}, { 1, 1}, {-1, 1}};
+    double2 vertex_array[4] = {{-1, -1}, { 1, -1}, { 1, 1}, {-1, 1}};
     int3 *tria_array = NULL;
     std::string *tria_markers = NULL;
     int4 quad_array[1] = {{0, 1, 2, 3}};
@@ -390,7 +390,7 @@ bool test(bool tri, const std::string& space_name, int min_order, int max_order 
   // Prepare place for result summary.
   int end_order_v = H2D_GET_V_ORDER(order_perm.get_end_quad_order());
   int end_order_h = H2D_GET_H_ORDER(order_perm.get_end_quad_order());
-  int** fail_matrix = new_matrix<int>(end_order_v+1, end_order_h+1);
+  int** fail_matrix = new_matrix<int>(end_order_v + 1, end_order_h + 1);
   for(int i = 0; i <= end_order_v; i++)
     for(int k = 0; k <= end_order_h; k++)
       fail_matrix[i][k] = H2D_TEST_NOT_DONE;

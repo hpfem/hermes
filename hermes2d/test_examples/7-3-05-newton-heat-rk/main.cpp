@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
   // Initialize views.
   Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
-  Tview.set_min_max_range(0,20);
+  Tview.set_min_max_range(0, 20);
   Tview.fix_scale_width(30);
 
   // Initialize Runge-Kutta time stepping.
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
     // Save a current state on the disk.
     if(current_time > 0)
     {
-      continuity.add_record(current_time + time_step);
+      continuity.add_record(current_time+time_step);
       continuity.get_last_record()->save_mesh(&mesh);
       continuity.get_last_record()->save_space(&space);
       continuity.get_last_record()->save_solutions(Hermes::vector<Solution<double>*>(sln_time_new, sln_time_prev));

@@ -243,7 +243,7 @@ namespace Hermes
       *  \param[in] mesh A mesh that contains the element.
       *  \param[in] e A point to the element.
       *  \param[in] refined True if a refinement of the element was found.
-      *  \param[in,out] elem_ref The proposed refinement. Change a value of this parameter to select a different refinement.
+      *  \param[in, out] elem_ref The proposed refinement. Change a value of this parameter to select a different refinement.
       *  \return True if the element should not be refined using the refinement. */
       virtual bool can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const;
 
@@ -343,7 +343,7 @@ namespace Hermes
         /** \param[in] e1 A reference to the first element.
         *  \param[in] e1 A reference to the second element.
         *  \return True if a squared error of the first element is greater than a squared error of the second element. */
-        bool operator ()(const ElementReference& e1,const ElementReference& e2) const;
+        bool operator ()(const ElementReference& e1, const ElementReference& e2) const;
       };
     };
   }

@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
   double bdryLengthInput = atof(argv[2]);
 
   // Perform initial mesh refinements.
-  for (int i=0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i<INIT_REF_NUM; i++) mesh.refine_all_elements();
 
   // Create H1 space with a default shapeset.
   H1Space<double> space(&mesh, P_INIT);

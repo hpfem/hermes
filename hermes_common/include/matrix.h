@@ -141,8 +141,8 @@ namespace Hermes
 
         // write contents
         for (int j = 0; j < m; j++)
-          for (int i = Ap[j]; i < Ap[j+1]; i++)
-            fout << j+1 << " " << Ai[i]+1 << " " << Ax[i] << std::endl;
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            fout << j + 1 << " " << Ai[i] + 1 << " " << Ax[i] << std::endl;
 
         // finish
         fout.close();
@@ -155,7 +155,7 @@ namespace Hermes
       {
         unsigned int min = std::min(m, n);
         for (unsigned int i = 0; i < min; i++)
-          for (unsigned int j = i+1; j < min; j++)
+          for (unsigned int j = i + 1; j < min; j++)
             std::swap(matrix[i][j], matrix[j][i]);
 
         if (m < n)
@@ -207,7 +207,7 @@ namespace Hermes
         }
         for (i = n-1; i >= 0; i--) {
           sum = b[i];
-          for (j = i+1; j < n; j++) sum -= a[i][j]*b[j];
+          for (j = i + 1; j < n; j++) sum -= a[i][j]*b[j];
           b[i] = sum / a[i][i];
         }
       }
@@ -259,7 +259,7 @@ namespace Hermes
       /// \brief Hermes binary format
       ///
       DF_HERMES_BIN,
-      DF_NATIVE,	 ///< native format for the linear solver,
+      DF_NATIVE, 	 ///< native format for the linear solver,
       DF_MATRIX_MARKET ///< Matrix Market which can be read by pysparse library
     };
 

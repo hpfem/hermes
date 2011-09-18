@@ -60,8 +60,8 @@ namespace Hermes
     ///
     /// The WeakForm class represents the weak formulation of a system of linear PDEs.
     /// The number of equations ("neq") in the system is fixed and is passed to the constructor.
-    /// The weak formulation of the system A(U,V) = L(V) has a block structure. A(U,V) is
-    /// a (neq x neq) matrix of bilinear forms a_mn(u,v) and L(V) is a neq-component vector
+    /// The weak formulation of the system A(U, V) = L(V) has a block structure. A(U, V) is
+    /// a (neq x neq) matrix of bilinear forms a_mn(u, v) and L(V) is a neq-component vector
     /// of linear forms l(v). U and V are the vectors of basis and test functions.
     ///
     template<typename Scalar>
@@ -323,7 +323,7 @@ namespace Hermes
 
     /// Multi-component forms.
     /// The principle of functioning of multicomponent forms is as follows.
-    /// The form is registered on coordinates in the vector 'coordinates', e.g. {[0,0], [0,1], [2,1]}.
+    /// The form is registered on coordinates in the vector 'coordinates', e.g. {[0, 0], [0, 1], [2, 1]}.
     /// The method 'value' then accepts the parameter 'result', which is a vector with resulting values for
     /// the form on one coordinate. The vectors coordinates and result must have 1-1 relationship, i.e. if the
     /// form is to be registered on three different coordinates, the method value must insert 3 values for these

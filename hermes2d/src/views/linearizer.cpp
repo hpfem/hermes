@@ -212,19 +212,19 @@ namespace Hermes
 
             // recur to sub-elements
             sln->push_transform(0);
-            process_triangle(iv0, mid0, mid2,  level+1, val, phx, phy, tri_indices[1]);
+            process_triangle(iv0, mid0, mid2,  level + 1, val, phx, phy, tri_indices[1]);
             sln->pop_transform();
 
             sln->push_transform(1);
-            process_triangle(mid0, iv1, mid1,  level+1, val, phx, phy, tri_indices[2]);
+            process_triangle(mid0, iv1, mid1,  level + 1, val, phx, phy, tri_indices[2]);
             sln->pop_transform();
 
             sln->push_transform(2);
-            process_triangle(mid2, mid1, iv2,  level+1, val, phx, phy, tri_indices[3]);
+            process_triangle(mid2, mid1, iv2,  level + 1, val, phx, phy, tri_indices[3]);
             sln->pop_transform();
 
             sln->push_transform(3);
-            process_triangle(mid1, mid2, mid0, level+1, val, phx, phy, tri_indices[4]);
+            process_triangle(mid1, mid2, mid0, level + 1, val, phx, phy, tri_indices[4]);
             sln->pop_transform();
             return;
           }
@@ -373,40 +373,40 @@ namespace Hermes
             if (split == 3)
             {
               sln->push_transform(0);
-              process_quad(iv0, mid0, mid4, mid3, level+1, val, phx, phy, quad_indices[1]);
+              process_quad(iv0, mid0, mid4, mid3, level + 1, val, phx, phy, quad_indices[1]);
               sln->pop_transform();
 
               sln->push_transform(1);
-              process_quad(mid0, iv1, mid1, mid4, level+1, val, phx, phy, quad_indices[2]);
+              process_quad(mid0, iv1, mid1, mid4, level + 1, val, phx, phy, quad_indices[2]);
               sln->pop_transform();
 
               sln->push_transform(2);
-              process_quad(mid4, mid1, iv2, mid2, level+1, val, phx, phy, quad_indices[3]);
+              process_quad(mid4, mid1, iv2, mid2, level + 1, val, phx, phy, quad_indices[3]);
               sln->pop_transform();
 
               sln->push_transform(3);
-              process_quad(mid3, mid4, mid2, iv3, level+1, val, phx, phy, quad_indices[4]);
+              process_quad(mid3, mid4, mid2, iv3, level + 1, val, phx, phy, quad_indices[4]);
               sln->pop_transform();
             }
             else
               if (split == 1) // h-split
               {
                 sln->push_transform(4);
-                process_quad(iv0, iv1, mid1, mid3, level+1, val, phx, phy, quad_indices[5]);
+                process_quad(iv0, iv1, mid1, mid3, level + 1, val, phx, phy, quad_indices[5]);
                 sln->pop_transform();
 
                 sln->push_transform(5);
-                process_quad(mid3, mid1, iv2, iv3, level+1, val, phx, phy, quad_indices[6]);
+                process_quad(mid3, mid1, iv2, iv3, level + 1, val, phx, phy, quad_indices[6]);
                 sln->pop_transform();
               }
               else // v-split
               {
                 sln->push_transform(6);
-                process_quad(iv0, mid0, mid2, iv3, level+1, val, phx, phy, quad_indices[7]);
+                process_quad(iv0, mid0, mid2, iv3, level + 1, val, phx, phy, quad_indices[7]);
                 sln->pop_transform();
 
                 sln->push_transform(7);
-                process_quad(mid0, iv1, iv2, mid2, level+1, val, phx, phy, quad_indices[8]);
+                process_quad(mid0, iv1, iv2, mid2, level + 1, val, phx, phy, quad_indices[8]);
                 sln->pop_transform();
               }
             return;
@@ -537,9 +537,9 @@ namespace Hermes
         triangle_size = std::max(64 * nn, 20000);
         edges_size = std::max(24 * nn, 7500);
 
-        vertex_count=0;
-        triangle_count=0;
-        edges_count=0;
+        vertex_count = 0;
+        triangle_count = 0;
+        edges_count = 0;
         // reuse or allocate vertex, triangle and edge arrays
         verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
         tris = (int3*) realloc(tris, sizeof(int3) * triangle_size);
@@ -739,7 +739,7 @@ namespace Hermes
 
         // Output vertices.
         fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
-        for (int i=0; i < this->vertex_count; i++)
+        for (int i = 0; i < this->vertex_count; i++)
         {
           if (mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
           else fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
@@ -748,7 +748,7 @@ namespace Hermes
         // Output elements.
         fprintf(f, "\n");
         fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++)
+        for (int i = 0; i < this->triangle_count; i++)
         {
           fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
         }
@@ -756,7 +756,7 @@ namespace Hermes
         // Output cell types.
         fprintf(f, "\n");
         fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++)
+        for (int i = 0; i < this->triangle_count; i++)
         {
           fprintf(f, "5\n");    // The "5" means triangle in VTK.
         }
@@ -766,7 +766,7 @@ namespace Hermes
         fprintf(f, "POINT_DATA %d\n", this->vertex_count);
         fprintf(f, "SCALARS %s %s %d\n", quantity_name, "float", 1);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (int i=0; i < this->vertex_count; i++)
+        for (int i = 0; i < this->vertex_count; i++)
         {
           fprintf(f, "%g\n", this->verts[i][2]);
         }

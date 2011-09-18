@@ -91,7 +91,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem),ndp(problem)
+    NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem), ndp(problem)
     {
       // default values
       // convergence test
@@ -162,7 +162,7 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_precond(const char *pc)
     {
-      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner",pc);
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Preconditioner", pc);
     }
 
     template<typename Scalar>
@@ -173,25 +173,25 @@ namespace Hermes
 
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_ls_type(const char *type){
-      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Aztec Solver",type);
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Aztec Solver", type);
     }
 
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_ls_max_iters(int iters)
     {
-      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Iterations",iters);
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Max Iterations", iters);
     }
 
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_ls_tolerance(double tolerance)
     {
-      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Tolerance",tolerance);
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Tolerance", tolerance);
     }
 
     template<typename Scalar>
     void NewtonSolverNOX<Scalar>::set_ls_sizeof_krylov_subspace(int size)
     {
-      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace",size);
+      nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Size of Krylov Subspace", size);
     }
 
     template<typename Scalar>

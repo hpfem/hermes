@@ -40,9 +40,9 @@ namespace Hermes
 
     static Ord get_max_order();
 
-    Ord operator+(const Ord &o);
-    Ord operator+(double d);
-    Ord operator+(std::complex<double> d);
+    Ord operator + (const Ord &o);
+    Ord operator + (double d);
+    Ord operator + (std::complex<double> d);
     Ord operator-(const Ord &o);
     Ord operator-(double d);
     Ord operator-(std::complex<double> d);
@@ -79,11 +79,11 @@ namespace Hermes
 
   HERMES_API Ord operator/(const double &a, const Ord &b);
   HERMES_API Ord operator*(const double &a, const Ord &b);
-  HERMES_API Ord operator+(const double &a, const Ord &b);
+  HERMES_API Ord operator + (const double &a, const Ord &b);
   HERMES_API Ord operator-(const double &a, const Ord &b);
   HERMES_API Ord operator/(const std::complex<double> &a, const Ord &b);
   HERMES_API Ord operator*(const std::complex<double> &a, const Ord &b);
-  HERMES_API Ord operator+(const std::complex<double> &a, const Ord &b);
+  HERMES_API Ord operator + (const std::complex<double> &a, const Ord &b);
   HERMES_API Ord operator-(const std::complex<double> &a, const Ord &b);
   HERMES_API Ord operator-(const Ord &a);
 

@@ -108,7 +108,7 @@ namespace Hermes
         int3* tris;      ///< triangles: vertex index triplets
         int3* edges;     ///< edges: pairs of vertex indices
         int* hash_table; ///< hash table
-        int4 * info; ///< info[0]=p1, info[1]=p2, info[2]=next vertex in hash
+        int4 * info; ///< info[0] = p1, info[1] = p2, info[2] = next vertex in hash
 
         int vertex_count, triangle_count, edges_count; ///< Real numbers of vertices, triangles and edges
         int vertex_size, triangle_size, edges_size; ///< Size of arrays of vertices, triangles and edges

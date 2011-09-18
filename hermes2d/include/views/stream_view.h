@@ -49,7 +49,7 @@ namespace Hermes
         void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
         void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem);
 
-        /// Creates additional streamline with strarting point (x,y)
+        /// Creates additional streamline with strarting point (x, y)
         /// Note: Can be called only after StreamView::show
         void add_streamline(double x, double y);
 
@@ -80,8 +80,8 @@ namespace Hermes
         double root_y_min;
         double root_y_max;
 
-        /// Recurent function that finds linearized triangle which contain point (x,y).
-        /// As side effect it returns bacycentric coordinates of point (x,y) in that triangle.
+        /// Recurent function that finds linearized triangle which contain point (x, y).
+        /// As side effect it returns bacycentric coordinates of point (x, y) in that triangle.
         int find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar);
 
         /// Adds triangle to the kD-tree.
@@ -93,7 +93,7 @@ namespace Hermes
         void build_tree();
         void delete_tree(Node* father);
 
-        /// Tests whether given point (x,y) lies in given triangle
+        /// Tests whether given point (x, y) lies in given triangle
         /// using barycentric coordinates (returned as side efect).
         bool is_in_triangle(int idx, double x, double y, double3& bar);
 

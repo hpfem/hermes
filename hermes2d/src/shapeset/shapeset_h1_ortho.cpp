@@ -239,7 +239,7 @@ namespace Hermes
     inline double
     ortho2_f7x_1 (double x, double y)
     {
-      return -ortho2_f7x_0(x,y);
+      return -ortho2_f7x_0(x, y);
     }
 
     inline double
@@ -258,7 +258,7 @@ namespace Hermes
     inline double
     ortho2_f7y_1 (double x, double y)
     {
-      return -ortho2_f7y_0(x,y);
+      return -ortho2_f7y_0(x, y);
     }
 
     // number 8
@@ -294,7 +294,7 @@ namespace Hermes
     inline double
     ortho2_f8x_1 (double x, double y)
     {
-      return -ortho2_f8x_0(x,y);
+      return -ortho2_f8x_0(x, y);
     }
 
     inline double
@@ -313,7 +313,7 @@ namespace Hermes
     inline double
     ortho2_f8y_1 (double x, double y)
     {
-      return -ortho2_f8y_0(x,y);
+      return -ortho2_f8y_0(x, y);
     }
 
     // number 9
@@ -349,7 +349,7 @@ namespace Hermes
     inline double
     ortho2_f9x_1 (double x, double y)
     {
-      return -ortho2_f9x_0(x,y);
+      return -ortho2_f9x_0(x, y);
     }
 
     inline double
@@ -368,7 +368,7 @@ namespace Hermes
     inline double
     ortho2_f9y_1 (double x, double y)
     {
-      return -ortho2_f9y_0(x,y);
+      return -ortho2_f9y_0(x, y);
     }
 
     // Bubble functions, order 3
@@ -681,7 +681,7 @@ namespace Hermes
     inline double
     ortho2_f16x_1 (double x, double y)
     {
-      return -ortho2_f16x_0(x,y);
+      return -ortho2_f16x_0(x, y);
     }
 
     inline double
@@ -702,7 +702,7 @@ namespace Hermes
     inline double
     ortho2_f16y_1 (double x, double y)
     {
-      return -ortho2_f16y_0(x,y);
+      return -ortho2_f16y_0(x, y);
     }
 
     // number 17
@@ -740,7 +740,7 @@ namespace Hermes
     inline double
     ortho2_f17x_1 (double x, double y)
     {
-      return -ortho2_f17x_0(x,y);
+      return -ortho2_f17x_0(x, y);
     }
 
     inline double
@@ -761,7 +761,7 @@ namespace Hermes
     inline double
     ortho2_f17y_1 (double x, double y)
     {
-      return -ortho2_f17y_0(x,y);
+      return -ortho2_f17y_0(x, y);
     }
 
     // number 18
@@ -799,7 +799,7 @@ namespace Hermes
     inline double
     ortho2_f18x_1 (double x, double y)
     {
-      return -ortho2_f18x_0(x,y);
+      return -ortho2_f18x_0(x, y);
     }
 
     inline double
@@ -820,7 +820,7 @@ namespace Hermes
     inline double
     ortho2_f18y_1 (double x, double y)
     {
-      return -ortho2_f18y_0(x,y);
+      return -ortho2_f18y_0(x, y);
     }
 
     // Bubble functions, order 5
@@ -1859,7 +1859,7 @@ namespace Hermes
     inline double
     ortho2_f29x_1 (double x, double y)
     {
-      return -ortho2_f29x_0(x,y);
+      return -ortho2_f29x_0(x, y);
     }
 
     inline double
@@ -1880,7 +1880,7 @@ namespace Hermes
     inline double
     ortho2_f29y_1 (double x, double y)
     {
-      return -ortho2_f29y_0(x,y);
+      return -ortho2_f29y_0(x, y);
     }
 
     // number 30
@@ -1918,7 +1918,7 @@ namespace Hermes
     inline double
     ortho2_f30x_1 (double x, double y)
     {
-      return -ortho2_f30x_0(x,y);
+      return -ortho2_f30x_0(x, y);
     }
 
     inline double
@@ -1939,7 +1939,7 @@ namespace Hermes
     inline double
     ortho2_f30y_1 (double x, double y)
     {
-      return -ortho2_f30y_0(x,y);
+      return -ortho2_f30y_0(x, y);
     }
 
     // number 31
@@ -1977,7 +1977,7 @@ namespace Hermes
     inline double
     ortho2_f31x_1 (double x, double y)
     {
-      return -ortho2_f31x_0(x,y);
+      return -ortho2_f31x_0(x, y);
     }
 
     inline double
@@ -1998,7 +1998,7 @@ namespace Hermes
     inline double
     ortho2_f31y_1 (double x, double y)
     {
-      return -ortho2_f31y_0(x,y);
+      return -ortho2_f31y_0(x, y);
     }
 
     // Bubble functions, order 7
@@ -5700,7 +5700,7 @@ namespace Hermes
     inline double
     ortho2_f46x_1 (double x, double y)
     {
-      return -ortho2_f46x_0(x,y);
+      return -ortho2_f46x_0(x, y);
     }
 
     inline double
@@ -5721,7 +5721,7 @@ namespace Hermes
     inline double
     ortho2_f46y_1 (double x, double y)
     {
-      return -ortho2_f46y_0(x,y);
+      return -ortho2_f46y_0(x, y);
     }
 
     // number 47
@@ -5759,7 +5759,7 @@ namespace Hermes
     inline double
     ortho2_f47x_1 (double x, double y)
     {
-      return -ortho2_f47x_0(x,y);
+      return -ortho2_f47x_0(x, y);
     }
 
     inline double
@@ -5780,7 +5780,7 @@ namespace Hermes
     inline double
     ortho2_f47y_1 (double x, double y)
     {
-      return -ortho2_f47y_0(x,y);
+      return -ortho2_f47y_0(x, y);
     }
 
     // number 48
@@ -5818,7 +5818,7 @@ namespace Hermes
     inline double
     ortho2_f48x_1 (double x, double y)
     {
-      return -ortho2_f48x_0(x,y);
+      return -ortho2_f48x_0(x, y);
     }
 
     inline double
@@ -5839,7 +5839,7 @@ namespace Hermes
     inline double
     ortho2_f48y_1 (double x, double y)
     {
-      return -ortho2_f48y_0(x,y);
+      return -ortho2_f48y_0(x, y);
     }
 
     // Bubble functions, order 9

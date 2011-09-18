@@ -169,7 +169,7 @@ namespace Hermes
       // Plotting inside the interval of definition.
       for (unsigned int i = 0; i < points.size() - 1; i++)
       {
-        double h = (points[i+1] - points[i]) / subdiv;
+        double h = (points[i + 1] - points[i]) / subdiv;
         for (int j = 0; j < subdiv; j++)
         {
           double x = points[i] + j * h;
@@ -230,7 +230,7 @@ namespace Hermes
       double eps = 1e-8;
       for (int i = 0; i < nelem; i++)
       {
-        if (points[i+1] < points[i] + eps)
+        if (points[i + 1] < points[i] + eps)
         {
           warn("Duplicated or improperly ordered points in CubicSpline detected, returning false.");
           return false;
@@ -259,10 +259,10 @@ namespace Hermes
       }
 
       // Fill the rhs vector.
-      for (int i=0; i < nelem; i++)
+      for (int i = 0; i < nelem; i++)
       {
         rhs[2*i] = values[i];
-        rhs[2*i+1] = values[i+1];
+        rhs[2*i + 1] = values[i + 1];
       }
 
       // Fill the matrix. Step 1 - match values at interval endpoints.
@@ -275,7 +275,7 @@ namespace Hermes
         matrix[2*i][4*i + 1] = xx;
         matrix[2*i][4*i + 2] = xx2;
         matrix[2*i][4*i + 3] = xx3;
-        xx = points[i+1];
+        xx = points[i + 1];
         xx2 = xx*xx;
         xx3 = xx2 * xx;
         matrix[2*i + 1][4*i + 0] = 1.0;

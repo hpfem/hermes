@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   mloader.load("../domain.mesh", &mesh);
 
   // Perform initial mesh refinements (optional).
-  for (int i=0; i < INIT_REF_NUM; i++)
+  for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
 
   // Initialize the weak formulation.
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
     double sum = 0;
-    for (int i=0; i < ndof; i++) sum += coeff_vec[i];
+    for (int i = 0; i < ndof; i++) sum += coeff_vec[i];
     printf("coefficient sum = %g\n", sum);
 
     // Actual test. The values of 'sum' depend on the

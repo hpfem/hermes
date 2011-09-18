@@ -110,7 +110,7 @@ namespace Hermes
         /// If 'high_quality' is true, an anti-aliased frame is rendered and saved.
         void save_screenshot(const char* bmpname, bool high_quality = false);
         /// Like save_screenshot(), but forms the file name in printf-style using the 'number'
-        /// parameter, e.g., format="screen%03d.bmp" and number=5 gives the file name "screen005.bmp".
+        /// parameter, e.g., format = "screen%03d.bmp" and number = 5 gives the file name "screen005.bmp".
         void save_numbered_screenshot(const char* format, int number, bool high_quality = false);
 
         void set_palette(ViewPaletteType type);

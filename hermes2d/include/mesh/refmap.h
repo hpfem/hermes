@@ -114,7 +114,7 @@ namespace Hermes
         return cur_node->phys_y[order];
       }
 
-      /// Returns the triples [x,y,norm] of the tangent to the specified (possibly
+      /// Returns the triples [x, y, norm] of the tangent to the specified (possibly
       /// curved) edge at the 1D integration points along the edge. The maximum
       /// 1D quadrature rule is used by default, but the user may specify his own
       /// order. In this case, the edge pseudo-order is expected (as returned by
@@ -161,7 +161,7 @@ namespace Hermes
       {
         this->sub_idx = sub_idx;
         stack[top] = *ctm;
-        this->ctm = stack+top;
+        this->ctm = stack + top;
         update_cur_node();
         if (is_const) calc_const_inv_ref_map();
       }
@@ -180,7 +180,7 @@ namespace Hermes
 
       double2x2 const_inv_ref_map;
 
-      static const int H2D_MAX_TABLES = g_max_quad+1 + 4 * g_max_quad + 4;
+      static const int H2D_MAX_TABLES = g_max_quad + 1 + 4 * g_max_quad + 4;
 
       /// This structure represents one complete piece of information about the reference mapping
       /// taking into account the sub-element mapping.

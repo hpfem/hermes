@@ -62,7 +62,7 @@ namespace Hermes
     ///   [ x^3*y    x^2*y    x*y    y   ]       [      x^2*y  x*y    y   ]
     ///   [ x^3      x^2      x      1   ]       [ x^3  x^2    x      1   ]
     ///
-    /// The number of monomials is (p+1)^2 for quads and (p+1)*(p+2)/2 for triangles, where
+    /// The number of monomials is (p + 1)^2 for quads and (p + 1)*(p + 2)/2 for triangles, where
     /// 'p' is the polynomial degree.
     ///
 
@@ -118,7 +118,7 @@ namespace Hermes
       Scalar get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b);
 
       /// Returns solution value or derivatives at the physical domain point (x, y).
-      /// 'item' controls the returned value: H2D_FN_VAL_0, H2D_FN_VAL_1, H2D_FN_DX_0, H2D_FN_DX_1, H2D_FN_DY_0,....
+      /// 'item' controls the returned value: H2D_FN_VAL_0, H2D_FN_VAL_1, H2D_FN_DX_0, H2D_FN_DX_1, H2D_FN_DY_0, ....
       /// NOTE: This function should be used for postprocessing only, it is not effective
       /// enough for calculations. Since it searches for an element sequentinally, it is extremelly
       /// slow. Prefer Solution::get_ref_value if possible.

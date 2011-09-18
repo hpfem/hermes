@@ -573,12 +573,12 @@ namespace Hermes
               {
               public:
                 Jacobian(unsigned int g, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormSurf<Scalar>(g,g,HERMES_ANY),
+                  : MatrixFormSurf<Scalar>(g, g, HERMES_ANY),
                   g(g), geom_type(geom_type)
                 {};
 
                 Jacobian(unsigned int g, std::string area, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormSurf<Scalar>(g,g,area),
+                  : MatrixFormSurf<Scalar>(g, g, area),
                   g(g), geom_type(geom_type)
                 {};
 
@@ -611,12 +611,12 @@ namespace Hermes
               {
               public:
                 Residual(unsigned int g, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormSurf<Scalar>(g,HERMES_ANY),
+                  : VectorFormSurf<Scalar>(g, HERMES_ANY),
                   g(g), geom_type(geom_type)
                 {};
 
                 Residual(unsigned int g, std::string area, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormSurf<Scalar>(g,area),
+                  : VectorFormSurf<Scalar>(g, area),
                   g(g), geom_type(geom_type)
                 {};
 

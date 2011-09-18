@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
   mloader.load("../square.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for (int i=0; i < INIT_REF_NUM; i++)
+  for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
 
   // Initialize boundary conditions.
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
   double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
   info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[matrix_solver_type].c_str(), rel_err_1, time1);
   double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time+time2);
+  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time + time2);
 
   info("Coordinate ( 0.6,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.6));
   info("Coordinate ( 0.4,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.6));

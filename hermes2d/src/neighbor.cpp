@@ -207,7 +207,7 @@ namespace Hermes
             int n_sons = 0; // number of used transformations
 
             // Start the search by going down to the first son.
-            find_act_elem_down( vertex, orig_vertex_id, sons, n_sons+1);
+            find_act_elem_down( vertex, orig_vertex_id, sons, n_sons + 1);
 
             //debug_log("number of neighbors on the way down: %d ", n_neighbors);
           }
@@ -640,7 +640,7 @@ namespace Hermes
 
             neighbor_edges.push_back(local_edge_info);
 
-            // There is only one neighbor,...
+            // There is only one neighbor, ...
             n_neighbors = 1;
 
             // ...add it to the vector of neighbors.
@@ -683,7 +683,7 @@ namespace Hermes
             else
               bounding_verts_id[0] = mid_vert;
 
-            find_act_elem_down( n, bounding_verts_id, sons, n_sons+1);
+            find_act_elem_down( n, bounding_verts_id, sons, n_sons + 1);
 
             bounding_verts_id[0] = bnd_verts[0];
             bounding_verts_id[1] = bnd_verts[1];

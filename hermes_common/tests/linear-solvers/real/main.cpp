@@ -34,7 +34,7 @@ void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp)
 
   std::cout << msg << std::endl;
 
-  for(itr=mp.begin(); itr != mp.end(); ++itr)
+  for(itr = mp.begin(); itr != mp.end(); ++itr)
     std::cout << " " << (int) itr->first << ": " <<
     (int) itr->second.m << " " <<
     (int) itr->second.n << " " <<
@@ -44,12 +44,12 @@ void show_mat(const char *msg, std::map<unsigned int, MatrixEntry> mp)
   std::cout << std::endl;
 }
 
-void show_rhs(const char *msg, std::map<unsigned int,double > mp) {
+void show_rhs(const char *msg, std::map<unsigned int, double > mp) {
   std::map<unsigned int, double >::iterator itr;
 
   std::cout << msg << std::endl;
 
-  for(itr=mp.begin(); itr != mp.end(); ++itr)
+  for(itr = mp.begin(); itr != mp.end(); ++itr)
     std::cout << " " << (int) itr->first << ": " << (double) itr->second << std::endl;
 
   std::cout << std::endl;
@@ -133,10 +133,10 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
       if (cplx_2_real) {
         if (read_n_nums(row, 4, buffer)) {
           mat.insert(std::pair<unsigned int, MatrixEntry>(k,   MatrixEntry ((int) buffer[0],     (int) buffer[1],     buffer[2])));
-          mat.insert(std::pair<unsigned int, MatrixEntry>(k+1, MatrixEntry ((int) buffer[0] + n/2, (int) buffer[1],     buffer[3])));
-          mat.insert(std::pair<unsigned int, MatrixEntry>(k+2*nnz, MatrixEntry ((int) buffer[0],     (int) buffer[1] + n/2, (-1)*buffer[3])));
-          mat.insert(std::pair<unsigned int, MatrixEntry>(k+2*nnz+1, MatrixEntry ((int) buffer[0] + n/2, (int) buffer[1] + n/2, buffer[2])));
-          k=k+2;
+          mat.insert(std::pair<unsigned int, MatrixEntry>(k + 1, MatrixEntry ((int) buffer[0] + n/2, (int) buffer[1],     buffer[3])));
+          mat.insert(std::pair<unsigned int, MatrixEntry>(k + 2*nnz, MatrixEntry ((int) buffer[0],     (int) buffer[1] + n/2, (-1)*buffer[3])));
+          mat.insert(std::pair<unsigned int, MatrixEntry>(k + 2*nnz + 1, MatrixEntry ((int) buffer[0] + n/2, (int) buffer[1] + n/2, buffer[2])));
+          k = k + 2;
         }
         else
           state = STATE_RHS;
@@ -158,7 +158,7 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
           {
             rhs[((int) buffer[0])] = (double) buffer[1];
             rhs_buffer[l] = (double) buffer[2];
-            l=l+1;
+            l = l + 1;
           }
 
           else // This is last line in the file.
@@ -166,10 +166,10 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
             // First read last line entry
             rhs[((int) buffer[0])] = (double) buffer[1];
             rhs_buffer[l] = (double) buffer[2];
-            l=l+1;
+            l = l + 1;
             // Take imaginary parts you saved,
             // and fill the rest of the rhs vector.
-            for (int i=0; i < l; i++)
+            for (int i = 0; i < l; i++)
             {
               rhs[rhs.size()] = rhs_buffer[i];
             }
@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
   std::map<unsigned int, MatrixEntry> ar_mat;
   std::map<unsigned int, double > ar_rhs;
 
-  if (argc == 4 && strcasecmp(argv[3],"complex-matrix-to-real") == 0)
+  if (argc == 4 && strcasecmp(argv[3], "complex-matrix-to-real") == 0)
     cplx_2_real = true;
   else
     cplx_2_real = false;

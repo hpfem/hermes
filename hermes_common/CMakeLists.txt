@@ -104,7 +104,7 @@ project(hermes_common)
 		set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
 
 		# Link with all third party libraries corresponding to selected configuration
-		# options. Linking of optional libraries for the different Hermeses ({1,2,3}D)
+		# options. Linking of optional libraries for the different Hermeses ({1, 2, 3}D)
 		# is controled in their respective CMakeLists.txt. Note that for unselected
 		# TPL's, the respective variables will be empty.
 

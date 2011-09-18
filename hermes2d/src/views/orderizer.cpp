@@ -74,11 +74,11 @@ namespace Hermes
           {
             assert((unsigned) p < sizeof(buffer)-5);
             if (i == j)
-              sprintf(buffer+p, "%d", i);
+              sprintf(buffer + p, "%d", i);
             else
-              sprintf(buffer+p, "%d|%d", i, j);
-            labels[i][j] = buffer+p;
-            p += strlen(buffer+p) + 1;
+              sprintf(buffer + p, "%d|%d", i, j);
+            labels[i][j] = buffer + p;
+            p += strlen(buffer + p) + 1;
           }
         }
       }
@@ -237,7 +237,7 @@ namespace Hermes
 
         // Output vertices.
         fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
-        for (int i=0; i < this->vertex_count; i++)
+        for (int i = 0; i < this->vertex_count; i++)
         {
           fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
         }
@@ -245,7 +245,7 @@ namespace Hermes
         // Output elements.
         fprintf(f, "\n");
         fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++)
+        for (int i = 0; i < this->triangle_count; i++)
         {
           fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
         }
@@ -253,7 +253,7 @@ namespace Hermes
         // Output cell types.
         fprintf(f, "\n");
         fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
-        for (int i=0; i < this->triangle_count; i++)
+        for (int i = 0; i < this->triangle_count; i++)
         {
           fprintf(f, "5\n");    // The "5" means triangle in VTK.
         }
@@ -264,7 +264,7 @@ namespace Hermes
         fprintf(f, "POINT_DATA %d\n", this->vertex_count);
         fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (int i=0; i < this->vertex_count; i++)
+        for (int i = 0; i < this->vertex_count; i++)
         {
           fprintf(f, "%g\n", this->verts[i][2]);
         }

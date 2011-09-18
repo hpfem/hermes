@@ -45,7 +45,7 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
   *d = 1.0;
   for (i = 0; i < n; i++)
   {
-    big=0.0;
+    big = 0.0;
     for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
     if (big == 0.0) EXIT("Singular matrix in routine LUDCMP!");
     vv[i] = 1.0 / big;
@@ -86,7 +86,7 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
     if (j != n-1)
     {
       dum = 1.0 / (a[j][j]);
-      for (i = j+1; i < n; i++) a[i][j] *= dum;
+      for (i = j + 1; i < n; i++) a[i][j] *= dum;
     }
   }
   delete [] vv;
@@ -192,7 +192,7 @@ int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, in
   // sort the indices and remove duplicities
   qsort_int(buffer, end - buffer);
   int *q = buffer;
-  for (int *p = buffer, last = -1; p < end; p++) if (*p != last) *q++ = last = *p;
+  for (int *p = buffer, last = -1; p < end; p++) if (*p != last) *q++= last = *p;
 
   return q - buffer;
 }

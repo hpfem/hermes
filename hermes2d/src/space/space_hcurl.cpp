@@ -267,7 +267,7 @@ namespace Hermes
       {
         int part = nd->part;
         int ori = part < 0 ? 1 : 0;
-        if (part < 0) part ^= ~0;
+        if (part < 0) part ^ =  ~0;
 
         nd = &this->ndata[nd->base->id]; // ccc
         for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
@@ -315,7 +315,7 @@ namespace Hermes
           // If the BC is not constant.
           else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
           {
-            // Find out the (x,y) coordinate.
+            // Find out the (x, y) coordinate.
             double x, y, n_x, n_y, t_x, t_y;
             Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
             CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
@@ -360,7 +360,7 @@ namespace Hermes
             nd = &this->ndata[e->en[i]->id];
             nd->base = ei[i]->node;
             nd->part = ei[i]->part;
-            if (ei[i]->ori) nd->part ^= ~0;
+            if (ei[i]->ori) nd->part ^ =  ~0;
           }
         }
       }

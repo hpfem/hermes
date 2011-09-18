@@ -94,8 +94,8 @@ namespace Hermes
     void CSCMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
     {
       int n = this->size;
-      for (int j=0; j<n; j++) vector_out[j] = 0;
-      for (int j=0; j<n; j++)
+      for (int j = 0; j<n; j++) vector_out[j] = 0;
+      for (int j = 0; j<n; j++)
       {
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
         {
@@ -336,17 +336,17 @@ namespace Hermes
 
       case DF_MATRIX_MARKET:
         {
-          fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
-          int nnz_sym=0;
+          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+          int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               if ((int)j <= Ai[i]) nnz_sym++;
-          fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
+          fprintf(file, "%d %d %d\n", this->size, this->size, nnz_sym);
           for (unsigned int j = 0; j < this->size; j++)
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               // The following line was replaced with the one below, because it gave a warning
               // to cause code abort at runtime.
-              //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
+              //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i] + 1, j + 1, Ax[i]);
               if ((int)j <= Ai[i])
               {
                 fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
@@ -442,17 +442,17 @@ namespace Hermes
 
       case DF_MATRIX_MARKET:
         {
-          fprintf(file,"%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
-          int nnz_sym=0;
+          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+          int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               if ((int)j <= Ai[i]) nnz_sym++;
-          fprintf(file,"%d %d %d\n", this->size, this->size, nnz_sym);
+          fprintf(file, "%d %d %d\n", this->size, this->size, nnz_sym);
           for (unsigned int j = 0; j < this->size; j++)
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               // The following line was replaced with the one below, because it gave a warning
               // to cause code abort at runtime.
-              //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i]+1, j+1, Ax[i]);
+              //if (j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i] + 1, j + 1, Ax[i]);
               if ((int)j <= Ai[i])
               {
                 fprintf(file, "%d %d ", Ai[i] + 1, (int)j + 1);
@@ -545,10 +545,10 @@ namespace Hermes
       _F_;
       this->nnz = nnz;
       this->size = size;
-      this->Ap = new int[this->size+1]; assert(this->Ap != NULL);
+      this->Ap = new int[this->size + 1]; assert(this->Ap != NULL);
       this->Ai = new int[nnz];    assert(this->Ai != NULL);
       this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
-      for (unsigned int i = 0; i < this->size+1; i++) this->Ap[i] = ap[i];
+      for (unsigned int i = 0; i < this->size + 1; i++) this->Ap[i] = ap[i];
       for (unsigned int i = 0; i < nnz; i++)
       {
         this->Ax[i] = ax[i];
@@ -655,7 +655,7 @@ namespace Hermes
         fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
         for (unsigned int i = 0; i < this->size; i++)
         {
-          Hermes::Helpers::fprint_num(file,v[i]);
+          Hermes::Helpers::fprint_num(file, v[i]);
           fprintf(file, "\n");
         }
         fprintf(file, " ];\n");
@@ -699,7 +699,7 @@ namespace Hermes
         fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
         for (unsigned int i = 0; i < this->size; i++)
         {
-          Hermes::Helpers::fprint_num(file,v[i]);
+          Hermes::Helpers::fprint_num(file, v[i]);
           fprintf(file, "\n");
         }
         fprintf(file, " ];\n");

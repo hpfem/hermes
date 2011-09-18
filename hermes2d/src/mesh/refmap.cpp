@@ -148,8 +148,8 @@ namespace Hermes
       {
         jac[i] = (m[i][0][0] * m[i][1][1] - m[i][0][1] * m[i][1][0]);
         double ij = 1.0 / jac[i];
-        error_if(!finite(ij), "1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac=%g)", i, order);
-        assert_msg(ij == ij, "1/jac[%d] is NaN when calculating inv. ref. map for order %d (jac=%g)", i, order);
+        error_if(!finite(ij), "1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac = %g)", i, order);
+        assert_msg(ij == ij, "1/jac[%d] is NaN when calculating inv. ref. map for order %d (jac = %g)", i, order);
 
         // invert and transpose the matrix
         irm[i][0][0] =  m[i][1][1] * ij;
@@ -301,7 +301,7 @@ namespace Hermes
         tan[0][2] *= (edge == 0 || edge == 2) ? ctm->m[0] : ctm->m[1];
 
         for (i = 1; i < np; i++)
-          memcpy(tan+i, tan, sizeof(double3));
+          memcpy(tan + i, tan, sizeof(double3));
       }
       else
       {
@@ -358,7 +358,7 @@ namespace Hermes
           error("Element #%d is concave or badly oriented.", element->id);
 
       // next, estimate the "exact" value of the typical integral int_grad_u_grad_v
-      // (with grad_u == grad_v == (1,1)) using the maximum integration rule
+      // (with grad_u == grad_v == (1, 1)) using the maximum integration rule
       double exact1 = 0.0;
       double exact2 = 0.0;
       for (i = 0; i < quad->get_num_points(mo); i++, m++)

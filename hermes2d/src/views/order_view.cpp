@@ -104,18 +104,18 @@ namespace Hermes
         {
           if (pal_type == H2DV_PT_DEFAULT)
           {
-            order_colors[i+min][0] = (float) (order_palette[i+min] >> 16) / 0xff;
-            order_colors[i+min][1] = (float) ((order_palette[i+min] >> 8) & 0xff) / 0xff;
-            order_colors[i+min][2] = (float) (order_palette[i+min] & 0xff) / 0xff;
+            order_colors[i + min][0] = (float) (order_palette[i + min] >> 16) / 0xff;
+            order_colors[i + min][1] = (float) ((order_palette[i + min] >> 8) & 0xff) / 0xff;
+            order_colors[i + min][2] = (float) (order_palette[i + min] & 0xff) / 0xff;
           }
           else
           {
-            get_palette_color((i + min) / (double)H2DV_MAX_VIEWABLE_ORDER, &order_colors[i+min][0]);
+            get_palette_color((i + min) / (double)H2DV_MAX_VIEWABLE_ORDER, &order_colors[i + min][0]);
           }
 
           sprintf(buf, "%d", i + min);
           box_names[i] = buf;
-          buf += strlen(buf)+1;
+          buf += strlen(buf) + 1;
         }
 
         scale_height = num_boxes * scale_box_height + (num_boxes-1) * scale_box_skip;

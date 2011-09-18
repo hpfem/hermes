@@ -195,20 +195,20 @@ namespace Hermes
         TwBar* tw_bar = TwNewBar("View setup");
 
         // Contours.
-        TwAddVarRW(tw_bar, "contours", TW_TYPE_BOOLCPP, &contours, " group=Contour2D label='Show contours'");
-        sprintf(buffer, " group=Contour2D label='Begin' step=%g", CONT_CHANGE);
+        TwAddVarRW(tw_bar, "contours", TW_TYPE_BOOLCPP, &contours, " group = Contour2D label = 'Show contours'");
+        sprintf(buffer, " group = Contour2D label = 'Begin' step = %g", CONT_CHANGE);
         TwAddVarRW(tw_bar, "cont_orig", TW_TYPE_DOUBLE, &cont_orig, buffer);
-        sprintf(buffer, " group=Contour2D label='Step' min=%g step=%g", MIN_CONT_STEP, CONT_CHANGE);
+        sprintf(buffer, " group = Contour2D label = 'Step' min = %g step = %g", MIN_CONT_STEP, CONT_CHANGE);
         TwAddVarRW(tw_bar, "cont_step", TW_TYPE_DOUBLE, &cont_step, buffer);
-        TwAddVarRW(tw_bar, "cont_color", TW_TYPE_COLOR3F, &cont_color, " group=Contour2D label='Color'");
+        TwAddVarRW(tw_bar, "cont_color", TW_TYPE_COLOR3F, &cont_color, " group = Contour2D label = 'Color'");
 
         // Mesh.
-        TwAddVarRW(tw_bar, "show_values", TW_TYPE_BOOLCPP, &show_values, " group=Elements2D label='Show Value'");
-        TwAddVarRW(tw_bar, "show_edges", TW_TYPE_BOOLCPP, &show_edges, " group=Elements2D label='Show Edges'");
-        TwAddVarRW(tw_bar, "show_aabb", TW_TYPE_BOOLCPP, &show_aabb, " group=Elements2D label='Show Bounding box'");
-        TwAddVarRW(tw_bar, "show_element_info", TW_TYPE_BOOLCPP, &show_element_info, " group=Elements2D label='Show ID'");
-        TwAddVarRW(tw_bar, "allow_node_selection", TW_TYPE_BOOLCPP, &allow_node_selection, " group=Elements2D label='Allow Node Sel.'");
-        TwAddVarRW(tw_bar, "edges_color", TW_TYPE_COLOR3F, &edges_color, " group=Elements2D label='Edge color'");
+        TwAddVarRW(tw_bar, "show_values", TW_TYPE_BOOLCPP, &show_values, " group = Elements2D label = 'Show Value'");
+        TwAddVarRW(tw_bar, "show_edges", TW_TYPE_BOOLCPP, &show_edges, " group = Elements2D label = 'Show Edges'");
+        TwAddVarRW(tw_bar, "show_aabb", TW_TYPE_BOOLCPP, &show_aabb, " group = Elements2D label = 'Show Bounding box'");
+        TwAddVarRW(tw_bar, "show_element_info", TW_TYPE_BOOLCPP, &show_element_info, " group = Elements2D label = 'Show ID'");
+        TwAddVarRW(tw_bar, "allow_node_selection", TW_TYPE_BOOLCPP, &allow_node_selection, " group = Elements2D label = 'Allow Node Sel.'");
+        TwAddVarRW(tw_bar, "edges_color", TW_TYPE_COLOR3F, &edges_color, " group = Elements2D label = 'Edge color'");
 
         // Help.
         const char* help_text = get_help_text();
@@ -654,16 +654,16 @@ namespace Hermes
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             glVertex2f(-radius, radius);
             glVertex2f( radius, radius);
-            glVertex2f( radius,-radius);
-            glVertex2f(-radius,-radius);
+            glVertex2f( radius, -radius);
+            glVertex2f(-radius, -radius);
 
             //foreground
             radius = (float)node_pixel_radius;
             glColor4f(0.2f, 0.2f, 0.4f, 1.0f);
             glVertex2f(-radius, radius);
             glVertex2f( radius, radius);
-            glVertex2f( radius,-radius);
-            glVertex2f(-radius,-radius);
+            glVertex2f( radius, -radius);
+            glVertex2f(-radius, -radius);
 
             glEnd();
           }
@@ -941,7 +941,7 @@ namespace Hermes
               const int3 &edge = edges[i];
               if (show_edges || edge[2] != 0) { //select internal edges to draw
                 gl_inx_buffer[buffer_inx] = (GLuint)edge[0];
-                gl_inx_buffer[buffer_inx+1] = (GLuint)edge[1];
+                gl_inx_buffer[buffer_inx + 1] = (GLuint)edge[1];
                 buffer_inx += 2;
               }
 
@@ -1044,12 +1044,12 @@ namespace Hermes
         // Axis-aligned bounding box of the model.
         GLdouble aabb[] =
         {
-          V0,V1,V2,V3,    // bottom
-          V0,V1,V5,V4,    // front
-          V0,V3,V7,V4,    // left
-          V1,V2,V6,V5,    // right
-          V2,V3,V7,V6,    // back
-          V4,V5,V6,V7     // top
+          V0, V1, V2, V3,    // bottom
+          V0, V1, V5, V4,    // front
+          V0, V3, V7, V4,    // left
+          V1, V2, V6, V5,    // right
+          V2, V3, V7, V6,    // back
+          V4, V5, V6, V7     // top
         };
 
         // Set the edge color.
@@ -1291,7 +1291,7 @@ namespace Hermes
       void ScalarView::update_layout()
       {
         View::update_layout();
-        // (x,y,-z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
+        // (x, y, -z) coordinates (in the eye coordinate system) of the point that lies at the center of solution domain
         // and vertically at the position of the average value of all vertices. This point will be the origin for all
         // drawing and also the initial position of the camera.
         xctr = (vertices_max_x + vertices_min_x) / 2.0;
@@ -1308,7 +1308,7 @@ namespace Hermes
           // into the viewing volume, and that it is not too flat (so that considerable amount of detail is visible).
           // Later on, we will determine the translation distance so that the model occupies as much of the view space as possible.
 
-          // Set scaling into the (-1,1) range on the x- and z- axes
+          // Set scaling into the (-1, 1) range on the x- and z- axes
           double max_radial = std::max(vertices_max_x - vertices_min_x, vertices_max_y - vertices_min_y);
           xzscale = 2.0 / max_radial;
 
@@ -1319,7 +1319,7 @@ namespace Hermes
           //  1. the model could be translated so that it lies completely below the top clipping plane of the viewing frustum and
           //     its farthest (away from the camera) corner is at least 1 unit before the far clipping plane (to allow some zooming out),
           //  2. the model's bounding box's part above (or below, whichever is bigger) the average function value (yctr) has dimensions
-          //     (-1,1)x(0,height)x(-1,1), where height > 0.1.
+          //     (-1, 1)x(0, height)x(-1, 1), where height > 0.1.
           // If this is not true, the model is either too tall or too flat and will be subject to different scaling
           // along the y-axis, such that it would fit to the viewing frustum at one third of its depth (i.e. at one third of
           // the total available zooming range).
@@ -1419,7 +1419,7 @@ namespace Hermes
         /// \todo allow settin min = max, in which case draw the corresponding contour.
         if (fabs(max-min) < 1e-8)
         {
-          warn("Range (%f,%f) is too narrow: adjusted to (%f,%f)", min, max, min-0.5, max);
+          warn("Range (%f, %f) is too narrow: adjusted to (%f, %f)", min, max, min-0.5, max);
           min -= 0.5;
         }
         View::set_min_max_range(min, max);
@@ -1718,7 +1718,7 @@ namespace Hermes
         vert_b[1] = -(vert_b[1] - pars->y_min) * pars->scale;
 
         //store
-        fprintf(pars->fout, "<path d=\"M %g %g L %g %g\"/>\n", vert_a[0], vert_a[1], vert_b[0], vert_b[1]);
+        fprintf(pars->fout, "<path d = \"M %g %g L %g %g\"/>\n", vert_a[0], vert_a[1], vert_b[0], vert_b[1]);
       }
 
       void ScalarView::export_mesh_edges_svg(const char* filename, float width_mm)
@@ -1735,9 +1735,9 @@ namespace Hermes
 
         //prepare header
         fprintf(fout, SVG_HEADER);
-        fprintf(fout, "<svg width=\"%.2fmm\" height=\"%.2fmm\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">\n", (float)width_mm, (float)height_mm);
+        fprintf(fout, "<svg width = \"%.2fmm\" height = \"%.2fmm\" version = \"1.1\" xmlns = \"http://www.w3.org/2000/svg\">\n", (float)width_mm, (float)height_mm);
         fprintf(fout, "<desc>%s</desc>\n", title.c_str());
-        fprintf(fout, "<g stroke=\"black\" stroke-width=\"0.3\" fill=\"none\" transform=\"translate(0 %g)\">\n", height_mm * SVG_UNIT_MM); //move bottom of mesh flipped over Y to bottom of image
+        fprintf(fout, "<g stroke = \"black\" stroke-width = \"0.3\" fill = \"none\" transform = \"translate(0 %g)\">\n", height_mm * SVG_UNIT_MM); //move bottom of mesh flipped over Y to bottom of image
 
         //prepare parameters
         SVGExportParams svg_params;

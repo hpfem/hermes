@@ -78,7 +78,7 @@ namespace Hermes
         int i;
 
         if (elems != NULL) delete [] elems;
-        ne = mesh->get_max_element_id()+1;
+        ne = mesh->get_max_element_id() + 1;
         elems = new ObjInfo[ne];
         for (i = 0; i < ne; i++)
           elems[i].id = -1;
@@ -252,7 +252,7 @@ namespace Hermes
           return mc[marker];
         else
         {
-          srand(marker+2);
+          srand(marker + 2);
           randcol[0] = (float) rand() / RAND_MAX;
           randcol[1] = (float) rand() / RAND_MAX;
           randcol[2] = (float) rand() / RAND_MAX;

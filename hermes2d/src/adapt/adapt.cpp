@@ -43,12 +43,12 @@ namespace Hermes
       _F_
       // sanity check
       if (proj_norms.size() > 0 && spaces.size() != proj_norms.size())
-        throw Exceptions::LengthException(1,2,spaces.size(),proj_norms.size());
+        throw Exceptions::LengthException(1, 2, spaces.size(), proj_norms.size());
 
       this->num = spaces.size();
 
       // sanity checks
-      if ((this->num <= 0) || (this->num > H2D_MAX_COMPONENTS)) throw Exceptions::ValueException("components",this->num,0,H2D_MAX_COMPONENTS);
+      if ((this->num <= 0) || (this->num > H2D_MAX_COMPONENTS)) throw Exceptions::ValueException("components", this->num, 0, H2D_MAX_COMPONENTS);
 
       // reset values
       memset(errors, 0, sizeof(errors));
@@ -148,7 +148,7 @@ namespace Hermes
       if (refinement_selectors.empty())
         throw Exceptions::NullException(1);
       if (spaces.size() != refinement_selectors.size())
-        throw Exceptions::LengthException(1,refinement_selectors.size(),spaces.size());
+        throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
 
       Hermes::TimePeriod cpu_time;
 
@@ -463,7 +463,7 @@ namespace Hermes
     {
       _F_
       if (num != 1)
-        throw Exceptions::LengthException(1,1,num);
+        throw Exceptions::LengthException(1, 1, num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
     }
 
@@ -474,9 +474,9 @@ namespace Hermes
     {
       _F_
       if (slns.size() != num)
-        throw Exceptions::LengthException(1,slns.size(),num);
+        throw Exceptions::LengthException(1, slns.size(), num);
       if (rslns.size() != num)
-        throw Exceptions::LengthException(2,rslns.size(),num);
+        throw Exceptions::LengthException(2, rslns.size(), num);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }
 
@@ -486,7 +486,7 @@ namespace Hermes
     {
       _F_
       if (num != 1)
-        throw Exceptions::LengthException(1,1,num);
+        throw Exceptions::LengthException(1, 1, num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
     }
 
@@ -497,9 +497,9 @@ namespace Hermes
     {
       _F_
       if (slns.size() != num)
-        throw Exceptions::LengthException(1,slns.size(),num);
+        throw Exceptions::LengthException(1, slns.size(), num);
       if (rslns.size() != num)
-        throw Exceptions::LengthException(2,rslns.size(),num);
+        throw Exceptions::LengthException(2, rslns.size(), num);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }
 
@@ -680,8 +680,8 @@ namespace Hermes
           mesh->refine_element_id(elem_ref.id, elem_ref.split);
         for (int j = 0; j < 2; j++)
         {
-          space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j+2 ]->id, elem_ref.p[j]);
-          space->edata[e->sons[ (elem_ref.split == 1) ? j : j+2 ]->id].changed_in_last_adaptation = true;
+          space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id, elem_ref.p[j]);
+          space->edata[e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id].changed_in_last_adaptation = true;
         }
       }
     }
@@ -1143,7 +1143,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::CompareElements::operator()(const ElementReference& e1,const ElementReference& e2) const
+    bool Adapt<Scalar>::CompareElements::operator()(const ElementReference& e1, const ElementReference& e2) const
     {
       return errors[e1.comp][e1.id] > errors[e2.comp][e2.id];
     }

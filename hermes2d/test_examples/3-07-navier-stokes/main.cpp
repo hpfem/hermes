@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
-  mesh.refine_towards_boundary(BDY_OBSTACLE,1, false);
+  mesh.refine_towards_boundary(BDY_OBSTACLE, 1, false);
   mesh.refine_towards_boundary(BDY_TOP, 1, true);     // '4' is the number of levels,
   mesh.refine_towards_boundary(BDY_BOTTOM, 1, true);  // 'true' stands for anisotropic refinements.
 

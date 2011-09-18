@@ -27,9 +27,9 @@ namespace Hermes
 
   Ord Ord::get_max_order() {return Ord(30);}
 
-  Ord Ord::operator+(const Ord &o) { return Ord(std::max(this->order, o.order)); }
-  Ord Ord::operator+(double d) { return *this; }
-  Ord Ord::operator+(std::complex<double> d) { return *this; }
+  Ord Ord::operator+ (const Ord &o) { return Ord(std::max(this->order, o.order)); }
+  Ord Ord::operator+ (double d) { return *this; }
+  Ord Ord::operator+ (std::complex<double> d) { return *this; }
   Ord Ord::operator-(const Ord &o) { return Ord(std::max(this->order, o.order)); }
   Ord Ord::operator-(double d) { return *this; }
   Ord Ord::operator-(std::complex<double> d) { return *this; }
@@ -61,11 +61,11 @@ namespace Hermes
 
   Ord operator/(const double &a, const Ord &b) { return Ord::get_max_order(); }
   Ord operator*(const double &a, const Ord &b) { return b; }
-  Ord operator+(const double &a, const Ord &b) { return b; }
+  Ord operator + (const double &a, const Ord &b) { return b; }
   Ord operator-(const double &a, const Ord &b) { return b; }
   Ord operator/(const std::complex<double> &a, const Ord &b) { return Ord::get_max_order(); }
   Ord operator*(const std::complex<double> &a, const Ord &b) { return b; }
-  Ord operator+(const std::complex<double> &a, const Ord &b) { return b; }
+  Ord operator + (const std::complex<double> &a, const Ord &b) { return b; }
   Ord operator-(const std::complex<double> &a, const Ord &b) { return b; }
   Ord operator-(const Ord &a) { return a; }
 

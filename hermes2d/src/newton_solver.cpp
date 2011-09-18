@@ -148,7 +148,7 @@ namespace Hermes
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
         {
-          throw Exceptions::ValueException("residual norm",residual_norm,max_allowed_residual_norm);
+          throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, return 'true'.
@@ -182,7 +182,7 @@ namespace Hermes
         assemble_time += this->timer->last();
 
         // Multiply the residual vector with -1 since the matrix
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         residual->change_sign();
 
         // Solve the linear system.
@@ -195,7 +195,7 @@ namespace Hermes
           throw Exceptions::LinearSolverException();
         }
 
-        // Add \deltaY^{n+1} to Y^n.
+        // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
@@ -207,7 +207,7 @@ namespace Hermes
             delete this->timer;
             this->timer = NULL;
           }
-          throw Exceptions::ValueException("iterations",it,newton_max_iter);
+          throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
 
         this->timer->tick();
@@ -273,7 +273,7 @@ namespace Hermes
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
         {
-          throw Exceptions::ValueException("residual norm",residual_norm,max_allowed_residual_norm);
+          throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, return 'true'.
@@ -305,7 +305,7 @@ namespace Hermes
         }
 
         // Multiply the residual vector with -1 since the matrix
-        // equation reads J(Y^n) \deltaY^{n+1} = -F(Y^n).
+        // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         residual->change_sign();
 
         // Solve the linear system.
@@ -313,14 +313,14 @@ namespace Hermes
           throw Exceptions::LinearSolverException();
         }
 
-        // Add \deltaY^{n+1} to Y^n.
+        // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {
-          throw Exceptions::ValueException("newton iterations",it,newton_max_iter);
+          throw Exceptions::ValueException("newton iterations", it, newton_max_iter);
         }
       }
     }

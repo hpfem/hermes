@@ -6,7 +6,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    ElementToRefine& ElementToRefine::operator=(const ElementToRefine& orig)
+    ElementToRefine& ElementToRefine::operator = (const ElementToRefine& orig)
     {
       id = orig.id;
       comp = orig.comp;

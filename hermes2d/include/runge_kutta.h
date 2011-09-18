@@ -177,7 +177,7 @@ namespace Hermes
       /// the 'K_i' vectors in the usual R-K notation.
       Scalar* K_vector;
 
-      /// Vector u_ext_vec will represent h \sum_{j=1}^s a_{ij} K_i.
+      /// Vector u_ext_vec will represent h \sum_{j = 1}^s a_{ij} K_i.
       Scalar* u_ext_vec;
 
       /// Vector for the left part of the residual.

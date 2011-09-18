@@ -157,7 +157,7 @@ namespace Hermes
         // Subdomains //
         unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
         if(subdomains_count != meshes.size())
-          error("Number of subdomains(=%u) does not equal the number of provided meshes in the vector(=%u).", subdomains_count, meshes.size());
+          error("Number of subdomains( = %u) does not equal the number of provided meshes in the vector( = %u).", subdomains_count, meshes.size());
 
         for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
         {
@@ -1134,7 +1134,7 @@ namespace Hermes
       nurbs->degree = 2;
       // there are three control points.
       nurbs->np = 3;
-      // there are 6 knots: {0,0,0,1,1,1}
+      // there are 6 knots: {0, 0, 0, 1, 1, 1}
       nurbs->nk = 6;
       nurbs->kv = new double[nurbs->nk];
 
@@ -1191,9 +1191,9 @@ namespace Hermes
       nurbs->pt[0][0] = mesh->nodes[p1].x;
       nurbs->pt[0][1] = mesh->nodes[p1].y;
       nurbs->pt[0][2] = 1.0;
-      nurbs->pt[inner+1][0] = mesh->nodes[p2].x;
-      nurbs->pt[inner+1][1] = mesh->nodes[p2].y;
-      nurbs->pt[inner+1][2] = 1.0;
+      nurbs->pt[inner + 1][0] = mesh->nodes[p2].x;
+      nurbs->pt[inner + 1][1] = mesh->nodes[p2].y;
+      nurbs->pt[inner + 1][2] = 1.0;
 
       // read inner control points
       for (int i = 0; i < inner; i++)
@@ -1244,7 +1244,7 @@ namespace Hermes
         nurbs_xml.inner_point().push_back(XMLMesh::inner_point(nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2]));
 
       int max = nurbs->nk - (nurbs->degree + 1);
-      for (int i = nurbs->degree+1; i < max; i++)
+      for (int i = nurbs->degree + 1; i < max; i++)
         nurbs_xml.knot().push_back(XMLMesh::knot(nurbs->kv[i]));
     }
   }

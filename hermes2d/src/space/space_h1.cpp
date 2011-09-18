@@ -269,13 +269,13 @@ namespace Hermes
         {
           int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
           for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
-            al->add_triplet(this->shapeset->get_edge_index(surf_num, ori, j+2), dof, 1.0);
+            al->add_triplet(this->shapeset->get_edge_index(surf_num, ori, j + 2), dof, 1.0);
         }
         else
         {
           for (int j = 0; j < nd->n; j++)
           {
-            al->add_triplet(this->shapeset->get_edge_index(surf_num, 0, j+2), -1, nd->edge_bc_proj[j+2]);
+            al->add_triplet(this->shapeset->get_edge_index(surf_num, 0, j + 2), -1, nd->edge_bc_proj[j + 2]);
           }
         }
       }
@@ -283,11 +283,11 @@ namespace Hermes
       {
         int part = nd->part;
         int ori = part < 0 ? 1 : 0;
-        if (part < 0) part ^= ~0;
+        if (part < 0) part ^ =  ~0;
 
         nd = &this->ndata[nd->base->id];
         for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
-          al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j+2, ori, part), dof, 1.0);
+          al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j + 2, ori, part), dof, 1.0);
       }
     }
 
@@ -309,14 +309,14 @@ namespace Hermes
       else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
       {
         surf_pos->t = surf_pos->lo;
-        // Find out the (x,y) coordinates for the first endpoint.
+        // Find out the (x, y) coordinates for the first endpoint.
         double x, y, n_x, n_y, t_x, t_y;
         Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
         CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
         // Calculate.
         proj[0] = bc->value(x, y, n_x, n_y, t_x, t_y);
         surf_pos->t = surf_pos->hi;
-        // Find out the (x,y) coordinates for the second endpoint.
+        // Find out the (x, y) coordinates for the second endpoint.
         CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
         // Calculate.
         proj[1] = bc->value(x, y, n_x, n_y, t_x, t_y);
@@ -333,7 +333,7 @@ namespace Hermes
         for (int i = 0; i < order; i++)
         {
           rhs[i] = 0.0;
-          int ii = this->shapeset->get_edge_index(0, 0, i+2);
+          int ii = this->shapeset->get_edge_index(0, 0, i + 2);
           for (int j = 0; j < quad1d.get_num_points(mo); j++)
           {
             double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
@@ -349,7 +349,7 @@ namespace Hermes
             // If the BC is not constant.
             else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
             {
-              // Find out the (x,y) coordinate.
+              // Find out the (x, y) coordinate.
               double x, y, n_x, n_y, t_x, t_y;
               Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
               CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
@@ -477,7 +477,7 @@ namespace Hermes
             nd = &this->ndata[e->en[i]->id];
             nd->base = ei[i]->node;
             nd->part = ei[i]->part;
-            if (ei[i]->ori) nd->part ^= ~0;
+            if (ei[i]->ori) nd->part ^ =  ~0;
           }
         }
       }
@@ -552,7 +552,7 @@ namespace Hermes
           for (k = 0; k < nd->n; k++, edge_dofs++)
           {
             edge_dofs->dof = nd->dof + k*this->stride;
-            edge_dofs->coef = this->shapeset->get_fn_value(this->shapeset->get_edge_index(0, ei[i]->ori, k+2), mid, -1.0, 0);
+            edge_dofs->coef = this->shapeset->get_fn_value(this->shapeset->get_edge_index(0, ei[i]->ori, k + 2), mid, -1.0, 0);
           }
 
           //dump_baselist(ndata[mid_vn->id]);

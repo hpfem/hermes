@@ -159,7 +159,7 @@ namespace Hermes
       // Calculate norms for all solutions.
       Hermes::vector<double> norms;
       int n = slns.size();
-      for (int i=0; i<n; i++)
+      for (int i = 0; i<n; i++)
       {
         switch (slns[i]->get_space_type())
         {

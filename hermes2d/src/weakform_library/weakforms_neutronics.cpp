@@ -159,7 +159,7 @@ namespace Hermes
               if (Sigma_a.size() > 0)
               {
                 // Warn if \Sigma_a < \Sigma_f for any region (this indicates an unphysical situation, since
-                // by definition \Sigma_a = \Sigma_f + \Sigma_c + \Sigma_{n,p} + other possible reactions
+                // by definition \Sigma_a = \Sigma_f + \Sigma_c + \Sigma_{n, p} + other possible reactions
                 // leading to neutron removal).
                 MaterialPropertyMap1::const_iterator ita = Sigma_a.begin();
                 MaterialPropertyMap1::const_iterator itf = Sigma_f.begin();
@@ -168,7 +168,7 @@ namespace Hermes
                   rank1::const_iterator a = ita->second.begin();
                   rank1::const_iterator f = itf->second.begin();
 
-                  for ( ; a != ita->second.end(); ++a,++f)
+                  for ( ; a != ita->second.end(); ++a, ++f)
                     if (*a < *f)
                       warning(W_SA_LT_SF);
                 }
@@ -417,7 +417,7 @@ namespace Hermes
                 error(E_NONMATCHING_PROPERTIES);
 
               using ValidationFunctors::ensure_size;
-              std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size(G,G));
+              std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size(G, G));
               std::for_each(Sigma_r.begin(), Sigma_r.end(), ensure_size(G));
               std::for_each(src.begin(), src.end(), ensure_size(G));
               std::for_each(D.begin(), D.end(), ensure_size(G));

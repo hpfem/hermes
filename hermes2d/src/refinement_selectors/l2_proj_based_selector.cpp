@@ -19,7 +19,7 @@ namespace Hermes
 
       template<typename Scalar>
       L2ProjBasedSelector<Scalar>::L2ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, L2Shapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1,1), Range<int>(0, H2DRS_MAX_L2_ORDER)) {}
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1, 1), Range<int>(0, H2DRS_MAX_L2_ORDER)) {}
 
       template<typename Scalar>
       void L2ProjBasedSelector<Scalar>::set_current_order_range(Element* element)
@@ -99,7 +99,7 @@ namespace Hermes
         //and restrict it according to the given adapt-type)
         bool iso_p = false;
         int start_quad_order = quad_order;
-        int last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_p_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(max_p_order_v, order_v+H2DRS_MAX_ORDER_INC));
+        int last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_p_order_h, order_h + H2DRS_MAX_ORDER_INC), std::min(max_p_order_v, order_v + H2DRS_MAX_ORDER_INC));
         switch(this->cand_list)
         {
         case H2D_H_ISO:
@@ -112,7 +112,7 @@ namespace Hermes
 
         //generate all H-candidates
         iso_p = false;
-        int start_order_h = std::max(this->current_min_order, (order_h+1) / 2), start_order_v = std::max(this->current_min_order, (order_v+1) / 2);
+        int start_order_h = std::max(this->current_min_order, (order_h + 1) / 2), start_order_v = std::max(this->current_min_order, (order_v + 1) / 2);
         start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, start_order_h + H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, start_order_v + H2DRS_MAX_ORDER_INC));
         switch(this->cand_list)
@@ -132,10 +132,10 @@ namespace Hermes
           && (this->cand_list == H2D_H_ANISO || this->cand_list == H2D_HP_ANISO_H || this->cand_list == H2D_HP_ANISO))
         {
           iso_p = false;
-          int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(this->current_min_order, (order_v+1) / 2));
-          int last_quad_order_hz = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, order_h+H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_quad_order)+H2DRS_MAX_ORDER_INC));
-          int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(this->current_min_order, (order_h+1) / 2), order_v);
-          int last_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_quad_order)+H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, order_v+H2DRS_MAX_ORDER_INC));
+          int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(this->current_min_order, (order_v + 1) / 2));
+          int last_quad_order_hz = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, order_h + H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_quad_order) + H2DRS_MAX_ORDER_INC));
+          int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(this->current_min_order, (order_h + 1) / 2), order_v);
+          int last_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_quad_order) + H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, order_v + H2DRS_MAX_ORDER_INC));
           switch(this->cand_list)
           {
           case H2D_H_ANISO:

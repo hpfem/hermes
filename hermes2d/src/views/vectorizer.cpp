@@ -166,10 +166,10 @@ namespace Hermes
               int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], xval[idx[2]], yval[idx[2]]);
 
               // recur to sub-elements
-              push_transform(0);  process_triangle(iv0, mid0, mid2,  level+1, xval, yval, phx, phy, tri_indices[1]);  pop_transform();
-              push_transform(1);  process_triangle(mid0, iv1, mid1,  level+1, xval, yval, phx, phy, tri_indices[2]);  pop_transform();
-              push_transform(2);  process_triangle(mid2, mid1, iv2,  level+1, xval, yval, phx, phy, tri_indices[3]);  pop_transform();
-              push_transform(3);  process_triangle(mid1, mid2, mid0, level+1, xval, yval, phx, phy, tri_indices[4]);  pop_transform();
+              push_transform(0);  process_triangle(iv0, mid0, mid2,  level + 1, xval, yval, phx, phy, tri_indices[1]);  pop_transform();
+              push_transform(1);  process_triangle(mid0, iv1, mid1,  level + 1, xval, yval, phx, phy, tri_indices[2]);  pop_transform();
+              push_transform(2);  process_triangle(mid2, mid1, iv2,  level + 1, xval, yval, phx, phy, tri_indices[3]);  pop_transform();
+              push_transform(3);  process_triangle(mid1, mid2, mid0, level + 1, xval, yval, phx, phy, tri_indices[4]);  pop_transform();
               return;
           }
         }
@@ -286,10 +286,10 @@ namespace Hermes
               int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
 
               // recur to sub-elements
-              push_transform(0);  process_quad(iv0, mid0, mid4, mid3, level+1, xval, yval, phx, phy, quad_indices[1]);  pop_transform();
-              push_transform(1);  process_quad(mid0, iv1, mid1, mid4, level+1, xval, yval, phx, phy, quad_indices[2]);  pop_transform();
-              push_transform(2);  process_quad(mid4, mid1, iv2, mid2, level+1, xval, yval, phx, phy, quad_indices[3]);  pop_transform();
-              push_transform(3);  process_quad(mid3, mid4, mid2, iv3, level+1, xval, yval, phx, phy, quad_indices[4]);  pop_transform();
+              push_transform(0);  process_quad(iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  pop_transform();
+              push_transform(1);  process_quad(mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  pop_transform();
+              push_transform(2);  process_quad(mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  pop_transform();
+              push_transform(3);  process_quad(mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  pop_transform();
               return;
           }
         }
@@ -362,10 +362,10 @@ namespace Hermes
         triangle_size = std::max(64 * nn, 20000);
         edges_size = std::max(24 * nn, 7500);
 
-        vertex_count=0;
-        triangle_count=0;
-        edges_count=0;
-        dashes_count=0;
+        vertex_count = 0;
+        triangle_count = 0;
+        edges_count = 0;
+        dashes_count = 0;
 
         // reuse or allocate vertex, triangle and edge arrays
         verts = (double4*) malloc(sizeof(double4) * vertex_size);
@@ -464,7 +464,7 @@ namespace Hermes
           Trf* xctm = xsln->get_ctm();
           Trf* yctm = ysln->get_ctm();
           double r[4] = { -1.0, 1.0, 1.0, -1.0 };
-          double ref[4][2] = { {-1.0,-1.0}, {1.0,-1.0}, {1.0,1.0}, {-1.0,1.0} };
+          double ref[4][2] = { {-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0} };
           for (unsigned int i = 0; i < e[0]->nvert; i++)
           {
             bool bold = false;

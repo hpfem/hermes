@@ -39,7 +39,7 @@ namespace Hermes
       int n = slns_prev_iter.size();
       if(dp->get_spaces().size() != n)
         error("Mismatched number of spaces and solutions in PicardSolver.");
-      for (int i=0; i<n; i++)
+      for (int i = 0; i<n; i++)
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
@@ -62,7 +62,7 @@ namespace Hermes
       int n = slns_prev_iter.size();
       if(dp->get_spaces().size() != n)
         error("Mismatched number of spaces and solutions in PicardSolver.");
-      for (int i=0; i<n; i++)
+      for (int i = 0; i<n; i++)
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
@@ -101,8 +101,8 @@ namespace Hermes
         rhs[i] = 0;
         for (int k = 0; k < ndof; k++)
 	{
-          Scalar residual_n_k = previous_vectors[n+1][k] - previous_vectors[n][k];
-          Scalar residual_i_k = previous_vectors[i+1][k] - previous_vectors[i][k];
+          Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
+          Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
           rhs[i] += residual_n_k * (residual_n_k - residual_i_k);
 	}
         for (int j = 0; j < n; j++)
@@ -110,9 +110,9 @@ namespace Hermes
           Scalar val = 0;
           for (int k = 0; k < ndof; k++)
   	  {
-            Scalar residual_n_k = previous_vectors[n+1][k] - previous_vectors[n][k];
-            Scalar residual_i_k = previous_vectors[i+1][k] - previous_vectors[i][k];
-            Scalar residual_j_k = previous_vectors[j+1][k] - previous_vectors[j][k];
+            Scalar residual_n_k = previous_vectors[n + 1][k] - previous_vectors[n][k];
+            Scalar residual_i_k = previous_vectors[i + 1][k] - previous_vectors[i][k];
+            Scalar residual_j_k = previous_vectors[j + 1][k] - previous_vectors[j][k];
             val += (residual_n_k - residual_i_k) * (residual_n_k - residual_j_k);
           }
 
@@ -236,7 +236,7 @@ namespace Hermes
             // If memory full, shift all vectors back, forgetting the oldest one.
             // Save this->sln_vector[] as the newest one.
             Scalar* oldest_vec = previous_vectors[0];
-            for (int i = 0; i < num_last_vectors_used-1; i++) previous_vectors[i] = previous_vectors[i+1];
+            for (int i = 0; i < num_last_vectors_used-1; i++) previous_vectors[i] = previous_vectors[i + 1];
             previous_vectors[num_last_vectors_used-1] = oldest_vec;
             for (int j = 0; j < ndof; j++) previous_vectors[num_last_vectors_used-1][j] = this->sln_vector[j];
           }

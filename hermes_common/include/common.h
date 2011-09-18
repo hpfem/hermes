@@ -202,12 +202,12 @@ namespace Hermes
   {
     inline void fprint_num(FILE*f, double x)
     {
-      fprintf(f,"%lf",x);
+      fprintf(f, "%lf", x);
     }
 
     inline void fprint_num(FILE*f, std::complex<double> x)
     {
-      fprintf(f,"(%lf, %lf)",x.real(),x.imag());
+      fprintf(f, "(%lf, %lf)", x.real(), x.imag());
     }
 
     /// This class makes command line arguments available to any other method in Hermes.

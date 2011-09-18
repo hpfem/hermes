@@ -563,7 +563,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, Hermes::vector<std::string> areas,\
+      DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, Hermes::vector<std::string> areas, \
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
         GeomType gt)

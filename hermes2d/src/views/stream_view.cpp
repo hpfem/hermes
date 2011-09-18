@@ -108,14 +108,14 @@ namespace Hermes
           double x_mid = (x_min + x_max)/2;
           double y_mid = (y_min + y_max)/2;
           int3& tri = xtris[e_idx];
-          if (father->level % 2) // level = 1, 3, 5,...
+          if (father->level % 2) // level = 1, 3, 5, ...
           {
             if (vert[tri[0]][1] <= y_mid || vert[tri[1]][1] <= y_mid || vert[tri[2]][1] <= y_mid)
               add_element_to_tree(father->sons[0], e_idx, x_min, x_max, y_min, y_mid);
             if (vert[tri[0]][1] >= y_mid || vert[tri[1]][1] >= y_mid || vert[tri[2]][1] >= y_mid)
               add_element_to_tree(father->sons[1], e_idx, x_min, x_max, y_mid, y_max);
           }
-          else // level 0, 2, 4,...
+          else // level 0, 2, 4, ...
           {
             if (vert[tri[0]][0] <= x_mid || vert[tri[1]][0] <= x_mid || vert[tri[2]][0] <= x_mid)
               add_element_to_tree(father->sons[0], e_idx, x_min, x_mid, y_min, y_max);
@@ -155,12 +155,12 @@ namespace Hermes
         {
           double x_mid = (x_max + x_min)/2;
           double y_mid = (y_max + y_min)/2;
-          if (father->level % 2) // level = 1, 3, 5,...
+          if (father->level % 2) // level = 1, 3, 5, ...
             if (y <= y_mid)
               return find_triangle_in_tree(x, y, father->sons[0], x_min, x_max, y_min, y_mid, bar);
             else
               return find_triangle_in_tree(x, y, father->sons[1], x_min, x_max, y_mid, y_max, bar);
-          else // level 0, 2, 4,...
+          else // level 0, 2, 4, ...
             if (x <= x_mid)
               return find_triangle_in_tree(x, y, father->sons[0], x_min, x_mid, y_min, y_max, bar);
             else
@@ -214,7 +214,7 @@ namespace Hermes
 
         while(1)
         {
-          if (get_solution_values(x, y, k1, l1) == false) // point (x,y) does not lie in the domain
+          if (get_solution_values(x, y, k1, l1) == false) // point (x, y) does not lie in the domain
           {
             tau = tau/2;  // draw streamline to the end of the domain
             if (tau < min_tau) break;
@@ -251,7 +251,7 @@ namespace Hermes
             // error according to Merson
             double x_err = 1.0/5.0 * (x4 - x5) / (root_x_max - root_x_min);
             double y_err = 1.0/5.0 * (y4 - y5) / (root_y_max - root_y_min);
-            double err = std::max(fabs(x_err),fabs(y_err));
+            double err = std::max(fabs(x_err), fabs(y_err));
             if (err < ODE_EPS)
             {
               tau_ok = true;  x = x5;  y = y5;
@@ -457,8 +457,8 @@ namespace Hermes
         report_time("Time to create streamline: %g s", cpu_time.tick().last());
       }
 
-      static int n_vert(int i) { return (i+1) % 3; }
-      static int p_vert(int i) { return (i+2) % 3; }
+      static int n_vert(int i) { return (i + 1) % 3; }
+      static int p_vert(int i) { return (i + 2) % 3; }
 
 
       void StreamView::on_display()
@@ -537,7 +537,7 @@ namespace Hermes
           for (int j = 0; j < streamlength[i] - 1; j++)
           {
             glVertex2d(transform_x(streamlines[i][j][0]), transform_y(streamlines[i][j][1]));
-            glVertex2d(transform_x(streamlines[i][j+1][0]), transform_y(streamlines[i][j+1][1]));
+            glVertex2d(transform_x(streamlines[i][j + 1][0]), transform_y(streamlines[i][j + 1][1]));
           }
           glEnd();
         }
@@ -597,7 +597,7 @@ namespace Hermes
       {
         View::on_left_mouse_down(x, y);
 
-        // adding streamline (initial point set at (x,y))
+        // adding streamline (initial point set at (x, y))
         if (!scale_focused && glutGetModifiers() == GLUT_ACTIVE_CTRL)
         {
           Hermes::TimePeriod cpu_time;

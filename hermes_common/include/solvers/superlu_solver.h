@@ -113,7 +113,7 @@ namespace Hermes {
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
-        add_to_diagonal_blocks(num_stages,dynamic_cast<SuperLUMatrix*>(mat));
+        add_to_diagonal_blocks(num_stages, dynamic_cast<SuperLUMatrix*>(mat));
       }
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
@@ -143,7 +143,7 @@ namespace Hermes {
       int *Ai;
       /// Index to Ax/Ai, where each column starts.
       unsigned int *Ap;
-      /// Number of non-zero entries (= Ap[size]).
+      /// Number of non-zero entries ( =  Ap[size]).
       unsigned int nnz;
 
       friend class Solvers::SuperLUSolver<Scalar>;
@@ -237,7 +237,7 @@ namespace Hermes {
       SuperMatrix L, U;             ///< L/U factors of A.
       double *R, *C;                ///< Row/column scaling factors of A.
       int *perm_r;                  ///< Row permutations from partial pivoting.
-      int *perm_c;                  ///< Column permutations to reduce fill-in (=> matrix Pc).
+      int *perm_c;                  ///< Column permutations to reduce fill-in ( = > matrix Pc).
       int *etree;                   ///< Elimination tree of Pc'*A'*A*Pc.
       slu_options_t options;        ///< Structure holding the input options for the solver.
 

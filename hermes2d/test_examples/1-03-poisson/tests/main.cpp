@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   mloader.load("../domain.xml", &mesh);
 
   // Perform initial mesh refinements (optional).
-  for (int i=0; i < INIT_REF_NUM; i++)
+  for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
 
   // Initialize the weak formulation.
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
   // current shapeset. If you change the shapeset,
   // you need to correct these numbers.
   double sum = 0;
-  for (int i=0; i < ndof; i++)
+  for (int i = 0; i < ndof; i++)
     sum += newton.get_sln_vector()[i];
   printf("coefficient sum = %g\n", sum);
 

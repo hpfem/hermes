@@ -28,7 +28,7 @@ namespace Hermes
       /// Error of an element of a candidate for various permutations of orders. \ingroup g_selectors
       /** If not noted otherwise, the first index is the horizontal order, the second index is the vertical order.
       *  The maximum allowed order is ::H2DRS_MAX_ORDER + 1. */
-      typedef double CandElemProjError[H2DRS_MAX_ORDER+2][H2DRS_MAX_ORDER+2];
+      typedef double CandElemProjError[H2DRS_MAX_ORDER + 2][H2DRS_MAX_ORDER + 2];
 
 # define H2DRS_DEFAULT_ERR_WEIGHT_H 2.0 ///< A default multiplicative coefficient of an error of a H-candidate. \ingroup g_selectors
 # define H2DRS_DEFAULT_ERR_WEIGHT_P 1.0 ///< A default multiplicative coefficient of an error of a P-candidate. \ingroup g_selectors
@@ -116,7 +116,7 @@ namespace Hermes
           /// Assignment operator. Prevent unauthorized copying of the pointer.
           /** This method prevents a user from copying allocated internal structures
           *  because C++ does not support garbage collection. */
-          const TrfShapeExp& operator=(const TrfShapeExp& other) {
+          const TrfShapeExp& operator = (const TrfShapeExp& other) {
             delete[] values; values = NULL;
             error_if(other.values != NULL, "Unable to assign a non-empty values. Use references instead.");
             return *this;
@@ -220,7 +220,7 @@ namespace Hermes
         };
         /// A projection matrix cache type.
         /** Defines a cache of projection matrices for all possible permutations of orders. */
-        typedef double** ProjMatrixCache[H2DRS_MAX_ORDER+2][H2DRS_MAX_ORDER+2];
+        typedef double** ProjMatrixCache[H2DRS_MAX_ORDER + 2][H2DRS_MAX_ORDER + 2];
 
         /// An array of projection matrices.
         /** The first index is the mode (see the enum ElementMode2D). The second and the third index

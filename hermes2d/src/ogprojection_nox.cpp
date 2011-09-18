@@ -172,7 +172,7 @@ namespace Hermes
         // Residual.
         proj_wf->add_vector_form(new ProjectionVectorFormVol(i, source_meshfns[i], norm));
       }
-      for (int i=0; i < n; i++)
+      for (int i = 0; i < n; i++)
       {
         if (!found[i])
         {

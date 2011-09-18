@@ -60,7 +60,7 @@ namespace Hermes
         {
           for (k = 0; k <= 10; k++)
           {
-            np[mode][k] = n = mode ? sqr(k+1) : (k+1)*(k+2)/2;
+            np[mode][k] = n = mode ? sqr(k + 1) : (k + 1)*(k + 2)/2;
             tables[mode][k] = pt = new double3[n];
 
             for (i = k, m = 0; i >= 0; i--)
@@ -323,7 +323,7 @@ namespace Hermes
     {
       int i, j, k, l, m, row;
       double x, y, xn, yn;
-      int n = this->mode ? sqr(o+1) : (o+1)*(o+2)/2;
+      int n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
 
       // loop through all chebyshev points
       double** mat = new_matrix<double>(n, n);
@@ -359,7 +359,7 @@ namespace Hermes
       vec->extract(coeffs);
       // debug
       //printf("coeffs:\n");
-      //for (int i=0; i<9; i++) printf("%g ", coeffs[i]);
+      //for (int i = 0; i<9; i++) printf("%g ", coeffs[i]);
       //printf("\n");
       this->set_coeff_vector(space, coeffs, add_dir_lift);
       delete [] coeffs;
@@ -450,7 +450,7 @@ namespace Hermes
         // Hcurl: actual order of functions is one higher than element order
         if ((space->get_shapeset())->get_num_components() == 2) o++;
 
-        num_coeffs += this->mode ? sqr(o+1) : (o+1)*(o+2)/2;
+        num_coeffs += this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
         elem_orders[e->id] = o;
       }
       num_coeffs *= this->num_components;
@@ -512,7 +512,7 @@ namespace Hermes
     {
       _F_
       if (solution_vector==NULL) throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2,3,spaces.size(),solutions.size());
+      if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       for(unsigned int i = 0; i < solutions.size(); i++)
         if(add_dir_lift == Hermes::vector<bool>())
@@ -551,7 +551,7 @@ namespace Hermes
     {
       _F_
       if (solution_vector==NULL) throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2,3,spaces.size(),solutions.size());
+      if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       for(unsigned int i = 0; i < solutions.size(); i++)
         if(add_dir_lift == Hermes::vector<bool>())
@@ -591,7 +591,7 @@ namespace Hermes
     {
       _F_
       if (solution_vector==NULL) throw Exceptions::NullException(1);
-      if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2,3,spaces.size(),solutions.size());
+      if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       for(unsigned int i = 0; i < solutions.size(); i++)
         if(add_dir_lift == Hermes::vector<bool>())
@@ -664,11 +664,11 @@ namespace Hermes
     {
       int i, j, k;
       for (i = 0; i <= o; i++) {
-        *result++ = 0.0;
+        *result++= 0.0;
         k = mode ? o : i;
         for (j = 0; j < k; j++)
-          *result++ = (Scalar) (k-j) * mono[j];
-        mono += k+1;
+          *result++= (Scalar) (k-j) * mono[j];
+        mono += k + 1;
       }
     }
 
@@ -678,16 +678,16 @@ namespace Hermes
       int i, j;
       if (mode) {
         for (j = 0; j <= o; j++)
-          *result++ = 0.0;
+          *result++= 0.0;
         for (i = 0; i < o; i++)
           for (j = 0; j <= o; j++)
-            *result++ = (Scalar) (o-i) * (*mono++);
+            *result++= (Scalar) (o-i) * (*mono++);
       }
       else {
         for (i = 0; i <= o; i++) {
-          *result++ = 0.0;
+          *result++= 0.0;
           for (j = 0; j < i; j++)
-            *result++ = (Scalar) (o+1-i) * (*mono++);
+            *result++= (Scalar) (o + 1-i) * (*mono++);
         }
       }
     }
@@ -744,18 +744,18 @@ namespace Hermes
       if (sln_type == HERMES_SLN)
       {
         int o = this->order = elem_orders[this->element->id];
-        int n = this->mode ? sqr(o+1) : (o+1)*(o+2)/2;
+        int n = this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
 
         for (int i = 0, m = 0; i < this->num_components; i++)
         {
           Scalar* mono = mono_coeffs + elem_coeffs[i][e->id];
           dxdy_coeffs[i][0] = mono;
 
-          make_dx_coeffs(this->mode, o, mono, dxdy_coeffs[i][1] = dxdy_buffer+m);  m += n;
-          make_dy_coeffs(this->mode, o, mono, dxdy_coeffs[i][2] = dxdy_buffer+m);  m += n;
-          make_dx_coeffs(this->mode, o, dxdy_coeffs[i][1], dxdy_coeffs[i][3] = dxdy_buffer+m);  m += n;
-          make_dy_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][4] = dxdy_buffer+m);  m += n;
-          make_dx_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][5] = dxdy_buffer+m);  m += n;
+          make_dx_coeffs(this->mode, o, mono, dxdy_coeffs[i][1] = dxdy_buffer + m);  m += n;
+          make_dy_coeffs(this->mode, o, mono, dxdy_coeffs[i][2] = dxdy_buffer + m);  m += n;
+          make_dx_coeffs(this->mode, o, dxdy_coeffs[i][1], dxdy_coeffs[i][3] = dxdy_buffer + m);  m += n;
+          make_dy_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][4] = dxdy_buffer + m);  m += n;
+          make_dx_coeffs(this->mode, o, dxdy_coeffs[i][2], dxdy_coeffs[i][5] = dxdy_buffer + m);  m += n;
         }
       }
       else if (sln_type == HERMES_EXACT)
@@ -821,7 +821,7 @@ namespace Hermes
 
             node->values[0][3][i] = sqr((*m)[0][0])*vxx + 2*(*m)[0][1]*(*m)[0][0]*vxy + sqr((*m)[0][1])*vyy + (*mm)[0][0]*vx + (*mm)[0][1]*vy;   // dxx
             node->values[0][4][i] = sqr((*m)[1][0])*vxx + 2*(*m)[1][1]*(*m)[1][0]*vxy + sqr((*m)[1][1])*vyy + (*mm)[2][0]*vx + (*mm)[2][1]*vy;   // dyy
-            node->values[0][5][i] = (*m)[0][0]*(*m)[1][0]*vxx + ((*m)[0][0]*(*m)[1][1]+(*m)[1][0]*(*m)[0][1])*vxy + (*m)[0][1]*(*m)[1][1]*vyy + (*mm)[1][0]*vx + (*mm)[1][1]*vy;   //dxy
+            node->values[0][5][i] = (*m)[0][0]*(*m)[1][0]*vxx + ((*m)[0][0]*(*m)[1][1] + (*m)[1][0]*(*m)[0][1])*vxy + (*m)[0][1]*(*m)[1][1]*vyy + (*mm)[1][0]*vx + (*mm)[1][1]*vy;   //dxy
           }
         }
 #endif
@@ -1319,7 +1319,7 @@ namespace Hermes
           if (b == 4)
             return sqr(mat[1][0])*vxx + 2*mat[1][1]*mat[1][0]*vxy + sqr(mat[1][1])*vyy + mat2[2][0]*vx + mat2[2][1]*vy;   // dyy
           if (b == 5)
-            return mat[0][0]*mat[1][0]*vxx + (mat[0][0]*mat[1][1]+mat[1][0]*mat[0][1])*vxy + mat[0][1]*mat[1][1]*vyy + mat2[1][0]*vx + mat2[1][1]*vy;   //dxy
+            return mat[0][0]*mat[1][0]*vxx + (mat[0][0]*mat[1][1] + mat[1][0]*mat[0][1])*vxy + mat[0][1]*mat[1][1]*vyy + mat2[1][0]*vx + mat2[1][1]*vy;   //dxy
 #endif
         }
       }

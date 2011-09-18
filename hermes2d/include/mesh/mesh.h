@@ -121,7 +121,7 @@ namespace Hermes
       int get_num_surf() {return nvert; }
 
       // helper functions to obtain the index of the next or previous vertex/edge
-      int next_vert(int i) const { return (i < (int)nvert-1) ? i+1 : 0; }
+      int next_vert(int i) const { return (i < (int)nvert-1) ? i + 1 : 0; }
       int prev_vert(int i) const { return (i > 0) ? i-1 : nvert-1; }
 
       bool hsplit() const { assert(!active); return sons[0] != NULL; }

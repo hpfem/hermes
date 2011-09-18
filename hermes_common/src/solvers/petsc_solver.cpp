@@ -36,16 +36,16 @@ namespace Hermes
 
     Hermes::Helpers::CommandLineArgs cmd_line_args;
 
-    inline void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],std::complex<double> y[])
+    inline void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], std::complex<double> y[])
     {
       VecGetValues(x, ni, ix, y);
     }
 
-    void vec_get_value(Vec x,PetscInt ni,const PetscInt ix[],double y[])
+    void vec_get_value(Vec x, PetscInt ni, const PetscInt ix[], double y[])
     {
-      PetscScalar *py=new PetscScalar[ni];
+      PetscScalar *py = new PetscScalar[ni];
       VecGetValues(x, ni, ix, py);
-      for (int i=0;i<ni;i++)y[i]=py[i].real();
+      for (int i = 0;i<ni;i++)y[i] = py[i].real();
       delete [] py;
     }
 
@@ -176,7 +176,7 @@ namespace Hermes
       double v = 0.0;
       PetscScalar pv;
       MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &pv);
-      v=pv.real();
+      v = pv.real();
       return v;
     }
 
@@ -197,7 +197,7 @@ namespace Hermes
     }
 
     inline PetscScalar to_petsc(double x){
-      return std::complex<double>(x,0);
+      return std::complex<double>(x, 0);
     }
 
     inline PetscScalar to_petsc(std::complex<double> x){
@@ -243,9 +243,9 @@ namespace Hermes
       switch (fmt)
       {
       case DF_MATLAB_SPARSE: //only to stdout
-        PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
-        PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-        MatView(matrix,viewer);
+        PetscViewer  viewer = PETSC_VIEWER_STDOUT_SELF;
+        PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+        MatView(matrix, viewer);
         return true;
       }
       return false;
@@ -276,12 +276,12 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
     {
-      for (unsigned int i=0;i<this->size;i++)
+      for (unsigned int i = 0;i<this->size;i++)
       {
-        vector_out[i]=0;
-        for (unsigned int j=0;j<this->size;j++)
+        vector_out[i] = 0;
+        for (unsigned int j = 0;j<this->size;j++)
         {
-          vector_out[i]+=vector_in[j]*get(i,j);
+          vector_out[i] +=vector_in[j]*get(i, j);
         }
       }
     }
@@ -289,7 +289,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add_matrix(PetscMatrix<Scalar>* mat)
     {
-      MatAXPY(matrix,1,mat->matrix,DIFFERENT_NONZERO_PATTERN);    //matrix=1*mat+matrix (matrix and mat have different nonzero structure)
+      MatAXPY(matrix, 1, mat->matrix, DIFFERENT_NONZERO_PATTERN);    //matrix = 1*mat + matrix (matrix and mat have different nonzero structure)
     }
 
     template<typename Scalar>
@@ -310,14 +310,14 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
       _F_;
-      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() ))
+      if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
         error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
-      unsigned int block_size=mat->get_size();
-      for (unsigned int r=0;r<block_size;r++)
+      unsigned int block_size = mat->get_size();
+      for (unsigned int r = 0;r<block_size;r++)
       {
-        for (unsigned int c=0;c<block_size;c++)
+        for (unsigned int c = 0;c<block_size;c++)
         {
-          this->add(i+r,j+c,mat->get(r,c));
+          this->add(i + r, j + c, mat->get(r, c));
         }
       }
     }
@@ -328,7 +328,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::multiply_with_Scalar(Scalar value)
     {
       _F_;
-      MatScale(matrix,to_petsc(value));
+      MatScale(matrix, to_petsc(value));
     }
     // Creates matrix in PETSC format using size, nnz, and the three arrays.
 
@@ -336,12 +336,12 @@ namespace Hermes
     void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
     {
       _F_;
-      this->size=size;
-      this->nnz=nnz;
+      this->size = size;
+      this->nnz = nnz;
       PetscScalar* pax = new PetscScalar[nnz];
-      for (unsigned i=0;i<nnz;i++)
-        pax[i]=to_petsc(ax[i]);
-      MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,size,size,ap,ai,pax,&matrix);
+      for (unsigned i = 0;i<nnz;i++)
+        pax[i] = to_petsc(ax[i]);
+      MatCreateSeqAIJWithArrays(PETSC_COMM_SELF, size, size, ap, ai, pax, &matrix);
       delete pax;
     }
 
@@ -349,10 +349,10 @@ namespace Hermes
     PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate()
     {
       _F_;
-      PetscMatrix<Scalar>*ptscmatrix=new PetscMatrix<Scalar>();
-      MatDuplicate(matrix,MAT_COPY_VALUES,&(ptscmatrix->matrix));
-      ptscmatrix->size=this->size;
-      ptscmatrix->nnz=nnz;
+      PetscMatrix<Scalar>*ptscmatrix = new PetscMatrix<Scalar>();
+      MatDuplicate(matrix, MAT_COPY_VALUES, &(ptscmatrix->matrix));
+      ptscmatrix->size = this->size;
+      ptscmatrix->nnz = nnz;
       return ptscmatrix;
     };
 
@@ -405,7 +405,7 @@ namespace Hermes
       double y = 0;
       PetscScalar py;
       VecGetValues(vec, 1, (PetscInt*) &idx, &py);
-      y=py.real();
+      y = py.real();
       return y;
     }
 
@@ -470,7 +470,7 @@ namespace Hermes
       PetscScalar py;
       for (unsigned int i = 0; i < n; i++)
       {
-        VecSetValue(vec, idx[i],to_petsc(y[i]), ADD_VALUES);
+        VecSetValue(vec, idx[i], to_petsc(y[i]), ADD_VALUES);
       }
     }
 
@@ -481,9 +481,9 @@ namespace Hermes
       switch (fmt)
       {
       case DF_MATLAB_SPARSE: //only to stdout
-        PetscViewer  viewer=PETSC_VIEWER_STDOUT_SELF;
-        PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-        VecView(vec,viewer);
+        PetscViewer  viewer = PETSC_VIEWER_STDOUT_SELF;
+        PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+        VecView(vec, viewer);
         return true;
       }
       return false;

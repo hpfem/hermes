@@ -225,7 +225,7 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add_to_diagonal(Scalar v)
     {
-      for (unsigned int i=0; i < this->size; i++)
+      for (unsigned int i = 0; i < this->size; i++)
       {
         add(i, i, v);
       }
@@ -248,26 +248,26 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat)
     {
-      if ((this->get_size() < i+mat->get_size() )||(this->get_size() < j+mat->get_size() ))
+      if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
         error("Incompatible matrix sizes in Epetra<Scalar>::add_as_block()");
-      unsigned int block_size=mat->get_size();
-      for (unsigned int r=0;r<block_size;r++)
+      unsigned int block_size = mat->get_size();
+      for (unsigned int r = 0;r<block_size;r++)
       {
-        for (unsigned int c=0;c<block_size;c++)
+        for (unsigned int c = 0;c<block_size;c++)
         {
-          this->add(i+r,j+c,mat->get(r,c));
+          this->add(i + r, j + c, mat->get(r, c));
         }
       }
     }
 
     template<typename Scalar>
     void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
-      for (unsigned int i=0;i<this->size;i++) //probably can be optimized by use native vectors
+      for (unsigned int i = 0;i<this->size;i++) //probably can be optimized by use native vectors
       {
-        vector_out[i]=0;
-        for (unsigned int j=0;j<this->size;j++)
+        vector_out[i] = 0;
+        for (unsigned int j = 0;j<this->size;j++)
         {
-          vector_out[i]+=vector_in[j]*get(i,j);
+          vector_out[i] +=vector_in[j]*get(i, j);
         }
       }
     }

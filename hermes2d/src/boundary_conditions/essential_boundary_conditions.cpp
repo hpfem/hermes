@@ -82,7 +82,7 @@ namespace Hermes
       ExactSolutionScalar<Scalar>* exact_solution)
       : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution(exact_solution)
     {
-      for (unsigned int i=0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
+      for (unsigned int i = 0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
     };
 
     template<typename Scalar>
@@ -104,7 +104,7 @@ namespace Hermes
       ExactSolutionVector<Scalar>* exact_solution2)
       : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2)
     {
-      for (unsigned int i=0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
+      for (unsigned int i = 0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
     };
 
     template<typename Scalar>

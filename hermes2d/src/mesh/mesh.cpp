@@ -331,7 +331,7 @@ namespace Hermes
       // adjust mid-edge coordinates if this is a curved element
       if (e->is_curved())
       {
-        double2 pt[3] = { { 0.0,-1.0 }, { 0.0, 0.0 }, { -1.0, 0.0 } };
+        double2 pt[3] = { { 0.0, -1.0 }, { 0.0, 0.0 }, { -1.0, 0.0 } };
         e->cm->get_mid_edge_points(e, pt, 3);
         x0->x = pt[0][0]; x0->y = pt[0][1];
         x1->x = pt[1][0]; x1->y = pt[1][1];
@@ -449,7 +449,7 @@ namespace Hermes
         // adjust mid-edge coordinates if this is a curved element
         if (e->is_curved())
         {
-          double2 pt[5] = { { 0.0,-1.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, 0.0 } };
+          double2 pt[5] = { { 0.0, -1.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, 0.0 } };
           e->cm->get_mid_edge_points(e, pt, 5);
           x0->x = pt[0][0];  x0->y = pt[0][1];
           x1->x = pt[1][0];  x1->y = pt[1][1];
@@ -744,7 +744,7 @@ namespace Hermes
       // refinement: refine all elements to quad elements.
       for (int i = 0; i < depth; i++)
       {
-        int size = get_max_node_id()+1;
+        int size = get_max_node_id() + 1;
         rtb_vert = new char[size];
         memset(rtb_vert, 0, sizeof(char) * size);
 
@@ -782,7 +782,7 @@ namespace Hermes
         // refinement: refine all elements to quad elements.
         for (int i = 0; i < depth; i++)
         {
-          int size = get_max_node_id()+1;
+          int size = get_max_node_id() + 1;
           rtb_vert = new char[size];
           memset(rtb_vert, 0, sizeof(char) * size);
 
@@ -1334,7 +1334,7 @@ namespace Hermes
       {
         if (!e_inter)
         {
-          double2 pt[4] = { { 0.0,-1.0 }, { 0.0, 0.0 },{ -1.0, 0.0 }, { -0.33333333, -0.33333333 } };
+          double2 pt[4] = { { 0.0, -1.0 }, { 0.0, 0.0 }, { -1.0, 0.0 }, { -0.33333333, -0.33333333 } };
           e->cm->get_mid_edge_points(e, pt, 4);
           x0->x = pt[0][0]; x0->y = pt[0][1];
           x1->x = pt[1][0]; x1->y = pt[1][1];
@@ -1424,8 +1424,8 @@ namespace Hermes
           {
             cm[idx] = new CurvMap;
             memset(cm[idx], 0, sizeof(CurvMap));
-            cm[idx+1] = new CurvMap;
-            memset(cm[idx+1], 0, sizeof(CurvMap));
+            cm[idx + 1] = new CurvMap;
+            memset(cm[idx + 1], 0, sizeof(CurvMap));
           }
         }
 
@@ -1433,7 +1433,7 @@ namespace Hermes
         if (e->cm->nurbs[idx] != NULL)
         {
           angle2 = refinement_angle[0] / 2;
-          Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
+          Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx + 1)%3]->id);
 
           for (int k = 0; k < 2; k++)
           {
@@ -1451,8 +1451,8 @@ namespace Hermes
             else if (k == 1)
             {
               p1 = node_temp->id;
-              p2 = e->vn[(idx+1)%3]->id;
-              idx = (idx+1)%3;
+              p2 = e->vn[(idx + 1)%3]->id;
+              idx = (idx + 1)%3;
               if (idx == 0) continue;
               if (idx == 1) idx2 = 0;
               if (idx == 2) idx2 = 0;
@@ -1472,9 +1472,9 @@ namespace Hermes
             nurbs->pt[0][1] = nodes[p1].y;
             nurbs->pt[0][2] = 1.0;
 
-            nurbs->pt[inner+1][0] = nodes[p2].x;
-            nurbs->pt[inner+1][1] = nodes[p2].y;
-            nurbs->pt[inner+1][2] = 1.0;
+            nurbs->pt[inner + 1][0] = nodes[p2].x;
+            nurbs->pt[inner + 1][1] = nodes[p2].y;
+            nurbs->pt[inner + 1][2] = 1.0;
 
             double angle = angle2;
             double a = (180.0 - angle) / 180.0 * M_PI;
@@ -1511,7 +1511,7 @@ namespace Hermes
         if (e->cm->nurbs[idx] != NULL)
         {
           angle2 = refinement_angle[1] / 2;
-          Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx+1)%3]->id);
+          Node* node_temp = this->get_vertex_node(e->vn[idx%3]->id, e->vn[(idx + 1)%3]->id);
           for (int k = 0; k < 2; k++)
           {
             int p1, p2;
@@ -1527,8 +1527,8 @@ namespace Hermes
             else if (k == 1)
             {
               p1 = node_temp->id;
-              p2 = e->vn[(idx+1)%3]->id;
-              idx = (idx+1)%3;
+              p2 = e->vn[(idx + 1)%3]->id;
+              idx = (idx + 1)%3;
               if (idx == 0) continue;
               if (idx == 1) idx2 = 0;
               if (idx == 2) idx2 = 0;
@@ -1547,9 +1547,9 @@ namespace Hermes
             nurbs->pt[0][1] = nodes[p1].y;
             nurbs->pt[0][2] = 1.0;
 
-            nurbs->pt[inner+1][0] = nodes[p2].x;
-            nurbs->pt[inner+1][1] = nodes[p2].y;
-            nurbs->pt[inner+1][2] = 1.0;
+            nurbs->pt[inner + 1][0] = nodes[p2].x;
+            nurbs->pt[inner + 1][1] = nodes[p2].y;
+            nurbs->pt[inner + 1][2] = 1.0;
 
             double angle = angle2;
             double a = (180.0 - angle) / 180.0 * M_PI;
@@ -1730,9 +1730,9 @@ namespace Hermes
               nurbs->pt[0][1] = nodes[p1].y;
               nurbs->pt[0][2] = 1.0;
 
-              nurbs->pt[inner+1][0] = nodes[p2].x;
-              nurbs->pt[inner+1][1] = nodes[p2].y;
-              nurbs->pt[inner+1][2] = 1.0;
+              nurbs->pt[inner + 1][0] = nodes[p2].x;
+              nurbs->pt[inner + 1][1] = nodes[p2].y;
+              nurbs->pt[inner + 1][2] = 1.0;
 
               double angle = angle2;
               double a = (180.0 - angle) / 180.0 * M_PI;
@@ -2020,9 +2020,9 @@ namespace Hermes
             nurbs->pt[0][1] = nodes[p1].y;
             nurbs->pt[0][2] = 1.0;
 
-            nurbs->pt[inner+1][0] = nodes[p2].x;
-            nurbs->pt[inner+1][1] = nodes[p2].y;
-            nurbs->pt[inner+1][2] = 1.0;
+            nurbs->pt[inner + 1][0] = nodes[p2].x;
+            nurbs->pt[inner + 1][1] = nodes[p2].y;
+            nurbs->pt[inner + 1][2] = 1.0;
 
             double angle = angle2;
             double a = (180.0 - angle) / 180.0 * M_PI;
@@ -2216,9 +2216,9 @@ namespace Hermes
             nurbs->pt[0][1] = nodes[p1].y;
             nurbs->pt[0][2] = 1.0;
 
-            nurbs->pt[inner+1][0] = nodes[p2].x;
-            nurbs->pt[inner+1][1] = nodes[p2].y;
-            nurbs->pt[inner+1][2] = 1.0;
+            nurbs->pt[inner + 1][0] = nodes[p2].x;
+            nurbs->pt[inner + 1][1] = nodes[p2].y;
+            nurbs->pt[inner + 1][2] = 1.0;
 
             double angle = angle2;
             double a = (180.0 - angle) / 180.0 * M_PI;
@@ -2383,7 +2383,7 @@ namespace Hermes
         // adjust mid-edge coordinates if this is a curved element
         if (e->is_curved())
         {
-          double2 pt[5] = { { 0.0,-1.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, 0.0 } };
+          double2 pt[5] = { { 0.0, -1.0 }, { 1.0, 0.0 }, { 0.0, 1.0 }, { -1.0, 0.0 }, { 0.0, 0.0 } };
           e->cm->get_mid_edge_points(e, pt, 5);
           x0->x = pt[0][0];  x0->y = pt[0][1];
           x1->x = pt[1][0];  x1->y = pt[1][1];
@@ -2402,8 +2402,8 @@ namespace Hermes
             {
               cm[i%4] = new CurvMap;
               memset(cm[i%4], 0, sizeof(CurvMap));
-              cm[(i+1)%4] = new CurvMap;
-              memset(cm[(i+1)%4], 0, sizeof(CurvMap));
+              cm[(i + 1)%4] = new CurvMap;
+              memset(cm[(i + 1)%4], 0, sizeof(CurvMap));
             }
           }
 
@@ -2413,7 +2413,7 @@ namespace Hermes
               if ((fabs(refinement_angle[idx%4] - 0.0) > 1e-4))
               {
                 angle2 = refinement_angle[idx%4] / 2;
-                Node* node_temp = this->get_vertex_node(e->vn[idx%4]->id, e->vn[(idx+1)%4]->id);
+                Node* node_temp = this->get_vertex_node(e->vn[idx%4]->id, e->vn[(idx + 1)%4]->id);
 
                 int p1, p2;
                 p1 = e->vn[(idx)%4]->id;
@@ -2433,9 +2433,9 @@ namespace Hermes
                 nurbs->pt[0][1] = nodes[p1].y;
                 nurbs->pt[0][2] = 1.0;
 
-                nurbs->pt[inner+1][0] = nodes[p2].x;
-                nurbs->pt[inner+1][1] = nodes[p2].y;
-                nurbs->pt[inner+1][2] = 1.0;
+                nurbs->pt[inner + 1][0] = nodes[p2].x;
+                nurbs->pt[inner + 1][1] = nodes[p2].y;
+                nurbs->pt[inner + 1][2] = 1.0;
 
                 double angle = angle2;
                 double a = (180.0 - angle) / 180.0 * M_PI;
@@ -2467,10 +2467,10 @@ namespace Hermes
                 nurbs->ref++;
               }
 
-              if ((fabs(refinement_angle[(idx+3)%4] - 0.0) > 1e-4))
+              if ((fabs(refinement_angle[(idx + 3)%4] - 0.0) > 1e-4))
               {
-                angle2 = refinement_angle[(idx+3)%4]/2;
-                Node* node_temp = this->get_vertex_node(e->vn[idx%4]->id, e->vn[(idx+1)%4]->id);
+                angle2 = refinement_angle[(idx + 3)%4]/2;
+                Node* node_temp = this->get_vertex_node(e->vn[idx%4]->id, e->vn[(idx + 1)%4]->id);
 
                 int p1, p2;
                 p1 = e->vn[(idx)%4]->id;
@@ -2490,9 +2490,9 @@ namespace Hermes
                 nurbs->pt[0][1] = nodes[p1].y;
                 nurbs->pt[0][2] = 1.0;
 
-                nurbs->pt[inner+1][0] = nodes[p2].x;
-                nurbs->pt[inner+1][1] = nodes[p2].y;
-                nurbs->pt[inner+1][2] = 1.0;
+                nurbs->pt[inner + 1][0] = nodes[p2].x;
+                nurbs->pt[inner + 1][1] = nodes[p2].y;
+                nurbs->pt[inner + 1][2] = 1.0;
 
                 double angle = angle2;
                 double a = (180.0 - angle) / 180.0 * M_PI;
@@ -2520,7 +2520,7 @@ namespace Hermes
 
                 cm[idx]->toplevel = 1;
                 cm[idx]->order = 4;
-                cm[idx]->nurbs[(idx+3)%4] = nurbs;
+                cm[idx]->nurbs[(idx + 3)%4] = nurbs;
                 nurbs->ref++;
               }
             }
@@ -2566,7 +2566,7 @@ namespace Hermes
       Node* v3 = peek_vertex_node(v1->id, v2->id);
       if (v3 != NULL)
       {
-        degree = 1 + std::max(get_edge_degree(v1,v3), get_edge_degree(v3,v2));
+        degree = 1 + std::max(get_edge_degree(v1, v3), get_edge_degree(v3, v2));
       }
       return degree;
     }
@@ -2785,7 +2785,7 @@ namespace Hermes
         if (node->elem[1] != NULL) node->elem[1] = (Element*) (node->elem[1]->id + 1);
       }
 
-      int* idx = new int[elements.get_size()+1];
+      int* idx = new int[elements.get_size() + 1];
       Array<Element> new_elements;
       Element* e;
       for_all_active_elements(e, this)
@@ -2888,7 +2888,7 @@ namespace Hermes
 
       if (reg)
       {
-        for_all_active_elements(e,this)
+        for_all_active_elements(e, this)
         {
           if (e->is_curved()) error("Regularization of curved elements is not supported.");
 
