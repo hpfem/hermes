@@ -248,7 +248,7 @@ namespace Hermes
       {
         int part = nd->part;
         int ori = part < 0 ? 1 : 0;
-        if (part < 0) part ^ =  ~0;
+        if (part < 0) part ^=  ~0;
 
         nd = &this->ndata[nd->base->id]; // ccc
         for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
@@ -357,7 +357,7 @@ namespace Hermes
             nd = &this->ndata[e->en[i]->id];
             nd->base = ei[i]->node;
             nd->part = ei[i]->part;
-            if (ei[i]->ori) nd->part ^ =  ~0;
+            if (ei[i]->ori) nd->part ^=  ~0;
           }
         }
       }
