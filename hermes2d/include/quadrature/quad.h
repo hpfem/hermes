@@ -28,15 +28,11 @@ namespace Hermes
       H2D_GIP2D_W = 2  ///< A weight.
     };
 
-#define H2D_GIP1D_X 0
-#define H2D_GIP1D_W 1
+    static int H2D_GIP1D_X = 0;
+    static int H2D_GIP1D_W = 1;
 
-#ifdef EXTREME_QUAD
-    const int g_max_quad = 99;
-#else
     const int g_max_quad = 24;
     const int g_max_tri = 20;
-#endif
 
     /// Quad1D is a base class for all 1D quadrature points.
     ///

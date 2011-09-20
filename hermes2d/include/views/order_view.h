@@ -31,8 +31,8 @@ namespace Hermes
     {
       // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
-
-#define H2DV_MAX_VIEWABLE_ORDER 10 ///< Maximum viewable order.
+      
+      static const int H2DV_MAX_VIEWABLE_ORDER = 10; ///< Maximum viewable order.
 
       /// \brief Displays the polynomial degrees of elements.
       ///

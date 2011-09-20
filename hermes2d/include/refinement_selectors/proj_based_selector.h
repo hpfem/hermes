@@ -30,10 +30,6 @@ namespace Hermes
       *  The maximum allowed order is ::H2DRS_MAX_ORDER + 1. */
       typedef double CandElemProjError[H2DRS_MAX_ORDER + 2][H2DRS_MAX_ORDER + 2];
 
-# define H2DRS_DEFAULT_ERR_WEIGHT_H 2.0 ///< A default multiplicative coefficient of an error of a H-candidate. \ingroup g_selectors
-# define H2DRS_DEFAULT_ERR_WEIGHT_P 1.0 ///< A default multiplicative coefficient of an error of a P-candidate. \ingroup g_selectors
-# define H2DRS_DEFAULT_ERR_WEIGHT_ANISO 1.414214 ///< A default multiplicative coefficient of an error of a ANISO-candidate. \ingroup g_selectors
-
       /// A general projection-based selector. \ingroup g_selectors
       /** Calculates an error of a candidate as a combination of errors of
       *  elements of a candidate. Each element of a candidate is calculated
@@ -187,9 +183,10 @@ namespace Hermes
         bool warn_uniform_orders;
 
       protected: //error evaluation
-#define H2DRS_VALCACHE_INVALID 0 ///< State of value cache: item contains undefined or invalid value. \ingroup g_selectors
-#define H2DRS_VALCACHE_VALID 1 ///< State of value cache: item contains a valid value. \ingroup g_selectors
-#define H2DRS_VALCACHE_USER 2 ///< State of value cache: the first state ID which can be used by the user. \ingroup g_selectors
+        static const int H2DRS_VALCACHE_INVALID = 0; ///< State of value cache: item contains undefined or invalid value. \ingroup g_selectors
+        static const int H2DRS_VALCACHE_VALID = 1; ///< State of value cache: item contains a valid value. \ingroup g_selectors
+        static const int H2DRS_VALCACHE_USER = 2; ///< State of value cache: the first state ID which can be used by the user. \ingroup g_selectors
+
         /// An item of a value cache.
         template<typename T>
         struct ValueCacheItem {

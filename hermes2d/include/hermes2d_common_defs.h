@@ -26,6 +26,58 @@
 #include "hermes_common.h"
 #include "config.h"
 
+/// Macros.
+#define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
+
+#define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
+
+#define HERMES_ONE NULL
+#define HERMES_DEFAULT_FUNCTION NULL
+#define HERMES_DEFAULT_SPLINE NULL
+
+#define H2D_MAX_COMPONENTS 10 ///< A maximum number of components in Hermes2D.
+
+    /// Constant used by Adapt::calc_eror().
+#define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
+    ///  The total error is divided by the norm and therefore it should be in a range [0, 1].
+    ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
+#define HERMES_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
+    ///  The total error is absolute, i.e., it is an integral over squares of differencies.
+    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_TOTAL_ERROR_REL.
+#define HERMES_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
+    ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
+    ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
+    ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
+    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
+#define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
+    ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
+    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
+
+
+    /// Macros for combining quad horizontal and vertical orders.
+#define H2D_MAKE_QUAD_ORDER(h_order, v_order) (((v_order) << H2D_ORDER_BITS) + (h_order))
+#define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
+#define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
+    
+    /// Enabling second derivatives in weak forms. Turned on by default. Second
+    /// derivatives are employed, among others, by stabilization methods for
+    /// transport equations. For usage see the example linear-convection-diffusion.
+#define H2D_SECOND_DERIVATIVES_ENABLED
+
+#define H2DRS_ASSUMED_MAX_CANDS 512 ///< An estimated maximum number of candidates. Used for purpose of reserving space. \internal \ingroup g_selectors
+
+//TODO: find out why 20 used used, should'n be there 2*(H2DRS_MAX_ORDER+1)
+#define H2DRS_INTR_GIP_ORDER 20 ///< An integration order used to integrate while evaluating a candidate. \internal \ingroup g_selectors
+#define H2DRS_MAX_ORDER_INC 2 ///< Maximum increase of an order in candidates. \ingroup g_selectors
+
+#define H2DRS_SCORE_DIFF_ZERO 1E-13 ///< A threshold of difference between scores. Anything below this values is considered zero. \internal \ingroup g_selectors
+
+#define H2DRS_ORDER_ANY -1 ///< Any order. Used as a wildcard to indicate that a given order can by any valid order. \internal \ingroup g_selectors
+
+# define H2DRS_DEFAULT_ERR_WEIGHT_H 2.0 ///< A default multiplicative coefficient of an error of a H-candidate. \ingroup g_selectors
+# define H2DRS_DEFAULT_ERR_WEIGHT_P 1.0 ///< A default multiplicative coefficient of an error of a P-candidate. \ingroup g_selectors
+# define H2DRS_DEFAULT_ERR_WEIGHT_ANISO 1.414214 ///< A default multiplicative coefficient of an error of a ANISO-candidate. \ingroup g_selectors
+
 namespace Hermes
 {
   /// Namespace containing definitions specific for Hermes2D.
@@ -59,20 +111,9 @@ namespace Hermes
       HERMES_INVALID_SPACE = -9999
     };
 
-#define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
-
-#define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
-
-#define HERMES_ONE NULL
-
     /// How many bits the order number takes.
     const int H2D_ORDER_BITS = 5;
     const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
-
-    /// Macros for combining quad horizontal and vertical orders.
-#define H2D_MAKE_QUAD_ORDER(h_order, v_order) (((v_order) << H2D_ORDER_BITS) + (h_order))
-#define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
-#define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
 
     /// Geometrical type of weak forms.
     enum GeomType
@@ -81,11 +122,6 @@ namespace Hermes
       HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
       HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
     };
-
-    /// Enabling second derivatives in weak forms. Turned on by default. Second
-    /// derivatives are employed, among others, by stabilization methods for
-    /// transport equations. For usage see the example linear-convection-diffusion.
-#define H2D_SECOND_DERIVATIVES_ENABLED
 
     /// Projection norms.
     enum ProjNormType
@@ -108,9 +144,6 @@ namespace Hermes
     class Quad2D;
     class Quad1DStd;
     class Quad2DStd;
-
-#define HERMES_DEFAULT_FUNCTION NULL
-#define HERMES_DEFAULT_SPLINE NULL
 
     /// Class for global functions.
     template<typename Scalar>
