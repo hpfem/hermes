@@ -82,7 +82,7 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
       vv[imax] = vv[j];
     }
     indx[j] = imax;
-    if (a[j][j] == 0.0) a[j][j] = HERMES_TINY;
+    if (a[j][j] == 0.0) a[j][j] = 1.0e-20;
     if (j != n-1)
     {
       dum = 1.0 / (a[j][j]);

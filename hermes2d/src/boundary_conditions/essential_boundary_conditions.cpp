@@ -17,8 +17,6 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#define HERMES_REPORT_WARN
-
 #include "essential_boundary_conditions.h"
 #include "exact_solution.h"
 namespace Hermes

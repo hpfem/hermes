@@ -25,8 +25,6 @@
 #include "common.h"
 #include "error.h"
 
-#define HERMES_TINY 1.0e-20
-
 using namespace Hermes::Error;
 
 namespace Hermes
