@@ -36,21 +36,15 @@ namespace Hermes
       {
       public:
 
-        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
-          : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
-
-        VectorBaseView(char* title, WinGeom* wg = NULL)
-          : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL);
+        
+        VectorBaseView(char* title, WinGeom* wg = NULL);
 
         void show(Space<Scalar>* space);
 
-        virtual void set_title(const char* t) {
-          if (basic_title.length() == 0)
-            basic_title.assign(t);
-          View::set_title(t);
-        }
+        virtual void set_title(const char* t);
 
-        virtual ~VectorBaseView() { free(); }
+        virtual ~VectorBaseView();
 
       protected:
 

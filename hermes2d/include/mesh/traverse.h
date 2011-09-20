@@ -60,7 +60,7 @@ namespace Hermes
       void finish();
 
       Element** get_next_state(bool* bnd, SurfPos* surf_pos);
-      Element*  get_base() const { return base; }
+      inline Element*  get_base() const { return base; }
 
       UniData** construct_union_mesh(Mesh* unimesh);
 

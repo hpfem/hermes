@@ -67,11 +67,11 @@ namespace Hermes
 
         void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
 
-        void show_mesh(bool show = true) { show_edges = show; refresh(); }
-        void show_bounding_box(bool show = true) { show_aabb = show; refresh(); }
+        inline void show_mesh(bool show = true) { show_edges = show; refresh(); }
+        inline void show_bounding_box(bool show = true) { show_aabb = show; refresh(); }
         void show_contours(double step, double orig = 0.0);
-        void hide_contours() { contours = false; refresh(); }
-        void set_3d_mode(bool enable = true) { mode3d = enable; refresh(); }
+        inline void hide_contours() { contours = false; refresh(); }
+        inline void set_3d_mode(bool enable = true) { mode3d = enable; refresh(); }
         void set_vertical_scaling(double sc);  ///< Sets the scaling on the vertical axis programmatically.
         void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
 

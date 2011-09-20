@@ -45,16 +45,16 @@ namespace Hermes
       public:
         ViewMonitor();
         ~ViewMonitor();
-        void enter() { pthread_mutex_lock(&mutex); }; ///< enters protected section
-        void leave() { pthread_mutex_unlock(&mutex); }; ///< leaves protected section
-        void signal_keypress() { pthread_cond_broadcast(&cond_keypress); }; ///< signals keypress inside a protected section
-        void wait_keypress() { pthread_cond_wait(&cond_keypress, &mutex); }; ///< waits for keypress inside a protected section
-        void signal_close() { pthread_cond_broadcast(&cond_close); }; ///< signals close inside a protected section
-        void wait_close() { pthread_cond_wait(&cond_close, &mutex); }; ///< waits for close inside a protected section
-        void signal_drawing_finished() { pthread_cond_broadcast(&cond_drawing_finished); }; ///< signals drawing finished inside a protected section
-        void wait_drawing_fisnihed() { pthread_cond_wait(&cond_drawing_finished, &mutex); }; ///< waits for drawing finished inside a protected section
-        void signal_cross_thread_call() { pthread_cond_broadcast(&cond_cross_thread_call); }; ///< signals that cross-thread-call finished
-        void wait_cross_thread_call() { pthread_cond_wait(&cond_cross_thread_call, &mutex); }; ///< waits for finishing of a cross-thread call
+        inline void enter() { pthread_mutex_lock(&mutex); }; ///< enters protected section
+        inline void leave() { pthread_mutex_unlock(&mutex); }; ///< leaves protected section
+        inline void signal_keypress() { pthread_cond_broadcast(&cond_keypress); }; ///< signals keypress inside a protected section
+        inline void wait_keypress() { pthread_cond_wait(&cond_keypress, &mutex); }; ///< waits for keypress inside a protected section
+        inline void signal_close() { pthread_cond_broadcast(&cond_close); }; ///< signals close inside a protected section
+        inline void wait_close() { pthread_cond_wait(&cond_close, &mutex); }; ///< waits for close inside a protected section
+        inline void signal_drawing_finished() { pthread_cond_broadcast(&cond_drawing_finished); }; ///< signals drawing finished inside a protected section
+        inline void wait_drawing_fisnihed() { pthread_cond_wait(&cond_drawing_finished, &mutex); }; ///< waits for drawing finished inside a protected section
+        inline void signal_cross_thread_call() { pthread_cond_broadcast(&cond_cross_thread_call); }; ///< signals that cross-thread-call finished
+        inline void wait_cross_thread_call() { pthread_cond_wait(&cond_cross_thread_call, &mutex); }; ///< waits for finishing of a cross-thread call
       };
 
       /* exported types */

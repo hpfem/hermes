@@ -83,7 +83,7 @@ namespace Hermes
       virtual ~Solution();
 
       void assign(Solution* sln);
-      Solution& operator = (Solution& sln) { assign(&sln); return *this; }
+      inline Solution& operator = (Solution& sln) { assign(&sln); return *this; }
 
       void copy(const Solution<Scalar>* sln);
 
@@ -128,10 +128,10 @@ namespace Hermes
       void multiply(Scalar coef);
 
       /// Returns solution type.
-      SolutionType get_type() const { return sln_type; };
+      inline SolutionType get_type() const { return sln_type; };
 
       /// Returns space type.
-      SpaceType get_space_type() const { return space_type; };
+      inline SpaceType get_space_type() const { return space_type; };
 
       /// Internal.
       virtual void set_active_element(Element* e);

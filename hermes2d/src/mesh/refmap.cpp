@@ -34,6 +34,117 @@ namespace Hermes
       set_quad_2d(&g_quad_2d_std); // default quadrature
     }
 
+    RefMap::~RefMap() { free(); }
+
+    /// Sets the quadrature points in which the reference map will be evaluated.
+    /// \param quad_2d [in] The quadrature points.
+    void set_quad_2d(Quad2D* quad_2d);
+
+    /// Returns the current quadrature points.
+    Quad2D* RefMap::get_quad_2d() const 
+    { 
+      return quad_2d;
+    }
+
+    /// Returns the 1D quadrature for use in surface integrals.
+    const Quad1D* RefMap::get_quad_1d() const 
+    {
+      return &quad_1d; 
+    }
+
+    /// Returns true if the jacobian of the reference map is constant (which
+    /// is the case for non-curvilinear triangular elements), false otherwise.
+    bool RefMap::is_jacobian_const() const 
+    {
+      return is_const; 
+    }
+
+    /// Returns the increase in the integration order due to the reference map.
+    int RefMap::get_inv_ref_order() const 
+    {
+      return inv_ref_order; 
+    }
+
+    /// If the jacobian of the reference map is constant, this is the fast
+    /// way to obtain it.
+    double RefMap::get_const_jacobian() const 
+    {
+      return const_jacobian; 
+    }
+
+    /// If the reference map is constant, this is the fast way to obtain
+    /// its inverse matrix.
+    double2x2* RefMap::get_const_inv_ref_map()
+    {
+      return &const_inv_ref_map; 
+    }
+
+    /// Returns the jacobian of the reference map precalculated at the integration
+    /// points of the specified order. Intended for non-constant jacobian elements.
+    double* RefMap::get_jacobian(int order)
+    {
+      if (cur_node->inv_ref_map[order] == NULL)
+        calc_inv_ref_map(order);
+      return cur_node->jacobian[order];
+    }
+
+    /// Returns the inverse matrices of the reference map precalculated at the
+    /// integration points of the specified order. Intended for non-constant
+    /// jacobian elements.
+    double2x2* RefMap::get_inv_ref_map(int order)
+    {
+      if (cur_node->inv_ref_map[order] == NULL) calc_inv_ref_map(order);
+      return cur_node->inv_ref_map[order];
+    }
+
+    /// Returns coefficients for weak forms with second derivatives.
+    double3x2* RefMap::get_second_ref_map(int order)
+    {
+      if (cur_node->second_ref_map[order] == NULL) calc_second_ref_map(order);
+      return cur_node->second_ref_map[order];
+    }
+
+    /// Returns the x-coordinates of the integration points transformed to the
+    /// physical domain of the element. Intended for integrals containing spatial
+    /// variables.
+    double* RefMap::get_phys_x(int order)
+    {
+      if (cur_node->phys_x[order] == NULL) calc_phys_x(order);
+      return cur_node->phys_x[order];
+    }
+
+    /// Returns he y-coordinates of the integration points transformed to the
+    /// physical domain of the element. Intended for integrals containing spatial
+    /// variables.
+    double* RefMap::get_phys_y(int order)
+    {
+      if (cur_node->phys_y[order] == NULL) calc_phys_y(order);
+      return cur_node->phys_y[order];
+    }
+
+    /// Returns the triples [x, y, norm] of the tangent to the specified (possibly
+    /// curved) edge at the 1D integration points along the edge. The maximum
+    /// 1D quadrature rule is used by default, but the user may specify his own
+    /// order. In this case, the edge pseudo-order is expected (as returned by
+    /// Quad2D::get_edge_points).
+    double3* RefMap::get_tangent(int edge, int order)
+    {
+      if(quad_2d == NULL)
+        error("2d quadrature wasn't set.");
+      if (order == -1)
+        order = quad_2d->get_edge_points(edge);
+
+      // NOTE: Hermes::Order-based caching of geometric data is already employed in DiscreteProblem.
+      if(cur_node->tan[edge] != NULL)
+      {
+        delete[] cur_node->tan[edge];
+        cur_node->tan[edge] = NULL;
+      }
+      calc_tangent(edge, order);
+
+      return cur_node->tan[edge];
+    }
+
     void RefMap::set_quad_2d(Quad2D* quad_2d)
     {
       free();

@@ -109,13 +109,7 @@ namespace Hermes
       unsigned int get_neq() { return neq; }
 
       /// Deletes all volumetric and surface forms.
-      void delete_all()
-      {
-        mfvol.clear();
-        mfsurf.clear();
-        vfvol.clear();
-        vfsurf.clear();
-      };
+      void delete_all();
 
       /// Internal. Used by DiscreteProblem to detect changes in the weakform.
       int get_seq() const { return seq; }

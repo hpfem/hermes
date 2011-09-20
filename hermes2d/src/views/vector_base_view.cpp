@@ -46,6 +46,26 @@ namespace Hermes
         update_solution();
       }
 
+      template<typename Scalar>
+      VectorBaseView<Scalar>::VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL)
+        : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+
+      template<typename Scalar>
+      VectorBaseView<Scalar>::VectorBaseView(char* title, WinGeom* wg = NULL)
+        : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
+
+      template<typename Scalar>
+      void VectorBaseView<Scalar>::set_title(const char* t) {
+        if (basic_title.length() == 0)
+          basic_title.assign(t);
+        View::set_title(t);
+      }
+
+      template<typename Scalar>
+      VectorBaseView<Scalar>::~VectorBaseView() 
+      { 
+        free(); 
+      }
 
       template<typename Scalar>
       void VectorBaseView<Scalar>::free()

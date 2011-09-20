@@ -25,6 +25,31 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
+    {
+      _F_;
+
+      this->neq = neq;
+      this->seq = 0;
+      this->is_matfree = mat_free;
+    }
+
+    template<typename Scalar>
+    WeakForm<Scalar>::~WeakForm()
+    {
+      delete_all();
+    }
+    
+    template<typename Scalar>
+    void WeakForm<Scalar>::delete_all()
+    {
+      mfvol.clear();
+      mfsurf.clear();
+      vfvol.clear();
+      vfsurf.clear();
+    };
+
+    template<typename Scalar>
     Form<Scalar>::Form(std::string area, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
     ext(ext), scaling_factor(scaling_factor), u_ext_offset(u_ext_offset)
@@ -283,20 +308,6 @@ namespace Hermes
       return NULL;
     }
 
-    template<typename Scalar>
-    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
-    {
-      _F_;
-
-      this->neq = neq;
-      this->seq = 0;
-      this->is_matfree = mat_free;
-    }
-
-    template<typename Scalar>
-    WeakForm<Scalar>::~WeakForm()
-    {
-    }
 
     template<typename Scalar>
     void WeakForm<Scalar>::add_matrix_form(MatrixFormVol<Scalar>* form)
