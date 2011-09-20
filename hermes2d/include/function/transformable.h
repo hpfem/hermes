@@ -82,7 +82,7 @@ namespace Hermes
       void set_transform(uint64_t idx);
 
       /// \return The current transform index.
-      inline uint64_t get_transform() const;
+      uint64_t get_transform() const;
 
       /// Empties the stack, loads identity transform.
       void reset_transform();
