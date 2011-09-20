@@ -98,14 +98,14 @@ namespace Hermes
       Function();
 
       /// \brief Returns the polynomial degree of the function being represented by the class.
-      int get_fn_order() const { return order; }
+      int get_fn_order() const;
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.
       /// \param edge [in] Edge at which the order should be evaluated. (0-3)
-      virtual int get_edge_fn_order(int edge) const { return order; }
+      virtual int get_edge_fn_order(int edge) const;
 
       /// \brief Returns the number of components of the function being represented by the class.
-      int get_num_components() const { return num_components; }
+      int get_num_components() const;
 
       /// Activates an integration rule of the specified order. Subsequent calls to
       /// get_values(), get_dx_values() etc. will be returning function values at these points.
@@ -113,95 +113,47 @@ namespace Hermes
       /// \param mask [in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY,
       ///   H2D_FN_DXX, H2D_FN_DYY, H2D_FN_DXY specifying the values which should be precalculated. The default is
       ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
-      void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT)
-      {
-        if(nodes->present(order)) {
-          cur_node = nodes->get(order);
-          // If the mask has changed.
-          if((cur_node->mask & mask) != mask) {
-            precalculate(order, mask);
-            nodes->add(cur_node, order);
-          }
-        }
-        else {
-          // The value had not existed.
-          cur_node = NULL;
-          precalculate(order, mask);
-          nodes->add(cur_node, order);
-        }
-      }
+      void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
 
       /// \brief Returns function values.
       /// \param component [in] The component of the function (0 or 1).
       /// \return The values of the function at all points of the current integration rule.
-      Scalar* get_fn_values(int component = 0)
-      {
-        check_params; check_table(0, "Function values");
-        return cur_node->values[component][0];
-      }
+      Scalar* get_fn_values(int component = 0);
 
       /// \brief Returns the x partial derivative.
       /// \param component [in] The component of the function (0 or 1).
       /// \return The x partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dx_values(int component = 0)
-      {
-        check_params; check_table(1, "DX values");
-        return cur_node->values[component][1];
-      }
+      Scalar* get_dx_values(int component = 0);
 
       /// \brief Returns the y partial derivative.
       /// \param component [in] The component of the function (0 or 1).
       /// \return The y partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dy_values(int component = 0)
-      {
-        check_params; check_table(2, "DY values");
-        return cur_node->values[component][2];
-      }
+      Scalar* get_dy_values(int component = 0);
 
       /// \brief Returns both x and y partial derivatives.
       /// This function provides the both often-used dx and dy values in one call.
       /// \param dx [out] Variable which receives the pointer to the first partial derivatives by x
       /// \param dy [out] Variable which receives the pointer to the first partial derivatives by y
       /// \param component [in] The component of the function (0 or 1).
-      void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0)
-      {
-        check_params; check_table(1, "DX values"); check_table(2, "DY values");
-        dx = cur_node->values[component][1];
-        dy = cur_node->values[component][2];
-      }
+      void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0);
 
       /// \brief Returns the second x partial derivative.
       /// \param component [in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dxx_values(int component = 0)
-      {
-        check_params; check_table(3, "DXX values");
-        return cur_node->values[component][3];
-      }
+      Scalar* get_dxx_values(int component = 0);
 
       /// \brief Returns the second y partial derivative.
       /// \param component [in] The component of the function (0 or 1).
       /// \return The y second partial derivative of the function at all points of the current integration rule.
-      Scalar* get_dyy_values(int component = 0)
-      {
-        check_params; check_table(4, "DYY values");
-        return cur_node->values[component][4];
-      }
+      Scalar* get_dyy_values(int component = 0);
 
       /// \brief Returns the second mixed derivative.
       /// \param component [in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
-      Scalar* get_dxy_values(int component = 0)
-      {
-        check_params; check_table(5, "DXY values");
-        return cur_node->values[component][5];
-      }
+      Scalar* get_dxy_values(int component = 0);
 
       /// For internal use.
-      Scalar* get_values(int a, int b)
-      {
-        return cur_node->values[a][b];
-      }
+      Scalar* get_values(int a, int b);
 
       /// \brief Selects the quadrature points in which the function will be evaluated.
       /// \details It is possible to switch back and forth between different quadrature
@@ -211,7 +163,7 @@ namespace Hermes
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       /// \brief Returns the current quadrature points.
-      Quad2D* get_quad_2d() const { return quads[cur_quad]; }
+      Quad2D* get_quad_2d() const;
 
       /// \brief Frees all precalculated tables.
       virtual void free() = 0;
@@ -256,24 +208,10 @@ namespace Hermes
 
       /// With changed sub-element mapping, there comes the need for a change of the current
       /// Node table nodes.
-      void update_nodes_ptr()
-      {
-        if (sub_idx > H2D_MAX_IDX)
-          handle_overflow_idx();
-        else {
-          if(sub_tables->find(sub_idx) == sub_tables->end())
-            sub_tables->insert(std::pair<uint64_t, LightArray<Node*>*>(sub_idx, new LightArray<Node*>));
-          nodes = sub_tables->find(sub_idx)->second;
-        }
-      };
+      void update_nodes_ptr();
 
       /// For internal use only.
-      void force_transform(uint64_t sub_idx, Trf* ctm)
-      {
-        this->sub_idx = sub_idx;
-        this->ctm = ctm;
-        update_nodes_ptr();
-      }
+      void force_transform(uint64_t sub_idx, Trf* ctm);
 
       Quad2D* quads[8]; ///< list of available quadratures
 
@@ -287,21 +225,9 @@ namespace Hermes
 
       virtual void  handle_overflow_idx() = 0;
 
-      void replace_cur_node(Node* node)
-      {
-        if (node == NULL) throw Exceptions::NullException(1);
-        if (cur_node != NULL) {
-          total_mem -= cur_node->size;
-          ::free(cur_node);
-        }
-        cur_node = node;
-      }
+      void replace_cur_node(Node* node);
 
-      void check_order(Quad2D* quad, int order)
-      {
-        if (order < 0 || order >= quad->get_num_tables())
-          error("Hermes::Order out of range (%d, %d).", order, quad->get_num_tables());
-      }
+      void check_order(Quad2D* quad, int order);
 
       static int idx2mask[6][2];  ///< index to mask table
     };
