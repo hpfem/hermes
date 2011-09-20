@@ -49,22 +49,6 @@ namespace Hermes
     const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
     const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
 
-    /// Plenty of checking stuff for the debug version
-#ifndef NDEBUG
-#define check_params \
-  if (component < 0 || component > num_components) \
-  error("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem."); \
-  if (cur_node == NULL) \
-  error("Invalid node. Did you call set_quad_order()?");
-#define check_table(n, msg) \
-  if (cur_node->values[component][n] == NULL) \
-  error(msg " not precalculated for component %d. Did you call set_quad_order() with correct mask?", component)
-#else
-#define check_params
-#define check_table(n, msg)
-#endif
-
-
     /// \brief Represents an arbitrary function defined on an element.
     ///
     /// The Function class is an abstraction of a function defined in integration points on an
@@ -136,7 +120,7 @@ namespace Hermes
       /// \return The values of the function at all points of the current integration rule.
       Scalar* get_fn_values(int component = 0)
       {
-        check_params; check_table(0, "Function values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,0, "Function values");
         return cur_node->values[component][0];
       }
 
@@ -145,7 +129,7 @@ namespace Hermes
       /// \return The x partial derivative of the function at all points of the current integration rule.
       Scalar* get_dx_values(int component = 0)
       {
-        check_params; check_table(1, "DX values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,1, "DX values");
         return cur_node->values[component][1];
       }
 
@@ -154,7 +138,7 @@ namespace Hermes
       /// \return The y partial derivative of the function at all points of the current integration rule.
       Scalar* get_dy_values(int component = 0)
       {
-        check_params; check_table(2, "DY values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,2, "DY values");
         return cur_node->values[component][2];
       }
 
@@ -165,7 +149,7 @@ namespace Hermes
       /// \param component [in] The component of the function (0 or 1).
       void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0)
       {
-        check_params; check_table(1, "DX values"); check_table(2, "DY values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,1, "DX values"); check_table(component, cur_node,2, "DY values");
         dx = cur_node->values[component][1];
         dy = cur_node->values[component][2];
       }
@@ -175,7 +159,7 @@ namespace Hermes
       /// \return The x second partial derivative of the function at all points of the current integration rule.
       Scalar* get_dxx_values(int component = 0)
       {
-        check_params; check_table(3, "DXX values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,3, "DXX values");
         return cur_node->values[component][3];
       }
 
@@ -184,7 +168,7 @@ namespace Hermes
       /// \return The y second partial derivative of the function at all points of the current integration rule.
       Scalar* get_dyy_values(int component = 0)
       {
-        check_params; check_table(4, "DYY values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,4, "DYY values");
         return cur_node->values[component][4];
       }
 
@@ -193,7 +177,7 @@ namespace Hermes
       /// \return The second mixed derivative of the function at all points of the current integration rule.
       Scalar* get_dxy_values(int component = 0)
       {
-        check_params; check_table(5, "DXY values");
+        check_params(component, cur_node, num_components); check_table(component, cur_node,5, "DXY values");
         return cur_node->values[component][5];
       }
 
@@ -216,16 +200,6 @@ namespace Hermes
       /// \brief Frees all precalculated tables.
       virtual void free() = 0;
 
-    protected:
-
-      /// precalculates the current function at the current integration points.
-      virtual void precalculate(int order, int mask) = 0;
-
-      int order;          ///< current function polynomial order
-
-      int num_components; ///< number of vector components
-
-# define H2D_Node_HDR_SIZE (sizeof(Node) - sizeof(Scalar)) ///< Size of the header part of the structure Node
       struct Node
       {
         int mask;           ///< a combination of H2D_FN_XXX: specifies which tables are present
@@ -241,6 +215,15 @@ namespace Hermes
 
         Node& operator=(const Node& other) { return *this; }; ///< Assignment is not allowed.
       };
+
+    protected:
+
+      /// precalculates the current function at the current integration points.
+      virtual void precalculate(int order, int mask) = 0;
+
+      int order;          ///< current function polynomial order
+
+      int num_components; ///< number of vector components
 
       /// Table of Node tables, for each possible transformation there can be a different Node table.
       std::map<uint64_t, LightArray<Node*>*>* sub_tables;
@@ -305,6 +288,38 @@ namespace Hermes
 
       static int idx2mask[6][2];  ///< index to mask table
     };
+
+    // Debug helpers.
+    static void check_params(int component, Function<double>::Node* cur_node, int num_components)
+    {
+      if (component < 0 || component > num_components)
+        error("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem.");
+      if (cur_node == NULL)
+        error("Invalid node. Did you call set_quad_order()?");
+    }
+
+    // Debug helpers.
+    static void check_params(int component, Function<std::complex<double> >::Node* cur_node, int num_components)
+    {
+      if (component < 0 || component > num_components)
+        error("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem.");
+      if (cur_node == NULL)
+        error("Invalid node. Did you call set_quad_order()?");
+    }
+
+    // Debug helpers.
+    static void check_table(int component, Function<double>::Node* cur_node, int n, const char* msg)
+    {
+      if (cur_node->values[component][n] == NULL)
+        error("%s not precalculated for component %d. Did you call set_quad_order() with correct mask?", msg, component);
+    }
+
+    // Debug helpers.
+    static void check_table(int component, Function<std::complex<double> >::Node* cur_node, int n, const char* msg)
+    {
+      if (cur_node->values[component][n] == NULL)
+        error("%s not precalculated for component %d. Did you call set_quad_order() with correct mask?", msg, component);
+    }  
   }
 }
 #endif

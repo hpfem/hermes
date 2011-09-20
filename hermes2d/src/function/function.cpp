@@ -73,7 +73,7 @@ namespace Hermes
       while (m) { nt += m & 1; m >>= 1; }
 
       // allocate a node including its data part, init table pointers
-      int size = H2D_Node_HDR_SIZE + sizeof(Scalar) * num_points * nt; //Due to impl. reasons, the structure Node has non-zero length of data even though they can be zero.
+      int size = (sizeof(Node) - sizeof(Scalar)) + sizeof(Scalar) * num_points * nt; //Due to impl. reasons, the structure Node has non-zero length of data even though they can be zero.
       Node* node = (Node*) malloc(size);
       node->mask = mask;
       node->size = size;

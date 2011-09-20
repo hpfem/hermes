@@ -45,7 +45,7 @@ namespace Hermes
     *
     */
 
-#define H2D_MAX_COMPONENTS 10 ///< A maximum number of components.
+#define H2D_MAX_COMPONENTS 10 ///< A maximum number of components in Hermes2D.
 
     /// Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt

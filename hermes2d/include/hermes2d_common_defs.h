@@ -31,9 +31,6 @@ namespace Hermes
   /// Namespace containing definitions specific for Hermes2D.
   namespace Hermes2D
   {
-    /// H2D-specific error codes.
-#define H2D_ERR_EDGE_INDEX_OUT_OF_RANGE         "Edge index out of range."
-
     enum ///< node types
     {
       HERMES_TYPE_VERTEX = 0,
@@ -85,7 +82,7 @@ namespace Hermes
       HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
     };
 
-    /// Enabling second derivatives in weak forms. Turned off by default. Second
+    /// Enabling second derivatives in weak forms. Turned on by default. Second
     /// derivatives are employed, among others, by stabilization methods for
     /// transport equations. For usage see the example linear-convection-diffusion.
 #define H2D_SECOND_DERIVATIVES_ENABLED

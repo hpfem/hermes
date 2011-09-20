@@ -73,5 +73,22 @@ namespace Hermes
         warned_order = true;
       }
     }
+
+    HERMES_API void limit_order(int& o)
+    {
+      if (o > g_safe_max_order) 
+      { 
+        o = g_safe_max_order;
+        warn_order();
+      }
+      o = g_order_table[o];
+    }
+
+    HERMES_API void limit_order_nowarn(int& o)
+    {
+      if (o > g_safe_max_order)
+        o = g_safe_max_order;
+      o = g_order_table[o];
+    }
   }
 }
