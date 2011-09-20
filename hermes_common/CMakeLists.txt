@@ -21,6 +21,10 @@ project(hermes_common)
 				src/python_API/python_api.cpp
 				src/python_API/python_engine.cpp
 			)
+    set ( PYTHON_INCLUDES
+				include/python_API/python_api.h
+				include/python_API/python_engine.h
+			)
 	endif (WITH_PYTHON)
 
 	#
@@ -50,8 +54,6 @@ project(hermes_common)
 		src/solvers/amesos_solver.cpp
 		src/solvers/mumps_solver.cpp
 		src/solvers/superlu_solver.cpp
-		src/solvers/superlu_real.cpp
-		src/solvers/superlu_cplx.cpp
 		src/solvers/petsc_solver.cpp
 		src/solvers/umfpack_solver.cpp
 		src/solvers/precond_ml.cpp
@@ -62,6 +64,38 @@ project(hermes_common)
 		${PYTHON_SOURCES}
 	)
 
+  set(HEADERS
+		include/hermes_logging.h
+		include/common_time_period.h
+		include/callstack.h
+		include/error.h
+		include/matrix.h
+		include/tables.h
+		include/qsort.h
+		include/c99_functions.h
+		include/ord.h
+		include/hermes_function.h
+		include/exceptions.h
+		
+		include/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp
+		
+		include/solvers/dp_interface.h
+		include/solvers/linear_solver.h
+		include/solvers/nonlinear_solver.h
+		include/solvers/newton_solver_nox.h
+		include/solvers/epetra.h
+		include/solvers/aztecoo_solver.h
+		include/solvers/amesos_solver.h
+		include/solvers/mumps_solver.h
+		include/solvers/superlu_solver.h
+		include/solvers/petsc_solver.h
+		include/solvers/umfpack_solver.h
+		include/solvers/precond_ml.h
+		include/solvers/precond_ifpack.h
+		
+		${PYTHON_INCLUDES}
+	)
+  
 	#
 	# Subdirectories with CMakeLists.txt
 	#
@@ -100,7 +134,7 @@ project(hermes_common)
 	# Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 	# and set its build properties (compile and link flags, installation directories).
 	macro(BUILD_COMMON_LIB HERMES_COMMON_LIB BUILD_FLAGS)
-		add_library(${HERMES_COMMON_LIB} SHARED ${SRC})
+		add_library(${HERMES_COMMON_LIB} SHARED ${SRC} ${HEADERS})
 		set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
 
 		# Link with all third party libraries corresponding to selected configuration

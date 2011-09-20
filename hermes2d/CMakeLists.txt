@@ -198,6 +198,103 @@ project(hermes2d)
 		src/weakform_library/weakforms_maxwell.cpp
 		src/weakform_library/weakforms_neutronics.cpp
 	)
+  
+  set(HEADERS
+		include/forms.h
+		include/range.h
+		include/asmlist.h
+		include/newton_solver.h
+		include/picard_solver.h
+
+    include/calculation_continuity.h
+
+		include/adapt/adapt.h
+		include/adapt/kelly_type_adapt.h
+
+		include/boundary_conditions/essential_boundary_conditions.h
+
+		include/function/transformable.h
+		include/function/function.h
+		include/function/exact_solution.h
+		include/function/solution.h
+		include/function/filter.h
+		include/function/mesh_function.h
+    include/function/solution_h2d_xml.h
+
+		include/mesh/refmap.h
+		include/mesh/curved.h
+		include/mesh/refinement_type.h
+		include/mesh/element_to_refine.h
+		include/mesh/mesh_reader_exodusii.h
+		include/mesh/hash.h
+		include/mesh/mesh_reader_h2d.h
+		include/mesh/mesh_reader_h2d_xml.h
+    include/mesh/mesh_reader_h1d_xml.h
+		include/mesh/mesh_h2d_xml.h
+    include/mesh/mesh_h1d_xml.h
+		include/mesh/subdomains_h2d_xml.h
+		include/mesh/mesh.h
+		include/mesh/traverse.h
+		include/mesh/mesh_data.h
+
+		include/quadrature/limit_order.h
+		include/quadrature/quad.h
+    include/quadrature/quad_all.h
+
+		include/refinement_selectors/selector.h
+		include/refinement_selectors/order_permutator.h
+		include/refinement_selectors/optimum_selector.h
+		include/refinement_selectors/proj_based_selector.h
+		include/refinement_selectors/l2_proj_based_selector.h
+		include/refinement_selectors/h1_proj_based_selector.h
+		include/refinement_selectors/hcurl_proj_based_selector.h
+
+		include/shapeset/shapeset.h
+		include/shapeset/shapeset_h1_all.h
+		include/shapeset/shapeset_h1_quad.h
+		include/shapeset/shapeset_hc_all.h
+		include/shapeset/shapeset_hd_all.h
+		include/shapeset/shapeset_l2_all.h
+		include/shapeset/precalc.h
+
+		include/space/space.h
+		include/space/space_h1.h
+		include/space/space_hcurl.h
+		include/space/space_l2.h
+		include/space/space_hdiv.h
+    include/space/space_h2d_xml.h
+
+		include/views/base_view.h
+		include/views/mesh_view.h
+		include/views/order_view.h
+		include/views/scalar_view.h
+		include/views/stream_view.h
+		include/views/vector_base_view.h
+		include/views/vector_view.h
+		include/views/view.h
+		include/views/view_support.h
+		include/views/linearizer.h
+    include/views/linearizer_base.h
+		include/views/orderizer.h
+		include/views/vectorizer.h
+
+		include/weakform/weakform.h
+
+		include/neighbor.h
+		include/graph.h
+		include/ogprojection.h
+		include/ogprojection_nox.h
+		include/hermes2d_common_defs.h
+		include/discrete_problem.h
+		include/runge_kutta.h
+		include/spline.h
+
+		include/weakform_library/weakforms_elasticity.h
+		include/weakform_library/weakforms_h1.h
+		include/weakform_library/weakforms_hcurl.h
+		include/weakform_library/weakforms_maxwell.h
+		include/weakform_library/weakforms_neutronics.h
+	)
 		
 	#
 	# Build and install the library.
@@ -208,7 +305,7 @@ project(hermes2d)
 	# and set its build properties (compile and link flags, installation directories). Due to
 	# different optional libraries for H1D, H2D and H3D, this macro is dimension-specific.
 	macro(BUILD_2D_LIB HERMES_LIB HERMES_COMMON_LIB BUILD_FLAGS)
-		add_library(${HERMES_LIB} SHARED ${SRC})
+		add_library(${HERMES_LIB} SHARED ${SRC} ${HEADERS})
 
 		set(_FLAGS ${BUILD_FLAGS})
 
