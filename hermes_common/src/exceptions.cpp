@@ -84,11 +84,13 @@ namespace Hermes
       return itemIdx;
     }
 
-    NullException::~NullException(){
+    NullException::~NullException()
+    {
       delete[] message;
     }
 
-    NullException::NullException(const NullException & e){
+    NullException::NullException(const NullException & e)
+    {
       char * msg= new char[strlen(e.getMsg())+1];
       strcpy(msg,e.getMsg());
       message=msg;

@@ -64,7 +64,8 @@ namespace Hermes
 
         // Sparse matrix entry not found (raise an error when trying to add
         // value to this position, return 0 when obtaining value there).
-        if (lo > hi){
+        if (lo > hi)
+        {
           mid = -1;
           break;
         }
@@ -143,8 +144,15 @@ namespace Hermes
       delete[] jcn; jcn = NULL;
     }
 
-    inline double mumps_to_Scalar(double x){return x;}
-    inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x){return std::complex<double>(x.r, x.i);}
+    inline double mumps_to_Scalar(double x)
+    {
+      return x;
+    }
+
+    inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x)
+    {
+      return std::complex<double>(x.r, x.i);
+    }
 
     template<typename Scalar>
     Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)

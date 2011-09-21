@@ -67,7 +67,8 @@ namespace Hermes {
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
       virtual void add_to_diagonal_blocks(int num_stages, EpetraMatrix<Scalar>* mat);
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+      {
         add_to_diagonal_blocks(num_stages, dynamic_cast<EpetraMatrix<Scalar>*>(mat));
       }
       virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);

@@ -60,7 +60,8 @@ namespace Hermes
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+      {
         add_to_diagonal_blocks(num_stages, dynamic_cast<CSCMatrix<Scalar>*>(mat));
       }
       /// Add matrix to specific position.

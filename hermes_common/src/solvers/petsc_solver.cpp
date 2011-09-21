@@ -196,11 +196,13 @@ namespace Hermes
       MatZeroEntries(matrix);
     }
 
-    inline PetscScalar to_petsc(double x){
+    inline PetscScalar to_petsc(double x)
+    {
       return std::complex<double>(x, 0);
     }
 
-    inline PetscScalar to_petsc(std::complex<double> x){
+    inline PetscScalar to_petsc(std::complex<double> x)
+    {
       return x;
     }
 
@@ -208,7 +210,8 @@ namespace Hermes
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
       _F_;
-      if (v != 0.0){		// ignore zero values.
+      if (v != 0.0)
+      {		// ignore zero values.
         MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
       }
     }

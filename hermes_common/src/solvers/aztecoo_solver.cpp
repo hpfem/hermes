@@ -52,7 +52,8 @@ namespace Hermes
     {
       _F_;
       int az_solver;
-      if (name){
+      if (name)
+      {
         if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
         else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
         else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
@@ -69,7 +70,8 @@ namespace Hermes
     {
       _F_;
       int az_precond;
-      if (name){
+      if (name)
+      {
         if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
         else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
         else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;

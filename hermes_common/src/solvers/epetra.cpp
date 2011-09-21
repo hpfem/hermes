@@ -261,7 +261,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
+    void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+    {
       for (unsigned int i = 0;i<this->size;i++) //probably can be optimized by use native vectors
       {
         vector_out[i] = 0;

@@ -172,7 +172,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolverNOX<Scalar>::set_ls_type(const char *type){
+    void NewtonSolverNOX<Scalar>::set_ls_type(const char *type)
+    {
       nl_pars->sublist("Direction").sublist("Newton").sublist("Linear Solver").set("Aztec Solver", type);
     }
 
