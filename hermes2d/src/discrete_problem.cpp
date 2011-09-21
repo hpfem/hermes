@@ -1892,24 +1892,30 @@ namespace Hermes
       // Initialize the NeighborSearches.
       for(unsigned int i = 0; i < stage.meshes.size(); i++)
       {
-        if(!neighbor_searches.present(stage.meshes[i]->get_seq() - min_dg_mesh_seq))
-        {
-          NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(stage.fns[i]->get_active_element(), stage.meshes[i]);
-          ns->original_central_el_transform = stage.fns[i]->get_transform();
-          neighbor_searches.add(ns, stage.meshes[i]->get_seq() - min_dg_mesh_seq);
-        }
+        if(i > 0 && stage.meshes.at(i - 1)->get_seq() == stage.meshes.at(i)->get_seq())
+          continue;
+        else
+          if(!neighbor_searches.present(stage.meshes[i]->get_seq() - min_dg_mesh_seq))
+          {
+            NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(stage.fns[i]->get_active_element(), stage.meshes[i]);
+            ns->original_central_el_transform = stage.fns[i]->get_transform();
+            neighbor_searches.add(ns, stage.meshes[i]->get_seq() - min_dg_mesh_seq);
+          }
       }
 
       // Calculate respective neighbors.
       // Also clear the initial_sub_idxs from the central element transformations
       // of NeighborSearches with multiple neighbors.
       for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
+      {
+        if(i > 0 && stage.meshes.at(i - 1)->get_seq() == stage.meshes.at(i)->get_seq())
+          continue;
         if(neighbor_searches.present(i))
         {
           neighbor_searches.get(i)->set_active_edge_multimesh(isurf);
           neighbor_searches.get(i)->clear_initial_sub_idx();
         }
-        return;
+      }
     }
 
     template<typename Scalar>
