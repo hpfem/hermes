@@ -53,6 +53,8 @@ project(hermes_common)
 		src/solvers/aztecoo_solver.cpp
 		src/solvers/amesos_solver.cpp
 		src/solvers/mumps_solver.cpp
+    src/solvers/superlu_real.cpp
+    src/solvers/superlu_cplx.cpp
 		src/solvers/superlu_solver.cpp
 		src/solvers/petsc_solver.cpp
 		src/solvers/umfpack_solver.cpp
