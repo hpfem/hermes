@@ -32,6 +32,99 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Function<Scalar>::get_fn_order() const
+    { 
+      return order;
+    }
+
+    template<typename Scalar>
+    int Function<Scalar>::get_edge_fn_order(int edge) const
+    {
+      return order;
+    }
+
+    template<typename Scalar>
+    int Function<Scalar>::get_num_components() const
+    {
+      return num_components;
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::set_quad_order(unsigned int order, int mask)
+    {
+      if(nodes->present(order)) {
+        cur_node = nodes->get(order);
+        // If the mask has changed.
+        if((cur_node->mask & mask) != mask) {
+          precalculate(order, mask);
+          nodes->add(cur_node, order);
+        }
+      }
+      else {
+        // The value had not existed.
+        cur_node = NULL;
+        precalculate(order, mask);
+        nodes->add(cur_node, order);
+      }
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_fn_values(int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 0, "Function values");
+      return cur_node->values[component][0];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dx_values(int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values");
+      return cur_node->values[component][1];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dy_values(int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 2, "DY values");
+      return cur_node->values[component][2];
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 1, "DX values"); check_table(component, cur_node, 2, "DY values");
+      dx = cur_node->values[component][1];
+      dy = cur_node->values[component][2];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dxx_values(int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 3, "DXX values");
+      return cur_node->values[component][3];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dyy_values(int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 4, "DYY values");
+      return cur_node->values[component][4];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_dxy_values(int component)
+    {
+      check_params(component, cur_node, num_components); check_table(component, cur_node, 5, "DXY values");
+      return cur_node->values[component][5];
+    }
+
+    template<typename Scalar>
+    Scalar* Function<Scalar>::get_values(int a, int b)
+    {
+      return cur_node->values[a][b];
+    }
+
+    template<typename Scalar>
     void Function<Scalar>::set_quad_2d(Quad2D* quad_2d)
     {
       int i;
@@ -54,6 +147,12 @@ namespace Hermes
         }
 
       error("too many quadratures.");
+    }
+
+    template<typename Scalar>
+    Quad2D* Function<Scalar>::get_quad_2d() const 
+    {
+      return quads[cur_quad]; 
     }
 
     template<typename Scalar>
@@ -90,6 +189,44 @@ namespace Hermes
       total_mem += size;
       if (max_mem < total_mem) max_mem = total_mem;
       return node;
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::update_nodes_ptr()
+    {
+      if (sub_idx > H2D_MAX_IDX)
+        handle_overflow_idx();
+      else {
+        if(sub_tables->find(sub_idx) == sub_tables->end())
+          sub_tables->insert(std::pair<uint64_t, LightArray<Node*>*>(sub_idx, new LightArray<Node*>));
+        nodes = sub_tables->find(sub_idx)->second;
+      }
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      this->ctm = ctm;
+      update_nodes_ptr();
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::replace_cur_node(Node* node)
+    {
+      if (node == NULL) throw Exceptions::NullException(1);
+      if (cur_node != NULL) {
+        total_mem -= cur_node->size;
+        ::free(cur_node);
+      }
+      cur_node = node;
+    }
+
+    template<typename Scalar>
+    void Function<Scalar>::check_order(Quad2D* quad, int order)
+    {
+      if (order < 0 || order >= quad->get_num_tables())
+        error("Hermes::Order out of range (%d, %d).", order, quad->get_num_tables());
     }
 
     template class HERMES_API Function<double>;

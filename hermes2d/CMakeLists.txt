@@ -73,6 +73,8 @@ project(hermes2d)
 		find_package(EXODUSII REQUIRED)
 		include_directories(${EXODUSII_INCLUDE_DIR})
 	endif(WITH_EXODUSII)
+	include_directories(${XSD_INCLUDE_DIR})
+	include_directories(${XERCES_INCLUDE_DIR})
 	
 	#
 	# Header files location for the Hermes2d library.
