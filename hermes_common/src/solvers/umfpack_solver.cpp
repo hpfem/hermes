@@ -206,6 +206,18 @@ namespace Hermes
         this->add_as_block(ndof*i, ndof*i, mat_block);
       }
     }
+    
+    template<typename Scalar>
+    void CSCMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<CSCMatrix<Scalar>*>(mat));
+    }
+
+    template<typename Scalar>
+    unsigned int CSCMatrix<Scalar>::get_nnz() const 
+    {
+      return this->nnz;
+    }
 
     template<typename Scalar>
     void CSCMatrix<Scalar>::add_as_block(unsigned int offset_i, unsigned int offset_j, CSCMatrix<Scalar>* mat)
@@ -566,6 +578,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int *CSCMatrix<Scalar>::get_Ap()
+    {
+      return this->Ap;
+    }
+
+    template<typename Scalar>
+    int *CSCMatrix<Scalar>::get_Ai()
+    {
+      return this->Ai;
+    }
+
+    template<typename Scalar>
+    Scalar *CSCMatrix<Scalar>::get_Ax()
+    {
+      return this->Ax;
+    }
+
+    template<typename Scalar>
     UMFPackVector<Scalar>::UMFPackVector()
     {
       _F_;
@@ -643,6 +673,37 @@ namespace Hermes
       _F_;
       for (unsigned int i = 0; i < n; i++)
         v[idx[i]] += y[i];
+    }
+
+    template<typename Scalar>
+    Scalar UMFPackVector<Scalar>::get(unsigned int idx)
+    { 
+      return v[idx]; 
+    }
+
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::extract(Scalar *v) const 
+    { 
+      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    }
+
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::add_vector(Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
+    }
+
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
+    }
+
+    template<typename Scalar>
+    Scalar *UMFPackVector<Scalar>::get_c_array()
+    {
+      return this->v;
     }
 
     template<>
@@ -768,6 +829,18 @@ namespace Hermes
       this->Ap_pos = 0;
       this->Ai_pos = 0;
       return true;
+    }
+
+    template<typename Scalar>
+    UMFPackIterator<Scalar>::UMFPackIterator(CSCMatrix<Scalar>* mat)
+    {
+      this->size = mat->get_size();
+      this->nnz = mat->get_nnz();
+      this->Ai = mat->get_Ai();
+      this->Ap = mat->get_Ap();
+      this->Ax = mat->get_Ax();
+      this->Ai_pos = 0;
+      this->Ap_pos = 0;
     }
 
     template<typename Scalar>

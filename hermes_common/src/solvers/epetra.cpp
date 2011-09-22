@@ -198,7 +198,8 @@ namespace Hermes
     void EpetraMatrix<double>::add(unsigned int m, unsigned int n, double v)
     {
       _F_;
-      if (v != 0.0) {		// ignore zero values
+      if (v != 0.0)
+      {		// ignore zero values
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
         if (ierr != 0) error("Failed to insert into Epetra matrix");
@@ -209,7 +210,8 @@ namespace Hermes
     void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
       _F_;
-      if (v != 0.0) {		// ignore zero values
+      if (v != 0.0)
+      {		// ignore zero values
         double v_r = std::real<double>(v);
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
@@ -246,6 +248,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void EpetraMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<EpetraMatrix<Scalar>*>(mat));
+    }
+
+    template<typename Scalar>
     void EpetraMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat)
     {
       if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
@@ -261,7 +269,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out){
+    void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+    {
       for (unsigned int i = 0;i<this->size;i++) //probably can be optimized by use native vectors
       {
         vector_out[i] = 0;
@@ -417,6 +426,31 @@ namespace Hermes
       _F_;
       for (unsigned int i = 0; i < n; i++)
         add(idx[i], y[i]);
+    }
+
+    template<typename Scalar>
+    Scalar EpetraVector<Scalar>::get(unsigned int idx)
+    { 
+      return (*vec)[idx];
+    }
+
+    template<typename Scalar>
+    void EpetraVector<Scalar>::extract(Scalar *v) const 
+    { 
+      vec->ExtractCopy((double *)v); ///< \todo this can't be used with complex numbers
+    } 
+
+    template<typename Scalar>
+    void EpetraVector<Scalar>::add_vector(Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void EpetraVector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
     template<typename Scalar>

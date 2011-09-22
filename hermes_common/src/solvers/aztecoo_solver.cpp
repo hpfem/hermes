@@ -52,7 +52,8 @@ namespace Hermes
     {
       _F_;
       int az_solver;
-      if (name){
+      if (name)
+      {
         if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
         else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
         else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
@@ -65,11 +66,35 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void AztecOOSolver<Scalar>::set_tolerance(double tol)
+    { 
+      this->tolerance = tol;
+    }
+
+    template<typename Scalar>
+    void AztecOOSolver<Scalar>::set_max_iters(int iters)
+    { 
+      this->max_iters = iters; 
+    }
+
+    template<typename Scalar>
+#ifdef HAVE_TEUCHOS
+    void AztecOOSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+#else
+    void AztecOOSolver<Scalar>::set_precond(Precond<Scalar> *pc)
+#endif
+    {
+      this->precond_yes = true; 
+      this->pc = pc; 
+    }
+
+    template<typename Scalar>
     void AztecOOSolver<Scalar>::set_precond(const char *name)
     {
       _F_;
       int az_precond;
-      if (name){
+      if (name)
+      {
         if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
         else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
         else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;

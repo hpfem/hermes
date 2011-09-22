@@ -29,13 +29,16 @@
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
 
-namespace Hermes {
-  namespace Solvers {
+namespace Hermes
+{
+  namespace Solvers
+  {
     /// \brief Encapsulation of Amesos linear solver.
     ///
     /// @ingroup solvers
     template<typename Scalar>
-    class HERMES_API AmesosSolver : public DirectSolver<Scalar> {
+    class HERMES_API AmesosSolver : public DirectSolver<Scalar>
+    {
     public:
       AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AmesosSolver();

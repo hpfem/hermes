@@ -34,6 +34,45 @@ namespace Hermes
 {
   namespace Solvers
   {
+
+    template<typename Scalar>
+    LinearSolver<Scalar>::LinearSolver() 
+    { 
+      sln = NULL; 
+      time = -1.0; 
+    }
+
+    template<typename Scalar>
+    LinearSolver<Scalar>::~LinearSolver() 
+    { 
+      if (sln != NULL) 
+        delete [] sln; 
+    }
+
+    template<typename Scalar>
+    Scalar *LinearSolver<Scalar>::get_sln_vector() 
+    { 
+      return sln; 
+    }
+
+    template<typename Scalar>
+    int LinearSolver<Scalar>::get_error() 
+    { 
+      return error; 
+    }
+
+    template<typename Scalar>
+    double LinearSolver<Scalar>::get_time() 
+    { 
+      return time; 
+    }
+
+    template<typename Scalar>
+    void LinearSolver<Scalar>::set_factorization_scheme()
+    {
+      set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+    }
+
     template<typename Scalar>
     LinearSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
     {
@@ -111,6 +150,24 @@ namespace Hermes
         error("Unknown matrix solver requested.");
       }
       return NULL;
+    }
+
+    template<typename Scalar>
+    void DirectSolver<Scalar>::set_factorization_scheme(FactorizationScheme reuse_scheme)
+    {
+      factorization_scheme = reuse_scheme;
+    }
+
+    template<typename Scalar>
+    void IterSolver<Scalar>::set_tolerance(double tol)
+    {
+      this->tolerance = tol;
+    }
+
+    template<typename Scalar>
+    void IterSolver<Scalar>::set_max_iters(int iters)
+    {
+      this->max_iters = iters;
     }
 
     template HERMES_API LinearSolver<double>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver,

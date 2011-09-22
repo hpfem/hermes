@@ -35,9 +35,11 @@
 
 using namespace Hermes::Algebra;
 
-namespace Hermes {
+namespace Hermes
+{
   /// Namespace containing objects for preconditioners.
-  namespace Preconditioners {
+  namespace Preconditioners
+  {
     /// \brief Abstract class to define interface for preconditioners.
     ///
     /// @ingroup preconds

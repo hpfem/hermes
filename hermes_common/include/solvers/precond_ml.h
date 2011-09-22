@@ -27,14 +27,17 @@
 #include "epetra.h"
 #include <ml_MultiLevelPreconditioner.h>
 
-namespace Hermes {
-  namespace Preconditioners {
+namespace Hermes
+{
+  namespace Preconditioners
+  {
     using namespace Hermes::Solvers;
     /// \brief Preconditioners built on ML.
     ///
     /// @ingroup preconds
     template <typename Scalar>
-    class HERMES_API MlPrecond : public Precond<Scalar> {
+    class HERMES_API MlPrecond : public Precond<Scalar>
+    {
     public:
       /// @param[in] type - type of the preconditioner [ sa | dd ]
       /// - sa = smooth aggregation
