@@ -28,13 +28,16 @@
 #include "precond_ifpack.h"
 #include <AztecOO.h>
 
-namespace Hermes {
-  namespace Solvers {
+namespace Hermes
+{
+  namespace Solvers
+  {
     /// \brief Encapsulation of AztecOO linear solver.
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API AztecOOSolver : public IterSolver<Scalar> {
+    class HERMES_API AztecOOSolver : public IterSolver<Scalar>
+    {
     public:
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();

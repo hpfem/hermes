@@ -335,19 +335,22 @@ namespace Hermes
         return;
       }
 
-      unsigned int get_size() const {
+      unsigned int get_size() const
+      {
         return size;
       }
 
       /// Checks the id position for presence.
-      bool present(unsigned int id) const {
+      bool present(unsigned int id) const
+      {
         if(id >= size)
           return false;
         return presence[id >> page_bits][id & page_mask];
       }
 
       /// After successful check for presence, the value can be retrieved.
-      TYPE& get(unsigned int id) const {
+      TYPE& get(unsigned int id) const
+      {
         assert(id < size);
         return pages[id >> page_bits][id & page_mask];
       }

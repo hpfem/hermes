@@ -96,7 +96,8 @@ namespace Hermes
     ///\todo Adjust interface to support faster update of matrix and rhs
     ///
     template <typename Scalar>
-    class LinearSolver {
+    class LinearSolver
+    {
     public:
       LinearSolver() { sln = NULL; time = -1.0; }
 
@@ -145,7 +146,8 @@ namespace Hermes
         : LinearSolver<Scalar>(), factorization_scheme(factorization_scheme) {};
 
     protected:
-      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) {
+      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme)
+      {
         factorization_scheme = reuse_scheme;
       }
 

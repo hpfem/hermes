@@ -26,7 +26,8 @@
 #include "linear_solver.h"
 #include "matrix.h"
 
-extern "C" {
+extern "C"
+{
 #include <mumps_c_types.h>
 #include <dmumps_c.h>
 #include <zmumps_c.h>
@@ -43,14 +44,17 @@ namespace Hermes
     template <typename Scalar> class MumpsSolver;
   }
 }
-namespace Hermes {
-  namespace Algebra {
+namespace Hermes
+{
+  namespace Algebra
+  {
     /** Type for storing number in Mumps structures */
     template <typename Scalar> struct mumps_type;
 
     /** Type for storing number in Mumps complex structures */
     template <>
-    struct mumps_type<std::complex<double> >{
+    struct mumps_type<std::complex<double> >
+    {
     /** Type for storing mumps struct in Mumps complex structures */
       typedef ZMUMPS_STRUC_C mumps_struct;
     /** Type for storing scalar number in Mumps complex structures */
@@ -59,7 +63,8 @@ namespace Hermes {
 
     /** Type for storing number in Mumps real structures */
     template <>
-    struct mumps_type<double>{
+    struct mumps_type<double>
+    {
     /** Type for storing mumps struct in Mumps real structures */
       typedef DMUMPS_STRUC_C mumps_struct;
     /** Type for storing scalar number in Mumps real structures */
@@ -126,7 +131,8 @@ namespace Hermes {
 
     /** \brief Vector used with MUMPS solver */
     template <typename Scalar>
-    class MumpsVector : public Vector<Scalar> {
+    class MumpsVector : public Vector<Scalar>
+    {
     public:
       MumpsVector();
       virtual ~MumpsVector();
@@ -140,11 +146,13 @@ namespace Hermes {
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec) {
+      virtual void add_vector(Vector<Scalar>* vec)
+      {
         assert(this->length() == vec->length());
         for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
       };
-      virtual void add_vector(Scalar* vec) {
+      virtual void add_vector(Scalar* vec)
+      {
         for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
       };
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
@@ -163,7 +171,8 @@ namespace Hermes {
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API MumpsSolver : public DirectSolver<Scalar> {
+    class HERMES_API MumpsSolver : public DirectSolver<Scalar>
+    {
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
     public:

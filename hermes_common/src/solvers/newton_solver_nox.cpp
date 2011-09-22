@@ -344,7 +344,8 @@ namespace Hermes
         f_sln.ExtractCopy(this->sln_vector);
 
       }
-      else { // not converged
+      else // not converged
+      { 
         num_iters = -1;
         throw Exceptions::Exception("Nox solver did not converge");
       }

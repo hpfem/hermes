@@ -68,7 +68,8 @@ namespace Hermes
       void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0)
       {
         if (n == 0) n = m;
-        for(unsigned int i = 0; i < m; i++) {
+        for(unsigned int i = 0; i < m; i++)
+        {
           memcpy(dest[i], src[i], n*sizeof(T));
         }
       }
@@ -91,7 +92,8 @@ namespace Hermes
 
         //open file
         std::ofstream fout(fname.c_str());
-        if (!fout.is_open()) {
+        if (!fout.is_open())
+        {
           error("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
         }
@@ -103,7 +105,8 @@ namespace Hermes
         fout << std::string("# columns: ") << n << std::endl;
 
         //write contents
-        for(unsigned int i = 0; i < m; i++) {
+        for(unsigned int i = 0; i < m; i++)
+        {
           for(unsigned int k = 0; k < n; k++)
             fout << ' ' << matrix[i][k];
           fout << std::endl;
@@ -125,7 +128,8 @@ namespace Hermes
 
         // open file
         std::ofstream fout(fname.c_str());
-        if (!fout.is_open()) {
+        if (!fout.is_open())
+        {
           error("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
         }
@@ -196,14 +200,16 @@ namespace Hermes
         int i, ip, j;
         T sum;
 
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n; i++)
+        {
           ip = indx[i];
           sum = b[ip];
           b[ip] = b[i];
           for (j = 0; j < i; j++) sum -= a[i][j]*b[j];
           b[i] = sum;
         }
-        for (i = n-1; i >= 0; i--) {
+        for (i = n-1; i >= 0; i--)
+        {
           sum = b[i];
           for (j = i + 1; j < n; j++) sum -= a[i][j]*b[j];
           b[i] = sum / a[i][i];
@@ -229,14 +235,16 @@ namespace Hermes
         int i, k;
         T sum;
 
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n; i++)
+        {
           sum = b[i];
           k = i;
           while (--k >= 0) sum -= a[i][k] * x[k];
           x[i] = sum / p[i];
         }
 
-        for (i = n-1; i >= 0; i--) {
+        for (i = n-1; i >= 0; i--)
+        {
           sum = x[i];
           k = i;
           while (++k < n) sum -= a[k][i] * x[k];
@@ -263,7 +271,8 @@ namespace Hermes
 
     /// \brief General (abstract) matrix representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Matrix {
+    class HERMES_API Matrix
+    {
     public:
       /// get size of matrix
       /// @return size of matrix

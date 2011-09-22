@@ -38,7 +38,8 @@ namespace Hermes
     /// (can be used in umfpack, in that case use the
     /// UMFPackMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
-    class HERMES_API CSCMatrix : public SparseMatrix<Scalar> {
+    class HERMES_API CSCMatrix : public SparseMatrix<Scalar>
+    {
     public:
       CSCMatrix();
       /// \brief Constructor with specific size
@@ -90,17 +91,20 @@ namespace Hermes
       CSCMatrix* duplicate();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ap
-      int *get_Ap() {
+      int *get_Ap()
+      {
         return this->Ap;
       }
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ai
-      int *get_Ai() {
+      int *get_Ai()
+      {
         return this->Ai;
       }
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ax
-      Scalar *get_Ax() {
+      Scalar *get_Ax()
+      {
         return this->Ax;
       }
 
@@ -119,12 +123,12 @@ namespace Hermes
 
     /// \brief This class is to be used with UMFPack solver only.
     template <typename Scalar>
-    class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> {
-    };
+    class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> {};
 
     /// \brief Class representing the vector for UMFPACK.
     template <typename Scalar>
-    class HERMES_API UMFPackVector : public Vector<Scalar> {
+    class HERMES_API UMFPackVector : public Vector<Scalar> 
+    {
     public:
       UMFPackVector();
       /// Constructor of vector with specific size.
@@ -141,18 +145,21 @@ namespace Hermes
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec) {
+      virtual void add_vector(Vector<Scalar>* vec)
+      {
         assert(this->length() == vec->length());
         for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
       };
-      virtual void add_vector(Scalar* vec) {
+      virtual void add_vector(Scalar* vec)
+      {
         for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
       };
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
       /// @return pointer to array with vector data
       /// \sa #v
-      Scalar *get_c_array() {
+      Scalar *get_c_array()
+      {
         return this->v;
       }
 
@@ -167,7 +174,8 @@ namespace Hermes
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> {
+    class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> 
+    {
     public:
       /// Constructor of UMFPack solver.
       /// @param[in] m pointer to matrix
@@ -196,7 +204,8 @@ namespace Hermes
 
     /// \brief UMFPack matrix iterator. \todo document members
     template <typename Scalar>
-    class UMFPackIterator {
+    class UMFPackIterator
+    {
     public:
       UMFPackIterator(CSCMatrix<Scalar>* mat)
       {

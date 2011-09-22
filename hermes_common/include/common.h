@@ -162,7 +162,8 @@ namespace Hermes
     "Trilinos/AztecOO"
   };
 
-  struct HERMES_API SplineCoeff {
+  struct HERMES_API SplineCoeff
+  {
     double a, b, c, d;		// four coefficients of a cubic spline.
   };
 
@@ -219,20 +220,25 @@ namespace Hermes
       int m_argc;
       char** m_argv;
 
-      void set(int argc_in, char** argv_in) {
+      void set(int argc_in, char** argv_in)
+      {
         m_argc = argc_in;
         m_argv = argv_in;
       }
-      bool check() {
+      bool check()
+      {
         return (m_argc > 0);
       }
-      void missing_error() {
+      void missing_error()
+      {
         error("Command line arguments have not been set.");
       }
-      int& get_argc() {
+      int& get_argc()
+      {
         return m_argc;
       }
-      char**& get_argv() {
+      char**& get_argv()
+      {
         return m_argv;
       }
     };
@@ -245,7 +251,8 @@ namespace Hermes
 
     // Complex part.
 #ifdef __cplusplus
-    extern "C" {
+    e
+      xtern "C" {
 #endif
       extern int zscal_(int *, std::complex<double> *, std::complex<double> *, int *);
       extern int zaxpy_(int *, std::complex<double> *, std::complex<double> *, int *, std::complex<double> *, int *);

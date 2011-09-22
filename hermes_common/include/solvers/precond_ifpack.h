@@ -28,14 +28,17 @@
 #include "epetra.h"
 #include <Ifpack_Preconditioner.h>
 
-namespace Hermes {
-  namespace Preconditioners {
+namespace Hermes
+{
+  namespace Preconditioners
+  {
     using namespace Hermes::Solvers;
     /// \brief Preconditioners built on IFPACK.
     ///
     /// @ingroup preconds
     template <typename Scalar>
-    class HERMES_API IfpackPrecond: public Precond<Scalar> {
+    class HERMES_API IfpackPrecond: public Precond<Scalar>
+    {
     public:
       /// Constructor for relaxation methods.
       /// @param[in] cls - class of the preconditioner [ point-relax | block-relax ]

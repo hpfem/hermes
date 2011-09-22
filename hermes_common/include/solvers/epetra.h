@@ -45,10 +45,13 @@ namespace Hermes
   }
 }
 
-namespace Hermes {
-  namespace Algebra {
+namespace Hermes
+{
+  namespace Algebra
+  {
     template <typename Scalar>
-    class HERMES_API EpetraMatrix : public SparseMatrix<Scalar> {
+    class HERMES_API EpetraMatrix : public SparseMatrix<Scalar>
+    {
     public:
       EpetraMatrix();
       EpetraMatrix(Epetra_RowMatrix &mat);
@@ -95,7 +98,8 @@ namespace Hermes {
     };
 
     template <typename Scalar>
-    class HERMES_API EpetraVector : public Vector<Scalar> {
+    class HERMES_API EpetraVector : public Vector<Scalar>
+    {
     public:
       EpetraVector();
       EpetraVector(const Epetra_Vector &v);
@@ -110,11 +114,13 @@ namespace Hermes {
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec) {
+      virtual void add_vector(Vector<Scalar>* vec)
+      {
         assert(this->length() == vec->length());
         for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
       };
-      virtual void add_vector(Scalar* vec) {
+      virtual void add_vector(Scalar* vec)
+      {
         for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
       };
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);

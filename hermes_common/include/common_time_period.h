@@ -32,7 +32,8 @@
 namespace Hermes
 {
   /// Tick type. Used by the class Hermes::TimePeriod.
-  enum TimerPeriodTickType {
+  enum TimerPeriodTickType
+  {
     HERMES_ACCUMULATE, ///< Accumulate a period between ticks.
     HERMES_SKIP ///< Skip period between ticks, i.e., do not accumulate it.
   };
@@ -40,7 +41,8 @@ namespace Hermes
   /// A named time period measurement with accumulation.
   /** An instance of the timer should not be used across threads. The class is not thread-safe.
   *  \todo Measure time that CPU spent on the task instead of a global time. */
-  class HERMES_API TimePeriod {
+  class HERMES_API TimePeriod
+  {
   public:
     TimePeriod(const char *name = NULL); ///< Constructs internal structures and starts measuring.
 

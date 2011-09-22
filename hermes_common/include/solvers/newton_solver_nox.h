@@ -36,8 +36,10 @@
 #include <NOX_Epetra.H>
 #include "exceptions.h"
 
-namespace Hermes {
-  namespace Solvers {
+namespace Hermes
+{
+  namespace Solvers
+  {
 
     /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
@@ -197,7 +199,8 @@ namespace Hermes {
       double achieved_tol;
 
       // convergence params
-      struct conv_t {
+      struct conv_t
+      {
         int max_iters;
         double abs_resid;
         double rel_resid;
@@ -208,7 +211,8 @@ namespace Hermes {
         double wrms_atol;
       } conv;
 
-      struct conv_flag_t {
+      struct conv_flag_t
+      {
         unsigned absresid:1;
         unsigned relresid:1;
         unsigned wrms:1;
