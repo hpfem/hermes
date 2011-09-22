@@ -182,7 +182,7 @@ namespace Hermes
         if (bnd[3]) { surf_pos[3].lo = (double) (ONE-s->cr.t) / ONE;  surf_pos[3].hi = (double) (ONE-s->cr.b) / ONE; }
       }
 
-      for (unsigned int i = 0; i < base->nvert; i++)
+      for (unsigned int i = 0; i < base->get_num_surf(); i++)
       {
         int j = base->next_vert(i);
         surf_pos[i].v1 = base->vn[i]->id;

@@ -98,7 +98,7 @@ namespace Hermes
       // save boundary markers
       XMLMesh::edges_type edges;
       for_all_base_elements(e, mesh)
-        for (unsigned i = 0; i < e->nvert; i++)
+        for (unsigned i = 0; i < e->get_num_surf(); i++)
           if (mesh->get_base_edge_node(e, i)->marker)
             edges.edge().push_back(XMLMesh::edge(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str()));
 
@@ -106,7 +106,7 @@ namespace Hermes
       XMLMesh::curves_type curves;
       for_all_base_elements(e, mesh)
         if (e->is_curved())
-          for (unsigned i = 0; i < e->nvert; i++)
+          for (unsigned i = 0; i < e->get_num_surf(); i++)
             if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
               if(e->cm->nurbs[i]->arc)
                 save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i], curves);
@@ -406,7 +406,7 @@ namespace Hermes
                 }
 
                 int idx = -1;
-                for (unsigned j = 0; j < e->nvert; j++)
+                for (unsigned j = 0; j < e->get_num_surf(); j++)
                   if (e->en[j] == en) { idx = j; break; }
                   assert(idx >= 0);
 
@@ -563,7 +563,7 @@ namespace Hermes
         // save boundary markers
         subdomain.edges().set(XMLSubdomains::subdomain::edges_type());
         for_all_base_elements(e, meshes[meshes_i])
-          for (unsigned i = 0; i < e->nvert; i++)
+          for (unsigned i = 0; i < e->get_num_surf(); i++)
             // Not internal internal markers.
             if (meshes[meshes_i]->get_base_edge_node(e, i)->marker)
             {
@@ -579,7 +579,7 @@ namespace Hermes
         // save curved edges
         for_all_base_elements(e, meshes[meshes_i])
           if (e->is_curved())
-            for (unsigned i = 0; i < e->nvert; i++)
+            for (unsigned i = 0; i < e->get_num_surf(); i++)
               if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
                 if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
                 {
@@ -833,7 +833,7 @@ namespace Hermes
             }
 
             int idx = -1;
-            for (unsigned j = 0; j < e->nvert; j++)
+            for (unsigned j = 0; j < e->get_num_surf(); j++)
               if (e->en[j] == en) { idx = j; break; }
               assert(idx >= 0);
 
@@ -1086,7 +1086,7 @@ namespace Hermes
             }
 
             int idx = -1;
-            for (unsigned j = 0; j < e->nvert; j++)
+            for (unsigned j = 0; j < e->get_num_surf(); j++)
               if (e->en[j] == en) { idx = j; break; }
               assert(idx >= 0);
 

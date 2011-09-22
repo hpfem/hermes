@@ -147,7 +147,7 @@ namespace Hermes
           //debug_log("active neighbor el: %d", neighb_el->id);
 
           // Get local number of the edge used by the neighbor.
-          for (unsigned int j = 0; j < neighb_el->nvert; j++)
+          for (unsigned int j = 0; j < neighb_el->get_num_surf(); j++)
             if (central_el->en[active_edge] == neighb_el->en[j])
             {
               neighbor_edge.local_num_of_edge = j;
@@ -159,7 +159,7 @@ namespace Hermes
 
             // Query the orientation of the neighbor edge relative to the central el.
             int p1 = central_el->vn[active_edge]->id;
-            int p2 = central_el->vn[(active_edge + 1) % central_el->nvert]->id;
+            int p2 = central_el->vn[(active_edge + 1) % central_el->get_num_surf()]->id;
             local_edge_info.orientation = neighbor_edge_orientation(p1, p2, 0);
 
             neighbor_edges.push_back(local_edge_info);
@@ -179,7 +179,7 @@ namespace Hermes
           // Endpoints of the active edge.
           int orig_vertex_id[2];
           orig_vertex_id[0] = central_el->vn[active_edge]->id;
-          orig_vertex_id[1]  = central_el->vn[(active_edge + 1) % central_el->nvert]->id;
+          orig_vertex_id[1]  = central_el->vn[(active_edge + 1) % central_el->get_num_surf()]->id;
 
           if (vertex == NULL)
           {
@@ -543,7 +543,7 @@ namespace Hermes
 
       // IDs of vertices bounding the current intermediate parent edge.
       int p1 = elem->vn[active_edge]->id;
-      int p2 = elem->vn[(active_edge + 1) % elem->nvert]->id;
+      int p2 = elem->vn[(active_edge + 1) % elem->get_num_surf()]->id;
 
       int id_of_par_orient_1 = p1;
       int id_of_par_orient_2 = p2;
@@ -582,7 +582,7 @@ namespace Hermes
 
             // Get local number of the edge used by the neighbor.
             neighbor_edge.local_num_of_edge = -1;
-            for(unsigned int j = 0; j < neighb_el->nvert; j++)
+            for(unsigned int j = 0; j < neighb_el->get_num_surf(); j++)
               if(neighb_el->en[j] == edge)
               {
                 neighbor_edge.local_num_of_edge = j;
@@ -615,7 +615,7 @@ namespace Hermes
               {
                 if(n->id == par_mid_vertices[j-1]->id)
                 {
-                  neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
+                  neighbor_transforms->transf[n_parents - j - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->get_num_surf();
                   p2 = par_mid_vertices[j]->id;
                 }
                 else
@@ -630,7 +630,7 @@ namespace Hermes
             if (orig_vertex_id[0] == par_mid_vertices[0]->id)
               neighbor_transforms->transf[n_parents - 1] = neighbor_edge.local_num_of_edge;
             else
-              neighbor_transforms->transf[n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->nvert;
+              neighbor_transforms->transf[n_parents - 1] = (neighbor_edge.local_num_of_edge + 1) % neighb_el->get_num_surf();
 
             NeighborEdgeInfo local_edge_info;
             local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
@@ -663,7 +663,7 @@ namespace Hermes
 
       for (int i = 0; i < 2; i++)
       {
-        sons[n_sons-1] = (active_edge + i) % central_el->nvert;
+        sons[n_sons-1] = (active_edge + i) % central_el->get_num_surf();
 
         // Try to get a pointer to the edge between the middle vertex and one of the vertices bounding the previously
         // tested segment.
@@ -699,7 +699,7 @@ namespace Hermes
 
               // Get local number of the edge used by the neighbor.
               neighbor_edge.local_num_of_edge = -1;
-              for(unsigned int k = 0; k < neighb_el->nvert; k++)
+              for(unsigned int k = 0; k < neighb_el->get_num_surf(); k++)
                 if(neighb_el->en[k] == edge)
                 {
                   neighbor_edge.local_num_of_edge = k;

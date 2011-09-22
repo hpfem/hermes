@@ -172,24 +172,24 @@ namespace Hermes
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
-      for (unsigned int i = 0; i < e->nvert; i++)
+      for (unsigned int i = 0; i < e->get_num_surf(); i++)
         indices[k++] = ref_map_shapeset.get_vertex_index(i);
 
       // straight-edged element
       if (e->cm == NULL)
       {
-        for (unsigned int i = 0; i < e->nvert; i++)
+        for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
           lin_coeffs[i][0] = e->vn[i]->x;
           lin_coeffs[i][1] = e->vn[i]->y;
         }
         coeffs = lin_coeffs;
-        nc = e->nvert;
+        nc = e->get_num_surf();
       }
       else // curvilinear element - edge and bubble shapes
       {
         int o = e->cm->order;
-        for (unsigned int i = 0; i < e->nvert; i++)
+        for (unsigned int i = 0; i < e->get_num_surf(); i++)
           for (j = 2; j <= o; j++)
             indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j);
 

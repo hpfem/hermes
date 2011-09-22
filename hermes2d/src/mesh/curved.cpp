@@ -310,7 +310,7 @@ namespace Hermes
       double  fx,  fy;
       x = y = 0.0;
 
-      for (unsigned int j = 0; j < e->nvert; j++)
+      for (unsigned int j = 0; j < e->get_num_surf(); j++)
       {
         int va = j;
         int vb = e->next_vert(j);
@@ -646,7 +646,7 @@ namespace Hermes
           fn[j][k] = fn[j][k] - (fa[k] + (t + 1)/2.0 * (fb[k] - fa[k]));
       }
 
-      double2* result = proj + e->nvert + edge * (order - 1);
+      double2* result = proj + e->get_num_surf() + edge * (order - 1);
       for (k = 0; k < 2; k++)
       {
         for (i = 0; i < ne; i++)
@@ -712,7 +712,7 @@ namespace Hermes
       int mo2 = quad2d.get_max_order();
       int np = quad2d.get_num_points(mo2);
 
-      for (unsigned int k = 0; k < e->nvert; k++) // loop over vertices
+      for (unsigned int k = 0; k < e->get_num_surf(); k++) // loop over vertices
       {
         // vertex basis functions in all integration points
         double* vd;
@@ -736,7 +736,7 @@ namespace Hermes
 
           for (int m = 0; m < 2; m++)  //part 0 or 1
             for (int j = 0; j < np; j++)
-              old[m][j] += proj[e->nvert + k * (order-1) + ii][m] * ed[j];
+              old[m][j] += proj[e->get_num_surf() + k * (order-1) + ii][m] * ed[j];
         }
       }
     }
@@ -778,7 +778,7 @@ namespace Hermes
         calc_ref_map(e, nurbs, a[0], a[1], fn[j]);
       }
 
-      double2* result = proj + e->nvert + e->nvert * (order - 1);
+      double2* result = proj + e->get_num_surf() + e->get_num_surf() * (order - 1);
       for (k = 0; k < 2; k++)
       {
         for (i = 0; i < nb; i++) // loop over bubble basis functions
@@ -795,7 +795,7 @@ namespace Hermes
         }
 
         // solve
-        if (e->nvert == 3)
+        if (e->get_num_surf() == 3)
           cholsl(bubble_proj_matrix_tri, nb, bubble_tri_p, rhside[k], rhside[k]);
         else
           cholsl(bubble_proj_matrix_quad, nb, bubble_quad_p, rhside[k], rhside[k]);
@@ -819,7 +819,7 @@ namespace Hermes
     {
       _F_;
       // vertex part
-      for (unsigned int i = 0; i < e->nvert; i++)
+      for (unsigned int i = 0; i < e->get_num_surf(); i++)
       {
         proj[i][0] = e->vn[i]->x;
         proj[i][1] = e->vn[i]->y;
@@ -829,7 +829,7 @@ namespace Hermes
         e = e->cm->parent;
 
       // edge part
-      for (int edge = 0; edge < (int)e->nvert; edge++)
+      for (int edge = 0; edge < (int)e->get_num_surf(); edge++)
         calc_edge_projection(e, edge, nurbs, order, proj);
 
       //bubble part
@@ -851,7 +851,7 @@ namespace Hermes
       ref_map_shapeset.set_mode(e->get_mode());
 
       // allocate projection coefficients
-      int nv = e->nvert;
+      int nv = e->get_num_surf();
       int ne = order - 1;
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
       int nb = ref_map_shapeset.get_num_bubbles(qo);

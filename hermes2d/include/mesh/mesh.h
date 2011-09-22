@@ -149,6 +149,8 @@ namespace Hermes
       void unref_all_nodes(HashTable* ht);
     private:
       unsigned nvert:30; ///< number of vertices (3 or 4)
+
+      friend class Mesh;
     };
 
     /// \brief Represents a finite element mesh.
@@ -410,7 +412,6 @@ namespace Hermes
       ElementMarkersConversion element_markers_conversion;
       BoundaryMarkersConversion boundary_markers_conversion;
 
-      friend class Element;
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
       friend class MeshReaderH1DXML;

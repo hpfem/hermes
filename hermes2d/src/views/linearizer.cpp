@@ -599,7 +599,7 @@ namespace Hermes
           double *dy = ydisp->get_fn_values();
 
           int iv[4];
-          for (unsigned int i = 0; i < e[0]->nvert; i++)
+          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
           {
             double f = val[i];
             if (this->auto_max && finite(f) && fabs(f) > this->max)
@@ -624,7 +624,7 @@ namespace Hermes
           else
             process_quad(iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL);
 
-          for (unsigned int i = 0; i < e[0]->nvert; i++)
+          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
             process_edge(iv[i], iv[e[0]->next_vert(i)], e[0]->en[i]->marker);
         }
 

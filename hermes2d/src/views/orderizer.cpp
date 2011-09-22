@@ -149,7 +149,7 @@ namespace Hermes
         for_all_active_elements(e, mesh)
         {
           oo = o[4] = o[5] = space->get_element_order(e->id);
-          for (unsigned int k = 0; k < e->nvert; k++)
+          for (unsigned int k = 0; k < e->get_num_surf(); k++)
             o[k] = space->get_edge_order(e, k);
 
           refmap.set_active_element(e);
@@ -186,7 +186,7 @@ namespace Hermes
           }
 
           double xmin = 1e100, ymin = 1e100, xmax = -1e100, ymax = -1e100;
-          for (unsigned int k = 0; k < e->nvert; k++)
+          for (unsigned int k = 0; k < e->get_num_surf(); k++)
           {
             if (e->vn[k]->x < xmin) xmin = e->vn[k]->x;
             if (e->vn[k]->x > xmax) xmax = e->vn[k]->x;
