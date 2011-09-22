@@ -137,6 +137,9 @@ namespace Hermes
       /// makes it active. Also handles element orders.
       void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
 
+      /// Updates element orders when the underlying mesh has been refined.
+      void update_element_orders_after_refinement();
+
       /// Sets the shapeset.
       virtual void set_shapeset(Shapeset* shapeset) = 0;
 

@@ -397,6 +397,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void Space<Scalar>::update_element_orders_after_refinement()
+    {
+      Element* e;
+      for_all_active_elements(e, this->mesh)
+      {
+        if(this->get_element_order(e->id) < 0)
+          this->set_element_order_internal(e->id, this->get_element_order(e->parent->id));
+      }
+      assign_dofs();
+    }
+
+    template<typename Scalar>
     void Space<Scalar>::unrefine_all_mesh_elements(bool keep_initial_refinements)
     {
       // find inactive elements with active sons
