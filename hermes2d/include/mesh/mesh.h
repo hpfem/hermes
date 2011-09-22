@@ -57,7 +57,6 @@ namespace Hermes
         {
           int marker;       ///< edge marker
           Element* elem[2]; ///< elements sharing the edge node
-          Nurbs* nurbs;     ///< temporary curved edge ptr (only for loading the mesh)
         };
       };
 

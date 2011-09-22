@@ -426,7 +426,6 @@ namespace Hermes
       // remember the markers of the edge nodes
       int bnd[3] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd    };
       int mrk[3] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker };
-      Nurbs* nurbs[3] = { e->en[0]->nurbs, e->en[1]->nurbs, e->en[2]->nurbs };
 
       // obtain three mid-edge vertex nodes
       Node* x0, *x1, *x2;
@@ -457,13 +456,6 @@ namespace Hermes
       sons[1] = create_triangle(e->marker, x0, e->vn[1], x1, cm[1]);
       sons[2] = create_triangle(e->marker, x2, x1, e->vn[2], cm[2]);
       sons[3] = create_triangle(e->marker, x1, x2, x0, cm[3]);
-
-      sons[0]->en[0]->nurbs = nurbs[0];
-      sons[1]->en[0]->nurbs = nurbs[0];
-      sons[1]->en[1]->nurbs = nurbs[1];
-      sons[2]->en[1]->nurbs = nurbs[1];
-      sons[2]->en[2]->nurbs = nurbs[2];
-      sons[0]->en[2]->nurbs = nurbs[2];
 
       // update coefficients of curved reference mapping
       for (int i = 0; i < 4; i++)
@@ -529,7 +521,6 @@ namespace Hermes
       newnode->p2 = -9999;
       newnode->marker = 0;
       newnode->elem[0] = newnode->elem[1] = NULL;
-      newnode->nurbs = NULL;
 
       return newnode;
     }
@@ -542,7 +533,6 @@ namespace Hermes
       // remember the markers of the edge nodes
       int bnd[4] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
       int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
-      Nurbs* nurbs[4] = { e->en[0]->nurbs, e->en[1]->nurbs, e->en[2]->nurbs, e->en[3]->nurbs };
       
       // deactivate this element and unregister from its nodes
       e->active = false;
@@ -585,15 +575,6 @@ namespace Hermes
         sons[1] = create_quad(e->marker, x0, e->vn[1], x1, mid, cm[1]);
         sons[2] = create_quad(e->marker, mid, x1, e->vn[2], x2, cm[2]);
         sons[3] = create_quad(e->marker, x3, mid, x2, e->vn[3], cm[3]);
-        
-        sons[0]->en[0]->nurbs = nurbs[0];
-        sons[1]->en[0]->nurbs = nurbs[0];
-        sons[1]->en[1]->nurbs = nurbs[1];
-        sons[2]->en[1]->nurbs = nurbs[1];
-        sons[2]->en[2]->nurbs = nurbs[2];
-        sons[3]->en[2]->nurbs = nurbs[2];
-        sons[3]->en[3]->nurbs = nurbs[3];
-        sons[0]->en[3]->nurbs = nurbs[3];
 
         // Increase the number of active elements by 4.
         this->nactive += 4;
@@ -632,13 +613,6 @@ namespace Hermes
         sons[1] = create_quad(e->marker, x3, x1, e->vn[2], e->vn[3], cm[1]);
         sons[2] = sons[3] = NULL;
 
-        sons[0]->en[0]->nurbs = nurbs[0];
-        sons[1]->en[0]->nurbs = nurbs[0];
-        sons[1]->en[1]->nurbs = nurbs[1];
-        sons[0]->en[2]->nurbs = nurbs[2];
-        sons[1]->en[2]->nurbs = nurbs[2];
-        sons[0]->en[3]->nurbs = nurbs[3];
-
         this->nactive += 2;
 
         sons[0]->en[0]->bnd = bnd[0];  sons[0]->en[0]->marker = mrk[0];
@@ -674,13 +648,6 @@ namespace Hermes
         sons[0] = sons[1] = NULL;
         sons[2] = create_quad(e->marker, e->vn[0], x0, x2, e->vn[3], cm[0]);
         sons[3] = create_quad(e->marker, x0, e->vn[1], e->vn[2], x2, cm[1]);
-
-        sons[2]->en[0]->nurbs = nurbs[0];
-        sons[2]->en[1]->nurbs = nurbs[1];
-        sons[3]->en[1]->nurbs = nurbs[1];
-        sons[3]->en[2]->nurbs = nurbs[2];
-        sons[2]->en[3]->nurbs = nurbs[3];
-        sons[3]->en[3]->nurbs = nurbs[3];
 
         this->nactive += 2;
 

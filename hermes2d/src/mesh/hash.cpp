@@ -201,7 +201,6 @@ namespace Hermes
       newnode->p2 = p2;
       newnode->marker = 0;
       newnode->elem[0] = newnode->elem[1] = NULL;
-      newnode->nurbs = NULL;
 
       // insert into hashtable
       newnode->next_hash = e_table[i];
