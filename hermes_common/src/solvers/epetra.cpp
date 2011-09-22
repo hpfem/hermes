@@ -198,7 +198,8 @@ namespace Hermes
     void EpetraMatrix<double>::add(unsigned int m, unsigned int n, double v)
     {
       _F_;
-      if (v != 0.0) {		// ignore zero values
+      if (v != 0.0)
+      {		// ignore zero values
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
         if (ierr != 0) error("Failed to insert into Epetra matrix");
@@ -209,7 +210,8 @@ namespace Hermes
     void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
       _F_;
-      if (v != 0.0) {		// ignore zero values
+      if (v != 0.0)
+      {		// ignore zero values
         double v_r = std::real<double>(v);
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);

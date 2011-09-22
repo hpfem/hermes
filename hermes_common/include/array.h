@@ -100,7 +100,8 @@ namespace Hermes
       }
 
       /// Wrapper function for Hermes::vector::add() for compatibility purposes.
-      int add(TYPE item) {
+      int add(TYPE item)
+      {
         TYPE* ptr = this->add();
         *ptr = item;
         return ptr->id;
@@ -157,9 +158,11 @@ namespace Hermes
       /// \return
       /// 	\li First index present in the array that is equal or greater than the passed \c idx (if found),
       /// 	\li \c INVALID_IDX (if not found).
-      int first(int idx = 0) {
+      int first(int idx = 0)
+      {
         int index = idx;
-        while (get(index).used == false) {
+        while (get(index).used == false)
+        {
           index++;
           if (index >= nitems) return INVALID_IDX;
         }
@@ -172,9 +175,11 @@ namespace Hermes
       /// \return
       /// 	\li First idx present in the array that is greater than the passed \c idx (if found),
       /// 	\li \c INVALID_IDX (if not found).
-      int next(int idx = 0) {
+      int next(int idx = 0)
+      {
         int index = idx + 1;
-        while (get(index).used == false) {
+        while (get(index).used == false)
+        {
           index++;
           if (index >= nitems) return INVALID_IDX;
         }
@@ -187,10 +192,12 @@ namespace Hermes
       /// \return
       ///		\li Last index present in the array that is equal or less than the passed \c idx (if found),
       /// 	\li \c INVALID_IDX (if not found).
-      int last(int idx = INT_MAX) {
+      int last(int idx = INT_MAX)
+      {
         int index = idx;
         if (index > nitems - 1) index = nitems - 1;
-        while (get(index).used == false) {
+        while (get(index).used == false)
+        {
           index--;
           if (index < 0) return INVALID_IDX;
         }
@@ -203,10 +210,12 @@ namespace Hermes
       /// \return
       /// 	\li Last index present in the array that is less than the passed \c idx (if found),
       /// 	\li \c INVALID_IDX (if not found).
-      int prev(int idx = INT_MAX) {
+      int prev(int idx = INT_MAX)
+      {
         int index = idx - 1;
         if (index > nitems - 1) index = nitems - 1;
-        while (get(index).used == false) {
+        while (get(index).used == false)
+        {
           index--;
           if (index < 0) return INVALID_IDX;
         }
@@ -214,7 +223,8 @@ namespace Hermes
       }
 
       /// Checks whether an element exists at position idx.
-      bool exists(int idx) {
+      bool exists(int idx)
+      {
         if (get(idx).used == true) return true;
         else return false;
       }
@@ -285,12 +295,15 @@ namespace Hermes
 
     public:
 
-      LightArray(unsigned int page_bits = 9) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1) {
+      LightArray(unsigned int page_bits = 9) : page_bits(page_bits), page_size(1 << page_bits), page_mask((1 << page_bits) - 1)
+      {
         size = 0;
       }
 
-      ~LightArray() {
-        for(unsigned int i = 0; i < pages.size(); i++) {
+      ~LightArray()
+      {
+        for(unsigned int i = 0; i < pages.size(); i++)
+        {
           delete [] pages[i];
           delete [] presence[i];
         }
@@ -302,7 +315,8 @@ namespace Hermes
       void add(TYPE item, unsigned int id)
       {
         TYPE* temp;
-        while(id >= pages.size() * page_size) {
+        while(id >= pages.size() * page_size)
+        {
           TYPE* new_page = new TYPE[page_size];
           pages.push_back(new_page);
 
