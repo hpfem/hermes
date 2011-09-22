@@ -36,7 +36,8 @@
 #include "Teuchos_RCP.hpp"
 #endif
 
-namespace Hermes {
+namespace Hermes
+{
 
 using Teuchos::RCP;
 using Teuchos::Ptr;
@@ -45,7 +46,8 @@ using Teuchos::null;
 
 
 template <typename Scalar>
-class HERMES_API EigenSolver {
+class HERMES_API EigenSolver
+{
 public:
     EigenSolver(const RCP<Algebra::Matrix<Scalar> > &A, const RCP<Algebra::Matrix<Scalar> > &B);
 
@@ -57,7 +59,8 @@ public:
             int max_iter = 150);
 
     // Returns the number of calculated eigenvalues
-    int get_n_eigs() {
+    int get_n_eigs()
+    {
         return this->n_eigs;
     }
     // Returns the i-th eigenvalue
@@ -69,7 +72,8 @@ public:
     // permanently.
     void get_eigenvector(int i, double **vec, int *n);
 
-    void print_eigenvalues() {
+    void print_eigenvalues()
+    {
         printf("Eigenvalues:\n");
         for (int i = 0; i < this->get_n_eigs(); i++)
             printf("%3d: %f\n", i, this->get_eigenvalue(i));

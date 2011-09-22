@@ -64,7 +64,8 @@ namespace Hermes
 
         // Sparse matrix entry not found (raise an error when trying to add
         // value to this position, return 0 when obtaining value there).
-        if (lo > hi){
+        if (lo > hi)
+        {
           mid = -1;
           break;
         }
@@ -143,8 +144,15 @@ namespace Hermes
       delete[] jcn; jcn = NULL;
     }
 
-    inline double mumps_to_Scalar(double x){return x;}
-    inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x){return std::complex<double>(x.r, x.i);}
+    inline double mumps_to_Scalar(double x)
+    {
+      return x;
+    }
+
+    inline std::complex<double> mumps_to_Scalar(ZMUMPS_COMPLEX x)
+    {
+      return std::complex<double>(x.r, x.i);
+    }
 
     template<typename Scalar>
     Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
@@ -305,6 +313,12 @@ namespace Hermes
       {
         this->add_as_block(ndof*i, ndof*i, mat);
       }
+    }
+
+    template<typename Scalar>
+    void MumpsMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<MumpsMatrix*>(mat));
     }
 
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, ZMUMPS_COMPLEX b)
@@ -510,6 +524,31 @@ namespace Hermes
       {
         v[idx[i]] += y[i];
       }
+    }
+
+    template<typename Scalar>
+    Scalar MumpsVector<Scalar>::get(unsigned int idx) 
+    { 
+      return v[idx]; 
+    }
+
+    template<typename Scalar>
+    void MumpsVector<Scalar>::extract(Scalar *v) const 
+    { 
+      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    }
+
+    template<typename Scalar>
+    void MumpsVector<Scalar>::add_vector(Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void MumpsVector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
     template<typename Scalar>

@@ -196,11 +196,13 @@ namespace Hermes
       MatZeroEntries(matrix);
     }
 
-    inline PetscScalar to_petsc(double x){
+    inline PetscScalar to_petsc(double x)
+    {
       return std::complex<double>(x, 0);
     }
 
-    inline PetscScalar to_petsc(std::complex<double> x){
+    inline PetscScalar to_petsc(std::complex<double> x)
+    {
       return x;
     }
 
@@ -208,7 +210,8 @@ namespace Hermes
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
       _F_;
-      if (v != 0.0){		// ignore zero values.
+      if (v != 0.0)
+      {		// ignore zero values.
         MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
       }
     }
@@ -304,6 +307,12 @@ namespace Hermes
       {
         this->add_as_block(ndof*i, ndof*i, mat);
       }
+    }
+
+    template<typename Scalar>
+    void PetscMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<PetscMatrix<Scalar>*>(mat));
     }
 
     template<typename Scalar>
@@ -472,6 +481,19 @@ namespace Hermes
       {
         VecSetValue(vec, idx[i], to_petsc(y[i]), ADD_VALUES);
       }
+    }
+
+    template<typename Scalar>
+    void PetscVector<Scalar>::add_vector(Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void PetscVector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
     template<typename Scalar>

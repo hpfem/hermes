@@ -27,8 +27,10 @@
 
 using namespace Hermes::Algebra;
 
-namespace Hermes {
-  namespace Solvers {
+namespace Hermes
+{
+  namespace Solvers
+  {
     /// \brief Minimalistic DiscreteProblem interface required by NoxProblemInterface.
     template<typename Scalar>
     class DiscreteProblemInterface

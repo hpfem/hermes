@@ -30,12 +30,15 @@ typedef int int_t;
 
 #include <supermatrix.h>
 #include <slu_util.h>
-namespace Hermes {
-  namespace Solvers {
+namespace Hermes
+{
+  namespace Solvers
+  {
     template <typename Scalar> class SuperLUSolver;
 #ifdef SLU_MT
     template <typename Scalar>
-    class SuperLu{
+    class SuperLu
+    {
     public:
       void gsequ (SuperMatrix *A, double *r, double *c, double *rowcnd, double *colcnd, double *amax, int *info);
       void laqgs (SuperMatrix *A, float *r, float *c, float rowcnd, float colcnd, float amax, char *equed);
@@ -51,7 +54,8 @@ namespace Hermes {
 
     typedef superlu_options_t         slu_options_t;
     typedef SuperLUStat_t             slu_stat_t;
-    typedef struct {
+    typedef struct
+    {
       float for_lu;
       float total_needed;
     } slu_memusage_t;
@@ -70,14 +74,16 @@ namespace Hermes {
 
     /** Type for storing number in SuperLU real structures */
     template<>
-    struct SuperLuType<double>{
+    struct SuperLuType<double>
+    {
     /** Type for storing scalar number in SuperLU real structures */
       typedef double Scalar;
     };
 
     /** Type for storing number in SuperLU complex structures */
     template<>
-    struct SuperLuType<std::complex<double> >{
+    struct SuperLuType<std::complex<double> >
+    {
     /** Type for storing scalar number in SuperLU complex structures */
       typedef struct { double r, i; } Scalar;
     };
@@ -85,11 +91,14 @@ namespace Hermes {
   }
 }
 
-namespace Hermes {
-  namespace Algebra {
+namespace Hermes
+{
+  namespace Algebra
+  {
     /** \brief Matrix used with SuperLU solver */
     template <typename Scalar>
-    class SuperLUMatrix : public SparseMatrix<Scalar> {
+    class SuperLUMatrix : public SparseMatrix<Scalar>
+    {
     public:
       SuperLUMatrix();
       virtual ~SuperLUMatrix();
@@ -112,9 +121,7 @@ namespace Hermes {
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, SuperLUMatrix* mat);
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
-        add_to_diagonal_blocks(num_stages, dynamic_cast<SuperLUMatrix*>(mat));
-      }
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
@@ -151,27 +158,23 @@ namespace Hermes {
 
     /** \brief Vector used with SuperLU solver */
     template <typename Scalar>
-    class SuperLUVector : public Vector<Scalar> {
+    class SuperLUVector : public Vector<Scalar>
+    {
     public:
       SuperLUVector();
       virtual ~SuperLUVector();
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx) { return v[idx]; }
-      virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
+      virtual Scalar get(unsigned int idx);
+      virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec) {
-        assert(this->length() == vec->length());
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-      };
-      virtual void add_vector(Scalar* vec) {
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-      };
+      virtual void add_vector(Vector<Scalar>* vec);
+      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
     protected:
@@ -182,13 +185,15 @@ namespace Hermes {
     };
 
   }
-  namespace Solvers{
+  namespace Solvers
+  {
 
     /// Encapsulation of SUPERLU linear solver.
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API SuperLUSolver : public DirectSolver<Scalar> {
+    class HERMES_API SuperLUSolver : public DirectSolver<Scalar>
+    {
     private:
 #ifndef SLU_MT
       void create_csc_matrix (SuperMatrix *A, int m, int n, int nnz, typename SuperLuType<Scalar>::Scalar *nzval, int *rowind, int *colptr,

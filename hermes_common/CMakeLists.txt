@@ -23,7 +23,7 @@ project(hermes_common)
 			)
     set ( PYTHON_INCLUDES
 				include/python_API/python_api.h
-				include/python_API/python_engine.h
+				include/python_API/python_engine_api.h
 			)
 	endif (WITH_PYTHON)
 

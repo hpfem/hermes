@@ -26,7 +26,8 @@
 #include "linear_solver.h"
 #include "matrix.h"
 
-extern "C" {
+extern "C"
+{
 #include <mumps_c_types.h>
 #include <dmumps_c.h>
 #include <zmumps_c.h>
@@ -43,14 +44,17 @@ namespace Hermes
     template <typename Scalar> class MumpsSolver;
   }
 }
-namespace Hermes {
-  namespace Algebra {
+namespace Hermes
+{
+  namespace Algebra
+  {
     /** Type for storing number in Mumps structures */
     template <typename Scalar> struct mumps_type;
 
     /** Type for storing number in Mumps complex structures */
     template <>
-    struct mumps_type<std::complex<double> >{
+    struct mumps_type<std::complex<double> >
+    {
     /** Type for storing mumps struct in Mumps complex structures */
       typedef ZMUMPS_STRUC_C mumps_struct;
     /** Type for storing scalar number in Mumps complex structures */
@@ -59,7 +63,8 @@ namespace Hermes {
 
     /** Type for storing number in Mumps real structures */
     template <>
-    struct mumps_type<double>{
+    struct mumps_type<double>
+    {
     /** Type for storing mumps struct in Mumps real structures */
       typedef DMUMPS_STRUC_C mumps_struct;
     /** Type for storing scalar number in Mumps real structures */
@@ -93,9 +98,7 @@ namespace Hermes {
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, MumpsMatrix* mat);
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat){
-        add_to_diagonal_blocks(num_stages, dynamic_cast<MumpsMatrix*>(mat));
-      }
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
@@ -125,27 +128,23 @@ namespace Hermes {
 
     /** \brief Vector used with MUMPS solver */
     template <typename Scalar>
-    class MumpsVector : public Vector<Scalar> {
+    class MumpsVector : public Vector<Scalar>
+    {
     public:
       MumpsVector();
       virtual ~MumpsVector();
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx) { return v[idx]; }
-      virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
+      virtual Scalar get(unsigned int idx);
+      virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec) {
-        assert(this->length() == vec->length());
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-      };
-      virtual void add_vector(Scalar* vec) {
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-      };
+      virtual void add_vector(Vector<Scalar>* vec);
+      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
     protected:
@@ -162,7 +161,8 @@ namespace Hermes {
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API MumpsSolver : public DirectSolver<Scalar> {
+    class HERMES_API MumpsSolver : public DirectSolver<Scalar>
+    {
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
     public:

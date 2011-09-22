@@ -32,7 +32,8 @@
 namespace Hermes
 {
   /// Tick type. Used by the class Hermes::TimePeriod.
-  enum TimerPeriodTickType {
+  enum TimerPeriodTickType
+  {
     HERMES_ACCUMULATE, ///< Accumulate a period between ticks.
     HERMES_SKIP ///< Skip period between ticks, i.e., do not accumulate it.
   };
@@ -40,7 +41,8 @@ namespace Hermes
   /// A named time period measurement with accumulation.
   /** An instance of the timer should not be used across threads. The class is not thread-safe.
   *  \todo Measure time that CPU spent on the task instead of a global time. */
-  class HERMES_API TimePeriod {
+  class HERMES_API TimePeriod
+  {
   public:
     TimePeriod(const char *name = NULL); ///< Constructs internal structures and starts measuring.
 
@@ -49,20 +51,20 @@ namespace Hermes
     const TimePeriod& tick(TimerPeriodTickType type = HERMES_ACCUMULATE); ///< Starts/ends a new period.
 
     /// Returns a name of the time period if any.
-    const std::string& name() const { return period_name; }
+    const std::string& name() const;
 
     /// Returns accumulated time (in seconds).
-    double accumulated() const { return accum; };
+    double accumulated() const;
 
     /// Returns accumulated time in human readable form.
-    std::string accumulated_str() const { return to_string(accum); };
+    std::string accumulated_str() const;
 
     /// Returns last measured period (in seconds).
     /** \return Returns the length of the last measured time period. -1 if period was skipped. */
-    double last() const { return last_period; };
+    double last() const;
 
     /// Returns last measured period in human readable form.
-    std::string last_str() const { return to_string(last_period); };
+    std::string last_str() const;
 
   private:
 #ifdef WIN32 //Windows
