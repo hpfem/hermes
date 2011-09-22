@@ -39,7 +39,7 @@
 #if PY_VERSION_HEX < 0x02040000
 #define METH_COEXIST 0
 #define PyDict_CheckExact(op) (Py_TYPE(op) == &PyDict_Type)
-#define PyDict_Contains(d,o)   PySequence_Contains(d,o)
+#define PyDict_Contains(d, o)   PySequence_Contains(d, o)
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
@@ -160,11 +160,11 @@ typedef struct
 
 
 #if PY_MAJOR_VERSION >= 3
-#define __Pyx_PyNumber_Divide(x,y)         PyNumber_TrueDivide(x,y)
-#define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceTrueDivide(x,y)
+#define __Pyx_PyNumber_Divide(x, y)         PyNumber_TrueDivide(x, y)
+#define __Pyx_PyNumber_InPlaceDivide(x, y)  PyNumber_InPlaceTrueDivide(x, y)
 #else
-#define __Pyx_PyNumber_Divide(x,y)         PyNumber_Divide(x,y)
-#define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceDivide(x,y)
+#define __Pyx_PyNumber_Divide(x, y)         PyNumber_Divide(x, y)
+#define __Pyx_PyNumber_InPlaceDivide(x, y)  PyNumber_InPlaceDivide(x, y)
 #endif
 
 #if (PY_MAJOR_VERSION < 3) || (PY_VERSION_HEX >= 0x03010300)
@@ -191,13 +191,13 @@ typedef struct
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
-#define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),((char *)(n)))
-#define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),((char *)(n)),(a))
-#define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),((char *)(n)))
+#define __Pyx_GetAttrString(o, n)   PyObject_GetAttrString((o), ((char *)(n)))
+#define __Pyx_SetAttrString(o, n, a) PyObject_SetAttrString((o), ((char *)(n)), (a))
+#define __Pyx_DelAttrString(o, n)   PyObject_DelAttrString((o), ((char *)(n)))
 #else
-#define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),(n))
-#define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),(n),(a))
-#define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),(n))
+#define __Pyx_GetAttrString(o, n)   PyObject_GetAttrString((o), (n))
+#define __Pyx_SetAttrString(o, n, a) PyObject_SetAttrString((o), (n), (a))
+#define __Pyx_DelAttrString(o, n)   PyObject_DelAttrString((o), (n))
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
@@ -492,11 +492,11 @@ static int __Pyx_PrintOne(PyObject* stream, PyObject *o); /*proto*/
 #endif
 
 #if defined(_WIN32) && defined(__cplusplus) && CYTHON_CCOMPLEX
-#define __Pyx_SET_CREAL(z,x) ((z).real(x))
-#define __Pyx_SET_CIMAG(z,y) ((z).imag(y))
+#define __Pyx_SET_CREAL(z, x) ((z).real(x))
+#define __Pyx_SET_CIMAG(z, y) ((z).imag(y))
 #else
-#define __Pyx_SET_CREAL(z,x) __Pyx_CREAL(z) = (x)
-#define __Pyx_SET_CIMAG(z,y) __Pyx_CIMAG(z) = (y)
+#define __Pyx_SET_CREAL(z, x) __Pyx_CREAL(z) = (x)
+#define __Pyx_SET_CIMAG(z, y) __Pyx_CIMAG(z) = (y)
 #endif
 
 static CYTHON_INLINE __pyx_t_float_complex __pyx_t_float_complex_from_parts(float, float);

@@ -92,7 +92,7 @@ namespace Hermes
     NullException::NullException(const NullException & e)
     {
       char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg,e.getMsg());
+      strcpy(msg, e.getMsg());
       message=msg;
       paramIdx=e.getParamIdx();
       itemIdx=e.getItemIdx();
@@ -149,7 +149,7 @@ namespace Hermes
     LengthException::LengthException(const LengthException&e)
     {
       char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg,e.getMsg());
+      strcpy(msg, e.getMsg());
       message=msg;
       this->fstParamIdx=e.getFirstParamIdx();
       this->sndParamIdx=e.getSecondParamIdx();
@@ -179,11 +179,11 @@ namespace Hermes
     LinearSolverException::LinearSolverException(const LinearSolverException&e)
     {
       char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg,e.getMsg());
+      strcpy(msg, e.getMsg());
       message=msg;
     }
     
-    ValueException::ValueException(const char * name,double value,double allowed)
+    ValueException::ValueException(const char * name, double value, double allowed)
     {
       char * msg =  new char[55 + strlen(name)];
       if (value>allowed)
@@ -198,7 +198,7 @@ namespace Hermes
     ValueException::ValueException(const char * name, double value, double min, double max)
     {
       char * msg= new char[70+strlen(name)];
-      sprintf(msg,"Variable %s is %f allowed range is %f -- %f",name,value,min,max);
+      sprintf(msg, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
       message=msg;
       this->value=value;
       if (value>min)
@@ -225,7 +225,7 @@ namespace Hermes
     ValueException::ValueException(const ValueException&e)
     {
       char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg,e.getMsg());
+      strcpy(msg, e.getMsg());
       message=msg;
       this->value=e.getValue();
       this->allowed=e.getAllowed();

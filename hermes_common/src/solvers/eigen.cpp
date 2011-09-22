@@ -37,7 +37,7 @@
 #if PY_VERSION_HEX < 0x02040000
 #define METH_COEXIST 0
 #define PyDict_CheckExact(op) (Py_TYPE(op) == &PyDict_Type)
-#define PyDict_Contains(d,o)   PySequence_Contains(d,o)
+#define PyDict_Contains(d, o)   PySequence_Contains(d, o)
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
@@ -158,11 +158,11 @@ typedef struct
 
 
 #if PY_MAJOR_VERSION >= 3
-#define __Pyx_PyNumber_Divide(x,y)         PyNumber_TrueDivide(x,y)
-#define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceTrueDivide(x,y)
+#define __Pyx_PyNumber_Divide(x, y)         PyNumber_TrueDivide(x, y)
+#define __Pyx_PyNumber_InPlaceDivide(x, y)  PyNumber_InPlaceTrueDivide(x, y)
 #else
-#define __Pyx_PyNumber_Divide(x,y)         PyNumber_Divide(x,y)
-#define __Pyx_PyNumber_InPlaceDivide(x,y)  PyNumber_InPlaceDivide(x,y)
+#define __Pyx_PyNumber_Divide(x, y)         PyNumber_Divide(x, y)
+#define __Pyx_PyNumber_InPlaceDivide(x, y)  PyNumber_InPlaceDivide(x, y)
 #endif
 
 #if (PY_MAJOR_VERSION < 3) || (PY_VERSION_HEX >= 0x03010300)
@@ -189,13 +189,13 @@ typedef struct
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
-#define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),((char *)(n)))
-#define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),((char *)(n)),(a))
-#define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),((char *)(n)))
+#define __Pyx_GetAttrString(o, n)   PyObject_GetAttrString((o), ((char *)(n)))
+#define __Pyx_SetAttrString(o, n, a) PyObject_SetAttrString((o), ((char *)(n)), (a))
+#define __Pyx_DelAttrString(o, n)   PyObject_DelAttrString((o), ((char *)(n)))
 #else
-#define __Pyx_GetAttrString(o,n)   PyObject_GetAttrString((o),(n))
-#define __Pyx_SetAttrString(o,n,a) PyObject_SetAttrString((o),(n),(a))
-#define __Pyx_DelAttrString(o,n)   PyObject_DelAttrString((o),(n))
+#define __Pyx_GetAttrString(o, n)   PyObject_GetAttrString((o), (n))
+#define __Pyx_SetAttrString(o, n, a) PyObject_SetAttrString((o), (n), (a))
+#define __Pyx_DelAttrString(o, n)   PyObject_DelAttrString((o), (n))
 #endif
 
 #if PY_VERSION_HEX < 0x02050000
@@ -734,13 +734,13 @@ static PyObject *__pyx_pf_5eigen_0solve_eig_numpy(PyObject *__pyx_self, PyObject
   Py_ssize_t __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
-  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A,&__pyx_n_s__B,0};
+  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A, &__pyx_n_s__B, 0};
   __Pyx_RefNannySetupContext("solve_eig_numpy");
   __pyx_self = __pyx_self;
   if (unlikely(__pyx_kwds)) 
   {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
-    PyObject* values[2] = {0,0};
+    PyObject* values[2] = {0, 0};
     switch (PyTuple_GET_SIZE(__pyx_args)) 
     {
     case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -1375,13 +1375,13 @@ static PyObject *__pyx_pf_5eigen_1solve_eig_scipy(PyObject *__pyx_self, PyObject
   Py_ssize_t __pyx_t_5;
   Py_ssize_t __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
-  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A,&__pyx_n_s__B,0};
+  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A, &__pyx_n_s__B, 0};
   __Pyx_RefNannySetupContext("solve_eig_scipy");
   __pyx_self = __pyx_self;
   if (unlikely(__pyx_kwds)) 
   {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
-    PyObject* values[2] = {0,0};
+    PyObject* values[2] = {0, 0};
     switch (PyTuple_GET_SIZE(__pyx_args)) 
     {
     case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -2237,13 +2237,13 @@ static PyObject *__pyx_pf_5eigen_3solve_eig_pysparse(PyObject *__pyx_self, PyObj
   PyObject *__pyx_t_8 = NULL;
   Py_ssize_t __pyx_t_9;
   Py_ssize_t __pyx_t_10;
-  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A,&__pyx_n_s__B,&__pyx_n_s__n_eigs,&__pyx_n_s__target_value,&__pyx_n_s__verbose,&__pyx_n_s__jdtol,&__pyx_n_s__max_iter,0};
+  static PyObject **__pyx_pyargnames[] = {&__pyx_n_s__A, &__pyx_n_s__B, &__pyx_n_s__n_eigs, &__pyx_n_s__target_value, &__pyx_n_s__verbose, &__pyx_n_s__jdtol, &__pyx_n_s__max_iter, 0};
   __Pyx_RefNannySetupContext("solve_eig_pysparse");
   __pyx_self = __pyx_self;
   if (unlikely(__pyx_kwds)) 
   {
     Py_ssize_t kw_args = PyDict_Size(__pyx_kwds);
-    PyObject* values[7] = {0,0,0,0,0,0,0};
+    PyObject* values[7] = {0, 0, 0, 0, 0, 0, 0};
     values[2] = ((PyObject *)__pyx_int_4);
     values[3] = ((PyObject *)__pyx_int_neg_1);
     values[4] = __pyx_k_5;
