@@ -314,6 +314,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void SuperLUMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<SuperLUMatrix*>(mat));
+    }
+
+    template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix<Scalar>* mat)
     {
       _F_;
@@ -480,6 +486,31 @@ namespace Hermes
       {
         v[idx[i]] += y[i];
       }
+    }
+
+    template<typename Scalar>
+    Scalar SuperLUVector<Scalar>::get(unsigned int idx)
+    { 
+      return v[idx]; 
+    }
+    
+    template<typename Scalar>
+    void SuperLUVector<Scalar>::extract(Scalar *v) const 
+    { 
+      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    }
+    
+    template<typename Scalar>
+    void SuperLUVector<Scalar>::add_vector(Vector<Scalar>* vec) 
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void SuperLUVector<Scalar>::add_vector(Scalar* vec) 
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
     template<typename Scalar>

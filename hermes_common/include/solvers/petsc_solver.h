@@ -126,15 +126,8 @@ namespace Hermes
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec)
-      {
-        assert(this->length() == vec->length());
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-      };
-      virtual void add_vector(Scalar* vec)
-      {
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-      };
+      virtual void add_vector(Vector<Scalar>* vec);
+      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
     protected:

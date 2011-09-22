@@ -315,6 +315,12 @@ namespace Hermes
       }
     }
 
+    template<typename Scalar>
+    void MumpsMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<MumpsMatrix*>(mat));
+    }
+
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, ZMUMPS_COMPLEX b)
     {
       a.r +=b.r;
@@ -518,6 +524,31 @@ namespace Hermes
       {
         v[idx[i]] += y[i];
       }
+    }
+
+    template<typename Scalar>
+    Scalar MumpsVector<Scalar>::get(unsigned int idx) 
+    { 
+      return v[idx]; 
+    }
+
+    template<typename Scalar>
+    void MumpsVector<Scalar>::extract(Scalar *v) const 
+    { 
+      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    }
+
+    template<typename Scalar>
+    void MumpsVector<Scalar>::add_vector(Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void MumpsVector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
     template<typename Scalar>

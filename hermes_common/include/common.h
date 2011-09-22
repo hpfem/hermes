@@ -251,8 +251,8 @@ namespace Hermes
 
     // Complex part.
 #ifdef __cplusplus
-    e
-      xtern "C" {
+    extern "C" 
+    {
 #endif
       extern int zscal_(int *, std::complex<double> *, std::complex<double> *, int *);
       extern int zaxpy_(int *, std::complex<double> *, std::complex<double> *, int *, std::complex<double> *, int *);

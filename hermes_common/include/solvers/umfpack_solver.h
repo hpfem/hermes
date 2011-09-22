@@ -61,10 +61,7 @@ namespace Hermes
       /// @param[in] num_stages matrix is added to num_stages positions. num_stages * size(added matrix) = size(target matrix)
       /// @param[in] mat added matrix
       virtual void add_to_diagonal_blocks(int num_stages, CSCMatrix<Scalar>* mat);
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
-      {
-        add_to_diagonal_blocks(num_stages, dynamic_cast<CSCMatrix<Scalar>*>(mat));
-      }
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
       /// @param[in] j column in target matrix coresponding with lef column of added matrix
@@ -73,7 +70,7 @@ namespace Hermes
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
       virtual unsigned int get_matrix_size() const;
-      virtual unsigned int get_nnz() const {return this->nnz;}
+      virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
 
       // Applies the matrix to vector_in and saves result to vector_out.
@@ -91,22 +88,13 @@ namespace Hermes
       CSCMatrix* duplicate();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ap
-      int *get_Ap()
-      {
-        return this->Ap;
-      }
+      int *get_Ap();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ai
-      int *get_Ai()
-      {
-        return this->Ai;
-      }
+      int *get_Ai();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ax
-      Scalar *get_Ax()
-      {
-        return this->Ax;
-      }
+      Scalar *get_Ax();
 
     protected:
       // UMFPack specific data structures for storing the system matrix (CSC format).
@@ -138,30 +126,20 @@ namespace Hermes
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx) { return v[idx]; }
-      virtual void extract(Scalar *v) const { memcpy(v, this->v, this->size * sizeof(Scalar)); }
+      virtual Scalar get(unsigned int idx);
+      virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec)
-      {
-        assert(this->length() == vec->length());
-        for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
-      };
-      virtual void add_vector(Scalar* vec)
-      {
-        for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
-      };
+      virtual void add_vector(Vector<Scalar>* vec);
+      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
       /// @return pointer to array with vector data
       /// \sa #v
-      Scalar *get_c_array()
-      {
-        return this->v;
-      }
+      Scalar *get_c_array();
 
     protected:
       /// UMFPack specific data structures for storing the rhs.
@@ -207,16 +185,7 @@ namespace Hermes
     class UMFPackIterator
     {
     public:
-      UMFPackIterator(CSCMatrix<Scalar>* mat)
-      {
-        this->size = mat->get_size();
-        this->nnz = mat->get_nnz();
-        this->Ai = mat->get_Ai();
-        this->Ap = mat->get_Ap();
-        this->Ax = mat->get_Ax();
-        this->Ai_pos = 0;
-        this->Ap_pos = 0;
-      };
+      UMFPackIterator(CSCMatrix<Scalar>* mat);
       bool init();
       void get_current_position(int& i, int& j, Scalar& val);
       bool move_to_position(int i, int j);

@@ -99,9 +99,9 @@ namespace Hermes
     class LinearSolver
     {
     public:
-      LinearSolver() { sln = NULL; time = -1.0; }
+      LinearSolver();
 
-      virtual ~LinearSolver() { if (sln != NULL) delete [] sln; }
+      virtual ~LinearSolver();
 
       /// Solve.
       /// @return true on succes
@@ -109,23 +109,20 @@ namespace Hermes
 
       /// Get solution vector.
       /// @return solution vector ( #sln )
-      Scalar *get_sln_vector() { return sln; }
+      Scalar *get_sln_vector();
 
       /// @return #error
-      int get_error() { return error; }
+      int get_error();
       /// Get time spent on solving.
       /// @return time spent on solving in secs ( #time )
-      double get_time() { return time; }
+      double get_time();
 
       /// Set factorization scheme.
       /// @param[in] reuse_scheme factoriztion scheme to set
       virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
 
       /// Set factorization scheme to default.
-      virtual void set_factorization_scheme()
-      {
-        set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
-      }
+      virtual void set_factorization_scheme();
 
     protected:
       /// Solution vector.
@@ -146,10 +143,7 @@ namespace Hermes
         : LinearSolver<Scalar>(), factorization_scheme(factorization_scheme) {};
 
     protected:
-      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme)
-      {
-        factorization_scheme = reuse_scheme;
-      }
+      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme);
 
       unsigned int factorization_scheme;
     };
@@ -167,17 +161,11 @@ namespace Hermes
 
       /// Set the convergence tolerance.
       /// @param[in] tol - the tolerance to set
-      void set_tolerance(double tol)
-      {
-        this->tolerance = tol;
-      }
+      void set_tolerance(double tol);
 
       /// Set maximum number of iterations to perform.
       /// @param[in] iters - number of iterations
-      void set_max_iters(int iters)
-      {
-        this->max_iters = iters;
-      }
+      void set_max_iters(int iters);
 
       virtual void set_precond(const char *name) = 0;
 

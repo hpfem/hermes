@@ -52,10 +52,10 @@ namespace Hermes
       void set_solver(const char *solver);
       /// Set the convergence tolerance
       /// @param[in] tol - the tolerance to set
-      void set_tolerance(double tol) { this->tolerance = tol; }
+      void set_tolerance(double tol);
       /// Set maximum number of iterations to perform
       /// @param[in] iters - number of iterations
-      void set_max_iters(int iters) { this->max_iters = iters; }
+      void set_max_iters(int iters);
 
       /// Set Aztec internal preconditioner
       /// @param[in] name - name of the preconditioner [ none | jacobi | neumann | least-squares ]
@@ -64,11 +64,10 @@ namespace Hermes
       /// \brief Set preconditioner from IFPACK.
       /// @param[in] pc - IFPACK preconditioner
 #ifdef HAVE_TEUCHOS
-      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
 #else
-      virtual void set_precond(Precond<Scalar> *pc)
+      virtual void set_precond(Precond<Scalar> *pc);
 #endif
-      { this->precond_yes = true; this->pc = pc; }
 
       /// Option setting function
       void set_option(int option, int value);

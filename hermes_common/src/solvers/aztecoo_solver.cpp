@@ -66,6 +66,29 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void AztecOOSolver<Scalar>::set_tolerance(double tol)
+    { 
+      this->tolerance = tol;
+    }
+
+    template<typename Scalar>
+    void AztecOOSolver<Scalar>::set_max_iters(int iters)
+    { 
+      this->max_iters = iters; 
+    }
+
+    template<typename Scalar>
+#ifdef HAVE_TEUCHOS
+    void AztecOOSolver<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
+#else
+    void AztecOOSolver<Scalar>::set_precond(Precond<Scalar> *pc)
+#endif
+    {
+      this->precond_yes = true; 
+      this->pc = pc; 
+    }
+
+    template<typename Scalar>
     void AztecOOSolver<Scalar>::set_precond(const char *name)
     {
       _F_;

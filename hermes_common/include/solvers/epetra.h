@@ -70,10 +70,7 @@ namespace Hermes
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
       virtual void add_to_diagonal_blocks(int num_stages, EpetraMatrix<Scalar>* mat);
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
-      {
-        add_to_diagonal_blocks(num_stages, dynamic_cast<EpetraMatrix<Scalar>*>(mat));
-      }
+      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
       virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
       virtual void add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat);
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
@@ -107,22 +104,15 @@ namespace Hermes
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx) { return (*vec)[idx]; }
-      virtual void extract(Scalar *v) const { vec->ExtractCopy((double *)v); } ///< \todo this can't be used with complex numbers
+      virtual Scalar get(unsigned int idx);
+      virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec)
-      {
-        assert(this->length() == vec->length());
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-      };
-      virtual void add_vector(Scalar* vec)
-      {
-        for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-      };
+      virtual void add_vector(Vector<Scalar>* vec);
+      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE);
 
     protected:

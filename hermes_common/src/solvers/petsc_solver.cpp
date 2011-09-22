@@ -310,6 +310,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void PetscMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      add_to_diagonal_blocks(num_stages, dynamic_cast<PetscMatrix<Scalar>*>(mat));
+    }
+
+    template<typename Scalar>
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
       _F_;
@@ -475,6 +481,19 @@ namespace Hermes
       {
         VecSetValue(vec, idx[i], to_petsc(y[i]), ADD_VALUES);
       }
+    }
+
+    template<typename Scalar>
+    void PetscVector<Scalar>::add_vector(Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void PetscVector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
     template<typename Scalar>

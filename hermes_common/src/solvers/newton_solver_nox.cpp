@@ -91,6 +91,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Teuchos::RCP<Precond<Scalar> > DiscreteProblemNOX<Scalar>::get_precond() 
+    { 
+      return precond; 
+    }
+
+    template<typename Scalar>
+    EpetraMatrix<Scalar> *DiscreteProblemNOX<Scalar>::get_jacobian() 
+    { 
+      return &jacobian; 
+    }
+
+    template<typename Scalar>
     NewtonSolverNOX<Scalar>::NewtonSolverNOX(DiscreteProblemInterface<Scalar>* problem) : NonlinearSolver<Scalar>(problem), ndp(problem)
     {
       // default values
@@ -350,6 +362,91 @@ namespace Hermes
         throw Exceptions::Exception("Nox solver did not converge");
       }
     }
+
+
+    template<typename Scalar>
+    int NewtonSolverNOX<Scalar>::get_num_iters() 
+    { 
+      return num_iters; 
+    }
+
+    template<typename Scalar>
+    double NewtonSolverNOX<Scalar>::get_residual()  
+    { 
+      return residual; 
+    }
+
+    template<typename Scalar>
+    int NewtonSolverNOX<Scalar>::get_num_lin_iters() 
+    { 
+      return num_lin_iters; 
+    }
+
+    template<typename Scalar>
+    double NewtonSolverNOX<Scalar>::get_achieved_tol()  
+    { 
+      return achieved_tol; 
+    }
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_norm_type(NOX::Abstract::Vector::NormType type)  
+    { 
+      conv.norm_type = type; 
+    }
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_scale_type(NOX::StatusTest::NormF::ScaleType type)  
+    { 
+      conv.stype = type; 
+    }
+    
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_conv_iters(int iters)        
+    { 
+      conv.max_iters = iters; 
+    }
+    
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_conv_abs_resid(double resid) 
+    { 
+      conv_flag.absresid = 1; 
+      conv.abs_resid = resid; 
+    }
+    
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_conv_rel_resid(double resid) 
+    { 
+      conv_flag.relresid = 1; 
+      conv.rel_resid = resid; 
+    }
+    
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::disable_abs_resid() 
+    { 
+      conv_flag.absresid = 0; 
+    }
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::disable_rel_resid() 
+    { 
+      conv_flag.relresid = 0; 
+    }
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_conv_update(double update)   
+    { 
+      conv_flag.update = 1; 
+      conv.update = update; 
+    }    
+
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::set_conv_wrms(double rtol, double atol)
+    {
+      conv_flag.wrms = 1;
+      conv.wrms_rtol = rtol;
+      conv.wrms_atol = atol;
+    }
+
     template class HERMES_API DiscreteProblemNOX<double>;
     // template class HERMES_API DiscreteProblemNOX<std::complex<double> >; //complex version of nox solver is not implemented
     template class HERMES_API NewtonSolverNOX<double>;

@@ -105,6 +105,31 @@ namespace Hermes
     return *this;
   }
 
+  const std::string& TimePeriod::name() const 
+  { 
+    return period_name; 
+  }
+
+  double TimePeriod::accumulated() const 
+  { 
+    return accum; 
+  }
+
+  std::string TimePeriod::accumulated_str() const { 
+    return to_string(accum); 
+  }
+
+  double TimePeriod::last() const 
+  { 
+    return last_period; 
+  }
+
+  std::string TimePeriod::last_str() const 
+  {
+    return to_string(last_period); 
+  }
+
+
   const TimePeriod& TimePeriod::tick_reset()
   {
     tick(HERMES_SKIP);
