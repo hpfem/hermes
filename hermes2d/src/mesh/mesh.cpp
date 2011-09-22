@@ -21,6 +21,12 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    bool Node::is_constrained_vertex() const 
+    { 
+      assert(type == HERMES_TYPE_VERTEX); 
+      return ref <= 3 && !bnd; 
+    }
+
     void Node::ref_element(Element* e)
     {
       if (type == HERMES_TYPE_EDGE)
@@ -68,6 +74,61 @@ namespace Hermes
         vn[i]->unref_element(ht);
         en[i]->unref_element(ht, this);
       }
+    }
+
+    Element::Element() : visited(false) {};
+
+    bool Element::is_triangle() const 
+    {
+      return nvert == 3;
+    }
+
+    bool Element::is_quad() const 
+    {
+      return nvert == 4; 
+    }
+
+    bool Element::is_curved() const 
+    {
+      return cm != NULL; 
+    }
+
+    int  Element::get_mode() const 
+    {
+      return is_triangle() ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
+    }
+
+    int Element::get_num_surf() 
+    {
+      return nvert; 
+    }
+
+    int Element::next_vert(int i) const 
+    {
+      return (i < (int)nvert-1) ? i + 1 : 0; 
+    }
+
+    int Element::prev_vert(int i) const 
+    {
+      return (i > 0) ? i-1 : nvert-1; 
+    }
+
+    bool Element::hsplit() const 
+    {
+      assert(!active);
+      return sons[0] != NULL; 
+    }
+
+    bool Element::vsplit() const 
+    {
+      assert(!active);
+      return sons[2] != NULL; 
+    }
+
+    bool Element::bsplit() const 
+    {
+      assert(!active);
+      return sons[0] != NULL && sons[2] != NULL; 
     }
 
     Element* Element::get_neighbor(int ie) const
@@ -128,7 +189,7 @@ namespace Hermes
     }
 
     void Mesh::create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
-                  int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers)
+      int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers)
     {
       //printf("Calling Mesh::free() in Mesh::create().\n");
       free();
@@ -160,7 +221,7 @@ namespace Hermes
         this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, tri_markers[i]);
 
         e = create_triangle(this->element_markers_conversion.get_internal_marker(tri_markers[i]).marker, &nodes[tris[i][0]], &nodes[tris[i][1]],
-                            &nodes[tris[i][2]], NULL);
+          &nodes[tris[i][2]], NULL);
       }
 
       // create quads
@@ -169,7 +230,7 @@ namespace Hermes
         this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, quad_markers[i]);
 
         e = create_quad(this->element_markers_conversion.get_internal_marker(quad_markers[i]).marker, &nodes[quads[i][0]], &nodes[quads[i][1]],
-                        &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
+          &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
       }
 
       // set boundary markers
@@ -1880,7 +1941,7 @@ namespace Hermes
       if(conversion_table.find(internal_marker) == conversion_table.end())
         return StringValid("-999", false);
 
-     return StringValid(conversion_table.find(internal_marker)->second, true);
+      return StringValid(conversion_table.find(internal_marker)->second, true);
 
     }
 
@@ -1895,7 +1956,7 @@ namespace Hermes
       if(conversion_table_inverse.find(user_marker) == conversion_table_inverse.end())
         return IntValid(-999, false);
 
-     return IntValid(conversion_table_inverse.find(user_marker)->second, true);
+      return IntValid(conversion_table_inverse.find(user_marker)->second, true);
     }
 
     void Mesh::convert_triangles_to_base(Element *e)

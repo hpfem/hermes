@@ -49,12 +49,12 @@ namespace Hermes
 
       union
       {
-        struct // vertex node variant:
+        struct
         {
           double x, y; ///< vertex node coordinates
         };
-        struct // edge node variant:
-        {// \todo review pointer sizes for 64-bits !!!
+        struct
+        {
           int marker;       ///< edge marker
           Element* elem[2]; ///< elements sharing the edge node
           Nurbs* nurbs;     ///< temporary curved edge ptr (only for loading the mesh)
@@ -64,7 +64,8 @@ namespace Hermes
       int p1, p2; ///< parent id numbers
       Node* next_hash; ///< next node in hash synonym list
 
-      bool is_constrained_vertex() const { assert(type == HERMES_TYPE_VERTEX); return ref <= 3 && !bnd; }
+      /// Returns true if the (vertex) node is constrained.
+      bool is_constrained_vertex() const;
 
       void ref_element(Element* e = NULL);
       void unref_element(HashTable* ht, Element* e = NULL);
@@ -94,10 +95,9 @@ namespace Hermes
     class HERMES_API Element
     {
     public:
-      Element() : visited(false) {};
+      Element();
 
       int id;            ///< element id number
-      unsigned nvert:30; ///< number of vertices (3 or 4)
       unsigned active:1; ///< 0 = active, no sons; 1 = inactive (refined), has sons
       unsigned used:1;   ///< array item usage flag
       int marker;        ///< element marker
@@ -114,19 +114,19 @@ namespace Hermes
 
       CurvMap* cm; ///< curved mapping, NULL if not curvilinear
 
-      bool is_triangle() const { return nvert == 3; }
-      bool is_quad() const { return nvert == 4; }
-      bool is_curved() const { return cm != NULL; }
-      int  get_mode() const { return is_triangle() ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; }
-      int get_num_surf() {return nvert; }
+      bool is_triangle() const;
+      bool is_quad() const;
+      bool is_curved() const;
+      int  get_mode() const;
+      int get_num_surf();
 
       // helper functions to obtain the index of the next or previous vertex/edge
-      int next_vert(int i) const { return (i < (int)nvert-1) ? i + 1 : 0; }
-      int prev_vert(int i) const { return (i > 0) ? i-1 : nvert-1; }
+      int next_vert(int i) const;
+      int prev_vert(int i) const;
 
-      bool hsplit() const { assert(!active); return sons[0] != NULL; }
-      bool vsplit() const { assert(!active); return sons[2] != NULL; }
-      bool bsplit() const { assert(!active); return sons[0] != NULL && sons[2] != NULL; }
+      bool hsplit() const;
+      bool vsplit() const;
+      bool bsplit() const;
 
       /// Returns a pointer to the neighboring element across the edge 'ie', or
       /// NULL if it does not exist or is across an irregular edge.
@@ -147,6 +147,8 @@ namespace Hermes
 
       void ref_all_nodes();
       void unref_all_nodes(HashTable* ht);
+    private:
+      unsigned nvert:30; ///< number of vertices (3 or 4)
     };
 
     /// \brief Represents a finite element mesh.
@@ -408,6 +410,7 @@ namespace Hermes
       ElementMarkersConversion element_markers_conversion;
       BoundaryMarkersConversion boundary_markers_conversion;
 
+      friend class Element;
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
       friend class MeshReaderH1DXML;

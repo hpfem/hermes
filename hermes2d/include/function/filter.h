@@ -164,10 +164,7 @@ namespace Hermes
 
       void init(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
 
-      virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0) {
-        error("Not implemented yet");
-        return 0;
-      }
+      virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
     protected:
 
@@ -287,8 +284,7 @@ namespace Hermes
       VonMisesFilter(Hermes::vector<MeshFunction<double>*> solutions, double lambda, double mu,
         int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
 
-      virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
-      { error("Not implemented yet"); return 0; }
+      virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
     protected:
       double lambda, mu;
@@ -310,8 +306,7 @@ namespace Hermes
 
       LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac = 1);
 
-      virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0)
-      { error("Not implemented yet"); return 0; }
+      virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
 
     protected:
       double tau_frac;

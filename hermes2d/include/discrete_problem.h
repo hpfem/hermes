@@ -275,7 +275,7 @@ namespace Hermes
       void set_spaces(Space<Scalar>* space);
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
-      void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
+      inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
     protected:
       bool cache_for_adaptivity;

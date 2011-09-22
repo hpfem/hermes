@@ -439,6 +439,7 @@ namespace Hermes
         // multiply them by the vector of the reference edge
         double2* v1 = ref_map_shapeset.get_ref_vertex(a);
         double2* v2 = ref_map_shapeset.get_ref_vertex(b);
+
         double ex = (*v2)[0] - (*v1)[0];
         double ey = (*v2)[1] - (*v1)[1];
         for (i = 0; i < np; i++)
