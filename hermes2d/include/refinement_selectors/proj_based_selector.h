@@ -60,9 +60,9 @@ namespace Hermes
         *  \param[in] weight_aniso An error weight of ANISO-candidate. The default value is ::H2DRS_DEFAULT_ERR_WEIGHT_ANISO. */
         void set_error_weights(double weight_h = H2DRS_DEFAULT_ERR_WEIGHT_H, double weight_p = H2DRS_DEFAULT_ERR_WEIGHT_P, double weight_aniso = H2DRS_DEFAULT_ERR_WEIGHT_ANISO);
 
-        double get_error_weight_h() { return error_weight_h; };
-        double get_error_weight_p() { return error_weight_p; };
-        double get_error_weight_aniso() { return error_weight_aniso; };
+        double get_error_weight_h() const;
+        double get_error_weight_p() const;
+        double get_error_weight_aniso() const;
 
       protected: //evaluated shape basis
         /// A transform shaped function expansions.
@@ -81,42 +81,32 @@ namespace Hermes
           double** values; ///< Values. The first index is index of a functions expansion, the second index is an index of a an integration point.
         public:
           /// A default contructor. Creates an empty instance.
-          TrfShapeExp() : num_gip(0), num_expansion(0), values(NULL) {};
+          TrfShapeExp();
 
           /// Desructor.
-          virtual ~TrfShapeExp() { delete[] values; };
+          virtual ~TrfShapeExp();
 
           /// Allocates a space for function expansions.
           /** \param[in] num_expansion A number of expansions.
           *  \param[in] num_gip A number of itegration points. */
-          void allocate(int num_expansion, int num_gip) {
-            delete[] values;
-            values = new_matrix<double>(num_expansion, num_gip);
-            this->num_expansion = num_expansion;
-            this->num_gip = num_gip;
-          };
+          void allocate(int num_expansion, int num_gip);
 
           /// Operator for accessing of contents.
           /** \param[in] inx_expansion An index of a function expansion.
           *  \return A pointer to an array of values of a function expansion at integration points. The returned pointer should not be stored outside the calling method or deallocated. */
-          inline double* operator[](int inx_expansion) {
-            assert_msg(values != NULL, "Function expansions not allocated.");
-            assert_msg(inx_expansion < num_expansion, "Index (%d) of an expansion out of range [0, %d]", inx_expansion, num_expansion-1);
-            return values[inx_expansion];
-          };
+          inline double* operator[](int inx_expansion);
 
           /// Returns true if the instance is empty, i.e., the method allocate() was not called yet.
           /** \return True if the instance is empty, i.e., the method allocate() was not called yet. */
-          inline bool empty() { return values == NULL; };
+          inline bool empty() const;
 
           /// Assignment operator. Prevent unauthorized copying of the pointer.
-          /** This method prevents a user from copying allocated internal structures
-          *  because C++ does not support garbage collection. */
-          const TrfShapeExp& operator = (const TrfShapeExp& other) {
+          const TrfShapeExp& operator = (const TrfShapeExp& other)
+          {
             delete[] values; values = NULL;
             error_if(other.values != NULL, "Unable to assign a non-empty values. Use references instead.");
             return *this;
-          };
+          }
         };
 
         /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.

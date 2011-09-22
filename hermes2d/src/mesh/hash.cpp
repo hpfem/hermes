@@ -27,6 +27,11 @@ namespace Hermes
       nqueries = ncollisions = 0;
     }
 
+    HashTable::~HashTable()
+    {
+      free(); 
+    }
+
     void HashTable::init(int size)
     {
       v_table = e_table = NULL;
@@ -54,6 +59,23 @@ namespace Hermes
         node = node->next_hash;
       }
       *ptr = NULL;
+    }
+
+    Node* HashTable::get_node(int id) const 
+    {
+      return &(nodes[id]); 
+    }
+
+    /// Returns the total number of nodes stored.
+    int HashTable::get_num_nodes() const 
+    {
+      return nodes.get_num_items(); 
+    }
+
+    /// Returns the maximum node id number plus one.
+    int HashTable::get_max_node_id() const 
+    {
+      return nodes.get_size(); 
     }
 
     void HashTable::copy(const HashTable* ht)

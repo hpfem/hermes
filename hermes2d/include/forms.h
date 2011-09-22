@@ -219,8 +219,8 @@ namespace Hermes
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
 
-      virtual void free() { wrapped_geom->free(); delete wrapped_geom; }
-      virtual void free_ord() { delete wrapped_geom; }
+      virtual void free();
+      virtual void free_ord();
 
     private:
       int neighb_marker;

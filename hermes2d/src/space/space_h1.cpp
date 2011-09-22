@@ -166,7 +166,7 @@ namespace Hermes
         int order = this->get_element_order(e->id);
         if (order > 0)
         {
-          for (unsigned int i = 0; i < e->nvert; i++)
+          for (unsigned int i = 0; i < e->get_num_surf(); i++)
           {
             // vertex dofs
             Node* vn = e->vn[i];
@@ -470,7 +470,7 @@ namespace Hermes
       // on non-refined elements all we have to do is update edge nodes lying on constrained edges
       if (e->active)
       {
-        for (unsigned int i = 0; i < e->nvert; i++)
+        for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
           if (ei[i] != NULL)
           {
@@ -486,7 +486,7 @@ namespace Hermes
       {
         // create new edge infos where we don't have them yet
         EdgeInfo ei_data[4];
-        for (unsigned int i = 0; i < e->nvert; i++)
+        for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
           if (ei[i] == NULL)
           {
@@ -509,7 +509,7 @@ namespace Hermes
         }
 
         // create a baselist for each mid-edge vertex node
-        for (unsigned int i = 0; i < e->nvert; i++)
+        for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
           if (ei[i] == NULL) continue;
           j = e->next_vert(i);
@@ -561,7 +561,7 @@ namespace Hermes
         // create edge infos for half-edges
         EdgeInfo  half_ei_data[4][2];
         EdgeInfo* half_ei[4][2];
-        for (unsigned int i = 0; i < e->nvert; i++)
+        for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
           if (ei[i] == NULL)
           {

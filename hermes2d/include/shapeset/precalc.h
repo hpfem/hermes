@@ -68,29 +68,22 @@ namespace Hermes
       void set_active_shape(int index);
 
       /// Returns the index of the active shape (can be negative if the shape is constrained).
-      int get_active_shape() const { return index; };
+      int get_active_shape() const;
 
       /// Returns a pointer to the shapeset which is being precalculated.
-      Shapeset* get_shapeset() const { return shapeset; }
+      Shapeset* get_shapeset() const;
 
       /// Returns type of space
-      SpaceType get_space_type() const { return shapeset->get_space_type(); }
+      SpaceType get_space_type() const;
 
       /// Internal. Use set_active_element() instead.
       void set_mode(int mode);
 
       /// For internal use only.
-      void set_master_transform()
-      {
-        assert(master_pss != NULL);
-        sub_idx = master_pss->sub_idx;
-        top = master_pss->top;
-        stack[top] = *(master_pss->ctm);
-        ctm = stack + top;
-      }
+      void set_master_transform();
 
       /// Returns the polynomial order of the active shape function on given edge.
-      virtual int get_edge_fn_order(int edge) { return Global<double>::make_edge_order(mode, edge, shapeset->get_order(index)); }
+      virtual int get_edge_fn_order(int edge);
 
       /// See Transformable::push_transform.
       virtual void push_transform(int son);
@@ -120,19 +113,16 @@ namespace Hermes
 
       PrecalcShapeset* master_pss;
 
-      bool is_slave() const { return master_pss != NULL; }
+      /// Returns true iff this is a precalculated shapeset for test functions.
+      bool is_slave() const;
 
       virtual void precalculate(int order, int mask);
 
       void update_max_index();
 
       /// Forces a transform without using push_transform() etc.
-      /// Used by the Solution class. <b>For internal use only</b>.
-      void force_transform(uint64_t sub_idx, Trf* ctm)
-      {
-        this->sub_idx = sub_idx;
-        this->ctm = ctm;
-      }
+      /// Used by the Solution class.
+      void force_transform(uint64_t sub_idx, Trf* ctm);
 
       friend class RefMap;
     };

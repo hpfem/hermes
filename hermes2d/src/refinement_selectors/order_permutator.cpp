@@ -65,6 +65,30 @@ namespace Hermes
           *tgt_quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
       }
 
+      int OrderPermutator::get_order_h() const 
+      {
+        return order_h; 
+      }
+
+      int OrderPermutator::get_order_v() const 
+      {
+        return order_v; 
+      }
+
+      int OrderPermutator::get_quad_order() const 
+      {
+        return H2D_MAKE_QUAD_ORDER(order_h, order_v); 
+      }
+
+      int OrderPermutator::get_start_quad_order() const 
+      {
+        return H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v); 
+      }
+
+      int OrderPermutator::get_end_quad_order() const 
+      {
+        return H2D_MAKE_QUAD_ORDER(end_order_h, end_order_v); 
+      }
     }
   }
 }

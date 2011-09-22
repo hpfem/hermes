@@ -442,7 +442,7 @@ namespace Hermes
         this->mode = e->get_mode();
         o = space->get_element_order(e->id);
         o = std::max(H2D_GET_H_ORDER(o), H2D_GET_V_ORDER(o));
-        for (unsigned int k = 0; k < e->nvert; k++)
+        for (unsigned int k = 0; k < e->get_num_surf(); k++)
         {
           int eo = space->get_edge_order(e, k);
           if (eo > o) o = eo;
@@ -1386,10 +1386,10 @@ namespace Hermes
       {
         Element* elem[5];
         elem[0] = e_last;
-        for (unsigned int i = 1; i <= e_last->nvert; i++)
+        for (unsigned int i = 1; i <= e_last->get_num_surf(); i++)
           elem[i] = e_last->get_neighbor(i-1);
 
-        for (unsigned int i = 0; i <= e_last->nvert; i++)
+        for (unsigned int i = 0; i <= e_last->get_num_surf(); i++)
           if (elem[i] != NULL)
           {
             this->refmap->set_active_element(elem[i]);

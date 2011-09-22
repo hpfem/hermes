@@ -26,6 +26,26 @@ namespace Hermes
       legend = grid = true;
     }
 
+    void Graph::set_log_x(bool log)
+    {
+      logx = log; 
+    }
+
+    void Graph::set_log_y(bool log) 
+    {
+      logy = log; 
+    }
+
+    void Graph::show_legend(bool show) 
+    { 
+      legend = show;
+    }
+
+    void Graph::show_grid(bool show)
+    {
+      grid = show; 
+    }
+
     void Graph::set_captions(const char* title, const char* x_axis_name, const char* y_axis_name)
     {
       this->title = title ? title : "";

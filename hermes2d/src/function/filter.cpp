@@ -471,6 +471,11 @@ namespace Hermes
       this->cur_node = node;
     }
 
+    template<typename Scalar>
+    Scalar DXDYFilter<Scalar>::get_pt_value(double x, double y, int item = H2D_FN_VAL_0) 
+    {
+      return 0;
+    }
 
     template<typename Scalar>
     void MagFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
@@ -641,6 +646,11 @@ namespace Hermes
       cur_node = node;
     }
 
+    double VonMisesFilter::get_pt_value(double x, double y, int item)
+    {
+      return 0; 
+    }
+
     VonMisesFilter::VonMisesFilter(Hermes::vector<MeshFunction<double>*> solutions, double lambda, double mu,
       int cyl, int item1, int item2)
       : Filter<double>(solutions)
@@ -698,6 +708,12 @@ namespace Hermes
       }
       this->nodes->add(node, order);
       this->cur_node = node;
+    }
+
+    template<typename Scalar>
+    Scalar LinearFilter<Scalar>::get_pt_value(double x, double y, int item)
+    {
+      return 0; 
     }
 
     template<typename Scalar>

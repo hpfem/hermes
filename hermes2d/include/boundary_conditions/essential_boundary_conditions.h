@@ -83,7 +83,7 @@ namespace Hermes
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
       /// Function giving info that u_Essential is a constant.
-      typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
+      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
     };
 
     /// Class representing non-constant essential boundary condition for Scalar approximation.
@@ -101,7 +101,7 @@ namespace Hermes
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
-      typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
+      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
       ExactSolutionScalar<Scalar>* exact_solution;
     };
@@ -122,7 +122,7 @@ namespace Hermes
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
       /// Function giving info that u_Essential is a non-constant function.
-      typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
+      inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
       ExactSolutionVector<Scalar>* exact_solution2;
     };

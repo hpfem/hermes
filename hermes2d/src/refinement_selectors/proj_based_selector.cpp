@@ -63,6 +63,57 @@ namespace Hermes
       }
 
       template<typename Scalar>
+      double ProjBasedSelector<Scalar>::get_error_weight_h() const
+      {
+        return error_weight_h; 
+      }
+
+      template<typename Scalar>
+      double ProjBasedSelector<Scalar>::get_error_weight_p() const
+      {
+        return error_weight_p; 
+      }
+
+      template<typename Scalar>
+      double ProjBasedSelector<Scalar>::get_error_weight_aniso() const
+      {
+        return error_weight_aniso; 
+      }
+
+      template<typename Scalar>
+      ProjBasedSelector<Scalar>::TrfShapeExp::TrfShapeExp() : num_gip(0), num_expansion(0), values(NULL) {};
+
+
+      template<typename Scalar>
+      ProjBasedSelector<Scalar>::TrfShapeExp::~TrfShapeExp() 
+      {
+        delete[] values; 
+      }
+
+      template<typename Scalar>
+      void ProjBasedSelector<Scalar>::TrfShapeExp::allocate(int num_expansion, int num_gip) 
+      {
+        delete[] values;
+        values = new_matrix<double>(num_expansion, num_gip);
+        this->num_expansion = num_expansion;
+        this->num_gip = num_gip;
+      }
+
+      template<typename Scalar>
+      double* ProjBasedSelector<Scalar>::TrfShapeExp::operator[](int inx_expansion) 
+      {
+        assert_msg(values != NULL, "Function expansions not allocated.");
+        assert_msg(inx_expansion < num_expansion, "Index (%d) of an expansion out of range [0, %d]", inx_expansion, num_expansion-1);
+        return values[inx_expansion];
+      }
+
+      template<typename Scalar>
+      bool ProjBasedSelector<Scalar>::TrfShapeExp::empty() const
+      {
+        return values == NULL; 
+      }
+
+      template<typename Scalar>
       void ProjBasedSelector<Scalar>::evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error)
       {
         bool tri = e->is_triangle();

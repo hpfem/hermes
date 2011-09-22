@@ -291,6 +291,19 @@ namespace Hermes
     }
 
     template<typename T>
+    void InterfaceGeom<T>::free() 
+    {
+      wrapped_geom->free(); 
+      delete wrapped_geom; 
+    }
+    
+    template<typename T>
+    void InterfaceGeom<T>::free_ord() 
+    {
+      delete wrapped_geom; 
+    }
+
+    template<typename T>
     int InterfaceGeom<T>::get_neighbor_marker() const
     {
       return neighb_marker;

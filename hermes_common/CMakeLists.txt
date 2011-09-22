@@ -42,6 +42,7 @@ project(hermes_common)
 		src/ord.cpp
 		src/hermes_function.cpp
 		src/exceptions.cpp
+    src/range.cpp
 		
 		src/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
 		
@@ -78,6 +79,7 @@ project(hermes_common)
 		include/ord.h
 		include/hermes_function.h
 		include/exceptions.h
+    include/range.h
 		
 		include/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp
 		

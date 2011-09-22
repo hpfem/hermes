@@ -58,23 +58,23 @@ namespace Hermes
 
         /// Returns the current horizontal order.
         /** \return The current horizontal order. */
-        int get_order_h() const { return order_h; };
+        int get_order_h() const;
 
         /// Returns the current vertical order.
         /** \return The current vertical order. */
-        int get_order_v() const { return order_v; };
+        int get_order_v() const;
 
         /// Returns the current order in an encoded form.
         /** \return The current order in an encoded form. */
-        int get_quad_order() const { return H2D_MAKE_QUAD_ORDER(order_h, order_v); };
+        int get_quad_order() const;
 
         /// Returns the starting order in an encoded form.
         /** \return The starting order in an encoded form. */
-        int get_start_quad_order() const { return H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v); };
+        int get_start_quad_order() const;
 
         /// Returns the ending order in an encoded form.
         /** \return The ending order in an encoded form. */
-        int get_end_quad_order() const { return H2D_MAKE_QUAD_ORDER(end_order_h, end_order_v); };
+        int get_end_quad_order() const;
       };
     }
   }

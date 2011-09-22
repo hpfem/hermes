@@ -568,7 +568,7 @@ namespace Hermes
           double max_x, max_y, min_x, min_y;
           max_x = min_x = element->vn[0]->x;
           max_y = min_y = element->vn[0]->y;
-          for(unsigned int i = 0; i < element->nvert; i++)
+          for(unsigned int i = 0; i < element->get_num_surf(); i++)
           {
             sum_x += element->vn[i]->x;
             sum_y += element->vn[i]->y;
@@ -583,7 +583,7 @@ namespace Hermes
               min_y = element->vn[i]->y;
           }
           element_infos.push_back(ElementInfo(element->id,
-            (float)(sum_x / element->nvert), (float)(sum_y / element->nvert),
+            (float)(sum_x / element->get_num_surf()), (float)(sum_y / element->get_num_surf()),
             (float)(max_x - min_x), (float)(max_y - min_y)));
         }
       }
@@ -1698,62 +1698,6 @@ namespace Hermes
         VIEWER_GUI(TwWindowSize(width, height));
 
         View::on_reshape(width, height);
-      }
-
-
-      void ScalarView::draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param)
-      {
-        assert_msg(param != NULL, "Param parameter equals to NULL");
-
-        SVGExportParams* pars = (SVGExportParams*)param;
-        double3* verts = viewer->lin->get_vertices();
-
-        //transform coordinates
-        double3 vert_a, vert_b;
-        memcpy(&vert_a, verts + inx_vert_a, sizeof(double3));
-        memcpy(&vert_b, verts + inx_vert_b, sizeof(double3));
-        vert_a[0] = (vert_a[0] - pars->x_min) * pars->scale;
-        vert_a[1] = -(vert_a[1] - pars->y_min) * pars->scale; //invert Y-axis
-        vert_b[0] = (vert_b[0] - pars->x_min) * pars->scale;
-        vert_b[1] = -(vert_b[1] - pars->y_min) * pars->scale;
-
-        //store
-        fprintf(pars->fout, "<path d = \"M %g %g L %g %g\"/>\n", vert_a[0], vert_a[1], vert_b[0], vert_b[1]);
-      }
-
-      void ScalarView::export_mesh_edges_svg(const char* filename, float width_mm)
-      {
-        lin->lock_data();
-
-        //get AABB
-        double width = vertices_max_x - vertices_min_x, height = vertices_max_y - vertices_min_y;
-        error_if(width == 0.0 || height == 0.0, "No edges to save or edge vertices are corrupted");
-        double height_mm = height * width_mm/width;
-
-        //prepare output
-        FILE* fout = fopen(filename, "wt");
-
-        //prepare header
-        fprintf(fout, SVG_HEADER);
-        fprintf(fout, "<svg width = \"%.2fmm\" height = \"%.2fmm\" version = \"1.1\" xmlns = \"http://www.w3.org/2000/svg\">\n", (float)width_mm, (float)height_mm);
-        fprintf(fout, "<desc>%s</desc>\n", title.c_str());
-        fprintf(fout, "<g stroke = \"black\" stroke-width = \"0.3\" fill = \"none\" transform = \"translate(0 %g)\">\n", height_mm * SVG_UNIT_MM); //move bottom of mesh flipped over Y to bottom of image
-
-        //prepare parameters
-        SVGExportParams svg_params;
-        svg_params.fout = fout;
-        svg_params.x_min = vertices_min_x; svg_params.y_min = vertices_min_x;
-        svg_params.scale = width_mm/width * SVG_UNIT_MM; //convert from mesh units to mm to px
-
-        //store edges
-        draw_edges(&draw_svg_edge, &svg_params, false);
-
-        //clenaup
-        fprintf(fout, "</g>\n");
-        fprintf(fout, "</svg>\n");
-        fclose(fout);
-
-        lin->unlock_data();
       }
 
       const char* ScalarView::get_help_text() const

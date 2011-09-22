@@ -18,6 +18,38 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    // Debug helpers.
+    static void check_params(int component, Function<double>::Node* cur_node, int num_components)
+    {
+      if (component < 0 || component > num_components)
+        error("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem.");
+      if (cur_node == NULL)
+        error("Invalid node. Did you call set_quad_order()?");
+    }
+
+    // Debug helpers.
+    static void check_params(int component, Function<std::complex<double> >::Node* cur_node, int num_components)
+    {
+      if (component < 0 || component > num_components)
+        error("Invalid component. You are probably using Scalar-valued shapeset for an Hcurl / Hdiv problem.");
+      if (cur_node == NULL)
+        error("Invalid node. Did you call set_quad_order()?");
+    }
+
+    // Debug helpers.
+    static void check_table(int component, Function<double>::Node* cur_node, int n, const char* msg)
+    {
+      if (cur_node->values[component][n] == NULL)
+        error("%s not precalculated for component %d. Did you call set_quad_order() with correct mask?", msg, component);
+    }
+
+    // Debug helpers.
+    static void check_table(int component, Function<std::complex<double> >::Node* cur_node, int n, const char* msg)
+    {
+      if (cur_node->values[component][n] == NULL)
+        error("%s not precalculated for component %d. Did you call set_quad_order() with correct mask?", msg, component);
+    }
+
     template<typename Scalar>
     Function<Scalar>::Function()
       : Transformable()

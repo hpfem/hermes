@@ -92,13 +92,13 @@ namespace Hermes
           oi->id = e->id;
           oi->type = e->marker;
           oi->x = oi->y = 0.0;
-          for (unsigned i = 0; i < e->nvert; i++)
+          for (unsigned i = 0; i < e->get_num_surf(); i++)
           {
             oi->x += e->vn[i]->x;
             oi->y += e->vn[i]->y;
           }
-          oi->x /= e->nvert;
-          oi->y /= e->nvert;
+          oi->x /= e->get_num_surf();
+          oi->y /= e->get_num_surf();
         }
 
         create();

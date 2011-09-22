@@ -332,7 +332,7 @@ namespace Hermes
             }
 
             int idx = -1;
-            for (unsigned j = 0; j < e->nvert; j++)
+            for (unsigned j = 0; j < e->get_num_surf(); j++)
               if (e->en[j] == en) { idx = j; break; }
               assert(idx >= 0);
 
@@ -466,7 +466,7 @@ namespace Hermes
       fprintf(f, "\n]\n\nboundaries =\n[");
       first = true;
       for_all_base_elements(e, mesh)
-        for (unsigned i = 0; i < e->nvert; i++)
+        for (unsigned i = 0; i < e->get_num_surf(); i++)
           if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
             const char* nl = first ? "\n" : ",\n";  first = false;
             fprintf(f, "%s  [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
@@ -477,7 +477,7 @@ namespace Hermes
           first = true;
           for_all_base_elements(e, mesh)
             if (e->is_curved())
-              for (unsigned i = 0; i < e->nvert; i++)
+              for (unsigned i = 0; i < e->get_num_surf(); i++)
                 if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
                   fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
                   save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);

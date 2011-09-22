@@ -422,7 +422,7 @@ namespace Hermes
           double* xval = xsln->get_values(component_x, value_type_x);
           double* yval = ysln->get_values(component_y, value_type_y);
 
-          for (unsigned int i = 0; i < e[0]->nvert; i++)
+          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
           {
             double fx = xval[i];
             double fy = yval[i];
@@ -444,7 +444,7 @@ namespace Hermes
           double* y = ysln->get_refmap()->get_phys_y(0);
 
           int iv[4];
-          for (unsigned int i = 0; i < e[0]->nvert; i++)
+          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
           {
             double fx = xval[i];
             double fy = yval[i];
@@ -465,7 +465,7 @@ namespace Hermes
           Trf* yctm = ysln->get_ctm();
           double r[4] = { -1.0, 1.0, 1.0, -1.0 };
           double ref[4][2] = { {-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0} };
-          for (unsigned int i = 0; i < e[0]->nvert; i++)
+          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
           {
             bool bold = false;
             double px = ref[i][0];

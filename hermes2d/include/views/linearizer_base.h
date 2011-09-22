@@ -65,14 +65,7 @@ namespace Hermes
       class Quad2DLin : public Quad2D
       {
       public:
-        Quad2DLin()
-        {
-          mode = HERMES_MODE_TRIANGLE;
-          max_order[0]  = max_order[1]  = 1;
-          num_tables[0] = num_tables[1] = 2;
-          tables = lin_tables;
-          np = lin_np;
-        };
+        Quad2DLin();
       };
 
       extern HERMES_API Quad2DLin g_quad_lin;
@@ -87,8 +80,8 @@ namespace Hermes
         double get_min_value() const;
         double get_max_value() const;
 
-        void lock_data() const { pthread_mutex_lock(&data_mutex); }
-        void unlock_data() const { pthread_mutex_unlock(&data_mutex); }
+        void lock_data() const;
+        void unlock_data() const;
 
         int3* get_triangles();
         int get_num_triangles();

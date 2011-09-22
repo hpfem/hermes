@@ -52,7 +52,7 @@ double CalculateBoundaryLength(Mesh* mesh, int bdryMarker)
 
   // Loop through all boundary faces of all active elements.
   for_all_active_elements(e, mesh) {
-    for(int edge = 0; edge < e->nvert; ++edge) {
+    for(int edge = 0; edge < e->get_num_surf(); ++edge) {
       if ((e->en[edge]->bnd) && (e->en[edge]->marker == bdryMarker)) {
         rm.set_active_element(e);
         points_location = quad->get_edge_points(edge);

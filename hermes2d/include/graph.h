@@ -37,11 +37,11 @@ namespace Hermes
 
       void set_captions(const char* title = NULL, const char* x_axis_name = NULL, const char* y_axis_name = NULL);
 
-      void set_log_x(bool log = true) { logx = log; }
-      void set_log_y(bool log = true) { logy = log; }
+      void set_log_x(bool log = true);
+      void set_log_y(bool log = true);
 
-      void show_legend(bool show = true) { legend = show; }
-      void show_grid(bool show = true) { grid = show; }
+      void show_legend(bool show = true);
+      void show_grid(bool show = true);
 
       int  add_row(const char* name = NULL, const char* color = "k", const char* line = "-", const char* marker = "");
       void set_row_style(int row, const char* color = "k", const char* line = "-", const char* marker = "");

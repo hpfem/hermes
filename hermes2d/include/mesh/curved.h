@@ -125,83 +125,11 @@ namespace Hermes
         /// Recursive calculation of the basis function N_i,k(int i, int k, double t, double* knot).
         static double nurbs_basis_fn(int i, int k, double t, double* knot);
 
+        // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
+        // as well as the unit normal and unit tangential vectors. This is done using
+        // the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
         static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
           double& y, double& n_x, double& n_y, double& t_x, double& t_y);
-
-        ///  Definition of vertex basis functions for triangles.
-        static double lambda_0(double x, double y)
-        {
-          return -0.5 * (x + y);
-        }
-        static double lambda_1(double x, double y)
-        {
-          return  0.5 * (x + 1);
-        }
-        static double lambda_2(double x, double y)
-        {
-          return  0.5 * (y + 1);
-        }
-
-        ///  1D Lobatto functions.
-        static double lob0(double x)
-        {
-          return l0(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob1(double x)
-        {
-          return l1(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob2(double x)
-        {
-          return l2(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob3(double x)
-        {
-          return l3(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob4(double x)
-        {
-          return l4(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob5(double x)
-        {
-          return l5(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob6(double x)
-        {
-          return l6(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob7(double x)
-        {
-          return l7(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob8(double x)
-        {
-          return l8(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob9(double x)
-        {
-          return l9(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob10(double x)
-        {
-          return l10(x);
-        }
-        ///  1D Lobatto functions.
-        static double lob11(double x)
-        {
-          return l11(x);
-        }
 
         static const double2 ref_vert[2][4];
 
