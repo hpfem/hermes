@@ -202,5 +202,45 @@ namespace Hermes
       if(sub_tables != NULL)
         update_nodes_ptr();
     }
+
+    int PrecalcShapeset::get_active_shape() const 
+    {
+      return index; 
+    };
+
+    Shapeset* PrecalcShapeset::get_shapeset() const 
+    {
+      return shapeset; 
+    }
+
+    SpaceType PrecalcShapeset::get_space_type() const 
+    {
+      return shapeset->get_space_type();
+    }
+
+    void PrecalcShapeset::set_master_transform()
+    {
+      assert(master_pss != NULL);
+      sub_idx = master_pss->sub_idx;
+      top = master_pss->top;
+      stack[top] = *(master_pss->ctm);
+      ctm = stack + top;
+    }
+
+    int PrecalcShapeset::get_edge_fn_order(int edge) 
+    {
+      return Global<double>::make_edge_order(mode, edge, shapeset->get_order(index)); 
+    }
+
+    bool PrecalcShapeset::is_slave() const
+    {
+      return master_pss != NULL; 
+    }
+
+    void PrecalcShapeset::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      this->ctm = ctm;
+    }
   }
 }

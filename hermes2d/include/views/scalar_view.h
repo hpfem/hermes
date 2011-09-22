@@ -77,13 +77,6 @@ namespace Hermes
 
 
       public:
-        void export_mesh_edges_svg(const char* filename, float width_mm = 100.0f); ///< Exports mesh edges to SVG format. Height is calculated from input vertices. Function locks data.
-
-#define SVG_HEADER "<?xml version=\"1.0\" standalone=\"no\"?>\n"\
-  "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "\
-  "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
-#define SVG_UNIT_MM 3.543307 /* size of 1 mm in SVG px */
-
         Linearizer* lin;
 
       protected:
@@ -178,16 +171,8 @@ namespace Hermes
 
         typedef void (*DrawSingleEdgeCallback)(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< A callback function that draws edge using specified vertex indices. Param is user supplied parameter.
 
-        struct SVGExportParams
-        {
-          FILE* fout; ///< Output file.
-          double x_min, y_min; ///< Minimum of vertices.
-          double scale; ///< Scale coefficient that converts from mesh scale to SVG scale.
-        };
-
         void calculate_mesh_aabb(double* x_min, double* x_max, double* y_min, double* y_max); ///< Calculates AABB from edges.
 
-        static void draw_svg_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< Draws edge specified by edge into SVG file given as parameter (type: SVGExportParams*). Functions assumes that data are locked.
         static void draw_gl_edge(int inx_vert_a, int inx_vert_b, ScalarView* viewer, void* param); ///< Draws edge specified by edge indices using GL. Functions assumes that data are locked.
         void draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only); ///< Draws edges of elements and boundary of mesh. Functions assumes that data are locked.
         void draw_aabb(); ///< Draws the axes-aligned bounding box of the model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.

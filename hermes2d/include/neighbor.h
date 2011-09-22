@@ -168,7 +168,7 @@ namespace Hermes
       /// \param[in] on_neighbor  If true, order is returned for the neighbor el. (using its local active edge number).
       /// \return    The edge "pseudo-order" (determined by the true order and local edge number).
       ///
-      int get_quad_eo(bool on_neighbor = false);
+      int get_quad_eo(bool on_neighbor = false) const;
 
       /*** Methods for retrieving additional information about the neighborhood. ***/
 
@@ -176,21 +176,19 @@ namespace Hermes
       ///
       /// \return The number of neighbors.
       ///
-      int get_num_neighbors() const { return n_neighbors; }
+      int get_num_neighbors() const;
 
       /// Retrieve all neighbor elements.
       ///
       /// \return pointer to the vector of neighboring elements.
       ///
-      Hermes::vector<Element*>* get_neighbors() { return &neighbors; }
+      Hermes::vector<Element*>* get_neighbors();
 
       /// Frees the memory occupied by the extended shapeset.
-      void clear_supported_shapes() {
-        if (supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
-      }
+      void clear_supported_shapes();
 
       /// Function that sets the variable ignore_errors. See the variable description.
-      void set_ignore_errors(bool value) {this->ignore_errors = value;};
+      void set_ignore_errors(bool value);
 
       /// This class represents the extended shapeset, consisting of shape functions from both the central element and
       /// current neighbor element, extended by zero to the union of these elements.
@@ -208,13 +206,9 @@ namespace Hermes
         ExtendedShapeset(const ExtendedShapeset & other);
 
         /// Destructor.
-        ~ExtendedShapeset() {
-          delete [] dof; delete neighbor_al;
-        }
+        ~ExtendedShapeset();
 
-        void free_central_al() {
-          delete central_al;
-        }
+        void free_central_al();
 
         /// Create assembly list for the extended shapeset by joining central and neighbor element's assembly lists.
         void combine_assembly_lists();
@@ -224,17 +218,13 @@ namespace Hermes
         /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
         /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
         ///
-        void update(NeighborSearch* neighborhood, Space<Scalar>* space) {
-          delete [] this->dof;
-          space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
-          combine_assembly_lists();
-        }
+        void update(NeighborSearch* neighborhood, Space<Scalar>* space);
 
       public:
         int cnt;  ///< Number of shape functions in the extended shapeset.
         int *dof; ///< Array of global DOF numbers of shape functions in the extended shapeset.
 
-        bool has_support_on_neighbor(unsigned int index) { return (index >= central_al->cnt); };
+        bool has_support_on_neighbor(unsigned int index) const;
 
         AsmList<Scalar>* central_al;                    ///< Assembly list for the currently assembled edge on the central elem.
         AsmList<Scalar>* neighbor_al;                   ///< Assembly list for the currently assembled edge on the neighbor elem.
@@ -260,28 +250,28 @@ namespace Hermes
       bool ignore_errors;
 
       /// Returns the current active segment.
-      int get_active_segment();
+      int get_active_segment() const;
 
       /// Sets the active segment, neighbor element, and neighbor edge accordingly.
       void set_active_segment(unsigned int index);
 
       /// Returns the current neighbor element according to the current active segment.
-      Element* get_neighb_el();
+      Element* get_neighb_el() const;
 
       /// Returns the current active neighbor edge according to the current active segment.
-      NeighborEdgeInfo get_neighbor_edge();
+      NeighborEdgeInfo get_neighbor_edge() const;
 
       /// Returns the number(depth) of the current central transformation according to the current active segment.
-      unsigned int get_central_n_trans(unsigned int index);
+      unsigned int get_central_n_trans(unsigned int index) const;
 
       /// Returns the current central transformations according to the current active segment.
-      unsigned int get_central_transformations(unsigned int index_1, unsigned int index_2);
+      unsigned int get_central_transformations(unsigned int index_1, unsigned int index_2) const;
 
       /// Returns the number(depth) of the current neighbor transformation according to the current active segment.
-      unsigned int get_neighbor_n_trans(unsigned int index);
+      unsigned int get_neighbor_n_trans(unsigned int index) const;
 
       /// Returns the current neighbor transformations according to the current active segment.
-      unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2);
+      unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2) const;
 
       /// Transformations of an element to one of its neighbors.
       struct Transformations
@@ -292,47 +282,23 @@ namespace Hermes
         unsigned int transf[max_level];   ///< Array holding the transformations at subsequent levels.
         unsigned int num_levels;          ///< Number of transformation levels actually used in \c transf.
 
-        Transformations() : num_levels(0) { memset(transf, 0, max_level * sizeof(int)); }
-        Transformations(const Transformations* t) { copy_from(t); }
-        Transformations(const Hermes::vector<unsigned int>& t) { copy_from(t); }
+        Transformations();
+        Transformations(const Transformations* t);
+        Transformations(const Hermes::vector<unsigned int>& t);
 
-        void copy_from(const Hermes::vector<unsigned int>& t)
-        {
-          num_levels = std::min<unsigned int>(t.size(), max_level);
-          std::copy( t.begin(), t.begin() + num_levels, transf);
-        }
+        void copy_from(const Hermes::vector<unsigned int>& t);
 
-        void copy_from(const Transformations* t)
-        {
-          num_levels = t->num_levels;
-          memcpy(transf, t->transf, max_level * sizeof(unsigned int));
-        }
+        void copy_from(const Transformations* t);
 
-        void copy_to(Hermes::vector<unsigned int>* t)
-        {
-          t->assign(transf, transf + num_levels);
-        }
+        void copy_to(Hermes::vector<unsigned int>* t);
 
-        void reset()
-        {
-          memset(transf, 0, num_levels * sizeof(unsigned int));
-          num_levels = 0;
-        }
+        void reset();
 
         void strip_initial_transformations(unsigned int number_of_stripped);
 
-        void apply_on(Transformable* tr) const
-        {
-          for(unsigned int i = 0; i < num_levels; i++)
-            tr->push_transform(transf[i]);
-        }
+        void apply_on(Transformable* tr) const;
 
-        void apply_on(const Hermes::vector<Transformable*>& tr) const
-        {
-          for(Hermes::vector<Transformable*>::const_iterator it = tr.begin(); it != tr.end(); ++it)
-            for(unsigned int i = 0; i < num_levels; i++)
-              (*it)->push_transform(transf[i]);
-        }
+        void apply_on(const Hermes::vector<Transformable*>& tr) const;
       };
 
 
@@ -439,23 +405,10 @@ namespace Hermes
       void reset_neighb_info();
 
       /*** Quadrature on the active edge. ***/
-
       Quad2D* quad;
 
-      /// Structure specifying the quadrature on the active segment.
-      struct QuadInfo
-      {
-        int eo;       ///< Edge pseudo-order.
-
-        QuadInfo() : eo(0) {};
-
-        void init(Quad2D* quad, int eo) {
-          this->eo = eo;
-        }
-      };
-
-      QuadInfo central_quad;  ///< Quadrature data of the active edge with respect to the central element.
-      QuadInfo neighb_quad;   ///< Quadrature data of the active edge with respect to the element on the other side.
+      int central_quad_order;  ///< Quadrature data of the active edge with respect to the central element.
+      int neighb_quad_order;   ///< Quadrature data of the active edge with respect to the element on the other side.
 
       friend class DiscreteProblem<Scalar>;
       friend class KellyTypeAdapt<Scalar>;

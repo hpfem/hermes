@@ -141,9 +141,7 @@ namespace Hermes
       double get_diameter() const;
 
       // returns the edge orientation. This works for the unconstrained edges.
-      int get_edge_orientation(int ie) {
-          return (this->vn[ie]->id < this->vn[this->next_vert(ie)]->id) ? 0 : 1;
-      }
+      int get_edge_orientation(int ie) const;
 
       void ref_all_nodes();
       void unref_all_nodes(HashTable* ht);
@@ -188,28 +186,16 @@ namespace Hermes
       Element* get_element(int id) const;
 
       /// Returns the total number of elements stored.
-      int get_num_elements() const {
-        if (this == NULL) error("this == NULL in Mesh::get_num_elements().");
-        return elements.get_num_items();
-      }
+      int get_num_elements() const;
 
       /// Returns the number of coarse mesh elements.
-      int get_num_base_elements() const {
-        if (this == NULL) error("this == NULL in Mesh::get_num_base_elements().");
-        return nbase;
-      }
+      int get_num_base_elements() const;
 
       /// Returns the current number of active elements in the mesh.
-      int get_num_active_elements() const {
-        if (this == NULL) error("this == NULL in Mesh::get_num_active_elements().");
-        return nactive;
-      }
+      int get_num_active_elements() const;
 
       /// Returns the maximum node id number plus one.
-      int get_max_element_id() const {
-        if (this == NULL) error("this == NULL in Mesh::get_max_element_id().");
-        return elements.get_size();
-      }
+      int get_max_element_id() const;
 
       /// Refines an element.
       /// \param id [in] Element id number.
@@ -268,13 +254,13 @@ namespace Hermes
       int get_edge_sons(Element* e, int edge, int& son1, int& son2);
 
       /// For internal use.
-      unsigned get_seq() const { return seq; }
+      unsigned get_seq() const;
 
       /// For internal use.
-      void set_seq(unsigned seq) { this->seq = seq; }
+      void set_seq(unsigned seq);
 
       /// For internal use.
-      Element* get_element_fast(int id) const { return &(elements[id]);}
+      Element* get_element_fast(int id) const;
 
       /// Refines all triangle elements to quads.
       /// It can refine a triangle element into three quadrilaterals.
@@ -337,7 +323,7 @@ namespace Hermes
       class HERMES_API MarkersConversion
       {
       public:
-        MarkersConversion() : min_marker_unused(1) {};
+        MarkersConversion();
 
         /// Info about the maximum marker used so far, used in determining
         /// of the internal marker for a user-supplied std::string identification for
@@ -352,8 +338,8 @@ namespace Hermes
         /// Struct for return type of get_user_marker().
         struct StringValid
         {
-          StringValid() {};
-          StringValid(std::string marker, bool valid) : marker(marker), valid(valid) {};
+          StringValid();
+          StringValid(std::string marker, bool valid);
           std::string marker;
           bool valid;
         };
@@ -361,8 +347,8 @@ namespace Hermes
         /// Struct for return type of get_internal_marker().
         struct IntValid
         {
-          IntValid() {};
-          IntValid(int marker, bool valid) : marker(marker), valid(valid) {};
+          IntValid();
+          IntValid(int marker, bool valid);
           int marker;
           bool valid;
         };
@@ -398,15 +384,15 @@ namespace Hermes
       class ElementMarkersConversion : public MarkersConversion
       {
       public:
-        ElementMarkersConversion() {};
-        virtual MarkersConversionType get_type() { return HERMES_ELEMENT_MARKERS_CONVERSION; };
+        ElementMarkersConversion();
+        virtual MarkersConversionType get_type();
       };
 
       class BoundaryMarkersConversion : public MarkersConversion
       {
       public:
-        BoundaryMarkersConversion() {};
-        virtual MarkersConversionType get_type() { return HERMES_BOUNDARY_MARKERS_CONVERSION; };
+        BoundaryMarkersConversion();
+        virtual MarkersConversionType get_type();
       };
 
       ElementMarkersConversion element_markers_conversion;
@@ -426,8 +412,8 @@ namespace Hermes
       friend class KellyTypeAdapt<std::complex<double> >;
 
     public:
-      ElementMarkersConversion &get_element_markers_conversion() { return element_markers_conversion; };
-      BoundaryMarkersConversion &get_boundary_markers_conversion() { return boundary_markers_conversion; };
+      ElementMarkersConversion &get_element_markers_conversion();
+      BoundaryMarkersConversion &get_boundary_markers_conversion();
 
       /*  node and son numbering on a triangle:
 

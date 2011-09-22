@@ -104,7 +104,6 @@ project(hermes2d)
 	#
 	set(SRC
 		src/forms.cpp
-		src/range.cpp
 		src/asmlist.cpp
 		src/newton_solver.cpp
 		src/picard_solver.cpp
@@ -203,7 +202,6 @@ project(hermes2d)
   
   set(HEADERS
 		include/forms.h
-		include/range.h
 		include/asmlist.h
 		include/newton_solver.h
 		include/picard_solver.h

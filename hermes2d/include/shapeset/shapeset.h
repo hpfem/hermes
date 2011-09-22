@@ -66,121 +66,59 @@ namespace Hermes
     class HERMES_API Shapeset
     {
     public:
-      ~Shapeset() { free_constrained_edge_combinations(); }
+      ~Shapeset();
 
       /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.
-      inline void set_mode(int mode)
-      {
-        assert(mode == HERMES_MODE_TRIANGLE || mode == HERMES_MODE_QUAD);
-        this->mode = mode;
-        nvert = (mode == HERMES_MODE_TRIANGLE) ? 3 : 4;
-      }
+      void set_mode(int mode);
 
       /// Returns the current mode.
-      inline int get_mode() const { return mode; }
+      int get_mode() const;
 
       /// Returns the maximum poly degree for all shape functions.
-      inline int get_max_order() const { return max_order; }
+      int get_max_order() const;
 
       /// Returns the highest shape function index.
-      inline int get_max_index() const { return max_index[mode]; }
+      int get_max_index() const;
 
       /// Returns 2 if this is a vector shapeset, 1 otherwise.
-      inline int get_num_components() const { return num_components; }
+      int get_num_components() const;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
-      inline int get_vertex_index(int vertex) const
-      {
-        assert(vertex >= 0 && vertex < nvert);
-        return vertex_indices[mode][vertex];
-      }
+      int get_vertex_index(int vertex) const;
 
       /// Returns the index of an edge function associated with the specified edge and of the
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
-      inline int get_edge_index(int edge, int ori, int order) const
-      {
-        assert(edge >= 0 && edge < nvert);
-        assert(order >= 0 && order <= max_order);
-        assert(ori == 0 || ori == 1);
-        return edge_indices[mode][edge][2*order + ori];
-      }
+      int get_edge_index(int edge, int ori, int order) const;
 
       /// Returns a complete set of indices of bubble functions for an element of the given order.
-      inline int* get_bubble_indices(int order) const
-      {
-        assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
-        assert(H2D_GET_V_ORDER(order) >= 0 && H2D_GET_V_ORDER(order) <= max_order);
-        int index = order;
-        if (mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
-          index = H2D_MAKE_QUAD_ORDER(H2D_GET_V_ORDER(order), H2D_GET_H_ORDER(order));
-        return bubble_indices[mode][index];
-      }
+      int* get_bubble_indices(int order) const;
 
       /// Returns the number of bubble functions for an element of the given order.
-      inline int get_num_bubbles(int order) const
-      {
-        assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
-        assert(H2D_GET_V_ORDER(order) >= 0 && H2D_GET_V_ORDER(order) <= max_order);
-        return bubble_count[mode][order];
-      }
+      int get_num_bubbles(int order) const;
 
       /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
-      inline int get_constrained_edge_index(int edge, int order, int ori, int part) const
-      {
-        assert(edge >= 0 && edge < nvert);
-        assert(order >= 0 && order <= max_order);
-        assert(part >= 0);
-        assert(order <= H2D_ORDER_MASK);
-        return -1 - ((part << 7) + (order << 3) + (edge << 1) + ori);
-      }
+      int get_constrained_edge_index(int edge, int order, int ori, int part) const;
 
       /// Returns the polynomial degree of the specified shape function.
       /// If on quads, it returns encoded orders. The orders has to be decoded through macros
       /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
-      inline int get_order(int index) const
-      {
-        if (index >= 0) {
-          assert(index >= 0 && index <= max_index[mode]);
-          return index_to_order[mode][index];
-        }
-        else return ((-1 - index) >> 3) & 15;
-      }
+      int get_order(int index) const;
 
       /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
       /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
-      inline double get_value(int n, int index, double x, double y, int component)
-      {
-        if (index >= 0)
-        {
-          assert(index >= 0 && index <= max_index[mode]); assert(component >= 0 && component < num_components);
-          Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
-          if (shape_expansion == NULL) { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined
-            static int warned_mode = -1, warned_index = -1, warned_n = 1; //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
-            warn_if(warned_mode != mode || warned_index != index || warned_n != n, "Requested undefined expansion %d (mode: %d) of a shape %d, returning 0", n, mode, index);
-            warned_mode = mode; warned_index = index; warned_n = n;
-            return 0;
-          }
-          else
-            return shape_expansion[component][index](x, y);
-        }
-        else
-          return get_constrained_value(n, index, x, y, component);
-      }
+      double get_value(int n, int index, double x, double y, int component);
 
-      inline double get_fn_value (int index, double x, double y, int component) { return get_value(0, index, x, y, component); }
-      inline double get_dx_value (int index, double x, double y, int component) { return get_value(1, index, x, y, component); }
-      inline double get_dy_value (int index, double x, double y, int component) { return get_value(2, index, x, y, component); }
-      inline double get_dxx_value(int index, double x, double y, int component) { return get_value(3, index, x, y, component); }
-      inline double get_dyy_value(int index, double x, double y, int component) { return get_value(4, index, x, y, component); }
-      inline double get_dxy_value(int index, double x, double y, int component) { return get_value(5, index, x, y, component); }
+      double get_fn_value (int index, double x, double y, int component);
+      double get_dx_value (int index, double x, double y, int component);
+      double get_dy_value (int index, double x, double y, int component);
+      double get_dxx_value(int index, double x, double y, int component);
+      double get_dyy_value(int index, double x, double y, int component);
+      double get_dxy_value(int index, double x, double y, int component);
 
       /// Returns the coordinates of the reference domain vertices.
-      double2* get_ref_vertex(int vertex)
-      {
-        return &ref_vert[mode][vertex];
-      }
+      double2* get_ref_vertex(int vertex);
 
       /// Shape-function function type. Internal.
       typedef double (*shape_fn_t)(double, double);

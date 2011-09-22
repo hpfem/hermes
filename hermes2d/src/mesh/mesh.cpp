@@ -67,6 +67,11 @@ namespace Hermes
       }
     }
 
+    int Element::get_edge_orientation(int ie) const
+    {
+      return (this->vn[ie]->id < this->vn[this->next_vert(ie)]->id) ? 0 : 1;
+    }
+
     void Element::unref_all_nodes(HashTable* ht)
     {
       for (unsigned int i = 0; i < nvert; i++)
@@ -253,10 +258,52 @@ namespace Hermes
       seq = g_mesh_seq++;
     }
 
+    int Mesh::get_num_elements() const 
+    {
+      if (this == NULL) error("this == NULL in Mesh::get_num_elements().");
+      return elements.get_num_items();
+    }
+
+    /// Returns the number of coarse mesh elements.
+    int Mesh::get_num_base_elements() const
+    {
+      if (this == NULL) error("this == NULL in Mesh::get_num_base_elements().");
+      return nbase;
+    }
+
+    /// Returns the current number of active elements in the mesh.
+    int Mesh::get_num_active_elements() const
+    {
+      if (this == NULL) error("this == NULL in Mesh::get_num_active_elements().");
+      return nactive;
+    }
+
+    /// Returns the maximum node id number plus one.
+    int Mesh::get_max_element_id() const 
+    {
+      if (this == NULL) error("this == NULL in Mesh::get_max_element_id().");
+      return elements.get_size();
+    }
+
     Element* Mesh::get_element(int id) const
     {
       if (id < 0 || id >= elements.get_size())
         error("Invalid element ID %d, current range: [0; %d]", id, elements.get_size());
+      return &(elements[id]);
+    }
+
+    unsigned Mesh::get_seq() const
+    {
+      return seq;
+    }
+
+    void Mesh::set_seq(unsigned seq) 
+    {
+      this->seq = seq; 
+    }
+
+    Element* Mesh::get_element_fast(int id) const 
+    {
       return &(elements[id]);
     }
 
@@ -1912,6 +1959,54 @@ namespace Hermes
         convert_quads_to_base(e);// FIXME:
 
       seq = g_mesh_seq++;
+    }
+
+    Mesh::MarkersConversion::MarkersConversion() : min_marker_unused(1) 
+    {
+    }
+
+    Mesh::MarkersConversion::StringValid::StringValid() 
+    {
+    }
+
+    Mesh::MarkersConversion::StringValid::StringValid(std::string marker, bool valid) : marker(marker), valid(valid) 
+    {
+    }
+
+    Mesh::MarkersConversion::IntValid::IntValid() 
+    {
+    }
+
+    Mesh::MarkersConversion::IntValid::IntValid(int marker, bool valid) : marker(marker), valid(valid) 
+    {
+    }
+
+    Mesh::ElementMarkersConversion::ElementMarkersConversion() 
+    {
+    }
+
+    Mesh::MarkersConversion::MarkersConversionType Mesh::ElementMarkersConversion::get_type() 
+    {
+      return HERMES_ELEMENT_MARKERS_CONVERSION;
+    }
+
+    Mesh::BoundaryMarkersConversion::BoundaryMarkersConversion() 
+    {
+    }
+
+    Mesh::MarkersConversion::MarkersConversionType Mesh::BoundaryMarkersConversion::get_type() 
+    {
+      return HERMES_BOUNDARY_MARKERS_CONVERSION;
+    }
+
+    Mesh::ElementMarkersConversion &Mesh::get_element_markers_conversion() 
+    {
+      return element_markers_conversion;
+    }
+
+    Mesh::BoundaryMarkersConversion &Mesh::get_boundary_markers_conversion() 
+    {
+      return boundary_markers_conversion; 
     }
 
     void Mesh::MarkersConversion::insert_marker(int internal_marker, std::string user_marker)
