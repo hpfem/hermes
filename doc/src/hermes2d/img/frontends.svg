@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.45.1"
+   sodipodi:docbase="/home/jakub/hermes2d/doc/img"
+   sodipodi:docname="frontends.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Lend"
+       style="overflow:visible;">
+      <path
+         id="path3283"
+         style="font-size:12.0;fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(1.1) rotate(180) translate(1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path3265"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.1671077"
+     inkscape:cx="336.08497"
+     inkscape:cy="725.7138"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="1497"
+     inkscape:window-height="845"
+     inkscape:window-x="18"
+     inkscape:window-y="19" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#fcffb2;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:2.49999996;stroke-opacity:1"
+       id="rect2162"
+       width="172.27815"
+       height="27.550291"
+       x="118.04273"
+       y="287.67477" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+       x="128.90964"
+       y="305.45383"
+       id="text2190"><tspan
+         sodipodi:role="line"
+         id="tspan2192"
+         x="128.90964"
+         y="305.45383"><tspan
+   style="font-style:italic"
+   id="tspan2194">hp</tspan>-Adaptive Elliptic Problems</tspan></text>
+    <rect
+       style="fill:#d5ffe6;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:2.49999996;stroke-opacity:1"
+       id="rect2204"
+       width="172.27815"
+       height="27.550291"
+       x="118.04273"
+       y="331.66818" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+       x="131.26076"
+       y="349.75015"
+       id="text2196"><tspan
+         sodipodi:role="line"
+         id="tspan2198"
+         x="131.26076"
+         y="349.75015">Non-linear Elasticity Problems</tspan></text>
+    <rect
+       style="fill:#ffd5d5;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:2.49999996;stroke-opacity:1"
+       id="rect2206"
+       width="172.27815"
+       height="27.550291"
+       x="118.04273"
+       y="375.66159" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+       x="145.21947"
+       y="393.2821"
+       id="text2200"><tspan
+         sodipodi:role="line"
+         id="tspan2202"
+         x="145.21947"
+         y="393.2821">Fluid Dynamics Problems</tspan></text>
+    <rect
+       style="fill:#d5e5ff;fill-opacity:1;stroke:#000000;stroke-width:0.8;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:2.49999996;stroke-opacity:1"
+       id="rect2160"
+       width="165.89114"
+       height="116.14005"
+       x="346.30856"
+       y="288.13623" />
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Times New Roman"
+       x="396.84229"
+       y="350.96652"
+       id="text2239"><tspan
+         sodipodi:role="line"
+         id="tspan2241"
+         x="396.84229"
+         y="350.96652">Hermes2D</tspan></text>
+    <path
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:0.7;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 290.71005,301.59194 L 344.98164,301.59194"
+       id="path2282"
+       inkscape:connector-type="polyline"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:0.7;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 290.82088,345.73701 L 345.3614,345.9234"
+       id="path2284"
+       inkscape:connector-type="polyline"
+       inkscape:connection-start="#rect2204"
+       inkscape:connection-end="#rect2160"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:0.7;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 290.2486,388.80496 L 345.45737,388.80496"
+       id="path2286"
+       inkscape:connector-type="polyline"
+       sodipodi:nodetypes="cc" />
+  </g>
+</svg>

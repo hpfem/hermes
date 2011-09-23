@@ -1,0 +1,10 @@
+CMakeCache.txt
+CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+config_real.cmake
+*.pyc
+
