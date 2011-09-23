@@ -472,7 +472,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DXDYFilter<Scalar>::get_pt_value(double x, double y, int item = H2D_FN_VAL_0) 
+    Scalar DXDYFilter<Scalar>::get_pt_value(double x, double y, int item) 
     {
       return 0;
     }
