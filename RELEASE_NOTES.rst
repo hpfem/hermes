@@ -2,11 +2,11 @@
 Release Notes Version 1.0
 =========================
 
-The following list contains main changes between the Hermes Legacy code 
-and Version 1.0.
+(compared to hermes-legacy)
 
-1. No longer there is a real and complex version of the library. Instead,
-   classes that have a real and complex version are templated.
-
-More coming soon. 
-
+* Unified library for handling both real and complex problems using advanced C++ templating
+* Division of the library's code into easy-to-manage namespaces
+* XML save / load of the most important classes using provided XML schemas
+* Well arranged doxygen documentation
+* Calculations with quantities defined in their respective subdomains
+* Exception safe API
