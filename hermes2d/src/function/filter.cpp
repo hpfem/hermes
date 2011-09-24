@@ -594,6 +594,32 @@ namespace Hermes
         error("SquareFilter only supports one MeshFunction.");
     };
 
+    void AbsFilter::filter_fn(int n, Hermes::vector<double*> v1, double * result)
+    {
+      for (int i = 0; i < n; i++)
+        result[i] = std::abs(v1.at(0)[i]);
+    };
+
+    AbsFilter::AbsFilter(Hermes::vector<MeshFunction<double>*> solutions, Hermes::vector<int> items)
+      : SimpleFilter<double>(solutions, items)
+    {
+      if (solutions.size() > 1)
+        error("AbsFilter only supports one MeshFunction.");
+    };
+
+    AbsFilter::AbsFilter(MeshFunction<double>* solution)
+      : SimpleFilter<double>()
+    {
+      this->num = 1;
+      this->sln[0] = solution;
+      
+      this->item[0] =	H2D_FN_VAL;
+
+      this->init();
+      init_components();
+
+    };
+
 
     void RealFilter::filter_fn(int n, std::complex<double>* values, double* result)
     {
@@ -618,19 +644,16 @@ namespace Hermes
     {
     };
 
-    void AbsFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
+    void ComplexAbsFilter::filter_fn(int n, std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
-        result[i] = sqrt(sqr(v1.at(0)[i].real()) + sqr(v1.at(0)[i].imag()));
+        result[i] = sqrt(sqr(values[i].real()) + sqr(values[i].imag()));
     };
 
-    AbsFilter::AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items)
-      : SimpleFilter<std::complex<double> >(solutions, items)
+    ComplexAbsFilter::ComplexAbsFilter(MeshFunction<std::complex<double> >* solution, int item)
+      : ComplexFilter(solution, item)
     {
-      if (solutions.size() > 1)
-        error("RealFilter only supports one MeshFunction.");
     };
-
 
     void AngleFilter::filter_fn(int n, Hermes::vector<std::complex<double>*> v1, double* result)
     {

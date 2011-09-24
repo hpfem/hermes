@@ -238,6 +238,17 @@ namespace Hermes
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
 
+    /// Calculates absolute value of a real solution.
+    class HERMES_API AbsFilter : public SimpleFilter<double>
+    {
+    public:
+      AbsFilter(Hermes::vector<MeshFunction<double>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      AbsFilter(MeshFunction<double>* solutions);
+
+    protected:
+      virtual void filter_fn(int n, Hermes::vector<double*> values, double* result);
+    };
+
     /// Removes the imaginary part from a function.
     class HERMES_API RealFilter : public ComplexFilter
     {
@@ -260,15 +271,14 @@ namespace Hermes
       virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
-
     /// Computes the absolute value of a complex solution.
-    class HERMES_API AbsFilter : public SimpleFilter<std::complex<double> >
+    class HERMES_API ComplexAbsFilter : public ComplexFilter
     {
     public:
-      AbsFilter(Hermes::vector<MeshFunction<std::complex<double> >*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      ComplexAbsFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
 
     protected:
-      virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
+      virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
 
     /// Computes the angle of a complex solution.
