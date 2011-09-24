@@ -71,7 +71,7 @@ namespace Hermes
         if(vec == NULL)
           vec = new Vectorizer;
         if (xsln == ysln)
-          error("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
+          warning("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
         show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 

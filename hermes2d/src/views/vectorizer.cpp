@@ -335,7 +335,7 @@ namespace Hermes
 
       }
 
-      void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem, int yitem, double eps)
+      void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
       {
         // sanity check
         if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
@@ -346,8 +346,8 @@ namespace Hermes
         // initialization
         this->xsln = xsln;
         this->ysln = ysln;
-        this->xitem = xitem;
-        this->yitem = yitem;
+        this->xitem = xitem_orig;
+        this->yitem = yitem_orig;
         this->eps = eps;
 
         Transformable* fns[2] = { xsln, ysln };
@@ -361,6 +361,7 @@ namespace Hermes
         vertex_size = std::max(32 * nn, 10000);
         triangle_size = std::max(64 * nn, 20000);
         edges_size = std::max(24 * nn, 7500);
+        dashes_size = edges_size;
 
         vertex_count = 0;
         triangle_count = 0;
@@ -408,6 +409,8 @@ namespace Hermes
           yitem >>= 1;
           value_type_y++;
         }
+        xitem = xitem_orig;
+        yitem = yitem_orig;
 
         Mesh** meshes = new Mesh*[2];
         meshes[0] = xsln->get_mesh();
@@ -430,7 +433,7 @@ namespace Hermes
           }
         }
         trav.finish();
-
+        
         trav.begin(2, meshes, fns);
         // process all elements of the mesh
         while ((e = trav.get_next_state(NULL, NULL)) != NULL)
@@ -556,16 +559,21 @@ namespace Hermes
         if (this->vertex_count >= this->vertex_size)
         {
           this->vertex_size *= 2;
-          verts = (double4*) realloc(verts, sizeof(double4) * this->vertex_size);
-          this->info = (int4*) realloc(this->info, sizeof(int4) * this->vertex_size);
-          verbose("Vectorizer::add_vertex(): realloc to %d", this->vertex_size);
+          verts = (double4*) realloc(verts, sizeof(double4) * vertex_size);
+          this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
+          this->hash_table = (int*) realloc(hash_table, sizeof(int) * vertex_size);
+          memset(this->hash_table + this->vertex_size / 2, 0xff, sizeof(int) * this->vertex_size / 2);
         }
         return this->vertex_count++;
       }
 
       void Vectorizer::add_dash(int iv1, int iv2)
       {
-        if (dashes_count >= dashes_size) dashes = (int2*) realloc(dashes, sizeof(int2) * (dashes_size = dashes_size * 3 / 2));
+        if (this->dashes_count >= this->dashes_size)
+        {
+          this->dashes_size *= 2;
+          dashes = (int2*) realloc(dashes, sizeof(int2) * (dashes_size = dashes_size * 3 / 2));
+        }
         dashes[dashes_count][0] = iv1;
         dashes[dashes_count++][1] = iv2;
       }

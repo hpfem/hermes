@@ -143,6 +143,8 @@ namespace Hermes
       virtual void push_transform(int son);
 
       virtual void pop_transform();
+      
+      virtual void free();
     protected:
       MeshFunction<std::complex<double> >* sln_complex;
 

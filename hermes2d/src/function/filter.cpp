@@ -337,11 +337,24 @@ namespace Hermes
 
     ComplexFilter::ComplexFilter(MeshFunction<std::complex<double> >* solution, int item) : Filter<double>()
     {
-      this->num = 1;
+      this->num = 0;
+      this->unimesh = false;
       this->sln_complex = solution;
       this->num_components = solution->get_num_components();
       this->mesh = solution->get_mesh();
       set_quad_2d(&g_quad_2d_std);
+    }
+
+    void ComplexFilter::free()
+    {
+      for(std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
+      {
+        for(unsigned int l = 0; l < it->second->get_size(); l++)
+          if(it->second->present(l))
+            ::free(it->second->get(l));
+        delete it->second;
+      }
+      tables[this->cur_quad].clear();
     }
 
     void ComplexFilter::set_quad_2d(Quad2D* quad_2d)
@@ -355,6 +368,8 @@ namespace Hermes
       MeshFunction<double>::set_active_element(e);
      
       this->sln_complex->set_active_element(e);
+      
+      memset(sln_sub, 0, sizeof(sln_sub));
 
       for(std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
       {
@@ -366,9 +381,10 @@ namespace Hermes
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];
+      
       this->update_nodes_ptr();
 
-      this->order = sln_complex->get_fn_order(); // fixme
+      this->order = 20; // fixme
     }
 
     void ComplexFilter::push_transform(int son)
@@ -392,35 +408,19 @@ namespace Hermes
       int np = quad->get_num_points(order);
       struct Function<double>::Node* node = this->new_node(H2D_FN_VAL, np);
 
-      // precalculate solution
-      this->sln_complex->set_quad_order(order, this->item);
+      this->sln_complex->set_quad_order(order, H2D_FN_VAL);
 
-      for (int j = 0; j < this->num_components; j++)
-      {
-        // obtain corresponding tables
-        int a = 0, b = 0, mask = item;
-        if (mask >= 0x40)
-        {
-          a = 1;
-          mask >>= 6;
-        }
-        while (!(mask & 1))
-        {
-          mask >>= 1;
-          b++;
-        }
-        std::complex<double>* tab = this->sln_complex->get_values(this->num_components == 1 ? a : j, b);
-
-        // apply the filter
-        filter_fn(np, tab, node->values[j][0]);
-      }
+      // obtain corresponding tables
+      filter_fn(np, this->sln_complex->get_values(0, 0), node->values[0][0]);
+      if(num_components > 1)
+        filter_fn(np, this->sln_complex->get_values(1, 0), node->values[1][0]);
 
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
         ::free(this->nodes->get(order));
       }
-      this->nodes->add(node, order);
+      
       this->cur_node = node;
     }
 

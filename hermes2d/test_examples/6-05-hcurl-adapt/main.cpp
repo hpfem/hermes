@@ -148,7 +148,8 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
     Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
 
-    try{
+    try
+    {
       newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception e)
