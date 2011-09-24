@@ -135,7 +135,14 @@ namespace Hermes
       ComplexFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
 
       virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
+      
+      virtual void set_quad_2d(Quad2D* quad_2d);
 
+      virtual void set_active_element(Element* e);
+
+      virtual void push_transform(int son);
+
+      virtual void pop_transform();
     protected:
       MeshFunction<std::complex<double> >* sln_complex;
 

@@ -339,6 +339,48 @@ namespace Hermes
     {
       this->num = 1;
       this->sln_complex = solution;
+      this->num_components = solution->get_num_components();
+      this->mesh = solution->get_mesh();
+      set_quad_2d(&g_quad_2d_std);
+    }
+
+    void ComplexFilter::set_quad_2d(Quad2D* quad_2d)
+    {
+      MeshFunction<double>::set_quad_2d(quad_2d);
+      this->sln_complex->set_quad_2d(quad_2d);
+    }
+
+    void ComplexFilter::set_active_element(Element* e)
+    {
+      MeshFunction<double>::set_active_element(e);
+     
+      this->sln_complex->set_active_element(e);
+
+      for(std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
+      {
+        for(unsigned int l = 0; l < it->second->get_size(); l++)
+          if(it->second->present(l))
+            ::free(it->second->get(l));
+        delete it->second;
+      }
+      tables[this->cur_quad].clear();
+
+      this->sub_tables = &tables[this->cur_quad];
+      this->update_nodes_ptr();
+
+      this->order = sln_complex->get_fn_order(); // fixme
+    }
+
+    void ComplexFilter::push_transform(int son)
+    {
+      MeshFunction<double>::push_transform(son);
+      this->sln_complex->push_transform(son);
+    }
+
+    void ComplexFilter::pop_transform()
+    {
+      MeshFunction<double>::pop_transform();
+      this->sln_complex->pop_transform();
     }
 
     void ComplexFilter::precalculate(int order, int mask)
