@@ -1067,8 +1067,8 @@ namespace Hermes
       // Go through all vertices and rescale coordinates.
       Node* n;
       for_all_vertex_nodes(n, this) {
-        n->x *= x_ref;
-        n->y *= y_ref;
+        n->x /= x_ref;
+        n->y /= y_ref;
       }
 
       // If curvilinear, there is more to do.

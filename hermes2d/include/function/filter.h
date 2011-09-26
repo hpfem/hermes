@@ -243,7 +243,7 @@ namespace Hermes
     {
     public:
       AbsFilter(Hermes::vector<MeshFunction<double>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
-      AbsFilter(MeshFunction<double>* solutions);
+      AbsFilter(MeshFunction<double>* solution);
 
     protected:
       virtual void filter_fn(int n, Hermes::vector<double*> values, double* result);
