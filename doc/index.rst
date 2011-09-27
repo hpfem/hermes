@@ -21,8 +21,7 @@ This document is organized as follows:
 
 This document is under continuous development. If you find bugs, typos, dead links 
 and such, please report them to the 
-`Hermes2D mailing list <http://groups.google.com/group/hermes2d/>`_ -- thanks!
-
+`Hermes2D mailing list <http://groups.google.com/group/hermes2d/>`_.
 Introduction
 ------------
 
