@@ -68,11 +68,11 @@ system::
 
 To get the Tutorial clone::
 
-    git clone http://git.hpfem.org/git/hermes-tutorial.git
+    git clone git://github.com/hpfem/hermes-tutorial.git
 
 To get Examples, clone::
 
-    git clone http://git.hpfem.org/git/hermes-examples.git
+    git clone git://github.com/hpfem/hermes-examples.git
 
 Both repositores contain a folder doc/ with documentation. To build 
 the documentation, type "make html" in that directory.
