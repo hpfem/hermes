@@ -102,7 +102,7 @@ namespace Hermes
 
       virtual Scalar value (double x, double y) const;
 
-      virtual void derivatives (double x, double y, double& dx, double& dy) const;
+      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
     protected:

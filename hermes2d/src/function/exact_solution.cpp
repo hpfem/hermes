@@ -59,7 +59,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    void ConstantSolution<Scalar>::derivatives (double x, double y, double& dx, double& dy) const {
+    void ConstantSolution<Scalar>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
       dx = 0;
       dy = 0;
     };
