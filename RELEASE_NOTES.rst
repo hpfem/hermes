@@ -8,5 +8,5 @@ Release Notes Version 1.0
 * Division of the library's code into easy-to-manage namespaces
 * XML save / load of the most important classes using provided XML schemas
 * Well arranged doxygen documentation
-* Calculations with quantities defined in their respective subdomains
+* Calculations with physical quantities defined in different subdomains
 * Exception safe API
