@@ -4,16 +4,6 @@ Hermes Authors File
 All people who contributed to the Hermes project 
 (in the order of the date of their first contribution):
 
-Hermes1D
---------
-Pavel Solin (project leader) <solin@unr.edu>
-Ondrej Certik <ondrej@certik.cz>
-Pavel Karban <karban@kte.zcu.cz>
-Frantisek Mach <mach.frantisek@gmail.com>
-David Panek <panek50@kte.zcu.cz>
-Milan Hanus <mhanus@kma.zcu.cz>
-Lukas Korous <lukas.korous@gmail.com>
-
 Hermes2D
 --------
 
@@ -42,8 +32,18 @@ Mateusz Paprocki <mattpap@gmail.com>
 Colman Marcus-Quinn <colman01@gmail.com>
 Vladimir Cerny <blackvladimir@gmail.com>
 
-Hermes3D
---------
+Hermes1D (abandonned - Hermes2D is used to solve 1D problems)
+-------------------------------------------------------------
+Pavel Solin (project leader) <solin@unr.edu>
+Ondrej Certik <ondrej@certik.cz>
+Pavel Karban <karban@kte.zcu.cz>
+Frantisek Mach <mach.frantisek@gmail.com>
+David Panek <panek50@kte.zcu.cz>
+Milan Hanus <mhanus@kma.zcu.cz>
+Lukas Korous <lukas.korous@gmail.com>
+
+Hermes3D (on hold for the moment)
+---------------------------------
 
 Pavel Solin <solin@unr.edu>
 Martin Zitka
