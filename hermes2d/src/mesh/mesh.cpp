@@ -1071,38 +1071,15 @@ namespace Hermes
         n->y /= y_ref;
       }
 
-      // If curvilinear, there is more to do.
+      // If curvilinear, throw an exception.
       bool curved = false;
       Element* e;
       for_all_elements(e, this)
-      {
         if (e->cm != NULL)
         {
-          for(unsigned int i = 0; i < e->get_num_surf(); i++)
-            if(e->cm->nurbs[i] != NULL)
-              if(e->cm->nurbs[i]->np != 3)
-              {
-                warning("Can not rescale general NURBS.");
-                return false;
-              }
-              else
-              {
-                // edge endpoints control points.
-                e->cm->nurbs[i]->pt[0][0] = e->vn[i]->x;
-                e->cm->nurbs[i]->pt[0][1] = e->vn[i]->y;
-                e->cm->nurbs[i]->pt[0][2] = 1.0;
-                e->cm->nurbs[i]->pt[2][0] = e->vn[(i + 1) % e->get_num_surf()]->x;
-                e->cm->nurbs[i]->pt[2][1] = e->vn[(i + 1) % e->get_num_surf()]->y;
-                e->cm->nurbs[i]->pt[2][2] = 1.0;
-
-                double a = (180.0 - e->cm->nurbs[i]->angle) / 180.0 * M_PI;
-                double x = 1.0 / std::tan(a * 0.5);
-                e->cm->nurbs[i]->pt[1][0] = 0.5*((e->cm->nurbs[i]->pt[2][0] + e->cm->nurbs[i]->pt[0][0]) + (e->cm->nurbs[i]->pt[2][1] - e->cm->nurbs[i]->pt[0][1]) * x);
-                e->cm->nurbs[i]->pt[1][1] = 0.5*((e->cm->nurbs[i]->pt[2][1] + e->cm->nurbs[i]->pt[0][1]) - (e->cm->nurbs[i]->pt[2][0] - e->cm->nurbs[i]->pt[0][0]) * x);
-                e->cm->nurbs[i]->pt[1][2] = Hermes::cos((M_PI - a) * 0.5);
-              }
+          throw CurvedException(e->id);
+          return false;
         }
-      }
       return true;
     }
 
@@ -2052,6 +2029,26 @@ namespace Hermes
         return IntValid(-999, false);
 
       return IntValid(conversion_table_inverse.find(user_marker)->second, true);
+    }
+
+    Mesh::CurvedException::CurvedException(int elementId) : elementId(elementId)
+    {
+      char * msg = new char[27];
+      sprintf(msg, "Element id %i is curved, this is not supported in this method.", elementId);
+      message = msg;
+    }
+
+    Mesh::CurvedException::CurvedException(const CurvedException & e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg, e.getMsg());
+      message=msg;
+      elementId = e.elementId;
+    }
+
+    int Mesh::CurvedException::getElementId() const
+    {
+      return this->elementId;
     }
 
     void Mesh::convert_triangles_to_base(Element *e)

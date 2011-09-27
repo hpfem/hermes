@@ -379,6 +379,21 @@ namespace Hermes
         friend class Space<std::complex<double> >;
         friend class Mesh;
       };
+      
+      /// \brief Curved element exception.
+      /// Exception occurs when there is a curved element where we only process not curved.
+      class HERMES_API CurvedException : public Hermes::Exceptions::Exception
+      {
+      public:
+        /// Constructor
+        /// \param[in] element_id Id of the element that is curved.
+        CurvedException(int elementId);
+        CurvedException(const CurvedException & e);
+
+        int getElementId() const;
+      private:
+        int elementId;
+      };
 
       class ElementMarkersConversion : public MarkersConversion
       {
