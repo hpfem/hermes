@@ -85,17 +85,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ConstantSolutionVector<Scalar>::ConstantSolutionVector(Mesh* mesh, Scalar constantX, Scalar constantY) : ExactSolutionVectorScalar<Scalar>(mesh), constantX(constantX), constantY(constantY) {};
+    ConstantSolutionVector<Scalar>::ConstantSolutionVector(Mesh* mesh, Scalar constantX, Scalar constantY) : ExactSolutionVector<Scalar>(mesh), constantX(constantX), constantY(constantY) {};
 
     template<typename Scalar>
     Scalar2<Scalar> ConstantSolutionVector<Scalar>::value (double x, double y) const {
-      return Scalar2<Scalar<(constantX, constantY);
+      return Scalar2<Scalar>(constantX, constantY);
     };
 
     template<typename Scalar>
     void ConstantSolutionVector<Scalar>::derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
-      dx = Scalar2<Scalar<(Scalar(0.0), Scalar(0.0));
-      dy = Scalar2<Scalar<(Scalar(0.0), Scalar(0.0));
+      dx = Scalar2<Scalar>(Scalar(0.0), Scalar(0.0));
+      dy = Scalar2<Scalar>(Scalar(0.0), Scalar(0.0));
     };
 
     template<typename Scalar>
