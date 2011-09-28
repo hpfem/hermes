@@ -361,7 +361,7 @@ namespace Hermes
         vertex_size = std::max(32 * nn, 10000);
         triangle_size = std::max(64 * nn, 20000);
         edges_size = std::max(24 * nn, 7500);
-        dashes_size = edges_size;
+        //dashes_size = edges_size;
 
         vertex_count = 0;
         triangle_count = 0;
@@ -572,7 +572,7 @@ namespace Hermes
         if (this->dashes_count >= this->dashes_size)
         {
           this->dashes_size *= 2;
-          dashes = (int2*) realloc(dashes, sizeof(int2) * (dashes_size = dashes_size * 3 / 2));
+          dashes = (int2*) realloc(dashes, sizeof(int2) * dashes_size);
         }
         dashes[dashes_count][0] = iv1;
         dashes[dashes_count++][1] = iv2;
