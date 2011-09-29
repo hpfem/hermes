@@ -9,7 +9,7 @@ If you are using a Debian-based system, install the required libraries first:
 .. sourcecode::
     .
 
-    apt-get install cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev python-dev python-numpy python-scipy cython python-matplotlib libxerces-c-dev xsdcxx
+    apt-get install git git-core cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev python-dev python-numpy python-scipy cython python-matplotlib libxerces-c-dev xsdcxx
 
 .. latexcode::
     .
@@ -20,12 +20,7 @@ If you are using a Debian-based system, install the required libraries first:
 (Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
 least 0.98.5.2 or higher.)
 
-There are multiple ways to obtain the source code. The simplest one 
-is to clone the Git repository either from the hpfem.org server::
-
-    git clone http://git.hpfem.org/git/hermes.git
-
-or from Github::
+To obtain the source code, clone the Git repository from Github::
   
     git clone git://github.com/hpfem/hermes.git
 
