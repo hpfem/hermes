@@ -101,13 +101,13 @@ namespace Hermes
       //                    iteration of the Newton's method.
       // block_diagonal_jacobian... if true then the tensor product block Jacobian is
       //                            reduced to just the diagonal blocks.
-      bool rk_time_step_newton(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev,
+      void rk_time_step_newton(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev,
                         Hermes::vector<Solution<Scalar>*> slns_time_new, Hermes::vector<Solution<Scalar>*> error_fns,
                         bool freeze_jacobian = true, bool block_diagonal_jacobian = false,
                         bool verbose = false, double newton_tol = 1e-6,
                         int newton_max_iter = 20, double newton_damping_coeff = 1.0,
                         double newton_max_allowed_residual_norm = 1e10);
-      bool rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* slns_time_prev,
+      void rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* slns_time_prev,
                         Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn,
                         bool freeze_jacobian = true, bool block_diagonal_jacobian = false,
                         bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20,
@@ -115,12 +115,12 @@ namespace Hermes
 
       // This is a wrapper for the previous function if error_fn is not provided
       // (adaptive time stepping is not wanted).
-      bool rk_time_step_newton(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev,
+      void rk_time_step_newton(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev,
                         Hermes::vector<Solution<Scalar>*> slns_time_new,
                         bool freeze_jacobian = true, bool block_diagonal_jacobian = false,
                         bool verbose = false, double newton_tol = 1e-6, int newton_max_iter = 20,
                         double newton_damping_coeff = 1.0, double newton_max_allowed_residual_norm = 1e10);
-      bool rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
+      void rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
                         Solution<Scalar>* sln_time_new, bool freeze_jacobian = true,
                         bool block_diagonal_jacobian = false, bool verbose = false,
                         double newton_tol = 1e-6, int newton_max_iter = 20, double newton_damping_coeff = 1.0,

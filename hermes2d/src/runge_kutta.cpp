@@ -72,7 +72,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
+    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
                                           Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn,
                                           bool freeze_jacobian, bool block_diagonal_jacobian,
                                           bool verbose, double newton_tol, int newton_max_iter,
@@ -90,7 +90,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
+    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
                                           Hermes::vector<Solution<Scalar>*> slns_time_prev,
                                           Hermes::vector<Solution<Scalar>*> slns_time_new,
                                           Hermes::vector<Solution<Scalar>*> error_fns,
@@ -210,13 +210,7 @@ namespace Hermes
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > newton_max_allowed_residual_norm)
         {
-          if (verbose)
-          {
-            info("Current residual norm: %g", residual_norm);
-            info("Maximum allowed residual norm: %g", newton_max_allowed_residual_norm);
-            info("Newton solve not successful, returning false.");
-          }
-          return false;
+          throw Exceptions::ValueException("residual norm", residual_norm, newton_max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, or the maximum number
@@ -242,7 +236,7 @@ namespace Hermes
 
         // Solve the linear system.
         if(!solver->solve())
-          error ("Matrix solver failed.\n");
+          throw Exceptions::LinearSolverException();
 
         // Add \deltaK^{n + 1} to K^n.
         for (unsigned int i = 0; i < num_stages*ndof; i++)
@@ -255,9 +249,7 @@ namespace Hermes
       // If max number of iterations was exceeded, fail.
       if (it >= newton_max_iter)
       {
-        if (verbose)
-          info("Maximum allowed number of Newton iterations exceeded, returning false.");
-        return false;
+        throw Exceptions::ValueException("newton iterations", it, newton_max_iter);
       }
 
       // Project previous time level solution on the stage space,
@@ -301,11 +293,10 @@ namespace Hermes
       delete [] coeff_vec;
 
       iteration++;
-      return true;
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
+    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
                                           Hermes::vector<Solution<Scalar>*> slns_time_prev,
                                           Hermes::vector<Solution<Scalar>*> slns_time_new,
                                           bool freeze_jacobian, bool block_diagonal_jacobian,
@@ -320,7 +311,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
+    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
                                           Solution<Scalar>* sln_time_new,
                                           bool freeze_jacobian, bool block_diagonal_jacobian,
                                           bool verbose, double newton_tol, int newton_max_iter,
