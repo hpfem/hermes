@@ -40,6 +40,9 @@ namespace Hermes
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
       
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+      
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
+
     protected:
       virtual int get_edge_order(Element* e, int edge) {
         // There are no continuity constraints on shape functions in L2.
@@ -53,8 +56,6 @@ namespace Hermes
       /// Common code for the constructors.
       void init(Shapeset* shapeset, Ord2 p_init);
       
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
-
       struct L2Data
       {
         int vdof[4];

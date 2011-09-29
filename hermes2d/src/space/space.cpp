@@ -110,6 +110,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Shapeset* Space<Scalar>::get_shapeset()
+    {
+      return this->shapeset;
+    }
+
+    template<typename Scalar>
     int Space<Scalar>::get_num_dofs()
     {
       return ndof;

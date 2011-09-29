@@ -51,6 +51,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int* AsmList<Scalar>::get_idx()
+    {
+      return this->idx;
+    }
+
+    template<typename Scalar>
+    int* AsmList<Scalar>::get_dof()
+    {
+      return this->dof;
+    }
+
+    template<typename Scalar>
+    unsigned int AsmList<Scalar>::get_cnt()
+    {
+      return this->cnt;
+    }
+
+    template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
       if (cnt >= cap) enlarge();

@@ -66,6 +66,16 @@ namespace Hermes
       /// order. In this case, the edge pseudo-order is expected (as returned by
       /// Quad2D::get_edge_points).
       double3* get_tangent(int edge, int order = -1);
+      
+      /// Transforms physical coordinates x, y from the element e back to the reference domain.
+      /// If the point (x, y) does not lie in e, then (xi1, xi2) will not lie in the reference domain.
+      void untransform(Element* e, double x, double y, double& xi1, double& xi2);
+      
+      /// Returns the x-coordinates of the integration points transformed to the
+      /// physical domain of the element. Intended for integrals containing spatial
+      /// variables.
+      double* get_phys_x(int order);
+
     private:
       /// Returns true if the jacobian of the reference map is constant (which
       /// is the case for non-curvilinear triangular elements), false otherwise.
@@ -94,19 +104,10 @@ namespace Hermes
       /// Returns coefficients for weak forms with second derivatives.
       double3x2* get_second_ref_map(int order);
 
-      /// Returns the x-coordinates of the integration points transformed to the
-      /// physical domain of the element. Intended for integrals containing spatial
-      /// variables.
-      double* get_phys_x(int order);
-
       /// Returns he y-coordinates of the integration points transformed to the
       /// physical domain of the element. Intended for integrals containing spatial
       /// variables.
       double* get_phys_y(int order);
-
-      /// Transforms physical coordinates x, y from the element e back to the reference domain.
-      /// If the point (x, y) does not lie in e, then (xi1, xi2) will not lie in the reference domain.
-      void untransform(Element* e, double x, double y, double& xi1, double& xi2);
 
       /// Calculates the inverse Jacobi matrix of reference map at a particular point (xi1, xi2).
       void inv_ref_map_at_point(double xi1, double xi2, double& x, double& y, double2x2& m);

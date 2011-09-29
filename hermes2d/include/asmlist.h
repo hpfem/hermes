@@ -31,15 +31,19 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API AsmList
     {
+    public:
+      /// Constructor.
+      AsmList();
+      
+      /// Destructor.
+      ~AsmList();
+
+      int* get_idx();
+      int* get_dof();
+      unsigned int get_cnt();
     private:
       /// Copy constructor.
       AsmList(const AsmList<Scalar> & other);
-
-      /// Constructor.
-      AsmList();
-
-      /// Destructor.
-      ~AsmList();
 
       int* idx;      ///< array of shape function indices
       int* dof;      ///< array of basis function numbers (DOFs)

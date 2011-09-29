@@ -143,7 +143,6 @@ namespace Hermes
       /// \brief Returns the current quadrature points.
       Quad2D* get_quad_2d() const;
 
-    protected:
       /// Activates an integration rule of the specified order. Subsequent calls to
       /// get_values(), get_dx_values() etc. will be returning function values at these points.
       /// \param order [in] Integration rule order.
@@ -152,6 +151,7 @@ namespace Hermes
       ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
       void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
 
+    protected:
       /// For internal use.
       Scalar* get_values(int a, int b);
 

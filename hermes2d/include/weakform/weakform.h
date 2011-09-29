@@ -112,6 +112,15 @@ namespace Hermes
       void set_current_time(double time);
 
       virtual double get_current_time() const;
+
+      Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol();
+      Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf();
+      Hermes::vector<VectorFormVol<Scalar> *> get_vfvol();
+      Hermes::vector<VectorFormSurf<Scalar> *> get_vfsurf();
+      Hermes::vector<MultiComponentMatrixFormVol<Scalar> *> get_mfvol_mc();
+      Hermes::vector<MultiComponentMatrixFormSurf<Scalar> *> get_mfsurf_mc();
+      Hermes::vector<MultiComponentVectorFormVol<Scalar> *> get_vfvol_mc();
+      Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> get_vfsurf_mc();
     protected:
       /// Internal. Used by DiscreteProblem to detect changes in the weakform.
       int get_seq() const { return seq; }

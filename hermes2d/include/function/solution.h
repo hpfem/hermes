@@ -160,14 +160,13 @@ namespace Hermes
 
       static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
         PrecalcShapeset* pss, bool add_dir_lift = true);
-    protected:
-      
-      /// Internal.
-      virtual void set_active_element(Element* e);
       
       /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
-
+      
+      /// Internal.
+      virtual void set_active_element(Element* e);
+    protected:
       virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
       
       /// Enables or disables transformation of the solution derivatives (H1 case)

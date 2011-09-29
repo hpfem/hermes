@@ -428,6 +428,47 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Hermes::vector<MatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol()
+    {
+      return mfvol;
+    }
+    template<typename Scalar>
+    Hermes::vector<MatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf()
+    {
+      return mfsurf;
+    }
+    template<typename Scalar>
+      Hermes::vector<VectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol()
+    {
+      return vfvol;
+    }
+    template<typename Scalar>
+      Hermes::vector<VectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf()
+    {
+      return vfsurf;
+    }
+    template<typename Scalar>
+      Hermes::vector<MultiComponentMatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol_mc()
+    {
+      return mfvol_mc;
+    }
+    template<typename Scalar>
+      Hermes::vector<MultiComponentMatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf_mc()
+    {
+      return mfsurf_mc;
+    }
+    template<typename Scalar>
+      Hermes::vector<MultiComponentVectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol_mc()
+    {
+      return vfvol_mc;
+    }
+    template<typename Scalar>
+      Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf_mc()
+    {
+      return vfsurf_mc;
+    }
+
+    template<typename Scalar>
     void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
       Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage)
     {

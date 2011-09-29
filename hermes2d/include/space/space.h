@@ -161,8 +161,16 @@ namespace Hermes
       void update_essential_bc_values();
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
+      
+      /// Obtains an assembly list for the given element.
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
 
-    protected:
+      Shapeset* get_shapeset();
+      
+      /// Sets element polynomial order. This version does not call assign_dofs() and is
+      /// intended primarily for internal use.
+      virtual void set_element_order_internal(int id, int order);
+
       /// \brief Builds basis functions and assigns DOF numbers to them.
       /// \details This functions must be called \b after assigning element orders, and \b before
       /// using the space in a computation, otherwise an error will occur.
@@ -170,14 +178,14 @@ namespace Hermes
       /// \param stride [in] The difference between the DOF numbers of successive basis functions.
       /// \return The number of basis functions contained in the space.
       virtual int assign_dofs(int first_dof = 0, int stride = 1);
+      
+      /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
+      static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
+    protected:
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
       void distribute_orders(Mesh* mesh, int* parents);
 
-      /// Sets element polynomial order. This version does not call assign_dofs() and is
-      /// intended primarily for internal use.
-      virtual void set_element_order_internal(int id, int order);
-      
       /// Internal. Obtains the order of an edge, according to the minimum rule.
       virtual int get_edge_order(Element* e, int edge);
 
@@ -191,14 +199,8 @@ namespace Hermes
       /// Returns true if the space is ready for computation, false otherwise.
       bool is_up_to_date() const;
       
-      /// Obtains an assembly list for the given element.
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
-
       /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
       void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al);
-
-      /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-      static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
       /// Sets the same polynomial order for all elements in the mesh. Does not
       /// call assign_dofs(). For internal use.
