@@ -394,7 +394,7 @@ namespace Hermes
       return e;
     }
 
-    static CurvMap* create_son_curv_map(Element* e, int son)
+    CurvMap* create_son_curv_map(Element* e, int son)
     {
       // if the top three bits of part are nonzero, we would overflow
       // -- make the element non-curvilinear

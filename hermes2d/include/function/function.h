@@ -36,6 +36,7 @@ namespace Hermes
       template<typename Scalar> class H1ProjBasedSelector;
       class HcurlProjBasedSelector;
     };
+    template<typename Scalar> class Geom;
 
     namespace Views{
       class Orderizer;
@@ -150,11 +151,9 @@ namespace Hermes
       ///   H2D_FN_DXX, H2D_FN_DYY, H2D_FN_DXY specifying the values which should be precalculated. The default is
       ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
       void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
-
-    protected:
-      /// For internal use.
+      
       Scalar* get_values(int a, int b);
-
+    protected:
       /// \brief Selects the quadrature points in which the function will be evaluated.
       /// \details It is possible to switch back and forth between different quadrature
       /// points: no precalculated values are freed. The standard quadrature is
@@ -249,9 +248,9 @@ namespace Hermes
 
       template<typename T> friend class Func;
       template<typename T> friend class Geom;
-      template<typename Scalar> friend class Filter;
-      template<typename Scalar> friend class SimpleFilter;
-      template<typename Scalar> friend class DXDYFilter;
+      template<typename T> friend class Filter;
+      template<typename T> friend class SimpleFilter;
+      template<typename T> friend class DXDYFilter;
       friend class ComplexFilter;
       friend class VonMisesFilter;
       friend HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);

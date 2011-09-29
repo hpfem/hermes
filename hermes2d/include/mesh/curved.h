@@ -155,13 +155,13 @@ namespace Hermes
       static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
 
       static bool warning_issued;
-      template<typename Scalar> friend class Space;
-      template<typename Scalar> friend class H1Space;
-      template<typename Scalar> friend class L2Space;
-      template<typename Scalar> friend class HcurlSpace;
-      template<typename Scalar> friend class HdivSpace;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename T> friend class Space;
+      template<typename T> friend class H1Space;
+      template<typename T> friend class L2Space;
+      template<typename T> friend class HcurlSpace;
+      template<typename T> friend class HdivSpace;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class KellyTypeAdapt;
       friend class RefMap;
       friend class Mesh;
       friend class MeshReader;

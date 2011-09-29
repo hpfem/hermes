@@ -62,11 +62,11 @@ namespace Hermes
       *  \param[in] dest A destination array.
       *  \param[in] src A source arrapy. */
       static void copy_orders(int* dest, const int* src);
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class RefinementSelectors::Selector;
-      template<typename Scalar> friend class RefinementSelectors::HOnlySelector;
-      template<typename Scalar> friend class RefinementSelectors::POnlySelector;
-      template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class RefinementSelectors::Selector;
+      template<typename T> friend class RefinementSelectors::HOnlySelector;
+      template<typename T> friend class RefinementSelectors::POnlySelector;
+      template<typename T> friend class RefinementSelectors::OptimumSelector;
     };
   }
 }

@@ -221,18 +221,18 @@ namespace Hermes
       double2* coeffs;
 
       double2  lin_coeffs[4];
-      template<typename Scalar> friend class MeshFunction;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class Solution;
-      template<typename Scalar> friend class ExactSolution;
-      template<typename Scalar> friend class ExactSolutionScalar;
-      template<typename Scalar> friend class ExactSolutionVector;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename T> friend class MeshFunction;
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class Solution;
+      template<typename T> friend class ExactSolution;
+      template<typename T> friend class ExactSolutionScalar;
+      template<typename T> friend class ExactSolutionVector;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class KellyTypeAdapt;
       friend class Views::Orderizer;
       friend class Views::Vectorizer;
       friend class Views::Linearizer;
-      template<typename Scalar> friend class Global;
+      template<typename T> friend class Global;
       friend class VonMisesFilter;
       template<typename T> friend class Func;
       template<typename T> friend class Geom;

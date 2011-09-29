@@ -91,12 +91,12 @@ namespace Hermes
       uint64_t init_idx(Rect* cr, Rect* er);
 
       Mesh* unimesh;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class Filter;
-      template<typename Scalar> friend class SimpleFilter;
-      template<typename Scalar> friend class Global;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class Filter;
+      template<typename T> friend class SimpleFilter;
+      template<typename T> friend class Global;
       friend class Views::Orderizer;
       friend class Views::Vectorizer;
       friend class Views::Linearizer;

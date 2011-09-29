@@ -99,8 +99,8 @@ namespace Hermes
         *  \param[in] suggested_quad_orders Suggested encoded orders. If not NULL, the method should copy them to the output. If NULL, the method have to calculate orders. */
         virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) = 0;
 
-        template<typename Scalar> friend class Adapt;
-        template<typename Scalar> friend class KellyTypeAdapt;
+        template<typename T> friend class Adapt;
+        template<typename T> friend class KellyTypeAdapt;
       };
 
       /// A selector that selects H-refinements only. \ingroup g_selectors
@@ -118,8 +118,8 @@ namespace Hermes
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
         *  For details, see Selector::generate_shared_mesh_orders. */
         virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
-        template<typename Scalar> friend class Adapt;
-        template<typename Scalar> friend class KellyTypeAdapt;
+        template<typename T> friend class Adapt;
+        template<typename T> friend class KellyTypeAdapt;
       };
 
       /// A selector that increases order (i.e., it selects P-refinements only). \ingroup g_selectors
@@ -142,8 +142,8 @@ namespace Hermes
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
         *  For details, see Selector::generate_shared_mesh_orders. */
         virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
-        template<typename Scalar> friend class Adapt;
-        template<typename Scalar> friend class KellyTypeAdapt;
+        template<typename T> friend class Adapt;
+        template<typename T> friend class KellyTypeAdapt;
       };
     }
   }

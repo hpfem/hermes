@@ -301,12 +301,12 @@ namespace Hermes
 
         void apply_on(const Hermes::vector<Transformable*>& tr) const;
         
-        template<typename Scalar> friend class NeighborSearch;
-        template<typename Scalar> friend class KellyTypeAdapt;
-        template<typename Scalar> friend class Adapt;
-        template<typename Scalar> friend class Func;
-        template<typename Scalar> friend class DiscontinuousFunc;
-        template<typename Scalar> friend class DiscreteProblem;
+        template<typename T> friend class NeighborSearch;
+        template<typename T> friend class KellyTypeAdapt;
+        template<typename T> friend class Adapt;
+        template<typename T> friend class Func;
+        template<typename T> friend class DiscontinuousFunc;
+        template<typename T> friend class DiscreteProblem;
       };
 
 
@@ -418,11 +418,11 @@ namespace Hermes
       int central_quad_order;  ///< Quadrature data of the active edge with respect to the central element.
       int neighb_quad_order;   ///< Quadrature data of the active edge with respect to the element on the other side.
 
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class Func;
-      template<typename Scalar> friend class DiscontinuousFunc;
-      template<typename Scalar> friend class DiscreteProblem;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class Func;
+      template<typename T> friend class DiscontinuousFunc;
+      template<typename T> friend class DiscreteProblem;
     };
   }
 }

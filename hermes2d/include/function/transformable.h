@@ -124,13 +124,13 @@ namespace Hermes
       /// Stack top.
       unsigned int top;
 
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class Func;
-      template<typename Scalar> friend class Function;
-      template<typename Scalar> friend class DiscontinuousFunc;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class NeighborSearch;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class Func;
+      template<typename T> friend class Function;
+      template<typename T> friend class DiscontinuousFunc;
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class NeighborSearch;
       friend class CurvMap;
       friend class Traverse;
       friend class Views::Vectorizer;

@@ -108,7 +108,7 @@ namespace Hermes
     }
 
 
-    static void init_transforms(Transformable* fn, Rect* cr, Rect* er)
+    void init_transforms(Transformable* fn, Rect* cr, Rect* er)
     {
       Rect r;
       memcpy(&r, er, sizeof(Rect));

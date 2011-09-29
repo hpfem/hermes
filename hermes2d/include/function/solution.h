@@ -236,14 +236,14 @@ namespace Hermes
       Element* e_last; ///< last visited element when getting solution values at specific points
 
       friend class RefMap;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class OGProjection;
-      template<typename Scalar> friend class OGProjectionNOX;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class Func;
-      template<typename Scalar> friend class DiscontinuousFunc;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class NeighborSearch;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class OGProjection;
+      template<typename T> friend class OGProjectionNOX;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class Func;
+      template<typename T> friend class DiscontinuousFunc;
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class NeighborSearch;
       template<typename T> friend HERMES_API Func<T>* init_fn(Solution<T>*fu, const int order);
       template<typename T> friend class RefinementSelectors::ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::H1ProjBasedSelector;

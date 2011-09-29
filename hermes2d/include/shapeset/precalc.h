@@ -123,13 +123,13 @@ namespace Hermes
       void force_transform(uint64_t sub_idx, Trf* ctm);
 
       friend class RefMap;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class Func;
-      template<typename Scalar> friend class Solution;
-      template<typename Scalar> friend class DiscontinuousFunc;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class NeighborSearch;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class Func;
+      template<typename T> friend class Solution;
+      template<typename T> friend class DiscontinuousFunc;
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class NeighborSearch;
       friend class CurvMap;
     };
   }

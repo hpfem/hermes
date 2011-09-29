@@ -38,7 +38,7 @@ namespace Hermes
     protected:
       /// For scaling of the solution.
       Scalar exact_multiplicator;
-      template<typename Scalar> friend class Solution;
+      template<typename T> friend class Solution;
     };
 
     /// These classes are abstract (pure virtual destructor).

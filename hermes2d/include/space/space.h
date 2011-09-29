@@ -339,7 +339,7 @@ namespace Hermes
 
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
-      template<typename Scalar> friend class Continuity;
+      template<typename T> friend class Continuity;
 
       /// Saves this space into a file.
       bool save(const char *filename) const;
@@ -347,8 +347,8 @@ namespace Hermes
       /// Loads a space from a file.
       void load(const char *filename, EssentialBCs<Scalar>* essential_bcs = NULL);
 
-      template<typename Scalar> friend class OGProjection;
-      template<typename Scalar> friend class OGProjectionNOX;
+      template<typename T> friend class OGProjection;
+      template<typename T> friend class OGProjectionNOX;
       template<typename T> friend class Solution;
       template<typename T> friend class RungeKutta;
       template<typename T> friend class ExactSolution;

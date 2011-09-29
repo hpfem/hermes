@@ -109,11 +109,11 @@ namespace Hermes
           /** \return True if the instance is empty, i.e., the method allocate() was not called yet. */
           inline bool empty() const;
 
-          template<typename Scalar> friend class ProjBasedSelector;
-          template<typename Scalar> friend class L2ProjBasedSelector;
-          template<typename Scalar> friend class H1ProjBasedSelector;
+          template<typename T> friend class ProjBasedSelector;
+          template<typename T> friend class L2ProjBasedSelector;
+          template<typename T> friend class H1ProjBasedSelector;
           friend class HcurlProjBasedSelector;
-          template<typename Scalar> friend class Adapt;
+          template<typename T> friend class Adapt;
         };
 
         /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
