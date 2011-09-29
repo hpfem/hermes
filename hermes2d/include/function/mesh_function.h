@@ -80,6 +80,19 @@ namespace Hermes
       void update_refmap();
 
       void force_transform(uint64_t sub_idx, Trf* ctm);
+
+      friend class RefMap;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class Adapt;
+      
+      template<typename T> friend class Func;
+      template<typename T> friend class Geom;
+
+      template<typename T> friend HERMES_API Func<T>* init_fn(MeshFunction<T>*fu, const int order);
+
+      template<typename Scalar> friend class DiscontinuousFunc;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class NeighborSearch;
     };
   }
 }

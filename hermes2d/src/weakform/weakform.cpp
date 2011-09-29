@@ -428,13 +428,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>*> ext)
-    {
-      _F_;
-      error("Not implemented yet.");
-    }
-
-    template<typename Scalar>
     void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
       Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage)
     {

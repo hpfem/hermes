@@ -103,16 +103,8 @@ namespace Hermes
       /// Adds multicomponent surface vector form.
       void add_multicomponent_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* vfs);
 
-      void set_ext_fns(void* fn, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>());
-
       /// Returns the number of equations.
       unsigned int get_neq() { return neq; }
-
-      /// Deletes all volumetric and surface forms.
-      void delete_all();
-
-      /// Internal. Used by DiscreteProblem to detect changes in the weakform.
-      int get_seq() const { return seq; }
 
       bool is_matrix_free() { return is_matfree; }
 
@@ -120,6 +112,9 @@ namespace Hermes
       void set_current_time(double time);
 
       virtual double get_current_time() const;
+    protected:
+      /// Internal. Used by DiscreteProblem to detect changes in the weakform.
+      int get_seq() const { return seq; }
 
       void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
         Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage = false);
@@ -158,7 +153,9 @@ namespace Hermes
       /// Holds multicomponent surface vector forms.
       Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
 
-    protected:
+      /// Deletes all volumetric and surface forms.
+      void delete_all();
+
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
 

@@ -34,9 +34,6 @@ namespace Hermes
       H1Space(Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      /// Common code for the constructors.
-      void init(Shapeset* shapeset, Ord2 p_init);
-
       virtual ~H1Space();
 
       virtual void set_shapeset(Shapeset* shapeset);
@@ -55,11 +52,13 @@ namespace Hermes
 
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+    protected:
+      
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
-
-    protected:
+      /// Common code for the constructors.
+      void init(Shapeset* shapeset, Ord2 p_init);
 
       virtual void assign_vertex_dofs();
       virtual void assign_edge_dofs() {};

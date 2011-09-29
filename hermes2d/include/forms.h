@@ -36,7 +36,7 @@ namespace Hermes
 
     /// Calculated function values (from the class Function) on an element for assembling.
     template<typename T>
-    class Func
+    class HERMES_API Func
     {
     public:
       const int num_gip; ///< Number of integration points used by this intance.

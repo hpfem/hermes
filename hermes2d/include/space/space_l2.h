@@ -32,16 +32,15 @@ namespace Hermes
       L2Space(Mesh* mesh, int p_init = 0,
         Shapeset* shapeset = NULL);
 
-      /// Common code for the constructors.
-      void init(Shapeset* shapeset, Ord2 p_init);
-
       virtual ~L2Space();
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
       /// Loads this space from a file.
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
-
+      
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+    protected:
       virtual int get_edge_order(Element* e, int edge) {
         // There are no continuity constraints on shape functions in L2.
         return Global<Scalar>::make_edge_order( e->get_mode(), edge, this->edata[e->id].order );
@@ -51,12 +50,10 @@ namespace Hermes
 
       virtual SpaceType get_type() const { return HERMES_L2_SPACE; }
 
+      /// Common code for the constructors.
+      void init(Shapeset* shapeset, Ord2 p_init);
+      
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
-
-      // FIXME: This function should probably not be used at all.
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
-
-    protected:
 
       struct L2Data
       {

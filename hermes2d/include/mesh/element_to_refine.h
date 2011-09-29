@@ -21,17 +21,17 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    namespace RefinementSelectors{
+      template<typename Scalar> class Selector;
+      template<typename Scalar> class HOnlySelector;
+      template<typename Scalar> class POnlySelector;
+      template<typename Scalar> class OptimumSelector;
+    };
+
     /// A refinement record. \ingroup g_adapt
     /** Except the attribute ElementToRefine::q, the class is able to dump its content to a stringstream
     *  in a human readable form, see operator<<(std::ostream& stream, const ElementToRefine& elem_ref). */
     class HERMES_API ElementToRefine {
-    public:
-      int id; ///< An ID of the element. -1 if invalid.
-      int comp; ///< An index of the component. -1 if invalid.
-      int split; ///< Proposed refinement. Possible values are defined in the enum ::RefinementType.
-      int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
-      int q[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of the best H-refinement. These orders are used in a case multiple components shares a single mesh.
-
     public:
       /// Constructor. Creates an invalid refinement.
       ElementToRefine();
@@ -43,9 +43,15 @@ namespace Hermes
 
       /// Copy-contructor.
       ElementToRefine(const ElementToRefine &orig);
-
+      
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
+    private:
+      int id; ///< An ID of the element. -1 if invalid.
+      int comp; ///< An index of the component. -1 if invalid.
+      int split; ///< Proposed refinement. Possible values are defined in the enum ::RefinementType.
+      int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
+      int q[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of the best H-refinement. These orders are used in a case multiple components shares a single mesh.
 
       /// Returns a number of sons.
       /** \return A number of sons of a given refinement. */
@@ -56,6 +62,11 @@ namespace Hermes
       *  \param[in] dest A destination array.
       *  \param[in] src A source arrapy. */
       static void copy_orders(int* dest, const int* src);
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class RefinementSelectors::Selector;
+      template<typename Scalar> friend class RefinementSelectors::HOnlySelector;
+      template<typename Scalar> friend class RefinementSelectors::POnlySelector;
+      template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
     };
   }
 }

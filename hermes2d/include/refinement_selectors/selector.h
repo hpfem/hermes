@@ -74,9 +74,8 @@ namespace Hermes
       *  - updating orders of a mesh shared among components. */
       template<typename Scalar>
       class HERMES_API Selector {
-      public:
+      protected:
         const int max_order; ///< A maximum allowed order.
-      public:
         /// Constructor
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
         Selector(int max_order = H2DRS_DEFAULT_ORDER) : max_order(max_order) {};
@@ -99,12 +98,15 @@ namespace Hermes
         *  \param[out] tgt_quad_orders Generated encoded orders.
         *  \param[in] suggested_quad_orders Suggested encoded orders. If not NULL, the method should copy them to the output. If NULL, the method have to calculate orders. */
         virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) = 0;
+
+        template<typename Scalar> friend class Adapt;
+        template<typename Scalar> friend class KellyTypeAdapt;
       };
 
       /// A selector that selects H-refinements only. \ingroup g_selectors
       template<typename Scalar>
       class HERMES_API HOnlySelector : public Selector<Scalar> {
-      public:
+      protected:
         /// Constructor.
         HOnlySelector() : Selector<Scalar>() {};
 
@@ -116,6 +118,8 @@ namespace Hermes
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
         *  For details, see Selector::generate_shared_mesh_orders. */
         virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
+        template<typename Scalar> friend class Adapt;
+        template<typename Scalar> friend class KellyTypeAdapt;
       };
 
       /// A selector that increases order (i.e., it selects P-refinements only). \ingroup g_selectors
@@ -123,7 +127,7 @@ namespace Hermes
       class HERMES_API POnlySelector : public Selector<Scalar> {
         const int order_h_inc; ///< Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
         const int order_v_inc; ///< Increase along the vertical direction in a quadrilateral.
-      public:
+      protected:
         /// Constructor.
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used.
         *  \param[in] order_h_inc An increase of the horizontal order in a quadrilateral and an order in a triangle. The increase has to be greater or equal to 0.
@@ -138,6 +142,8 @@ namespace Hermes
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
         *  For details, see Selector::generate_shared_mesh_orders. */
         virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
+        template<typename Scalar> friend class Adapt;
+        template<typename Scalar> friend class KellyTypeAdapt;
       };
     }
   }

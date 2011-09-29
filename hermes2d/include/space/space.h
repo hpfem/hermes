@@ -31,7 +31,13 @@ namespace Hermes
   {
     template<typename Scalar> class Adapt;
     template<typename Scalar> class DiscreteProblem;
-
+    namespace Views
+    {
+      template<typename Scalar> class BaseView;
+      template<typename Scalar> class VectorBaseView;
+      class Orderizer;
+      class OrderView;
+    };
     /// \brief Represents a finite element space over a domain.
     ///
     /// The Space class represents a finite element space over a domain defined by 'mesh', spanned
@@ -95,11 +101,6 @@ namespace Hermes
 
       virtual ~Space();
 
-      virtual void free();
-
-      /// Sets the boundary condition.
-      void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
-
       /// Sets element polynomial order. Can be called by the user. Should not be called
       /// for many elements at once, since assign_dofs() is called at the end of this function.
       virtual void set_element_order(int id, int order);
@@ -107,24 +108,12 @@ namespace Hermes
       /// Sets polynomial order to all elements.
       virtual void set_element_orders(int* elem_orders);
 
-      /// Sets element polynomial order. This version does not call assign_dofs() and is
-      /// intended primarily for internal use.
-      virtual void set_element_order_internal(int id, int order);
-
       /// Returns element polynomial order.
       int get_element_order(int id) const;
 
       /// Sets the same polynomial order for all elements in the mesh. Intended for
       /// the user and thus assign_dofs() is called at the end of this function.
       void set_uniform_order(int order, std::string marker = HERMES_ANY);
-
-      /// Sets the same polynomial order for all elements in the mesh. Does not
-      /// call assign_dofs(). For internal use.
-      void set_uniform_order_internal(Ord2 order, int marker);
-
-      /// Sets the order automatically assigned to all newly created elements.
-      /// (The order of these is normally undefined and has to be set explicitly.)
-      void set_default_order(int tri_order, int quad_order = -1);
 
       /// Set the element order relative to the current order.
       /// The parameter min_order prevents decreasing polynomial order below this threshold.
@@ -148,9 +137,32 @@ namespace Hermes
       /// recursively. This is useful for reference solution spaces.
       void copy_orders(const Space<Scalar>* space, int inc = 0);
 
-      /// Internal. Obtains the order of an edge, according to the minimum rule.
-      virtual int get_edge_order(Element* e, int edge);
+      /// \brief Returns the number of basis functions contained in the space.
+      int get_num_dofs();
 
+      /// \brief Returns the number of basis functions contained in the spaces.
+      static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
+      
+      /// \brief Returns the number of basis functions contained in the space.
+      static int get_num_dofs(Space<Scalar>* space);
+
+      Mesh* get_mesh() const;
+
+      void set_mesh(Mesh* mesh);
+      
+      /// Sets the boundary condition.
+      void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
+      
+      /// Obtains an boundary conditions
+      EssentialBCs<Scalar>* get_essential_bcs() const;
+
+      /// Updates essential BC values. Typically used for time-dependent
+      /// essnetial boundary conditions.
+      void update_essential_bc_values();
+
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
+
+    protected:
       /// \brief Builds basis functions and assigns DOF numbers to them.
       /// \details This functions must be called \b after assigning element orders, and \b before
       /// using the space in a computation, otherwise an error will occur.
@@ -159,51 +171,41 @@ namespace Hermes
       /// \return The number of basis functions contained in the space.
       virtual int assign_dofs(int first_dof = 0, int stride = 1);
 
-      /// \brief Returns the number of basis functions contained in the space.
-      int get_num_dofs();
+      /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
+      void distribute_orders(Mesh* mesh, int* parents);
+
+      /// Sets element polynomial order. This version does not call assign_dofs() and is
+      /// intended primarily for internal use.
+      virtual void set_element_order_internal(int id, int order);
+      
+      /// Internal. Obtains the order of an edge, according to the minimum rule.
+      virtual int get_edge_order(Element* e, int edge);
 
       /// \brief Returns the DOF number of the last basis function.
       int get_max_dof() const;
-
-      Shapeset* get_shapeset() const;
-
-      Mesh* get_mesh() const;
-
-      void set_mesh(Mesh* mesh);
-
+      
       /// Creates a copy of the space, increases order of all elements by
       /// "order_increase".
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const = 0;
 
       /// Returns true if the space is ready for computation, false otherwise.
       bool is_up_to_date() const;
-
-      /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
-      void distribute_orders(Mesh* mesh, int* parents);
-
-      /// Obtains an boundary conditions
-      EssentialBCs<Scalar>* get_essential_bcs() const;
-
+      
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
 
       /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
       void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al);
 
-      /// Updates essential BC values. Typically used for time-dependent
-      /// essnetial boundary conditions.
-      void update_essential_bc_values();
-
-      /// \brief Returns the number of basis functions contained in the spaces.
-      static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
-
-      /// \brief Returns the number of basis functions contained in the space.
-      static int get_num_dofs(Space<Scalar>* space);
-
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
-    protected:
+      /// Sets the same polynomial order for all elements in the mesh. Does not
+      /// call assign_dofs(). For internal use.
+      void set_uniform_order_internal(Ord2 order, int marker);
+
+      virtual void free();
+
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
 
@@ -300,7 +302,6 @@ namespace Hermes
       Hermes::vector<void*> bc_data;
 
       void precalculate_projection_matrix(int nv, double**& mat, double*& p);
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
       void update_edge_bc(Element* e, SurfPos* surf_pos);
 
       /// Called by Space to update constraining relationships between shape functions due
@@ -314,10 +315,10 @@ namespace Hermes
 
       void free_bc_data();
 
-public:
       /// Internal. Used by DiscreteProblem to detect changes in the space.
       int get_seq() const;
 
+    public:
       /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
       /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
       virtual SpaceType get_type() const = 0;
@@ -336,12 +337,26 @@ public:
 
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
+      template<typename Scalar> friend class Continuity;
 
       /// Saves this space into a file.
       bool save(const char *filename) const;
 
       /// Loads a space from a file.
       void load(const char *filename, EssentialBCs<Scalar>* essential_bcs = NULL);
+
+      template<typename Scalar> friend class OGProjection;
+      template<typename Scalar> friend class OGProjectionNOX;
+      template<typename T> friend class Solution;
+      template<typename T> friend class RungeKutta;
+      template<typename T> friend class ExactSolution;
+      template<typename T> friend class NeighborSearch;
+      template<typename T> friend class ExactSolutionScalar;
+      template<typename T> friend class ExactSolutionVector;
+      template<typename T> friend class Views::BaseView;
+      friend class Views::Orderizer;
+      friend class Views::OrderView;
+      template<typename T> friend class Views::VectorBaseView;
     };
   }
 }

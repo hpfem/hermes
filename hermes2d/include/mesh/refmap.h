@@ -25,6 +25,11 @@ namespace Hermes
   namespace Hermes2D
   {
     class Element;
+    namespace Views{
+      class Orderizer;
+      class Linearizer;
+      class Vectorizer;
+    };
 
     /// \brief Represents the reference mapping.
     ///
@@ -37,7 +42,6 @@ namespace Hermes
     class HERMES_API RefMap : public Transformable
     {
     public:
-
       RefMap();
 
       ~RefMap();
@@ -55,7 +59,14 @@ namespace Hermes
       /// Initializes the reference map for the specified element.
       /// Must be called prior to using all other functions in the class.
       virtual void set_active_element(Element* e);
-
+      
+      /// Returns the triples [x, y, norm] of the tangent to the specified (possibly
+      /// curved) edge at the 1D integration points along the edge. The maximum
+      /// 1D quadrature rule is used by default, but the user may specify his own
+      /// order. In this case, the edge pseudo-order is expected (as returned by
+      /// Quad2D::get_edge_points).
+      double3* get_tangent(int edge, int order = -1);
+    private:
       /// Returns true if the jacobian of the reference map is constant (which
       /// is the case for non-curvilinear triangular elements), false otherwise.
       bool is_jacobian_const() const;
@@ -93,13 +104,6 @@ namespace Hermes
       /// variables.
       double* get_phys_y(int order);
 
-      /// Returns the triples [x, y, norm] of the tangent to the specified (possibly
-      /// curved) edge at the 1D integration points along the edge. The maximum
-      /// 1D quadrature rule is used by default, but the user may specify his own
-      /// order. In this case, the edge pseudo-order is expected (as returned by
-      /// Quad2D::get_edge_points).
-      double3* get_tangent(int edge, int order = -1);
-
       /// Transforms physical coordinates x, y from the element e back to the reference domain.
       /// If the point (x, y) does not lie in e, then (xi1, xi2) will not lie in the reference domain.
       void untransform(Element* e, double x, double y, double& xi1, double& xi2);
@@ -128,8 +132,6 @@ namespace Hermes
         update_cur_node();
         if (is_const) calc_const_inv_ref_map();
       }
-
-    protected:
 
       Quad2D* quad_2d;
 
@@ -218,6 +220,24 @@ namespace Hermes
       double2* coeffs;
 
       double2  lin_coeffs[4];
+      template<typename Scalar> friend class MeshFunction;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class Solution;
+      template<typename Scalar> friend class ExactSolution;
+      template<typename Scalar> friend class ExactSolutionScalar;
+      template<typename Scalar> friend class ExactSolutionVector;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      friend class Views::Orderizer;
+      friend class Views::Vectorizer;
+      friend class Views::Linearizer;
+      template<typename Scalar> friend class Global;
+      friend class VonMisesFilter;
+      template<typename T> friend class Func;
+      template<typename T> friend class Geom;
+      friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
+      friend Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
+      friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
     };
   }
 }

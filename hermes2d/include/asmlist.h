@@ -31,14 +31,7 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API AsmList
     {
-    public:
-
-      int* idx;      ///< array of shape function indices
-      int* dof;      ///< array of basis function numbers (DOFs)
-      Scalar* coef;  ///< array of coefficients
-      unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
-      unsigned int cap;       ///< internal
-
+    private:
       /// Copy constructor.
       AsmList(const AsmList<Scalar> & other);
 
@@ -48,12 +41,25 @@ namespace Hermes
       /// Destructor.
       ~AsmList();
 
+      int* idx;      ///< array of shape function indices
+      int* dof;      ///< array of basis function numbers (DOFs)
+      Scalar* coef;  ///< array of coefficients
+      unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
+      unsigned int cap;       ///< internal
+      
       /// Adds a record for one basis function (shape functions index, basis functions index, coefficient).
       void add_triplet(int i, int d, Scalar c);
 
-    protected:
       /// Internal. Enlarges the storage capacity.
       void enlarge();
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class NeighborSearch;
+      template<typename Scalar> friend class Solution;
+      template<typename Scalar> friend class Space;
+      template<typename Scalar> friend class H1Space;
+      template<typename Scalar> friend class L2Space;
+      template<typename Scalar> friend class HcurlSpace;
+      template<typename Scalar> friend class HdivSpace;
     };
   }
 }

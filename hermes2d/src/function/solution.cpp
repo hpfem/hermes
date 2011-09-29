@@ -374,8 +374,8 @@ namespace Hermes
       if (space == NULL) throw Exceptions::NullException(1);
 
       // initialize precalc shapeset using the space's shapeset
-      Shapeset *shapeset = space->get_shapeset();
-      if (space->get_shapeset() == NULL) throw Exceptions::Exception("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
+      Shapeset *shapeset = space->shapeset;
+      if (space->shapeset == NULL) throw Exceptions::Exception("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
       PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
       if (pss == NULL) throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
 
@@ -398,7 +398,7 @@ namespace Hermes
       if (coeffs == NULL) throw Exceptions::Exception("Coefficient vector == NULL in Solution<Scalar>::set_coeff_vector().");
       if (!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
-      if (space->get_shapeset() != pss->get_shapeset())
+      if (space->shapeset != pss->shapeset)
         throw Exceptions::Exception("Provided 'space' and 'pss' must have the same shapesets.");
 
       free();
@@ -449,7 +449,7 @@ namespace Hermes
         }
 
         // Hcurl: actual order of functions is one higher than element order
-        if ((space->get_shapeset())->get_num_components() == 2) o++;
+        if ((space->shapeset)->get_num_components() == 2) o++;
 
         num_coeffs += this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
         elem_orders[e->id] = o;

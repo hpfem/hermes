@@ -30,7 +30,9 @@ namespace Hermes
     ///
     class HERMES_API PrecalcShapeset : public Function<double>
     {
-    public:
+    public:      
+      /// Returns type of space
+      SpaceType get_space_type() const;
 
       /// \brief Constructs a standard (master) precalculated shapeset class.
       /// \param shapeset [in] Pointer to the shapeset to be precalculated.
@@ -47,7 +49,8 @@ namespace Hermes
 
       /// Destructor.
       virtual ~PrecalcShapeset();
-
+    
+    private:
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       /// \brief Frees all precalculated tables.
@@ -73,9 +76,6 @@ namespace Hermes
       /// Returns a pointer to the shapeset which is being precalculated.
       Shapeset* get_shapeset() const;
 
-      /// Returns type of space
-      SpaceType get_space_type() const;
-
       /// Internal. Use set_active_element() instead.
       void set_mode(int mode);
 
@@ -89,8 +89,6 @@ namespace Hermes
       virtual void push_transform(int son);
 
       virtual void pop_transform();
-
-    protected:
 
       Shapeset* shapeset;
 
@@ -125,6 +123,14 @@ namespace Hermes
       void force_transform(uint64_t sub_idx, Trf* ctm);
 
       friend class RefMap;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class Func;
+      template<typename Scalar> friend class Solution;
+      template<typename Scalar> friend class DiscontinuousFunc;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class NeighborSearch;
+      friend class CurvMap;
     };
   }
 }

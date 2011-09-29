@@ -90,12 +90,6 @@ namespace Hermes
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss = NULL);
 
-      /// Enables or disables transformation of the solution derivatives (H1 case)
-      /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
-      /// H2D_FN_VAL_0 and H2D_FN_VAL_1 will or will not be returned premultiplied by the reference
-      /// mapping matrix. The default is enabled (true).
-      void enable_transform(bool enable = true);
-
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
       void save(const char* filename) const;
@@ -132,9 +126,18 @@ namespace Hermes
 
       /// Returns space type.
       inline SpaceType get_space_type() const { return space_type; };
+      
+      /// In case there is a space this solution belongs to, this returns the seq number of the space.
+      /// This is used to check if the pointer returned by get_space() points to the same space, or if the space has changed.
+      int get_space_seq();
 
-      /// Internal.
-      virtual void set_active_element(Element* e);
+      /// In case this is valid it returns a pointer to the space this solution belongs to.
+      /// Only use when get_space() == get_space_seq();
+      Space<Scalar>* get_space();
+
+      /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
+      /// Only use when get_space() == get_space_seq();
+      Scalar* get_sln_vector();
 
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
@@ -157,25 +160,22 @@ namespace Hermes
 
       static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
         PrecalcShapeset* pss, bool add_dir_lift = true);
-
+    protected:
+      
+      /// Internal.
+      virtual void set_active_element(Element* e);
+      
       /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
 
-      /// In case there is a space this solution belongs to, this returns the seq number of the space.
-      /// This is used to check if the pointer returned by get_space() points to the same space, or if the space has changed.
-      int get_space_seq();
-
-      /// In case this is valid it returns a pointer to the space this solution belongs to.
-      /// Only use when get_space() == get_space_seq();
-      Space<Scalar>* get_space();
-
-      /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
-      /// Only use when get_space() == get_space_seq();
-      Scalar* get_sln_vector();
-
       virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
+      
+      /// Enables or disables transformation of the solution derivatives (H1 case)
+      /// or values (vector (Hcurl) case). This means H2D_FN_DX_0 and H2D_FN_DY_0 or
+      /// H2D_FN_VAL_0 and H2D_FN_VAL_1 will or will not be returned premultiplied by the reference
+      /// mapping matrix. The default is enabled (true).
+      void enable_transform(bool enable = true);
 
-    protected:
       virtual void init();
 
       virtual void free();
@@ -236,6 +236,20 @@ namespace Hermes
 
       Element* e_last; ///< last visited element when getting solution values at specific points
 
+      friend class RefMap;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class OGProjection;
+      template<typename Scalar> friend class OGProjectionNOX;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class Func;
+      template<typename Scalar> friend class DiscontinuousFunc;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class NeighborSearch;
+      template<typename T> friend HERMES_API Func<T>* init_fn(Solution<T>*fu, const int order);
+      template<typename T> friend class RefinementSelectors::ProjBasedSelector;
+      template<typename T> friend class RefinementSelectors::H1ProjBasedSelector;
+      template<typename T> friend class RefinementSelectors::L2ProjBasedSelector;
+      friend class RefinementSelectors::HcurlProjBasedSelector;
     };
   }
 }

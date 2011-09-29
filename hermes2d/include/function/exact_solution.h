@@ -35,9 +35,10 @@ namespace Hermes
 
       /// Dimension of result - either 1 or 2.
       virtual unsigned int get_dimension() const = 0;
-
+    protected:
       /// For scaling of the solution.
       Scalar exact_multiplicator;
+      template<typename Scalar> friend class Solution;
     };
 
     /// These classes are abstract (pure virtual destructor).

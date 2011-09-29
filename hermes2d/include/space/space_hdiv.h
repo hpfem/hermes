@@ -37,9 +37,6 @@ namespace Hermes
       HdivSpace(Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      /// Common code for the constructors.
-      void init(Shapeset* shapeset, Ord2 p_init);
-
       virtual ~HdivSpace();
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
@@ -49,10 +46,14 @@ namespace Hermes
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
       virtual void set_shapeset(Shapeset* shapeset);
-
-      virtual SpaceType get_type() const { return HERMES_HDIV_SPACE; }
+      
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
     protected:
+      /// Common code for the constructors.
+      void init(Shapeset* shapeset, Ord2 p_init);
+
+      virtual SpaceType get_type() const { return HERMES_HDIV_SPACE; }
 
       virtual void assign_vertex_dofs() {}
       virtual void assign_edge_dofs();
@@ -65,8 +66,6 @@ namespace Hermes
       static double** hdiv_proj_mat;
       static double*  hdiv_chol_p;
       static int      hdiv_proj_ref;
-
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
       struct EdgeInfo
       {

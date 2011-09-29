@@ -36,10 +36,7 @@ namespace Hermes
       HcurlSpace(Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      /// Common code for the constructors.
-      void init(Shapeset* shapeset, Ord2 p_init);
-
-      virtual ~HcurlSpace();
+        virtual ~HcurlSpace();
 
       virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
 
@@ -47,18 +44,16 @@ namespace Hermes
 
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
-      virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
-
       virtual void set_shapeset(Shapeset* shapeset);
-
-      /// Sets element polynomial order and calls assign_dofs(). Intended for the user.
-      virtual void set_element_order(int id, int order);
-
-      /// Sets element polynomial order without calling assign_dofs(). For internal use.
-      virtual void set_element_order_internal(int id, int order);
-
+      
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
     protected:
+      
+      virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
+      
+      /// Common code for the constructors.
+      void init(Shapeset* shapeset, Ord2 p_init);
 
       virtual void assign_vertex_dofs() {}
       virtual void assign_edge_dofs();
@@ -70,8 +65,6 @@ namespace Hermes
       static double** hcurl_proj_mat;
       static double*  hcurl_chol_p;
       static int      hcurl_proj_ref;
-
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
       struct EdgeInfo
       {

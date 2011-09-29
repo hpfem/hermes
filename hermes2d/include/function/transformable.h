@@ -23,6 +23,11 @@ namespace Hermes
   namespace Hermes2D
   {
     class Element;
+    template<typename Scalar> class Func;
+    namespace Views
+    {
+      class Vectorizer;
+    }
 
     /// 2D transformation.
     struct Trf
@@ -30,6 +35,8 @@ namespace Hermes
       double2 m; /// The 2x2 diagonal transformation matrix.
       double2 t; /// Translation vector.
     };
+
+    struct Rect;
 
     /// A total number of valid transformation of a triangle to a sub-domain.
     static const int H2D_TRF_TRI_NUM = 4;
@@ -52,6 +59,16 @@ namespace Hermes
     class HERMES_API Transformable
     {
     public:
+      /// \return The element associated with the function being represented by the class.
+      Element* get_active_element() const;
+      
+      /// Sets the current transform at once as if it was created by multiple calls to push_transform().
+      /// \param idx [in] The number of the sub-element, as returned by get_transform().
+      void set_transform(uint64_t idx);
+
+      /// \return The current transform index.
+      uint64_t get_transform() const;
+    protected:
 
       Transformable();
 
@@ -63,9 +80,6 @@ namespace Hermes
       /// \param e [in] Element associated with the function being represented by the class.
       virtual void set_active_element(Element* e);
 
-      /// \return The element associated with the function being represented by the class.
-      Element* get_active_element() const;
-
       /// Multiplies the current transformation matrix on the right by a transformation to the
       /// specified son element and pushes it on top of the matrix stack. All integration
       /// points will then be transformed to this sub-element. This process can be repeated.
@@ -76,13 +90,6 @@ namespace Hermes
       /// the current transformation matrix. This returns the transform to the state before the
       /// last push_transform() was performed.
       virtual void pop_transform();
-
-      /// Sets the current transform at once as if it was created by multiple calls to push_transform().
-      /// \param idx [in] The number of the sub-element, as returned by get_transform().
-      void set_transform(uint64_t idx);
-
-      /// \return The current transform index.
-      uint64_t get_transform() const;
 
       /// Empties the stack, loads identity transform.
       void reset_transform();
@@ -100,8 +107,6 @@ namespace Hermes
       static void pop_transforms(std::set<Transformable *>& transformables);
       static const unsigned int H2D_MAX_TRN_LEVEL = 15;
 
-    protected:
-
       /// The active element.
       Element* element;
 
@@ -118,6 +123,18 @@ namespace Hermes
       Trf stack[21];
       /// Stack top.
       unsigned int top;
+
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class Func;
+      template<typename Scalar> friend class Function;
+      template<typename Scalar> friend class DiscontinuousFunc;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class NeighborSearch;
+      friend class CurvMap;
+      friend class Traverse;
+      friend class Views::Vectorizer;
+      friend void init_transforms(Transformable* fn, Rect* cr, Rect* er);
     };
   }
 }

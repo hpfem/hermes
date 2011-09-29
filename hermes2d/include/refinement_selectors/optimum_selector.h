@@ -77,7 +77,6 @@ namespace Hermes
         *  \param[in] enable True to enable, false to disable. */
         virtual void set_option(const SelOption option, bool enable);
 
-      public: //candidates
         /// A candidate.
         struct Cand {
           double error; ///< An error of this candidate.
@@ -318,7 +317,7 @@ namespace Hermes
       public:
         /// Destructor.
         virtual ~OptimumSelector() {};
-
+      protected:
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
         virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement); ///< Selects refinement.

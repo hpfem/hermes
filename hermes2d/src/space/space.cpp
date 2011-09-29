@@ -122,12 +122,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Shapeset* Space<Scalar>::get_shapeset() const
-    {
-      return shapeset;
-    }
-
-    template<typename Scalar>
     Mesh* Space<Scalar>::get_mesh() const
     {
       return mesh;
@@ -336,15 +330,6 @@ namespace Hermes
           ed->order = H2D_MAKE_QUAD_ORDER(elem_orders_[counter], elem_orders_[counter]);
         counter++;
       }
-    }
-
-    template<typename Scalar>
-    void Space<Scalar>::set_default_order(int tri_order, int quad_order)
-    {
-      _F_;
-      if (quad_order == -1) quad_order = H2D_MAKE_QUAD_ORDER(tri_order, tri_order);
-      default_tri_order = tri_order;
-      default_quad_order = quad_order;
     }
 
     template<typename Scalar>

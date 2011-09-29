@@ -102,7 +102,7 @@ namespace Hermes
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
         pss[i] = NULL;
-        Shapeset *shapeset = spaces[i]->get_shapeset();
+        Shapeset *shapeset = spaces[i]->shapeset;
         if (shapeset == NULL) error("Internal in DiscreteProblem<Scalar>::init_spaces().");
         PrecalcShapeset *p = new PrecalcShapeset(shapeset);
         if (p == NULL) error("New PrecalcShapeset could not be allocated in DiscreteProblem<Scalar>::init_spaces().");

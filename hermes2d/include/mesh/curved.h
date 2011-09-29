@@ -18,6 +18,7 @@
 
 #include "../hermes2d_common_defs.h"
 #include "../shapeset/shapeset_common.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -71,89 +72,102 @@ namespace Hermes
         coeffs = NULL;};
         CurvMap(CurvMap* cm);
         ~CurvMap();
-
-        /// this structure defines a curved mapping of an element; it has two
-        /// modes, depending on the value of 'toplevel'
-        bool toplevel;
-        union
+    private: 
+      /// this structure defines a curved mapping of an element; it has two
+      /// modes, depending on the value of 'toplevel'
+      bool toplevel;
+      union
+      {
+        // if toplevel=true, this structure belongs to a base mesh element
+        // and the array 'nurbs' points to (up to four) NURBS curved edges
+        Nurbs* nurbs[4];
+        struct
         {
-          // if toplevel=true, this structure belongs to a base mesh element
-          // and the array 'nurbs' points to (up to four) NURBS curved edges
-          Nurbs* nurbs[4];
-          struct
-          {
-            // if toplevel=false, this structure belongs to a refined element
-            // and 'parent' points to the base mesh element CurvMap structure;
-            Element* parent;
-            uint64_t part;
-          };
+          // if toplevel=false, this structure belongs to a refined element
+          // and 'parent' points to the base mesh element CurvMap structure;
+          Element* parent;
+          uint64_t part;
         };
+      };
 
-        /// current polynomial degree of the refmap approximation
-        int order;
+      /// current polynomial degree of the refmap approximation
+      int order;
 
-        /// finally here are the coefficients of the higher-order basis functions
-        /// that constitute the projected reference mapping:
-        int nc; // number of coefficients (todo: mozna spis polyn. rad zobrazeni)
-        double2* coeffs; // array of the coefficients
+      /// finally here are the coefficients of the higher-order basis functions
+      /// that constitute the projected reference mapping:
+      int nc; ///< number of coefficients
+      double2* coeffs; ///< array of the coefficients
 
-        /// this is called for every curvilinear element when it is created
-        /// or when it is necessary to re-calculate coefficients for another
-        /// order: 'e' is a pointer to the element to which this CurvMap
-        /// belongs to. First, old "coeffs" are removed if they are not NULL,
-        /// then new coefficients are projected.
-        void update_refmap_coeffs(Element* e);
+      /// this is called for every curvilinear element when it is created
+      /// or when it is necessary to re-calculate coefficients for another
+      /// order: 'e' is a pointer to the element to which this CurvMap
+      /// belongs to. First, old "coeffs" are removed if they are not NULL,
+      /// then new coefficients are projected.
+      void update_refmap_coeffs(Element* e);
 
-        void get_mid_edge_points(Element* e, double2* pt, int n);
+      void get_mid_edge_points(Element* e, double2* pt, int n);
 
-        static H1ShapesetJacobi ref_map_shapeset;
-        static PrecalcShapeset ref_map_pss;
+      static H1ShapesetJacobi ref_map_shapeset;
+      static PrecalcShapeset ref_map_pss;
 
-        static double** edge_proj_matrix;  ///< projection matrix for each edge is the same
-        static double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
-        static double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
+      static double** edge_proj_matrix;  ///< projection matrix for each edge is the same
+      static double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
+      static double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
 
-        static double* edge_p;  ///<  diagonal vector in cholesky factorization
-        static double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
-        static double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
+      static double* edge_p;  ///<  diagonal vector in cholesky factorization
+      static double* bubble_tri_p; ///<  diagonal vector in cholesky factorization
+      static double* bubble_quad_p; ///<  diagonal vector in cholesky factorization
 
-        static Quad1DStd quad1d;
-        static Quad2DStd quad2d; ///<  fixme: g_quad_2d_std
+      static Quad1DStd quad1d;
+      static Quad2DStd quad2d; ///<  fixme: g_quad_2d_std
 
-        static Trf ctm;
+      static Trf ctm;
 
-        /// Recursive calculation of the basis function N_i,k(int i, int k, double t, double* knot).
-        static double nurbs_basis_fn(int i, int k, double t, double* knot);
+      /// Recursive calculation of the basis function N_i,k(int i, int k, double t, double* knot).
+      static double nurbs_basis_fn(int i, int k, double t, double* knot);
 
-        // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
-        // as well as the unit normal and unit tangential vectors. This is done using
-        // the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
-        static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
-          double& y, double& n_x, double& n_y, double& t_x, double& t_y);
+      // Nurbs curve: t goes from -1 to 1, function returns x, y coordinates in plane
+      // as well as the unit normal and unit tangential vectors. This is done using
+      // the Wikipedia page http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline.
+      static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x, 
+        double& y, double& n_x, double& n_y, double& t_x, double& t_y);
 
-        static const double2 ref_vert[2][4];
+      static const double2 ref_vert[2][4];
 
-        /// Subtraction of straight edge and nurbs curve.
-        static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
-        static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y);
-        static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
-          double& x, double& y);
+      /// Subtraction of straight edge and nurbs curve.
+      static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);
+      static void calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y);
+      static void calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
+        double& x, double& y);
 
-        static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f);
+      static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f);
 
-        static void precalculate_cholesky_projection_matrix_edge();
-        static double** calculate_bubble_projection_matrix(int nb, int* indices);
-        static void precalculate_cholesky_projection_matrices_bubble();
+      static void precalculate_cholesky_projection_matrix_edge();
+      static double** calculate_bubble_projection_matrix(int nb, int* indices);
+      static void precalculate_cholesky_projection_matrices_bubble();
 
-        static void edge_coord(Element* e, int edge, double t, double2& x, double2& v);
-        static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj);
+      static void edge_coord(Element* e, int edge, double t, double2& x, double2& v);
+      static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj);
 
-        static void old_projection(Element* e, int order, double2* proj, double* old[2]);
-        static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
+      static void old_projection(Element* e, int order, double2* proj, double* old[2]);
+      static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
 
-        static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
+      static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
 
-        static bool warning_issued;
+      static bool warning_issued;
+      template<typename Scalar> friend class Space;
+      template<typename Scalar> friend class H1Space;
+      template<typename Scalar> friend class L2Space;
+      template<typename Scalar> friend class HcurlSpace;
+      template<typename Scalar> friend class HdivSpace;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      friend class RefMap;
+      friend class Mesh;
+      friend class MeshReader;
+      friend class MeshReaderH2D;
+      friend class MeshReaderH2DXML;
+      friend CurvMap* create_son_curv_map(Element* e, int son);
     };
   }
 }

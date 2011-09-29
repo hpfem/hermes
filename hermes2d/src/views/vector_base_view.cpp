@@ -38,7 +38,7 @@ namespace Hermes
       void VectorBaseView<Scalar>::show(Space<Scalar>* space)
       {
         free();
-        pss = new PrecalcShapeset(space->get_shapeset());
+        pss = new PrecalcShapeset(space->shapeset);
         sln = new Solution<Scalar>();
         this->space = space;
         ndof = space->get_num_dofs();

@@ -19,6 +19,11 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    namespace Views{
+      class Orderizer;
+      class Linearizer;
+      class Vectorizer;
+    };
     /// \brief Determines the position on an element surface (edge in 2D and Face in 3D).
     /// \details Used for the retrieval of boundary condition values.
     /// \details Same in H2D and H3D.
@@ -54,7 +59,7 @@ namespace Hermes
     ///
     class HERMES_API Traverse
     {
-    public:
+    private:
 
       void begin(int n, Mesh** meshes, Transformable** fn = NULL);
       void finish();
@@ -63,9 +68,7 @@ namespace Hermes
       inline Element*  get_base() const { return base; }
 
       UniData** construct_union_mesh(Mesh* unimesh);
-
-    private:
-
+      
       int num;
       Mesh** meshes;
       Transformable** fn;
@@ -88,7 +91,15 @@ namespace Hermes
       uint64_t init_idx(Rect* cr, Rect* er);
 
       Mesh* unimesh;
-
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class Filter;
+      template<typename Scalar> friend class SimpleFilter;
+      template<typename Scalar> friend class Global;
+      friend class Views::Orderizer;
+      friend class Views::Vectorizer;
+      friend class Views::Linearizer;
     };
   }
 }

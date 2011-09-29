@@ -32,7 +32,7 @@ namespace Hermes
   namespace Hermes2D
   {
     /** \defgroup g_adapt Adaptivity
-    *  \brief Adaptivity provides framework for modyfying elements in order to decrease errors of the solution.
+    *  \brief Adaptivity provides framework for modifying elements in order to decrease errors of the solution.
     *
     *  Adaptivity classes calculate error of every element.
     *  An error of an element is calculated either by comparing a
@@ -44,7 +44,6 @@ namespace Hermes
     *  is proposed through refinement selectors, see \ref g_selectors.
     *
     */
-
 
     /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity. \ingroup g_adapt
     /** The class provides basic functionality necessary to adaptively refine elements.
@@ -189,12 +188,12 @@ namespace Hermes
       *  \param[in] An element index.
       *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
       double get_element_error_squared(int component, int id) const;
-
+    protected:
       /// Returns regular queue of elements
       /** \return A regular queue. */
       const Hermes::vector<ElementReference>& get_regular_queue() const;
 
-      /// Apply a single refienement.
+      /// Apply a single refinement.
       /** \param[in] A refinement to apply. */
       void apply_refinement(const ElementToRefine& elem_ref);
 
@@ -206,7 +205,6 @@ namespace Hermes
       /** \return A vector of refinements generated during the last execution of the method adapt(). The returned vector might change or become invalid after the next execution of the method adadpt(). */
       const std::vector<ElementToRefine>& get_last_refinements() const; ///< Returns last refinements.
 
-    protected:
       std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
       Hermes::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
@@ -215,7 +213,7 @@ namespace Hermes
       /** Overload this method to omit some elements from processing.
       *  \param[in] inx_element An index of an element in the regular queue. -1 if the element cames from the priority queue.
       *  \param[in] mesh A mesh that contains the element.
-      *  \parar[in] element A pointer to the element.
+      *  \param[in] element A pointer to the element.
       *  \return True if the element should be skipped. */
       virtual bool should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) const;
 
@@ -231,7 +229,7 @@ namespace Hermes
       virtual bool can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const;
 
       /// Fixes refinements of a mesh which is shared among multiple components of a multimesh.
-      /** If a mesh is shared among components, it has to be refined similarly in order to avoid incosistency.
+      /** If a mesh is shared among components, it has to be refined similarly in order to avoid inconsistency.
       *  \param[in] meshes An array of meshes of components.
       *  \param[in] elems_to_refine A vector of refinements.
       *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
@@ -239,8 +237,8 @@ namespace Hermes
       void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, int** idx,
         Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
 
-      /// Enforces the same order to an element of a mesh which is shared among multiple compoenets.
-      /** \param[in] meshes An arrat of meshes of components. */
+      /// Enforces the same order to an element of a mesh which is shared among multiple components.
+      /** \param[in] meshes An array of meshes of components. */
       void homogenize_shared_mesh_orders(Mesh** meshes);
 
       int num;                              ///< Number of solution components (as in wf->neq).

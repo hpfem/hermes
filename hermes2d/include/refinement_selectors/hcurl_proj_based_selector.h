@@ -84,7 +84,6 @@ namespace Hermes
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
         virtual double evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj);
 
-      protected: //defaults
         static HcurlShapeset default_shapeset; ///< A default shapeset.
       };
     }
