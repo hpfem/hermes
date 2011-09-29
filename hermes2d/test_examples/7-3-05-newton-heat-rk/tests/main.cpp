@@ -93,9 +93,14 @@ int main(int argc, char* argv[])
          current_time, time_step, bt.get_size());
     bool freeze_jacobian = true;
     bool verbose = true;
-    if (!runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
-                                  sln_time_new, freeze_jacobian, verbose))
-      error("Runge-Kutta time step failed, try to decrease time step size.");
+    try
+    {
+      runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
+                                  sln_time_new, freeze_jacobian, verbose);
+    }catch(Exceptions::Exception& e){
+      e.printMsg();
+      error("Runge-Kutta time step failed");
+    }
 
     // Copy solution for the new time step.
     sln_time_prev->copy(sln_time_new);
