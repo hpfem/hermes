@@ -229,6 +229,10 @@ namespace Hermes
 
       void check_order(Quad2D* quad, int order);
 
+      static void check_params(int component, Node* cur_node, int num_components);
+    
+      static void check_table(int component, Node* cur_node, int n, const char* msg);
+
       static int idx2mask[6][2];  ///< index to mask table
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class RefinementSelectors::H1ProjBasedSelector;
@@ -243,8 +247,6 @@ namespace Hermes
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class Global;
       friend class CurvMap;
-      friend void check_params(int component, typename Function<Scalar>::Node* cur_node, int num_components);
-      friend void check_table(int component, typename Function<Scalar>::Node* cur_node, int n, const char* msg); 
 
       template<typename T> friend class Func;
       template<typename T> friend class Geom;
