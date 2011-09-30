@@ -678,10 +678,6 @@ namespace Hermes
           for(int i = 0; i < num_sons; i++)
             tgt_quad_orders[i] = quad_order;
         }
-#ifdef _DEBUG
-        for(int i = num_sons; i < H2D_MAX_ELEMENT_SONS; i++)
-          tgt_quad_orders[i] = 0;
-#endif
       }
 
       template<typename Scalar>

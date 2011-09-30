@@ -174,6 +174,7 @@ namespace Hermes
       int edge_marker;       ///< Edge marker (for surface forms only).
       int id;           ///< ID number of the element (undefined for edge).
       T diam;           ///< Element diameter (for edge, diameter of the parent element).
+      T area;           ///< Element area (for edge, area of the parent element).
       T *x, *y;         ///< Coordinates [in physical domain].
       T *nx, *ny;       ///< Normals [in physical domain] (locally oriented
       ///< to point outside the element). Only for edge

@@ -399,7 +399,6 @@ namespace Hermes
           if (num_shapes > 0)
           {
             bool use_ortho = ortho_svals_available && order_perm.get_order_h() == order_perm.get_order_v();
-            //error_if(!use_ortho, "Non-ortho"); //DEBUG
 
             //select a cache
             Hermes::vector< ValueCacheItem<Scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
@@ -408,7 +407,6 @@ namespace Hermes
             //calculate projection matrix iff no ortho is used
             if (!use_ortho)
             {
-              //error_if(!use_ortho, "Non-ortho"); //DEBUG
               if (proj_matrices[order_h][order_v] == NULL)
                 proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes);
               copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
@@ -446,7 +444,6 @@ namespace Hermes
             //solve iff no ortho is used
             if (!use_ortho)
             {
-              //error_if(!use_ortho, "Non-ortho"); //DEBUG
               ludcmp(proj_matrix, num_shapes, indx, d);
               lubksb<Scalar>(proj_matrix, num_shapes, indx, right_side);
             }
