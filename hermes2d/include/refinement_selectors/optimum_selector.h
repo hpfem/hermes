@@ -17,7 +17,6 @@
 #define __H2D_REFINEMENT_OPTIMUM_SELECTOR_H
 
 #include <ostream>
-#include "../range.h"
 #include "order_permutator.h"
 #include "selector.h"
 
