@@ -27,8 +27,10 @@ namespace Hermes
     class HERMES_API H1ShapesetOrtho : public Shapeset
     {
     public: H1ShapesetOrtho();
-            virtual int get_id() const { return 0; }
-            virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    private:
+      virtual int get_id() const { return 0; }
+      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
 
@@ -36,8 +38,10 @@ namespace Hermes
     class HERMES_API H1ShapesetJacobi : public Shapeset
     {
     public: H1ShapesetJacobi();
-            virtual int get_id() const { return 1; }
-            virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    private:
+      virtual int get_id() const { return 1; }
+      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
 
@@ -45,8 +49,10 @@ namespace Hermes
     class HERMES_API H1ShapesetEigen : public Shapeset
     {
     public: H1ShapesetEigen();
-            virtual int get_id() const { return 2; }
-            virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+    private:
+      virtual int get_id() const { return 2; }
+      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
 

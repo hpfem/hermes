@@ -812,7 +812,7 @@ namespace Hermes
         ninitial = this->get_max_element_id();
     }
 
-    static int rtb_criterion(Element* e)
+    int rtb_criterion(Element* e)
     {
       unsigned int i;
       for (i = 0; i < e->get_num_surf(); i++)

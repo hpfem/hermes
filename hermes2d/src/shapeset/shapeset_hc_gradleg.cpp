@@ -15808,7 +15808,7 @@ namespace Hermes
 
 
 
-    static void check_gradleg_tri(Shapeset* shapeset)
+    void check_gradleg_tri(Shapeset* shapeset)
     {
       shapeset->set_mode(HERMES_MODE_TRIANGLE);
       for (int i = 1; i <= 10; i++)

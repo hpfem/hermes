@@ -1271,10 +1271,10 @@ namespace Hermes
     }
 
 
-    static inline bool is_in_ref_domain(Element* e, double xi1, double xi2)
+    static bool is_in_ref_domain(Element* e, double xi1, double xi2)
     {
       const double TOL = 1e-11;
-      if (e->is_triangle())
+      if(e->get_num_surf() == 3)
         return (xi1 + xi2 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 + 1.0 >= -TOL);
       else
         return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);

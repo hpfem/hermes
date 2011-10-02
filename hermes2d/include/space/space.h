@@ -183,6 +183,8 @@ namespace Hermes
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
     protected:
+      static Node* get_mid_edge_vertex_node(Element* e, int i, int j);
+
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
       void distribute_orders(Mesh* mesh, int* parents);
 

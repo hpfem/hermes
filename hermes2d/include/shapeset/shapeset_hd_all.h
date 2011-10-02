@@ -26,8 +26,10 @@ namespace Hermes
     class HERMES_API HdivShapesetLegendre : public Shapeset
     {
     public: HdivShapesetLegendre();
-            virtual int get_id() const { return 20; }
-            virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
+    protected:
+      virtual int get_id() const { return 20; }
+      virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
+      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
 

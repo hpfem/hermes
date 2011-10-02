@@ -201,11 +201,9 @@ namespace Hermes
       friend class Views::Orderizer;
       friend class Views::Vectorizer;
       friend bool is_twin_nurbs(Element* e, int i);
-      friend bool is_in_ref_domain(Element* e, double xi1, double xi2);
       friend int rtb_criterion(Element* e);
       friend int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons);
       friend CurvMap* create_son_curv_map(Element* e, int son);
-      friend Node* get_mid_edge_vertex_node(Element* e, int i, int j);
     };
 
     /// \brief Represents a finite element mesh.

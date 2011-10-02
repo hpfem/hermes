@@ -34,6 +34,8 @@ namespace Hermes
       "Neighboring elements are not defined and so are not function traces on their interface. "
       "Did you forget setting H2D_ANY_INNER_EDGE in add_matrix/vector_form?";
 
+    template<typename Scalar> class OGProjection;
+
     /// Calculated function values (from the class Function) on an element for assembling.
     template<typename T>
     class HERMES_API Func
@@ -99,8 +101,8 @@ namespace Hermes
 
       friend Func<Hermes::Ord>* init_fn_ord(const int order);
       friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-      template<typename T> friend Func<T>* init_fn(MeshFunction<T>*fu, const int order);
-      template<typename T> friend Func<T>* init_fn(Solution<T>*fu, const int order);
+      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order);
+      template<typename Scalar> friend Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order);
 
       template<typename Scalar> friend class DiscontinuousFunc;
       template<typename Scalar> friend class ExtData;
@@ -108,7 +110,7 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class BasicKellyAdapt;
-      template<typename Scalar> friend class OGProjection;
+      template<typename Scalar> friend class Hermes::Hermes2D::OGProjection;
       friend class ErrorEstimatorFormKelly;
     };
 
@@ -178,10 +180,10 @@ namespace Hermes
       bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
       ///< (when retrieving values on an edge that is oriented differently in both elements).
       static T zero;              ///< Zero value used for the zero-extension.
-      template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class KellyTypeAdapt;
-      template<typename T> friend class Adapt;
-      template<typename T> friend class NeighborSearch;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class NeighborSearch;
     };
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
@@ -258,9 +260,9 @@ namespace Hermes
       virtual void free_ord();
 
       int neighb_marker;
-      template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class KellyTypeAdapt;
-      template<typename T> friend class Adapt;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class Adapt;
     };
 
     /// Init element geometry for calculating the integration order.

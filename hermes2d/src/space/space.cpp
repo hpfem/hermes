@@ -74,6 +74,15 @@ namespace Hermes
       if (nsize) { ::free(ndata); ndata = NULL; }
       if (esize) { ::free(edata); edata = NULL; }
     }
+    
+    template<typename Scalar>
+    Node* Space<Scalar>::get_mid_edge_vertex_node(Element* e, int i, int j)
+    {
+      if (e->is_triangle()) return e->sons[3]->vn[e->prev_vert(i)];
+      else if (e->sons[2] == NULL) return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
+      else if (e->sons[0] == NULL) return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
+      else return e->sons[i]->vn[j];
+    }
 
     template<typename Scalar>
     void Space<Scalar>::resize_tables()

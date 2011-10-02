@@ -328,18 +328,6 @@ namespace Hermes
       return proj;
     }
 
-
-
-    //// hanging nodes /////////////////////////////////////////////////////////////////////////////////
-
-    static Node* get_mid_edge_vertex_node(Element* e, int i, int j)
-    {
-      if (e->is_triangle()) return e->sons[3]->vn[e->prev_vert(i)];
-      else if (e->sons[2] == NULL) return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
-      else if (e->sons[0] == NULL) return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
-      else return e->sons[i]->vn[j];
-    }
-
     template<typename Scalar>
     void HdivSpace<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
     {
@@ -372,7 +360,7 @@ namespace Hermes
           if (ei[i] == NULL)
           {
             j = e->next_vert(i);
-            Node* mid_vn = get_mid_edge_vertex_node(e, i, j);
+            Node* mid_vn = this->get_mid_edge_vertex_node(e, i, j);
             if (mid_vn != NULL && mid_vn->is_constrained_vertex())
             {
               Node* mid_en = this->mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);

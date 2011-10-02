@@ -31,6 +31,18 @@ namespace Hermes
       H2D_FEI_DXY = 5 ///< Index of df/dxdy.
     };
 
+    namespace RefinementSelectors
+    {
+      template<typename Scalar> class Selector;
+      template<typename Scalar> class POnlySelector;
+      template<typename Scalar> class HOnlySelector;
+      template<typename Scalar> class OptimumSelector;
+      template<typename Scalar> class ProjBasedSelector;
+      template<typename Scalar> class H1ProjBasedSelector;
+      template<typename Scalar> class L2ProjBasedSelector;
+      class HcurlProjBasedSelector;
+    }
+
     /// \brief Defines a set of shape functions.
     ///
     /// This class stores mainly the definitions of the polynomials for all shape functions,
@@ -67,7 +79,16 @@ namespace Hermes
     {
     public:
       ~Shapeset();
+      
+      /// Shape-function function type. Internal.
+      typedef double (*shape_fn_t)(double, double);
+      
+      /// Returns the polynomial degree of the specified shape function.
+      /// If on quads, it returns encoded orders. The orders has to be decoded through macros
+      /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
+      int get_order(int index) const;
 
+    protected:
       /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.
       void set_mode(int mode);
 
@@ -101,11 +122,6 @@ namespace Hermes
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
       int get_constrained_edge_index(int edge, int order, int ori, int part) const;
 
-      /// Returns the polynomial degree of the specified shape function.
-      /// If on quads, it returns encoded orders. The orders has to be decoded through macros
-      /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
-      int get_order(int index) const;
-
       /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
       /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
       double get_value(int n, int index, double x, double y, int component);
@@ -120,16 +136,11 @@ namespace Hermes
       /// Returns the coordinates of the reference domain vertices.
       double2* get_ref_vertex(int vertex);
 
-      /// Shape-function function type. Internal.
-      typedef double (*shape_fn_t)(double, double);
-
       /// Returns shapeset identifier. Internal.
       virtual int get_id() const = 0;
 
       /// Returns space type.
       virtual SpaceType get_space_type() const = 0;
-
-    protected:
 
       int mode;
       int nvert;
@@ -190,6 +201,15 @@ namespace Hermes
       /// Constructs the linear combination of edge functions, forming a constrained edge function.
       ///
       double get_constrained_value(int n, int index, double x, double y, int component);
+
+      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      friend void check_leg_tri(Shapeset* shapeset);
+      friend void check_gradleg_tri(Shapeset* shapeset);
+      template<typename Scalar> friend class Space;
+      template<typename Scalar> friend class H1Space;
+      template<typename Scalar> friend class L2Space;
+      template<typename Scalar> friend class HcurlSpace;
+      template<typename Scalar> friend class HdivSpace;
     };
   }
 }

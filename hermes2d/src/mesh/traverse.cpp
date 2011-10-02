@@ -40,7 +40,7 @@ namespace Hermes
     };
 
 
-    static int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
+    int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
     {
       uint64_t hmid = (er->l + er->r) >> 1;
       uint64_t vmid = (er->t + er->b) >> 1;
