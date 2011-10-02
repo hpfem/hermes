@@ -13,19 +13,7 @@ project(hermes_common)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/python_API)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/third_party_codes/trilinos-teuchos)
-
-	if (WITH_PYTHON)
-		set ( PYTHON_SOURCES
-				src/python_API/python_api.cpp
-				src/python_API/python_engine.cpp
-			)
-    set ( PYTHON_INCLUDES
-				include/python_API/python_api.h
-				include/python_API/python_engine_api.h
-			)
-	endif (WITH_PYTHON)
 
 	#
 	# Source files for the Hermes_common library.
@@ -63,8 +51,6 @@ project(hermes_common)
 		src/solvers/precond_ifpack.cpp
 	 # src/solvers/eigensolver.cpp
 	 # src/solvers/eigen.cpp
-		
-		${PYTHON_SOURCES}
 	)
 
   set(HEADERS
@@ -80,9 +66,7 @@ project(hermes_common)
 		include/hermes_function.h
 		include/exceptions.h
     include/range.h
-		
 		include/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp
-		
 		include/solvers/dp_interface.h
 		include/solvers/linear_solver.h
 		include/solvers/nonlinear_solver.h
@@ -96,8 +80,6 @@ project(hermes_common)
 		include/solvers/umfpack_solver.h
 		include/solvers/precond_ml.h
 		include/solvers/precond_ifpack.h
-		
-		${PYTHON_INCLUDES}
 	)
   
 	#
@@ -107,11 +89,6 @@ project(hermes_common)
 			enable_testing()
 			add_subdirectory(tests)
 	endif(HERMES_COMMON_WITH_TESTS)
-
-	if(WITH_PYTHON)
-			set(CYTHON_INCLUDE_DIRECTORIES -I${CMAKE_CURRENT_SOURCE_DIR})
-			add_subdirectory(hermes_common_python)
-	endif(WITH_PYTHON)
 
 	# Create file with preprocessor definitions exposing the build settings to the source code.
 	configure_file(
@@ -123,17 +100,6 @@ project(hermes_common)
 	# Build and install the library.
 	#
 	include(BuildAndInstallScripts)
-
-	# This is needed e.g. for eigenvalue problems.
-	# FIXME: Find which projects need it and enclose their CMake scripts in
-	# if(WITH_PYTHON) ... endif(WITH_PYTHON). The following should then be not needed,
-	# as it has been already done in ../CMakeLists.txt
-	############ WORKING ON REPLACING THIS BY A C++ EIGENPROBLEM SOLVER.
-	#if(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
-	#    find_package(Python REQUIRED)
-	#    find_package(NumPy REQUIRED)
-	#    include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-	#endif(NOT PYTHON_FOUND OR NOT NUMPY_FOUND)
 
 	# Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
 	# and set its build properties (compile and link flags, installation directories).
@@ -159,7 +125,6 @@ project(hermes_common)
 				${PTHREAD_LIBRARY} ${MPI_LIBRARIES} ${SCALAPACK_LIBRARIES}
 				${CLAPACK_LIBRARY} ${BLAS_LIBRARY} ${F2C_LIBRARY}
 				${ADDITIONAL_LIBS}
-				${PYTHON_LIBRARY}
 		)
 
 		if(NOT MSVC)
@@ -201,9 +166,7 @@ project(hermes_common)
 
 	file(GLOB INC_COMMON    "include/*.h")
 	file(GLOB INC_SOLVER    "include/solvers/*.h")
-	file(GLOB INC_PYTHON    "include/python_API/*.h")
 	file(GLOB INC_TP        "include/third_party_codes/trilinos-teuchos/*.h*")
 	install(FILES ${INC_COMMON}    DESTINATION ${TARGET_ROOT}/include/hermes_common)
 	install(FILES ${INC_SOLVER}    DESTINATION ${TARGET_ROOT}/include/hermes_common/solvers)
-	install(FILES ${INC_PYTHON}    DESTINATION ${TARGET_ROOT}/include/hermes_common/python_API)
 	install(FILES ${INC_TP}        DESTINATION ${TARGET_ROOT}/include/hermes_common/third_party_codes/trilinos-teuchos)

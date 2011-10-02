@@ -15,18 +15,6 @@ permits.
 disks which came with your Mac. XCode contains the GNU compilers, make 
 and many other things which are required to build Hermes.
 
-**Step 2**: Download and install MacPython version 2.6 using the disk image for 
-your version of OSX at http://www.python.org/download/releases/2.6.5/. 
-You will already have a version of Python which gets installed with 
-your operating system, but it will probably be out of date. Once this 
-is installed, go to the Python 2.6 directory which will be in your 
-Applications folder and double click the 'Update Shell 
-Profile.command' script to run it. This will update your system to use 
-the latest version of Python. We also found the Chris Fonnesbeck's
-`SciPy Superpack for Python 2.6 (64-bit) <http://stronginference.com/scipy-superpack/>`_ very useful.
-If you are on a 64-bit machine, you can force 64-bit version of Python by running
-"arch -x86_64 /usr/bin/python".
-
 **Step 3**: Install the following libraries and applications: Suitesparse, 
 glew, cmake, git. If you don't already have these on your Mac, then 
 the easiest way to get them is to use MacPorts (which is an 
@@ -88,8 +76,7 @@ You can turn on and off various components to build, just create the CMake.vars
 file and add the following::
 
     set(WITH_EXAMPLES NO)
-    set(WITH_PYTHON YES)
-
+    
 (and any other option that you would like to change, see CMakeLists.txt for the
 whole list).
 

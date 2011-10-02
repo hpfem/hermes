@@ -82,7 +82,6 @@ project(hermes2d)
 	#
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/include)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/include/solvers)
-	include_directories(${CMAKE_HOME_DIRECTORY}/hermes_common/include/python_API)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include/form)
@@ -356,7 +355,6 @@ project(hermes2d)
 			${XERCES_LIBRARY}
 			${LAPACK_LIBRARY}
 			${CLAPACK_LIBRARY} ${BLAS_LIBRARY}
-			${PYTHON_LIBRARY}
 		)
 	endmacro(BUILD_2D_LIB)
 

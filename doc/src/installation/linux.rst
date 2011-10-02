@@ -9,13 +9,12 @@ If you are using a Debian-based system, install the required libraries first:
 .. sourcecode::
     .
 
-    apt-get install git git-core cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev python-dev python-numpy python-scipy cython python-matplotlib libxerces-c-dev xsdcxx
+    apt-get install git git-core cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev libxerces-c-dev xsdcxx
 
 .. latexcode::
     .
 
     apt-get install cmake g++ gfortran freeglut3-dev libsuitesparse-dev libglew1.5-dev 
-    python-dev python-numpy python-scipy cython python-matplotlib
 
 (Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
 least 0.98.5.2 or higher.)
@@ -90,7 +89,6 @@ You can turn on and off various components to build, just create the CMake.vars
 file and add the following::
 
     set(WITH_EXAMPLES NO)
-    set(WITH_PYTHON YES)
 
 (and any other option that you would like to change, see CMakeLists.txt for the
 whole list).

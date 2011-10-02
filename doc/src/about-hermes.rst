@@ -2,7 +2,7 @@
 About Hermes
 ============
 
-Hermes is a free C++/Python library for rapid development of
+Hermes is a free C++ library for rapid development of
 adaptive *hp*-FEM and *hp*-DG solvers for partial differential equations (PDE)
 and multiphysics PDE systems. The development team includes the 
 `hp-FEM group <http://hpfem.org/>`_ at the `University of Nevada, Reno <http://www.unr.edu>`_ 

@@ -10,8 +10,6 @@
 #cmakedefine WITH_EXODUSII
 #cmakedefine WITH_MPI
 
-#cmakedefine WITH_PYTHON
-
 // stacktrace
 #cmakedefine HAVE_TEUCHOS_LINK
 #cmakedefine HAVE_TEUCHOS_BFD

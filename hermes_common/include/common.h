@@ -66,8 +66,6 @@
 #include "range.h"
 #include "qsort.h"
 #include "ord.h"
-#include "python_API/python_api.h"
-#include "python_API/python_engine_api.h"
 
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
@@ -283,10 +281,6 @@ namespace Hermes
 
 #endif
   }
-  /* python support */
-  /// Throws an exception std::runtime_error. Used by Python wrappers.
-  /** \param[in] text A text (a cause) of the exception. */
-  extern HERMES_API void throw_exception(char *text);
 
   // Common return values for tests.
   #define TEST_SUCCESS    0

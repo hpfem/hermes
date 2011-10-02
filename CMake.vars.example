@@ -17,9 +17,6 @@ else()
   #set(CLAPACK_ROOT "/usr/lib/")
 endif()
 
-# Python.
-set(WITH_PYTHON NO)
-
 # Trilinos
 if (WIN32) 
   set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")

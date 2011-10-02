@@ -33,8 +33,6 @@ project(hermes)
 	# Reporting and logging:
 		set(REPORT_WITH_LOGO        YES)  #logo will be shown
 		set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
-		set(REPORT_RUNTIME_CONTROL  NO)   #reporting will be controlled by preprocessor directives.
-																			#The runtime control is intended just for Python wrappers.
 		set(REPORT_ALL              NO)   #do not report all events, just selected ones
 		set(REPORT_WARNING          YES)  #warnings will be reported
 		set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
@@ -110,20 +108,12 @@ project(hermes)
 		# set(MPI_LIBRARIES         -lmpi)
 		# set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
-	# Enable or disable Python.
-	# Python wrappers are disabled.
-		set(WITH_PYTHON             NO)
-		
 	### END DEFAULT CONFIGURATION ###
 		
 	set(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
 	set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR})
 	set(HERMES_COMMON_LIB  hermes_common)
 		
-	# Set overrides:
-	if(WITH_PYTHON)
-		set(REPORT_RUNTIME_CONTROL YES) #required by python wrappers
-	endif(WITH_PYTHON)
 	### end DEFAULT CONFIGURATION ###
 
 	#ADDED BY COLMAN
@@ -236,14 +226,6 @@ project(hermes)
 		find_package(XSD REQUIRED)
 		find_package(XERCES REQUIRED)
 		
-		# Python
-		if(WITH_PYTHON)
-			find_package(Python REQUIRED)
-			find_package(NumPy REQUIRED)
-			find_package(Cython REQUIRED)
-			include_directories(${PYTHON_INCLUDE_PATH} ${NUMPY_INCLUDE_PATH})
-		endif(WITH_PYTHON)
-
 		# Solvers.
 		if(WITH_UMFPACK)
 			find_package(UMFPACK REQUIRED)
@@ -359,7 +341,6 @@ project(hermes)
 	#~~~~~~~~
 	message("\nConfiguration results")
 	message("---------------------")
-	message("Build with Python: ${WITH_PYTHON}")
 	message("Build with UMFPACK: ${WITH_UMFPACK}")
 	message("Build with PETSC: ${WITH_PETSC}")
 	message("Build with MUMPS: ${WITH_MUMPS}")
@@ -373,16 +354,8 @@ project(hermes)
 	else(HAVE_TEUCHOS_STACKTRACE)
 			message("Print Teuchos stacktrace on segfault: NO")
 	endif(HAVE_TEUCHOS_STACKTRACE)
-	if(REPORT_RUNTIME_CONTROL)
-		if(WITH_PYTHON)
-			message("Report controlled by: RUNTIME and PREP. DIRECTIVES (enforced by Python)")
-		else(WITH_PYTHON)
-			message("Report controlled by: RUNTIME and PREP. DIRECTIVES (enforced by Python)")
-		endif(WITH_PYTHON)
-	else(REPORT_RUNTIME_CONTROL)
-		message("Report controlled by: PREPROCESSOR DIRECTIVES")
-	endif(REPORT_RUNTIME_CONTROL)
-	message("Report with logo: ${REPORT_WITH_LOGO}")
+	
+  message("Report with logo: ${REPORT_WITH_LOGO}")
 	if(REPORT_ALL)
 		message("Report all events: YES")
 	else(REPORT_ALL)

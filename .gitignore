@@ -65,9 +65,6 @@ Debug/
 # kdevelop project files
 *.kdev*
 
-# Python stuff
-!python/_hermes_common.so
-
 # Documentation generated
 *.html
 *.eps

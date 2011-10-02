@@ -1,3 +1,0 @@
-LINK=`python -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LINKFORSHARED')"`
-gcc -g -I/usr/include/python2.6 -c -o a.o a.c && \
-gcc -g $LINK -o a a.o /usr/lib/libpython2.6.a -lz -lpthread -ldl -lutil -lm
