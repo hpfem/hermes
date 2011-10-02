@@ -176,6 +176,13 @@ namespace Hermes
       *  \param[in] thr A stop condition relative error threshold. */
       void unrefine(double thr);
 
+      /// Returns a squared error of an element.
+      /** \param[in] A component index.
+      *  \param[in] An element index.
+      *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
+      double get_element_error_squared(int component, int id) const;
+    protected:
+      
       /// A reference to an element.
       struct ElementReference {
         int id; ///< An element ID. Invalid if below 0.
@@ -183,12 +190,6 @@ namespace Hermes
         ElementReference(int id = -1, int comp = -1) : id(id), comp(comp) {}; ///< Constructor. It creates an invalid element reference.
       };
 
-      /// Returns a squared error of an element.
-      /** \param[in] A component index.
-      *  \param[in] An element index.
-      *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
-      double get_element_error_squared(int component, int id) const;
-    protected:
       /// Returns regular queue of elements
       /** \return A regular queue. */
       const Hermes::vector<ElementReference>& get_regular_queue() const;

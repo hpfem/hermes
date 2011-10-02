@@ -29,7 +29,25 @@ namespace Hermes
     template<typename Scalar> class Space;
     template<typename Scalar> class KellyTypeAdapt;
     struct MItem;
+    struct Rect;
     extern unsigned g_mesh_seq;
+
+    namespace RefinementSelectors
+    {
+      template<typename Scalar> class Selector;
+      template<typename Scalar> class POnlySelector;
+      template<typename Scalar> class HOnlySelector;
+      template<typename Scalar> class OptimumSelector;
+      template<typename Scalar> class ProjBasedSelector;
+      template<typename Scalar> class H1ProjBasedSelector;
+      template<typename Scalar> class L2ProjBasedSelector;
+      class HcurlProjBasedSelector;
+    }
+
+    namespace Views
+    {
+      class MeshView;
+    }
 
     /// \brief Stores one node of a mesh.
     ///
@@ -99,11 +117,18 @@ namespace Hermes
       int id;            ///< element id number
       unsigned active:1; ///< 0 = active, no sons; 1 = inactive (refined), has sons
       unsigned used:1;   ///< array item usage flag
-      int marker;        ///< element marker
-      int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
       Element* parent;   ///< pointer to the parent element for the current son
       bool visited;      ///< true if the element has been visited during assembling
+      int get_num_surf();
+      
+      /// Calculates the area of the element. For curved elements, this is only
+      /// an approximation: the curvature is not accounted for.
+      double get_area() const;
 
+      /// Returns the length of the longest edge for triangles, and the
+      /// length of the longer diagonal for quads. Ignores element curvature.
+      double get_diameter() const;
+      
       Node* vn[4];   ///< vertex node pointers
       union
       {
@@ -111,13 +136,18 @@ namespace Hermes
         Element* sons[4]; ///< son elements (up to four)
       };
 
+      int marker;        ///< element marker
       CurvMap* cm; ///< curved mapping, NULL if not curvilinear
+
+      // returns the edge orientation. This works for the unconstrained edges.
+      int get_edge_orientation(int ie) const;
+      int  get_mode() const;
+    protected:
+      int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
 
       bool is_triangle() const;
       bool is_quad() const;
       bool is_curved() const;
-      int  get_mode() const;
-      int get_num_surf();
 
       // helper functions to obtain the index of the next or previous vertex/edge
       int next_vert(int i) const;
@@ -131,23 +161,51 @@ namespace Hermes
       /// NULL if it does not exist or is across an irregular edge.
       Element* get_neighbor(int ie) const;
 
-      /// Calculates the area of the element. For curved elements, this is only
-      /// an approximation: the curvature is not accounted for.
-      double get_area() const;
-
-      /// Returns the length of the longest edge for triangles, and the
-      /// length of the longer diagonal for quads. Ignores element curvature.
-      double get_diameter() const;
-
-      // returns the edge orientation. This works for the unconstrained edges.
-      int get_edge_orientation(int ie) const;
-
       void ref_all_nodes();
       void unref_all_nodes(HashTable* ht);
     private:
       unsigned nvert:30; ///< number of vertices (3 or 4)
 
       friend class Mesh;
+      friend class MeshReaderH2D;
+      friend class MeshReaderH1DXML;
+      friend class MeshReaderH2DXML;
+      friend class PrecalcShapeset;
+      template<typename Scalar> friend class Space;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class H1Space;
+      template<typename Scalar> friend class HcurlSpace;
+      template<typename Scalar> friend class HdivSpace;
+      template<typename Scalar> friend class L2Space;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class Solution;
+      template<typename Scalar> friend class NeighborSearch;
+      template<typename Scalar> friend class Filter;
+      template<typename Scalar> friend class MeshFunction;
+      template<typename Scalar> friend class Global;
+      template<typename Scalar> friend class RefinementSelectors::Selector;
+      template<typename Scalar> friend class RefinementSelectors::POnlySelector;
+      template<typename Scalar> friend class RefinementSelectors::HOnlySelector;
+      template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
+      template<typename Scalar> friend class RefinementSelectors::ProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
+      friend class RefinementSelectors::HcurlProjBasedSelector;
+      friend class Views::ScalarView;
+      friend class Views::Linearizer;
+      friend class RefMap;
+      friend class Traverse;
+      friend class Transformable;
+      friend class CurvMap;
+      friend class Views::Orderizer;
+      friend class Views::Vectorizer;
+      friend bool is_twin_nurbs(Element* e, int i);
+      friend bool is_in_ref_domain(Element* e, double xi1, double xi2);
+      friend int rtb_criterion(Element* e);
+      friend int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons);
+      friend CurvMap* create_son_curv_map(Element* e, int son);
+      friend Node* get_mid_edge_vertex_node(Element* e, int i, int j);
     };
 
     /// \brief Represents a finite element mesh.
@@ -248,23 +306,24 @@ namespace Hermes
       /// original state. However, it is not exactly an inverse to
       /// refine_all_elements().
       void unrefine_all_elements(bool keep_initial_refinements = true);
-
+      
       /// For internal use.
-      int get_edge_sons(Element* e, int edge, int& son1, int& son2);
-
+      Element* get_element_fast(int id) const;
+      
       /// For internal use.
       unsigned get_seq() const;
 
       /// For internal use.
       void set_seq(unsigned seq);
 
-      /// For internal use.
-      Element* get_element_fast(int id) const;
-
       /// Refines all triangle elements to quads.
       /// It can refine a triangle element into three quadrilaterals.
       /// Note: this function creates a base mesh.
       void convert_triangles_to_quads();
+
+    private:
+      /// For internal use.
+      int get_edge_sons(Element* e, int edge, int& son1, int& son2);
 
       /// Refines all quad elements to triangles.
       /// It refines a quadrilateral element into two triangles.
@@ -295,8 +354,6 @@ namespace Hermes
       Array<Element> elements;
       int nactive;
       unsigned seq;
-
-    protected:
 
       int nbase, ntopvert;
       int ninitial;
@@ -420,11 +477,34 @@ namespace Hermes
       friend class DiscreteProblem<std::complex<double> >;
       friend class WeakForm<double>;
       friend class WeakForm<std::complex<double> >;
-      friend class Space<double>;
-      friend class Space<std::complex<double> >;
+      template<typename Scalar> friend class Adapt;
       friend class KellyTypeAdapt<double>;
+      template<typename Scalar> friend class Global;
       friend class KellyTypeAdapt<std::complex<double> >;
-
+      template<typename Scalar> friend class Solution;
+      template<typename Scalar> friend class Filter;
+      template<typename Scalar> friend class MeshFunction;
+      friend class RefMap;
+      friend class Traverse;
+      friend class Transformable;
+      friend class Curved;
+      friend class Views::MeshView;
+      template<typename Scalar> friend class RefinementSelectors::Selector;
+      template<typename Scalar> friend class RefinementSelectors::POnlySelector;
+      template<typename Scalar> friend class RefinementSelectors::HOnlySelector;
+      template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
+      template<typename Scalar> friend class RefinementSelectors::ProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
+      friend class RefinementSelectors::HcurlProjBasedSelector;
+      friend class PrecalcShapeset;
+      template<typename Scalar> friend class Space;
+      template<typename Scalar> friend class H1Space;
+      template<typename Scalar> friend class HcurlSpace;
+      template<typename Scalar> friend class HdivSpace;
+      template<typename Scalar> friend class L2Space;
+      friend class Views::ScalarView;
+      friend class Views::Orderizer;
     public:
       ElementMarkersConversion &get_element_markers_conversion();
       BoundaryMarkersConversion &get_boundary_markers_conversion();

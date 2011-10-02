@@ -26,17 +26,19 @@ namespace Hermes
     /// Functor representing the interface estimator scaling function.
     class InterfaceEstimatorScalingFunction
     {
-      public:
+      private:
         virtual double value(double e_diam, const std::string& e_marker) const = 0;
+        template<typename Scalar> friend class KellyTypeAdapt;
     };
 
     /// Pre-defined function used for scaling interface error estimates (see the KellyTypeAdapt constructor).
     class ScaleByElementDiameter : public InterfaceEstimatorScalingFunction
     {
-      public:
+      private:
         virtual double value(double e_diam, const std::string& e_marker) const {
           return e_diam;
         }
+        template<typename Scalar> friend class KellyTypeAdapt;
     };
 
     /// \class KellyTypeAdapt

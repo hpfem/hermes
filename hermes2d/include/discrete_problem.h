@@ -35,7 +35,7 @@ namespace Hermes
     /// Multimesh neighbors traversal class.
     class NeighborNode
     {
-    public:
+    private:
       NeighborNode(NeighborNode* parent, unsigned int transformation);
       ~NeighborNode();
       void set_left_son(NeighborNode* left_son);
@@ -44,11 +44,12 @@ namespace Hermes
       NeighborNode* get_left_son();
       NeighborNode* get_right_son();
       unsigned int get_transformation();
-    private:
       NeighborNode* parent;
       NeighborNode* left_son;
       NeighborNode* right_son;
       unsigned int transformation;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class KellyTypeAdapt;
     };
 
     /// Discrete problem class.
@@ -68,12 +69,55 @@ namespace Hermes
       /// Non-parameterized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
       DiscreteProblem();
 
-      /// Init function. Common code for the constructors.
-      void init();
-
       /// Destuctor.
       virtual ~DiscreteProblem();
-      void free();
+
+      /// Sets the storing of the previous matrix in adaptivity.
+      void set_adaptivity_cache();
+
+      /// Assembling.
+      /// General assembling procedure for nonlinear problems. coeff_vec is the
+      /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
+      /// antries are created in diagonal blocks even if corresponding matrix weak
+      /// forms do not exist. This is useful if the matrix is later to be merged with
+      /// a matrix that has nonzeros in these blocks. The Table serves for optional
+      /// weighting of matrix blocks in systems. The parameter add_dir_lift decides
+      /// whether Dirichlet lift will be added while coeff_vec is converted into
+      /// Solutions.
+      void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
+        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
+
+      /// Assembling.
+      /// Without the matrix.
+      void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
+        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
+
+      /// Light version passing NULL for the coefficient vector. External solutions
+      /// are initialized with zeros.
+      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
+        Table* block_weights = NULL);
+
+      /// Light version passing NULL for the coefficient vector. External solutions
+      /// are initialized with zeros.
+      /// Without the matrix.
+      void assemble(Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
+        Table* block_weights = NULL);
+
+      void invalidate_matrix();
+
+      /// Set this problem to Finite Volume.
+      void set_fvm();
+      
+      void set_spaces(Hermes::vector<Space<Scalar>*> spaces);
+
+      void set_spaces(Space<Scalar>* space);
+
+    protected:
+      /// Get the number of unknowns.
+      int get_num_dofs();
+
+      /// Get info about presence of a matrix.
+      bool is_matrix_free();
 
       // GET functions.
       /// Get pointer to n-th space.
@@ -88,14 +132,6 @@ namespace Hermes
       /// This is different from H3D.
       PrecalcShapeset* get_pss(int n);
 
-      /// Get the number of unknowns.
-      int get_num_dofs();
-
-      /// Get info about presence of a matrix.
-      bool is_matrix_free() ;
-
-      /// Sets the storing of the previous matrix in adaptivity.
-      void set_adaptivity_cache();
       void temp_enable_adaptivity_cache();
       void temp_disable_adaptivity_cache();
 
@@ -128,33 +164,8 @@ namespace Hermes
       Element* init_state(Stage<Scalar>& stage, Hermes::vector<PrecalcShapeset*>& spss,
         Hermes::vector<RefMap*>& refmap, Element** e, Hermes::vector<AsmList<Scalar>*>& al);
 
-      /// Assembling.
-      /// General assembling procedure for nonlinear problems. coeff_vec is the
-      /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
-      /// antries are created in diagonal blocks even if corresponding matrix weak
-      /// forms do not exist. This is useful if the matrix is later to be merged with
-      /// a matrix that has nonzeros in these blocks. The Table serves for optional
-      /// weighting of matrix blocks in systems. The parameter add_dir_lift decides
-      /// whether Dirichlet lift will be added while coeff_vec is converted into
-      /// Solutions.
-      void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
-
-      /// Assembling.
-      /// Without the matrix.
-      void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
-
-      /// Light version passing NULL for the coefficient vector. External solutions
-      /// are initialized with zeros.
-      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
-        Table* block_weights = NULL);
-
-      /// Light version passing NULL for the coefficient vector. External solutions
-      /// are initialized with zeros.
-      /// Without the matrix.
-      void assemble(Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
-        Table* block_weights = NULL);
+      /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
+      inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
       /// Assemble one stage.
       void assemble_one_stage(Stage<Scalar>& stage,
@@ -265,19 +276,11 @@ namespace Hermes
         int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
-      void invalidate_matrix();
+      /// Init function. Common code for the constructors.
+      void init();
 
-      /// Set this problem to Finite Volume.
-      void set_fvm();
+      void free();
 
-      void set_spaces(Hermes::vector<Space<Scalar>*> spaces);
-
-      void set_spaces(Space<Scalar>* space);
-
-      /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
-      inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
-
-    protected:
       bool cache_for_adaptivity;
       bool temp_cache_for_adaptivity;
 
@@ -699,7 +702,10 @@ namespace Hermes
       /// Returns the profiling info from the last call to assemble().
       void get_last_profiling_output(std::ostream & out);
 
-      friend class KellyTypeAdapt<Scalar>;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class NewtonSolver;
+      template<typename T> friend class PicardSolver;
+      template<typename T> friend class RungeKutta;
     };
   }
 }

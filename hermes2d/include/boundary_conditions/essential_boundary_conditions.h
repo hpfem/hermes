@@ -53,23 +53,27 @@ namespace Hermes
       /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
       /// normal and tangential vectors.
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
-
-      /// Special case of a constant function.
-      Scalar value_const;
-
+      
       /// Sets the current time for time-dependent boundary conditions.
       void set_current_time(double time);
       double get_current_time() const;
 
     protected:
+      /// Special case of a constant function.
+      Scalar value_const;
+
       /// Current time.
       double current_time;
 
       /// Markers.
       Hermes::vector<std::string> markers;
 
-      friend class EssentialBCs<Scalar>;
-      friend class Space<Scalar>;
+      template<typename T> friend class EssentialBCs;
+      template<typename T> friend class Space;
+      template<typename T> friend class H1Space;
+      template<typename T> friend class L2Space;
+      template<typename T> friend class HcurlSpace;
+      template<typename T> friend class HdivSpace;
     };
 
     /// Class representing constant essential boundary condition.
@@ -165,6 +169,13 @@ namespace Hermes
 
       /// Create boundary markers cache for assembling
       void create_marker_cache();
+
+      template<typename T> friend class EssentialBCs;
+      template<typename T> friend class Space;
+      template<typename T> friend class H1Space;
+      template<typename T> friend class L2Space;
+      template<typename T> friend class HcurlSpace;
+      template<typename T> friend class HdivSpace;
     };
   }
 }

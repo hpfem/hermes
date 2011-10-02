@@ -123,6 +123,11 @@ namespace Hermes
 
         /// Calculates AABB from an array of X-axis and Y-axis coordinates. The distance between values in the array is stride bytes.
         static void calc_aabb(double* x, double* y, int stride, int num, double* min_x, double* max_x, double* min_y, double* max_y);
+        friend class MeshView;
+        friend class OrderView;
+        friend class ScalarView;
+        friend class VectorView;
+        friend class StreamView;
       };
 
       const int LIN_MAX_LEVEL = 6;

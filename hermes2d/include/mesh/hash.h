@@ -23,6 +23,16 @@ namespace Hermes
   namespace Hermes2D
   {
     struct Node;
+
+    namespace Views
+    {
+      class MeshView;
+      class ScalarView;
+      class Linearizer;
+      class Vectorizer;
+      class Orderizer;
+    };
+
     /// \brief Stores and searches node tables.
     ///
     /// HashTable is a base class for Mesh. It serves as a container for all nodes
@@ -30,7 +40,7 @@ namespace Hermes
     ///
     class HERMES_API HashTable
     {
-    public:
+    protected:
 
       HashTable();
       ~HashTable();
@@ -62,8 +72,6 @@ namespace Hermes
 
       static const int H2D_DEFAULT_HASH_SIZE = 0x8000; // 32K entries
 
-      // The following functions are used by the derived class Mesh:
-    protected:
       Array<Node> nodes; ///< Array storing all nodes
 
       /// Initializes the hash table.
@@ -109,6 +117,14 @@ namespace Hermes
 
       friend struct Node;
       friend class MeshReaderH2D;
+      template<typename Scalar> friend class NeighborSearch;
+      template<typename Scalar> friend class Space;
+      template<typename Scalar> friend class H1Space;
+      template<typename Scalar> friend class L2Space;
+      template<typename Scalar> friend class HcurlSpace;
+      template<typename Scalar> friend class HdivSpace;
+      friend class Views::ScalarView;
+      friend class Views::Linearizer;
     };
   }
 }

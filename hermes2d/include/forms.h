@@ -39,8 +39,6 @@ namespace Hermes
     class HERMES_API Func
     {
     public:
-      const int num_gip; ///< Number of integration points used by this intance.
-      const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
       T *val;            ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
       T *dx, *dy;        ///< First-order partial derivatives.
       T *laplace;        ///< Sum of second-order partial derivatives. Enabled by defining H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h.
@@ -49,35 +47,7 @@ namespace Hermes
       T *dy0, *dy1;      ///< Components of the gradient of a vector field.
       T *curl;           ///< Components of the curl of a vector field.
       T *div;            ///< Components of the div of a vector field.
-
-      /// Constructor.
-      /** \param[in] num_gip A number of integration points.
-      *  \param[in] num_comps A number of components. */
-      Func(int num_gip, int num_comps);
-
-      /// Calculate this -= func for each function expations and each integration point.
-      /** \param[in] func A function which is subtracted from *this. A number of integratioN points and a number of component has to match. */
-      void subtract(const Func<T>& func);
-      void subtract(T* attribute, T* other_attribute);
-
-      /// Calculate this += func for each function expations and each integration point.
-      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
-      void add(const Func<T>& func);
-      void add(T* attribute, T* other_attribute);
-
-      /// Dellocates an instance of Func<Ord>
-      virtual void free_ord();
-
-      /// Dellocates an instance of Func<double> / Func<std::complex<double> >
-      virtual void free_fn();
-
-      /// All deallocation done via free_fn / free_ord.
-      /// This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
-      /// NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
-      /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
-      /// expected from a continuous function.
-      virtual ~Func() { };
-
+      
       /// Methods designed for discontinuous functions, return errors here.
       virtual T& get_val_central(int k) const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
@@ -94,6 +64,52 @@ namespace Hermes
       virtual T& get_laplace_central(int k) { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
       virtual T& get_laplace_neighbor(int k) { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      
+      /// Dellocates an instance of Func<Ord>
+      virtual void free_ord();
+
+      /// Dellocates an instance of Func<double> / Func<std::complex<double> >
+      virtual void free_fn();
+
+      /// All deallocation done via free_fn / free_ord.
+      /// This is to allow proper destruction of DiscontinuousFunc by applying delete on a Func pointer.
+      /// NOTE: An error is raised if the user tries to use a Func object for a discontinuous function.
+      /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
+      /// expected from a continuous function.
+      virtual ~Func() { };
+
+    protected:
+      const int num_gip; ///< Number of integration points used by this intance.
+      const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
+      
+      /// Constructor.
+      /** \param[in] num_gip A number of integration points.
+      *  \param[in] num_comps A number of components. */
+      Func(int num_gip, int num_comps);
+
+      /// Calculate this -= func for each function expations and each integration point.
+      /** \param[in] func A function which is subtracted from *this. A number of integratioN points and a number of component has to match. */
+      void subtract(const Func<T>& func);
+      void subtract(T* attribute, T* other_attribute);
+
+      /// Calculate this += func for each function expations and each integration point.
+      /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
+      void add(const Func<T>& func);
+      void add(T* attribute, T* other_attribute);
+
+      friend Func<Hermes::Ord>* init_fn_ord(const int order);
+      friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
+      template<typename T> friend Func<T>* init_fn(MeshFunction<T>*fu, const int order);
+      template<typename T> friend Func<T>* init_fn(Solution<T>*fu, const int order);
+
+      template<typename Scalar> friend class DiscontinuousFunc;
+      template<typename Scalar> friend class ExtData;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class BasicKellyAdapt;
+      template<typename Scalar> friend class OGProjection;
+      friend class ErrorEstimatorFormKelly;
     };
 
     /** \class DiscontinuousFunc forms.h "src/form/forms.h"
@@ -116,22 +132,6 @@ namespace Hermes
       Func<T> *fn_central;        ///< Central element's component.
       Func<T> *fn_neighbor;       ///< Neighbor element's component.
 
-      /// One-component constructor.
-      ///
-      /// \param[in]  fn                  Function defined either on the central or the neighbor element.
-      /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
-      /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
-      ///
-      DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false);
-
-      /// Two-component constructor.
-      ///
-      /// \param[in]  fn_c                Function defined on the central element.
-      /// \param[in]  fn_n                Function defined on the neighbor element.
-      /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
-      ///
-      DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false);
-
       /// Get values on the central element.
       virtual T& get_val_central(int k) const;
       /// Get values on the neighboring element.
@@ -149,6 +149,23 @@ namespace Hermes
       /// Get second derivatives (laplacian) on the neighboring element.
       virtual T& get_laplace_neighbor(int k);
 
+      /// One-component constructor.
+      ///
+      /// \param[in]  fn                  Function defined either on the central or the neighbor element.
+      /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
+      /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+      ///
+      DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false);
+
+      /// Two-component constructor.
+      ///
+      /// \param[in]  fn_c                Function defined on the central element.
+      /// \param[in]  fn_n                Function defined on the neighbor element.
+      /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
+      ///
+      DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false);
+
+    private:
       void subtract(const DiscontinuousFunc<T>& func);
 
       /// Default destructor may be used. Deallocation is done using the following functions.
@@ -158,11 +175,13 @@ namespace Hermes
 
       virtual void free_ord();
 
-    private:
       bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
       ///< (when retrieving values on an edge that is oriented differently in both elements).
       static T zero;              ///< Zero value used for the zero-extension.
-
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Adapt;
+      template<typename T> friend class NeighborSearch;
     };
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
@@ -170,9 +189,6 @@ namespace Hermes
     class HERMES_API Geom
     {
     public:
-      int elem_marker;       ///< Element marker (for both volumetric and surface forms).
-      int edge_marker;       ///< Edge marker (for surface forms only).
-      int id;           ///< ID number of the element (undefined for edge).
       T diam;           ///< Element diameter (for edge, diameter of the parent element).
       T area;           ///< Element area (for edge, area of the parent element).
       T *x, *y;         ///< Coordinates [in physical domain].
@@ -180,19 +196,7 @@ namespace Hermes
       ///< to point outside the element). Only for edge
       ///< (undefined for element).
       T *tx, *ty;       ///< Tangents [in physical domain]. Only for edge.
-      int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
-      ///< otherwise 1 (each edge has a unique global normal).
-      ///< Only for edge.
-
-      /// Constructor.
-      Geom();
-
-      /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
-      virtual ~Geom() {};
-
-      /// Deallocation.
-      virtual void free();
-      virtual void free_ord() {};
+      int id;           ///< ID number of the element (undefined for edge).
 
       /// Methods designed for discontinuous functions, return errors here.
       virtual int get_neighbor_marker() const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
@@ -200,6 +204,33 @@ namespace Hermes
       virtual int get_neighbor_id()     const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
       /// Methods designed for discontinuous functions, return errors here.
       virtual T   get_neighbor_diam()   const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
+      
+      /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
+      virtual ~Geom() {};
+
+      /// Deallocation.
+      virtual void free();
+      virtual void free_ord() {};
+      int elem_marker;       ///< Element marker (for both volumetric and surface forms).
+      int edge_marker;       ///< Edge marker (for surface forms only).
+      
+    protected:
+      int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
+      ///< otherwise 1 (each edge has a unique global normal).
+      ///< Only for edge.
+
+      /// Constructor.
+      Geom();
+
+      friend Geom<Hermes::Ord>* init_geom_ord();
+      friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
+      friend Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class InterfaceGeom;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class BasicKellyAdapt;
+      friend class ErrorEstimatorFormKelly;
+      template<typename Scalar> friend class Adapt;
     };
 
 
@@ -213,9 +244,12 @@ namespace Hermes
     class HERMES_API InterfaceGeom : public Geom<T>
     {
     public:
+      int neighb_id;
+      T   neighb_diam;
+    private:
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
-
+      Geom<T>* wrapped_geom;
       int get_neighbor_marker() const;
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
@@ -223,11 +257,10 @@ namespace Hermes
       virtual void free();
       virtual void free_ord();
 
-    private:
       int neighb_marker;
-      int neighb_id;
-      T   neighb_diam;
-      Geom<T>* wrapped_geom;
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Adapt;
     };
 
     /// Init element geometry for calculating the integration order.
@@ -255,8 +288,9 @@ namespace Hermes
     class HERMES_API ExtData
     {
     public:
-      int nf;           ///< Number of functions in 'fn' array.
       Func<T>** fn;     ///< Array of pointers to functions.
+    private:
+      int nf;           ///< Number of functions in 'fn' array.
 
       /// Constructor.
       ExtData();
@@ -266,6 +300,13 @@ namespace Hermes
 
       /// Deallocation for integration order.
       void free_ord();
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class InterfaceGeom;
+      template<typename Scalar> friend class KellyTypeAdapt;
+      template<typename Scalar> friend class BasicKellyAdapt;
+      friend class ErrorEstimatorFormKelly;
+      template<typename Scalar> friend class Adapt;
+      template<typename Scalar> friend class OGProjection;
     };
   }
 }
