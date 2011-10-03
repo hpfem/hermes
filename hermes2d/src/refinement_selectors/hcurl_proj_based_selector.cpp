@@ -15,7 +15,7 @@ namespace Hermes
       const int HcurlProjBasedSelector::H2DRS_MAX_HCURL_ORDER = 6;
 
       HcurlProjBasedSelector::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<std::complex<double> >(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
+        : ProjBasedSelector<std::complex<double> >(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, OptimumSelector<std::complex<double> >::Range(), OptimumSelector<std::complex<double> >::Range(0, H2DRS_MAX_HCURL_ORDER))
         , precalc_rvals_curl(NULL) {}
 
       HcurlProjBasedSelector::~HcurlProjBasedSelector()

@@ -115,7 +115,7 @@ namespace Hermes
       unsigned int nnz;
       template <typename T> friend class Hermes::Solvers::UMFPackLinearSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
-      template<typename Scalar> friend SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
+      template<typename T> friend SparseMatrix<T>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
     };
 
     /// \brief This class is to be used with UMFPack solver only.
@@ -124,7 +124,7 @@ namespace Hermes
     {
       template <typename T> friend class Hermes::Solvers::UMFPackLinearSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
-      template<typename Scalar> friend SparseMatrix<Scalar>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
+      template<typename T> friend SparseMatrix<T>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
     };
 
     /// \brief Class representing the vector for UMFPACK.
@@ -160,7 +160,7 @@ namespace Hermes
       Scalar *v;
       template <typename T> friend class Hermes::Solvers::UMFPackLinearSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
-      template<typename Scalar> friend Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
+      template<typename T> friend Vector<T>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
     };
   }
   namespace Solvers
@@ -196,7 +196,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
-      template<typename Scalar> friend LinearSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
+      template<typename T> friend LinearSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
     };
 
     /// \brief UMFPack matrix iterator. \todo document members
