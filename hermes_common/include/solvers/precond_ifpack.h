@@ -53,6 +53,11 @@ namespace Hermes
       /// Wrap IFPACK object.
       IfpackPrecond(Ifpack_Preconditioner *ipc);
       virtual ~IfpackPrecond();
+      
+      void set_param(const char *name, const char *value);
+      void set_param(const char *name, int value);
+      void set_param(const char *name, double value);
+    protected:
 
       virtual Epetra_Operator *get_obj() { return prec; }
 
@@ -60,17 +65,12 @@ namespace Hermes
       virtual void destroy() { }
       virtual void compute();
 
-      void set_param(const char *name, const char *value);
-      void set_param(const char *name, int value);
-      void set_param(const char *name, double value);
-
       // Epetra_Operator interface
       virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;
       virtual const Epetra_Comm &Comm() const;
       virtual const Epetra_Map &OperatorDomainMap() const;
       virtual const Epetra_Map &OperatorRangeMap() const;
 
-    protected:
       void create_point_relax(EpetraMatrix<Scalar> *a, const char *name);
       void create_block_relax(EpetraMatrix<Scalar> *a, const char *name);
       void create_add_schwartz(EpetraMatrix<Scalar> *a, const char *name, int overlap);

@@ -46,7 +46,11 @@ namespace Hermes
       /// Wrap ML object.
       MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
       virtual ~MlPrecond();
-
+      
+      void set_param(const char *name, const char *value);
+      void set_param(const char *name, int value);
+      void set_param(const char *name, double value);
+    protected:
       virtual Epetra_Operator *get_obj() { return prec; }
 
       /// @param[in] a
@@ -56,10 +60,6 @@ namespace Hermes
       /// Compute the preconditioner.
       virtual void compute();
 
-      void set_param(const char *name, const char *value);
-      void set_param(const char *name, int value);
-      void set_param(const char *name, double value);
-
       void print_unused();
 
       // Epetra_Operator interface
@@ -68,7 +68,6 @@ namespace Hermes
       virtual const Epetra_Map &OperatorDomainMap() const;
       virtual const Epetra_Map &OperatorRangeMap() const;
 
-    protected:
       ML_Epetra::MultiLevelPreconditioner *prec;
       Teuchos::ParameterList mlist;
       EpetraMatrix<Scalar> *mat;

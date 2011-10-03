@@ -39,14 +39,7 @@ namespace Hermes
     class HERMES_API AztecOOSolver : public IterSolver<Scalar>
     {
     public:
-      AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
-      virtual ~AztecOOSolver();
-
-      virtual bool solve();
-
-      virtual int get_num_iters();
-      virtual double get_residual();
-
+      
       /// Set the type of the solver
       /// @param[in] solver - name of the solver [ gmres | cg | cgs | tfqmr | bicgstab ]
       void set_solver(const char *solver);
@@ -60,6 +53,13 @@ namespace Hermes
       /// Set Aztec internal preconditioner
       /// @param[in] name - name of the preconditioner [ none | jacobi | neumann | least-squares ]
       virtual void set_precond(const char *name);
+      
+      AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+      virtual ~AztecOOSolver();
+      virtual bool solve();
+    protected:
+      virtual int get_num_iters();
+      virtual double get_residual();
 
       /// \brief Set preconditioner from IFPACK.
       /// @param[in] pc - IFPACK preconditioner
@@ -75,7 +75,6 @@ namespace Hermes
       /// Parameter setting function
       void set_param(int param, double value);
 
-    protected:
       AztecOO aztec;    ///< Instance of the Aztec solver.
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
@@ -85,6 +84,7 @@ namespace Hermes
 #else
       Precond<Scalar> *pc;
 #endif
+      template<typename Scalar> friend LinearSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
     };
   }
 }

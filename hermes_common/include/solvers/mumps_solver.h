@@ -76,7 +76,7 @@ namespace Hermes
     template <typename Scalar>
     class MumpsMatrix : public SparseMatrix<Scalar>
     {
-    public:
+    protected:
       MumpsMatrix();
       virtual ~MumpsMatrix();
 
@@ -130,7 +130,7 @@ namespace Hermes
     template <typename Scalar>
     class MumpsVector : public Vector<Scalar>
     {
-    public:
+    protected:
       MumpsVector();
       virtual ~MumpsVector();
 
@@ -165,7 +165,7 @@ namespace Hermes
     {
     private:
       void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
-    public:
+    protected:
       /// Constructor of MumpsSolver.
       /// @param[in] m matrix pointer
       /// @param[in] rhs right hand side pointer

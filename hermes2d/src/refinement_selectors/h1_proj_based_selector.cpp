@@ -18,7 +18,7 @@ namespace Hermes
 
       template<typename Scalar>
       H1ProjBasedSelector<Scalar>::H1ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, H1Shapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1, 1), Range<int>(2, H2DRS_MAX_H1_ORDER)) {}
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range(1, 1), Range(2, H2DRS_MAX_H1_ORDER)) {}
 
       template<typename Scalar>
       void H1ProjBasedSelector<Scalar>::set_current_order_range(Element* element)

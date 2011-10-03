@@ -64,8 +64,8 @@ namespace Hermes
 
       template<typename Scalar>
       OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, double conv_exp, int
-        max_order, Shapeset* shapeset, const Range<int>& vertex_order, const
-        Range<int>& edge_bubble_order) :
+        max_order, Shapeset* shapeset, const Range& vertex_order, const
+        Range& edge_bubble_order) :
       Selector<Scalar>(max_order),
         opt_symmetric_mesh(true),
         opt_apply_exp_dof(false),
@@ -98,7 +98,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order)
+      void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range& vertex_order, const Range& edge_bubble_order)
       {
         Hermes::vector<ShapeInx> &indices = shape_indices[mode];
         int* next_order = this->next_order_shape[mode];
@@ -115,7 +115,7 @@ namespace Hermes
         has_vertex = has_edge = has_bubble = false;
 
         //get total range of orders
-        Range<int> order_range = Range<int>::make_envelope(vertex_order, edge_bubble_order);
+        Range order_range = Range::make_envelope(vertex_order, edge_bubble_order);
 
         //prepare array of used shape indices
         std::map<int, bool> used_shape_index;
@@ -689,6 +689,76 @@ namespace Hermes
         case H2D_APPLY_CONV_EXP_DOF: opt_apply_exp_dof = enable; break;
         default: error("Unknown option %d.", (int)option);
         }
+      }
+      
+      template<typename Scalar>
+      OptimumSelector<Scalar>::Range::Range() : empty_range(true) {}
+
+      template<typename Scalar>
+      OptimumSelector<Scalar>::Range::Range(const int& lower_bound, const int& upper_bound) : lower_bound(lower_bound), upper_bound(upper_bound), empty_range(lower_bound > upper_bound) 
+      {
+      }
+  
+      template<typename Scalar>
+      bool OptimumSelector<Scalar>::Range::empty() const 
+      {
+        return empty_range; 
+      }
+
+      template<typename Scalar>
+      const int& OptimumSelector<Scalar>::Range::lower() const 
+      {
+        return lower_bound; 
+      }
+
+      template<typename Scalar>
+      const int& OptimumSelector<Scalar>::Range::upper() const 
+      {
+        return upper_bound; 
+      }
+
+      template<typename Scalar>
+      bool OptimumSelector<Scalar>::Range::is_in_closed(const typename OptimumSelector<Scalar>::Range& range) const 
+      {
+        return (range.lower_bound >= lower_bound && range.upper_bound <= upper_bound); 
+      }
+
+      template<typename Scalar>
+      bool OptimumSelector<Scalar>::Range::is_in_closed(const int& value) const 
+      {
+        return (value >= lower_bound && value <= upper_bound); 
+      }
+
+      template<typename Scalar>
+      bool OptimumSelector<Scalar>::Range::is_in_open(const int& value) const 
+      {
+        return (value > lower_bound && value < upper_bound); 
+      }
+
+      template<typename Scalar>
+      void OptimumSelector<Scalar>::Range::enlarge_to_include(const int& value) 
+      {
+        if (empty_range) {
+          lower_bound = upper_bound = value;
+          empty_range = false;
+        }
+        else {
+          if (lower_bound > value)
+            lower_bound = value;
+          if (upper_bound < value)
+            upper_bound = value;
+        }
+      }
+
+      template<typename Scalar>
+      typename OptimumSelector<Scalar>::Range OptimumSelector<Scalar>::Range::make_envelope(const typename OptimumSelector<Scalar>::Range& a, const typename OptimumSelector<Scalar>::Range& b)
+      {
+        if (a.empty())
+          return b;
+        else if (b.empty())
+          return a;
+        else
+          return Range(std::min(a.lower(), b.lower()), std::max(a.upper(), b.upper()));
       }
 
       template class HERMES_API OptimumSelector<double>;

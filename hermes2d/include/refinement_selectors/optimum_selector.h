@@ -265,6 +265,31 @@ namespace Hermes
           *  \param[in] type A type of the shape function. */
           ShapeInx(int order_h, int order_v, int inx, ShapeType type) : order_h(order_h), order_v(order_v), inx(inx), type(type) {};
         };
+        
+        /// Range of values.
+        class Range 
+        {
+        protected:
+          int lower_bound;    ///< Lower boundary.
+          int upper_bound;    ///< Upper boundary.
+          bool empty_range; ///< intrue if range is empty.
+          Range();
+          Range(const int& lower_bound, const int& upper_bound);
+          bool empty() const;
+          const int& lower() const;
+          const int& upper() const;
+          bool is_in_closed(const Range& range) const;
+          bool is_in_closed(const int& value) const;
+          bool is_in_open(const int& value) const;
+          void enlarge_to_include(const int& value);
+
+          static Range make_envelope(const Range& a, const Range& b);
+          template<typename T> friend class OptimumSelector;
+          template<typename T> friend class ProjBasedSelector;
+          template<typename T> friend class H1ProjBasedSelector;
+          template<typename T> friend class L2ProjBasedSelector;
+          friend class HcurlProjBasedSelector;
+        };
 
         Shapeset *shapeset; ///< A shapeset used to calculate error.
 
@@ -293,7 +318,7 @@ namespace Hermes
         *  \param[in] mode A mode (ElementMode2D).
         *  \param[in] vertex_order A range of orders in which to search for vertex functions.
         *  \param[in] edge_bubble_order A range of order in which to search for edge and bubble functions. */
-        void build_shape_indices(const int mode, const Range<int>& vertex_order, const Range<int>& edge_bubble_order);
+        void build_shape_indices(const int mode, const Range& vertex_order, const Range& edge_bubble_order);
 
         /// Returns a number of shapes that may be contained in an element of a given order.
         /** \param[in] mode A mode (ElementMode2D).
@@ -309,9 +334,9 @@ namespace Hermes
         *  \param[in] conv_exp A conversion exponent, see evaluate_cands_score().
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used.
         *  \param[in] shapeset A shapeset. It cannot be NULL.
-        *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range<int>()) to skip vertex functions.
-        *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range<int>()) to skip edge and bubble functions. */
-        OptimumSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range<int>& vertex_order, const Range<int>& edge_bubble_order);
+        *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range()) to skip vertex functions.
+        *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range()) to skip edge and bubble functions. */
+        OptimumSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
 
       public:
         /// Destructor.

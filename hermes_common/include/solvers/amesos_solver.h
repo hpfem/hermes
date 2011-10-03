@@ -40,17 +40,17 @@ namespace Hermes
     class HERMES_API AmesosSolver : public DirectSolver<Scalar>
     {
     public:
-      AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
-      virtual ~AmesosSolver();
-
       static bool is_available(const char *name);
 
       /// Returns the current UseTranspose setting.
       bool use_transpose();
       /// If set true, X will be set to the solution of A^T X = B (not A X = B).
       void set_use_transpose(bool use_transpose);
-      virtual bool solve();
 
+      AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
+
+      virtual ~AmesosSolver();
+      virtual bool solve();
     protected:
       static Amesos factory;
       Amesos_BaseSolver *solver;
@@ -59,6 +59,7 @@ namespace Hermes
       EpetraVector<Scalar> *rhs;
 
       bool setup_factorization();
+      template<typename Scalar> friend LinearSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
     };
   }
 }

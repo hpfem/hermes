@@ -99,7 +99,7 @@ namespace
 
 
   /* Return if given char is whitespace or not. */
-  bool is_whitespace_char(const char c)
+  static bool is_whitespace_char(const char c)
   {
     return c == ' ' || c == '\t';
   }
@@ -108,7 +108,7 @@ namespace
   /* Removes the leading whitespace from a string and returnes the new
   * string.
   */
-  std::string remove_leading_whitespace(const std::string &str)
+  static std::string remove_leading_whitespace(const std::string &str)
   {
     if (str.length() && is_whitespace_char(str[0]))
     {
@@ -128,7 +128,7 @@ namespace
 
 
   /* Reads the 'line_number'th line from the file filename. */
-  std::string read_line_from_file(std::string filename, unsigned int line_number)
+  static std::string read_line_from_file(std::string filename, unsigned int line_number)
   {
     std::ifstream in(filename.c_str());
     if (!in.is_open())
@@ -153,7 +153,7 @@ namespace
 
 
   /* Allows printf like formatting, but returns a std::string. */
-  std::string format(const char *fmt, ...)
+  static std::string format(const char *fmt, ...)
   {
 #ifdef HAVE_VASPRINTF
     va_list argptr;
@@ -186,7 +186,7 @@ namespace
   added by hand in C.
   */
 
-  std::string demangle_function_name(std::string name)
+  static std::string demangle_function_name(std::string name)
   {
 #ifdef HAVE_CXXABI
     std::string s;
@@ -225,7 +225,7 @@ namespace
   data->line_found, so that subsequent calls to process_section exit
   immediately.
   */
-  void process_section(bfd *abfd, asection *section, void *_data)
+  static void process_section(bfd *abfd, asection *section, void *_data)
   {
     line_data *data = (line_data*)_data;
     if (data->line_found)
@@ -274,7 +274,7 @@ namespace
 
 
   /* Loads the symbol table into 'data->symbol_table'.  */
-  int load_symbol_table(bfd *abfd, line_data *data)
+  static int load_symbol_table(bfd *abfd, line_data *data)
   {
     if ((bfd_get_file_flags(abfd) & HAS_SYMS) == 0)
       // If we don't have any symbols, return
@@ -315,7 +315,7 @@ namespace
   File "/home/ondrej/repos/rcp/src/Teuchos_RCP.hpp", line 428, in Teuchos::RCP<A>::assert_not_null() const
   throw_null_ptr_error(typeName(*this));
   */
-  std::string addr2str(std::string file_name, bfd_vma addr)
+  static std::string addr2str(std::string file_name, bfd_vma addr)
   {
 #ifdef HAVE_TEUCHOS_BFD
     // Initialize 'abfd' and do some sanity checks
@@ -395,7 +395,7 @@ namespace
   'info'). If it succeeds, returns (in the 'data') the full path to the shared
   lib and the local address in the file.
   */
-  int shared_lib_callback(struct dl_phdr_info *info,
+  static int shared_lib_callback(struct dl_phdr_info *info,
     size_t size, void *_data)
   {
     struct match_data *data = (struct match_data *)_data;
@@ -429,7 +429,7 @@ namespace
   It converts addresses to filenames, line numbers, function names and the
   line text.
   */
-  std::string stacktrace2str(void *const *stacktrace_buffer, int stacktrace_size)
+  static std::string stacktrace2str(void *const *stacktrace_buffer, int stacktrace_size)
   {
     const int stack_depth = stacktrace_size - 1;
 
@@ -471,7 +471,7 @@ namespace
   }
 
 
-  void loc_segfault_callback_print_stack(int sig_num)
+  static void loc_segfault_callback_print_stack(int sig_num)
   {
     std::cout << "\nSegfault caught. Printing stacktrace:\n\n";
     Teuchos::show_stacktrace();
@@ -482,7 +482,7 @@ namespace
   }
 
 
-  void loc_abort_callback_print_stack(int sig_num)
+  static void loc_abort_callback_print_stack(int sig_num)
   {
     std::cout << "\nAbort caught. Printing stacktrace:\n\n";
     Teuchos::show_stacktrace();

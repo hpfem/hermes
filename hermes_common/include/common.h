@@ -63,7 +63,6 @@
 #include "vector.h"
 #include "tables.h"
 #include "array.h"
-#include "range.h"
 #include "qsort.h"
 #include "ord.h"
 

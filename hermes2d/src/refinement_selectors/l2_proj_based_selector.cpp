@@ -19,7 +19,7 @@ namespace Hermes
 
       template<typename Scalar>
       L2ProjBasedSelector<Scalar>::L2ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, L2Shapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range<int>(1, 1), Range<int>(0, H2DRS_MAX_L2_ORDER)) {}
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, Range(1, 1), Range(0, H2DRS_MAX_L2_ORDER)) {}
 
       template<typename Scalar>
       void L2ProjBasedSelector<Scalar>::set_current_order_range(Element* element)
