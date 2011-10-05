@@ -9,7 +9,7 @@ Copyright
 =========
 
 Copyright (c) 2010-2011 hp-FEM group at the University of Nevada,
-Reno (UNR). Email: hpfem@unr.edu, home page: http://hpfem.org/.
+Reno (UNR). Email: hermes2d@googlegroups.com, home page: http://hpfem.org/.
 
 
 User Documentation
