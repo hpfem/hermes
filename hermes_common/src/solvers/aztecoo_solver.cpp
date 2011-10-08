@@ -187,7 +187,7 @@ namespace Hermes
 
       Komplex_LinearProblem kp(c0r, c0i, *m->mat, c1r, c1i, *m->mat_im, xr, xi, *rhs->vec, *rhs->vec_im);
       Epetra_LinearProblem *lp = kp.KomplexProblem();
-      aztec.SetProblem(*lp);
+      aztec.SetProblem(*lp,true);
 
       // solve it
       aztec.Iterate(this->max_iters, this->tolerance);
