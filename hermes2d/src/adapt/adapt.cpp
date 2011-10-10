@@ -54,6 +54,12 @@ namespace Hermes
       memset(errors, 0, sizeof(errors));
       memset(sln, 0, sizeof(sln));
       memset(rsln, 0, sizeof(rsln));
+      own_forms = new bool*[H2D_MAX_COMPONENTS];
+      for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
+      {
+        own_forms[i] = new bool[H2D_MAX_COMPONENTS];
+        memset(own_forms[i], 0, H2D_MAX_COMPONENTS * sizeof(bool));
+      }
 
       // if norms were not set by the user, set them to defaults
       // according to spaces
@@ -84,6 +90,7 @@ namespace Hermes
       {
         error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
         norm_form[i][i] = error_form[i][i];
+        own_forms[i][i] = true;
       }
     }
 
@@ -105,6 +112,12 @@ namespace Hermes
       memset(errors, 0, sizeof(errors));
       memset(sln, 0, sizeof(sln));
       memset(rsln, 0, sizeof(rsln));
+      own_forms = new bool*[H2D_MAX_COMPONENTS];
+      for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
+      {
+        own_forms[i] = new bool[H2D_MAX_COMPONENTS];
+        memset(own_forms[i], 0, H2D_MAX_COMPONENTS * sizeof(bool));
+      }
 
       // if norms were not set by the user, set them to defaults
       // according to spaces
@@ -123,6 +136,7 @@ namespace Hermes
       // assign norm weak forms  according to norms selection
       error_form[0][0] = new MatrixFormVolError(proj_norm);
       norm_form[0][0] = error_form[0][0];
+      own_forms[0][0] = true;
     }
 
     template<typename Scalar>
@@ -134,8 +148,11 @@ namespace Hermes
       // free error_form
       for (int i = 0; i < this->num; i++)
         for (int j = 0; j < this->num; j++)
-          if (error_form[i][j] != NULL)
-            delete error_form[i][j];  // The same memory is used for norm_form[i][j] unless set_norm_form is called.
+          if (error_form[i][j] != NULL && own_forms[i][j])
+          {
+            delete error_form[i][j];
+            own_forms[i][j] = false;
+          }
     }
 
     template<typename Scalar>
@@ -341,6 +358,11 @@ namespace Hermes
       Space<Scalar>::assign_dofs(this->spaces);
 
       return done;
+    }
+
+    template<typename Scalar>
+    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError()
+    {
     }
 
     template<typename Scalar>
@@ -811,14 +833,20 @@ namespace Hermes
 
       // FIXME: Memory leak - always for i == j (see the constructor), may happen for i != j
       //        if user does not delete previously set error forms by himself.
+      if(own_forms[i][j] && error_form[i][j] != NULL)
+        delete error_form[i][j];
       error_form[i][j] = form;
       norm_form[i][j] = error_form[i][j];
+      own_forms[i][j] = false;
     }
 
     template<typename Scalar>
     void Adapt<Scalar>::set_error_form(typename Adapt<Scalar>::MatrixFormVolError* form)
     {
+      if(own_forms[0][0] && error_form[0][0] != NULL)
+        delete error_form[0][0];
       set_error_form(0, 0, form);
+      own_forms[0][0] = false;
     }
 
     template<typename Scalar>

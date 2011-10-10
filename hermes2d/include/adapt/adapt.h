@@ -64,6 +64,8 @@ namespace Hermes
       class HERMES_API MatrixFormVolError
       {
       public:
+        /// Empty constructor.
+        MatrixFormVolError();
         /// Constructor that takes the norm identification.
         MatrixFormVolError(ProjNormType type);
 
@@ -244,6 +246,7 @@ namespace Hermes
 
       int num;                              ///< Number of solution components (as in wf->neq).
       Hermes::vector<Space<Scalar>*> spaces;        ///< Spaces.
+      bool **own_forms;
       int num_act_elems;                    ///< A total number of active elements across all provided meshes.
       Solution<Scalar>* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
       Solution<Scalar>* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
