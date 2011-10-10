@@ -2,6 +2,7 @@
 
 # Some search paths.
 if (WIN32)
+  set(DEP_ROOT "d:/hpfem/hermes/dependencies")
   set(GLUT_ROOT "d:/hpfem/hermes/dependencies/glut")
   set(GLEW_ROOT "d:/hpfem/hermes/dependencies/glew")
   set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies/pthread")

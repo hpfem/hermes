@@ -15,8 +15,8 @@ Building Hermes
  In order to build the library and examples, you need to:
 
  - Prepare dependecy libraries, see 'Dependency Check-list'.
- - Copy a file 'my_hermes_root\\CMakeVars\\MSVC\\CMake.vars' to 'my_hermes_root'. The file contains settings for the project.
- - Modify the file 'my_hermes_root\\CMakeVars\\MSVC\\CMake.vars'. The first line has to be modified, for info about the rest of the file, please refer to Linus installation instructions. Please, follow comments in the file. For example, you 
+ - Copy a file 'CMake.vars.example' to 'CMake.vars'. The file contains settings for the project.
+ - Modify the file 'CMake.vars'. The first line in WIN32 block has to be modified, for info about the rest of the file, please refer to Linux installation instructions. Please, follow comments in the file. For example, you 
    could set the first line as::
 
        set(DEP_ROOT "../dependencies")
@@ -63,11 +63,7 @@ Dependency check-list
 
 This list works for 32-bit version of Hermes.
 	
-  - In order to create the structure, execute the following command::
-
-        'prepare_dep_dir.bat'. 
-
-    Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable.
+  - Be sure to include a directory 'dependecies\\bin' into 'PATH' environment variable.
   - All Hermes project files assumes that dependency libraries are available in a fixed directory structure. The root of this structure has to have the same parent as does Hermes director, i.e., if 'C:\\my_work\\hermes\\' is a root of the Hermes directory, then 'C:\\my_work\\dependecies\\' is a root of the dependency directory. Subdirectories are:
 
     - dependencies\\include: Header files (\*.h) of dependency libraries.
