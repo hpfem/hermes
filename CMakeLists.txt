@@ -18,9 +18,9 @@ project(hermes)
 		set(HERMES_COMMON_WITH_TESTS YES)
 
 	# Hermes2D:
-	set(WITH_H2D 									YES)
+	set(WITH_H2D                        YES)
 		# Release and debug versions.
-		set(H2D_DEBUG 							YES)
+		set(H2D_DEBUG               YES)
 		set(H2D_RELEASE             YES)
 		# Optional parts of the library.
 		set(H2D_WITH_GLUT 					YES)
