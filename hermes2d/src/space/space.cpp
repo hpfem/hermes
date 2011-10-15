@@ -389,9 +389,7 @@ namespace Hermes
           set_element_order_internal(e->id, std::max<int>(horizontal_min_order, get_element_order(e->id) + horizontal_order_change));
         }
         else
-          set_element_order_internal(e->id, std::max<int>
-          (H2D_MAKE_QUAD_ORDER(horizontal_min_order, vertical_min_order),
-          H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(get_element_order(e->id)) + horizontal_order_change, H2D_GET_V_ORDER(get_element_order(e->id)) + vertical_order_change)));
+          set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(std::max<int>(H2D_GET_H_ORDER(get_element_order(e->id)) + horizontal_order_change, horizontal_min_order), std::max<int>(H2D_GET_V_ORDER(get_element_order(e->id)) + vertical_order_change, vertical_min_order)));
       }
       assign_dofs();
     }
@@ -887,7 +885,7 @@ namespace Hermes
     {
       _F_;
       for (unsigned int i = 0; i < bc_data.size(); i++)
-        delete [] (Scalar*) bc_data[i];
+        ::free(bc_data[i]);
       bc_data.clear();
     }
 
