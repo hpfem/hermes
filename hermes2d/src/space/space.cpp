@@ -885,7 +885,7 @@ namespace Hermes
     {
       _F_;
       for (unsigned int i = 0; i < bc_data.size(); i++)
-        delete [] (Scalar*) bc_data[i];
+        ::free(bc_data[i]);
       bc_data.clear();
     }
 
