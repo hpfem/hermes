@@ -142,12 +142,13 @@ namespace Hermes
       // returns the edge orientation. This works for the unconstrained edges.
       int get_edge_orientation(int ie) const;
       int  get_mode() const;
-    protected:
-      int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
 
       bool is_triangle() const;
       bool is_quad() const;
       bool is_curved() const;
+
+    protected:
+      int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
 
       // helper functions to obtain the index of the next or previous vertex/edge
       int next_vert(int i) const;
