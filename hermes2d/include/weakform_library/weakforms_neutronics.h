@@ -36,7 +36,7 @@ namespace Hermes
           be enabled by creating a descendant and adding surface forms to it.
           */
           template<typename Scalar>
-          class DefaultWeakFormFixedSource : public WeakForm<Scalar>
+          class HERMES_API DefaultWeakFormFixedSource : public WeakForm<Scalar>
           {
           public:
             DefaultWeakFormFixedSource( Hermes::vector<std::string> regions,

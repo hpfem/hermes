@@ -39,21 +39,24 @@ namespace Hermes
             {
               /* Jacobian */
               // Diffusion.
-              add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, regions[i], D_map[i],
-                HERMES_DEFAULT_SPLINE, HERMES_SYM));
+              add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, regions[i], new Hermes1DFunction<Scalar>(D_map[i]),
+                HERMES_SYM));
               // Absorption.
-              add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, regions[i], Sigma_a_map[i],
-                HERMES_DEFAULT_FUNCTION, HERMES_SYM));
+              add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i]),
+                HERMES_SYM));
 
               /* Residual */
               // Diffusion.
-              add_vector_form(new DefaultResidualDiffusion<Scalar>(0, regions[i], D_map[i]));
+              add_vector_form(new DefaultResidualDiffusion<Scalar>(0, regions[i], new Hermes1DFunction<Scalar>(D_map[i])));
               // Absorption.
-              add_vector_form(new DefaultResidualVol<Scalar>(0, regions[i], Sigma_a_map[i]));
+              add_vector_form(new DefaultResidualVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i])));
               // Sources.
-              add_vector_form(new DefaultVectorFormVol<Scalar>(0, regions[i], -Q_map[i]));
+              add_vector_form(new DefaultVectorFormVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(-Q_map[i])));
             }
           }
+
+          template class HERMES_API DefaultWeakFormFixedSource<double>;
+          template class HERMES_API DefaultWeakFormFixedSource<std::complex<double> >;
         }
       }
 
