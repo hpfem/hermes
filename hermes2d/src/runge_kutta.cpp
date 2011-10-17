@@ -16,7 +16,7 @@
 #include <typeinfo>
 #include "runge_kutta.h"
 #include "discrete_problem.h"
-#include "ogprojection.h"
+#include "projections/ogprojection.h"
 #include "weakform_library/weakforms_hcurl.h"
 namespace Hermes
 {

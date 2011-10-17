@@ -23,7 +23,7 @@
 #define __H2D_SOLVER_PICARD_H_
 
 #include "hermes2d_common_defs.h"
-#include "ogprojection.h"
+#include "projections/ogprojection.h"
 #include "discrete_problem.h"
 #include "views/scalar_view.h"
 

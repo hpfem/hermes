@@ -18,9 +18,9 @@
 #ifndef __H2D_OGPROJECTION_NOX_H
 #define __H2D_OGPROJECTION_NOX_H
 
-#include "function/solution.h"
-#include "forms.h"
-#include "weakform/weakform.h"
+#include "../function/solution.h"
+#include "../forms.h"
+#include "../weakform/weakform.h"
 
 //#include "epetra.h"
 #if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)

@@ -98,6 +98,7 @@ project(hermes2d)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include/views)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include/weakform)
 	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include/weakform_library)
+	include_directories(${CMAKE_HOME_DIRECTORY}/hermes2d/include/projections)
 
   #
 	# Source files for the Hermes2d library.
@@ -108,7 +109,7 @@ project(hermes2d)
 		src/newton_solver.cpp
 		src/picard_solver.cpp
 
-    src/calculation_continuity.cpp
+                src/calculation_continuity.cpp
 
 		src/adapt/adapt.cpp
 		src/adapt/kelly_type_adapt.cpp
@@ -121,7 +122,7 @@ project(hermes2d)
 		src/function/solution.cpp
 		src/function/filter.cpp
 		src/function/mesh_function.cpp
-    src/function/solution_h2d_xml.cpp
+                src/function/solution_h2d_xml.cpp
 
 		src/mesh/refmap.cpp
 		src/mesh/curved.cpp
@@ -131,9 +132,9 @@ project(hermes2d)
 		src/mesh/hash.cpp
 		src/mesh/mesh_reader_h2d.cpp
 		src/mesh/mesh_reader_h2d_xml.cpp
-    src/mesh/mesh_reader_h1d_xml.cpp
+                src/mesh/mesh_reader_h1d_xml.cpp
 		src/mesh/mesh_h2d_xml.cpp
-    src/mesh/mesh_h1d_xml.cpp
+                src/mesh/mesh_h1d_xml.cpp
 		src/mesh/subdomains_h2d_xml.cpp
 		src/mesh/mesh.cpp
 		src/mesh/traverse.cpp
@@ -165,7 +166,7 @@ project(hermes2d)
 		src/space/space_hcurl.cpp
 		src/space/space_l2.cpp
 		src/space/space_hdiv.cpp
-    src/space/space_h2d_xml.cpp
+                src/space/space_h2d_xml.cpp
 
 		src/views/base_view.cpp
 		src/views/mesh_view.cpp
@@ -178,7 +179,7 @@ project(hermes2d)
 		src/views/view_data.cpp
 		src/views/view_support.cpp
 		src/views/linearizer.cpp
-    src/views/linearizer_base.cpp
+                src/views/linearizer_base.cpp
 		src/views/orderizer.cpp
 		src/views/vectorizer.cpp
 
@@ -186,12 +187,13 @@ project(hermes2d)
 
 		src/neighbor.cpp
 		src/graph.cpp
-		src/ogprojection.cpp
-		src/ogprojection_nox.cpp
 		src/hermes2d_common_defs.cpp
 		src/discrete_problem.cpp
 		src/runge_kutta.cpp
 		src/spline.cpp
+
+		src/projections/ogprojection.cpp
+		src/projections/ogprojection_nox.cpp
 
 		src/weakform_library/weakforms_elasticity.cpp
 		src/weakform_library/weakforms_h1.cpp
@@ -206,7 +208,7 @@ project(hermes2d)
 		include/newton_solver.h
 		include/picard_solver.h
 
-    include/calculation_continuity.h
+                include/calculation_continuity.h
 
 		include/adapt/adapt.h
 		include/adapt/kelly_type_adapt.h
@@ -219,7 +221,7 @@ project(hermes2d)
 		include/function/solution.h
 		include/function/filter.h
 		include/function/mesh_function.h
-    include/function/solution_h2d_xml.h
+                include/function/solution_h2d_xml.h
 
 		include/mesh/refmap.h
 		include/mesh/curved.h
@@ -229,9 +231,9 @@ project(hermes2d)
 		include/mesh/hash.h
 		include/mesh/mesh_reader_h2d.h
 		include/mesh/mesh_reader_h2d_xml.h
-    include/mesh/mesh_reader_h1d_xml.h
+                include/mesh/mesh_reader_h1d_xml.h
 		include/mesh/mesh_h2d_xml.h
-    include/mesh/mesh_h1d_xml.h
+                include/mesh/mesh_h1d_xml.h
 		include/mesh/subdomains_h2d_xml.h
 		include/mesh/mesh.h
 		include/mesh/traverse.h
@@ -239,7 +241,7 @@ project(hermes2d)
 
 		include/quadrature/limit_order.h
 		include/quadrature/quad.h
-    include/quadrature/quad_all.h
+                include/quadrature/quad_all.h
 
 		include/refinement_selectors/selector.h
 		include/refinement_selectors/order_permutator.h
@@ -262,7 +264,7 @@ project(hermes2d)
 		include/space/space_hcurl.h
 		include/space/space_l2.h
 		include/space/space_hdiv.h
-    include/space/space_h2d_xml.h
+                include/space/space_h2d_xml.h
 
 		include/views/base_view.h
 		include/views/mesh_view.h
@@ -274,7 +276,7 @@ project(hermes2d)
 		include/views/view.h
 		include/views/view_support.h
 		include/views/linearizer.h
-    include/views/linearizer_base.h
+                include/views/linearizer_base.h
 		include/views/orderizer.h
 		include/views/vectorizer.h
 
@@ -282,12 +284,13 @@ project(hermes2d)
 
 		include/neighbor.h
 		include/graph.h
-		include/ogprojection.h
-		include/ogprojection_nox.h
 		include/hermes2d_common_defs.h
 		include/discrete_problem.h
 		include/runge_kutta.h
 		include/spline.h
+
+		include/projections/ogprojection.h
+		include/projections/ogprojection_nox.h
 
 		include/weakform_library/weakforms_elasticity.h
 		include/weakform_library/weakforms_h1.h
@@ -399,6 +402,7 @@ project(hermes2d)
 	file(GLOB INC_VIEWS      "include/views/*.h")
 	file(GLOB INC_WEAKFORM   "include/weakform/*.h")
 	file(GLOB INC_WEAKFORM_LIBRARY "include/weakform_library/*.h")
+	file(GLOB INC_PROJECTIONS "include/projections/*.h")
 
 	install(FILES ${INC}           DESTINATION ${TARGET_ROOT}/include/hermes2d)
 	install(FILES ${INC_SPACE}     DESTINATION ${TARGET_ROOT}/include/hermes2d/space)
@@ -415,6 +419,7 @@ project(hermes2d)
 	install(FILES ${INC_VIEWS}     DESTINATION ${TARGET_ROOT}/include/hermes2d/views)
 	install(FILES ${INC_WEAKFORM}  DESTINATION ${TARGET_ROOT}/include/hermes2d/weakform)
 	install(FILES ${INC_WEAKFORM_LIBRARY}  DESTINATION ${TARGET_ROOT}/include/hermes2d/weakform_library)
+	install(FILES ${INC_PROJECTIONS}  DESTINATION ${TARGET_ROOT}/include/hermes2d/projections)
 
 	if(H2D_WITH_TEST_EXAMPLES)
 		enable_testing()
