@@ -166,7 +166,7 @@ namespace Hermes
         int order = this->get_element_order(e->id);
         if (order > 0)
         {
-          for (unsigned int i = 0; i < e->get_num_surf(); i++)
+          for (unsigned int i = 0; i < e->get_nvert(); i++)
           {
             // vertex dofs
             Node* vn = e->vn[i];

@@ -114,12 +114,12 @@ namespace Hermes
     public:
       Element();
 
-      int id;            ///< element id number
-      unsigned active:1; ///< 0 = active, no sons; 1 = inactive (refined), has sons
-      unsigned used:1;   ///< array item usage flag
-      Element* parent;   ///< pointer to the parent element for the current son
-      bool visited;      ///< true if the element has been visited during assembling
-      int get_num_surf();
+      int id;              ///< element id number
+      unsigned active:1;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
+      unsigned used:1;     ///< array item usage flag
+      Element* parent;     ///< pointer to the parent element for the current son
+      bool visited;        ///< true if the element has been visited during assembling
+      int get_num_surf();  ///< returns number of edges (same as number of vertices)
       
       /// Calculates the area of the element. For curved elements, this is only
       /// an approximation: the curvature is not accounted for.
@@ -146,6 +146,7 @@ namespace Hermes
       bool is_triangle() const;
       bool is_quad() const;
       bool is_curved() const;
+      int get_nvert() const;
 
     protected:
       int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()

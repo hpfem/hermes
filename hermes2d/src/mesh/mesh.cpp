@@ -98,6 +98,11 @@ namespace Hermes
       return cm != NULL; 
     }
 
+    int Element::get_nvert() const 
+    {
+      return this->nvert; 
+    }
+
     int  Element::get_mode() const 
     {
       return is_triangle() ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 

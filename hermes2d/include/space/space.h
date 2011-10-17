@@ -42,7 +42,7 @@ namespace Hermes
     ///
     /// The Space class represents a finite element space over a domain defined by 'mesh', spanned
     /// by basis functions constructed using 'shapeset'. It serves as a base class for H1Space,
-    /// HcurlSpace, HhivSpace and L2Space, since most of the functionality is common for all these spaces.
+    /// HcurlSpace, HdivSpace and L2Space, since most of the functionality is common for all these spaces.
     ///
     /// There are four main functions the Space class provides:
     /// <ol>

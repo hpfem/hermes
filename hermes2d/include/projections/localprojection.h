@@ -55,29 +55,9 @@ namespace Hermes
           Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      static void project_local(Hermes::vector<Space<Scalar>*> spaces,
-          Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
-          Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK);
-
-      static void project_local(Hermes::vector<Space<Scalar> *> spaces,
-          Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
-          Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-          Hermes::vector<Solution<Scalar> *> sols_dest,
-          Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK);
-
-      static void project_local(Space<Scalar>* space,
-          MatrixFormVol<Scalar>* custom_projection_jacobian,
-          VectorFormVol<Scalar>* custom_projection_residual,
-          Solution<Scalar>* sol_dest,
-          Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK);
-
       // Underlying function for local projection (sometimes called 
       // projection-based interpolation). Not intended for the user. 
     protected:
-      static void project_local_internal(Hermes::vector<Space<Scalar>*> spaces, 
-          WeakForm<Scalar>*proj_wf, Scalar* target_vec,
-          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK);
 
       // Jacobian matrix (same as stiffness matrix since projections are linear).
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
