@@ -194,6 +194,7 @@ project(hermes2d)
 
 		src/projections/ogprojection.cpp
 		src/projections/ogprojection_nox.cpp
+		src/projections/localprojection.cpp
 
 		src/weakform_library/weakforms_elasticity.cpp
 		src/weakform_library/weakforms_h1.cpp
@@ -291,6 +292,7 @@ project(hermes2d)
 
 		include/projections/ogprojection.h
 		include/projections/ogprojection_nox.h
+		include/projections/localprojection.h
 
 		include/weakform_library/weakforms_elasticity.h
 		include/weakform_library/weakforms_h1.h
