@@ -237,6 +237,7 @@ namespace Hermes
 
       friend class RefMap;
       template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Continuity;
       template<typename T> friend class OGProjection;
       template<typename T> friend class OGProjectionNOX;
       template<typename T> friend class Adapt;

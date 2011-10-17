@@ -360,23 +360,27 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Mesh*> meshes)
+    void Continuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Space<Scalar>*> spaces)
     {
-      if(solutions.size() != meshes.size())
-        error("Argument count does not agree in Continuity::Record::load_solutions().");
+      if(solutions.size() != spaces.size())
+        throw Exceptions::LengthException(1, 2, solutions.size(), spaces.size());
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         std::stringstream filename;
         filename << Continuity<Scalar>::solutionFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
-        solutions[i]->load(filename.str().c_str(), meshes[i]);
+        solutions[i]->load(filename.str().c_str(), spaces[i]->get_mesh());
+        solutions[i]->space = spaces[i];
+        solutions[i]->space_type = spaces[i]->get_type();
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, Mesh* mesh)
+    void Continuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, Space<Scalar>* space)
     {
       std::stringstream filename;
       filename << Continuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
-      solution->load(filename.str().c_str(), mesh);
+      solution->load(filename.str().c_str(), space->get_mesh());
+      solution->space = space;
+      solution->space_type = space->get_type();
     }
 
     template<typename Scalar>
