@@ -200,6 +200,8 @@ namespace Hermes
         {
           delete sols_src[i]->get_mesh();
           sols_src[i]->own_mesh = false;
+          delete sols_src[i]->get_space();
+          sols_src[i]->space = NULL;
         }
 
         Solution<Scalar>::vector_to_solutions(target_vec, spaces, sols_dest);
