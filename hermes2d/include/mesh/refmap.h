@@ -75,12 +75,12 @@ namespace Hermes
       /// physical domain of the element. Intended for integrals containing spatial
       /// variables.
       double* get_phys_x(int order);
-
-    private:
+      
       /// Returns true if the jacobian of the reference map is constant (which
       /// is the case for non-curvilinear triangular elements), false otherwise.
       bool is_jacobian_const() const;
-
+      
+    private:
       /// Returns the increase in the integration order due to the reference map.
       int get_inv_ref_order() const;
 
