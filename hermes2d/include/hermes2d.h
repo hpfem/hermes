@@ -89,6 +89,7 @@
 #include "adapt/adapt.h"
 #include "adapt/kelly_type_adapt.h"
 #include "neighbor.h"
+#include "projections/localprojection.h"
 #include "projections/ogprojection.h"
 #include "projections/ogprojection_nox.h"
 
