@@ -80,13 +80,13 @@ namespace Hermes
       /// is the case for non-curvilinear triangular elements), false otherwise.
       bool is_jacobian_const() const;
       
-    private:
-      /// Returns the increase in the integration order due to the reference map.
-      int get_inv_ref_order() const;
-
       /// If the jacobian of the reference map is constant, this is the fast
       /// way to obtain it.
       double get_const_jacobian() const;
+
+    private:
+      /// Returns the increase in the integration order due to the reference map.
+      int get_inv_ref_order() const;
 
       /// If the reference map is constant, this is the fast way to obtain
       /// its inverse matrix.
