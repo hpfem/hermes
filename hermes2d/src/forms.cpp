@@ -364,7 +364,7 @@ namespace Hermes
       e->elem_marker = rm->get_active_element()->marker;
       e->diam = rm->get_active_element()->get_diameter();
       e->area = rm->get_active_element()->get_area();
-      e->id = rm->get_active_element()->en[surf_pos->surf_num]->id;
+      e->id = rm->get_active_element()->id;
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
       double3 *tan;
