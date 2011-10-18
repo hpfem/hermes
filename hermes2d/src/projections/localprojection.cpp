@@ -16,7 +16,6 @@
 #include "projections/localprojection.h"
 #include "space.h"
 #include "discrete_problem.h"
-#include "newton_solver.h"
 
 namespace Hermes
 {
@@ -49,8 +48,9 @@ namespace Hermes
       Scalar** target_vec_space = new Scalar*[n];
       for (int i=0; i < n; i++) 
       {
-        target_vec_space[i] = new Scalar[ndof];
-        memset(target_vec_space[i], 0, ndof*sizeof(Scalar));
+        int ndof_i = ndof_space[i];
+        target_vec_space[i] = new Scalar[ndof_i];
+        memset(target_vec_space[i], 0, ndof_i*sizeof(Scalar));
       }
 
       // For each function source_meshfns[i], dump into the first part of target_vec_space[i] the values 
@@ -70,20 +70,24 @@ namespace Hermes
           {
             for (unsigned int j = 0; j < e->get_nvert(); j++)
             {
-              // Vertex dofs.
+              // FIXME - the same vertex is visited several times since it 
+              // belongs to multiple elements!
               Node* vn = e->vn[j];
-              typename Space<Scalar>::NodeData* nd = spaces[j]->ndata + vn->id;
+              double x = e->vn[j]->x;
+              double y = e->vn[j]->y;
+              //info("Probing vertex %g %g\n", x, y);
+              typename Space<Scalar>::NodeData* nd = spaces[i]->ndata + vn->id;
               if (!vn->is_constrained_vertex() && nd->dof >= 0)
               {
                 int dof_num = nd->dof;
-                // FIXME: If this is a Solution, the it would be faster to just 
+                // FIXME: If this is a Solution, the it would be MUCH faster to just 
                 // retrieve the value from the coefficient vector stored in the Solution.
 
                 // FIXME: Retrieving the value through get_pt_value() is slow and this 
                 // should be only done if we are dealing with MeshFunction (not a Solution).
-                double x = e->vn[j]->x;
-                double y = e->vn[j]->y;
-                target_vec_space[i][dof_num] = source_meshfns[i]->get_pt_value(x, y);
+                Scalar val = source_meshfns[i]->get_pt_value(x, y);
+                //printf("Found active vertex %g %g, val = %g, dof_num = %d\n", x, y, std::abs(val), dof_num);
+                target_vec_space[i][dof_num] = val;
               }
             }
           }
@@ -105,6 +109,12 @@ namespace Hermes
 	}
         counter += ndof_space[i];
       }
+
+      // debug
+      //for (int i=0; i<counter; i++) 
+      //{
+      //  printf("dof %d val %g\n", i, std::abs(target_vec[i]));
+      //}
 
       // Clean up.
       for (int i = 0; i < n; i++) delete [] target_vec_space[i];

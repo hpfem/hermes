@@ -159,7 +159,7 @@ namespace Hermes
       // look at the adjacent edge nodes given a vertex node, thus we have to walk through
       // all elements in the mesh.
 
-      // loop through all elements and assign vertex, edge and bubble dofs
+      // Loop through all elements and assign vertex, edge and bubble dofs.
       Element* e;
       for_all_active_elements(e, this->mesh)
       {
@@ -181,6 +181,9 @@ namespace Hermes
               {
                 nd->dof = this->next_dof;
                 this->next_dof += this->stride;
+                //double x = vn->x;
+                //double y = vn->y;
+                //info("Assigning dof %d to vertex %g %g\n", nd->dof, x, y);
               }
               nd->n = 1;
             }
@@ -190,7 +193,7 @@ namespace Hermes
             nd = this->ndata + en->id;
             if (nd->dof == this->H2D_UNASSIGNED_DOF)
             {
-              // if the edge node is not constrained, assign it dofs
+              // If the edge node is not constrained, assign it dofs.
               if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
               {
                 int ndofs = this->get_edge_order_internal(en) - 1;
@@ -216,13 +219,13 @@ namespace Hermes
                   this->next_dof += ndofs * this->stride;
                 }
               }
-              else // constrained edge node
+              else // Constrained edge node.
                 nd->n = -1;
             }
           }
         }
 
-        // bubble dofs
+        // Bubble dofs.
         this->shapeset->set_mode(e->get_mode());
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
