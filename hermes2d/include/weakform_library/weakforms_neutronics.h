@@ -531,8 +531,8 @@ namespace Hermes
 
           namespace Definitions
           {
-            typedef MultiArray<rank0> grow;
-            typedef MultiArray<rank1> gmat;
+            typedef MultiArray<rank0> row;
+            typedef MultiArray<rank1> mat;
             typedef MultiArray<bool> bool_row;
             typedef MultiArray< Hermes::vector<bool> > bool_mat;
           }
