@@ -1,16 +1,10 @@
 
 @import url("default.css");
 
-img.align-center{
+div.align-center{
   text-align: center;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-img{
-  text-align: center;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
