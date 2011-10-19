@@ -884,6 +884,19 @@ namespace Hermes
             }
           }
         }
+
+        namespace SupportClasses
+	{
+          void SourceFilter::filter_fn(int n, Hermes::vector<double*> values, double* result)
+	  {
+	    for (int i = 0; i < n; i++) 
+	    {
+	      result[i] = 0;
+	      for (unsigned int j = 0; j < values.size(); j++)
+	        result[i] += nu[j] * Sigma_f[j] * values.at(j)[i];
+	    } 
+	  }
+	}
       }
     }
   }

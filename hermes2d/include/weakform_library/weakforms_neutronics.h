@@ -3,6 +3,7 @@
 
 #include "weakforms_h1.h"
 #include "../forms.h"
+#include "../function/filter.h"
 
 namespace Hermes
 {
@@ -1073,6 +1074,37 @@ namespace Hermes
             };
 
           }
+        }
+
+        namespace SupportClasses
+        {
+          using MaterialProperties::Common::MaterialPropertyMaps;
+          using namespace MaterialProperties::Definitions;
+        
+          class SourceFilter : public SimpleFilter<double>
+          {
+            public: 
+            SourceFilter(Hermes::vector<MeshFunction*> solutions, const MaterialPropertyMaps* matprop,
+                         const std::string& source_area)
+              : SimpleFilter(solutions, Hermes::vector<int>())
+            {
+              nu = matprop->get_nu().at(source_area);
+              Sigma_f = matprop->get_Sigma_f().at(source_area);
+            }
+            SourceFilter(Hermes::vector<Solution<double>*> solutions, const MaterialPropertyMaps* matprop,
+                const std::string& source_area)
+            : SimpleFilter(solutions, Hermes::vector<int>())
+            {
+              nu = matprop->get_nu().at(source_area);
+              Sigma_f = matprop->get_Sigma_f().at(source_area);
+            }
+            
+          private:
+            rank1 nu;
+            rank1 Sigma_f;
+            
+            void filter_fn(int n, Hermes::vector<double*> values, double* result);
+          };
         }
       }
     }
