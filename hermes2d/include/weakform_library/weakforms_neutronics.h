@@ -1015,9 +1015,7 @@ namespace Hermes
                 unsigned int g;
               };
             };
-
           }
-
         }
 
         namespace CompleteWeakForms
@@ -1072,7 +1070,6 @@ namespace Hermes
 
               void update_keff(double new_keff);
             };
-
           }
         }
 
