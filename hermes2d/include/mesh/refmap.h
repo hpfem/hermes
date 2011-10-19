@@ -84,6 +84,10 @@ namespace Hermes
       /// way to obtain it.
       double get_const_jacobian() const;
 
+      /// Returns the jacobian of the reference map precalculated at the integration
+      /// points of the specified order. Intended for non-constant jacobian elements.
+      double* get_jacobian(int order);
+
     private:
       /// Returns the increase in the integration order due to the reference map.
       int get_inv_ref_order() const;
@@ -92,9 +96,6 @@ namespace Hermes
       /// its inverse matrix.
       double2x2* get_const_inv_ref_map();
 
-      /// Returns the jacobian of the reference map precalculated at the integration
-      /// points of the specified order. Intended for non-constant jacobian elements.
-      double* get_jacobian(int order);
 
       /// Returns the inverse matrices of the reference map precalculated at the
       /// integration points of the specified order. Intended for non-constant
