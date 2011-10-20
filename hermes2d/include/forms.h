@@ -291,6 +291,7 @@ namespace Hermes
     {
     public:
       Func<T>** fn;     ///< Array of pointers to functions.
+      int get_nf() { return nf; };
     private:
       int nf;           ///< Number of functions in 'fn' array.
 

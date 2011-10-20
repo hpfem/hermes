@@ -146,7 +146,7 @@ namespace Hermes
             using namespace Definitions;
             using namespace Messages;
 
-            class NDArrayMapOp
+            class HERMES_API NDArrayMapOp
             {
               //
               // NOTE: Could be perhaps combined with the classes material_property_map and MultiArray below
@@ -295,7 +295,7 @@ namespace Hermes
 #undef for_each_element_in_map
             };
 
-            class MaterialPropertyMaps
+            class HERMES_API MaterialPropertyMaps
             {
             protected:
 
@@ -394,7 +394,7 @@ namespace Hermes
             using namespace Definitions;
             using namespace Messages;
 
-            class MaterialPropertyMaps : public Common::MaterialPropertyMaps
+            class HERMES_API MaterialPropertyMaps : public Common::MaterialPropertyMaps
             {
             protected:
 
@@ -486,7 +486,7 @@ namespace Hermes
               const rank1& get_D(std::string material) const;
               const rank1& get_src(std::string material) const;
 
-              friend std::ostream & operator<< (std::ostream& os, const MaterialPropertyMaps& matprop);
+              friend HERMES_API std::ostream & operator<< (std::ostream& os, const MaterialPropertyMaps& matprop);
             };
           }
 
@@ -545,7 +545,7 @@ namespace Hermes
           {
             using namespace MaterialProperties::Diffusion;
 
-            class GenericForm
+            class HERMES_API GenericForm
             {
             protected:
               const MaterialPropertyMaps& matprop;
@@ -556,21 +556,19 @@ namespace Hermes
                 : matprop(matprop), geom_type(geom_type)
               {};
 
-              template<typename Scalar>
-              std::string get_material(int elem_marker, WeakForm<Scalar>*wf) const
-              {
-                if (elem_marker == -9999)
-                  return matprop.get_D().begin()->first;
+              GenericForm(const MaterialPropertyMaps& matprop, Mesh* mesh,
+                GeomType geom_type = HERMES_PLANAR)
+                : matprop(matprop), geom_type(geom_type), mesh(mesh)
+              {};
 
-                return wf->get_element_markers_conversion()->get_user_marker(elem_marker);
-              }
+              Mesh* mesh;
             };
 
-            struct VacuumBoundaryCondition
+            struct HERMES_API VacuumBoundaryCondition
             {
               // TODO: General albedo boundary condition.
               template<typename Scalar>
-              class Jacobian : public MatrixFormSurf<Scalar>
+              class HERMES_API Jacobian : public MatrixFormSurf<Scalar>
               {
               public:
                 Jacobian(unsigned int g, GeomType geom_type = HERMES_PLANAR)
@@ -608,7 +606,7 @@ namespace Hermes
               };
 
               template<typename Scalar>
-              class Residual : public VectorFormSurf<Scalar>
+              class HERMES_API Residual : public VectorFormSurf<Scalar>
               {
               public:
                 Residual(unsigned int g, GeomType geom_type = HERMES_PLANAR)
@@ -646,7 +644,7 @@ namespace Hermes
               };
             };
 
-            struct DiffusionReaction
+            struct HERMES_API DiffusionReaction
             {
               template<typename Scalar>
               class Jacobian : public MatrixFormVol<Scalar>, protected GenericForm
@@ -734,10 +732,10 @@ namespace Hermes
               };
             };
 
-            struct FissionYield
+            struct HERMES_API FissionYield
             {
               template<typename Scalar>
-              class Jacobian : public MatrixFormVol<Scalar>, protected GenericForm
+              class HERMES_API Jacobian : public MatrixFormVol<Scalar>, protected GenericForm
               {
               public:
 
@@ -752,6 +750,20 @@ namespace Hermes
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR )
                   : MatrixFormVol<Scalar>(gto, gfrom, area),
                   GenericForm(matprop, geom_type),
+                  gto(gto), gfrom(gfrom)
+                {};
+
+                Jacobian( unsigned int gto, unsigned int gfrom,
+                  const MaterialPropertyMaps& matprop, Mesh* mesh, GeomType geom_type = HERMES_PLANAR)
+                  : MatrixFormVol<Scalar>(gto, gfrom),
+                  GenericForm(matprop, mesh, geom_type),
+                  gto(gto), gfrom(gfrom)
+                {};
+
+                Jacobian( unsigned int gto, unsigned int gfrom, std::string area,
+                  const MaterialPropertyMaps& matprop, Mesh* mesh, GeomType geom_type = HERMES_PLANAR)
+                  : MatrixFormVol<Scalar>(gto, gfrom, area),
+                  GenericForm(matprop, mesh, geom_type),
                   gto(gto), gfrom(gfrom)
                 {};
 
@@ -780,7 +792,7 @@ namespace Hermes
               };
 
               template<typename Scalar>
-              class OuterIterationForm : public VectorFormVol<Scalar>, protected GenericForm
+              class HERMES_API OuterIterationForm : public VectorFormVol<Scalar>, protected GenericForm
               {
               public:
 
@@ -838,7 +850,7 @@ namespace Hermes
               };
 
               template<typename Scalar>
-              class Residual : public VectorFormVol<Scalar>, protected GenericForm
+              class HERMES_API Residual : public VectorFormVol<Scalar>, protected GenericForm
               {
               public:
                 Residual( unsigned int gto, unsigned int gfrom,
@@ -880,7 +892,7 @@ namespace Hermes
               };
             };
 
-            struct Scattering
+            struct HERMES_API Scattering
             {
               template<typename Scalar>
               class Jacobian : public MatrixFormVol<Scalar>, protected GenericForm
@@ -970,7 +982,7 @@ namespace Hermes
               };
             };
 
-            struct ExternalSources
+            struct HERMES_API ExternalSources
             {
               template<typename Scalar>
               class LinearForm : public VectorFormVol<Scalar>, protected GenericForm
@@ -1026,7 +1038,7 @@ namespace Hermes
             using namespace ElementaryForms::Diffusion;
 
             template<typename Scalar>
-            class DefaultWeakFormFixedSource : public WeakForm<Scalar>
+            class HERMES_API DefaultWeakFormFixedSource : public WeakForm<Scalar>
             {
             protected:
               void lhs_init(unsigned int G, const MaterialPropertyMaps& matprop, GeomType geom_type);
@@ -1057,7 +1069,7 @@ namespace Hermes
             };
 
             template<typename Scalar>
-            class DefaultWeakFormSourceIteration : public WeakForm<Scalar>
+            class HERMES_API DefaultWeakFormSourceIteration : public WeakForm<Scalar>
             {
             protected:
               Hermes::vector<FissionYield::OuterIterationForm<Scalar>*> keff_iteration_forms;
@@ -1078,7 +1090,7 @@ namespace Hermes
           using MaterialProperties::Common::MaterialPropertyMaps;
           using namespace MaterialProperties::Definitions;
         
-          class SourceFilter : public SimpleFilter<double>
+          class HERMES_API SourceFilter : public SimpleFilter<double>
           {
             public: 
             SourceFilter(Hermes::vector<MeshFunction*> solutions, const MaterialPropertyMaps* matprop,
