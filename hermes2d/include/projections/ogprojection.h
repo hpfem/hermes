@@ -25,8 +25,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
-
     template<typename Scalar>
     class HERMES_API OGProjection
     {
@@ -43,7 +41,7 @@ namespace Hermes
 
       static void project_global(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
         Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-        ProjNormType proj_norm = HERMES_H1_NORM);
+        ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       static void project_global(Hermes::vector<Space<Scalar>*> spaces,
         Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,

@@ -32,7 +32,7 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_internal(Hermes::vector<Space<Scalar>*> spaces, WeakForm<Scalar>* wf,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
+      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver)
     {
       _F_;
       unsigned int n = spaces.size();
@@ -50,7 +50,7 @@ namespace Hermes
       memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
       // Perform Newton's iteration.
-      NewtonSolver<Scalar> newton(&dp, matrix_solver_type);
+      NewtonSolver<Scalar> newton(&dp, matrix_solver);
       // No output for the Newton's loop.
       newton.set_verbose_output(false);
       newton.solve(coeff_vec);
@@ -63,15 +63,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type, Hermes::vector<ProjNormType> proj_norms)
+    void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, 
+        Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
+        Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, 
+        Hermes::vector<ProjNormType> proj_norms)
     {
       _F_;
       int n = spaces.size();
 
+      // Sanity checks.
       if (n!=source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
-      if (target_vec==NULL) throw Exceptions::NullException(3);
-      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if (target_vec == NULL) throw Exceptions::NullException(3);
+      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       // this is needed since spaces may have their DOFs enumerated only locally.
       ndof = Space<Scalar>::assign_dofs(spaces);
@@ -83,7 +86,8 @@ namespace Hermes
         {
           if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_space() != NULL)
           {
-            if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_space_seq() == spaces[i]->get_seq() && dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_sln_vector() != NULL)
+            if(dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_space_seq() == spaces[i]->get_seq() 
+                && dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_sln_vector() != NULL)
             {
               for(int j = ndof_start_running; j < ndof_start_running + spaces[i]->get_num_dofs(); j++)
                 target_vec[j] = dynamic_cast<Solution<Scalar>*>(source_meshfns[i])->get_sln_vector()[j - ndof_start_running];
@@ -110,7 +114,7 @@ namespace Hermes
       if(all_slns_vectors_stored)
         return;
 
-      // define temporary projection weak form
+      // Define temporary projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(n);
 
       // For error detection.
@@ -118,72 +122,88 @@ namespace Hermes
       for (int i = 0; i < n; i++)
         found[i] = false;
 
+      // If projection norms are not provided, set them
+      // to match the type of each space.
       for (int i = 0; i < n; i++)
       {
-        ProjNormType norm = HERMES_UNSET_NORM;
+        ProjNormType norm_i = HERMES_UNSET_NORM;
         if (proj_norms == Hermes::vector<ProjNormType>())
         {
-          SpaceType space_type = spaces[i]->get_type();
-          switch (space_type)
+          SpaceType space_type_i = spaces[i]->get_type();
+          switch (space_type_i)
           {
-          case HERMES_H1_SPACE: norm = HERMES_H1_NORM; break;
-          case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
-          case HERMES_HDIV_SPACE: norm = HERMES_HDIV_NORM; break;
-          case HERMES_L2_SPACE: norm = HERMES_L2_NORM; break;
-          default: error("Unknown space type in OGProjection<Scalar>::project_global().");
+            case HERMES_H1_SPACE: norm_i = HERMES_H1_NORM; break;
+            case HERMES_HCURL_SPACE: norm_i = HERMES_HCURL_NORM; break;
+            case HERMES_HDIV_SPACE: norm_i = HERMES_HDIV_NORM; break;
+            case HERMES_L2_SPACE: norm_i = HERMES_L2_NORM; break;
+            default: error("Unknown space type in OGProjection<Scalar>::project_global().");
           }
         }
-        else norm = proj_norms[i];
+        else norm_i = proj_norms[i];
 
         // FIXME - memory leak - create Projection class and encapsulate this function project_global(...)
         // maybe in more general form
         found[i] = true;
         // Jacobian.
-        proj_wf->add_matrix_form(new ProjectionMatrixFormVol(i, i, norm));
+        proj_wf->add_matrix_form(new ProjectionMatrixFormVol(i, i, norm_i));
         // Residual.
-        proj_wf->add_vector_form(new ProjectionVectorFormVol(i, source_meshfns[i], norm));
+        proj_wf->add_vector_form(new ProjectionVectorFormVol(i, source_meshfns[i], norm_i));
       }
+
       for (int i = 0; i < n; i++)
       {
         if (!found[i])
         {
           warn("Index of component: %d\n", i);
-          error("Wrong projection norm in project_global().");
+          error("Wrong projection norm in OGProjection<Scalar>::project_global().");
         }
       }
 
-      project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      project_internal(spaces, proj_wf, target_vec, matrix_solver);
 
       delete proj_wf;
     }
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type, Hermes::vector<ProjNormType> proj_norms)
+      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
       Hermes::vector<MeshFunction<Scalar>*> mesh_fns;
       for(unsigned int i = 0; i < source_sols.size(); i++)
         mesh_fns.push_back(source_sols[i]);
-      project_global(spaces, mesh_fns, target_vec, matrix_solver_type, proj_norms);
+      project_global(spaces, mesh_fns, target_vec, matrix_solver, proj_norms);
     }
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type,
+      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver,
       ProjNormType proj_norm)
     {
+      if (proj_norm == HERMES_UNSET_NORM) 
+      { 
+        SpaceType space_type = space->get_type();
+        switch (space_type)
+        {
+          case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
+          case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
+          case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
+          case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
+          default: error("Unknown space type in OGProjection<Scalar>::project_global().");
+        }
+      }
+
       Hermes::vector<Space<Scalar>*> spaces;
       spaces.push_back(space);
       Hermes::vector<MeshFunction<Scalar>*> source_meshfns;
       source_meshfns.push_back(source_meshfn);
       Hermes::vector<ProjNormType> proj_norms;
       proj_norms.push_back(proj_norm);
-      project_global(spaces, source_meshfns, target_vec, matrix_solver_type, proj_norms);
+      project_global(spaces, source_meshfns, target_vec, matrix_solver, proj_norms);
     }
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
-      Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver_type,
+      Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver,
       Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {
       _F_;
@@ -193,7 +213,7 @@ namespace Hermes
       for (unsigned int i = 0; i < sols_src.size(); i++)
         ref_slns_mf.push_back(static_cast<MeshFunction<Scalar>*>(sols_src[i]));
 
-      OGProjection<Scalar>::project_global(spaces, ref_slns_mf, target_vec, matrix_solver_type, proj_norms);
+      OGProjection<Scalar>::project_global(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms);
 
       if(delete_old_meshes)
         for(unsigned int i = 0; i < sols_src.size(); i++)
@@ -212,9 +232,22 @@ namespace Hermes
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Space<Scalar>* space,
       Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
-      Hermes::MatrixSolverType matrix_solver_type,
+      Hermes::MatrixSolverType matrix_solver,
       ProjNormType proj_norm)
     {
+      if (proj_norm == HERMES_UNSET_NORM) 
+      { 
+        SpaceType space_type = space->get_type();
+        switch (space_type)
+        {
+          case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
+          case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
+          case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
+          case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
+          default: error("Unknown space type in OGProjection<Scalar>::project_global().");
+        }
+      }
+
       Hermes::vector<Space<Scalar>*> spaces;
       spaces.push_back(space);
       Hermes::vector<Solution<Scalar>*> sols_src;
@@ -225,14 +258,14 @@ namespace Hermes
       if(proj_norm != HERMES_UNSET_NORM)
         proj_norms.push_back(proj_norm);
 
-      project_global(spaces, sols_src, sols_dest, matrix_solver_type, proj_norms);
+      project_global(spaces, sols_src, sols_dest, matrix_solver, proj_norms);
     }
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces,
       Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
       Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver_type)
+      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver)
     {
       _F_;
       unsigned int n = spaces.size();
@@ -255,7 +288,7 @@ namespace Hermes
         proj_wf->add_vector_form(custom_projection_residual[i]);
       }
 
-      project_internal(spaces, proj_wf, target_vec, matrix_solver_type);
+      project_internal(spaces, proj_wf, target_vec, matrix_solver);
 
       delete proj_wf;
     }

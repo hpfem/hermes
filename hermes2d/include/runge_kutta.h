@@ -184,7 +184,7 @@ namespace Hermes
       /// Number of previous calls to rk_time_step_newton().
       unsigned int iteration;
     private:
-      MatrixSolverType matrix_solver_type;
+      MatrixSolverType matrix_solver;
     };
   }
 }
