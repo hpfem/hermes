@@ -20,6 +20,7 @@
 #include "../function/solution.h"
 #include "../forms.h"
 #include "../weakform/weakform.h"
+#include "../views/scalar_view.h"
 
 namespace Hermes
 {
@@ -31,30 +32,33 @@ namespace Hermes
     public:
       LocalProjection();
 
+      // Main function.
       static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
+      // This is a wrapper that takes Solutions instead of MeshFunctions.
       static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
+      // This is a wrapper that takes only one MeshFunction.
       static void project_local(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      static void project_local(Hermes::vector<Space<Scalar>*> spaces,
-          Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,
-          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
-
+      // This is a wrapper that takes only one Solution.
       static void project_local(Space<Scalar>* space,
           Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
           Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      // Underlying function for local projection (sometimes called 
-      // projection-based interpolation). Not intended for the user. 
+      // This is a wrapper that delivers Solutions instead of a coefficient vector.
+      static void project_local(Hermes::vector<Space<Scalar>*> spaces,
+          Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,
+          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
+
     protected:
 
       // Jacobian matrix (same as stiffness matrix since projections are linear).

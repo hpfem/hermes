@@ -99,6 +99,15 @@ namespace Hermes
 
       }
 
+      /*
+      // debug
+      Solution<double> debug_sln;
+      Solution<double>::vector_to_solution(target_vec_space[3], spaces[3], &debug_sln);
+      Hermes::Hermes2D::Views::ScalarView sv;
+      sv.show(&debug_sln);
+      Hermes::Hermes2D::Views::View::wait();
+      */
+
       // Copy all the vectors target_vec_space[i] into target_vec.
       int counter = 0;
       for (int i = 0; i < n; i++) 
@@ -130,37 +139,10 @@ namespace Hermes
 
       // Sanity checks.
       if (n != source_sols.size()) throw Exceptions::LengthException(1, 2, n, source_sols.size());
-      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
-      // This vector will contain projection norms. 
-      Hermes::vector<ProjNormType> proj_norms_new = Hermes::vector<ProjNormType>();
-
-      // If projection norms are not provided, set them
-      // to match the type of each space.
-      for (int i = 0; i < n; i++)
-      {
-        ProjNormType norm_i = HERMES_UNSET_NORM;
-        if (proj_norms == Hermes::vector<ProjNormType>())
-        {
-          SpaceType space_type_i = spaces[i]->get_type();
-          switch (space_type_i)
-          {
-            case HERMES_H1_SPACE: norm_i = HERMES_H1_NORM; break;
-            case HERMES_HCURL_SPACE: norm_i = HERMES_HCURL_NORM; break;
-            case HERMES_HDIV_SPACE: norm_i = HERMES_HDIV_NORM; break;
-            case HERMES_L2_SPACE: norm_i = HERMES_L2_NORM; break;
-            default: error("Unknown space type in OGProjection<Scalar>::project_global().");
-          }
-        }
-        else norm_i = proj_norms[i];
-
-        proj_norms_new.push_back(norm_i);
-      }
-
-      Hermes::vector<MeshFunction<Scalar>*> mesh_fns;
-      for(unsigned int i = 0; i < source_sols.size(); i++)
-        mesh_fns.push_back(source_sols[i]);
-      project_local(spaces, mesh_fns, target_vec, matrix_solver, proj_norms_new);
+      Hermes::vector<MeshFunction<Scalar>*> mesh_fns = Hermes::vector<MeshFunction<Scalar>*>();
+      for(unsigned int i = 0; i < source_sols.size(); i++) mesh_fns.push_back(source_sols[i]);
+      project_local(spaces, mesh_fns, target_vec, matrix_solver, proj_norms);
     }
 
     template<typename Scalar>
