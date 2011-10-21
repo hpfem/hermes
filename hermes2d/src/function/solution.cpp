@@ -508,11 +508,12 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
       Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<Solution<Scalar>*> solutions,
-      Hermes::vector<bool> add_dir_lift)
+      Hermes::vector<Solution<Scalar>*> solutions, 
+      Hermes::vector<bool> add_dir_lift, bool assign_dofs)
     {
       _F_
-      Space<Scalar>::assign_dofs(spaces);
+      if(assign_dofs)
+        Space<Scalar>::assign_dofs(spaces);
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
@@ -548,11 +549,12 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<Solution<Scalar>*> solutions,
-      Hermes::vector<bool> add_dir_lift)
+      Hermes::vector<Solution<Scalar>*> solutions, 
+      Hermes::vector<bool> add_dir_lift, bool assign_dofs)
     {
       _F_
-      Space<Scalar>::assign_dofs(spaces);
+      if(assign_dofs)
+        Space<Scalar>::assign_dofs(spaces);
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
@@ -589,11 +591,12 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
       Hermes::vector<Solution<Scalar>*> solutions,
-      Hermes::vector<PrecalcShapeset *> pss,
-      Hermes::vector<bool> add_dir_lift)
+      Hermes::vector<PrecalcShapeset *> pss, 
+      Hermes::vector<bool> add_dir_lift, bool assign_dofs)
     {
-      _F_
-      Space<Scalar>::assign_dofs(spaces);
+      _F_;
+      if(assign_dofs)
+        Space<Scalar>::assign_dofs(spaces);
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
