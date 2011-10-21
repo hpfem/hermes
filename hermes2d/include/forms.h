@@ -79,6 +79,9 @@ namespace Hermes
       /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
       /// expected from a continuous function.
       virtual ~Func() { };
+      
+      void subtract(const Func<T>& func);
+      void add(T* attribute, T* other_attribute);
 
     protected:
       const int num_gip; ///< Number of integration points used by this intance.
@@ -91,13 +94,11 @@ namespace Hermes
 
       /// Calculate this -= func for each function expations and each integration point.
       /** \param[in] func A function which is subtracted from *this. A number of integratioN points and a number of component has to match. */
-      void subtract(const Func<T>& func);
       void subtract(T* attribute, T* other_attribute);
 
       /// Calculate this += func for each function expations and each integration point.
       /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
       void add(const Func<T>& func);
-      void add(T* attribute, T* other_attribute);
 
       friend Func<Hermes::Ord>* init_fn_ord(const int order);
       friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
