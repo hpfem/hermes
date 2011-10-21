@@ -512,6 +512,7 @@ namespace Hermes
       Hermes::vector<bool> add_dir_lift)
     {
       _F_
+      Space<Scalar>::assign_dofs(spaces);
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
@@ -551,6 +552,7 @@ namespace Hermes
       Hermes::vector<bool> add_dir_lift)
     {
       _F_
+      Space<Scalar>::assign_dofs(spaces);
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
@@ -591,6 +593,7 @@ namespace Hermes
       Hermes::vector<bool> add_dir_lift)
     {
       _F_
+      Space<Scalar>::assign_dofs(spaces);
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
