@@ -30,14 +30,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
+    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, 
+        Hermes::vector<MeshFunction<Scalar>*> meshfns,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
       _F_;
       int n = spaces.size();
 
-      if (n!=source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
-      if (target_vec==NULL) throw Exceptions::NullException(3);
+      if (n != meshfns.size()) throw Exceptions::LengthException(1, 2, n, meshfns.size());
+      if (target_vec == NULL) throw Exceptions::NullException(3);
       if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       // Get ndof of each space.
@@ -53,7 +54,7 @@ namespace Hermes
         memset(target_vec_space[i], 0, ndof_i*sizeof(Scalar));
       }
 
-      // For each function source_meshfns[i], dump into the first part of target_vec_space[i] the values 
+      // For each function meshfns[i], dump into the first part of target_vec_space[i] the values 
       // of active vertex dofs, then add values of active edge dofs, and finally also values 
       // of active bubble dofs.
       // Start with active vertex dofs.
@@ -85,7 +86,7 @@ namespace Hermes
 
                 // FIXME: Retrieving the value through get_pt_value() is slow and this 
                 // should be only done if we are dealing with MeshFunction (not a Solution).
-                Scalar val = source_meshfns[i]->get_pt_value(x, y);
+                Scalar val = meshfns[i]->get_pt_value(x, y);
                 //printf("Found active vertex %g %g, val = %g, dof_num = %d\n", x, y, std::abs(val), dof_num);
                 target_vec_space[i][dof_num] = val;
               }
@@ -100,7 +101,24 @@ namespace Hermes
       }
 
       /*
-      // debug
+      // debug (related to example ns-heat-subdomains)
+      printf("LP: Dimensions: %d, %d, %d, %d\n", ndof_space[0], ndof_space[1], ndof_space[2], ndof_space[3]);
+      printf("LP;' Vector 0 = ");
+      for (int i=0; i<ndof_space[0]; i++) printf("%g ", target_vec_space[0][i]);
+      printf("\n");
+      printf("LP;' Vector 1 = ");
+      for (int i=0; i<ndof_space[1]; i++) printf("%g ", target_vec_space[1][i]);
+      printf("\n");
+      printf("LP;' Vector 2 = ");
+      for (int i=0; i<ndof_space[2]; i++) printf("%g ", target_vec_space[2][i]);
+      printf("\n");
+      printf("LP;' Vector 3 = ");
+      for (int i=0; i<ndof_space[3]; i++) printf("%g ", target_vec_space[3][i]);
+      printf("\n");
+      */
+
+      /*
+      // debug (related to example ns-heat-subdomains)
       Solution<double> debug_sln;
       Solution<double>::vector_to_solution(target_vec_space[3], spaces[3], &debug_sln);
       Hermes::Hermes2D::Views::ScalarView sv;
@@ -132,21 +150,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
+    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
       int n = spaces.size();
 
       // Sanity checks.
-      if (n != source_sols.size()) throw Exceptions::LengthException(1, 2, n, source_sols.size());
+      if (n != slns.size()) throw Exceptions::LengthException(1, 2, n, slns.size());
 
       Hermes::vector<MeshFunction<Scalar>*> mesh_fns = Hermes::vector<MeshFunction<Scalar>*>();
-      for(unsigned int i = 0; i < source_sols.size(); i++) mesh_fns.push_back(source_sols[i]);
+      for(unsigned int i = 0; i < slns.size(); i++) mesh_fns.push_back(slns[i]);
       project_local(spaces, mesh_fns, target_vec, matrix_solver, proj_norms);
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
+    void LocalProjection<Scalar>::project_local(Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver,
       ProjNormType proj_norm)
     {
@@ -165,11 +183,11 @@ namespace Hermes
 
       Hermes::vector<Space<Scalar>*> spaces;
       spaces.push_back(space);
-      Hermes::vector<MeshFunction<Scalar>*> source_meshfns;
-      source_meshfns.push_back(source_meshfn);
+      Hermes::vector<MeshFunction<Scalar>*> meshfns;
+      meshfns.push_back(meshfn);
       Hermes::vector<ProjNormType> proj_norms;
       proj_norms.push_back(proj_norm);
-      project_local(spaces, source_meshfns, target_vec, matrix_solver, proj_norms);
+      project_local(spaces, meshfns, target_vec, matrix_solver, proj_norms);
     }
 
     template<typename Scalar>

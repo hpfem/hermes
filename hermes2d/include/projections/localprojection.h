@@ -33,17 +33,17 @@ namespace Hermes
       LocalProjection();
 
       // Main function.
-      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
+      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> meshfns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       // This is a wrapper that takes Solutions instead of MeshFunctions.
-      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
+      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       // This is a wrapper that takes only one MeshFunction.
-      static void project_local(Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
+      static void project_local(Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
