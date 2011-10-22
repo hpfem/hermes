@@ -349,11 +349,11 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, 
-        bool add_dir_lift, int start_index)
+      bool add_dir_lift, int start_index)
     {
       _F_
-      // Sanity check.
-      if (space == NULL) throw Exceptions::NullException(1);
+        // Sanity check.
+        if (space == NULL) throw Exceptions::NullException(1);
       if (vec == NULL) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
@@ -365,11 +365,11 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, 
-        bool add_dir_lift, int start_index)
+      bool add_dir_lift, int start_index)
     {
       _F_
-      // Sanity check.
-      if (space == NULL) throw Exceptions::NullException(1);
+        // Sanity check.
+        if (space == NULL) throw Exceptions::NullException(1);
 
       // Initialize precalc shapeset using the space's shapeset.
       Shapeset *shapeset = space->shapeset;
@@ -382,10 +382,10 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, 
-        Scalar* coeff_vec, bool add_dir_lift, int start_index)
+      Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       _F_
-      int o;
+        int o;
 
       // Sanity checks
       if (space == NULL) throw Exceptions::NullException(1);
@@ -504,11 +504,11 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
-        Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions, 
-        Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
+      Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions, 
+      Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
-      if (solution_vector == NULL) throw Exceptions::NullException(1);
+        if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -517,18 +517,18 @@ namespace Hermes
       {
         int counter = 0;
         for (int i=0; i < spaces.size(); i++) 
-	{
+        {
           start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
-	}
+        }
       }
       else 
       {
         if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
-	{
+        {
           start_indices_new.push_back(start_indices[i]);
-	}
+        }
       }
 
       // Debug.
@@ -538,12 +538,12 @@ namespace Hermes
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift == Hermes::vector<bool>())
-	{
+        {
           bool add_dir_lift = true;
           solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices_new[i]);
-	}
+        }
         else
-	{
+        {
           solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift.at(i), start_indices_new[i]);
         }
       }
@@ -552,10 +552,10 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space,
-	Solution<Scalar>* solution, bool add_dir_lift, int start_index)
+      Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
-      if (solution_vector == NULL) throw Exceptions::NullException(1);
+        if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
 
@@ -572,7 +572,7 @@ namespace Hermes
       start_indices_to_pass.push_back(start_index);
 
       Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, 
-	  add_dir_lift_to_pass, start_indices_to_pass);
+        add_dir_lift_to_pass, start_indices_to_pass);
     }
 
     template<typename Scalar>
@@ -580,7 +580,7 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
-      if (solution_vector == NULL) throw Exceptions::NullException(1);
+        if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -589,29 +589,29 @@ namespace Hermes
       {
         int counter = 0;
         for (int i=0; i < spaces.size(); i++) 
-	{
+        {
           start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
-	}
+        }
       }
       else 
       {
         if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
-	{
+        {
           start_indices_new.push_back(start_indices[i]);
-	}
+        }
       }
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift.empty())
-	{
+        {
           bool add_dir_lift = true;
           solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices_new[i]);
-	}
+        }
         else
-	{
+        {
           solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i], start_indices_new[i]);
         }
       }
@@ -620,10 +620,10 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solution(Vector<Scalar>* solution_vector, Space<Scalar>* space,
-	Solution<Scalar>* solution, bool add_dir_lift, int start_index)
+      Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
-      if (solution_vector == NULL) throw Exceptions::NullException(1);
+        if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
 
@@ -640,7 +640,7 @@ namespace Hermes
       start_indices_to_pass.push_back(start_index);
 
       Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, 
-          add_dir_lift_to_pass, start_indices_to_pass);
+        add_dir_lift_to_pass, start_indices_to_pass);
     }
 
     template<typename Scalar>
@@ -658,41 +658,41 @@ namespace Hermes
       {
         int counter = 0;
         for (int i=0; i < spaces.size(); i++) 
-	{
+        {
           start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
-	}
+        }
       }
       else 
       {
         if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
-	{
+        {
           start_indices_new.push_back(start_indices[i]);
-	}
+        }
       }
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift.empty())
-	{
+        {
           bool add_dir_lift = true;
           solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift, start_indices_new[i]);
-	}
+        }
         else
-	{
+        {
           solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift.at(i), start_indices_new[i]);
-	}
+        }
       }
       return;
     }
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
-	PrecalcShapeset* pss, bool add_dir_lift, int start_index)
+      PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
       _F_
-      if (solution_vector==NULL) throw Exceptions::NullException(1);
+        if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (space==NULL) throw Exceptions::NullException(2);
       if (solution==NULL) throw Exceptions::NullException(3);
       if (pss==NULL) throw Exceptions::NullException(4);
@@ -713,7 +713,7 @@ namespace Hermes
       start_indices_to_pass.push_back(start_index);
 
       Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, pss_to_pass, 
-	  add_dir_lift_to_pass, start_indices_to_pass);
+        add_dir_lift_to_pass, start_indices_to_pass);
     }
 
     template<typename Scalar>
@@ -1154,7 +1154,7 @@ namespace Hermes
       try
       {
         XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, 
-            this->num_elems, this->num_coeffs, this->num_dofs);
+          this->num_elems, this->num_coeffs, this->num_dofs);
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
           xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i]));
@@ -1344,7 +1344,7 @@ namespace Hermes
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
     {
       _F_
-      if (e==NULL) throw Exceptions::NullException(1);
+        if (e==NULL) throw Exceptions::NullException(1);
       set_active_element(e);
 
       int o = elem_orders[e->id];
@@ -1376,7 +1376,7 @@ namespace Hermes
     Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
     {
       _F_
-      if (e==NULL) throw Exceptions::NullException(1);
+        if (e==NULL) throw Exceptions::NullException(1);
       if (this->num_components == 1)
       {
         if (b == 0)
