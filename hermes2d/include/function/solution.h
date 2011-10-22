@@ -142,24 +142,27 @@ namespace Hermes
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
         Hermes::vector<Solution<Scalar>*> solutions, 
-        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(), bool assign_dofs = false);
+	Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
+	Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
-        bool add_dir_lift = true);
+	bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar> *> spaces,
         Hermes::vector<Solution<Scalar>*> solutions, 
-        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(), bool assign_dofs = false);
+	Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
+        Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution<Scalar>* solution,
-        bool add_dir_lift = true);
+        bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
         Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss, 
-        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(), bool assign_dofs = false);
+        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
+        Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
-        PrecalcShapeset* pss, bool add_dir_lift = true);
+        PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
       
       /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
@@ -183,11 +186,11 @@ namespace Hermes
       Scalar* sln_vector;
 
       /// Converts a coefficient vector into a Solution.
-      virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift);
+      virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift);
+      virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift);
+      virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift, int start_index);
 
       SolutionType sln_type;
       SpaceType space_type;
