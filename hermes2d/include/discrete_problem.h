@@ -150,10 +150,6 @@ namespace Hermes
       /// Throws errors if not.
       void assemble_sanity_checks(Table* block_weights);
 
-      /// Converts coeff_vec to u_ext.
-      /// If the supplied coeff_vec is NULL, it supplies the appropriate number of NULL pointers.
-      void convert_coeff_vec(Scalar* coeff_vec, Hermes::vector<Solution<Scalar>*> & u_ext, bool add_dir_lift);
-
       /// Initializes psss.
       void initialize_psss(Hermes::vector<PrecalcShapeset*>& spss);
 
