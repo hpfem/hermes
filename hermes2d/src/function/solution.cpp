@@ -352,17 +352,13 @@ namespace Hermes
         bool add_dir_lift, int start_index)
     {
       _F_
-      // sanity check
+      // Sanity check.
       if (space == NULL) throw Exceptions::NullException(1);
       if (vec == NULL) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
       Scalar* coeffs = new Scalar [vec->length()];
       vec->extract(coeffs);
-      // debug
-      //printf("coeffs:\n");
-      //for (int i = 0; i<9; i++) printf("%g ", coeffs[i]);
-      //printf("\n");
       this->set_coeff_vector(space, coeffs, add_dir_lift, start_index);
       delete [] coeffs;
     }
@@ -372,33 +368,31 @@ namespace Hermes
         bool add_dir_lift, int start_index)
     {
       _F_
-      // sanity check
+      // Sanity check.
       if (space == NULL) throw Exceptions::NullException(1);
 
-      // initialize precalc shapeset using the space's shapeset
+      // Initialize precalc shapeset using the space's shapeset.
       Shapeset *shapeset = space->shapeset;
       if (space->shapeset == NULL) throw Exceptions::Exception("Space->shapeset == NULL in Solution<Scalar>::set_coeff_vector().");
       PrecalcShapeset *pss = new PrecalcShapeset(shapeset);
       if (pss == NULL) throw Exceptions::Exception("PrecalcShapeset could not be allocated in Solution<Scalar>::set_coeff_vector().");
-
       set_coeff_vector(space, pss, coeffs, add_dir_lift, start_index);
-
       delete pss;
     }
 
     template<typename Scalar>
     void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, 
-        Scalar* coeffs, bool add_dir_lift, int start_index)
+        Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       _F_
       int o;
 
-      // some sanity checks
+      // Sanity checks
       if (space == NULL) throw Exceptions::NullException(1);
       if (space->get_mesh() == NULL) throw Exceptions::Exception("Mesh == NULL in Solution<Scalar>::set_coeff_vector().");
       if (pss == NULL) throw Exceptions::NullException(2);
-      if (coeffs == NULL) throw Exceptions::NullException(3);
-      if (coeffs == NULL) throw Exceptions::Exception("Coefficient vector == NULL in Solution<Scalar>::set_coeff_vector().");
+      if (coeff_vec == NULL) throw Exceptions::NullException(3);
+      if (coeff_vec == NULL) throw Exceptions::Exception("Coefficient vector == NULL in Solution<Scalar>::set_coeff_vector().");
       if (!space->is_up_to_date())
         throw Exceptions::Exception("Provided 'space' is not up to date.");
       if (space->shapeset != pss->shapeset)
@@ -408,9 +402,10 @@ namespace Hermes
 
       if(this->sln_vector != NULL)
         delete [] this->sln_vector;
-      this->sln_vector = new Scalar[space->get_num_dofs()];
-      for(int i = 0; i < space->get_num_dofs(); i++)
-        this->sln_vector[i] = coeffs[i + start_index];
+      int ndof = space->get_num_dofs();
+      this->sln_vector = new Scalar[ndof];
+      for(int i = 0; i < ndof; i++)
+        this->sln_vector[i] = coeff_vec[i + start_index];
 
       this->space_type = space->get_type();
       this->space = space;
@@ -489,7 +484,7 @@ namespace Hermes
             pss->set_quad_order(o, H2D_FN_VAL);
             int dof = al.dof[k];
             double dir_lift_coeff = add_dir_lift ? 1.0 : 0.0;
-            Scalar coef = al.coef[k] * (dof >= 0 ? coeffs[dof + start_index] : dir_lift_coeff);
+            Scalar coef = al.coef[k] * (dof >= 0 ? coeff_vec[dof + start_index] : dir_lift_coeff);
             double* shape = pss->get_fn_values(l);
             for (int i = 0; i < np; i++)
               val[i] += shape[i] * coef;
@@ -511,42 +506,45 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
         Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions, 
-        Hermes::vector<bool> add_dir_lift, Hermes::vector<int> st_indices)
+        Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
       if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices = Hermes::vector<int>();
-      if (st_indices == Hermes::vector<int>())
+      Hermes::vector<int> start_indices_new;
+      if (start_indices.empty())
       {
         int counter = 0;
         for (int i=0; i < spaces.size(); i++) 
 	{
-          start_indices.push_back(counter);
+          start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
 	}
       }
       else 
       {
-        if (st_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
 	{
-          start_indices.push_back(st_indices[i]);
+          start_indices_new.push_back(start_indices[i]);
 	}
       }
+
+      printf("Start_indices_new[0] = %d\n", start_indices_new[0]);
+      if (spaces.size() > 1) printf("Start_indices_new[1] = %d\n", start_indices_new[1]);
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift == Hermes::vector<bool>())
 	{
           bool add_dir_lift = true;
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices[i]);
+          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices_new[i]);
 	}
         else
 	{
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift.at(i), start_indices[i]);
+          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift.at(i), start_indices_new[i]);
         }
       }
       return;
@@ -579,42 +577,42 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> st_indices)
+      Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
       if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices = Hermes::vector<int>();
-      if (st_indices == Hermes::vector<int>())
+      Hermes::vector<int> start_indices_new;
+      if (start_indices.empty())
       {
         int counter = 0;
         for (int i=0; i < spaces.size(); i++) 
 	{
-          start_indices.push_back(counter);
+          start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
 	}
       }
       else 
       {
-        if (st_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
 	{
-          start_indices.push_back(st_indices[i]);
+          start_indices_new.push_back(start_indices[i]);
 	}
       }
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
-        if(add_dir_lift == Hermes::vector<bool>())
+        if(add_dir_lift.empty())
 	{
           bool add_dir_lift = true;
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices[i]);
+          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices_new[i]);
 	}
         else
 	{
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i], start_indices[i]);
+          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i], start_indices_new[i]);
         }
       }
       return;
@@ -648,42 +646,42 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
       Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss, 
-      Hermes::vector<bool> add_dir_lift, Hermes::vector<int> st_indices)
+      Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_;
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
-      Hermes::vector<int> start_indices = Hermes::vector<int>();
-      if (st_indices == Hermes::vector<int>())
+      Hermes::vector<int> start_indices_new;
+      if (start_indices.empty())
       {
         int counter = 0;
         for (int i=0; i < spaces.size(); i++) 
 	{
-          start_indices.push_back(counter);
+          start_indices_new.push_back(counter);
           counter += spaces[i]->get_num_dofs();
 	}
       }
       else 
       {
-        if (st_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
 	{
-          start_indices.push_back(st_indices[i]);
+          start_indices_new.push_back(start_indices[i]);
 	}
       }
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
-        if(add_dir_lift == Hermes::vector<bool>())
+        if(add_dir_lift.empty())
 	{
           bool add_dir_lift = true;
-          solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift, start_indices[i]);
+          solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift, start_indices_new[i]);
 	}
         else
 	{
-          solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift.at(i), start_indices[i]);
+          solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift.at(i), start_indices_new[i]);
 	}
       }
       return;

@@ -696,9 +696,21 @@ namespace Hermes
       profiling.assemble_util_time.tick();
       profiling.current_record.create_sparse_structure = profiling.assemble_util_time.last();
 
-      // Convert the coefficient vector 'coeff_vec' into solutions Hermes::vector 'u_ext'.
-      Hermes::vector<Solution<Scalar>*> u_ext = Hermes::vector<Solution<Scalar>*>();
-      convert_coeff_vec(coeff_vec, u_ext, add_dir_lift);
+      // Convert the coefficient vector into vector of external solutions.
+      Hermes::vector<Solution<Scalar>*> u_ext;
+      int first_dof = 0;
+      for (int i = 0; i < wf->get_neq(); i++)
+      {
+        Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
+        Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, 
+          add_dir_lift, first_dof);
+        u_ext.push_back(external_solution_i);
+        first_dof += spaces[i]->get_num_dofs();
+      }
+
+      // OLD VERSION OF THE ABOVE PARAGRAPH
+      //Hermes::vector<Solution<Scalar>*> u_ext;
+      //convert_coeff_vec(coeff_vec, u_ext, add_dir_lift);
 
       // Reset the warnings about insufficiently high integration order.
       reset_warn_order();
