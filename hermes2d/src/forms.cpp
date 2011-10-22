@@ -280,6 +280,7 @@ namespace Hermes
       this->elem_marker = geom->elem_marker;
       this->id = geom->id;
       this->diam = geom->diam;
+      this->area = geom->area;
       this->x = geom->x;
       this->y = geom->y;
       this->tx = geom->tx;
