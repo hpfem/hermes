@@ -121,6 +121,7 @@ namespace Hermes
             solutions.push_back(new Solution<Scalar>());
             dir_lift_false.push_back(false);
           }
+
           Solution<Scalar>::vector_to_solutions(residual, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
