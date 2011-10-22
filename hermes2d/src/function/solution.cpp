@@ -532,8 +532,9 @@ namespace Hermes
 	}
       }
 
-      printf("Start_indices_new[0] = %d\n", start_indices_new[0]);
-      if (spaces.size() > 1) printf("Start_indices_new[1] = %d\n", start_indices_new[1]);
+      // Debug.
+      //printf("Start_indices_new[0] = %d\n", start_indices_new[0]);
+      //if (spaces.size() > 1) printf("Start_indices_new[1] = %d\n", start_indices_new[1]);
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
