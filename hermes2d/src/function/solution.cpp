@@ -413,7 +413,6 @@ namespace Hermes
 
       this->num_components = pss->get_num_components();
       sln_type = HERMES_SLN;
-      num_dofs = space->get_num_dofs();
 
       // copy the mesh   TODO: share meshes between solutions // WHAT???
       this->mesh = space->get_mesh();
