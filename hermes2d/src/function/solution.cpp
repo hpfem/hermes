@@ -483,7 +483,7 @@ namespace Hermes
             pss->set_quad_order(o, H2D_FN_VAL);
             int dof = al.dof[k];
             double dir_lift_coeff = add_dir_lift ? 1.0 : 0.0;
-            Scalar coef = al.coef[k] * (dof >= 0 ? coeff_vec[dof + start_index] : dir_lift_coeff);
+            Scalar coef = al.coef[k] * (dof >= 0 ? coeff_vec[dof] : dir_lift_coeff);
             double* shape = pss->get_fn_values(l);
             for (int i = 0; i < np; i++)
               val[i] += shape[i] * coef;
