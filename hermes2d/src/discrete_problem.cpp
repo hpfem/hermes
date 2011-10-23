@@ -69,7 +69,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init()
     {
-      _F_;
+      _F_
 
       // Initialize special variable for Runge-Kutta time integration.
       RungeKutta = false;
