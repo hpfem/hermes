@@ -30,140 +30,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, 
-        Hermes::vector<MeshFunction<Scalar>*> meshfns,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
-    {
-      _F_;
-      int n = spaces.size();
-
-      if (n != meshfns.size()) throw Exceptions::LengthException(1, 2, n, meshfns.size());
-      if (target_vec == NULL) throw Exceptions::NullException(3);
-      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
-
-      // Get ndof of each space.
-      int* ndof_space = new int[n];
-      for (int i=0; i < n; i++) ndof_space[i] = spaces[i]->get_num_dofs();
-
-      // Create a zero target vector for each space. 
-      Scalar** target_vec_space = new Scalar*[n];
-      for (int i=0; i < n; i++) 
-      {
-        int ndof_i = ndof_space[i];
-        target_vec_space[i] = new Scalar[ndof_i];
-        memset(target_vec_space[i], 0, ndof_i*sizeof(Scalar));
-      }
-
-      // For each function meshfns[i], dump into the first part of target_vec_space[i] the values 
-      // of active vertex dofs, then add values of active edge dofs, and finally also values 
-      // of active bubble dofs.
-      // Start with active vertex dofs.
-      for (int i = 0; i < n; i++) 
-      { 
-        Mesh* mesh_i = spaces[i]->get_mesh();
-	Element* e;
-        // Go through all active elements in mesh[i]
-        // to collect active vertex DOF.
-	for_all_active_elements(e, mesh_i)
-        {
-          int order = spaces[i]->get_element_order(e->id);
-          if (order > 0)
-          {
-            for (unsigned int j = 0; j < e->get_nvert(); j++)
-            {
-              // FIXME - the same vertex is visited several times since it 
-              // belongs to multiple elements!
-              Node* vn = e->vn[j];
-              double x = e->vn[j]->x;
-              double y = e->vn[j]->y;
-              //info("Probing vertex %g %g\n", x, y);
-              typename Space<Scalar>::NodeData* nd = spaces[i]->ndata + vn->id;
-              if (!vn->is_constrained_vertex() && nd->dof >= 0)
-              {
-                int dof_num = nd->dof;
-                // FIXME: If this is a Solution, the it would be MUCH faster to just 
-                // retrieve the value from the coefficient vector stored in the Solution.
-
-                // FIXME: Retrieving the value through get_pt_value() is slow and this 
-                // should be only done if we are dealing with MeshFunction (not a Solution).
-                Scalar val = meshfns[i]->get_pt_value(x, y);
-                //printf("Found active vertex %g %g, val = %g, dof_num = %d\n", x, y, std::abs(val), dof_num);
-                target_vec_space[i][dof_num] = val;
-              }
-            }
-          }
-        }
-
-        // TODO: Calculate coefficients of edge functions and copy into target_vec_space[i] as well
-
-        // TODO: Calculate coefficients of bubble functions and copy into target_vec_space[i] as well.
-
-      }
-
-      /*
-      // debug (related to example ns-heat-subdomains)
-      printf("LP: Dimensions: %d, %d, %d, %d\n", ndof_space[0], ndof_space[1], ndof_space[2], ndof_space[3]);
-      printf("LP;' Vector 0 = ");
-      for (int i=0; i<ndof_space[0]; i++) printf("%g ", target_vec_space[0][i]);
-      printf("\n");
-      printf("LP;' Vector 1 = ");
-      for (int i=0; i<ndof_space[1]; i++) printf("%g ", target_vec_space[1][i]);
-      printf("\n");
-      printf("LP;' Vector 2 = ");
-      for (int i=0; i<ndof_space[2]; i++) printf("%g ", target_vec_space[2][i]);
-      printf("\n");
-      printf("LP;' Vector 3 = ");
-      for (int i=0; i<ndof_space[3]; i++) printf("%g ", target_vec_space[3][i]);
-      printf("\n");
-      */
-
-      /*
-      // debug (related to example ns-heat-subdomains)
-      Solution<double> debug_sln;
-      Solution<double>::vector_to_solution(target_vec_space[3], spaces[3], &debug_sln);
-      Hermes::Hermes2D::Views::ScalarView sv;
-      sv.show(&debug_sln);
-      Hermes::Hermes2D::Views::View::wait();
-      */
-
-      // Copy all the vectors target_vec_space[i] into target_vec.
-      int counter = 0;
-      for (int i = 0; i < n; i++) 
-      {
-        for (int j = 0; j < ndof_space[i]; j++) 
-	{
-          target_vec[counter + j] = target_vec_space[i][j];
-	}
-        counter += ndof_space[i];
-      }
-
-      // debug
-      //for (int i=0; i<counter; i++) 
-      //{
-      //  printf("dof %d val %g\n", i, std::abs(target_vec[i]));
-      //}
-
-      // Clean up.
-      for (int i = 0; i < n; i++) delete [] target_vec_space[i];
-
-      return;
-    }
-
-    template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
-      Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
-    {
-      int n = spaces.size();
-
-      // Sanity checks.
-      if (n != slns.size()) throw Exceptions::LengthException(1, 2, n, slns.size());
-
-      Hermes::vector<MeshFunction<Scalar>*> mesh_fns = Hermes::vector<MeshFunction<Scalar>*>();
-      for(unsigned int i = 0; i < slns.size(); i++) mesh_fns.push_back(slns[i]);
-      project_local(spaces, mesh_fns, target_vec, matrix_solver, proj_norms);
-    }
-
-    template<typename Scalar>
     void LocalProjection<Scalar>::project_local(Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver,
       ProjNormType proj_norm)
@@ -181,102 +47,134 @@ namespace Hermes
         }
       }
 
-      Hermes::vector<Space<Scalar>*> spaces;
-      spaces.push_back(space);
-      Hermes::vector<MeshFunction<Scalar>*> meshfns;
-      meshfns.push_back(meshfn);
-      Hermes::vector<ProjNormType> proj_norms;
-      proj_norms.push_back(proj_norm);
-      project_local(spaces, meshfns, target_vec, matrix_solver, proj_norms);
-    }
+      // Get dimension of the space.
+      int ndof = space->get_num_dofs();
 
-    template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> sols_src,
-      Hermes::vector<Solution<Scalar>*> sols_dest, Hermes::MatrixSolverType matrix_solver,
-      Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
-    {
-      _F_;
-      int n = spaces.size();
+      // Erase the target vector. 
+      memset(target_vec, 0, ndof*sizeof(Scalar));
 
-      // Sanity checks.
-      if (n != sols_src.size()) throw Exceptions::LengthException(1, 2, n, sols_src.size());
-      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
-
-      // This vector will contain projection norms. 
-      Hermes::vector<ProjNormType> proj_norms_new = Hermes::vector<ProjNormType>();
-
-      // If projection norms are not provided, set them
-      // to match the type of each space.
-      for (int i = 0; i < n; i++)
+      // Dump into the first part of target_vec the values of active vertex dofs, then add values 
+      // of active edge dofs, and finally also values of active bubble dofs.
+      // Start with active vertex dofs.
+      Mesh* mesh = space->get_mesh();
+      Element* e;
+      // Go through all active elements in mesh to collect active vertex DOF.
+      for_all_active_elements(e, mesh)
       {
-        ProjNormType norm_i = HERMES_UNSET_NORM;
-        if (proj_norms == Hermes::vector<ProjNormType>())
+        int order = space->get_element_order(e->id);
+        if (order > 0)
         {
-          SpaceType space_type_i = spaces[i]->get_type();
-          switch (space_type_i)
+          for (unsigned int j = 0; j < e->get_nvert(); j++)
           {
-            case HERMES_H1_SPACE: norm_i = HERMES_H1_NORM; break;
-            case HERMES_HCURL_SPACE: norm_i = HERMES_HCURL_NORM; break;
-            case HERMES_HDIV_SPACE: norm_i = HERMES_HDIV_NORM; break;
-            case HERMES_L2_SPACE: norm_i = HERMES_L2_NORM; break;
-            default: error("Unknown space type in OGProjection<Scalar>::project_global().");
+            // FIXME - the same vertex is visited several times since it 
+            // belongs to multiple elements!
+            Node* vn = e->vn[j];
+            double x = e->vn[j]->x;
+            double y = e->vn[j]->y;
+            //info("Probing vertex %g %g\n", x, y);
+            typename Space<Scalar>::NodeData* nd = space->ndata + vn->id;
+            if (!vn->is_constrained_vertex() && nd->dof >= 0)
+            {
+              int dof_num = nd->dof;
+              // FIXME: If this is a Solution, the it would be MUCH faster to just 
+              // retrieve the value from the coefficient vector stored in the Solution.
+
+              // FIXME: Retrieving the value through get_pt_value() is slow and this 
+              // should be only done if we are dealing with MeshFunction (not a Solution).
+              Scalar val = meshfn->get_pt_value(x, y);
+              //printf("Found active vertex %g %g, val = %g, dof_num = %d\n", x, y, std::abs(val), dof_num);
+              target_vec[dof_num] = val;
+            }
           }
         }
-        else norm_i = proj_norms[i];
 
-        proj_norms_new.push_back(norm_i);
+        // TODO: Calculate coefficients of edge functions and copy into target_vec_space[i] as well
+
+        // TODO: Calculate coefficients of bubble functions and copy into target_vec_space[i] as well.
+
       }
-
-      Scalar* target_vec = new Scalar[Space<Scalar>::get_num_dofs(spaces)];
-      Hermes::vector<MeshFunction<Scalar>*> ref_slns_mf;
-      for (unsigned int i = 0; i < sols_src.size(); i++)
-        ref_slns_mf.push_back(static_cast<MeshFunction<Scalar>*>(sols_src[i]));
-
-      LocalProjection<Scalar>::project_local(spaces, ref_slns_mf, target_vec, matrix_solver, proj_norms_new);
-
-      if(delete_old_meshes) 
-      {
-        for(unsigned int i = 0; i < sols_src.size(); i++)
-        {
-          delete sols_src[i]->get_mesh();
-          sols_src[i]->own_mesh = false;
-        }
-      }
-      
-      Solution<Scalar>::vector_to_solutions(target_vec, spaces, sols_dest);
-
-      delete [] target_vec;
     }
 
     template<typename Scalar>
     void LocalProjection<Scalar>::project_local(Space<Scalar>* space,
-        Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
-        Hermes::MatrixSolverType matrix_solver,
-        ProjNormType proj_norm)
+        Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
+        Hermes::MatrixSolverType matrix_solver, ProjNormType proj_norm)
     {
-      if (proj_norm == HERMES_UNSET_NORM) 
-      { 
-        SpaceType space_type = space->get_type();
-        switch (space_type)
-        {
-          case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
-          case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
-          case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
-          case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-          default: error("Unknown space type in OGProjection<Scalar>::project_global().");
-        }
+      _F_
+      int ndof = space->get_num_dofs();
+      Scalar* coeff_vec = new Scalar[ndof];
+      project_local(space, source_sln, coeff_vec, matrix_solver, proj_norm);
+      Solution<Scalar>::vector_to_solution(coeff_vec, space, target_sln, proj_norm);
+      delete [] coeff_vec;
+    }
+
+    template<typename Scalar>
+    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, 
+        Hermes::vector<MeshFunction<Scalar>*> meshfns, Scalar* target_vec, 
+        Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
+    {
+      _F_
+      int n = spaces.size();
+
+      if (n != meshfns.size()) throw Exceptions::LengthException(1, 2, n, meshfns.size());
+      if (target_vec == NULL) throw Exceptions::NullException(3);
+      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+
+      int start_index = 0;
+      for (int i = 0; i < n; i++) 
+      {
+        if (proj_norms.empty())
+          project_local(spaces[i], meshfns[i], target_vec + start_index, matrix_solver);
+        else
+          project_local(spaces[i], meshfns[i], target_vec + start_index, matrix_solver, proj_norms[i]);
+        start_index += spaces[i]->get_num_dofs();
       }
+    }
 
-      Hermes::vector<Space<Scalar>*> spaces;
-      spaces.push_back(space);
-      Hermes::vector<Solution<Scalar>*> sols_src;
-      sols_src.push_back(sol_src);
-      Hermes::vector<Solution<Scalar>*> sols_dest;
-      sols_dest.push_back(sol_dest);
-      Hermes::vector<ProjNormType> proj_norms;
-      proj_norms.push_back(proj_norm);
+    template<typename Scalar>
+    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, 
+        Hermes::vector<Solution<Scalar>*> slns, Scalar* target_vec, 
+        Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
+    {
+      _F_
+      int n = spaces.size();
 
-      project_local(spaces, sols_src, sols_dest, matrix_solver, proj_norms);
+      // Sanity checks.
+      if (n != slns.size()) throw Exceptions::LengthException(1, 2, n, slns.size());
+      if (target_vec == NULL) throw Exceptions::NullException(3);
+      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+
+      int start_index = 0;
+      for (int i = 0; i < n; i++) 
+      {
+        if (proj_norms.empty())
+          project_local(spaces[i], slns[i], target_vec + start_index, matrix_solver);
+        else
+          project_local(spaces[i], slns[i], target_vec + start_index, matrix_solver, proj_norms[i]);
+        start_index += spaces[i]->get_num_dofs();
+      }
+    }
+
+    template<typename Scalar>
+    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+      Hermes::vector<Solution<Scalar>*> target_slns, Hermes::MatrixSolverType matrix_solver,
+      Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
+    {
+      _F_
+      int n = spaces.size();
+
+      // Sanity checks.
+      if (n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      if (n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
+      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+
+      for (int i = 0; i < n; i++) 
+      {
+        if (proj_norms.empty())
+          project_local(spaces[i], source_slns[i], target_slns[i], matrix_solver);
+        else
+          project_local(spaces[i], source_slns[i], target_slns[i], matrix_solver, proj_norms[i]);
+      }
     }
 
     template class HERMES_API LocalProjection<double>;

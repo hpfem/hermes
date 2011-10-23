@@ -32,30 +32,30 @@ namespace Hermes
     public:
       LocalProjection();
 
-      // Main function.
-      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> meshfns,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
-
-      // This is a wrapper that takes Solutions instead of MeshFunctions.
-      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
-
-      // This is a wrapper that takes only one MeshFunction.
+      // Main functionality.
       static void project_local(Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      // This is a wrapper that takes only one Solution.
+      // Wrapper that delivers a Solution instead of coefficient vector. 
       static void project_local(Space<Scalar>* space,
-          Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
+	  Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
           Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      // This is a wrapper that delivers Solutions instead of a coefficient vector.
+      // Wrapper that takes multiple MeshFunctions.
+      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> meshfns,
+          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+
+      // Wrapper that takes multiple Solutions.
+      static void project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
+          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+
+      // Wrapper that delivers Solutions instead of a coefficient vector.
       static void project_local(Hermes::vector<Space<Scalar>*> spaces,
-          Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,
+          Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
           Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
