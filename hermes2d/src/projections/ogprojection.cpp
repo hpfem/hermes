@@ -179,6 +179,7 @@ namespace Hermes
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, matrix_solver, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
         else
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, matrix_solver, proj_norms[i], newton_tol, newton_max_iter);
+        spaces[i]->assign_dofs(start_index);
         start_index += spaces[i]->get_num_dofs();
       }
     }
