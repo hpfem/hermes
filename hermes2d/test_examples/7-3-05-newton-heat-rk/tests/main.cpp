@@ -85,7 +85,6 @@ int main(int argc, char* argv[])
   RungeKutta<double> runge_kutta(&dp, &bt, matrix_solver_type);
 
   // Time stepping loop:
-  int ts = 1;
   do
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
@@ -107,7 +106,6 @@ int main(int argc, char* argv[])
 
     // Increase current time and time step counter.
     current_time += time_step;
-    ts++;
   }
   while (current_time < T_FINAL);
 

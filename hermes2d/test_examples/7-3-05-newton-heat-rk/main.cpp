@@ -116,18 +116,6 @@ int main(int argc, char* argv[])
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&dp, &bt, matrix_solver_type);
 
-  // Look for a saved solution on the disk.
-  Continuity<double> continuity(Continuity<double>::onlyTime);
-
-  if(continuity.have_record_available())
-  {
-    continuity.get_last_record()->load_mesh(&mesh);
-    continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh, &bcs);
-    continuity.get_last_record()->load_solutions(Hermes::vector<Solution<double>*>(sln_time_new, sln_time_prev), Hermes::vector<Space<double>*>(&space, &space));
-    continuity.get_last_record()->load_time_step_length(time_step);
-    current_time = continuity.get_last_record()->get_time();
-  }
-
   // Time stepping loop:
   do
   {
@@ -135,28 +123,15 @@ int main(int argc, char* argv[])
     info("Runge-Kutta time step (t = %g s, tau = %g s, stages: %d).",
          current_time, time_step, bt.get_size());
     bool freeze_jacobian = true;
-    bool block_diagonal_jacobian = false;
     bool verbose = true;
     try
     {
       runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
-                                    sln_time_new, freeze_jacobian, block_diagonal_jacobian,
-                                    verbose);
+                                  sln_time_new, freeze_jacobian, verbose);
     }
-    catch(Exceptions::Exception& e)
-    {
+    catch(Exceptions::Exception& e){
       e.printMsg();
       error("Runge-Kutta time step failed");
-    }
-
-    // Save a current state on the disk.
-    if(current_time > 0)
-    {
-      continuity.add_record(current_time+time_step);
-      continuity.get_last_record()->save_mesh(&mesh);
-      continuity.get_last_record()->save_space(&space);
-      continuity.get_last_record()->save_solutions(Hermes::vector<Solution<double>*>(sln_time_new, sln_time_prev));
-      continuity.get_last_record()->save_time_step_length(time_step);
     }
 
     // Show the new time level solution.
