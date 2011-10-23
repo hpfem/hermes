@@ -69,7 +69,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init()
     {
-      _F_;
+      _F_
 
       // Initialize special variable for Runge-Kutta time integration.
       RungeKutta = false;
@@ -632,22 +632,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::convert_coeff_vec(Scalar* coeff_vec, Hermes::vector<Solution<Scalar>*> & u_ext,
-      bool add_dir_lift)
-    {
-      _F_;
-      if (coeff_vec != NULL)
-      {
-        for (unsigned int i = 0; i < wf->get_neq(); i++)
-        {
-          Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
-          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift);
-          u_ext.push_back(external_solution_i);
-        }
-      }
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss)
     {
       _F_;
@@ -675,7 +659,7 @@ namespace Hermes
       bool force_diagonal_blocks, bool add_dir_lift,
       Table* block_weights)
     {
-      _F_;
+      _F_
 
       // Sanity checks.
       assemble_sanity_checks(block_weights);
@@ -699,18 +683,13 @@ namespace Hermes
       // Convert the coefficient vector into vector of external solutions.
       Hermes::vector<Solution<Scalar>*> u_ext;
       int first_dof = 0;
-      for (int i = 0; i < wf->get_neq(); i++)
+      if (coeff_vec != NULL) for (int i = 0; i < wf->get_neq(); i++)
       {
         Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
-        Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, 
-          add_dir_lift, first_dof);
+        Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift, first_dof);
         u_ext.push_back(external_solution_i);
         first_dof += spaces[i]->get_num_dofs();
       }
-
-      // OLD VERSION OF THE ABOVE PARAGRAPH
-      //Hermes::vector<Solution<Scalar>*> u_ext;
-      //convert_coeff_vec(coeff_vec, u_ext, add_dir_lift);
 
       // Reset the warnings about insufficiently high integration order.
       reset_warn_order();
