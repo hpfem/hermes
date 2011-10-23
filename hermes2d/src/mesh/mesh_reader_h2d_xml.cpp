@@ -164,6 +164,7 @@ namespace Hermes
           unsigned int vertex_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().size() : 0;
           unsigned int element_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().size() : 0;
           unsigned int edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges()->i().size() : 0;
+          unsigned int inner_edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges()->i().size() : 0;
 
           // copy nodes and elements
           if(vertex_number_count == 0 && element_number_count == 0 && edge_number_count == 0)
@@ -332,7 +333,7 @@ namespace Hermes
                 edge = &parsed_xml_domain->edges().edge().at(edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges()->i().at(edge_number_i))->second);
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if (en == NULL)
-                error("Boundary data error (edge does not exist)");
+                error("Boundary data error (edge %i does not exist)", edge_number_i);
 
               // Trim whitespaces.
               unsigned int begin = edge->marker().find_first_not_of(" \t\n");
@@ -347,6 +348,29 @@ namespace Hermes
               meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(edge->v1())->second].bnd = 1;
               meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(edge->v2())->second].bnd = 1;
               en->bnd = 1;
+            }
+
+            // Inner Edge numbers //
+            for (int inner_edge_number_i = 0; inner_edge_number_i < inner_edge_number_count; inner_edge_number_i++)
+            {
+              XMLSubdomains::domain::edges_type::edge_type* edge;
+              if(edge_number_count == parsed_xml_domain->edges().edge().size())
+                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(inner_edge_number_i)->second);
+              else
+                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges()->i().at(inner_edge_number_i))->second);
+              Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
+              if (en == NULL)
+                error("Inner data error (edge %i does not exist)", inner_edge_number_i);
+
+              // Trim whitespaces.
+              unsigned int begin = edge->marker().find_first_not_of(" \t\n");
+              unsigned int end = edge->marker().find_last_not_of(" \t\n");
+              edge->marker().erase(end + 1, edge->marker().length());
+              edge->marker().erase(0, begin);
+
+              en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->marker()).marker;
+
+              en->bnd = 0;
             }
 
             // Curves //

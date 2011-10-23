@@ -45,6 +45,13 @@
                         </sequence>
 											</complexType>
 										</element>
+                    <element minOccurs="0" maxOccurs="1" name="inner_edges">
+											<complexType>
+												<sequence>
+                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                        </sequence>
+											</complexType>
+										</element>
                     <element minOccurs="0" maxOccurs="1" name="refinements" type="mesh:refinements_type" />
 									</sequence>
 									<attribute name="name" type="string" use="required" />
