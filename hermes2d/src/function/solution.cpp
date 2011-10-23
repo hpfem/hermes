@@ -385,9 +385,9 @@ namespace Hermes
       Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       _F_
-        int o;
+      int o;
 
-      // Sanity checks
+      // Sanity checks.
       if (space == NULL) throw Exceptions::NullException(1);
       if (space->get_mesh() == NULL) throw Exceptions::Exception("Mesh == NULL in Solution<Scalar>::set_coeff_vector().");
       if (pss == NULL) throw Exceptions::NullException(2);
@@ -404,8 +404,11 @@ namespace Hermes
         delete [] this->sln_vector;
       int ndof = space->get_num_dofs();
       this->sln_vector = new Scalar[ndof];
-      for(int i = 0; i < ndof; i++)
+      for(int i = 0; i < ndof; i++) 
+      {
+	// By adding start_index we move to the desired section of coeff_vec.
         this->sln_vector[i] = coeff_vec[i + start_index];
+      }
 
       this->space_type = space->get_type();
       this->space = space;
@@ -414,10 +417,10 @@ namespace Hermes
       this->num_components = pss->get_num_components();
       sln_type = HERMES_SLN;
 
-      // copy the mesh   TODO: share meshes between solutions // WHAT???
+      // Copy the mesh.  
       this->mesh = space->get_mesh();
 
-      // allocate the coefficient arrays
+      // Allocate the coefficient arrays.
       num_elems = this->mesh->get_max_element_id();
       if(elem_orders != NULL)
         delete [] elem_orders;
@@ -431,7 +434,7 @@ namespace Hermes
         memset(elem_coeffs[l], 0, sizeof(int) * num_elems);
       }
 
-      // obtain element orders, allocate mono_coeffs
+      // Obtain element orders, allocate mono_coeffs.
       Element* e;
       num_coeffs = 0;
       for_all_active_elements(e, this->mesh)
@@ -445,7 +448,7 @@ namespace Hermes
           if (eo > o) o = eo;
         }
 
-        // Hcurl: actual order of functions is one higher than element order
+        // Hcurl and Hdiv: actual order of functions is one higher than element order
         if ((space->shapeset)->get_num_components() == 2) o++;
 
         num_coeffs += this->mode ? sqr(o + 1) : (o + 1)*(o + 2)/2;
@@ -456,7 +459,7 @@ namespace Hermes
         delete [] mono_coeffs;
       mono_coeffs = new Scalar[num_coeffs];
 
-      // express the solution on elements as a linear combination of monomials
+      // Express the solution on elements as a linear combination of monomials.
       Quad2D* quad = &g_quad_2d_cheb;
       pss->set_quad_2d(quad);
       Scalar* mono = mono_coeffs;
@@ -473,7 +476,7 @@ namespace Hermes
 
         for (int l = 0; l < this->num_components; l++)
         {
-          // obtain solution values for the current element
+          // Obtain solution values for the current element.
           Scalar* val = mono;
           elem_coeffs[l][e->id] = (int) (mono - mono_coeffs);
           memset(val, 0, sizeof(Scalar)*np);
@@ -483,6 +486,9 @@ namespace Hermes
             pss->set_quad_order(o, H2D_FN_VAL);
             int dof = al.dof[k];
             double dir_lift_coeff = add_dir_lift ? 1.0 : 0.0;
+            // By subtracting space->first_dof we make sure that it does not matter where the 
+            // enumeration of dofs in the space starts. This ca be either zero or there can be some 
+            // offset. By adding start_index we move to the desired section of coeff_vec.
             Scalar coef = al.coef[k] * (dof >= 0 ? coeff_vec[dof  - space->first_dof + start_index] : dir_lift_coeff);
             double* shape = pss->get_fn_values(l);
             for (int i = 0; i < np; i++)
@@ -508,7 +514,7 @@ namespace Hermes
       Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -531,22 +537,14 @@ namespace Hermes
         }
       }
 
-      // Debug.
-      //printf("Start_indices_new[0] = %d\n", start_indices_new[0]);
-      //if (spaces.size() > 1) printf("Start_indices_new[1] = %d\n", start_indices_new[1]);
-
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift == Hermes::vector<bool>())
-        {
-          bool add_dir_lift = true;
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices_new[i]);
-        }
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
-        {
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift.at(i), start_indices_new[i]);
-        }
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
+
       return;
     }
 
@@ -555,24 +553,12 @@ namespace Hermes
       Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      // Sanity checks.
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
 
-      Hermes::vector<Space<Scalar>*> spaces_to_pass;
-      spaces_to_pass.push_back(space);
-
-      Hermes::vector<Solution<Scalar>*> solutions_to_pass;
-      solutions_to_pass.push_back(solution);
-
-      Hermes::vector<bool> add_dir_lift_to_pass;
-      add_dir_lift_to_pass.push_back(add_dir_lift);
-
-      Hermes::vector<int> start_indices_to_pass;
-      start_indices_to_pass.push_back(start_index);
-
-      Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, 
-        add_dir_lift_to_pass, start_indices_to_pass);
+      solution->set_coeff_vector(space, solution_vector, add_dir_lift, start_index);
     }
 
     template<typename Scalar>
@@ -580,7 +566,7 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -605,16 +591,12 @@ namespace Hermes
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
-        if(add_dir_lift.empty())
-        {
-          bool add_dir_lift = true;
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift, start_indices_new[i]);
-        }
+        if(add_dir_lift == Hermes::vector<bool>())
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
-        {
-          solutions[i]->set_coeff_vector(spaces[i], solution_vector, add_dir_lift[i], start_indices_new[i]);
-        }
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
+
       return;
     }
 
@@ -623,24 +605,12 @@ namespace Hermes
       Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      // Sanity checks.
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
 
-      Hermes::vector<Space<Scalar>*> spaces_to_pass;
-      spaces_to_pass.push_back(space);
-
-      Hermes::vector<Solution<Scalar>*> solutions_to_pass;
-      solutions_to_pass.push_back(solution);
-
-      Hermes::vector<bool> add_dir_lift_to_pass;
-      add_dir_lift_to_pass.push_back(add_dir_lift);
-
-      Hermes::vector<int> start_indices_to_pass;
-      start_indices_to_pass.push_back(start_index);
-
-      Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, 
-        add_dir_lift_to_pass, start_indices_to_pass);
+      solution->set_coeff_vector(space, solution_vector, add_dir_lift, start_index);
     }
 
     template<typename Scalar>
@@ -674,16 +644,12 @@ namespace Hermes
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
-        if(add_dir_lift.empty())
-        {
-          bool add_dir_lift = true;
-          solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift, start_indices_new[i]);
-        }
+        if(add_dir_lift == Hermes::vector<bool>())
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
-        {
-          solutions[i]->set_coeff_vector(spaces[i], pss[i], solution_vector, add_dir_lift.at(i), start_indices_new[i]);
-        }
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
+
       return;
     }
 
@@ -692,28 +658,12 @@ namespace Hermes
       PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
       _F_
-        if (solution_vector==NULL) throw Exceptions::NullException(1);
-      if (space==NULL) throw Exceptions::NullException(2);
-      if (solution==NULL) throw Exceptions::NullException(3);
-      if (pss==NULL) throw Exceptions::NullException(4);
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
+      if (space == NULL) throw Exceptions::NullException(2);
+      if (solution == NULL) throw Exceptions::NullException(3);
+      if (pss == NULL) throw Exceptions::NullException(4);
 
-      Hermes::vector<Space<Scalar>*> spaces_to_pass;
-      spaces_to_pass.push_back(space);
-
-      Hermes::vector<Solution<Scalar>*> solutions_to_pass;
-      solutions_to_pass.push_back(solution);
-
-      Hermes::vector<PrecalcShapeset*> pss_to_pass;
-      pss_to_pass.push_back(pss);
-
-      Hermes::vector<bool> add_dir_lift_to_pass;
-      add_dir_lift_to_pass.push_back(add_dir_lift);
-
-      Hermes::vector<int> start_indices_to_pass;
-      start_indices_to_pass.push_back(start_index);
-
-      Solution<Scalar>::vector_to_solutions(solution_vector, spaces_to_pass, solutions_to_pass, pss_to_pass, 
-        add_dir_lift_to_pass, start_indices_to_pass);
+      solution->set_coeff_vector(space, pss, solution_vector, add_dir_lift, start_index);
     }
 
     template<typename Scalar>

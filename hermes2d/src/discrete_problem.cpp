@@ -659,7 +659,7 @@ namespace Hermes
       bool force_diagonal_blocks, bool add_dir_lift,
       Table* block_weights)
     {
-      _F_;
+      _F_
 
       // Sanity checks.
       assemble_sanity_checks(block_weights);
@@ -686,8 +686,7 @@ namespace Hermes
       if (coeff_vec != NULL) for (int i = 0; i < wf->get_neq(); i++)
       {
         Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
-        Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, 
-          add_dir_lift, first_dof);
+        Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, add_dir_lift, first_dof);
         u_ext.push_back(external_solution_i);
         first_dof += spaces[i]->get_num_dofs();
       }
