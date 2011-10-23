@@ -38,7 +38,7 @@
                         </sequence>
 											</complexType>
 										</element>										
-										<element minOccurs="0" maxOccurs="1" name="edges">
+										<element minOccurs="0" maxOccurs="1" name="boundary_edges">
 											<complexType>
 												<sequence>
                           <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />

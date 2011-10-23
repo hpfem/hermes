@@ -163,11 +163,11 @@ namespace Hermes
         {
           unsigned int vertex_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().size() : 0;
           unsigned int element_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().size() : 0;
-          unsigned int edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges()->i().size() : 0;
+          unsigned int boundary_edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().size() : 0;
           unsigned int inner_edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges()->i().size() : 0;
 
           // copy nodes and elements
-          if(vertex_number_count == 0 && element_number_count == 0 && edge_number_count == 0)
+          if(vertex_number_count == 0 && element_number_count == 0 && boundary_edge_number_count == 0)
           {
             meshes[subdomains_i]->copy(&global_mesh);
             continue;
@@ -321,19 +321,19 @@ namespace Hermes
             }
 
             // Boundary Edge numbers //
-            if(edge_number_count == 0)
-              edge_number_count = parsed_xml_domain->edges().edge().size();
+            if(boundary_edge_number_count == 0)
+              boundary_edge_number_count = parsed_xml_domain->edges().edge().size();
 
-            for (int edge_number_i = 0; edge_number_i < edge_number_count; edge_number_i++)
+            for (int boundary_edge_number_i = 0; boundary_edge_number_i < boundary_edge_number_count; boundary_edge_number_i++)
             {
               XMLSubdomains::domain::edges_type::edge_type* edge;
-              if(edge_number_count == parsed_xml_domain->edges().edge().size())
-                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(edge_number_i)->second);
+              if(boundary_edge_number_count == parsed_xml_domain->edges().edge().size())
+                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(boundary_edge_number_i)->second);
               else
-                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).edges()->i().at(edge_number_i))->second);
+                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i))->second);
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if (en == NULL)
-                error("Boundary data error (edge %i does not exist)", edge_number_i);
+                error("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
 
               // Trim whitespaces.
               unsigned int begin = edge->marker().find_first_not_of(" \t\n");
@@ -354,7 +354,7 @@ namespace Hermes
             for (int inner_edge_number_i = 0; inner_edge_number_i < inner_edge_number_count; inner_edge_number_i++)
             {
               XMLSubdomains::domain::edges_type::edge_type* edge;
-              if(edge_number_count == parsed_xml_domain->edges().edge().size())
+              if(inner_edge_number_count == parsed_xml_domain->edges().edge().size())
                 edge = &parsed_xml_domain->edges().edge().at(edge_is.find(inner_edge_number_i)->second);
               else
                 edge = &parsed_xml_domain->edges().edge().at(edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges()->i().at(inner_edge_number_i))->second);
@@ -584,8 +584,8 @@ namespace Hermes
           }
         }
 
-        // save boundary markers
-        subdomain.edges().set(XMLSubdomains::subdomain::edges_type());
+        // save boundary edges markers
+        subdomain.boundary_edges().set(XMLSubdomains::subdomain::boundary_edges_type());
         for_all_base_elements(e, meshes[meshes_i])
           for (unsigned i = 0; i < e->get_num_surf(); i++)
             // Not internal internal markers.
@@ -597,7 +597,7 @@ namespace Hermes
                 vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
                 edges.edge().push_back(XMLSubdomains::edge(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker.c_str(), edge_i));
               }
-              subdomain.edges()->i().push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
+              subdomain.boundary_edges()->i().push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
             }
 
         // save curved edges
