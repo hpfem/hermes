@@ -691,6 +691,9 @@ namespace Hermes
         first_dof += spaces[i]->get_num_dofs();
       }
 
+      // Assign global DOFs.
+      Space<Scalar>::assign_dofs(spaces);
+
       // Reset the warnings about insufficiently high integration order.
       reset_warn_order();
 
