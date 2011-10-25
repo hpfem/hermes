@@ -173,6 +173,7 @@ namespace Hermes
       virtual ~MumpsSolver();
 
       virtual bool solve();
+      virtual int get_matrix_size();
 
     protected:
       /// Matrix to solve.

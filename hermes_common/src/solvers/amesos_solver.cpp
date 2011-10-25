@@ -75,6 +75,11 @@ namespace Hermes
       return solver->UseTranspose();
     }
 
+    template<typename Scalar>
+    int AmesosSolver<Scalar>::get_matrix_size(){
+      return m->size;
+    }
+
     template<>
     bool AmesosSolver<double>::solve()
     {

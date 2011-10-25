@@ -120,6 +120,12 @@ namespace Hermes
       aztec.SetAztecParam(param, value);
     }
 
+    template<typename Scalar>
+    int AztecOOSolver<Scalar>::get_matrix_size()
+    {
+      return m->size;
+    }
+
     template<>
     bool AztecOOSolver<double>::solve()
     {

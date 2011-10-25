@@ -51,6 +51,7 @@ namespace Hermes
 
       virtual ~AmesosSolver();
       virtual bool solve();
+      virtual int get_matrix_size();
     protected:
       static Amesos factory;
       Amesos_BaseSolver *solver;
