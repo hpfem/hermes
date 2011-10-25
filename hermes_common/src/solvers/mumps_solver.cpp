@@ -710,6 +710,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    bool MumpsSolver<Scalar>::get_matrix_size()
+    {
+      return m->size();
+    }
+
+    template<typename Scalar>
     bool MumpsSolver<Scalar>::solve()
     {
       _F_;
