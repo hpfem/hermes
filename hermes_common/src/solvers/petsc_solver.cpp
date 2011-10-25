@@ -534,6 +534,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    bool PetscLinearSolver<Scalar>::get_matrix_size()
+    {
+      return m->size();
+    }
+
+    template<typename Scalar>
     bool PetscLinearSolver<Scalar>::solve()
     {
       _F_;

@@ -940,6 +940,12 @@ namespace Hermes
       free_factorization_data();
     }
 
+    template<typename Scalar>
+    int UMFPackLinearSolver<Scalar>::get_matrix_size()
+    {
+      return m->get_size();
+    }
+
     template<>
     bool UMFPackLinearSolver<std::complex<double> >::setup_factorization()
     {

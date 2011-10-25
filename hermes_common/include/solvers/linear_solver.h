@@ -116,6 +116,8 @@ namespace Hermes
       /// Get time spent on solving.
       /// @return time spent on solving in secs ( #time )
       double get_time();
+      /// Get size of matrix
+      virtual int get_matrix_size() = 0;
 
       /// Set factorization scheme.
       /// @param[in] reuse_scheme factoriztion scheme to set
