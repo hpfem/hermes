@@ -843,10 +843,7 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::set_error_form(typename Adapt<Scalar>::MatrixFormVolError* form)
     {
-      if(own_forms[0][0] && error_form[0][0] != NULL)
-        delete error_form[0][0];
       set_error_form(0, 0, form);
-      own_forms[0][0] = false;
     }
 
     template<typename Scalar>
