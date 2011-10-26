@@ -25,10 +25,6 @@
 #include "precond.h"
 #include "dp_interface.h"
 
-#ifdef HAVE_TEUCHOS
-#include <Teuchos_RefCountPtr.hpp>
-#endif
-
 using namespace Hermes::Algebra;
 
 /// @defgroup solvers Solvers
@@ -138,7 +134,7 @@ namespace Hermes
     /// \brief Base class for defining interface for direct linear solvers.
     ///
     template <typename Scalar>
-    class DirectSolver : virtual public LinearSolver<Scalar>
+    class DirectSolver : public LinearSolver<Scalar>
     {
     public:
       DirectSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH)
@@ -153,7 +149,7 @@ namespace Hermes
     /// \brief  Abstract class for defining interface for iterative solvers.
     ///
     template <typename Scalar>
-    class IterSolver : public virtual LinearSolver<Scalar>
+    class IterSolver : public LinearSolver<Scalar>
     {
     public:
       IterSolver() : LinearSolver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
@@ -171,11 +167,7 @@ namespace Hermes
 
       virtual void set_precond(const char *name) = 0;
 
-#ifdef HAVE_TEUCHOS
-      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc) = 0;
-#else
       virtual void set_precond(Precond<Scalar> *pc) = 0;
-#endif
 
     protected:
       int max_iters;          ///< Maximum number of iterations.

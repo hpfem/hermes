@@ -64,11 +64,7 @@ namespace Hermes
 
       /// \brief Set preconditioner from IFPACK.
       /// @param[in] pc - IFPACK preconditioner
-#ifdef HAVE_TEUCHOS
-      virtual void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
-#else
       virtual void set_precond(Precond<Scalar> *pc);
-#endif
 
       /// Option setting function
       void set_option(int option, int value);
@@ -80,11 +76,8 @@ namespace Hermes
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
 
-#ifdef HAVE_TEUCHOS
-      Teuchos::RCP<Precond<Scalar> > pc;
-#else
       Precond<Scalar> *pc;
-#endif
+
       template<typename T> friend LinearSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
     };
   }
