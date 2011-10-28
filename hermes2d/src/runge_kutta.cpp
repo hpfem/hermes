@@ -17,6 +17,7 @@
 #include "runge_kutta.h"
 #include "discrete_problem.h"
 #include "projections/ogprojection.h"
+#include "projections/localprojection.h"
 #include "weakform_library/weakforms_hcurl.h"
 namespace Hermes
 {
@@ -32,6 +33,8 @@ namespace Hermes
       _F_
       if (dp==NULL) throw Exceptions::NullException(1);
       if (bt==NULL) throw Exceptions::NullException(2);
+
+      do_global_projections = true;
 
       matrix_right = create_matrix<Scalar>(matrix_solver);
       matrix_left = create_matrix<Scalar>(matrix_solver);
@@ -60,6 +63,18 @@ namespace Hermes
       delete [] K_vector;
       delete [] u_ext_vec;
       delete [] vector_left;
+    }
+
+    template<typename Scalar>
+    void RungeKutta<Scalar>::use_global_projections()
+    {
+      do_global_projections = true;
+    }
+
+    template<typename Scalar>
+    void RungeKutta<Scalar>::use_local_projections()
+    {
+      do_global_projections = false;
     }
 
     template<typename Scalar>
@@ -257,10 +272,13 @@ namespace Hermes
       // Project previous time level solution on the stage space,
       // to be able to add them together. The result of the projection
       // will be stored in the vector coeff_vec.
-      // FIXME - this projection is slow and it is not needed when the
-      //         spaces are the same (if spatial adaptivity does not take place).
+      // FIXME - this projection is not needed when the
+      //         spaces are the same (if spatial adaptivity is not used).
       Scalar* coeff_vec = new Scalar[ndof];
-      OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+      if (do_global_projections)
+        OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+      else 
+        LocalProjection<Scalar>::project_local(dp->get_spaces(), slns_time_prev, coeff_vec);
 
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
