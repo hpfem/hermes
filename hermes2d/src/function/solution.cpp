@@ -1104,7 +1104,7 @@ namespace Hermes
       try
       {
         XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, 
-          this->num_elems, this->num_coeffs, this->num_dofs);
+          this->num_elems, this->num_coeffs, this->space->get_num_dofs());
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
           xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i]));
@@ -1120,7 +1120,7 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
-        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
+        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->space->get_num_dofs(); sln_coeff_i++)
           xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i]));
 
         std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
@@ -1152,7 +1152,7 @@ namespace Hermes
 
       try
       {
-        XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, this->num_elems, this->num_coeffs, this->num_dofs);
+        XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, this->num_elems, this->num_coeffs, this->space->get_num_dofs());
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
         {
@@ -1171,7 +1171,7 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
-        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
+        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->space->get_num_dofs(); sln_coeff_i++)
         {
           xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i].real()));
           xmlsolution.sln_vector().sln_coeff().back().imaginary() = this->sln_vector[sln_coeff_i].imag();
@@ -1258,6 +1258,7 @@ namespace Hermes
         this->num_coeffs = parsed_xml_solution->num_coeffs();
         this->num_elems = parsed_xml_solution->num_elems();
         this->num_components = parsed_xml_solution->num_components();
+        this->num_dofs = parsed_xml_solution->num_dofs();
 
         this->mono_coeffs = new std::complex<double>[num_coeffs];
 
