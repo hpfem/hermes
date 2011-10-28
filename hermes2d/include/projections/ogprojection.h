@@ -53,13 +53,13 @@ namespace Hermes
           ProjNormType proj_norm = HERMES_UNSET_NORM, 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      // Wrapper for multiple source MeshFunctions that delivers coefficienbt vector. 
+      // Wrapper for multiple source MeshFunctions that delivers coefficient vector. 
       static void project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      // Wrapper for multiple source Solutions that delivers coefficienbt vector. 
+      // Wrapper for multiple source Solutions that delivers coefficient vector. 
       static void project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
