@@ -182,6 +182,10 @@ namespace Hermes
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
+      /// Creates a copy of the space, increases order of all elements by
+      /// "order_increase".
+      virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const = 0;
+
     protected:
       static Node* get_mid_edge_vertex_node(Element* e, int i, int j);
 
@@ -194,10 +198,6 @@ namespace Hermes
       /// \brief Returns the DOF number of the last basis function.
       int get_max_dof() const;
       
-      /// Creates a copy of the space, increases order of all elements by
-      /// "order_increase".
-      virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const = 0;
-
       /// Returns true if the space is ready for computation, false otherwise.
       bool is_up_to_date() const;
       
