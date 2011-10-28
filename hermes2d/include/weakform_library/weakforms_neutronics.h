@@ -1193,6 +1193,9 @@ namespace Hermes
                 GeomType geom_type = HERMES_PLANAR );
 
               void update_keff(double new_keff);
+              /// \todo This is needed by 4-group adapt, however it must have been removed, so I provided this dummy method to
+              /// get over it.
+              double get_keff() { return 0.0; };
             };
           }
         }
