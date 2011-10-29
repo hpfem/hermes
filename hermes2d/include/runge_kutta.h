@@ -18,6 +18,7 @@
 
 #include "hermes2d_common_defs.h"
 #include "weakform/weakform.h"
+#include "function/filter.h"
 #include "exceptions.h"
 namespace Hermes
 {
@@ -132,7 +133,18 @@ namespace Hermes
                         double newton_tol = 1e-6, int newton_max_iter = 20, double newton_damping_coeff = 1.0,
                         double newton_max_allowed_residual_norm = 1e10);
 
+      /**
+       \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
+      
+       \brief Sets the filters to reinitialize.
+      
+       \author  Lk
+       \date  10/29/2011
+      
+       \param [in]  filters_to_reinit the filters to reinitialize.
+       */
 
+      void set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
     protected:
       /// Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
       /// The original discretized equation is M\dot{Y} = F(t, Y) where M is the mass
@@ -189,6 +201,9 @@ namespace Hermes
 
       /// Number of previous calls to rk_time_step_newton().
       unsigned int iteration;
+
+      ///< The filters to reinitialize in every Newton's loop
+      Hermes::vector<Filter<Scalar>*> filters_to_reinit;
     private:
       bool do_global_projections;
       MatrixSolverType matrix_solver;

@@ -183,6 +183,15 @@ namespace Hermes
         // Prepare vector h\sum_{j = 1}^s a_{ij} K_j.
         prepare_u_ext_vec(time_step);
 
+        // Reinitialize filters.
+        if(this->filters_to_reinit.size() > 0)
+        {
+          Solution<Scalar>::vector_to_solutions(u_ext_vec, dp->get_spaces(), slns_time_new);
+        
+          for(unsigned int filters_i = 0; filters_i < this->filters_to_reinit.size(); filters_i++)
+            filters_to_reinit.at(filters_i)->reinit();
+        }
+
         // Residual corresponding to the stage derivatives k_i in the equation k_i - f(...) = 0.
         multiply_as_diagonal_block_matrix(matrix_left, num_stages, K_vector, vector_left);
 
@@ -280,6 +289,11 @@ namespace Hermes
       else 
         LocalProjection<Scalar>::project_local(dp->get_spaces(), slns_time_prev, coeff_vec);
 
+      if (do_global_projections)
+        OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+      else 
+        LocalProjection<Scalar>::project_local(dp->get_spaces(), slns_time_prev, coeff_vec);
+
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
         for (unsigned int j = 0; j < num_stages; j++)
@@ -345,6 +359,13 @@ namespace Hermes
       return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
                           error_fns, freeze_jacobian, block_diagonal_jacobian, verbose, newton_tol,
                           newton_max_iter, newton_damping_coeff, newton_max_allowed_residual_norm);
+    }
+
+    template<typename Scalar>
+    void RungeKutta<Scalar>::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit)
+    {
+      for(int i = 0; i < filters_to_reinit.size(); i++)
+        this->filters_to_reinit.push_back(filters_to_reinit.at(i));
     }
 
     template<typename Scalar>
