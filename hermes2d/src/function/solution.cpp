@@ -352,8 +352,8 @@ namespace Hermes
         bool add_dir_lift, int start_index)
     {
       _F_
-        // Sanity check.
-        if (space == NULL) throw Exceptions::NullException(1);
+      // Sanity check.
+      if (space == NULL) throw Exceptions::NullException(1);
       if (vec == NULL) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
@@ -368,8 +368,8 @@ namespace Hermes
         bool add_dir_lift, int start_index)
     {
       _F_
-        // Sanity check.
-        if (space == NULL) throw Exceptions::NullException(1);
+      // Sanity check.
+      if (space == NULL) throw Exceptions::NullException(1);
 
       // Initialize precalc shapeset using the space's shapeset.
       Shapeset *shapeset = space->shapeset;
@@ -385,7 +385,7 @@ namespace Hermes
         Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       _F_
-        int o;
+      int o;
 
       // Sanity checks.
       if (space == NULL) throw Exceptions::NullException(1);
@@ -514,7 +514,7 @@ namespace Hermes
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -553,8 +553,8 @@ namespace Hermes
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
-        // Sanity checks.
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      // Sanity checks.
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
 

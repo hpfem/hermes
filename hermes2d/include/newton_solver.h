@@ -42,30 +42,20 @@ namespace Hermes
 
       ~NewtonSolver();
 
-      /// Solve with default tolerances.
-      /// Calls solve(Scalar*, bool) with residual_as_function = 'false'.
-      virtual void solve(Scalar* coeff_vec);
-
-      /// Solve with default tolerances.
+      /// Solve with user-defined tolerances.
       /// \param[in] residual_as_function Translate the residual vector into a residual function (or multiple functions)
       ///                                 in the corresponding finite element space(s) and measure their norm(s) there.
       ///                                 This is more meaningful than just measuring the l2-norm of the residual vector,
       ///                                 since in the FE space not all components in the residual vector have the same weight.
       ///                                 On the other hand, this is slower as it requires global norm calculation, and thus
       ///                                 numerical integration over the entire domain. Therefore this option is off by default.
-      virtual void solve(Scalar* coeff_vec, bool residual_as_function);
-
-      /// Solve with user-defined tolerances.
-      /// \param[in] residual_as_function See the method solve(Scalar*, bool).
-      void solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
-
-      /// A solve() method where the jacobian is reused.
-      /// Version with default tolerances.
-      void solve_keep_jacobian(Scalar* coeff_vec, bool residual_as_function = false);
+      void solve(Scalar* coeff_vec = NULL, double newton_tol = 1e-8, 
+                 int newton_max_iter = 100, bool residual_as_function = false);
 
       /// A solve() method where the jacobian is reused.
       /// Version with user-defined tolerances.
-      void solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function = false);
+      void solve_keep_jacobian(Scalar* coeff_vec = NULL, double newton_tol = 1e-8, 
+                               int newton_max_iter = 100, bool residual_as_function = false);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
