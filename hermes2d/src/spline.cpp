@@ -74,6 +74,10 @@ namespace Hermes
 
     double CubicSpline::derivative(double x) const
     {
+      // For simple constant case.
+      if(this->is_const)
+        return 0.0;
+
       // For general case.
       int m = -1;
       if (!this->find_interval(x, m))
@@ -129,6 +133,8 @@ namespace Hermes
     {
       int i_left = 0;
       int i_right = points.size() - 1;
+      if(i_right < 0)
+        return false;
 
       if (x_in < points[i_left]) return false;
       if (x_in > points[i_right]) return false;
