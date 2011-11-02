@@ -68,11 +68,11 @@ namespace Hermes
 
       /// \return The current transform index.
       uint64_t get_transform() const;
+
+      virtual ~Transformable();
     protected:
 
       Transformable();
-
-      virtual ~Transformable();
 
       /// Called by the assembling procedure and by other functions. In PrecalcShapeset it
       /// sets an internal variable that can be later retrieved by get_active_element().
