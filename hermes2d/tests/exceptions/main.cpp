@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
   //LengthException test
   double solution_vector[3];
-  Hermes::vector<Hermes2D::Space<double>*> spaces(NULL,NULL,NULL,NULL);
+  Hermes::vector<const Hermes2D::Space<double>*> spaces(NULL,NULL,NULL,NULL);
   Hermes::vector<Hermes2D::Solution<double>*> solutions(NULL,NULL,NULL);
 
 

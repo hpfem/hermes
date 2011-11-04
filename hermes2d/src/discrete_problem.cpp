@@ -31,21 +31,20 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces) : wf(wf), wf_seq(-1), spaces(spaces)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
     {
       _F_;
-      if (wf==NULL) throw Exceptions::NullException(1);
       if (spaces.empty()) throw Exceptions::NullException(2);
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        this->spaces.push_back(spaces.at(i));
       init();
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf, Space<Scalar>* space)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
       : wf(wf), wf_seq(-1)
     {
       _F_;
-      if (wf==NULL) throw Exceptions::NullException(1);
-      if (space==NULL) throw Exceptions::NullException(2);
       spaces.push_back(space);
       init();
     }
@@ -74,6 +73,8 @@ namespace Hermes
       // Initialize special variable for Runge-Kutta time integration.
       RungeKutta = false;
       RK_original_spaces_count = 0;
+
+      ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // Sanity checks.
       if(wf == NULL)
@@ -108,9 +109,6 @@ namespace Hermes
         if (p == NULL) error("New PrecalcShapeset could not be allocated in DiscreteProblem<Scalar>::init_spaces().");
         pss[i] = p;
       }
-
-      // Create global enumeration of dof and fill the ndof variable.
-      ndof = Space<Scalar>::assign_dofs(spaces);
 
       // There is a special function that sets a DiscreteProblem to be FVM.
       // Purpose is that this constructor looks cleaner and is simpler.
@@ -261,19 +259,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* DiscreteProblem<Scalar>::get_space(int n)
+    const Space<Scalar>* DiscreteProblem<Scalar>::get_space(int n)
     {
       return this->spaces[n];
     }
 
     template<typename Scalar>
-    WeakForm<Scalar>* DiscreteProblem<Scalar>::get_weak_formulation()
+    const WeakForm<Scalar>* DiscreteProblem<Scalar>::get_weak_formulation()
     {
       return this->wf;
     }
 
     template<typename Scalar>
-    Hermes::vector<Space<Scalar>*> DiscreteProblem<Scalar>::get_spaces()
+    Hermes::vector<const Space<Scalar>*> DiscreteProblem<Scalar>::get_spaces()
     {
       return this->spaces;
     }
@@ -441,7 +439,7 @@ namespace Hermes
               for(int ed = 0; ed < num_edges; ed++)
               {
                 ns.set_active_edge(ed);
-                Hermes::vector<Element *> *neighbors = ns.get_neighbors();
+                const Hermes::vector<Element *> *neighbors = ns.get_neighbors();
 
                 neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
                 neighbor_elems_arrays[el][ed] = new Element * [neighbor_elems_counts[el][ed]];
@@ -549,7 +547,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<Space<Scalar>*> spaces)
+    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
     {
       if(this->spaces.size() != spaces.size())
         error("DiscreteProblem can not change the number of spaces.");
@@ -614,9 +612,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(Space<Scalar>* space)
+    void DiscreteProblem<Scalar>::set_spaces(const Space<Scalar>* space)
     {
-      Hermes::vector<Space<Scalar>*> spaces;
+      Hermes::vector<const Space<Scalar>*> spaces;
       spaces.push_back(space);
       set_spaces(spaces);
     }
@@ -690,9 +688,6 @@ namespace Hermes
         u_ext.push_back(external_solution_i);
         first_dof += spaces[i]->get_num_dofs();
       }
-
-      // Assign global DOFs.
-      Space<Scalar>::assign_dofs(spaces);
 
       // Reset the warnings about insufficiently high integration order.
       reset_warn_order();

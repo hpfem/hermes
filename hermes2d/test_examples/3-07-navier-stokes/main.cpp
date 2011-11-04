@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
   info("ndof = %d.", ndof);
 
   // Define projection norms.
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
   wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
-  DiscreteProblem<double> dp(wf, Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space));
+  DiscreteProblem<double> dp(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
@@ -153,9 +153,9 @@ int main(int argc, char* argv[])
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space))];
+  double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space))];
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
-  OGProjection<double>::project_global(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space),
+  OGProjection<double>::project_global(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space),
     Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
     coeff_vec, matrix_solver_type,
     Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
       error("Newton's iteration failed.");
     }
     Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
-    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
+    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
 
     // Show the solution at the end of time step.
     sprintf(title, "Velocity, time %g", current_time);

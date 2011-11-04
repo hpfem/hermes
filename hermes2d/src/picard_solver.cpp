@@ -158,7 +158,7 @@ namespace Hermes
       bool anderson_is_on = (num_last_vectors_used > 1);
       int num_spaces = this->slns_prev_iter.size();
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_num_dofs();
-      Hermes::vector<Space<Scalar>* > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      Hermes::vector<const Space<Scalar>* > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
       NewtonSolver<Scalar> newton(static_cast<DiscreteProblem<Scalar>*>(this->dp), this->matrix_solver_type);
       newton.set_verbose_output(this->verbose_output);
 

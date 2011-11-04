@@ -108,7 +108,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Element*>* NeighborSearch<Scalar>::get_neighbors()
+    const Hermes::vector<Element*>* NeighborSearch<Scalar>::get_neighbors() const
     {
       return &neighbors;
     }
@@ -275,7 +275,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<unsigned int> NeighborSearch<Scalar>::get_transforms(uint64_t sub_idx)
+    Hermes::vector<unsigned int> NeighborSearch<Scalar>::get_transforms(uint64_t sub_idx) const
     {
       _F_;
       Hermes::vector<unsigned int> transformations_backwards;
@@ -292,7 +292,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NeighborSearch<Scalar>::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations)
+    bool NeighborSearch<Scalar>::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations) const
     {
       _F_;
       // No subelements => of course this edge is an inter-element one.
@@ -446,7 +446,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NeighborSearch<Scalar>::compatible_transformations(unsigned int a, unsigned int b, int edge)
+    bool NeighborSearch<Scalar>::compatible_transformations(unsigned int a, unsigned int b, int edge) const
     {
       _F_;
       if(a == b)
@@ -757,7 +757,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment)
+    int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const
     {
       _F_;
       if (segment == 0)
@@ -786,7 +786,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(Space<Scalar>*space, AsmList<Scalar>* al)
+    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(const Space<Scalar>*space, AsmList<Scalar>* al)
     {
       _F_;
       if (supported_shapes == NULL)
@@ -798,7 +798,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(Space<Scalar> *space, AsmList<Scalar>* al)
+    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(const Space<Scalar> *space, AsmList<Scalar>* al)
     {
       _F_;
       if (supported_shapes != NULL)
@@ -940,7 +940,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>* space) :
+    NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, const Space<Scalar>* space) :
     central_al(central_al)
     {
       _F_;
@@ -972,7 +972,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, Space<Scalar>* space) 
+    void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, const Space<Scalar>* space) 
     {
       delete [] this->dof;
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);

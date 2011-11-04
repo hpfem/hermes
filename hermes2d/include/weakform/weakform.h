@@ -104,9 +104,9 @@ namespace Hermes
       void add_multicomponent_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* vfs);
 
       /// Returns the number of equations.
-      unsigned int get_neq() { return neq; }
+      unsigned int get_neq() const { return neq; }
 
-      bool is_matrix_free() { return is_matfree; }
+      bool is_matrix_free() const { return is_matfree; }
 
       /// For time-dependent right-hand side functions.
       void set_current_time(double time);
@@ -129,10 +129,10 @@ namespace Hermes
       /// Internal. Used by DiscreteProblem to detect changes in the weakform.
       int get_seq() const { return seq; }
 
-      void get_stages(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
-        Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage = false);
+      void get_stages(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*>& u_ext,
+        Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage = false) const;
 
-      bool** get_blocks(bool force_diagonal_blocks);
+      bool** get_blocks(bool force_diagonal_blocks) const;
 
       double current_time;
 
@@ -167,13 +167,13 @@ namespace Hermes
       Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
 
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
-        Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
+        Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false) const;
 
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
-        Mesh* m1, Mesh* m2, Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
+        Mesh* m1, Mesh* m2, Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false) const;
 
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
-        Mesh* m1, Mesh* m2, Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);
+        Mesh* m1, Mesh* m2, Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false) const;
 
       friend class DiscreteProblem<Scalar>;
       friend class RungeKutta<Scalar>;

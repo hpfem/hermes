@@ -133,11 +133,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al)
+    void L2Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const
     {}
 
     template<typename Scalar>
-    void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
+    void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       // some checks
       if (e->id >= this->esize || this->edata[e->id].order < 0)
@@ -153,7 +153,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
+    void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
       if (!ed->n) return;
@@ -167,7 +167,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
+    void L2Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const
     {
       this->get_bubble_assembly_list(e, al);
     }

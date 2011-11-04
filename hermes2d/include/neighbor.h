@@ -108,10 +108,10 @@ namespace Hermes
       void set_active_edge_multimesh(const int& edge);
 
       /// Extract transformations in the correct direction from the provided sub_idx.
-      Hermes::vector<unsigned int> get_transforms(uint64_t sub_idx);
+      Hermes::vector<unsigned int> get_transforms(uint64_t sub_idx) const;
 
       /// Gives an info if edge is an intra- or inter- element edge.
-      bool is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations);
+      bool is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations) const;
 
       /// Update according to the subelement mapping of the central element.
       void update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations);
@@ -121,7 +121,7 @@ namespace Hermes
 
       /// Give the info if the two transformations are correct, w.r.t. the edge.
       /// Simply compares a to b in case of triangles, does more work in case of quads.
-      bool compatible_transformations(unsigned int a, unsigned int b, int edge);
+      bool compatible_transformations(unsigned int a, unsigned int b, int edge) const;
 
       /// Clear the initial_sub_idxs from the central element transformations of NeighborSearches with multiple neighbors.
       /// Does nothing in the opposite case.
@@ -152,8 +152,8 @@ namespace Hermes
       /// \param[in]  al    Assembly list for the central element.
       /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
       ///
-      ExtendedShapeset* create_extended_asmlist(Space<Scalar>* space, AsmList<Scalar>* al);
-      ExtendedShapeset* create_extended_asmlist_multicomponent(Space<Scalar>* space, AsmList<Scalar>* al);
+      ExtendedShapeset* create_extended_asmlist(const Space<Scalar>* space, AsmList<Scalar>* al);
+      ExtendedShapeset* create_extended_asmlist_multicomponent(const Space<Scalar>* space, AsmList<Scalar>* al);
 
       /*** Methods for working with quadrature on the active edge. ***/
 
@@ -182,7 +182,7 @@ namespace Hermes
       ///
       /// \return pointer to the vector of neighboring elements.
       ///
-      Hermes::vector<Element*>* get_neighbors();
+      const Hermes::vector<Element*>* get_neighbors() const;
 
       /// Frees the memory occupied by the extended shapeset.
       void clear_supported_shapes();
@@ -201,7 +201,7 @@ namespace Hermes
         /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
         /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
         ///
-        ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, Space<Scalar>*space);
+        ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, const Space<Scalar>*space);
 
         ExtendedShapeset(const ExtendedShapeset & other);
 
@@ -218,7 +218,7 @@ namespace Hermes
         /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
         /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
         ///
-        void update(NeighborSearch* neighborhood, Space<Scalar>* space);
+        void update(NeighborSearch* neighborhood, const Space<Scalar>* space);
 
       public:
         int cnt;  ///< Number of shape functions in the extended shapeset.
@@ -407,7 +407,7 @@ namespace Hermes
       /// \return 1 if the orientation of the neighbor's edge is reversed w.r.t. the central el.'s edge,
       ///         0 otherwise.
       ///
-      int neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment);
+      int neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const;
 
       /// Cleaning of internal structures before a new edge is set as active.
       void reset_neighb_info();

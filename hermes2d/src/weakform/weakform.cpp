@@ -469,8 +469,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::get_stages(Hermes::vector<Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
-      Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage)
+    void WeakForm<Scalar>::get_stages(Hermes::vector<const Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
+      Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage) const
     {
       _F_;
 
@@ -614,7 +614,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage)
+      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) const
     {
 
       _F_;
@@ -692,7 +692,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage)
+      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) const
     {
 
       _F_;
@@ -773,7 +773,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage)
+      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) const
     {
 
       _F_;
@@ -847,7 +847,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks)
+    bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks) const
     {
       _F_;
       bool** blocks = new_matrix<bool>(neq, neq);

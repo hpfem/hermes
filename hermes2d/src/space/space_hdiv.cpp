@@ -225,7 +225,7 @@ namespace Hermes
     //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
-    void HdivSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
+    void HdivSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const
     {
       Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
@@ -258,7 +258,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    void HdivSpace<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
+    void HdivSpace<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
       if (!ed->n) return;

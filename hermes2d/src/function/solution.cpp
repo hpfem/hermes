@@ -348,7 +348,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, 
+    void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, const Vector<Scalar>* vec, 
         bool add_dir_lift, int start_index)
     {
       _F_
@@ -364,7 +364,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, 
+    void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, const Scalar* coeffs, 
         bool add_dir_lift, int start_index)
     {
       _F_
@@ -381,8 +381,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, 
-        Scalar* coeff_vec, bool add_dir_lift, int start_index)
+    void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss, 
+        const Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       _F_
       int o;
@@ -509,8 +509,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector,
-        Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions, 
+    void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector,
+        Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions, 
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
@@ -549,7 +549,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space,
+    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
@@ -562,7 +562,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(Vector<Scalar>* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
+    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
       Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       _F_
@@ -601,7 +601,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(Vector<Scalar>* solution_vector, Space<Scalar>* space,
+    void Solution<Scalar>::vector_to_solution(const Vector<Scalar>* solution_vector, const Space<Scalar>* space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       _F_
@@ -614,7 +614,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar>*> spaces,
+    void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
         Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss, 
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
@@ -654,7 +654,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
+    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
         PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
       _F_
@@ -667,7 +667,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss)
+    void Solution<Scalar>::set_dirichlet_lift(const Space<Scalar>* space, PrecalcShapeset* pss)
     {
       space_type = space->get_type();
       int ndof = space->get_num_dofs();
@@ -1463,7 +1463,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    Space<Scalar>* Solution<Scalar>::get_space()
+    const Space<Scalar>* Solution<Scalar>::get_space()
     {
       if(this->sln_type == HERMES_SLN)
         return space;

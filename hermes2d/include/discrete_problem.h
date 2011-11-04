@@ -61,10 +61,10 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar>*> spaces);
+      DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces);
 
       /// Constructor for one equation.
-      DiscreteProblem(WeakForm<Scalar>* wf, Space<Scalar>* space);
+      DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
 
       /// Non-parameterized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
       DiscreteProblem();
@@ -108,9 +108,9 @@ namespace Hermes
       /// Set this problem to Finite Volume.
       void set_fvm();
       
-      void set_spaces(Hermes::vector<Space<Scalar>*> spaces);
+      void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
 
-      void set_spaces(Space<Scalar>* space);
+      void set_spaces(const Space<Scalar>* space);
 
     protected:
       /// Get the number of unknowns.
@@ -121,13 +121,13 @@ namespace Hermes
 
       // GET functions.
       /// Get pointer to n-th space.
-      Space<Scalar>* get_space(int n);
+      const Space<Scalar>* get_space(int n);
 
       /// Get the weak forms.
-      WeakForm<Scalar>* get_weak_formulation();
+      const WeakForm<Scalar>* get_weak_formulation();
 
       /// Get all spaces as a Hermes::vector.
-      Hermes::vector<Space<Scalar>*> get_spaces();
+      Hermes::vector<const Space<Scalar>*> get_spaces();
 
       /// This is different from H3D.
       PrecalcShapeset* get_pss(int n);
@@ -472,13 +472,13 @@ namespace Hermes
       unsigned int min_dg_mesh_seq;
 
       /// Weak formulation.
-      WeakForm<Scalar>* wf;
+      const WeakForm<Scalar>* wf;
 
       /// Seq number of the WeakForm.
       int wf_seq;
 
       /// Space instances for all equations in the system.
-      Hermes::vector<Space<Scalar>*> spaces;
+      Hermes::vector<const Space<Scalar>*> spaces;
 
       /// Seq numbers of Space instances in spaces.
       int* sp_seq;
@@ -625,7 +625,7 @@ namespace Hermes
 
         /// For caching of values calculated on the previous reference space during adaptivity.
         /// Previous spaces (incl. mesh) to be able to determine the previous element assembly lists etc.
-        Hermes::vector<Space<Scalar>*> stored_spaces_for_adaptivity;
+        Hermes::vector<const Space<Scalar>*> stored_spaces_for_adaptivity;
 
         LightArray<Func<Hermes::Ord>*> cache_fn_ord;
       };

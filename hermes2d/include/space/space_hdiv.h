@@ -59,9 +59,9 @@ namespace Hermes
       virtual void assign_edge_dofs();
       virtual void assign_bubble_dofs();
 
-      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) {}
-      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
-      virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al);
+      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const {}
+      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
+      virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
       static double** hdiv_proj_mat;
       static double*  hdiv_chol_p;

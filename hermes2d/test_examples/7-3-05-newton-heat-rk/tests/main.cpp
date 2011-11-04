@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp(&wf, &space);
 
   // Initialize Runge-Kutta time stepping.
-  RungeKutta<double> runge_kutta(&dp, &bt, matrix_solver_type);
+  RungeKutta<double> runge_kutta(&wf, &space, &bt, matrix_solver_type);
 
   // Time stepping loop:
   do

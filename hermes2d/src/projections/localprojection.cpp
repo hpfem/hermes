@@ -30,7 +30,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
+    void LocalProjection<Scalar>::project_local(const Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver,
       ProjNormType proj_norm)
     {
@@ -96,7 +96,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Space<Scalar>* space,
+    void LocalProjection<Scalar>::project_local(const Space<Scalar>* space,
         Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
         Hermes::MatrixSolverType matrix_solver, ProjNormType proj_norm)
     {
@@ -109,7 +109,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, 
+    void LocalProjection<Scalar>::project_local(Hermes::vector<const Space<Scalar>*> spaces, 
         Hermes::vector<MeshFunction<Scalar>*> meshfns, Scalar* target_vec, 
         Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
@@ -132,7 +132,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, 
+    void LocalProjection<Scalar>::project_local(Hermes::vector<const Space<Scalar>*> spaces, 
         Hermes::vector<Solution<Scalar>*> slns, Scalar* target_vec, 
         Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
@@ -156,7 +156,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+    void LocalProjection<Scalar>::project_local(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
       Hermes::vector<Solution<Scalar>*> target_slns, Hermes::MatrixSolverType matrix_solver,
       Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {

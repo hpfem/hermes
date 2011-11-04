@@ -525,7 +525,7 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y) = 0;
 
       /// Get vector length.
-      unsigned int length() {return this->size;}
+      unsigned int length() const {return this->size;}
 
       /// Write to file.
       /// @param[in] file file handle

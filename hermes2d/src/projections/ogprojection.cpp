@@ -31,7 +31,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_internal(Space<Scalar>* space, WeakForm<Scalar>* wf,
+    void OGProjection<Scalar>::project_internal(const Space<Scalar>* space, WeakForm<Scalar>* wf,
 	Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, double newton_tol, int newton_max_iter)
     {
       _F_
@@ -64,7 +64,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Space<Scalar>* space,
+    void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
         MatrixFormVol<Scalar>* custom_projection_jacobian,
         VectorFormVol<Scalar>* custom_projection_residual,
         Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, 
@@ -85,7 +85,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Space<Scalar>* space, 
+    void OGProjection<Scalar>::project_global(const Space<Scalar>* space, 
         MeshFunction<Scalar>* source_meshfn, Scalar* target_vec, 
         Hermes::MatrixSolverType matrix_solver, ProjNormType proj_norm, 
         double newton_tol, int newton_max_iter)
@@ -145,7 +145,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Space<Scalar>* space,
+    void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
         Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
         Hermes::MatrixSolverType matrix_solver, ProjNormType proj_norm, 
         double newton_tol, int newton_max_iter)
@@ -176,7 +176,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, 
+    void OGProjection<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, 
         Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
         Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, 
         Hermes::vector<ProjNormType> proj_norms, 
@@ -203,7 +203,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+    void OGProjection<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
         Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms, 
         double newton_tol, int newton_max_iter)
     {
@@ -227,7 +227,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+    void OGProjection<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
         Hermes::vector<Solution<Scalar>*> target_slns, Hermes::MatrixSolverType matrix_solver,
         Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes, 
         double newton_tol, int newton_max_iter)

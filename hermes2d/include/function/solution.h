@@ -88,7 +88,7 @@ namespace Hermes
       void copy(const Solution<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
-      void set_dirichlet_lift(Space<Scalar>* space, PrecalcShapeset* pss = NULL);
+      void set_dirichlet_lift(const Space<Scalar>* space, PrecalcShapeset* pss = NULL);
 
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
@@ -133,35 +133,35 @@ namespace Hermes
 
       /// In case this is valid it returns a pointer to the space this solution belongs to.
       /// Only use when get_space() == get_space_seq();
-      Space<Scalar>* get_space();
+      const Space<Scalar>* get_space();
 
       /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
       /// Only use when get_space() == get_space_seq();
       Scalar* get_sln_vector();
 
       /// Passes solution components calculated from solution vector as Solutions.
-      static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
+      static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
           Hermes::vector<Solution<Scalar>*> solutions, 
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
-      static void vector_to_solutions(Vector<Scalar>* vec, Hermes::vector<Space<Scalar> *> spaces,
+      static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<const Space<Scalar> *> spaces,
           Hermes::vector<Solution<Scalar>*> solutions, 
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solution(Vector<Scalar>* vec, Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(const Vector<Scalar>* vec, const Space<Scalar>* space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
-      static void vector_to_solutions(Scalar* solution_vector, Hermes::vector<Space<Scalar> *> spaces,
+      static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
           Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss, 
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solution(Scalar* solution_vector, Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
           PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
 
       /// If this is set to true, the mesh was created by this instance of this class.
@@ -186,17 +186,17 @@ namespace Hermes
       Scalar* sln_vector;
 
       /// Converts a coefficient vector into a Solution.
-      virtual void set_coeff_vector(Space<Scalar>* space, Vector<Scalar>* vec, bool add_dir_lift, int start_index);
+      virtual void set_coeff_vector(const Space<Scalar>* space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(Space<Scalar>* space, PrecalcShapeset* pss, Scalar* coeffs, bool add_dir_lift, int start_index);
+      virtual void set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss, const Scalar* coeffs, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(Space<Scalar>* space, Scalar* coeffs, bool add_dir_lift, int start_index);
+      virtual void set_coeff_vector(const Space<Scalar>* space, const Scalar* coeffs, bool add_dir_lift, int start_index);
 
       SolutionType sln_type;
       SpaceType space_type;
 
       /// In case this is valid it contains a pointer to the space this solution belongs to.
-      Space<Scalar>* space;
+      const Space<Scalar>* space;
 
       /// In case there is a space this solution belongs to, this is the seq number of the space.
       int space_seq;

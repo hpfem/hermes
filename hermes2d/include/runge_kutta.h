@@ -76,7 +76,11 @@ namespace Hermes
       /// Constructor.
       /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
       /// as an initial guess for the Newton's method, instead zero vector will be used.
-      RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
+      RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
+          bool start_from_zero_K_vector = false, bool residual_as_vector = true);
+
+      /// Constructor for one equation.
+      RungeKutta(const WeakForm<Scalar>* wf, Space<Scalar>* space, ButcherTable* bt, MatrixSolverType matrix_solver = SOLVER_UMFPACK, 
           bool start_from_zero_K_vector = false, bool residual_as_vector = true);
 
       /// Projections will be global orthogonal (default)
@@ -168,8 +172,12 @@ namespace Hermes
       /// Matrix solver.
       LinearSolver<Scalar>* solver;
 
-      /// DiscreteProblem.
-      DiscreteProblem<Scalar>* dp;
+      /// Weak formulation.
+      const WeakForm<Scalar>* wf;
+
+      /// Space instances for all equations in the system.
+      Hermes::vector<const Space<Scalar>*> spaces;
+      Hermes::vector<Space<Scalar>*> spaces_mutable;
 
       /// ButcherTable.
       ButcherTable* bt;

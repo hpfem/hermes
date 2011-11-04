@@ -119,13 +119,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Shapeset* Space<Scalar>::get_shapeset()
+    Shapeset* Space<Scalar>::get_shapeset() const
     {
       return this->shapeset;
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs()
+    int Space<Scalar>::get_num_dofs() const
     {
       return ndof;
     }
@@ -239,7 +239,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
+    int Space<Scalar>::get_num_dofs(Hermes::vector<const Space<Scalar>*> spaces)
     {
       _F_;
       int ndof = 0;
@@ -250,7 +250,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Space<Scalar>* space)
+    int Space<Scalar>::get_num_dofs(const Space<Scalar>* space)
     {
       return space->get_num_dofs();
     }
@@ -567,7 +567,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_edge_order(Element* e, int edge)
+    int Space<Scalar>::get_edge_order(Element* e, int edge) const
     {
       _F_;
       Node* en = e->en[edge];
@@ -580,7 +580,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_edge_order_internal(Node* en)
+    int Space<Scalar>::get_edge_order_internal(Node* en) const
     {
       _F_;
       assert(en->type == HERMES_TYPE_EDGE);
@@ -734,7 +734,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al)
+    void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       _F_;
       // some checks
@@ -755,7 +755,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al)
+    void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const
     {
       _F_;
       al->cnt = 0;
@@ -766,7 +766,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al)
+    void Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       _F_;
       ElementData* ed = &edata[e->id];

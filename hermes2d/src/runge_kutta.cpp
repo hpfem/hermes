@@ -24,14 +24,19 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(DiscreteProblem<Scalar>* dp, ButcherTable* bt, 
+    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt, 
         Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
-      : dp(dp), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * dp->get_spaces().size()),
-      stage_wf_left(dp->get_spaces().size()), start_from_zero_K_vector(start_from_zero_K_vector), 
+      : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
+      stage_wf_left(spaces.size()), start_from_zero_K_vector(start_from_zero_K_vector), 
       residual_as_vector(residual_as_vector), iteration(0) , matrix_solver(matrix_solver)
     {
-      _F_
-      if (dp==NULL) throw Exceptions::NullException(1);
+      _F_;
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        this->spaces.push_back(const_cast<const Space<Scalar>*>(spaces.at(i)));
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        this->spaces_mutable.push_back(spaces.at(i));
+
+
       if (bt==NULL) throw Exceptions::NullException(2);
 
       do_global_projections = true;
@@ -44,13 +49,46 @@ namespace Hermes
 
       // Vector K_vector of length num_stages * ndof. will represent
       // the 'K_i' vectors in the usual R-K notation.
-      K_vector = new Scalar[num_stages * dp->get_num_dofs()];
+      K_vector = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
 
       // Vector u_ext_vec will represent h \sum_{j = 1}^s a_{ij} K_i.
-      u_ext_vec = new Scalar[num_stages * dp->get_num_dofs()];
+      u_ext_vec = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
 
       // Vector for the left part of the residual.
-      vector_left = new Scalar[num_stages*  dp->get_num_dofs()];
+      vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
+    }
+
+    template<typename Scalar>
+    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Space<Scalar>* space, ButcherTable* bt, 
+        Hermes::MatrixSolverType matrix_solver, bool start_from_zero_K_vector, bool residual_as_vector)
+      : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
+      stage_wf_left(1), start_from_zero_K_vector(start_from_zero_K_vector), 
+      residual_as_vector(residual_as_vector), iteration(0) , matrix_solver(matrix_solver)
+    {
+      _F_;
+
+      spaces.push_back(const_cast<const Space<Scalar>*>(space));
+      spaces_mutable.push_back(space);
+
+      if (bt==NULL) throw Exceptions::NullException(2);
+
+      do_global_projections = true;
+
+      matrix_right = create_matrix<Scalar>(matrix_solver);
+      matrix_left = create_matrix<Scalar>(matrix_solver);
+      vector_right = create_vector<Scalar>(matrix_solver);
+      // Create matrix solver.
+      solver = create_linear_solver(matrix_solver, matrix_right, vector_right);
+
+      // Vector K_vector of length num_stages * ndof. will represent
+      // the 'K_i' vectors in the usual R-K notation.
+      K_vector = new Scalar[num_stages * Space<Scalar>::get_num_dofs(spaces)];
+
+      // Vector u_ext_vec will represent h \sum_{j = 1}^s a_{ij} K_i.
+      u_ext_vec = new Scalar[num_stages * Space<Scalar>::get_num_dofs(spaces)];
+
+      // Vector for the left part of the residual.
+      vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(spaces)];
     }
 
     template<typename Scalar>
@@ -121,23 +159,23 @@ namespace Hermes
         error("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       // All Spaces of the problem.
-      Hermes::vector<Space<Scalar>*> stage_spaces_vector;
+      Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
 
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
       for (unsigned int i = 0; i < num_stages; i++)
-        for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++)
-          stage_spaces_vector.push_back(dp->get_space(space_i)->dup(dp->get_space(space_i)->get_mesh()));
+        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+          stage_spaces_vector.push_back(spaces[space_i]->dup(spaces[space_i]->get_mesh()));
 
-      int ndof = dp->get_num_dofs();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // Creates the stage weak formulation.
-      create_stage_wf(dp->get_spaces().size(), current_time, time_step,
+      create_stage_wf(spaces.size(), current_time, time_step,
                       slns_time_prev, block_diagonal_jacobian);
 
       // Set the correct time to the essential boundary conditions.
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
-        Space<Scalar>::update_essential_bc_values(dp->get_spaces(), current_time + bt->get_C(stage_i)*time_step);
+        Space<Scalar>::update_essential_bc_values(spaces_mutable, current_time + bt->get_C(stage_i)*time_step);
 
       // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian
       // matrix of the term coming from the left-hand side of the RK formula k_i = f(...). This is
@@ -146,9 +184,9 @@ namespace Hermes
       // matrix and residula vector coming from the function f(...). Of course the RK equation is assumed
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
-      DiscreteProblem<Scalar> stage_dp_left(&stage_wf_left, dp->get_spaces());
+      DiscreteProblem<Scalar> stage_dp_left(&stage_wf_left, spaces);
       DiscreteProblem<Scalar> stage_dp_right(&stage_wf_right, stage_spaces_vector);
-      stage_dp_right.set_RK(dp->get_spaces().size());
+      stage_dp_right.set_RK(spaces.size());
 
       // Prepare residuals of stage solutions.
       Hermes::vector<Solution<Scalar>*> residuals_vector;
@@ -156,9 +194,9 @@ namespace Hermes
       Hermes::vector<bool> add_dir_lift;
       for (unsigned int i = 0; i < num_stages; i++)
       {
-        for(unsigned int sln_i = 0; sln_i < dp->get_spaces().size(); sln_i++)
+        for(unsigned int sln_i = 0; sln_i < spaces.size(); sln_i++)
         {
-          residuals_vector.push_back(new Solution<Scalar>(dp->get_space(sln_i)->get_mesh()));
+          residuals_vector.push_back(new Solution<Scalar>(spaces[sln_i]->get_mesh()));
           add_dir_lift.push_back(false);
         }
       }
@@ -186,7 +224,7 @@ namespace Hermes
         // Reinitialize filters.
         if(this->filters_to_reinit.size() > 0)
         {
-          Solution<Scalar>::vector_to_solutions(u_ext_vec, dp->get_spaces(), slns_time_new);
+          Solution<Scalar>::vector_to_solutions(u_ext_vec, spaces, slns_time_new);
         
           for(unsigned int filters_i = 0; filters_i < this->filters_to_reinit.size(); filters_i++)
             filters_to_reinit.at(filters_i)->reinit();
@@ -285,21 +323,21 @@ namespace Hermes
       //         spaces are the same (if spatial adaptivity is not used).
       Scalar* coeff_vec = new Scalar[ndof];
       if (do_global_projections)
-        OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+        OGProjection<Scalar>::project_global(spaces, slns_time_prev, coeff_vec);
       else 
-        LocalProjection<Scalar>::project_local(dp->get_spaces(), slns_time_prev, coeff_vec);
+        LocalProjection<Scalar>::project_local(spaces, slns_time_prev, coeff_vec);
 
       if (do_global_projections)
-        OGProjection<Scalar>::project_global(dp->get_spaces(), slns_time_prev, coeff_vec);
+        OGProjection<Scalar>::project_global(spaces, slns_time_prev, coeff_vec);
       else 
-        LocalProjection<Scalar>::project_local(dp->get_spaces(), slns_time_prev, coeff_vec);
+        LocalProjection<Scalar>::project_local(spaces, slns_time_prev, coeff_vec);
 
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
         for (unsigned int j = 0; j < num_stages; j++)
           coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j * ndof + i];
 
-      Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), slns_time_new);
+      Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, slns_time_new);
 
       // If error_fn is not NULL, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
@@ -312,7 +350,7 @@ namespace Hermes
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
           coeff_vec[i] *= time_step;
         }
-        Solution<Scalar>::vector_to_solutions(coeff_vec, dp->get_spaces(), error_fns, add_dir_lift);
+        Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, error_fns, add_dir_lift);
       }
 
       // Delete stage spaces.
@@ -380,8 +418,8 @@ namespace Hermes
       // First let's do the mass matrix (only one block ndof times ndof).
       for(unsigned int component_i = 0; component_i < size; component_i++)
       {
-        if(dp->get_spaces()[component_i]->get_type() == HERMES_H1_SPACE
-           || dp->get_spaces()[component_i]->get_type() == HERMES_L2_SPACE)
+        if(spaces[component_i]->get_type() == HERMES_H1_SPACE
+           || spaces[component_i]->get_type() == HERMES_L2_SPACE)
         {
           MatrixFormVolL2<Scalar>* proj_form = new MatrixFormVolL2<Scalar>(component_i, component_i);
           proj_form->areas.push_back(HERMES_ANY);
@@ -389,8 +427,8 @@ namespace Hermes
           proj_form->u_ext_offset = 0;
           stage_wf_left.add_matrix_form(proj_form);
         }
-        if(dp->get_spaces()[component_i]->get_type() == HERMES_HDIV_SPACE
-           || dp->get_spaces()[component_i]->get_type() == HERMES_HCURL_SPACE)
+        if(spaces[component_i]->get_type() == HERMES_HDIV_SPACE
+           || spaces[component_i]->get_type() == HERMES_HCURL_SPACE)
         {
           MatrixFormVolHCurl<Scalar>* proj_form = new MatrixFormVolHCurl<Scalar>(component_i, component_i);
           proj_form->areas.push_back(HERMES_ANY);
@@ -404,9 +442,6 @@ namespace Hermes
       // (right-hand side) and use them to create a block Jacobian matrix of
       // size (num_stages*ndof times num_stages*ndof) and a block residual
       // vector of length num_stages*ndof.
-
-      // Original weak formulation.
-      WeakForm<Scalar>* wf = dp->get_weak_formulation();
 
       // Extracting volume and surface matrix and vector forms from the
       // original weak formulation.
@@ -430,12 +465,12 @@ namespace Hermes
 
             MatrixFormVol<Scalar>* mfv_ij = mfvol_base[m]->clone();
 
-            mfv_ij->i = mfv_ij->i + i * dp->get_spaces().size();
-            mfv_ij->j = mfv_ij->j + j * dp->get_spaces().size();
+            mfv_ij->i = mfv_ij->i + i * spaces.size();
+            mfv_ij->j = mfv_ij->j + j * spaces.size();
 
             mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
-            mfv_ij->u_ext_offset = i * dp->get_spaces().size();
+            mfv_ij->u_ext_offset = i * spaces.size();
 
             for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
@@ -462,12 +497,12 @@ namespace Hermes
 
             MatrixFormSurf<Scalar>* mfs_ij = mfsurf_base[m]->clone();
 
-            mfs_ij->i = mfs_ij->i + i * dp->get_spaces().size();
-            mfs_ij->j = mfs_ij->j + j * dp->get_spaces().size();
+            mfs_ij->i = mfs_ij->i + i * spaces.size();
+            mfs_ij->j = mfs_ij->j + j * spaces.size();
 
             mfs_ij->scaling_factor = -time_step * bt->get_A(i, j);
 
-            mfs_ij->u_ext_offset = i * dp->get_spaces().size();
+            mfs_ij->u_ext_offset = i * spaces.size();
 
             for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
               mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
@@ -490,10 +525,10 @@ namespace Hermes
         {
           VectorFormVol<Scalar>* vfv_i = vfvol_base[m]->clone();
 
-          vfv_i->i = vfv_i->i + i * dp->get_spaces().size();
+          vfv_i->i = vfv_i->i + i * spaces.size();
 
           vfv_i->scaling_factor = -1.0;
-          vfv_i->u_ext_offset = i * dp->get_spaces().size();
+          vfv_i->u_ext_offset = i * spaces.size();
 
           for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
             vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
@@ -515,10 +550,10 @@ namespace Hermes
         {
           VectorFormSurf<Scalar>* vfs_i = vfsurf_base[m]->clone();
 
-          vfs_i->i = vfs_i->i + i * dp->get_spaces().size();
+          vfs_i->i = vfs_i->i + i * spaces.size();
 
           vfs_i->scaling_factor = -1.0;
-          vfs_i->u_ext_offset = i * dp->get_spaces().size();
+          vfs_i->u_ext_offset = i * spaces.size();
 
           for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
             vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
@@ -535,20 +570,20 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::prepare_u_ext_vec(double time_step)
     {
-      unsigned int ndof = dp->get_num_dofs();
+      unsigned int ndof = Space<Scalar>::get_num_dofs(spaces);
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
       {
         unsigned int running_space_ndofs = 0;
-        for(unsigned int space_i = 0; space_i < dp->get_spaces().size(); space_i++)
+        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         {
-          for (int idx = 0; idx < dp->get_space(space_i)->get_num_dofs(); idx++)
+          for (int idx = 0; idx < spaces[space_i]->get_num_dofs(); idx++)
           {
             Scalar increment = 0;
             for (unsigned int stage_j = 0; stage_j < num_stages; stage_j++)
               increment += bt->get_A(stage_i, stage_j) * K_vector[stage_j * ndof + running_space_ndofs + idx];
             u_ext_vec[stage_i * ndof + running_space_ndofs + idx] = time_step * increment;
           }
-          running_space_ndofs += dp->get_space(space_i)->get_num_dofs();
+          running_space_ndofs += spaces[space_i]->get_num_dofs();
         }
       }
     }

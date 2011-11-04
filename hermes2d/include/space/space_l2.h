@@ -41,10 +41,10 @@ namespace Hermes
       
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
       
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al);
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
     protected:
-      virtual int get_edge_order(Element* e, int edge) {
+      virtual int get_edge_order(Element* e, int edge) const {
         // There are no continuity constraints on shape functions in L2.
         return Global<Scalar>::make_edge_order( e->get_mode(), edge, this->edata[e->id].order );
       }
@@ -71,9 +71,9 @@ namespace Hermes
       virtual void assign_edge_dofs() {}
       virtual void assign_bubble_dofs();
 
-      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al);
-      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al);
-      virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al);
+      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const;
+      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
+      virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
     };
   }
 }

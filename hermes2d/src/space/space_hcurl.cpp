@@ -218,7 +218,7 @@ namespace Hermes
     //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
-    void HcurlSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al)
+    void HcurlSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const
     {
       Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
