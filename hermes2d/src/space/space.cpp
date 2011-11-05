@@ -734,7 +734,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
+    void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
     {
       _F_;
       // some checks
@@ -752,6 +752,8 @@ namespace Hermes
       for (unsigned int i = 0; i < e->get_num_surf(); i++)
         get_boundary_assembly_list_internal(e, i, al);
       get_bubble_assembly_list(e, al);
+      for(unsigned int i = 0; i < al->cnt; i++)
+        al->dof[i] += first_dof;
     }
 
     template<typename Scalar>

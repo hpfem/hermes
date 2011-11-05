@@ -163,7 +163,7 @@ namespace Hermes
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
       
       /// Obtains an assembly list for the given element.
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 
       Shapeset* get_shapeset() const;
       

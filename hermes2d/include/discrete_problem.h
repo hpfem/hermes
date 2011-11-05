@@ -479,6 +479,7 @@ namespace Hermes
 
       /// Space instances for all equations in the system.
       Hermes::vector<const Space<Scalar>*> spaces;
+      Hermes::vector<unsigned int> spaces_first_dofs;
 
       /// Seq numbers of Space instances in spaces.
       int* sp_seq;

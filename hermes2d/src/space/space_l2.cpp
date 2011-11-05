@@ -137,7 +137,7 @@ namespace Hermes
     {}
 
     template<typename Scalar>
-    void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
+    void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
     {
       // some checks
       if (e->id >= this->esize || this->edata[e->id].order < 0)
@@ -150,6 +150,9 @@ namespace Hermes
       al->cnt = 0;
       this->shapeset->set_mode(e->get_mode());
       get_bubble_assembly_list(e, al);
+      
+      for(unsigned int i = 0; i < al->cnt; i++)
+        al->dof[i] += first_dof;
     }
 
     template<typename Scalar>

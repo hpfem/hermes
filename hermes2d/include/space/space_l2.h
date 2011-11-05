@@ -41,7 +41,7 @@ namespace Hermes
       
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
       
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 
     protected:
       virtual int get_edge_order(Element* e, int edge) const {

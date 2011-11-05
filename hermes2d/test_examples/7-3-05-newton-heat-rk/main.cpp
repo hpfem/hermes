@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     try
     {
       runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
-                                  sln_time_new, freeze_jacobian, verbose);
+                                  sln_time_new, freeze_jacobian, false, verbose);
     }
     catch(Exceptions::Exception& e){
       e.printMsg();

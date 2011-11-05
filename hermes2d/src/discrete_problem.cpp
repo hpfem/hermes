@@ -35,8 +35,13 @@ namespace Hermes
     {
       _F_;
       if (spaces.empty()) throw Exceptions::NullException(2);
+      unsigned int first_dof_running = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
+      {
         this->spaces.push_back(spaces.at(i));
+        this->spaces_first_dofs.push_back(first_dof_running);
+        first_dof_running += spaces.at(i)->get_num_dofs();
+      }
       init();
     }
 
@@ -46,6 +51,8 @@ namespace Hermes
     {
       _F_;
       spaces.push_back(space);
+      this->spaces_first_dofs.push_back(0);
+
       init();
     }
 
@@ -411,7 +418,7 @@ namespace Hermes
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
             if (e[i] != NULL)
-              spaces[i]->get_element_assembly_list(e[i], &(al[i]));
+              spaces[i]->get_element_assembly_list(e[i], &(al[i]), spaces_first_dofs[i]);
 
           if(is_DG)
           {
@@ -457,7 +464,7 @@ namespace Hermes
                     {
                       AsmList<Scalar>*am = &(al[m]);
                       AsmList<Scalar>*an = new AsmList<Scalar>;
-                      spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an);
+                      spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an, spaces_first_dofs[el]);
 
                       // pretend assembling of the element stiffness matrix
                       // register nonzero elements
@@ -887,7 +894,7 @@ namespace Hermes
             unsigned int *son = new unsigned int[stage.idx.size()];
             for (unsigned int i = 0; i < stage.idx.size(); i++)
             {
-              spaces[stage.idx[i]]->get_element_assembly_list(e[i], &al[i]);
+              spaces[stage.idx[i]]->get_element_assembly_list(e[i], &al[i], spaces_first_dofs[stage.idx[i]]);
               for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
                 if(e[i]->parent->sons[sons_i] == e[i])
                   son[i] = sons_i;
@@ -911,7 +918,7 @@ namespace Hermes
                   break;
                 }
 
-                this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_element_assembly_list(e_prev[i], &al_prev[i]);
+                this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_element_assembly_list(e_prev[i], &al_prev[i], spaces_first_dofs[stage.idx[i]]);
                 if(al[i].cnt != al_prev[i].cnt)
                   stored_value = false;
                 for(unsigned int ai = 0; ai < al[i].cnt; ai++)
@@ -1056,7 +1063,7 @@ namespace Hermes
         }
 
         // \todo do not obtain again if the element was not changed.
-        spaces[j]->get_element_assembly_list(e[i], al[j]);
+        spaces[j]->get_element_assembly_list(e[i], al[j], spaces_first_dofs[j]);
 
         // Set active element to all test functions.
         spss[j]->set_active_element(e[i]);
