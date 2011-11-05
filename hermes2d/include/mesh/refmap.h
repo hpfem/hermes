@@ -76,6 +76,11 @@ namespace Hermes
       /// variables.
       double* get_phys_x(int order);
       
+      /// Returns he y-coordinates of the integration points transformed to the
+      /// physical domain of the element. Intended for integrals containing spatial
+      /// variables.
+      double* get_phys_y(int order);
+
       /// Returns true if the jacobian of the reference map is constant (which
       /// is the case for non-curvilinear triangular elements), false otherwise.
       bool is_jacobian_const() const;
@@ -96,7 +101,6 @@ namespace Hermes
       /// its inverse matrix.
       double2x2* get_const_inv_ref_map();
 
-
       /// Returns the inverse matrices of the reference map precalculated at the
       /// integration points of the specified order. Intended for non-constant
       /// jacobian elements.
@@ -105,10 +109,6 @@ namespace Hermes
       /// Returns coefficients for weak forms with second derivatives.
       double3x2* get_second_ref_map(int order);
 
-      /// Returns he y-coordinates of the integration points transformed to the
-      /// physical domain of the element. Intended for integrals containing spatial
-      /// variables.
-      double* get_phys_y(int order);
 
       /// Calculates the inverse Jacobi matrix of reference map at a particular point (xi1, xi2).
       void inv_ref_map_at_point(double xi1, double xi2, double& x, double& y, double2x2& m);

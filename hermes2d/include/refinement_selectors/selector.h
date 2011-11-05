@@ -79,8 +79,6 @@ namespace Hermes
         /// Constructor
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
         Selector(int max_order = H2DRS_DEFAULT_ORDER) : max_order(max_order) {};
-        /// Destructor.
-        virtual ~Selector() {};
 
         /// Selects a refinement.
         /** This methods has to be implemented.
@@ -106,10 +104,10 @@ namespace Hermes
       /// A selector that selects H-refinements only. \ingroup g_selectors
       template<typename Scalar>
       class HERMES_API HOnlySelector : public Selector<Scalar> {
-      protected:
+      public:
         /// Constructor.
         HOnlySelector() : Selector<Scalar>() {};
-
+      protected:
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
         virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement);
@@ -127,13 +125,14 @@ namespace Hermes
       class HERMES_API POnlySelector : public Selector<Scalar> {
         const int order_h_inc; ///< Increase along the horizontal direction in a quadrilateral or increase of an order in a triangle.
         const int order_v_inc; ///< Increase along the vertical direction in a quadrilateral.
-      protected:
+      public:
         /// Constructor.
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used.
         *  \param[in] order_h_inc An increase of the horizontal order in a quadrilateral and an order in a triangle. The increase has to be greater or equal to 0.
         *  \param[in] order_v_inc An increase of the vertical order in a quadrilateral. The increase has to be greater or equal to 0. */
         POnlySelector(int max_order, int order_h_inc, int order_v_inc);
 
+      protected:
         /// Selects a refinement.
         /** Increases an order ising POnlySelector::order_h_inc and POnlySelector::order_v_inc. Fails if the order cannot be increased due to the maximum order. For details, see Selector::select_refinement. */
         virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement);

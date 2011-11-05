@@ -121,6 +121,10 @@ namespace Hermes
       Hermes::vector<MultiComponentMatrixFormSurf<Scalar> *> get_mfsurf_mc();
       Hermes::vector<MultiComponentVectorFormVol<Scalar> *> get_vfvol_mc();
       Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> get_vfsurf_mc();
+      
+      /// Deletes all volumetric and surface forms.
+      void delete_all();
+
     protected:
       /// Internal. Used by DiscreteProblem to detect changes in the weakform.
       int get_seq() const { return seq; }
@@ -161,9 +165,6 @@ namespace Hermes
 
       /// Holds multicomponent surface vector forms.
       Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> vfsurf_mc;
-
-      /// Deletes all volumetric and surface forms.
-      void delete_all();
 
       Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
         Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage = false);

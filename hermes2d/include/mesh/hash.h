@@ -40,11 +40,7 @@ namespace Hermes
     ///
     class HERMES_API HashTable
     {
-    protected:
-
-      HashTable();
-      ~HashTable();
-
+    public:
       /// Retrieves a node by its id number.
       Node* get_node(int id) const;
 
@@ -53,6 +49,10 @@ namespace Hermes
 
       /// Returns the maximum node id number plus one.
       int get_max_node_id() const;
+
+    protected:
+      HashTable();
+      ~HashTable();
 
       /// Returns a vertex node with parent id's p1 and p2 if it exists, NULL otherwise.
       Node* peek_vertex_node(int p1, int p2);
