@@ -36,9 +36,7 @@ namespace Hermes
       : IterSolver<Scalar>(), m(m), rhs(rhs)
     {
       _F_;
-#ifndef HAVE_TEUCHOS
       pc = NULL;
-#endif
     }
 
     template<typename Scalar>
