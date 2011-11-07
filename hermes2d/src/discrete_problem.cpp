@@ -62,8 +62,6 @@ namespace Hermes
       // Set all attributes for which we don't need to acces wf or spaces.
       // This is important for the destructor to properly detect what needs to be deallocated.
       sp_seq = NULL;
-      cache_for_adaptivity = false;
-      temp_cache_for_adaptivity = false;
       is_fvm = false;
       RungeKutta = false;
       RK_original_spaces_count = 0;
@@ -101,9 +99,6 @@ namespace Hermes
       matrix_buffer_dim = 0;
       have_matrix = false;
 
-      cache_for_adaptivity = false;
-      temp_cache_for_adaptivity = false;
-
       // Initialize precalc shapesets according to spaces provided.
       pss = new PrecalcShapeset*[wf->get_neq()];
 
@@ -137,100 +132,6 @@ namespace Hermes
         for(unsigned int i = 0; i < wf->get_neq(); i++)
           delete pss[i];
         delete [] pss;
-      }
-      if(cache_for_adaptivity)
-      {
-        // Matrix.
-        for(unsigned int i = 0; i < this->spaces.size(); i++)
-        {
-          for(unsigned int j = 0; j < this->spaces.size(); j++)
-          {
-            for(int k = 0; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
-              std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k]);
-            std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j]);
-          }
-          delete [] this->assembling_caches.previous_reference_dp_cache_matrix[i];
-          std::free(this->assembling_caches.element_reassembled_matrix[i]);
-        }
-        delete [] this->assembling_caches.previous_reference_dp_cache_matrix;
-
-        // Vector.
-        for(unsigned int i = 0; i < this->spaces.size(); i++)
-        {
-          for(int j = 0; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
-              std::free(this->assembling_caches.previous_reference_dp_cache_vector[i][j]);
-          std::free(this->assembling_caches.previous_reference_dp_cache_vector[i]);
-          std::free(this->assembling_caches.element_reassembled_vector[i]);
-        }
-        delete [] this->assembling_caches.previous_reference_dp_cache_vector;
-
-        // Spaces.
-        for(unsigned int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
-        {
-          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
-          delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
-        }
-      }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_adaptivity_cache()
-    {
-      cache_for_adaptivity = true;
-
-      // Matrix.
-      this->assembling_caches.previous_reference_dp_cache_matrix = new Scalar****[this->spaces.size()];
-      this->assembling_caches.cache_matrix_size = new unsigned int*[this->spaces.size()];
-      this->assembling_caches.element_reassembled_matrix = new bool*[this->spaces.size()];
-      // Vector.
-      this->assembling_caches.previous_reference_dp_cache_vector = new Scalar**[this->spaces.size()];
-      this->assembling_caches.cache_vector_size = new unsigned int[this->spaces.size()];
-      this->assembling_caches.element_reassembled_vector = new bool*[this->spaces.size()];
-
-      for(unsigned int i = 0; i < this->spaces.size(); i++)
-      {
-        // Matrix.
-        this->assembling_caches.element_reassembled_matrix[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-
-        this->assembling_caches.previous_reference_dp_cache_matrix[i] = new Scalar***[this->spaces.size()];
-          this->assembling_caches.cache_matrix_size[i] = new unsigned int[this->spaces.size()];
-        for(unsigned int j = 0; j < this->spaces.size(); j++)
-        {
-          this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
-          this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) malloc(sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          for(int k = 0; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
-            this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
-        }
-
-        // Vector.
-        this->assembling_caches.element_reassembled_vector[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-
-        this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) malloc(sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-        this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
-        for(int j = 0; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
-          this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
-      }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::temp_disable_adaptivity_cache()
-    {
-      if(this->cache_for_adaptivity)
-      {
-        this->temp_cache_for_adaptivity = true;
-        this->cache_for_adaptivity = false;
-        return;
-      }
-      this->temp_cache_for_adaptivity = false;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::temp_enable_adaptivity_cache()
-    {
-      if(this->temp_cache_for_adaptivity)
-      {
-        this->cache_for_adaptivity = true;
-        this->temp_cache_for_adaptivity = false;
       }
     }
 
@@ -570,51 +471,7 @@ namespace Hermes
 
       this->spaces = spaces;
       this->ndof = Space<Scalar>::get_num_dofs(spaces);
-      if(this->cache_for_adaptivity)
-      {
-        for(unsigned int i = 0; i < this->spaces.size(); i++)
-        {
-          if(smaller_spaces)
-          {
-            std::free(this->assembling_caches.element_reassembled_matrix[i]);
-            this->assembling_caches.element_reassembled_matrix[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          }
-          else
-            this->assembling_caches.element_reassembled_matrix[i] = (bool*) realloc(this->assembling_caches.element_reassembled_matrix[i], sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          for(unsigned int j = 0; j < this->spaces.size(); j++)
-          {
-            if(smaller_spaces)
-            {
-              std::free(this->assembling_caches.previous_reference_dp_cache_matrix[i][j]);
-              this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) malloc(sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-            }
-            else
-              this->assembling_caches.previous_reference_dp_cache_matrix[i][j] = (Scalar***) realloc(this->assembling_caches.previous_reference_dp_cache_matrix[i][j], sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-            for(int k = this->assembling_caches.cache_matrix_size[i][j]; k <= this->spaces[i]->get_mesh()->get_max_element_id(); k++)
-              this->assembling_caches.previous_reference_dp_cache_matrix[i][j][k] = NULL;
-            this->assembling_caches.cache_matrix_size[i][j] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
-          }
-
-          // Vector.
-          if(smaller_spaces)
-          {
-            std::free(this->assembling_caches.element_reassembled_vector[i]);
-            this->assembling_caches.element_reassembled_vector[i] = (bool*) malloc(sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          }
-          else
-            this->assembling_caches.element_reassembled_vector[i] = (bool*) realloc(this->assembling_caches.element_reassembled_vector[i], sizeof(bool) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          if(smaller_spaces)
-            {
-              std::free(this->assembling_caches.previous_reference_dp_cache_vector[i]);
-              this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) malloc(sizeof(Scalar**) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-            }
-          else
-            this->assembling_caches.previous_reference_dp_cache_vector[i] = (Scalar**) realloc(this->assembling_caches.previous_reference_dp_cache_vector[i], sizeof(Scalar*) * (this->spaces[i]->get_mesh()->get_max_element_id() + 1));
-          for(int j = this->assembling_caches.cache_vector_size[i]; j <= this->spaces[i]->get_mesh()->get_max_element_id(); j++)
-              this->assembling_caches.previous_reference_dp_cache_vector[i][j] = NULL;
-          this->assembling_caches.cache_vector_size[i] = this->spaces[i]->get_mesh()->get_max_element_id() + 1;
-        }
-      }
+      
       this->invalidate_matrix();
     }
 
@@ -673,17 +530,8 @@ namespace Hermes
         if (block_weights->get_size() != wf->get_neq())
           throw Exceptions::LengthException(6, block_weights->get_size(), wf->get_neq());
 
-      // Time measurement.
-      profiling.current_record.reset();
-      profiling.total_time.tick();
-      profiling.assemble_util_time.tick();
-
       // Creating matrix sparse structure.
       create_sparse_structure(mat, rhs, force_diagonal_blocks, block_weights);
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.current_record.create_sparse_structure = profiling.assemble_util_time.last();
 
       // Convert the coefficient vector into vector of external solutions.
       Hermes::vector<Solution<Scalar>*> u_ext;
@@ -713,25 +561,11 @@ namespace Hermes
       if (mat != NULL)
         get_matrix_buffer(9);
 
-      if(cache_for_adaptivity)
-      {
-        for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
-          for(int i = 0; i <= this->spaces[space_i]->get_mesh()->get_max_element_id(); i++)
-          {
-            this->assembling_caches.element_reassembled_matrix[space_i][i] = false;
-            this->assembling_caches.element_reassembled_vector[space_i][i] = false;
-          }
-      }
-
       // Create assembling stages.
       Hermes::vector<Stage<Scalar> > stages = Hermes::vector<Stage<Scalar> >();
       bool want_matrix = (mat != NULL);
       bool want_vector = (rhs != NULL);
-      wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector, cache_for_adaptivity);
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.current_record.initialization = profiling.assemble_util_time.last();
+      wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector);
 
       // Loop through all assembling stages -- the purpose of this is increased performance
       // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -764,24 +598,6 @@ namespace Hermes
       // Delete the vector u_ext.
       for(typename Hermes::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
         delete *it;
-
-      // Handle the previous spaces when caching previous reference spaces integrals.
-      if(this->cache_for_adaptivity)
-      {
-        if(this->assembling_caches.stored_spaces_for_adaptivity.size() == 0 || this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq() != this->spaces[0]->get_seq())
-        {
-          for(unsigned int space_i = 0; space_i < this->assembling_caches.stored_spaces_for_adaptivity.size(); space_i++)
-          {
-            delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i)->get_mesh();
-            delete this->assembling_caches.stored_spaces_for_adaptivity.at(space_i);
-          }
-          this->assembling_caches.stored_spaces_for_adaptivity = this->spaces;
-        }
-      }
-      // Time measurement.
-      profiling.total_time.tick();
-      profiling.current_record.total = profiling.total_time.last();
-      profiling.profile.push_back(profiling.current_record);
     }
 
     template<typename Scalar>
@@ -863,160 +679,9 @@ namespace Hermes
         // The proper sub-element mappings to all the functions of
         // this stage is supplied by the function Traverse::get_next_state()
         // called in the while loop.
-      {
-        if(this->cache_for_adaptivity)
-        {
-          bool stored_value = true;
-
-          // Check that this is the first assembly of the matrix in this adaptivity step.
-          // If not, we have to calculate the matrix again.
-          if(this->assembling_caches.stored_spaces_for_adaptivity.size() > 0)
-          {
-            if(spaces[0]->get_seq() == this->assembling_caches.stored_spaces_for_adaptivity[0]->get_seq())
-              stored_value = false;
-          }
-          else
-            stored_value = false;
-
-          // Test if we want to use the stored value (when the last adaptation did not change this element in any space)
-          for (unsigned int i = 0; i < stage.idx.size(); i++)
-            if(spaces[stage.idx[i]]->edata[e[i]->id].changed_in_last_adaptation)
-              stored_value = false;
-
-          if(stored_value)
-          {
-            // We want the current assembly lists in order to know where in the matrix to insert.
-            AsmList<Scalar>* al = new AsmList<Scalar>[stage.idx.size()];
-
-            // Also we need to find out the id of the element in the previous reference mesh.
-            // So we want to know what son of the parent of e[i] is e[i]. Because this
-            // is the only same thing in the current and previous reference meshes.
-            unsigned int *son = new unsigned int[stage.idx.size()];
-            for (unsigned int i = 0; i < stage.idx.size(); i++)
-            {
-              spaces[stage.idx[i]]->get_element_assembly_list(e[i], &al[i], spaces_first_dofs[stage.idx[i]]);
-              for(unsigned int sons_i = 0; sons_i < 4; sons_i++)
-                if(e[i]->parent->sons[sons_i] == e[i])
-                  son[i] = sons_i;
-            }
-
-            // Previous reference solution assembly lists.
-            AsmList<Scalar>* al_prev = new AsmList<Scalar>[stage.idx.size()];
-            Element** e_prev = new Element*[stage.idx.size()];
-            for (unsigned int i = 0; i < stage.idx.size(); i++)
-            {
-              if(stored_value)
-              {
-                e_prev[i] = this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_mesh()->get_element(e[i]->parent->id)->sons[son[i]];
-
-                // If we have already reassembled this element.
-                if( (mat != NULL && this->assembling_caches.element_reassembled_matrix[i][e_prev[i]->id])
-                    ||
-                    (rhs != NULL && this->assembling_caches.element_reassembled_vector[i][e_prev[i]->id]) )
-                {
-                  stored_value = false;
-                  break;
-                }
-
-                this->assembling_caches.stored_spaces_for_adaptivity[stage.idx[i]]->get_element_assembly_list(e_prev[i], &al_prev[i], spaces_first_dofs[stage.idx[i]]);
-                if(al[i].cnt != al_prev[i].cnt)
-                  stored_value = false;
-                for(unsigned int ai = 0; ai < al[i].cnt; ai++)
-                {
-                  if(al[i].idx[ai] != al_prev[i].idx[ai] || (al[i].dof[ai] != al_prev[i].dof[ai] && al[i].dof[ai] < 0))
-                  {
-                    stored_value = false;
-                    break;
-                  }
-                }
-              }
-            }
-            if(stored_value)
-            {
-              for (unsigned int i = 0; i < stage.idx.size(); i++)
-              {
-                if(mat != NULL)
-                {
-                  for (unsigned int j = 0; j < stage.idx.size(); j++)
-                  {
-                    for(unsigned int ai = 0; ai < al[i].cnt; ai++)
-                      for(unsigned int aj = 0; aj < al[j].cnt; aj++)
-                        if(al[i].dof[ai] > -1 && al[j].dof[aj] > -1)
-                          mat->add(al[i].dof[ai], al[j].dof[aj],
-                            this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e_prev[i]->id][ai][aj]);
-
-                    if(e[i]->id != e_prev[i]->id)
-                    {
-                      if(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] != NULL)
-                        std::free(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id]);
-                      this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] = new_matrix_malloc<Scalar>(al[i].cnt, al[j].cnt);
-
-                      for (unsigned int j = 0; j < stage.idx.size(); j++)
-                        for(unsigned int ai = 0; ai < al[i].cnt; ai++)
-                          for(unsigned int aj = 0; aj < al[j].cnt; aj++)
-                            if(al[i].dof[ai] > -1 && al[j].dof[aj] > -1)
-                              this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id][ai][aj] =
-                                this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e_prev[i]->id][ai][aj];
-                    }
-                    this->assembling_caches.element_reassembled_matrix[i][e[i]->id] = true;
-                  }
-                }
-                if(rhs != NULL)
-                {
-                  for(unsigned int ai = 0; ai < al[i].cnt; ai++)
-                    if(al[i].dof[ai] > -1)
-                      rhs->add(al[i].dof[ai], this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e_prev[i]->id][ai]);
-
-                  if(e[i]->id != e_prev[i]->id)
-                  {
-                    if(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] != NULL)
-                      std::free(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id]);
-                    this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] = (Scalar*) malloc(sizeof(Scalar) * al[i].cnt);
-
-                    for(unsigned int ai = 0; ai < al[i].cnt; ai++)
-                      if(al[i].dof[ai] > -1)
-                        this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id][ai] =
-                          this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e_prev[i]->id][ai];
-                  }
-                  this->assembling_caches.element_reassembled_vector[i][e[i]->id] = true;
-                }
-              }
-            }
-            delete [] al;
-            delete [] al_prev;
-          }
-          if(!stored_value)
-          {
-            for (unsigned int i = 0; i < stage.idx.size(); i++)
-            {
-              if(mat != NULL)
-                for (unsigned int j = 0; j < stage.idx.size(); j++)
-                  if(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] != NULL)
-                  {
-                    std::free(this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id]);
-                    this->assembling_caches.previous_reference_dp_cache_matrix[stage.idx[i]][stage.idx[j]][e[i]->id] = NULL;
-                    this->assembling_caches.element_reassembled_matrix[i][e[i]->id] = true;
-                  }
-              if(rhs != NULL)
-                if(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] != NULL)
-                {
-                  std::free(this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id]);
-                  this->assembling_caches.previous_reference_dp_cache_vector[stage.idx[i]][e[i]->id] = NULL;
-                  this->assembling_caches.element_reassembled_vector[i][e[i]->id] = true;
-                }
-            }
-            assemble_one_state(stage, mat, rhs, force_diagonal_blocks,
-            block_weights, spss, refmap,
-            u_ext, e, bnd, surf_pos, trav.get_base());
-          }
-        }
-        else
-        {
-          assemble_one_state(stage, mat, rhs, force_diagonal_blocks,
-          block_weights, spss, refmap,
-          u_ext, e, bnd, surf_pos, trav.get_base());
-        }
-      }
+        assemble_one_state(stage, mat, rhs, force_diagonal_blocks,
+        block_weights, spss, refmap,
+        u_ext, e, bnd, surf_pos, trav.get_base());
 
       if (mat != NULL)
         mat->finish();
@@ -1089,8 +754,6 @@ namespace Hermes
       bool* bnd, SurfPos* surf_pos, Element* trav_base)
     {
       _F_;
-      // Time measurement.
-      profiling.assemble_util_time.tick();
 
       // Assembly list vector.
       Hermes::vector<AsmList<Scalar>*> al;
@@ -1112,13 +775,6 @@ namespace Hermes
         return;
 
       init_cache();
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.current_record.state_init += profiling.assemble_util_time.last();
-
-      // Time measurement.
-      profiling.assemble_util_time.reset();
 
       // Assemble volume matrix forms.
       if (mat != NULL)
@@ -1157,9 +813,6 @@ namespace Hermes
 
       delete_cache();
 
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.current_record.form_preparation_assemble += profiling.assemble_util_time.accumulated();
     }
 
     template<typename Scalar>
@@ -1278,40 +931,7 @@ namespace Hermes
         }
         // Insert the local stiffness matrix into the global one.
         if (mat != NULL)
-        {
           mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
-          if(this->cache_for_adaptivity)
-          {
-            Scalar** matrix = NULL;
-            if(this->assembling_caches.previous_reference_dp_cache_matrix[m][n][refmap[m]->get_active_element()->id] == NULL)
-            {
-              // This also zeroes the matrix.
-              matrix = new_matrix_malloc<Scalar>(al[m]->cnt, al[n]->cnt);
-              this->assembling_caches.previous_reference_dp_cache_matrix[m][n][refmap[m]->get_active_element()->id] = matrix;
-            }
-            else
-              matrix = this->assembling_caches.previous_reference_dp_cache_matrix[m][n][refmap[m]->get_active_element()->id];
-            for (unsigned int i = 0; i < al[m]->cnt; i++)
-              for (unsigned int j = 0; j < al[n]->cnt; j++)
-                if(al[m]->dof[i] >=0 && al[n]->dof[j] >=0)
-                  matrix[i][j] += local_stiffness_matrix[i][j];
-            if(sym)
-            {
-              if(this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] == NULL)
-              {
-                // This also zeroes the matrix.
-                matrix = new_matrix_malloc<Scalar>(al[n]->cnt, al[m]->cnt);
-                this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] = matrix;
-              }
-              else
-                matrix = this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id];
-              for (unsigned int i = 0; i < al[m]->cnt; i++)
-                for (unsigned int j = 0; j < al[n]->cnt; j++)
-                  if(al[m]->dof[i] >=0 && al[n]->dof[j] >=0)
-                    matrix[j][i] += local_stiffness_matrix[j][i];
-            }
-          }
-        }
 
         // Insert also the off-diagonal (anti-)symmetric block, if required.
         if (tra)
@@ -1322,25 +942,7 @@ namespace Hermes
           transpose(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
 
           if (mat != NULL)
-          {
             mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
-            if(this->cache_for_adaptivity)
-            {
-              Scalar** matrix = NULL;
-              if(this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] == NULL)
-              {
-                // This also zeroes the matrix.
-                matrix = new_matrix_malloc<Scalar>(al[n]->cnt, al[m]->cnt);
-                this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id] = matrix;
-              }
-              else
-                matrix = this->assembling_caches.previous_reference_dp_cache_matrix[n][m][refmap[n]->get_active_element()->id];
-              for (unsigned int i = 0; i < al[m]->cnt; i++)
-                for (unsigned int j = 0; j < al[n]->cnt; j++)
-                  if(al[m]->dof[i] >=0 && al[n]->dof[j] >=0)
-                    matrix[j][i] += local_stiffness_matrix[j][i];
-            }
-          }
         }
       }
     }
@@ -1515,17 +1117,7 @@ namespace Hermes
         if (assemble_this_form == false) continue;
 
         Scalar* vector = NULL;
-        if(this->cache_for_adaptivity)
-        {
-          if(this->assembling_caches.previous_reference_dp_cache_vector[m][refmap[m]->get_active_element()->id] == NULL)
-          {
-            vector = (Scalar*) malloc(al[m]->cnt * sizeof(Scalar));
-            this->assembling_caches.previous_reference_dp_cache_vector[m][refmap[m]->get_active_element()->id] = vector;
-            memset(vector, 0, al[m]->cnt * sizeof(Scalar));
-          }
-          else
-            vector = this->assembling_caches.previous_reference_dp_cache_vector[m][refmap[m]->get_active_element()->id];
-        }
+        
         for (unsigned int i = 0; i < al[m]->cnt; i++)
         {
           if (al[m]->dof[i] < 0) continue;
@@ -1535,13 +1127,7 @@ namespace Hermes
           // Numerical integration performed only if the coefficient
           // multiplying the form is nonzero.
           if (std::abs(al[m]->coef[i]) > 1e-12)
-          {
-            Scalar result = eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i];
-            rhs->add(al[m]->dof[i], result);
-
-            if(this->cache_for_adaptivity)
-              vector[i] += result;
-          }
+            rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
         }
       }
     }
@@ -3078,19 +2664,10 @@ namespace Hermes
       _F_;
       Scalar result = 0;
 
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
-
       // Determine the integration order by parsing the form.
       int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
       // Perform non-adaptive numerical quadrature of order "order".
       result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
-
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-      profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
 
       return result;
     }
@@ -3101,10 +2678,6 @@ namespace Hermes
       RefMap *ru, RefMap *rv, Hermes::vector<Scalar>& result)
     {
       _F_;
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
 
       // Determine the integration order by parsing the form.
       int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
@@ -3153,14 +2726,7 @@ namespace Hermes
       ExtData<Scalar>* ext = init_ext_fns(mfv->ext, rv, order);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       mfv->value(np, jwt, prev, u, v, e, ext, result);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       for(unsigned int i = 0; i < result.size(); i++)
         result[i] *= mfv->scaling_factor;
@@ -3179,11 +2745,6 @@ namespace Hermes
           ext->free();
           delete ext;
         }
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
     }
     template<typename Scalar>
     int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MatrixFormVol<Scalar> *mfv, Hermes::vector<Solution<Scalar>*> u_ext,
@@ -3227,14 +2788,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
@@ -3294,14 +2848,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
@@ -3379,14 +2926,7 @@ namespace Hermes
           prev[ext_i]->add(*ext->fn[mfv->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       Scalar res = mfv->value(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       // Clean up.
       for(int i = 0; i < prev_size; i++)
@@ -3415,19 +2955,10 @@ namespace Hermes
 
       Scalar result = 0;
 
-     // Time measurement.
-        profiling.assemble_util_time.tick();
-        profiling.eval_util_time.reset();
-
-        // Determine the integration order by parsing the form.
-        int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
-        // Perform non-adaptive numerical quadrature of order "order".
-        result = eval_form_subelement(order, vfv, u_ext, fv, rv);
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
+      // Determine the integration order by parsing the form.
+      int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
+      // Perform non-adaptive numerical quadrature of order "order".
+      result = eval_form_subelement(order, vfv, u_ext, fv, rv);
 
       return result;
     }
@@ -3437,10 +2968,6 @@ namespace Hermes
       PrecalcShapeset *fv, RefMap *rv, Hermes::vector<Scalar>& result)
     {
       _F_;
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
 
       // Determine the integration order by parsing the form.
       int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
@@ -3485,14 +3012,7 @@ namespace Hermes
       ExtData<Scalar>* ext = init_ext_fns(vfv->ext, rv, order);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       vfv->value(np, jwt, prev, v, e, ext, result);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       for(unsigned int i = 0; i < result.size(); i++)
         result[i] *= vfv->scaling_factor;
@@ -3504,18 +3024,13 @@ namespace Hermes
           prev[i]->free_fn();
           delete prev[i];
         }
-        delete [] prev;
+      delete [] prev;
 
-        if (ext != NULL)
-        {
-          ext->free();
-          delete ext;
-        }
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
+      if (ext != NULL)
+      {
+        ext->free();
+        delete ext;
+      }
     }
 
     template<typename Scalar>
@@ -3561,14 +3076,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = vfv->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
@@ -3630,14 +3138,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = vfv->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
@@ -3715,14 +3216,7 @@ namespace Hermes
           prev[ext_i]->add(*ext->fn[vfv->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       Scalar res = vfv->value(np, jwt, prev, v, e, ext) * vfv->scaling_factor;
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       // Clean up.
       for(int i = 0; i < prev_size; i++)
@@ -3731,15 +3225,15 @@ namespace Hermes
           prev[i]->free_fn();
           delete prev[i];
         }
-        delete [] prev;
+      delete [] prev;
 
-        if (ext != NULL)
-        {
-          ext->free();
-          delete ext;
-        }
+      if (ext != NULL)
+      {
+        ext->free();
+        delete ext;
+      }
 
-        return res;
+      return res;
     }
 
     template<typename Scalar>
@@ -3750,20 +3244,10 @@ namespace Hermes
       _F_;
       Scalar result = 0;
 
-        // Time measurement.
-        profiling.assemble_util_time.tick();
-        profiling.eval_util_time.reset();
-
-        // Determine the integration order by parsing the form.
-        int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
-        // Perform non-adaptive numerical quadrature of order "order".
-        result = eval_form_subelement(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-
+      // Determine the integration order by parsing the form.
+      int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
+      // Perform non-adaptive numerical quadrature of order "order".
+      result = eval_form_subelement(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
 
       return result;
     }
@@ -3773,10 +3257,6 @@ namespace Hermes
       PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result)
     {
       _F_;
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
 
       // Determine the integration order by parsing the form.
       int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
@@ -3817,14 +3297,7 @@ namespace Hermes
       ExtData<Scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       mfs->value(np, jwt, prev, u, v, e, ext, result);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       for(unsigned int i = 0; i < result.size(); i++)
         result[i] *= mfs->scaling_factor * 0.5;
@@ -3836,18 +3309,13 @@ namespace Hermes
           prev[i]->free_fn();
           delete prev[i];
         }
-        delete [] prev;
+      delete [] prev;
 
-        if (ext != NULL)
-        {
-          ext->free();
-          delete ext;
-        }
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
+      if (ext != NULL)
+      {
+        ext->free();
+        delete ext;
+      }
     }
 
     template<typename Scalar>
@@ -3892,14 +3360,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
@@ -3960,14 +3421,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
@@ -4039,14 +3493,7 @@ namespace Hermes
           prev[ext_i]->add(*ext->fn[mfs->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       Scalar res = mfs->value(np, jwt, prev, u, v, e, ext) * mfs->scaling_factor;
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       // Clean up.
       for(int i = 0; i < prev_size; i++)
@@ -4076,18 +3523,10 @@ namespace Hermes
       _F_;
       Scalar result = 0;
 
-        // Time measurement.
-        profiling.assemble_util_time.tick();
-        profiling.eval_util_time.reset();
-        // Determine the integration order by parsing the form.
-        int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
-        // Perform non-adaptive numerical quadrature of order "order".
-        result = eval_form_subelement(order, vfs, u_ext, fv, rv, surf_pos);
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
+      // Determine the integration order by parsing the form.
+      int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
+      // Perform non-adaptive numerical quadrature of order "order".
+      result = eval_form_subelement(order, vfs, u_ext, fv, rv, surf_pos);
 
       return result;
     }
@@ -4097,10 +3536,6 @@ namespace Hermes
       PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result)
     {
       _F_;
-
-      // Time measurement.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
 
       // Determine the integration order by parsing the form.
       int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
@@ -4139,14 +3574,7 @@ namespace Hermes
       Func<double>* v = get_fn(fv, rv, eo);
       ExtData<Scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       vfs->value(np, jwt, prev, v, e, ext, result);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       for(unsigned int i = 0; i < result.size(); i++)
         result[i] *= vfs->scaling_factor * 0.5;
@@ -4165,12 +3593,6 @@ namespace Hermes
           ext->free();
           delete ext;
         }
-
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-        profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-
     }
 
     template<typename Scalar>
@@ -4214,14 +3636,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = vfs->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
@@ -4281,14 +3696,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = vfs->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
@@ -4359,14 +3767,7 @@ namespace Hermes
           prev[ext_i]->add(*ext->fn[vfs->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // The actual calculation takes place here.
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       Scalar res = vfs->value(np, jwt, prev, v, e, ext) * vfs->scaling_factor;
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       // Clean up.
       for(int i = 0; i < prev_size; i++)
@@ -4428,14 +3829,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference maps.
         order = ru->get_inv_ref_order();
@@ -4505,14 +3899,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, fake_e, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference maps.
         order = ru->get_inv_ref_order();
@@ -4550,10 +3937,6 @@ namespace Hermes
     {
       _F_;
 
-      // Time measurements.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
-
       NeighborSearch<Scalar>* nbs_u = neighbor_searches.get(neighbor_index_u);
       NeighborSearch<Scalar>* nbs_v = neighbor_searches.get(neighbor_index_v);
 
@@ -4608,14 +3991,7 @@ namespace Hermes
 
       ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       Scalar res = mfs->value(np, jwt, prev, u, v, e, ext);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       // Clean up.
       for (int i = 0; i < prev_size; i++)
@@ -4643,11 +4019,6 @@ namespace Hermes
       // Scaling.
       res *= mfs->scaling_factor;
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-      profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-
       return 0.5 * res; // Edges are parametrized from 0 to 1 while integration weights
       // are defined in (-1, 1). Thus multiplying with 0.5 to correct
       // the weights.
@@ -4659,10 +4030,6 @@ namespace Hermes
       SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v, Hermes::vector<Scalar>& result)
     {
       _F_;
-
-      // Time measurements.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
 
       NeighborSearch<Scalar>* nbs_u = neighbor_searches.get(neighbor_index_u);
       NeighborSearch<Scalar>* nbs_v = neighbor_searches.get(neighbor_index_v);
@@ -4718,14 +4085,7 @@ namespace Hermes
 
       ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       mfs->value(np, jwt, prev, u, v, e, ext, result);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       for(unsigned int i = 0; i < result.size(); i++)
         result[i] *= mfs->scaling_factor * 0.5;
@@ -4752,11 +4112,6 @@ namespace Hermes
       delete u;
       delete v;
       delete e;
-
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-      profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
     }
 
     template<typename Scalar>
@@ -4801,14 +4156,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = vfs->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
@@ -4879,14 +4227,7 @@ namespace Hermes
         double fake_wt = 1.0;
 
         // Total order of the vector form.
-        // Time measurement.
-        profiling.eval_util_time.tick();
-        profiling.integration_time.tick();
         Hermes::Ord o = vfs->ord(1, &fake_wt, oi, ov, fake_e, fake_ext);
-        // Time measurement.
-        profiling.integration_time.tick();
-        profiling.current_record.form_evaluation += profiling.integration_time.last();
-        profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
@@ -4922,10 +4263,6 @@ namespace Hermes
     {
       _F_;
 
-      // Time measurements.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
-
       NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(neighbor_index_v));
       int order = calc_order_dg_vector_form(vfs, u_ext, fv, rv, surf_pos, neighbor_searches, neighbor_index_v);
 
@@ -4970,14 +4307,7 @@ namespace Hermes
       Func<double>* v = get_fn(fv, rv, eo);
       ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       Scalar res = vfs->value(np, jwt, prev, v, e, ext) * vfs->scaling_factor;
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       // Clean up.
       for (int i = 0; i < prev_size; i++)
@@ -5002,11 +4332,6 @@ namespace Hermes
       // Scaling.
       res *= vfs->scaling_factor;
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-      profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
-
       return 0.5 * res; // Edges are parametrized from 0 to 1 while integration weights
       // are defined in (-1, 1). Thus multiplying with 0.5 to correct
       // the weights.
@@ -5017,10 +4342,6 @@ namespace Hermes
       SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v, Hermes::vector<Scalar>& result)
     {
       _F_;
-
-      // Time measurements.
-      profiling.assemble_util_time.tick();
-      profiling.eval_util_time.reset();
 
       NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(neighbor_index_v));
       int order = calc_order_dg_vector_form(vfs, u_ext, fv, rv, surf_pos, neighbor_searches, neighbor_index_v);
@@ -5066,14 +4387,7 @@ namespace Hermes
       Func<double>* v = get_fn(fv, rv, eo);
       ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
 
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.integration_time.tick();
       vfs->value(np, jwt, prev, v, e, ext, result);
-      // Time measurement.
-      profiling.integration_time.tick();
-      profiling.current_record.form_evaluation += profiling.integration_time.last();
-      profiling.eval_util_time.tick(Hermes::HERMES_SKIP);
 
       for(unsigned int i = 0; i < result.size(); i++)
         result[i] *= vfs->scaling_factor * 0.5;
@@ -5097,11 +4411,6 @@ namespace Hermes
       }
 
       delete e;
-
-      // Time measurement.
-      profiling.eval_util_time.tick();
-      profiling.current_record.form_preparation_eval += profiling.eval_util_time.accumulated();
-      profiling.assemble_util_time.tick(Hermes::HERMES_SKIP);
     }
 
     NeighborNode::NeighborNode(NeighborNode* parent, unsigned int transformation) : parent(parent), transformation(transformation)
@@ -5274,63 +4583,6 @@ namespace Hermes
           }
         }
       }
-    }
-
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::Profiling::Profiling()
-    {
-    }
-
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::Profiling::Record::Record()
-    {
-      reset();
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::Profiling::Record::reset()
-    {
-      create_sparse_structure = 0;
-      form_evaluation = 0;
-      form_preparation_assemble = 0;
-      form_preparation_eval = 0;
-      initialization = 0;
-      state_init = 0;
-      total = 0;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::Profiling::get_profiling_output(std::ostream & out, unsigned int order)
-    {
-        out << std::endl;
-        out << "Assembly no. " << order + 1 << ":" << std::endl;
-        out << "\t" << "Total assembly time: " << profile[order].total << " s"  << std::endl;
-        out << "\t" << "Sparse structure creation: " << profile[order].create_sparse_structure << " s"  << std::endl;
-        out << "\t" << "Global initialization time: " << profile[order].initialization << " s"  << std::endl;
-        out << "\t" << "State initialization (accumulated): " << profile[order].state_init << " s"  << std::endl;
-        out << "\t" << "Form calculation preparations (assemble_* methods): " << profile[order].form_preparation_assemble << " s"  << std::endl;
-        out << "\t" << "Form calculation preparations (eval_*_form methods): " << profile[order].form_preparation_eval << " s"  << std::endl;
-        out << "\t" << "Form calculations (accumulated): " << profile[order].form_evaluation << " s"  << std::endl;
-        out << std::endl;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::get_all_profiling_output(std::ostream & out)
-    {
-      if(profiling.profile.size() == 0)
-        info("No assemblies were done yet to get an output for.");
-
-      for(unsigned int i = 0; i < profiling.profile.size(); i++)
-        profiling.get_profiling_output(out, i);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::get_last_profiling_output(std::ostream & out)
-    {
-      if(profiling.profile.size() == 0)
-        info("No assemblies were done yet to get an output for.");
-
-      profiling.get_profiling_output(out, profiling.profile.size() - 1);
     }
 
     template class HERMES_API DiscreteProblem<double>;

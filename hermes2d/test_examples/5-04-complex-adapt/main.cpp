@@ -107,7 +107,6 @@ int main(int argc, char* argv[])
   Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
 
   DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
-  dp.set_adaptivity_cache();
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);

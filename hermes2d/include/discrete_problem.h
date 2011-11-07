@@ -72,9 +72,6 @@ namespace Hermes
       /// Destuctor.
       virtual ~DiscreteProblem();
 
-      /// Sets the storing of the previous matrix in adaptivity.
-      void set_adaptivity_cache();
-
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the
       /// previous Newton vector. If force_diagonal_block == true, then (zero) matrix
@@ -131,9 +128,6 @@ namespace Hermes
 
       /// This is different from H3D.
       PrecalcShapeset* get_pss(int n);
-
-      void temp_enable_adaptivity_cache();
-      void temp_disable_adaptivity_cache();
 
       /// Preassembling.
       /// Precalculate matrix sparse structure.
@@ -276,9 +270,6 @@ namespace Hermes
       void init();
 
       void free();
-
-      bool cache_for_adaptivity;
-      bool temp_cache_for_adaptivity;
 
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
@@ -599,105 +590,11 @@ namespace Hermes
         /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for quads.
         std::map<KeyNonConst, Func<double>* , CompareNonConst> cache_fn_quads;
 
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// Contains true if the matrix entry for the Element has already been recalculated, and the value
-        /// saved is therefore not possible to use.
-        bool** element_reassembled_matrix;
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// Contains pair<Element id, true> if the vector entry for the Element has already been recalculated, and the value
-        /// saved is therefore not possible to use.
-        bool** element_reassembled_vector;
-
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// The matrix cache, coordinates are : [Space_1][Space_2][Element id on Space_1][DOF on Space_1][DOF on Space_2].
-        Scalar***** previous_reference_dp_cache_matrix;
-
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// The vector cache, coordinates are : [Space][Element id on Space][DOF on Space].
-        Scalar*** previous_reference_dp_cache_vector;
-
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// Current size of the [Element id on Space_1] dimension in previous_reference_dp_cache_matrix.
-        unsigned int** cache_matrix_size;
-
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// Current size of the [Element id on Space] dimension in previous_reference_dp_cache_vector.
-        unsigned int* cache_vector_size;
-
-        /// For caching of values calculated on the previous reference space during adaptivity.
-        /// Previous spaces (incl. mesh) to be able to determine the previous element assembly lists etc.
-        Hermes::vector<const Space<Scalar>*> stored_spaces_for_adaptivity;
-
         LightArray<Func<Hermes::Ord>*> cache_fn_ord;
       };
 
       /// An AssemblingCaches instance for this instance of DiscreteProblem.
       AssemblingCaches assembling_caches;
-
-      /// Class used for profiling of DiscreteProblem (assembling).
-      class Profiling
-      {
-      private:
-        Profiling();
-
-        /// Utility time measurement.
-        /// For measuring parts of assembling in methods "assemble_*".
-        /// Also for initialization parts.
-        Hermes::TimePeriod assemble_util_time;
-
-        /// Utility time measurement.
-        /// For measuring parts of assembling in methods "eval_*_form".
-        /// Except for numerical integration.
-        Hermes::TimePeriod eval_util_time;
-
-        /// Total time measurement.
-        /// For measuring the whole assembling.
-        Hermes::TimePeriod total_time;
-
-        /// Integration time measurement.
-        /// For measuring the numerical integration.
-        /// Also, the numerical integration when calculating the integration order is counted.
-        Hermes::TimePeriod integration_time;
-
-        /// One record stores information about one matrix assembling.
-        class Record
-        {
-        public:
-          Record();
-          void reset();
-
-          double total;
-          double create_sparse_structure;
-          double initialization;
-          double state_init;
-          /// In assemble_* methods.
-          double form_preparation_assemble;
-          /// In eval_*_form methods.
-          double form_preparation_eval;
-          double form_evaluation;
-        };
-
-        /// The Record instance that is currently being filled.
-        Record current_record;
-
-        /// Stores all Records.
-        Hermes::vector<Record> profile;
-
-        /// Returns the profiling info.
-        void get_profiling_output(std::ostream & out, unsigned int order);
-
-        friend class DiscreteProblem<Scalar>;
-      };
-
-      /// A Profiling instance for this instance of DiscreteProblem.
-      Profiling profiling;
-
-    public:
-      /// Returns all profiling info.
-      void get_all_profiling_output(std::ostream & out);
-
-      /// Returns the profiling info from the last call to assemble().
-      void get_last_profiling_output(std::ostream & out);
 
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class NewtonSolver;
