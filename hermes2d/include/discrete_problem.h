@@ -290,7 +290,7 @@ namespace Hermes
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv);
 
       /// Elementary function used in eval_form() in adaptive mode for volumetric matrix forms.
-      Scalar eval_form_subelement(int order, MatrixFormVol<Scalar>* mfv,
+      Scalar eval_form_value(int order, MatrixFormVol<Scalar>* mfv,
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv,
         RefMap* ru, RefMap* rv);
@@ -307,7 +307,7 @@ namespace Hermes
       int calc_order_vector_form_vol(MultiComponentVectorFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv);
 
-      Scalar eval_form_subelement(int order, VectorFormVol<Scalar>* vfv,
+      Scalar eval_form_value(int order, VectorFormVol<Scalar>* vfv,
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv);
 
@@ -329,7 +329,7 @@ namespace Hermes
         PrecalcShapeset* fu, PrecalcShapeset* fv,
         RefMap* ru, RefMap* rv, SurfPos* surf_pos);
 
-      Scalar eval_form_subelement(int order, MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
+      Scalar eval_form_value(int order, MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos);
 
       /// Vector<Scalar> surface forms. The functions provide the same functionality as the
@@ -346,7 +346,7 @@ namespace Hermes
       int calc_order_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
 
-      Scalar eval_form_subelement(int order, VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
+      Scalar eval_form_value(int order, VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
 
       /// Calculates integration order for DG matrix forms.

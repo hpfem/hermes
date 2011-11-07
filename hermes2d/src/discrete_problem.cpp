@@ -2667,7 +2667,7 @@ namespace Hermes
       // Determine the integration order by parsing the form.
       int order = calc_order_matrix_form_vol(mfv, u_ext, fu, fv, ru, rv);
       // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_subelement(order, mfv, u_ext, fu, fv, ru, rv);
+      result = eval_form_value(order, mfv, u_ext, fu, fv, ru, rv);
 
       return result;
     }
@@ -2868,7 +2868,7 @@ namespace Hermes
       return order;
     }
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, MatrixFormVol<Scalar> *mfv,
+    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, MatrixFormVol<Scalar> *mfv,
       Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fu, PrecalcShapeset *fv,
       RefMap *ru, RefMap *rv)
@@ -2958,7 +2958,7 @@ namespace Hermes
       // Determine the integration order by parsing the form.
       int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
       // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_subelement(order, vfv, u_ext, fv, rv);
+      result = eval_form_value(order, vfv, u_ext, fv, rv);
 
       return result;
     }
@@ -3159,7 +3159,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, VectorFormVol<Scalar> *vfv,
+    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, VectorFormVol<Scalar> *vfv,
       Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fv, RefMap *rv)
     {
@@ -3247,7 +3247,7 @@ namespace Hermes
       // Determine the integration order by parsing the form.
       int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
       // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_subelement(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
+      result = eval_form_value(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
 
       return result;
     }
@@ -3442,7 +3442,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, MatrixFormSurf<Scalar> *mfs, Hermes::vector<Solution<Scalar>*> u_ext,
+    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, MatrixFormSurf<Scalar> *mfs, Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
     {
       _F_;
@@ -3526,7 +3526,7 @@ namespace Hermes
       // Determine the integration order by parsing the form.
       int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
       // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_subelement(order, vfs, u_ext, fv, rv, surf_pos);
+      result = eval_form_value(order, vfs, u_ext, fv, rv, surf_pos);
 
       return result;
     }
@@ -3717,7 +3717,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_subelement(int order, VectorFormSurf<Scalar> *vfs, Hermes::vector<Solution<Scalar>*> u_ext,
+    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, VectorFormSurf<Scalar> *vfs, Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
     {
       _F_;
