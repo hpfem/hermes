@@ -202,7 +202,7 @@ namespace Hermes
       bool is_up_to_date() const;
       
       /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
-      void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const;
+      void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 
       /// Sets the same polynomial order for all elements in the mesh. Does not
       /// call assign_dofs(). For internal use.

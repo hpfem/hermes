@@ -152,7 +152,8 @@ namespace Hermes
       get_bubble_assembly_list(e, al);
       
       for(unsigned int i = 0; i < al->cnt; i++)
-        al->dof[i] += first_dof;
+        if(al->dof[i] >= 0)
+          al->dof[i] += first_dof;
     }
 
     template<typename Scalar>

@@ -753,11 +753,12 @@ namespace Hermes
         get_boundary_assembly_list_internal(e, i, al);
       get_bubble_assembly_list(e, al);
       for(unsigned int i = 0; i < al->cnt; i++)
-        al->dof[i] += first_dof;
+        if(al->dof[i] >= 0)
+          al->dof[i] += first_dof;
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const
+    void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al, unsigned int first_dof) const
     {
       _F_;
       al->cnt = 0;
@@ -765,6 +766,9 @@ namespace Hermes
       get_vertex_assembly_list(e, surf_num, al);
       get_vertex_assembly_list(e, e->next_vert(surf_num), al);
       get_boundary_assembly_list_internal(e, surf_num, al);
+      for(unsigned int i = 0; i < al->cnt; i++)
+        if(al->dof[i] >= 0)
+          al->dof[i] += first_dof;
     }
 
     template<typename Scalar>

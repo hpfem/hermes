@@ -1638,7 +1638,7 @@ namespace Hermes
               nat[j] = false;
           }
         }
-        spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j]);
+        spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j], spaces_first_dofs[j]);
       }
 
       // Assemble boundary edges:
