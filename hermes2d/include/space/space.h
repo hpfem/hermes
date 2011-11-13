@@ -125,7 +125,7 @@ namespace Hermes
       /// Recursively removes all son elements of the given element and
       /// makes it active. Also handles element orders.
       void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
-
+      
       /// Updates element orders when the underlying mesh has been refined.
       void update_element_orders_after_refinement();
 
@@ -148,7 +148,11 @@ namespace Hermes
 
       Mesh* get_mesh() const;
 
+      /// \brief Sets a (new) mesh and calls assign_dofs().
       void set_mesh(Mesh* mesh);
+
+      /// \brief Sets a (new) mesh seq, and mesh_seq.
+      void set_mesh_seq(int seq);
       
       /// Sets the boundary condition.
       void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
