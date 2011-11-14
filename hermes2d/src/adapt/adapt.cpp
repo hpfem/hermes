@@ -355,7 +355,8 @@ namespace Hermes
         have_errors = true; // space without changes
 
       // since space changed, assign dofs:
-      Space<Scalar>::assign_dofs(this->spaces);
+      for(unsigned int i = 0; i < this->spaces.size(); i++)
+        this->spaces[i]->assign_dofs();
 
       return done;
     }
