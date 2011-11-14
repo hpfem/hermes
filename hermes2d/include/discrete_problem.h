@@ -168,6 +168,29 @@ namespace Hermes
         Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, Element** e,
         bool* bnd, SurfPos* surf_pos, Element* trav_base);
 
+
+
+      /// NEW STUFF FOR INTEGRATION OF WHOLE LOCAL VOLUME MATRIX
+
+      /// Assemble the local volume matrix
+      void assemble_local_volume_matrix(Scalar** local_stiffness_matrix, MatrixFormVol<Scalar>* mfv, Hermes::vector<PrecalcShapeset*>& spss,
+        Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        Hermes::vector<AsmList<Scalar>*>& al, int m, int n, double block_scaling_coeff);
+
+      Scalar eval_form_whole(int order, MatrixFormVol<Scalar> *mfv,
+        Hermes::vector<Solution<Scalar>*> u_ext,
+        PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv,
+        Func<Scalar>** prev, Func<double>* u, Func<double>* v, ExtData<Scalar>* ext);
+
+      int calc_order_matrix_form_vol_whole(MatrixFormVol<Scalar> *mfv, Hermes::vector<PrecalcShapeset*>& spss,
+        Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+        Hermes::vector<AsmList<Scalar>*>& al, int m, int n);
+
+
+
+
+
+
       /// Assemble volume matrix forms.
       void assemble_volume_matrix_forms(Stage<Scalar>& stage,
         SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,

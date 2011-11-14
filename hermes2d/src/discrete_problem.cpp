@@ -870,57 +870,9 @@ namespace Hermes
         Scalar **local_stiffness_matrix = NULL;
         local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
 
-        for (unsigned int i = 0; i < al[m]->cnt; i++)
-        {
-          if (!tra && al[m]->dof[i] < 0) continue;
-          spss[m]->set_active_shape(al[m]->idx[i]);
-          // Unsymmetric block.
-          if (!sym)
-          {
-            for (unsigned int j = 0; j < al[n]->cnt; j++)
-            {
-              pss[n]->set_active_shape(al[n]->idx[j]);
-              if (al[n]->dof[j] >= 0)
-              {
-                if (mat != NULL)
-                {
-                  Scalar val = 0;
-                  // Numerical integration performed only if all
-                  // coefficients multiplying the form are nonzero.
-                  if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12)
-                  {
-                    val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                      refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                  }
-                  local_stiffness_matrix[i][j] = val;
-                }
-              }
-            }
-          }
-          // Symmetric block.
-          else
-          {
-            for (unsigned int j = 0; j < al[n]->cnt; j++)
-            {
-              if (j < i && al[n]->dof[j] >= 0)
-                continue;
-              pss[n]->set_active_shape(al[n]->idx[j]);
-              if (al[n]->dof[j] >= 0)
-              {
-                if (mat != NULL)
-                {
-                  Scalar val = 0;
-                  // Numerical integration performed only if all coefficients
-                  // multiplying the form are nonzero.
-                  if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12)
-                    val = block_scaling_coeff * eval_form(mfv, u_ext, pss[n], spss[m], refmap[n],
-                    refmap[m]) * al[n]->coef[j] * al[m]->coef[i];
-                  local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
-                }
-              }
-            }
-          }
-        }
+        if (mat!= NULL)
+            assemble_local_volume_matrix(local_stiffness_matrix, mfv, spss, refmap, u_ext, al, m, n, block_scaling_coeff);
+
         // Insert the local stiffness matrix into the global one.
         if (mat != NULL)
           mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
@@ -938,6 +890,220 @@ namespace Hermes
         }
       }
     }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble_local_volume_matrix(Scalar** local_stiffness_matrix,
+      MatrixFormVol<Scalar>* mfv, Hermes::vector<PrecalcShapeset*>& spss,
+      Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+      Hermes::vector<AsmList<Scalar>*>& al, int m, int n, double block_scaling_coeff)
+    {
+        bool tra = (m != n) && (mfv->sym != 0);
+        bool sym = (m == n) && (mfv->sym == 1);
+
+        int order = calc_order_matrix_form_vol_whole(mfv, spss, refmap, u_ext, al, m, n);
+
+        //this->profiling.func_init_time.tick();
+
+        // Values of the previous Newton iteration, shape functions
+        // and external functions in quadrature points.
+        int prev_size = u_ext.size() - mfv->u_ext_offset;
+        // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+        if(this->RungeKutta)
+          prev_size = this->RK_original_spaces_count;
+
+        Func<Scalar>** prev = new Func<Scalar>*[prev_size];
+        if (u_ext != Hermes::vector<Solution<Scalar>*>())
+          for (int i = 0; i < prev_size; i++)
+            if (u_ext[i + mfv->u_ext_offset] != NULL)
+              prev[i] = this->isempty[i] ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
+            else
+              prev[i] = NULL;
+        else
+          for (int i = 0; i < prev_size; i++)
+            prev[i] = NULL;
+
+        Func<double>* u_list[al[m]->cnt];
+        for (unsigned int i = 0; i < al[m]->cnt; i++)
+            u_list[i] = NULL;
+        Func<double>* v_list[al[n]->cnt];
+        for (unsigned int j = 0; j < al[n]->cnt; j++)
+            v_list[j] = NULL;
+
+        ExtData<Scalar>* ext = init_ext_fns(mfv->ext, refmap[m], order);
+
+        for (unsigned int i = 0; i < al[m]->cnt; i++)
+        {
+          if (!tra && al[m]->dof[i] < 0) continue;
+          spss[m]->set_active_shape(al[m]->idx[i]);
+          // Unsymmetric block.
+          if (!sym)
+          {
+            for (unsigned int j = 0; j < al[n]->cnt; j++)
+            {
+              this->pss[n]->set_active_shape(al[n]->idx[j]);
+              if (al[n]->dof[j] >= 0)
+              {
+                  Scalar val = 0;
+                  // Numerical integration performed only if all
+                  // coefficients multiplying the form are nonzero.
+                  if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12)
+                  {
+                      if(u_list[j] == NULL)
+                          u_list[j] = get_fn(this->pss[n], refmap[n], order);
+                      if(v_list[i] == NULL)
+                          v_list[i] = this->get_fn(spss[m], refmap[m], order);
+                      val = block_scaling_coeff * eval_form_whole(order, mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m],
+                         prev, u_list[j], v_list[i], ext) * al[n]->coef[j] * al[m]->coef[i];
+                  }
+                  local_stiffness_matrix[i][j] = val;
+              }
+            }
+          }
+          // Symmetric block.
+          else
+          {
+            for (unsigned int j = 0; j < al[n]->cnt; j++)
+            {
+              if (j < i && al[n]->dof[j] >= 0)
+                continue;
+              this->pss[n]->set_active_shape(al[n]->idx[j]);
+              if (al[n]->dof[j] >= 0)
+              {
+                  Scalar val = 0;
+                  // Numerical integration performed only if all coefficients
+                  // multiplying the form are nonzero.
+                  if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12){
+                      if(u_list[j] == NULL)
+                          u_list[j] = get_fn(this->pss[n], refmap[n], order);
+                      if(v_list[i] == NULL)
+                          v_list[i] = this->get_fn(spss[m], refmap[m], order);
+                      val = block_scaling_coeff * eval_form_whole(order, mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m],
+                         prev, u_list[j], v_list[i], ext) * al[n]->coef[j] * al[m]->coef[i];
+                  }
+                  local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+
+              }
+            }
+          }
+        }
+
+        for (unsigned int i = 0; i < al[m]->cnt; i++)
+            if(u_list[i] == NULL)
+                delete u_list[i];
+        for (unsigned int j = 0; j < al[n]->cnt; j++)
+            if(v_list[j] == NULL)
+                delete v_list[j];
+
+        for(int i = 0; i < prev_size; i++)
+            if (prev[i] != NULL)
+            {
+                prev[i]->free_fn();
+                delete prev[i];
+            }
+        delete [] prev;
+
+        if (ext != NULL)
+        {
+            ext->free();
+            delete ext;
+        }
+    }
+
+
+    template<typename Scalar>
+    Scalar DiscreteProblem<Scalar>::eval_form_whole(int order, MatrixFormVol<Scalar> *mfv,
+      Hermes::vector<Solution<Scalar>*> u_ext,
+      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv,
+      Func<Scalar>** prev, Func<double>* u, Func<double>* v, ExtData<Scalar>* ext)
+    {
+      // Evaluate the form using numerical quadrature of order "order".
+      Quad2D* quad = fu->get_quad_2d();
+      double3* pt = quad->get_points(order);
+      int np = quad->get_num_points(order);
+
+      // Init geometry and jacobian*weights.
+      if (this->cache_e[order] == NULL)
+      {
+        this->cache_e[order] = init_geom_vol(ru, order);
+        double* jac = NULL;
+        if(!ru->is_jacobian_const())
+          jac = ru->get_jacobian(order);
+        this->cache_jwt[order] = new double[np];
+        for(int i = 0; i < np; i++)
+        {
+          if(ru->is_jacobian_const())
+            this->cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
+          else
+            this->cache_jwt[order][i] = pt[i][2] * jac[i];
+        }
+      }
+      Geom<double>* e = this->cache_e[order];
+      double* jwt = this->cache_jwt[order];
+
+      // Values of the previous Newton iteration, shape functions
+      // and external functions in quadrature points.
+      int prev_size = u_ext.size() - mfv->u_ext_offset;
+      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+      if(this->RungeKutta)
+        prev_size = this->RK_original_spaces_count;
+
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(this->RungeKutta)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          prev[ext_i]->add(*ext->fn[mfv->ext.size() - this->RK_original_spaces_count + ext_i]);
+
+      // The actual calculation takes place here.
+      Scalar res = mfv->value(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
+      return res;
+    }
+
+
+    template <typename Scalar>
+    int DiscreteProblem<Scalar>::calc_order_matrix_form_vol_whole(MatrixFormVol<Scalar> *mfv,
+      Hermes::vector<PrecalcShapeset*>& spss,
+      Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+      Hermes::vector<AsmList<Scalar>*>& al, int m, int n)
+    {
+        //this->profiling.order_calc_time.tick();
+
+        int order = 0;
+
+        if(this->is_fvm)
+            order = refmap[n]->get_inv_ref_order();
+        else
+        {
+            //find functions with maximal order
+            int max_ord_i = 0;
+            int max_ind_i = 0;
+            for (unsigned int i = 0; i < al[m]->cnt; i++){
+                spss[m]->set_active_shape(al[m]->idx[i]);
+                if(spss[m]->get_fn_order() > max_ord_i){
+                    max_ind_i = i;
+                    max_ord_i = spss[m]->get_fn_order();
+                }
+            }
+            int max_ord_j = 0;
+            int max_ind_j = 0;
+            for (unsigned int j = 0; j < al[n]->cnt; j++){
+                this->pss[n]->set_active_shape(al[n]->idx[j]);
+                if(this->pss[n]->get_fn_order() > max_ord_j){
+                    max_ind_j = j;
+                    max_ord_j = this->pss[n]->get_fn_order();
+                }
+            }
+
+            spss[m]->set_active_shape(al[m]->idx[max_ind_i]);
+            this->pss[n]->set_active_shape(al[n]->idx[max_ind_j]);
+            order = calc_order_matrix_form_vol(mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m]);
+
+          // Increase due to reference map.
+          order += refmap[n]->get_inv_ref_order();
+          limit_order(order);
+        }
+
+        return order;
+    }
+
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_volume_vector_forms(Stage<Scalar>& stage,
