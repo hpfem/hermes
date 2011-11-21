@@ -124,5 +124,7 @@ namespace Hermes
     template HERMES_API class ExactSolutionVector<std::complex<double> >;
     template HERMES_API class ConstantSolution<double>;
     template HERMES_API class ConstantSolution<std::complex<double> >;
+    template HERMES_API class ConstantSolutionVector<double>;
+    template HERMES_API class ConstantSolutionVector<std::complex<double> >;
   }
 }
