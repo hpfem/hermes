@@ -49,7 +49,7 @@ namespace Hermes
         OrderView(char* title, WinGeom* wg = NULL);
 
         template<typename Scalar>
-        void show(Space<Scalar>* space);
+        void show(const Space<Scalar>* space);
 
       protected:
 
