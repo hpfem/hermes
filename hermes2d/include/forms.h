@@ -83,6 +83,8 @@ namespace Hermes
       void subtract(const Func<T>& func);
       void add(T* attribute, T* other_attribute);
 
+      int get_num_gip() const;
+
     protected:
       const int num_gip; ///< Number of integration points used by this intance.
       const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
