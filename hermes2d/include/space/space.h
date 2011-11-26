@@ -29,6 +29,14 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    enum SpaceType {
+      HERMES_H1_SPACE = 0,
+      HERMES_HCURL_SPACE = 1,
+      HERMES_HDIV_SPACE = 2,
+      HERMES_L2_SPACE = 3,
+      HERMES_INVALID_SPACE = -9999
+    };
+
     template<typename Scalar> class Adapt;
     template<typename Scalar> class DiscreteProblem;
     namespace Views
@@ -38,6 +46,8 @@ namespace Hermes
       class Orderizer;
       class OrderView;
     };
+    class Shapeset;
+
     /// \brief Represents a finite element space over a domain.
     ///
     /// The Space class represents a finite element space over a domain defined by 'mesh', spanned
@@ -97,7 +107,7 @@ namespace Hermes
     class HERMES_API Space
     {
     public:
-      Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init);
+      Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init);
 
       virtual ~Space();
 
@@ -210,7 +220,7 @@ namespace Hermes
 
       /// Sets the same polynomial order for all elements in the mesh. Does not
       /// call assign_dofs(). For internal use.
-      void set_uniform_order_internal(Ord2 order, int marker);
+      void set_uniform_order_internal(int order, int marker);
 
       virtual void free();
 
@@ -345,7 +355,7 @@ namespace Hermes
 
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
-      template<typename T> friend class Continuity;
+      template<typename T> friend class CalculationContinuity;
 
       /// Saves this space into a file.
       bool save(const char *filename) const;

@@ -18,7 +18,7 @@
 #ifndef __H2D_FORMS_H
 #define __H2D_FORMS_H
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "quadrature/quad.h"
 #include "function/function.h"
 #include "function/solution.h"

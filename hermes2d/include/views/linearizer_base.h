@@ -21,7 +21,7 @@
 #ifndef __H2D_LINEARIZER_SUPPORT_H
 #define __H2D_LINEARIZER_SUPPORT_H
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "../quadrature/quad_all.h"
 
 namespace Hermes

@@ -22,7 +22,7 @@
 # include <sys/time.h>
 #endif
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "view_support.h"
 #include "view.h"
 #include "solution.h"

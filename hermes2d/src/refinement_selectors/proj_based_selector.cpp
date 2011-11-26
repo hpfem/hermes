@@ -1,5 +1,5 @@
 #define HERMES_REPORT_WARN
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "solution.h"
 #include "discrete_problem.h"
 #include "quad_all.h"
@@ -227,7 +227,7 @@ namespace Hermes
         assert_msg(info_p.is_empty() || (H2D_GET_H_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of P-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_p.max_quad_order), H2D_GET_V_ORDER(info_p.max_quad_order));
         assert_msg(info_aniso.is_empty() || (H2D_GET_H_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of ANISO-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_aniso.max_quad_order), H2D_GET_V_ORDER(info_aniso.max_quad_order));
 
-        int mode = e->get_mode();
+        ElementMode2D mode = e->get_mode();
 
         // select quadrature, obtain integration points and weights
         Quad2D* quad = &g_quad_2d_std;

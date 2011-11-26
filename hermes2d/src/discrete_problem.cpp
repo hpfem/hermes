@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
 #include "discrete_problem.h"
@@ -939,10 +939,10 @@ namespace Hermes
           for (int i = 0; i < prev_size; i++)
             prev[i] = NULL;
 
-        Func<double>* u_list[al[m]->cnt];
+        Func<double>** u_list = new Func<double>*[al[m]->cnt];
         for (unsigned int i = 0; i < al[m]->cnt; i++)
             u_list[i] = NULL;
-        Func<double>* v_list[al[n]->cnt];
+        Func<double>** v_list = new Func<double>*[al[n]->cnt];
         for (unsigned int j = 0; j < al[n]->cnt; j++)
             v_list[j] = NULL;
 

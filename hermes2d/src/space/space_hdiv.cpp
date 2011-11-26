@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "space_hdiv.h"
 #include "matrix.h"
 #include "quad_all.h"
@@ -31,7 +31,7 @@ namespace Hermes
     int      HdivSpace<Scalar>::hdiv_proj_ref = 0;
 
     template<typename Scalar>
-    void HdivSpace<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
+    void HdivSpace<Scalar>::init(Shapeset* shapeset, int p_init)
     {
       if (shapeset == NULL)
       {
@@ -49,7 +49,7 @@ namespace Hermes
       this->chol_p   = hdiv_chol_p;
 
       // set uniform poly order in elements
-      if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an Hdiv space.");
+      if (p_init < 0) error("P_INIT must be >= 0 in an Hdiv space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -58,18 +58,18 @@ namespace Hermes
 
     template<typename Scalar>
     HdivSpace<Scalar>::HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
+      : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
       _F_;
-      init(shapeset, Ord2(p_init, p_init));
+      init(shapeset, p_init);
     }
 
     template<typename Scalar>
     HdivSpace<Scalar>::HdivSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
+      : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       _F_;
-      init(shapeset, Ord2(p_init, p_init));
+      init(shapeset, p_init);
     }
 
     template<typename Scalar>

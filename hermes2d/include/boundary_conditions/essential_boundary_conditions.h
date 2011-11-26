@@ -20,7 +20,7 @@
 #ifndef __HERMES_COMMON_BOUNDARYCONDITIONS_H
 #define __HERMES_COMMON_BOUNDARYCONDITIONS_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 namespace Hermes
 {
   namespace Hermes2D

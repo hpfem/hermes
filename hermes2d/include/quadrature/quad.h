@@ -16,7 +16,7 @@
 #ifndef __H2D_QUAD_H
 #define __H2D_QUAD_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -64,8 +64,8 @@ namespace Hermes
     class HERMES_API Quad2D
     {
     public:
-      void set_mode(int mode) { this->mode = mode; }
-      int  get_mode() const { return mode; }
+      void set_mode(ElementMode2D mode) { this->mode = mode; }
+      ElementMode2D  get_mode() const { return mode; }
 
       inline int get_num_points(int order)  const { return np[mode][order]; };
       inline double3* get_points(int order) const { assert(order < num_tables[mode]); return tables[mode][order]; }
@@ -80,7 +80,7 @@ namespace Hermes
 
     protected:
 
-      int mode;
+      ElementMode2D mode;
 
       double3*** tables;
       int** np;

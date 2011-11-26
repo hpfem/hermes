@@ -51,7 +51,7 @@ namespace Hermes
 
     protected:
       /// Common code for the constructors.
-      void init(Shapeset* shapeset, Ord2 p_init);
+      void init(Shapeset* shapeset, int p_init);
 
       virtual SpaceType get_type() const { return HERMES_HDIV_SPACE; }
 

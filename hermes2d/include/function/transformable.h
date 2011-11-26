@@ -16,7 +16,7 @@
 #ifndef __H2D_TRANSFORM_H
 #define __H2D_TRANSFORM_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "exceptions.h"
 namespace Hermes
 {

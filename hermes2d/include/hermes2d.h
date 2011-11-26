@@ -18,7 +18,7 @@
 #ifndef __HERMES_2D_H
 #define __HERMES_2D_H
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 
 #include "newton_solver.h"
 #include "picard_solver.h"

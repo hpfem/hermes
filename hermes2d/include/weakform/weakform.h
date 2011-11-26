@@ -24,6 +24,14 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Geometrical type of weak forms.
+    enum GeomType
+    {
+      HERMES_PLANAR = 0,         // Planar problem.
+      HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
+      HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
+    };
+
     class RefMap;
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class RungeKutta;

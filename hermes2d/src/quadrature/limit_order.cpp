@@ -1,4 +1,4 @@
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "quad_all.h"
 #include "limit_order.h"
 
@@ -52,7 +52,7 @@ namespace Hermes
       g_order_table_quad = quad_table;
     }
 
-    HERMES_API void update_limit_table(int mode)
+    HERMES_API void update_limit_table(ElementMode2D mode)
     {
       g_quad_2d_std.set_mode(mode);
       g_max_order = g_quad_2d_std.get_max_order();

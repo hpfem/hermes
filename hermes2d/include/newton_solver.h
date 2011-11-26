@@ -22,7 +22,7 @@
 #ifndef __H2D_SOLVER_NEWTON_H_
 #define __H2D_SOLVER_NEWTON_H_
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "discrete_problem.h"
 #include "exceptions.h"
 

@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file calculation_continuity.h
-\brief Calculation continuity functionality.
+/*! \file calculation_CalculationContinuity.h
+\brief Calculation CalculationContinuity functionality.
 */
 
 #include "config.h"
@@ -31,7 +31,7 @@ namespace Hermes
     /// Class used for resuming an interrupted calculation.
     /// Its purpose is to store everything necessary to resume it from a certain point.
     template<typename Scalar>
-    class HERMES_API Continuity
+    class HERMES_API CalculationContinuity
     {
     public:
       /// Choose an identification method of records.
@@ -43,7 +43,7 @@ namespace Hermes
         onlyNumber
       };
 
-      Continuity(IdentificationMethod identification_method);
+      CalculationContinuity(IdentificationMethod identification_method);
 
       /// One record of the calculation. Stores every information to resume a calculation from this one point.
       class HERMES_API Record

@@ -16,7 +16,7 @@
 #ifndef __H2D_CURVED_H
 #define __H2D_CURVED_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "../shapeset/shapeset_common.h"
 
 namespace Hermes

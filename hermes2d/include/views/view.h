@@ -22,7 +22,7 @@
 #ifndef __H2D_VIEW_H
 #define __H2D_VIEW_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "vectorizer.h"
 #include "orderizer.h"
 

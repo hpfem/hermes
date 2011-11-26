@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "mesh.h"
 #include "mesh_reader_h2d.h"
 
@@ -103,12 +103,12 @@ namespace Hermes
       return this->nvert; 
     }
 
-    int  Element::get_mode() const 
+    ElementMode2D Element::get_mode() const 
     {
-      return is_triangle() ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
+      return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
     }
 
-    int Element::get_num_surf() 
+    unsigned int Element::get_num_surf() 
     {
       return nvert; 
     }

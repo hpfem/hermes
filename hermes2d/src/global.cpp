@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "quadrature/quad_all.h"
 #include "mesh.h"
 #include "traverse.h"
@@ -28,25 +28,6 @@ namespace Hermes
   namespace Hermes2D
   {
     class Transformable;
-
-    template<typename Scalar>
-    std::string Global<Scalar>::get_quad_order_str(const int quad_order)
-    {
-      std::stringstream str;
-      str << "(H:" << H2D_GET_H_ORDER(quad_order) << ";V:" << H2D_GET_V_ORDER(quad_order) << ")";
-      return str.str();
-    }
-
-    template<typename Scalar>
-    int Global<Scalar>::make_edge_order(int mode, int edge, int encoded_order)
-    {
-      assert(edge < 4);
-
-      if (mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2)
-        return H2D_GET_H_ORDER(encoded_order);
-      else
-        return H2D_GET_V_ORDER(encoded_order);
-    }
 
     template<typename Scalar>
     double Global<Scalar>::get_l2_norm(Vector<Scalar>* vec)

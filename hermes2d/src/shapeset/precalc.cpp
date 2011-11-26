@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "quad_all.h"
 #include "precalc.h"
 #include "mesh.h"
@@ -106,7 +106,7 @@ namespace Hermes
     }
 
 
-    void PrecalcShapeset::set_mode(int mode)  // used in curved.cpp
+    void PrecalcShapeset::set_mode(ElementMode2D mode)  // used in curved.cpp
     {
       this->mode = mode;
       shapeset->set_mode(mode);
@@ -229,7 +229,10 @@ namespace Hermes
 
     int PrecalcShapeset::get_edge_fn_order(int edge) 
     {
-      return Global<double>::make_edge_order(mode, edge, shapeset->get_order(index)); 
+      if (mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2)
+        return H2D_GET_H_ORDER(shapeset->get_order(index));
+      else
+        return H2D_GET_V_ORDER(shapeset->get_order(index));
     }
 
     bool PrecalcShapeset::is_slave() const

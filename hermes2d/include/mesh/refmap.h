@@ -16,7 +16,7 @@
 #ifndef __H2D_REFMAP_H
 #define __H2D_REFMAP_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "../shapeset/precalc.h"
 #include "../quadrature/quad_all.h"
 

@@ -34,7 +34,7 @@ namespace Hermes
     unsigned g_space_seq = 0;
 
     template<typename Scalar>
-    Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, Ord2 p_init)
+    Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       _F_;
@@ -290,24 +290,20 @@ namespace Hermes
     {
       _F_;
       if(marker == HERMES_ANY)
-        set_uniform_order_internal(Ord2(order, order), -1234);
+        set_uniform_order_internal(order, -1234);
       else
-        set_uniform_order_internal(Ord2(order, order), mesh->element_markers_conversion.get_internal_marker(marker).marker);
+        set_uniform_order_internal(order, mesh->element_markers_conversion.get_internal_marker(marker).marker);
 
       // since space changed, enumerate basis functions
       this->assign_dofs();
     }
 
     template<typename Scalar>
-    void Space<Scalar>::set_uniform_order_internal(Ord2 order, int marker)
+    void Space<Scalar>::set_uniform_order_internal(int order, int marker)
     {
       _F_;
       resize_tables();
-      if (order.order_h < 0 || order.order_v < 0)
-        error("Hermes::Order cannot be negative.");
-      if (order.order_h > 10 || order.order_v > 10)
-        error("Hermes::Order = %d x %d, maximum is 10.", order.order_h, order.order_v);
-      int quad_order = H2D_MAKE_QUAD_ORDER(order.order_h, order.order_v);
+      int quad_order = H2D_MAKE_QUAD_ORDER(order, order);
 
       Element* e;
       for_all_active_elements(e, mesh)
@@ -316,10 +312,7 @@ namespace Hermes
         {
           ElementData* ed = &edata[e->id];
           if (e->is_triangle())
-            if(order.order_h != order.order_v)
-              error("Hermes::Orders do not match and triangles are present in the mesh.");
-            else
-              ed->order = order.order_h;
+            ed->order = order;
           else
             ed->order = quad_order;
         }

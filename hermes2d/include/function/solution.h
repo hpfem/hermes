@@ -218,7 +218,8 @@ namespace Hermes
 
       Scalar* mono_coeffs;  ///< monomial coefficient array
       int* elem_coeffs[2];  ///< array of pointers into mono_coeffs
-      int* elem_orders;    ///< stored element orders
+      /// Stored element orders in the mathematical sense. The polynomial degree of the highest basis function + increments due to the element shape, etc.  .
+      int* elem_orders;
       int num_coeffs, num_elems;
       int num_dofs;
 
@@ -240,7 +241,7 @@ namespace Hermes
 
       friend class RefMap;
       template<typename T> friend class KellyTypeAdapt;
-      template<typename T> friend class Continuity;
+      template<typename T> friend class CalculationContinuity;
       template<typename T> friend class OGProjection;
       template<typename T> friend class OGProjectionNOX;
       template<typename T> friend class Adapt;

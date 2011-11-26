@@ -1,4 +1,4 @@
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "refinement_type.h"
 
 HERMES_API bool is_refin_aniso(const int refin_type)

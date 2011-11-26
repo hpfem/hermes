@@ -56,15 +56,15 @@ namespace Hermes
 
         int i, j, k, n, m;
         double3* pt;
-        for (mode = 0; mode <= 1; mode++)
+        for (int mode_i = 0; mode_i <= 1; mode_i++)
         {
           for (k = 0; k <= 10; k++)
           {
-            np[mode][k] = n = mode ? sqr(k + 1) : (k + 1)*(k + 2)/2;
-            tables[mode][k] = pt = new double3[n];
+            np[mode_i][k] = n = mode_i ? sqr(k + 1) : (k + 1)*(k + 2)/2;
+            tables[mode_i][k] = pt = new double3[n];
 
             for (i = k, m = 0; i >= 0; i--)
-              for (j = k; j >= (mode ? 0 : k-i); j--, m++) {
+              for (j = k; j >= (mode_i ? 0 : k-i); j--, m++) {
                 pt[m][0] = k ? cos(j * M_PI / k) : 1.0;
                 pt[m][1] = k ? cos(i * M_PI / k) : 1.0;
                 pt[m][2] = 1.0;
@@ -75,9 +75,9 @@ namespace Hermes
 
       ~Quad2DCheb()
       {
-        for (int mode = 0; mode <= 1; mode++)
+        for (int mode_i = 0; mode_i <= 1; mode_i++)
           for (int k = 1; k <= 10; k++)
-            delete[] tables[mode][k];
+            delete[] tables[mode_i][k];
       }
 
       virtual void dummy_fn() {}

@@ -23,7 +23,7 @@
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "base_view.h"
 #include "filter.h"
 

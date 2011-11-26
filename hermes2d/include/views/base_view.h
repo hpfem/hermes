@@ -22,7 +22,7 @@
 #ifndef __H2D_BASE_VIEW_H
 #define __H2D_BASE_VIEW_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "scalar_view.h"
 #include "../space/space.h"
 #include "../shapeset/precalc.h"

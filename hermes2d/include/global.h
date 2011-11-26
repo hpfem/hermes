@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file hermes2d_common_defs.h
+/*! \file global.h
 \brief Common definitions for Hermes2D.
 \todo Put more common H2D stuff here.
 */
@@ -52,13 +52,7 @@
 #define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
     ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
     ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
-
-
-    /// Macros for combining quad horizontal and vertical orders.
-#define H2D_MAKE_QUAD_ORDER(h_order, v_order) (((v_order) << H2D_ORDER_BITS) + (h_order))
-#define H2D_GET_H_ORDER(order) ((order) & H2D_ORDER_MASK)
-#define H2D_GET_V_ORDER(order) ((order) >> H2D_ORDER_BITS)
-    
+  
     /// Enabling second derivatives in weak forms. Turned on by default. Second
     /// derivatives are employed, among others, by stabilization methods for
     /// transport equations. For usage see the example linear-convection-diffusion.
@@ -83,58 +77,6 @@ namespace Hermes
   /// Namespace containing definitions specific for Hermes2D.
   namespace Hermes2D
   {
-    enum ///< node types
-    {
-      HERMES_TYPE_VERTEX = 0,
-      HERMES_TYPE_EDGE = 1
-    };
-
-    enum ElementMode2D {
-      HERMES_MODE_TRIANGLE = 0,
-      HERMES_MODE_QUAD = 1
-    };
-
-    class Ord2
-    {
-    public:
-      Ord2(int order_h, int order_v) : order_h(order_h), order_v(order_v) {};
-      Ord2(int order) : order_h(order), order_v(order) {};
-      int order_h;
-      int order_v;
-    };
-
-    enum SpaceType {
-      HERMES_H1_SPACE = 0,
-      HERMES_HCURL_SPACE = 1,
-      HERMES_HDIV_SPACE = 2,
-      HERMES_L2_SPACE = 3,
-      HERMES_INVALID_SPACE = -9999
-    };
-
-    /// How many bits the order number takes.
-    const int H2D_ORDER_BITS = 5;
-    const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
-
-    /// Geometrical type of weak forms.
-    enum GeomType
-    {
-      HERMES_PLANAR = 0,         // Planar problem.
-      HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
-      HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
-    };
-
-    /// Projection norms.
-    enum ProjNormType
-    {
-      HERMES_L2_NORM,
-      HERMES_H1_NORM,
-      HERMES_H1_SEMINORM,
-      HERMES_HCURL_NORM,
-      HERMES_HDIV_NORM,
-      /// Used for passing to projecting functions.
-      HERMES_UNSET_NORM
-    };
-
     class RefMap;
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class Space;
@@ -144,6 +86,15 @@ namespace Hermes
     class Quad2D;
     class Quad1DStd;
     class Quad2DStd;
+    
+    /// How many bits the encoded_order number takes.
+    const int H2D_ORDER_BITS = 5;
+    const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
+
+    /// Macros for combining quad horizontal and vertical encoded_orders.
+    #define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
+    #define H2D_GET_H_ORDER(encoded_order) ((encoded_order) & H2D_ORDER_MASK)
+    #define H2D_GET_V_ORDER(encoded_order) ((encoded_order) >> H2D_ORDER_BITS)
 
     /// Class for global functions.
     template<typename Scalar>
@@ -180,13 +131,24 @@ namespace Hermes
       static double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
       static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      ///< Returns string representation of the quad order: used for debugging purposses.
-      static std::string get_quad_order_str(const int quad_order);
-
-      ///< Returns the correct axial order for given edge.
-      static int make_edge_order(int edge, int encoded_order, int mode);
-
       static double get_l2_norm(Vector<Scalar>* vec);
+    };
+
+    /// Projection norms.
+    /// Used in projections and adaptivity.
+    enum ProjNormType
+    {
+      HERMES_L2_NORM,
+      HERMES_H1_NORM,
+      HERMES_H1_SEMINORM,
+      HERMES_HCURL_NORM,
+      HERMES_HDIV_NORM,
+      HERMES_UNSET_NORM
+    };
+      
+    enum ElementMode2D {
+      HERMES_MODE_TRIANGLE = 0,
+      HERMES_MODE_QUAD = 1
     };
   }
 }

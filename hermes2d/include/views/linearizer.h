@@ -16,7 +16,7 @@
 #ifndef __H2D_LINEARIZER_H
 #define __H2D_LINEARIZER_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "../function/solution.h"
 #include "linearizer_base.h"
 

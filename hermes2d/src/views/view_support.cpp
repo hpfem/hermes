@@ -28,7 +28,7 @@
 
 #include <map>
 #include <vector>
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "view.h"
 #include "view_support.h"
 

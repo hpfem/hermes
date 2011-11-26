@@ -16,7 +16,7 @@
 #ifndef __H2D_RUNGE_KUTTA_H
 #define __H2D_RUNGE_KUTTA_H
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "weakform/weakform.h"
 #include "function/filter.h"
 #include "exceptions.h"

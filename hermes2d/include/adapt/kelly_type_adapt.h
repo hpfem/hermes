@@ -208,17 +208,17 @@ namespace Hermes
       ///                       If not specified, they are defined according to the spaces.
       ///
       ///
-      KellyTypeAdapt(Hermes::vector<Space<Scalar>*> spaces_,
-                     bool ignore_visited_segments_ = true,
+      KellyTypeAdapt(Hermes::vector<Space<Scalar>*> spaces,
+                     bool ignore_visited_segments = true,
                      Hermes::vector<const InterfaceEstimatorScalingFunction*>
                        interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
-                     Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>());
+                     Hermes::vector<typename ProjNormType> norms_ = Hermes::vector<typename ProjNormType>());
 
 
-      KellyTypeAdapt(Space<Scalar>* space_,
-                     bool ignore_visited_segments_ = true,
+      KellyTypeAdapt(Space<Scalar>* space,
+                     bool ignore_visited_segments = true,
                      const InterfaceEstimatorScalingFunction* interface_scaling_fn_ = NULL,
-                     ProjNormType norm_ = HERMES_UNSET_NORM);
+                     typename ProjNormType norm_ = HERMES_UNSET_NORM);
 
       /// Destructor.
       virtual ~KellyTypeAdapt()
@@ -349,7 +349,7 @@ namespace Hermes
       ///
       BasicKellyAdapt(Hermes::vector<Space<Scalar>*> spaces_,
                       double const_by_laplacian = 1.0,
-                      Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>())
+                      Hermes::vector<typename ProjNormType> norms_ = Hermes::vector<typename ProjNormType>())
         : KellyTypeAdapt<Scalar>(spaces_, true, Hermes::vector<const InterfaceEstimatorScalingFunction*>(), norms_)
       {
         set_scaling_consts(const_by_laplacian);
@@ -357,7 +357,7 @@ namespace Hermes
           this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i, const_by_laplacian));
       }
 
-      BasicKellyAdapt(Space<Scalar>* space_, double const_by_laplacian = 1.0, ProjNormType norm_ = HERMES_UNSET_NORM)
+      BasicKellyAdapt(Space<Scalar>* space_, double const_by_laplacian = 1.0, typename ProjNormType norm_ = HERMES_UNSET_NORM)
         : KellyTypeAdapt<Scalar>(space_, true, NULL, norm_)
       {
         set_scaling_consts(const_by_laplacian);

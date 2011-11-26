@@ -53,7 +53,7 @@ namespace Hermes
       virtual SpaceType get_type() const { return HERMES_HCURL_SPACE; }
       
       /// Common code for the constructors.
-      void init(Shapeset* shapeset, Ord2 p_init);
+      void init(Shapeset* shapeset, int p_init);
 
       virtual void assign_vertex_dofs() {}
       virtual void assign_edge_dofs();

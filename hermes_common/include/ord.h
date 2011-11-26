@@ -74,7 +74,6 @@ namespace Hermes
 
   protected:
     int order;
-
   };
 
   HERMES_API Ord operator/(const double &a, const Ord &b);

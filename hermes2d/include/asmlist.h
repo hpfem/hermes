@@ -16,7 +16,7 @@
 #ifndef __H2D_ASMLIST_H
 #define __H2D_ASMLIST_H
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 
 namespace Hermes
 {

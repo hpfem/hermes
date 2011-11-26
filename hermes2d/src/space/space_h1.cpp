@@ -23,7 +23,7 @@ namespace Hermes
     template<typename Scalar> int      H1Space<Scalar>::h1_proj_ref = 0;
 
     template<typename Scalar>
-    void H1Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
+    void H1Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
       if (shapeset == NULL)
       {
@@ -38,7 +38,7 @@ namespace Hermes
       this->chol_p   = h1_chol_p;
 
       // set uniform poly order in elements
-      if (p_init.order_h < 1 || p_init.order_v < 1) error("P_INIT must be >=  1 in an H1 space.");
+      if (p_init < 1) error("P_INIT must be >=  1 in an H1 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -47,18 +47,18 @@ namespace Hermes
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, essential_bcs, Ord2(p_init, p_init))
+      : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
       _F_;
-      init(shapeset, Ord2(p_init, p_init));
+      init(shapeset, p_init);
     }
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
+      : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       _F_;
-      init(shapeset, Ord2(p_init, p_init));
+      init(shapeset, p_init);
     }
 
     template<typename Scalar>

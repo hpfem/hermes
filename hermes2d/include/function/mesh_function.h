@@ -68,7 +68,7 @@ namespace Hermes
 
     protected:
 
-      int mode;
+      ElementMode2D mode;
       Mesh* mesh;
       RefMap* refmap;
 

@@ -1,4 +1,4 @@
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "matrix.h"
 #include "solution.h"
 #include "shapeset/shapeset_l2_all.h"

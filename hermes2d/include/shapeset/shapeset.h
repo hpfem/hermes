@@ -16,7 +16,8 @@
 #ifndef __H2D_SHAPESET_H
 #define __H2D_SHAPESET_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
+#include "../space/space.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -41,7 +42,9 @@ namespace Hermes
       template<typename Scalar> class H1ProjBasedSelector;
       template<typename Scalar> class L2ProjBasedSelector;
       class HcurlProjBasedSelector;
-    }
+    };
+
+    enum SpaceType;
 
     /// \brief Defines a set of shape functions.
     ///

@@ -16,7 +16,7 @@
 #ifndef __H2D_REFINEMENT_TYPE_H
 #define __H2D_REFINEMENT_TYPE_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 
 /// Possible refinements of an element.
 enum RefinementType {

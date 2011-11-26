@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "space_l2.h"
 #include "matrix.h"
 #include "quad_all.h"
@@ -25,7 +25,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    void L2Space<Scalar>::init(Shapeset* shapeset, Ord2 p_init)
+    void L2Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
       if (shapeset == NULL)
       {
@@ -36,7 +36,7 @@ namespace Hermes
       lsize = 0;
 
       // set uniform poly order in elements
-      if (p_init.order_h < 0 || p_init.order_v < 0) error("P_INIT must be >= 0 in an L2 space.");
+      if (p_init < 0) error("P_INIT must be >= 0 in an L2 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -45,10 +45,10 @@ namespace Hermes
 
     template<typename Scalar>
     L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL, Ord2(p_init, p_init))
+      : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       _F_;
-      init(shapeset, Ord2(p_init, p_init));
+      init(shapeset, p_init);
     }
 
     template<typename Scalar>

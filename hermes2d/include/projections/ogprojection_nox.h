@@ -37,7 +37,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    //const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
+    //const typename ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
 
     template<typename Scalar>
     class HERMES_API OGProjectionNOX
@@ -46,21 +46,21 @@ namespace Hermes
       OGProjectionNOX();
 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-        Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+        Scalar* target_vec, Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>());
 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
-        Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+        Scalar* target_vec, Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>());
 
       static void project_global(const Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-        Scalar* target_vec, ProjNormType proj_norm = HERMES_H1_NORM);
+        Scalar* target_vec, typename ProjNormType proj_norm = HERMES_H1_NORM);
 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces,
         Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,
-        Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
+        Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>(), bool delete_old_mesh = false);
 
       static void project_global(const Space<Scalar>* space,
         Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
-        ProjNormType proj_norm = HERMES_UNSET_NORM);
+        typename ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces,
         Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
@@ -90,7 +90,7 @@ namespace Hermes
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
       {
       public:
-        ProjectionMatrixFormVol(int i, int j, ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
+        ProjectionMatrixFormVol(int i, int j, typename ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
         {
           this->projNormType = projNormType;
         }
@@ -138,7 +138,7 @@ namespace Hermes
         }
 
       private:
-        ProjNormType projNormType;
+        typename ProjNormType projNormType;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
@@ -204,7 +204,7 @@ namespace Hermes
       class ProjectionVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        ProjectionVectorFormVol(int i, MeshFunction<Scalar>* ext, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
+        ProjectionVectorFormVol(int i, MeshFunction<Scalar>* ext, typename ProjNormType projNormType) : VectorFormVol<Scalar>(i)
         {
           this->projNormType = projNormType;
           this->ext = Hermes::vector<MeshFunction<Scalar>*>();
@@ -254,7 +254,7 @@ namespace Hermes
         }
 
       private:
-        ProjNormType projNormType;
+        typename ProjNormType projNormType;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,

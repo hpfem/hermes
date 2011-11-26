@@ -1,4 +1,4 @@
-#include "hermes2d_common_defs.h"
+#include "global.h"
 #include "solution.h"
 #include "element_to_refine.h"
 #include "selector.h"

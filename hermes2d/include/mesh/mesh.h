@@ -16,7 +16,7 @@
 #ifndef __H2D_MESH_H
 #define __H2D_MESH_H
 
-#include "../hermes2d_common_defs.h"
+#include "../global.h"
 #include "curved.h"
 #include "hash.h"
 
@@ -24,6 +24,12 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    enum ///< node types
+    {
+      HERMES_TYPE_VERTEX = 0,
+      HERMES_TYPE_EDGE = 1
+    };
+
     class Element;
     class HashTable;
     template<typename Scalar> class Space;
@@ -119,7 +125,7 @@ namespace Hermes
       unsigned used:1;     ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
-      int get_num_surf();  ///< returns number of edges (same as number of vertices)
+      unsigned int get_num_surf();  ///< returns number of edges (same as number of vertices)
       
       /// Calculates the area of the element. For curved elements, this is only
       /// an approximation: the curvature is not accounted for.
@@ -141,7 +147,7 @@ namespace Hermes
 
       // returns the edge orientation. This works for the unconstrained edges.
       int get_edge_orientation(int ie) const;
-      int  get_mode() const;
+      ElementMode2D  get_mode() const;
 
       bool is_triangle() const;
       bool is_quad() const;
