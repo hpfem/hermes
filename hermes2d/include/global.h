@@ -92,10 +92,11 @@ namespace Hermes
     const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
 
     /// Macros for combining quad horizontal and vertical encoded_orders.
-    #define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
     #define H2D_GET_H_ORDER(encoded_order) ((encoded_order) & H2D_ORDER_MASK)
     #define H2D_GET_V_ORDER(encoded_order) ((encoded_order) >> H2D_ORDER_BITS)
-
+    #define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
+    #define H2D_MAKE_EDGE_ORDER(mode, edge, order) ((mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2) ? H2D_GET_H_ORDER(order) : H2D_GET_V_ORDER(order))
+    
     /// Class for global functions.
     template<typename Scalar>
     class HERMES_API Global {

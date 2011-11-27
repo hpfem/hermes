@@ -229,10 +229,7 @@ namespace Hermes
 
     int PrecalcShapeset::get_edge_fn_order(int edge) 
     {
-      if (mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2)
-        return H2D_GET_H_ORDER(shapeset->get_order(index));
-      else
-        return H2D_GET_V_ORDER(shapeset->get_order(index));
+      return H2D_MAKE_EDGE_ORDER(mode, edge, shapeset->get_order(index));
     }
 
     bool PrecalcShapeset::is_slave() const

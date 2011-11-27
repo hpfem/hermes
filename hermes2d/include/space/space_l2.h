@@ -45,10 +45,7 @@ namespace Hermes
 
     protected:
       virtual int get_edge_order(Element* e, int edge) const {
-        if (e->get_mode() == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2)
-          return H2D_GET_H_ORDER(shapeset->get_order(this->edata[e->id].order));
-        else
-          return H2D_GET_V_ORDER(shapeset->get_order(this->edata[e->id].order));
+        return H2D_MAKE_EDGE_ORDER(e->get_mode(), edge, shapeset->get_order(this->edata[e->id].order));
       }
 
       virtual void set_shapeset(Shapeset* shapeset);
