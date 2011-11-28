@@ -150,7 +150,7 @@ namespace Hermes
 
       bool bnd[4];
       SurfPos surf_pos[4];
-      Element **ee;
+      Traverse::State *ee;
       Traverse trav;
 
       // Reset the e->visited status of each element of each mesh (most likely it will be set to true from
@@ -172,11 +172,11 @@ namespace Hermes
         // Go through all solution components.
         for (int i = 0; i < this->num; i++)
         {
-          if (ee[i] == NULL)
+          if (ee->e[i] == NULL)
             continue;
 
           // Set maximum integration order for use in integrals, see limit_order()
-          update_limit_table(ee[i]->get_mode());
+          update_limit_table(ee->e[i]->get_mode());
 
           RefMap *rm = this->sln[i]->get_refmap();
 
@@ -192,7 +192,7 @@ namespace Hermes
               continue;
 
             if (error_estimators_vol[iest]->area != HERMES_ANY)
-              if (!element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).valid || element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).marker != ee[i]->marker)
+              if (!element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).valid || element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).marker != ee->e[i]->marker)
                 continue;
 
             err += eval_volumetric_estimator(error_estimators_vol[iest], rm);
@@ -204,7 +204,7 @@ namespace Hermes
             if (error_estimators_surf[iest]->i != i)
               continue;
 
-            for (int isurf = 0; isurf < ee[i]->get_num_surf(); isurf++)
+            for (int isurf = 0; isurf < ee->e[i]->get_num_surf(); isurf++)
             {
               if (bnd[isurf])   // Boundary
               {
@@ -322,10 +322,10 @@ namespace Hermes
                   // Scale the error estimate by the scaling function dependent on the element diameter
                   // (use the central element's diameter).
                   if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
-                    if(!element_markers_conversion.get_user_marker(ee[i]->marker).valid)
+                    if(!element_markers_conversion.get_user_marker(ee->e[i]->marker).valid)
                       error("Marker not valid.");
                     else
-                      central_err *= interface_scaling_fns[i]->value(ee[i]->get_diameter(), element_markers_conversion.get_user_marker(ee[i]->marker).marker);
+                      central_err *= interface_scaling_fns[i]->value(ee->e[i]->get_diameter(), element_markers_conversion.get_user_marker(ee->e[i]->marker).marker);
 
                   // In the case this edge will be ignored when calculating the error for the element on
                   // the other side, add the now computed error to that element as well.
@@ -343,7 +343,7 @@ namespace Hermes
 
                     errors_components[i] += central_err + neighb_err;
                     total_error += central_err + neighb_err;
-                    this->errors[i][ee[i]->id] += central_err;
+                    this->errors[i][ee->e[i]->id] += central_err;
                     this->errors[i][neighb->id] += neighb_err;
                   }
                   else
@@ -385,9 +385,9 @@ namespace Hermes
 
           errors_components[i] += err;
           total_error += err;
-          this->errors[i][ee[i]->id] += err;
+          this->errors[i][ee->e[i]->id] += err;
 
-          ee[i]->visited = true;
+          ee->e[i]->visited = true;
         }
       }
       trav.finish();

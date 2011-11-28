@@ -657,13 +657,16 @@ namespace Hermes
       // Loop through all assembling states.
       // Assemble each one.
       while ((current_state = trav.get_next_state(bnd, surf_pos)) != NULL)
+      {
         // One state is a collection of (virtual) elements sharing
         // the same physical location on (possibly) different meshes.
         // This is then the same element of the virtual union mesh.
         // The proper sub-element mappings to all the functions of
         // this stage is supplied by the function Traverse::get_next_state()
         // called in the while loop.
-        assemble_one_state(spss, refmap, u_ext);
+        if(current_state->e != NULL)
+          assemble_one_state(spss, refmap, u_ext);
+      }
 
       if (current_mat != NULL)
         current_mat->finish();
@@ -703,11 +706,6 @@ namespace Hermes
       for (unsigned int i = 0; i < current_stage->idx.size(); i++)
       {
         int j = current_stage->idx[i];
-        if (current_state->e[i] == NULL)
-        {
-          isempty[j] = true;
-          continue;
-        }
 
         // \todo do not obtain again if the element was not changed.
         spaces[j]->get_element_assembly_list(current_state->e[i], al[j], spaces_first_dofs[j]);
@@ -743,14 +741,8 @@ namespace Hermes
       for(unsigned int i = 0; i < wf->get_neq(); i++)
         nat.push_back(false);
 
-      isempty.clear();
-      for(unsigned int i = 0; i < wf->get_neq(); i++)
-        isempty.push_back(false);
-
       // Initialize the state, return a non-NULL element; if no such element found, return.
       Element* rep_element = init_state(spss, refmap, al);
-      if(rep_element == NULL)
-        return;
 
       init_cache();
 
@@ -795,7 +787,7 @@ namespace Hermes
         MatrixFormVol<Scalar>* mfv = current_stage->mfvol[ww];
         int m = mfv->i;
         int n = mfv->j;
-        if (isempty[m] || isempty[n]) continue;
+        if (current_state->e[m] == NULL || current_state->e[n] == NULL) continue;
         if (fabs(mfv->scaling_factor) < 1e-12) continue;
 
         // Assemble this form only if one of its areas is HERMES_ANY
@@ -889,7 +881,7 @@ namespace Hermes
         if (u_ext != Hermes::vector<Solution<Scalar>*>())
           for (int i = 0; i < prev_size; i++)
             if (u_ext[i + mfv->u_ext_offset] != NULL)
-              prev[i] = this->isempty[i] ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
+              prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
             else
               prev[i] = NULL;
         else
@@ -1093,7 +1085,6 @@ namespace Hermes
       {
         VectorFormVol<Scalar>* vfv = current_stage->vfvol[ww];
         int m = vfv->i;
-        if (isempty[vfv->i]) continue;
         if (fabs(vfv->scaling_factor) < 1e-12) continue;
 
         // Assemble this form only if one of its areas is HERMES_ANY
@@ -1151,7 +1142,7 @@ namespace Hermes
       for (unsigned int i = 0; i < current_stage->idx.size(); i++)
       {
         int j = current_stage->idx[i];
-        if (isempty[j])
+        if (current_state->e[j] == NULL)
           continue;
         if(marker > 0)
         {
@@ -1350,7 +1341,7 @@ namespace Hermes
           // Also push the transformations to the slave psss and refmaps.
           for (unsigned int i = 0; i < current_stage->idx.size(); i++)
           {
-            if(isempty[current_stage->idx[i]])
+            if(current_state->e[current_stage->idx[i]] == NULL)
               continue;
             spss[current_stage->idx[i]]->set_master_transform();
             refmap[current_stage->idx[i]]->force_transform(pss[current_stage->idx[i]]->get_transform(), pss[current_stage->idx[i]]->get_ctm());
@@ -1388,7 +1379,7 @@ namespace Hermes
           // Also clear the transformations from the slave psss and refmaps.
           for (unsigned int i = 0; i < current_stage->idx.size(); i++)
           {
-            if(isempty[current_stage->idx[i]])
+            if(current_state->e[current_stage->idx[i]] == NULL)
               continue;
             spss[current_stage->idx[i]]->set_master_transform();
             refmap[current_stage->idx[i]]->force_transform(pss[current_stage->idx[i]]->get_transform(), pss[current_stage->idx[i]]->get_ctm());
@@ -1774,7 +1765,7 @@ namespace Hermes
         MatrixFormSurf<Scalar>* mfs = current_stage->mfsurf[ww];
         int m = mfs->i;
         int n = mfs->j;
-        if (isempty[m] || isempty[n])
+        if (current_state->e[m] == NULL || current_state->e[n] == NULL)
           continue;
         if (!nat[m] || !nat[n])
           continue;
@@ -1871,7 +1862,7 @@ namespace Hermes
       {
         VectorFormSurf<Scalar>* vfs = current_stage->vfsurf[ww];
         int m = vfs->i;
-        if (isempty[m])
+        if (current_state->e[m] == NULL)
           continue;
         if (fabs(vfs->scaling_factor) < 1e-12)
           continue;
@@ -1943,7 +1934,7 @@ namespace Hermes
         int m = mfs->i;
         int n = mfs->j;
 
-        if (isempty[m] || isempty[n])
+        if (current_state->e[m] == NULL || current_state->e[n] == NULL)
           continue;
         if (fabs(mfs->scaling_factor) < 1e-12)
           continue;
@@ -2040,7 +2031,7 @@ namespace Hermes
         if (vfs->areas[0] != H2D_DG_INNER_EDGE)
           continue;
         int m = vfs->i;
-        if (isempty[m])
+        if (current_state->e[m] == NULL)
           continue;
         if (fabs(vfs->scaling_factor) < 1e-12)
           continue;
@@ -2375,7 +2366,7 @@ namespace Hermes
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
           if (u_ext[i + mfv->u_ext_offset] != NULL)
-            prev[i] = isempty[i] ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
+            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
           else
             prev[i] = NULL;
       else
@@ -2667,7 +2658,7 @@ namespace Hermes
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
           if (u_ext[i + vfv->u_ext_offset] != NULL)
-            prev[i] = isempty[i] ? NULL : init_fn(u_ext[i + vfv->u_ext_offset], order);
+            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + vfv->u_ext_offset], order);
           else
             prev[i] = NULL;
       else
@@ -2943,7 +2934,7 @@ namespace Hermes
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
           if (u_ext[i + mfs->u_ext_offset] != NULL)
-            prev[i] = isempty[i] ? NULL : init_fn(u_ext[i + mfs->u_ext_offset], eo);
+            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + mfs->u_ext_offset], eo);
           else
             prev[i] = NULL;
       else
@@ -3218,7 +3209,7 @@ namespace Hermes
       if (u_ext != Hermes::vector<Solution<Scalar>*>())
         for (int i = 0; i < prev_size; i++)
           if (u_ext[i + vfs->u_ext_offset] != NULL)
-            prev[i] = isempty[i] ? NULL : init_fn(u_ext[i + vfs->u_ext_offset], eo);
+            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + vfs->u_ext_offset], eo);
           else
             prev[i] = NULL;
       else

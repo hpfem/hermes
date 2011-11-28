@@ -236,8 +236,7 @@ namespace Hermes
         // Assemble the block Jacobian matrix of the stationary residual F.
         // Diagonal blocks are created even if empty, so that matrix_left can be added later.
         bool force_diagonal_blocks = true;
-        bool add_dir_lift = false;
-        stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks, add_dir_lift);
+        stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks);
 
         std::ofstream rhs_out("rhs_out");
         for(int i = 0; i < vector_right->length(); i++)
@@ -261,7 +260,7 @@ namespace Hermes
           // Translate residual vector into residual functions.
           Hermes::vector<bool> add_dir_lift_vector;
           add_dir_lift_vector.reserve(1);
-          add_dir_lift_vector.push_back(add_dir_lift);
+          add_dir_lift_vector.push_back(false);
           Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(),
             residuals_vector, add_dir_lift_vector);
           residual_norm = Global<Scalar>::calc_norms(residuals_vector);
@@ -294,7 +293,7 @@ namespace Hermes
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
-          stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks, add_dir_lift);
+          stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks);
 
           std::ofstream mat_out("mat_out");
           for(int i = 0; i < vector_right->length(); i++)

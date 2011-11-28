@@ -417,15 +417,15 @@ namespace Hermes
         meshes[1] = ysln->get_mesh();
 
         trav.begin(2, meshes, fns);
-        Element** e;
-        while ((e = trav.get_next_state(NULL, NULL)) != NULL)
+        Traverse::State* current_state;
+        while ((current_state = trav.get_next_state(NULL, NULL)) != NULL)
         {
           xsln->set_quad_order(0, xitem);
           ysln->set_quad_order(0, yitem);
           double* xval = xsln->get_values(component_x, value_type_x);
           double* yval = ysln->get_values(component_y, value_type_y);
 
-          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
+          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
           {
             double fx = xval[i];
             double fy = yval[i];
@@ -436,7 +436,7 @@ namespace Hermes
         
         trav.begin(2, meshes, fns);
         // process all elements of the mesh
-        while ((e = trav.get_next_state(NULL, NULL)) != NULL)
+        while ((current_state = trav.get_next_state(NULL, NULL)) != NULL)
         {
           xsln->set_quad_order(0, xitem);
           ysln->set_quad_order(0, yitem);
@@ -447,7 +447,7 @@ namespace Hermes
           double* y = ysln->get_refmap()->get_phys_y(0);
 
           int iv[4];
-          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
+          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
           {
             double fx = xval[i];
             double fy = yval[i];
@@ -455,10 +455,10 @@ namespace Hermes
           }
 
           // we won't bother calculating physical coordinates from the refmap if this is not a curved element
-          this->curved = (e[0]->cm != NULL);
+          this->curved = (current_state->e[0]->cm != NULL);
 
           // recur to sub-elements
-          if (e[0]->is_triangle())
+          if (current_state->e[0]->is_triangle())
             process_triangle(iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL);
           else
             process_quad(iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL);
@@ -468,7 +468,7 @@ namespace Hermes
           Trf* yctm = ysln->get_ctm();
           double r[4] = { -1.0, 1.0, 1.0, -1.0 };
           double ref[4][2] = { {-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0} };
-          for (unsigned int i = 0; i < e[0]->get_num_surf(); i++)
+          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
           {
             bool bold = false;
             double px = ref[i][0];
@@ -485,14 +485,14 @@ namespace Hermes
               if ((xctm->m[1]*py + xctm->t[1] == r[i]) && (yctm->m[1]*py + yctm->t[1] == r[i]))
                 bold = true;
             }
-            int j = e[0]->next_vert(i);
+            int j = current_state->e[0]->next_vert(i);
             // we draw a line only if both edges lies on the boundary or if the line is from left top to right bottom
-            if (((e[0]->en[i]->bnd) && (e[1]->en[i]->bnd)) ||
+            if (((current_state->e[0]->en[i]->bnd) && (current_state->e[1]->en[i]->bnd)) ||
               (verts[iv[i]][1] < verts[iv[j]][1]) ||
               (verts[iv[i]][1] == verts[iv[j]][1] && verts[iv[i]][0] < verts[iv[j]][0]))
             {
               if (bold)
-                this->process_edge(iv[i], iv[j], e[0]->en[i]->marker);
+                this->process_edge(iv[i], iv[j], current_state->e[0]->en[i]->marker);
               else
                 this->process_dash(iv[i], iv[j]);
             }

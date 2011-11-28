@@ -51,23 +51,23 @@ namespace Hermes
       Element* e;
       uint64_t idx;
     };
+    
+      
+    static const uint64_t ONE = (uint64_t) 1 << 63;
 
+    struct Rect
+    {
+      uint64_t l, b, r, t;
+    };
+
+      
     /// Traverse is a multi-mesh traversal utility class. Given N meshes sharing the
     /// same base mesh it walks through all (pseudo-)elements of the union of all
     /// the N meshes.
     ///
     class HERMES_API Traverse
     {
-    private:
-      
-      static const uint64_t ONE = (uint64_t) 1 << 63;
-
-      struct Rect
-      {
-        uint64_t l, b, r, t;
-      };
-
-      struct State
+    private:struct State
       {
         bool visited;
         Element** e;
@@ -106,6 +106,8 @@ namespace Hermes
       void set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos);
       void union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni);
       uint64_t init_idx(Rect* cr, Rect* er);
+
+      void free_state(State* state);
 
       Mesh* unimesh;
       template<typename T> friend class Adapt;

@@ -116,7 +116,7 @@ namespace Hermes
     }
 
 
-    State* Traverse::push_state()
+    Traverse::State* Traverse::push_state()
     {
       if (top >= size) error("Stack overflow. Increase stack size.");
 
@@ -133,7 +133,7 @@ namespace Hermes
     }
 
 
-    void Traverse::set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos)
+    void Traverse::set_boundary_info(Traverse::State* s, bool* bnd, SurfPos* surf_pos)
     {
       Element* e = NULL;
       for (int i = 0; i < num; i++)
@@ -174,7 +174,7 @@ namespace Hermes
     }
 
 
-    State* Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
+    Traverse::State* Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     {
       while (1)
       {
@@ -310,6 +310,12 @@ namespace Hermes
             {
               if (bnd != NULL)
                 set_boundary_info(s, bnd, surf_pos);
+              bool empty = true;
+              for (i = 0; i < num; i++)
+                if(s->e[i] != NULL)
+                  empty = false;
+              if(empty)
+                s->e = NULL;
               return s;
             }
 
@@ -528,12 +534,12 @@ namespace Hermes
     }
 
 
-    void free_state(State* state)
+    void Traverse::free_state(Traverse::State* state)
     {
       delete [] state->e;
       delete [] state->er;
       delete [] state->trans;
-      memset(state, 0, sizeof(State));
+      memset(state, 0, sizeof(Traverse::State));
     }
 
 

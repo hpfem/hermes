@@ -59,10 +59,10 @@ namespace Hermes
       trav.begin(2, meshes, tr);
 
       double error = 0.0;
-      Element** ee;
+      Traverse::State* ee;
       while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
       {
-        update_limit_table(ee[0]->get_mode());
+        update_limit_table(ee->e[0]->get_mode());
 
         RefMap* ru = sln1->get_refmap();
         RefMap* rv = sln2->get_refmap();

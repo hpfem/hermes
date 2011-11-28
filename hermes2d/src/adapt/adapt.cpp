@@ -932,7 +932,7 @@ namespace Hermes
       double total_error = 0.0;
 
       // Calculate error.
-      Element **ee;
+      Traverse::State * ee;
       trav.begin(2 * num, meshes, tr);
       while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
       {
@@ -951,7 +951,7 @@ namespace Hermes
               total_error += err;
               errors_components[i] += err;
               if(solutions_for_adapt)
-                this->errors[i][ee[i]->id] += err;
+                this->errors[i][ee->e[i]->id] += err;
             }
           }
         }
