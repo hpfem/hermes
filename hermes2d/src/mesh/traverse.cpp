@@ -21,25 +21,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    const uint64_t ONE = (uint64_t) 1 << 63;
-
-    struct Rect
-    {
-      uint64_t l, b, r, t;
-    };
-
-    struct State
-    {
-      bool visited;
-      Element** e;
-      Rect  cr;
-      Rect* er;
-      bool bnd[3];
-      uint64_t lo[3], hi[3];
-      int* trans;
-    };
-
-
     int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
     {
       uint64_t hmid = (er->l + er->r) >> 1;
@@ -193,7 +174,7 @@ namespace Hermes
     }
 
 
-    Element** Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
+    State* Traverse::get_next_state(bool* bnd, SurfPos* surf_pos)
     {
       while (1)
       {
@@ -329,7 +310,7 @@ namespace Hermes
             {
               if (bnd != NULL)
                 set_boundary_info(s, bnd, surf_pos);
-              return s->e;
+              return s;
             }
 
             // Triangle: push son states

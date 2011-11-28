@@ -82,12 +82,12 @@ namespace Hermes
       /// whether Dirichlet lift will be added while coeff_vec is converted into
       /// Solutions.
       void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
+        bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
       /// Assembling.
       /// Without the matrix.
       void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, bool add_dir_lift = true, Table* block_weights = NULL);
+        bool force_diagonal_blocks = false, Table* block_weights = NULL);
 
       /// Light version passing NULL for the coefficient vector. External solutions
       /// are initialized with zeros.
@@ -106,7 +106,7 @@ namespace Hermes
       void set_fvm();
 
     protected:
-      is_DG_stage(Stage<Scalar>& stage);
+      void is_DG_stage();
 
       /// Get the number of unknowns.
       int get_num_dofs();
@@ -134,8 +134,7 @@ namespace Hermes
       /// forms do not exist. This is useful if the matrix is later to be merged with
       /// a matrix that has nonzeros in these blocks. The Table serves for optional
       /// weighting of matrix blocks in systems.
-      void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, Table* block_weights = NULL);
+      void create_sparse_structure();
 
       /// Initializes psss.
       void initialize_psss(Hermes::vector<PrecalcShapeset*>& spss);
@@ -144,22 +143,18 @@ namespace Hermes
       void initialize_refmaps(Hermes::vector<RefMap*>& refmap);
 
       /// Initialize a state, returns a non-NULL Element.
-      Element* init_state(Stage<Scalar>& stage, Hermes::vector<PrecalcShapeset*>& spss,
-        Hermes::vector<RefMap*>& refmap, Element** e, Hermes::vector<AsmList<Scalar>*>& al);
+      Element* init_state(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
       inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
       /// Assemble one stage.
-      void assemble_one_stage(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext);
+      void assemble_one_stage(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext);
 
       /// Assemble one state.
-      void assemble_one_state(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext, Element** e,
-        bool* bnd, SurfPos* surf_pos, Element* trav_base);
+      void assemble_one_state(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext);
+
+
 
 
 
@@ -182,18 +177,14 @@ namespace Hermes
 
 
 
-
+      ////////////////////////////
 
       /// Assemble volume matrix forms.
-      void assemble_volume_matrix_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+      void assemble_volume_matrix_forms(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
         int marker, Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Assemble volume vector forms.
-      void assemble_volume_vector_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
+      void assemble_volume_vector_forms(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
         int marker, Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Assemble surface and DG forms.
@@ -474,6 +465,14 @@ namespace Hermes
 
       /// Number of spaces in the original problem in a Runge-Kutta method.
       int RK_original_spaces_count;
+
+      /// Storing assembling info.
+      Stage<Scalar>* current_stage;
+      SparseMatrix<Scalar>* current_mat;
+      Vector<Scalar>* current_rhs;
+      bool current_force_diagonal_blocks;
+      Table* current_block_weights;
+      Traverse::State* current_state;
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches
