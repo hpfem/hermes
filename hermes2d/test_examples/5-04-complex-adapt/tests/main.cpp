@@ -98,13 +98,6 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-
-  DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
-
-  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-  Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
-
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
@@ -112,8 +105,13 @@ int main(int argc, char* argv[])
     info("---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
-    ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-    dp.set_spaces(ref_space);
+    Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+
+    DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
+    
+    // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize reference problem.
