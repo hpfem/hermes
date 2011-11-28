@@ -104,12 +104,10 @@ namespace Hermes
 
       /// Set this problem to Finite Volume.
       void set_fvm();
-      
-      void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-
-      void set_spaces(const Space<Scalar>* space);
 
     protected:
+      is_DG_stage(Stage<Scalar>& stage);
+
       /// Get the number of unknowns.
       int get_num_dofs();
 
@@ -138,11 +136,6 @@ namespace Hermes
       /// weighting of matrix blocks in systems.
       void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
         bool force_diagonal_blocks = false, Table* block_weights = NULL);
-
-      /// Assembling utilities.
-      /// Check whether it is sane to assemble.
-      /// Throws errors if not.
-      void assemble_sanity_checks(Table* block_weights);
 
       /// Initializes psss.
       void initialize_psss(Hermes::vector<PrecalcShapeset*>& spss);

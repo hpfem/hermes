@@ -472,45 +472,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
-    {
-      if(this->spaces.size() != spaces.size())
-        error("DiscreteProblem can not change the number of spaces.");
-
-      // After derefinement, the spaces' sizes can go down, in this case there is no sense in reallocing stuff, freeing and allocating again is the way.
-      bool smaller_spaces = false;
-      for(unsigned int i = 0; i < spaces.size(); i++)
-        if(this->spaces[i]->get_num_dofs() > spaces[i]->get_num_dofs())
-        {
-          smaller_spaces = true;
-          break;
-        }
-
-      this->spaces = spaces;
-      this->ndof = Space<Scalar>::get_num_dofs(spaces);
-      
-      this->invalidate_matrix();
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(const Space<Scalar>* space)
-    {
-      Hermes::vector<const Space<Scalar>*> spaces;
-      spaces.push_back(space);
-      set_spaces(spaces);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_sanity_checks(Table* block_weights)
-    {
-      _F_;
-
-      for (unsigned int i = 0; i < wf->get_neq(); i++)
-        if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
-
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss)
     {
       _F_;
@@ -538,10 +499,8 @@ namespace Hermes
       bool force_diagonal_blocks, bool add_dir_lift,
       Table* block_weights)
     {
-      _F_
+      _F_;
 
-      // Sanity checks.
-      assemble_sanity_checks(block_weights);
       // Check that the block scaling table have proper dimension.
       if (block_weights != NULL)
         if (block_weights->get_size() != wf->get_neq())
@@ -627,30 +586,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_stage(Stage<Scalar>& stage,
-      SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs,
-      bool force_diagonal_blocks, Table* block_weights,
-      Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap,
-      Hermes::vector<Solution<Scalar>*>& u_ext)
+    void DiscreteProblem<Scalar>::is_DG_stage(Stage<Scalar>& stage)
     {
-      _F_;
-      // Boundary flags. bnd[i] == true if i-th edge of the current
-      // element is a boundary edge.
-      bool bnd[4];
-
-      // Info about the boundary edge.
-      SurfPos surf_pos[4];
-
-      // Create the assembling states.
-      Traverse trav;
-      for (unsigned i = 0; i < stage.idx.size(); i++)
-        stage.fns[i] = pss[stage.idx[i]];
-      for (unsigned i = 0; i < stage.ext.size(); i++)
-        stage.ext[i]->set_quad_2d(&g_quad_2d_std);
-      trav.begin(stage.meshes.size(), &(stage.meshes.front()), &(stage.fns.front()));
-
-      // Check that there is a DG form, so that the DG assembling procedure needs to be performed.
       DG_matrix_forms_present = false;
       DG_vector_forms_present = false;
       for(unsigned int i = 0; i < stage.mfsurf.size() && DG_matrix_forms_present == false; i++)
@@ -685,6 +622,35 @@ namespace Hermes
           break;
         }
       }
+    }
+
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble_one_stage(Stage<Scalar>& stage,
+      SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs,
+      bool force_diagonal_blocks, Table* block_weights,
+      Hermes::vector<PrecalcShapeset *>& spss,
+      Hermes::vector<RefMap *>& refmap,
+      Hermes::vector<Solution<Scalar>*>& u_ext)
+    {
+      _F_;
+      // Boundary flags. bnd[i] == true if i-th edge of the current
+      // element is a boundary edge.
+      bool bnd[4];
+
+      // Info about the boundary edge.
+      SurfPos surf_pos[4];
+
+      // Create the assembling states.
+      Traverse trav;
+      for (unsigned i = 0; i < stage.idx.size(); i++)
+        stage.fns[i] = pss[stage.idx[i]];
+      for (unsigned i = 0; i < stage.ext.size(); i++)
+        stage.ext[i]->set_quad_2d(&g_quad_2d_std);
+      trav.begin(stage.meshes.size(), &(stage.meshes.front()), &(stage.fns.front()));
+
+      // Check that there is a DG form, so that the DG assembling procedure needs to be performed.
+      is_DG_stage(stage);
 
       // Loop through all assembling states.
       // Assemble each one.
