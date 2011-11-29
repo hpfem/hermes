@@ -149,24 +149,38 @@ namespace Hermes
       void create_sparse_structure();
 
       /// Initializes psss.
-      void initialize_psss(Hermes::vector<PrecalcShapeset*>& spss);
+      void initialize_psss();
 
       /// Initializes refmaps.
-      void initialize_refmaps(Hermes::vector<RefMap*>& refmap);
+      void initialize_refmaps();
+      
+      /// Initializes u_ext.
+      void initialize_u_ext(Scalar* coeff_vec);
+      
+      /// De-initializes u_ext.
+      void deinitialize_u_ext();
+
+      /// De-initializes psss.
+      void deinitialize_psss();
+
+      /// De-initializes refmaps.
+      void deinitialize_refmaps();
 
       /// Initialize a state, returns a non-NULL Element.
-      Element* init_state(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap *>& refmap, Hermes::vector<AsmList<Scalar>*>& al);
+      Element* init_state(Hermes::vector<AsmList<Scalar>*>& al);
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
       inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
       /// Assemble one stage.
-      void assemble_one_stage(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext);
+      void assemble_one_stage();
 
       /// Assemble one state.
-      void assemble_one_state(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext);
+      void assemble_one_state();
 
+      void calc_u_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
 
+      void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o);
 
 
 
@@ -442,6 +456,8 @@ namespace Hermes
 
       /// Instance of the class Geom used in the calculation of integration order.
       Geom<Hermes::Ord> geom_ord;
+      /// Fake weight used in the calculation of integration order.
+      static double fake_wt;
 
       /// If the problem has only constant test functions, there is no need for order calculation,
       /// which saves time.
@@ -484,6 +500,9 @@ namespace Hermes
       Table* current_block_weights;
       Traverse::State* current_state;
       int current_isurf;
+      Hermes::vector<RefMap *> current_refmap;
+      Hermes::vector<PrecalcShapeset *> current_spss;
+      Hermes::vector<Solution<Scalar>*> current_u_ext;
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches

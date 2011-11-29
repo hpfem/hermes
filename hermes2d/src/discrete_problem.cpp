@@ -31,6 +31,9 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    double DiscreteProblem<Scalar>::fake_wt = 1.0;
+
+    template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
     {
       _F_;
@@ -581,25 +584,64 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::initialize_psss(Hermes::vector<PrecalcShapeset *>& spss)
+    void DiscreteProblem<Scalar>::initialize_psss()
     {
       _F_;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
-        spss.push_back(new PrecalcShapeset(pss[i]));
-        spss[i]->set_quad_2d(&g_quad_2d_std);
+        current_spss.push_back(new PrecalcShapeset(pss[i]));
+        current_spss[i]->set_quad_2d(&g_quad_2d_std);
       }
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::initialize_refmaps(Hermes::vector<RefMap *>& refmap)
+    void DiscreteProblem<Scalar>::initialize_refmaps()
     {
       _F_;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
-        refmap.push_back(new RefMap());
-        refmap[i]->set_quad_2d(&g_quad_2d_std);
+        current_refmap.push_back(new RefMap());
+        current_refmap[i]->set_quad_2d(&g_quad_2d_std);
       }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::initialize_u_ext(Scalar* coeff_vec)
+    {
+      _F_;
+      int first_dof = 0;
+      if (coeff_vec != NULL)
+        for (int i = 0; i < wf->get_neq(); i++)
+        {
+          Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
+          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, first_dof);
+          current_u_ext.push_back(external_solution_i);
+          first_dof += spaces[i]->get_num_dofs();
+        }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::deinitialize_psss()
+    {
+      _F_;
+      for (unsigned int i = 0; i < wf->get_neq(); i++)
+        delete current_spss[i];
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::deinitialize_refmaps()
+    {
+      _F_;
+      for (unsigned int i = 0; i < wf->get_neq(); i++)
+        delete current_refmap[i];
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::deinitialize_u_ext()
+    {
+      _F_;
+      for(typename Hermes::vector<Solution<Scalar>*>::iterator it = current_u_ext.begin(); it != current_u_ext.end(); it++)
+        delete *it;
     }
 
     template<typename Scalar>
@@ -624,26 +666,14 @@ namespace Hermes
       create_sparse_structure();
 
       // Convert the coefficient vector into vector of external solutions.
-      Hermes::vector<Solution<Scalar>*> u_ext;
-      int first_dof = 0;
-      if (coeff_vec != NULL) for (int i = 0; i < wf->get_neq(); i++)
-      {
-        Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
-        Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, first_dof);
-        u_ext.push_back(external_solution_i);
-        first_dof += spaces[i]->get_num_dofs();
-      }
 
       // Reset the warnings about insufficiently high integration order.
       reset_warn_order();
 
-      // Create slave pss's, refmaps.
-      Hermes::vector<PrecalcShapeset *> spss;
-      Hermes::vector<RefMap *> refmap;
-
-      // Initialize slave pss's, refmaps.
-      initialize_psss(spss);
-      initialize_refmaps(refmap);
+      // Initialize slave pss's, refmaps, u_ext.
+      initialize_psss();
+      initialize_refmaps();
+      initialize_u_ext(coeff_vec);
 
       // Initialize matrix buffer.
       matrix_buffer = NULL;
@@ -655,7 +685,7 @@ namespace Hermes
       Hermes::vector<Stage<Scalar> > stages = Hermes::vector<Stage<Scalar> >();
       bool want_matrix = (mat != NULL);
       bool want_vector = (rhs != NULL);
-      wf->get_stages(spaces, u_ext, stages, want_matrix, want_vector);
+      wf->get_stages(spaces, current_u_ext, stages, want_matrix, want_vector);
 
       // Loop through all assembling stages -- the purpose of this is increased performance
       // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
@@ -675,7 +705,7 @@ namespace Hermes
         // mesh of the current test function, then the stage would have
         // three meshes. By stage functions, all functions are meant: shape
         // functions (their precalculated values), and mesh functions.
-        assemble_one_stage(spss, refmap, u_ext);
+        assemble_one_stage();
       }
       // Deinitialize matrix buffer.
       if(matrix_buffer != NULL)
@@ -683,15 +713,9 @@ namespace Hermes
       matrix_buffer = NULL;
       matrix_buffer_dim = 0;
 
-      // Deinitialize slave pss's, refmaps.
-      for(Hermes::vector<PrecalcShapeset *>::iterator it = spss.begin(); it != spss.end(); it++)
-        delete *it;
-      for(Hermes::vector<RefMap *>::iterator it = refmap.begin(); it != refmap.end(); it++)
-        delete *it;
-
-      // Delete the vector u_ext.
-      for(typename Hermes::vector<Solution<Scalar>*>::iterator it = u_ext.begin(); it != u_ext.end(); it++)
-        delete *it;
+      deinitialize_psss();
+      deinitialize_refmaps();
+      deinitialize_u_ext();
     }
 
     template<typename Scalar>
@@ -743,10 +767,7 @@ namespace Hermes
 
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_stage(
-      Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap,
-      Hermes::vector<Solution<Scalar>*>& u_ext)
+    void DiscreteProblem<Scalar>::assemble_one_stage()
     {
       _F_;
 
@@ -776,7 +797,7 @@ namespace Hermes
         // this stage is supplied by the function Traverse::get_next_state()
         // called in the while loop.
         if(current_state->e != NULL)
-          assemble_one_state(spss, refmap, u_ext);
+          assemble_one_state();
       }
 
       if (current_mat != NULL)
@@ -795,8 +816,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Element* DiscreteProblem<Scalar>::init_state(Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap, Hermes::vector<AsmList<Scalar>*>& al)
+    Element* DiscreteProblem<Scalar>::init_state(Hermes::vector<AsmList<Scalar>*>& al)
     {
       _F_;
       // Find a non-NULL e[i].
@@ -822,12 +842,12 @@ namespace Hermes
         spaces[j]->get_element_assembly_list(current_state->e[i], al[j], spaces_first_dofs[j]);
 
         // Set active element to all test functions.
-        spss[j]->set_active_element(current_state->e[i]);
-        spss[j]->set_master_transform();
+        current_spss[j]->set_active_element(current_state->e[i]);
+        current_spss[j]->set_master_transform();
 
         // Set active element to reference mappings.
-        refmap[j]->set_active_element(current_state->e[i]);
-        refmap[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
+        current_refmap[j]->set_active_element(current_state->e[i]);
+        current_refmap[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
 
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
         if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -837,8 +857,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_state(Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap,
-      Hermes::vector<Solution<Scalar>*>& u_ext)
+    void DiscreteProblem<Scalar>::assemble_one_state()
     {
       _F_;
 
@@ -853,20 +872,33 @@ namespace Hermes
         nat.push_back(false);
 
       // Initialize the state, return a non-NULL element; if no such element found, return.
-      Element* rep_element = init_state(spss, refmap, al);
+      Element* rep_element = init_state(al);
 
       init_cache();
 
+      for(Hermes::vector<MatrixFormVol<Scalar> *>::iterator it = current_stage->mfvol.begin(); it != current_stage->mfvol.end(); it++)
+      {
+        if(!form_to_be_assembled(*it))
+          continue;
+        
+        //int order = calc_order(form, ., ., ., al[al->cnt - 1], al[al->cnt - 1]);
+        // Tady se necha zasuplit whatever za ten order.
+
+        //assemble_form(form)
+      }
+
+
       // Assemble volume matrix forms.
+
       if (current_mat != NULL)
       {
-        assemble_volume_matrix_forms(spss, refmap, u_ext, rep_element->marker, al);
+        assemble_volume_matrix_forms(current_spss, current_refmap, current_u_ext, rep_element->marker, al);
       }
 
       // Assemble volume vector forms.
       if (current_rhs != NULL)
       {
-        assemble_volume_vector_forms(spss, refmap, u_ext, rep_element->marker, al);
+        assemble_volume_vector_forms(current_spss, current_refmap, current_u_ext, rep_element->marker, al);
       }
 
       // Assemble surface integrals now: loop through surfaces of the element.
@@ -2289,61 +2321,69 @@ namespace Hermes
     }
     
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::calc_u_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
+    {
+      _F_;
+      int u_ext_length = current_u_ext.size();      // Number of external solutions.
+      int u_ext_offset = form->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+      // and there will be only u_ext_length - u_ext_offset of them.
+
+      // Hermes::Order of solutions from the previous Newton iteration.
+      if (current_u_ext != Hermes::vector<Solution<Scalar>*>())
+        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+          if (current_u_ext[i + u_ext_offset] != NULL)
+            oi[i] = get_fn_ord(current_u_ext[i + u_ext_offset]->get_fn_order());
+          else
+            oi[i] = get_fn_ord(0);
+      else
+        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+          oi[i] = get_fn_ord(0);
+      
+      oext = init_ext_fns_ord(form->ext);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o)
+    {
+      // Increase due to reference map.
+      order = current_refmap[form->i]->get_inv_ref_order();
+      order += o->get_order();
+      limit_order(order);
+    }
+
+    template<typename Scalar>
     int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MatrixFormVol<Scalar> *mfv, Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv)
     {
       _F_;
-      // Hermes::Order that will be returned.
+
       int order;
 
       if(is_fvm)
         order = ru->get_inv_ref_order();
       else
       {
-        int u_ext_length = u_ext.size();      // Number of external solutions.
-        int u_ext_offset = mfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-        // and there will be only u_ext_length - u_ext_offset of them.
-
-        // Increase for multi-valued shape functions.
-        int inc = (fu->get_num_components() == 2) ? 1 : 0;
-
-        // Hermes::Order of solutions from the previous Newton iteration.
-        Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[u_ext_length - u_ext_offset];
-        if (u_ext != Hermes::vector<Solution<Scalar>*>())
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            if (u_ext[i + u_ext_offset] != NULL)
-              oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
-            else
-              oi[i] = get_fn_ord(0);
-        else
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            oi[i] = get_fn_ord(0);
+        // Hermes::Order of solutions from the previous Newton iteration etc..
+        Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[current_u_ext.size() - mfv->u_ext_offset];
+        ExtData<Hermes::Ord>* ext_ord;
+        calc_u_ext_orders(mfv, u_ext_ord, ext_ord);
 
         // Hermes::Order of shape functions.
-        Func<Hermes::Ord>* ou = get_fn_ord(fu->get_fn_order() + inc);
-        Func<Hermes::Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
-
-        // Hermes::Order of additional external functions.
-        ExtData<Hermes::Ord>* fake_ext = init_ext_fns_ord(mfv->ext);
-
-        // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-        double fake_wt = 1.0;
+        Func<Hermes::Ord>* ou = get_fn_ord(fu->get_fn_order());
+        Func<Hermes::Ord>* ov = get_fn_ord(fv->get_fn_order());
 
         // Total order of the vector form.
-        Hermes::Ord o = mfv->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
+        Hermes::Ord o = mfv->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, ext_ord);
 
-        // Increase due to reference map.
-        order = ru->get_inv_ref_order();
-        order += o.get_order();
-        limit_order(order);
+        adjust_order_to_refmaps(mfv, order, &o);
 
         // Cleanup.
-        delete [] oi;
+        delete [] u_ext_ord;
 
-        if (fake_ext != NULL)
+        if (ext_ord != NULL)
         {
-          fake_ext->free_ord();
-          delete fake_ext;
+          ext_ord->free_ord();
+          delete ext_ord;
         }
       }
       return order;

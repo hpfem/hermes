@@ -82,16 +82,20 @@ namespace Hermes
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j,
       std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset)
     {
+      this->i = i;
+      this->j = j;
     }
 
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j,
       Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i), j(j)
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset)
     {
+      this->i = i;
+      this->j = j;
     }
 
     template<typename Scalar>
@@ -156,15 +160,17 @@ namespace Hermes
     template<typename Scalar>
     VectorForm<Scalar>::VectorForm(unsigned int i, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i)
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset)
     {
+      this->i = i;
     }
 
     template<typename Scalar>
     VectorForm<Scalar>::VectorForm(unsigned int i, Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i)
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset)
     {
+      this->i = i;
     }
 
     template<typename Scalar>
@@ -487,6 +493,7 @@ namespace Hermes
           Mesh* m1 = spaces[ii]->get_mesh();
           Mesh* m2 = spaces[jj]->get_mesh();
           Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext, one_stage);
+          s->forms.push_back(mfvol[i]);
           s->mfvol.push_back(mfvol[i]);
         }
 
@@ -497,6 +504,7 @@ namespace Hermes
           Mesh* m1 = spaces[ii]->get_mesh();
           Mesh* m2 = spaces[jj]->get_mesh();
           Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext, one_stage);
+          s->forms.push_back(mfsurf[i]);
           s->mfsurf.push_back(mfsurf[i]);
         }
 
@@ -538,6 +546,7 @@ namespace Hermes
           unsigned int ii = vfvol[i]->i;
           Mesh *m = spaces[ii]->get_mesh();
           Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext, one_stage);
+          s->forms.push_back(vfvol[i]);
           s->vfvol.push_back(vfvol[i]);
         }
 
@@ -547,6 +556,7 @@ namespace Hermes
           unsigned int ii = vfsurf[i]->i;
           Mesh *m = spaces[ii]->get_mesh();
           Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext, one_stage);
+          s->forms.push_back(vfsurf[i]);
           s->vfsurf.push_back(vfsurf[i]);
         }
 

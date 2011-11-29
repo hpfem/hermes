@@ -221,6 +221,8 @@ namespace Hermes
       /// external coefficient vector.
       int u_ext_offset;
 
+      unsigned int i;
+
     protected:
       WeakForm<Scalar>* wf;
       double stage_time;
@@ -240,7 +242,7 @@ namespace Hermes
         Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
-      unsigned int i, j;
+      unsigned int j;
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -300,8 +302,6 @@ namespace Hermes
       VectorForm(unsigned int i, Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
-
-      unsigned int i;
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -471,6 +471,11 @@ namespace Hermes
 
       Hermes::vector<MeshFunction<Scalar>*> ext;
 
+      Hermes::vector<Form<Scalar> *> forms;
+      
+      
+      
+      
       /// Holds volumetric matrix forms.
       Hermes::vector<MatrixFormVol<Scalar> *> mfvol;
 
