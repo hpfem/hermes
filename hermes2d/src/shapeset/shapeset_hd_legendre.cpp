@@ -8694,8 +8694,13 @@ namespace Hermes
       hdiv_leg_quad_index_to_order
     };
 
-
-
+    void HdivShapesetLegendre::set_mode(int mode)
+    {
+      if(mode == HERMES_MODE_TRIANGLE)
+        throw Hermes::Exceptions::ValueException("mode", mode, HERMES_MODE_TRIANGLE);
+      this->mode = mode;
+      nvert = (mode == HERMES_MODE_TRIANGLE) ? 3 : 4;
+    }
 
     HdivShapesetLegendre::HdivShapesetLegendre()
     {
@@ -8738,7 +8743,7 @@ namespace Hermes
 
       comb_table = NULL;
 
-      set_mode(HERMES_MODE_TRIANGLE);
+      set_mode(HERMES_MODE_QUAD);
     }
   }
 }
