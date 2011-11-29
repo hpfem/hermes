@@ -80,9 +80,40 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j,
+      std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
+    {
+    }
+
+    template<typename Scalar>
+    MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j,
+      Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext,
+      double scaling_factor, int u_ext_offset) :
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i), j(j)
+    {
+    }
+
+    template<typename Scalar>
+    Scalar MatrixForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+      Geom<double> *e, ExtData<Scalar> *ext) const
+    {
+      error("MatrixForm<Scalar>::value must be overrided.");
+      return 0.0;
+    }
+
+    template<typename Scalar>
+    Hermes::Ord MatrixForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+      Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
+    {
+      error("MatrixForm<Scalar>::ord must be overrided.");
+      return Hermes::Ord();
+    }
+
+    template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j,
       std::string area, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+    MatrixForm<Scalar>(i, j, area, ext, scaling_factor, u_ext_offset), sym(sym)
     {
     }
 
@@ -90,24 +121,8 @@ namespace Hermes
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j,
       Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i), j(j), sym(sym)
+    MatrixForm<Scalar>(i, j, areas, ext, scaling_factor, u_ext_offset), sym(sym)
     {
-    }
-
-    template<typename Scalar>
-    Scalar MatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const
-    {
-      error("MatrixFormVol<Scalar>::value must be overrided.");
-      return 0.0;
-    }
-
-    template<typename Scalar>
-    Hermes::Ord MatrixFormVol<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
-    {
-      error("MatrixFormVol<Scalar>::ord must be overrided.");
-      return Hermes::Ord();
     }
 
     template<typename Scalar>
@@ -120,31 +135,15 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i), j(j)
+    MatrixForm<Scalar>(i, j, area, ext, scaling_factor, u_ext_offset)
     {
     }
 
     template<typename Scalar>
     MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j, Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i), j(j)
+    MatrixForm<Scalar>(i, j, areas, ext, scaling_factor, u_ext_offset)
     {
-    }
-
-    template<typename Scalar>
-    Scalar MatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const
-    {
-      error("MatrixFormSurf<Scalar>::value must be overrided.");
-      return 0.0;
-    }
-
-    template<typename Scalar>
-    Hermes::Ord MatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
-    {
-      error("MatrixFormSurf<Scalar>::ord must be overrided.");
-      return Hermes::Ord();
     }
 
     template<typename Scalar>
@@ -155,32 +154,46 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    VectorFormVol<Scalar>::VectorFormVol(unsigned int i, std::string area,
+    VectorForm<Scalar>::VectorForm(unsigned int i, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
     Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i)
     {
     }
 
     template<typename Scalar>
-    VectorFormVol<Scalar>::VectorFormVol(unsigned int i, Hermes::vector<std::string> areas,
+    VectorForm<Scalar>::VectorForm(unsigned int i, Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
     Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i)
     {
     }
 
     template<typename Scalar>
-    Scalar VectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+    VectorFormVol<Scalar>::VectorFormVol(unsigned int i, std::string area,
+      Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    VectorForm<Scalar>(i, area, ext, scaling_factor, u_ext_offset)
+    {
+    }
+
+    template<typename Scalar>
+    VectorFormVol<Scalar>::VectorFormVol(unsigned int i, Hermes::vector<std::string> areas,
+      Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
+    VectorForm<Scalar>(i, areas, ext, scaling_factor, u_ext_offset)
+    {
+    }
+
+    template<typename Scalar>
+    Scalar VectorForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      error("VectorFormVol<Scalar>::value must be overrided.");
+      error("VectorForm<Scalar>::value must be overrided.");
       return 0.0;
     }
 
     template<typename Scalar>
-    Hermes::Ord VectorFormVol<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+    Hermes::Ord VectorForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      error("VectorFormVol<Scalar>::ord must be overrided.");
+      error("VectorForm<Scalar>::ord must be overrided.");
       return Hermes::Ord();
     }
 
@@ -195,31 +208,15 @@ namespace Hermes
     VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, std::string area,
       Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), i(i)
+    VectorForm<Scalar>(i, area, ext, scaling_factor, u_ext_offset)
     {
     }
     template<typename Scalar>
     VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
       Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), i(i)
+    VectorForm<Scalar>(i, areas, ext, scaling_factor, u_ext_offset)
     {
-    }
-
-    template<typename Scalar>
-    Scalar VectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-      Geom<double> *e, ExtData<Scalar> *ext) const
-    {
-      error("VectorFormSurf<Scalar>::value must be overrided.");
-      return 0.0;
-    }
-
-    template<typename Scalar>
-    Hermes::Ord VectorFormSurf<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
-    {
-      error("VectorFormSurf<Scalar>::ord must be overrided.");
-      return Hermes::Ord();
     }
 
     template<typename Scalar>

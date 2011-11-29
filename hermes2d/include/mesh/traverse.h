@@ -76,6 +76,7 @@ namespace Hermes
         bool bnd[3];
         uint64_t lo[3], hi[3];
         int* trans;
+        Element* rep;
       };
 
       void begin(int n, Mesh** meshes, Transformable** fn = NULL);

@@ -106,6 +106,18 @@ namespace Hermes
       void set_fvm();
 
     protected:
+      /// The form will be assembled.
+      bool form_to_be_assembled(MatrixForm<Scalar>* form);
+      bool form_to_be_assembled(MatrixFormVol<Scalar>* form);
+      bool form_to_be_assembled(MatrixFormSurf<Scalar>* form);
+      bool form_to_be_assembled(VectorForm<Scalar>* form);
+      bool form_to_be_assembled(VectorFormVol<Scalar>* form);
+      bool form_to_be_assembled(VectorFormSurf<Scalar>* form);
+
+      // If a block scaling table is provided, return scaling coefficient.
+      double block_scaling_coeff(MatrixForm<Scalar>* form);
+      
+      /// The current stage contains DG forms.
       void is_DG_stage();
 
       /// Get the number of unknowns.
@@ -240,8 +252,6 @@ namespace Hermes
 
       /// Init function. Common code for the constructors.
       void init();
-
-      void free();
 
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
@@ -473,6 +483,7 @@ namespace Hermes
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
       Traverse::State* current_state;
+      int current_isurf;
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches

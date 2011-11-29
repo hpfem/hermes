@@ -227,7 +227,30 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API MatrixFormVol : public Form<Scalar>
+    class HERMES_API MatrixForm : public Form<Scalar>
+    {
+    public:
+      /// One area constructor.
+      MatrixForm(unsigned int i, unsigned int j,
+        std::string area = HERMES_ANY, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
+        double scaling_factor = 1.0, int u_ext_offset = 0);
+
+      /// Multiple areas constructor..
+      MatrixForm(unsigned int i, unsigned int j,
+        Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
+        double scaling_factor = 1.0, int u_ext_offset = 0);
+
+      unsigned int i, j;
+
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const;
+
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+    };
+
+    template<typename Scalar>
+    class HERMES_API MatrixFormVol : public MatrixForm<Scalar>
     {
     public:
       /// One area constructor.
@@ -244,19 +267,11 @@ namespace Hermes
 
       virtual MatrixFormVol* clone();
 
-      unsigned int i, j;
-
       int sym;
-
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const;
-
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
     };
 
     template<typename Scalar>
-    class HERMES_API MatrixFormSurf : public Form<Scalar>
+    class HERMES_API MatrixFormSurf : public MatrixForm<Scalar>
     {
     public:
       /// One area constructor.
@@ -270,18 +285,33 @@ namespace Hermes
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       virtual MatrixFormSurf* clone();
-
-      unsigned int i, j;
-
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const;
-
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
     };
 
     template<typename Scalar>
-    class VectorFormVol : public Form<Scalar>
+    class VectorForm : public Form<Scalar>
+    {
+    public:
+      /// One area constructor.
+      VectorForm(unsigned int i, std::string area = HERMES_ANY,
+        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
+        double scaling_factor = 1.0, int u_ext_offset = 0);
+
+      /// Multiple areas constructor..
+      VectorForm(unsigned int i, Hermes::vector<std::string> areas,
+        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
+        double scaling_factor = 1.0, int u_ext_offset = 0);
+
+      unsigned int i;
+
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const;
+
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
+        ExtData<Hermes::Ord> *ext) const;
+    };
+
+    template<typename Scalar>
+    class VectorFormVol : public VectorForm<Scalar>
     {
     public:
       /// One area constructor.
@@ -295,18 +325,10 @@ namespace Hermes
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       virtual VectorFormVol* clone();
-
-      unsigned int i;
-
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const;
-
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
-        ExtData<Hermes::Ord> *ext) const;
     };
 
     template<typename Scalar>
-    class VectorFormSurf : public Form<Scalar>
+    class VectorFormSurf : public VectorForm<Scalar>
     {
     public:
       /// One area constructor.
@@ -320,14 +342,6 @@ namespace Hermes
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       virtual VectorFormSurf* clone();
-
-      unsigned int i;
-
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const;
-
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
     };
 
     /// Multi-component forms.

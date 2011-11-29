@@ -313,7 +313,10 @@ namespace Hermes
               bool empty = true;
               for (i = 0; i < num; i++)
                 if(s->e[i] != NULL)
+                {
                   empty = false;
+                  s->rep = s->e[i];
+                }
               if(empty)
                 s->e = NULL;
               return s;

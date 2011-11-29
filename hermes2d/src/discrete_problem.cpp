@@ -126,7 +126,9 @@ namespace Hermes
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
       _F_;
-      free();
+      if (wf != NULL)
+        memset(sp_seq, -1, sizeof(int) * wf->get_neq());
+      wf_seq = -1;
       if (sp_seq != NULL) delete [] sp_seq;
       if (pss != NULL)
       {
@@ -134,15 +136,6 @@ namespace Hermes
           delete pss[i];
         delete [] pss;
       }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::free()
-    {
-      _F_;
-      if (wf != NULL)
-        memset(sp_seq, -1, sizeof(int) * wf->get_neq());
-      wf_seq = -1;
     }
 
     template<typename Scalar>
@@ -231,6 +224,124 @@ namespace Hermes
     void DiscreteProblem<Scalar>::set_fvm()
     {
       this->is_fvm = true;
+    }
+      
+    template<typename Scalar>
+    double DiscreteProblem<Scalar>::block_scaling_coeff(MatrixForm<Scalar>* form)
+    {
+      if(current_block_weights != NULL)
+        return current_block_weights->get_A(form->i, form->j);
+      return 1.0;
+    }
+
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixForm<Scalar>* form)
+    {
+      if (current_state->e[form->i] == NULL || current_state->e[form->j] == NULL)
+        return false;
+      if (fabs(form->scaling_factor) < 1e-12)
+        return false;
+
+      // If a block scaling table is provided, and if the scaling coefficient
+      // A_mn for this block is zero, then the form does not need to be assembled.
+      if (current_block_weights != NULL)
+        if (fabs(current_block_weights->get_A(form->i, form->j)) < 1e-12)
+          return false;
+      return true;
+    }
+
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixFormVol<Scalar>* form)
+    {
+      if(!form_to_be_assembled((MatrixForm<Scalar>*)form))
+        return false;
+      
+      // Assemble this form only if one of its areas is HERMES_ANY
+      // of if the element marker coincides with one of the form's areas.
+      bool assemble_this_form = false;
+      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
+      {
+        if(form->areas[ss] == HERMES_ANY)
+        {
+          assemble_this_form = true;
+          break;
+        }
+        else
+        {
+          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).valid;
+          if(marker_on_space_m)
+            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
+
+          bool marker_on_space_n = this->spaces[form->j]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).valid;
+          if(marker_on_space_n)
+            marker_on_space_n = (this->spaces[form->j]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
+
+          if (marker_on_space_m && marker_on_space_n)
+          {
+            assemble_this_form = true;
+            break;
+          }
+        }
+      }
+      if (!assemble_this_form)
+        return false;
+      return true;
+    }
+
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixFormSurf<Scalar>* form)
+    {
+      if (form->areas[0] == H2D_DG_INNER_EDGE)
+        return false;
+      if(!form_to_be_assembled((MatrixForm<Scalar>*)form))
+        return false;
+
+      bool assemble_this_form = false;
+      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
+      {
+        if(form->areas[ss] == HERMES_ANY || form->areas[ss] == H2D_DG_BOUNDARY_EDGE)
+        {
+          assemble_this_form = true;
+          break;
+        }
+        else
+        {
+          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).valid;
+          if(marker_on_space_m)
+            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[this->current_isurf]->marker);
+
+          bool marker_on_space_n = this->spaces[form->j]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).valid;
+          if(marker_on_space_n)
+            marker_on_space_n = (this->spaces[form->j]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[this->current_isurf]->marker);
+
+          if (marker_on_space_m && marker_on_space_n)
+          {
+            assemble_this_form = true;
+            break;
+          }
+        }
+      }
+      if (assemble_this_form == false)
+        return false;
+      return true;
+    }
+    
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorForm<Scalar>* form)
+    {
+      return true;
+    }
+    
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorFormVol<Scalar>* form)
+    {
+      return true;
+    }
+    
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorFormSurf<Scalar>* form)
+    {
+      return true;
     }
 
     template<typename Scalar>
@@ -784,75 +895,35 @@ namespace Hermes
       _F_;
       for (unsigned ww = 0; ww < current_stage->mfvol.size(); ww++)
       {
-        MatrixFormVol<Scalar>* mfv = current_stage->mfvol[ww];
-        int m = mfv->i;
-        int n = mfv->j;
-        if (current_state->e[m] == NULL || current_state->e[n] == NULL) continue;
-        if (fabs(mfv->scaling_factor) < 1e-12) continue;
-
-        // Assemble this form only if one of its areas is HERMES_ANY
-        // of if the element marker coincides with one of the form's areas.
-        bool assemble_this_form = false;
-        for (unsigned int ss = 0; ss < mfv->areas.size(); ss++)
-        {
-          if(mfv->areas[ss] == HERMES_ANY)
-          {
-            assemble_this_form = true;
-            break;
-          }
-          else
-          {
-            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).valid;
-            if(marker_on_space_m)
-              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).marker == marker);
-
-            bool marker_on_space_n = this->spaces[n]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).valid;
-            if(marker_on_space_n)
-              marker_on_space_n = (this->spaces[n]->get_mesh()->get_element_markers_conversion().get_internal_marker(mfv->areas[ss]).marker == marker);
-
-            if (marker_on_space_m && marker_on_space_n)
-            {
-              assemble_this_form = true;
-              break;
-            }
-          }
-        }
-        if (!assemble_this_form)
+        if(!form_to_be_assembled(current_stage->mfvol[ww]))
           continue;
 
-        // If a block scaling table is provided, and if the scaling coefficient
-        // A_mn for this block is zero, then the form does not need to be assembled.
-        double block_scaling_coeff = 1.;
-        if (current_block_weights != NULL)
-        {
-          block_scaling_coeff = current_block_weights->get_A(m, n);
-          if (fabs(block_scaling_coeff) < 1e-12)
-            continue;
-        }
-        bool tra = (m != n) && (mfv->sym != 0);
-        bool sym = (m == n) && (mfv->sym == 1);
+        double block_scaling_coef = this->block_scaling_coeff(current_stage->mfvol[ww]);
+
+        bool tra = (current_stage->mfvol[ww]->i != current_stage->mfvol[ww]->j) && (current_stage->mfvol[ww]->sym != 0);
+        bool sym = (current_stage->mfvol[ww]->i == current_stage->mfvol[ww]->j) && (current_stage->mfvol[ww]->sym == 1);
 
         // Assemble the local stiffness matrix for the form mfv.
         Scalar **local_stiffness_matrix = NULL;
-        local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
+        local_stiffness_matrix = get_matrix_buffer(std::max(al[current_stage->mfvol[ww]->i]->cnt, al[current_stage->mfvol[ww]->j]->cnt));
 
         if (current_mat != NULL)
-            assemble_local_volume_matrix(local_stiffness_matrix, mfv, spss, refmap, u_ext, al, m, n, block_scaling_coeff);
+            assemble_local_volume_matrix(local_stiffness_matrix, current_stage->mfvol[ww], spss, refmap, u_ext, al, current_stage->mfvol[ww]->i, current_stage->mfvol[ww]->j, block_scaling_coef);
 
         // Insert the local stiffness matrix into the global one.
         if (current_mat != NULL)
-          current_mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
+          current_mat->add(al[current_stage->mfvol[ww]->i]->cnt, al[current_stage->mfvol[ww]->j]->cnt, local_stiffness_matrix, al[current_stage->mfvol[ww]->i]->dof, al[current_stage->mfvol[ww]->j]->dof);
 
         // Insert also the off-diagonal (anti-)symmetric block, if required.
         if (tra)
         {
-          if (mfv->sym < 0)
-            chsgn(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
+          if (current_stage->mfvol[ww]->sym < 0)
+            chsgn(local_stiffness_matrix, al[current_stage->mfvol[ww]->i]->cnt, al[current_stage->mfvol[ww]->j]->cnt);
 
-          transpose(local_stiffness_matrix, al[m]->cnt, al[n]->cnt);
+          transpose(local_stiffness_matrix, al[current_stage->mfvol[ww]->i]->cnt, al[current_stage->mfvol[ww]->j]->cnt);
 
           if (current_mat != NULL)
-            current_mat->add(al[n]->cnt, al[m]->cnt, local_stiffness_matrix, al[n]->dof, al[m]->dof);
+            current_mat->add(al[current_stage->mfvol[ww]->j]->cnt, al[current_stage->mfvol[ww]->i]->cnt, local_stiffness_matrix, al[current_stage->mfvol[ww]->j]->dof, al[current_stage->mfvol[ww]->i]->dof);
         }
       }
     }
@@ -1762,79 +1833,32 @@ namespace Hermes
       _F_;
       for (unsigned int ww = 0; ww < current_stage->mfsurf.size(); ww++)
       {
-        MatrixFormSurf<Scalar>* mfs = current_stage->mfsurf[ww];
-        int m = mfs->i;
-        int n = mfs->j;
-        if (current_state->e[m] == NULL || current_state->e[n] == NULL)
-          continue;
-        if (!nat[m] || !nat[n])
-          continue;
-        if (fabs(mfs->scaling_factor) < 1e-12)
-          continue;
-        if (mfs->areas[0] == H2D_DG_INNER_EDGE)
+        if(!form_to_be_assembled(current_stage->mfsurf[ww]))
           continue;
 
-        // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
-        // or if the element marker coincides with one of the form's areas.
-        bool assemble_this_form = false;
-        for (unsigned int ss = 0; ss < mfs->areas.size(); ss++)
-        {
-          if(mfs->areas[ss] == HERMES_ANY || mfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)
-          {
-            assemble_this_form = true;
-            break;
-          }
-          else
-          {
-            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
-            if(marker_on_space_m)
-              marker_on_space_m = (this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker);
-
-            bool marker_on_space_n = this->spaces[n]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).valid;
-            if(marker_on_space_n)
-              marker_on_space_n = (this->spaces[n]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(mfs->areas[ss]).marker == marker);
-
-            if (marker_on_space_m && marker_on_space_n)
-            {
-              assemble_this_form = true;
-              break;
-            }
-          }
-        }
-        if (assemble_this_form == false)
-          continue;
-
-        // If a block scaling table is provided, and if the scaling coefficient
-        // A_mn for this block is zero, then the form does not need to be assembled.
-        double block_scaling_coeff = 1.;
-        if (block_weights != NULL)
-        {
-          block_scaling_coeff = block_weights->get_A(m, n);
-          if (fabs(block_scaling_coeff) < 1e-12)
-            continue;
-        }
+        double block_scaling_coef = this->block_scaling_coeff(current_stage->mfvol[ww]);
 
         surf_pos.base = trav_base;
 
-        Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[m]->cnt, al[n]->cnt));
-        for (unsigned int i = 0; i < al[m]->cnt; i++)
+        Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[current_stage->mfsurf[ww]->i]->cnt, al[current_stage->mfsurf[ww]->j]->cnt));
+        for (unsigned int i = 0; i < al[current_stage->mfsurf[ww]->i]->cnt; i++)
         {
-          if (al[m]->dof[i] < 0)
+          if (al[current_stage->mfsurf[ww]->i]->dof[i] < 0)
             continue;
-          spss[m]->set_active_shape(al[m]->idx[i]);
-          for (unsigned int j = 0; j < al[n]->cnt; j++)
+          spss[current_stage->mfsurf[ww]->i]->set_active_shape(al[current_stage->mfsurf[ww]->i]->idx[i]);
+          for (unsigned int j = 0; j < al[current_stage->mfsurf[ww]->j]->cnt; j++)
           {
-            pss[n]->set_active_shape(al[n]->idx[j]);
-            if (al[n]->dof[j] >= 0)
+            pss[current_stage->mfsurf[ww]->j]->set_active_shape(al[current_stage->mfsurf[ww]->j]->idx[j]);
+            if (al[current_stage->mfsurf[ww]->j]->dof[j] >= 0)
             {
               if (mat != NULL)
               {
                 Scalar val = 0;
                 // Numerical integration performed only if all coefficients multiplying the form are nonzero.
-                if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12)
+                if (std::abs(al[current_stage->mfsurf[ww]->i]->coef[i]) > 1e-12 && std::abs(al[current_stage->mfsurf[ww]->j]->coef[j]) > 1e-12)
                 {
-                  val = block_scaling_coeff * eval_form(mfs, u_ext, pss[n], spss[m], refmap[n],
-                    refmap[m], &surf_pos) * al[n]->coef[j] * al[m]->coef[i];
+                  val = block_scaling_coef * eval_form(current_stage->mfsurf[ww], u_ext, pss[current_stage->mfsurf[ww]->j], spss[current_stage->mfsurf[ww]->i], refmap[current_stage->mfsurf[ww]->j],
+                    refmap[current_stage->mfsurf[ww]->i], &surf_pos) * al[current_stage->mfsurf[ww]->j]->coef[j] * al[current_stage->mfsurf[ww]->i]->coef[i];
                 }
                 local_stiffness_matrix[i][j] = val;
               }
@@ -1842,7 +1866,7 @@ namespace Hermes
           }
         }
         if (mat != NULL)
-          current_mat->add(al[m]->cnt, al[n]->cnt, local_stiffness_matrix, al[m]->dof, al[n]->dof);
+          current_mat->add(al[current_stage->mfsurf[ww]->i]->cnt, al[current_stage->mfsurf[ww]->j]->cnt, local_stiffness_matrix, al[current_stage->mfsurf[ww]->i]->dof, al[current_stage->mfsurf[ww]->j]->dof);
       }
     }
 
