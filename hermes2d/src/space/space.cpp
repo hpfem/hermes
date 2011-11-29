@@ -177,7 +177,7 @@ namespace Hermes
 
       resize_tables();
 
-      if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0)
+      if (mesh->get_element(id)->is_quad() && H2D_GET_V_ORDER(order) == 0)
         order = H2D_MAKE_QUAD_ORDER(order, order);
 
       edata[id].order = order;
