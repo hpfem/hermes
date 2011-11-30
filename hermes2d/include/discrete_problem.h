@@ -178,7 +178,8 @@ namespace Hermes
       /// Assemble one state.
       void assemble_one_state();
 
-      void calc_u_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
+      void calc_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
+      void calc_ext(Form<Scalar> *form, Func<Scalar>** prev, ExtData<Scalar>* ext, int order);
 
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o);
 
@@ -276,8 +277,7 @@ namespace Hermes
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv);
 
       /// Calculates the necessary integration order to use for a particular volumetric matrix form.
-      int calc_order_matrix_form_vol(MatrixFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv);
+      int calc_order_matrix_form_vol(MatrixFormVol<Scalar>* mfv);
 
       /// Elementary function used in eval_form() in adaptive mode for volumetric matrix forms.
       Scalar eval_form_value(int order, MatrixFormVol<Scalar>* mfv,
@@ -503,6 +503,7 @@ namespace Hermes
       Hermes::vector<RefMap *> current_refmap;
       Hermes::vector<PrecalcShapeset *> current_spss;
       Hermes::vector<Solution<Scalar>*> current_u_ext;
+      Hermes::vector<AsmList<Scalar>*> current_al;
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches
