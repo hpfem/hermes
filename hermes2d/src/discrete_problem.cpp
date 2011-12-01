@@ -379,6 +379,35 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorFormSurf<Scalar>* form)
     {
+      if (form->areas[0] == H2D_DG_INNER_EDGE)
+        return false;
+      
+      if(!form_to_be_assembled((VectorForm<Scalar>*)form))
+        return false;
+      
+      bool assemble_this_form = false;
+      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
+      {
+        if(form->areas[ss] == HERMES_ANY || form->areas[ss] == H2D_DG_BOUNDARY_EDGE)
+        {
+          assemble_this_form = true;
+          break;
+        }
+        else
+        {
+          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).valid;
+          if(marker_on_space_m)
+            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[this->current_isurf]->marker);
+
+          if (marker_on_space_m)
+          {
+            assemble_this_form = true;
+            break;
+          }
+        }
+      }
+      if (assemble_this_form == false)
+        return false;
       return true;
     }
 
@@ -921,11 +950,11 @@ namespace Hermes
       // Assemble surface integrals now: loop through surfaces of the element.
       for (current_isurf = 0; current_isurf < rep_element->get_num_surf(); current_isurf++)
       {
-        init_state();
-
         // \todo DG.
         if(!this->current_state->bnd[current_isurf])
           continue;
+        
+        init_surface_state();
 
         if (current_mat != NULL)
         {
@@ -1013,7 +1042,7 @@ namespace Hermes
 
       // Init geometry.
       int n_quadrature_points;
-      if(static_cast<MatrixFormVol<Scalar>*>(form))
+      if(dynamic_cast<MatrixFormVol<Scalar>*>(form))
         n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
       else
         n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
@@ -1042,7 +1071,7 @@ namespace Hermes
                 for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
                   u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
-              if(static_cast<MatrixFormVol<Scalar>*>(form))
+              if(dynamic_cast<MatrixFormVol<Scalar>*>(form))
                 local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
               else
                 local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
@@ -1072,11 +1101,7 @@ namespace Hermes
                 for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
                   u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
-              if(static_cast<MatrixFormVol<Scalar>*>(form))
-                val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
-              else
-                // Surface forms are always unsymmetric.
-                assert(NULL);
+              val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
 
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
@@ -1134,17 +1159,17 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order)
     {
+      // Init geometry.
+      int n_quadrature_points;
+      if(dynamic_cast<VectorFormVol<Scalar>*>(form))
+        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
+      else
+        n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
+
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
       ExtData<Scalar> ext;
       init_ext(form, u_ext, &ext, order);
-
-      // Init geometry.
-      int n_quadrature_points;
-      if(static_cast<VectorFormVol<Scalar>*>(form))
-        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
-      else
-        n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
@@ -1162,7 +1187,7 @@ namespace Hermes
           for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
             u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
         
-        if(static_cast<VectorFormVol<Scalar>*>(form))
+        if(dynamic_cast<VectorFormVol<Scalar>*>(form))
           current_rhs->add(current_al[form->i]->dof[i], form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
         else
           current_rhs->add(current_al[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
@@ -1200,7 +1225,6 @@ namespace Hermes
       return np;
     }
 
-
     template<typename Scalar>
     int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order)
     {
@@ -1223,8 +1247,6 @@ namespace Hermes
       order = eo;
       return np;
     }
-    
-     
     
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
