@@ -347,35 +347,6 @@ namespace Hermes
         GeomType gt;
       };
 
-      template<typename Scalar>
-      class HERMES_API DefaultMultiComponentVectorFormSurf : public MultiComponentVectorFormSurf<Scalar>
-      {
-      public:
-        DefaultMultiComponentVectorFormSurf<Scalar>(Hermes::vector<unsigned int> coordinates,
-          std::string area = HERMES_ANY,
-          Hermes::vector<Scalar> coeffs = Hermes::vector<Scalar>(1.0),
-          GeomType gt = HERMES_PLANAR);
-        DefaultMultiComponentVectorFormSurf<Scalar>(Hermes::vector<unsigned int> coordinates,
-          Hermes::vector<std::string> areas,
-          Hermes::vector<Scalar> coeffs, GeomType gt = HERMES_PLANAR);
-
-        virtual void value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext, Hermes::vector<Scalar>& result) const;
-
-        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
-
-        /* FIXME
-        virtual VectorFormSurf<Scalar>* clone() {
-        return new DefaultMultiComponentVectorFormSurf<Scalar>(*this);
-        }
-        */
-
-      private:
-        Hermes::vector<Scalar> coeffs;
-        GeomType gt;
-      };
-
       /* Default surface vector form \int_{area} const_coeff * function_coeff(x, y) * u_ext[0] v dS
       const_coeff... constant number
       function_coeff... (generally nonconstant) function of x, y

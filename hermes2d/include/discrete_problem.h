@@ -260,32 +260,6 @@ namespace Hermes
         int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
-      /// Vector<Scalar> volume forms. The functions provide the same functionality as the
-      /// parallel ones for matrix volume forms.
-      void eval_form(MultiComponentVectorFormVol<Scalar>* vfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, Hermes::vector<Scalar>& result);
-
-      int calc_order_volume_vector_form(MultiComponentVectorFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv);
-
-      /// Matrix<Scalar> surface forms. The functions provide the same functionality as the
-      /// parallel ones for matrix volume forms.
-      void eval_form(MultiComponentMatrixFormSurf<Scalar>* mfs,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result);
-
-      int calc_order_surface_matrix_form(MultiComponentMatrixFormSurf<Scalar>* mfs,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv,
-        RefMap* ru, RefMap* rv, SurfPos* surf_pos);
-
-      void eval_form(MultiComponentVectorFormSurf<Scalar>* vfs,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result);
-
-      int calc_order_surface_vector_form(MultiComponentVectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
-
       /// Evaluates DG matrix forms on an edge between elements identified by ru_actual, rv.
       Scalar eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv,

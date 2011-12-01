@@ -235,86 +235,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MultiComponentMatrixFormVol<Scalar>::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
-      std::string area, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
-
-    template<typename Scalar>
-    MultiComponentMatrixFormVol<Scalar>::MultiComponentMatrixFormVol(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
-      Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates), sym(sym) { }
-
-    template<typename Scalar>
-    MultiComponentMatrixFormVol<Scalar>* MultiComponentMatrixFormVol<Scalar>::clone()
-    {
-      error("MultiComponentMatrixFormVol::clone() must be overridden.");
-      return NULL;
-    }
-
-    template<typename Scalar>
-    MultiComponentMatrixFormSurf<Scalar>::MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
-
-    template<typename Scalar>
-    MultiComponentMatrixFormSurf<Scalar>::MultiComponentMatrixFormSurf(Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates,
-      Hermes::vector<std::string> areas,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
-
-    template<typename Scalar>
-    MultiComponentMatrixFormSurf<Scalar>* MultiComponentMatrixFormSurf<Scalar>::clone()
-    {
-      error("WeakForm::MatrixFormSurf::clone() must be overridden.");
-      return NULL;
-    }
-
-    template<typename Scalar>
-    MultiComponentVectorFormVol<Scalar>::MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates, std::string area,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
-
-    template<typename Scalar>
-    MultiComponentVectorFormVol<Scalar>::MultiComponentVectorFormVol(Hermes::vector<unsigned int> coordinates,
-      Hermes::vector<std::string> areas,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
-
-    template<typename Scalar>
-    MultiComponentVectorFormVol<Scalar>* MultiComponentVectorFormVol<Scalar>::clone()
-    {
-      error("WeakForm::VectorFormVol::clone() must be overridden.");
-      return NULL;
-    }
-
-    template<typename Scalar>
-    MultiComponentVectorFormSurf<Scalar>::MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates, std::string area,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
-
-    template<typename Scalar>
-    MultiComponentVectorFormSurf<Scalar>::MultiComponentVectorFormSurf(Hermes::vector<unsigned int> coordinates,
-      Hermes::vector<std::string> areas,
-      Hermes::vector<MeshFunction<Scalar>*> ext,
-      double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), coordinates(coordinates) { }
-
-    template<typename Scalar>
-    MultiComponentVectorFormSurf<Scalar>* MultiComponentVectorFormSurf<Scalar>::clone()
-    {
-      error("WeakForm::VectorFormVol::clone() must be overridden.");
-      return NULL;
-    }
-
-
-    template<typename Scalar>
     void WeakForm<Scalar>::add_matrix_form(MatrixFormVol<Scalar>* form)
     {
       _F_;
@@ -371,68 +291,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::add_multicomponent_matrix_form(MultiComponentMatrixFormVol<Scalar>* form)
-    {
-      _F_;
-
-      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-      {
-        if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
-          error("Invalid equation number.");
-        if (form->sym < 0 && form->coordinates.at(form_i).first == form->coordinates.at(form_i).second)
-          error("Only off-diagonal forms can be antisymmetric.");
-      }
-      if (form->sym < -1 || form->sym > 1)
-        error("\"sym\" must be -1, 0 or 1.");
-
-      if (mfvol_mc.size() > 100)
-        warn("Large number of forms (> 100). Is this the intent?");
-
-      form->set_weakform(this);
-
-      mfvol_mc.push_back(form);
-      seq++;
-    }
-
-    template<typename Scalar>
-    void WeakForm<Scalar>::add_multicomponent_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>* form)
-    {
-      _F_;
-      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-        if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
-          error("Invalid equation number.");
-
-      form->set_weakform(this);
-      mfsurf_mc.push_back(form);
-      seq++;
-    }
-
-    template<typename Scalar>
-    void WeakForm<Scalar>::add_multicomponent_vector_form(MultiComponentVectorFormVol<Scalar>* form)
-    {
-      _F_;
-      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-        if(form->coordinates.at(form_i) >= neq)
-          error("Invalid equation number.");
-      form->set_weakform(this);
-      vfvol_mc.push_back(form);
-      seq++;
-    }
-
-    template<typename Scalar>
-    void WeakForm<Scalar>::add_multicomponent_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* form)
-    {
-      _F_;
-      for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-        if(form->coordinates.at(form_i) >= neq)
-          error("Invalid equation number.");
-
-      form->set_weakform(this);
-      vfsurf_mc.push_back(form);
-      seq++;
-    }
-
-    template<typename Scalar>
     Hermes::vector<MatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol()
     {
       return mfvol;
@@ -451,26 +309,6 @@ namespace Hermes
       Hermes::vector<VectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf()
     {
       return vfsurf;
-    }
-    template<typename Scalar>
-      Hermes::vector<MultiComponentMatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol_mc()
-    {
-      return mfvol_mc;
-    }
-    template<typename Scalar>
-      Hermes::vector<MultiComponentMatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf_mc()
-    {
-      return mfsurf_mc;
-    }
-    template<typename Scalar>
-      Hermes::vector<MultiComponentVectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol_mc()
-    {
-      return vfvol_mc;
-    }
-    template<typename Scalar>
-      Hermes::vector<MultiComponentVectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf_mc()
-    {
-      return vfsurf_mc;
     }
 
     template<typename Scalar>
@@ -509,36 +347,6 @@ namespace Hermes
           s->forms.push_back(mfsurf[i]);
           s->mfsurf.push_back(mfsurf[i]);
         }
-
-        // Multi component forms.
-        for (unsigned i = 0; i < mfvol_mc.size(); i++)
-        {
-          Mesh* the_one_mesh = spaces[mfvol_mc.at(i)->coordinates.at(0).first]->get_mesh();
-          for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++)
-          {
-            if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-            if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-          }
-
-          Stage<Scalar>* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext, one_stage);
-          s->mfvol_mc.push_back(mfvol_mc[i]);
-        }
-        for (unsigned i = 0; i < mfsurf_mc.size(); i++)
-        {
-          Mesh* the_one_mesh = spaces[mfsurf_mc.at(i)->coordinates.at(0).first]->get_mesh();
-          for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++)
-          {
-            if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-            if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-          }
-
-          Stage<Scalar>* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext, one_stage);
-          s->mfsurf_mc.push_back(mfsurf_mc[i]);
-        }
       }
       if (want_vector)
       {
@@ -560,29 +368,6 @@ namespace Hermes
           Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext, one_stage);
           s->forms.push_back(vfsurf[i]);
           s->vfsurf.push_back(vfsurf[i]);
-        }
-
-        // Multi component forms.
-        for (unsigned i = 0; i < vfvol_mc.size(); i++)
-        {
-          Mesh* the_one_mesh = spaces[vfvol_mc.at(i)->coordinates.at(0)]->get_mesh();
-          for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++)
-            if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-
-          Stage<Scalar>*s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext, one_stage);
-          s->vfvol_mc.push_back(vfvol_mc[i]);
-        }
-
-        for (unsigned i = 0; i < vfsurf_mc.size(); i++)
-        {
-          Mesh* the_one_mesh = spaces[vfsurf_mc.at(i)->coordinates.at(0)]->get_mesh();
-          for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++)
-            if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-
-          Stage<Scalar>*s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext, one_stage);
-          s->vfsurf_mc.push_back(vfsurf_mc[i]);
         }
       }
 
@@ -699,163 +484,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<std::pair<unsigned int, unsigned int> > coordinates,
-      Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) const
-    {
-
-      _F_;
-      // first create a list of meshes the form uses
-      std::set<unsigned> seq;
-      seq.insert(m1->get_seq());
-      seq.insert(m2->get_seq());
-      Mesh *mmm;
-      for (unsigned i = 0; i < ext.size(); i++)
-      {
-        mmm = ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
-        seq.insert(mmm->get_seq());
-      }
-      for (unsigned i = 0; i < u_ext.size(); i++)
-      {
-        if (u_ext[i] != NULL)
-        {
-          mmm = u_ext[i]->get_mesh();
-          if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
-          seq.insert(mmm->get_seq());
-        }
-      }
-
-      // find a suitable existing stage for the form
-      Stage<Scalar>* s = NULL;
-      if(one_stage)
-        assert(stages.size() <= 1);
-      for (unsigned i = 0; i < stages.size(); i++)
-        if (seq.size() == stages[i].seq_set.size() &&
-          equal(seq.begin(), seq.end(), stages[i].seq_set.begin()))
-        {
-          s = &stages[i];
-          break;
-        }
-
-        // create a new stage if not found
-        if (s == NULL)
-        {
-          if(stages.size() > 0 && one_stage)
-          {
-            s = &stages[0];
-            for(std::set<unsigned>::iterator it = seq.begin(); it != seq.end(); it++)
-            {
-              bool is_already_in_the_set = false;
-              for(std::set<unsigned>::iterator s_it = s->seq_set.begin(); s_it != s->seq_set.end(); s_it++)
-                if(*it == *s_it)
-                  is_already_in_the_set = true;
-              if(!is_already_in_the_set)
-                s->seq_set.insert(*it);
-            }
-          }
-          else
-          {
-            Stage<Scalar> newstage;
-            stages.push_back(newstage);
-            s = &stages.back();
-            s->seq_set = seq;
-          }
-        }
-
-
-        // update and return the stage
-        for (unsigned int i = 0; i < ext.size(); i++)
-          s->ext_set.insert(ext[i]);
-        for (unsigned int i = 0; i < u_ext.size(); i++)
-          if (u_ext[i] != NULL)
-            s->ext_set.insert(u_ext[i]);
-
-        for(unsigned int ii = 0; ii < coordinates.size(); ii++)
-        {
-          s->idx_set.insert(coordinates.at(ii).first);
-          s->idx_set.insert(coordinates.at(ii).second);
-        }
-        return s;
-    }
-
-    template<typename Scalar>
-    Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, Hermes::vector<unsigned int> coordinates,
-      Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) const
-    {
-
-      _F_;
-      // first create a list of meshes the form uses
-      std::set<unsigned> seq;
-      seq.insert(m1->get_seq());
-      seq.insert(m2->get_seq());
-      Mesh *mmm;
-      for (unsigned i = 0; i < ext.size(); i++)
-      {
-        mmm = ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
-        seq.insert(mmm->get_seq());
-      }
-      for (unsigned i = 0; i < u_ext.size(); i++)
-      {
-        if (u_ext[i] != NULL)
-        {
-          mmm = u_ext[i]->get_mesh();
-          if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
-          seq.insert(mmm->get_seq());
-        }
-      }
-
-      // find a suitable existing stage for the form
-      Stage<Scalar>* s = NULL;
-      for (unsigned i = 0; i < stages.size(); i++)
-        if (seq.size() == stages[i].seq_set.size() &&
-          equal(seq.begin(), seq.end(), stages[i].seq_set.begin()))
-        {
-          s = &stages[i];
-          break;
-        }
-
-        // create a new stage if not found
-        if (s == NULL)
-        {
-          if(stages.size() > 0 && one_stage)
-          {
-            s = &stages[0];
-            for(std::set<unsigned>::iterator it = seq.begin(); it != seq.end(); it++)
-            {
-              bool is_already_in_the_set = false;
-              for(std::set<unsigned>::iterator s_it = s->seq_set.begin(); s_it != s->seq_set.end(); s_it++)
-                if(*it == *s_it)
-                  is_already_in_the_set = true;
-              if(!is_already_in_the_set)
-                s->seq_set.insert(*it);
-            }
-          }
-          else
-          {
-            Stage<Scalar> newstage;
-            stages.push_back(newstage);
-            s = &stages.back();
-            s->seq_set = seq;
-          }
-        }
-
-        // update and return the stage
-        for (unsigned int i = 0; i < ext.size(); i++)
-          s->ext_set.insert(ext[i]);
-        for (unsigned int i = 0; i < u_ext.size(); i++)
-          if (u_ext[i] != NULL)
-            s->ext_set.insert(u_ext[i]);
-
-        for(unsigned int ii = 0; ii < coordinates.size(); ii++)
-          s->idx_set.insert(coordinates.at(ii));
-
-        return s;
-    }
-
-    template<typename Scalar>
     bool** WeakForm<Scalar>::get_blocks(bool force_diagonal_blocks) const
     {
       _F_;
@@ -875,26 +503,6 @@ namespace Hermes
           if (fabs(mfvol[i]->scaling_factor) > 1e-12)
             blocks[mfvol[i]->j][mfvol[i]->i] = true;
       }
-
-      for (unsigned i = 0; i < mfvol_mc.size(); i++)
-      {
-        if (fabs(mfvol_mc[i]->scaling_factor) > 1e-12)
-          for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
-            blocks[mfvol_mc[i]->coordinates[component_i].first][mfvol_mc[i]->coordinates[component_i].second] = true;
-        if (mfvol_mc[i]->sym)
-          if (fabs(mfvol_mc[i]->scaling_factor) > 1e-12)
-            for(unsigned int component_i = 0; component_i < mfvol_mc[i]->coordinates.size(); component_i++)
-              blocks[mfvol_mc[i]->coordinates[component_i].second][mfvol_mc[i]->coordinates[component_i].first] = true;
-      }
-
-      for (unsigned i = 0; i < mfsurf.size(); i++)
-        if (fabs(mfsurf[i]->scaling_factor) > 1e-12)
-          blocks[mfsurf[i]->i][mfsurf[i]->j] = true;
-
-      for (unsigned i = 0; i < mfsurf_mc.size(); i++)
-        if (fabs(mfsurf_mc[i]->scaling_factor) > 1e-12)
-          for(unsigned int component_i = 0; component_i < mfsurf_mc[i]->coordinates.size(); component_i++)
-            blocks[mfsurf_mc[i]->coordinates[component_i].first][mfsurf_mc[i]->coordinates[component_i].second] = true;
 
       return blocks;
     }
@@ -925,13 +533,5 @@ namespace Hermes
     template class HERMES_API VectorFormSurf<std::complex<double> >;
     template class HERMES_API Stage<double>;
     template class HERMES_API Stage<std::complex<double> >;
-    template class HERMES_API MultiComponentVectorFormVol<double>;
-    template class HERMES_API MultiComponentVectorFormVol<std::complex<double> >;
-    template class HERMES_API MultiComponentVectorFormSurf<double>;
-    template class HERMES_API MultiComponentVectorFormSurf<std::complex<double> >;
-    template class HERMES_API MultiComponentMatrixFormVol<double>;
-    template class HERMES_API MultiComponentMatrixFormVol<std::complex<double> >;
-    template class HERMES_API MultiComponentMatrixFormSurf<double>;
-    template class HERMES_API MultiComponentMatrixFormSurf<std::complex<double> >;
   }
 }
