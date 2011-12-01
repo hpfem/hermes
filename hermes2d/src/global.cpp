@@ -60,7 +60,7 @@ namespace Hermes
 
       double error = 0.0;
       Traverse::State* ee;
-      while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
+      while ((ee = trav.get_next_state()) != NULL)
       {
         update_limit_table(ee->e[0]->get_mode());
 

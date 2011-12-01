@@ -585,7 +585,7 @@ namespace Hermes
         // Loop through all elements.
         Traverse::State *current_state;
         // Loop through all elements.
-        while ((current_state = trav.get_next_state(NULL, NULL)) != NULL)
+        while ((current_state = trav.get_next_state()) != NULL)
         {
           sln->set_quad_order(0, item);
           double* val = sln->get_values(component, value_type);

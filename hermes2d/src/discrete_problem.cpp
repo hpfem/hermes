@@ -296,6 +296,9 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixFormSurf<Scalar>* form)
     {
+      if(current_state->rep->en[this->current_isurf]->marker == 0)
+        return false;
+
       if (form->areas[0] == H2D_DG_INNER_EDGE)
         return false;
       if(!form_to_be_assembled((MatrixForm<Scalar>*)form))
@@ -379,6 +382,9 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorFormSurf<Scalar>* form)
     {
+      if(current_state->rep->en[this->current_isurf]->marker == 0)
+        return false;
+
       if (form->areas[0] == H2D_DG_INNER_EDGE)
         return false;
       
@@ -487,7 +493,7 @@ namespace Hermes
         }
 
         // Loop through all elements.
-        while ((current_state = trav.get_next_state(NULL, NULL)) != NULL)
+        while ((current_state = trav.get_next_state()) != NULL)
         {
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
@@ -805,13 +811,6 @@ namespace Hermes
     {
       _F_;
 
-      // Boundary flags. bnd[i] == true if i-th edge of the current
-      // element is a boundary edge.
-      bool bnd[4];
-
-      // Info about the boundary edge.
-      SurfPos surf_pos[4];
-
       // Create the assembling states.
       Traverse trav;
       for (unsigned i = 0; i < current_stage->idx.size(); i++)
@@ -822,7 +821,7 @@ namespace Hermes
 
       // Loop through all assembling states.
       // Assemble each one.
-      while ((current_state = trav.get_next_state(bnd, surf_pos)) != NULL)
+      while ((current_state = trav.get_next_state()) != NULL)
       {
         // One state is a collection of (virtual) elements sharing
         // the same physical location on (possibly) different meshes.
@@ -1174,6 +1173,8 @@ namespace Hermes
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
       {
+        if (current_al[form->i]->dof[i] < 0)
+          continue;
         current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
         
         // Is this necessary, i.e. is there a coefficient smaller than 1e-12?

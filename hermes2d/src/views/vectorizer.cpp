@@ -418,7 +418,7 @@ namespace Hermes
 
         trav.begin(2, meshes, fns);
         Traverse::State* current_state;
-        while ((current_state = trav.get_next_state(NULL, NULL)) != NULL)
+        while ((current_state = trav.get_next_state()) != NULL)
         {
           xsln->set_quad_order(0, xitem);
           ysln->set_quad_order(0, yitem);
@@ -436,7 +436,7 @@ namespace Hermes
         
         trav.begin(2, meshes, fns);
         // process all elements of the mesh
-        while ((current_state = trav.get_next_state(NULL, NULL)) != NULL)
+        while ((current_state = trav.get_next_state()) != NULL)
         {
           xsln->set_quad_order(0, xitem);
           ysln->set_quad_order(0, yitem);

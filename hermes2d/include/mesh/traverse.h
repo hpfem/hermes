@@ -73,7 +73,7 @@ namespace Hermes
         Element** e;
         Rect  cr;
         Rect* er;
-        bool bnd[3];
+        bool bnd[4];
         uint64_t lo[3], hi[3];
         int* trans;
         Element* rep;
@@ -82,7 +82,7 @@ namespace Hermes
       void begin(int n, Mesh** meshes, Transformable** fn = NULL);
       void finish();
 
-      State* get_next_state(bool* bnd, SurfPos* surf_pos);
+      State* get_next_state();
       inline Element*  get_base() const { return base; }
 
       UniData** construct_union_mesh(Mesh* unimesh);
@@ -104,7 +104,7 @@ namespace Hermes
       int udsize;
 
       State* push_state();
-      void set_boundary_info(State* s, bool* bnd, SurfPos* surf_pos);
+      void set_boundary_info(State* s);
       void union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni);
       uint64_t init_idx(Rect* cr, Rect* er);
 

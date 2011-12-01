@@ -167,8 +167,23 @@ namespace Hermes
 
       // Begin the multimesh traversal.
       trav.begin(this->num, &(stage.meshes.front()), &(stage.fns.front()));
-      while ((ee = trav.get_next_state(bnd, surf_pos)) != NULL)
+      while ((ee = trav.get_next_state()) != NULL)
       {
+        bnd[0] = ee->bnd[0];
+        bnd[1] = ee->bnd[1];
+        bnd[2] = ee->bnd[2];
+        bnd[3] = ee->bnd[3];
+
+        surf_pos[0].marker = ee->rep->en[0]->marker;
+        surf_pos[1].marker = ee->rep->en[1]->marker;
+        surf_pos[2].marker = ee->rep->en[2]->marker;
+        surf_pos[3].marker = ee->rep->en[3]->marker;
+
+        surf_pos[0].surf_num = 0;
+        surf_pos[1].surf_num = 1;
+        surf_pos[2].surf_num = 2;
+        surf_pos[3].surf_num = 3;
+
         // Go through all solution components.
         for (int i = 0; i < this->num; i++)
         {

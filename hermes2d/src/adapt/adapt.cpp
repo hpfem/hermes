@@ -934,7 +934,7 @@ namespace Hermes
       // Calculate error.
       Traverse::State * ee;
       trav.begin(2 * num, meshes, tr);
-      while ((ee = trav.get_next_state(NULL, NULL)) != NULL)
+      while ((ee = trav.get_next_state()) != NULL)
       {
         for (i = 0; i < num; i++)
         {
