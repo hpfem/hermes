@@ -114,7 +114,7 @@ namespace Hermes
       bool form_to_be_assembled(VectorFormVol<Scalar>* form);
       bool form_to_be_assembled(VectorFormSurf<Scalar>* form);
 
-      // If a block scaling table is provided, return scaling coefficient.
+      // Return scaling coefficient.
       double block_scaling_coeff(MatrixForm<Scalar>* form);
       
       /// The current stage contains DG forms.
@@ -149,25 +149,26 @@ namespace Hermes
       void create_sparse_structure();
 
       /// Initializes psss.
-      void initialize_psss();
+      void init_psss();
 
       /// Initializes refmaps.
-      void initialize_refmaps();
+      void init_refmaps();
       
       /// Initializes u_ext.
-      void initialize_u_ext(Scalar* coeff_vec);
+      void init_u_ext(Scalar* coeff_vec);
       
       /// De-initializes u_ext.
-      void deinitialize_u_ext();
+      void deinit_u_ext();
 
       /// De-initializes psss.
-      void deinitialize_psss();
+      void deinit_psss();
 
       /// De-initializes refmaps.
-      void deinitialize_refmaps();
+      void deinit_refmaps();
 
       /// Initialize a state, returns a non-NULL Element.
-      Element* init_state(Hermes::vector<AsmList<Scalar>*>& al);
+      Element* init_state();
+      void init_surface_state();
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
       inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
@@ -177,63 +178,57 @@ namespace Hermes
 
       /// Assemble one state.
       void assemble_one_state();
-
-      void calc_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
-      void calc_ext(Form<Scalar> *form, Func<Scalar>** prev, ExtData<Scalar>* ext, int order);
-
+      
+      /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o);
 
 
 
-      /// NEW STUFF FOR INTEGRATION OF WHOLE LOCAL VOLUME MATRIX
+      /// Matrix volumetric forms - calculate the integration order.
+      int calc_order_matrix_form(MatrixForm<Scalar>* mfv);
 
-      /// Assemble the local volume matrix
-      void assemble_local_volume_matrix(Scalar** local_stiffness_matrix, MatrixFormVol<Scalar>* mfv, Hermes::vector<PrecalcShapeset*>& spss,
-        Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        Hermes::vector<AsmList<Scalar>*>& al, int m, int n, double block_scaling_coeff);
-
-      Scalar eval_form_whole(int order, MatrixFormVol<Scalar> *mfv,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv,
-        Func<Scalar>** prev, Func<double>* u, Func<double>* v, ExtData<Scalar>* ext);
-
-      int calc_order_matrix_form_vol_whole(MatrixFormVol<Scalar> *mfv, Hermes::vector<PrecalcShapeset*>& spss,
-        Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        Hermes::vector<AsmList<Scalar>*>& al, int m, int n);
+      /// Matrix volumetric forms - assemble the form.
+      void assemble_matrix_form(MatrixForm<Scalar>* form, int order);
 
 
+      /// Vector volumetric forms - calculate the integration order.
+      int calc_order_vector_form(VectorForm<Scalar>* mfv);
+
+      /// Vector volumetric forms - assemble the form.
+      void assemble_vector_form(VectorForm<Scalar>* form, int order);
 
 
-      ////////////////////////////
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Init geometry, jacobian * weights, return the number of integration points.
+      int init_geometry_points(RefMap* reference_mapping, int order);
+      int init_surface_geometry_points(RefMap* reference_mapping, int& order);
+      
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Calculates orders for external functions.
+      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Cleans up after init_ext_orders.
+      void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
 
-      /// Assemble volume matrix forms.
-      void assemble_volume_matrix_forms(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al);
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Calculates external functions.
+      void init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order);
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Cleans up after init_ext.
+      void deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext);
 
-      /// Assemble volume vector forms.
-      void assemble_volume_vector_forms(Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al);
+      
+      /// Init function. Common code for the constructors.
+      void init();
 
-      /// Assemble surface and DG forms.
-      void assemble_surface_integrals(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base, Element* rep_element);
+      DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
-      /// Assemble surface matrix forms.
-      void assemble_surface_matrix_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base);
 
-      /// Assemble surface vector forms.
-      void assemble_surface_vector_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base);
+
+      /// Calculates integration order for DG matrix forms.
+      int calc_order_dg_matrix_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
+        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
+        bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
 
       /// Assemble DG forms.
       void assemble_DG_forms(Stage<Scalar>& stage,
@@ -265,85 +260,31 @@ namespace Hermes
         int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
         int isurf, Element** e, Element* trav_base, Element* rep_element);
 
-      /// Init function. Common code for the constructors.
-      void init();
-
-      DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
-
-      /// Main function for the evaluation of volumetric matrix forms.
-      /// Evaluates weak form on element given by the RefMap.
-      /// Calls the function calc_order_matrix_form_vol to get the integration order.
-      Scalar eval_form(MatrixFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv);
-
-      /// Calculates the necessary integration order to use for a particular volumetric matrix form.
-      int calc_order_matrix_form_vol(MatrixFormVol<Scalar>* mfv);
-
-      /// Elementary function used in eval_form() in adaptive mode for volumetric matrix forms.
-      Scalar eval_form_value(int order, MatrixFormVol<Scalar>* mfv,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv,
-        RefMap* ru, RefMap* rv);
-
       /// Vector<Scalar> volume forms. The functions provide the same functionality as the
       /// parallel ones for matrix volume forms.
-      Scalar eval_form(VectorFormVol<Scalar>* vfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv);
       void eval_form(MultiComponentVectorFormVol<Scalar>* vfv, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, Hermes::vector<Scalar>& result);
 
-      int calc_order_vector_form_vol(VectorFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv);
-      int calc_order_vector_form_vol(MultiComponentVectorFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv);
-
-      Scalar eval_form_value(int order, VectorFormVol<Scalar>* vfv,
-        Hermes::vector<Solution<Scalar>*> u_ext,
+      int calc_order_volume_vector_form(MultiComponentVectorFormVol<Scalar>* mfv, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv);
 
       /// Matrix<Scalar> surface forms. The functions provide the same functionality as the
       /// parallel ones for matrix volume forms.
-      Scalar eval_form(MatrixFormSurf<Scalar>* mfs,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos);
       void eval_form(MultiComponentMatrixFormSurf<Scalar>* mfs,
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result);
 
-      int calc_order_matrix_form_surf(MatrixFormSurf<Scalar>* mfs,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv,
-        RefMap* ru, RefMap* rv, SurfPos* surf_pos);
-      int calc_order_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>* mfs,
+      int calc_order_surface_matrix_form(MultiComponentMatrixFormSurf<Scalar>* mfs,
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv,
         RefMap* ru, RefMap* rv, SurfPos* surf_pos);
 
-      Scalar eval_form_value(int order, MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, RefMap* rv, SurfPos* surf_pos);
-
-      /// Vector<Scalar> surface forms. The functions provide the same functionality as the
-      /// parallel ones for matrix volume forms.
-      Scalar eval_form(VectorFormSurf<Scalar>* vfs,
-        Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
       void eval_form(MultiComponentVectorFormSurf<Scalar>* vfs,
         Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos, Hermes::vector<Scalar>& result);
 
-      int calc_order_vector_form_surf(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
+      int calc_order_surface_vector_form(MultiComponentVectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
-      int calc_order_vector_form_surf(MultiComponentVectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
-
-      Scalar eval_form_value(int order, VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv, SurfPos* surf_pos);
-
-      /// Calculates integration order for DG matrix forms.
-      int calc_order_dg_matrix_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
-        bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
-
 
       /// Evaluates DG matrix forms on an edge between elements identified by ru_actual, rv.
       Scalar eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
@@ -456,6 +397,7 @@ namespace Hermes
 
       /// Instance of the class Geom used in the calculation of integration order.
       Geom<Hermes::Ord> geom_ord;
+
       /// Fake weight used in the calculation of integration order.
       static double fake_wt;
 
@@ -475,10 +417,10 @@ namespace Hermes
       PrecalcShapeset** pss;
 
       /// Geometry cache.
-      Geom<double>* cache_e[g_max_quad + 1 + 4* g_max_quad + 4];
+      Geom<double>* geometry_cache[g_max_quad + 1 + 4* g_max_quad + 4];
 
       /// Jacobian * weights cache.
-      double* cache_jwt[g_max_quad + 1 + 4* g_max_quad + 4];
+      double* jacobian_x_weights_cache[g_max_quad + 1 + 4* g_max_quad + 4];
 
       /// There is a matrix form set on DG_INNER_EDGE area or not.
       bool DG_matrix_forms_present;
@@ -504,6 +446,11 @@ namespace Hermes
       Hermes::vector<PrecalcShapeset *> current_spss;
       Hermes::vector<Solution<Scalar>*> current_u_ext;
       Hermes::vector<AsmList<Scalar>*> current_al;
+
+      Quad2D* quad;
+      
+      void set_quad_2d(Quad2D* quad);
+
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches

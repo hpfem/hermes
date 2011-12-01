@@ -122,7 +122,9 @@ namespace Hermes
       Geom<Hermes::Ord> *tmp = init_geom_ord();
       geom_ord = *tmp;
       delete tmp;
+      quad = &g_quad_2d_std;
 
+      current_al.resize(wf->get_neq());
     }
 
     template<typename Scalar>
@@ -332,12 +334,45 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorForm<Scalar>* form)
     {
+      if (current_state->e[form->i] == NULL)
+        return false;
+      if (fabs(form->scaling_factor) < 1e-12)
+        return false;
+
       return true;
     }
     
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorFormVol<Scalar>* form)
     {
+      if(!form_to_be_assembled((VectorForm<Scalar>*)form))
+        return false;
+      
+      // Assemble this form only if one of its areas is HERMES_ANY
+      // of if the element marker coincides with one of the form's areas.
+      bool assemble_this_form = false;
+      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
+      {
+        if(form->areas[ss] == HERMES_ANY)
+        {
+          assemble_this_form = true;
+          break;
+        }
+        else
+        {
+          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).valid;
+          if(marker_on_space_m)
+            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
+
+          if (marker_on_space_m)
+          {
+            assemble_this_form = true;
+            break;
+          }
+        }
+      }
+      if (!assemble_this_form)
+        return false;
       return true;
     }
     
@@ -584,7 +619,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::initialize_psss()
+    void DiscreteProblem<Scalar>::init_psss()
     {
       _F_;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
@@ -595,7 +630,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::initialize_refmaps()
+    void DiscreteProblem<Scalar>::init_refmaps()
     {
       _F_;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
@@ -606,7 +641,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::initialize_u_ext(Scalar* coeff_vec)
+    void DiscreteProblem<Scalar>::init_u_ext(Scalar* coeff_vec)
     {
       _F_;
       int first_dof = 0;
@@ -621,27 +656,30 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::deinitialize_psss()
+    void DiscreteProblem<Scalar>::deinit_psss()
     {
       _F_;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         delete current_spss[i];
+      current_spss.clear();
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::deinitialize_refmaps()
+    void DiscreteProblem<Scalar>::deinit_refmaps()
     {
       _F_;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         delete current_refmap[i];
+      current_refmap.clear();
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::deinitialize_u_ext()
+    void DiscreteProblem<Scalar>::deinit_u_ext()
     {
       _F_;
       for(typename Hermes::vector<Solution<Scalar>*>::iterator it = current_u_ext.begin(); it != current_u_ext.end(); it++)
         delete *it;
+      current_u_ext.clear();
     }
 
     template<typename Scalar>
@@ -671,9 +709,9 @@ namespace Hermes
       reset_warn_order();
 
       // Initialize slave pss's, refmaps, u_ext.
-      initialize_psss();
-      initialize_refmaps();
-      initialize_u_ext(coeff_vec);
+      init_psss();
+      init_refmaps();
+      init_u_ext(coeff_vec);
 
       // Initialize matrix buffer.
       matrix_buffer = NULL;
@@ -713,9 +751,9 @@ namespace Hermes
       matrix_buffer = NULL;
       matrix_buffer_dim = 0;
 
-      deinitialize_psss();
-      deinitialize_refmaps();
-      deinitialize_u_ext();
+      deinit_psss();
+      deinit_refmaps();
+      deinit_u_ext();
     }
 
     template<typename Scalar>
@@ -764,7 +802,6 @@ namespace Hermes
         }
       }
     }
-
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_one_stage()
@@ -816,7 +853,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Element* DiscreteProblem<Scalar>::init_state(Hermes::vector<AsmList<Scalar>*>& al)
+    Element* DiscreteProblem<Scalar>::init_state()
     {
       _F_;
       // Find a non-NULL e[i].
@@ -837,23 +874,40 @@ namespace Hermes
       for (unsigned int i = 0; i < current_stage->idx.size(); i++)
       {
         int j = current_stage->idx[i];
+        if (current_state->e[j] == NULL)
+          continue;
 
         // \todo do not obtain again if the element was not changed.
-        spaces[j]->get_element_assembly_list(current_state->e[i], al[j], spaces_first_dofs[j]);
+        spaces[j]->get_element_assembly_list(current_state->e[j], current_al[j], spaces_first_dofs[j]);
 
         // Set active element to all test functions.
-        current_spss[j]->set_active_element(current_state->e[i]);
+        current_spss[j]->set_active_element(current_state->e[j]);
         current_spss[j]->set_master_transform();
 
         // Set active element to reference mappings.
-        current_refmap[j]->set_active_element(current_state->e[i]);
+        current_refmap[j]->set_active_element(current_state->e[j]);
         current_refmap[j]->force_transform(pss[j]->get_transform(), pss[j]->get_ctm());
 
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
         if(DG_matrix_forms_present || DG_vector_forms_present)
-          current_state->e[i]->visited = true;
+          current_state->e[j]->visited = true;
       }
       return e0;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::init_surface_state()
+    {
+      _F_;
+      // Obtain the list of shape functions which are nonzero on this surface.
+      for (unsigned int i = 0; i < current_stage->idx.size(); i++)
+      {
+        int j = current_stage->idx[i];
+        if (current_state->e[j] == NULL)
+          continue;
+        
+        spaces[j]->get_boundary_assembly_list(current_state->e[j], current_isurf, current_al[j], spaces_first_dofs[j]);
+      }
     }
 
     template<typename Scalar>
@@ -863,52 +917,73 @@ namespace Hermes
 
       // Assembly list vector.
       for(unsigned int i = 0; i < wf->get_neq(); i++)
-        current_al.push_back(new AsmList<Scalar>);
-
-      // Natural boundary condition flag.
-      /*
-      Hermes::vector<bool> nat;
-      for(unsigned int i = 0; i < wf->get_neq(); i++)
-        nat.push_back(false);
-      */
+        current_al[i] = new AsmList<Scalar>;
         
       // Initialize the state, return a non-NULL element; if no such element found, return.
-      Element* rep_element = init_state(current_al);
+      Element* rep_element = init_state();
 
       init_cache();
 
-      for(Hermes::vector<MatrixFormVol<Scalar> *>::iterator it = current_stage->mfvol.begin(); it != current_stage->mfvol.end(); it++)
-      {
-        if(!form_to_be_assembled(*it))
-          continue;
-        
-        int order = calc_order_matrix_form_vol(*it);
-        
-        //assemble_form(form)
-      }
-
-
-      // Assemble volume matrix forms.
-
       if (current_mat != NULL)
       {
-        assemble_volume_matrix_forms(current_spss, current_refmap, current_u_ext, rep_element->marker, al);
+        for(Hermes::vector<MatrixFormVol<Scalar> *>::iterator it = current_stage->mfvol.begin(); it != current_stage->mfvol.end(); it++)
+        {
+          if(!form_to_be_assembled(*it))
+            continue;
+        
+          int order = calc_order_matrix_form(*it);
+        
+          assemble_matrix_form(*it, order);
+        }
       }
-
-      // Assemble volume vector forms.
+    
       if (current_rhs != NULL)
       {
-        assemble_volume_vector_forms(current_spss, current_refmap, current_u_ext, rep_element->marker, al);
+        for(Hermes::vector<VectorFormVol<Scalar> *>::iterator it = current_stage->vfvol.begin(); it != current_stage->vfvol.end(); it++)
+        {
+          if(!form_to_be_assembled(*it))
+              continue;
+        
+          int order = calc_order_vector_form(*it);
+        
+          assemble_vector_form(*it, order);
+        }
       }
 
       // Assemble surface integrals now: loop through surfaces of the element.
-      for (int isurf = 0; isurf < rep_element->get_num_surf(); isurf++)
+      for (current_isurf = 0; current_isurf < rep_element->get_num_surf(); current_isurf++)
       {
-        /*
-        assemble_surface_integrals(stage, mat, rhs, force_diagonal_blocks,
-          block_weights, spss, refmap, u_ext,           surf_pos[isurf].marker, al, bnd[isurf], surf_pos[isurf],
-          nat, isurf, e, trav_base, rep_element);
-        */
+        init_state();
+
+        // \todo DG.
+        if(!this->current_state->bnd[current_isurf])
+          continue;
+
+        if (current_mat != NULL)
+        {
+          for(Hermes::vector<MatrixFormSurf<Scalar> *>::iterator it = current_stage->mfsurf.begin(); it != current_stage->mfsurf.end(); it++)
+          {
+            if(!form_to_be_assembled(*it))
+              continue;
+        
+            int order = calc_order_matrix_form(*it);
+        
+            assemble_matrix_form(*it, order);
+          }
+        }
+    
+        if (current_rhs != NULL)
+        {
+          for(Hermes::vector<VectorFormSurf<Scalar> *>::iterator it = current_stage->vfsurf.begin(); it != current_stage->vfsurf.end(); it++)
+          {
+            if(!form_to_be_assembled(*it))
+                continue;
+        
+            int order = calc_order_vector_form(*it);
+        
+            assemble_vector_form(*it, order);
+          }
+        }
       }
 
       // Delete assembly lists.
@@ -917,389 +992,364 @@ namespace Hermes
 
       delete_cache();
     }
+    
+
+
 
     template<typename Scalar>
-      calc_geometry(pss[form->i]->get_quad_2d(), order);
+    int DiscreteProblem<Scalar>::calc_order_matrix_form(MatrixForm<Scalar> *form)
+    {
+      _F_;
+
+      int order;
+
+      if(is_fvm)
+        order = current_refmap[form->i]->get_inv_ref_order();
+      else
+      {
+        // order of solutions from the previous Newton iteration etc..
+        Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
+        ExtData<Hermes::Ord> ext_ord;
+        init_ext_orders(form, u_ext_ord, &ext_ord);
+
+        // Order of shape functions.
+        Func<Hermes::Ord>* ou = get_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
+        Func<Hermes::Ord>* ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+
+        // Total order of the vector form.
+        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, &ext_ord);
+
+        adjust_order_to_refmaps(form, order, &o);
+
+        // Cleanup.
+        deinit_ext_orders(form, u_ext_ord, &ext_ord);
+      }
+      return order;
+    }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_volume_matrix_form(int order, MatrixFormVol<Scalar>* form)
+    void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order)
     {
       double block_scaling_coef = this->block_scaling_coeff(form);
 
       bool tra = (form->i != form->j) && (form->sym != 0);
       bool sym = (form->i == form->j) && (form->sym == 1);
 
-      // Assemble the local stiffness matrix for the form mfv.
-      Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[form->i]->cnt, al[form->j]->cnt));
+      // Assemble the local stiffness matrix for the form form.
+      Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(current_al[form->i]->cnt, current_al[form->j]->cnt));
 
-      Func<Hermes::Ord>** u_ext = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
-      ExtData<Hermes::Ord>* ext;
-      calc_ext(form, u_ext, ext);
+      // Init external functions.
+      Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
+      ExtData<Scalar> ext;
+      init_ext(form, u_ext, &ext, order);
 
-      calc_geometry(pss[form->i]->get_quad_2d(), order);
+      // Init geometry.
+      int n_quadrature_points;
+      if(static_cast<MatrixFormVol<Scalar>*>(form))
+        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
+      else
+        n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
 
-      // Hermes::Order of shape functions.
-      Func<Scalar>* u = get_fn(order);
-      Func<Scalar>* v = get_fn(order);
-
+      // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
       {
         if (!tra && current_al[form->i]->dof[i] < 0) 
           continue;
-        spss[m]->set_active_shape(current_al[form->i]->idx[i]);
+        current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
         if (!sym)
+        {
           for (unsigned int j = 0; j < current_al[form->j]->cnt; j++)
           {
-            this->pss[n]->set_active_shape(current_al[form->j]->idx[j]);
+            this->pss[form->j]->set_active_shape(current_al[form->j]->idx[j]);
             if (current_al[form->j]->dof[j] >= 0)
+            {
               // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if (std::abs(current_al[form->i]->coef[i]) > 1e-12 && std::abs(current_al[form->j]->coef[j]) > 1e-12)
-                local_stiffness_matrix[i][j] = block_scaling_coeff * 
-                eval_form(order, mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m], prev, u_list[j], v_list[i], ext) * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
-          }
-          // Symmetric block.
-          else
-            for (unsigned int j = 0; j < current_al[form->j]->cnt; j++)
-            {
-              if (j < i && current_al[form->j]->dof[j] >= 0)
+              if (std::abs(current_al[form->i]->coef[i]) < 1e-12 || std::abs(current_al[form->j]->coef[j]) < 1e-12)
                 continue;
-              this->pss[n]->set_active_shape(current_al[form->j]->idx[j]);
-              if (current_al[form->j]->dof[j] >= 0)
-              {
-                Scalar val = 0;
-                // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-                if (std::abs(current_al[form->i]->coef[i]) > 1e-12 && std::abs(current_al[form->j]->coef[j]) > 1e-12)
-                {
-                  val = block_scaling_coeff * 
-                  eval_form(order, mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m], prev, u_list[j], v_list[i], ext) * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
-                }
-                local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
-              }
+              Func<double>* u = get_fn(this->pss[form->j], this->current_refmap[form->j], order);
+              Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
+
+              // Add the previous time level solution previously inserted at the back of ext.
+              if(RungeKutta)
+                for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+                  u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+
+              if(static_cast<MatrixFormVol<Scalar>*>(form))
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
+              else
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
             }
+          }
         }
-
-        for(int i = 0; i < prev_size; i++)
-            if (prev[i] != NULL)
-            {
-                prev[i]->free_fn();
-                delete prev[i];
-            }
-        delete [] prev;
-
-        if (ext != NULL)
+        // Symmetric block.
+        else
         {
-            ext->free();
-            delete ext;
+          for (unsigned int j = 0; j < current_al[form->j]->cnt; j++)
+          {
+            if (j < i && current_al[form->j]->dof[j] >= 0)
+              continue;
+            this->pss[form->j]->set_active_shape(current_al[form->j]->idx[j]);
+            if (current_al[form->j]->dof[j] >= 0)
+            {
+              Scalar val = 0;
+              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+              if (std::abs(current_al[form->i]->coef[i]) < 1e-12 || std::abs(current_al[form->j]->coef[j]) < 1e-12)
+                continue;
+
+              Func<double>* u = get_fn(this->pss[form->j], this->current_refmap[form->j], order);
+              Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
+
+              // Add the previous time level solution previously inserted at the back of ext.
+              if(RungeKutta)
+                for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+                  u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+
+              if(static_cast<MatrixFormVol<Scalar>*>(form))
+                val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
+              else
+                // Surface forms are always unsymmetric.
+                assert(NULL);
+
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+            }
+          }
         }
-
-
-
-
+      }
 
       // Insert the local stiffness matrix into the global one.
-      current_mat->add(al[form->i]->cnt, al[form->j]->cnt, local_stiffness_matrix, al[form->i]->dof, al[form->j]->dof);
+      current_mat->add(current_al[form->i]->cnt, current_al[form->j]->cnt, local_stiffness_matrix, current_al[form->i]->dof, current_al[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
       if (tra)
       {
         if (form->sym < 0)
-          chsgn(local_stiffness_matrix, al[form->i]->cnt, al[form->j]->cnt);
-        transpose(local_stiffness_matrix, al[form->i]->cnt, al[form->j]->cnt);
-        current_mat->add(al[form->j]->cnt, al[form->i]->cnt, local_stiffness_matrix, al[form->j]->dof, al[form->i]->dof);
+          chsgn(local_stiffness_matrix, current_al[form->i]->cnt, current_al[form->j]->cnt);
+        transpose(local_stiffness_matrix, current_al[form->i]->cnt, current_al[form->j]->cnt);
+        current_mat->add(current_al[form->j]->cnt, current_al[form->i]->cnt, local_stiffness_matrix, current_al[form->j]->dof, current_al[form->i]->dof);
       }
+
+      // Cleanup.
+      deinit_ext(form, u_ext, &ext);
+    }
+    
+    
+    template<typename Scalar>
+    int DiscreteProblem<Scalar>::calc_order_vector_form(VectorForm<Scalar> *form)
+    {
+      _F_;
+
+      int order;
+
+      if(is_fvm)
+        order = current_refmap[form->i]->get_inv_ref_order();
+      else
+      {
+        // order of solutions from the previous Newton iteration etc..
+        Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
+        ExtData<Hermes::Ord> ext_ord;
+        init_ext_orders(form, u_ext_ord, &ext_ord);
+
+        // Order of shape functions.
+        Func<Hermes::Ord>* ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+
+        // Total order of the vector form.
+        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
+
+        adjust_order_to_refmaps(form, order, &o);
+
+        // Cleanup.
+        deinit_ext_orders(form, u_ext_ord, &ext_ord);
+      }
+      return order;
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_local_volume_matrix(Scalar** local_stiffness_matrix,
-      MatrixFormVol<Scalar>* mfv, Hermes::vector<PrecalcShapeset*>& spss,
-      Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-      Hermes::vector<AsmList<Scalar>*>& al, int m, int n, double block_scaling_coeff)
+    void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order)
     {
+      // Init external functions.
+      Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
+      ExtData<Scalar> ext;
+      init_ext(form, u_ext, &ext, order);
 
-        for (unsigned int i = 0; i < al[m]->cnt; i++)
-        {
-          if (!tra && al[m]->dof[i] < 0) continue;
-          spss[m]->set_active_shape(al[m]->idx[i]);
-          // Unsymmetric block.
-          if (!sym)
-          {
-            for (unsigned int j = 0; j < al[n]->cnt; j++)
-            {
-              this->pss[n]->set_active_shape(al[n]->idx[j]);
-              if (al[n]->dof[j] >= 0)
-              {
-                  Scalar val = 0;
-                  // Numerical integration performed only if all
-                  // coefficients multiplying the form are nonzero.
-                  if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12)
-                  {
-                      if(u_list[j] == NULL)
-                          u_list[j] = get_fn(this->pss[n], refmap[n], order);
-                      if(v_list[i] == NULL)
-                          v_list[i] = this->get_fn(spss[m], refmap[m], order);
-                      val = block_scaling_coeff * eval_form_whole(order, mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m],
-                         prev, u_list[j], v_list[i], ext) * al[n]->coef[j] * al[m]->coef[i];
-                  }
-                  local_stiffness_matrix[i][j] = val;
-              }
-            }
-          }
-          // Symmetric block.
-          else
-          {
-            for (unsigned int j = 0; j < al[n]->cnt; j++)
-            {
-              if (j < i && al[n]->dof[j] >= 0)
-                continue;
-              this->pss[n]->set_active_shape(al[n]->idx[j]);
-              if (al[n]->dof[j] >= 0)
-              {
-                  Scalar val = 0;
-                  // Numerical integration performed only if all coefficients
-                  // multiplying the form are nonzero.
-                  if (std::abs(al[m]->coef[i]) > 1e-12 && std::abs(al[n]->coef[j]) > 1e-12){
-                      if(u_list[j] == NULL)
-                          u_list[j] = get_fn(this->pss[n], refmap[n], order);
-                      if(v_list[i] == NULL)
-                          v_list[i] = this->get_fn(spss[m], refmap[m], order);
-                      val = block_scaling_coeff * eval_form_whole(order, mfv, u_ext, this->pss[n], spss[m], refmap[n], refmap[m],
-                         prev, u_list[j], v_list[i], ext) * al[n]->coef[j] * al[m]->coef[i];
-                  }
-                  local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+      // Init geometry.
+      int n_quadrature_points;
+      if(static_cast<VectorFormVol<Scalar>*>(form))
+        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
+      else
+        n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
 
-              }
-            }
-          }
-        }
+      // Actual form-specific calculation.
+      for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
+      {
+        current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
+        
+        // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+        if (std::abs(current_al[form->i]->coef[i]) < 1e-12)
+          continue;
 
-        for (unsigned int i = 0; i < al[m]->cnt; i++)
-            if(u_list[i] == NULL)
-                delete u_list[i];
-        for (unsigned int j = 0; j < al[n]->cnt; j++)
-            if(v_list[j] == NULL)
-                delete v_list[j];
+        Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
 
-        for(int i = 0; i < prev_size; i++)
-            if (prev[i] != NULL)
-            {
-                prev[i]->free_fn();
-                delete prev[i];
-            }
-        delete [] prev;
+        // Add the previous time level solution previously inserted at the back of ext.
+        if(RungeKutta)
+          for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+            u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+        
+        if(static_cast<VectorFormVol<Scalar>*>(form))
+          current_rhs->add(current_al[form->i]->dof[i], form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
+        else
+          current_rhs->add(current_al[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
+      }
 
-        if (ext != NULL)
-        {
-            ext->free();
-            delete ext;
-        }
+      // Cleanup.
+      deinit_ext(form, u_ext, &ext);
     }
-
+    
 
     template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_whole(int order, MatrixFormVol<Scalar> *mfv,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv,
-      Func<Scalar>** prev, Func<double>* u, Func<double>* v, ExtData<Scalar>* ext)
+    int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order)
     {
-      // Evaluate the form using numerical quadrature of order "order".
-      Quad2D* quad = fu->get_quad_2d();
       double3* pt = quad->get_points(order);
       int np = quad->get_num_points(order);
 
       // Init geometry and jacobian*weights.
-      if (this->cache_e[order] == NULL)
+      if (geometry_cache[order] == NULL)
       {
-        this->cache_e[order] = init_geom_vol(ru, order);
+        geometry_cache[order] = init_geom_vol(reference_mapping, order);
         double* jac = NULL;
-        if(!ru->is_jacobian_const())
-          jac = ru->get_jacobian(order);
-        this->cache_jwt[order] = new double[np];
+        if(!reference_mapping->is_jacobian_const())
+          jac = reference_mapping->get_jacobian(order);
+        jacobian_x_weights_cache[order] = new double[np];
         for(int i = 0; i < np; i++)
         {
-          if(ru->is_jacobian_const())
-            this->cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
+          if(reference_mapping->is_jacobian_const())
+            jacobian_x_weights_cache[order][i] = pt[i][2] * reference_mapping->get_const_jacobian();
           else
-            this->cache_jwt[order][i] = pt[i][2] * jac[i];
+            jacobian_x_weights_cache[order][i] = pt[i][2] * jac[i];
         }
       }
-      Geom<double>* e = this->cache_e[order];
-      double* jwt = this->cache_jwt[order];
+      Geom<double>* e = geometry_cache[order];
+      double* jwt = jacobian_x_weights_cache[order];
+      return np;
+    }
 
+
+    template<typename Scalar>
+    int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order)
+    {
+      int eo = quad->get_edge_points(current_isurf, order);
+      double3* pt = quad->get_points(eo);
+      int np = quad->get_num_points(eo);
+
+      // Init geometry and jacobian*weights.
+      if (geometry_cache[eo] == NULL)
+      {
+        geometry_cache[eo] = init_geom_surf(reference_mapping, current_isurf, current_state->rep->marker, eo);
+        double3* tan = reference_mapping->get_tangent(current_isurf, eo);
+        jacobian_x_weights_cache[eo] = new double[np];
+        for(int i = 0; i < np; i++)
+          jacobian_x_weights_cache[eo][i] = pt[i][2] * tan[i][2];
+      }
+      Geom<double>* e = geometry_cache[eo];
+      double* jwt = jacobian_x_weights_cache[eo];
+
+      order = eo;
+      return np;
+    }
+    
+     
+    
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
+    {
+      _F_;
+      int u_ext_length = current_u_ext.size();      // Number of external solutions.
+      int u_ext_offset = form->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
+      // and there will be only u_ext_length - u_ext_offset of them.
+
+      // Hermes::Order of solutions from the previous Newton iteration.
+      if (current_u_ext != Hermes::vector<Solution<Scalar>*>())
+        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+          if (current_u_ext[i + u_ext_offset] != NULL)
+            oi[i] = get_fn_ord(current_u_ext[i + u_ext_offset]->get_fn_order());
+          else
+            oi[i] = get_fn_ord(0);
+      else
+        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+          oi[i] = get_fn_ord(0);
+      
+      oext = init_ext_fns_ord(form->ext);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
+    {
+      _F_;
+      delete [] oi;
+
+      if (oext != NULL)
+        oext->free_ord();
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order)
+    {
+      _F_;
+      
       // Values of the previous Newton iteration, shape functions
       // and external functions in quadrature points.
-      int prev_size = u_ext.size() - mfv->u_ext_offset;
+      int prev_size = current_u_ext.size() - form->u_ext_offset;
       // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
       if(this->RungeKutta)
         prev_size = this->RK_original_spaces_count;
 
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(this->RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          prev[ext_i]->add(*ext->fn[mfv->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // The actual calculation takes place here.
-      Scalar res = mfv->value(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
-      return res;
-    }
-
-
-    template <typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_matrix_form_vol_whole(MatrixFormVol<Scalar> *mfv,
-      Hermes::vector<PrecalcShapeset*>& spss,
-      Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-      Hermes::vector<AsmList<Scalar>*>& al, int m, int n)
-    {
-        //this->profiling.order_calc_time.tick();
-
-        int order = 0;
-
-        if(this->is_fvm)
-            order = refmap[n]->get_inv_ref_order();
-        else
-        {
-            //find functions with maximal order
-            int max_ord_i = 0;
-            int max_ind_i = 0;
-            for (unsigned int i = 0; i < al[m]->cnt; i++){
-                spss[m]->set_active_shape(al[m]->idx[i]);
-                if(spss[m]->get_fn_order() > max_ord_i){
-                    max_ind_i = i;
-                    max_ord_i = spss[m]->get_fn_order();
-                }
-            }
-            int max_ord_j = 0;
-            int max_ind_j = 0;
-            for (unsigned int j = 0; j < al[n]->cnt; j++){
-                this->pss[n]->set_active_shape(al[n]->idx[j]);
-                if(this->pss[n]->get_fn_order() > max_ord_j){
-                    max_ind_j = j;
-                    max_ord_j = this->pss[n]->get_fn_order();
-                }
-            }
-
-            spss[m]->set_active_shape(al[m]->idx[max_ind_i]);
-            this->pss[n]->set_active_shape(al[n]->idx[max_ind_j]);
-            order = calc_order_matrix_form_vol(mfv);
-
-          // Increase due to reference map.
-          order += refmap[n]->get_inv_ref_order();
-          limit_order(order);
-        }
-
-        return order;
-    }
-
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_volume_vector_forms(
-      Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-      int marker, Hermes::vector<AsmList<Scalar>*>& al)
-    {
-      _F_;
-
-      if(current_rhs == NULL)
-        return;
-      for (unsigned int ww = 0; ww < current_stage->vfvol.size(); ww++)
-      {
-        VectorFormVol<Scalar>* vfv = current_stage->vfvol[ww];
-        int m = vfv->i;
-        if (fabs(vfv->scaling_factor) < 1e-12) continue;
-
-        // Assemble this form only if one of its areas is HERMES_ANY
-        // of if the element marker coincides with one of the form's areas.
-        bool assemble_this_form = false;
-        for (unsigned int ss = 0; ss < vfv->areas.size(); ss++)
-        {
-          if(vfv->areas[ss] == HERMES_ANY)
-          {
-            assemble_this_form = true;
-            break;
-          }
+      if (current_u_ext != Hermes::vector<Solution<Scalar>*>())
+        for (int i = 0; i < prev_size; i++)
+          if (current_u_ext[i + form->u_ext_offset] != NULL)
+            u_ext[i] = current_state->e[i] == NULL ? NULL : init_fn(current_u_ext[i + form->u_ext_offset], order);
           else
-          {
-            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfv->areas[ss]).valid;
-            if(marker_on_space_m)
-              marker_on_space_m = (this->spaces[m]->get_mesh()->get_element_markers_conversion().get_internal_marker(vfv->areas[ss]).marker == marker);
+            u_ext[i] = NULL;
+      else
+        for (int i = 0; i < prev_size; i++)
+          u_ext[i] = NULL;
 
-            if (marker_on_space_m)
-            {
-              assemble_this_form = true;
-              break;
-            }
-          }
-        }
-        if (assemble_this_form == false) continue;
-
-        Scalar* vector = NULL;
-        
-        for (unsigned int i = 0; i < al[m]->cnt; i++)
-        {
-          if (al[m]->dof[i] < 0) continue;
-
-          spss[m]->set_active_shape(al[m]->idx[i]);
-
-          // Numerical integration performed only if the coefficient
-          // multiplying the form is nonzero.
-          if (std::abs(al[m]->coef[i]) > 1e-12)
-            current_rhs->add(al[m]->dof[i], eval_form(vfv, u_ext, spss[m], refmap[m]) * al[m]->coef[i]);
-        }
-      }
+      ext = init_ext_fns(form->ext, current_refmap[form->i], order);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_surface_integrals(Stage<Scalar>& stage,
-      SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks,
-      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-      int marker, Hermes::vector<AsmList<Scalar>*>& al,
-      bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat, int isurf,
-      Element** e, Element* trav_base, Element* rep_element)
+    void DiscreteProblem<Scalar>::deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext)
     {
       _F_;
-      // Obtain the list of shape functions which are nonzero on this surface.
-      for (unsigned int i = 0; i < current_stage->idx.size(); i++)
+      
+      // Values of the previous Newton iteration, shape functions
+      // and external functions in quadrature points.
+      int prev_size = current_u_ext.size() - form->u_ext_offset;
+      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
+      if(this->RungeKutta)
+        prev_size = this->RK_original_spaces_count;
+      
+      for(int i = 0; i < prev_size; i++)
+      if (u_ext[i] != NULL)
       {
-        int j = current_stage->idx[i];
-        if (current_state->e[j] == NULL)
-          continue;
-        if(marker > 0)
-        {
-          nat[j] = true;
-          if(spaces[j]->get_essential_bcs() != NULL)
-          {
-            if(spaces[j]->get_mesh()->get_boundary_markers_conversion().get_user_marker(marker).valid)
-            {
-              if(spaces[j]->get_essential_bcs()->get_boundary_condition(spaces[j]->get_mesh()->get_boundary_markers_conversion().get_user_marker(marker).marker) != NULL)
-                nat[j] = false;
-            }
-            else
-              nat[j] = false;
-          }
-        }
-        spaces[j]->get_boundary_assembly_list(e[i], isurf, al[j], spaces_first_dofs[j]);
+        u_ext[i]->free_fn();
+        delete u_ext[i];
       }
 
-      // Assemble boundary edges:
-      if(bnd == 1)
-      {
-        assemble_surface_matrix_forms(stage, mat, rhs, force_diagonal_blocks, block_weights,
-          spss, refmap, u_ext,
-          marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
-        if (rhs != NULL)
-        {
-          assemble_surface_vector_forms(stage, mat, rhs, force_diagonal_blocks, block_weights,
-            spss, refmap, u_ext,
-            marker, al, bnd, surf_pos, nat, isurf, e, trav_base);
-        }
-      }
-      // Assemble inner edges (in discontinuous Galerkin discretization):
-      else
-        if(DG_vector_forms_present || DG_matrix_forms_present)
-          assemble_DG_forms(stage, mat, rhs, force_diagonal_blocks, block_weights,
-          spss, refmap, u_ext,
-          marker, al, bnd, surf_pos, nat, isurf, e, trav_base, rep_element);
+      delete [] u_ext;
+
+      if (ext != NULL)
+        ext->free();
     }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o)
+    {
+      // Increase due to reference map.
+      order = current_refmap[form->i]->get_inv_ref_order();
+      order += o->get_order();
+      limit_order(order);
+    }
+
+
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_DG_forms(Stage<Scalar>& stage,
@@ -1385,12 +1435,12 @@ namespace Hermes
 
                 // For every neighbor we want to delete the geometry caches and create new ones.
                 for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
-                  if (cache_e[i] != NULL)
+                  if (geometry_cache[i] != NULL)
                   {
-                    cache_e[i]->free();
-                    delete cache_e[i];
-                    cache_e[i] = NULL;
-                    delete [] cache_jwt[i];
+                    geometry_cache[i]->free();
+                    delete geometry_cache[i];
+                    geometry_cache[i] = NULL;
+                    delete [] jacobian_x_weights_cache[i];
                   }
 
                   assemble_DG_one_neighbor(processed, neighbor_i, stage, mat, rhs,
@@ -1870,123 +1920,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_surface_matrix_forms(Stage<Scalar>& stage,
-      SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks,
-      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-      int marker, Hermes::vector<AsmList<Scalar>*>& al,
-      bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-      int isurf, Element** e, Element* trav_base)
-    {
-      _F_;
-      for (unsigned int ww = 0; ww < current_stage->mfsurf.size(); ww++)
-      {
-        if(!form_to_be_assembled(current_stage->mfsurf[ww]))
-          continue;
-
-        double block_scaling_coef = this->block_scaling_coeff(form);
-
-        surf_pos.base = trav_base;
-
-        Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(al[current_stage->mfsurf[ww]->i]->cnt, al[current_stage->mfsurf[ww]->j]->cnt));
-        for (unsigned int i = 0; i < al[current_stage->mfsurf[ww]->i]->cnt; i++)
-        {
-          if (al[current_stage->mfsurf[ww]->i]->dof[i] < 0)
-            continue;
-          spss[current_stage->mfsurf[ww]->i]->set_active_shape(al[current_stage->mfsurf[ww]->i]->idx[i]);
-          for (unsigned int j = 0; j < al[current_stage->mfsurf[ww]->j]->cnt; j++)
-          {
-            pss[current_stage->mfsurf[ww]->j]->set_active_shape(al[current_stage->mfsurf[ww]->j]->idx[j]);
-            if (al[current_stage->mfsurf[ww]->j]->dof[j] >= 0)
-            {
-              if (mat != NULL)
-              {
-                Scalar val = 0;
-                // Numerical integration performed only if all coefficients multiplying the form are nonzero.
-                if (std::abs(al[current_stage->mfsurf[ww]->i]->coef[i]) > 1e-12 && std::abs(al[current_stage->mfsurf[ww]->j]->coef[j]) > 1e-12)
-                {
-                  val = block_scaling_coef * eval_form(current_stage->mfsurf[ww], u_ext, pss[current_stage->mfsurf[ww]->j], spss[current_stage->mfsurf[ww]->i], refmap[current_stage->mfsurf[ww]->j],
-                    refmap[current_stage->mfsurf[ww]->i], &surf_pos) * al[current_stage->mfsurf[ww]->j]->coef[j] * al[current_stage->mfsurf[ww]->i]->coef[i];
-                }
-                local_stiffness_matrix[i][j] = val;
-              }
-            }
-          }
-        }
-        if (mat != NULL)
-          current_mat->add(al[current_stage->mfsurf[ww]->i]->cnt, al[current_stage->mfsurf[ww]->j]->cnt, local_stiffness_matrix, al[current_stage->mfsurf[ww]->i]->dof, al[current_stage->mfsurf[ww]->j]->dof);
-      }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_surface_vector_forms(Stage<Scalar>& stage,
-      SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks,
-      Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss,
-      Hermes::vector<RefMap *>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-      int marker, Hermes::vector<AsmList<Scalar>*>& al,
-      bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-      int isurf, Element** e, Element* trav_base)
-    {
-      _F_;
-      if(rhs == NULL)
-        return;
-      for (unsigned int ww = 0; ww < current_stage->vfsurf.size(); ww++)
-      {
-        VectorFormSurf<Scalar>* vfs = current_stage->vfsurf[ww];
-        int m = vfs->i;
-        if (current_state->e[m] == NULL)
-          continue;
-        if (fabs(vfs->scaling_factor) < 1e-12)
-          continue;
-        if (vfs->areas[0] == H2D_DG_INNER_EDGE)
-          continue;
-
-        // Assemble this form only if one of its areas is HERMES_ANY or H2D_DG_BOUNDARY_EDGE,
-        // or if the element marker coincides with one of the form's areas.
-        bool assemble_this_form = false;
-        for (unsigned int ss = 0; ss < vfs->areas.size(); ss++)
-        {
-          if(vfs->areas[ss] == HERMES_ANY || vfs->areas[ss] == H2D_DG_BOUNDARY_EDGE)
-          {
-            assemble_this_form = true;
-            break;
-          }
-          else
-          {
-            bool marker_on_space_m = this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(vfs->areas[ss]).valid;
-            if(marker_on_space_m)
-              marker_on_space_m = (this->spaces[m]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(vfs->areas[ss]).marker == marker);
-
-            if (marker_on_space_m)
-            {
-              assemble_this_form = true;
-              break;
-            }
-          }
-        }
-        if (assemble_this_form == false)
-          continue;
-
-        if (vfs->areas[0] == HERMES_ANY && !nat[m])
-          continue;
-
-        surf_pos.base = trav_base;
-
-        for (unsigned int i = 0; i < al[m]->cnt; i++)
-        {
-          if (al[m]->dof[i] < 0)
-            continue;
-
-          spss[m]->set_active_shape(al[m]->idx[i]);
-
-          // Numerical integration performed only if the coefficient multiplying the form is nonzero.
-          if (std::abs(al[m]->coef[i]) > 1e-12)
-            rhs->add(al[m]->dof[i], eval_form(vfs, u_ext, spss[m], refmap[m], &surf_pos) * al[m]->coef[i]);
-        }
-      }
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(Stage<Scalar>& stage,
       SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks,
       Table* block_weights, Hermes::vector<PrecalcShapeset *>& spss,
@@ -2263,20 +2196,20 @@ namespace Hermes
       _F_;
       for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
       {
-        cache_e[i] = NULL;
-        cache_jwt[i] = NULL;
+        geometry_cache[i] = NULL;
+        jacobian_x_weights_cache[i] = NULL;
       }
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::delete_single_geom_cache(int order)
     {
-      if (cache_e[order] != NULL)
+      if (geometry_cache[order] != NULL)
       {
-        cache_e[order]->free();
-        delete cache_e[order];
-        cache_e[order] = NULL;
-        delete [] cache_jwt[order];
+        geometry_cache[order]->free();
+        delete geometry_cache[order];
+        geometry_cache[order] = NULL;
+        delete [] jacobian_x_weights_cache[order];
       }
     }
 
@@ -2286,10 +2219,10 @@ namespace Hermes
       _F_;
       for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
       {
-        if (cache_e[i] != NULL)
+        if (geometry_cache[i] != NULL)
         {
-          cache_e[i]->free(); delete cache_e[i];
-          delete [] cache_jwt[i];
+          geometry_cache[i]->free(); delete geometry_cache[i];
+          delete [] jacobian_x_weights_cache[i];
         }
       }
 
@@ -2319,212 +2252,13 @@ namespace Hermes
       return new DiscontinuousFunc<Hermes::Ord>(get_fn_ord(central_order), get_fn_ord(neighbor_order));
     }
 
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form(MatrixFormVol<Scalar> *mfv,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv,
-      RefMap *ru, RefMap *rv)
-    {
-      _F_;
-      Scalar result = 0;
-
-      // Determine the integration order by parsing the form.
-      int order = calc_order_matrix_form_vol(mfv);
-      // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_value(order, mfv, u_ext, fu, fv, ru, rv);
-
-      return result;
-    }
     
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::calc_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
+    void DiscreteProblem<Scalar>::set_quad_2d(Quad2D* quad)
     {
-      _F_;
-      int u_ext_length = current_u_ext.size();      // Number of external solutions.
-      int u_ext_offset = form->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-      // and there will be only u_ext_length - u_ext_offset of them.
-
-      // Hermes::Order of solutions from the previous Newton iteration.
-      if (current_u_ext != Hermes::vector<Solution<Scalar>*>())
-        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-          if (current_u_ext[i + u_ext_offset] != NULL)
-            oi[i] = get_fn_ord(current_u_ext[i + u_ext_offset]->get_fn_order());
-          else
-            oi[i] = get_fn_ord(0);
-      else
-        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-          oi[i] = get_fn_ord(0);
-      
-      oext = init_ext_fns_ord(form->ext);
+      this->quad = quad;
     }
 
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::calc_ext(Form<Scalar> *form, Func<Scalar>** prev, ExtData<Scalar>* ext, int order)
-    {
-      _F_;
-      
-      // Values of the previous Newton iteration, shape functions
-      // and external functions in quadrature points.
-      int prev_size = u_ext.size() - mfv->u_ext_offset;
-      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
-      if(this->RungeKutta)
-        prev_size = this->RK_original_spaces_count;
-
-      Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-      if (u_ext != Hermes::vector<Solution<Scalar>*>())
-        for (int i = 0; i < prev_size; i++)
-          if (u_ext[i + mfv->u_ext_offset] != NULL)
-            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
-          else
-            prev[i] = NULL;
-      else
-        for (int i = 0; i < prev_size; i++)
-          prev[i] = NULL;
-
-      ext = init_ext_fns(form->ext, current_refmap[form->i], order);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o)
-    {
-      // Increase due to reference map.
-      order = current_refmap[form->i]->get_inv_ref_order();
-      order += o->get_order();
-      limit_order(order);
-    }
-
-    template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_matrix_form_vol(MatrixFormVol<Scalar> *mfv)
-    {
-      _F_;
-
-      int order;
-
-      if(is_fvm)
-        order = current_refmap[mfv->j]->get_inv_ref_order();
-      else
-      {
-        // order of solutions from the previous Newton iteration etc..
-        Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - mfv->u_ext_offset];
-        ExtData<Hermes::Ord>* ext_ord;
-        calc_ext_orders(mfv, u_ext_ord, ext_ord);
-
-        // Hermes::Order of shape functions.
-        Func<Hermes::Ord>* ou = get_fn_ord(this->spaces[mfv->j]->get_element_order(current_state->e[mfv->j]->id));
-        Func<Hermes::Ord>* ov = get_fn_ord(this->spaces[mfv->i]->get_element_order(current_state->e[mfv->i]->id));
-
-        // Total order of the vector form.
-        Hermes::Ord o = mfv->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, ext_ord);
-
-        adjust_order_to_refmaps(mfv, order, &o);
-
-        // Cleanup.
-        delete [] u_ext_ord;
-
-        if (ext_ord != NULL)
-        {
-          ext_ord->free_ord();
-          delete ext_ord;
-        }
-      }
-      return order;
-    }
-    
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, MatrixFormVol<Scalar> *mfv,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv,
-      RefMap *ru, RefMap *rv)
-    {
-      // Evaluate the form using numerical quadrature of order "order".
-      Quad2D* quad = fu->get_quad_2d();
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
-
-      // Init geometry and jacobian*weights.
-      if (cache_e[order] == NULL)
-      {
-        cache_e[order] = init_geom_vol(ru, order);
-        double* jac = NULL;
-        if(!ru->is_jacobian_const())
-          jac = ru->get_jacobian(order);
-        cache_jwt[order] = new double[np];
-        for(int i = 0; i < np; i++)
-        {
-          if(ru->is_jacobian_const())
-            cache_jwt[order][i] = pt[i][2] * ru->get_const_jacobian();
-          else
-            cache_jwt[order][i] = pt[i][2] * jac[i];
-        }
-      }
-      Geom<double>* e = cache_e[order];
-      double* jwt = cache_jwt[order];
-
-      // Values of the previous Newton iteration, shape functions
-      // and external functions in quadrature points.
-      int prev_size = u_ext.size() - mfv->u_ext_offset;
-      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
-      if(RungeKutta)
-        prev_size = RK_original_spaces_count;
-
-      Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-      if (u_ext != Hermes::vector<Solution<Scalar>*>())
-        for (int i = 0; i < prev_size; i++)
-          if (u_ext[i + mfv->u_ext_offset] != NULL)
-            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + mfv->u_ext_offset], order);
-          else
-            prev[i] = NULL;
-      else
-        for (int i = 0; i < prev_size; i++)
-          prev[i] = NULL;
-
-      Func<double>* u = get_fn(fu, ru, order);
-      Func<double>* v = get_fn(fv, rv, order);
-
-      ExtData<Scalar>* ext = init_ext_fns(mfv->ext, rv, order);
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          prev[ext_i]->add(*ext->fn[mfv->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // The actual calculation takes place here.
-      Scalar res = mfv->value(np, jwt, prev, u, v, e, ext) * mfv->scaling_factor;
-
-      // Clean up.
-      for(int i = 0; i < prev_size; i++)
-        if (prev[i] != NULL)
-        {
-          prev[i]->free_fn();
-          delete prev[i];
-        }
-        delete [] prev;
-
-        if (ext != NULL)
-        {
-          ext->free();
-          delete ext;
-        }
-
-        return res;
-    }
-
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form(VectorFormVol<Scalar> *vfv,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv)
-    {
-      _F_;
-
-      Scalar result = 0;
-
-      // Determine the integration order by parsing the form.
-      int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
-      // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_value(order, vfv, u_ext, fv, rv);
-
-      return result;
-    }
     template<typename Scalar>
     void DiscreteProblem<Scalar>::eval_form(MultiComponentVectorFormVol<Scalar>*vfv,
       Hermes::vector<Solution<Scalar>*> u_ext,
@@ -2533,30 +2267,30 @@ namespace Hermes
       _F_;
 
       // Determine the integration order by parsing the form.
-      int order = calc_order_vector_form_vol(vfv, u_ext, fv, rv);
+      int order = calc_order_volume_vector_form(vfv, u_ext, fv, rv);
       // Evaluate the form using numerical quadrature of order "order".
       Quad2D* quad = fv->get_quad_2d();
       double3* pt = quad->get_points(order);
       int np = quad->get_num_points(order);
 
       // Init geometry and jacobian*weights.
-      if (cache_e[order] == NULL)
+      if (geometry_cache[order] == NULL)
       {
-        cache_e[order] = init_geom_vol(rv, order);
+        geometry_cache[order] = init_geom_vol(rv, order);
         double* jac = NULL;
         if(!rv->is_jacobian_const())
           jac = rv->get_jacobian(order);
-        cache_jwt[order] = new double[np];
+        jacobian_x_weights_cache[order] = new double[np];
         for(int i = 0; i < np; i++)
         {
           if(rv->is_jacobian_const())
-            cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
+            jacobian_x_weights_cache[order][i] = pt[i][2] * rv->get_const_jacobian();
           else
-            cache_jwt[order][i] = pt[i][2] * jac[i];
+            jacobian_x_weights_cache[order][i] = pt[i][2] * jac[i];
         }
       }
-      Geom<double>* e = cache_e[order];
-      double* jwt = cache_jwt[order];
+      Geom<double>* e = geometry_cache[order];
+      double* jwt = jacobian_x_weights_cache[order];
 
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - vfv->u_ext_offset;
@@ -2597,69 +2331,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_vector_form_vol(VectorFormVol<Scalar> *vfv,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv)
-    {
-      _F_;
-      // Hermes::Order that will be returned.
-      int order;
-
-      if(is_fvm)
-        order = rv->get_inv_ref_order();
-      else
-      {
-        int u_ext_length = u_ext.size();      // Number of external solutions.
-        int u_ext_offset = vfv->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-        // and there will be only u_ext_length - u_ext_offset of them.
-
-        // Increase for multi-valued shape functions.
-        int inc = (fv->get_num_components() == 2) ? 1 : 0;
-
-        // Hermes::Order of solutions from the previous Newton iteration.
-        Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[u_ext_length - u_ext_offset];
-        if (u_ext != Hermes::vector<Solution<Scalar>*>())
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            if (u_ext[i + u_ext_offset] != NULL)
-              oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_fn_order() + inc);
-            else
-              oi[i] = get_fn_ord(0);
-        else
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            oi[i] = get_fn_ord(0);
-
-        // Hermes::Order of the shape function.
-        Func<Hermes::Ord>* ov = get_fn_ord(fv->get_fn_order() + inc);
-
-        // Hermes::Order of additional external functions.
-        ExtData<Hermes::Ord>* fake_ext = init_ext_fns_ord(vfv->ext);
-
-        // Hermes::Order of geometric attributes (eg. for multiplication of
-        // a solution with coordinates, normals, etc.).
-        double fake_wt = 1.0;
-
-        // Total order of the vector form.
-        Hermes::Ord o = vfv->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
-
-        // Increase due to reference map.
-        order = rv->get_inv_ref_order();
-        order += o.get_order();
-        limit_order(order);
-
-        // Cleanup.
-        delete [] oi;
-
-        if (fake_ext != NULL)
-        {
-          fake_ext->free_ord();
-          delete fake_ext;
-        }
-      }
-
-      return order;
-    }
-    template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_vector_form_vol(MultiComponentVectorFormVol<Scalar>*vfv,
+    int DiscreteProblem<Scalar>::calc_order_volume_vector_form(MultiComponentVectorFormVol<Scalar>*vfv,
       Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fv, RefMap *rv)
     {
@@ -2721,99 +2393,6 @@ namespace Hermes
       return order;
     }
 
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, VectorFormVol<Scalar> *vfv,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv)
-    {
-      _F_;
-
-      // Evaluate the form using numerical quadrature of order "order".
-      Quad2D* quad = fv->get_quad_2d();
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
-
-      // Init geometry and jacobian*weights.
-      if (cache_e[order] == NULL)
-      {
-        cache_e[order] = init_geom_vol(rv, order);
-        double* jac = NULL;
-        if(!rv->is_jacobian_const())
-          jac = rv->get_jacobian(order);
-        cache_jwt[order] = new double[np];
-        for(int i = 0; i < np; i++)
-        {
-          if(rv->is_jacobian_const())
-            cache_jwt[order][i] = pt[i][2] * rv->get_const_jacobian();
-          else
-            cache_jwt[order][i] = pt[i][2] * jac[i];
-        }
-      }
-      Geom<double>* e = cache_e[order];
-      double* jwt = cache_jwt[order];
-
-      // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-      int prev_size = u_ext.size() - vfv->u_ext_offset;
-
-      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
-      if(RungeKutta)
-        prev_size = RK_original_spaces_count;
-
-      Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-      if (u_ext != Hermes::vector<Solution<Scalar>*>())
-        for (int i = 0; i < prev_size; i++)
-          if (u_ext[i + vfv->u_ext_offset] != NULL)
-            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + vfv->u_ext_offset], order);
-          else
-            prev[i] = NULL;
-      else
-        for (int i = 0; i < prev_size; i++)
-          prev[i] = NULL;
-
-      Func<double>* v = get_fn(fv, rv, order);
-      ExtData<Scalar>* ext = init_ext_fns(vfv->ext, rv, order);
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          prev[ext_i]->add(*ext->fn[vfv->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // The actual calculation takes place here.
-      Scalar res = vfv->value(np, jwt, prev, v, e, ext) * vfv->scaling_factor;
-
-      // Clean up.
-      for(int i = 0; i < prev_size; i++)
-        if (prev[i] != NULL)
-        {
-          prev[i]->free_fn();
-          delete prev[i];
-        }
-      delete [] prev;
-
-      if (ext != NULL)
-      {
-        ext->free();
-        delete ext;
-      }
-
-      return res;
-    }
-
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form(MatrixFormSurf<Scalar> *mfs,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
-    {
-      _F_;
-      Scalar result = 0;
-
-      // Determine the integration order by parsing the form.
-      int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
-      // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_value(order, mfs, u_ext, fu, fv, ru, rv, surf_pos);
-
-      return result;
-    }
     template<typename Scalar>
     void DiscreteProblem<Scalar>::eval_form(MultiComponentMatrixFormSurf<Scalar>*mfs,
       Hermes::vector<Solution<Scalar>*> u_ext,
@@ -2822,7 +2401,7 @@ namespace Hermes
       _F_;
 
       // Determine the integration order by parsing the form.
-      int order = calc_order_matrix_form_surf(mfs, u_ext, fu, fv, ru, rv, surf_pos);
+      int order = calc_order_surface_matrix_form(mfs, u_ext, fu, fv, ru, rv, surf_pos);
       // Evaluate the form using numerical quadrature of order "order".
       Quad2D* quad = fu->get_quad_2d();
 
@@ -2831,16 +2410,16 @@ namespace Hermes
       int np = quad->get_num_points(eo);
 
       // Init geometry and jacobian*weights.
-      if (cache_e[eo] == NULL)
+      if (geometry_cache[eo] == NULL)
       {
-        cache_e[eo] = init_geom_surf(ru, surf_pos, eo);
+        geometry_cache[eo] = init_geom_surf(ru, surf_pos->surf_num, surf_pos->marker, eo);
         double3* tan = ru->get_tangent(surf_pos->surf_num, eo);
-        cache_jwt[eo] = new double[np];
+        jacobian_x_weights_cache[eo] = new double[np];
         for(int i = 0; i < np; i++)
-          cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+          jacobian_x_weights_cache[eo][i] = pt[i][2] * tan[i][2];
       }
-      Geom<double>* e = cache_e[eo];
-      double* jwt = cache_jwt[eo];
+      Geom<double>* e = geometry_cache[eo];
+      double* jwt = jacobian_x_weights_cache[eo];
 
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - mfs->u_ext_offset;
@@ -2882,7 +2461,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_matrix_form_surf(MatrixFormSurf<Scalar> *mfs, Hermes::vector<Solution<Scalar>*> u_ext,
+    int DiscreteProblem<Scalar>::calc_order_surface_matrix_form(MultiComponentMatrixFormSurf<Scalar>*mfs, Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
     {
       _F_;
@@ -2912,68 +2491,7 @@ namespace Hermes
           for(int i = 0; i < u_ext_length - u_ext_offset; i++)
             oi[i] = get_fn_ord(0);
 
-        // Hermes::Order of shape functions.
-        Func<Hermes::Ord>* ou = get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc);
-        Func<Hermes::Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
-
-        // Hermes::Order of additional external functions.
-        ExtData<Hermes::Ord>* fake_ext = init_ext_fns_ord(mfs->ext, surf_pos->surf_num);
-
-        // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-        double fake_wt = 1.0;
-
-        // Total order of the vector form.
-        Hermes::Ord o = mfs->ord(1, &fake_wt, oi, ou, ov, &geom_ord, fake_ext);
-
-        // Increase due to reference map.
-        order = ru->get_inv_ref_order();
-        order += o.get_order();
-        limit_order(order);
-
-        // Cleanup.
-        delete [] oi;
-
-        if (fake_ext != NULL)
-        {
-          fake_ext->free_ord();
-          delete fake_ext;
-        }
-      }
-
-      return order;
-    }
-    template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_matrix_form_surf(MultiComponentMatrixFormSurf<Scalar>*mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
-    {
-      _F_;
-      // Hermes::Order that will be returned.
-      int order;
-
-      if(is_fvm)
-        order = ru->get_inv_ref_order();
-      else
-      {
-        int u_ext_length = u_ext.size();      // Number of external solutions.
-        int u_ext_offset = mfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-        // and there will be only u_ext_length - u_ext_offset of them.
-
-        // Increase for multi-valued shape functions.
-        int inc = (fu->get_num_components() == 2) ? 1 : 0;
-
-        // Hermes::Order of solutions from the previous Newton iteration.
-        Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[u_ext_length - u_ext_offset];
-        if (u_ext != Hermes::vector<Solution<Scalar>*>())
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            if (u_ext[i + u_ext_offset] != NULL)
-              oi[i] = get_fn_ord(u_ext[i + u_ext_offset]->get_edge_fn_order(surf_pos->surf_num) + inc);
-            else
-              oi[i] = get_fn_ord(0);
-        else
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            oi[i] = get_fn_ord(0);
-
-        // Hermes::Order of shape functions.
+        // Order of shape functions.
         Func<Hermes::Ord>* ou = get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc);
         Func<Hermes::Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
 
@@ -3004,95 +2522,6 @@ namespace Hermes
       return order;
     }
 
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, MatrixFormSurf<Scalar> *mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fu, PrecalcShapeset *fv, RefMap *ru, RefMap *rv, SurfPos* surf_pos)
-    {
-      _F_;
-
-      // Evaluate the form using numerical quadrature of order "order".
-      Quad2D* quad = fu->get_quad_2d();
-
-      int eo = quad->get_edge_points(surf_pos->surf_num, order);
-      double3* pt = quad->get_points(eo);
-      int np = quad->get_num_points(eo);
-
-      // Init geometry and jacobian*weights.
-      if (cache_e[eo] == NULL)
-      {
-        cache_e[eo] = init_geom_surf(ru, surf_pos, eo);
-        double3* tan = ru->get_tangent(surf_pos->surf_num, eo);
-        cache_jwt[eo] = new double[np];
-        for(int i = 0; i < np; i++)
-          cache_jwt[eo][i] = pt[i][2] * tan[i][2];
-      }
-      Geom<double>* e = cache_e[eo];
-      double* jwt = cache_jwt[eo];
-
-      // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-      int prev_size = u_ext.size() - mfs->u_ext_offset;
-      Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
-      if(RungeKutta)
-        prev_size = RK_original_spaces_count;
-
-      if (u_ext != Hermes::vector<Solution<Scalar>*>())
-        for (int i = 0; i < prev_size; i++)
-          if (u_ext[i + mfs->u_ext_offset] != NULL)
-            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + mfs->u_ext_offset], eo);
-          else
-            prev[i] = NULL;
-      else
-        for (int i = 0; i < prev_size; i++)
-          prev[i] = NULL;
-
-      Func<double>* u = get_fn(fu, ru, eo);
-      Func<double>* v = get_fn(fv, rv, eo);
-      ExtData<Scalar>* ext = init_ext_fns(mfs->ext, rv, eo);
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          prev[ext_i]->add(*ext->fn[mfs->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // The actual calculation takes place here.
-      Scalar res = mfs->value(np, jwt, prev, u, v, e, ext) * mfs->scaling_factor;
-
-      // Clean up.
-      for(int i = 0; i < prev_size; i++)
-        if (prev[i] != NULL)
-        {
-          prev[i]->free_fn();
-          delete prev[i];
-        }
-        delete [] prev;
-
-        if (ext != NULL)
-        {
-          ext->free();
-          delete ext;
-        }
-
-        return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
-        // are defined in (-1, 1). Thus multiplying with 0.5 to correct
-        // the weights.
-    }
-
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form(VectorFormSurf<Scalar> *vfs,
-      Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
-    {
-      _F_;
-      Scalar result = 0;
-
-      // Determine the integration order by parsing the form.
-      int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
-      // Perform non-adaptive numerical quadrature of order "order".
-      result = eval_form_value(order, vfs, u_ext, fv, rv, surf_pos);
-
-      return result;
-    }
     template<typename Scalar>
     void DiscreteProblem<Scalar>::eval_form(MultiComponentVectorFormSurf<Scalar>*vfs,
       Hermes::vector<Solution<Scalar>*> u_ext,
@@ -3101,7 +2530,7 @@ namespace Hermes
       _F_;
 
       // Determine the integration order by parsing the form.
-      int order = calc_order_vector_form_surf(vfs, u_ext, fv, rv, surf_pos);
+      int order = calc_order_surface_vector_form(vfs, u_ext, fv, rv, surf_pos);
       // Evaluate the form using numerical quadrature of order "order".
       Quad2D* quad = fv->get_quad_2d();
 
@@ -3110,16 +2539,16 @@ namespace Hermes
       int np = quad->get_num_points(eo);
 
       // Init geometry and jacobian*weights.
-      if (cache_e[eo] == NULL)
+      if (geometry_cache[eo] == NULL)
       {
-        cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
+        geometry_cache[eo] = init_geom_surf(rv, surf_pos->surf_num, surf_pos->marker, eo);
         double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
-        cache_jwt[eo] = new double[np];
+        jacobian_x_weights_cache[eo] = new double[np];
         for(int i = 0; i < np; i++)
-          cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+          jacobian_x_weights_cache[eo][i] = pt[i][2] * tan[i][2];
       }
-      Geom<double>* e = cache_e[eo];
-      double* jwt = cache_jwt[eo];
+      Geom<double>* e = geometry_cache[eo];
+      double* jwt = jacobian_x_weights_cache[eo];
 
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - vfs->u_ext_offset;
@@ -3159,7 +2588,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_vector_form_surf(VectorFormSurf<Scalar> *vfs, Hermes::vector<Solution<Scalar>*> u_ext,
+    int DiscreteProblem<Scalar>::calc_order_surface_vector_form(MultiComponentVectorFormSurf<Scalar>*vfs, Hermes::vector<Solution<Scalar>*> u_ext,
       PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
     {
       _F_;
@@ -3217,139 +2646,6 @@ namespace Hermes
       }
 
       return order;
-    }
-    template<typename Scalar>
-    int DiscreteProblem<Scalar>::calc_order_vector_form_surf(MultiComponentVectorFormSurf<Scalar>*vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
-    {
-      _F_;
-      // Hermes::Order that will be returned.
-      int order;
-
-      if(is_fvm)
-        order = rv->get_inv_ref_order();
-      else
-      {
-        int u_ext_length = u_ext.size();      // Number of external solutions.
-        int u_ext_offset = vfs->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-        // and there will be only u_ext_length - u_ext_offset of them.
-
-        // Increase for multi-valued shape functions.
-        int inc = (fv->get_num_components() == 2) ? 1 : 0;
-
-        // Hermes::Order of solutions from the previous Newton iteration.
-        Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[u_ext_length - u_ext_offset];
-        if (u_ext != Hermes::vector<Solution<Scalar>*>())
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            if (u_ext[i + u_ext_offset] != NULL)
-              oi[i] = get_fn_ord(u_ext[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
-            else
-              oi[i] = get_fn_ord(0);
-        else
-          for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-            oi[i] = get_fn_ord(0);
-
-        // Hermes::Order of the shape function.
-        Func<Hermes::Ord>* ov = get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc);
-
-        // Hermes::Order of additional external functions.
-        ExtData<Hermes::Ord>* fake_ext = init_ext_fns_ord(vfs->ext);
-
-        // Hermes::Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
-        double fake_wt = 1.0;
-
-        // Total order of the vector form.
-        Hermes::Ord o = vfs->ord(1, &fake_wt, oi, ov, &geom_ord, fake_ext);
-
-        // Increase due to reference map.
-        order = rv->get_inv_ref_order();
-        order += o.get_order();
-        limit_order(order);
-
-        // Cleanup.
-        delete [] oi;
-
-        if (fake_ext != NULL)
-        {
-          fake_ext->free_ord();
-          delete fake_ext;
-        }
-      }
-
-      return order;
-    }
-
-    template<typename Scalar>
-    Scalar DiscreteProblem<Scalar>::eval_form_value(int order, VectorFormSurf<Scalar> *vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-      PrecalcShapeset *fv, RefMap *rv, SurfPos* surf_pos)
-    {
-      _F_;
-
-      // Evaluate the form using numerical quadrature of order "order".
-      Quad2D* quad = fv->get_quad_2d();
-
-      int eo = quad->get_edge_points(surf_pos->surf_num, order);
-      double3* pt = quad->get_points(eo);
-      int np = quad->get_num_points(eo);
-
-      // Init geometry and jacobian*weights.
-      if (cache_e[eo] == NULL)
-      {
-        cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
-        double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
-        cache_jwt[eo] = new double[np];
-        for(int i = 0; i < np; i++)
-          cache_jwt[eo][i] = pt[i][2] * tan[i][2];
-      }
-      Geom<double>* e = cache_e[eo];
-      double* jwt = cache_jwt[eo];
-
-      // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-      int prev_size = u_ext.size() - vfs->u_ext_offset;
-      Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
-      if(RungeKutta)
-        prev_size = RK_original_spaces_count;
-
-      if (u_ext != Hermes::vector<Solution<Scalar>*>())
-        for (int i = 0; i < prev_size; i++)
-          if (u_ext[i + vfs->u_ext_offset] != NULL)
-            prev[i] = current_state->e[i] == NULL ? NULL : init_fn(u_ext[i + vfs->u_ext_offset], eo);
-          else
-            prev[i] = NULL;
-      else
-        for (int i = 0; i < prev_size; i++)
-          prev[i] = NULL;
-
-      Func<double>* v = get_fn(fv, rv, eo);
-      ExtData<Scalar>* ext = init_ext_fns(vfs->ext, rv, eo);
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          prev[ext_i]->add(*ext->fn[vfs->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // The actual calculation takes place here.
-      Scalar res = vfs->value(np, jwt, prev, v, e, ext) * vfs->scaling_factor;
-
-      // Clean up.
-      for(int i = 0; i < prev_size; i++)
-        if (prev[i] != NULL)
-        {
-          prev[i]->free_fn();
-          delete prev[i];
-        }
-        delete [] prev;
-
-        if (ext != NULL)
-        {
-          ext->free();
-          delete ext;
-        }
-
-        return 0.5 * res; // Edges are parameterized from 0 to 1 while integration weights
-        // are defined in (-1, 1). Thus multiplying with 0.5 to correct
-        // the weights.
     }
 
     template<typename Scalar>
@@ -3378,7 +2674,7 @@ namespace Hermes
           for (int i = 0; i < prev_size; i++)
             oi[i] = get_fn_ord(0);
 
-        // Hermes::Order of shape functions.
+        // Order of shape functions.
         int inc = (fv->get_num_components() == 2) ? 1 : 0;
         DiscontinuousFunc<Hermes::Ord>* ou = new DiscontinuousFunc<Hermes::Ord>(get_fn_ord(fu->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_u);
         DiscontinuousFunc<Hermes::Ord>* ov = new DiscontinuousFunc<Hermes::Ord>(get_fn_ord(fv->get_edge_fn_order(surf_pos->surf_num) + inc), neighbor_supp_v);
@@ -3447,18 +2743,18 @@ namespace Hermes
       assert(surf_pos->surf_num == neighbor_searches.get(neighbor_index_u)->active_edge);
 
       // Init geometry and jacobian*weights.
-      if (cache_e[eo] == NULL)
+      if (geometry_cache[eo] == NULL)
       {
-        cache_e[eo] = init_geom_surf(ru_central, surf_pos, eo);
+        geometry_cache[eo] = init_geom_surf(ru_central, surf_pos->surf_num, surf_pos->marker, eo);
         double3* tan = ru_central->get_tangent(surf_pos->surf_num, eo);
-        cache_jwt[eo] = new double[np];
+        jacobian_x_weights_cache[eo] = new double[np];
         for(int i = 0; i < np; i++)
-          cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+          jacobian_x_weights_cache[eo][i] = pt[i][2] * tan[i][2];
       }
 
-      Geom<double>* e = new InterfaceGeom<double>(cache_e[eo], nbs_u->neighb_el->marker,
+      Geom<double>* e = new InterfaceGeom<double>(geometry_cache[eo], nbs_u->neighb_el->marker,
         nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
-      double* jwt = cache_jwt[eo];
+      double* jwt = jacobian_x_weights_cache[eo];
 
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - mfs->u_ext_offset;
@@ -3609,18 +2905,18 @@ namespace Hermes
       assert(surf_pos->surf_num == nbs_v->active_edge);
 
       // Init geometry and jacobian*weights.
-      if (cache_e[eo] == NULL)
+      if (geometry_cache[eo] == NULL)
       {
-        cache_e[eo] = init_geom_surf(rv, surf_pos, eo);
+        geometry_cache[eo] = init_geom_surf(rv, surf_pos->surf_num, surf_pos->marker, eo);
         double3* tan = rv->get_tangent(surf_pos->surf_num, eo);
-        cache_jwt[eo] = new double[np];
+        jacobian_x_weights_cache[eo] = new double[np];
         for(int i = 0; i < np; i++)
-          cache_jwt[eo][i] = pt[i][2] * tan[i][2];
+          jacobian_x_weights_cache[eo][i] = pt[i][2] * tan[i][2];
       }
 
-      Geom<double>* e = new InterfaceGeom<double>(cache_e[eo], nbs_v->neighb_el->marker,
+      Geom<double>* e = new InterfaceGeom<double>(geometry_cache[eo], nbs_v->neighb_el->marker,
         nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
-      double* jwt = cache_jwt[eo];
+      double* jwt = jacobian_x_weights_cache[eo];
 
       // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
       int prev_size = u_ext.size() - vfs->u_ext_offset;

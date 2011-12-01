@@ -82,7 +82,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j,
       std::string area, Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(area, ext, scaling_factor, u_ext_offset)
+    Form<Scalar>(area, ext, scaling_factor, u_ext_offset), sym(0)
     {
       this->i = i;
       this->j = j;
@@ -92,7 +92,7 @@ namespace Hermes
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j,
       Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset)
+    Form<Scalar>(areas, ext, scaling_factor, u_ext_offset), sym(0)
     {
       this->i = i;
       this->j = j;
@@ -117,16 +117,18 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j,
       std::string area, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext, double scaling_factor, int u_ext_offset) :
-    MatrixForm<Scalar>(i, j, area, ext, scaling_factor, u_ext_offset), sym(sym)
+    MatrixForm<Scalar>(i, j, area, ext, scaling_factor, u_ext_offset)
     {
+      this->sym = sym;
     }
 
     template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j,
       Hermes::vector<std::string> areas, SymFlag sym, Hermes::vector<MeshFunction<Scalar>*> ext,
       double scaling_factor, int u_ext_offset) :
-    MatrixForm<Scalar>(i, j, areas, ext, scaling_factor, u_ext_offset), sym(sym)
+    MatrixForm<Scalar>(i, j, areas, ext, scaling_factor, u_ext_offset)
     {
+      this->sym = sym;
     }
 
     template<typename Scalar>

@@ -243,6 +243,8 @@ namespace Hermes
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       unsigned int j;
+      
+      int sym;
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -268,8 +270,6 @@ namespace Hermes
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       virtual MatrixFormVol* clone();
-
-      int sym;
     };
 
     template<typename Scalar>

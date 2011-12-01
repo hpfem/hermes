@@ -621,7 +621,7 @@ namespace Hermes
       int np = quad->get_num_points(eo);
 
       // Initialize geometry and jacobian*weights.
-      Geom<double>* e = init_geom_surf(rm, surf_pos, eo);
+      Geom<double>* e = init_geom_surf(rm, surf_pos->surf_num, surf_pos->marker, eo);
       double3* tan = rm->get_tangent(surf_pos->surf_num, eo);
       double* jwt = new double[np];
       for(int i = 0; i < np; i++)
@@ -712,7 +712,7 @@ namespace Hermes
       for(int i = 0; i < np; i++)
         jwt[i] = pt[i][2] * tan[i][2];
 
-      Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rm, surf_pos, eo),
+      Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rm, surf_pos->surf_num, surf_pos->marker, eo),
                                                   nbs->neighb_el->marker,
                                                   nbs->neighb_el->id,
                                                   nbs->neighb_el->get_diameter());

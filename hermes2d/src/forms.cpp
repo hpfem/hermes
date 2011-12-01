@@ -364,10 +364,10 @@ namespace Hermes
       return e;
     }
 
-    Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
+    Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order)
     {
       Geom<double>* e = new Geom<double>;
-      e->edge_marker = surf_pos->marker;
+      e->edge_marker = marker;
       e->elem_marker = rm->get_active_element()->marker;
       e->diam = rm->get_active_element()->get_diameter();
       e->area = rm->get_active_element()->get_area();
@@ -375,7 +375,7 @@ namespace Hermes
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
       double3 *tan;
-      tan = rm->get_tangent(surf_pos->surf_num, order);
+      tan = rm->get_tangent(isurf, order);
 
       Quad2D* quad = rm->get_quad_2d();
       int np = quad->get_num_points(order);
@@ -388,7 +388,7 @@ namespace Hermes
         e->tx[i] = tan[i][0];  e->ty[i] =   tan[i][1];
         e->nx[i] = tan[i][1];  e->ny[i] = - tan[i][0];
       }
-      e->orientation = rm->get_active_element()->get_edge_orientation(surf_pos->surf_num);
+      e->orientation = rm->get_active_element()->get_edge_orientation(isurf);
       return e;
     }
 
