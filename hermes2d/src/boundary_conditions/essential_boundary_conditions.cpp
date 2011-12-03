@@ -116,7 +116,7 @@ namespace Hermes
     Scalar DefaultEssentialBCNonConstHcurl<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
     {
       Scalar2<Scalar> val = exact_solution2->value(x, y);
-      return val.val[0] * t_x + val.val[1] * t_y;
+      return val[0] * t_x + val[1] * t_y;
     };
 
 
@@ -209,6 +209,8 @@ namespace Hermes
     template HERMES_API class DefaultEssentialBCConst<std::complex<double> >;
     template HERMES_API class DefaultEssentialBCNonConst<double>;
     template HERMES_API class DefaultEssentialBCNonConst<std::complex<double> >;
+    template HERMES_API class DefaultEssentialBCNonConstHcurl<double>;
+    template HERMES_API class DefaultEssentialBCNonConstHcurl<std::complex<double> >;
     template HERMES_API class EssentialBCs<double>;
     template HERMES_API class EssentialBCs<std::complex<double> >;
   }
