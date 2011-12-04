@@ -238,12 +238,6 @@ namespace Hermes
         bool force_diagonal_blocks = true;
         stage_dp_right.assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks);
 
-        std::ofstream rhs_out("rhs_out");
-        for(int i = 0; i < vector_right->length(); i++)
-          if(std::abs(vector_right->get(i)) > 1E-5)
-            rhs_out << i << ':' <<  vector_right->get(i) << std::endl;
-        rhs_out.close();
-
         // Finalizing the residual vector.
         vector_right->add_vector(vector_left);
 
@@ -294,13 +288,6 @@ namespace Hermes
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
           stage_dp_right.assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks);
-
-          std::ofstream mat_out("mat_out");
-          for(int i = 0; i < vector_right->length(); i++)
-            for(int j = 0; j < vector_right->length(); j++)
-              if(std::abs(matrix_right->get(i,j)) > 1E-5)
-                mat_out << i << ',' << j << ':' <<  matrix_right->get(i,j) << std::endl;
-          mat_out.close();
 
           // Adding the block mass matrix M to matrix_right. This completes the
           // resulting tensor Jacobian.

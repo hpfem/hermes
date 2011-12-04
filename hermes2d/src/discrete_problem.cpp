@@ -668,7 +668,7 @@ namespace Hermes
         for (int i = 0; i < wf->get_neq(); i++)
         {
           Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
-          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, first_dof);
+          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, true, first_dof);
           current_u_ext.push_back(external_solution_i);
           first_dof += spaces[i]->get_num_dofs();
         }
@@ -1026,6 +1026,9 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order)
     {
+      _F_;
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
+
       double block_scaling_coef = this->block_scaling_coeff(form);
 
       bool tra = (form->i != form->j) && (form->sym != 0);
@@ -1041,15 +1044,15 @@ namespace Hermes
 
       // Init geometry.
       int n_quadrature_points;
-      if(dynamic_cast<MatrixFormVol<Scalar>*>(form))
-        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
-      else
+      if(surface_form)
         n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
+      else
+        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
       {
-        if (!tra && current_al[form->i]->dof[i] < 0) 
+        if ((!tra || surface_form) && current_al[form->i]->dof[i] < 0) 
           continue;
         current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
         if (!sym)
@@ -1070,10 +1073,10 @@ namespace Hermes
                 for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
                   u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
-              if(dynamic_cast<MatrixFormVol<Scalar>*>(form))
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
-              else
+              if(surface_form)
                 local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
+              else
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
             }
           }
         }

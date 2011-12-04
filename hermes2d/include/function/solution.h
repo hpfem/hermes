@@ -146,7 +146,7 @@ namespace Hermes
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
-          bool add_dir_lift = false, int start_index = 0);
+          bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<const Space<Scalar> *> spaces,
           Hermes::vector<Solution<Scalar>*> solutions, 
@@ -162,7 +162,7 @@ namespace Hermes
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
-          PrecalcShapeset* pss, bool add_dir_lift = false, int start_index = 0);
+          PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
 
       /// If this is set to true, the mesh was created by this instance of this class.
       bool own_mesh;
