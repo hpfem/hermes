@@ -424,6 +424,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
+    {
+      this->current_mat = mat;
+      if(rhs != NULL)
+        this->current_rhs = rhs;
+      this->create_sparse_structure();
+    }
+
+    template<typename Scalar>
     void DiscreteProblem<Scalar>::create_sparse_structure()
     {
       _F_;

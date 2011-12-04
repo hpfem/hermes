@@ -147,6 +147,7 @@ namespace Hermes
       /// a matrix that has nonzeros in these blocks. The Table serves for optional
       /// weighting of matrix blocks in systems.
       void create_sparse_structure();
+      void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
 
       /// Initializes psss.
       void init_psss();
@@ -182,14 +183,11 @@ namespace Hermes
       /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o);
 
-
-
       /// Matrix volumetric forms - calculate the integration order.
       int calc_order_matrix_form(MatrixForm<Scalar>* mfv);
 
       /// Matrix volumetric forms - assemble the form.
       void assemble_matrix_form(MatrixForm<Scalar>* form, int order);
-
 
       /// Vector volumetric forms - calculate the integration order.
       int calc_order_vector_form(VectorForm<Scalar>* mfv);

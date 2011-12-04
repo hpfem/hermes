@@ -50,6 +50,7 @@ namespace Hermes
       /// a matrix that has nonzeros in these blocks. The Table serves for optional
       /// weighting of matrix blocks in systems.
       virtual void create_sparse_structure() = 0;
+      virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL) = 0;
 
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the

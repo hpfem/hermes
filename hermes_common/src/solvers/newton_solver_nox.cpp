@@ -29,7 +29,7 @@ namespace Hermes
     {
       this->precond = Teuchos::null;
       if(!this->dp->is_matrix_free())
-        this->dp->create_sparse_structure();
+        this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
@@ -160,7 +160,7 @@ namespace Hermes
     void DiscreteProblemNOX<Scalar>::set_precond(Teuchos::RCP<Precond<Scalar> > &pc)
     {
       precond = pc;
-      this->dp->create_sparse_structure();
+      this->dp->create_sparse_structure(&jacobian);
     }
 
     template<typename Scalar>
