@@ -87,7 +87,7 @@ namespace Hermes
       ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
       ///   - ExtData\<Scalar\> *ext ... external functions (currently unused).
       ///
-      class HERMES_API ErrorEstimatorForm
+      class HERMES_API ErrorEstimatorForm : public Form<Scalar>
       {
       public:
         int i; ///< Component.

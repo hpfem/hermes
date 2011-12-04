@@ -540,7 +540,7 @@ namespace Hermes
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift == Hermes::vector<bool>())
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], false, start_indices_new[i]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
@@ -592,7 +592,7 @@ namespace Hermes
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift == Hermes::vector<bool>())
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], false, start_indices_new[i]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
@@ -645,7 +645,7 @@ namespace Hermes
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         if(add_dir_lift == Hermes::vector<bool>())
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], false, start_indices_new[i]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }

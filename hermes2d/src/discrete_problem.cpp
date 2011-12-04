@@ -125,6 +125,12 @@ namespace Hermes
       quad = &g_quad_2d_std;
 
       current_al.resize(wf->get_neq());
+
+      current_mat = NULL;
+      current_stage = NULL;
+      current_rhs = NULL;
+      current_block_weights = NULL;
+      current_isurf = -1;
     }
 
     template<typename Scalar>
@@ -947,7 +953,7 @@ namespace Hermes
       }
 
       // Assemble surface integrals now: loop through surfaces of the element.
-      for (current_isurf = 0; current_isurf < rep_element->get_num_surf(); current_isurf++)
+      for (this->current_isurf = 0; this->current_isurf < rep_element->get_num_surf(); this->current_isurf++)
       {
         // \todo DG.
         if(!this->current_state->bnd[current_isurf])
@@ -1161,12 +1167,15 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order)
     {
+      _F_;
+      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
+
       // Init geometry.
       int n_quadrature_points;
-      if(dynamic_cast<VectorFormVol<Scalar>*>(form))
-        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
-      else
+      if(surface_form)
         n_quadrature_points = init_surface_geometry_points(current_refmap[form->i], order);
+      else
+        n_quadrature_points = init_geometry_points(current_refmap[form->i], order);
 
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
@@ -1191,10 +1200,10 @@ namespace Hermes
           for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
             u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
         
-        if(dynamic_cast<VectorFormVol<Scalar>*>(form))
-          current_rhs->add(current_al[form->i]->dof[i], form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
-        else
+        if(surface_form)
           current_rhs->add(current_al[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
+        else
+          current_rhs->add(current_al[form->i]->dof[i], form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
       }
 
       // Cleanup.
@@ -1205,6 +1214,7 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order)
     {
+      _F_;
       double3* pt = quad->get_points(order);
       int np = quad->get_num_points(order);
 
@@ -1232,6 +1242,7 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order)
     {
+      _F_;
       int eo = quad->get_edge_points(current_isurf, order);
       double3* pt = quad->get_points(eo);
       int np = quad->get_num_points(eo);
@@ -1256,22 +1267,22 @@ namespace Hermes
     void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
     {
       _F_;
-      int u_ext_length = current_u_ext.size();      // Number of external solutions.
-      int u_ext_offset = form->u_ext_offset; // External solutions will start with u_ext[u_ext_offset]
-      // and there will be only u_ext_length - u_ext_offset of them.
+      unsigned int prev_size = RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset;
 
-      // Hermes::Order of solutions from the previous Newton iteration.
       if (current_u_ext != Hermes::vector<Solution<Scalar>*>())
-        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
-          if (current_u_ext[i + u_ext_offset] != NULL)
-            oi[i] = get_fn_ord(current_u_ext[i + u_ext_offset]->get_fn_order());
+        for(int i = 0; i < prev_size; i++)
+          if (current_u_ext[i + form->u_ext_offset] != NULL)
+            oi[i] = get_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
           else
             oi[i] = get_fn_ord(0);
       else
-        for(int i = 0; i < u_ext_length - u_ext_offset; i++)
+        for(int i = 0; i < prev_size; i++)
           oi[i] = get_fn_ord(0);
       
-      oext = init_ext_fns_ord(form->ext);
+      oext->nf = form->ext.size();
+      oext->fn = new Func<Hermes::Ord>*[oext->nf];
+      for (int i = 0; i < oext->nf; i++)
+        oext->fn[i] = get_fn_ord(form->ext[i]->get_fn_order());
     }
 
     template<typename Scalar>
@@ -1288,32 +1299,32 @@ namespace Hermes
     void DiscreteProblem<Scalar>::init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order)
     {
       _F_;
+      unsigned int prev_size = RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset;
       
-      // Values of the previous Newton iteration, shape functions
-      // and external functions in quadrature points.
-      int prev_size = current_u_ext.size() - form->u_ext_offset;
-      // In case of Runge-Kutta, this is time-saving, as it is known how many functions are there for the user.
-      if(this->RungeKutta)
-        prev_size = this->RK_original_spaces_count;
-
       if (current_u_ext != Hermes::vector<Solution<Scalar>*>())
-        for (int i = 0; i < prev_size; i++)
+        for(int i = 0; i < prev_size; i++)
           if (current_u_ext[i + form->u_ext_offset] != NULL)
             u_ext[i] = current_state->e[i] == NULL ? NULL : init_fn(current_u_ext[i + form->u_ext_offset], order);
           else
             u_ext[i] = NULL;
       else
-        for (int i = 0; i < prev_size; i++)
+        for(int i = 0; i < prev_size; i++)
           u_ext[i] = NULL;
-
-      ext = init_ext_fns(form->ext, current_refmap[form->i], order);
+      
+      ext->nf = form->ext.size();
+      ext->fn = new Func<Scalar>*[ext->nf];
+      for (unsigned i = 0; i < ext->nf; i++)
+      {
+        if (form->ext[i] != NULL) 
+          ext->fn[i] = init_fn(form->ext[i], order);
+        else ext->fn[i] = NULL;
+      }
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext)
     {
       _F_;
-      
       // Values of the previous Newton iteration, shape functions
       // and external functions in quadrature points.
       int prev_size = current_u_ext.size() - form->u_ext_offset;
@@ -1337,6 +1348,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o)
     {
+      _F_;
       // Increase due to reference map.
       order = current_refmap[form->i]->get_inv_ref_order();
       order += o->get_order();
@@ -2041,59 +2053,6 @@ namespace Hermes
           rhs->add(al[m]->dof[i], eval_dg_form(vfs, u_ext, spss[m], refmap[m], &surf_pos, neighbor_searches, current_stage->meshes[m]->get_seq() - min_dg_mesh_seq) * al[m]->coef[i]);
         }
       }
-    }
-
-    template<typename Scalar>
-    ExtData<Hermes::Ord>* DiscreteProblem<Scalar>::init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext)
-    {
-      _F_;
-      ExtData<Hermes::Ord>* fake_ext = new ExtData<Hermes::Ord>;
-
-      // External functions.
-      fake_ext->nf = ext.size();
-      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[fake_ext->nf];
-      for (int i = 0; i < fake_ext->nf; i++)
-        fake_ext_fn[i] = get_fn_ord(ext[i]->get_fn_order());
-      fake_ext->fn = fake_ext_fn;
-
-      return fake_ext;
-    }
-
-    template<typename Scalar>
-    ExtData<Scalar>* DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
-      RefMap *rm, const int order)
-    {
-      _F_;
-      ExtData<Scalar>* ext_data = new ExtData<Scalar>;
-
-      // Copy external functions.
-      Func<Scalar>** ext_fn = new Func<Scalar>*[ext.size()];
-      for (unsigned i = 0; i < ext.size(); i++)
-      {
-        if (ext[i] != NULL) ext_fn[i] = init_fn(ext[i], order);
-        else ext_fn[i] = NULL;
-      }
-      ext_data->nf = ext.size();
-      ext_data->fn = ext_fn;
-
-      return ext_data;
-    }
-
-    template<typename Scalar>
-    ExtData<Hermes::Ord>* DiscreteProblem<Scalar>::init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
-      int edge)
-    {
-      _F_;
-      ExtData<Hermes::Ord>* fake_ext = new ExtData<Hermes::Ord>;
-
-      // External functions.
-      fake_ext->nf = ext.size();
-      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[fake_ext->nf];
-      for (int i = 0; i < fake_ext->nf; i++)
-        fake_ext_fn[i] = get_fn_ord(ext[i]->get_edge_fn_order(edge));
-      fake_ext->fn = fake_ext_fn;
-
-      return fake_ext;
     }
 
     template<typename Scalar>

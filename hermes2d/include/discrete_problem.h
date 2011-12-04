@@ -223,8 +223,6 @@ namespace Hermes
 
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
-
-
       /// Calculates integration order for DG matrix forms.
       int calc_order_dg_matrix_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
@@ -276,20 +274,9 @@ namespace Hermes
         PrecalcShapeset* fv, RefMap* rv,
         SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
 
-      /// Initialize orders of external functions for volumetric forms.
-      ExtData<Hermes::Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext);
-
-      /// Initialize orders of external functions for surface forms.
-      ExtData<Hermes::Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
-        int edge);
-
       /// Initialize orders of external functions for DG forms.
       ExtData<Hermes::Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
-
-      /// Initialize external functions for volumetric / surface forms.
-      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
-        RefMap* rm, const int order);
 
       /// Initialize external functions for DG forms.
       ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,

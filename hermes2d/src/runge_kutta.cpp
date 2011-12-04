@@ -256,7 +256,7 @@ namespace Hermes
           add_dir_lift_vector.reserve(1);
           add_dir_lift_vector.push_back(false);
           Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right.get_spaces(),
-            residuals_vector, add_dir_lift_vector);
+            residuals_vector);
           residual_norm = Global<Scalar>::calc_norms(residuals_vector);
         }
 
@@ -349,7 +349,7 @@ namespace Hermes
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
           coeff_vec[i] *= time_step;
         }
-        Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, error_fns, add_dir_lift);
+        Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, error_fns);
       }
 
       // Delete stage spaces.
