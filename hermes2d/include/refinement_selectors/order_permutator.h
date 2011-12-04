@@ -16,7 +16,6 @@
 #ifndef __H2D_REFINEMENT_ORDER_PERMUTATOR_H
 #define __H2D_REFINEMENT_ORDER_PERMUTATOR_H
 
-#include "../quadrature/encoded_order.h"
 namespace Hermes
 {
   namespace Hermes2D

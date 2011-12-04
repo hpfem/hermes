@@ -33,7 +33,7 @@ namespace Hermes
   {
     template<typename Scalar>
     Adapt<Scalar>::Adapt(Hermes::vector<Space<Scalar>*> spaces,
-      Hermes::vector<typename ProjNormType> proj_norms) :
+      Hermes::vector<ProjNormType> proj_norms) :
     spaces(spaces),
       num_act_elems(-1),
       have_errors(false),
@@ -69,10 +69,10 @@ namespace Hermes
         {
           switch (spaces[i]->get_type())
           {
-          case HERMES_H1_SPACE: proj_norms.push_back(typename HERMES_H1_NORM); break;
-          case HERMES_HCURL_SPACE: proj_norms.push_back(typename HERMES_HCURL_NORM); break;
-          case HERMES_HDIV_SPACE: proj_norms.push_back(typename HERMES_HDIV_NORM); break;
-          case HERMES_L2_SPACE: proj_norms.push_back(typename HERMES_L2_NORM); break;
+          case HERMES_H1_SPACE: proj_norms.push_back(HERMES_H1_NORM); break;
+          case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
+          case HERMES_HDIV_SPACE: proj_norms.push_back(HERMES_HDIV_NORM); break;
+          case HERMES_L2_SPACE: proj_norms.push_back(HERMES_L2_NORM); break;
           default: error("Unknown space type in Adapt<Scalar>::Adapt().");
           }
         }
@@ -95,7 +95,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Space<Scalar>* space, typename ProjNormType proj_norm) :
+    Adapt<Scalar>::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
     spaces(Hermes::vector<Space<Scalar>*>()),
       num_act_elems(-1),
       have_errors(false),
@@ -125,10 +125,10 @@ namespace Hermes
       {
         switch (space->get_type())
         {
-        case HERMES_H1_SPACE: proj_norm = typename HERMES_H1_NORM; break;
-        case HERMES_HCURL_SPACE: proj_norm = typename HERMES_HCURL_NORM; break;
-        case HERMES_HDIV_SPACE: proj_norm = typename HERMES_HDIV_NORM; break;
-        case HERMES_L2_SPACE: proj_norm = typename HERMES_L2_NORM; break;
+        case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
+        case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
+        case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
+        case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
         default: error("Unknown space type in Adapt<Scalar>::Adapt().");
         }
       }
@@ -367,7 +367,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(typename ProjNormType type)
+    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(ProjNormType type)
     {
       this->projNormType = type;
     }
@@ -441,15 +441,15 @@ namespace Hermes
     {
       switch (projNormType)
       {
-      case typename HERMES_L2_NORM:
+      case HERMES_L2_NORM:
         return l2_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case typename HERMES_H1_NORM:
+      case HERMES_H1_NORM:
         return h1_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
         return h1_error_semi_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case typename HERMES_HCURL_NORM:
+      case HERMES_HCURL_NORM:
         return hcurl_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case typename HERMES_HDIV_NORM:
+      case HERMES_HDIV_NORM:
         return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");
@@ -464,15 +464,15 @@ namespace Hermes
     {
       switch (projNormType)
       {
-      case typename HERMES_L2_NORM:
+      case HERMES_L2_NORM:
         return l2_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case typename HERMES_H1_NORM:
+      case HERMES_H1_NORM:
         return h1_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
       case HERMES_H1_SEMINORM:
         return h1_error_semi_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case typename HERMES_HCURL_NORM:
+      case HERMES_HCURL_NORM:
         return hcurl_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case typename HERMES_HDIV_NORM:
+      case HERMES_HDIV_NORM:
         return hdiv_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
       default:
         error("Unknown projection type");

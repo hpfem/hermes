@@ -937,7 +937,7 @@ namespace Hermes
 
       if (current_mat != NULL)
       {
-        for(Hermes::vector<MatrixFormVol<Scalar> *>::iterator it = current_stage->mfvol.begin(); it != current_stage->mfvol.end(); it++)
+        for(typename Hermes::vector<MatrixFormVol<Scalar> *>::iterator it = current_stage->mfvol.begin(); it != current_stage->mfvol.end(); it++)
         {
           if(!form_to_be_assembled(*it))
             continue;
@@ -950,7 +950,7 @@ namespace Hermes
     
       if (current_rhs != NULL)
       {
-        for(Hermes::vector<VectorFormVol<Scalar> *>::iterator it = current_stage->vfvol.begin(); it != current_stage->vfvol.end(); it++)
+        for(typename Hermes::vector<VectorFormVol<Scalar> *>::iterator it = current_stage->vfvol.begin(); it != current_stage->vfvol.end(); it++)
         {
           if(!form_to_be_assembled(*it))
               continue;
@@ -972,7 +972,7 @@ namespace Hermes
 
         if (current_mat != NULL)
         {
-          for(Hermes::vector<MatrixFormSurf<Scalar> *>::iterator it = current_stage->mfsurf.begin(); it != current_stage->mfsurf.end(); it++)
+          for(typename Hermes::vector<MatrixFormSurf<Scalar> *>::iterator it = current_stage->mfsurf.begin(); it != current_stage->mfsurf.end(); it++)
           {
             if(!form_to_be_assembled(*it))
               continue;
@@ -985,7 +985,7 @@ namespace Hermes
     
         if (current_rhs != NULL)
         {
-          for(Hermes::vector<VectorFormSurf<Scalar> *>::iterator it = current_stage->vfsurf.begin(); it != current_stage->vfsurf.end(); it++)
+          for(typename Hermes::vector<VectorFormSurf<Scalar> *>::iterator it = current_stage->vfsurf.begin(); it != current_stage->vfsurf.end(); it++)
           {
             if(!form_to_be_assembled(*it))
                 continue;

@@ -17,7 +17,6 @@
 #define __H2D_SHAPESET_H
 
 #include "../global.h"
-#include "../space/space.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -44,7 +43,13 @@ namespace Hermes
       class HcurlProjBasedSelector;
     };
 
-    enum SpaceType;
+    enum SpaceType {
+      HERMES_H1_SPACE = 0,
+      HERMES_HCURL_SPACE = 1,
+      HERMES_HDIV_SPACE = 2,
+      HERMES_L2_SPACE = 3,
+      HERMES_INVALID_SPACE = -9999
+    };
 
     /// \brief Defines a set of shape functions.
     ///

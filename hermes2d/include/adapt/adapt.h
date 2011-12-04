@@ -59,8 +59,8 @@ namespace Hermes
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      Adapt(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>());
-      Adapt(Space<Scalar>* space, typename ProjNormType proj_norm = HERMES_UNSET_NORM);
+      Adapt(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+      Adapt(Space<Scalar>* space, ProjNormType proj_norm = HERMES_UNSET_NORM);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
       /// Matrix forms for error calculation.
@@ -70,7 +70,7 @@ namespace Hermes
         /// Empty constructor.
         MatrixFormVolError();
         /// Constructor that takes the norm identification.
-        MatrixFormVolError(typename ProjNormType type);
+        MatrixFormVolError(ProjNormType type);
 
         /// Error bilinear form callback function.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
@@ -85,7 +85,7 @@ namespace Hermes
 
       protected:
         /// Norm used.
-        typename ProjNormType projNormType;
+        ProjNormType projNormType;
 
         /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>

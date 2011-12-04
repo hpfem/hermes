@@ -35,29 +35,29 @@ namespace Hermes
       // Main functionality.
       static void project_local(const Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          typename ProjNormType proj_norm = HERMES_UNSET_NORM);
+          ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       // Wrapper that delivers a Solution instead of coefficient vector. 
       static void project_local(const Space<Scalar>* space,
 	  Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
           Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          typename ProjNormType proj_norm = HERMES_UNSET_NORM);
+          ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       // Wrapper that takes multiple MeshFunctions.
       static void project_local(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> meshfns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>());
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       // Wrapper that takes multiple Solutions.
       static void project_local(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
           Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>());
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       // Wrapper that delivers Solutions instead of a coefficient vector.
       static void project_local(Hermes::vector<const Space<Scalar>*> spaces,
           Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
           Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<typename ProjNormType> proj_norms = Hermes::vector<typename ProjNormType>(), bool delete_old_mesh = false);
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
     protected:
 
@@ -65,7 +65,7 @@ namespace Hermes
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
       {
       public:
-        ProjectionMatrixFormVol(int i, int j, typename ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
+        ProjectionMatrixFormVol(int i, int j, ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
         {
           this->projNormType = projNormType;
         }
@@ -113,7 +113,7 @@ namespace Hermes
         }
 
       private:
-        typename ProjNormType projNormType;
+        ProjNormType projNormType;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
@@ -179,7 +179,7 @@ namespace Hermes
       class ProjectionVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        ProjectionVectorFormVol(int i, MeshFunction<Scalar>* ext, typename ProjNormType projNormType) : VectorFormVol<Scalar>(i)
+        ProjectionVectorFormVol(int i, MeshFunction<Scalar>* ext, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
         {
           this->projNormType = projNormType;
           this->ext = Hermes::vector<MeshFunction<Scalar>*>();
@@ -229,7 +229,7 @@ namespace Hermes
         }
 
       private:
-        typename ProjNormType projNormType;
+        ProjNormType projNormType;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,

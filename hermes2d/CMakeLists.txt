@@ -140,7 +140,6 @@ project(hermes2d)
     src/mesh/traverse.cpp
     src/mesh/mesh_data.cpp
 
-    src/quadrature/encoded_order.cpp
     src/quadrature/limit_order.cpp
     src/quadrature/quad_std.cpp
 
@@ -241,7 +240,6 @@ project(hermes2d)
     include/mesh/traverse.h
     include/mesh/mesh_data.h
 
-    include/quadrature/encoded_order.h
     include/quadrature/limit_order.h
     include/quadrature/quad.h
     include/quadrature/quad_all.h

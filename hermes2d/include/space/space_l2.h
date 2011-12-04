@@ -45,7 +45,7 @@ namespace Hermes
 
     protected:
       virtual int get_edge_order(Element* e, int edge) const {
-        return H2D_MAKE_EDGE_ORDER(e->get_mode(), edge, shapeset->get_order(this->edata[e->id].order));
+        return H2D_MAKE_EDGE_ORDER(e->get_mode(), edge, this->shapeset->get_order(this->edata[e->id].order));
       }
 
       virtual void set_shapeset(Shapeset* shapeset);

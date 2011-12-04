@@ -22,7 +22,7 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 4;                             // Initial polynomial degree of all mesh elements.
 
 const bool JFNK = true;                          // true = jacobian-free method,
