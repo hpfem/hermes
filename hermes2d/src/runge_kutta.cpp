@@ -312,7 +312,7 @@ namespace Hermes
       // If max number of iterations was exceeded, fail.
       if (it >= newton_max_iter)
       {
-        throw Exceptions::ValueException("newton iterations", it, newton_max_iter);
+        throw Exceptions::ValueException("Newton iterations", it, newton_max_iter);
       }
 
       // Project previous time level solution on the stage space,

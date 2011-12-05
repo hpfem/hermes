@@ -683,7 +683,7 @@ namespace Hermes
         for (int i = 0; i < wf->get_neq(); i++)
         {
           Solution<Scalar>* external_solution_i = new Solution<Scalar>(spaces[i]->get_mesh());
-          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, true, first_dof);
+          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], external_solution_i, !RungeKutta, first_dof);
           current_u_ext.push_back(external_solution_i);
           first_dof += spaces[i]->get_num_dofs();
         }
@@ -1056,6 +1056,11 @@ namespace Hermes
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
       ExtData<Scalar> ext;
       init_ext(form, u_ext, &ext, order);
+      
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(RungeKutta)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // Init geometry.
       int n_quadrature_points;
@@ -1082,11 +1087,6 @@ namespace Hermes
                 continue;
               Func<double>* u = get_fn(this->pss[form->j], this->current_refmap[form->j], order);
               Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
-
-              // Add the previous time level solution previously inserted at the back of ext.
-              if(RungeKutta)
-                for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-                  u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
               if(surface_form)
                 local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
@@ -1190,12 +1190,18 @@ namespace Hermes
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : current_u_ext.size() - form->u_ext_offset];
       ExtData<Scalar> ext;
       init_ext(form, u_ext, &ext, order);
+      
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(RungeKutta)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
       {
         if (current_al[form->i]->dof[i] < 0)
           continue;
+
         current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
         
         // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
@@ -1203,11 +1209,6 @@ namespace Hermes
           continue;
 
         Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
-
-        // Add the previous time level solution previously inserted at the back of ext.
-        if(RungeKutta)
-          for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-            u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
         
         if(surface_form)
           current_rhs->add(current_al[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);
