@@ -502,9 +502,7 @@ namespace Hermes
             mutable_spaces.push_back(const_cast<Space<Scalar>*>(spaces.at(i)));
             spaces_first_dofs[i] = 0;
           }
-
           Space<Scalar>::assign_dofs(mutable_spaces);
-
         }
 
         // Loop through all elements.
@@ -942,9 +940,37 @@ namespace Hermes
           if(!form_to_be_assembled(*it))
             continue;
         
+          Func<double>** base_fns = new Func<double>*[current_al[(*it)->j]->cnt];
+          Func<double>** test_fns = new Func<double>*[current_al[(*it)->i]->cnt];
+          
           int order = calc_order_matrix_form(*it);
         
-          assemble_matrix_form(*it, order);
+          for (unsigned int i = 0; i < current_al[(*it)->i]->cnt; i++)
+          {
+            if (std::abs(current_al[(*it)->i]->coef[i]) < 1e-12)
+              continue;
+            if (current_al[(*it)->i]->dof[i] >= 0)
+            {
+              current_spss[(*it)->i]->set_active_shape(current_al[(*it)->i]->idx[i]);
+              test_fns[i] = get_fn(this->current_spss[(*it)->i], this->current_refmap[(*it)->i], order);
+            }
+          }
+
+          for (unsigned int j = 0; j < current_al[(*it)->j]->cnt; j++)
+          {
+            if (std::abs(current_al[(*it)->j]->coef[j]) < 1e-12)
+                continue;
+            if (current_al[(*it)->j]->dof[j] >= 0)
+            {
+              this->pss[(*it)->j]->set_active_shape(current_al[(*it)->j]->idx[j]);
+              base_fns[j] = get_fn(this->pss[(*it)->j], this->current_refmap[(*it)->j], order);
+            }
+          }
+
+          assemble_matrix_form(*it, order, base_fns, test_fns);
+
+          delete [] base_fns;
+          delete [] test_fns;
         }
       }
     
@@ -955,9 +981,24 @@ namespace Hermes
           if(!form_to_be_assembled(*it))
               continue;
         
+          Func<double>** test_fns = new Func<double>*[current_al[(*it)->i]->cnt];
+          
           int order = calc_order_vector_form(*it);
         
-          assemble_vector_form(*it, order);
+          for (unsigned int i = 0; i < current_al[(*it)->i]->cnt; i++)
+          {
+            if (std::abs(current_al[(*it)->i]->coef[i]) < 1e-12)
+              continue;
+            if (current_al[(*it)->i]->dof[i] >= 0)
+            {
+              current_spss[(*it)->i]->set_active_shape(current_al[(*it)->i]->idx[i]);
+              test_fns[i] = get_fn(this->current_spss[(*it)->i], this->current_refmap[(*it)->i], order);
+            }
+          }
+
+          assemble_vector_form(*it, order, test_fns);
+
+          delete [] test_fns;
         }
       }
 
@@ -977,9 +1018,37 @@ namespace Hermes
             if(!form_to_be_assembled(*it))
               continue;
         
+            Func<double>** base_fns = new Func<double>*[current_al[(*it)->j]->cnt];
+            Func<double>** test_fns = new Func<double>*[current_al[(*it)->i]->cnt];
+          
             int order = calc_order_matrix_form(*it);
         
-            assemble_matrix_form(*it, order);
+            for (unsigned int i = 0; i < current_al[(*it)->i]->cnt; i++)
+            {
+              if (std::abs(current_al[(*it)->i]->coef[i]) < 1e-12)
+                continue;
+              if (current_al[(*it)->i]->dof[i] >= 0)
+              {
+                current_spss[(*it)->i]->set_active_shape(current_al[(*it)->i]->idx[i]);
+                test_fns[i] = get_fn(this->current_spss[(*it)->i], this->current_refmap[(*it)->i], quad->get_edge_points(current_isurf, order));
+              }
+            }
+
+            for (unsigned int j = 0; j < current_al[(*it)->j]->cnt; j++)
+            {
+              if (std::abs(current_al[(*it)->j]->coef[j]) < 1e-12)
+                continue;
+              if (current_al[(*it)->j]->dof[j] >= 0)
+              {
+                this->pss[(*it)->j]->set_active_shape(current_al[(*it)->j]->idx[j]);
+                base_fns[j] = get_fn(this->pss[(*it)->j], this->current_refmap[(*it)->j], quad->get_edge_points(current_isurf, order));
+              }
+            }
+
+            assemble_matrix_form(*it, order, base_fns, test_fns);
+
+            delete [] base_fns;
+            delete [] test_fns;
           }
         }
     
@@ -990,9 +1059,24 @@ namespace Hermes
             if(!form_to_be_assembled(*it))
                 continue;
         
+            Func<double>** test_fns = new Func<double>*[current_al[(*it)->i]->cnt];
+          
             int order = calc_order_vector_form(*it);
         
-            assemble_vector_form(*it, order);
+            for (unsigned int i = 0; i < current_al[(*it)->i]->cnt; i++)
+            {
+              if (std::abs(current_al[(*it)->i]->coef[i]) < 1e-12)
+                continue;
+              if (current_al[(*it)->i]->dof[i] >= 0)
+              {
+                current_spss[(*it)->i]->set_active_shape(current_al[(*it)->i]->idx[i]);
+                test_fns[i] = get_fn(this->current_spss[(*it)->i], this->current_refmap[(*it)->i], quad->get_edge_points(current_isurf, order));
+              }
+            }
+
+            assemble_vector_form(*it, order, test_fns);
+
+            delete [] test_fns;
           }
         }
       }
@@ -1003,9 +1087,6 @@ namespace Hermes
 
       delete_cache();
     }
-    
-
-
 
     template<typename Scalar>
     int DiscreteProblem<Scalar>::calc_order_matrix_form(MatrixForm<Scalar> *form)
@@ -1039,7 +1120,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order)
+    void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns)
     {
       _F_;
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
@@ -1072,21 +1153,25 @@ namespace Hermes
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_al[form->i]->cnt; i++)
       {
+        if (current_al[form->i]->dof[i] < 0)
+          continue;
+
         if ((!tra || surface_form) && current_al[form->i]->dof[i] < 0) 
           continue;
-        current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
+        if(std::abs(current_al[form->i]->coef[i]) < 1e-12)
+          continue;
         if (!sym)
         {
           for (unsigned int j = 0; j < current_al[form->j]->cnt; j++)
           {
-            this->pss[form->j]->set_active_shape(current_al[form->j]->idx[j]);
             if (current_al[form->j]->dof[j] >= 0)
             {
               // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if (std::abs(current_al[form->i]->coef[i]) < 1e-12 || std::abs(current_al[form->j]->coef[j]) < 1e-12)
+              if (std::abs(current_al[form->j]->coef[j]) < 1e-12)
                 continue;
-              Func<double>* u = get_fn(this->pss[form->j], this->current_refmap[form->j], order);
-              Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
+              
+              Func<double>* u = base_fns[j];
+              Func<double>* v = test_fns[i];
 
               if(surface_form)
                 local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
@@ -1102,23 +1187,16 @@ namespace Hermes
           {
             if (j < i && current_al[form->j]->dof[j] >= 0)
               continue;
-            this->pss[form->j]->set_active_shape(current_al[form->j]->idx[j]);
             if (current_al[form->j]->dof[j] >= 0)
             {
-              Scalar val = 0;
               // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if (std::abs(current_al[form->i]->coef[i]) < 1e-12 || std::abs(current_al[form->j]->coef[j]) < 1e-12)
+              if (std::abs(current_al[form->j]->coef[j]) < 1e-12)
                 continue;
 
-              Func<double>* u = get_fn(this->pss[form->j], this->current_refmap[form->j], order);
-              Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
+              Func<double>* u = base_fns[j];
+              Func<double>* v = test_fns[i];
 
-              // Add the previous time level solution previously inserted at the back of ext.
-              if(RungeKutta)
-                for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-                  u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-              val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
+              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->j]->coef[j] * current_al[form->i]->coef[i];
 
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
@@ -1174,7 +1252,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order)
+    void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns)
     {
       _F_;
       bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
@@ -1202,13 +1280,11 @@ namespace Hermes
         if (current_al[form->i]->dof[i] < 0)
           continue;
 
-        current_spss[form->i]->set_active_shape(current_al[form->i]->idx[i]);
-        
         // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
         if (std::abs(current_al[form->i]->coef[i]) < 1e-12)
           continue;
 
-        Func<double>* v = get_fn(this->current_spss[form->i], this->current_refmap[form->i], order);
+        Func<double>* v = test_fns[i];
         
         if(surface_form)
           current_rhs->add(current_al[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_al[form->i]->coef[i]);

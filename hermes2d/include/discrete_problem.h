@@ -187,13 +187,13 @@ namespace Hermes
       int calc_order_matrix_form(MatrixForm<Scalar>* mfv);
 
       /// Matrix volumetric forms - assemble the form.
-      void assemble_matrix_form(MatrixForm<Scalar>* form, int order);
+      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns);
 
       /// Vector volumetric forms - calculate the integration order.
       int calc_order_vector_form(VectorForm<Scalar>* mfv);
 
       /// Vector volumetric forms - assemble the form.
-      void assemble_vector_form(VectorForm<Scalar>* form, int order);
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns);
 
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
