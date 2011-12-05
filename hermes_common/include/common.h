@@ -54,6 +54,8 @@
 #include <fstream>
 #include <cstring>
 
+#include <omp.h>
+
 #include "hermes_logging.h"
 #include "hermes_function.h"
 #include "common_time_period.h"
