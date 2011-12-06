@@ -23,20 +23,15 @@ namespace Hermes
   namespace Hermes2D
   {
     /// H(div) shapeset based on Legendre polynomials.
-    class HERMES_API HdivShapesetLegendre : public Shapeset
+    class HERMES_API HdivShapeset : public Shapeset
     {
-    public: HdivShapesetLegendre();
+    public: HdivShapeset();
     protected:
       virtual int get_id() const { return 20; }
       virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
       virtual void set_mode(int mode);
     };
-
-
-
-    /// This is the default Hdiv shapeset typedef.
-    typedef HdivShapesetLegendre HdivShapeset;
   }
 }
 #endif

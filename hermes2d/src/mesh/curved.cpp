@@ -27,7 +27,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    H1ShapesetJacobi CurvMap::ref_map_shapeset;
+    H1Shapeset CurvMap::ref_map_shapeset;
     PrecalcShapeset CurvMap::ref_map_pss(&ref_map_shapeset);
 
     double** CurvMap::edge_proj_matrix = NULL;

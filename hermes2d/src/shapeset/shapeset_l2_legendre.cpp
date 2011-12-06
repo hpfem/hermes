@@ -5581,7 +5581,7 @@ namespace Hermes
     };
 
 
-    L2ShapesetLegendre::L2ShapesetLegendre()
+    L2Shapeset::L2Shapeset()
     {
       shape_table[0] = leg_shape_fn_table;
       shape_table[1] = leg_shape_fn_table_dx;

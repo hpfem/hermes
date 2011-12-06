@@ -15836,7 +15836,7 @@ namespace Hermes
 
 
 
-    HcurlShapesetGradLeg::HcurlShapesetGradLeg()
+    HcurlShapeset::HcurlShapeset()
     {
       shape_table[0] = gradleg_shape_fn_table;
       shape_table[1] = gradleg_shape_fn_table_x;

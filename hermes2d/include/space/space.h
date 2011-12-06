@@ -22,6 +22,7 @@
 #include "../mesh/traverse.h"
 #include "../quadrature/quad_all.h"
 #include "../boundary_conditions/essential_boundary_conditions.h"
+#include "../hermes2d_common_defs.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 

@@ -22,7 +22,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    H1ShapesetJacobi ref_map_shapeset;
+    H1Shapeset ref_map_shapeset;
     PrecalcShapeset ref_map_pss(&ref_map_shapeset);
 
     RefMap::RefMap()
