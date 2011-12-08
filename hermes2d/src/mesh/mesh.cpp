@@ -125,19 +125,22 @@ namespace Hermes
 
     bool Element::hsplit() const 
     {
-      assert(!active);
+      if(active)
+        return false;
       return sons[0] != NULL; 
     }
 
     bool Element::vsplit() const 
     {
-      assert(!active);
+      if(active)
+        return false;
       return sons[2] != NULL; 
     }
 
     bool Element::bsplit() const 
     {
-      assert(!active);
+      if(active)
+        return false;
       return sons[0] != NULL && sons[2] != NULL; 
     }
 

@@ -77,11 +77,10 @@ namespace Hermes
       private:
         State();
         void operator=(const State & other);
+        void push_transform(int son, int i);
+        uint64_t get_transform(int i);
         bool visited;
-        Rect  cr;
-        Rect* er;
-        uint64_t lo[3], hi[3];
-        int* trans;
+        uint64_t* sub_idx;
         int num;
       friend class Traverse;
       };

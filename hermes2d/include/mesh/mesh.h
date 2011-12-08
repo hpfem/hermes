@@ -153,6 +153,10 @@ namespace Hermes
       bool is_quad() const;
       bool is_curved() const;
       int get_nvert() const;
+      
+      bool hsplit() const;
+      bool vsplit() const;
+      bool bsplit() const;
 
     protected:
       int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
@@ -160,10 +164,6 @@ namespace Hermes
       // helper functions to obtain the index of the next or previous vertex/edge
       int next_vert(int i) const;
       int prev_vert(int i) const;
-
-      bool hsplit() const;
-      bool vsplit() const;
-      bool bsplit() const;
 
       /// Returns a pointer to the neighboring element across the edge 'ie', or
       /// NULL if it does not exist or is across an irregular edge.
