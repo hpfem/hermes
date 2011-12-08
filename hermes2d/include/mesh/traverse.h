@@ -67,16 +67,23 @@ namespace Hermes
     ///
     class HERMES_API Traverse
     {
-    private:struct State
+    private:
+      class State
       {
-        bool visited;
+      public:
         Element** e;
+        bool bnd[4];
+        Element* rep;
+      private:
+        State();
+        void operator=(const State & other);
+        bool visited;
         Rect  cr;
         Rect* er;
-        bool bnd[4];
         uint64_t lo[3], hi[3];
         int* trans;
-        Element* rep;
+        int num;
+      friend class Traverse;
       };
 
       void begin(int n, Mesh** meshes, Transformable** fn = NULL);

@@ -21,7 +21,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
+    static int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
     {
       uint64_t hmid = (er->l + er->r) >> 1;
       uint64_t vmid = (er->t + er->b) >> 1;
@@ -89,7 +89,7 @@ namespace Hermes
     }
 
 
-    void init_transforms(Transformable* fn, Rect* cr, Rect* er)
+    static void init_transforms(Transformable* fn, Rect* cr, Rect* er)
     {
       Rect r;
       memcpy(&r, er, sizeof(Rect));
@@ -452,6 +452,38 @@ namespace Hermes
       }
     }
 
+    Traverse::State::State()
+    {
+      memset(this, 0, sizeof(Traverse::State));
+    }
+
+    void Traverse::State::operator=(const State & other)
+    {
+      // Delete part.
+      if(e != NULL)
+        delete [] e;
+      if(er != NULL)
+        delete [] er;
+      if(trans != NULL)
+        delete [] trans;
+
+      this->num = other.num;
+
+      this->e = new Element*[num];
+      this->er = new Rect[num];
+      this->trans = new int[num];
+      memcpy(this->e, other.e, num * sizeof(Element*));
+      memcpy(this->er, other.er, num * sizeof(Rect));
+      memcpy(this->trans, other.trans, num * sizeof(int));
+
+      memcpy(this->lo, other.lo, 3 * sizeof(uint64_t));
+      memcpy(this->hi, other.hi, 3 * sizeof(uint64_t));
+      memcpy(this->bnd, other.bnd, 4 * sizeof(bool));
+
+      this->rep = other.rep;
+      this->visited = other.visited;
+      this->cr = other.cr;
+    }
 
     void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
     {

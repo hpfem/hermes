@@ -195,7 +195,6 @@ namespace Hermes
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns);
 
-
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Init geometry, jacobian * weights, return the number of integration points.
       int init_geometry_points(RefMap* reference_mapping, int order);
@@ -214,7 +213,6 @@ namespace Hermes
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext.
       void deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext);
-
       
       /// Init function. Common code for the constructors.
       void init();

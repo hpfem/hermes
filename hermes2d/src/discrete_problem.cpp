@@ -846,6 +846,7 @@ namespace Hermes
           assemble_one_state();
       }
 
+      /// \todo Should this be really here? Or in assemble()?
       if (current_mat != NULL)
         current_mat->finish();
       if (current_rhs != NULL)
