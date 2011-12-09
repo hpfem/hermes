@@ -134,7 +134,6 @@ namespace Hermes
       friend class CurvMap;
       friend class Traverse;
       friend class Views::Vectorizer;
-      friend void init_transforms(Transformable* fn, Rect* cr, Rect* er);
     };
   }
 }

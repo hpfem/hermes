@@ -210,7 +210,6 @@ namespace Hermes
       friend class Views::Vectorizer;
       friend bool is_twin_nurbs(Element* e, int i);
       friend int rtb_criterion(Element* e);
-      friend int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons);
       friend CurvMap* create_son_curv_map(Element* e, int son);
     };
 

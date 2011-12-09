@@ -107,33 +107,6 @@ namespace Hermes
       }
     }
 
-    static void init_transforms(Transformable* fn, Rect* cr, Rect* er)
-    {
-      _F_;
-      Rect r;
-      memcpy(&r, er, sizeof(Rect));
-
-      while (cr->l > r.l || cr->r < r.r || cr->b > r.b || cr->t < r.t)
-      {
-        uint64_t hmid = (r.l + r.r) >> 1;
-        uint64_t vmid = (r.t + r.b) >> 1;
-        int son;
-
-        if(cr->r <= hmid && cr->t <= vmid) son = 0;
-        else if(cr->l >= hmid && cr->t <= vmid) son = 1;
-        else if(cr->l >= hmid && cr->b >= vmid) son = 2;
-        else if(cr->r <= hmid && cr->b >= vmid) son = 3;
-        else if(cr->r <= hmid) son = 6;
-        else if(cr->l >= hmid) son = 7;
-        else if(cr->t <= vmid) son = 4;
-        else if(cr->b >= vmid) son = 5;
-        else assert(0);
-
-        fn->push_transform(son);
-        move_to_son(&r, &r, son);
-      }
-    }
-
     Traverse::State::State()
     {
       _F_;
