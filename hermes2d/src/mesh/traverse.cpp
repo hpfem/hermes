@@ -164,18 +164,37 @@ namespace Hermes
       this->visited = other.visited;
     }
 
-    void Traverse::State::push_transform(int son, int i)
+    void Traverse::State::push_transform(int son, int i, bool is_triangle)
     {
       _F_;
-      this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
-      if(son != 0 && son != 1 && son != 4)
-        bnd[0] = false;
-      if(son != 1 && son != 2 && son != 7)
-        bnd[1] = false;
-      if(son != 2 && son != 3 && son != 5)
-        bnd[2] = false;
-      if(son != 3 && son != 0 && son != 6)
-        bnd[3] = false;
+      if(is_triangle)
+      {
+        if(son < 3)
+        {
+          switch (son)
+          {
+            case 0: bnd[1] = false; break;
+            case 1: bnd[2] = false; break;
+            case 2: bnd[0] = false; break;
+          }
+        }
+        else
+        {
+          memset(bnd, 0, sizeof(bnd));
+        }
+      }
+      else
+      {
+        this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
+        if(son != 0 && son != 1 && son != 4)
+          bnd[0] = false;
+        if(son != 1 && son != 2 && son != 7)
+          bnd[1] = false;
+        if(son != 2 && son != 3 && son != 5)
+          bnd[2] = false;
+        if(son != 3 && son != 0 && son != 6)
+          bnd[3] = false;
+      }
     }
 
     uint64_t Traverse::State::get_transform(int i)
@@ -213,7 +232,7 @@ namespace Hermes
 
       if(s->rep->is_triangle())
         for (int i = 0; i < 3; i++)
-          s->bnd[i] = (e->en[i]->bnd);
+          s->bnd[i] = s->bnd[i] && (e->en[i]->bnd);
       else
       {
         s->bnd[0] = s->bnd[0] && e->en[0]->bnd;
@@ -332,40 +351,20 @@ namespace Hermes
               {
                 ns->e[i] = NULL;
               }
-              else
-                ns->rep = s->e[i];
-              // ..if the current element is active.
-              if(s->e[i] != NULL && s->e[i]->active)
+              else if(s->e[i]->active)
               {
+                ns->rep = s->e[i];
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = s->sub_idx[i];
-                ns->push_transform(son, i);
+                ns->push_transform(son, i, true);
               }
               // ..we move to the son.
               else
               {
                 ns->e[i] = s->e[i]->sons[son];
-                // If the son's element is active.
-                if(ns->e[i]->active)
-                  ns->sub_idx[i] = 0;
+                if(ns->e[i] != NULL)
+                  ns->rep = ns->e[i];
+                ns->sub_idx[i] = 0;
               }
-            }
-
-            // Determine boundary flags and positions for the new state.
-            if(son < 3)
-            {
-              memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
-
-              switch (son)
-              {
-              case 0: ns->bnd[1] = false; break;
-              case 1: ns->bnd[2] = false; break;
-              case 2: ns->bnd[0] = false; break;
-              }
-            }
-            else
-            {
-              memset(ns->bnd, 0, sizeof(ns->bnd));
             }
           }
         }

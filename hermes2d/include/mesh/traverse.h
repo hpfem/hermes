@@ -77,7 +77,7 @@ namespace Hermes
       private:
         State();
         void operator=(const State & other);
-        void push_transform(int son, int i);
+        void push_transform(int son, int i, bool is_triangle = false);
         uint64_t get_transform(int i);
         bool visited;
         uint64_t* sub_idx;
