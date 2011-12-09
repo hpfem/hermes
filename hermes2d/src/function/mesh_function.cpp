@@ -95,7 +95,7 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_active_element(Element* e)
     {
-      this->element = e;
+      Transformable::set_active_element(e);
       mode = e->get_mode();
       refmap->set_active_element(e);
       Function<Scalar>::reset_transform();

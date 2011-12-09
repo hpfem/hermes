@@ -162,7 +162,8 @@ namespace Hermes
       assert(num_tables <= H2D_MAX_TABLES);
 
       if (e == element) return;
-      element = e;
+      Transformable::set_active_element(e);
+
 
       reset_transform();
       update_cur_node();

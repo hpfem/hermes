@@ -80,6 +80,7 @@ namespace Hermes
       _F_
         if (e==NULL) throw Exceptions::NullException(1);
       element = e;
+      this->reset_transform();
     }
 
     void Transformable::set_transform(uint64_t idx)

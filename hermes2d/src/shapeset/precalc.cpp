@@ -102,7 +102,7 @@ namespace Hermes
       mode = e->get_mode();
       shapeset->set_mode(mode);
       get_quad_2d()->set_mode(mode);
-      element = e;
+      Transformable::set_active_element(e);
     }
 
 
