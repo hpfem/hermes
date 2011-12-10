@@ -107,12 +107,12 @@ namespace Hermes
 
     protected:
       /// The form will be assembled.
-      bool form_to_be_assembled(MatrixForm<Scalar>* form);
-      bool form_to_be_assembled(MatrixFormVol<Scalar>* form);
-      bool form_to_be_assembled(MatrixFormSurf<Scalar>* form);
-      bool form_to_be_assembled(VectorForm<Scalar>* form);
-      bool form_to_be_assembled(VectorFormVol<Scalar>* form);
-      bool form_to_be_assembled(VectorFormSurf<Scalar>* form);
+      bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
+      bool form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state);
+      bool form_to_be_assembled(MatrixFormSurf<Scalar>* form, Traverse::State* current_state);
+      bool form_to_be_assembled(VectorForm<Scalar>* form, Traverse::State* current_state);
+      bool form_to_be_assembled(VectorFormVol<Scalar>* form, Traverse::State* current_state);
+      bool form_to_be_assembled(VectorFormSurf<Scalar>* form, Traverse::State* current_state);
 
       // Return scaling coefficient.
       double block_scaling_coeff(MatrixForm<Scalar>* form);
@@ -136,9 +136,6 @@ namespace Hermes
       /// Get all spaces as a Hermes::vector.
       Hermes::vector<const Space<Scalar>*> get_spaces();
 
-      /// This is different from H3D.
-      PrecalcShapeset* get_pss(int n);
-
       /// Preassembling.
       /// Precalculate matrix sparse structure.
       /// If force_diagonal_block == true, then (zero) matrix
@@ -149,67 +146,49 @@ namespace Hermes
       void create_sparse_structure();
       void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
 
-      /// Initializes psss.
-      void init_psss();
-
-      /// Initializes refmaps.
-      void init_refmaps();
-      
-      /// Initializes u_ext.
-      void init_u_ext(Scalar* coeff_vec);
-      
-      /// De-initializes u_ext.
-      void deinit_u_ext();
-
-      /// De-initializes psss.
-      void deinit_psss();
-
-      /// De-initializes refmaps.
-      void deinit_refmaps();
-
       /// Initialize a state, returns a non-NULL Element.
-      Element* init_state();
-      void init_surface_state();
+      Element* init_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
+      void init_surface_state(AsmList<Scalar>** current_als, Traverse::State* current_state);
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
       inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
       /// Assemble one stage.
-      void assemble_one_stage();
+      void assemble_one_stage(Scalar* coeff_vec);
 
       /// Assemble one state.
-      void assemble_one_state();
+      void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
       
       /// Adjusts order to refmaps.
-      void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o);
+      void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
       /// Matrix volumetric forms - calculate the integration order.
-      int calc_order_matrix_form(MatrixForm<Scalar>* mfv);
+      int calc_order_matrix_form(MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Matrix volumetric forms - assemble the form.
-      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns);
+      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
       /// Vector volumetric forms - calculate the integration order.
-      int calc_order_vector_form(VectorForm<Scalar>* mfv);
+      int calc_order_vector_form(VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Vector volumetric forms - assemble the form.
-      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns);
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Init geometry, jacobian * weights, return the number of integration points.
       int init_geometry_points(RefMap* reference_mapping, int order);
-      int init_surface_geometry_points(RefMap* reference_mapping, int& order);
+      int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state);
       
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
-      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
+      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext, Solution<Scalar>** current_u_ext);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
       void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates external functions.
-      void init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order);
+      void init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext.
       void deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext);
@@ -370,9 +349,6 @@ namespace Hermes
       /// If other conditions apply.
       bool have_matrix;
 
-      /// PrecalcShapeset instances for the problem (as many as equations in the system).
-      PrecalcShapeset** pss;
-
       /// Geometry cache.
       Geom<double>* geometry_cache[g_max_quad + 1 + 4* g_max_quad + 4];
 
@@ -397,12 +373,6 @@ namespace Hermes
       Vector<Scalar>* current_rhs;
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
-      Traverse::State* current_state;
-      int current_isurf;
-      Hermes::vector<RefMap *> current_refmap;
-      Hermes::vector<PrecalcShapeset *> current_spss;
-      Hermes::vector<Solution<Scalar>*> current_u_ext;
-      Hermes::vector<AsmList<Scalar>*> current_al;
 
       Quad2D* quad;
       

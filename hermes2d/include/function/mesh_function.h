@@ -66,6 +66,8 @@ namespace Hermes
 
       virtual void pop_transform();
 
+      virtual MeshFunction* clone() { error("You need to implement MeshFunction::clone() to be able to use it"); return NULL; }
+
     protected:
 
       ElementMode2D mode;

@@ -82,13 +82,16 @@ namespace Hermes
         bool visited;
         uint64_t* sub_idx;
         int num;
+        int isurf;
       friend class Traverse;
+      template<typename Scalar> friend class DiscreteProblem;
       };
 
       void begin(int n, Mesh** meshes, Transformable** fn = NULL);
       void finish();
 
-      State* get_next_state();
+      State* get_next_state(int* top_by_ref = NULL, int* id_by_ref = NULL);
+      int get_num_states(Mesh* mesh);
       inline Element*  get_base() const { return base; }
 
       UniData** construct_union_mesh(Mesh* unimesh);
@@ -109,7 +112,7 @@ namespace Hermes
       UniData** unidata;
       int udsize;
 
-      State* push_state();
+      State* push_state(int* top_by_ref = NULL);
       void set_boundary_info(State* s);
       void union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni);
       uint64_t init_idx(Rect* cr, Rect* er);

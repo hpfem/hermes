@@ -176,23 +176,28 @@ namespace Hermes
       return this->sub_idx[i];
     }
 
-    Traverse::State* Traverse::push_state()
+    Traverse::State* Traverse::push_state(int* top_by_ref)
     {
+#define kod_co_se_dela_jednou
       _F_;
-      if(top >= size) 
+
+      int top_f = (top_by_ref == NULL) ? top : *top_by_ref;
+
+      if(top_f >= size) 
         error("Stack overflow. Increase stack size.");
 
-      if(stack[top].e == NULL)
+      if(stack[top_f].e == NULL)
       {
-        stack[top].e = new Element*[num];
-        stack[top].sub_idx = new uint64_t[num];
+        stack[top_f].e = new Element*[num];
+        stack[top_f].sub_idx = new uint64_t[num];
       }
 
-      stack[top].visited = false;
-      memset(stack[top].sub_idx, 0, num * sizeof(uint64_t));
+      stack[top_f].visited = false;
+      memset(stack[top_f].sub_idx, 0, num * sizeof(uint64_t));
       for(int i = 0; i < 4; i++)
-        stack[top].bnd[i] = true;
-      return stack + top++;
+        stack[top_f].bnd[i] = true;
+      return stack + top_f++;
+#define kod_co_se_dela_jednou
     }
 
     void Traverse::set_boundary_info(Traverse::State* s)
@@ -215,10 +220,150 @@ namespace Hermes
       }
     }
 
+    int Traverse::get_num_states(Mesh* mesh)
+    {
+      this->begin(1, &mesh);
+      int count = 0;
+      _F_;
+      while (1)
+      {
+        int i, son;
+        State* s;
+        while (top > 0 && (s = stack + top-1)->visited)
+          top--;
+        if(top <= 0)
+        {
+          s = push_state();
+          while (1)
+          {
+            if(id >= meshes[0]->get_num_base_elements())
+              return NULL;
+            int nused = 0;
+            s->e[0] = meshes[0]->get_element(id);
+            if(!s->e[0]->used)
+            {
+              s->e[0] = NULL;
+              continue;
+            }
+            nused++;
+            if(nused)
+              break;
+            id++;
+          }
+          id++;
+        }
+
+        s->visited = true;
+
+        bool leaf = true;
+        if(s->e[0] != NULL)
+          if(!s->e[0]->active)
+          {
+            leaf = false;
+            break;
+          }
+
+        if(leaf)
+          count++;
+        if(s->rep->is_triangle())
+        {
+          for (son = 0; son <= 3; son++)
+          {
+            State* ns = push_state();
+            if(s->e[0] == NULL)
+              ns->e[0] = NULL;
+            else if(s->e[0]->active)
+              ns->e[0] = s->e[0];
+            else
+              ns->e[0] = s->e[0]->sons[son];
+          }
+        }
+        else
+        {
+          int split = 0;
+          for (i = 0; i < num; i++)
+            if(s->e[0] != NULL && !s->e[0]->active)
+              split |= get_split(s->e[0]);
+
+          if(split == 3)
+          {
+            for (son = 0; son <= 3; son++)
+            {
+              State* ns = push_state();
+              if(s->e[0] == NULL)
+                ns->e[0] = NULL;
+              else
+              {
+                if(s->e[0]->active)
+                  ns->e[0] = s->e[0];
+                else if(s->e[0]->bsplit())
+                  ns->e[0] = s->e[0]->sons[son];
+                else if(s->e[0]->hsplit())
+                  ns->e[0] = s->e[0]->sons[son / 2];
+                else if(s->e[0]->vsplit())
+                  ns->e[0] = s->e[0]->sons[(son / 2) + 2];
+                if(ns->e[0] != NULL)
+                  ns->rep = ns->e[0];
+              }
+            }
+          }
+          else if(split == 1)
+          {
+            int son0 = 4, son1 = 5;
+            for (son = son0; son <= son1; son++)
+            {
+              State* ns = push_state();
+              if(s->e[0] == NULL)
+                ns->e[0] = NULL;
+              else
+              {
+                if(s->e[0]->active)
+                  ns->e[0] = s->e[0];
+                else if(s->e[0]->hsplit())
+                  ns->e[0] = s->e[0]->sons[son - 4];
+                if(ns->e[0] != NULL)
+                  ns->rep = ns->e[0];
+              }
+            }
+          }
+          else if(split == 2)
+          {
+            int son0 = 6, son1 = 7;
+            for (son = son0; son <= son1; son++)
+            {
+              State* ns = push_state();
+              if(s->e[0] == NULL)
+                ns->e[0] = NULL;
+              else
+              {
+                if(s->e[0]->active)
+                  ns->e[0] = s->e[0];
+                else if(s->e[0]->vsplit())
+                  ns->e[0] = s->e[0]->sons[son - 4];
+                if(ns->e[0] != NULL)
+                  ns->rep = ns->e[0];
+              }
+            }
+          }
+          else
+          {
+            State* ns = push_state();
+            if(s->e[0] == NULL)
+              ns->e[0] = NULL;
+            else
+              ns->e[0] = s->e[0];
+          }
+        }
+      }
+      this->finish();
+      return count;
+    }
+
     ////////////
-    Traverse::State* Traverse::get_next_state()
+    Traverse::State* Traverse::get_next_state(int* top_by_ref, int* id_by_ref)
     {
       _F_;
+#define tady_to_jen_na_1_vlakne
       while (1)
       {
         int i, son;
@@ -226,14 +371,16 @@ namespace Hermes
         // If the top state was visited already, we are returning through it:
         // undo all its transformations, pop it and continue with a non-visited one
         State* s;
-        while (top > 0 && (s = stack + top-1)->visited)
-        {
-          top--;
-        }
+        // Serial / parallel code.
+        int top_f = (top_by_ref == NULL) ? top : *top_by_ref;
+        int id_f = (id_by_ref == NULL) ? id : *id_by_ref;
+
+        while (top_f > 0 && (s = stack + top_f-1)->visited)
+          top_f--;
 
         // The stack is empty, take next base element
         // The process starts here (at the beginning the stack is always empty, i.e. top == 0)
-        if(top <= 0)
+        if(top_f <= 0)
         {
           // Push the state of a new base element.
           // This function only allocates memory for the new state,
@@ -269,11 +416,12 @@ namespace Hermes
             // (break this cycle looking for such an element id).
             if(nused)
               break;
-            id++;
+            id_f++;
           }
 
-          id++;
+          id_f++;
         }
+#define tady_konci_to_co_se_musi_delat_jednou
 
         // Entering a new state: perform the transformations for it
         s->visited = true;

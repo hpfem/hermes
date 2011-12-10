@@ -312,7 +312,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::get_stages(Hermes::vector<const Space<Scalar> *> spaces, Hermes::vector<Solution<Scalar> *>& u_ext,
+    void WeakForm<Scalar>::get_stages(Hermes::vector<const Space<Scalar> *> spaces, 
       Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage) const
     {
       _F_;
@@ -332,7 +332,7 @@ namespace Hermes
           unsigned int ii = mfvol[i]->i, jj = mfvol[i]->j;
           Mesh* m1 = spaces[ii]->get_mesh();
           Mesh* m2 = spaces[jj]->get_mesh();
-          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, u_ext, one_stage);
+          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfvol[i]->ext, one_stage);
           s->forms.push_back(mfvol[i]);
           s->mfvol.push_back(mfvol[i]);
         }
@@ -343,7 +343,7 @@ namespace Hermes
           unsigned int ii = mfsurf[i]->i, jj = mfsurf[i]->j;
           Mesh* m1 = spaces[ii]->get_mesh();
           Mesh* m2 = spaces[jj]->get_mesh();
-          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, u_ext, one_stage);
+          Stage<Scalar>* s = find_stage(stages, ii, jj, m1, m2, mfsurf[i]->ext, one_stage);
           s->forms.push_back(mfsurf[i]);
           s->mfsurf.push_back(mfsurf[i]);
         }
@@ -355,7 +355,7 @@ namespace Hermes
         {
           unsigned int ii = vfvol[i]->i;
           Mesh *m = spaces[ii]->get_mesh();
-          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, u_ext, one_stage);
+          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfvol[i]->ext, one_stage);
           s->forms.push_back(vfvol[i]);
           s->vfvol.push_back(vfvol[i]);
         }
@@ -365,7 +365,7 @@ namespace Hermes
         {
           unsigned int ii = vfsurf[i]->i;
           Mesh *m = spaces[ii]->get_mesh();
-          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, u_ext, one_stage);
+          Stage<Scalar>*s = find_stage(stages, ii, ii, m, m, vfsurf[i]->ext, one_stage);
           s->forms.push_back(vfsurf[i]);
           s->vfsurf.push_back(vfsurf[i]);
         }
@@ -408,7 +408,7 @@ namespace Hermes
     template<typename Scalar>
     Stage<Scalar>* WeakForm<Scalar>::find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj,
       Mesh* m1, Mesh* m2,
-      Hermes::vector<MeshFunction<Scalar>*>& ext, Hermes::vector<Solution<Scalar>*>& u_ext, bool one_stage) const
+      Hermes::vector<MeshFunction<Scalar>*>& ext, bool one_stage) const
     {
 
       _F_;
@@ -423,16 +423,7 @@ namespace Hermes
         if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
         seq.insert(mmm->get_seq());
       }
-      for (unsigned i = 0; i < u_ext.size(); i++)
-      {
-        if (u_ext[i] != NULL)
-        {
-          mmm = u_ext[i]->get_mesh();
-          if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
-          seq.insert(mmm->get_seq());
-        }
-      }
-
+      
       // find a suitable existing stage for the form
       Stage<Scalar>* s = NULL;
       if(one_stage)
@@ -474,9 +465,6 @@ namespace Hermes
         // update and return the stage
         for (unsigned int i = 0; i < ext.size(); i++)
           s->ext_set.insert(ext[i]);
-        for (unsigned int i = 0; i < u_ext.size(); i++)
-          if (u_ext[i] != NULL)
-            s->ext_set.insert(u_ext[i]);
 
         s->idx_set.insert(ii);
         s->idx_set.insert(jj);
