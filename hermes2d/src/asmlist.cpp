@@ -37,9 +37,11 @@ namespace Hermes
     template<typename Scalar>
     AsmList<Scalar>::AsmList()
     {
-      idx = dof = NULL;
-      coef = NULL;
-      cnt = cap = 0;
+      cnt = 0;
+      cap = 128;
+      idx = (int*) malloc(sizeof(int) * cap);
+      dof = (int*) malloc(sizeof(int) * cap);
+      coef = (Scalar*) malloc(sizeof(Scalar) * cap);
     }
 
     template<typename Scalar>
@@ -71,7 +73,8 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
-      if (cnt >= cap) enlarge();
+      if (cnt >= cap)
+        enlarge();
       idx[cnt] = i;
       dof[cnt] = d;
       coef[cnt++] = c;
@@ -80,7 +83,7 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::enlarge()
     {
-      cap = !cap ? 256 : cap * 2;
+      cap = !cap ? 128 : cap * 2;
       idx = (int*) realloc(idx, sizeof(int) * cap);
       dof = (int*) realloc(dof, sizeof(int) * cap);
       coef = (Scalar*) realloc(coef, sizeof(Scalar) * cap);
