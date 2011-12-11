@@ -164,8 +164,6 @@ namespace Hermes
       if (e == element) return;
       Transformable::set_active_element(e);
 
-
-      reset_transform();
       update_cur_node();
 
       is_const = !element->is_curved() &&

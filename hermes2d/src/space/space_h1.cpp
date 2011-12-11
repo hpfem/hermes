@@ -264,7 +264,8 @@ namespace Hermes
       _F_;
       Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
-      if (this->get_element_order(e->id) == 0) return;
+      if (this->get_element_order(e->id) == 0)
+        return;
 
       if (nd->n >= 0) // unconstrained
       {

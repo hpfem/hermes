@@ -789,7 +789,7 @@ namespace Hermes
           ext[i][j] = current_stage->ext[j]->clone();
       }
       /***************************Ext bude opruz - musi se pak predelat pointery u forem */
-      Traverse trav_master;
+      Traverse trav_master(true);
       unsigned int num_states = trav_master.get_num_states(current_stage->meshes.front());
       
       trav_master.begin(current_stage->meshes.size(), &(current_stage->meshes.front()));
@@ -798,8 +798,6 @@ namespace Hermes
       Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        trav[i].stack = trav_master.stack;
-
         for (unsigned j = 0; j < current_stage->idx.size(); j++)
           fns[i].push_back(pss[i][current_stage->idx[j]]);
         /*
@@ -818,6 +816,7 @@ namespace Hermes
           u_ext[i][current_stage->idx[j]]->set_quad_2d(&g_quad_2d_std);
         }
         trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
+        trav[i].stack = trav_master.stack;
       }
       unsigned int i;
 //#pragma omp for shared(trav_master.top, trav_master.id, current_stage->meshes)
@@ -996,7 +995,7 @@ namespace Hermes
         // \todo DG.
         if(!current_state->bnd[current_state->isurf])
           continue;
-        
+
         init_surface_state(current_als, current_state);
 
         if (current_mat != NULL)

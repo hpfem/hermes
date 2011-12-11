@@ -67,6 +67,8 @@ namespace Hermes
     ///
     class HERMES_API Traverse
     {
+    public:
+      Traverse(bool master = false);
     private:
       class State
       {
@@ -118,6 +120,8 @@ namespace Hermes
       uint64_t init_idx(Rect* cr, Rect* er);
 
       void free_state(State* state);
+
+      bool master;
 
       Mesh* unimesh;
       template<typename T> friend class Adapt;

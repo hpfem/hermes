@@ -107,6 +107,10 @@ namespace Hermes
       }
     }
 
+    Traverse::Traverse(bool master) : master(master)
+    {
+    }
+
     Traverse::State::State()
     {
       _F_;
@@ -399,7 +403,7 @@ namespace Hermes
             for (i = 0; i < num; i++)
             {
               // Retrieve the Element with this id on the i-th mesh.
-              s->e[i] = meshes[i]->get_element(id);
+              s->e[i] = meshes[i]->get_element(*id_f);
               if(!s->e[i]->used)
               {
                 s->e[i] = NULL;
@@ -704,14 +708,18 @@ namespace Hermes
     void Traverse::finish()
     {
       _F_;
-      if(stack == NULL) return;
 
-      for (int i = 0; i < size; i++)
-        if(stack[i].e != NULL)
-          free_state(stack + i);
+      if(master)
+      {
+        if(stack == NULL) return;
 
-      delete [] stack;
-      stack = NULL;
+        for (int i = 0; i < size; i++)
+          if(stack[i].e != NULL)
+            free_state(stack + i);
+
+        delete [] stack;
+        stack = NULL;
+      }
 
       delete [] subs;
       delete [] sons;
