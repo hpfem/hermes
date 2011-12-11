@@ -32,26 +32,6 @@ namespace Hermes
   {
     class PrecalcShapeset;
 
-    /// Multimesh neighbors traversal class.
-    class NeighborNode
-    {
-    private:
-      NeighborNode(NeighborNode* parent, unsigned int transformation);
-      ~NeighborNode();
-      void set_left_son(NeighborNode* left_son);
-      void set_right_son(NeighborNode* right_son);
-      void set_transformation(unsigned int transformation);
-      NeighborNode* get_left_son();
-      NeighborNode* get_right_son();
-      unsigned int get_transformation();
-      NeighborNode* parent;
-      NeighborNode* left_son;
-      NeighborNode* right_son;
-      unsigned int transformation;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class KellyTypeAdapt;
-    };
-
     /// Discrete problem class.
     ///
     /// This class does assembling into external matrix / vector structures.
@@ -196,68 +176,6 @@ namespace Hermes
       /// Init function. Common code for the constructors.
       void init();
 
-      DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
-
-      /// Calculates integration order for DG matrix forms.
-      int calc_order_dg_matrix_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
-        bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
-
-      /// Assemble DG forms.
-      void assemble_DG_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base, Element* rep_element);
-
-      /// Assemble one DG neighbor.
-      void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset *>& spss, Hermes::vector<RefMap *>& refmap, std::map<unsigned int, PrecalcShapeset *> npss,
-        std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base, Element* rep_element);
-
-      /// Assemble DG matrix forms.
-      void assemble_DG_matrix_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, std::map<unsigned int, PrecalcShapeset*> npss,
-        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base, Element* rep_element);
-
-      /// Assemble DG vector forms.
-      void assemble_DG_vector_forms(Stage<Scalar>& stage,
-        SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights,
-        Hermes::vector<PrecalcShapeset*>& spss, Hermes::vector<RefMap*>& refmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Hermes::vector<Solution<Scalar>*>& u_ext,
-        int marker, Hermes::vector<AsmList<Scalar>*>& al, bool bnd, SurfPos& surf_pos, Hermes::vector<bool>& nat,
-        int isurf, Element** e, Element* trav_base, Element* rep_element);
-
-      /// Evaluates DG matrix forms on an edge between elements identified by ru_actual, rv.
-      Scalar eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv,
-        bool neighbor_supp_u, bool neighbor_supp_v,
-        SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
-
-      /// Calculates integration order for DG vector forms.
-      int calc_order_dg_vector_form(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
-
-      /// Evaluates DG vector forms on an edge between elements identified by ru_actual, rv.
-      Scalar eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv,
-        SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
-
-      /// Initialize orders of external functions for DG forms.
-      ExtData<Hermes::Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
-
-      /// Initialize external functions for DG forms.
-      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
-        int order);
-
       /// Uses assembling_caches to get (possibly cached) precalculated shapeset function values.
       Func<double>* get_fn(PrecalcShapeset* fu, RefMap* rm, const int order);
 
@@ -272,36 +190,6 @@ namespace Hermes
 
       /// Deinitialize a single geometry cache.
       void delete_single_geom_cache(int order);
-
-      /// Initialize neighbors.
-      void init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, const Stage<Scalar>& stage, const int& isurf);
-
-      /// Initialize the tree for traversing multimesh neighbors.
-      void build_multimesh_tree(NeighborNode* root, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
-
-      /// Recursive insertion function into the tree.
-      void insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count);
-
-      /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
-      Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree);
-
-      /// Traverse the multimesh tree. Used in the function get_multimesh_neighbors_transformations().
-      void traverse_multimesh_tree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
-
-      /// Update the NeighborSearch according to the multimesh tree.
-      void update_neighbor_search(NeighborSearch<Scalar>* ns, NeighborNode* multimesh_tree);
-
-      /// Finds a node in the multimesh tree that corresponds to the array transformations, with the length of transformation_count,
-      /// starting to look for it in the NeighborNode node.
-      NeighborNode* find_node(unsigned int* transformations, unsigned int transformation_count, NeighborNode* node);
-
-      /// Updates the NeighborSearch ns according to the subtree of NeighborNode node.
-      /// Returns 0 if no neighbor was deleted, -1 otherwise.
-      unsigned int update_ns_subtree(NeighborSearch<Scalar>* ns, NeighborNode* node, unsigned int ith_neighbor);
-
-      /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
-      void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
-        Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
       /// Returns the matrix_buffer of the size n.
       Scalar** get_matrix_buffer(int n);
@@ -377,7 +265,6 @@ namespace Hermes
       Quad2D* quad;
       
       void set_quad_2d(Quad2D* quad);
-
 
       /// Class handling various caches used in assembling.
       class AssemblingCaches

@@ -100,6 +100,11 @@ namespace Hermes
                                                      Hermes::vector<double>* component_errors,
                                                      unsigned int error_flags)
     {
+      /***************/
+      error("DG missing in this version.");
+      return 0.0;
+      /***************/
+      /*
       int n = slns.size();
       error_if (n != this->num,
         "Wrong number of solutions.");
@@ -242,7 +247,7 @@ namespace Hermes
                 if (error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE)
                   continue;
 
-                /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+                // BEGIN COPY FROM DISCRETE_PROBLEM.CPP
 
                 // 5 is for bits per page in the array.
                 LightArray<NeighborSearch<Scalar>*> neighbor_searches(5);
@@ -324,7 +329,7 @@ namespace Hermes
                       ns->central_transformations.get(neighbor)->apply_on(stage.fns[fns_i]);
                   }
 
-                  /* END COPY FROM DISCRETE_PROBLEM.CPP */
+                  // END COPY FROM DISCRETE_PROBLEM.CPP
                   rm->force_transform(this->sln[i]->get_transform(), this->sln[i]->get_ctm());
 
                   // The estimate is multiplied by 0.5 in order to distribute the error equally onto
@@ -364,7 +369,7 @@ namespace Hermes
                   else
                     err += central_err;
 
-                  /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+                  // BEGIN COPY FROM DISCRETE_PROBLEM.CPP 
 
                   // Clear the transformations from the RefMaps and all functions.
                   for(unsigned int fns_i = 0; fns_i < stage.fns.size(); fns_i++)
@@ -372,10 +377,10 @@ namespace Hermes
 
                   rm->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
 
-                  /* END COPY FROM DISCRETE_PROBLEM.CPP */
+                  // END COPY FROM DISCRETE_PROBLEM.CPP
                 }
 
-                /* BEGIN COPY FROM DISCRETE_PROBLEM.CPP */
+                // BEGIN COPY FROM DISCRETE_PROBLEM.CPP
 
                 // Delete the multimesh tree;
                 delete root;
@@ -385,7 +390,7 @@ namespace Hermes
                   if(neighbor_searches.present(j))
                     delete neighbor_searches.get(j);
 
-                /* END COPY FROM DISCRETE_PROBLEM.CPP */
+                // END COPY FROM DISCRETE_PROBLEM.CPP
 
               }
             }
@@ -465,6 +470,7 @@ namespace Hermes
         error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
+      */
     }
 
     template<typename Scalar>
@@ -517,6 +523,11 @@ namespace Hermes
     double KellyTypeAdapt<Scalar>::eval_volumetric_estimator(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form,
                                                              RefMap *rm)
     {
+      /***************/
+      error("DG missing in this version.");
+      return 0.0;
+      /***************/
+      /*
       // Determine the integration order.
       int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
 
@@ -595,12 +606,18 @@ namespace Hermes
       delete [] jwt;
 
       return std::abs(res);
+      */
     }
 
     template<typename Scalar>
     double KellyTypeAdapt<Scalar>::eval_boundary_estimator(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* err_est_form,
                                                            RefMap *rm, SurfPos* surf_pos)
     {
+      /***************/
+      error("DG missing in this version.");
+      return 0.0;
+      /***************/
+      /*
       // Determine the integration order.
       int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
       Func<Hermes::Ord>** oi = new Func<Hermes::Ord>* [this->num];
@@ -678,6 +695,7 @@ namespace Hermes
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                                   // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                                   // the weights.
+    */
     }
 
     template<typename Scalar>
@@ -686,6 +704,11 @@ namespace Hermes
                                                             LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
                                                             int neighbor_index)
     {
+      /***************/
+      error("DG missing in this version.");
+      return 0.0;
+      /***************/
+      /*
       NeighborSearch<Scalar>* nbs = neighbor_searches.get(neighbor_index);
       Hermes::vector<MeshFunction<Scalar>*> slns;
       for (int i = 0; i < this->num; i++)
@@ -759,6 +782,7 @@ namespace Hermes
       return std::abs(0.5*res);   // Edges are parameterized from 0 to 1 while integration weights
                                   // are defined in (-1, 1). Thus multiplying with 0.5 to correct
                                   // the weights.
+      */
     }
 
     // #endif
