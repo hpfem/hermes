@@ -795,13 +795,13 @@ namespace Hermes
       trav_master.begin(current_stage->meshes.size(), &(current_stage->meshes.front()));
 
       Traverse* trav = new Traverse[omp_get_max_threads()];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         trav[i].stack = trav_master.stack;
 
-        Hermes::vector<Transformable *> fns;
         for (unsigned j = 0; j < current_stage->idx.size(); j++)
-          fns.push_back(pss[i][current_stage->idx[j]]);
+          fns[i].push_back(pss[i][current_stage->idx[j]]);
         /*
         /***************************Ext bude opruz - musi se pak predelat pointery u forem 
         for (unsigned j = 0; j < current_stage->ext.size(); j++)
@@ -812,24 +812,24 @@ namespace Hermes
         /***************************Ext bude opruz - musi se pak predelat pointery u forem */
         for (unsigned j = 0; j < current_stage->idx.size(); j++)
         {
-          fns.push_back(u_ext[i][current_stage->idx[j]]);
+          fns[i].push_back(u_ext[i][current_stage->idx[j]]);
           if(i == 0)
             current_stage->meshes.push_back(u_ext[i][current_stage->idx[j]]->get_mesh());
           u_ext[i][current_stage->idx[j]]->set_quad_2d(&g_quad_2d_std);
         }
-        trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns.front()));
+        trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
       }
       unsigned int i;
 //#pragma omp for shared(trav_master.top, trav_master.id, current_stage->meshes)
       for(i = 0; i < num_states; i++)
       {
-        Traverse::State* current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+        Traverse::State* current_state = trav[00].get_next_state(&trav_master.top, &trav_master.id);
 
-        PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
-        PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
-        RefMap** current_refmaps = refmaps[omp_get_thread_num()];
-        Solution<Scalar>** current_u_ext = u_ext[omp_get_thread_num()];
-        AsmList<Scalar>** current_als = als[omp_get_thread_num()];
+        PrecalcShapeset** current_pss = pss[00];
+        PrecalcShapeset** current_spss = spss[00];
+        RefMap** current_refmaps = refmaps[00];
+        Solution<Scalar>** current_u_ext = u_ext[00];
+        AsmList<Scalar>** current_als = als[00];
 
         // One state is a collection of (virtual) elements sharing
         // the same physical location on (possibly) different meshes.
@@ -861,19 +861,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Element* DiscreteProblem<Scalar>::init_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
+    void DiscreteProblem<Scalar>::init_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
       _F_;
-      // Find a non-NULL e[i].
-      Element* e0 = NULL;
-      for (unsigned int i = 0; i < current_stage->idx.size(); i++)
-        if ((e0 = current_state->e[i]) != NULL)
-          break;
-      if(e0 == NULL)
-        return NULL;
 
       // Set maximum integration order for use in integrals, see limit_order()
-      update_limit_table(e0->get_mode());
+      update_limit_table(current_state->rep->get_mode());
 
       // Obtain assembly lists for the element at all spaces of the stage, set appropriate mode for each pss.
       // NOTE: Active elements and transformations for external functions (including the solutions from previous
@@ -900,7 +893,7 @@ namespace Hermes
         if(DG_matrix_forms_present || DG_vector_forms_present)
           current_state->e[j]->visited = true;
       }
-      return e0;
+      return;
     }
 
     template<typename Scalar>
@@ -922,13 +915,9 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
       _F_;
-
-      // Assembly list vector.
-      for(unsigned int i = 0; i < wf->get_neq(); i++)
-        current_als[i] = new AsmList<Scalar>;
         
       // Initialize the state, return a non-NULL element; if no such element found, return.
-      Element* rep_element = init_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
+      init_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
 
       init_cache();
 
@@ -1002,7 +991,7 @@ namespace Hermes
       }
 
       // Assemble surface integrals now: loop through surfaces of the element.
-      for (current_state->isurf = 0; current_state->isurf < rep_element->get_num_surf(); current_state->isurf++)
+      for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
       {
         // \todo DG.
         if(!current_state->bnd[current_state->isurf])
@@ -1079,10 +1068,6 @@ namespace Hermes
           }
         }
       }
-
-      // Delete assembly lists.
-      for(unsigned int i = 0; i < wf->get_neq(); i++)
-        delete current_als[i];
 
       delete_cache();
     }

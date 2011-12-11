@@ -127,7 +127,7 @@ namespace Hermes
       void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
 
       /// Initialize a state, returns a non-NULL Element.
-      Element* init_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
+      void init_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
       void init_surface_state(AsmList<Scalar>** current_als, Traverse::State* current_state);
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.

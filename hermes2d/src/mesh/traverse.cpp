@@ -181,22 +181,22 @@ namespace Hermes
 #define kod_co_se_dela_jednou
       _F_;
 
-      int top_f = (top_by_ref == NULL) ? top : *top_by_ref;
+      int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
 
-      if(top_f >= size) 
+      if(*top_f >= size) 
         error("Stack overflow. Increase stack size.");
 
-      if(stack[top_f].e == NULL)
+      if(stack[*top_f].e == NULL)
       {
-        stack[top_f].e = new Element*[num];
-        stack[top_f].sub_idx = new uint64_t[num];
+        stack[*top_f].e = new Element*[num];
+        stack[*top_f].sub_idx = new uint64_t[num];
       }
 
-      stack[top_f].visited = false;
-      memset(stack[top_f].sub_idx, 0, num * sizeof(uint64_t));
+      stack[*top_f].visited = false;
+      memset(stack[*top_f].sub_idx, 0, num * sizeof(uint64_t));
       for(int i = 0; i < 4; i++)
-        stack[top_f].bnd[i] = true;
-      return stack + top_f++;
+        stack[*top_f].bnd[i] = true;
+      return stack + (*top_f)++;
 #define kod_co_se_dela_jednou
     }
 
@@ -237,7 +237,7 @@ namespace Hermes
           while (1)
           {
             if(id >= meshes[0]->get_num_base_elements())
-              return NULL;
+              return count;
             int nused = 0;
             s->e[0] = meshes[0]->get_element(id);
             if(!s->e[0]->used)
@@ -258,14 +258,14 @@ namespace Hermes
         bool leaf = true;
         if(s->e[0] != NULL)
           if(!s->e[0]->active)
-          {
             leaf = false;
-            break;
-          }
 
         if(leaf)
+        {
           count++;
-        if(s->rep->is_triangle())
+          continue;
+        }
+        if(s->e[0]->is_triangle())
         {
           for (son = 0; son <= 3; son++)
           {
@@ -364,6 +364,10 @@ namespace Hermes
     {
       _F_;
 #define tady_to_jen_na_1_vlakne
+      // Serial / parallel code.
+      int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
+      int* id_f = (id_by_ref == NULL) ? &this->id : id_by_ref;
+
       while (1)
       {
         int i, son;
@@ -371,22 +375,19 @@ namespace Hermes
         // If the top state was visited already, we are returning through it:
         // undo all its transformations, pop it and continue with a non-visited one
         State* s;
-        // Serial / parallel code.
-        int top_f = (top_by_ref == NULL) ? top : *top_by_ref;
-        int id_f = (id_by_ref == NULL) ? id : *id_by_ref;
-
-        while (top_f > 0 && (s = stack + top_f-1)->visited)
-          top_f--;
+        
+        while (*top_f > 0 && (s = stack + *top_f-1)->visited)
+          (*top_f)--;
 
         // The stack is empty, take next base element
         // The process starts here (at the beginning the stack is always empty, i.e. top == 0)
-        if(top_f <= 0)
+        if(*top_f <= 0)
         {
           // Push the state of a new base element.
           // This function only allocates memory for the new state,
           // with as many Elements* as there are meshes in this stage.
           // (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
-          s = push_state();
+          s = push_state(top_f);
           while (1)
           {
             // No more base elements? we're finished.
@@ -416,15 +417,17 @@ namespace Hermes
             // (break this cycle looking for such an element id).
             if(nused)
               break;
-            id_f++;
+            (*id_f)++;
           }
 
-          id_f++;
+          (*id_f)++;
         }
-#define tady_konci_to_co_se_musi_delat_jednou
 
         // Entering a new state: perform the transformations for it
         s->visited = true;
+
+#define tady_konci_to_co_se_musi_delat_jednou
+
         if(fn != NULL)
         {
           // For every mesh of this stage..
@@ -463,7 +466,7 @@ namespace Hermes
           // Triangle always has 4 sons.
           for (son = 0; son <= 3; son++)
           {
-            State* ns = push_state();
+            State* ns = push_state(top_f);
             // For every mesh..
             for (i = 0; i < num; i++)
             {
@@ -503,7 +506,7 @@ namespace Hermes
           {
             for (son = 0; son <= 3; son++)
             {
-              State* ns = push_state();
+              State* ns = push_state(top_f);
 
               for (i = 0; i < num; i++)
               {
@@ -545,7 +548,7 @@ namespace Hermes
 
             for (son = son0; son <= son1; son++)
             {
-              State* ns = push_state();
+              State* ns = push_state(top_f);
 
               for (i = 0; i < num; i++)
               {
@@ -577,7 +580,7 @@ namespace Hermes
 
             for (son = son0; son <= son1; son++)
             {
-              State* ns = push_state();
+              State* ns = push_state(top_f);
 
               for (i = 0; i < num; i++)
               {
@@ -606,7 +609,7 @@ namespace Hermes
           // No splits, recur to one son.
           else
           {
-            State* ns = push_state();
+            State* ns = push_state(top_f);
 
             for (i = 0; i < num; i++)
             {
