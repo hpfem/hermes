@@ -396,7 +396,7 @@ namespace Hermes
           {
             // No more base elements? we're finished.
             // Id is set to zero at the beginning by the function trav.begin(..).
-            if(id >= meshes[0]->get_num_base_elements())
+            if(*id_f >= meshes[0]->get_num_base_elements())
               return NULL;
             int nused = 0;
             // The variable num is the number of meshes in the stage

@@ -64,13 +64,13 @@ namespace Hermes
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
       /// Matrix forms for error calculation.
-      class HERMES_API MatrixFormVolError
+      class HERMES_API MatrixFormVolError : public MatrixFormVol<Scalar>
       {
       public:
         /// Empty constructor.
-        MatrixFormVolError();
+        MatrixFormVolError(int i, int j);
         /// Constructor that takes the norm identification.
-        MatrixFormVolError(ProjNormType type);
+        MatrixFormVolError(int i, int j, ProjNormType type);
 
         /// Error bilinear form callback function.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
@@ -82,6 +82,7 @@ namespace Hermes
           Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
           ExtData<Hermes::Ord> *ext) const;
 
+        virtual MatrixFormVol<Scalar>* clone();
 
       protected:
         /// Norm used.

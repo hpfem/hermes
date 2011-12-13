@@ -161,6 +161,11 @@ namespace Hermes
           }
         }
 
+        MatrixFormVol<Scalar>* clone()
+        {
+          return new ProjectionMatrixFormVol(*this);
+        }
+
       private:
         ProjNormType projNormType;
 

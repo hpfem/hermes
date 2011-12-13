@@ -670,7 +670,7 @@ namespace Hermes
         // Check that there is a DG form, so that the DG assembling procedure needs to be performed.
         is_DG_stage();
 
-        // Assemble one current_stage-> One stage is a collection of functions,
+        // Assemble one stage. One stage is a collection of functions,
         // and meshes that can not be further minimized.
         // E.g. if a linear form uses two external solutions, each of
         // which is defined on a different mesh, and different to the
@@ -779,16 +779,94 @@ namespace Hermes
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           als[i][j] = new AsmList<Scalar>();
       }
-      /***************************Ext bude opruz - musi se pak predelat pointery u forem 
-
-      Solution<Scalar>*** ext = new MeshFunction<Scalar>**[omp_get_max_threads()];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        ext[i] = new MeshFunction<Scalar>**[current_stage->ext.size()];
+        ext[i] = new MeshFunction<Scalar>*[current_stage->ext.size()];
         for (int j = 0; j < current_stage->ext.size(); j++)
           ext[i][j] = current_stage->ext[j]->clone();
       }
-      /***************************Ext bude opruz - musi se pak predelat pointery u forem */
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[omp_get_max_threads()];
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->mfvol.size(); j++)
+        {
+          mfvol[i].push_back(current_stage->mfvol[j]->clone());
+          // Inserting proper ext.
+          for(int k = 0; k < current_stage->mfvol[j]->ext.size(); k++)
+          {
+            for (int l = 0; l < current_stage->ext.size(); l++)
+            {
+              if(current_stage->ext[l] == current_stage->mfvol[j]->ext[j])
+              {
+                current_stage->mfvol[j]->ext[j] = ext[i][l];
+                break;
+              }
+            }
+          }
+        }
+      }
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[omp_get_max_threads()];
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->mfsurf.size(); j++)
+        {
+          mfsurf[i].push_back(current_stage->mfsurf[j]->clone());
+          // Inserting proper ext.
+          for(int k = 0; k < current_stage->mfsurf[j]->ext.size(); k++)
+          {
+            for (int l = 0; l < current_stage->ext.size(); l++)
+            {
+              if(current_stage->ext[l] == current_stage->mfsurf[j]->ext[j])
+              {
+                current_stage->mfsurf[j]->ext[j] = ext[i][l];
+                break;
+              }
+            }
+          }
+        }
+      }
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[omp_get_max_threads()];
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->vfvol.size(); j++)
+        {
+          vfvol[i].push_back(current_stage->vfvol[j]->clone());
+          // Inserting proper ext.
+          for(int k = 0; k < current_stage->vfvol[j]->ext.size(); k++)
+          {
+            for (int l = 0; l < current_stage->ext.size(); l++)
+            {
+              if(current_stage->ext[l] == current_stage->vfvol[j]->ext[j])
+              {
+                current_stage->vfvol[j]->ext[j] = ext[i][l];
+                break;
+              }
+            }
+          }
+        }
+      }
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[omp_get_max_threads()];
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->vfsurf.size(); j++)
+        {
+          vfsurf[i].push_back(current_stage->vfsurf[j]->clone());
+          // Inserting proper ext.
+          for(int k = 0; k < current_stage->vfsurf[j]->ext.size(); k++)
+          {
+            for (int l = 0; l < current_stage->ext.size(); l++)
+            {
+              if(current_stage->ext[l] == current_stage->vfsurf[j]->ext[j])
+              {
+                current_stage->vfsurf[j]->ext[j] = ext[i][l];
+                break;
+              }
+            }
+          }
+        }
+      }
+
       Traverse trav_master(true);
       unsigned int num_states = trav_master.get_num_states(current_stage->meshes.front());
       
@@ -800,14 +878,11 @@ namespace Hermes
       {
         for (unsigned j = 0; j < current_stage->idx.size(); j++)
           fns[i].push_back(pss[i][current_stage->idx[j]]);
-        /*
-        /***************************Ext bude opruz - musi se pak predelat pointery u forem 
         for (unsigned j = 0; j < current_stage->ext.size(); j++)
         {
-          fns.push_back(ext[i][j]);
+          fns[i].push_back(ext[i][j]);
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
-        /***************************Ext bude opruz - musi se pak predelat pointery u forem */
         for (unsigned j = 0; j < current_stage->idx.size(); j++)
         {
           fns[i].push_back(u_ext[i][current_stage->idx[j]]);
@@ -818,9 +893,9 @@ namespace Hermes
         trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
       }
-      unsigned int i;
+      unsigned int state_i;
 //#pragma omp for shared(trav_master.top, trav_master.id, current_stage->meshes)
-      for(i = 0; i < num_states; i++)
+      for(state_i = 0; state_i < num_states; state_i++)
       {
         Traverse::State* current_state = trav[00].get_next_state(&trav_master.top, &trav_master.id);
 
@@ -830,6 +905,11 @@ namespace Hermes
         Solution<Scalar>** current_u_ext = u_ext[00];
         AsmList<Scalar>** current_als = als[00];
 
+        MatrixFormVol<Scalar>** current_mfvol = mfvol[00].size() == 0 ? NULL : &(mfvol[00].front());
+        MatrixFormSurf<Scalar>** current_mfsurf = mfsurf[00].size() == 0 ? NULL : &(mfsurf[00].front());
+        VectorFormVol<Scalar>** current_vfvol = vfvol[00].size() == 0 ? NULL : &(vfvol[00].front());
+        VectorFormSurf<Scalar>** current_vfsurf = vfsurf[00].size() == 0 ? NULL : &(vfsurf[00].front());
+
         // One state is a collection of (virtual) elements sharing
         // the same physical location on (possibly) different meshes.
         // This is then the same element of the virtual union mesh.
@@ -837,7 +917,7 @@ namespace Hermes
         // this stage is supplied by the function Traverse::get_next_state()
         // called in the while loop.
         if(current_state->e != NULL)
-          assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
+          assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
       }
 
       /// \todo Should this be really here? Or in assemble()?
@@ -911,7 +991,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
+    void DiscreteProblem<Scalar>::assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state,
+        MatrixFormVol<Scalar>** current_mfvol, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormVol<Scalar>** current_vfvol, VectorFormSurf<Scalar>** current_vfsurf)
     {
       _F_;
         
@@ -922,39 +1003,39 @@ namespace Hermes
 
       if (current_mat != NULL)
       {
-        for(typename Hermes::vector<MatrixFormVol<Scalar> *>::iterator it = current_stage->mfvol.begin(); it != current_stage->mfvol.end(); it++)
+        for(int current_mfvol_i = 0; current_mfvol_i < current_stage->mfvol.size(); current_mfvol_i++)
         {
-          if(!form_to_be_assembled(*it, current_state))
+          if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
             continue;
         
-          Func<double>** base_fns = new Func<double>*[current_als[(*it)->j]->cnt];
-          Func<double>** test_fns = new Func<double>*[current_als[(*it)->i]->cnt];
+          Func<double>** base_fns = new Func<double>*[current_als[current_mfvol[current_mfvol_i]->j]->cnt];
+          Func<double>** test_fns = new Func<double>*[current_als[current_mfvol[current_mfvol_i]->i]->cnt];
           
-          int order = calc_order_matrix_form(*it, current_refmaps, current_u_ext, current_state);
+          int order = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
         
-          for (unsigned int i = 0; i < current_als[(*it)->i]->cnt; i++)
+          for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
           {
-            if (std::abs(current_als[(*it)->i]->coef[i]) < 1e-12)
+            if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) < 1e-12)
               continue;
-            if (current_als[(*it)->i]->dof[i] >= 0)
+            if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
             {
-              current_spss[(*it)->i]->set_active_shape(current_als[(*it)->i]->idx[i]);
-              test_fns[i] = get_fn(current_spss[(*it)->i], current_refmaps[(*it)->i], order);
+              current_spss[current_mfvol[current_mfvol_i]->i]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->i]->idx[i]);
+              test_fns[i] = get_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
             }
           }
 
-          for (unsigned int j = 0; j < current_als[(*it)->j]->cnt; j++)
+          for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
           {
-            if (std::abs(current_als[(*it)->j]->coef[j]) < 1e-12)
+            if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) < 1e-12)
                 continue;
-            if (current_als[(*it)->j]->dof[j] >= 0)
+            if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
             {
-              current_pss[(*it)->j]->set_active_shape(current_als[(*it)->j]->idx[j]);
-              base_fns[j] = get_fn(current_pss[(*it)->j], current_refmaps[(*it)->j], order);
+              current_pss[current_mfvol[current_mfvol_i]->j]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->j]->idx[j]);
+              base_fns[j] = get_fn(current_pss[current_mfvol[current_mfvol_i]->j], current_refmaps[current_mfvol[current_mfvol_i]->j], order);
             }
           }
 
-          assemble_matrix_form(*it, order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
+          assemble_matrix_form(current_mfvol[current_mfvol_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           delete [] base_fns;
           delete [] test_fns;
@@ -963,27 +1044,27 @@ namespace Hermes
     
       if (current_rhs != NULL)
       {
-        for(typename Hermes::vector<VectorFormVol<Scalar> *>::iterator it = current_stage->vfvol.begin(); it != current_stage->vfvol.end(); it++)
+        for(int current_vfvol_i = 0; current_vfvol_i < current_stage->vfvol.size(); current_vfvol_i++)
         {
-          if(!form_to_be_assembled(*it, current_state))
+          if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
               continue;
         
-          Func<double>** test_fns = new Func<double>*[current_als[(*it)->i]->cnt];
+          Func<double>** test_fns = new Func<double>*[current_als[current_vfvol[current_vfvol_i]->i]->cnt];
           
-          int order = calc_order_vector_form(*it, current_refmaps, current_u_ext, current_state);
+          int order = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
         
-          for (unsigned int i = 0; i < current_als[(*it)->i]->cnt; i++)
+          for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
           {
-            if (std::abs(current_als[(*it)->i]->coef[i]) < 1e-12)
+            if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) < 1e-12)
               continue;
-            if (current_als[(*it)->i]->dof[i] >= 0)
+            if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
             {
-              current_spss[(*it)->i]->set_active_shape(current_als[(*it)->i]->idx[i]);
-              test_fns[i] = get_fn(current_spss[(*it)->i], current_refmaps[(*it)->i], order);
+              current_spss[current_vfvol[current_vfvol_i]->i]->set_active_shape(current_als[current_vfvol[current_vfvol_i]->i]->idx[i]);
+              test_fns[i] = get_fn(current_spss[current_vfvol[current_vfvol_i]->i], current_refmaps[current_vfvol[current_vfvol_i]->i], order);
             }
           }
 
-          assemble_vector_form(*it, order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
+          assemble_vector_form(current_vfvol[current_vfvol_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           delete [] test_fns;
         }
@@ -1000,39 +1081,39 @@ namespace Hermes
 
         if (current_mat != NULL)
         {
-          for(typename Hermes::vector<MatrixFormSurf<Scalar> *>::iterator it = current_stage->mfsurf.begin(); it != current_stage->mfsurf.end(); it++)
+          for(int current_mfsurf_i = 0; current_mfsurf_i < current_stage->mfsurf.size(); current_mfsurf_i++)
           {
-            if(!form_to_be_assembled(*it, current_state))
+            if(!form_to_be_assembled(current_mfsurf[current_mfsurf_i], current_state))
               continue;
         
-            Func<double>** base_fns = new Func<double>*[current_als[(*it)->j]->cnt];
-            Func<double>** test_fns = new Func<double>*[current_als[(*it)->i]->cnt];
+            Func<double>** base_fns = new Func<double>*[current_als[current_mfsurf[current_mfsurf_i]->j]->cnt];
+            Func<double>** test_fns = new Func<double>*[current_als[current_mfsurf[current_mfsurf_i]->i]->cnt];
           
-            int order = calc_order_matrix_form(*it, current_refmaps, current_u_ext, current_state);
+            int order = calc_order_matrix_form(current_mfsurf[current_mfsurf_i], current_refmaps, current_u_ext, current_state);
         
-            for (unsigned int i = 0; i < current_als[(*it)->i]->cnt; i++)
+            for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
             {
-              if (std::abs(current_als[(*it)->i]->coef[i]) < 1e-12)
+              if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
-              if (current_als[(*it)->i]->dof[i] >= 0)
+              if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
               {
-                current_spss[(*it)->i]->set_active_shape(current_als[(*it)->i]->idx[i]);
-                test_fns[i] = get_fn(current_spss[(*it)->i], current_refmaps[(*it)->i], quad->get_edge_points(current_state->isurf, order));
+                current_spss[current_mfsurf[current_mfsurf_i]->i]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->i]->idx[i]);
+                test_fns[i] = get_fn(current_spss[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i], quad->get_edge_points(current_state->isurf, order));
               }
             }
 
-            for (unsigned int j = 0; j < current_als[(*it)->j]->cnt; j++)
+            for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
             {
-              if (std::abs(current_als[(*it)->j]->coef[j]) < 1e-12)
+              if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) < 1e-12)
                 continue;
-              if (current_als[(*it)->j]->dof[j] >= 0)
+              if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
               {
-                current_pss[(*it)->j]->set_active_shape(current_als[(*it)->j]->idx[j]);
-                base_fns[j] = get_fn(current_pss[(*it)->j], current_refmaps[(*it)->j], quad->get_edge_points(current_state->isurf, order));
+                current_pss[current_mfsurf[current_mfsurf_i]->j]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->j]->idx[j]);
+                base_fns[j] = get_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], quad->get_edge_points(current_state->isurf, order));
               }
             }
 
-            assemble_matrix_form(*it, order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
+            assemble_matrix_form(current_mfsurf[current_mfsurf_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
             delete [] base_fns;
             delete [] test_fns;
@@ -1041,27 +1122,27 @@ namespace Hermes
     
         if (current_rhs != NULL)
         {
-          for(typename Hermes::vector<VectorFormSurf<Scalar> *>::iterator it = current_stage->vfsurf.begin(); it != current_stage->vfsurf.end(); it++)
+          for(int current_vfsurf_i = 0; current_vfsurf_i < current_stage->vfsurf.size(); current_vfsurf_i++)
           {
-            if(!form_to_be_assembled(*it, current_state))
+            if(!form_to_be_assembled(current_vfsurf[current_vfsurf_i], current_state))
                 continue;
         
-            Func<double>** test_fns = new Func<double>*[current_als[(*it)->i]->cnt];
+            Func<double>** test_fns = new Func<double>*[current_als[current_vfsurf[current_vfsurf_i]->i]->cnt];
           
-            int order = calc_order_vector_form(*it, current_refmaps, current_u_ext, current_state);
+            int order = calc_order_vector_form(current_vfsurf[current_vfsurf_i], current_refmaps, current_u_ext, current_state);
         
-            for (unsigned int i = 0; i < current_als[(*it)->i]->cnt; i++)
+            for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
             {
-              if (std::abs(current_als[(*it)->i]->coef[i]) < 1e-12)
+              if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
-              if (current_als[(*it)->i]->dof[i] >= 0)
+              if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
               {
-                current_spss[(*it)->i]->set_active_shape(current_als[(*it)->i]->idx[i]);
-                test_fns[i] = get_fn(current_spss[(*it)->i], current_refmaps[(*it)->i], quad->get_edge_points(current_state->isurf, order));
+                current_spss[current_vfsurf[current_vfsurf_i]->i]->set_active_shape(current_als[current_vfsurf[current_vfsurf_i]->i]->idx[i]);
+                test_fns[i] = get_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], quad->get_edge_points(current_state->isurf, order));
               }
             }
 
-            assemble_vector_form(*it, order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
+            assemble_vector_form(current_vfsurf[current_vfsurf_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
             delete [] test_fns;
           }
