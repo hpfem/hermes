@@ -38,8 +38,6 @@ namespace Hermes
     public:
       NewtonSolver(DiscreteProblem<Scalar>* dp);
       NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
-      void init_linear_solver();
-
       ~NewtonSolver();
 
       /// Solve with user-defined tolerances.
@@ -78,6 +76,8 @@ namespace Hermes
       void reset_times() { setup_time = assemble_time = solve_time = 0.; }
 
     protected:
+      void init_linear_solver();
+
       /// Jacobian.
       SparseMatrix<Scalar>* jacobian;
 

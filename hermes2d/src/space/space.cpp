@@ -177,7 +177,7 @@ namespace Hermes
 
       resize_tables();
 
-      if (mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0)
+      if (mesh->get_element(id)->is_quad() && H2D_GET_V_ORDER(order) == 0)
         order = H2D_MAKE_QUAD_ORDER(order, order);
 
       edata[id].order = order;
@@ -201,7 +201,7 @@ namespace Hermes
 
       if(same_meshes)
         for (unsigned int i = 0; i < coarse.size(); i++)
-          ref_spaces->at(i)->get_mesh()->set_seq(same_seq);
+          ref_spaces->at(i)->set_mesh_seq(same_seq);
       return ref_spaces;
     }
 
@@ -616,10 +616,19 @@ namespace Hermes
       if (this->mesh == mesh) return;
       free();
       this->mesh = mesh;
+      this->mesh_seq = mesh->get_seq();
       seq = g_space_seq++;
 
       // since space changed, enumerate basis functions
       this->assign_dofs();
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::set_mesh_seq(int seq)
+    {
+      _F_;
+      this->mesh_seq = seq;
+      this->mesh->set_seq(seq);
     }
 
     template<typename Scalar>

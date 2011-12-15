@@ -30,6 +30,7 @@ namespace Hermes
       if(dp->get_spaces().size() != 1)
         error("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
+      verbose_output_inner_newton = false;
     }
 
     template<typename Scalar>
@@ -43,6 +44,7 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
+      verbose_output_inner_newton = false;
     }
 
     template<typename Scalar>
@@ -53,6 +55,7 @@ namespace Hermes
       if(dp->get_spaces().size() != n)
         error("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
+      verbose_output_inner_newton = false;
     }
 
     template<typename Scalar>
@@ -66,6 +69,13 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
+      verbose_output_inner_newton = false;
+    }
+    
+    template<typename Scalar>
+    void PicardSolver<Scalar>::set_verbose_output_inner_newton(bool to_set)
+    {
+      this->verbose_output_inner_newton = to_set;
     }
 
     template<typename Scalar>
@@ -160,7 +170,7 @@ namespace Hermes
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_num_dofs();
       Hermes::vector<const Space<Scalar>* > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
       NewtonSolver<Scalar> newton(static_cast<DiscreteProblem<Scalar>*>(this->dp), this->matrix_solver_type);
-      newton.set_verbose_output(this->verbose_output);
+      newton.set_verbose_output(this->verbose_output_inner_newton);
 
       // Delete solution vector if there is any.
       if(this->sln_vector != NULL)

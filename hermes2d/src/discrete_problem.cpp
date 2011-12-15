@@ -119,6 +119,7 @@ namespace Hermes
       Geom<Hermes::Ord> *tmp = init_geom_ord();
       geom_ord = *tmp;
       delete tmp;
+
     }
 
     template<typename Scalar>
@@ -311,6 +312,19 @@ namespace Hermes
         Traverse trav;
         trav.begin(wf->get_neq(), meshes);
 
+        if(is_DG)
+        {
+          Hermes::vector<Space<Scalar>*> mutable_spaces;
+          for(unsigned int i = 0; i < this->spaces.size(); i++)
+          {
+            mutable_spaces.push_back(const_cast<Space<Scalar>*>(spaces.at(i)));
+            spaces_first_dofs[i] = 0;
+          }
+
+          Space<Scalar>::assign_dofs(mutable_spaces);
+
+        }
+
         // Loop through all elements.
         Element **e;
         while ((e = trav.get_next_state(NULL, NULL)) != NULL)
@@ -319,7 +333,10 @@ namespace Hermes
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
             if (e[i] != NULL)
-              spaces[i]->get_element_assembly_list(e[i], &(al[i]), spaces_first_dofs[i]);
+              if(is_DG)
+                spaces[i]->get_element_assembly_list(e[i], &(al[i]));
+              else
+                spaces[i]->get_element_assembly_list(e[i], &(al[i]), spaces_first_dofs[i]);
 
           if(is_DG)
           {
@@ -365,7 +382,7 @@ namespace Hermes
                     {
                       AsmList<Scalar>*am = &(al[m]);
                       AsmList<Scalar>*an = new AsmList<Scalar>;
-                      spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an, spaces_first_dofs[el]);
+                      spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an);
 
                       // pretend assembling of the element stiffness matrix
                       // register nonzero elements

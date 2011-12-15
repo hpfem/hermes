@@ -24,7 +24,7 @@ namespace Hermes
   namespace Hermes2D
   {
     class Element;
-    class H1ShapesetJacobi;
+    class H1Shapeset;
     class PrecalcShapeset;
     class Quad1DStd;
     class Quad2DStd;
@@ -107,7 +107,7 @@ namespace Hermes
 
       void get_mid_edge_points(Element* e, double2* pt, int n);
 
-      static H1ShapesetJacobi ref_map_shapeset;
+      static H1Shapeset ref_map_shapeset;
       static PrecalcShapeset ref_map_pss;
 
       static double** edge_proj_matrix;  ///< projection matrix for each edge is the same

@@ -35,9 +35,9 @@ namespace Hermes
 
 
     /// Shape functions based on integrated Jacobi polynomials.
-    class HERMES_API H1ShapesetJacobi : public Shapeset
+    class HERMES_API H1Shapeset : public Shapeset
     {
-    public: H1ShapesetJacobi();
+    public: H1Shapeset();
     private:
       virtual int get_id() const { return 1; }
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
@@ -54,10 +54,6 @@ namespace Hermes
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
-
-
-    /// This is the default shapeset typedef
-    typedef H1ShapesetJacobi H1Shapeset;
   }
 }
 #endif

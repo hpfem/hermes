@@ -103,7 +103,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::process_space(Space<Scalar>* space)
+      void Orderizer::process_space(const Space<Scalar>* space)
       {
         // sanity check
         if (space == NULL) error("Space is NULL in Orderizer:process_solution().");
@@ -221,7 +221,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::save_orders_vtk(Space<Scalar>* space, const char* file_name)
+      void Orderizer::save_orders_vtk(const Space<Scalar>* space, const char* file_name)
       {
         process_space(space);
 
@@ -296,10 +296,10 @@ namespace Hermes
         return this->vertex_count;
       }
 
-      template HERMES_API void Orderizer::save_orders_vtk<double>(Space<double>* space, const char* file_name);
-      template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(Space<std::complex<double> >* space, const char* file_name);
-      template HERMES_API void Orderizer::process_space<double>(Space<double>* space);
-      template HERMES_API void Orderizer::process_space<std::complex<double> >(Space<std::complex<double> >* space);
+      template HERMES_API void Orderizer::save_orders_vtk<double>(const Space<double>* space, const char* file_name);
+      template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(const Space<std::complex<double> >* space, const char* file_name);
+      template HERMES_API void Orderizer::process_space<double>(const Space<double>* space);
+      template HERMES_API void Orderizer::process_space<std::complex<double> >(const Space<std::complex<double> >* space);
     }
   }
 }

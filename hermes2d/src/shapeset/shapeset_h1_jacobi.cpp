@@ -4225,7 +4225,7 @@ namespace Hermes
     };
 
 
-    H1ShapesetJacobi::H1ShapesetJacobi()
+    H1Shapeset::H1Shapeset()
     {
       shape_table[0] = jacobi_shape_fn_table;
       shape_table[1] = jacobi_shape_fn_table_dx;

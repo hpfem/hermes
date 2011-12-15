@@ -90,7 +90,7 @@ namespace Hermes
 
     protected:
       /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.
-      void set_mode(int mode);
+      virtual void set_mode(int mode);
 
       /// Returns the current mode.
       int get_mode() const;

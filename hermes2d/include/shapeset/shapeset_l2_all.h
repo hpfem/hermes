@@ -25,17 +25,14 @@ namespace Hermes
   namespace Hermes2D
   {
     /// L2 shapeset - products of legendre polynomials
-    class HERMES_API L2ShapesetLegendre : public Shapeset
+    class HERMES_API L2Shapeset : public Shapeset
     {
-    public: L2ShapesetLegendre();
+    public: L2Shapeset();
     protected:
       virtual int get_id() const { return 30; }
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
-
-    /// This is the default shapeset typedef
-    typedef L2ShapesetLegendre L2Shapeset;
   }
 }
 #endif

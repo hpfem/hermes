@@ -342,6 +342,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolver<Scalar>::set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set)
+    {
+      max_allowed_residual_norm = max_allowed_residual_norm_to_set;
+    }
+
+    template<typename Scalar>
     void NewtonSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
     {
       NonlinearSolver<Scalar>::set_iterative_method(iterative_method_name);

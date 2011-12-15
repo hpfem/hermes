@@ -27,5 +27,6 @@ or if you can suggest improvements to this documentation or to Hermes itself.
 Anyone who contributes with at least one patch becomes automatically a 
 `co-author <http://git.hpfem.org/hermes.git/blob/HEAD:/AUTHORS>`_ of the code.
 
-The library is available under the GPL license (Version 2, 1991). 
+Free use of this software is granted under the terms of the GNU Lesser General
+Public License (LGPL). For details see the files `COPYING` and `COPYING.LESSER`.
 

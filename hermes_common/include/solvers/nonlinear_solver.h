@@ -61,10 +61,9 @@ namespace Hermes
       /// \param[in] preconditioner_name See the attribute preconditioner.
       void set_preconditioner(const char* preconditioner_name);
 
-    protected:
       DiscreteProblemInterface<Scalar>* dp; ///< FE problem being solved (not NULL in case of using
       ///< NonlinearProblem(DiscreteProblemInterface *) ctor.
-
+    protected:
       /// The solution vector.
       Scalar* sln_vector;
 
