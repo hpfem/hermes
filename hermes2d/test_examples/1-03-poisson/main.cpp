@@ -80,47 +80,47 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+  newton.set_damping_coeff(0.1);
   try
   {
-    newton.solve(coeff_vec);
+    newton.solve_keep_jacobian(coeff_vec, 1e-3, 10);
   }
   catch(Hermes::Exceptions::Exception e)
   {
     e.printMsg();
-    error("Newton's iteration failed.");
-  };
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
-  // VTK output.
-  if (VTK_VISUALIZATION)
-  {
-    // Output solution in VTK format.
-    Hermes::Hermes2D::Views::Linearizer lin;
-    bool mode_3D = true;
-    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
-    info("Solution in VTK format saved to file %s.", "sln.vtk");
+    // VTK output.
+    if (VTK_VISUALIZATION)
+    {
+      // Output solution in VTK format.
+      Hermes::Hermes2D::Views::Linearizer lin;
+      bool mode_3D = true;
+      lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
+      info("Solution in VTK format saved to file %s.", "sln.vtk");
 
-    // Output mesh and element orders in VTK format.
-    Hermes::Hermes2D::Views::Orderizer ord;
-    ord.save_orders_vtk(&space, "ord.vtk");
-    info("Element orders in VTK format saved to file %s.", "ord.vtk");
+      // Output mesh and element orders in VTK format.
+      Hermes::Hermes2D::Views::Orderizer ord;
+      ord.save_orders_vtk(&space, "ord.vtk");
+      info("Element orders in VTK format saved to file %s.", "ord.vtk");
+    }
+
+    // Visualize the solution.
+    if (HERMES_VISUALIZATION)
+    {
+      Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
+      // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
+      // triangles for OpenGL. The second parameter of View::show() sets the error
+      // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default),
+      // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows
+      // considerably with more accurate representation, so use it wisely.
+      view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_HIGH);
+      Hermes::Hermes2D::Views::View::wait();
+    }
+
+    // Clean up.
+    delete [] coeff_vec;
   }
-
-  // Visualize the solution.
-  if (HERMES_VISUALIZATION)
-  {
-    Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
-    // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
-    // triangles for OpenGL. The second parameter of View::show() sets the error
-    // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default),
-    // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows
-    // considerably with more accurate representation, so use it wisely.
-    view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_HIGH);
-    Hermes::Hermes2D::Views::View::wait();
-  }
-
-  // Clean up.
-  delete [] coeff_vec;
 
   return 0;
 }

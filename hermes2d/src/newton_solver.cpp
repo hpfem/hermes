@@ -67,21 +67,17 @@ namespace Hermes
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
 
-      // If coeff_vec == NULL then create a zero vector.
-      bool delete_coeff_vec = false;
-      if(coeff_vec == NULL) 
-      {
-        coeff_vec = new Scalar[ndof];
-        memset(coeff_vec, 0, ndof*sizeof(Scalar));
-        delete_coeff_vec = true;
-      }
       // Delete the old solution vector, if there is any.
       if(this->sln_vector != NULL)
-      {
         delete [] this->sln_vector;
-        this->sln_vector = NULL;
-      }
 
+      this->sln_vector = new Scalar[ndof];
+      if(coeff_vec == NULL) 
+        memset(this->sln_vector, 0, ndof*sizeof(Scalar));
+      else
+        for (int i = 0; i < ndof; i++)
+          this->sln_vector[i] = coeff_vec[i];
+          
       // The Newton's loop.
       double residual_norm;
       int it = 1;
@@ -99,7 +95,7 @@ namespace Hermes
       while (true)
       {
         // Assemble just the residual vector.
-        this->dp->assemble(coeff_vec, residual);
+        this->dp->assemble(sln_vector, residual);
 
         this->timer->tick();
         assemble_time += this->timer->last();
@@ -150,11 +146,6 @@ namespace Hermes
         // This is the only correct way of ending.
         if (residual_norm < newton_tol && it > 1) 
         {
-          // We want to return the solution in a different structure.
-          this->sln_vector = new Scalar[ndof];
-          for (int i = 0; i < ndof; i++)
-            this->sln_vector[i] = coeff_vec[i];
-
           this->timer->tick();
           solve_time += this->timer->last();
 
@@ -164,12 +155,6 @@ namespace Hermes
             this->timer = NULL;
           }
 
-          if (delete_coeff_vec) 
-	        {
-            delete [] coeff_vec;
-            coeff_vec = NULL;
-	        }
-
           return;
         }
 
@@ -177,7 +162,7 @@ namespace Hermes
         solve_time += this->timer->last();
 
         // Assemble just the jacobian.
-        this->dp->assemble(coeff_vec, jacobian);
+        this->dp->assemble(sln_vector, jacobian);
         this->timer->tick();
         assemble_time += this->timer->last();
 
@@ -197,7 +182,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
+          sln_vector[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
@@ -222,14 +207,16 @@ namespace Hermes
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
 
-      // If coeff_vec == NULL then create a zero vector.
-      bool delete_coeff_vec = false;
+      // Delete the old solution vector, if there is any.
+      if(this->sln_vector != NULL)
+        delete [] this->sln_vector;
+
+      this->sln_vector = new Scalar[ndof];
       if(coeff_vec == NULL) 
-      {
-        coeff_vec = new Scalar[ndof];
-        memset(coeff_vec, 0, ndof*sizeof(Scalar));
-        delete_coeff_vec = true;
-      }
+        memset(this->sln_vector, 0, ndof*sizeof(Scalar));
+      else
+        for (int i = 0; i < ndof; i++)
+          this->sln_vector[i] = coeff_vec[i];
 
       // The Newton's loop.
       double residual_norm;
@@ -237,7 +224,7 @@ namespace Hermes
       while (true)
       {
         // Assemble the residual vector.
-        this->dp->assemble(coeff_vec, residual);
+        this->dp->assemble(sln_vector, residual);
 
         // Measure the residual norm.
         if (residual_as_function)
@@ -288,20 +275,8 @@ namespace Hermes
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
-        if (residual_norm < newton_tol && it > 1) {
-          // We want to return the solution in a different structure.
-          this->sln_vector = new Scalar[ndof];
-          for (int i = 0; i < ndof; i++)
-            this->sln_vector[i] = coeff_vec[i];
-
-          if (delete_coeff_vec) 
-	  {
-            delete [] coeff_vec;
-            coeff_vec = NULL;
-	  }
-
+        if (residual_norm < newton_tol && it > 1)
           return;
-        }
 
         // Assemble and keep the jacobian if this has not been done before.
         // Also declare that LU-factorization in case of a direct solver will be done only once and reused afterwards.
@@ -316,7 +291,7 @@ namespace Hermes
           // Create new matrix solver with correct matrix.
           linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, kept_jacobian, residual);
 
-          this->dp->assemble(coeff_vec, kept_jacobian);
+          this->dp->assemble(sln_vector, kept_jacobian);
           linear_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         }
 
@@ -331,7 +306,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
+          sln_vector[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
