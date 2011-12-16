@@ -89,6 +89,7 @@ class Scalar2
   Scalar val[2];
 
 public:
+  Scalar2() {}
   Scalar2(Scalar v1, Scalar v2)
   {
     val[0] = v1; val[1] = v2;
