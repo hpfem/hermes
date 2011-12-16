@@ -27,13 +27,13 @@ namespace Hermes
     double NewtonSolver<Scalar>::max_allowed_residual_norm = 1E9;
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), damping_coeff(1.0)
     {
       init_linear_solver();
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type), kept_jacobian(NULL), damping_coeff(1.0)
     {
       init_linear_solver();
     }
@@ -197,7 +197,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += linear_solver->get_sln_vector()[i];
+          coeff_vec[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
@@ -331,7 +331,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += linear_solver->get_sln_vector()[i];
+          coeff_vec[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
@@ -381,6 +381,12 @@ namespace Hermes
 #else
       warning("Trying to set iterative method without AztecOO present.");
 #endif
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_damping_coeff(double damping_coeff)
+    {
+      this->damping_coeff = damping_coeff;
     }
 
     template class HERMES_API NewtonSolver<double>;

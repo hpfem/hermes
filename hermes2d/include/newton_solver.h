@@ -75,6 +75,8 @@ namespace Hermes
       /// Reset times to zero.
       void reset_times() { setup_time = assemble_time = solve_time = 0.; }
 
+      /// Sets the dumping coefficient.
+      void set_damping_coeff(double damping_coeff);
     protected:
       void init_linear_solver();
 
@@ -99,6 +101,9 @@ namespace Hermes
       double setup_time;
       double assemble_time;
       double solve_time;
+
+      /// Damping coefficient.
+      double damping_coeff;
 
       /// Pointer to an external timer to which this instance of NewtonSolver accumulates time spent in it.
       TimePeriod *timer;
