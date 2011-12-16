@@ -95,7 +95,7 @@ namespace Hermes
       while (true)
       {
         // Assemble just the residual vector.
-        this->dp->assemble(sln_vector, residual);
+        this->dp->assemble(this->sln_vector, residual);
 
         this->timer->tick();
         assemble_time += this->timer->last();
@@ -162,7 +162,7 @@ namespace Hermes
         solve_time += this->timer->last();
 
         // Assemble just the jacobian.
-        this->dp->assemble(sln_vector, jacobian);
+        this->dp->assemble(this->sln_vector, jacobian);
         this->timer->tick();
         assemble_time += this->timer->last();
 
@@ -182,7 +182,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          sln_vector[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
+          this->sln_vector[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
@@ -224,7 +224,7 @@ namespace Hermes
       while (true)
       {
         // Assemble the residual vector.
-        this->dp->assemble(sln_vector, residual);
+        this->dp->assemble(this->sln_vector, residual);
 
         // Measure the residual norm.
         if (residual_as_function)
@@ -291,7 +291,7 @@ namespace Hermes
           // Create new matrix solver with correct matrix.
           linear_solver = create_linear_solver<Scalar>(this->matrix_solver_type, kept_jacobian, residual);
 
-          this->dp->assemble(sln_vector, kept_jacobian);
+          this->dp->assemble(this->sln_vector, kept_jacobian);
           linear_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         }
 
@@ -306,7 +306,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
-          sln_vector[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
+          this->sln_vector[i] += this->damping_coeff * linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
