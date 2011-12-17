@@ -235,6 +235,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    MeshFunction<Scalar>* Solution<Scalar>::clone()
+    {
+      Solution<Scalar>* sln = new Solution<Scalar>();
+      sln->copy(this);
+      return sln;
+    }
+
+    template<typename Scalar>
     void Solution<Scalar>::free_tables()
     {
       for (int i = 0; i < 4; i++)

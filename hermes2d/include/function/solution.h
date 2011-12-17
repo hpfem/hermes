@@ -169,6 +169,8 @@ namespace Hermes
 
       /// Internal.
       virtual void set_active_element(Element* e);
+
+      virtual MeshFunction<Scalar>* clone();
     protected:
       virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
 

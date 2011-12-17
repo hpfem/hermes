@@ -240,6 +240,11 @@ namespace Hermes
           this->ext.push_back(ext);
         }
 
+        VectorFormVol<Scalar>* clone()
+        {
+          return new ProjectionVectorFormVol(*this);
+        }
+
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, ExtData<Scalar> *ext) const
         {

@@ -799,7 +799,7 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->mfvol[j]->ext[j])
               {
-                current_stage->mfvol[j]->ext[j] = ext[i][l];
+                mfvol[i][j]->ext[j] = ext[i][l];
                 break;
               }
             }
@@ -819,7 +819,7 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->mfsurf[j]->ext[j])
               {
-                current_stage->mfsurf[j]->ext[j] = ext[i][l];
+                mfsurf[i][j]->ext[j] = ext[i][l];
                 break;
               }
             }
@@ -839,7 +839,7 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->vfvol[j]->ext[j])
               {
-                current_stage->vfvol[j]->ext[j] = ext[i][l];
+                vfvol[i][j]->ext[j] = ext[i][l];
                 break;
               }
             }
@@ -859,7 +859,7 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->vfsurf[j]->ext[j])
               {
-                current_stage->vfsurf[j]->ext[j] = ext[i][l];
+                vfsurf[i][j]->ext[j] = ext[i][l];
                 break;
               }
             }
@@ -919,6 +919,83 @@ namespace Hermes
         if(current_state->e != NULL)
           assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
       }
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned int j = 0; j < wf->get_neq(); j++)
+          delete pss[i][j];
+        delete [] pss[i];
+      }
+      delete [] pss;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned int j = 0; j < wf->get_neq(); j++)
+          delete spss[i][j];
+        delete [] spss[i];
+      }
+      delete [] spss;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned int j = 0; j < wf->get_neq(); j++)
+          delete refmaps[i][j];
+        delete [] refmaps[i];
+      }
+      delete [] refmaps;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned int j = 0; j < wf->get_neq(); j++)
+          delete u_ext[i][j];
+        delete [] u_ext[i];
+      }
+      delete [] u_ext;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned int j = 0; j < wf->get_neq(); j++)
+          delete als[i][j];
+        delete [] als[i];
+      }
+      delete [] als;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned int j = 0; j < current_stage->ext.size(); j++)
+          delete ext[i][j];
+        delete [] ext[i];
+      }
+      delete [] ext;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->mfvol.size(); j++)
+          delete mfvol[i][j];
+        mfvol[i].clear();
+      }
+      delete [] mfvol;
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->mfsurf.size(); j++)
+          delete mfsurf[i][j];
+        mfsurf[i].clear();
+      }
+      delete [] mfsurf;
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->vfvol.size(); j++)
+          delete vfvol[i][j];
+        vfvol[i].clear();
+      }
+      delete [] vfvol;
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (int j = 0; j < current_stage->vfsurf.size(); j++)
+          delete vfsurf[i][j];
+        vfsurf[i].clear();
+      }
+      delete [] vfsurf;
 
       /// \todo Should this be really here? Or in assemble()?
       if (current_mat != NULL)
