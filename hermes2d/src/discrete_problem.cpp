@@ -868,7 +868,7 @@ namespace Hermes
       }
 
       Traverse trav_master(true);
-      unsigned int num_states = trav_master.get_num_states(current_stage->meshes.front());
+      unsigned int num_states = trav_master.get_num_states(current_stage->meshes);
       
       trav_master.begin(current_stage->meshes.size(), &(current_stage->meshes.front()));
 
@@ -893,33 +893,40 @@ namespace Hermes
         trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
       }
-      unsigned int state_i;
-//#pragma omp for shared(trav_master.top, trav_master.id, current_stage->meshes)
-      for(state_i = 0; state_i < num_states; state_i++)
+int state_i;
+#define CHUNKSIZE 1
+#pragma omp parallel shared(trav_master) private(state_i)
       {
-        Traverse::State* current_state = trav[00].get_next_state(&trav_master.top, &trav_master.id);
+        #pragma omp for schedule(dynamic, CHUNKSIZE)
+        for(state_i = 0; state_i < num_states; state_i++)
+        {
+          Traverse::State* current_state;
+          #pragma omp critical
+          {
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+          }
 
-        PrecalcShapeset** current_pss = pss[00];
-        PrecalcShapeset** current_spss = spss[00];
-        RefMap** current_refmaps = refmaps[00];
-        Solution<Scalar>** current_u_ext = u_ext[00];
-        AsmList<Scalar>** current_als = als[00];
+          PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
+          PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
+          RefMap** current_refmaps = refmaps[omp_get_thread_num()];
+          Solution<Scalar>** current_u_ext = u_ext[omp_get_thread_num()];
+          AsmList<Scalar>** current_als = als[omp_get_thread_num()];
 
-        MatrixFormVol<Scalar>** current_mfvol = mfvol[00].size() == 0 ? NULL : &(mfvol[00].front());
-        MatrixFormSurf<Scalar>** current_mfsurf = mfsurf[00].size() == 0 ? NULL : &(mfsurf[00].front());
-        VectorFormVol<Scalar>** current_vfvol = vfvol[00].size() == 0 ? NULL : &(vfvol[00].front());
-        VectorFormSurf<Scalar>** current_vfsurf = vfsurf[00].size() == 0 ? NULL : &(vfsurf[00].front());
+          MatrixFormVol<Scalar>** current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
+          MatrixFormSurf<Scalar>** current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
+          VectorFormVol<Scalar>** current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
+          VectorFormSurf<Scalar>** current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
 
-        // One state is a collection of (virtual) elements sharing
-        // the same physical location on (possibly) different meshes.
-        // This is then the same element of the virtual union mesh.
-        // The proper sub-element mappings to all the functions of
-        // this stage is supplied by the function Traverse::get_next_state()
-        // called in the while loop.
-        if(current_state->e != NULL)
-          assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+          // One state is a collection of (virtual) elements sharing
+          // the same physical location on (possibly) different meshes.
+          // This is then the same element of the virtual union mesh.
+          // The proper sub-element mappings to all the functions of
+          // this stage is supplied by the function Traverse::get_next_state()
+          // called in the while loop.
+          if(current_state->e != NULL)
+            assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+        }
       }
-
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
@@ -1584,6 +1591,11 @@ namespace Hermes
     Func<double>* DiscreteProblem<Scalar>::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     {
       _F_;
+
+      //// Only for testing OpenMP.
+      return init_fn(fu, rm, order);
+      //// Only for testing OpenMP.
+
       if(rm->is_jacobian_const())
       {
         typename AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());

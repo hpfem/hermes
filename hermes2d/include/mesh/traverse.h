@@ -93,7 +93,7 @@ namespace Hermes
       void finish();
 
       State* get_next_state(int* top_by_ref = NULL, int* id_by_ref = NULL);
-      int get_num_states(Mesh* mesh);
+      int get_num_states(Hermes::vector<Mesh*> meshes);
       inline Element*  get_base() const { return base; }
 
       UniData** construct_union_mesh(Mesh* unimesh);
