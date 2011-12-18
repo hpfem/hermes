@@ -895,9 +895,9 @@ namespace Hermes
       }
 int state_i;
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master) private(state_i)
+//#pragma omp parallel shared(trav_master) private(state_i)
       {
-        #pragma omp for schedule(dynamic, CHUNKSIZE)
+        //#pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
         {
           Traverse::State* current_state;
@@ -1591,10 +1591,6 @@ int state_i;
     Func<double>* DiscreteProblem<Scalar>::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
     {
       _F_;
-
-      //// Only for testing OpenMP.
-      return init_fn(fu, rm, order);
-      //// Only for testing OpenMP.
 
       if(rm->is_jacobian_const())
       {
