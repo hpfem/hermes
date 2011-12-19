@@ -19,6 +19,7 @@
 #include "../global.h"
 #include "../shapeset/precalc.h"
 #include "../quadrature/quad_all.h"
+#include "shapeset/shapeset_h1_all.h"
 
 namespace Hermes
 {
@@ -96,6 +97,8 @@ namespace Hermes
       /// Returns the increase in the integration order due to the reference map.
       int get_inv_ref_order() const;
       
+      H1ShapesetJacobi ref_map_shapeset;
+      PrecalcShapeset ref_map_pss;
     private:
       /// If the reference map is constant, this is the fast way to obtain
       /// its inverse matrix.

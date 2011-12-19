@@ -631,8 +631,8 @@ namespace Hermes
     {
       _F_;
 
-      current_rhs = rhs;
       current_mat = mat;
+      current_rhs = rhs;
       current_force_diagonal_blocks = force_diagonal_blocks;
       current_block_weights = block_weights;
 
@@ -677,7 +677,7 @@ namespace Hermes
         // mesh of the current test function, then the stage would have
         // three meshes. By stage functions, all functions are meant: shape
         // functions (their precalculated values), and mesh functions.
-        assemble_one_stage(coeff_vec);
+        assemble_one_stage(coeff_vec, mat, rhs);
       }
       // Deinitialize matrix buffer.
       if(matrix_buffer != NULL)
@@ -718,7 +718,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_stage(Scalar* coeff_vec)
+    void DiscreteProblem<Scalar>::assemble_one_stage(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       _F_;
 
@@ -895,16 +895,14 @@ namespace Hermes
       }
 int state_i;
 #define CHUNKSIZE 1
-//#pragma omp parallel shared(trav_master) private(state_i)
+#pragma omp parallel shared(trav_master, mat, rhs) private(state_i)
       {
-        //#pragma omp for schedule(dynamic, CHUNKSIZE)
+        #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
         {
           Traverse::State* current_state;
-          #pragma omp critical
-          {
+          #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-          }
 
           PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
           PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
@@ -1083,8 +1081,6 @@ int state_i;
       // Initialize the state, return a non-NULL element; if no such element found, return.
       init_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
 
-      init_cache();
-
       if (current_mat != NULL)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < current_stage->mfvol.size(); current_mfvol_i++)
@@ -1104,7 +1100,8 @@ int state_i;
             if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_mfvol[current_mfvol_i]->i]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->i]->idx[i]);
-              test_fns[i] = get_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
+#pragma omp critical (get_fn)
+                test_fns[i] = get_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
             }
           }
 
@@ -1115,7 +1112,9 @@ int state_i;
             if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
             {
               current_pss[current_mfvol[current_mfvol_i]->j]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->j]->idx[j]);
+#pragma omp critical (get_fn)
               base_fns[j] = get_fn(current_pss[current_mfvol[current_mfvol_i]->j], current_refmaps[current_mfvol[current_mfvol_i]->j], order);
+
             }
           }
 
@@ -1144,6 +1143,7 @@ int state_i;
             if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_vfvol[current_vfvol_i]->i]->set_active_shape(current_als[current_vfvol[current_vfvol_i]->i]->idx[i]);
+#pragma omp critical (get_fn)
               test_fns[i] = get_fn(current_spss[current_vfvol[current_vfvol_i]->i], current_refmaps[current_vfvol[current_vfvol_i]->i], order);
             }
           }
@@ -1182,6 +1182,7 @@ int state_i;
               if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_mfsurf[current_mfsurf_i]->i]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->i]->idx[i]);
+#pragma omp critical (get_fn)
                 test_fns[i] = get_fn(current_spss[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i], quad->get_edge_points(current_state->isurf, order));
               }
             }
@@ -1193,6 +1194,7 @@ int state_i;
               if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
               {
                 current_pss[current_mfsurf[current_mfsurf_i]->j]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->j]->idx[j]);
+#pragma omp critical (get_fn)
                 base_fns[j] = get_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], quad->get_edge_points(current_state->isurf, order));
               }
             }
@@ -1222,6 +1224,7 @@ int state_i;
               if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_vfsurf[current_vfsurf_i]->i]->set_active_shape(current_als[current_vfsurf[current_vfsurf_i]->i]->idx[i]);
+#pragma omp critical (get_fn)
                 test_fns[i] = get_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], quad->get_edge_points(current_state->isurf, order));
               }
             }
@@ -1253,8 +1256,13 @@ int state_i;
         init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
 
         // Order of shape functions.
-        Func<Hermes::Ord>* ou = get_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
-        Func<Hermes::Ord>* ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+        Func<Hermes::Ord>* ou;
+        Func<Hermes::Ord>* ov;
+#pragma omp critical (get_fn_ord)
+        {
+          ou = get_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
+          ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+        }
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, &ext_ord);
@@ -1293,10 +1301,12 @@ int state_i;
 
       // Init geometry.
       int n_quadrature_points;
+      Geom<double>* geometry = NULL;
+      double* jacobian_x_weights = NULL;
       if(surface_form)
-        n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state);
+        n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state, geometry, jacobian_x_weights);
       else
-        n_quadrature_points = init_geometry_points(current_refmaps[form->i], order);
+        n_quadrature_points = init_geometry_points(current_refmaps[form->i], order, geometry, jacobian_x_weights);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
@@ -1322,9 +1332,9 @@ int state_i;
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
             }
           }
         }
@@ -1344,7 +1354,7 @@ int state_i;
               Func<double>* u = base_fns[j];
               Func<double>* v = test_fns[i];
 
-              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, u, v, geometry_cache[order], &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
 
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
@@ -1385,7 +1395,9 @@ int state_i;
         init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
 
         // Order of shape functions.
-        Func<Hermes::Ord>* ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+        Func<Hermes::Ord>* ov;
+#pragma omp critical (get_fn_ord)
+        ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
@@ -1406,10 +1418,12 @@ int state_i;
 
       // Init geometry.
       int n_quadrature_points;
+      Geom<double>* geometry = NULL;
+      double* jacobian_x_weights = NULL;
       if(surface_form)
-        n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state);
+        n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state, geometry, jacobian_x_weights);
       else
-        n_quadrature_points = init_geometry_points(current_refmaps[form->i], order);
+        n_quadrature_points = init_geometry_points(current_refmaps[form->i], order, geometry, jacobian_x_weights);
 
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
@@ -1434,9 +1448,9 @@ int state_i;
         Func<double>* v = test_fns[i];
         
         if(surface_form)
-          current_rhs->add(current_als[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_als[form->i]->coef[i]);
+          current_rhs->add(current_als[form->i]->dof[i], 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i]);
         else
-          current_rhs->add(current_als[form->i]->dof[i], form->value(n_quadrature_points, jacobian_x_weights_cache[order], u_ext, v, geometry_cache[order], &ext) * form->scaling_factor * current_als[form->i]->coef[i]);
+          current_rhs->add(current_als[form->i]->dof[i], form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i]);
       }
 
       // Cleanup.
@@ -1444,35 +1458,31 @@ int state_i;
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order)
+    int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       _F_;
       double3* pt = quad->get_points(order);
       int np = quad->get_num_points(order);
 
       // Init geometry and jacobian*weights.
-      if (geometry_cache[order] == NULL)
+      geometry = init_geom_vol(reference_mapping, order);
+      double* jac = NULL;
+      if(!reference_mapping->is_jacobian_const())
+        jac = reference_mapping->get_jacobian(order);
+      jacobian_x_weights = new double[np];
+      for(int i = 0; i < np; i++)
       {
-        geometry_cache[order] = init_geom_vol(reference_mapping, order);
-        double* jac = NULL;
-        if(!reference_mapping->is_jacobian_const())
-          jac = reference_mapping->get_jacobian(order);
-        jacobian_x_weights_cache[order] = new double[np];
-        for(int i = 0; i < np; i++)
-        {
-          if(reference_mapping->is_jacobian_const())
-            jacobian_x_weights_cache[order][i] = pt[i][2] * reference_mapping->get_const_jacobian();
-          else
-            jacobian_x_weights_cache[order][i] = pt[i][2] * jac[i];
-        }
+        if(reference_mapping->is_jacobian_const())
+          jacobian_x_weights[i] = pt[i][2] * reference_mapping->get_const_jacobian();
+        else
+          jacobian_x_weights[i] = pt[i][2] * jac[i];
       }
-      Geom<double>* e = geometry_cache[order];
-      double* jwt = jacobian_x_weights_cache[order];
+
       return np;
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state)
+    int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       _F_;
       int eo = quad->get_edge_points(current_state->isurf, order);
@@ -1480,17 +1490,12 @@ int state_i;
       int np = quad->get_num_points(eo);
 
       // Init geometry and jacobian*weights.
-      if (geometry_cache[eo] == NULL)
-      {
-        geometry_cache[eo] = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->marker, eo);
-        double3* tan = reference_mapping->get_tangent(current_state->isurf, eo);
-        jacobian_x_weights_cache[eo] = new double[np];
-        for(int i = 0; i < np; i++)
-          jacobian_x_weights_cache[eo][i] = pt[i][2] * tan[i][2];
-      }
-      Geom<double>* e = geometry_cache[eo];
-      double* jwt = jacobian_x_weights_cache[eo];
-
+      geometry = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->marker, eo);
+      double3* tan = reference_mapping->get_tangent(current_state->isurf, eo);
+      jacobian_x_weights = new double[np];
+      for(int i = 0; i < np; i++)
+        jacobian_x_weights[i] = pt[i][2] * tan[i][2];
+      
       order = eo;
       return np;
     }
@@ -1504,17 +1509,21 @@ int state_i;
       if (current_u_ext != NULL)
         for(int i = 0; i < prev_size; i++)
           if (current_u_ext[i + form->u_ext_offset] != NULL)
-            oi[i] = get_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
+#pragma omp critical (get_fn_ord)
+          oi[i] = get_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
           else
-            oi[i] = get_fn_ord(0);
+#pragma omp critical (get_fn_ord)
+          oi[i] = get_fn_ord(0);
       else
         for(int i = 0; i < prev_size; i++)
-          oi[i] = get_fn_ord(0);
+#pragma omp critical (get_fn_ord)
+        oi[i] = get_fn_ord(0);
       
       oext->nf = form->ext.size();
       oext->fn = new Func<Hermes::Ord>*[oext->nf];
       for (int i = 0; i < oext->nf; i++)
-        oext->fn[i] = get_fn_ord(form->ext[i]->get_fn_order());
+#pragma omp critical (get_fn_ord)
+      oext->fn[i] = get_fn_ord(form->ext[i]->get_fn_order());
     }
 
     template<typename Scalar>
@@ -1592,6 +1601,8 @@ int state_i;
     {
       _F_;
 
+      return init_fn(fu, rm, order);
+
       if(rm->is_jacobian_const())
       {
         typename AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());
@@ -1631,6 +1642,9 @@ int state_i;
     Func<Hermes::Ord>* DiscreteProblem<Scalar>::get_fn_ord(const int order)
     {
       _F_;
+
+      return init_fn_ord((unsigned int) order);
+
       assert(order >= 0);
       unsigned int cached_order = (unsigned int) order;
       if(!assembling_caches.cache_fn_ord.present(cached_order))
@@ -1639,40 +1653,9 @@ int state_i;
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_cache()
-    {
-      _F_;
-      for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
-      {
-        geometry_cache[i] = NULL;
-        jacobian_x_weights_cache[i] = NULL;
-      }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::delete_single_geom_cache(int order)
-    {
-      if (geometry_cache[order] != NULL)
-      {
-        geometry_cache[order]->free();
-        delete geometry_cache[order];
-        geometry_cache[order] = NULL;
-        delete [] jacobian_x_weights_cache[order];
-      }
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::delete_cache()
     {
       _F_;
-      for (int i = 0; i < g_max_quad + 1 + 4 * g_max_quad + 4; i++)
-      {
-        if (geometry_cache[i] != NULL)
-        {
-          geometry_cache[i]->free(); delete geometry_cache[i];
-          delete [] jacobian_x_weights_cache[i];
-        }
-      }
 
       for (typename std::map<typename AssemblingCaches::KeyNonConst, Func<double>*, typename AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_quads.begin();
         it != assembling_caches.cache_fn_quads.end(); it++)

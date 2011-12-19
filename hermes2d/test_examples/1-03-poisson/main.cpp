@@ -28,7 +28,7 @@
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
-const int P_INIT = 4;                             // Uniform polynomial degree of mesh elements.
+const int P_INIT = 1;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,

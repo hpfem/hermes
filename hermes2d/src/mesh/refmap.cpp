@@ -16,16 +16,12 @@
 #include "global.h"
 #include "mesh.h"
 #include "refmap.h"
-#include "shapeset/shapeset_h1_all.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    H1ShapesetJacobi ref_map_shapeset;
-    PrecalcShapeset ref_map_pss(&ref_map_shapeset);
-
-    RefMap::RefMap()
+    RefMap::RefMap() : ref_map_shapeset(H1ShapesetJacobi()), ref_map_pss(PrecalcShapeset(&ref_map_shapeset))
     {
       quad_2d = NULL;
       num_tables = 0;
@@ -93,7 +89,8 @@ namespace Hermes
     /// jacobian elements.
     double2x2* RefMap::get_inv_ref_map(int order)
     {
-      if (cur_node->inv_ref_map[order] == NULL) calc_inv_ref_map(order);
+      if (cur_node->inv_ref_map[order] == NULL) 
+        calc_inv_ref_map(order);
       return cur_node->inv_ref_map[order];
     }
 
@@ -258,7 +255,8 @@ namespace Hermes
       {
         jac[i] = (m[i][0][0] * m[i][1][1] - m[i][0][1] * m[i][1][0]);
         double ij = 1.0 / jac[i];
-        error_if(!finite(ij), "1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac = %g)", i, order);
+        if(!finite(ij))
+          error("1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac = %g)", i, order);
         assert_msg(ij == ij, "1/jac[%d] is NaN when calculating inv. ref. map for order %d (jac = %g)", i, order);
 
         // invert and transpose the matrix

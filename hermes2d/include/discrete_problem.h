@@ -134,7 +134,7 @@ namespace Hermes
       inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
 
       /// Assemble one stage.
-      void assemble_one_stage(Scalar* coeff_vec);
+      void assemble_one_stage(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
 
       /// Assemble one state.
       void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state,
@@ -157,8 +157,8 @@ namespace Hermes
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Init geometry, jacobian * weights, return the number of integration points.
-      int init_geometry_points(RefMap* reference_mapping, int order);
-      int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state);
+      int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights);
+      int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
       
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
@@ -183,14 +183,8 @@ namespace Hermes
       /// Uses assembling_caches to get (possibly chached) dummy function for calculation of the integration order.
       Func<Hermes::Ord>* get_fn_ord(const int order);
 
-      /// Initialize all caches.
-      void init_cache();
-
       /// Deinitialize all caches.
       void delete_cache();
-
-      /// Deinitialize a single geometry cache.
-      void delete_single_geom_cache(int order);
 
       /// Returns the matrix_buffer of the size n.
       Scalar** get_matrix_buffer(int n);
@@ -237,12 +231,6 @@ namespace Hermes
       /// Matrix structure can be reused.
       /// If other conditions apply.
       bool have_matrix;
-
-      /// Geometry cache.
-      Geom<double>* geometry_cache[g_max_quad + 1 + 4* g_max_quad + 4];
-
-      /// Jacobian * weights cache.
-      double* jacobian_x_weights_cache[g_max_quad + 1 + 4* g_max_quad + 4];
 
       /// There is a matrix form set on DG_INNER_EDGE area or not.
       bool DG_matrix_forms_present;

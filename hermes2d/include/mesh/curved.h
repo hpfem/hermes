@@ -107,9 +107,6 @@ namespace Hermes
 
       void get_mid_edge_points(Element* e, double2* pt, int n);
 
-      static H1ShapesetJacobi ref_map_shapeset;
-      static PrecalcShapeset ref_map_pss;
-
       static double** edge_proj_matrix;  ///< projection matrix for each edge is the same
       static double** bubble_proj_matrix_tri; ///< projection matrix for triangle bubbles
       static double** bubble_proj_matrix_quad; ///< projection matrix for quad bubbles
@@ -142,17 +139,17 @@ namespace Hermes
 
       static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f);
 
-      static void precalculate_cholesky_projection_matrix_edge();
-      static double** calculate_bubble_projection_matrix(int nb, int* indices);
-      static void precalculate_cholesky_projection_matrices_bubble();
+      static void precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      static double** calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      static void precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
 
       static void edge_coord(Element* e, int edge, double t, double2& x, double2& v);
-      static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj);
+      static void calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
 
-      static void old_projection(Element* e, int order, double2* proj, double* old[2]);
-      static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
+      static void old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      static void calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
 
-      static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj);
+      static void ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
 
       static bool warning_issued;
       template<typename T> friend class Space;
@@ -160,6 +157,7 @@ namespace Hermes
       template<typename T> friend class L2Space;
       template<typename T> friend class HcurlSpace;
       template<typename T> friend class HdivSpace;
+      template<typename T> friend class DiscreteProblem;
       template<typename T> friend class Adapt;
       template<typename T> friend class KellyTypeAdapt;
       friend class RefMap;
