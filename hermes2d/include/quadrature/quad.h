@@ -64,24 +64,17 @@ namespace Hermes
     class HERMES_API Quad2D
     {
     public:
-      void set_mode(ElementMode2D mode) { this->mode = mode; }
-      ElementMode2D  get_mode() const { return mode; }
+      inline int get_num_points(int order, ElementMode2D mode)  const { return np[mode][order]; };
+      inline double3* get_points(int order, ElementMode2D mode) const { assert(order < num_tables[mode]); return tables[mode][order]; }
+      inline int get_edge_points(int edge, int order, ElementMode2D mode) {return  max_order[mode]+1 + (3*(1-mode) + 4*mode)*order + edge;}
 
-      inline int get_num_points(int order)  const { return np[mode][order]; };
-      inline double3* get_points(int order) const { assert(order < num_tables[mode]); return tables[mode][order]; }
-      inline int get_edge_points(int edge)  const { return max_order[mode]+1 + (3*(1-mode) + 4*mode)*max_order[mode] + edge; }
-      inline int get_edge_points(int edge, int order) {return  max_order[mode]+1 + (3*(1-mode) + 4*mode)*order + edge;}
+      inline int get_max_order(ElementMode2D mode) const { return max_order[mode]; }
+      inline int get_safe_max_order(ElementMode2D mode) const { return safe_max_order[mode]; }
+      inline int get_num_tables(ElementMode2D mode) const { return num_tables[mode]; }
 
-      inline int get_max_order() const { return max_order[mode]; }
-      inline int get_safe_max_order() const { return safe_max_order[mode]; }
-      inline int get_num_tables() const { return num_tables[mode]; }
-
-      inline double2* get_ref_vertex(int n) { return &ref_vert[mode][n]; }
+      inline double2* get_ref_vertex(int n, ElementMode2D mode) { return &ref_vert[mode][n]; }
 
     protected:
-
-      ElementMode2D mode;
-
       double3*** tables;
       int** np;
 

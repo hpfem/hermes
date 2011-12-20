@@ -48,7 +48,6 @@ namespace Hermes
 
         Quad2DOrd()
         {
-          mode = HERMES_MODE_TRIANGLE;
           max_order[0] = max_order[1] = 1;
           num_tables[0] = num_tables[1] = 2;
           tables = ord_tables;
@@ -156,8 +155,8 @@ namespace Hermes
           double* x = refmap.get_phys_x(type);
           double* y = refmap.get_phys_y(type);
 
-          double3* pt = quad_ord.get_points(type);
-          int np = quad_ord.get_num_points(type);
+          double3* pt = quad_ord.get_points(type, e->get_mode());
+          int np = quad_ord.get_num_points(type, e->get_mode());
           int id[80];
           assert(np <= 80);
 

@@ -813,10 +813,8 @@ namespace Hermes
     void NeighborSearch<Scalar>::set_quad_order(int order)
     {
       _F_;
-      quad->set_mode(neighbors[active_segment]->get_mode());
-      neighb_quad_order = quad->get_edge_points(neighbor_edge.local_num_of_edge, order);
-      quad->set_mode(central_el->get_mode());
-      central_quad_order = quad->get_edge_points(active_edge, order);
+      neighb_quad_order = quad->get_edge_points(neighbor_edge.local_num_of_edge, order, neighbors[active_segment]->get_mode());
+      central_quad_order = quad->get_edge_points(active_edge, order, central_el->get_mode());
     }
 
     template<typename Scalar>

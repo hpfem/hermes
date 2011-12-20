@@ -183,7 +183,7 @@ namespace Hermes
         //set element and integration order
         rsln->set_active_element(element);
         rsln->set_quad_order(intr_gip_order);
-        const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order);
+        const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 
         //allocate space for Curl
         if (precalc_rvals_curl == NULL)

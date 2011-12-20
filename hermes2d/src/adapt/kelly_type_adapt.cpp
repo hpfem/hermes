@@ -498,8 +498,8 @@ namespace Hermes
 
       // Evaluate the form.
       Quad2D* quad = sln->get_quad_2d();
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
+      double3* pt = quad->get_points(order, sln->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, sln->get_active_element()->get_mode());
 
       // Initialize geometry and jacobian*weights.
       Geom<double>* e = init_geom_vol(rm, order);

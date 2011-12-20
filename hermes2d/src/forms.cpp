@@ -378,7 +378,7 @@ namespace Hermes
       tan = rm->get_tangent(isurf, order);
 
       Quad2D* quad = rm->get_quad_2d();
-      int np = quad->get_num_points(order);
+      int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
       e->tx = new double [np];
       e->ty = new double [np];
       e->nx = new double [np];
@@ -421,8 +421,8 @@ namespace Hermes
       else
 #endif
         fu->set_quad_order(order);
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
+      double3* pt = quad->get_points(order, rm->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
       Func<double>* u = new Func<double>(np, nc);
 
       // H1 space.
@@ -640,8 +640,8 @@ namespace Hermes
       int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
       fu->set_quad_order(order);
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
+      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       if (u->nc == 1)
@@ -693,8 +693,8 @@ namespace Hermes
 #endif
         fu->set_quad_order(order);
 
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
+      double3* pt = quad->get_points(order, fu->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, fu->get_active_element()->get_mode());
       Func<Scalar>* u = new Func<Scalar>(np, nc);
 
       if (u->nc == 1)

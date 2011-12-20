@@ -529,9 +529,9 @@ namespace Hermes
           ref_map_pss->set_quad_order(o);
           double* fnj = ref_map_pss->get_fn_values();
 
-          double3* pt = quad2d.get_points(o);
+          double3* pt = quad2d.get_points(o, ref_map_pss->mode);
           double val = 0.0;
-          for (int k = 0; k < quad2d.get_num_points(o); k++)
+          for (int k = 0; k < quad2d.get_num_points(o, ref_map_pss->mode); k++)
             val += pt[k][2] * (fni[k] * fnj[k]);
 
           mat[i][j] = mat[j][i] = val;
@@ -709,8 +709,8 @@ namespace Hermes
     {
       _F_;
       
-      int mo2 = quad2d.get_max_order();
-      int np = quad2d.get_num_points(mo2);
+      int mo2 = quad2d.get_max_order(e->get_mode());
+      int np = quad2d.get_num_points(mo2, e->get_mode());
 
       for (unsigned int k = 0; k < e->get_num_surf(); k++) // loop over vertices
       {
@@ -748,8 +748,8 @@ namespace Hermes
       ref_map_pss->set_active_element(e);
 
       int i, j, k;
-      int mo2 = quad2d.get_max_order();
-      int np = quad2d.get_num_points(mo2);
+      int mo2 = quad2d.get_max_order(e->get_mode());
+      int np = quad2d.get_num_points(mo2, e->get_mode());
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
       int nb = ref_map_shapeset->get_num_bubbles(qo);
 
@@ -770,7 +770,7 @@ namespace Hermes
       old_projection(e, order, proj, old, ref_map_shapeset, ref_map_pss);
 
       // fn values of both components of nonpolynomial function
-      double3* pt = quad2d.get_points(mo2);
+      double3* pt = quad2d.get_points(mo2, e->get_mode());
       for (j = 0; j < np; j++)  // over all integration points
       {
         double2 a;

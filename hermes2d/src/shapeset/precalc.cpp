@@ -101,7 +101,6 @@ namespace Hermes
     {
       mode = e->get_mode();
       shapeset->set_mode(mode);
-      get_quad_2d()->set_mode(mode);
       Transformable::set_active_element(e);
     }
 
@@ -110,7 +109,6 @@ namespace Hermes
     {
       this->mode = mode;
       shapeset->set_mode(mode);
-      get_quad_2d()->set_mode(mode);
       element = NULL;
     }
 
@@ -121,10 +119,8 @@ namespace Hermes
 
       // initialization
       Quad2D* quad = get_quad_2d();
-      quad->set_mode(mode);
-      check_order(quad, order);
-      int np = quad->get_num_points(order);
-      double3* pt = quad->get_points(order);
+      int np = quad->get_num_points(order, this->mode);
+      double3* pt = quad->get_points(order, this->mode);
 
       int oldmask = (cur_node != NULL) ? cur_node->mask : 0;
       int newmask = mask | oldmask;

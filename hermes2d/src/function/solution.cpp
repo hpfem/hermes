@@ -45,7 +45,6 @@ namespace Hermes
 
       Quad2DCheb()
       {
-        mode = HERMES_MODE_TRIANGLE;
         max_order[0]  = max_order[1]  = 10;
         num_tables[0] = num_tables[1] = 11;
         tables = cheb_tab;
@@ -474,9 +473,8 @@ namespace Hermes
       for_all_active_elements(e, this->mesh)
       {
         this->mode = e->get_mode();
-        quad->set_mode(this->mode);
         o = elem_orders[e->id];
-        int np = quad->get_num_points(o);
+        int np = quad->get_num_points(o, e->get_mode());
 
         AsmList<Scalar> al;
         space->get_element_assembly_list(e, &al);
@@ -949,8 +947,7 @@ namespace Hermes
       int i, j, k, l;
       struct Function<Scalar>::Node* node = NULL;
       Quad2D* quad = this->quads[this->cur_quad];
-      quad->set_mode(this->mode);
-      int np = quad->get_num_points(order);
+      int np = quad->get_num_points(order, this->mode);
 
       if (sln_type == HERMES_SLN)
       {
@@ -980,7 +977,7 @@ namespace Hermes
         Scalar* x = new Scalar[np];
         Scalar* y = new Scalar[np];
         Scalar* tx = new Scalar[np];
-        double3* pt = quad->get_points(order);
+        double3* pt = quad->get_points(order, element->get_mode());
         for (i = 0; i < np; i++)
         {
           x[i] = pt[i][0] * this->ctm->m[0] + this->ctm->t[0];

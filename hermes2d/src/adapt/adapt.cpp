@@ -786,8 +786,8 @@ namespace Hermes
 
       // eval the form
       Quad2D* quad = sln1->get_quad_2d();
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
+      double3* pt = quad->get_points(order, sln1->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, sln1->get_active_element()->get_mode());
 
       // init geometry and jacobian*weights
       Geom<double>* e = init_geom_vol(rrv1, order);
@@ -850,8 +850,8 @@ namespace Hermes
 
       // eval the form
       Quad2D* quad = rsln1->get_quad_2d();
-      double3* pt = quad->get_points(order);
-      int np = quad->get_num_points(order);
+      double3* pt = quad->get_points(order, rrv1->get_active_element()->get_mode());
+      int np = quad->get_num_points(order, rrv1->get_active_element()->get_mode());
 
       // init geometry and jacobian*weights
       Geom<double>* e = init_geom_vol(rrv1, order);

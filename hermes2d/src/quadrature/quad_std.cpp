@@ -2488,8 +2488,6 @@ namespace Hermes
 
     Quad2DStd::Quad2DStd()
     {
-      mode = HERMES_MODE_TRIANGLE;
-
       ref_vert[0][0][0] = -1.0;
       ref_vert[0][0][1] = -1.0;
       ref_vert[0][1][0] =  1.0;

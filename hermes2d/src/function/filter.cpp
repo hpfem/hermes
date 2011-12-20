@@ -278,7 +278,7 @@ namespace Hermes
         error("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
-      int np = quad->get_num_points(order);
+      int np = quad->get_num_points(order, element->get_mode());
       struct Function<Scalar>::Node* node = this->new_node(H2D_FN_VAL, np);
 
       // precalculate all solutions
@@ -405,7 +405,7 @@ namespace Hermes
         error("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
-      int np = quad->get_num_points(order);
+      int np = quad->get_num_points(order, element->get_mode());
       struct Function<double>::Node* node = this->new_node(H2D_FN_VAL, np);
 
       this->sln_complex->set_quad_order(order, H2D_FN_VAL);
@@ -470,7 +470,7 @@ namespace Hermes
     void DXDYFilter<Scalar>::precalculate(int order, int mask)
     {
       Quad2D* quad = this->quads[this->cur_quad];
-      int np = quad->get_num_points(order);
+      int np = quad->get_num_points(order, element->get_mode());
       struct Function<Scalar>::Node* node = this->new_node(H2D_FN_DEFAULT, np);
 
       // precalculate all solutions
@@ -675,7 +675,7 @@ namespace Hermes
         error("VonMisesFilter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
-      int np = quad->get_num_points(order);
+      int np = quad->get_num_points(order, element->get_mode());
       Filter<double>::Node* node = new_node(H2D_FN_VAL_0, np);
 
       this->sln[0]->set_quad_order(order, H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY);

@@ -129,7 +129,7 @@ namespace Hermes
       if(quad_2d == NULL)
         error("2d quadrature wasn't set.");
       if (order == -1)
-        order = quad_2d->get_edge_points(edge);
+        order = quad_2d->get_edge_points(edge, quad_2d->get_max_order(element->get_mode()), element->get_mode());
 
       // NOTE: Hermes::Order-based caching of geometric data is already employed in DiscreteProblem.
       if(cur_node->tan[edge] != NULL)
@@ -154,8 +154,7 @@ namespace Hermes
       if (e != element) free();
 
       ref_map_pss.set_active_element(e);
-      quad_2d->set_mode(e->get_mode());
-      num_tables = quad_2d->get_num_tables();
+      num_tables = quad_2d->get_num_tables(e->get_mode());
       assert(num_tables <= H2D_MAX_TABLES);
 
       if (e == element) return;
@@ -198,7 +197,7 @@ namespace Hermes
       }
 
       // calculate the order of the inverse reference map
-      if (element->iro_cache == -1 && quad_2d->get_max_order() > 1)
+      if (element->iro_cache == -1 && quad_2d->get_max_order(e->get_mode()) > 1)
       {
         element->iro_cache = is_const ? 0 : calc_inv_ref_order();
       }
@@ -225,7 +224,7 @@ namespace Hermes
     void RefMap::calc_inv_ref_map(int order)
     {
       assert(quad_2d != NULL);
-      int i, j, np = quad_2d->get_num_points(order);
+      int i, j, np = quad_2d->get_num_points(order, element->get_mode());
 
       // construct jacobi matrices of the direct reference map for all integration points
 
@@ -274,7 +273,7 @@ namespace Hermes
     void RefMap::calc_second_ref_map(int order)
     {
       assert(quad_2d != NULL);
-      int i, j, np = quad_2d->get_num_points(order);
+      int i, j, np = quad_2d->get_num_points(order, element->get_mode());
 
       double3x2* k = new double3x2[np];
       memset(k, 0, np * sizeof(double3x2));
@@ -359,7 +358,7 @@ namespace Hermes
     void RefMap::calc_phys_x(int order)
     {
       // transform all x coordinates of the integration points
-      int i, j, np = quad_2d->get_num_points(order);
+      int i, j, np = quad_2d->get_num_points(order, element->get_mode());
       double* x = cur_node->phys_x[order] = new double[np];
       memset(x, 0, np * sizeof(double));
       ref_map_pss.force_transform(sub_idx, ctm);
@@ -376,7 +375,7 @@ namespace Hermes
     void RefMap::calc_phys_y(int order)
     {
       // transform all y coordinates of the integration points
-      int i, j, np = quad_2d->get_num_points(order);
+      int i, j, np = quad_2d->get_num_points(order, element->get_mode());
       double* y = cur_node->phys_y[order] = new double[np];
       memset(y, 0, np * sizeof(double));
       ref_map_pss.force_transform(sub_idx, ctm);
@@ -393,7 +392,7 @@ namespace Hermes
     void RefMap::calc_tangent(int edge, int eo)
     {
       int i, j;
-      int np = quad_2d->get_num_points(eo);
+      int np = quad_2d->get_num_points(eo, element->get_mode());
       double3* tan = cur_node->tan[edge] = new double3[np];
       int a = edge, b = element->next_vert(edge);
 
@@ -456,13 +455,13 @@ namespace Hermes
     int RefMap::calc_inv_ref_order()
     {
       Quad2D* quad = get_quad_2d();
-      int i, o, mo = quad->get_max_order();
+      int i, o, mo = quad->get_max_order(element->get_mode());
 
       // check first the positivity of the jacobian
-      double3* pt = quad->get_points(mo);
+      double3* pt = quad->get_points(mo, element->get_mode());
       double2x2* m = get_inv_ref_map(mo);
       double* jac = get_jacobian(mo);
-      for (i = 0; i < quad->get_num_points(mo); i++)
+      for (i = 0; i < quad->get_num_points(mo, element->get_mode()); i++)
         if (jac[i] <= 0.0)
           error("Element #%d is concave or badly oriented.", element->id);
 
@@ -470,7 +469,7 @@ namespace Hermes
       // (with grad_u == grad_v == (1, 1)) using the maximum integration rule
       double exact1 = 0.0;
       double exact2 = 0.0;
-      for (i = 0; i < quad->get_num_points(mo); i++, m++)
+      for (i = 0; i < quad->get_num_points(mo, element->get_mode()); i++, m++)
       {
         exact1 += pt[i][2] * jac[i] * (sqr((*m)[0][0] + (*m)[0][1]) + sqr((*m)[1][0] + (*m)[1][1]));
         exact2 += pt[i][2] / jac[i];
@@ -478,12 +477,12 @@ namespace Hermes
       // find sufficient quadrature degree
       for (o = 0; o < mo; o++)
       {
-        pt = quad->get_points(o);
+        pt = quad->get_points(o, element->get_mode());
         m = get_inv_ref_map(o);
         jac = get_jacobian(o);
         double result1 = 0.0;
         double result2 = 0.0;
-        for (i = 0; i < quad->get_num_points(o); i++, m++)
+        for (i = 0; i < quad->get_num_points(o, element->get_mode()); i++, m++)
         {
           result1 += pt[i][2] * jac[i] * (sqr((*m)[0][0] + (*m)[0][1]) + sqr((*m)[1][0] + (*m)[1][1]));
           result2 += pt[i][2] / jac[i] ;

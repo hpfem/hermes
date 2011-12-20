@@ -54,9 +54,8 @@ namespace Hermes
 
     HERMES_API void update_limit_table(ElementMode2D mode)
     {
-      g_quad_2d_std.set_mode(mode);
-      g_max_order = g_quad_2d_std.get_max_order();
-      g_safe_max_order = g_quad_2d_std.get_safe_max_order();
+      g_max_order = g_quad_2d_std.get_max_order(mode);
+      g_safe_max_order = g_quad_2d_std.get_safe_max_order(mode);
       g_order_table = (mode == HERMES_MODE_TRIANGLE) ? g_order_table_tri : g_order_table_quad;
     }
 

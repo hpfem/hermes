@@ -229,8 +229,6 @@ namespace Hermes
 
       void replace_cur_node(Node* node);
 
-      void check_order(Quad2D* quad, int order);
-
       static void check_params(int component, Node* cur_node, int num_components);
     
       static void check_table(int component, Node* cur_node, int n, const char* msg);

@@ -240,13 +240,6 @@ namespace Hermes
       cur_node = node;
     }
 
-    template<typename Scalar>
-    void Function<Scalar>::check_order(Quad2D* quad, int order)
-    {
-      if (order < 0 || order >= quad->get_num_tables())
-        error("Hermes::Order out of range (%d, %d).", order, quad->get_num_tables());
-    }
-
     template class HERMES_API Function<double>;
     template class HERMES_API Function<std::complex<double> >;
   }
