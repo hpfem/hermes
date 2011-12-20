@@ -121,8 +121,8 @@ namespace Hermes
       Element();
 
       int id;              ///< element id number
-      unsigned active:1;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
-      unsigned used:1;     ///< array item usage flag
+      bool active;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
+      bool used;     ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
       unsigned int get_num_surf();  ///< returns number of edges (same as number of vertices)

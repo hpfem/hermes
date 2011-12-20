@@ -119,7 +119,7 @@ namespace Hermes
         this->bnd[i] = true;
     }
 
-    void Traverse::State::operator=(const State & other)
+    void Traverse::State::operator=(const State * other)
     {
       _F_;
       // Delete part.
@@ -128,17 +128,17 @@ namespace Hermes
       if(sub_idx != NULL)
         delete [] sub_idx;
 
-      this->num = other.num;
+      this->num = other->num;
 
       this->e = new Element*[num];
       this->sub_idx = new uint64_t[num];
-      memcpy(this->e, other.e, num * sizeof(Element*));
-      memcpy(this->sub_idx, other.sub_idx, num * sizeof(uint64_t));
+      memcpy(this->e, other->e, num * sizeof(Element*));
+      memcpy(this->sub_idx, other->sub_idx, num * sizeof(uint64_t));
 
-      memcpy(this->bnd, other.bnd, 4 * sizeof(bool));
+      memcpy(this->bnd, other->bnd, 4 * sizeof(bool));
 
-      this->rep = other.rep;
-      this->visited = other.visited;
+      this->rep = other->rep;
+      this->visited = other->visited;
     }
 
     void Traverse::State::push_transform(int son, int i, bool is_triangle)
@@ -182,7 +182,6 @@ namespace Hermes
 
     Traverse::State* Traverse::push_state(int* top_by_ref)
     {
-#define kod_co_se_dela_jednou
       _F_;
 
       int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
@@ -200,8 +199,8 @@ namespace Hermes
       memset(stack[*top_f].sub_idx, 0, num * sizeof(uint64_t));
       for(int i = 0; i < 4; i++)
         stack[*top_f].bnd[i] = true;
+      stack[*top_f].num = this->num;
       return stack + (*top_f)++;
-#define kod_co_se_dela_jednou
     }
 
     void Traverse::set_boundary_info(Traverse::State* s)
@@ -491,7 +490,7 @@ namespace Hermes
         // undo all its transformations, pop it and continue with a non-visited one
         State* s;
         
-        while (*top_f > 0 && (s = stack + *top_f-1)->visited)
+        while (*top_f > 0 && (s = stack + (*top_f)-1)->visited)
           (*top_f)--;
 
         // The stack is empty, take next base element

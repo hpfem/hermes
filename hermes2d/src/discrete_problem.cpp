@@ -900,9 +900,11 @@ int state_i;
         #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
         {
-          Traverse::State* current_state;
+          Traverse::State current_state;
           #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+          
+          int asdf = current_state.e[0]->id;
 
           PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
           PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
@@ -921,8 +923,10 @@ int state_i;
           // The proper sub-element mappings to all the functions of
           // this stage is supplied by the function Traverse::get_next_state()
           // called in the while loop.
-          if(current_state->e != NULL)
-            assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+          assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+
+          if(asdf != current_state.e[0]->id)
+            error("Fuccck");
         }
       }
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
