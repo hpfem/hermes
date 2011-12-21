@@ -94,6 +94,9 @@ namespace Hermes
       /// element orders) to an XML file.
       void save(const char* filename) const;
 
+      /// Saves the complete 1D solution to a simple graph file.
+      void save1D(double* x, Scalar* y, int num_points, const char* filename = NULL);
+
       /// Loads the solution from a file previously created by Solution::save(). This completely
       /// restores the solution in the memory.
       void load(const char* filename, Mesh* mesh);

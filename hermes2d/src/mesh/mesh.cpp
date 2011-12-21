@@ -192,7 +192,7 @@ namespace Hermes
 
     unsigned g_mesh_seq = 0;
 
-    Mesh::Mesh() : HashTable()
+    Mesh::Mesh() : HashTable(), a(1), b(-1)
     {
       nbase = nactive = ntopvert = ninitial = 0;
       seq = g_mesh_seq++;
@@ -288,6 +288,16 @@ namespace Hermes
     {
       if (this == NULL) error("this == NULL in Mesh::get_max_element_id().");
       return elements.get_size();
+    }
+
+    double Mesh::get_a()
+    {
+      return a;
+    }
+    
+    double Mesh::get_b()
+    {
+      return b;
     }
 
     Element* Mesh::get_element(int id) const
