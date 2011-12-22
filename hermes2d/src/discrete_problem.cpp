@@ -1128,7 +1128,15 @@ int state_i;
 
           assemble_matrix_form(current_mfvol[current_mfvol_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
+          for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
+            if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) < 1e-12)
+              if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
+                base_fns[j]->free_fn();
           delete [] base_fns;
+          for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
+            if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) < 1e-12)
+              if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+                test_fns[i]->free_fn();
           delete [] test_fns;
         }
       }
@@ -1158,6 +1166,10 @@ int state_i;
 
           assemble_vector_form(current_vfvol[current_vfvol_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
+          for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
+            if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) < 1e-12)
+              if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
+                test_fns[i]->free_fn();
           delete [] test_fns;
         }
       }
@@ -1209,8 +1221,16 @@ int state_i;
 
             assemble_matrix_form(current_mfsurf[current_mfsurf_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
-            delete [] base_fns;
-            delete [] test_fns;
+            for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
+            if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) < 1e-12)
+              if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
+                base_fns[j]->free_fn();
+          delete [] base_fns;
+          for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
+            if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
+              if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
+                test_fns[i]->free_fn();
+          delete [] test_fns;
           }
         }
     
@@ -1239,7 +1259,11 @@ int state_i;
 
             assemble_vector_form(current_vfsurf[current_vfsurf_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
-            delete [] test_fns;
+          for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
+            if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) < 1e-12)
+              if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
+                test_fns[i]->free_fn();
+          delete [] test_fns;
           }
         }
       }
@@ -1262,13 +1286,8 @@ int state_i;
         init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
 
         // Order of shape functions.
-        Func<Hermes::Ord>* ou;
-        Func<Hermes::Ord>* ov;
-
-        {
-          ou = init_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
-          ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
-        }
+        Func<Hermes::Ord>* ou = init_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
+        Func<Hermes::Ord>* ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, &ext_ord);
@@ -1277,6 +1296,10 @@ int state_i;
 
         // Cleanup.
         deinit_ext_orders(form, u_ext_ord, &ext_ord);
+        ou->free_ord();
+        delete ou;
+        ov->free_ord();
+        delete ov;
       }
       return order;
     }
@@ -1405,9 +1428,7 @@ int state_i;
         init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
 
         // Order of shape functions.
-        Func<Hermes::Ord>* ov;
-
-        ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+        Func<Hermes::Ord>* ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
@@ -1416,6 +1437,8 @@ int state_i;
         
         // Cleanup.
         deinit_ext_orders(form, u_ext_ord, &ext_ord);
+        ov->free_ord();
+        delete ov;
       }
       return order;
     }
