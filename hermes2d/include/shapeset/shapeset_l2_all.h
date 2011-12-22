@@ -27,7 +27,9 @@ namespace Hermes
     /// L2 shapeset - products of legendre polynomials
     class HERMES_API L2ShapesetLegendre : public Shapeset
     {
-    public: L2ShapesetLegendre();
+    public: 
+      L2ShapesetLegendre();
+      virtual Shapeset* clone() { return new L2ShapesetLegendre(*this); };
     protected:
       virtual int get_id() const { return 30; }
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }

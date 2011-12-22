@@ -26,7 +26,9 @@ namespace Hermes
     /// H1 shapeset with orthogonalized bubble functions for improved conditioning.
     class HERMES_API H1ShapesetOrtho : public Shapeset
     {
-    public: H1ShapesetOrtho();
+    public: 
+      H1ShapesetOrtho();
+      virtual Shapeset* clone() { return new H1ShapesetOrtho(*this); };
     private:
       virtual int get_id() const { return 0; }
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
@@ -37,7 +39,9 @@ namespace Hermes
     /// Shape functions based on integrated Jacobi polynomials.
     class HERMES_API H1ShapesetJacobi : public Shapeset
     {
-    public: H1ShapesetJacobi();
+    public: 
+      H1ShapesetJacobi();
+      virtual Shapeset* clone() { return new H1ShapesetJacobi(*this); };
     private:
       virtual int get_id() const { return 1; }
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
@@ -48,7 +52,9 @@ namespace Hermes
     /// Experimental.
     class HERMES_API H1ShapesetEigen : public Shapeset
     {
-    public: H1ShapesetEigen();
+    public: 
+      H1ShapesetEigen();
+      virtual Shapeset* clone() { return new H1ShapesetEigen(*this); };
     private:
       virtual int get_id() const { return 2; }
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }

@@ -96,6 +96,8 @@ namespace Hermes
       /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
       int get_order(int index) const;
 
+      virtual Shapeset* clone() = 0;
+
     protected:
       /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.
       void set_mode(int mode);

@@ -722,12 +722,20 @@ namespace Hermes
     {
       _F_;
 
+      Shapeset*** shapesets = new Shapeset**[omp_get_max_threads()];
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        shapesets[i] = new Shapeset*[wf->get_neq()];
+        for (unsigned int j = 0; j < wf->get_neq(); j++)
+          shapesets[i][j] = spaces[j]->shapeset->clone();
+      }
+
       PrecalcShapeset*** pss = new PrecalcShapeset**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         pss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
-          pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
+          pss[i][j] = new PrecalcShapeset(shapesets[i][j]);
       }
       PrecalcShapeset*** spss = new PrecalcShapeset**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
@@ -893,6 +901,7 @@ namespace Hermes
         trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
       }
+
 int state_i;
 #define CHUNKSIZE 1
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i)
@@ -1099,8 +1108,8 @@ int state_i;
             if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_mfvol[current_mfvol_i]->i]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->i]->idx[i]);
-#pragma omp critical (get_fn)
-                test_fns[i] = get_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
+
+                test_fns[i] = init_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
             }
           }
 
@@ -1111,8 +1120,8 @@ int state_i;
             if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
             {
               current_pss[current_mfvol[current_mfvol_i]->j]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->j]->idx[j]);
-#pragma omp critical (get_fn)
-              base_fns[j] = get_fn(current_pss[current_mfvol[current_mfvol_i]->j], current_refmaps[current_mfvol[current_mfvol_i]->j], order);
+
+              base_fns[j] = init_fn(current_pss[current_mfvol[current_mfvol_i]->j], current_refmaps[current_mfvol[current_mfvol_i]->j], order);
 
             }
           }
@@ -1142,8 +1151,8 @@ int state_i;
             if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_vfvol[current_vfvol_i]->i]->set_active_shape(current_als[current_vfvol[current_vfvol_i]->i]->idx[i]);
-#pragma omp critical (get_fn)
-              test_fns[i] = get_fn(current_spss[current_vfvol[current_vfvol_i]->i], current_refmaps[current_vfvol[current_vfvol_i]->i], order);
+
+              test_fns[i] = init_fn(current_spss[current_vfvol[current_vfvol_i]->i], current_refmaps[current_vfvol[current_vfvol_i]->i], order);
             }
           }
 
@@ -1181,8 +1190,8 @@ int state_i;
               if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_mfsurf[current_mfsurf_i]->i]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->i]->idx[i]);
-#pragma omp critical (get_fn)
-                test_fns[i] = get_fn(current_spss[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i], quad->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
+
+                test_fns[i] = init_fn(current_spss[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i], quad->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
               }
             }
 
@@ -1193,8 +1202,8 @@ int state_i;
               if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
               {
                 current_pss[current_mfsurf[current_mfsurf_i]->j]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->j]->idx[j]);
-#pragma omp critical (get_fn)
-                base_fns[j] = get_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], quad->get_edge_points(current_state->isurf, order,current_state->e[0]->get_mode()));
+
+                base_fns[j] = init_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], quad->get_edge_points(current_state->isurf, order,current_state->e[0]->get_mode()));
               }
             }
 
@@ -1223,8 +1232,8 @@ int state_i;
               if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_vfsurf[current_vfsurf_i]->i]->set_active_shape(current_als[current_vfsurf[current_vfsurf_i]->i]->idx[i]);
-#pragma omp critical (get_fn)
-                test_fns[i] = get_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], quad->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
+
+                test_fns[i] = init_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], quad->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
               }
             }
 
@@ -1234,8 +1243,6 @@ int state_i;
           }
         }
       }
-
-      delete_cache();
     }
 
     template<typename Scalar>
@@ -1257,10 +1264,10 @@ int state_i;
         // Order of shape functions.
         Func<Hermes::Ord>* ou;
         Func<Hermes::Ord>* ov;
-#pragma omp critical (get_fn_ord)
+
         {
-          ou = get_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
-          ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+          ou = init_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
+          ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
         }
 
         // Total order of the vector form.
@@ -1399,33 +1406,14 @@ int state_i;
 
         // Order of shape functions.
         Func<Hermes::Ord>* ov;
-#pragma omp critical (get_fn_ord)
-        ov = get_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+
+        ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
 
         adjust_order_to_refmaps(form, order, &o, current_refmaps);
-        if(current_state->e[0]->id == 8)
-        {
-          std::cout << 'o' << ':' << order << std::endl;
-          for(int fa = 0; fa < 1; fa++)
-          {
-            std::cout << 'o' << 'u' << ':' << u_ext_ord[0]->val[fa].get_order() << std::endl;
-            std::cout << 'o' << 'v' << ':' << ov->val[fa].get_order() << std::endl;
-            std::cout << 'o' << 'g' << ':' << geom_ord.x[fa].get_order() << std::endl;
-          }
-        }
-        if(current_state->e[0]->id == 15)
-        {
-          std::cout << 'o' << '-' << order << std::endl;
-          for(int fa = 0; fa < 1; fa++)
-          {
-            std::cout << 'o' << 'u' << '-' << u_ext_ord[0]->val[fa].get_order() << std::endl;
-            std::cout << 'o' << 'v' << '-' << ov->val[fa].get_order() << std::endl;
-            std::cout << 'o' << 'g' << '-' << geom_ord.x[fa].get_order() << std::endl;
-          }
-        }
+        
         // Cleanup.
         deinit_ext_orders(form, u_ext_ord, &ext_ord);
       }
@@ -1442,16 +1430,6 @@ int state_i;
       int n_quadrature_points;
       Geom<double>* geometry = NULL;
       double* jacobian_x_weights = NULL;
-
-      if(current_state->e[0]->id == 8)
-        {
-          std::cout << 'B' << ':' << order << std::endl;
-        }
-        if(current_state->e[0]->id == 15)
-        {
-          std::cout << 'B' << '-' << order << std::endl;
-        }
-
 
       if(surface_form)
         n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state, geometry, jacobian_x_weights);
@@ -1487,28 +1465,6 @@ int state_i;
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
 #pragma omp critical
         current_rhs->add(current_als[form->i]->dof[i], val);
-        if(current_state->e[0]->id == 8 && current_als[form->i]->dof[i] == 2)
-        {
-          for(int fa = 0; fa < 3; fa++)
-          {
-            std::cout << 'j' << ':' << jacobian_x_weights[fa] << std::endl;
-            std::cout << 'u' << ':' << u_ext[0]->val[fa] << std::endl;
-            std::cout << 'v' << ':' << v->val[fa] << std::endl;
-            std::cout << 'g' << ':' << geometry->x[fa] << std::endl;
-          }
-          std::cout << 'n' << ':' << n_quadrature_points << std::endl;
-        }
-        if(current_state->e[0]->id == 15 && current_als[form->i]->dof[i] == 0)
-        {
-          for(int fa = 0; fa < 3; fa++)
-          {
-            std::cout << 'j' << '-' << jacobian_x_weights[fa] << std::endl;
-            std::cout << 'u' << '-' << u_ext[0]->val[fa] << std::endl;
-            std::cout << 'v' << '-' << v->val[fa] << std::endl;
-            std::cout << 'g' << '-' << geometry->x[fa] << std::endl;
-          }
-          std::cout << 'n' << '-' << n_quadrature_points << std::endl;
-        }
       }
 
       // Cleanup.
@@ -1568,21 +1524,21 @@ int state_i;
       if (current_u_ext != NULL)
         for(int i = 0; i < prev_size; i++)
           if (current_u_ext[i + form->u_ext_offset] != NULL)
-#pragma omp critical (get_fn_ord)
-          oi[i] = get_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
+
+          oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
           else
-#pragma omp critical (get_fn_ord)
-          oi[i] = get_fn_ord(0);
+
+          oi[i] = init_fn_ord(0);
       else
         for(int i = 0; i < prev_size; i++)
-#pragma omp critical (get_fn_ord)
-        oi[i] = get_fn_ord(0);
+
+        oi[i] = init_fn_ord(0);
       
       oext->nf = form->ext.size();
       oext->fn = new Func<Hermes::Ord>*[oext->nf];
       for (int i = 0; i < oext->nf; i++)
-#pragma omp critical (get_fn_ord)
-      oext->fn[i] = get_fn_ord(form->ext[i]->get_fn_order());
+
+      oext->fn[i] = init_fn_ord(form->ext[i]->get_fn_order());
     }
 
     template<typename Scalar>
@@ -1653,217 +1609,6 @@ int state_i;
       order = current_refmaps[form->i]->get_inv_ref_order();
       order += o->get_order();
       limit_order(order);
-    }
-
-    template<typename Scalar>
-    Func<double>* DiscreteProblem<Scalar>::get_fn(PrecalcShapeset *fu, RefMap *rm, const int order)
-    {
-      _F_;
-
-      return init_fn(fu, rm, order);
-
-      if(rm->is_jacobian_const())
-      {
-        typename AssemblingCaches::KeyConst key(256 - fu->get_active_shape(), order, fu->get_transform(), fu->get_shapeset()->get_id(), rm->get_const_inv_ref_map());
-        if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE)
-        {
-          if(assembling_caches.const_cache_fn_triangles.find(key) == assembling_caches.const_cache_fn_triangles.end())
-            assembling_caches.const_cache_fn_triangles[key] = init_fn(fu, rm, order);
-          return assembling_caches.const_cache_fn_triangles[key];
-        }
-        else
-        {
-          if(assembling_caches.const_cache_fn_quads.find(key) == assembling_caches.const_cache_fn_quads.end())
-            assembling_caches.const_cache_fn_quads[key] = init_fn(fu, rm, order);
-          return assembling_caches.const_cache_fn_quads[key];
-        }
-      }
-      else
-      {
-        typename AssemblingCaches::KeyNonConst key(256 - fu->get_active_shape(), order,
-          fu->get_transform(), fu->get_shapeset()->get_id());
-        if(rm->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE)
-        {
-          if(assembling_caches.cache_fn_triangles.find(key) == assembling_caches.cache_fn_triangles.end())
-            assembling_caches.cache_fn_triangles[key] = init_fn(fu, rm, order);
-          return assembling_caches.cache_fn_triangles[key];
-        }
-        else
-        {
-          if(assembling_caches.cache_fn_quads.find(key) == assembling_caches.cache_fn_quads.end())
-            assembling_caches.cache_fn_quads[key] = init_fn(fu, rm, order);
-          return assembling_caches.cache_fn_quads[key];
-        }
-      }
-    }
-
-    template<typename Scalar>
-    Func<Hermes::Ord>* DiscreteProblem<Scalar>::get_fn_ord(const int order)
-    {
-      _F_;
-
-      return init_fn_ord((unsigned int) order);
-
-      assert(order >= 0);
-      unsigned int cached_order = (unsigned int) order;
-      if(!assembling_caches.cache_fn_ord.present(cached_order))
-        assembling_caches.cache_fn_ord.add(init_fn_ord(cached_order), cached_order);
-      return assembling_caches.cache_fn_ord.get(cached_order);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::delete_cache()
-    {
-      _F_;
-
-      for (typename std::map<typename AssemblingCaches::KeyNonConst, Func<double>*, typename AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_quads.begin();
-        it != assembling_caches.cache_fn_quads.end(); it++)
-      {
-        (it->second)->free_fn(); delete (it->second);
-      }
-      assembling_caches.cache_fn_quads.clear();
-
-      for (typename std::map<typename AssemblingCaches::KeyNonConst, Func<double>*, typename AssemblingCaches::CompareNonConst>::const_iterator it = assembling_caches.cache_fn_triangles.begin();
-        it != assembling_caches.cache_fn_triangles.end(); it++)
-      {
-        (it->second)->free_fn();
-        delete (it->second);
-      }
-      assembling_caches.cache_fn_triangles.clear();
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_quad_2d(Quad2D* quad)
-    {
-      this->quad = quad;
-    }
-
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::AssemblingCaches::AssemblingCaches()
-    {
-    };
-
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::AssemblingCaches::~AssemblingCaches()
-    {
-      _F_;
-      for (typename std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_triangles.begin();
-        it != const_cache_fn_triangles.end(); it++)
-      {
-        (it->second)->free_fn(); delete (it->second);
-      }
-      const_cache_fn_triangles.clear();
-
-      for (typename std::map<KeyConst, Func<double>*, CompareConst>::const_iterator it = const_cache_fn_quads.begin();
-        it != const_cache_fn_quads.end(); it++)
-      {
-        (it->second)->free_fn(); delete (it->second);
-      }
-      const_cache_fn_quads.clear();
-
-      for(unsigned int i = 0; i < cache_fn_ord.get_size(); i++)
-        if(cache_fn_ord.present(i))
-        {
-          cache_fn_ord.get(i)->free_ord();
-          delete cache_fn_ord.get(i);
-        }
-    };
-
-#ifdef _MSC_VER
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::AssemblingCaches::KeyConst::KeyConst(int index, int order, UINT64 sub_idx, int shapeset_type, double2x2* inv_ref_map)
-    {
-      this->index = index;
-      this->order = order;
-      this->sub_idx = sub_idx;
-      this->shapeset_type = shapeset_type;
-      this->inv_ref_map[0][0] = (* inv_ref_map)[0][0];
-      this->inv_ref_map[0][1] = (* inv_ref_map)[0][1];
-      this->inv_ref_map[1][0] = (* inv_ref_map)[1][0];
-      this->inv_ref_map[1][1] = (* inv_ref_map)[1][1];
-    }
-#else
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::AssemblingCaches::KeyConst::KeyConst(int index, int order, unsigned int sub_idx, int shapeset_type, double2x2* inv_ref_map)
-    {
-      this->index = index;
-      this->order = order;
-      this->sub_idx = sub_idx;
-      this->shapeset_type = shapeset_type;
-      this->inv_ref_map[0][0] = (* inv_ref_map)[0][0];
-      this->inv_ref_map[0][1] = (* inv_ref_map)[0][1];
-      this->inv_ref_map[1][0] = (* inv_ref_map)[1][0];
-      this->inv_ref_map[1][1] = (* inv_ref_map)[1][1];
-    }
-#endif
-
-    template<typename Scalar>
-    bool DiscreteProblem<Scalar>::AssemblingCaches::CompareConst::operator()(KeyConst a, KeyConst b) const
-    {
-      if(a.inv_ref_map[0][0] < b.inv_ref_map[0][0]) return true;
-      else if(a.inv_ref_map[0][0] > b.inv_ref_map[0][0]) return false;
-      else
-        if(a.inv_ref_map[0][1] < b.inv_ref_map[0][1]) return true;
-        else if(a.inv_ref_map[0][1] > b.inv_ref_map[0][1]) return false;
-        else
-          if(a.inv_ref_map[1][0] < b.inv_ref_map[1][0]) return true;
-          else if(a.inv_ref_map[1][0] > b.inv_ref_map[1][0]) return false;
-          else
-            if(a.inv_ref_map[1][1] < b.inv_ref_map[1][1]) return true;
-            else if(a.inv_ref_map[1][1] > b.inv_ref_map[1][1]) return false;
-            else
-              if (a.index < b.index) return true;
-              else if (a.index > b.index) return false;
-              else
-                if (a.order < b.order) return true;
-                else if (a.order > b.order) return false;
-                else
-                  if (a.sub_idx < b.sub_idx) return true;
-                  else if (a.sub_idx > b.sub_idx) return false;
-                  else
-                    if (a.shapeset_type < b.shapeset_type) return true;
-                    else return false;
-    }
-
-#ifdef _MSC_VER
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::AssemblingCaches::KeyNonConst::KeyNonConst(int index, int order, UINT64 sub_idx, int shapeset_type)
-    {
-      this->index = index;
-      this->order = order;
-      this->sub_idx = sub_idx;
-      this->shapeset_type = shapeset_type;
-    }
-#else
-    template<typename Scalar>
-    DiscreteProblem<Scalar>::AssemblingCaches::KeyNonConst::KeyNonConst(int index, int order, unsigned int sub_idx, int shapeset_type)
-    {
-      this->index = index;
-      this->order = order;
-      this->sub_idx = sub_idx;
-      this->shapeset_type = shapeset_type;
-    }
-#endif
-
-    template<typename Scalar> bool DiscreteProblem<Scalar>::AssemblingCaches::CompareNonConst::operator()(KeyNonConst a, KeyNonConst b) const
-    {
-      if (a.index < b.index) return true;
-      else if (a.index > b.index) return false;
-      else
-      {
-        if (a.order < b.order) return true;
-        else if (a.order > b.order) return false;
-        else
-        {
-          if (a.sub_idx < b.sub_idx) return true;
-          else if (a.sub_idx > b.sub_idx) return false;
-          else
-          {
-            if (a.shapeset_type < b.shapeset_type) return true;
-            else return false;
-          }
-        }
-      }
     }
 
     template class HERMES_API DiscreteProblem<double>;

@@ -25,7 +25,9 @@ namespace Hermes
     /// H(curl) shapeset based on Legendre polynomials.
     class HERMES_API HcurlShapesetLegendre : public Shapeset
     {
-    public: HcurlShapesetLegendre();
+    public: 
+      HcurlShapesetLegendre();
+      virtual Shapeset* clone() { return new HcurlShapesetLegendre(*this); };
     protected:
       virtual int get_id() const { return 10; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
@@ -35,7 +37,9 @@ namespace Hermes
     // Experimental.
     class HERMES_API HcurlShapesetEigen2 : public Shapeset
     {
-    public: HcurlShapesetEigen2();
+    public: 
+      HcurlShapesetEigen2();
+      virtual Shapeset* clone() { return new HcurlShapesetEigen2(*this); };
     protected:
       virtual int get_id() const { return 11; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
@@ -45,7 +49,9 @@ namespace Hermes
     /// Experimental.
     class HERMES_API HcurlShapesetGradEigen : public Shapeset
     {
-    public: HcurlShapesetGradEigen();
+    public: 
+      HcurlShapesetGradEigen();
+      virtual Shapeset* clone() { return new HcurlShapesetGradEigen(*this); };
     protected:
       virtual int get_id() const { return 12; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
@@ -55,7 +61,9 @@ namespace Hermes
     /// H(curl) shapeset with Legendre bubbles and gradients of H1 functions as edges
     class HERMES_API HcurlShapesetGradLeg : public Shapeset
     {
-    public: HcurlShapesetGradLeg();
+    public: 
+      HcurlShapesetGradLeg();
+      virtual Shapeset* clone() { return new HcurlShapesetGradLeg(*this); };
     protected:
       virtual int get_id() const { return 13; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }

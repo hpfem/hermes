@@ -25,7 +25,9 @@ namespace Hermes
     /// H(div) shapeset based on Legendre polynomials.
     class HERMES_API HdivShapesetLegendre : public Shapeset
     {
-    public: HdivShapesetLegendre();
+    public: 
+      HdivShapesetLegendre();
+      virtual Shapeset* clone() { return new HdivShapesetLegendre(*this); };
     protected:
       virtual int get_id() const { return 20; }
       virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }

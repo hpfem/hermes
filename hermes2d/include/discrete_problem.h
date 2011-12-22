@@ -177,15 +177,6 @@ namespace Hermes
       /// Init function. Common code for the constructors.
       void init();
 
-      /// Uses assembling_caches to get (possibly cached) precalculated shapeset function values.
-      Func<double>* get_fn(PrecalcShapeset* fu, RefMap* rm, const int order);
-
-      /// Uses assembling_caches to get (possibly chached) dummy function for calculation of the integration order.
-      Func<Hermes::Ord>* get_fn_ord(const int order);
-
-      /// Deinitialize all caches.
-      void delete_cache();
-
       /// Returns the matrix_buffer of the size n.
       Scalar** get_matrix_buffer(int n);
 
@@ -254,85 +245,6 @@ namespace Hermes
       Quad2D* quad;
       
       void set_quad_2d(Quad2D* quad);
-
-      /// Class handling various caches used in assembling.
-      class AssemblingCaches
-      {
-      public:
-        /// Basic constructor.
-        AssemblingCaches();
-
-        /// Basic destructor.
-        ~AssemblingCaches();
-
-        /// Key for caching precalculated shapeset values on transformed elements with constant
-        /// jacobians.
-        struct KeyConst
-        {
-          int index;
-          int order;
-#ifdef _MSC_VER
-          UINT64 sub_idx;
-#else
-          unsigned int sub_idx;
-#endif
-          int shapeset_type;
-          double inv_ref_map[2][2];
-#ifdef _MSC_VER
-          KeyConst(int index, int order, UINT64 sub_idx, int shapeset_type, double2x2* inv_ref_map);
-#else
-          KeyConst(int index, int order, unsigned int sub_idx, int shapeset_type, double2x2* inv_ref_map);
-#endif
-        };
-
-        /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
-        struct CompareConst
-        {
-          bool operator()(KeyConst a, KeyConst b) const;
-        };
-
-        /// PrecalcShapeset stored values for Elements with constant jacobian of the reference mapping for triangles.
-        std::map<KeyConst, Func<double>* , CompareConst> const_cache_fn_triangles;
-
-        /// PrecalcShapeset stored values for Elements with constant jacobian of the reference mapping for quads.
-        std::map<KeyConst, Func<double>* , CompareConst> const_cache_fn_quads;
-
-        /// The same setup for elements with non-constant jacobians.
-        /// This cache is deleted with every change of the state in assembling.
-        struct KeyNonConst
-        {
-          int index;
-          int order;
-#ifdef _MSC_VER
-          UINT64 sub_idx;
-#else
-          unsigned int sub_idx;
-#endif
-          int shapeset_type;
-#ifdef _MSC_VER
-          KeyNonConst(int index, int order, UINT64 sub_idx, int shapeset_type);
-#else
-          KeyNonConst(int index, int order, unsigned int sub_idx, int shapeset_type);
-#endif
-        };
-
-        /// Functor that compares two above keys (needed e.g. to create a std::map indexed by these keys);
-        struct CompareNonConst
-        {
-          bool operator()(KeyNonConst a, KeyNonConst b) const;
-        };
-
-        /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for triangles.
-        std::map<KeyNonConst, Func<double>* , CompareNonConst> cache_fn_triangles;
-
-        /// PrecalcShapeset stored values for Elements with non-constant jacobian of the reference mapping for quads.
-        std::map<KeyNonConst, Func<double>* , CompareNonConst> cache_fn_quads;
-
-        LightArray<Func<Hermes::Ord>*> cache_fn_ord;
-      };
-
-      /// An AssemblingCaches instance for this instance of DiscreteProblem.
-      AssemblingCaches assembling_caches;
 
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class NewtonSolver;
