@@ -977,7 +977,7 @@ namespace Hermes
         Scalar* x = new Scalar[np];
         Scalar* y = new Scalar[np];
         Scalar* tx = new Scalar[np];
-        double3* pt = quad->get_points(order, element->get_mode());
+        double3* pt = quad->get_points(order, this->element->get_mode());
         for (i = 0; i < np; i++)
         {
           x[i] = pt[i][0] * this->ctm->m[0] + this->ctm->t[0];

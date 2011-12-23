@@ -34,8 +34,8 @@ namespace Hermes
 
       T result = 0.0;
 
-      double3* pt = quad->get_points(o);
-      int np = quad->get_num_points(o);
+      double3* pt = quad->get_points(o, rg->get_active_element()->get_mode());
+      int np = quad->get_num_points(o, rg->get_active_element()->get_mode());
       double2x2* mg, *mh;
       mg = rg->get_inv_ref_map(o);
       mh = rh->get_inv_ref_map(o);
