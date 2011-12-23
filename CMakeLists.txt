@@ -188,10 +188,14 @@ project(hermes)
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 			# Disable all warnings and turn on only important ones:
 			set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS}")
-			set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
+			set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare -fopenmp ${CMAKE_CXX_FLAGS}")
 
 			set(RELEASE_FLAGS "-DNDEBUG -O3")
-			set(DEBUG_FLAGS   "-g")
+      set(FLAGS ${RELEASE_FLAGS})
+      set(DEBUG_FLAGS   "-g")
+      if(H2D_DEBUG)
+        set(FLAGS ${DEBUG_FLAGS})
+      endif(H2D_DEBUG)
 	endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 	# Enabling multiprocessor build on MSVC
