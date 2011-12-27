@@ -807,7 +807,7 @@ namespace Hermes
           {
             for (int l = 0; l < current_stage->ext.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->mfvol[j]->ext[j])
+              if(current_stage->ext[l] == current_stage->mfvol[j]->ext[k])
               {
                 while(k >= mfvol[i][j]->ext.size())
                   mfvol[i][j]->ext.push_back(NULL);
@@ -829,7 +829,7 @@ namespace Hermes
           {
             for (int l = 0; l < current_stage->ext.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->mfsurf[j]->ext[j])
+              if(current_stage->ext[l] == current_stage->mfsurf[j]->ext[k])
               {
                 while(k >= mfsurf[i][j]->ext.size())
                   mfsurf[i][j]->ext.push_back(NULL);
@@ -851,7 +851,7 @@ namespace Hermes
           {
             for (int l = 0; l < current_stage->ext.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->vfvol[j]->ext[j])
+              if(current_stage->ext[l] == current_stage->vfvol[j]->ext[k])
               {
                 while(k >= vfvol[i][j]->ext.size())
                   vfvol[i][j]->ext.push_back(NULL);
@@ -874,7 +874,7 @@ namespace Hermes
           {
             for (int l = 0; l < current_stage->ext.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->vfsurf[j]->ext[j])
+              if(current_stage->ext[l] == current_stage->vfsurf[j]->ext[k])
               {
                 while(k >= vfsurf[i][j]->ext.size())
                   vfsurf[i][j]->ext.push_back(NULL);
