@@ -1020,16 +1020,23 @@ int state_i;
         vfsurf[i].clear();
       }
       delete [] vfsurf;
+      
+      trav_master.finish();
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+        trav[i].finish();
+      
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        fns[i].clear();
+      }
+      delete [] fns;
+      delete [] trav;
 
       /// \todo Should this be really here? Or in assemble()?
       if (current_mat != NULL)
         current_mat->finish();
       if (current_rhs != NULL)
         current_rhs->finish();
-
-      trav_master.finish();
-      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
-        trav[i].finish();
 
       if(DG_matrix_forms_present || DG_vector_forms_present)
       {
@@ -1140,14 +1147,20 @@ int state_i;
           assemble_matrix_form(current_mfvol[current_mfvol_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
-            if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) < 1e-12)
+            if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) >= 1e-12)
               if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
+              {
                 base_fns[j]->free_fn();
+                delete base_fns[j];
+              }
           delete [] base_fns;
           for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
-            if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) < 1e-12)
+            if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) >= 1e-12)
               if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+              {
                 test_fns[i]->free_fn();
+                delete test_fns[i];
+              }
           delete [] test_fns;
         }
       }
@@ -1178,9 +1191,12 @@ int state_i;
           assemble_vector_form(current_vfvol[current_vfvol_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
-            if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) < 1e-12)
+            if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) >= 1e-12)
               if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
+              {
                 test_fns[i]->free_fn();
+                delete test_fns[i];
+              }
           delete [] test_fns;
         }
       }
@@ -1233,14 +1249,20 @@ int state_i;
             assemble_matrix_form(current_mfsurf[current_mfsurf_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
             for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
-            if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) < 1e-12)
+            if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) >= 1e-12)
               if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
+              {
                 base_fns[j]->free_fn();
+                delete base_fns[j];
+              }
           delete [] base_fns;
           for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
-            if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
+            if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) >= 1e-12)
               if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
+              {
                 test_fns[i]->free_fn();
+                delete test_fns[i];
+              }
           delete [] test_fns;
           }
         }
@@ -1271,9 +1293,12 @@ int state_i;
             assemble_vector_form(current_vfsurf[current_vfsurf_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
-            if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) < 1e-12)
+            if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) >= 1e-12)
               if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
+              {
                 test_fns[i]->free_fn();
+                delete test_fns[i];
+              }
           delete [] test_fns;
           }
         }
@@ -1418,8 +1443,10 @@ int state_i;
 
       // Cleanup.
       deinit_ext(form, u_ext, &ext);
-
       delete [] local_stiffness_matrix;
+      delete [] jacobian_x_weights;
+      geometry->free();
+      delete geometry;
     }
     
     template<typename Scalar>
@@ -1503,6 +1530,9 @@ int state_i;
 
       // Cleanup.
       deinit_ext(form, u_ext, &ext);
+      delete [] jacobian_x_weights;
+      geometry->free();
+      delete geometry;
     }
 
     template<typename Scalar>
