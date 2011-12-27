@@ -200,7 +200,8 @@ project(hermes)
 
 	# Enabling multiprocessor build on MSVC
 	if(MSVC)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /openmp")
+		SET(FLAGS "${FLAGS} /openmp")
 	endif(MSVC)
 
 	# This overrides CXX flags for MSVC
