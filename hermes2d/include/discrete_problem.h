@@ -243,6 +243,8 @@ namespace Hermes
       Table* current_block_weights;
 
       Quad2D* quad;
+
+      bool threads_reported;
       
       void set_quad_2d(Quad2D* quad);
 

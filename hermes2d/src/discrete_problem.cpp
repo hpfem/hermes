@@ -60,7 +60,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL), current_stage(NULL)
+    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL), current_stage(NULL), threads_reported(false)
     {
       // Set all attributes for which we don't need to acces wf or spaces.
       // This is important for the destructor to properly detect what needs to be deallocated.
@@ -105,6 +105,8 @@ namespace Hermes
       // There is a special function that sets a DiscreteProblem to be FVM.
       // Purpose is that this constructor looks cleaner and is simpler.
       this->is_fvm = false;
+      
+      threads_reported = false;
 
       Geom<Hermes::Ord> *tmp = init_geom_ord();
       geom_ord = *tmp;
@@ -807,7 +809,9 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->mfvol[j]->ext[j])
               {
-                mfvol[i][j]->ext[j] = ext[i][l];
+                while(k >= mfvol[i][j]->ext.size())
+                  mfvol[i][j]->ext.push_back(NULL);
+                mfvol[i][j]->ext[k] = ext[i][l];
                 break;
               }
             }
@@ -827,7 +831,9 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->mfsurf[j]->ext[j])
               {
-                mfsurf[i][j]->ext[j] = ext[i][l];
+                while(k >= mfsurf[i][j]->ext.size())
+                  mfsurf[i][j]->ext.push_back(NULL);
+                mfsurf[i][j]->ext[k] = ext[i][l];
                 break;
               }
             }
@@ -847,7 +853,10 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->vfvol[j]->ext[j])
               {
-                vfvol[i][j]->ext[j] = ext[i][l];
+                while(k >= vfvol[i][j]->ext.size())
+                  vfvol[i][j]->ext.push_back(NULL);
+
+                vfvol[i][j]->ext[k] = ext[i][l];
                 break;
               }
             }
@@ -867,7 +876,9 @@ namespace Hermes
             {
               if(current_stage->ext[l] == current_stage->vfsurf[j]->ext[j])
               {
-                vfsurf[i][j]->ext[j] = ext[i][l];
+                while(k >= vfsurf[i][j]->ext.size())
+                  vfsurf[i][j]->ext.push_back(NULL);
+                vfsurf[i][j]->ext[k] = ext[i][l];
                 break;
               }
             }
@@ -911,7 +922,7 @@ int state_i;
         {
           Traverse::State current_state;
           #pragma omp critical (get_next_state)
-              current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
           
           PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
           PrecalcShapeset** current_spss = spss[omp_get_thread_num()];

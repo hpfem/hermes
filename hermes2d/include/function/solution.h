@@ -85,7 +85,7 @@ namespace Hermes
       void assign(Solution* sln);
       inline Solution& operator = (Solution& sln) { assign(&sln); return *this; }
 
-      void copy(const Solution<Scalar>* sln);
+      virtual void copy(const Solution<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(const Space<Scalar>* space, PrecalcShapeset* pss = NULL);
