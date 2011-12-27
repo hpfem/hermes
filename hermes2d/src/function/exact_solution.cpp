@@ -61,6 +61,8 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ConstantSolution<Scalar>::clone()
     {
+      if(this->sln_type == HERMES_SLN)
+        return Solution<Scalar>::clone();
       ConstantSolution<Scalar>* sln = new ConstantSolution<Scalar>(this->mesh, this->constant);
       return sln;
     }
@@ -88,6 +90,8 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ZeroSolution<Scalar>::clone()
     {
+      if(this->sln_type == HERMES_SLN)
+        return Solution<Scalar>::clone();
       ZeroSolution<Scalar>* sln = new ZeroSolution<Scalar>(this->mesh);
       return sln;
     }
@@ -110,6 +114,8 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ConstantSolutionVector<Scalar>::clone()
     {
+      if(this->sln_type == HERMES_SLN)
+        return Solution<Scalar>::clone();
       ConstantSolutionVector<Scalar>* sln = new ConstantSolutionVector<Scalar>(this->mesh, this->constantX, this->constantY);
       return sln;
     }
@@ -152,6 +158,8 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ZeroSolutionVector<Scalar>::clone()
     {
+      if(this->sln_type == HERMES_SLN)
+        return Solution<Scalar>::clone();
       ZeroSolutionVector<Scalar>* sln = new ZeroSolutionVector<Scalar>(this->mesh);
       return sln;
     }
