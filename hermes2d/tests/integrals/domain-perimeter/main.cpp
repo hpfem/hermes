@@ -55,9 +55,9 @@ double CalculateBoundaryLength(Mesh* mesh, int bdryMarker)
     for(int edge = 0; edge < e->get_num_surf(); ++edge) {
       if ((e->en[edge]->bnd) && (e->en[edge]->marker == bdryMarker)) {
         rm.set_active_element(e);
-        points_location = quad->get_edge_points(edge);
-        points = quad->get_points(points_location);
-        np = quad->get_num_points(points_location);
+        points_location = quad->get_edge_points(edge, quad->get_max_order(e->get_mode()), e->get_mode());
+        points = quad->get_points(points_location, e->get_mode());
+        np = quad->get_num_points(points_location, e->get_mode());
         tangents = rm.get_tangent(edge, points_location);
         for(int i = 0; i < np; i++) {
           // Weights sum up to two on every edge, therefore the division by two must be present.
