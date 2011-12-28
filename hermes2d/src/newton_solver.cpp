@@ -199,6 +199,12 @@ namespace Hermes
         for (int i = 0; i < ndof; i++)
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
+        
+        std::ofstream out("out");
+        for(int ia = 0; ia < ndof; ia++)
+          out << coeff_vec[ia] << std::endl;
+        out.close();
+
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {

@@ -1102,7 +1102,7 @@ int state_i;
 
       // Initialize the state, return a non-NULL element; if no such element found, return.
       init_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
-
+      
       if (current_mat != NULL)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < current_stage->mfvol.size(); current_mfvol_i++)
@@ -1139,7 +1139,6 @@ int state_i;
 
             }
           }
-
           assemble_matrix_form(current_mfvol[current_mfvol_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
@@ -1160,7 +1159,6 @@ int state_i;
           delete [] test_fns;
         }
       }
-    
       if (current_rhs != NULL)
       {
         for(int current_vfvol_i = 0; current_vfvol_i < current_stage->vfvol.size(); current_vfvol_i++)
@@ -1424,7 +1422,7 @@ int state_i;
       }
 
       // Insert the local stiffness matrix into the global one.
-#pragma omp critical
+#pragma omp critical (mat)
       current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
@@ -1433,7 +1431,7 @@ int state_i;
         if (form->sym < 0)
           chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
         transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
-#pragma omp critical
+#pragma omp critical (mat)
         current_mat->add(current_als[form->j]->cnt, current_als[form->i]->cnt, local_stiffness_matrix, current_als[form->j]->dof, current_als[form->i]->dof);
       }
 
@@ -1520,7 +1518,7 @@ int state_i;
           val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
-#pragma omp critical
+#pragma omp critical (rhs)
         current_rhs->add(current_als[form->i]->dof[i], val);
       }
 
@@ -1535,7 +1533,6 @@ int state_i;
     int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       _F_;
-      
       double3* pt = quad->get_points(order, reference_mapping->get_active_element()->get_mode());
       int np = quad->get_num_points(order, reference_mapping->get_active_element()->get_mode());
 
@@ -1552,7 +1549,6 @@ int state_i;
         else
           jacobian_x_weights[i] = pt[i][2] * jac[i];
       }
-
       return np;
     }
 
@@ -1668,7 +1664,7 @@ int state_i;
       // Increase due to reference map.
       order = current_refmaps[form->i]->get_inv_ref_order();
       order += o->get_order();
-      limit_order(order);
+      limit_order(order, current_refmaps[form->i]->get_active_element()->get_mode());
     }
 
     template class HERMES_API DiscreteProblem<double>;

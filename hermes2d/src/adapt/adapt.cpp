@@ -773,12 +773,12 @@ namespace Hermes
       if(static_cast<Solution<Scalar>*>(rsln1) || static_cast<Solution<Scalar>*>(rsln2))
       {
         if(static_cast<Solution<Scalar>*>(rsln1)->get_type() == HERMES_EXACT)
-        { limit_order_nowarn(order); }
+        { limit_order_nowarn(order, rv1->get_active_element()->get_mode()); }
         else
-          limit_order(order);
+          limit_order(order, rv1->get_active_element()->get_mode());
       }
       else
-        limit_order(order);
+        limit_order(order, rv1->get_active_element()->get_mode());
 
       ou->free_ord(); delete ou;
       ov->free_ord(); delete ov;
@@ -837,12 +837,12 @@ namespace Hermes
       if(static_cast<Solution<Scalar>*>(rsln1) || static_cast<Solution<Scalar>*>(rsln2))
       {
         if(static_cast<Solution<Scalar>*>(rsln1)->get_type() == HERMES_EXACT)
-        { limit_order_nowarn(order);  }
+        { limit_order_nowarn(order, rrv1->get_active_element()->get_mode());  }
         else
-          limit_order(order);
+          limit_order(order, rrv1->get_active_element()->get_mode());
       }
       else
-        limit_order(order);
+        limit_order(order, rrv1->get_active_element()->get_mode());
 
       ou->free_ord(); delete ou;
       ov->free_ord(); delete ov;

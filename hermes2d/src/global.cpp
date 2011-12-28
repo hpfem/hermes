@@ -194,7 +194,7 @@ namespace Hermes
       Quad2D* quad = sln1->get_quad_2d();
 
       int o = 2*std::max(sln1->get_fn_order(), sln2->get_fn_order()) + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
@@ -217,7 +217,7 @@ namespace Hermes
       Quad2D* quad = sln->get_quad_2d();
 
       int o = 2 * sln->get_fn_order() + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln->set_quad_order(o);
 
@@ -236,7 +236,7 @@ namespace Hermes
       Quad2D* quad = sln1->get_quad_2d();
 
       int o = 2*std::max(sln1->get_fn_order(), sln2->get_fn_order()) + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln1->set_quad_order(o, H2D_FN_VAL);
       sln2->set_quad_order(o, H2D_FN_VAL);
@@ -256,7 +256,7 @@ namespace Hermes
       Quad2D* quad = sln->get_quad_2d();
 
       int o = 2 *sln->get_fn_order() + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln->set_quad_order(o, H2D_FN_VAL);
 
@@ -273,7 +273,7 @@ namespace Hermes
       Quad2D* quad = sln1->get_quad_2d();
 
       int o = 2 * std::max(sln1->get_fn_order(), sln2->get_fn_order()) + 2 + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
@@ -296,7 +296,7 @@ namespace Hermes
       Quad2D* quad = sln->get_quad_2d();
 
       int o = 2 * sln->get_fn_order() + 2 + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln->set_quad_order(o);
 
@@ -314,7 +314,7 @@ namespace Hermes
       Quad2D* quad = sln1->get_quad_2d();
 
       int o = 2 * std::max(sln1->get_fn_order(), sln2->get_fn_order()) + 2 + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
@@ -334,7 +334,7 @@ namespace Hermes
       Quad2D* quad = sln->get_quad_2d();
 
       int o = 2 * sln->get_fn_order() + 2 + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln->set_quad_order(o);
 
@@ -355,7 +355,7 @@ namespace Hermes
       Quad2D* quad = sln1->get_quad_2d();
 
       int o = 2 * std::max(sln1->get_fn_order(), sln2->get_fn_order()) + 2 + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
@@ -381,7 +381,7 @@ namespace Hermes
       Quad2D* quad = sln->get_quad_2d();
 
       int o = 2 * sln->get_fn_order() + 2 + ru->get_inv_ref_order();
-      limit_order_nowarn(o);
+      limit_order_nowarn(o, ru->get_active_element()->get_mode());
 
       sln->set_quad_order(o);
 

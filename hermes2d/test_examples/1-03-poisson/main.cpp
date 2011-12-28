@@ -38,7 +38,7 @@ Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
-const double VOLUME_HEAT_SRC = 5e3;        // Volume heat sources generated (for example) by electric current.
+const double VOLUME_HEAT_SRC = 5e2;        // Volume heat sources generated (for example) by electric current.
 const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
@@ -51,10 +51,6 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
-
-  // This is here basically to show off that we can save a mesh with refinements and load it back again.
-  mloader.save("domain2.xml", &mesh);
-  mloader.load("domain2.xml", &mesh);
 
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
@@ -82,6 +78,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+
   try
   {
     newton.solve(coeff_vec);
@@ -90,7 +87,8 @@ int main(int argc, char* argv[])
   {
     e.printMsg();
     error("Newton's iteration failed.");
-  };
+  }
+  
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
   clock_t finish = clock();

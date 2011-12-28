@@ -43,7 +43,6 @@ namespace Hermes
 
     HERMES_API int  g_max_order;
     HERMES_API int  g_safe_max_order;
-    HERMES_API int* g_order_table = NULL;
 
     HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
     {
@@ -56,7 +55,6 @@ namespace Hermes
     {
       g_max_order = g_quad_2d_std.get_max_order(mode);
       g_safe_max_order = g_quad_2d_std.get_safe_max_order(mode);
-      g_order_table = (mode == HERMES_MODE_TRIANGLE) ? g_order_table_tri : g_order_table_quad;
     }
 
     HERMES_API void reset_warn_order()
@@ -73,21 +71,27 @@ namespace Hermes
       }
     }
 
-    HERMES_API void limit_order(int& o)
+    HERMES_API void limit_order(int& o, ElementMode2D mode)
     {
       if (o > g_safe_max_order) 
       { 
         o = g_safe_max_order;
         warn_order();
       }
-      o = g_order_table[o];
+      if(mode == HERMES_MODE_TRIANGLE)
+        o = g_order_table_tri[o];
+      else
+        o = g_order_table_quad[o];
     }
 
-    HERMES_API void limit_order_nowarn(int& o)
+    HERMES_API void limit_order_nowarn(int& o, ElementMode2D mode)
     {
       if (o > g_safe_max_order)
         o = g_safe_max_order;
-      o = g_order_table[o];
+      if(mode == HERMES_MODE_TRIANGLE)
+        o = g_order_table_tri[o];
+      else
+        o = g_order_table_quad[o];
     }
   }
 }
