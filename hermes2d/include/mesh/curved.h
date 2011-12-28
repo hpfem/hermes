@@ -140,7 +140,7 @@ namespace Hermes
       static void calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f);
 
       static void precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
-      static double** calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
+      static double** calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss, ElementMode2D mode);
       static void precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss);
 
       static void edge_coord(Element* e, int edge, double t, double2& x, double2& v);
