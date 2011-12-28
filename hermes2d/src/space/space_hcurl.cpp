@@ -207,10 +207,9 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, this->mesh)
       {
-        this->shapeset->set_mode(e->get_mode());
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
-        ed->n = this->shapeset->get_num_bubbles(ed->order);
+        ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
         this->next_dof += ed->n * this->stride;
       }
     }
@@ -229,12 +228,12 @@ namespace Hermes
         {
           int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
           for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
-            al->add_triplet(this->shapeset->get_edge_index(surf_num, ori, j), dof, 1.0);
+            al->add_triplet(this->shapeset->get_edge_index(surf_num, ori, j, e->get_mode()), dof, 1.0);
         }
         else
         {
           for (int j = 0; j < nd->n; j++)
-            al->add_triplet(this->shapeset->get_edge_index(surf_num, 0, j), -1, nd->edge_bc_proj[j]);
+            al->add_triplet(this->shapeset->get_edge_index(surf_num, 0, j, e->get_mode()), -1, nd->edge_bc_proj[j]);
         }
       }
       else // constrained
@@ -245,7 +244,7 @@ namespace Hermes
 
         nd = &this->ndata[nd->base->id]; // ccc
         for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
-          al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j, ori, part), dof, 1.0);
+          al->add_triplet(this->shapeset->get_constrained_edge_index(surf_num, j, ori, part, e->get_mode()), dof, 1.0);
       }
     }
 
@@ -272,7 +271,7 @@ namespace Hermes
       for (int i = 0; i <= order; i++)
       {
         rhs[i] = 0.0;
-        int ii = this->shapeset->get_edge_index(0, 0, i);
+        int ii = this->shapeset->get_edge_index(0, 0, i, surf_pos->base->get_mode());
         for (int j = 0; j < quad1d.get_num_points(mo); j++)
         {
           double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
@@ -283,7 +282,7 @@ namespace Hermes
 
           if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
           {
-            rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
+            rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
               * bc->value_const * el;
           }
           // If the BC is not constant.
@@ -294,7 +293,7 @@ namespace Hermes
             Nurbs* nurbs = surf_pos->base->is_curved() ? surf_pos->base->cm->nurbs[surf_pos->surf_num] : NULL;
             CurvMap::nurbs_edge(surf_pos->base, nurbs, surf_pos->surf_num, 2.0*surf_pos->t - 1.0, x, y, n_x, n_y, t_x, t_y);
             // Calculate.
-            rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0)
+            rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
               * bc->value(x, y, n_x, n_y, t_x, t_y) * el;
           }
         }

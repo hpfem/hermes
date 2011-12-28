@@ -138,7 +138,7 @@ namespace Hermes
         *             used transformation including the identity to the a size defined by \a max_shape_inx. The system will assume that shape functions
         *             are precalculated if the array corresponding to the identity function is not empty.
         */
-        virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals) {};
+        virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode) {};
 
         /// Calculates values of orthogonalized shape function at GIP for all transformations.
         /** Override this method to supply a pre-calculated vales of orthonormalized shape function expansions
@@ -158,7 +158,7 @@ namespace Hermes
         *             used transformation including the identity to the a size defined by \a max_shape_inx. The system will assume that shape functions
         *             are precalculated if the array corresponding to the identity function is not empty.
         */
-        virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& ortho_svals) {};
+        virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, TrfShape& ortho_svals, ElementMode2D mode) {};
 
       protected:
         /// Constructor.
@@ -272,7 +272,7 @@ namespace Hermes
         *  \param[in] sub_ortho_svals
         *  \param[in] info Information about candidates: range of orders, etc.
         *  \param[out] errors_squared Calculated squared errors for all orders specified through \a info. */
-        void calc_error_cand_element(const int mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals, Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared);
+        void calc_error_cand_element(const ElementMode2D mode, double3* gip_points, int num_gip_points, const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals, Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals, const typename OptimumSelector<Scalar>::CandsInfo& info, CandElemProjError errors_squared);
 
       protected: //projection
         /// Projection of an element of a candidate.
@@ -327,7 +327,7 @@ namespace Hermes
         *  \param[in] shape_inx An array of shape indices.
         *  \param[in] num_shapes A number of shape indices in the array.
         *  \return A projection matrix. The matrix has to be allocated trought new_matrix(). The size of the matrix has to be \a num_shapes x \a num_shapes. */
-        virtual double** build_projection_matrix(double3* gip_points, int num_gip_points, const int* shape_inx, const int num_shapes) = 0;
+        virtual double** build_projection_matrix(double3* gip_points, int num_gip_points, const int* shape_inx, const int num_shapes, ElementMode2D) = 0;
 
         /// Evaluates a value of the right-hande side in a subdomain.
         /** Override to calculate a value of the right-hand side.

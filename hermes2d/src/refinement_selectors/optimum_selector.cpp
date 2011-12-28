@@ -81,11 +81,11 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices)
+      void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices, ElementMode2D mode)
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
-        const int num_bubbles = shapeset->get_num_bubbles(quad_order);
-        int* bubble_inxs = shapeset->get_bubble_indices(quad_order);
+        const int num_bubbles = shapeset->get_num_bubbles(quad_order, mode);
+        int* bubble_inxs = shapeset->get_bubble_indices(quad_order, mode);
         for(int j = 0; j < num_bubbles; j++)
         {
           int inx_bubble = bubble_inxs[j];
@@ -98,13 +98,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::build_shape_indices(const int mode, const Range& vertex_order, const Range& edge_bubble_order)
+      void OptimumSelector<Scalar>::build_shape_indices(const ElementMode2D mode, const Range& vertex_order, const Range& edge_bubble_order)
       {
         Hermes::vector<ShapeInx> &indices = shape_indices[mode];
         int* next_order = this->next_order_shape[mode];
         int& max_shape_inx = this->max_shape_inx[mode];
         int num_edges = (mode == HERMES_MODE_QUAD) ? 4 : 3;
-        shapeset->set_mode(mode);
         bool &has_vertex = has_vertex_shape[mode];
         bool &has_edge = has_edge_shape[mode];
         bool &has_bubble = has_bubble_shape[mode];
@@ -130,7 +129,7 @@ namespace Hermes
           {
             for (int i = 0; i < num_edges; i++)
             {
-              int inx = shapeset->get_vertex_index(i);
+              int inx = shapeset->get_vertex_index(i, mode);
               if (inx >= 0)
               {
                 used_shape_index[inx] = true;
@@ -148,7 +147,7 @@ namespace Hermes
             {
               for (int j = 0; j < num_edges; j++)
               {
-                int inx = shapeset->get_edge_index(j, 0, i);
+                int inx = shapeset->get_edge_index(j, 0, i, HERMES_MODE_QUAD);
                 if (inx >= 0)
                 {
                   used_shape_index[inx] = true;
@@ -164,7 +163,7 @@ namespace Hermes
             {
               for (int j = 0; j < num_edges; j++)
               {
-                int inx = shapeset->get_edge_index(j, 0, i);
+                int inx = shapeset->get_edge_index(j, 0, i, HERMES_MODE_TRIANGLE);
                 if (inx >= 0)
                 {
                   used_shape_index[inx] = true;
@@ -184,8 +183,8 @@ namespace Hermes
               unsigned num_indices_prev = indices.size();
               for(int order_other = edge_bubble_order.lower(); order_other <= order; order_other++)
               {
-                add_bubble_shape_index(order, order_other, used_shape_index, indices);
-                add_bubble_shape_index(order_other, order, used_shape_index, indices);
+                add_bubble_shape_index(order, order_other, used_shape_index, indices, mode);
+                add_bubble_shape_index(order_other, order, used_shape_index, indices, mode);
               }
 
               //check if indices were added
@@ -194,8 +193,8 @@ namespace Hermes
             }
             else { //triangles
               int order = i;
-              int num_bubbles = shapeset->get_num_bubbles(order);
-              int* bubble_inxs = shapeset->get_bubble_indices(order);
+              int num_bubbles = shapeset->get_num_bubbles(order, mode);
+              int* bubble_inxs = shapeset->get_bubble_indices(order, mode);
               for(int j = 0; j < num_bubbles; j++)
               {
                 int inx_bubble = bubble_inxs[j];
@@ -582,12 +581,6 @@ namespace Hermes
 
         //check validity
         assert_msg(std::max(order_h, order_v) <= H2DRS_MAX_ORDER, "Given order (%d, %d) exceedes the maximum supported order %d.", order_h, order_v, H2DRS_MAX_ORDER);
-
-        //set shapeset mode
-        if (element->is_triangle())
-          shapeset->set_mode(HERMES_MODE_TRIANGLE);
-        else
-          shapeset->set_mode(HERMES_MODE_QUAD);
 
         //set orders
         set_current_order_range(element);

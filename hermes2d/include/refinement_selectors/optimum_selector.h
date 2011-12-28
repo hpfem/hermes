@@ -310,7 +310,7 @@ namespace Hermes
         *  \param[in] order_v A vertical order of an element.
         *  \param[in,out] used_shape_index A vector of used shape indices. If a shape index is present in the map, a shape was already added and it will not be added again.
         *  \param[in,out] indices A vector of shape indices. The vector is updated by the function. */
-        void add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices);
+        void add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices, ElementMode2D mode);
 
         /// Builds shape index table OptimumSelector::shape_indices.
         /** The method fills the array OptimumSelector::shape_indices for a given mode.
@@ -318,7 +318,7 @@ namespace Hermes
         *  \param[in] mode A mode (ElementMode2D).
         *  \param[in] vertex_order A range of orders in which to search for vertex functions.
         *  \param[in] edge_bubble_order A range of order in which to search for edge and bubble functions. */
-        void build_shape_indices(const int mode, const Range& vertex_order, const Range& edge_bubble_order);
+        void build_shape_indices(const ElementMode2D mode, const Range& vertex_order, const Range& edge_bubble_order);
 
         /// Returns a number of shapes that may be contained in an element of a given order.
         /** \param[in] mode A mode (ElementMode2D).

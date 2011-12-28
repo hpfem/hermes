@@ -49,21 +49,6 @@ public:
   virtual Ord ord(Ord x, Ord y) const;
 };
 
-/* Initial solution */
-
-class CustomInitialSolution : public ExactSolutionScalar<double>
-{
-public:
-  CustomInitialSolution(Mesh* mesh)
-               : ExactSolutionScalar<double>(mesh) {};
-
-  double value(double x, double y) const;
-
-  virtual void derivatives (double x, double y, double& dx, double& dy) const;
-
-  virtual Ord ord(Ord x, Ord y) const;
-};
-
 /* Weak form */
 class CustomWeakForm : public WeakForm<double>
 {
@@ -83,6 +68,8 @@ private:
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    virtual MatrixFormVol<double>* clone() { return new JacobianFormVol(i, j); }
   };
 
   class ResidualFormVol : public VectorFormVol<double>
@@ -96,6 +83,7 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                     Geom<Ord> *e, ExtData<Ord> *ext) const;
 
+    virtual VectorFormVol<double>* clone() { return new ResidualFormVol(i, rhs); }
   private:
     // Problem parameters.
     CustomRightHandSide* rhs;
@@ -111,6 +99,8 @@ private:
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    virtual MatrixFormVol<double>* clone() { return new PrecondFormVol(i, j); }
   };
 };
 

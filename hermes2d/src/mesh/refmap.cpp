@@ -168,7 +168,7 @@ namespace Hermes
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
       for (unsigned int i = 0; i < e->get_num_surf(); i++)
-        indices[k++] = ref_map_shapeset.get_vertex_index(i);
+        indices[k++] = ref_map_shapeset.get_vertex_index(i, e->get_mode());
 
       // straight-edged element
       if (e->cm == NULL)
@@ -186,11 +186,11 @@ namespace Hermes
         int o = e->cm->order;
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
           for (j = 2; j <= o; j++)
-            indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j);
+            indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j, e->get_mode());
 
         if (e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
-        memcpy(indices + k, ref_map_shapeset.get_bubble_indices(o),
-          ref_map_shapeset.get_num_bubbles(o) * sizeof(int));
+        memcpy(indices + k, ref_map_shapeset.get_bubble_indices(o, e->get_mode()),
+          ref_map_shapeset.get_num_bubbles(o, e->get_mode()) * sizeof(int));
 
         coeffs = e->cm->coeffs;
         nc = e->cm->nc;
@@ -433,8 +433,8 @@ namespace Hermes
         }
 
         // multiply them by the vector of the reference edge
-        double2* v1 = ref_map_shapeset.get_ref_vertex(a);
-        double2* v2 = ref_map_shapeset.get_ref_vertex(b);
+        double2* v1 = ref_map_shapeset.get_ref_vertex(a, element->get_mode());
+        double2* v2 = ref_map_shapeset.get_ref_vertex(b, element->get_mode());
 
         double ex = (*v2)[0] - (*v1)[0];
         double ey = (*v2)[1] - (*v1)[1];
@@ -504,12 +504,12 @@ namespace Hermes
       x = y = 0;
       for (int i = 0; i < nc; i++)
       {
-        double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0);
+        double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0, element->get_mode());
         x += coeffs[i][0] * val;
         y += coeffs[i][1] * val;
 
-        double dx =  ref_map_shapeset.get_dx_value(indices[i], xi1, xi2, 0);
-        double dy =  ref_map_shapeset.get_dy_value(indices[i], xi1, xi2, 0);
+        double dx =  ref_map_shapeset.get_dx_value(indices[i], xi1, xi2, 0, element->get_mode());
+        double dy =  ref_map_shapeset.get_dy_value(indices[i], xi1, xi2, 0, element->get_mode());
         tmp[0][0] += coeffs[i][0] * dx;
         tmp[0][1] += coeffs[i][0] * dy;
         tmp[1][0] += coeffs[i][1] * dx;
@@ -531,15 +531,15 @@ namespace Hermes
       x = y = 0;
       for (int i = 0; i < nc; i++)
       {
-        double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0);
+        double val = ref_map_shapeset.get_fn_value(indices[i], xi1, xi2, 0, element->get_mode());
         x += coeffs[i][0] * val;
         y += coeffs[i][1] * val;
 
         double dxy, dxx, dyy;
 
-        dxx = ref_map_shapeset.get_dxx_value(indices[i], xi1, xi2, 0);
-        dxy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0);
-        dyy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0);
+        dxx = ref_map_shapeset.get_dxx_value(indices[i], xi1, xi2, 0, element->get_mode());
+        dxy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0, element->get_mode());
+        dyy = ref_map_shapeset.get_dxy_value(indices[i], xi1, xi2, 0, element->get_mode());
 
         k[0][0] += coeffs[i][0] * dxx;
         k[0][1] += coeffs[i][1] * dxx;

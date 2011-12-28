@@ -228,7 +228,6 @@ namespace Hermes
         return new DefaultJacobianDiffusion<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultJacobianAdvection<Scalar>::DefaultJacobianAdvection(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff1,
@@ -547,7 +546,6 @@ namespace Hermes
         return new DefaultResidualDiffusion<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultResidualAdvection<Scalar>::DefaultResidualAdvection(int i, std::string area,
         Hermes1DFunction<Scalar>* coeff1,
@@ -616,7 +614,6 @@ namespace Hermes
       {
         return new DefaultResidualAdvection<Scalar>(*this);
       }
-
 
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, std::string area,
@@ -697,13 +694,11 @@ namespace Hermes
         return result;
       }
 
-      // This is to make the form usable in rk_time_step_newton().
       template<typename Scalar>
       MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone()
       {
         return new DefaultMatrixFormSurf<Scalar>(*this);
       }
-
 
       template<typename Scalar>
       DefaultJacobianFormSurf<Scalar>::DefaultJacobianFormSurf(int i, int j, std::string area,
@@ -764,7 +759,6 @@ namespace Hermes
       {
         return new DefaultJacobianFormSurf<Scalar>(*this);
       }
-
 
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, std::string area,
@@ -850,7 +844,6 @@ namespace Hermes
       {
         return new DefaultVectorFormSurf<Scalar>(*this);
       }
-
 
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area,

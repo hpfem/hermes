@@ -50,6 +50,11 @@ namespace Hermes
           result += wt[i] * (u->val[i] * conj(v->val[i]));
         return result;
       }
+
+      MatrixFormVol<Scalar>* clone()
+      {
+        return new MatrixFormVolL2<Scalar>(*this);
+      }
     };
   }
 }

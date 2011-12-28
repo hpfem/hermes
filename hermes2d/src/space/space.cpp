@@ -748,7 +748,6 @@ namespace Hermes
 
       // add vertex, edge and bubble functions to the assembly list
       al->cnt = 0;
-      shapeset->set_mode(e->get_mode());
       for (unsigned int i = 0; i < e->get_num_surf(); i++)
         get_vertex_assembly_list(e, i, al);
       for (unsigned int i = 0; i < e->get_num_surf(); i++)
@@ -764,7 +763,6 @@ namespace Hermes
     {
       _F_;
       al->cnt = 0;
-      shapeset->set_mode(e->get_mode());
       get_vertex_assembly_list(e, surf_num, al);
       get_vertex_assembly_list(e, e->next_vert(surf_num), al);
       get_boundary_assembly_list_internal(e, surf_num, al);
@@ -781,7 +779,7 @@ namespace Hermes
 
       if (!ed->n) return;
 
-      int* indices = shapeset->get_bubble_indices(ed->order);
+      int* indices = shapeset->get_bubble_indices(ed->order, e->get_mode());
       for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += stride, indices++)
         al->add_triplet(*indices, dof, 1.0);
     }
@@ -805,21 +803,19 @@ namespace Hermes
       int component = (get_type() == HERMES_HDIV_SPACE) ? 1 : 0;
 
       Quad1DStd quad1d;
-      //shapeset->set_mode(HERMES_MODE_TRIANGLE);
-      shapeset->set_mode(HERMES_MODE_QUAD);
       for (int i = 0; i < n; i++)
       {
         for (int j = i; j < n; j++)
         {
           int o = i + j + 4;
           double2* pt = quad1d.get_points(o);
-          int ii = shapeset->get_edge_index(0, 0, i + nv);
-          int ij = shapeset->get_edge_index(0, 0, j + nv);
+          int ii = shapeset->get_edge_index(0, 0, i + nv, HERMES_MODE_QUAD);
+          int ij = shapeset->get_edge_index(0, 0, j + nv, HERMES_MODE_QUAD);
           double val = 0.0;
           for (int k = 0; k < quad1d.get_num_points(o); k++)
           {
-            val += pt[k][1] * shapeset->get_fn_value(ii, pt[k][0], -1.0, component)
-              * shapeset->get_fn_value(ij, pt[k][0], -1.0, component);
+            val += pt[k][1] * shapeset->get_fn_value(ii, pt[k][0], -1.0, component, HERMES_MODE_QUAD)
+              * shapeset->get_fn_value(ij, pt[k][0], -1.0, component, HERMES_MODE_QUAD);
           }
           mat[i][j] = val;
         }

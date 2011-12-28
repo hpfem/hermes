@@ -16755,17 +16755,13 @@ namespace Hermes
       leg_quad_index_to_order
     };
 
-
-
     void check_leg_tri(Shapeset* shapeset)
     {
-      shapeset->set_mode(HERMES_MODE_TRIANGLE);
       for (int i = 1; i <= 10; i++)
-    {
-        int nb = shapeset->get_num_bubbles(i);
+      {
+        int nb = shapeset->get_num_bubbles(i, HERMES_MODE_TRIANGLE);
         if (nb != 3*(i-1) + (i-1)*(i-2))
           error("Wrong bubble count");
-
       }
 
       int size_a  = sizeof(leg_tri_fn_a)  / sizeof(Shapeset::shape_fn_t);
@@ -16781,9 +16777,6 @@ namespace Hermes
       if (size_a != leg_tri_bubble_indices[10][leg_tri_bubble_count[10]-1] + 1)
         error("Bad index of last bubble");
     }
-
-
-
 
     HcurlShapesetLegendre::HcurlShapesetLegendre()
     {
@@ -16827,7 +16820,6 @@ namespace Hermes
       comb_table = NULL;
 
       check_leg_tri(this);
-      set_mode(HERMES_MODE_TRIANGLE);
     }
   }
 }

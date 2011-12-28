@@ -646,9 +646,6 @@ namespace Hermes
       // Creating matrix sparse structure.
       create_sparse_structure();
 
-      // Reset the warnings about insufficiently high integration order.
-      reset_warn_order();
-
       // Initialize matrix buffer.
       matrix_buffer = NULL;
       matrix_buffer_dim = 0;
@@ -724,20 +721,12 @@ namespace Hermes
     {
       _F_;
 
-      Shapeset*** shapesets = new Shapeset**[omp_get_max_threads()];
-      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
-      {
-        shapesets[i] = new Shapeset*[wf->get_neq()];
-        for (unsigned int j = 0; j < wf->get_neq(); j++)
-          shapesets[i][j] = spaces[j]->shapeset->clone();
-      }
-
       PrecalcShapeset*** pss = new PrecalcShapeset**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         pss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
-          pss[i][j] = new PrecalcShapeset(shapesets[i][j]);
+          pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
       }
       PrecalcShapeset*** spss = new PrecalcShapeset**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
@@ -781,6 +770,8 @@ namespace Hermes
             }
           }
         }
+        else
+          u_ext[i] = NULL;
       }
       AsmList<Scalar>*** als = new AsmList<Scalar>**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
@@ -902,18 +893,20 @@ namespace Hermes
           fns[i].push_back(ext[i][j]);
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
-        for (unsigned j = 0; j < current_stage->idx.size(); j++)
-        {
-          fns[i].push_back(u_ext[i][current_stage->idx[j]]);
-          if(i == 0)
-            current_stage->meshes.push_back(u_ext[i][current_stage->idx[j]]->get_mesh());
-          u_ext[i][current_stage->idx[j]]->set_quad_2d(&g_quad_2d_std);
-        }
+        if (coeff_vec != NULL)
+          for (unsigned j = 0; j < current_stage->idx.size(); j++)
+          {
+            fns[i].push_back(u_ext[i][current_stage->idx[j]]);
+            if(i == 0)
+              current_stage->meshes.push_back(u_ext[i][current_stage->idx[j]]->get_mesh());
+            u_ext[i][current_stage->idx[j]]->set_quad_2d(&g_quad_2d_std);
+          }
         trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
       }
 
 int state_i;
+
 #define CHUNKSIZE 1
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i)
       {
@@ -970,9 +963,12 @@ int state_i;
 
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (unsigned int j = 0; j < wf->get_neq(); j++)
-          delete u_ext[i][j];
-        delete [] u_ext[i];
+        if(u_ext[i] != NULL)
+        {
+          for (unsigned int j = 0; j < wf->get_neq(); j++)
+            delete u_ext[i][j];
+          delete [] u_ext[i];
+        }
       }
       delete [] u_ext;
 

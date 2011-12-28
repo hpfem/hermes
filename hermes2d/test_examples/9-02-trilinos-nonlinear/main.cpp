@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
   // Project the initial condition to obtain the initial
   // coefficient vector.
   info("Projecting to obtain initial vector for the Newton's method.");
-  CustomInitialSolution sln_tmp(&mesh);
+  ZeroSolution<double> sln_tmp(&mesh);
   OGProjection<double>::project_global(&space, &sln_tmp, coeff_vec, matrix_solver_type);
 
   // Measure the projection time.

@@ -274,8 +274,8 @@ namespace Hermes
         TrfShape empty_shape_vals;
         if (!cached_shape_vals_valid[mode])
         {
-          precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_ortho_vals[mode]);
-          precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_vals[mode]);
+          precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_ortho_vals[mode], mode);
+          precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_vals[mode], mode);
           cached_shape_vals_valid[mode] = true;
 
           //issue a warning if ortho values are defined and the selected cand_list might benefit from that but it cannot because elements do not have uniform orders
@@ -341,7 +341,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void ProjBasedSelector<Scalar>::calc_error_cand_element(const int mode
+      void ProjBasedSelector<Scalar>::calc_error_cand_element(const ElementMode2D mode
         , double3* gip_points, int num_gip_points
         , const int num_sub, Element** sub_domains, Trf** sub_trfs, Scalar*** sub_rvals
         , Hermes::vector<TrfShapeExp>** sub_nonortho_svals, Hermes::vector<TrfShapeExp>** sub_ortho_svals
@@ -407,7 +407,7 @@ namespace Hermes
             if (!use_ortho)
             {
               if (proj_matrices[order_h][order_v] == NULL)
-                proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes);
+                proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes, mode);
               copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
             }
 

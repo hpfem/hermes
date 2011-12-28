@@ -8737,8 +8737,6 @@ namespace Hermes
       ebias = 0;  // TODO
 
       comb_table = NULL;
-
-      set_mode(HERMES_MODE_TRIANGLE);
     }
   }
 }

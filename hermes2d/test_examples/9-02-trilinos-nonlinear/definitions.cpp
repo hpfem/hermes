@@ -83,24 +83,6 @@ Ord CustomExactSolution::ord(Ord x, Ord y) const
   return (1- 2*x) * y * (1 - y);
 }
 
-
-double CustomInitialSolution::value(double x, double y) const
-{
-  return  0;
-}
-
-void CustomInitialSolution::derivatives (double x, double y, double& dx, double& dy) const
-{
-  dx = 0;
-  dy = 0;
-}
-
-Ord CustomInitialSolution::ord(Ord x, Ord y) const
-{
-  return Ord(1);
-}
-
-
 CustomWeakForm::CustomWeakForm(bool JFNK, bool precondition_jacobian, bool precondition_jacobian_approx) : WeakForm(1, JFNK)
 {
   // Jacobian forms - volumetric.

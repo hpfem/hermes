@@ -17039,8 +17039,6 @@ namespace Hermes
       ebias = 2;
 
       comb_table = NULL;
-
-      set_mode(HERMES_MODE_TRIANGLE);
     }
   }
 }

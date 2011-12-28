@@ -58,8 +58,7 @@ namespace Hermes
     /// mechanisms for the calculation and storage of constrained shape functions.
     ///
     /// The class returns shape function values for both triangles and quads, depending on
-    /// what mode it is in. Use the function set_mode() to switch between HERMES_MODE_TRIANGLE and
-    /// HERMES_MODE_QUAD.
+    /// what mode is requested.
     ///
     /// Each shape function is assigned a unique number - 'index'. For standard shape functions,
     /// index is positive and not greater than the value returned by get_max_index(). Negative
@@ -94,66 +93,57 @@ namespace Hermes
       /// Returns the polynomial degree of the specified shape function.
       /// If on quads, it returns encoded orders. The orders has to be decoded through macros
       /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
-      int get_order(int index) const;
+      int get_order(int index, ElementMode2D mode) const;
 
       virtual Shapeset* clone() = 0;
 
     protected:
-      /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.
-      void set_mode(int mode);
-
-      /// Returns the current mode.
-      int get_mode() const;
-
       /// Returns the maximum poly degree for all shape functions.
       int get_max_order() const;
 
       /// Returns the highest shape function index.
-      int get_max_index() const;
+      int get_max_index(ElementMode2D mode) const;
 
       /// Returns 2 if this is a vector shapeset, 1 otherwise.
       int get_num_components() const;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
-      int get_vertex_index(int vertex) const;
+      int get_vertex_index(int vertex, ElementMode2D mode) const;
 
       /// Returns the index of an edge function associated with the specified edge and of the
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
-      int get_edge_index(int edge, int ori, int order) const;
+      int get_edge_index(int edge, int ori, int order, ElementMode2D mode) const;
 
       /// Returns a complete set of indices of bubble functions for an element of the given order.
-      int* get_bubble_indices(int order) const;
+      int* get_bubble_indices(int order, ElementMode2D mode) const;
 
       /// Returns the number of bubble functions for an element of the given order.
-      int get_num_bubbles(int order) const;
+      int get_num_bubbles(int order, ElementMode2D mode) const;
 
       /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
       /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
-      int get_constrained_edge_index(int edge, int order, int ori, int part) const;
+      int get_constrained_edge_index(int edge, int order, int ori, int part, ElementMode2D mode) const;
 
       /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
       /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
-      double get_value(int n, int index, double x, double y, int component);
+      double get_value(int n, int index, double x, double y, int component, ElementMode2D mode);
 
-      double get_fn_value (int index, double x, double y, int component);
-      double get_dx_value (int index, double x, double y, int component);
-      double get_dy_value (int index, double x, double y, int component);
-      double get_dxx_value(int index, double x, double y, int component);
-      double get_dyy_value(int index, double x, double y, int component);
-      double get_dxy_value(int index, double x, double y, int component);
+      double get_fn_value (int index, double x, double y, int component, ElementMode2D mode);
+      double get_dx_value (int index, double x, double y, int component, ElementMode2D mode);
+      double get_dy_value (int index, double x, double y, int component, ElementMode2D mode);
+      double get_dxx_value(int index, double x, double y, int component, ElementMode2D mode);
+      double get_dyy_value(int index, double x, double y, int component, ElementMode2D mode);
+      double get_dxy_value(int index, double x, double y, int component, ElementMode2D mode);
 
       /// Returns the coordinates of the reference domain vertices.
-      double2* get_ref_vertex(int vertex);
+      double2* get_ref_vertex(int vertex, ElementMode2D mode);
 
       /// Returns shapeset identifier. Internal.
       virtual int get_id() const = 0;
 
       /// Returns space type.
       virtual SpaceType get_space_type() const = 0;
-
-      int mode;
-      int nvert;
 
       shape_fn_t*** shape_table[6];
 
@@ -197,20 +187,20 @@ namespace Hermes
       /// linear combination of standard edge functions. This function determines the coefficients
       /// of such linear combination by forming and solving a simple linear system.
       ///
-      double* calculate_constrained_edge_combination(int order, int part, int ori);
+      double* calculate_constrained_edge_combination(int order, int part, int ori, ElementMode2D mode);
 
       /// Returns the coefficients for the linear combination forming a constrained edge function.
       /// This function performs the storage (caching) of these coefficients, so that they can be
       /// calculated only once.
       ///
-      double* get_constrained_edge_combination(int order, int part, int ori, int& nitems);
+      double* get_constrained_edge_combination(int order, int part, int ori, int& nitems, ElementMode2D mode);
 
       /// Releases all cached coefficients.
       void free_constrained_edge_combinations();
 
       /// Constructs the linear combination of edge functions, forming a constrained edge function.
       ///
-      double get_constrained_value(int n, int index, double x, double y, int component);
+      double get_constrained_value(int n, int index, double x, double y, int component, ElementMode2D mode);
 
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
       friend void check_leg_tri(Shapeset* shapeset);

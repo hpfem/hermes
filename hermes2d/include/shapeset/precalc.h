@@ -77,9 +77,6 @@ namespace Hermes
       /// Returns a pointer to the shapeset which is being precalculated.
       Shapeset* get_shapeset() const;
 
-      /// Internal. Use set_active_element() instead.
-      void set_mode(ElementMode2D mode);
-
       /// For internal use only.
       void set_master_transform();
 
@@ -103,8 +100,6 @@ namespace Hermes
       /// quadrature table selector (0-7), mode of the shape function (triangle/quad),
       /// and shape function index to a table from the middle layer.
       LightArray<std::map<uint64_t, LightArray<Node*>*>*> tables;
-
-      ElementMode2D mode;
 
       int index;
 

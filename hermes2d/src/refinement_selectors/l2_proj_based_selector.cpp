@@ -33,7 +33,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void L2ProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals)
+      void L2ProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals, ElementMode2D mode)
       {
         //for all transformations
         bool done = false;
@@ -65,7 +65,7 @@ namespace Hermes
               double ref_y = gip_points[k][H2D_GIP2D_Y] * trf.m[1] + trf.t[1];
 
               //for all expansions: retrieve values
-              shape_exp[H2D_L2FE_VALUE][k] = this->shapeset->get_fn_value(inx_shape, ref_x, ref_y, 0);
+              shape_exp[H2D_L2FE_VALUE][k] = this->shapeset->get_fn_value(inx_shape, ref_x, ref_y, 0, mode);
             }
           }
 
@@ -161,10 +161,10 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void L2ProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals)
+      void L2ProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals, ElementMode2D mode)
       {
         //calculate values
-        precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals);
+        precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals, mode);
 
         //calculate orthonormal basis
         const int num_shapes = (int)shapes.size();
@@ -263,7 +263,7 @@ namespace Hermes
 
       template<typename Scalar>
       double** L2ProjBasedSelector<Scalar>::build_projection_matrix(double3* gip_points, int num_gip_points,
-        const int* shape_inx, const int num_shapes)
+        const int* shape_inx, const int num_shapes, ElementMode2D mode)
       {
         //allocate
         double** matrix = new_matrix<double>(num_shapes, num_shapes);
@@ -282,8 +282,8 @@ namespace Hermes
             for(int j = 0; j < num_gip_points; j++)
             {
               double gip_x = gip_points[j][H2D_GIP2D_X], gip_y = gip_points[j][H2D_GIP2D_Y];
-              double value0 = this->shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0);
-              double value1 = this->shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 0);
+              double value0 = this->shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0, mode);
+              double value1 = this->shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 0, mode);
 
               value += gip_points[j][H2D_GIP2D_W] * (value0*value1);
             }

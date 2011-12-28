@@ -518,7 +518,7 @@ namespace Hermes
         for (int j = i; j < nb; j++)
         {
           int ii = indices[i], ij = indices[j];
-          int o = ref_map_shapeset->get_order(ii) + ref_map_shapeset->get_order(ij);
+          int o = ref_map_shapeset->get_order(ii, ref_map_pss->get_active_element()->get_mode()) + ref_map_shapeset->get_order(ij, ref_map_pss->get_active_element()->get_mode());
           o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
 
           ref_map_pss->set_active_shape(ii);
@@ -529,9 +529,9 @@ namespace Hermes
           ref_map_pss->set_quad_order(o);
           double* fnj = ref_map_pss->get_fn_values();
 
-          double3* pt = quad2d.get_points(o, ref_map_pss->mode);
+          double3* pt = quad2d.get_points(o, ref_map_pss->get_active_element()->get_mode());
           double val = 0.0;
-          for (int k = 0; k < quad2d.get_num_points(o, ref_map_pss->mode); k++)
+          for (int k = 0; k < quad2d.get_num_points(o, ref_map_pss->get_active_element()->get_mode()); k++)
             val += pt[k][2] * (fni[k] * fnj[k]);
 
           mat[i][j] = mat[j][i] = val;
@@ -546,14 +546,13 @@ namespace Hermes
       _F_;
       
       // *** triangles ***
-      ref_map_pss->set_mode(HERMES_MODE_TRIANGLE);
       int order = ref_map_shapeset->get_max_order();
 
       // calculate projection matrix of maximum order
       if (!bubble_proj_matrix_tri)
       {
-        int nb = ref_map_shapeset->get_num_bubbles(order);
-        int* indices = ref_map_shapeset->get_bubble_indices(order);
+        int nb = ref_map_shapeset->get_num_bubbles(order, ref_map_pss->get_active_element()->get_mode());
+        int* indices = ref_map_shapeset->get_bubble_indices(order, ref_map_pss->get_active_element()->get_mode());
         bubble_proj_matrix_tri = calculate_bubble_projection_matrix(nb, indices, ref_map_shapeset, ref_map_pss);
 
         // cholesky factorization of the matrix
@@ -562,15 +561,14 @@ namespace Hermes
       }
 
       // *** quads ***
-      ref_map_pss->set_mode(HERMES_MODE_QUAD);
       order = ref_map_shapeset->get_max_order();
       order = H2D_MAKE_QUAD_ORDER(order, order);
 
       // calculate projection matrix of maximum order
       if (!bubble_proj_matrix_quad)
       {
-        int nb = ref_map_shapeset->get_num_bubbles(order);
-        int *indices = ref_map_shapeset->get_bubble_indices(order);
+        int nb = ref_map_shapeset->get_num_bubbles(order, ref_map_pss->get_active_element()->get_mode());
+        int *indices = ref_map_shapeset->get_bubble_indices(order, ref_map_pss->get_active_element()->get_mode());
 
         bubble_proj_matrix_quad = calculate_bubble_projection_matrix(nb, indices, ref_map_shapeset, ref_map_pss);
 
@@ -716,7 +714,7 @@ namespace Hermes
       {
         // vertex basis functions in all integration points
         double* vd;
-        int index_v = ref_map_shapeset->get_vertex_index(k);
+        int index_v = ref_map_shapeset->get_vertex_index(k, e->get_mode());
         ref_map_pss->set_active_shape(index_v);
         ref_map_pss->set_quad_order(mo2);
         vd = ref_map_pss->get_fn_values();
@@ -729,7 +727,7 @@ namespace Hermes
         {
           // edge basis functions in all integration points
           double* ed;
-          int index_e = ref_map_shapeset->get_edge_index(k, 0, ii + 2);
+          int index_e = ref_map_shapeset->get_edge_index(k, 0, ii + 2, e->get_mode());
           ref_map_pss->set_active_shape(index_e);
           ref_map_pss->set_quad_order(mo2);
           ed = ref_map_pss->get_fn_values();
@@ -751,7 +749,7 @@ namespace Hermes
       int mo2 = quad2d.get_max_order(e->get_mode());
       int np = quad2d.get_num_points(mo2, e->get_mode());
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-      int nb = ref_map_shapeset->get_num_bubbles(qo);
+      int nb = ref_map_shapeset->get_num_bubbles(qo, e->get_mode());
 
       double2* fn = new double2[np];
       memset(fn, 0, np * sizeof(double2));
@@ -786,7 +784,7 @@ namespace Hermes
         {
           // bubble basis functions in all integration points
           double *bfn;
-          int index_i = ref_map_shapeset->get_bubble_indices(qo)[i];
+          int index_i = ref_map_shapeset->get_bubble_indices(qo, e->get_mode())[i];
           ref_map_pss->set_active_shape(index_i);
           ref_map_pss->set_quad_order(mo2);
           bfn = ref_map_pss->get_fn_values();
@@ -851,14 +849,11 @@ namespace Hermes
       if (edge_proj_matrix == NULL) precalculate_cholesky_projection_matrix_edge(&ref_map_shapeset, &ref_map_pss);
       if (bubble_proj_matrix_tri == NULL) precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
 
-      ref_map_pss.set_mode(e->get_mode());
-      ref_map_shapeset.set_mode(e->get_mode());
-
       // allocate projection coefficients
       int nv = e->get_num_surf();
       int ne = order - 1;
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
-      int nb = ref_map_shapeset.get_num_bubbles(qo);
+      int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
       nc = nv + nv*ne + nb;
       if (coeffs != NULL)
       {

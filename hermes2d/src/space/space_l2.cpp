@@ -124,10 +124,9 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, this->mesh)
       {
-        this->shapeset->set_mode(e->get_mode());
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
-        ed->n = this->shapeset->get_num_bubbles(ed->order); //FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
+        ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode()); //FIXME: this function might return invalid value because retrieved bubble functions for non-uniform orders might be invalid for the given order.
         this->next_dof += ed->n * this->stride;
       }
     }
@@ -148,7 +147,6 @@ namespace Hermes
 
       // add bubble functions to the assembly list
       al->cnt = 0;
-      this->shapeset->set_mode(e->get_mode());
       get_bubble_assembly_list(e, al);
       
       for(unsigned int i = 0; i < al->cnt; i++)
@@ -162,7 +160,7 @@ namespace Hermes
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
       if (!ed->n) return;
 
-      int* indices = this->shapeset->get_bubble_indices(ed->order);
+      int* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
       for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride)
       {
         //printf("triplet: %d, %d, %f\n", *indices, dof, 1.0);

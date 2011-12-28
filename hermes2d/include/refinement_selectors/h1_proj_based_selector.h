@@ -62,15 +62,15 @@ namespace Hermes
 
         /// Calculates values of shape function at GIP for all transformations.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */
-        virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals);
+        virtual void precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals, ElementMode2D mode);
 
         /// Calculates values of orthogonalized shape function at GIP for all transformations.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ortho_shapes(). */
-        virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals);
+        virtual void precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals, ElementMode2D mode);
 
         /// Builds projection matrix using a given set of shapes.
         /**  Overriden function. For details, see ProjBasedSelector::build_projection_matrix(). */
-        virtual double** build_projection_matrix(double3* gip_points, int num_gip_points, const int* shape_inx, const int num_shapes);
+        virtual double** build_projection_matrix(double3* gip_points, int num_gip_points, const int* shape_inx, const int num_shapes, ElementMode2D mode);
 
         /// Evaluates a value of the right-hande side in a subdomain.
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_rhs_subdomain(). */
