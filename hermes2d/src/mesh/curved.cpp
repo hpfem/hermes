@@ -549,7 +549,7 @@ namespace Hermes
       int order = ref_map_shapeset->get_max_order();
 
       // calculate projection matrix of maximum order
-      if (!bubble_proj_matrix_tri)
+      if (ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE)
       {
         int nb = ref_map_shapeset->get_num_bubbles(order, HERMES_MODE_TRIANGLE);
         int* indices = ref_map_shapeset->get_bubble_indices(order, HERMES_MODE_TRIANGLE);
@@ -561,12 +561,11 @@ namespace Hermes
       }
 
       // *** quads ***
-      order = ref_map_shapeset->get_max_order();
-      order = H2D_MAKE_QUAD_ORDER(order, order);
 
       // calculate projection matrix of maximum order
-      if (!bubble_proj_matrix_quad)
+      if (ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_QUAD)
       {
+        order = H2D_MAKE_QUAD_ORDER(order, order);
         int nb = ref_map_shapeset->get_num_bubbles(order, HERMES_MODE_QUAD);
         int *indices = ref_map_shapeset->get_bubble_indices(order, HERMES_MODE_QUAD);
 
@@ -794,7 +793,7 @@ namespace Hermes
         }
 
         // solve
-        if (e->get_num_surf() == 3)
+        if (e->get_mode() == HERMES_MODE_TRIANGLE)
           cholsl(bubble_proj_matrix_tri, nb, bubble_tri_p, rhside[k], rhside[k]);
         else
           cholsl(bubble_proj_matrix_quad, nb, bubble_quad_p, rhside[k], rhside[k]);
@@ -846,8 +845,12 @@ namespace Hermes
       ref_map_pss.set_active_element(e);
 
       // calculation of projection matrices
-      if (edge_proj_matrix == NULL) precalculate_cholesky_projection_matrix_edge(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_tri == NULL) precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
+      if (edge_proj_matrix == NULL) 
+        precalculate_cholesky_projection_matrix_edge(&ref_map_shapeset, &ref_map_pss);
+      if (bubble_proj_matrix_tri == NULL && e->get_mode() == HERMES_MODE_TRIANGLE) 
+        precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
+      if (bubble_proj_matrix_quad == NULL && e->get_mode() == HERMES_MODE_QUAD) 
+        precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
 
       // allocate projection coefficients
       int nv = e->get_num_surf();
