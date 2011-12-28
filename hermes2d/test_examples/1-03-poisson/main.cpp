@@ -28,8 +28,8 @@
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
-const int P_INIT = 3;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 8;                             // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 4;                       // Number of initial uniform mesh refinements.
 
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -43,6 +43,9 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
+  // Time measurement.
+  Hermes::TimePeriod cpu_time;
+
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
@@ -65,8 +68,6 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
   info("ndof = %d", ndof);
-
-  clock_t start = clock();
 
   // Initialize the FE problem.
   Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
@@ -91,8 +92,8 @@ int main(int argc, char* argv[])
   
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
-  clock_t finish = clock();
-  printf("Duration %lf\n", ((double)finish - start) / CLOCKS_PER_SEC);
+  cpu_time.tick();
+  printf("Duration %lf\n", cpu_time.accumulated());
 
   // VTK output.
   if (VTK_VISUALIZATION)
