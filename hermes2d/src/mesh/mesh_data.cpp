@@ -168,10 +168,6 @@ namespace Hermes
         // Remove all comments, unnecessary blank spaces, commas and paranthesis
         strip(line);
 
-        // Display stripped file
-        //if (line.find_first_not_of("\t ") != line.npos)
-        //	std::cout << line << std::endl;
-
         if (line.find_first_not_of("\t ") != line.npos)
         {			
           std::istringstream stream(line);

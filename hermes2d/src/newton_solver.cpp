@@ -27,13 +27,13 @@ namespace Hermes
     double NewtonSolver<Scalar>::max_allowed_residual_norm = 1E9;
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), timer(NULL)
     {
       init_linear_solver();
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : NonlinearSolver<Scalar>(dp, matrix_solver_type), kept_jacobian(NULL), timer(NULL)
     {
       init_linear_solver();
     }
@@ -64,8 +64,8 @@ namespace Hermes
     void NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {
       _F_
-      // Obtain the number of degrees of freedom.
-      int ndof = this->dp->get_num_dofs();
+        // Obtain the number of degrees of freedom.
+        int ndof = this->dp->get_num_dofs();
 
       // If coeff_vec == NULL then create a zero vector.
       bool delete_coeff_vec = false;
@@ -86,24 +86,22 @@ namespace Hermes
       double residual_norm;
       int it = 1;
 
-      bool delete_timer = false;
-      if (this->timer == NULL)
-      {
-        this->timer = new TimePeriod;
-        delete_timer = true;
+      if (this->timer != NULL)
+      {      
+        this->timer->tick();
+        setup_time += this->timer->last();
       }
-
-      this->timer->tick();
-      setup_time += this->timer->last();
 
       while (true)
       {
         // Assemble just the residual vector.
         this->dp->assemble(coeff_vec, residual);
 
-        this->timer->tick();
-        assemble_time += this->timer->last();
-
+        if (this->timer != NULL)
+        {
+          this->timer->tick();
+          assemble_time += this->timer->last();
+        }
         // Measure the residual norm.
         if (residual_as_function)
         {
@@ -116,7 +114,7 @@ namespace Hermes
           }
 
           Solution<Scalar>::vector_to_solutions(residual, 
-              static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
+            static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
@@ -155,75 +153,63 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          this->timer->tick();
-          solve_time += this->timer->last();
-
-          if (delete_timer)
+          if (this->timer != NULL)
           {
-            delete this->timer;
-            this->timer = NULL;
+            this->timer->tick();
+            solve_time += this->timer->last();
           }
 
           if (delete_coeff_vec) 
-	        {
+          {
             delete [] coeff_vec;
             coeff_vec = NULL;
-	        }
+          }
 
           return;
         }
 
-        this->timer->tick();
-        solve_time += this->timer->last();
-
+        if (this->timer != NULL)
+        {
+          this->timer->tick();
+          solve_time += this->timer->last();
+        }
         // Assemble just the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
-        this->timer->tick();
-        assemble_time += this->timer->last();
+        if (this->timer != NULL)
+        {
+          this->timer->tick();
+          assemble_time += this->timer->last();
+        }
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         residual->change_sign();
 
         // Solve the linear system.
-        if(!linear_solver->solve()) {
-          if (delete_timer)
-          {
-            delete this->timer;
-            this->timer = NULL;
-          }
+        if(!linear_solver->solve())
           throw Exceptions::LinearSolverException();
-        }
 
         // Add \deltaY^{n + 1} to Y^n.
         for (int i = 0; i < ndof; i++)
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
-        
-        std::ofstream out("out");
-        for(int ia = 0; ia < ndof; ia++)
-          out << coeff_vec[ia] << std::endl;
-        out.close();
-
         // Increase the number of iterations and test if we are still under the limit.
         if (it++ >= newton_max_iter)
         {
-          if (delete_timer)
-          {
-            delete this->timer;
-            this->timer = NULL;
-          }
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
 
-        this->timer->tick();
-        solve_time += this->timer->last();
+        if (this->timer != NULL)
+        {
+          this->timer->tick();
+          solve_time += this->timer->last();
+        }
       }
     }
 
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, 
-        int newton_max_iter, bool residual_as_function)
+      int newton_max_iter, bool residual_as_function)
     {
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
@@ -256,7 +242,7 @@ namespace Hermes
             dir_lift_false.push_back(false);
           }
           Solution<Scalar>::vector_to_solutions(residual, 
-              static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
+            static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
@@ -270,11 +256,6 @@ namespace Hermes
           // Calculate the l2-norm of residual vector, this is the traditional way.
           residual_norm = Global<Scalar>::get_l2_norm(residual);
         }
-
-        // Debug.
-        //printf("\n=================================\n");
-        //for (int d = 0; d < ndof; d++) printf("%g ", residual->get(d));
-        //exit(0);
 
         // Info for the user.
         if(it == 1)
@@ -301,10 +282,10 @@ namespace Hermes
             this->sln_vector[i] = coeff_vec[i];
 
           if (delete_coeff_vec) 
-	  {
+          {
             delete [] coeff_vec;
             coeff_vec = NULL;
-	  }
+          }
 
           return;
         }
