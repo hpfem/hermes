@@ -54,7 +54,15 @@ namespace Hermes
       newton.set_verbose_output(false);
 
       // Perform Newton iteration.
-      newton.solve(coeff_vec, newton_tol, newton_max_iter);
+      try
+      {
+        newton.solve(coeff_vec, newton_tol, newton_max_iter);
+      }
+      catch(Hermes::Exceptions::Exception e)
+      {
+        e.printMsg();
+        error("Newton's iteration in projection failed.");
+      }
 
       delete [] coeff_vec;
 

@@ -344,7 +344,7 @@ namespace Hermes
       {
         for (int i = 0; i < ndof; i++)
         {
-          coeff_vec[i] = 0;
+          coeff_vec[i] = 0.;
           for (unsigned int j = 0; j < num_stages; j++)
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
           coeff_vec[i] *= time_step;

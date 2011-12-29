@@ -550,7 +550,7 @@ namespace Hermes
               if(s->e[i]->active)
                 fn[i]->set_active_element(s->e[i]);
               // ..if the element on i-th mesh is inactive (we have to go down)..
-              if(s->sub_idx[i] > 0)
+              if(s->sub_idx[i] > 0 && fn[i]->get_active_element() != NULL)
                 fn[i]->set_transform(s->get_transform(i));
             }
         }
