@@ -894,12 +894,12 @@ namespace Hermes
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
         if (coeff_vec != NULL)
-          for (unsigned j = 0; j < current_stage->idx.size(); j++)
+          for (unsigned j = 0; j < wf->get_neq(); j++)
           {
-            fns[i].push_back(u_ext[i][current_stage->idx[j]]);
+            fns[i].push_back(u_ext[i][j]);
             if(i == 0)
-              current_stage->meshes.push_back(u_ext[i][current_stage->idx[j]]->get_mesh());
-            u_ext[i][current_stage->idx[j]]->set_quad_2d(&g_quad_2d_std);
+              current_stage->meshes.push_back(spaces[j]->get_mesh());
+            u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
           }
         trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
@@ -1062,19 +1062,19 @@ int state_i;
           continue;
 
         // \todo do not obtain again if the element was not changed.
-        spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j], spaces_first_dofs[j]);
+        spaces[j]->get_element_assembly_list(current_state->e[i], current_als[j], spaces_first_dofs[j]);
 
         // Set active element to all test functions.
-        current_spss[j]->set_active_element(current_state->e[j]);
+        current_spss[j]->set_active_element(current_state->e[i]);
         current_spss[j]->set_master_transform();
 
         // Set active element to reference mappings.
-        current_refmaps[j]->set_active_element(current_state->e[j]);
+        current_refmaps[j]->set_active_element(current_state->e[i]);
         current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
 
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
         if(DG_matrix_forms_present || DG_vector_forms_present)
-          current_state->e[j]->visited = true;
+          current_state->e[i]->visited = true;
       }
       return;
     }
