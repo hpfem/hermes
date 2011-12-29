@@ -137,6 +137,11 @@ namespace Hermes
           }
         }
 
+        MatrixFormVol<Scalar>* clone()
+        {
+          return new ProjectionMatrixFormVol(*this);
+        }
+
       private:
         ProjNormType projNormType;
 
@@ -251,6 +256,11 @@ namespace Hermes
             error("Unknown projection type");
             return Hermes::Ord();
           }
+        }
+        
+        VectorFormVol<Scalar>* clone()
+        {
+          return new ProjectionVectorFormVol(*this);
         }
 
       private:

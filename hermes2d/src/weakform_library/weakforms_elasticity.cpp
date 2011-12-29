@@ -52,6 +52,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
+      MatrixFormVol<Scalar>* DefaultJacobianElasticity_0_0<Scalar>::clone()
+      {
+        return new DefaultJacobianElasticity_0_0<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
+      }
+
+      template<typename Scalar>
       DefaultJacobianElasticity_0_1<Scalar>::DefaultJacobianElasticity_0_1
         (unsigned int i, unsigned int j, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu)
@@ -79,6 +85,12 @@ namespace Hermes
       {
         return lambda * int_dudy_dvdx<Ord, Ord>(n, wt, u, v) +
           mu * int_dudx_dvdy<Ord, Ord>(n, wt, u, v);
+      }
+
+      template<typename Scalar>
+      MatrixFormVol<Scalar>* DefaultJacobianElasticity_0_1<Scalar>::clone()
+      {
+        return new DefaultJacobianElasticity_0_1<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
       }
 
       template<typename Scalar>
@@ -112,6 +124,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
+      VectorFormVol<Scalar>* DefaultResidualElasticity_0_0<Scalar>::clone()
+      {
+        return new DefaultResidualElasticity_0_0<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
+      }
+
+      template<typename Scalar>
       DefaultResidualElasticity_0_1<Scalar>::DefaultResidualElasticity_0_1
         (unsigned int i, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
@@ -139,6 +157,12 @@ namespace Hermes
       {
         return lambda * int_dudy_dvdx<Ord, Ord>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdy<Ord, Ord>(n, wt, u_ext[1], v);
+      }
+      
+      template<typename Scalar>
+      VectorFormVol<Scalar>* DefaultResidualElasticity_0_1<Scalar>::clone()
+      {
+        return new DefaultResidualElasticity_0_1<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
       }
 
       template<typename Scalar>
@@ -171,6 +195,11 @@ namespace Hermes
           lambda * int_dudx_dvdy<Ord, Ord>(n, wt, u_ext[0], v);
       }
 
+      template<typename Scalar>
+      VectorFormVol<Scalar>* DefaultResidualElasticity_1_0<Scalar>::clone()
+      {
+        return new DefaultResidualElasticity_1_0<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
+      }
 
       template<typename Scalar>
       DefaultResidualElasticity_1_1<Scalar>::DefaultResidualElasticity_1_1
@@ -202,6 +231,13 @@ namespace Hermes
           mu * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[1], v);
       }
 
+      
+      template<typename Scalar>
+      VectorFormVol<Scalar>* DefaultResidualElasticity_1_1<Scalar>::clone()
+      {
+        return new DefaultResidualElasticity_1_1<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
+      }
+
       template<typename Scalar>
       DefaultJacobianElasticity_1_1<Scalar>::DefaultJacobianElasticity_1_1
         (unsigned int i, unsigned int j, double lambda, double mu)
@@ -230,6 +266,12 @@ namespace Hermes
       {
         return  mu * int_dudx_dvdx<Ord, Ord>(n, wt, u, v) +
           (lambda + 2*mu) * int_dudy_dvdy<Ord, Ord>(n, wt, u, v);
+      }
+
+      template<typename Scalar>
+      MatrixFormVol<Scalar>* DefaultJacobianElasticity_1_1<Scalar>::clone()
+      {
+        return new DefaultJacobianElasticity_1_1<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
       }
 
       template class HERMES_API DefaultJacobianElasticity_0_0<double>;

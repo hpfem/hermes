@@ -47,6 +47,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual MatrixFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
@@ -64,6 +65,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u,
           Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual MatrixFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
@@ -81,6 +83,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual VectorFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
@@ -98,6 +101,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual VectorFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
@@ -115,6 +119,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual VectorFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
@@ -132,6 +137,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual VectorFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
@@ -149,6 +155,7 @@ namespace Hermes
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
 
+        virtual MatrixFormVol<Scalar>* clone();
       private:
         double lambda, mu;
       };
