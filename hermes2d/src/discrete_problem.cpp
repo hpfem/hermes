@@ -60,7 +60,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL), current_stage(NULL), threads_reported(false)
+    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL)
     {
       // Set all attributes for which we don't need to acces wf or spaces.
       // This is important for the destructor to properly detect what needs to be deallocated.
@@ -105,8 +105,6 @@ namespace Hermes
       // There is a special function that sets a DiscreteProblem to be FVM.
       // Purpose is that this constructor looks cleaner and is simpler.
       this->is_fvm = false;
-      
-      threads_reported = false;
 
       Geom<Hermes::Ord> *tmp = init_geom_ord();
       geom_ord = *tmp;
@@ -114,7 +112,6 @@ namespace Hermes
       quad = &g_quad_2d_std;
 
       current_mat = NULL;
-      current_stage = NULL;
       current_rhs = NULL;
       current_block_weights = NULL;
     }
@@ -626,116 +623,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat,
-      Vector<Scalar>* rhs,
-      bool force_diagonal_blocks,
-      Table* block_weights)
+    void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
+          Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf)
     {
-      _F_;
-
-      current_mat = mat;
-      current_rhs = rhs;
-      current_force_diagonal_blocks = force_diagonal_blocks;
-      current_block_weights = block_weights;
-
-      // Check that the block scaling table have proper dimension.
-      if (block_weights != NULL)
-        if (block_weights->get_size() != wf->get_neq())
-          throw Exceptions::LengthException(6, block_weights->get_size(), wf->get_neq());
-
-      // Creating matrix sparse structure.
-      create_sparse_structure();
-
-      // Initialize matrix buffer.
-      matrix_buffer = NULL;
-      matrix_buffer_dim = 0;
-      if (mat != NULL)
-        get_matrix_buffer(9);
-
-      // Create assembling stages.
-      Hermes::vector<Stage<Scalar> > stages = Hermes::vector<Stage<Scalar> >();
-      bool want_matrix = (mat != NULL);
-      bool want_vector = (rhs != NULL);
-      wf->get_stages(spaces, stages, want_matrix, want_vector);
-
-      // Loop through all assembling stages -- the purpose of this is increased performance
-      // in multi-mesh calculations, where, e.g., only the right hand side uses two meshes.
-      // In such a case, the matrix forms are assembled over one mesh, and only the rhs
-      // traverses through the union mesh. On the other hand, if you don't use multi-mesh
-      // at all, there will always be only one stage in which all forms are assembled as usual.
-      for (unsigned ss = 0; ss < stages.size(); ss++)
-      {
-        current_stage = &stages[ss];
-        // Check that there is a DG form, so that the DG assembling procedure needs to be performed.
-        is_DG_stage();
-
-        // Assemble one stage. One stage is a collection of functions,
-        // and meshes that can not be further minimized.
-        // E.g. if a linear form uses two external solutions, each of
-        // which is defined on a different mesh, and different to the
-        // mesh of the current test function, then the stage would have
-        // three meshes. By stage functions, all functions are meant: shape
-        // functions (their precalculated values), and mesh functions.
-        assemble_one_stage(coeff_vec, mat, rhs);
-      }
-      // Deinitialize matrix buffer.
-      if(matrix_buffer != NULL)
-        delete [] matrix_buffer;
-      matrix_buffer = NULL;
-      matrix_buffer_dim = 0;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs,
-      bool force_diagonal_blocks, Table* block_weights)
-    {
-      _F_;
-      assemble(coeff_vec, NULL, rhs, force_diagonal_blocks, block_weights);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::is_DG_stage()
-    {
-      DG_matrix_forms_present = false;
-      DG_vector_forms_present = false;
-      for(unsigned int i = 0; i < current_stage->mfsurf.size() && DG_matrix_forms_present == false; i++)
-      {
-        if (current_stage->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
-        {
-          DG_matrix_forms_present = true;
-          break;
-        }
-      }
-      for(unsigned int i = 0; i < current_stage->vfsurf.size() && DG_vector_forms_present == false; i++)
-      {
-        if (current_stage->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
-        {
-          DG_vector_forms_present = true;
-          break;
-        }
-      }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_stage(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
-    {
-      _F_;
-
-      PrecalcShapeset*** pss = new PrecalcShapeset**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         pss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
       }
-      PrecalcShapeset*** spss = new PrecalcShapeset**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         spss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           spss[i][j] = new PrecalcShapeset(pss[i][j]);
       }
-      RefMap*** refmaps = new RefMap**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         refmaps[i] = new RefMap*[wf->get_neq()];
@@ -745,7 +647,6 @@ namespace Hermes
           refmaps[i][j]->set_quad_2d(&g_quad_2d_std);
         }
       }
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         if (coeff_vec != NULL)
@@ -773,32 +674,29 @@ namespace Hermes
         else
           u_ext[i] = NULL;
       }
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         als[i] = new AsmList<Scalar>*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           als[i][j] = new AsmList<Scalar>();
       }
-      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        ext[i] = new MeshFunction<Scalar>*[current_stage->ext.size()];
-        for (int j = 0; j < current_stage->ext.size(); j++)
-          ext[i][j] = current_stage->ext[j]->clone();
+        ext[i] = new MeshFunction<Scalar>*[ext_functions.size()];
+        for (int j = 0; j < ext_functions.size(); j++)
+          ext[i][j] = ext_functions[j]->clone();
       }
-      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->mfvol.size(); j++)
+        for (int j = 0; j < wf->mfvol.size(); j++)
         {
-          mfvol[i].push_back(current_stage->mfvol[j]->clone());
+          mfvol[i].push_back(wf->mfvol[j]->clone());
           // Inserting proper ext.
-          for(int k = 0; k < current_stage->mfvol[j]->ext.size(); k++)
+          for(int k = 0; k < wf->mfvol[j]->ext.size(); k++)
           {
-            for (int l = 0; l < current_stage->ext.size(); l++)
+            for (int l = 0; l < ext_functions.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->mfvol[j]->ext[k])
+              if(ext_functions[l] == wf->mfvol[j]->ext[k])
               {
                 while(k >= mfvol[i][j]->ext.size())
                   mfvol[i][j]->ext.push_back(NULL);
@@ -809,18 +707,17 @@ namespace Hermes
           }
         }
       }
-      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->mfsurf.size(); j++)
+        for (int j = 0; j < wf->mfsurf.size(); j++)
         {
-          mfsurf[i].push_back(current_stage->mfsurf[j]->clone());
+          mfsurf[i].push_back(wf->mfsurf[j]->clone());
           // Inserting proper ext.
-          for(int k = 0; k < current_stage->mfsurf[j]->ext.size(); k++)
+          for(int k = 0; k < wf->mfsurf[j]->ext.size(); k++)
           {
-            for (int l = 0; l < current_stage->ext.size(); l++)
+            for (int l = 0; l < ext_functions.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->mfsurf[j]->ext[k])
+              if(ext_functions[l] == wf->mfsurf[j]->ext[k])
               {
                 while(k >= mfsurf[i][j]->ext.size())
                   mfsurf[i][j]->ext.push_back(NULL);
@@ -831,18 +728,17 @@ namespace Hermes
           }
         }
       }
-      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->vfvol.size(); j++)
+        for (int j = 0; j < wf->vfvol.size(); j++)
         {
-          vfvol[i].push_back(current_stage->vfvol[j]->clone());
+          vfvol[i].push_back(wf->vfvol[j]->clone());
           // Inserting proper ext.
-          for(int k = 0; k < current_stage->vfvol[j]->ext.size(); k++)
+          for(int k = 0; k < wf->vfvol[j]->ext.size(); k++)
           {
-            for (int l = 0; l < current_stage->ext.size(); l++)
+            for (int l = 0; l < ext_functions.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->vfvol[j]->ext[k])
+              if(ext_functions[l] == wf->vfvol[j]->ext[k])
               {
                 while(k >= vfvol[i][j]->ext.size())
                   vfvol[i][j]->ext.push_back(NULL);
@@ -854,18 +750,17 @@ namespace Hermes
           }
         }
       }
-      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[omp_get_max_threads()];
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->vfsurf.size(); j++)
+        for (int j = 0; j < wf->vfsurf.size(); j++)
         {
-          vfsurf[i].push_back(current_stage->vfsurf[j]->clone());
+          vfsurf[i].push_back(wf->vfsurf[j]->clone());
           // Inserting proper ext.
-          for(int k = 0; k < current_stage->vfsurf[j]->ext.size(); k++)
+          for(int k = 0; k < wf->vfsurf[j]->ext.size(); k++)
           {
-            for (int l = 0; l < current_stage->ext.size(); l++)
+            for (int l = 0; l < ext_functions.size(); l++)
             {
-              if(current_stage->ext[l] == current_stage->vfsurf[j]->ext[k])
+              if(ext_functions[l] == wf->vfsurf[j]->ext[k])
               {
                 while(k >= vfsurf[i][j]->ext.size())
                   vfsurf[i][j]->ext.push_back(NULL);
@@ -876,67 +771,12 @@ namespace Hermes
           }
         }
       }
+    }
 
-      Traverse trav_master(true);
-      unsigned int num_states = trav_master.get_num_states(current_stage->meshes);
-      
-      trav_master.begin(current_stage->meshes.size(), &(current_stage->meshes.front()));
-
-      Traverse* trav = new Traverse[omp_get_max_threads()];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
-      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
-      {
-        for (unsigned j = 0; j < current_stage->idx.size(); j++)
-          fns[i].push_back(pss[i][current_stage->idx[j]]);
-        for (unsigned j = 0; j < current_stage->ext.size(); j++)
-        {
-          fns[i].push_back(ext[i][j]);
-          ext[i][j]->set_quad_2d(&g_quad_2d_std);
-        }
-        if (coeff_vec != NULL)
-          for (unsigned j = 0; j < wf->get_neq(); j++)
-          {
-            fns[i].push_back(u_ext[i][j]);
-            if(i == 0)
-              current_stage->meshes.push_back(spaces[j]->get_mesh());
-            u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
-          }
-        trav[i].begin(current_stage->meshes.size(), &(current_stage->meshes.front()), &(fns[i].front()));
-        trav[i].stack = trav_master.stack;
-      }
-
-int state_i;
-
-#define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master, mat, rhs) private(state_i)
-      {
-        #pragma omp for schedule(dynamic, CHUNKSIZE)
-        for(state_i = 0; state_i < num_states; state_i++)
-        {
-          Traverse::State current_state;
-          #pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-          
-          PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
-          PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
-          RefMap** current_refmaps = refmaps[omp_get_thread_num()];
-          Solution<Scalar>** current_u_ext = u_ext[omp_get_thread_num()];
-          AsmList<Scalar>** current_als = als[omp_get_thread_num()];
-
-          MatrixFormVol<Scalar>** current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
-          MatrixFormSurf<Scalar>** current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
-          VectorFormVol<Scalar>** current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
-          VectorFormSurf<Scalar>** current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
-
-          // One state is a collection of (virtual) elements sharing
-          // the same physical location on (possibly) different meshes.
-          // This is then the same element of the virtual union mesh.
-          // The proper sub-element mappings to all the functions of
-          // this stage is supplied by the function Traverse::get_next_state()
-          // called in the while loop.
-          assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
-        }
-      }
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
+          Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf)
+    {
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
@@ -982,7 +822,7 @@ int state_i;
 
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (unsigned int j = 0; j < current_stage->ext.size(); j++)
+        for (unsigned int j = 0; j < ext_functions.size(); j++)
           delete ext[i][j];
         delete [] ext[i];
       }
@@ -990,32 +830,160 @@ int state_i;
 
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->mfvol.size(); j++)
+        for (int j = 0; j < wf->mfvol.size(); j++)
           delete mfvol[i][j];
         mfvol[i].clear();
       }
       delete [] mfvol;
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->mfsurf.size(); j++)
+        for (int j = 0; j < wf->mfsurf.size(); j++)
           delete mfsurf[i][j];
         mfsurf[i].clear();
       }
       delete [] mfsurf;
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->vfvol.size(); j++)
+        for (int j = 0; j < wf->vfvol.size(); j++)
           delete vfvol[i][j];
         vfvol[i].clear();
       }
       delete [] vfvol;
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
-        for (int j = 0; j < current_stage->vfsurf.size(); j++)
+        for (int j = 0; j < wf->vfsurf.size(); j++)
           delete vfsurf[i][j];
         vfsurf[i].clear();
       }
       delete [] vfsurf;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat,
+      Vector<Scalar>* rhs,
+      bool force_diagonal_blocks,
+      Table* block_weights)
+    {
+      _F_;
+
+      current_mat = mat;
+      current_rhs = rhs;
+      current_force_diagonal_blocks = force_diagonal_blocks;
+      current_block_weights = block_weights;
+
+      // Check that the block scaling table have proper dimension.
+      if (block_weights != NULL)
+        if (block_weights->get_size() != wf->get_neq())
+          throw Exceptions::LengthException(6, block_weights->get_size(), wf->get_neq());
+
+      // Creating matrix sparse structure.
+      create_sparse_structure();
+
+      // Initialize matrix buffer.
+      matrix_buffer = NULL;
+      matrix_buffer_dim = 0;
+      if (mat != NULL)
+        get_matrix_buffer(9);
+
+      Hermes::vector<MeshFunction<Scalar>*> ext_functions;
+      for(unsigned int form_i = 0; form_i < wf->mfvol.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < wf->mfvol.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(wf->mfvol.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < wf->mfsurf.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < wf->mfsurf.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(wf->mfsurf.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < wf->vfvol.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < wf->vfvol.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(wf->vfvol.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < wf->vfsurf.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < wf->vfsurf.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(wf->vfsurf.at(form_i)->ext[ext_i]);
+
+      // Structures that cloning will be done into.
+      PrecalcShapeset*** pss = new PrecalcShapeset**[omp_get_max_threads()];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[omp_get_max_threads()];
+      RefMap*** refmaps = new RefMap**[omp_get_max_threads()];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[omp_get_max_threads()];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[omp_get_max_threads()];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[omp_get_max_threads()];
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[omp_get_max_threads()];
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[omp_get_max_threads()];
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[omp_get_max_threads()];
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[omp_get_max_threads()];
+
+      // Fill these structures.
+      init_assembling(coeff_vec, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
+
+      // Vector of meshes.
+      Hermes::vector<Mesh*> meshes;
+      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        meshes.push_back(spaces[space_i]->get_mesh());
+      for (unsigned j = 0; j < ext_functions.size(); j++)
+        meshes.push_back(ext_functions[j]->get_mesh());
+      if (coeff_vec != NULL)
+        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+          meshes.push_back(spaces[space_i]->get_mesh());
+
+      Traverse trav_master(true);
+      unsigned int num_states = trav_master.get_num_states(meshes);
+      
+      trav_master.begin(meshes.size(), &(meshes.front()));
+
+      Traverse* trav = new Traverse[omp_get_max_threads()];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        for (unsigned j = 0; j < spaces.size(); j++)
+          fns[i].push_back(pss[i][j]);
+        for (unsigned j = 0; j < ext_functions.size(); j++)
+        {
+          fns[i].push_back(ext[i][j]);
+          ext[i][j]->set_quad_2d(&g_quad_2d_std);
+        }
+        if (coeff_vec != NULL)
+          for (unsigned j = 0; j < wf->get_neq(); j++)
+          {
+            fns[i].push_back(u_ext[i][j]);
+            u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
+          }
+        trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
+        trav[i].stack = trav_master.stack;
+      }
+
+int state_i;
+
+#define CHUNKSIZE 1
+#pragma omp parallel shared(trav_master, mat, rhs) private(state_i)
+      {
+        #pragma omp for schedule(dynamic, CHUNKSIZE)
+        for(state_i = 0; state_i < num_states; state_i++)
+        {
+          Traverse::State current_state;
+          #pragma omp critical (get_next_state)
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+          
+          PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
+          PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
+          RefMap** current_refmaps = refmaps[omp_get_thread_num()];
+          Solution<Scalar>** current_u_ext = u_ext[omp_get_thread_num()];
+          AsmList<Scalar>** current_als = als[omp_get_thread_num()];
+
+          MatrixFormVol<Scalar>** current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
+          MatrixFormSurf<Scalar>** current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
+          VectorFormVol<Scalar>** current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
+          VectorFormSurf<Scalar>** current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
+
+          // One state is a collection of (virtual) elements sharing
+          // the same physical location on (possibly) different meshes.
+          // This is then the same element of the virtual union mesh.
+          // The proper sub-element mappings to all the functions of
+          // this stage is supplied by the function Traverse::get_next_state()
+          // called in the while loop.
+          assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+        }
+      }
+
+      deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
       
       trav_master.finish();
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
@@ -1037,9 +1005,46 @@ int state_i;
       if(DG_matrix_forms_present || DG_vector_forms_present)
       {
         Element* element_to_set_nonvisited;
-        for(unsigned int mesh_i = 0; mesh_i < current_stage->meshes.size(); mesh_i++)
-          for_all_elements(element_to_set_nonvisited, current_stage->meshes[mesh_i])
+        for(unsigned int mesh_i = 0; mesh_i < meshes.size(); mesh_i++)
+          for_all_elements(element_to_set_nonvisited, meshes[mesh_i])
           element_to_set_nonvisited->visited = false;
+      }
+
+      // Deinitialize matrix buffer.
+      if(matrix_buffer != NULL)
+        delete [] matrix_buffer;
+      matrix_buffer = NULL;
+      matrix_buffer_dim = 0;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs,
+      bool force_diagonal_blocks, Table* block_weights)
+    {
+      _F_;
+      assemble(coeff_vec, NULL, rhs, force_diagonal_blocks, block_weights);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::is_DG_stage()
+    {
+      DG_matrix_forms_present = false;
+      DG_vector_forms_present = false;
+      for(unsigned int i = 0; i < wf->mfsurf.size() && DG_matrix_forms_present == false; i++)
+      {
+        if (wf->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
+        {
+          DG_matrix_forms_present = true;
+          break;
+        }
+      }
+      for(unsigned int i = 0; i < wf->vfsurf.size() && DG_vector_forms_present == false; i++)
+      {
+        if (wf->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
+        {
+          DG_vector_forms_present = true;
+          break;
+        }
       }
     }
 
@@ -1055,22 +1060,21 @@ int state_i;
       // NOTE: Active elements and transformations for external functions (including the solutions from previous
       // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in
       // trav.get_next_state(...).
-      for (unsigned int i = 0; i < current_stage->idx.size(); i++)
+      for (unsigned int i = 0; i < spaces.size(); i++)
       {
-        int j = current_stage->idx[i];
-        if (current_state->e[j] == NULL)
+        if (current_state->e[i] == NULL)
           continue;
 
         // \todo do not obtain again if the element was not changed.
-        spaces[j]->get_element_assembly_list(current_state->e[i], current_als[j], spaces_first_dofs[j]);
+        spaces[i]->get_element_assembly_list(current_state->e[i], current_als[i], spaces_first_dofs[i]);
 
         // Set active element to all test functions.
-        current_spss[j]->set_active_element(current_state->e[i]);
-        current_spss[j]->set_master_transform();
+        current_spss[i]->set_active_element(current_state->e[i]);
+        current_spss[i]->set_master_transform();
 
         // Set active element to reference mappings.
-        current_refmaps[j]->set_active_element(current_state->e[i]);
-        current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
+        current_refmaps[i]->set_active_element(current_state->e[i]);
+        current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
 
         // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
         if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -1084,13 +1088,12 @@ int state_i;
     {
       _F_;
       // Obtain the list of shape functions which are nonzero on this surface.
-      for (unsigned int i = 0; i < current_stage->idx.size(); i++)
+      for (unsigned int i = 0; i < spaces.size(); i++)
       {
-        int j = current_stage->idx[i];
-        if (current_state->e[j] == NULL)
+        if (current_state->e[i] == NULL)
           continue;
         
-        spaces[j]->get_boundary_assembly_list(current_state->e[j], current_state->isurf, current_als[j], spaces_first_dofs[j]);
+        spaces[i]->get_boundary_assembly_list(current_state->e[i], current_state->isurf, current_als[i], spaces_first_dofs[i]);
       }
     }
 
@@ -1105,7 +1108,7 @@ int state_i;
       
       if (current_mat != NULL)
       {
-        for(int current_mfvol_i = 0; current_mfvol_i < current_stage->mfvol.size(); current_mfvol_i++)
+        for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
         {
           if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
             continue;
@@ -1161,7 +1164,7 @@ int state_i;
       }
       if (current_rhs != NULL)
       {
-        for(int current_vfvol_i = 0; current_vfvol_i < current_stage->vfvol.size(); current_vfvol_i++)
+        for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
         {
           if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
               continue;
@@ -1206,7 +1209,7 @@ int state_i;
 
         if (current_mat != NULL)
         {
-          for(int current_mfsurf_i = 0; current_mfsurf_i < current_stage->mfsurf.size(); current_mfsurf_i++)
+          for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
           {
             if(!form_to_be_assembled(current_mfsurf[current_mfsurf_i], current_state))
               continue;
@@ -1263,7 +1266,7 @@ int state_i;
     
         if (current_rhs != NULL)
         {
-          for(int current_vfsurf_i = 0; current_vfsurf_i < current_stage->vfsurf.size(); current_vfsurf_i++)
+          for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
           {
             if(!form_to_be_assembled(current_vfsurf[current_vfsurf_i], current_state))
                 continue;

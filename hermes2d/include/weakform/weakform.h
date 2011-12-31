@@ -45,7 +45,6 @@ namespace Hermes
     template<typename T> class Geom;
     template<typename T> class ExtData;
 
-    template<typename Scalar> class Stage;
     template<typename Scalar> class Form;
     template<typename Scalar> class MatrixFormVol;
     template<typename Scalar> class VectorFormVol;
@@ -117,7 +116,6 @@ namespace Hermes
       /// Internal. Used by DiscreteProblem to detect changes in the weakform.
       int get_seq() const { return seq; }
 
-      void get_stages(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Stage<Scalar> >& stages, bool want_matrix, bool want_vector, bool one_stage = false) const;
 
       bool** get_blocks(bool force_diagonal_blocks) const;
 
@@ -140,9 +138,6 @@ namespace Hermes
 
       /// Holds surface vector forms.
       Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
-
-      Stage<Scalar>* find_stage(Hermes::vector<Stage<Scalar> >& stages, int ii, int jj, Mesh* m1, Mesh* m2,
-        Hermes::vector<MeshFunction<Scalar>*>& ext, bool one_stage = false) const;
 
       friend class DiscreteProblem<Scalar>;
       friend class RungeKutta<Scalar>;
@@ -303,42 +298,6 @@ namespace Hermes
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
       virtual VectorFormSurf* clone();
-    };
-
-    template<typename Scalar>
-    class HERMES_API Stage
-    {
-    public:
-      Hermes::vector<int> idx;
-
-      Hermes::vector<Mesh*> meshes;
-
-      Hermes::vector<Transformable*> fns;
-
-      Hermes::vector<MeshFunction<Scalar>*> ext;
-
-      Hermes::vector<Form<Scalar> *> forms;
-      
-      
-      
-      
-      /// Holds volumetric matrix forms.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol;
-
-      /// Holds surface matrix forms.
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf;
-
-      /// Holds volumetric vector forms.
-      Hermes::vector<VectorFormVol<Scalar> *> vfvol;
-
-      /// Holds surface vector forms.
-      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
-
-      std::set<int> idx_set;
-
-      std::set<unsigned> seq_set;
-
-      std::set<MeshFunction<Scalar>*> ext_set;
     };
   }
 }

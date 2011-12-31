@@ -86,6 +86,13 @@ namespace Hermes
       void set_fvm();
 
     protected:
+
+      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
+          Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf);
+
+      void deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
+          Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf);
+
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
       bool form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state);
@@ -132,9 +139,6 @@ namespace Hermes
 
       /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
       inline void set_RK(int original_spaces_count) { this->RungeKutta = true; RK_original_spaces_count = original_spaces_count; }
-
-      /// Assemble one stage.
-      void assemble_one_stage(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
 
       /// Assemble one state.
       void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state,
@@ -236,15 +240,12 @@ namespace Hermes
       int RK_original_spaces_count;
 
       /// Storing assembling info.
-      Stage<Scalar>* current_stage;
       SparseMatrix<Scalar>* current_mat;
       Vector<Scalar>* current_rhs;
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
 
       Quad2D* quad;
-
-      bool threads_reported;
       
       void set_quad_2d(Quad2D* quad);
 
