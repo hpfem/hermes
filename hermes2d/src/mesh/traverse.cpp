@@ -769,23 +769,8 @@ namespace Hermes
           (*id_f)++;
         }
 
-        // Entering a new state: perform the transformations for it
+        // Entering a new state.
         s->visited = true;
-
-        if(fn != NULL)
-        {
-          // For every mesh of this stage..
-          for (i = 0; i < num; i++)
-            // ..where the element is used ..
-            if(s->e[i] != NULL)
-            {
-              if(s->e[i]->active)
-              {
-                fn[i]->set_active_element(s->e[i]);
-                fn[i]->set_transform(s->get_transform(i));
-              }
-            }
-        }
 
         // Is this the leaf state?
         bool leaf = true;
@@ -800,6 +785,15 @@ namespace Hermes
         // if yes, set boundary flags and return the state
         if(leaf)
         {
+          if(fn != NULL)
+            for (i = 0; i < num; i++)
+              if(s->e[i] != NULL)
+                if(s->e[i]->active)
+                {
+                  fn[i]->set_active_element(s->e[i]);
+                  fn[i]->set_transform(s->get_transform(i));
+                }
+
           set_boundary_info(s);
           return s;
         }
