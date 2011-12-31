@@ -86,6 +86,250 @@ namespace Hermes
       return 0;
     }
 
+    static int find_possible_sons(Element* e, uint64_t sub_idx, int son, uint64_t& result_sub_idx)
+    {
+      _F_;
+
+      result_sub_idx = 0;
+
+      if(sub_idx == 0)
+      {
+        if(e->bsplit())
+          return son;
+        else if(e->hsplit())
+        {
+          result_sub_idx = (son < 2) ? 5 : 6;
+          return (son == 0 || son == 3) ? 0 : 1;
+        }
+        else
+        {
+          result_sub_idx = (son == 0 || son == 3) ? 7 : 8;
+          return (son / 2) + 2;
+        }
+      }
+
+      bool possible_sons[4];
+      possible_sons[0] = possible_sons[1] = possible_sons[2] = possible_sons[3] = true;
+      uint64_t transformations[4];
+      transformations[0] = transformations[1] = transformations[2] = transformations[3] = 0;
+      
+      Hermes::vector<unsigned int> transformations_backwards;
+      while (sub_idx > 0)
+      {
+        transformations_backwards.push_back((sub_idx - 1) & 7);
+        sub_idx = (sub_idx - 1) >> 3;
+      }
+
+      if(e->bsplit())
+      {
+        if(transformations_backwards.back() != 4 && transformations_backwards.back() != 6)
+          possible_sons[0] = false;
+        if(transformations_backwards.back() != 4 && transformations_backwards.back() != 7)
+          possible_sons[1] = false;
+        if(transformations_backwards.back() != 5 && transformations_backwards.back() != 7)
+          possible_sons[2] = false;
+        if(transformations_backwards.back() != 5 && transformations_backwards.back() != 6)
+          possible_sons[3] = false;
+
+        if(possible_sons[son])
+        {
+          for(int i = transformations_backwards.size() - 1; i >= 0; i--)
+            result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
+          return son;
+        }
+        else
+        {
+          for(int i = transformations_backwards.size() - 2; i >= 0; i--)
+            result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
+          if(son == 0)
+          {
+           if(possible_sons[1])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+              return 1;
+            }
+            else if(possible_sons[3])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+              return 3;
+            }
+          }
+          if(son == 1)
+          {
+           if(possible_sons[2])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+              return 2;
+            }
+            else if(possible_sons[0])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+              return 0;
+            }
+          }
+          if(son == 2)
+          {
+           if(possible_sons[1])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+              return 1;
+            }
+            else if(possible_sons[3])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+              return 3;
+            }
+          }
+          if(son == 3)
+          {
+           if(possible_sons[0])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+              return 0;
+            }
+            else if(possible_sons[2])
+            {
+              result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+              return 2;
+            }
+          }
+        }
+      }
+      else if(e->hsplit())
+      {
+        possible_sons[2] = false;
+        possible_sons[3] = false;
+        
+        if(transformations_backwards.back() != 0 && transformations_backwards.back() != 3 && transformations_backwards.back() != 4 && transformations_backwards.back() != 5 && transformations_backwards.back() != 6)
+          possible_sons[0] = false;
+        if(transformations_backwards.back() != 1 && transformations_backwards.back() != 2 && transformations_backwards.back() != 4 && transformations_backwards.back() != 5 && transformations_backwards.back() != 7)
+          possible_sons[1] = false;
+
+        if(possible_sons[son] && transformations_backwards.size() > 0)
+          result_sub_idx = (result_sub_idx << 3) + transformations_backwards[transformations_backwards.size() - 1] + 1;
+        for(int i = transformations_backwards.size() - 2; i >= 0; i--)
+          result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
+        if(son == 0)
+        {
+          if(possible_sons[0])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+            return 0;
+          }
+          else if(possible_sons[1])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+            return 1;
+          }
+        }
+        if(son == 1)
+        {
+          if(possible_sons[0])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+            return 0;
+          }
+          if(possible_sons[1])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+            return 1;
+          }
+        }
+        if(son == 2)
+        {
+          if(possible_sons[0])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+            return 0;
+          }
+          if(possible_sons[1])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+            return 1;
+          }
+        }
+        if(son == 3)
+        {
+          if(possible_sons[0])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+            return 0;
+          }
+          if(possible_sons[1])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+            return 1;
+          }
+        }
+      }
+
+      else if(e->hsplit())
+      {
+        possible_sons[0] = false;
+        possible_sons[1] = false;
+        
+        if(transformations_backwards.back() != 0 && transformations_backwards.back() != 1 && transformations_backwards.back() != 4 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
+          possible_sons[2] = false;
+        if(transformations_backwards.back() != 2 && transformations_backwards.back() != 3 && transformations_backwards.back() != 5 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
+          possible_sons[3] = false;
+
+        for(int i = transformations_backwards.size() - 1; i >= 0; i--)
+          result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
+        if(son == 0)
+        {
+          if(possible_sons[2])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+            return 2;
+          }
+          else if(possible_sons[3])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+            return 3;
+          }
+        }
+        if(son == 1)
+        {
+          if(possible_sons[2])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+            return 2;
+          }
+          else if(possible_sons[3])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+            return 3;
+          }
+        }
+        if(son == 2)
+        {
+          if(possible_sons[2])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+            return 2;
+          }
+          else if(possible_sons[3])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+            return 3;
+          }
+        }
+        if(son == 3)
+        {
+          if(possible_sons[2])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+            return 2;
+          }
+          else if(possible_sons[3])
+          {
+            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+            return 3;
+          }
+        }
+      }
+    }
+    
     static void move_to_son(Rect* rnew, Rect* rold, int son)
     {
       _F_;
@@ -363,22 +607,12 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
+                    ns->sub_idx[i] = s->get_transform(i);
                     ns->push_transform(son, i);
                   }
-                  else if(s->e[i]->bsplit())
+                  else
                   {
-                    ns->e[i] = s->e[i]->sons[son];
-                    ns->sub_idx[i] = 0;
-                  }
-                  else if(s->e[i]->hsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[son / 2];
-                    ns->push_transform(son % 2 + 4, i);
-                  }
-                  else if(s->e[i]->vsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[(son / 2) + 2];
-                    ns->push_transform((son == 0 || son == 3) ? 6 : 7, i);
+                    ns->e[i] = s->e[i]->sons[find_possible_sons(s->e[i], s->get_transform(i), son, ns->sub_idx[i])];
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -405,12 +639,13 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
+                    ns->sub_idx[i] = s->get_transform(i);
                     ns->push_transform(son, i);
                   }
                   else if(s->e[i]->hsplit())
                   {
                     ns->e[i] = s->e[i]->sons[son - 4];
-                    ns->sub_idx[i] = 0;
+                    ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -437,12 +672,13 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
+                    ns->sub_idx[i] = s->get_transform(i);
                     ns->push_transform(son, i);
                   }
                   else if(s->e[i]->vsplit())
                   {
                     ns->e[i] = s->e[i]->sons[son - 4];
-                    ns->sub_idx[i] = 0;
+                    ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -464,7 +700,7 @@ namespace Hermes
               else
               {
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = 0;
+                ns->sub_idx[i] = s->get_transform(i);
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
               }
@@ -521,10 +757,6 @@ namespace Hermes
               }
               else
                 s->rep = s->e[i];
-              if(s->e[i]->active && fn != NULL)
-                // Important, sets the active element for all functions that share the i-th mesh
-                // (PrecalcShapesets, Solutions from previous time/Newton iterations)
-                fn[i]->set_active_element(s->e[i]);
               nused++;
             }
             // If there is any used element in this stage we continue with the calculation
@@ -548,10 +780,10 @@ namespace Hermes
             if(s->e[i] != NULL)
             {
               if(s->e[i]->active)
+              {
                 fn[i]->set_active_element(s->e[i]);
-              // ..if the element on i-th mesh is inactive (we have to go down)..
-              if(s->sub_idx[i] > 0 && fn[i]->get_active_element() != NULL)
                 fn[i]->set_transform(s->get_transform(i));
+              }
             }
         }
 
@@ -631,22 +863,12 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
+                    ns->sub_idx[i] = s->get_transform(i);
                     ns->push_transform(son, i);
                   }
-                  else if(s->e[i]->bsplit())
+                  else
                   {
-                    ns->e[i] = s->e[i]->sons[son];
-                    ns->sub_idx[i] = 0;
-                  }
-                  else if(s->e[i]->hsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[son / 2];
-                    ns->push_transform(son % 2 + 4, i);
-                  }
-                  else if(s->e[i]->vsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[(son / 2) + 2];
-                    ns->push_transform((son == 0 || son == 3) ? 6 : 7, i);
+                    ns->e[i] = s->e[i]->sons[find_possible_sons(s->e[i], s->get_transform(i), son, ns->sub_idx[i])];
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -673,12 +895,13 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
+                    ns->sub_idx[i] = s->get_transform(i);
                     ns->push_transform(son, i);
                   }
                   else if(s->e[i]->hsplit())
                   {
                     ns->e[i] = s->e[i]->sons[son - 4];
-                    ns->sub_idx[i] = 0;
+                    ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -705,12 +928,13 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
+                    ns->sub_idx[i] = s->get_transform(i);
                     ns->push_transform(son, i);
                   }
                   else if(s->e[i]->vsplit())
                   {
                     ns->e[i] = s->e[i]->sons[son - 4];
-                    ns->sub_idx[i] = 0;
+                    ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -732,7 +956,7 @@ namespace Hermes
               else
               {
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = 0;
+                ns->sub_idx[i] = s->get_transform(i);
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
               }
