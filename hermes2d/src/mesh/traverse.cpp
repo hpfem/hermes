@@ -79,7 +79,7 @@ namespace Hermes
       {
         return 1;
       }
-      else
+      else if(e->vsplit())
       {
         return 2;
       }
@@ -388,6 +388,9 @@ namespace Hermes
     void Traverse::State::push_transform(int son, int i, bool is_triangle)
     {
       _F_;
+
+      this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
+      
       if(is_triangle)
       {
         if(son < 3)
@@ -406,7 +409,6 @@ namespace Hermes
       }
       else
       {
-        this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
         if(son != 0 && son != 1 && son != 4)
           bnd[0] = false;
         if(son != 1 && son != 2 && son != 7)
@@ -567,6 +569,7 @@ namespace Hermes
               {
                 ns->rep = s->e[i];
                 ns->e[i] = s->e[i];
+                ns->sub_idx[i] = 0;
                 ns->push_transform(son, i, true);
               }
               // ..we move to the son.
@@ -622,7 +625,7 @@ namespace Hermes
           }
           else if(split == 1)
           {
-            int son0 = 4, son1 = 5;
+            int son0 = 6, son1 = 7;
 
             for (son = son0; son <= son1; son++)
             {
@@ -644,7 +647,7 @@ namespace Hermes
                   }
                   else if(s->e[i]->hsplit())
                   {
-                    ns->e[i] = s->e[i]->sons[son - 4];
+                    ns->e[i] = s->e[i]->sons[son - 6];
                     ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
@@ -655,7 +658,7 @@ namespace Hermes
           }
           else if(split == 2)
           {
-            int son0 = 6, son1 = 7;
+            int son0 = 4, son1 = 5;
 
             for (son = son0; son <= son1; son++)
             {
@@ -677,7 +680,7 @@ namespace Hermes
                   }
                   else if(s->e[i]->vsplit())
                   {
-                    ns->e[i] = s->e[i]->sons[son - 4];
+                    ns->e[i] = s->e[i]->sons[son - 2];
                     ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
@@ -817,6 +820,7 @@ namespace Hermes
               {
                 ns->rep = s->e[i];
                 ns->e[i] = s->e[i];
+                ns->sub_idx[i] = 0;
                 ns->push_transform(son, i, true);
               }
               // ..we move to the son.
@@ -872,7 +876,7 @@ namespace Hermes
           }
           else if(split == 1)
           {
-            int son0 = 4, son1 = 5;
+            int son0 = 6, son1 = 7;
 
             for (son = son0; son <= son1; son++)
             {
@@ -894,7 +898,7 @@ namespace Hermes
                   }
                   else if(s->e[i]->hsplit())
                   {
-                    ns->e[i] = s->e[i]->sons[son - 4];
+                    ns->e[i] = s->e[i]->sons[son - 6];
                     ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
@@ -905,7 +909,7 @@ namespace Hermes
           }
           else if(split == 2)
           {
-            int son0 = 6, son1 = 7;
+            int son0 = 4, son1 = 5;
 
             for (son = son0; son <= son1; son++)
             {
@@ -927,7 +931,7 @@ namespace Hermes
                   }
                   else if(s->e[i]->vsplit())
                   {
-                    ns->e[i] = s->e[i]->sons[son - 4];
+                    ns->e[i] = s->e[i]->sons[son - 2];
                     ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
