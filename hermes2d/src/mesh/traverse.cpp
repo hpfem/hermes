@@ -263,7 +263,7 @@ namespace Hermes
         }
       }
 
-      else if(e->hsplit())
+      else if(e->vsplit())
       {
         possible_sons[0] = false;
         possible_sons[1] = false;
