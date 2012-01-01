@@ -109,7 +109,6 @@ namespace Hermes
       Geom<Hermes::Ord> *tmp = init_geom_ord();
       geom_ord = *tmp;
       delete tmp;
-      quad = &g_quad_2d_std;
 
       current_mat = NULL;
       current_rhs = NULL;
@@ -1223,11 +1222,12 @@ int state_i;
             {
               if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
+
               if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_mfsurf[current_mfsurf_i]->i]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->i]->idx[i]);
 
-                test_fns[i] = init_fn(current_spss[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i], quad->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
+                test_fns[i] = init_fn(current_spss[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i], current_refmaps[current_mfsurf[current_mfsurf_i]->i]->get_quad_2d()->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
               }
             }
 
@@ -1239,7 +1239,7 @@ int state_i;
               {
                 current_pss[current_mfsurf[current_mfsurf_i]->j]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->j]->idx[j]);
 
-                base_fns[j] = init_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], quad->get_edge_points(current_state->isurf, order,current_state->e[0]->get_mode()));
+                base_fns[j] = init_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j]->get_quad_2d()->get_edge_points(current_state->isurf, order,current_state->e[0]->get_mode()));
               }
             }
 
@@ -1283,7 +1283,7 @@ int state_i;
               {
                 current_spss[current_vfsurf[current_vfsurf_i]->i]->set_active_shape(current_als[current_vfsurf[current_vfsurf_i]->i]->idx[i]);
 
-                test_fns[i] = init_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], quad->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
+                test_fns[i] = init_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i]->get_quad_2d()->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
               }
             }
 
@@ -1536,8 +1536,8 @@ int state_i;
     int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       _F_;
-      double3* pt = quad->get_points(order, reference_mapping->get_active_element()->get_mode());
-      int np = quad->get_num_points(order, reference_mapping->get_active_element()->get_mode());
+      double3* pt = reference_mapping->get_quad_2d()->get_points(order, reference_mapping->get_active_element()->get_mode());
+      int np = reference_mapping->get_quad_2d()->get_num_points(order, reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
       geometry = init_geom_vol(reference_mapping, order);
@@ -1559,9 +1559,9 @@ int state_i;
     int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       _F_;
-      int eo = quad->get_edge_points(current_state->isurf, order, reference_mapping->get_active_element()->get_mode());
-      double3* pt = quad->get_points(eo, reference_mapping->get_active_element()->get_mode());
-      int np = quad->get_num_points(eo, reference_mapping->get_active_element()->get_mode());
+      int eo = reference_mapping->get_quad_2d()->get_edge_points(current_state->isurf, order, reference_mapping->get_active_element()->get_mode());
+      double3* pt = reference_mapping->get_quad_2d()->get_points(eo, reference_mapping->get_active_element()->get_mode());
+      int np = reference_mapping->get_quad_2d()->get_num_points(eo, reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
       geometry = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->marker, eo);

@@ -245,10 +245,6 @@ namespace Hermes
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
 
-      Quad2D* quad;
-      
-      void set_quad_2d(Quad2D* quad);
-
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class NewtonSolver;
       template<typename T> friend class PicardSolver;
