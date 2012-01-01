@@ -98,14 +98,16 @@ namespace Hermes
           return son;
         else if(e->hsplit())
         {
+          result_sub_idx = (son == 0 || son == 3) ? 7 : 8;
+          return (son == 0 || son == 1) ? 0 : 1;
+        }
+        else if(e->vsplit())
+        {
           result_sub_idx = (son < 2) ? 5 : 6;
-          return (son == 0 || son == 3) ? 0 : 1;
+          return (son == 0 || son == 3) ? 2 : 3;
         }
         else
-        {
-          result_sub_idx = (son == 0 || son == 3) ? 7 : 8;
-          return (son / 2) + 2;
-        }
+          assert(0);
       }
 
       bool possible_sons[4];
@@ -200,9 +202,9 @@ namespace Hermes
         possible_sons[2] = false;
         possible_sons[3] = false;
         
-        if(transformations_backwards.back() != 0 && transformations_backwards.back() != 3 && transformations_backwards.back() != 4 && transformations_backwards.back() != 5 && transformations_backwards.back() != 6)
+        if(transformations_backwards.back() != 0 && transformations_backwards.back() != 1 && transformations_backwards.back() != 4 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
           possible_sons[0] = false;
-        if(transformations_backwards.back() != 1 && transformations_backwards.back() != 2 && transformations_backwards.back() != 4 && transformations_backwards.back() != 5 && transformations_backwards.back() != 7)
+        if(transformations_backwards.back() != 2 && transformations_backwards.back() != 3 && transformations_backwards.back() != 5 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
           possible_sons[1] = false;
 
         if(possible_sons[son] && transformations_backwards.size() > 0)
@@ -213,38 +215,35 @@ namespace Hermes
         {
           if(possible_sons[0])
           {
-            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
             return 0;
           }
           else if(possible_sons[1])
           {
-            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
-            return 1;
+            assert(0);
           }
         }
         if(son == 1)
         {
           if(possible_sons[0])
           {
-            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
             return 0;
           }
           if(possible_sons[1])
           {
-            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
-            return 1;
+            assert(0);
           }
         }
         if(son == 2)
         {
           if(possible_sons[0])
           {
-            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
-            return 0;
+            assert(0);
           }
           if(possible_sons[1])
           {
-            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
             return 1;
           }
         }
@@ -252,12 +251,11 @@ namespace Hermes
         {
           if(possible_sons[0])
           {
-            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
-            return 0;
+            assert(0);
           }
           if(possible_sons[1])
           {
-            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
             return 1;
           }
         }
@@ -268,9 +266,9 @@ namespace Hermes
         possible_sons[0] = false;
         possible_sons[1] = false;
         
-        if(transformations_backwards.back() != 0 && transformations_backwards.back() != 1 && transformations_backwards.back() != 4 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
+        if(transformations_backwards.back() == 1 || transformations_backwards.back() == 2 || transformations_backwards.back() == 7)
           possible_sons[2] = false;
-        if(transformations_backwards.back() != 2 && transformations_backwards.back() != 3 && transformations_backwards.back() != 5 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
+        if(transformations_backwards.back() == 0 || transformations_backwards.back() == 3 || transformations_backwards.back() == 6)
           possible_sons[3] = false;
 
         for(int i = transformations_backwards.size() - 1; i >= 0; i--)
@@ -279,25 +277,23 @@ namespace Hermes
         {
           if(possible_sons[2])
           {
-            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
             return 2;
           }
           else if(possible_sons[3])
           {
-            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
-            return 3;
+            assert(0);
           }
         }
         if(son == 1)
         {
           if(possible_sons[2])
           {
-            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
-            return 2;
+            assert(0);
           }
           else if(possible_sons[3])
           {
-            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
             return 3;
           }
         }
@@ -305,12 +301,11 @@ namespace Hermes
         {
           if(possible_sons[2])
           {
-            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
-            return 2;
+            assert(0);
           }
           else if(possible_sons[3])
           {
-            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
             return 3;
           }
         }
@@ -318,13 +313,12 @@ namespace Hermes
         {
           if(possible_sons[2])
           {
-            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
+            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
             return 2;
           }
           else if(possible_sons[3])
           {
-            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
-            return 3;
+            assert(0);
           }
         }
       }
@@ -625,7 +619,7 @@ namespace Hermes
           }
           else if(split == 1)
           {
-            int son0 = 6, son1 = 7;
+            int son0 = 4, son1 = 5;
 
             for (son = son0; son <= son1; son++)
             {
@@ -647,7 +641,7 @@ namespace Hermes
                   }
                   else if(s->e[i]->hsplit())
                   {
-                    ns->e[i] = s->e[i]->sons[son - 6];
+                    ns->e[i] = s->e[i]->sons[son - 4];
                     ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
@@ -658,7 +652,7 @@ namespace Hermes
           }
           else if(split == 2)
           {
-            int son0 = 4, son1 = 5;
+            int son0 = 6, son1 = 7;
 
             for (son = son0; son <= son1; son++)
             {
@@ -680,7 +674,7 @@ namespace Hermes
                   }
                   else if(s->e[i]->vsplit())
                   {
-                    ns->e[i] = s->e[i]->sons[son - 2];
+                    ns->e[i] = s->e[i]->sons[son - 4];
                     ns->sub_idx[i] = s->get_transform(i);
                   }
                   if(ns->e[i] != NULL)
