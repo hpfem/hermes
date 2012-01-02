@@ -70,6 +70,13 @@ namespace Hermes
       uint64_t get_transform() const;
 
       virtual ~Transformable();
+      
+      /// Multiplies the current transformation matrix on the right by a transformation to the
+      /// specified son element and pushes it on top of the matrix stack. All integration
+      /// points will then be transformed to this sub-element. This process can be repeated.
+      /// \param son [in] Son element number in the range [0-3] for triangles and [0-7] for quads.
+      virtual void push_transform(int son);
+
     protected:
 
       Transformable();
@@ -79,12 +86,6 @@ namespace Hermes
       /// In Solution it selects the element to retrieve solution values for, etc.
       /// \param e [in] Element associated with the function being represented by the class.
       virtual void set_active_element(Element* e);
-
-      /// Multiplies the current transformation matrix on the right by a transformation to the
-      /// specified son element and pushes it on top of the matrix stack. All integration
-      /// points will then be transformed to this sub-element. This process can be repeated.
-      /// \param son [in] Son element number in the range [0-3] for triangles and [0-7] for quads.
-      virtual void push_transform(int son);
 
       /// Removes the current transformation matrix from the top of the stack. The new top becomes
       /// the current transformation matrix. This returns the transform to the state before the

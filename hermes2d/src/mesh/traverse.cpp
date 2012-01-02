@@ -21,6 +21,11 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    static const Rect H2D_UNITY = { 0, 0, ONE, ONE };
+    Traverse::Traverse(bool master) : master(master)
+    {
+    }
+
     static int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
     {
       _F_;
@@ -68,262 +73,6 @@ namespace Hermes
       }
     }
 
-    static int get_split(Element* e)
-    {
-      _F_;
-      if(e->bsplit())
-      {
-        return 3;
-      }
-      else if(e->hsplit())
-      {
-        return 1;
-      }
-      else if(e->vsplit())
-      {
-        return 2;
-      }
-      return 0;
-    }
-
-    static int find_possible_sons(Element* e, uint64_t sub_idx, int son, uint64_t& result_sub_idx)
-    {
-      _F_;
-
-      result_sub_idx = 0;
-
-      if(sub_idx == 0)
-      {
-        if(e->bsplit())
-          return son;
-        else if(e->hsplit())
-        {
-          result_sub_idx = (son == 0 || son == 3) ? 7 : 8;
-          return (son == 0 || son == 1) ? 0 : 1;
-        }
-        else if(e->vsplit())
-        {
-          result_sub_idx = (son < 2) ? 5 : 6;
-          return (son == 0 || son == 3) ? 2 : 3;
-        }
-        else
-          assert(0);
-      }
-
-      bool possible_sons[4];
-      possible_sons[0] = possible_sons[1] = possible_sons[2] = possible_sons[3] = true;
-      uint64_t transformations[4];
-      transformations[0] = transformations[1] = transformations[2] = transformations[3] = 0;
-      
-      Hermes::vector<unsigned int> transformations_backwards;
-      while (sub_idx > 0)
-      {
-        transformations_backwards.push_back((sub_idx - 1) & 7);
-        sub_idx = (sub_idx - 1) >> 3;
-      }
-
-      if(e->bsplit())
-      {
-        if(transformations_backwards.back() != 4 && transformations_backwards.back() != 6)
-          possible_sons[0] = false;
-        if(transformations_backwards.back() != 4 && transformations_backwards.back() != 7)
-          possible_sons[1] = false;
-        if(transformations_backwards.back() != 5 && transformations_backwards.back() != 7)
-          possible_sons[2] = false;
-        if(transformations_backwards.back() != 5 && transformations_backwards.back() != 6)
-          possible_sons[3] = false;
-
-        if(possible_sons[son])
-        {
-          for(int i = transformations_backwards.size() - 1; i >= 0; i--)
-            result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
-          return son;
-        }
-        else
-        {
-          for(int i = transformations_backwards.size() - 2; i >= 0; i--)
-            result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
-          if(son == 0)
-          {
-           if(possible_sons[1])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 6 + 1;
-              return 1;
-            }
-            else if(possible_sons[3])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 4 + 1;
-              return 3;
-            }
-          }
-          if(son == 1)
-          {
-           if(possible_sons[2])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 4 + 1;
-              return 2;
-            }
-            else if(possible_sons[0])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 7 + 1;
-              return 0;
-            }
-          }
-          if(son == 2)
-          {
-           if(possible_sons[1])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 5 + 1;
-              return 1;
-            }
-            else if(possible_sons[3])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 7 + 1;
-              return 3;
-            }
-          }
-          if(son == 3)
-          {
-           if(possible_sons[0])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 5 + 1;
-              return 0;
-            }
-            else if(possible_sons[2])
-            {
-              result_sub_idx = (result_sub_idx << 3) + 6 + 1;
-              return 2;
-            }
-          }
-        }
-      }
-      else if(e->hsplit())
-      {
-        possible_sons[2] = false;
-        possible_sons[3] = false;
-        
-        if(transformations_backwards.back() != 0 && transformations_backwards.back() != 1 && transformations_backwards.back() != 4 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
-          possible_sons[0] = false;
-        if(transformations_backwards.back() != 2 && transformations_backwards.back() != 3 && transformations_backwards.back() != 5 && transformations_backwards.back() != 6 && transformations_backwards.back() != 7)
-          possible_sons[1] = false;
-
-        if(possible_sons[son] && transformations_backwards.size() > 0)
-          result_sub_idx = (result_sub_idx << 3) + transformations_backwards[transformations_backwards.size() - 1] + 1;
-        for(int i = transformations_backwards.size() - 2; i >= 0; i--)
-          result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
-        if(son == 0)
-        {
-          if(possible_sons[0])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
-            return 0;
-          }
-          else if(possible_sons[1])
-          {
-            assert(0);
-          }
-        }
-        if(son == 1)
-        {
-          if(possible_sons[0])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
-            return 0;
-          }
-          if(possible_sons[1])
-          {
-            assert(0);
-          }
-        }
-        if(son == 2)
-        {
-          if(possible_sons[0])
-          {
-            assert(0);
-          }
-          if(possible_sons[1])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 7 + 1;
-            return 1;
-          }
-        }
-        if(son == 3)
-        {
-          if(possible_sons[0])
-          {
-            assert(0);
-          }
-          if(possible_sons[1])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 6 + 1;
-            return 1;
-          }
-        }
-      }
-
-      else if(e->vsplit())
-      {
-        possible_sons[0] = false;
-        possible_sons[1] = false;
-        
-        if(transformations_backwards.back() == 1 || transformations_backwards.back() == 2 || transformations_backwards.back() == 7)
-          possible_sons[2] = false;
-        if(transformations_backwards.back() == 0 || transformations_backwards.back() == 3 || transformations_backwards.back() == 6)
-          possible_sons[3] = false;
-
-        for(int i = transformations_backwards.size() - 1; i >= 0; i--)
-          result_sub_idx = (result_sub_idx << 3) + transformations_backwards[i] + 1;
-        if(son == 0)
-        {
-          if(possible_sons[2])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
-            return 2;
-          }
-          else if(possible_sons[3])
-          {
-            assert(0);
-          }
-        }
-        if(son == 1)
-        {
-          if(possible_sons[2])
-          {
-            assert(0);
-          }
-          else if(possible_sons[3])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 4 + 1;
-            return 3;
-          }
-        }
-        if(son == 2)
-        {
-          if(possible_sons[2])
-          {
-            assert(0);
-          }
-          else if(possible_sons[3])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
-            return 3;
-          }
-        }
-        if(son == 3)
-        {
-          if(possible_sons[2])
-          {
-            result_sub_idx = (result_sub_idx << 3) + 5 + 1;
-            return 2;
-          }
-          else if(possible_sons[3])
-          {
-            assert(0);
-          }
-        }
-      }
-    }
-    
     static void move_to_son(Rect* rnew, Rect* rold, int son)
     {
       _F_;
@@ -345,8 +94,30 @@ namespace Hermes
       }
     }
 
-    Traverse::Traverse(bool master) : master(master)
+    void init_transforms(Transformable* fn, Rect* cr, Rect* er)
     {
+      Rect r;
+      memcpy(&r, er, sizeof(Rect));
+
+      while (cr->l > r.l || cr->r < r.r || cr->b > r.b || cr->t < r.t)
+      {
+        uint64_t hmid = (r.l + r.r) >> 1;
+        uint64_t vmid = (r.t + r.b) >> 1;
+        int son;
+
+        if (cr->r <= hmid && cr->t <= vmid) son = 0;
+        else if (cr->l >= hmid && cr->t <= vmid) son = 1;
+        else if (cr->l >= hmid && cr->b >= vmid) son = 2;
+        else if (cr->r <= hmid && cr->b >= vmid) son = 3;
+        else if (cr->r <= hmid) son = 6;
+        else if (cr->l >= hmid) son = 7;
+        else if (cr->t <= vmid) son = 4;
+        else if (cr->b >= vmid) son = 5;
+        else assert(0);
+
+        fn->push_transform(son);
+        move_to_son(&r, &r, son);
+      }
     }
 
     Traverse::State::State()
@@ -355,6 +126,9 @@ namespace Hermes
       memset(this, 0, sizeof(Traverse::State));
       for(int i = 0; i < 4; i++)
         this->bnd[i] = true;
+      cr = H2D_UNITY;
+      for (int i = 0; i < num; i++)
+        er[i] = H2D_UNITY;
     }
 
     void Traverse::State::operator=(const State * other)
@@ -372,8 +146,25 @@ namespace Hermes
       this->sub_idx = new uint64_t[num];
       memcpy(this->e, other->e, num * sizeof(Element*));
       memcpy(this->sub_idx, other->sub_idx, num * sizeof(uint64_t));
-
       memcpy(this->bnd, other->bnd, 4 * sizeof(bool));
+
+      /*
+      if(er != NULL)
+        delete [] er;
+      this->er = new Rect[num];
+      for(int i = 0; i < num; i++)
+      {
+        this->er[i].b = other->er[i].b;
+        this->er[i].t = other->er[i].t;
+        this->er[i].r = other->er[i].r;
+        this->er[i].l = other->er[i].l;
+      }
+
+      this->cr.b = other->cr.b;
+      this->cr.t = other->cr.t;
+      this->cr.r = other->cr.r;
+      this->cr.l = other->cr.l;
+      */
 
       this->rep = other->rep;
       this->visited = other->visited;
@@ -384,16 +175,16 @@ namespace Hermes
       _F_;
 
       this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
-      
+
       if(is_triangle)
       {
         if(son < 3)
         {
           switch (son)
           {
-            case 0: bnd[1] = false; break;
-            case 1: bnd[2] = false; break;
-            case 2: bnd[0] = false; break;
+          case 0: bnd[1] = false; break;
+          case 1: bnd[2] = false; break;
+          case 2: bnd[0] = false; break;
           }
         }
         else
@@ -432,6 +223,7 @@ namespace Hermes
       if(stack[*top_f].e == NULL)
       {
         stack[*top_f].e = new Element*[num];
+        stack[*top_f].er = new Rect[num];
         stack[*top_f].sub_idx = new uint64_t[num];
       }
 
@@ -440,33 +232,33 @@ namespace Hermes
       for(int i = 0; i < 4; i++)
         stack[*top_f].bnd[i] = true;
       stack[*top_f].num = this->num;
+
       return stack + (*top_f)++;
     }
 
-    void Traverse::set_boundary_info(Traverse::State* s)
+    void Traverse::set_boundary_info(State* s)
     {
-      _F_;
       Element* e = NULL;
       for (int i = 0; i < num; i++)
-        if((e = s->e[i]) != NULL) 
-          break;
+        if ((e = s->e[i]) != NULL) break;
 
-      if(s->rep->is_triangle())
+      if (s->rep->is_triangle())
+      {
         for (int i = 0; i < 3; i++)
-          s->bnd[i] = s->bnd[i] && (e->en[i]->bnd);
+          (s->bnd[i] = (s->bnd[i] && e->en[i]->bnd));
+      }
       else
       {
-        s->bnd[0] = s->bnd[0] && e->en[0]->bnd;
-        s->bnd[1] = s->bnd[1] && e->en[1]->bnd;
-        s->bnd[2] = s->bnd[2] && e->en[2]->bnd;
-        s->bnd[3] = s->bnd[3] && e->en[3]->bnd;
+        s->bnd[0] = s->bnd[0] && (s->cr.b == 0)   && e->en[0]->bnd;
+        s->bnd[1] = s->bnd[1] && (s->cr.r == ONE) && e->en[1]->bnd;
+        s->bnd[2] = s->bnd[2] && (s->cr.t == ONE) && e->en[2]->bnd;
+        s->bnd[3] = s->bnd[3] && (s->cr.l == 0)   && e->en[3]->bnd;
       }
     }
 
     int Traverse::get_num_states(Hermes::vector<Mesh*> meshes)
     {
       _F_;
-
       // This will be returned.
       int count = 0;
 
@@ -480,7 +272,7 @@ namespace Hermes
         // If the top state was visited already, we are returning through it:
         // undo all its transformations, pop it and continue with a non-visited one
         State* s;
-        
+
         while (top > 0 && (s = stack + top-1)->visited)
           (top)--;
 
@@ -493,6 +285,7 @@ namespace Hermes
           // with as many Elements* as there are meshes in this stage.
           // (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
           s = push_state();
+          s->cr = H2D_UNITY;
           while (1)
           {
             // No more base elements? we're finished.
@@ -512,6 +305,7 @@ namespace Hermes
               }
               else
                 s->rep = s->e[i];
+              s->er[i] = H2D_UNITY;
               nused++;
             }
             // If there is any used element in this stage we continue with the calculation
@@ -522,20 +316,32 @@ namespace Hermes
           }
 
           (id)++;
+
+          if (s->rep->is_triangle())
+          {
+            for (i = 0; i < 3; i++)
+            {
+              s->bnd[i] = true;
+              s->lo[i] = 0;
+              s->hi[i] = ONE;
+            }
+          }
         }
 
-        // Entering a new state: perform the transformations for it
+        // Entering a new state.
         s->visited = true;
 
         // Is this the leaf state?
         bool leaf = true;
         for (i = 0; i < num; i++)
+        {
           if(s->e[i] != NULL)
             if(!s->e[i]->active)
             {
               leaf = false;
               break;
             }
+        }
 
         // if yes, set boundary flags and return the state
         if(leaf)
@@ -563,17 +369,39 @@ namespace Hermes
               {
                 ns->rep = s->e[i];
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = 0;
+                ns->sub_idx[i] = s->sub_idx[i];
                 ns->push_transform(son, i, true);
               }
               // ..we move to the son.
               else
               {
                 ns->e[i] = s->e[i]->sons[son];
+                // If the son's element is active.
+                if (ns->e[i]->active)
+                  ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
-                ns->sub_idx[i] = 0;
               }
+            }
+
+            // Determine boundary flags and positions for the new state.
+            if (son < 3)
+            {
+              memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
+              memcpy(ns->lo, s->lo, sizeof(ns->lo));
+              memcpy(ns->hi, s->hi, sizeof(ns->hi));
+
+#define mid(n) ((s->lo[n] + s->hi[n]) / 2)
+              switch (son)
+              {
+              case 0: ns->bnd[1] = false; ns->hi[0] = mid(0); ns->lo[2] = mid(2); break;
+              case 1: ns->bnd[2] = false; ns->lo[0] = mid(0); ns->hi[1] = mid(1); break;
+              case 2: ns->bnd[0] = false; ns->lo[1] = mid(1); ns->hi[2] = mid(2); break;
+              }
+            }
+            else
+            {
+              memset(ns->bnd, 0, sizeof(ns->bnd));
             }
           }
         }
@@ -581,10 +409,11 @@ namespace Hermes
         else
         {
           // Obtain split types and son numbers for the current rectangle on all elements.
+          int4* current_sons = new int4[num];
           int split = 0;
           for (i = 0; i < num; i++)
             if(s->e[i] != NULL && !s->e[i]->active)
-              split |= get_split(s->e[i]);
+              split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, current_sons[i]);
 
           // Both splits: recur to four sons, similar to triangles.
           if(split == 3)
@@ -592,6 +421,8 @@ namespace Hermes
             for (son = 0; son <= 3; son++)
             {
               State* ns = push_state();
+              // Sets the son's "base" rectangle to the correct one.
+              move_to_son(&ns->cr, &s->cr, son);
 
               for (i = 0; i < num; i++)
               {
@@ -604,12 +435,16 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->get_transform(i);
+                    ns->sub_idx[i] = s->sub_idx[i];
                     ns->push_transform(son, i);
                   }
                   else
                   {
-                    ns->e[i] = s->e[i]->sons[find_possible_sons(s->e[i], s->get_transform(i), son, ns->sub_idx[i])];
+                    ns->e[i] = s->e[i]->sons[current_sons[i][son] & 3];
+                    // Sets the son's "current mesh" rectangle correctly.
+                    move_to_son(ns->er + i, s->er + i, current_sons[i][son]);
+                    if (ns->e[i]->active)
+                      ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -617,14 +452,18 @@ namespace Hermes
               }
             }
           }
-          else if(split == 1)
+          // V or h split, recur to two sons.
+          else if (split > 0)
           {
             int son0 = 4, son1 = 5;
+            if (split == 2) { son0 = 6; son1 = 7; }
 
             for (son = son0; son <= son1; son++)
             {
               State* ns = push_state();
+              move_to_son(&ns->cr, &s->cr, son);
 
+              int j = (son == 4 || son == 6) ? 0 : 2;
               for (i = 0; i < num; i++)
               {
                 if(s->e[i] == NULL)
@@ -636,13 +475,15 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->get_transform(i);
+                    ns->sub_idx[i] = s->sub_idx[i];
                     ns->push_transform(son, i);
                   }
-                  else if(s->e[i]->hsplit())
+                  else
                   {
-                    ns->e[i] = s->e[i]->sons[son - 4];
-                    ns->sub_idx[i] = s->get_transform(i);
+                    ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
+                    move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
+                    if (ns->e[i]->active) 
+                      ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -650,43 +491,12 @@ namespace Hermes
               }
             }
           }
-          else if(split == 2)
-          {
-            int son0 = 6, son1 = 7;
 
-            for (son = son0; son <= son1; son++)
-            {
-              State* ns = push_state();
-
-              for (i = 0; i < num; i++)
-              {
-                if(s->e[i] == NULL)
-                {
-                  ns->e[i] = NULL;
-                }
-                else
-                {
-                  if(s->e[i]->active)
-                  {
-                    ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->get_transform(i);
-                    ns->push_transform(son, i);
-                  }
-                  else if(s->e[i]->vsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[son - 4];
-                    ns->sub_idx[i] = s->get_transform(i);
-                  }
-                  if(ns->e[i] != NULL)
-                    ns->rep = ns->e[i];
-                }
-              }
-            }
-          }
           // No splits, recur to one son.
           else
           {
             State* ns = push_state();
+            memcpy(&ns->cr, &s->cr, sizeof(Rect));
 
             for (i = 0; i < num; i++)
             {
@@ -694,10 +504,16 @@ namespace Hermes
               {
                 ns->e[i] = NULL;
               }
-              else
+              else if (s->e[i]->active)
               {
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = s->get_transform(i);
+              }
+              else
+              {
+                ns->e[i] = s->e[i]->sons[current_sons[i][0] & 3];
+                move_to_son(ns->er + i, s->er + i, current_sons[i][0]);
+                if (ns->e[i]->active)
+                  ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
               }
@@ -706,8 +522,7 @@ namespace Hermes
         }
       }
     }
-    
-    ////////////
+
     Traverse::State* Traverse::get_next_state(int* top_by_ref, int* id_by_ref)
     {
       _F_;
@@ -722,7 +537,7 @@ namespace Hermes
         // If the top state was visited already, we are returning through it:
         // undo all its transformations, pop it and continue with a non-visited one
         State* s;
-        
+
         while (*top_f > 0 && (s = stack + (*top_f)-1)->visited)
           (*top_f)--;
 
@@ -735,6 +550,7 @@ namespace Hermes
           // with as many Elements* as there are meshes in this stage.
           // (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
           s = push_state(top_f);
+          s->cr = H2D_UNITY;
           while (1)
           {
             // No more base elements? we're finished.
@@ -754,6 +570,7 @@ namespace Hermes
               }
               else
                 s->rep = s->e[i];
+              s->er[i] = H2D_UNITY;
               nused++;
             }
             // If there is any used element in this stage we continue with the calculation
@@ -764,6 +581,16 @@ namespace Hermes
           }
 
           (*id_f)++;
+
+          if (s->rep->is_triangle())
+          {
+            for (i = 0; i < 3; i++)
+            {
+              s->bnd[i] = true;
+              s->lo[i] = 0;
+              s->hi[i] = ONE;
+            }
+          }
         }
 
         // Entering a new state.
@@ -772,12 +599,14 @@ namespace Hermes
         // Is this the leaf state?
         bool leaf = true;
         for (i = 0; i < num; i++)
+        {
           if(s->e[i] != NULL)
             if(!s->e[i]->active)
             {
               leaf = false;
               break;
             }
+        }
 
         // if yes, set boundary flags and return the state
         if(leaf)
@@ -785,14 +614,12 @@ namespace Hermes
           if(fn != NULL)
             for (i = 0; i < num; i++)
               if(s->e[i] != NULL)
-                if(s->e[i]->active)
-                {
-                  fn[i]->set_active_element(s->e[i]);
-                  fn[i]->set_transform(s->get_transform(i));
-                }
-
-          set_boundary_info(s);
-          return s;
+              {
+                fn[i]->set_active_element(s->e[i]);
+                fn[i]->set_transform(s->sub_idx[i]);
+              }
+              set_boundary_info(s);
+              return s;
         }
 
         // Triangle: push son states
@@ -814,17 +641,39 @@ namespace Hermes
               {
                 ns->rep = s->e[i];
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = 0;
+                ns->sub_idx[i] = s->sub_idx[i];
                 ns->push_transform(son, i, true);
               }
               // ..we move to the son.
               else
               {
                 ns->e[i] = s->e[i]->sons[son];
+                // If the son's element is active.
+                if (ns->e[i]->active)
+                  ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
-                ns->sub_idx[i] = 0;
               }
+            }
+
+            // Determine boundary flags and positions for the new state.
+            if (son < 3)
+            {
+              memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
+              memcpy(ns->lo, s->lo, sizeof(ns->lo));
+              memcpy(ns->hi, s->hi, sizeof(ns->hi));
+
+#define mid(n) ((s->lo[n] + s->hi[n]) / 2)
+              switch (son)
+              {
+              case 0: ns->bnd[1] = false; ns->hi[0] = mid(0); ns->lo[2] = mid(2); break;
+              case 1: ns->bnd[2] = false; ns->lo[0] = mid(0); ns->hi[1] = mid(1); break;
+              case 2: ns->bnd[0] = false; ns->lo[1] = mid(1); ns->hi[2] = mid(2); break;
+              }
+            }
+            else
+            {
+              memset(ns->bnd, 0, sizeof(ns->bnd));
             }
           }
         }
@@ -833,9 +682,10 @@ namespace Hermes
         {
           // Obtain split types and son numbers for the current rectangle on all elements.
           int split = 0;
+          int4* current_sons = new int4[num];
           for (i = 0; i < num; i++)
             if(s->e[i] != NULL && !s->e[i]->active)
-              split |= get_split(s->e[i]);
+              split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, current_sons[i]);
 
           // Both splits: recur to four sons, similar to triangles.
           if(split == 3)
@@ -843,7 +693,46 @@ namespace Hermes
             for (son = 0; son <= 3; son++)
             {
               State* ns = push_state(top_f);
+              // Sets the son's "base" rectangle to the correct one.
+              move_to_son(&ns->cr, &s->cr, son);
 
+              for (i = 0; i < num; i++)
+              {
+                if(s->e[i] == NULL)
+                {
+                  ns->e[i] = NULL;
+                }
+                else if (s->e[i]->active)
+                {
+                  ns->e[i] = s->e[i];
+                  ns->sub_idx[i] = s->sub_idx[i];
+                  ns->push_transform(son, i);
+                }
+                else
+                {
+                  ns->e[i] = s->e[i]->sons[current_sons[i][son] & 3];
+                  // Sets the son's "current mesh" rectangle correctly.
+                  move_to_son(ns->er + i, s->er + i, current_sons[i][son]);
+                  if (ns->e[i]->active)
+                    ns->sub_idx[i] = 0;
+                }
+                if(ns->e[i] != NULL)
+                  ns->rep = ns->e[i];
+              }
+            }
+          }
+          // V or h split, recur to two sons.
+          else if (split > 0)
+          {
+            int son0 = 4, son1 = 5;
+            if (split == 2) { son0 = 6; son1 = 7; }
+
+            for (son = son0; son <= son1; son++)
+            {
+              State* ns = push_state(top_f);
+              move_to_son(&ns->cr, &s->cr, son);
+
+              int j = (son == 4 || son == 6) ? 0 : 2;
               for (i = 0; i < num; i++)
               {
                 if(s->e[i] == NULL)
@@ -855,12 +744,15 @@ namespace Hermes
                   if(s->e[i]->active)
                   {
                     ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->get_transform(i);
+                    ns->sub_idx[i] = s->sub_idx[i];
                     ns->push_transform(son, i);
                   }
                   else
                   {
-                    ns->e[i] = s->e[i]->sons[find_possible_sons(s->e[i], s->get_transform(i), son, ns->sub_idx[i])];
+                    ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
+                    move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
+                    if (ns->e[i]->active) 
+                      ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
                     ns->rep = ns->e[i];
@@ -868,76 +760,12 @@ namespace Hermes
               }
             }
           }
-          else if(split == 1)
-          {
-            int son0 = 6, son1 = 7;
 
-            for (son = son0; son <= son1; son++)
-            {
-              State* ns = push_state(top_f);
-
-              for (i = 0; i < num; i++)
-              {
-                if(s->e[i] == NULL)
-                {
-                  ns->e[i] = NULL;
-                }
-                else
-                {
-                  if(s->e[i]->active)
-                  {
-                    ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->get_transform(i);
-                    ns->push_transform(son, i);
-                  }
-                  else if(s->e[i]->hsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[son - 6];
-                    ns->sub_idx[i] = s->get_transform(i);
-                  }
-                  if(ns->e[i] != NULL)
-                    ns->rep = ns->e[i];
-                }
-              }
-            }
-          }
-          else if(split == 2)
-          {
-            int son0 = 4, son1 = 5;
-
-            for (son = son0; son <= son1; son++)
-            {
-              State* ns = push_state(top_f);
-
-              for (i = 0; i < num; i++)
-              {
-                if(s->e[i] == NULL)
-                {
-                  ns->e[i] = NULL;
-                }
-                else
-                {
-                  if(s->e[i]->active)
-                  {
-                    ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->get_transform(i);
-                    ns->push_transform(son, i);
-                  }
-                  else if(s->e[i]->vsplit())
-                  {
-                    ns->e[i] = s->e[i]->sons[son - 2];
-                    ns->sub_idx[i] = s->get_transform(i);
-                  }
-                  if(ns->e[i] != NULL)
-                    ns->rep = ns->e[i];
-                }
-              }
-            }
-          }
           // No splits, recur to one son.
           else
           {
             State* ns = push_state(top_f);
+            memcpy(&ns->cr, &s->cr, sizeof(Rect));
 
             for (i = 0; i < num; i++)
             {
@@ -945,10 +773,16 @@ namespace Hermes
               {
                 ns->e[i] = NULL;
               }
-              else
+              else if (s->e[i]->active)
               {
                 ns->e[i] = s->e[i];
-                ns->sub_idx[i] = s->get_transform(i);
+              }
+              else
+              {
+                ns->e[i] = s->e[i]->sons[current_sons[i][0] & 3];
+                move_to_son(ns->er + i, s->er + i, current_sons[i][0]);
+                if (ns->e[i]->active)
+                  ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
               }
@@ -957,7 +791,6 @@ namespace Hermes
         }
       }
     }
-    ////////////
 
     void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
     {
@@ -1025,6 +858,7 @@ namespace Hermes
     {
       _F_;
       delete [] state->e;
+      delete [] state->er;
       delete [] state->sub_idx;
       memset(state, 0, sizeof(Traverse::State));
     }
@@ -1091,67 +925,39 @@ namespace Hermes
           break;
         }
 
-      // if yes, store the element transformation indices
-      if(leaf)
-      {
-        if(udsize <= uni->id)
+        // if yes, store the element transformation indices
+        if(leaf)
         {
-          if(!udsize) udsize = 1024;
-          while (udsize <= uni->id) udsize *= 2;
-          for (i = 0; i < num; i++)
-            unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
-        }
-        for (i = 0; i < num; i++)
-        {
-          unidata[i][uni->id].e = e[i];
-          unidata[i][uni->id].idx = idx[i];
-        }
-        return;
-      }
-
-      // state arrays
-      Element** e_new = new Element*[num];
-      Rect* er_new = new Rect[num];
-      Rect cr_new;
-
-      int4* sons = new int4[num];
-      uint64_t* idx_new = new uint64_t[num];
-      memcpy(idx_new, idx, num*sizeof(uint64_t));
-
-      if(tri)
-      {
-        // visit all sons of the triangle
-        unimesh->refine_element_id(uni->id);
-        for (son = 0; son <= 3; son++)
-        {
+          if(udsize <= uni->id)
+          {
+            if(!udsize) udsize = 1024;
+            while (udsize <= uni->id) udsize *= 2;
+            for (i = 0; i < num; i++)
+              unidata[i] = (UniData*) realloc(unidata[i], udsize * sizeof(UniData));
+          }
           for (i = 0; i < num; i++)
           {
-            if(e[i]->active)
-            {
-              e_new[i] = e[i];
-              idx_new[i] = (idx[i] << 3) + son + 1;
-            } else
-              e_new[i] = e[i]->sons[son];
+            unidata[i][uni->id].e = e[i];
+            unidata[i][uni->id].idx = idx[i];
           }
-          union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
+          return;
         }
-      }
-      else
-      {
-        // obtain split types and son numbers for the current rectangle on all elements
-        int split = 0;
-        for (i = 0; i < num; i++)
-          if(!e[i]->active)
-            split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
 
-        // both splits: recur to four sons
-        if(split == 3)
+        // state arrays
+        Element** e_new = new Element*[num];
+        Rect* er_new = new Rect[num];
+        Rect cr_new;
+
+        int4* sons = new int4[num];
+        uint64_t* idx_new = new uint64_t[num];
+        memcpy(idx_new, idx, num*sizeof(uint64_t));
+
+        if(tri)
         {
-          unimesh->refine_element_id(uni->id, 0);
-
+          // visit all sons of the triangle
+          unimesh->refine_element_id(uni->id);
           for (son = 0; son <= 3; son++)
           {
-            move_to_son(&cr_new, cr, son);
             for (i = 0; i < num; i++)
             {
               if(e[i]->active)
@@ -1159,66 +965,94 @@ namespace Hermes
                 e_new[i] = e[i];
                 idx_new[i] = (idx[i] << 3) + son + 1;
               } else
-              {
-                e_new[i] = e[i]->sons[sons[i][son] & 3];
-                move_to_son(&(er_new[i]), er + i, sons[i][son]);
-                if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
-              }
+                e_new[i] = e[i]->sons[son];
             }
-            union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
+            union_recurrent(NULL, e_new, NULL, idx_new, uni->sons[son]);
           }
         }
-        // v or h split, recur to two sons
-        else if(split > 0)
-        {
-          unimesh->refine_element_id(uni->id, split);
-
-          int son0 = 4, son1 = 5;
-          if(split == 2) { son0 = 6; son1 = 7; }
-
-          for (son = son0; son <= son1; son++)
-          {
-            move_to_son(&cr_new, cr, son);
-            j = (son == 4 || son == 6) ? 0 : 2;
-            for (i = 0; i < num; i++)
-            {
-              if(e[i]->active)
-              {
-                e_new[i] = e[i];
-                idx_new[i] = (idx[i] << 3) + son + 1;
-              } else
-              {
-                e_new[i] = e[i]->sons[sons[i][j] & 3];
-                move_to_son(&(er_new[i]), er + i, sons[i][j]);
-                if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
-              }
-            }
-            union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
-          }
-        }
-        // no splits, recur to one son
         else
         {
-          memcpy(&cr_new, cr, sizeof(Rect));
+          // obtain split types and son numbers for the current rectangle on all elements
+          int split = 0;
           for (i = 0; i < num; i++)
+            if(!e[i]->active)
+              split |= get_split_and_sons(e[i], cr, er + i, sons[i]);
+
+          // both splits: recur to four sons
+          if(split == 3)
           {
-            if(e[i]->active)
-              e_new[i] = e[i];
-            else
+            unimesh->refine_element_id(uni->id, 0);
+
+            for (son = 0; son <= 3; son++)
             {
-              e_new[i] = e[i]->sons[sons[i][0] & 3];
-              move_to_son(&(er_new[i]), er + i, sons[i][0]);
-              if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+              move_to_son(&cr_new, cr, son);
+              for (i = 0; i < num; i++)
+              {
+                if(e[i]->active)
+                {
+                  e_new[i] = e[i];
+                  idx_new[i] = (idx[i] << 3) + son + 1;
+                } else
+                {
+                  e_new[i] = e[i]->sons[sons[i][son] & 3];
+                  move_to_son(&(er_new[i]), er + i, sons[i][son]);
+                  if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+                }
+              }
+              union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son]);
             }
           }
-          union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
-        }
-      }
+          // v or h split, recur to two sons
+          else if(split > 0)
+          {
+            unimesh->refine_element_id(uni->id, split);
 
-      delete [] e_new;
-      delete [] er_new;
-      delete [] sons;
-      delete [] idx_new;
+            int son0 = 4, son1 = 5;
+            if(split == 2) { son0 = 6; son1 = 7; }
+
+            for (son = son0; son <= son1; son++)
+            {
+              move_to_son(&cr_new, cr, son);
+              j = (son == 4 || son == 6) ? 0 : 2;
+              for (i = 0; i < num; i++)
+              {
+                if(e[i]->active)
+                {
+                  e_new[i] = e[i];
+                  idx_new[i] = (idx[i] << 3) + son + 1;
+                } else
+                {
+                  e_new[i] = e[i]->sons[sons[i][j] & 3];
+                  move_to_son(&(er_new[i]), er + i, sons[i][j]);
+                  if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+                }
+              }
+              union_recurrent(&cr_new, e_new, er_new, idx_new, uni->sons[son & 3]);
+            }
+          }
+          // no splits, recur to one son
+          else
+          {
+            memcpy(&cr_new, cr, sizeof(Rect));
+            for (i = 0; i < num; i++)
+            {
+              if(e[i]->active)
+                e_new[i] = e[i];
+              else
+              {
+                e_new[i] = e[i]->sons[sons[i][0] & 3];
+                move_to_son(&(er_new[i]), er + i, sons[i][0]);
+                if(e_new[i]->active) idx_new[i] = init_idx(&cr_new, &(er_new[i]));
+              }
+            }
+            union_recurrent(&cr_new, e_new, er_new, idx_new, uni);
+          }
+        }
+
+        delete [] e_new;
+        delete [] er_new;
+        delete [] sons;
+        delete [] idx_new;
     }
 
     UniData** Traverse::construct_union_mesh(Mesh* unimesh)
