@@ -1319,8 +1319,19 @@ int state_i;
         init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
 
         // Order of shape functions.
-        Func<Hermes::Ord>* ou = init_fn_ord(this->spaces[form->j]->get_element_order(current_state->e[form->j]->id));
-        Func<Hermes::Ord>* ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+        int max_order_j = this->spaces[form->j]->get_element_order(current_state->e[form->j]->id);
+        int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
+        for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
+        {
+          int eo = this->spaces[form->j]->get_edge_order(current_state->e[form->j], k);
+          if (eo > max_order_j) 
+            max_order_j = eo;
+          eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
+          if (eo > max_order_i) 
+            max_order_i = eo;
+        }
+        Func<Hermes::Ord>* ou = init_fn_ord(max_order_j);
+        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i);
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, &ext_ord);
@@ -1463,7 +1474,14 @@ int state_i;
         init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
 
         // Order of shape functions.
-        Func<Hermes::Ord>* ov = init_fn_ord(this->spaces[form->i]->get_element_order(current_state->e[form->i]->id));
+        int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
+        for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
+        {
+          int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
+          if (eo > max_order_i) 
+            max_order_i = eo;
+        }
+        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i);
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
