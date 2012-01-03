@@ -1316,20 +1316,35 @@ int state_i;
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
         ExtData<Hermes::Ord> ext_ord;
-        init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
+        init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
         int max_order_j = this->spaces[form->j]->get_element_order(current_state->e[form->j]->id);
         int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
         for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
         {
-          int eo = this->spaces[form->j]->get_edge_order(current_state->e[form->j], k);
-          if (eo > max_order_j) 
-            max_order_j = eo;
-          eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-          if (eo > max_order_i) 
-            max_order_i = eo;
+          int eo_j = this->spaces[form->j]->get_edge_order(current_state->e[form->j], k);
+          int eo_i = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
+          if(current_state->rep->is_triangle())
+          {
+            if (eo_j > max_order_j)
+              max_order_j = eo_j;
+            if (eo_i > max_order_i) 
+              max_order_i = eo_i;
+          }
+          else
+          {
+            if (eo_j > H2D_GET_V_ORDER(max_order_j))
+              max_order_j = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(max_order_i), eo_j);
+            if (eo_j > H2D_GET_H_ORDER(max_order_j))
+              max_order_j = H2D_MAKE_QUAD_ORDER(eo_j, H2D_GET_V_ORDER(max_order_j));
+            if (eo_i > H2D_GET_V_ORDER(max_order_i))
+              max_order_i = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(max_order_i), eo_i);
+            if (eo_i > H2D_GET_H_ORDER(max_order_i))
+              max_order_i = H2D_MAKE_QUAD_ORDER(eo_i, H2D_GET_V_ORDER(max_order_i));
+          }
         }
+
         Func<Hermes::Ord>* ou = init_fn_ord(max_order_j);
         Func<Hermes::Ord>* ov = init_fn_ord(max_order_i);
 
@@ -1471,15 +1486,25 @@ int state_i;
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
         ExtData<Hermes::Ord> ext_ord;
-        init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext);
+        init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
         int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
         for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
         {
           int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-          if (eo > max_order_i) 
-            max_order_i = eo;
+          if(current_state->rep->is_triangle())
+          {
+            if (eo > max_order_i) 
+              max_order_i = eo;
+          }
+          else
+          {
+            if (eo > H2D_GET_V_ORDER(max_order_i))
+              max_order_i = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(max_order_i), eo);
+            if (eo > H2D_GET_H_ORDER(max_order_i))
+              max_order_i = H2D_MAKE_QUAD_ORDER(eo, H2D_GET_V_ORDER(max_order_i));
+          }
         }
         Func<Hermes::Ord>* ov = init_fn_ord(max_order_i);
 
@@ -1593,29 +1618,33 @@ int state_i;
     }
     
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext, Solution<Scalar>** current_u_ext)
+    void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
       _F_;
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
+      bool surface_form = (current_state->isurf > -1);
 
       if (current_u_ext != NULL)
         for(int i = 0; i < prev_size; i++)
           if (current_u_ext[i + form->u_ext_offset] != NULL)
-
-          oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
+            if(surface_form)
+              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf));
+            else
+              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
           else
 
           oi[i] = init_fn_ord(0);
       else
         for(int i = 0; i < prev_size; i++)
-
-        oi[i] = init_fn_ord(0);
+          oi[i] = init_fn_ord(0);
       
       oext->nf = form->ext.size();
       oext->fn = new Func<Hermes::Ord>*[oext->nf];
       for (int i = 0; i < oext->nf; i++)
-
-      oext->fn[i] = init_fn_ord(form->ext[i]->get_fn_order());
+        if(surface_form)
+          oext->fn[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf));
+        else
+          oext->fn[i] = init_fn_ord(form->ext[i]->get_fn_order());
     }
 
     template<typename Scalar>

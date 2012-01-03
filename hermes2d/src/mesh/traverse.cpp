@@ -129,6 +129,7 @@ namespace Hermes
       cr = H2D_UNITY;
       for (int i = 0; i < num; i++)
         er[i] = H2D_UNITY;
+      isurf = -1;
     }
 
     void Traverse::State::operator=(const State * other)
@@ -168,6 +169,7 @@ namespace Hermes
 
       this->rep = other->rep;
       this->visited = other->visited;
+      this->isurf = other->isurf;
     }
 
     void Traverse::State::push_transform(int son, int i, bool is_triangle)
@@ -228,6 +230,7 @@ namespace Hermes
       }
 
       stack[*top_f].visited = false;
+      stack[*top_f].isurf = -1;
       memset(stack[*top_f].sub_idx, 0, num * sizeof(uint64_t));
       for(int i = 0; i < 4; i++)
         stack[*top_f].bnd[i] = true;
