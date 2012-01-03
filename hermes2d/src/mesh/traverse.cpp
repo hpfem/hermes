@@ -318,14 +318,8 @@ namespace Hermes
           (id)++;
 
           if (s->rep->is_triangle())
-          {
             for (i = 0; i < 3; i++)
-            {
               s->bnd[i] = true;
-              s->lo[i] = 0;
-              s->hi[i] = ONE;
-            }
-          }
         }
 
         // Entering a new state.
@@ -388,15 +382,12 @@ namespace Hermes
             if (son < 3)
             {
               memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
-              memcpy(ns->lo, s->lo, sizeof(ns->lo));
-              memcpy(ns->hi, s->hi, sizeof(ns->hi));
 
-#define mid(n) ((s->lo[n] + s->hi[n]) / 2)
               switch (son)
               {
-              case 0: ns->bnd[1] = false; ns->hi[0] = mid(0); ns->lo[2] = mid(2); break;
-              case 1: ns->bnd[2] = false; ns->lo[0] = mid(0); ns->hi[1] = mid(1); break;
-              case 2: ns->bnd[0] = false; ns->lo[1] = mid(1); ns->hi[2] = mid(2); break;
+              case 0: ns->bnd[1] = false; break;
+              case 1: ns->bnd[2] = false; break;
+              case 2: ns->bnd[0] = false; break;
               }
             }
             else
@@ -583,14 +574,8 @@ namespace Hermes
           (*id_f)++;
 
           if (s->rep->is_triangle())
-          {
             for (i = 0; i < 3; i++)
-            {
               s->bnd[i] = true;
-              s->lo[i] = 0;
-              s->hi[i] = ONE;
-            }
-          }
         }
 
         // Entering a new state.
@@ -660,15 +645,12 @@ namespace Hermes
             if (son < 3)
             {
               memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
-              memcpy(ns->lo, s->lo, sizeof(ns->lo));
-              memcpy(ns->hi, s->hi, sizeof(ns->hi));
 
-#define mid(n) ((s->lo[n] + s->hi[n]) / 2)
               switch (son)
               {
-              case 0: ns->bnd[1] = false; ns->hi[0] = mid(0); ns->lo[2] = mid(2); break;
-              case 1: ns->bnd[2] = false; ns->lo[0] = mid(0); ns->hi[1] = mid(1); break;
-              case 2: ns->bnd[0] = false; ns->lo[1] = mid(1); ns->hi[2] = mid(2); break;
+              case 0: ns->bnd[1] = false; break;
+              case 1: ns->bnd[2] = false; break;
+              case 2: ns->bnd[0] = false; break;
               }
             }
             else

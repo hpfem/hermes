@@ -85,7 +85,6 @@ namespace Hermes
         uint64_t* sub_idx;
         Rect  cr;
         Rect* er;
-        uint64_t lo[3], hi[3];
         int num;
         int isurf;
       friend class Traverse;

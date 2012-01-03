@@ -123,21 +123,21 @@ namespace Hermes
       return (i > 0) ? i-1 : nvert-1; 
     }
 
-    bool Element::hsplit() const
+    bool Element::hsplit() const 
     {
       if(active)
         return false;
       return sons[0] != NULL; 
     }
 
-    bool Element::vsplit() const
+    bool Element::vsplit() const 
     {
       if(active)
         return false;
       return sons[2] != NULL; 
     }
 
-    bool Element::bsplit() const
+    bool Element::bsplit() const 
     {
       if(active)
         return false;
