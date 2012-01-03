@@ -229,7 +229,7 @@ namespace Hermes
 
       friend Geom<Hermes::Ord>* init_geom_ord();
       friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
-      friend Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order);
+      friend Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
 
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class InterfaceGeom;

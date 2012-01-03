@@ -951,8 +951,19 @@ namespace Hermes
 
 int state_i;
 
+PrecalcShapeset** current_pss;
+PrecalcShapeset** current_spss;
+RefMap** current_refmaps;
+Solution<Scalar>** current_u_ext;
+AsmList<Scalar>** current_als;
+
+MatrixFormVol<Scalar>** current_mfvol;
+MatrixFormSurf<Scalar>** current_mfsurf;
+VectorFormVol<Scalar>** current_vfvol;
+VectorFormSurf<Scalar>** current_vfsurf;
+
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master, mat, rhs) private(state_i)
+#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf)
       {
         #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
@@ -960,17 +971,17 @@ int state_i;
           Traverse::State current_state;
           #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-          
-          PrecalcShapeset** current_pss = pss[omp_get_thread_num()];
-          PrecalcShapeset** current_spss = spss[omp_get_thread_num()];
-          RefMap** current_refmaps = refmaps[omp_get_thread_num()];
-          Solution<Scalar>** current_u_ext = u_ext[omp_get_thread_num()];
-          AsmList<Scalar>** current_als = als[omp_get_thread_num()];
 
-          MatrixFormVol<Scalar>** current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
-          MatrixFormSurf<Scalar>** current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
-          VectorFormVol<Scalar>** current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
-          VectorFormSurf<Scalar>** current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
+          current_pss = pss[omp_get_thread_num()];
+          current_spss = spss[omp_get_thread_num()];
+          current_refmaps = refmaps[omp_get_thread_num()];
+          current_u_ext = u_ext[omp_get_thread_num()];
+          current_als = als[omp_get_thread_num()];
+
+          current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
+          current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
+          current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
+          current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
 
           // One state is a collection of (virtual) elements sharing
           // the same physical location on (possibly) different meshes.
@@ -1124,8 +1135,7 @@ int state_i;
             if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_mfvol[current_mfvol_i]->i]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->i]->idx[i]);
-
-                test_fns[i] = init_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
+              test_fns[i] = init_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
             }
           }
 
@@ -1141,6 +1151,7 @@ int state_i;
 
             }
           }
+          
           assemble_matrix_form(current_mfvol[current_mfvol_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
@@ -1196,14 +1207,12 @@ int state_i;
           delete [] test_fns;
         }
       }
-
       // Assemble surface integrals now: loop through surfaces of the element.
       for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
       {
         // \todo DG.
         if(!current_state->bnd[current_state->isurf])
           continue;
-
         init_surface_state(current_als, current_state);
 
         if (current_mat != NULL)
@@ -1242,7 +1251,7 @@ int state_i;
                 base_fns[j] = init_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j]->get_quad_2d()->get_edge_points(current_state->isurf, order,current_state->e[0]->get_mode()));
               }
             }
-
+            
             assemble_matrix_form(current_mfsurf[current_mfsurf_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
             for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
@@ -1286,7 +1295,7 @@ int state_i;
                 test_fns[i] = init_fn(current_spss[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i], current_refmaps[current_vfsurf[current_vfsurf_i]->i]->get_quad_2d()->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
               }
             }
-
+            
             assemble_vector_form(current_vfsurf[current_vfsurf_i], order, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
@@ -1607,8 +1616,8 @@ int state_i;
       int np = reference_mapping->get_quad_2d()->get_num_points(eo, reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
-      geometry = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->marker, eo);
-      double3* tan = reference_mapping->get_tangent(current_state->isurf, eo);
+      double3* tan;
+      geometry = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->marker, eo, tan);
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];

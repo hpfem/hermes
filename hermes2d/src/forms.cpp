@@ -364,7 +364,7 @@ namespace Hermes
       return e;
     }
 
-    Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order)
+    Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan)
     {
       Geom<double>* e = new Geom<double>;
       e->edge_marker = marker;
@@ -374,7 +374,7 @@ namespace Hermes
       e->id = rm->get_active_element()->id;
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
-      double3 *tan;
+      
       tan = rm->get_tangent(isurf, order);
 
       Quad2D* quad = rm->get_quad_2d();

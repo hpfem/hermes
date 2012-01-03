@@ -413,7 +413,7 @@ namespace Hermes
       else
       {
         // construct jacobi matrices of the direct reference map at integration points along the edge
-        static double2x2 m[15];
+        double2x2 m[15];
         assert(np <= 15);
         memset(m, 0, np*sizeof(double2x2));
         ref_map_pss.force_transform(sub_idx, ctm);
