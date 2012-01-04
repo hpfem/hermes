@@ -1063,9 +1063,6 @@ VectorFormSurf<Scalar>** current_vfsurf;
     {
       _F_;
 
-      // Set maximum integration order for use in integrals, see limit_order()
-      update_limit_table(current_state->rep->get_mode());
-
       // Obtain assembly lists for the element at all spaces of the stage, set appropriate mode for each pss.
       // NOTE: Active elements and transformations for external functions (including the solutions from previous
       // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in
@@ -1349,8 +1346,8 @@ VectorFormSurf<Scalar>** current_vfsurf;
             max_order_j = eo;
         }
 
-        Func<Hermes::Ord>* ou = init_fn_ord(max_order_j);
-        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i);
+        Func<Hermes::Ord>* ou = init_fn_ord(max_order_j + (spaces[form->j]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
+        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, &ext_ord);
@@ -1505,7 +1502,7 @@ VectorFormSurf<Scalar>** current_vfsurf;
           if (eo > max_order_i) 
             max_order_i = eo;
         }
-        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i);
+        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
 
         // Total order of the vector form.
         Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
@@ -1627,9 +1624,9 @@ VectorFormSurf<Scalar>** current_vfsurf;
         for(int i = 0; i < prev_size; i++)
           if (current_u_ext[i + form->u_ext_offset] != NULL)
             if(surface_form)
-              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf));
+              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf) + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
             else
-              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order());
+              oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order() + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
           else
 
           oi[i] = init_fn_ord(0);
@@ -1641,9 +1638,9 @@ VectorFormSurf<Scalar>** current_vfsurf;
       oext->fn = new Func<Hermes::Ord>*[oext->nf];
       for (int i = 0; i < oext->nf; i++)
         if(surface_form)
-          oext->fn[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf));
+          oext->fn[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
         else
-          oext->fn[i] = init_fn_ord(form->ext[i]->get_fn_order());
+          oext->fn[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
     }
 
     template<typename Scalar>
