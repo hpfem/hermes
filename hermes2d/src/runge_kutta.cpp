@@ -349,7 +349,7 @@ namespace Hermes
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
           coeff_vec[i] *= time_step;
         }
-        Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, error_fns);
+        Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, error_fns, add_dir_lift);
       }
 
       // Delete stage spaces.
