@@ -45,48 +45,76 @@ namespace Hermes
     public:
       OGProjectionNOX();
 
-      static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-        Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+      /// Main functionality is in the protected method project_internal().
+      /// This is a wrapper that delivers a Solution instead of a coefficient vector.   
+      static void project_global(const Space<Scalar>* space,
+          MatrixFormVol<Scalar>* custom_projection_jacobian,
+          VectorFormVol<Scalar>* custom_projection_residual,
+          Scalar* target_vec,
+          Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK, 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_sols,
-        Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
-
+      /**
+       \fn  static void OGProjection::project_global(Space<Scalar>* space,
+        MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
+        Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+        ProjNormType proj_norm = HERMES_UNSET_NORM, double newton_tol = 1e-6, int newton_max_iter = 10);
+      
+       \brief The method checks source_meshfn if it is an instance of Solution, if so, it checks its sln_vector, and space_seq
+              if they can be used directly.
+      
+       \author  LK
+       \date  10/29/2011
+      
+       \param [in]  space         If non-null, the space.
+       \param [in]  source_meshfn If non-null, source meshfn.
+       \param [out]  target_vec    If non-null, target vector.
+       \param matrix_solver           (optional) the matrix solver.
+       \param proj_norm               (optional) the project normalise.
+       \param newton_tol              (optional) the newton tolerance.
+       \param newton_max_iter         (optional) the newton maximum iterator.
+       */
+ 
       static void project_global(const Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-        Scalar* target_vec, ProjNormType proj_norm = HERMES_H1_NORM);
+          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          ProjNormType proj_norm = HERMES_UNSET_NORM, 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
+
+      /// Wrapper that delivers a Solution instead of coefficient vector. 
+      static void project_global(const Space<Scalar>* space,
+          Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
+          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          ProjNormType proj_norm = HERMES_UNSET_NORM, 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
+
+      /// Wrapper for multiple source MeshFunctions that delivers coefficient vector. 
+      static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
+          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
+
+      /// Wrapper for multiple source Solutions that delivers coefficient vector. 
+      static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces,
-        Hermes::vector<Solution<Scalar>*> sols_src, Hermes::vector<Solution<Scalar>*> sols_dest,
-        Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
+          Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
+          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false, 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      static void project_global(const Space<Scalar>* space,
-        Solution<Scalar>* sol_src, Solution<Scalar>* sol_dest,
-        ProjNormType proj_norm = HERMES_UNSET_NORM);
-
-      static void project_global(Hermes::vector<const Space<Scalar>*> spaces,
-        Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
-        Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-        Scalar* target_vec);
-
-      static void project_global(Hermes::vector<const Space<Scalar> *> spaces,
-                                 Hermes::vector<MatrixFormVol<Scalar> *> custom_projection_jacobian,
-                                 Hermes::vector<VectorFormVol<Scalar> *> custom_projection_residual,
-                                 Hermes::vector<Solution<Scalar> *> sols_dest);
-
-      static void project_global(const Space<Scalar>* space,
-                                 MatrixFormVol<Scalar>* custom_projection_jacobian,
-                                 VectorFormVol<Scalar>* custom_projection_residual,
-                                 Solution<Scalar>* sol_dest);
-
-      // Underlying function for global orthogonal projection.
-      // Not intended for the user. NOTE: the weak form here must be
-      // a special projection weak form, which is different from
-      // the weak form of the PDE. If you supply a weak form of the
-      // PDE, the PDE will just be solved.
     protected:
-      // MatrixSolverType is here for compatibility with OGProjection but it is ignored.
-      static void project_internal(Hermes::vector<const Space<Scalar>*> spaces, WeakForm<Scalar>*proj_wf, Scalar* target_vec);
+      /// Underlying function for global orthogonal projection.
+      /// Not intended for the user. NOTE: the weak form here must be
+      /// a special projection weak form, which is different from
+      /// the weak form of the PDE. If you supply a weak form of the
+      /// PDE, the PDE will just be solved.
+      static void project_internal(const Space<Scalar>* space, WeakForm<Scalar>* proj_wf, Scalar* target_vec,
+      Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK, double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      // Jacobian matrix (same as stiffness matrix since projections are linear).
+      /// Jacobian matrix (same as stiffness matrix since projections are linear).
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
       {
       public:
@@ -205,7 +233,7 @@ namespace Hermes
         }
       };
 
-      // Residual.
+      /// Residual.
       class ProjectionVectorFormVol : public VectorFormVol<Scalar>
       {
       public:

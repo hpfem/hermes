@@ -37,7 +37,8 @@ namespace Hermes
       _F_
 
       // Sanity check.
-      if(space == NULL) error("this->space == NULL in project_internal().");
+      if(space == NULL) 
+        error("this->space == NULL in project_internal().");
 
       // Get dimension of the space.
       int ndof = space->get_num_dofs();
