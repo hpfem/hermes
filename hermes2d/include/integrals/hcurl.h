@@ -17,8 +17,6 @@
 #define __H2D_INTEGRALS_HCURL_H
 
 #include "../quadrature/limit_order.h"
-#include "../forms.h"
-#include "../function/function.h"
 #include "../weakform/weakform.h"
 
 namespace Hermes
@@ -57,6 +55,11 @@ namespace Hermes
       {
         return int_e_f<Hermes::Ord, Hermes::Ord>(n, wt, u, v);
       }
+
+      MatrixFormVol<Scalar>* clone()
+      {
+        return new MatrixFormVolHCurl<Scalar>(*this);
+      }
     };
 
     template<typename Real, typename Scalar>
@@ -67,7 +70,7 @@ namespace Hermes
         result += wt[i] * (u->curl[i] * conj(v->curl[i]));
       return result;
     }
-
+      
     template<typename Real, typename Scalar>
     Scalar int_v0(int n, double *wt, Func<Scalar> *v)
     {

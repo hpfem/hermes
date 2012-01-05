@@ -105,8 +105,8 @@ namespace Hermes
     {
       _F_
 
-        // Define projection weak form.
-        WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
+      // Define projection weak form.
+      WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
       proj_wf->add_matrix_form(custom_projection_jacobian);
       proj_wf->add_vector_form(custom_projection_residual);
 

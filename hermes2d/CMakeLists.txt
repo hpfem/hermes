@@ -224,6 +224,11 @@ project(hermes2d)
     include/function/mesh_function.h
     include/function/solution_h2d_xml.h
 
+    include/integrals/l2.h
+    include/integrals/h1.h
+    include/integrals/hdiv.h
+    include/integrals/hcurl.h
+    
     include/mesh/refmap.h
     include/mesh/curved.h
     include/mesh/refinement_type.h
