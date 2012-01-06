@@ -205,7 +205,7 @@ namespace Hermes
       MeshFunction<Scalar>::pop_transform();
       for (int i = 0; i < num; i++)
       {
-        if (this->sln[i]->get_transform() == sln_sub[i])
+        if (this->sln[i]->get_transform() == sln_sub[i] && sln_sub[i] != 0)
           this->sln[i]->pop_transform();
         sln_sub[i] = this->sln[i]->get_transform();
       }
