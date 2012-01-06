@@ -98,6 +98,8 @@ namespace Hermes
       int get_num_states(Hermes::vector<Mesh*> meshes);
       inline Element*  get_base() const { return base; }
 
+      void init_transforms(State* s, int i);
+
       UniData** construct_union_mesh(Mesh* unimesh);
       
       int num;

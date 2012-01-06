@@ -94,28 +94,28 @@ namespace Hermes
       }
     }
 
-    void init_transforms(Transformable* fn, Rect* cr, Rect* er)
+    void Traverse::init_transforms(Traverse::State* s, int i)
     {
       Rect r;
-      memcpy(&r, er, sizeof(Rect));
+      memcpy(&r, s->er + i, sizeof(Rect));
 
-      while (cr->l > r.l || cr->r < r.r || cr->b > r.b || cr->t < r.t)
+      while (s->cr.l > r.l || s->cr.r < r.r || s->cr.b > r.b || s->cr.t < r.t)
       {
         uint64_t hmid = (r.l + r.r) >> 1;
         uint64_t vmid = (r.t + r.b) >> 1;
         int son;
 
-        if (cr->r <= hmid && cr->t <= vmid) son = 0;
-        else if (cr->l >= hmid && cr->t <= vmid) son = 1;
-        else if (cr->l >= hmid && cr->b >= vmid) son = 2;
-        else if (cr->r <= hmid && cr->b >= vmid) son = 3;
-        else if (cr->r <= hmid) son = 6;
-        else if (cr->l >= hmid) son = 7;
-        else if (cr->t <= vmid) son = 4;
-        else if (cr->b >= vmid) son = 5;
+        if (s->cr.r <= hmid && s->cr.t <= vmid) son = 0;
+        else if (s->cr.l >= hmid && s->cr.t <= vmid) son = 1;
+        else if (s->cr.l >= hmid && s->cr.b >= vmid) son = 2;
+        else if (s->cr.r <= hmid && s->cr.b >= vmid) son = 3;
+        else if (s->cr.r <= hmid) son = 6;
+        else if (s->cr.l >= hmid) son = 7;
+        else if (s->cr.t <= vmid) son = 4;
+        else if (s->cr.b >= vmid) son = 5;
         else assert(0);
 
-        fn->push_transform(son);
+        s->push_transform(son, i, s->rep->is_triangle());
         move_to_son(&r, &r, son);
       }
     }
@@ -325,8 +325,16 @@ namespace Hermes
               s->bnd[i] = true;
         }
 
-        // Entering a new state.
+        // Entering a new state, perform transformations.
         s->visited = true;
+        for (i = 0; i < num; i++)
+        {
+          // ..where the element is used ..
+          if (s->e[i] != NULL)
+            if (s->sub_idx[i] == 0 && s->e[i]->active)
+              if (!s->rep->is_triangle())
+                init_transforms(s, i);
+        }
 
         // Is this the leaf state?
         bool leaf = true;
@@ -581,8 +589,16 @@ namespace Hermes
               s->bnd[i] = true;
         }
 
-        // Entering a new state.
+        // Entering a new state, perform transformations.
         s->visited = true;
+        for (i = 0; i < num; i++)
+        {
+          // ..where the element is used ..
+          if (s->e[i] != NULL)
+            if (s->sub_idx[i] == 0 && s->e[i]->active)
+              if (!s->rep->is_triangle())
+                init_transforms(s, i);
+        }
 
         // Is this the leaf state?
         bool leaf = true;
