@@ -509,6 +509,7 @@ namespace Hermes
               else if (s->e[i]->active)
               {
                 ns->e[i] = s->e[i];
+                memcpy(&ns->er[i], &ns->cr, sizeof(Rect));
               }
               else
               {
@@ -777,6 +778,7 @@ namespace Hermes
               else if (s->e[i]->active)
               {
                 ns->e[i] = s->e[i];
+                memcpy(&ns->er[i], &ns->cr, sizeof(Rect));
               }
               else
               {
