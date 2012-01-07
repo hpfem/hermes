@@ -274,7 +274,7 @@ namespace Hermes
     /// Init element geometry for volumetric integrals.
     HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
     /// Init element geometry for surface integrals.
-    HERMES_API Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order);
+    HERMES_API Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
 
 
     /// Init the function for calculation the integration order.
