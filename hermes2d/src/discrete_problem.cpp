@@ -68,8 +68,6 @@ namespace Hermes
       is_fvm = false;
       RungeKutta = false;
       RK_original_spaces_count = 0;
-      matrix_buffer = NULL;
-      matrix_buffer_dim = 0;
       have_matrix = false;
     }
 
@@ -98,8 +96,6 @@ namespace Hermes
       memset(sp_seq, -1, sizeof(int) * wf->get_neq());
 
       // Matrix<Scalar> related settings.
-      matrix_buffer = NULL;
-      matrix_buffer_dim = 0;
       have_matrix = false;
 
       // There is a special function that sets a DiscreteProblem to be FVM.
@@ -133,18 +129,6 @@ namespace Hermes
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         ndof += spaces[i]->get_num_dofs();
       return ndof;
-    }
-
-    template<typename Scalar>
-    Scalar** DiscreteProblem<Scalar>::get_matrix_buffer(int n)
-    {
-      _F_;
-      if (n <= matrix_buffer_dim)
-        return matrix_buffer;
-      if (matrix_buffer != NULL)
-        delete [] matrix_buffer;
-      matrix_buffer_dim = n;
-      return (matrix_buffer = new_matrix<Scalar>(n, n));
     }
 
     template<typename Scalar>
@@ -878,12 +862,6 @@ namespace Hermes
       // Creating matrix sparse structure.
       create_sparse_structure();
 
-      // Initialize matrix buffer.
-      matrix_buffer = NULL;
-      matrix_buffer_dim = 0;
-      if (mat != NULL)
-        get_matrix_buffer(9);
-
       Hermes::vector<MeshFunction<Scalar>*> ext_functions;
       for(unsigned int form_i = 0; form_i < wf->mfvol.size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < wf->mfvol.at(form_i)->ext.size(); ext_i++)
@@ -1019,12 +997,6 @@ VectorFormSurf<Scalar>** current_vfsurf;
           for_all_elements(element_to_set_nonvisited, meshes[mesh_i])
           element_to_set_nonvisited->visited = false;
       }
-
-      // Deinitialize matrix buffer.
-      if(matrix_buffer != NULL)
-        delete [] matrix_buffer;
-      matrix_buffer = NULL;
-      matrix_buffer_dim = 0;
     }
 
     template<typename Scalar>

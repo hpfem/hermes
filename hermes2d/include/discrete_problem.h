@@ -181,9 +181,6 @@ namespace Hermes
       /// Init function. Common code for the constructors.
       void init();
 
-      /// Returns the matrix_buffer of the size n.
-      Scalar** get_matrix_buffer(int n);
-
       /// Matrix structure as well as spaces and weak formulation is up-to-date.
       bool is_up_to_date();
 
@@ -218,10 +215,6 @@ namespace Hermes
       /// If the problem has only constant test functions, there is no need for order calculation,
       /// which saves time.
       bool is_fvm;
-
-      Scalar** matrix_buffer;///< buffer for holding square matrix (during assembling)
-
-      int matrix_buffer_dim;///< dimension of the matrix held by 'matrix_buffer'
 
       /// Matrix structure can be reused.
       /// If other conditions apply.
