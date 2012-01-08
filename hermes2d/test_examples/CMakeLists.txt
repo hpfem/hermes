@@ -17,3 +17,5 @@ add_subdirectory("7-3-05-newton-heat-rk")
 IF(WITH_TRILINOS)
   add_subdirectory("9-02-trilinos-nonlinear")
 ENDIF(WITH_TRILINOS)
+
+add_subdirectory("linear-advection-dg-adapt")
