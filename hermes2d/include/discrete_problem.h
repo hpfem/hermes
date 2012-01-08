@@ -32,6 +32,26 @@ namespace Hermes
   {
     class PrecalcShapeset;
 
+    /// Multimesh neighbors traversal class.
+    class NeighborNode
+    {
+    private:
+      NeighborNode(NeighborNode* parent, unsigned int transformation);
+      ~NeighborNode();
+      void set_left_son(NeighborNode* left_son);
+      void set_right_son(NeighborNode* right_son);
+      void set_transformation(unsigned int transformation);
+      NeighborNode* get_left_son();
+      NeighborNode* get_right_son();
+      unsigned int get_transformation();
+      NeighborNode* parent;
+      NeighborNode* left_son;
+      NeighborNode* right_son;
+      unsigned int transformation;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class KellyTypeAdapt;
+    };
+
     /// Discrete problem class.
     ///
     /// This class does assembling into external matrix / vector structures.
@@ -104,9 +124,6 @@ namespace Hermes
       // Return scaling coefficient.
       double block_scaling_coeff(MatrixForm<Scalar>* form);
       
-      /// The current stage contains DG forms.
-      void is_DG_stage();
-
       /// Get the number of unknowns.
       int get_num_dofs();
 
@@ -143,7 +160,7 @@ namespace Hermes
       /// Assemble one state.
       void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state,
            MatrixFormVol<Scalar>** current_mfvol, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormVol<Scalar>** current_vfvol, VectorFormSurf<Scalar>** current_vfsurf);
-      
+ 
       /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
@@ -237,6 +254,92 @@ namespace Hermes
       Vector<Scalar>* current_rhs;
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
+
+      ///* DG *///
+      
+      /// Assemble DG forms.
+      void assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
+        Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn);
+
+      /// Assemble one DG neighbor.
+      void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, 
+        PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
+        Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn, 
+        std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
+        LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+
+      /// Assemble DG matrix forms.
+      void assemble_DG_matrix_forms(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
+        Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, std::map<unsigned int, PrecalcShapeset*> npss,
+        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+
+      /// Assemble DG vector forms.
+      void assemble_DG_vector_forms(PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
+        Traverse::State* current_state, VectorFormSurf<Scalar>** current_vfsurf, std::map<unsigned int, PrecalcShapeset*> nspss, 
+        std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+
+      DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
+
+      /// Calculates integration order for DG matrix forms.
+      int calc_order_dg_matrix_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
+        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
+        bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
+
+      /// Evaluates DG matrix forms on an edge between elements identified by ru_actual, rv.
+      Scalar eval_dg_form(MatrixFormSurf<Scalar>* mfs, Hermes::vector<Solution<Scalar>*> u_ext,
+        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv,
+        bool neighbor_supp_u, bool neighbor_supp_v,
+        SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
+      
+      /// Calculates integration order for DG vector forms.
+      int calc_order_dg_vector_form(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
+        PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
+        LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
+      
+      /// Evaluates DG vector forms on an edge between elements identified by ru_actual, rv.
+      Scalar eval_dg_form(VectorFormSurf<Scalar>* vfs, Hermes::vector<Solution<Scalar>*> u_ext,
+        PrecalcShapeset* fv, RefMap* rv,
+        SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
+
+      /// Initialize orders of external functions for DG forms.
+      ExtData<Hermes::Ord>* init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
+        LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+
+      /// Initialize external functions for DG forms.
+      ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
+        LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
+        int order);
+
+      /// Initialize neighbors.
+      void init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Traverse::State* current_state);
+
+      /// Initialize the tree for traversing multimesh neighbors.
+      void build_multimesh_tree(NeighborNode* root, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+
+      /// Recursive insertion function into the tree.
+      void insert_into_multimesh_tree(NeighborNode* node, unsigned int* transformations, unsigned int transformation_count);
+
+      /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
+      Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree);
+
+      /// Traverse the multimesh tree. Used in the function get_multimesh_neighbors_transformations().
+      void traverse_multimesh_tree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
+
+      /// Update the NeighborSearch according to the multimesh tree.
+      void update_neighbor_search(NeighborSearch<Scalar>* ns, NeighborNode* multimesh_tree);
+
+      /// Finds a node in the multimesh tree that corresponds to the array transformations, with the length of transformation_count,
+      /// starting to look for it in the NeighborNode node.
+      NeighborNode* find_node(unsigned int* transformations, unsigned int transformation_count, NeighborNode* node);
+
+      /// Updates the NeighborSearch ns according to the subtree of NeighborNode node.
+      /// Returns 0 if no neighbor was deleted, -1 otherwise.
+      unsigned int update_ns_subtree(NeighborSearch<Scalar>* ns, NeighborNode* node, unsigned int ith_neighbor);
+
+      /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
+      void traverse_multimesh_subtree(NeighborNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
+        Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
+
 
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class NewtonSolver;
