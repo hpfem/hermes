@@ -54,7 +54,7 @@ namespace Hermes
       bool save(const char *filename, Mesh *mesh);
 
       /// This method saves a single mesh to a stream.
-      const char* save_stream(Mesh *mesh);
+      std::string save_stream(Mesh *mesh);
 
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.

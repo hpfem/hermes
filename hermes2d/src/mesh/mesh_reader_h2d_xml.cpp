@@ -174,7 +174,7 @@ namespace Hermes
       return true;
     }
 
-    const char * MeshReaderH2DXML::save_stream(Mesh *mesh)
+    std::string MeshReaderH2DXML::save_stream(Mesh *mesh)
     {
       // Utility pointer.
       Element* e;
@@ -240,7 +240,8 @@ namespace Hermes
       std::ostringstream out;
       XMLMesh::mesh_(out, xmlmesh, namespace_info_map);
 
-      return out.str().c_str();
+      std::string str = out.str();
+      return str;
     }
 
     bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<Mesh *> meshes)
