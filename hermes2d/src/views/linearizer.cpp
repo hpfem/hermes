@@ -579,7 +579,7 @@ namespace Hermes
         trfs[2] = ydisp;
 
         // Init multi-mesh traversal.
-        Traverse trav;
+        Traverse trav(true);
         trav.begin(3, meshes, trfs);
 
         // Loop through all elements.

@@ -55,7 +55,7 @@ namespace Hermes
 
       Mesh* meshes[2] = { sln1->get_mesh(), sln2->get_mesh() };
       Transformable* tr[2] = { sln1, sln2 };
-      Traverse trav;
+      Traverse trav(true);
       trav.begin(2, meshes, tr);
 
       double error = 0.0;

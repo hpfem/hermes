@@ -76,6 +76,7 @@ namespace Hermes
         Element** e;
         bool bnd[4];
         Element* rep;
+        ~State();
       private:
         State();
         void operator=(const State * other);

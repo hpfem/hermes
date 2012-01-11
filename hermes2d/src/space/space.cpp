@@ -889,7 +889,7 @@ namespace Hermes
     {
       _F_;
       for (unsigned int i = 0; i < bc_data.size(); i++)
-        ::free(bc_data[i]);
+        delete (bc_data[i]);
       bc_data.clear();
     }
 

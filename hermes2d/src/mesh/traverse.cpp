@@ -172,6 +172,15 @@ namespace Hermes
       this->isurf = other->isurf;
     }
 
+    Traverse::State::~State()
+    {
+      _F_;
+      if(e != NULL)
+        delete [] e;
+      if(sub_idx != NULL)
+        delete [] sub_idx;
+    }
+
     void Traverse::State::push_transform(int son, int i, bool is_triangle)
     {
       _F_;
@@ -294,7 +303,11 @@ namespace Hermes
             // No more base elements? we're finished.
             // Id is set to zero at the beginning by the function trav.begin(..).
             if(id >= meshes[0]->get_num_base_elements())
+            {
+              this->finish();
               return count;
+            }
+
             int nused = 0;
             // The variable num is the number of meshes in the stage
             for (i = 0; i < num; i++)
@@ -522,6 +535,7 @@ namespace Hermes
               }
             }
           }
+          delete [] current_sons;
         }
       }
     }
@@ -791,6 +805,7 @@ namespace Hermes
               }
             }
           }
+          delete [] current_sons;
         }
       }
     }
@@ -806,55 +821,59 @@ namespace Hermes
       this->meshes = meshes;
       this->fn = fn;
 
-      top = 0;
       size = 256;
-      stack = new State[size];
-      memset(stack, 0, size * sizeof(State));
+      if(master)
+      {
+        stack = new State[size];
+        memset(stack, 0, size * sizeof(State));
 
-      sons = new int4[num];
-      subs = new uint64_t[num];
-      id = 0;
+        sons = new int4[num];
+        subs = new uint64_t[num];
+      
+        id = 0;
+        top = 0;
 
 #ifndef H2D_DISABLE_MULTIMESH_TESTS
-      // Test whether all master meshes have the same number of elements.
-      int base_elem_num = meshes[0]->get_num_base_elements();
-      for (int i = 1; i < n; i++)
-        if(base_elem_num != meshes[i]->get_num_base_elements())
-          error("Meshes not compatible in Traverse::begin().");
-
-      // Test whether areas of corresponding elements are the same.
-      double *areas = new double [base_elem_num];
-      memset(areas, 0, base_elem_num*sizeof(double));
-      if(areas == NULL) error("Not enough memory in Traverse::begin().");
-      // Read base element areas from the first mesh,
-      // Also get minimum element area.
-      int counter = 0;
-      double min_elem_area = 1e30;
-      Element* e;
-      for_all_base_elements(e, meshes[0])
-      {
-        areas[counter] = e->get_area();
-        if(areas[counter] < min_elem_area) min_elem_area = areas[counter];
-        //printf("base_element[%d].area = %g\n", counter, areas[counter]);
-        counter++;
-      }
-      // take one mesh at a time and compare element areas to the areas[] array
-      double tolerance = min_elem_area/100.;
-      for (int i = 1; i < n; i++)
-      {
-        counter = 0;
-        for_all_base_elements(e, meshes[i])
-        {
-          if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0)
-          {
-            printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
+        // Test whether all master meshes have the same number of elements.
+        int base_elem_num = meshes[0]->get_num_base_elements();
+        for (int i = 1; i < n; i++)
+          if(base_elem_num != meshes[i]->get_num_base_elements())
             error("Meshes not compatible in Traverse::begin().");
-          }
+
+        // Test whether areas of corresponding elements are the same.
+        double *areas = new double [base_elem_num];
+        memset(areas, 0, base_elem_num*sizeof(double));
+        if(areas == NULL) error("Not enough memory in Traverse::begin().");
+        // Read base element areas from the first mesh,
+        // Also get minimum element area.
+        int counter = 0;
+        double min_elem_area = 1e30;
+        Element* e;
+        for_all_base_elements(e, meshes[0])
+        {
+          areas[counter] = e->get_area();
+          if(areas[counter] < min_elem_area) min_elem_area = areas[counter];
+          //printf("base_element[%d].area = %g\n", counter, areas[counter]);
           counter++;
         }
-      }
-      delete [] areas;
+        // take one mesh at a time and compare element areas to the areas[] array
+        double tolerance = min_elem_area/100.;
+        for (int i = 1; i < n; i++)
+        {
+          counter = 0;
+          for_all_base_elements(e, meshes[i])
+          {
+            if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0)
+            {
+              printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
+              error("Meshes not compatible in Traverse::begin().");
+            }
+            counter++;
+          }
+        }
+        delete [] areas;
 #endif
+      }
     }
 
     void Traverse::free_state(Traverse::State* state)
@@ -880,10 +899,10 @@ namespace Hermes
 
         delete [] stack;
         stack = NULL;
-      }
 
-      delete [] subs;
-      delete [] sons;
+        delete [] subs;
+        delete [] sons;
+      }
     }
 
     uint64_t Traverse::init_idx(Rect* cr, Rect* er)

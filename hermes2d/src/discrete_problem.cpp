@@ -456,7 +456,7 @@ namespace Hermes
         for (unsigned int i = 0; i < wf->get_neq(); i++)
           meshes[i] = spaces[i]->get_mesh();
 
-        Traverse trav;
+        Traverse trav(true);
         trav.begin(wf->get_neq(), meshes);
 
         if(is_DG)
@@ -1619,6 +1619,9 @@ namespace Hermes
     void DiscreteProblem<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
     {
       _F_;
+      unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
+      for(int i = 0; i < prev_size; i++)
+        oi[i]->free_ord();
       delete [] oi;
 
       if (oext != NULL)

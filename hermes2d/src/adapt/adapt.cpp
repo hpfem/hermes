@@ -908,7 +908,7 @@ namespace Hermes
       // Prepare multi-mesh traversal and error arrays.
       Mesh **meshes = new Mesh *[2 * num];
       Transformable **tr = new Transformable *[2 * num];
-      Traverse trav;
+      Traverse trav(true);
       num_act_elems = 0;
       for (i = 0; i < num; i++)
       {
