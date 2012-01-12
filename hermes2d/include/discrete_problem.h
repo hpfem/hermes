@@ -220,9 +220,6 @@ namespace Hermes
       /// Number of DOFs of all Space instances in spaces.
       int ndof;
 
-      /// Element usage flag: iempty[i] == true if the current state does not posses an active element in the i-th space.
-      Hermes::vector<bool> isempty;
-
       /// Instance of the class Geom used in the calculation of integration order.
       Geom<Hermes::Ord> geom_ord;
 

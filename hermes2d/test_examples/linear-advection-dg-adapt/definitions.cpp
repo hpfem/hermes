@@ -31,6 +31,10 @@ Ord CustomWeakForm::CustomMatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
+MatrixFormVol<double>* CustomWeakForm::CustomMatrixFormVol::clone()
+{
+  return new CustomWeakForm::CustomMatrixFormVol(*this);
+}
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomVectorFormVol::vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, 
@@ -52,6 +56,11 @@ Ord CustomWeakForm::CustomVectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext
                                        Geom<Ord> *e, ExtData<Ord> *ext) const 
 {
   return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
+}
+
+VectorFormVol<double>* CustomWeakForm::CustomVectorFormVol::clone()
+{
+  return new CustomWeakForm::CustomVectorFormVol(*this);
 }
 
 template<typename Real>
@@ -87,6 +96,10 @@ Ord CustomWeakForm::CustomMatrixFormSurface::ord(int n, double *wt, Func<Ord> *u
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
+MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormSurface::clone()
+{
+  return new CustomWeakForm::CustomMatrixFormSurface(*this);
+}
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v, 
@@ -114,6 +127,10 @@ Ord CustomWeakForm::CustomMatrixFormInterface::ord(int n, double *wt, Func<Ord> 
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
+MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormInterface::clone()
+{
+  return new CustomWeakForm::CustomMatrixFormInterface(*this);
+}
 
 double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, 
                                                 Geom<double> *e, ExtData<double> *ext) const 
@@ -134,6 +151,11 @@ Ord CustomWeakForm::CustomVectorFormSurface::ord(int n, double *wt, Func<Ord> *u
   for (int i = 0; i < n; i++)
     result += -wt[i] * v->val[i];
   return result;
+}
+
+VectorFormSurf<double>* CustomWeakForm::CustomVectorFormSurface::clone()
+{
+  return new CustomWeakForm::CustomVectorFormSurface(*this);
 }
 
 template<typename Real>

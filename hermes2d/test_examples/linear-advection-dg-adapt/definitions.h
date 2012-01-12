@@ -24,6 +24,8 @@ private:
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    MatrixFormVol<double>* clone();
   };
 
   class CustomVectorFormVol : public VectorFormVol<double>
@@ -37,6 +39,8 @@ private:
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    VectorFormVol<double>* clone();
 
     template<typename Real>
     Real F(Real x, Real y) const;
@@ -53,6 +57,9 @@ private:
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    MatrixFormSurf<double>* clone();
+
   };
 
   class CustomMatrixFormInterface : public MatrixFormSurf<double>
@@ -66,6 +73,9 @@ private:
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    MatrixFormSurf<double>* clone();
+
   };
 
   class CustomVectorFormSurface : public VectorFormSurf<double>
@@ -76,6 +86,8 @@ private:
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
+
+    VectorFormSurf<double>* clone();
 
     template<typename Real>
     Real F(Real x, Real y) const;

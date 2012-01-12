@@ -64,9 +64,9 @@ namespace Hermes
     class HERMES_API Quad2D
     {
     public:
-      inline int get_num_points(int order, ElementMode2D mode)  const { return np[mode][order]; };
+      inline int get_num_points(int order, ElementMode2D mode)  const { assert(order < num_tables[mode]); return np[mode][order]; };
       inline double3* get_points(int order, ElementMode2D mode) const { assert(order < num_tables[mode]); return tables[mode][order]; }
-      inline int get_edge_points(int edge, int order, ElementMode2D mode) {return  max_order[mode]+1 + (3*(1-mode) + 4*mode)*order + edge;}
+      inline int get_edge_points(int edge, int order, ElementMode2D mode) {assert(order < num_tables[mode]);  return  max_order[mode]+1 + (3*(1-mode) + 4*mode)*order + edge;}
 
       inline int get_max_order(ElementMode2D mode) const { return max_order[mode]; }
       inline int get_safe_max_order(ElementMode2D mode) const { return safe_max_order[mode]; }

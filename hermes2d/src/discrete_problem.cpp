@@ -1694,6 +1694,13 @@ namespace Hermes
     {
       _F_;
 
+      bool DG_state = false;
+      for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+        if(current_state->rep->en[current_state->isurf]->marker == 0)
+          DG_state = true;
+      if(!DG_state)
+        return;
+
       // Determine the minimum mesh seq.
       min_dg_mesh_seq = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -1726,6 +1733,10 @@ namespace Hermes
 
       for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
       {
+        if(current_state->rep->en[current_state->isurf]->marker != 0)
+          continue;
+
+
         // Initialize the NeighborSearches.
         // 5 is for bits per page in the array.
         LightArray<NeighborSearch<Scalar>*> neighbor_searches(5);
@@ -1839,8 +1850,6 @@ namespace Hermes
           // Also push the transformations to the slave psss and refmaps.
           for (unsigned int i = 0; i < spaces.size(); i++)
           {
-            if(isempty[i])
-              continue;
             current_spss[i]->set_master_transform();
             current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
 
@@ -1854,12 +1863,13 @@ namespace Hermes
             }
           }
 
+
           /***/
           // The computation takes place here.
           if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
           {
             int order = 20;
-            
+        
             for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
             {
               if(!form_to_be_assembled((MatrixForm<Scalar>*)current_mfsurf[current_mfsurf_i], current_state))
@@ -1908,6 +1918,8 @@ namespace Hermes
                 for (int i = 0; i < prev_size; i++)
                   prev[i] = NULL;
 
+              ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
+              
               // Precalc shapeset and refmaps used for the evaluation.
               PrecalcShapeset* fu;
               PrecalcShapeset* fv;
@@ -1956,39 +1968,15 @@ namespace Hermes
                   if (ext_asmlist_u->dof[j] >= 0)
                   {
                     // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-                    nbs_u->set_quad_order(order);
-                    DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(init_fn(fu, ru, nbs_u->get_quad_eo(support_neigh_u)),
+                    DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(init_fn(fu, ru, order),
                       support_neigh_u, nbs_u->neighbor_edge.orientation);
-                    nbs_v->set_quad_order(order);
-                    DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(init_fn(fv, rv, nbs_v->get_quad_eo(support_neigh_v)),
+                    DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(init_fn(fv, rv, order),
                       support_neigh_v, nbs_v->neighbor_edge.orientation);
 
-                    ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
-
                     Scalar res = mfs->value(np, jacobian_x_weights, prev, u, v, e, ext) * mfs->scaling_factor;
-
-                    // Clean up.
-                    for (int i = 0; i < prev_size; i++)
-                    {
-                      if (prev[i] != NULL)
-                      {
-                        prev[i]->free_fn();
-                        delete prev[i];
-                      }
-                    }
-
-                    delete [] prev;
-
-
-                    if (ext != NULL)
-                    {
-                      ext->free();
-                      delete ext;
-                    }
-
+  
                     delete u;
                     delete v;
-                    delete e;
 
                     Scalar val = block_scaling_coeff(mfs) * 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
                       * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
@@ -1996,6 +1984,28 @@ namespace Hermes
                   }
                 }
               }
+              
+              // Clean up.
+              for (int i = 0; i < prev_size; i++)
+              {
+                if (prev[i] != NULL)
+                {
+                  prev[i]->free_fn();
+                  delete prev[i];
+                }
+              }
+
+              delete [] prev;
+
+
+              if (ext != NULL)
+              {
+                ext->free();
+                delete ext;
+              }
+                   
+              delete e;
+                    
 #pragma omp critical (mat)
               current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
             }
@@ -2004,6 +2014,7 @@ namespace Hermes
           if (current_rhs != NULL && DG_vector_forms_present)
           {
             int order = 20;
+
             for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
             {
               VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
