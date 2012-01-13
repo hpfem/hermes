@@ -764,7 +764,7 @@ namespace Hermes
         // This outputs double solution values.
         fprintf(f, "\n");
         fprintf(f, "POINT_DATA %d\n", this->vertex_count);
-        fprintf(f, "SCALARS %s %s %d\n", quantity_name, "float", 1);
+        fprintf(f, "SCALARS \"%s\" %s %d\n", quantity_name, "float", 1);
         fprintf(f, "LOOKUP_TABLE %s\n", "default");
         for (int i = 0; i < this->vertex_count; i++)
         {
