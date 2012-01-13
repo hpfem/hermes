@@ -143,9 +143,11 @@ namespace Hermes
 
       /// \brief Returns the number of basis functions contained in the spaces.
       static int get_num_dofs(Hermes::vector<const Space<Scalar>*> spaces);
+      static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
       
       /// \brief Returns the number of basis functions contained in the space.
       static int get_num_dofs(const Space<Scalar>* space);
+      static int get_num_dofs(Space<Scalar>* space);
 
       Mesh* get_mesh() const;
 
