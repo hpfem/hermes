@@ -89,7 +89,7 @@ namespace Hermes
     Scalar const_value;
   };
 
-  /// Generic class for functions of two variables.
+  /// Generic class for functions of three variables.
   template<typename Scalar>
   class HERMES_API Hermes3DFunction
   {
@@ -100,16 +100,16 @@ namespace Hermes
     /// Constructor for the constant case.
     Hermes3DFunction(Scalar value);
 
-    /// Two-dimensional function value.
+    /// Three-dimensional function value.
     virtual Scalar value(Scalar x, Scalar y, Scalar z) const;
 
-    /// Two-dimensional function integration order.
+    /// Three-dimensional function integration order.
     virtual Hermes::Ord value(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
 
-    /// Two-dimensional function derivative value.
+    /// Three-dimensional function derivative value.
     virtual Scalar derivative(Scalar x, Scalar y, Scalar z) const;
 
-    /// Two-dimensional function derivative integration order.
+    /// Three-dimensional function derivative integration order.
     virtual Hermes::Ord derivative(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
 
     /// The function is constant.

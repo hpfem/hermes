@@ -114,10 +114,12 @@ namespace Hermes
 
         Node* node;
         for_all_nodes(node, mesh)
-          if(node->y == 0)
-            node->y = 0;
-          else
-            node->y = (b-a) / 100;
+          if(node->y != 0)
+            node->y = (b-a) / HERMES_2D_1D_Y;
+
+        // Important, stores the boundaries in the mesh.
+        mesh->a = a;
+        mesh->b = b;
 
         // Elements //
         mesh->nbase = mesh->nactive = mesh->ninitial = vertices_count - 1;

@@ -41,7 +41,7 @@ namespace Hermes
       template<typename T> friend class Solution;
     };
 
-    /// These classes are abstract (pure virtual destructor).
+    /// These classes are abstract.
     /// The user is supposed to subclass them (see e.g. NIST benchmarks).
     template<typename Scalar>
     class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>

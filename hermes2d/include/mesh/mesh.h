@@ -321,6 +321,12 @@ namespace Hermes
       /// Note: this function creates a base mesh.
       void convert_triangles_to_quads();
 
+      /// For 1D problems.
+      /// Returns the left boundary coordinate.
+      double get_a();
+      /// Returns the right boundary coordinate.
+      double get_b();
+
     private:
       /// For internal use.
       int get_edge_sons(Element* e, int edge, int& son1, int& son2);
@@ -375,6 +381,9 @@ namespace Hermes
       void regularize_triangle(Element* e);
       void regularize_quad(Element* e);
       void flatten();
+
+      /// For 1D problems.
+      double a, b;
 
       class HERMES_API MarkersConversion
       {

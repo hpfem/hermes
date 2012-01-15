@@ -47,8 +47,14 @@ namespace Hermes
       /// This method loads a single mesh from a file.
       virtual bool load(const char *filename, Mesh *mesh);
 
+      /// This method loads a single mesh from a stream.
+      virtual bool load_stream(const char* stream, Mesh *mesh);
+
       /// This method saves a single mesh to a file.
       bool save(const char *filename, Mesh *mesh);
+
+      /// This method saves a single mesh to a stream.
+      std::string save_stream(Mesh *mesh);
 
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.

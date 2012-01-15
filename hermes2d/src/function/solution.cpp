@@ -1094,6 +1094,64 @@ namespace Hermes
     }
 
     template<>
+    void Solution<double>::save1D(double* x, double* y, int num_points, const char* filename)
+    {
+      if (sln_type == HERMES_UNDEF)
+        error("Cannot save 1D -- uninitialized solution.");
+      if(mesh->get_a() > mesh->get_b())
+        error("Cannot save 1D -- (a > b), are you sure this is a 1D solution?");
+
+      double a = mesh->get_a();
+      double b = mesh->get_b();
+
+      for(int point_i = 0; point_i < num_points; point_i++)
+      {
+        x[point_i] = a + ((double)point_i / (double)num_points) * (b - a);
+        y[point_i] = this->get_pt_value(a + ((double)point_i / (double)num_points) * (b - a), (b - a) / ((double)HERMES_2D_1D_Y * 2.0));
+      }
+
+      if(filename != NULL)
+      {
+        std::ofstream out(filename);
+        for(int point_i = 0; point_i < num_points; point_i++)
+          out << x[point_i] << std::endl;
+        for(int point_i = 0; point_i < num_points; point_i++)
+          out << y[point_i] << std::endl;
+        out.close();
+      }
+      return;
+    }
+
+    template<>
+    void Solution<std::complex<double> >::save1D(double* x, std::complex<double>* y, int num_points, const char* filename)
+    {
+      if (sln_type == HERMES_UNDEF)
+        error("Cannot save 1D -- uninitialized solution.");
+      if(mesh->get_a() > mesh->get_b())
+        error("Cannot save 1D -- (a > b), are you sure this is a 1D solution?");
+
+      double a = mesh->get_a();
+      double b = mesh->get_b();
+
+      for(int point_i = 0; point_i < num_points; point_i++)
+      {
+        x[point_i] = a + ((double)point_i / (double)num_points) * (b - a);
+        y[point_i] = this->get_pt_value(a + ((double)point_i / (double)num_points) * (b - a), (b - a) / ((double)HERMES_2D_1D_Y * 2.0));
+      }
+
+      if(filename != NULL)
+      {
+        std::ofstream out(filename);
+        for(int point_i = 0; point_i < num_points; point_i++)
+          out << x[point_i] << std::endl;
+        for(int point_i = 0; point_i < num_points; point_i++)
+          out << y[point_i] << std::endl;
+        out.close();
+      }
+      return;
+    }
+
+    template<>
     void Solution<double>::save(const char* filename) const
     {
       if (sln_type == HERMES_EXACT)

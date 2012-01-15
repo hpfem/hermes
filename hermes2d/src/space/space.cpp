@@ -250,7 +250,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
+    {
+      _F_;
+      int ndof = 0;
+      for (unsigned int i = 0; i<spaces.size(); i++) {
+        ndof += spaces[i]->get_num_dofs();
+      }
+      return ndof;
+    }
+
+    template<typename Scalar>
     int Space<Scalar>::get_num_dofs(const Space<Scalar>* space)
+    {
+      return space->get_num_dofs();
+    }
+
+    template<typename Scalar>
+    int Space<Scalar>::get_num_dofs(Space<Scalar>* space)
     {
       return space->get_num_dofs();
     }
