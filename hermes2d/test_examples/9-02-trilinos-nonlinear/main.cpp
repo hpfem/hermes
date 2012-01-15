@@ -22,8 +22,8 @@ using namespace Teuchos;
 //
 //  The following parameters can be changed:
 
-const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
-const int P_INIT = 4;                             // Initial polynomial degree of all mesh elements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 
 const bool JFNK = true;                          // true = jacobian-free method,
                                                   // false = Newton.
@@ -113,7 +113,6 @@ int main(int argc, char* argv[])
   //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-  Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp1, matrix_solver_type);
   newton.set_verbose_output(true);
   try{
@@ -124,7 +123,7 @@ int main(int argc, char* argv[])
     e.printMsg();
     error("Newton's iteration failed.");
   }
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln1);
 
   // Cleanup.
   delete(matrix);

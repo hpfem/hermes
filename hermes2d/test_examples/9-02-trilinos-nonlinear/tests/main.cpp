@@ -99,7 +99,6 @@ int main(int argc, char* argv[])
   //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-  Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp1, matrix_solver_type);
   newton.set_verbose_output(true);
   try{
@@ -110,7 +109,7 @@ int main(int argc, char* argv[])
     e.printMsg();
     error("Newton's iteration failed.");
   }
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln1);
 
   // Cleanup.
   delete(matrix);
