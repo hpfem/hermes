@@ -126,9 +126,6 @@ int main(int argc, char* argv[])
   }
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
-  // Translate the resulting coefficient vector into the Solution sln1.
-  Solution<double>::vector_to_solution(coeff_vec, &space, &sln1);
-
   // Cleanup.
   delete(matrix);
   delete(rhs);
