@@ -52,7 +52,7 @@ namespace Hermes
           double eps = HERMES_EPS_NORMAL);
         
         /// Returns string with a MeshFunction (Solution, Filter) in VTK format.
-        const char * save_solution_vtk_to_stream(MeshFunction<double>* sln, const char* quantity_name,
+        std::string save_solution_vtk_to_stream(MeshFunction<double>* sln, const char* quantity_name,
           bool mode_3D = true, int item = H2D_FN_VAL_0,
           double eps = HERMES_EPS_NORMAL);
 

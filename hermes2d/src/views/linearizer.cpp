@@ -731,13 +731,13 @@ namespace Hermes
         fstream.close();
       }
 
-      const char * Linearizer::save_solution_vtk_to_stream(MeshFunction<double>* sln, const char *quantity_name,
+      std::string Linearizer::save_solution_vtk_to_stream(MeshFunction<double>* sln, const char *quantity_name,
         bool mode_3D, int item, double eps){
         std::ostringstream sstream;
 
         save_solution_vtk(sln, sstream, quantity_name, mode_3D, item, eps);
 
-        return sstream.str().c_str();
+        return sstream.str();
       }
 
       void Linearizer::save_solution_vtk(MeshFunction<double>* sln, std::ostream& stream, const char *quantity_name,
