@@ -19,6 +19,9 @@
 #include "../hermes2d_common_defs.h"
 #include "../function/solution.h"
 #include "linearizer_base.h"
+#include <fstream>
+#include <sstream>
+#include <ostream>
 
 namespace Hermes
 {
@@ -88,6 +91,9 @@ namespace Hermes
         void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
 
         void find_min_max();
+      private:
+        void save_solution_vtk(MeshFunction<double>* sln, std::ostream& stream, const char *quantity_name,
+          bool mode_3D, int item, double eps);
       };
     }
   }

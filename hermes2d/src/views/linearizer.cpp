@@ -722,57 +722,60 @@ namespace Hermes
       }
 
       void Linearizer::save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char *quantity_name,
+        bool mode_3D, int item, double eps){
+        std::ofstream fstream(filename);
+        if (!fstream.is_open()) error("Could not open %s for writing.", filename);
+
+        save_solution_vtk(sln, fstream, quantity_name, mode_3D, item, eps);
+
+        fstream.close();
+      }
+
+      void Linearizer::save_solution_vtk(MeshFunction<double>* sln, std::ostream& stream, const char *quantity_name,
         bool mode_3D, int item, double eps)
       {
         this->sln = sln;
         process_solution(sln, item, eps);
 
-        FILE* f = fopen(filename, "wb");
-        if (f == NULL) error("Could not open %s for writing.", filename);
         lock_data();
 
         // Output header for vertices.
-        fprintf(f, "# vtk DataFile Version 2.0\n");
-        fprintf(f, "\n");
-        fprintf(f, "ASCII\n\n");
-        fprintf(f, "DATASET UNSTRUCTURED_GRID\n");
+        stream << "# vtk DataFile Version 2.0\n\n"
+               << "ASCII\n\n"
+               << "DATASET UNSTRUCTURED_GRID\n";
 
         // Output vertices.
-        fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
+        stream << "POINTS " << this->vertex_count << " float\n";
         for (int i = 0; i < this->vertex_count; i++)
         {
-          if (mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
-          else fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
+          if (mode_3D == true) stream << this->verts[i][0] << " " << this->verts[i][1] << " " << this->verts[i][2] << "\n";
+          else stream << this->verts[i][0] << " " << this->verts[i][1] << " 0.0\n";
         }
 
         // Output elements.
-        fprintf(f, "\n");
-        fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
+        stream << "\nCELLS " << this->triangle_count << " " << (4 * this->triangle_count) << "\n";
         for (int i = 0; i < this->triangle_count; i++)
         {
-          fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
+          stream << "3 " << this->tris[i][0] << " " << this->tris[i][1] << " " << this->tris[i][2] << "\n";
         }
 
         // Output cell types.
-        fprintf(f, "\n");
-        fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
+        stream << "\nCELL_TYPES " << this->triangle_count << "\n";
         for (int i = 0; i < this->triangle_count; i++)
         {
-          fprintf(f, "5\n");    // The "5" means triangle in VTK.
+          stream << "5\n";    // The "5" means triangle in VTK.
         }
 
         // This outputs double solution values.
-        fprintf(f, "\n");
-        fprintf(f, "POINT_DATA %d\n", this->vertex_count);
-        fprintf(f, "SCALARS \"%s\" %s %d\n", quantity_name, "float", 1);
-        fprintf(f, "LOOKUP_TABLE %s\n", "default");
+        stream << "\nPOINT_DATA " << this->vertex_count << "\n"
+               << "SCALARS \"" << quantity_name << "\" float 1\n"
+               << "LOOKUP_TABLE default\n";
         for (int i = 0; i < this->vertex_count; i++)
         {
-          fprintf(f, "%g\n", this->verts[i][2]);
+          stream << this->verts[i][2] << "\n";
         }
 
         unlock_data();
-        fclose(f);
       }
 
       void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
