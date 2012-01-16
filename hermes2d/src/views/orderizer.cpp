@@ -221,56 +221,68 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::save_orders_vtk(const Space<Scalar>* space, const char* file_name)
+      std::string Orderizer::save_roders_vtk_to_stream(const Space<Scalar>* space){
+        std::ostringstream sstream;
+
+        save_orders_vtk(space, sstream);
+
+        return sstream.str();
+      }
+
+      template<typename Scalar>
+      void Orderizer::save_orders_vtk(const Space<Scalar>* space, const char* file_name){
+        std::ofstream fstream(file_name);
+        if (!fstream.is_open()) error("Could not open %s for writing.", file_name);
+
+        save_orders_vtk(space, fstream);
+
+        fstream.close();
+      }
+
+      template<typename Scalar>
+      void Orderizer::save_orders_vtk(const Space<Scalar>* space, std::ostream& stream)
       {
         process_space(space);
 
-        FILE* f = fopen(file_name, "wb");
-        if (f == NULL) error("Could not open %s for writing.", file_name);
         lock_data();
 
         // Output header for vertices.
-        fprintf(f, "# vtk DataFile Version 2.0\n");
-        fprintf(f, "\n");
-        fprintf(f, "ASCII\n\n");
-        fprintf(f, "DATASET UNSTRUCTURED_GRID\n");
+        stream << "# vtk DataFile Version 2.0\n\n"
+               << "ASCII\n\n"
+               << "DATASET UNSTRUCTURED_GRID\n";
 
         // Output vertices.
-        fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
+        stream << "POINTS " << this->vertex_count << " float\n";
         for (int i = 0; i < this->vertex_count; i++)
         {
-          fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
+          stream << this->verts[i][0] << " " << this->verts[i][1] << " 0\n";
         }
 
         // Output elements.
-        fprintf(f, "\n");
-        fprintf(f, "CELLS %d %d\n", this->triangle_count, 4 * this->triangle_count);
+        stream << "\nCELLS " <<  this->triangle_count << " " << (4 * this->triangle_count) << "\n";
         for (int i = 0; i < this->triangle_count; i++)
         {
-          fprintf(f, "3 %d %d %d\n", this->tris[i][0], this->tris[i][1], this->tris[i][2]);
+          stream << "3 " << this->tris[i][0] << " " << this->tris[i][1] << " " << this->tris[i][2] << "\n";
         }
 
         // Output cell types.
-        fprintf(f, "\n");
-        fprintf(f, "CELL_TYPES %d\n", this->triangle_count);
+        stream << "\nCELL_TYPES " <<  this->triangle_count << "\n";
         for (int i = 0; i < this->triangle_count; i++)
         {
-          fprintf(f, "5\n");    // The "5" means triangle in VTK.
+          stream << "5\n";    // The "5" means triangle in VTK.
         }
 
         // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
         // for how it is done for vectors.
-        fprintf(f, "\n");
-        fprintf(f, "POINT_DATA %d\n", this->vertex_count);
-        fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
-        fprintf(f, "LOOKUP_TABLE %s\n", "default");
+        stream << "\nPOINT_DATA " << this->vertex_count 
+               << "\nSCALARS Mesh float 1\n"
+               << "LOOKUP_TABLE default\n";
         for (int i = 0; i < this->vertex_count; i++)
         {
-          fprintf(f, "%g\n", this->verts[i][2]);
+          stream << this->verts[i][2] << "\n";
         }
 
         unlock_data();
-        fclose(f);
       }
 
       int Orderizer::get_labels(int*& lvert, char**& ltext, double2*& lbox) const
