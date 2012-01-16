@@ -16,6 +16,7 @@
 #ifndef __H2D_ORDERIZER_H
 #define __H2D_ORDERIZER_H
 
+#include <ostream>
 #include "linearizer.h"
 
 namespace Hermes
@@ -41,6 +42,10 @@ namespace Hermes
         template<typename Scalar>
         void save_orders_vtk(const Space<Scalar>* space, const char* file_name);
 
+        /// Return string with a MeshFunction (Solution, Filter) in VTK format.
+        template<typename Scalar>
+        const char * save_roders_vtk_to_stream(const Space<Scalar>* space);
+
         int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
 
         void calc_vertices_aabb(double* min_x, double* max_x,
@@ -65,6 +70,9 @@ namespace Hermes
         int add_vertex();
 
         void make_vert(int & index, double x, double y, double val);
+      private:
+        template<typename Scalar>
+        void save_orders_vtk(const Space<Scalar>* space, std::ostream& stram);
       };
     }
   }
