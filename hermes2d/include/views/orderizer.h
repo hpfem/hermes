@@ -44,7 +44,7 @@ namespace Hermes
 
         /// Return string with a MeshFunction (Solution, Filter) in VTK format.
         template<typename Scalar>
-        const char * save_roders_vtk_to_stream(const Space<Scalar>* space);
+        std::string save_roders_vtk_to_stream(const Space<Scalar>* space);
 
         int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
 

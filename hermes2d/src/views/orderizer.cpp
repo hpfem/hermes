@@ -221,12 +221,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      const char * Orderizer::save_roders_vtk_to_stream(const Space<Scalar>* space){
+      std::string Orderizer::save_roders_vtk_to_stream(const Space<Scalar>* space){
         std::ostringstream sstream;
 
         save_orders_vtk(space, sstream);
 
-        return sstream.str().c_str();
+        return sstream.str();
       }
 
       template<typename Scalar>
