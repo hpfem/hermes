@@ -162,6 +162,7 @@ Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any ot
      -D Trilinos_ENABLE_Amesos:BOOL=ON \
      -D Trilinos_ENABLE_NOX:BOOL=ON \
      -D Trilinos_ENABLE_Anasazi:BOOL=ON \
+     -D Trilinos_ENABLE_PyTrilinos:BOOL=OFF \
      -D Trilinos_ENABLE_Komplex:BOOL=ON \
      -D Trilinos_ENABLE_Claps:BOOL=ON \
      -D Trilinos_ENABLE_TESTS:BOOL=ON \
