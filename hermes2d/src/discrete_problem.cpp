@@ -1836,7 +1836,12 @@ namespace Hermes
       // The important thing is that the transformations to the current subelement are already there.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[fns_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
+        Mesh * mesh_i;
+        if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
+          mesh_i = spaces[fns_i]->get_mesh();
+        else
+          mesh_i = (dynamic_cast<MeshFunction<Scalar>*>(fn[fns_i]))->get_mesh();
+        NeighborSearch<Scalar>* ns = neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq);
         if (ns->central_transformations.present(neighbor_i))
           ns->central_transformations.get(neighbor_i)->apply_on(fn[fns_i]);
       }
@@ -1987,7 +1992,9 @@ namespace Hermes
 
                 Scalar res = mfs->value(np, jacobian_x_weights, prev, u, v, e, ext) * mfs->scaling_factor;
 
+                u->free_fn();
                 delete u;
+                v->free_fn();
                 delete v;
 
                 Scalar val = block_scaling_coeff(mfs) * 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
@@ -2016,6 +2023,7 @@ namespace Hermes
             delete ext;
           }
 
+          e->free();
           delete e;
 
 #pragma omp critical (mat)
@@ -2098,12 +2106,35 @@ namespace Hermes
               delete ext;
             }
 
+            e->free();
             delete e;
 
 #pragma omp critical (rhs)
             current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(np, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
+            v->free_fn();
+            delete v;
           }
         }
+      }
+
+      // This is just cleaning after ourselves.
+      // Clear the transformations from the RefMaps and all functions.
+      for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
+      {
+        Mesh * mesh_i;
+        if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
+          mesh_i = spaces[fns_i]->get_mesh();
+        else
+          mesh_i = (dynamic_cast<MeshFunction<Scalar>*>(fn[fns_i]))->get_mesh();
+        
+        fn[fns_i]->set_transform(neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq)->original_central_el_transform);
+      }
+
+      // Also clear the transformations from the slave psss and refmaps.
+      for (unsigned int i = 0; i < spaces.size(); i++)
+      {
+        current_spss[i]->set_master_transform();
+        current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
       }
     }
 
