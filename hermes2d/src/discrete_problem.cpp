@@ -76,8 +76,8 @@ namespace Hermes
     {
       _F_
 
-      // Initialize special variable for Runge-Kutta time integration.
-      RungeKutta = false;
+        // Initialize special variable for Runge-Kutta time integration.
+        RungeKutta = false;
       RK_original_spaces_count = 0;
 
       ndof = Space<Scalar>::get_num_dofs(spaces);
@@ -959,7 +959,14 @@ namespace Hermes
         {
           Traverse::State current_state;
 #pragma omp critical (get_next_state)
-          current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+          {
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+
+            // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
+            if(DG_matrix_forms_present || DG_vector_forms_present)
+              for(unsigned int i = 0; i < current_state.num; i++)
+                current_state.e[i]->visited = true;
+          }
 
           current_pss = pss[omp_get_thread_num()];
           current_spss = spss[omp_get_thread_num()];
@@ -979,7 +986,7 @@ namespace Hermes
           // this stage is supplied by the function Traverse::get_next_state()
           // called in the while loop.
           assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
-          
+
           if(DG_matrix_forms_present || DG_vector_forms_present)
             assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_mfsurf, current_vfsurf, trav[omp_get_thread_num()].fn);
         }
@@ -1046,9 +1053,6 @@ namespace Hermes
         current_refmaps[i]->set_active_element(current_state->e[i]);
         current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
 
-        // Mark the active element on each mesh in order to prevent assembling on its edges from the other side.
-        if(DG_matrix_forms_present || DG_vector_forms_present)
-          current_state->e[i]->visited = true;
       }
       return;
     }
@@ -1576,11 +1580,10 @@ namespace Hermes
 
       // Init geometry and jacobian*weights.
       double3* tan;
-      geometry = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->marker, eo, tan);
+      geometry = init_geom_surf(reference_mapping, current_state->isurf, current_state->rep->en[current_state->isurf]->marker, eo, tan);
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
-
       order = eo;
       return np;
     }
@@ -1690,7 +1693,7 @@ namespace Hermes
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
-        Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn)
+      Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn)
     {
       _F_;
 
@@ -1707,35 +1710,35 @@ namespace Hermes
         if(spaces[i]->get_mesh()->get_seq() < min_dg_mesh_seq || i == 0)
           min_dg_mesh_seq = spaces[i]->get_mesh()->get_seq();
 
-      
-    // Create neighbor psss, refmaps.
-    std::map<unsigned int, PrecalcShapeset *> npss;
-    std::map<unsigned int, PrecalcShapeset *> nspss;
-    std::map<unsigned int, RefMap *> nrefmap;
+      // Create neighbor psss, refmaps.
+      std::map<unsigned int, PrecalcShapeset *> npss;
+      std::map<unsigned int, PrecalcShapeset *> nspss;
+      std::map<unsigned int, RefMap *> nrefmap;
 
-    // Initialize neighbor precalc shapesets and refmaps.
-    // This is only needed when there are matrix DG forms present.
-    if(DG_matrix_forms_present)
-      for (unsigned int i = 0; i < spaces.size(); i++)
+      // Initialize neighbor precalc shapesets and refmaps.
+      // This is only needed when there are matrix DG forms present.
+      if(DG_matrix_forms_present)
       {
-        PrecalcShapeset* new_ps = new PrecalcShapeset(spaces[i]->get_shapeset());
-        new_ps->set_quad_2d(&g_quad_2d_std);
-        npss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_ps));
+        for (unsigned int i = 0; i < spaces.size(); i++)
+        {
+          PrecalcShapeset* new_ps = new PrecalcShapeset(spaces[i]->get_shapeset());
+          new_ps->set_quad_2d(&g_quad_2d_std);
+          npss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_ps));
 
-        PrecalcShapeset* new_pss = new PrecalcShapeset(new_ps);
-        new_pss->set_quad_2d(&g_quad_2d_std);
-        nspss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_pss));
+          PrecalcShapeset* new_pss = new PrecalcShapeset(new_ps);
+          new_pss->set_quad_2d(&g_quad_2d_std);
+          nspss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_pss));
 
-        RefMap* new_rm = new RefMap();
-        new_rm->set_quad_2d(&g_quad_2d_std);
-        nrefmap.insert(std::pair<unsigned int, RefMap*>(i, new_rm));
+          RefMap* new_rm = new RefMap();
+          new_rm->set_quad_2d(&g_quad_2d_std);
+          nrefmap.insert(std::pair<unsigned int, RefMap*>(i, new_rm));
+        }
       }
 
       for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
       {
         if(current_state->rep->en[current_state->isurf]->marker != 0)
           continue;
-
 
         // Initialize the NeighborSearches.
         // 5 is for bits per page in the array.
@@ -1797,7 +1800,7 @@ namespace Hermes
           if(neighbor_searches.present(i))
             delete neighbor_searches.get(i);
       }
-      
+
       // Deinitialize neighbor pss's, refmaps.
       if(DG_matrix_forms_present)
       {
@@ -1810,289 +1813,298 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i, 
-        PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
-        Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn, 
-        std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches)
+      PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
+      Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn, 
+      std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
+      LightArray<NeighborSearch<Scalar>*>& neighbor_searches)
     {
       _F_;
       // Set the active segment in all NeighborSearches
       for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
+      {
         if(neighbor_searches.present(i))
         {
           neighbor_searches.get(i)->active_segment = neighbor_i;
           neighbor_searches.get(i)->neighb_el = neighbor_searches.get(i)->neighbors[neighbor_i];
           neighbor_searches.get(i)->neighbor_edge = neighbor_searches.get(i)->neighbor_edges[neighbor_i];
         }
+      }
 
-        // Push all the necessary transformations to all functions of this stage.
-        // The important thing is that the transformations to the current subelement are already there.
-        for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
+      // Push all the necessary transformations to all functions of this stage.
+      // The important thing is that the transformations to the current subelement are already there.
+      for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
+      {
+        NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[fns_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
+        if (ns->central_transformations.present(neighbor_i))
+          ns->central_transformations.get(neighbor_i)->apply_on(fn[fns_i]);
+      }
+
+      // For neighbor psss.
+      if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
+      {
+        for(unsigned int idx_i = 0; idx_i < spaces.size(); idx_i++)
         {
-          NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[fns_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
-          if (ns->central_transformations.present(neighbor_i))
-            ns->central_transformations.get(neighbor_i)->apply_on(fn[fns_i]);
+          NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[idx_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
+          npss[idx_i]->set_active_element((*ns->get_neighbors())[neighbor_i]);
+          if (ns->neighbor_transformations.present(neighbor_i))
+            ns->neighbor_transformations.get(neighbor_i)->apply_on(npss[idx_i]);
         }
+      }
 
-        // For neighbor psss.
+      // Also push the transformations to the slave psss and refmaps.
+      for (unsigned int i = 0; i < spaces.size(); i++)
+      {
+        current_spss[i]->set_master_transform();
+        current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
+
+        // Neighbor.
         if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
-          for(unsigned int idx_i = 0; idx_i < spaces.size(); idx_i++)
-          {
-            NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[idx_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
-            npss[idx_i]->set_active_element((*ns->get_neighbors())[neighbor_i]);
-            if (ns->neighbor_transformations.present(neighbor_i))
-              ns->neighbor_transformations.get(neighbor_i)->apply_on(npss[idx_i]);
-          }
+        {
+          nspss[i]->set_active_element(npss[i]->get_active_element());
+          nspss[i]->set_master_transform();
+          nrefmap[i]->set_active_element(npss[i]->get_active_element());
+          nrefmap[i]->force_transform(npss[i]->get_transform(), npss[i]->get_ctm());
+        }
+      }
 
-          // Also push the transformations to the slave psss and refmaps.
-          for (unsigned int i = 0; i < spaces.size(); i++)
-          {
-            current_spss[i]->set_master_transform();
-            current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
+      /***/
+      // The computation takes place here.
+      if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
+      {
+        int order = 20;
 
-            // Neighbor.
-            if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
-            {
-              nspss[i]->set_active_element(npss[i]->get_active_element());
-              nspss[i]->set_master_transform();
-              nrefmap[i]->set_active_element(npss[i]->get_active_element());
-              nrefmap[i]->force_transform(npss[i]->get_transform(), npss[i]->get_ctm());
+        for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
+        {
+          if(!form_to_be_assembled((MatrixForm<Scalar>*)current_mfsurf[current_mfsurf_i], current_state))
+            continue;
+
+          MatrixFormSurf<Scalar>* mfs = current_mfsurf[current_mfsurf_i];
+          if (mfs->areas[0] != H2D_DG_INNER_EDGE)
+            continue;
+          int m = mfs->i;
+          int n = mfs->j;
+
+          // Create the extended shapeset on the union of the central element and its current neighbor.
+          typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], current_als[n]);
+          typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], current_als[m]);
+
+          NeighborSearch<Scalar>* nbs_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq);
+          NeighborSearch<Scalar>* nbs_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq);
+
+          nbs_u->set_quad_order(order);
+          nbs_v->set_quad_order(order);
+
+          // Evaluate the form using just calculated order.
+          Quad2D* quad = current_pss[0]->get_quad_2d();
+          int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
+          int np = quad->get_num_points(eo, current_state->rep->get_mode());
+          double3* pt = quad->get_points(eo, current_state->rep->get_mode());
+
+          // Init geometry.
+          int n_quadrature_points;
+          Geom<double>* geometry = NULL;
+          double* jacobian_x_weights = NULL;
+          n_quadrature_points = init_surface_geometry_points(current_refmaps[mfs->i], order, current_state, geometry, jacobian_x_weights);
+
+          Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_u->neighb_el->marker,
+            nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
+
+          // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+          int prev_size = wf->get_neq() - mfs->u_ext_offset;
+          Func<Scalar>** prev = new Func<Scalar>*[prev_size];
+          if (current_u_ext != NULL)
+          {
+            for (int i = 0; i < prev_size; i++)
+            { 
+              if (current_u_ext[i + mfs->u_ext_offset] != NULL)
+              {
+                neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+                prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
+              }
+              else prev[i] = NULL;
             }
           }
+          else
+            for (int i = 0; i < prev_size; i++)
+              prev[i] = NULL;
 
+          ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
 
-          /***/
-          // The computation takes place here.
-          if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
+          // Precalc shapeset and refmaps used for the evaluation.
+          PrecalcShapeset* fu;
+          PrecalcShapeset* fv;
+          RefMap* ru;
+          RefMap* rv;
+          bool support_neigh_u, support_neigh_v;
+
+          Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
+          for (int i = 0; i < ext_asmlist_v->cnt; i++)
           {
-            int order = 20;
-        
-            for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
+            if (ext_asmlist_v->dof[i] < 0)
+              continue;
+            // Choose the correct shapeset for the test function.
+            if (!ext_asmlist_v->has_support_on_neighbor(i))
             {
-              if(!form_to_be_assembled((MatrixForm<Scalar>*)current_mfsurf[current_mfsurf_i], current_state))
-                continue;
-
-              MatrixFormSurf<Scalar>* mfs = current_mfsurf[current_mfsurf_i];
-              if (mfs->areas[0] != H2D_DG_INNER_EDGE)
-                continue;
-              int m = mfs->i;
-              int n = mfs->j;
-
-              // Create the extended shapeset on the union of the central element and its current neighbor.
-              typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], current_als[n]);
-              typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], current_als[m]);
-              
-              NeighborSearch<Scalar>* nbs_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq);
-              NeighborSearch<Scalar>* nbs_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq);
-
-              // Evaluate the form using just calculated order.
-              Quad2D* quad = current_pss[0]->get_quad_2d();
-              int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
-              int np = quad->get_num_points(eo, current_state->rep->get_mode());
-              double3* pt = quad->get_points(eo, current_state->rep->get_mode());
-
-              // Init geometry.
-              int n_quadrature_points;
-              Geom<double>* geometry = NULL;
-              double* jacobian_x_weights = NULL;
-              n_quadrature_points = init_surface_geometry_points(current_refmaps[mfs->i], order, current_state, geometry, jacobian_x_weights);
-                      
-              Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_u->neighb_el->marker,
-                nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
-                      
-              // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-              int prev_size = wf->get_neq() - mfs->u_ext_offset;
-              Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-              if (current_u_ext != NULL)
-                for (int i = 0; i < prev_size; i++)
-                  if (current_u_ext[i + mfs->u_ext_offset] != NULL)
-                  {
-                    neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
-                    prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
-                  }
-                  else prev[i] = NULL;
+              current_spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
+              fv = current_spss[m];
+              rv = current_refmaps[m];
+              support_neigh_v = false;
+            }
+            else
+            {
+              nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
+              fv = nspss[m];
+              rv = nrefmap[m];
+              support_neigh_v = true;
+            }
+            for (int j = 0; j < ext_asmlist_u->cnt; j++)
+            {
+              // Choose the correct shapeset for the solution function.
+              if (!ext_asmlist_u->has_support_on_neighbor(j))
+              {
+                current_pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
+                fu = current_pss[n];
+                ru = current_refmaps[n];
+                support_neigh_u = false;
+              }
               else
-                for (int i = 0; i < prev_size; i++)
-                  prev[i] = NULL;
-
-              ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order);
-              
-              // Precalc shapeset and refmaps used for the evaluation.
-              PrecalcShapeset* fu;
-              PrecalcShapeset* fv;
-              RefMap* ru;
-              RefMap* rv;
-              bool support_neigh_u, support_neigh_v;
-
-              Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
-              for (int i = 0; i < ext_asmlist_v->cnt; i++)
               {
-                if (ext_asmlist_v->dof[i] < 0)
-                  continue;
-                // Choose the correct shapeset for the test function.
-                if (!ext_asmlist_v->has_support_on_neighbor(i))
-                {
-                  current_spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
-                  fv = current_spss[m];
-                  rv = current_refmaps[m];
-                  support_neigh_v = false;
-                }
-                else
-                {
-                  nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
-                  fv = nspss[m];
-                  rv = nrefmap[m];
-                  support_neigh_v = true;
-                }
-                for (int j = 0; j < ext_asmlist_u->cnt; j++)
-                {
-                  // Choose the correct shapeset for the solution function.
-                  if (!ext_asmlist_u->has_support_on_neighbor(j))
-                  {
-                    current_pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
-                    fu = current_pss[n];
-                    ru = current_refmaps[n];
-                    support_neigh_u = false;
-                  }
-                  else
-                  {
-                    npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
-                    fu = npss[n];
-                    ru = nrefmap[n];
-                    support_neigh_u = true;
-                  }
-
-                  if (ext_asmlist_u->dof[j] >= 0)
-                  {
-                    // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-                    DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(init_fn(fu, ru, order),
-                      support_neigh_u, nbs_u->neighbor_edge.orientation);
-                    DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(init_fn(fv, rv, order),
-                      support_neigh_v, nbs_v->neighbor_edge.orientation);
-
-                    Scalar res = mfs->value(np, jacobian_x_weights, prev, u, v, e, ext) * mfs->scaling_factor;
-  
-                    delete u;
-                    delete v;
-
-                    Scalar val = block_scaling_coeff(mfs) * 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
-                      * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
-                    local_stiffness_matrix[i][j] = val;
-                  }
-                }
-              }
-              
-              // Clean up.
-              for (int i = 0; i < prev_size; i++)
-              {
-                if (prev[i] != NULL)
-                {
-                  prev[i]->free_fn();
-                  delete prev[i];
-                }
+                npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
+                fu = npss[n];
+                ru = nrefmap[n];
+                support_neigh_u = true;
               }
 
-              delete [] prev;
-
-
-              if (ext != NULL)
+              if (ext_asmlist_u->dof[j] >= 0)
               {
-                ext->free();
-                delete ext;
+                // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+                DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(init_fn(fu, ru, nbs_u->get_quad_eo(support_neigh_u)),
+                  support_neigh_u, nbs_u->neighbor_edge.orientation);
+                DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(init_fn(fv, rv, nbs_v->get_quad_eo(support_neigh_v)),
+                  support_neigh_v, nbs_v->neighbor_edge.orientation);
+
+                Scalar res = mfs->value(np, jacobian_x_weights, prev, u, v, e, ext) * mfs->scaling_factor;
+
+                delete u;
+                delete v;
+
+                Scalar val = block_scaling_coeff(mfs) * 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+                  * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
+                local_stiffness_matrix[i][j] = val;
               }
-                   
-              delete e;
-                    
-#pragma omp critical (mat)
-              current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
             }
           }
 
-          if (current_rhs != NULL && DG_vector_forms_present)
+          // Clean up.
+          for (int i = 0; i < prev_size; i++)
           {
-            int order = 20;
-
-            for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
+            if (prev[i] != NULL)
             {
-              VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
-              if (vfs->areas[0] != H2D_DG_INNER_EDGE)
-                continue;
-              int m = vfs->i;
- 
-              if(!form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
-                continue;
+              prev[i]->free_fn();
+              delete prev[i];
+            }
+          }
 
-              // Here we use the standard pss, possibly just transformed by NeighborSearch.
-              for (unsigned int dof_i = 0; dof_i < current_als[m]->cnt; dof_i++)
+          delete [] prev;
+
+
+          if (ext != NULL)
+          {
+            ext->free();
+            delete ext;
+          }
+
+          delete e;
+
+#pragma omp critical (mat)
+          current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
+        }
+      }
+
+      if (current_rhs != NULL && DG_vector_forms_present)
+      {
+        int order = 20;
+
+        for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
+        {
+          VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
+          if (vfs->areas[0] != H2D_DG_INNER_EDGE)
+            continue;
+          int m = vfs->i;
+
+          if(!form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
+            continue;
+
+          // Here we use the standard pss, possibly just transformed by NeighborSearch.
+          for (unsigned int dof_i = 0; dof_i < current_als[m]->cnt; dof_i++)
+          {
+            if (current_als[m]->dof[dof_i] < 0)
+              continue;
+            current_spss[m]->set_active_shape(current_als[m]->idx[dof_i]);
+
+            NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq));
+
+            // Evaluate the form using just calculated order.
+            Quad2D* quad = current_spss[m]->get_quad_2d();
+            int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
+            int np = quad->get_num_points(eo, current_state->rep->get_mode());
+            double3* pt = quad->get_points(eo, current_state->rep->get_mode());
+
+            // Init geometry and jacobian*weights.
+            // Init geometry.
+            int n_quadrature_points;
+            Geom<double>* geometry = NULL;
+            double* jacobian_x_weights = NULL;
+            n_quadrature_points = init_surface_geometry_points(current_refmaps[vfs->i], order, current_state, geometry, jacobian_x_weights);
+
+            Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_v->neighb_el->marker,
+              nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
+
+            // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+            int prev_size = wf->get_neq() - vfs->u_ext_offset;
+            Func<Scalar>** prev = new Func<Scalar>*[prev_size];
+            if (current_u_ext != NULL)
+              for (int i = 0; i < prev_size; i++)
+                if (current_u_ext[i + vfs->u_ext_offset] != NULL)
+                {
+                  neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+                  prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
+                }
+                else prev[i] = NULL;
+            else
+              for (int i = 0; i < prev_size; i++)
+                prev[i] = NULL;
+
+            Func<double>* v = init_fn(current_spss[m], current_refmaps[m], eo);
+            ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
+
+            // Clean up.
+            for (int i = 0; i < prev_size; i++)
+            {
+              if (prev[i] != NULL)
               {
-                if (current_als[m]->dof[dof_i] < 0)
-                  continue;
-                current_spss[m]->set_active_shape(current_als[m]->idx[dof_i]);
+                prev[i]->free_fn();
+                delete prev[i];
+              }
+            }
 
-                NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq));
+            delete [] prev;
 
-                // Evaluate the form using just calculated order.
-                Quad2D* quad = current_spss[m]->get_quad_2d();
-                int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
-                int np = quad->get_num_points(eo, current_state->rep->get_mode());
-                double3* pt = quad->get_points(eo, current_state->rep->get_mode());
+            if (ext != NULL)
+            {
+              ext->free();
+              delete ext;
+            }
 
-                // Init geometry and jacobian*weights.
-                  // Init geometry.
-                int n_quadrature_points;
-                Geom<double>* geometry = NULL;
-                double* jacobian_x_weights = NULL;
-                n_quadrature_points = init_surface_geometry_points(current_refmaps[vfs->i], order, current_state, geometry, jacobian_x_weights);
-                      
-                Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_v->neighb_el->marker,
-                  nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
-
-                // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-                int prev_size = wf->get_neq() - vfs->u_ext_offset;
-                Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-                if (current_u_ext != NULL)
-                  for (int i = 0; i < prev_size; i++)
-                    if (current_u_ext[i + vfs->u_ext_offset] != NULL)
-                    {
-                      neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
-                      prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
-                    }
-                    else prev[i] = NULL;
-                else
-                  for (int i = 0; i < prev_size; i++)
-                    prev[i] = NULL;
-
-                Func<double>* v = init_fn(current_spss[m], current_refmaps[m], eo);
-                ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order);
-
-                // Clean up.
-                for (int i = 0; i < prev_size; i++)
-                {
-                  if (prev[i] != NULL)
-                  {
-                    prev[i]->free_fn();
-                    delete prev[i];
-                  }
-                }
-
-                delete [] prev;
-
-                if (ext != NULL)
-                {
-                  ext->free();
-                  delete ext;
-                }
-
-                delete e;
+            delete e;
 
 #pragma omp critical (rhs)
-                current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(np, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
-              }
-            }
+            current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(np, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
           }
+        }
+      }
     }
 
     template<typename Scalar>
@@ -2390,99 +2402,99 @@ namespace Hermes
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_DG_matrix_forms(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
-        Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, std::map<unsigned int, PrecalcShapeset*> npss,
-        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches)
+      Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, std::map<unsigned int, PrecalcShapeset*> npss,
+      std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches)
     {
       _F_;
       /*
       for (unsigned int ww = 0; ww < wf->mfsurf.size(); ww++)
       {
-        MatrixFormSurf<Scalar>* mfs = mfsurf[ww];
-        if (mfs->areas[0] != H2D_DG_INNER_EDGE)
-          continue;
-        int m = mfs->i;
-        int n = mfs->j;
+      MatrixFormSurf<Scalar>* mfs = mfsurf[ww];
+      if (mfs->areas[0] != H2D_DG_INNER_EDGE)
+      continue;
+      int m = mfs->i;
+      int n = mfs->j;
 
-        if (isempty[m] || isempty[n])
-          continue;
-        if (fabs(mfs->scaling_factor) < 1e-12)
-          continue;
+      if (isempty[m] || isempty[n])
+      continue;
+      if (fabs(mfs->scaling_factor) < 1e-12)
+      continue;
 
-        surf_pos.base = trav_base;
+      surf_pos.base = trav_base;
 
-        // Create the extended shapeset on the union of the central element and its current neighbor.
-        typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
-        typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
+      // Create the extended shapeset on the union of the central element and its current neighbor.
+      typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = neighbor_searches.get(spaces[n]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[n], al[n]);
+      typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq)->create_extended_asmlist(spaces[m], al[m]);
 
-        // If a block scaling table is provided, and if the scaling coefficient
-        // A_mn for this block is zero, then the form does not need to be assembled.
-        double block_scaling_coeff = 1.;
-        if (block_weights != NULL)
-        {
-          block_scaling_coeff = block_weights->get_A(m, n);
-          if (fabs(block_scaling_coeff) < 1e-12)
-            continue;
-        }
+      // If a block scaling table is provided, and if the scaling coefficient
+      // A_mn for this block is zero, then the form does not need to be assembled.
+      double block_scaling_coeff = 1.;
+      if (block_weights != NULL)
+      {
+      block_scaling_coeff = block_weights->get_A(m, n);
+      if (fabs(block_scaling_coeff) < 1e-12)
+      continue;
+      }
 
-        // Precalc shapeset and refmaps used for the evaluation.
-        PrecalcShapeset* fu;
-        PrecalcShapeset* fv;
-        RefMap* ru;
-        RefMap* rv;
-        bool support_neigh_u, support_neigh_v;
+      // Precalc shapeset and refmaps used for the evaluation.
+      PrecalcShapeset* fu;
+      PrecalcShapeset* fv;
+      RefMap* ru;
+      RefMap* rv;
+      bool support_neigh_u, support_neigh_v;
 
-        Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
-        for (int i = 0; i < ext_asmlist_v->cnt; i++)
-        {
-          if (ext_asmlist_v->dof[i] < 0)
-            continue;
-          // Choose the correct shapeset for the test function.
-          if (!ext_asmlist_v->has_support_on_neighbor(i))
-          {
-            spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
-            fv = spss[m];
-            rv = refmap[m];
-            support_neigh_v = false;
-          }
-          else
-          {
-            nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
-            fv = nspss[m];
-            rv = nrefmap[m];
-            support_neigh_v = true;
-          }
-          for (int j = 0; j < ext_asmlist_u->cnt; j++)
-          {
-            // Choose the correct shapeset for the solution function.
-            if (!ext_asmlist_u->has_support_on_neighbor(j))
-            {
-              pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
-              fu = pss[n];
-              ru = refmap[n];
-              support_neigh_u = false;
-            }
-            else
-            {
-              npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
-              fu = npss[n];
-              ru = nrefmap[n];
-              support_neigh_u = true;
-            }
+      Scalar **local_stiffness_matrix = get_matrix_buffer(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
+      for (int i = 0; i < ext_asmlist_v->cnt; i++)
+      {
+      if (ext_asmlist_v->dof[i] < 0)
+      continue;
+      // Choose the correct shapeset for the test function.
+      if (!ext_asmlist_v->has_support_on_neighbor(i))
+      {
+      spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
+      fv = spss[m];
+      rv = refmap[m];
+      support_neigh_v = false;
+      }
+      else
+      {
+      nspss[m]->set_active_shape(ext_asmlist_v->neighbor_al->idx[i - ext_asmlist_v->central_al->cnt]);
+      fv = nspss[m];
+      rv = nrefmap[m];
+      support_neigh_v = true;
+      }
+      for (int j = 0; j < ext_asmlist_u->cnt; j++)
+      {
+      // Choose the correct shapeset for the solution function.
+      if (!ext_asmlist_u->has_support_on_neighbor(j))
+      {
+      pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
+      fu = pss[n];
+      ru = refmap[n];
+      support_neigh_u = false;
+      }
+      else
+      {
+      npss[n]->set_active_shape(ext_asmlist_u->neighbor_al->idx[j - ext_asmlist_u->central_al->cnt]);
+      fu = npss[n];
+      ru = nrefmap[n];
+      support_neigh_u = true;
+      }
 
-            if (ext_asmlist_u->dof[j] >= 0)
-            {
-              if (mat != NULL)
-              {
-                Scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
-                  * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
-                  * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
-                local_stiffness_matrix[i][j] = val;
-              }
-            }
-          }
-        }
-        if (mat != NULL)
-          mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
+      if (ext_asmlist_u->dof[j] >= 0)
+      {
+      if (mat != NULL)
+      {
+      Scalar val = block_scaling_coeff * eval_dg_form(mfs, u_ext, fu, fv, refmap[n], ru, rv, support_neigh_u, support_neigh_v, &surf_pos, neighbor_searches, stage.meshes[n]->get_seq() - min_dg_mesh_seq, stage.meshes[m]->get_seq() - min_dg_mesh_seq)
+      * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+      * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
+      local_stiffness_matrix[i][j] = val;
+      }
+      }
+      }
+      }
+      if (mat != NULL)
+      mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
       }
       */
     }
@@ -2618,7 +2630,6 @@ namespace Hermes
     {
       return this->transformation;
     }
-
 
     template class HERMES_API DiscreteProblem<double>;
     template class HERMES_API DiscreteProblem<std::complex<double> >;
