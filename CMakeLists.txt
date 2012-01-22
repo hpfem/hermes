@@ -32,7 +32,7 @@ project(hermes)
 
 	# Reporting and logging:
 		set(REPORT_WITH_LOGO        YES)  #logo will be shown
-		set(REPORT_TO_FILE          YES)  #reports will be mirrored to a file
+		set(REPORT_TO_FILE          NO)  #reports will be mirrored to a file
 		set(REPORT_ALL              NO)   #do not report all events, just selected ones
 		set(REPORT_WARNING          YES)  #warnings will be reported
 		set(REPORT_INTR_WARNING     NO)   #warnings about itegration points will NOT be reported
