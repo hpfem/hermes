@@ -1,0 +1,20 @@
+#! /bin/sh
+
+set -e
+
+if [ "$FEMHUB_LOCAL" = "" ]; then
+   echo "FEMHUB_LOCAL undefined ... exiting";
+   exit 1
+fi
+
+#cd hermes2d
+
+# Set the hermes2d build options:
+python -c 'print "set(TARGET_ROOT /home/lab/repo/git/femhub-distribution/local)\nset(HERMES_COMMON_WITH_TESTS no)\nset(H2D_WITH_TEST_EXAMPLES no)\nset(H2D_WITH_TESTS no)\nset(HERMES_COMMON_DEBUG no)\nset(H2D_DEBUG no)\nset(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)\nset(WITH_TESTS no)\nset(REPORT_WITH_LOGO no)\nset(WITH_BENCHMARKS no)"' > CMake.vars
+
+#cat CMake.vars > hermes_common/CMake.vars
+
+cmake -DCMAKE_INSTALL_PREFIX="$FEMHUB_LOCAL" .
+
+make
+make install
