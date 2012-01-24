@@ -351,7 +351,7 @@ namespace Hermes
         this->eps = eps;
 
         Transformable* fns[2] = { xsln, ysln };
-        Traverse trav;
+        Traverse trav(true);
 
         // estimate the required number of vertices and triangles
         // (based on the assumption that the linear mesh will be
