@@ -1618,11 +1618,20 @@ namespace Hermes
       _F_;
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       for(int i = 0; i < prev_size; i++)
+      {
         oi[i]->free_ord();
-      delete [] oi;
+        delete oi[i];
+      }
+      
+      oext->nf = form->ext.size();
+      for (int i = 0; i < oext->nf; i++)
+      {
+        oext->fn[i]->free_ord();
+        delete oext->fn[i];
+      }
 
-      if (oext != NULL)
-        oext->free_ord();
+      if(oext->nf > 0)
+        delete [] oext->fn;
     }
 
     template<typename Scalar>
