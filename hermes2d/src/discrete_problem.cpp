@@ -958,9 +958,9 @@ namespace Hermes
         for(state_i = 0; state_i < num_states; state_i++)
         {
           Traverse::State current_state;
-          
+
 #pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+          current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
           current_pss = pss[omp_get_thread_num()];
           current_spss = spss[omp_get_thread_num()];
@@ -1690,151 +1690,150 @@ namespace Hermes
       Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn)
     {
       _F_;
-        // Determine the minimum mesh seq.
-        unsigned int min_dg_mesh_seq = 0;
-        for(unsigned int i = 0; i < spaces.size(); i++)
-          if(spaces[i]->get_mesh()->get_seq() < min_dg_mesh_seq || i == 0)
-            min_dg_mesh_seq = spaces[i]->get_mesh()->get_seq();
+      // Determine the minimum mesh seq.
+      unsigned int min_dg_mesh_seq = 0;
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        if(spaces[i]->get_mesh()->get_seq() < min_dg_mesh_seq || i == 0)
+          min_dg_mesh_seq = spaces[i]->get_mesh()->get_seq();
 
-        // Create neighbor psss, refmaps.
-        std::map<unsigned int, PrecalcShapeset *> npss;
-        std::map<unsigned int, PrecalcShapeset *> nspss;
-        std::map<unsigned int, RefMap *> nrefmap;
+      // Create neighbor psss, refmaps.
+      std::map<unsigned int, PrecalcShapeset *> npss;
+      std::map<unsigned int, PrecalcShapeset *> nspss;
+      std::map<unsigned int, RefMap *> nrefmap;
 
-        // Initialize neighbor precalc shapesets and refmaps.
-        // This is only needed when there are matrix DG forms present.
+      // Initialize neighbor precalc shapesets and refmaps.
+      // This is only needed when there are matrix DG forms present.
 
 
-        if(DG_matrix_forms_present)
+      if(DG_matrix_forms_present)
+      {
+        for (unsigned int i = 0; i < spaces.size(); i++)
         {
-          for (unsigned int i = 0; i < spaces.size(); i++)
-          {
-            PrecalcShapeset* new_ps = new PrecalcShapeset(spaces[i]->shapeset);
-            npss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_ps));
-          }
+          PrecalcShapeset* new_ps = new PrecalcShapeset(spaces[i]->shapeset);
+          npss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_ps));
         }
+      }
 
-        if(DG_matrix_forms_present)
+      if(DG_matrix_forms_present)
+      {
+        for (unsigned int i = 0; i < spaces.size(); i++)
         {
-          for (unsigned int i = 0; i < spaces.size(); i++)
-          {
-            PrecalcShapeset* new_pss = new PrecalcShapeset(npss[i]);
-            nspss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_pss));
-          }
+          PrecalcShapeset* new_pss = new PrecalcShapeset(npss[i]);
+          nspss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_pss));
         }
+      }
 
 
-        if(DG_matrix_forms_present)
+      if(DG_matrix_forms_present)
+      {
+        for (unsigned int i = 0; i < spaces.size(); i++)
         {
-          for (unsigned int i = 0; i < spaces.size(); i++)
-          {
-            RefMap* new_rm = new RefMap();
-            new_rm->set_quad_2d(&g_quad_2d_std);
-            nrefmap.insert(std::pair<unsigned int, RefMap*>(i, new_rm));
-          }
+          RefMap* new_rm = new RefMap();
+          new_rm->set_quad_2d(&g_quad_2d_std);
+          nrefmap.insert(std::pair<unsigned int, RefMap*>(i, new_rm));
         }
-                  
-        bool** processed = new bool*[current_state->rep->get_num_surf()];
-        LightArray<NeighborSearch<Scalar>*>** neighbor_searches = new LightArray<NeighborSearch<Scalar>*>*[current_state->rep->get_num_surf()];
-          (5);
-        unsigned int* num_neighbors = new unsigned int[current_state->rep->get_num_surf()];
+      }
+
+      bool** processed = new bool*[current_state->rep->get_num_surf()];
+      LightArray<NeighborSearch<Scalar>*>** neighbor_searches = new LightArray<NeighborSearch<Scalar>*>*[current_state->rep->get_num_surf()];
+      (5);
+      unsigned int* num_neighbors = new unsigned int[current_state->rep->get_num_surf()];
 
 #pragma omp critical (DG)
+      {
+        for(unsigned int i = 0; i < current_state->num; i++)
+          current_state->e[i]->visited = true;
+
+        for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
         {
           if(current_state->rep->en[current_state->isurf]->marker == 0)
           {
-            for(unsigned int i = 0; i < current_state->num; i++)
-                    current_state->e[i]->visited = true;
+            neighbor_searches[current_state->isurf] = new LightArray<NeighborSearch<Scalar>*>(5);
 
-            for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+            init_neighbors((*neighbor_searches[current_state->isurf]), current_state, min_dg_mesh_seq);
+
+            // Create a multimesh tree;
+            NeighborNode* root = new NeighborNode(NULL, 0);
+            build_multimesh_tree(root, (*neighbor_searches[current_state->isurf]));
+
+            // Update all NeighborSearches according to the multimesh tree.
+            // After this, all NeighborSearches in neighbor_searches should have the same count
+            // of neighbors and proper set of transformations
+            // for the central and the neighbor element(s) alike.
+            // Also check that every NeighborSearch has the same number of neighbor elements.
+            num_neighbors[current_state->isurf] = 0;
+            for(unsigned int i = 0; i < (*neighbor_searches[current_state->isurf]).get_size(); i++)
             {
-              neighbor_searches[current_state->isurf] = new LightArray<NeighborSearch<Scalar>*>(5);
-            
-              init_neighbors((*neighbor_searches[current_state->isurf]), current_state, min_dg_mesh_seq);
-            
-              // Create a multimesh tree;
-              NeighborNode* root = new NeighborNode(NULL, 0);
-              build_multimesh_tree(root, (*neighbor_searches[current_state->isurf]));
+              if((*neighbor_searches[current_state->isurf]).present(i))
+              {
+                NeighborSearch<Scalar>* ns = (*neighbor_searches[current_state->isurf]).get(i);
+                update_neighbor_search(ns, root);
+                if(num_neighbors[current_state->isurf] == 0)
+                  num_neighbors[current_state->isurf] = ns->n_neighbors;
+                if(ns->n_neighbors != num_neighbors[current_state->isurf])
+                  error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
+              }
+            }
 
-              // Update all NeighborSearches according to the multimesh tree.
-              // After this, all NeighborSearches in neighbor_searches should have the same count
-              // of neighbors and proper set of transformations
-              // for the central and the neighbor element(s) alike.
-              // Also check that every NeighborSearch has the same number of neighbor elements.
-              num_neighbors[current_state->isurf] = 0;
+            // Delete the multimesh tree;
+            delete root;
+
+            processed[current_state->isurf] = new bool[num_neighbors[current_state->isurf]];
+
+            for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
+            {
+              // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
+              // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
+              // will be marked as visited, even though the edge was not calculated.
+              processed[current_state->isurf][neighbor_i] = true;
               for(unsigned int i = 0; i < (*neighbor_searches[current_state->isurf]).get_size(); i++)
               {
                 if((*neighbor_searches[current_state->isurf]).present(i))
                 {
-                  NeighborSearch<Scalar>* ns = (*neighbor_searches[current_state->isurf]).get(i);
-                  update_neighbor_search(ns, root);
-                  if(num_neighbors[current_state->isurf] == 0)
-                    num_neighbors[current_state->isurf] = ns->n_neighbors;
-                  if(ns->n_neighbors != num_neighbors[current_state->isurf])
-                    error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
-                }
-              }
-            
-              // Delete the multimesh tree;
-              delete root;
-
-              processed[current_state->isurf] = new bool[num_neighbors[current_state->isurf]];
-              
-              for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
-              {
-                // If the active segment has already been processed (when the neighbor element was assembled), it is skipped.
-                // We test all neighbor searches, because in the case of intra-element edge, the neighboring (the same as central) element
-                // will be marked as visited, even though the edge was not calculated.
-                processed[current_state->isurf][neighbor_i] = true;
-                for(unsigned int i = 0; i < (*neighbor_searches[current_state->isurf]).get_size(); i++)
-                {
-                  if((*neighbor_searches[current_state->isurf]).present(i))
+                  if(!(*neighbor_searches[current_state->isurf]).get(i)->neighbors.at(neighbor_i)->visited)
                   {
-                    std::cout << current_state->e[i]->id << ' ' << (current_state->e[i]->visited ? 'a' : 'n') << ' ' << (*neighbor_searches[current_state->isurf]).get(i)->neighbors.at(neighbor_i)->id << ' ' << ((*neighbor_searches[current_state->isurf]).get(i)->neighbors.at(neighbor_i)->visited ? 'a' : 'n') << std::endl;
-                    if(!(*neighbor_searches[current_state->isurf]).get(i)->neighbors.at(neighbor_i)->visited)
-                    {
-                      processed[current_state->isurf][neighbor_i] = false;
-                      break;
-                    }
+                    processed[current_state->isurf][neighbor_i] = false;
+                    break;
                   }
                 }
               }
             }
           }
         }
+      }
 
-        for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+      for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+      {
+        if(current_state->rep->en[current_state->isurf]->marker != 0)
+          continue;
+
+        for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
         {
-          if(current_state->rep->en[current_state->isurf]->marker != 0)
+          if(!DG_vector_forms_present && processed[current_state->isurf][neighbor_i])
             continue;
 
-          for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
-          {
-            if(!DG_vector_forms_present && processed[current_state->isurf][neighbor_i])
-              continue;
-
-            assemble_DG_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, 
-              current_state, current_mfsurf, current_vfsurf, fn,
-              npss, nspss, nrefmap, (*neighbor_searches[current_state->isurf]), min_dg_mesh_seq);
-          }
-
-          // Delete the neighbor_searches array.
-          delete neighbor_searches[current_state->isurf];
-          delete [] processed[current_state->isurf];
+          assemble_DG_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, 
+            current_state, current_mfsurf, current_vfsurf, fn,
+            npss, nspss, nrefmap, (*neighbor_searches[current_state->isurf]), min_dg_mesh_seq);
         }
 
-        delete [] processed;
-        delete [] neighbor_searches;
+        // Delete the neighbor_searches array.
+        delete neighbor_searches[current_state->isurf];
+        delete [] processed[current_state->isurf];
+      }
 
-        // Deinitialize neighbor pss's, refmaps.
-        if(DG_matrix_forms_present)
-        {
-          for(std::map<unsigned int, PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
-            delete it->second;
-          for(std::map<unsigned int, PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
-            delete it->second;
-          for(std::map<unsigned int, RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
-            delete it->second;
+      delete [] processed;
+      delete [] neighbor_searches;
+
+      // Deinitialize neighbor pss's, refmaps.
+      if(DG_matrix_forms_present)
+      {
+        for(std::map<unsigned int, PrecalcShapeset *>::iterator it = nspss.begin(); it != nspss.end(); it++)
+          delete it->second;
+        for(std::map<unsigned int, PrecalcShapeset *>::iterator it = npss.begin(); it != npss.end(); it++)
+          delete it->second;
+        for(std::map<unsigned int, RefMap *>::iterator it = nrefmap.begin(); it != nrefmap.end(); it++)
+          delete it->second;
       }
     }
 
