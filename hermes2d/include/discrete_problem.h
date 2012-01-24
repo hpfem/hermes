@@ -201,9 +201,6 @@ namespace Hermes
       /// Matrix structure as well as spaces and weak formulation is up-to-date.
       bool is_up_to_date();
 
-      /// Minimum identifier of the meshes used in DG assembling in one stage.
-      unsigned int min_dg_mesh_seq;
-
       /// Weak formulation.
       const WeakForm<Scalar>* wf;
 
@@ -263,7 +260,7 @@ namespace Hermes
         PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
         Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn, 
         std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+        LightArray<NeighborSearch<Scalar>*>& neighbor_searches, unsigned int min_dg_mesh_seq);
 
       /// Assemble DG matrix forms.
       void assemble_DG_matrix_forms(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
@@ -305,10 +302,10 @@ namespace Hermes
       /// Initialize external functions for DG forms.
       ExtData<Scalar>* init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
-        int order);
+        int order, unsigned int min_dg_mesh_seq);
 
       /// Initialize neighbors.
-      void init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Traverse::State* current_state);
+      void init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Traverse::State* current_state, unsigned int min_dg_mesh_seq);
 
       /// Initialize the tree for traversing multimesh neighbors.
       void build_multimesh_tree(NeighborNode* root, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
