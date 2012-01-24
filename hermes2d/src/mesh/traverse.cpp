@@ -149,24 +149,6 @@ namespace Hermes
       memcpy(this->sub_idx, other->sub_idx, num * sizeof(uint64_t));
       memcpy(this->bnd, other->bnd, 4 * sizeof(bool));
 
-      /*
-      if(er != NULL)
-        delete [] er;
-      this->er = new Rect[num];
-      for(int i = 0; i < num; i++)
-      {
-        this->er[i].b = other->er[i].b;
-        this->er[i].t = other->er[i].t;
-        this->er[i].r = other->er[i].r;
-        this->er[i].l = other->er[i].l;
-      }
-
-      this->cr.b = other->cr.b;
-      this->cr.t = other->cr.t;
-      this->cr.r = other->cr.r;
-      this->cr.l = other->cr.l;
-      */
-
       this->rep = other->rep;
       this->visited = other->visited;
       this->isurf = other->isurf;
@@ -538,6 +520,7 @@ namespace Hermes
           delete [] current_sons;
         }
       }
+      this->finish();
     }
 
     Traverse::State* Traverse::get_next_state(int* top_by_ref, int* id_by_ref)

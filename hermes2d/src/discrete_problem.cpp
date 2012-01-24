@@ -1326,6 +1326,7 @@ namespace Hermes
 
         // Cleanup.
         deinit_ext_orders(form, u_ext_ord, &ext_ord);
+        delete [] u_ext_ord;
         ou->free_ord();
         delete ou;
         ov->free_ord();
@@ -1481,6 +1482,7 @@ namespace Hermes
 
         // Cleanup.
         deinit_ext_orders(form, u_ext_ord, &ext_ord);
+        delete [] u_ext_ord;
         ov->free_ord();
         delete ov;
       }
