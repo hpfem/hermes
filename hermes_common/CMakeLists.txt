@@ -103,9 +103,6 @@ project(hermes_common)
 	# and set its build properties (compile and link flags, installation directories).
 	macro(BUILD_COMMON_LIB HERMES_COMMON_LIB BUILD_FLAGS)
 		add_library(${HERMES_COMMON_LIB} SHARED ${SRC} ${HEADERS})
-		if(NOT REPORT_TO_FILE)
-			set(BUILD_FLAGS "${BUILD_FLAGS} -DHERMES_REPORT_NO_FILE")
-		endif(NOT REPORT_TO_FILE)
 		set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
 
 		# Link with all third party libraries corresponding to selected configuration
