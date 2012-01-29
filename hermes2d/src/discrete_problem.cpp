@@ -1913,13 +1913,14 @@ namespace Hermes
       // The computation takes place here.
       if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
       {
-        int order = 20;
-
         for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
         {
           if(!form_to_be_assembled((MatrixForm<Scalar>*)current_mfsurf[current_mfsurf_i], current_state))
             continue;
-
+          
+          int order_base = 20;
+          int order = 20;
+        
           MatrixFormSurf<Scalar>* mfs = current_mfsurf[current_mfsurf_i];
           if (mfs->areas[0] != H2D_DG_INNER_EDGE)
             continue;
@@ -1946,7 +1947,7 @@ namespace Hermes
           int n_quadrature_points;
           Geom<double>* geometry = NULL;
           double* jacobian_x_weights = NULL;
-          n_quadrature_points = init_surface_geometry_points(current_refmaps[mfs->i], order, current_state, geometry, jacobian_x_weights);
+          n_quadrature_points = init_surface_geometry_points(current_refmaps[mfs->i], order_base, current_state, geometry, jacobian_x_weights);
 
           Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_u->neighb_el->marker,
             nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
@@ -2039,6 +2040,10 @@ namespace Hermes
             }
           }
 
+          
+          #pragma omp critical (mat)
+          current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
+          
           // Clean up.
           for (int i = 0; i < prev_size; i++)
           {
@@ -2060,18 +2065,16 @@ namespace Hermes
 
           e->free();
           delete e;
-
-#pragma omp critical (mat)
-          current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
         }
       }
 
       if (current_rhs != NULL && DG_vector_forms_present)
       {
-        int order = 20;
-
         for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
         {
+          int order_base = 20;
+          int order = 20;
+
           VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
           if (vfs->areas[0] != H2D_DG_INNER_EDGE)
             continue;
@@ -2080,6 +2083,41 @@ namespace Hermes
           if(!form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
             continue;
 
+          ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order, min_dg_mesh_seq);
+            
+          NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq));
+
+          // Evaluate the form using just calculated order.
+          Quad2D* quad = current_spss[m]->get_quad_2d();
+          int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
+          int np = quad->get_num_points(eo, current_state->rep->get_mode());
+          double3* pt = quad->get_points(eo, current_state->rep->get_mode());
+
+          // Init geometry and jacobian*weights.
+          // Init geometry.
+          int n_quadrature_points;
+          Geom<double>* geometry = NULL;
+          double* jacobian_x_weights = NULL;
+          n_quadrature_points = init_surface_geometry_points(current_refmaps[vfs->i], order_base, current_state, geometry, jacobian_x_weights);
+
+          Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_v->neighb_el->marker,
+            nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
+
+          // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
+          int prev_size = wf->get_neq() - vfs->u_ext_offset;
+          Func<Scalar>** prev = new Func<Scalar>*[prev_size];
+          if (current_u_ext != NULL)
+            for (int i = 0; i < prev_size; i++)
+              if (current_u_ext[i + vfs->u_ext_offset] != NULL)
+              {
+                neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
+                prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
+              }
+              else prev[i] = NULL;
+          else
+            for (int i = 0; i < prev_size; i++)
+              prev[i] = NULL;
+
           // Here we use the standard pss, possibly just transformed by NeighborSearch.
           for (unsigned int dof_i = 0; dof_i < current_als[m]->cnt; dof_i++)
           {
@@ -2087,68 +2125,35 @@ namespace Hermes
               continue;
             current_spss[m]->set_active_shape(current_als[m]->idx[dof_i]);
 
-            NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq));
-
-            // Evaluate the form using just calculated order.
-            Quad2D* quad = current_spss[m]->get_quad_2d();
-            int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
-            int np = quad->get_num_points(eo, current_state->rep->get_mode());
-            double3* pt = quad->get_points(eo, current_state->rep->get_mode());
-
-            // Init geometry and jacobian*weights.
-            // Init geometry.
-            int n_quadrature_points;
-            Geom<double>* geometry = NULL;
-            double* jacobian_x_weights = NULL;
-            n_quadrature_points = init_surface_geometry_points(current_refmaps[vfs->i], order, current_state, geometry, jacobian_x_weights);
-
-            Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_v->neighb_el->marker,
-              nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
-
-            // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-            int prev_size = wf->get_neq() - vfs->u_ext_offset;
-            Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-            if (current_u_ext != NULL)
-              for (int i = 0; i < prev_size; i++)
-                if (current_u_ext[i + vfs->u_ext_offset] != NULL)
-                {
-                  neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
-                  prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
-                }
-                else prev[i] = NULL;
-            else
-              for (int i = 0; i < prev_size; i++)
-                prev[i] = NULL;
-
             Func<double>* v = init_fn(current_spss[m], current_refmaps[m], eo);
-            ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order, min_dg_mesh_seq);
-
-            // Clean up.
-            for (int i = 0; i < prev_size; i++)
-            {
-              if (prev[i] != NULL)
-              {
-                prev[i]->free_fn();
-                delete prev[i];
-              }
-            }
-
-            delete [] prev;
-
-            if (ext != NULL)
-            {
-              ext->free();
-              delete ext;
-            }
-
-            e->free();
-            delete e;
-
+            
 #pragma omp critical (rhs)
             current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(np, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
+
             v->free_fn();
             delete v;
           }
+
+          // Clean up.
+          for (int i = 0; i < prev_size; i++)
+          {
+            if (prev[i] != NULL)
+            {
+              prev[i]->free_fn();
+              delete prev[i];
+            }
+          }
+
+          delete [] prev;
+
+          if (ext != NULL)
+          {
+            ext->free();
+            delete ext;
+          }
+
+          e->free();
+          delete e;
         }
       }
 
@@ -2198,7 +2203,7 @@ namespace Hermes
     {
       _F_;
       // Initialize the NeighborSearches.
-      for(unsigned int i = 0; i < current_state->num; i++)
+      for(unsigned int i = 0; i < spaces.size(); i++)
       {
         if(i > 0 && spaces[i - 1]->get_mesh()->get_seq() == spaces[i]->get_mesh()->get_seq())
           continue;
