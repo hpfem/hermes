@@ -506,6 +506,9 @@ namespace Hermes
 
       void Linearizer::process_solution(MeshFunction<double>* sln, int item, double eps)
       {
+        if (item == 0){
+          throw Exceptions::ValueException("item",item,1);
+        }
         lock_data();
         Hermes::TimePeriod time_period;
 
