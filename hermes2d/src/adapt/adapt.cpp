@@ -212,26 +212,50 @@ namespace Hermes
       int num_priority_elem = 0; //a number of elements that were processed using priority queue
 
       bool first_regular_element = true; //true if first regular element was not processed yet
-      int inx_regular_element = 0;
-      while (inx_regular_element < num_act_elems || !priority_queue.empty())
+
+      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[omp_get_max_threads()];
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
+        global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
+        for (unsigned int j = 0; j < refinement_selectors.size(); j++)
+          global_refinement_selectors[i][j] = refinement_selectors[j]->clone();
+      }
+
+      RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
+
+      double t0 = 0.0;
+      double t1 = 0.0;
+
+#pragma omp parallel private(current_refinement_selectors)
+      for(int inx_regular_element = 0; inx_regular_element < num_act_elems || !priority_queue.empty();)
+      {
+        cpu_time.tick();
+
+        current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
         int id, comp, inx_element;
 
         //get element identification
         if (priority_queue.empty())
         {
-          id = regular_queue[inx_regular_element].id;
-          comp = regular_queue[inx_regular_element].comp;
-          inx_element = inx_regular_element;
-          inx_regular_element++;
+#pragma omp critical (adapt_regular_queue)
+          {
+            id = regular_queue[inx_regular_element].id;
+            comp = regular_queue[inx_regular_element].comp;
+            inx_element = inx_regular_element;
+            inx_regular_element++;
+          }
         }
         else
         {
-          id = priority_queue.front().id;
-          comp = priority_queue.front().comp;
-          inx_element = -1;
-          priority_queue.pop();
-          num_priority_elem++;
+#pragma omp critical (adapt_priority_queue)
+          {
+            id = priority_queue.front().id;
+            comp = priority_queue.front().comp;
+            inx_element = -1;
+            priority_queue.pop();
+            num_priority_elem++;
+          }
         }
         num_exam_elem++;
 
@@ -242,53 +266,71 @@ namespace Hermes
 
         if (!should_ignore_element(inx_element, mesh, e))
         {
+          bool error_level_reached = false;
+
           //check if adaptivity loop should end
           if (inx_element >= 0)
           {
             //prepare error threshold for strategy 1
-            if (first_regular_element)
+#pragma omp critical (check_first_regular_element)
             {
-              error_squared_threshod = thr * err_squared;
-              first_regular_element = false;
+              if (first_regular_element)
+              {
+                error_squared_threshod = thr * err_squared;
+                first_regular_element = false;
+              }
             }
 
-            // first refinement strategy:
-            // refine elements until prescribed amount of error is processed
-            // if more elements have similar error refine all to keep the mesh symmetric
-            if ((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
-              && fabs((err_squared - err0_squared)/err0_squared) > 1e-3) break;
+#pragma omp critical (check_processed_error_squared)
+            {
+              // first refinement strategy:
+              // refine elements until prescribed amount of error is processed
+              // if more elements have similar error refine all to keep the mesh symmetric
+              if ((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
+                && fabs((err_squared - err0_squared)/err0_squared) > 1e-3) 
+                error_level_reached = true;
 
-            // second refinement strategy:
-            // refine all elements whose error is bigger than some portion of maximal error
-            if ((strat == 1) && (err_squared < error_squared_threshod)) break;
+              // second refinement strategy:
+              // refine all elements whose error is bigger than some portion of maximal error
+              if ((strat == 1) && (err_squared < error_squared_threshod))
+                error_level_reached = true;
 
-            if ((strat == 2) && (err_squared < thr)) break;
+              if ((strat == 2) && (err_squared < thr))
+                error_level_reached = true;
 
-            if ((strat == 3) &&
-              ( (err_squared < error_squared_threshod) ||
-              ( processed_error_squared > 1.5 * to_be_processed )) ) break;
+              if ((strat == 3) && ((err_squared < error_squared_threshod) || (processed_error_squared > 1.5 * to_be_processed)))
+                error_level_reached = true;
+            }
           }
 
-          // get refinement suggestion
-          ElementToRefine elem_ref(id, comp);
-          int current = this->spaces[comp]->get_element_order(id);
-          // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-          bool refined = refinement_selectors[comp]->select_refinement(e, current, rsln[comp], elem_ref);
-
-          //add to a list of elements that are going to be refined
-          if (can_refine_element(mesh, e, refined, elem_ref) )
+          if(!error_level_reached)
           {
-            idx[id][comp] = (int)elem_inx_to_proc.size();
-            elem_inx_to_proc.push_back(elem_ref);
-            err0_squared = err_squared;
-            processed_error_squared += err_squared;
-            spaces[comp]->edata[elem_ref.id].changed_in_last_adaptation = true;
+            // get refinement suggestion
+            ElementToRefine elem_ref(id, comp);
+            int current = this->spaces[comp]->get_element_order(id);
+            // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
+            t0 += cpu_time.tick().last();
+            bool refined = current_refinement_selectors[comp]->select_refinement(e, current, rsln[comp], elem_ref);
+            t1 += cpu_time.tick().last();
+            //add to a list of elements that are going to be refined
+            if (can_refine_element(mesh, e, refined, elem_ref) )
+            {
+              idx[id][comp] = (int)elem_inx_to_proc.size();
+              elem_inx_to_proc.push_back(elem_ref);
+              err0_squared = err_squared;
+#pragma omp critical (check_processed_error_squared)
+              {
+                processed_error_squared += err_squared;
+              }
+              spaces[comp]->edata[elem_ref.id].changed_in_last_adaptation = true;
+            }
+            else
+            {
+              debug_log("Element (id:%d, comp:%d) not changed", e->id, comp);
+              num_not_changed++;
+            }
           }
-          else
-          {
-            debug_log("Element (id:%d, comp:%d) not changed", e->id, comp);
-            num_not_changed++;
-          }
+          t0 += cpu_time.tick().last();
         }
         else
         {
@@ -296,6 +338,8 @@ namespace Hermes
         }
       }
 
+      info("t0:%g", t0);
+      info("t1:%g", t1);
       verbose("Examined elements: %d", num_exam_elem);
       verbose(" Elements taken from priority queue: %d", num_priority_elem);
       verbose(" Ignored elements: %d", num_ignored_elem);
@@ -311,7 +355,15 @@ namespace Hermes
       }
 
       //fix refinement if multimesh is used
-      fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, refinement_selectors);
+      fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
+
+      for(unsigned int i = 0; i < omp_get_num_threads(); i++)
+      {
+        for (unsigned int j = 0; j < refinement_selectors.size(); j++)
+          delete global_refinement_selectors[i][j];
+        delete [] global_refinement_selectors[i];
+      }
+      delete [] global_refinement_selectors;
 
       for(int i = 0; i < max_id; i++)
         delete [] idx[i];
@@ -344,8 +396,8 @@ namespace Hermes
         if (rsln[j] != NULL)
           rsln[j]->enable_transform(true);
 
-      verbose("Refined elements: %d", elem_inx_to_proc.size());
-      report_time("Refined elements in: %g s", cpu_time.tick().last());
+      info("Refined elements: %d", elem_inx_to_proc.size());
+      info("Refined elements in: %g s", cpu_time.tick().accumulated());
 
       //store for the user to retrieve
       last_refinements.swap(elem_inx_to_proc);
@@ -545,74 +597,79 @@ namespace Hermes
 
     template<typename Scalar>
     void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
-      int** idx, Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors)
+      int** idx, RefinementSelectors::Selector<Scalar> *** refinement_selectors)
     {
       int num_elem_to_proc = elems_to_refine.size();
-      for(int inx = 0; inx < num_elem_to_proc; inx++)
-      {
-        ElementToRefine& elem_ref = elems_to_refine[inx];
-        int current_quad_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
-        Element* current_elem = meshes[elem_ref.comp]->get_element(elem_ref.id);
 
-        //select a refinement used by all components that share a mesh which is about to be refined
-        int selected_refinement = elem_ref.split;
-        for (int j = 0; j < this->num; j++)
+      RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
+
+      #pragma omp parallel private(current_refinement_selectors)
+        for(int inx = 0; inx < num_elem_to_proc; inx++)
         {
-          if (selected_refinement == H2D_REFINEMENT_H) break; // iso refinement is max what can be recieved
-          if (j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if a mesh is shared
-            int ii = idx[elem_ref.id][j];
-            if (ii >= 0) { // and the sample element is about to be refined by another compoment
-              const ElementToRefine& elem_ref_ii = elems_to_refine[ii];
-              if (elem_ref_ii.split != selected_refinement && elem_ref_ii.split != H2D_REFINEMENT_P) { //select more complicated refinement
-                if ((elem_ref_ii.split == H2D_REFINEMENT_ANISO_H || elem_ref_ii.split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
-                  selected_refinement = elem_ref_ii.split;
-                else
-                  selected_refinement = H2D_REFINEMENT_H;
-              }
-            }
-          }
-        }
+          current_refinement_selectors = refinement_selectors[omp_get_thread_num()];
+          ElementToRefine& elem_ref = elems_to_refine[inx];
+          int current_quad_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
+          Element* current_elem = meshes[elem_ref.comp]->get_element(elem_ref.id);
 
-        //fix other refinements according to the selected refinement
-        if (selected_refinement != H2D_REFINEMENT_P)
-        {
-          //get suggested orders for the selected refinement
-          const int* suggested_orders = NULL;
-          if (selected_refinement == H2D_REFINEMENT_H)
-            suggested_orders = elem_ref.q;
-
-          //update orders
+          //select a refinement used by all components that share a mesh which is about to be refined
+          int selected_refinement = elem_ref.split;
           for (int j = 0; j < this->num; j++)
           {
-            if (j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if components share the mesh
-              // change currently processed refinement
-              if (elem_ref.split != selected_refinement)
-              {
-                elem_ref.split = selected_refinement;
-                refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref.split, elem_ref.p, suggested_orders);
-              }
-
-              // change other refinements
+            if (selected_refinement == H2D_REFINEMENT_H) break; // iso refinement is max what can be recieved
+            if (j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if a mesh is shared
               int ii = idx[elem_ref.id][j];
-              if (ii >= 0)
-              {
-                ElementToRefine& elem_ref_ii = elems_to_refine[ii];
-                if (elem_ref_ii.split != selected_refinement)
-                {
-                  elem_ref_ii.split = selected_refinement;
-                  refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_ii.split, elem_ref_ii.p, suggested_orders);
+              if (ii >= 0) { // and the sample element is about to be refined by another compoment
+                const ElementToRefine& elem_ref_ii = elems_to_refine[ii];
+                if (elem_ref_ii.split != selected_refinement && elem_ref_ii.split != H2D_REFINEMENT_P) { //select more complicated refinement
+                  if ((elem_ref_ii.split == H2D_REFINEMENT_ANISO_H || elem_ref_ii.split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
+                    selected_refinement = elem_ref_ii.split;
+                  else
+                    selected_refinement = H2D_REFINEMENT_H;
                 }
               }
-              else { // element (of the other comp.) not refined at all: assign refinement
-                ElementToRefine elem_ref_new(elem_ref.id, j);
-                elem_ref_new.split = selected_refinement;
-                refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_new.split, elem_ref_new.p, suggested_orders);
-                elems_to_refine.push_back(elem_ref_new);
+            }
+          }
+
+          //fix other refinements according to the selected refinement
+          if (selected_refinement != H2D_REFINEMENT_P)
+          {
+            //get suggested orders for the selected refinement
+            const int* suggested_orders = NULL;
+            if (selected_refinement == H2D_REFINEMENT_H)
+              suggested_orders = elem_ref.q;
+
+            //update orders
+            for (int j = 0; j < this->num; j++)
+            {
+              if (j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if components share the mesh
+                // change currently processed refinement
+                if (elem_ref.split != selected_refinement)
+                {
+                  elem_ref.split = selected_refinement;
+                  current_refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref.split, elem_ref.p, suggested_orders);
+                }
+
+                // change other refinements
+                int ii = idx[elem_ref.id][j];
+                if (ii >= 0)
+                {
+                  ElementToRefine& elem_ref_ii = elems_to_refine[ii];
+                  if (elem_ref_ii.split != selected_refinement)
+                  {
+                    elem_ref_ii.split = selected_refinement;
+                    current_refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_ii.split, elem_ref_ii.p, suggested_orders);
+                  }
+                }
+                else { // element (of the other comp.) not refined at all: assign refinement
+                  ElementToRefine elem_ref_new(elem_ref.id, j);
+                  elem_ref_new.split = selected_refinement;
+                  current_refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_new.split, elem_ref_new.p, suggested_orders);
+                  elems_to_refine.push_back(elem_ref_new);
+                }
               }
             }
           }
         }
-      }
     }
 
     template<typename Scalar>

@@ -237,7 +237,7 @@ namespace Hermes
       *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
       *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
       void fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine, int** idx,
-        Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
+        RefinementSelectors::Selector<Scalar>*** refinement_selectors);
 
       /// Enforces the same order to an element of a mesh which is shared among multiple components.
       /** \param[in] meshes An array of meshes of components. */

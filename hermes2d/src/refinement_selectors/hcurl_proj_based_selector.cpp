@@ -10,13 +10,23 @@ namespace Hermes
   {
     namespace RefinementSelectors
     {
-      HcurlShapeset HcurlProjBasedSelector::default_shapeset;
-
       const int HcurlProjBasedSelector::H2DRS_MAX_HCURL_ORDER = 6;
 
       HcurlProjBasedSelector::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<std::complex<double> >(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, OptimumSelector<std::complex<double> >::Range(), OptimumSelector<std::complex<double> >::Range(0, H2DRS_MAX_HCURL_ORDER))
-        , precalc_rvals_curl(NULL) {}
+        : ProjBasedSelector<std::complex<double> >(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, OptimumSelector<std::complex<double> >::Range(), OptimumSelector<std::complex<double> >::Range(0, H2DRS_MAX_HCURL_ORDER))
+        , precalc_rvals_curl(NULL)
+      {
+        if(user_shapeset != NULL)
+        {
+          warning("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
+          warning("Warning: The functionality for cloning user shapeset is to be implemented yet.");
+        }
+      }
+
+      Selector<std::complex<double> >* HcurlProjBasedSelector::clone()
+      {
+        return new HcurlProjBasedSelector(this->cand_list, this->conv_exp, this->max_order);
+      }
 
       HcurlProjBasedSelector::~HcurlProjBasedSelector()
       {

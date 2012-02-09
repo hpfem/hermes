@@ -37,6 +37,10 @@ namespace Hermes
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used, see HcurlProjBasedSelector::H2DRS_MAX_H1_ORDER.
         *  \param[in] user_shapeset A shapeset. If NULL, it will use internal instance of the class H1Shapeset. */
         H1ProjBasedSelector(CandList cand_list = H2D_HP_ANISO, double conv_exp = 1.0, int max_order = H2DRS_DEFAULT_ORDER, H1Shapeset* user_shapeset = NULL);
+
+        /// Cloning for paralelism.
+        virtual Selector<Scalar>* clone();
+
       protected: //overloads
         /// A function expansion of a function f used by this selector.
         enum LocalFuncExpansion {
@@ -79,8 +83,6 @@ namespace Hermes
         /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
         virtual double evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj);
-
-        static H1Shapeset default_shapeset; ///< A default shapeset.
       };
     }
   }

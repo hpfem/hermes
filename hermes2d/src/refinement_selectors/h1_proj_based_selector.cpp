@@ -11,14 +11,24 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template<typename Scalar>
-      H1Shapeset H1ProjBasedSelector<Scalar>::default_shapeset;
-
-      template<typename Scalar>
       const int H1ProjBasedSelector<Scalar>::H2DRS_MAX_H1_ORDER = H2DRS_MAX_ORDER;
 
       template<typename Scalar>
       H1ProjBasedSelector<Scalar>::H1ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, H1Shapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? &default_shapeset : user_shapeset, typename OptimumSelector<Scalar>::Range(1, 1), typename OptimumSelector<Scalar>::Range(2, H2DRS_MAX_H1_ORDER)) {}
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new H1Shapeset() : user_shapeset, typename OptimumSelector<Scalar>::Range(1, 1), typename OptimumSelector<Scalar>::Range(2, H2DRS_MAX_H1_ORDER))
+      {
+        if(user_shapeset != NULL)
+        {
+          warning("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
+          warning("Warning: The functionality for cloning user shapeset is to be implemented yet.");
+        }
+      }
+
+      template<typename Scalar>
+      Selector<Scalar>* H1ProjBasedSelector<Scalar>::clone()
+      {
+        return new H1ProjBasedSelector(this->cand_list, this->conv_exp, this->max_order);
+      }
 
       template<typename Scalar>
       void H1ProjBasedSelector<Scalar>::set_current_order_range(Element* element)
