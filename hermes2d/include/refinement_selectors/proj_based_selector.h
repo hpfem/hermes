@@ -63,6 +63,14 @@ namespace Hermes
         double get_error_weight_h() const;
         double get_error_weight_p() const;
         double get_error_weight_aniso() const;
+        
+        /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
+        class TrfShapeExp;
+        typedef Hermes::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
+
+        bool* cached_shape_vals_valid; ///< True if shape values were already initialized.
+        TrfShape* cached_shape_ortho_vals; ///< Precalculated valus of orthogonalized shape functions.
+        TrfShape* cached_shape_vals; ///< Precalculate values of shape functions.
 
       protected: //evaluated shape basis
         /// A transform shaped function expansions.
@@ -115,13 +123,6 @@ namespace Hermes
           friend class HcurlProjBasedSelector;
           template<typename T> friend class Adapt;
         };
-
-        /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
-        typedef Hermes::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
-
-        bool cached_shape_vals_valid[H2D_NUM_MODES]; ///< True if shape values were already initialized.
-        TrfShape cached_shape_ortho_vals[H2D_NUM_MODES]; ///< Precalculated valus of orthogonalized shape functions.
-        TrfShape cached_shape_vals[H2D_NUM_MODES]; ///< Precalculate values of shape functions.
 
         /// Calculates values of shape function at GIP for all transformations.
         /** Override this method to supply a pre-calculated vales of shape function expansions

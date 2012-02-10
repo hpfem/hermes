@@ -152,8 +152,7 @@ namespace Hermes
         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Refines elements based on results from calc_err_est().
-      /** The behavior of adaptivity can be controlled through methods should_ignore_element()
-      *  and can_refine_element() which are inteteded to be overridden if neccessary.
+      /** 
       *  \param[in] refinement_selectors Vector of selectors.
       *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
       *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
@@ -165,8 +164,7 @@ namespace Hermes
         int regularize = -1, double to_be_processed = 0.0);
 
       /// Refines elements based on results from calc_err_est().
-      /** The behavior of adaptivity can be controlled through methods should_ignore_element()
-      *  and can_refine_element() which are inteteded to be overridden if neccessary.
+      /** 
       *  \param[in] refinement_selector A pointer to a selector which will select a refinement.
       *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
       *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
@@ -210,25 +208,6 @@ namespace Hermes
       std::queue<ElementReference> priority_queue; ///< A queue of priority elements. Elements in this queue are processed before the elements in the Adapt::regular_queue.
       Hermes::vector<ElementReference> regular_queue; ///< A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       std::vector<ElementToRefine> last_refinements; ///< A vector of refinements generated during the last finished execution of the method adapt().
-
-      /// Returns true if a given element should be ignored and not processed through refinement selection.
-      /** Overload this method to omit some elements from processing.
-      *  \param[in] inx_element An index of an element in the regular queue. -1 if the element cames from the priority queue.
-      *  \param[in] mesh A mesh that contains the element.
-      *  \param[in] element A pointer to the element.
-      *  \return True if the element should be skipped. */
-      virtual bool should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) const;
-
-      /// Returns true if a given element can be refined using proposed refinement.
-      /** Overload this method to
-      *  - avoid application of a refinement even thought a selector considered this refinement as the optimal one,
-      *  - suggest a new refinement despite that the selector was not able to select a refinement.
-      *  \param[in] mesh A mesh that contains the element.
-      *  \param[in] e A point to the element.
-      *  \param[in] refined True if a refinement of the element was found.
-      *  \param[in, out] elem_ref The proposed refinement. Change a value of this parameter to select a different refinement.
-      *  \return True if the element should not be refined using the refinement. */
-      virtual bool can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const;
 
       /// Fixes refinements of a mesh which is shared among multiple components of a multimesh.
       /** If a mesh is shared among components, it has to be refined similarly in order to avoid inconsistency.

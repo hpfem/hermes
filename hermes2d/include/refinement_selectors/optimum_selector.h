@@ -19,6 +19,7 @@
 #include <ostream>
 #include "order_permutator.h"
 #include "selector.h"
+#include "common_time_period.h"
 
 namespace Hermes
 {
@@ -129,6 +130,13 @@ namespace Hermes
         /// Returns a vector of the last generated candidates.
         /** \return A vector of last generated candidates. The vector will change if a new list is generated. */
         const Hermes::vector<Cand>& get_candidates() const { return candidates; };
+
+        /// Number of shape functions for
+        /// - mode
+        /// - horizontal order + 1 (any)
+        /// - vertical order + 1 (any)
+        /// - shape function type
+        int ****num_shapes;
 
       protected: //candidates
         /// Information about candidates.
@@ -248,6 +256,15 @@ namespace Hermes
           H2DST_VERT_EDGE = 0x04, ///< Verical edge function.
           H2DST_TRI_EDGE = 0x08, ///< Triangle edge.
           H2DST_BUBBLE = 0x10 ///< Bubble function.
+        };
+
+        enum ShapeTypeInt {
+          H2DSI_VERTEX,
+          H2DSI_HORIZ_EDGE,
+          H2DSI_VERT_EDGE,
+          H2DSI_TRI_EDGE,
+          H2DSI_BUBBLE,
+          H2DSI_ANY
         };
 
         /// A shape index.

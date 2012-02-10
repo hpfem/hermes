@@ -24,6 +24,10 @@ namespace Hermes
         error_weight_p(H2DRS_DEFAULT_ERR_WEIGHT_P),
         error_weight_aniso(H2DRS_DEFAULT_ERR_WEIGHT_ANISO)
       {
+        cached_shape_vals_valid = new bool[2];
+        cached_shape_ortho_vals = new TrfShape[2];
+        cached_shape_vals = new TrfShape[2];
+
         //clean svals initialization state
         std::fill(cached_shape_vals_valid, cached_shape_vals_valid + H2D_NUM_MODES, false);
 
@@ -52,6 +56,10 @@ namespace Hermes
               if (proj_matrix_cache[m][i][k] != NULL)
                 delete[] proj_matrix_cache[m][i][k];
             }
+
+        delete [] cached_shape_vals_valid;
+        delete [] cached_shape_ortho_vals;
+        delete [] cached_shape_vals;
       }
 
       template<typename Scalar>
@@ -272,22 +280,26 @@ namespace Hermes
 
         // precalculate values of shape functions
         TrfShape empty_shape_vals;
-        if (!cached_shape_vals_valid[mode])
-        {
-          precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_ortho_vals[mode], mode);
-          precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_vals[mode], mode);
-          cached_shape_vals_valid[mode] = true;
 
-          //issue a warning if ortho values are defined and the selected cand_list might benefit from that but it cannot because elements do not have uniform orders
-          if (!warn_uniform_orders && mode == HERMES_MODE_QUAD && !cached_shape_ortho_vals[mode][H2D_TRF_IDENTITY].empty())
+#pragma omp critical (cached_shape_vals_valid)
+        {
+          if (!cached_shape_vals_valid[mode])
           {
-            warn_uniform_orders = true;
-            if (this->cand_list == H2D_H_ISO || this->cand_list == H2D_H_ANISO || this->cand_list == H2D_P_ISO || this->cand_list == H2D_HP_ISO || this->cand_list == H2D_HP_ANISO_H)
-            {
-              warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(this->cand_list));
-            }
+            precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_ortho_vals[mode], mode);
+            precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_vals[mode], mode);
+            cached_shape_vals_valid[mode] = true;
           }
         }
+        //issue a warning if ortho values are defined and the selected cand_list might benefit from that but it cannot because elements do not have uniform orders
+        if (!warn_uniform_orders && mode == HERMES_MODE_QUAD && !cached_shape_ortho_vals[mode][H2D_TRF_IDENTITY].empty())
+        {
+          warn_uniform_orders = true;
+          if (this->cand_list == H2D_H_ISO || this->cand_list == H2D_H_ANISO || this->cand_list == H2D_P_ISO || this->cand_list == H2D_HP_ISO || this->cand_list == H2D_HP_ANISO_H)
+          {
+            warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(this->cand_list));
+          }
+        }
+          
         TrfShape& svals = cached_shape_vals[mode];
         TrfShape& ortho_svals = cached_shape_ortho_vals[mode];
 

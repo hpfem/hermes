@@ -167,8 +167,6 @@ namespace Hermes
       if (spaces.size() != refinement_selectors.size())
         throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
 
-      Hermes::TimePeriod cpu_time;
-
       //get meshes
       int max_id = -1;
       Mesh* meshes[H2D_MAX_COMPONENTS];
@@ -205,153 +203,150 @@ namespace Hermes
       elem_inx_to_proc.reserve(num_act_elems);
 
       //adaptivity loop
-      double error_squared_threshod = -1; //an error threshold that breaks the adaptivity loop in a case of strategy 1
-      int num_exam_elem = 0; //a number of examined elements
+      double error_squared_threshold = -1; //an error threshold that breaks the adaptivity loop in a case of strategy 1
       int num_ignored_elem = 0; //a number of ignored elements
       int num_not_changed = 0; //a number of element that were not changed
       int num_priority_elem = 0; //a number of elements that were processed using priority queue
 
-      bool first_regular_element = true; //true if first regular element was not processed yet
+      
+      // Structures traversed in reality using strategies.
+      Hermes::vector<int> ids;
+      Hermes::vector<int> components;
+      Hermes::vector<int> current_orders;
+      bool first_regular_element = true; // true if first regular element was not processed yet
+      bool error_level_reached = false;
 
+      for(int inx_regular_element = 0; inx_regular_element < num_act_elems || !priority_queue.empty();)
+      {
+        int id, comp, inx_element;
+
+        // Process the queuse(s) to see what elements to really refine.
+        if (priority_queue.empty())
+        {
+          id = regular_queue[inx_regular_element].id;
+          comp = regular_queue[inx_regular_element].comp;
+          inx_regular_element++;
+
+          // Get info linked with the element
+          double err_squared = errors[comp][id];
+            
+          if (first_regular_element)
+          {
+            error_squared_threshold = thr * err_squared;
+            first_regular_element = false;
+          }
+          
+          // first refinement strategy:
+          // refine elements until prescribed amount of error is processed
+          // if more elements have similar error refine all to keep the mesh symmetric
+          if ((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
+            && fabs((err_squared - err0_squared)/err0_squared) > 1e-3) 
+            error_level_reached = true;
+
+          // second refinement strategy:
+          // refine all elements whose error is bigger than some portion of maximal error
+          if ((strat == 1) && (err_squared < error_squared_threshold))
+            error_level_reached = true;
+
+          if ((strat == 2) && (err_squared < thr))
+            error_level_reached = true;
+
+          if ((strat == 3) && ((err_squared < error_squared_threshold) || (processed_error_squared > 1.5 * to_be_processed)))
+            error_level_reached = true;
+
+          // Insert the element only if it complies with the strategy.
+          if(!error_level_reached)
+          {
+            err0_squared = err_squared;
+            processed_error_squared += err_squared;
+            ids.push_back(id);
+            components.push_back(comp);
+            current_orders.push_back(this->spaces[comp]->get_element_order(id));
+            spaces[comp]->edata[id].changed_in_last_adaptation = true;
+          }
+        }
+        // Priority - refine no matter what.
+        else
+        {
+          id = priority_queue.front().id;
+          comp = priority_queue.front().comp;
+          priority_queue.pop();
+
+          // Insert into appropripate arrays.
+          ids.push_back(id);
+          components.push_back(comp);
+          current_orders.push_back(this->spaces[comp]->get_element_order(id));
+          spaces[comp]->edata[id].changed_in_last_adaptation = true;
+        }
+      }
+
+      if (ids.empty())
+      {
+        warn("None of the elements selected for refinement was refined. Adaptivity step successful, returning 'true'.");
+        return true;
+      }
+
+      // RefinementSelectors cloning.
       RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[omp_get_max_threads()];
 
       for(unsigned int i = 0; i < omp_get_max_threads(); i++)
       {
         global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
+        {
           global_refinement_selectors[i][j] = refinement_selectors[j]->clone();
+          if(dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j]) != NULL)
+          {
+            dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j])->cached_shape_vals_valid = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j])->cached_shape_vals_valid;
+            dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j])->cached_shape_ortho_vals = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j])->cached_shape_ortho_vals;
+            dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j])->cached_shape_vals = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j])->cached_shape_vals;
+          }
+          if(dynamic_cast<RefinementSelectors::OptimumSelector<Scalar>*>(global_refinement_selectors[i][j]) != NULL)
+            dynamic_cast<RefinementSelectors::OptimumSelector<Scalar>*>(global_refinement_selectors[i][j])->num_shapes = dynamic_cast<RefinementSelectors::OptimumSelector<Scalar>*>(refinement_selectors[j])->num_shapes;
+        }
+      }
+
+      // Solution cloning.
+      Solution<Scalar>*** rslns = new Solution<Scalar>**[omp_get_max_threads()];
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        rslns[i] = new Solution<Scalar>*[this->num];
+        for (int j = 0; j < this->num; j++)
+        {
+          rslns[i][j] = new Solution<Scalar>(spaces[j]->get_mesh());
+          rslns[i][j]->copy(rsln[j]);
+        }
       }
 
       RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
+      Solution<Scalar>** current_rslns;
 
-      double t0 = 0.0;
-      double t1 = 0.0;
-
-#pragma omp parallel private(current_refinement_selectors)
-      for(int inx_regular_element = 0; inx_regular_element < num_act_elems || !priority_queue.empty();)
+#define CHUNKSIZE 1
+#pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns)
       {
-        cpu_time.tick();
-
-        current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
-        int id, comp, inx_element;
-
-        //get element identification
-        if (priority_queue.empty())
+#pragma omp for schedule(dynamic, CHUNKSIZE)
+        for(int id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
         {
-#pragma omp critical (adapt_regular_queue)
+          current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
+          current_rslns = rslns[omp_get_thread_num()];
+        
+          Mesh* mesh = meshes[components[id_to_refine]];
+          Element* e = mesh->get_element(ids[id_to_refine]);
+
+          // Get refinement suggestion
+          ElementToRefine elem_ref(ids[id_to_refine], components[id_to_refine]);
+          
+          // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
+          bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(e, current_orders[components[id_to_refine]], current_rslns[components[id_to_refine]], elem_ref);
+
+          //add to a list of elements that are going to be refined
+#pragma omp critical (elem_inx_to_proc)
           {
-            id = regular_queue[inx_regular_element].id;
-            comp = regular_queue[inx_regular_element].comp;
-            inx_element = inx_regular_element;
-            inx_regular_element++;
+            idx[ids[id_to_refine]][components[id_to_refine]] = (int)elem_inx_to_proc.size();
+            elem_inx_to_proc.push_back(elem_ref);
           }
         }
-        else
-        {
-#pragma omp critical (adapt_priority_queue)
-          {
-            id = priority_queue.front().id;
-            comp = priority_queue.front().comp;
-            inx_element = -1;
-            priority_queue.pop();
-            num_priority_elem++;
-          }
-        }
-        num_exam_elem++;
-
-        //get info linked with the element
-        double err_squared = errors[comp][id];
-        Mesh* mesh = meshes[comp];
-        Element* e = mesh->get_element(id);
-
-        if (!should_ignore_element(inx_element, mesh, e))
-        {
-          bool error_level_reached = false;
-
-          //check if adaptivity loop should end
-          if (inx_element >= 0)
-          {
-            //prepare error threshold for strategy 1
-#pragma omp critical (check_first_regular_element)
-            {
-              if (first_regular_element)
-              {
-                error_squared_threshod = thr * err_squared;
-                first_regular_element = false;
-              }
-            }
-
-#pragma omp critical (check_processed_error_squared)
-            {
-              // first refinement strategy:
-              // refine elements until prescribed amount of error is processed
-              // if more elements have similar error refine all to keep the mesh symmetric
-              if ((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
-                && fabs((err_squared - err0_squared)/err0_squared) > 1e-3) 
-                error_level_reached = true;
-
-              // second refinement strategy:
-              // refine all elements whose error is bigger than some portion of maximal error
-              if ((strat == 1) && (err_squared < error_squared_threshod))
-                error_level_reached = true;
-
-              if ((strat == 2) && (err_squared < thr))
-                error_level_reached = true;
-
-              if ((strat == 3) && ((err_squared < error_squared_threshod) || (processed_error_squared > 1.5 * to_be_processed)))
-                error_level_reached = true;
-            }
-          }
-
-          if(!error_level_reached)
-          {
-            // get refinement suggestion
-            ElementToRefine elem_ref(id, comp);
-            int current = this->spaces[comp]->get_element_order(id);
-            // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-            t0 += cpu_time.tick().last();
-            bool refined = current_refinement_selectors[comp]->select_refinement(e, current, rsln[comp], elem_ref);
-            t1 += cpu_time.tick().last();
-            //add to a list of elements that are going to be refined
-            if (can_refine_element(mesh, e, refined, elem_ref) )
-            {
-              idx[id][comp] = (int)elem_inx_to_proc.size();
-              elem_inx_to_proc.push_back(elem_ref);
-              err0_squared = err_squared;
-#pragma omp critical (check_processed_error_squared)
-              {
-                processed_error_squared += err_squared;
-              }
-              spaces[comp]->edata[elem_ref.id].changed_in_last_adaptation = true;
-            }
-            else
-            {
-              debug_log("Element (id:%d, comp:%d) not changed", e->id, comp);
-              num_not_changed++;
-            }
-          }
-          t0 += cpu_time.tick().last();
-        }
-        else
-        {
-          num_ignored_elem++;
-        }
-      }
-
-      info("t0:%g", t0);
-      info("t1:%g", t1);
-      verbose("Examined elements: %d", num_exam_elem);
-      verbose(" Elements taken from priority queue: %d", num_priority_elem);
-      verbose(" Ignored elements: %d", num_ignored_elem);
-      verbose(" Not changed elements: %d", num_not_changed);
-      verbose(" Elements to process: %d", elem_inx_to_proc.size());
-      bool done = false;
-      if (num_exam_elem == 0)
-        done = true;
-      else if (elem_inx_to_proc.empty())
-      {
-        warn("None of the elements selected for refinement could be refined. Adaptivity step not successful, returning 'true'.");
-        done = true;
       }
 
       //fix refinement if multimesh is used
@@ -364,6 +359,17 @@ namespace Hermes
         delete [] global_refinement_selectors[i];
       }
       delete [] global_refinement_selectors;
+
+      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      {
+        if(rslns[i] != NULL)
+        {
+          for (unsigned int j = 0; j < this->num; j++)
+            delete rslns[i][j];
+          delete [] rslns[i];
+        }
+      }
+      delete [] rslns;
 
       for(int i = 0; i < max_id; i++)
         delete [] idx[i];
@@ -396,21 +402,18 @@ namespace Hermes
         if (rsln[j] != NULL)
           rsln[j]->enable_transform(true);
 
-      info("Refined elements: %d", elem_inx_to_proc.size());
-      info("Refined elements in: %g s", cpu_time.tick().accumulated());
-
       //store for the user to retrieve
       last_refinements.swap(elem_inx_to_proc);
 
       have_errors = false;
-      if (strat == 2 && done == true)
+      if (strat == 2)
         have_errors = true; // space without changes
 
       // since space changed, assign dofs:
       for(unsigned int i = 0; i < this->spaces.size(); i++)
         this->spaces[i]->assign_dofs();
 
-      return done;
+      return false;
     }
 
     template<typename Scalar>
@@ -686,18 +689,6 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    bool Adapt<Scalar>::should_ignore_element(const int inx_element, const Mesh* mesh, const Element* element) const
-    {
-      return false;
-    };
-
-    template<typename Scalar>
-    bool Adapt<Scalar>::can_refine_element(Mesh* mesh, Element* e, bool refined, ElementToRefine& elem_ref) const
-    {
-      return refined;
-    };
-
-    template<typename Scalar>
     void Adapt<Scalar>::homogenize_shared_mesh_orders(Mesh** meshes)
     {
       Element* e;
@@ -941,8 +932,6 @@ namespace Hermes
       int n = slns.size();
       if (n != this->num) EXIT("Wrong number of solutions.");
 
-      Hermes::TimePeriod tmr;
-
       Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
       Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];
 
@@ -1037,9 +1026,6 @@ namespace Hermes
           }
         }
       }
-
-      tmr.tick();
-      error_time = tmr.accumulated();
 
       // Make the error relative if needed.
       if(solutions_for_adapt)
