@@ -54,7 +54,7 @@ namespace Hermes
         { -0.5,  0.5, 0.0 }, // 10
         { -1.0,  0.5, 0.0 }  // 11
       };
-
+ 
       double3 lin_pts_1_quad[21] =
       {
         {  0.0, -1.0, 0.0 }, // 0
@@ -577,6 +577,57 @@ namespace Hermes
         trfs[0] = sln;
         trfs[1] = xdisp;
         trfs[2] = ydisp;
+
+        /* Parallelization
+        - cloning of sln, xdisp, ydisp:
+        for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+        {
+          ext[i] = new MeshFunction<Scalar>*[ext_functions.size()];
+          for (int j = 0; j < ext_functions.size(); j++)
+            ext[i][j] = ext_functions[j]->clone();
+        }
+
+        - cloning of traverse:
+        Traverse trav_master(true);
+        unsigned int num_states = trav_master.get_num_states(meshes);
+
+        trav_master.begin(meshes.size(), &(meshes.front()));
+
+        Traverse* trav = new Traverse[omp_get_max_threads()];
+        Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
+        for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+        {
+          for (unsigned j = 0; j < spaces.size(); j++)
+            fns[i].push_back(pss[i][j]);
+          for (unsigned j = 0; j < ext_functions.size(); j++)
+          {
+            fns[i].push_back(ext[i][j]);
+            ext[i][j]->set_quad_2d(&g_quad_2d_std);
+          }
+        }
+
+        trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
+          trav[i].stack = trav_master.stack;
+
+        int state_i;
+
+        - zadny formy klonovat treba nejsou, ani pss, nic
+
+#define CHUNKSIZE 1
+#pragma omp parallel shared(trav_master) private(state_i)
+            {
+#pragma omp for schedule(dynamic, CHUNKSIZE)
+              for(state_i = 0; state_i < num_states; state_i++)
+              {
+                Traverse::State current_state;
+#pragma omp critical (get_next_state)
+                current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+
+                ...
+              }
+            }
+
+        */
 
         // Init multi-mesh traversal.
         Traverse trav(true);
