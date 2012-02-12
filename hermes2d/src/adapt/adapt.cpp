@@ -287,9 +287,9 @@ namespace Hermes
       }
 
       // RefinementSelectors cloning.
-      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[omp_get_max_threads()];
+      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[Global<Scalar>::Hermes_omp_get_max_threads()];
 
-      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
       {
         global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
@@ -307,9 +307,9 @@ namespace Hermes
       }
 
       // Solution cloning.
-      Solution<Scalar>*** rslns = new Solution<Scalar>**[omp_get_max_threads()];
+      Solution<Scalar>*** rslns = new Solution<Scalar>**[Global<Scalar>::Hermes_omp_get_max_threads()];
 
-      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
       {
         rslns[i] = new Solution<Scalar>*[this->num];
         for (int j = 0; j < this->num; j++)
@@ -360,7 +360,7 @@ namespace Hermes
       }
       delete [] global_refinement_selectors;
 
-      for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+      for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
       {
         if(rslns[i] != NULL)
         {

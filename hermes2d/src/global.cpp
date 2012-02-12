@@ -43,6 +43,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Global<Scalar>::Hermes_omp_get_max_threads()
+    { 
+      return HERMES_OMP_NUM_THREADS == -1 ? omp_get_max_threads() : HERMES_OMP_NUM_THREADS; 
+    }
+
+    template<typename Scalar>
     double Global<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type)
     {
       // sanity checks

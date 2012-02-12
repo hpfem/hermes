@@ -1,3 +1,6 @@
+// OpenMP
+#cmakedefine HERMES_OMP_NUM_THREADS ${HERMES_OMP_NUM_THREADS}
+
 #cmakedefine HAVE_FMEMOPEN
 #cmakedefine HAVE_LOG2
 #cmakedefine EXTREME_QUAD

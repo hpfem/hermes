@@ -580,7 +580,7 @@ namespace Hermes
 
         /* Parallelization
         - cloning of sln, xdisp, ydisp:
-        for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+        for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
         {
           ext[i] = new MeshFunction<Scalar>*[ext_functions.size()];
           for (int j = 0; j < ext_functions.size(); j++)
@@ -593,9 +593,9 @@ namespace Hermes
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        Traverse* trav = new Traverse[omp_get_max_threads()];
-        Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
-        for(unsigned int i = 0; i < omp_get_max_threads(); i++)
+        Traverse* trav = new Traverse[Global<Scalar>::Hermes_omp_get_max_threads()];
+        Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Global<Scalar>::Hermes_omp_get_max_threads()];
+        for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
         {
           for (unsigned j = 0; j < spaces.size(); j++)
             fns[i].push_back(pss[i][j]);

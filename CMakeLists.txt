@@ -11,6 +11,9 @@ project(hermes)
 	# The values below are sane defaults to produce a build on all platforms,
 	# if you want to override them, set them in CMake.vars
 
+  # OpenMP
+  set(HERMES_OMP_NUM_THREADS "-1")
+  
 	# HermesCommon
 		set(HERMES_COMMON_DEBUG     YES)
 		set(HERMES_COMMON_RELEASE   YES)
