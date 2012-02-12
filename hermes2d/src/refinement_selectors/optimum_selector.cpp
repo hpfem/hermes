@@ -1,3 +1,4 @@
+#include <iostream>
 #include "global.h"
 #include "solution.h"
 #include "discrete_problem.h"
@@ -108,12 +109,14 @@ namespace Hermes
           {
             used_shape_index[inx_bubble] = true;
             indices.push_back(ShapeInx(order_h, order_v, inx_bubble, H2DST_BUBBLE));
-            for(int order_h_i = order_h+1; order_h_i >= 0; order_h_i--)
-              for(int order_v_i = order_v+1; order_v_i >= 0; order_v_i--)
+            for(int order_h_i = order_h+1; order_h_i < H2DRS_MAX_ORDER + 2; order_h_i++)
+              for(int order_v_i = order_v+1; order_v_i < H2DRS_MAX_ORDER + 2; order_v_i++)
               {
                 num_shapes[mode][order_h_i][order_v_i][H2DSI_BUBBLE]++;
                 num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
               }
+            num_shapes[mode][0][0][H2DSI_BUBBLE]++;
+            num_shapes[mode][0][0][H2DSI_ANY]++;
           }
         }
       }
@@ -155,12 +158,14 @@ namespace Hermes
               {
                 used_shape_index[inx] = true;
                 indices.push_back(ShapeInx(1, 1, inx, H2DST_VERTEX));
-                for(int order_h_i = 2; order_h_i >= 0; order_h_i--)
-                  for(int order_v_i = 2; order_v_i >= 0; order_v_i--)
+                for(int order_h_i = 2; order_h_i < H2DRS_MAX_ORDER + 2; order_h_i++)
+                  for(int order_v_i = 2; order_v_i < H2DRS_MAX_ORDER + 2; order_v_i++)
                   {
                     num_shapes[mode][order_h_i][order_v_i][H2DSI_VERTEX]++;
                     num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                   }
+                num_shapes[mode][0][0][H2DSI_VERTEX]++;
+                num_shapes[mode][0][0][H2DSI_ANY]++;
                 has_vertex = true;
               }
             }
@@ -181,22 +186,26 @@ namespace Hermes
                   if ((j&1) == 0)//horizontal edge
                   {
                     indices.push_back(ShapeInx(i, 0, inx, H2DST_HORIZ_EDGE));
-                    for(int order_h_i = i+1; order_h_i >= 0; order_h_i--)
-                      for(int order_v_i = 1; order_v_i >= 0; order_v_i--)
+                    for(int order_h_i = i+1; order_h_i < H2DRS_MAX_ORDER + 2; order_h_i++)
+                      for(int order_v_i = 1; order_v_i < H2DRS_MAX_ORDER + 2; order_v_i++)
                       {
                         num_shapes[mode][order_h_i][order_v_i][H2DST_HORIZ_EDGE]++;
                         num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                       }
+                    num_shapes[mode][0][0][H2DST_HORIZ_EDGE]++;
+                    num_shapes[mode][0][0][H2DSI_ANY]++;
                   }
                   else  //vertical edge
                   {
                     indices.push_back(ShapeInx(0, i, inx, H2DST_VERT_EDGE));
-                    for(int order_h_i = 1; order_h_i >= 0; order_h_i--)
-                      for(int order_v_i = i+1; order_v_i >= 0; order_v_i--)
+                    for(int order_h_i = 1; order_h_i < H2DRS_MAX_ORDER + 2; order_h_i++)
+                      for(int order_v_i = i+1; order_v_i < H2DRS_MAX_ORDER + 2; order_v_i++)
                       {
                         num_shapes[mode][order_h_i][order_v_i][H2DSI_VERT_EDGE]++;
                         num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                       }
+                    num_shapes[mode][0][0][H2DSI_VERT_EDGE]++;
+                    num_shapes[mode][0][0][H2DSI_ANY]++;
                   }
                   has_edge = true;
                 }
@@ -211,12 +220,14 @@ namespace Hermes
                 {
                   used_shape_index[inx] = true;
                   indices.push_back(ShapeInx(i, i, inx, H2DST_TRI_EDGE));
-                  for(int order_h_i = i+1; order_h_i >= 0; order_h_i--)
-                    for(int order_v_i = i+1; order_v_i >= 0; order_v_i--)
+                  for(int order_h_i = i+1; order_h_i < H2DRS_MAX_ORDER + 2; order_h_i++)
+                    for(int order_v_i = i+1; order_v_i < H2DRS_MAX_ORDER + 2; order_v_i++)
                     {
                       num_shapes[mode][order_h_i][order_v_i][H2DSI_TRI_EDGE]++;
                       num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                     }
+                  num_shapes[mode][0][0][H2DSI_TRI_EDGE]++;
+                  num_shapes[mode][0][0][H2DSI_ANY]++;
                   has_edge = true;
                 }
               }
@@ -251,12 +262,14 @@ namespace Hermes
                 {
                   used_shape_index[inx_bubble] = true;
                   indices.push_back(ShapeInx(order, order, inx_bubble, H2DST_BUBBLE));
-                  for(int order_h_i = order+1; order_h_i >= 0; order_h_i--)
-                    for(int order_v_i = order+1; order_v_i >= 0; order_v_i--)
+                  for(int order_h_i = order+1; order_h_i < H2DRS_MAX_ORDER + 2; order_h_i++)
+                    for(int order_v_i = order+1; order_v_i < H2DRS_MAX_ORDER + 2; order_v_i++)
                     {
                       num_shapes[mode][order_h_i][order_v_i][H2DSI_BUBBLE]++;
                       num_shapes[mode][order_h_i][order_v_i][H2DSI_ANY]++;
                     }
+                  num_shapes[mode][0][0][H2DSI_BUBBLE]++;
+                  num_shapes[mode][0][0][H2DSI_ANY]++;
                   has_bubble = true;
                 }
               }
