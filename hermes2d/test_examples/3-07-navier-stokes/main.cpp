@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     }
 
     // Perform Newton's iteration.
-    info("Solving nonlinear problem using %i threads:", Global<Scalar>::Hermes_omp_get_max_threads());
+    info("Solving nonlinear problem using %i threads:", Global<double>::Hermes_omp_get_max_threads());
     bool verbose = true;
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     newton.set_verbose_output(verbose);
