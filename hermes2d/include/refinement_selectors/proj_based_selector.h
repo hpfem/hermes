@@ -47,6 +47,9 @@ namespace Hermes
       */
       template<typename Scalar>
       class HERMES_API ProjBasedSelector : public OptimumSelector<Scalar> {
+      protected:
+        class TrfShapeExp;
+
       public: //API
         /// Destructor
         virtual ~ProjBasedSelector();
@@ -65,7 +68,6 @@ namespace Hermes
         double get_error_weight_aniso() const;
         
         /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
-        class TrfShapeExp;
         typedef Hermes::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
 
         bool* cached_shape_vals_valid; ///< True if shape values were already initialized.
