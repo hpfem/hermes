@@ -20,6 +20,9 @@
 \brief Calculation continuity functionality.
 */
 
+#ifndef __H2D_CONTINUITY_H
+#define __H2D_CONTINUITY_H
+
 #include "config.h"
 #include "compat.h"
 #include "function/solution.h"
@@ -191,3 +194,5 @@ namespace Hermes
     };
   }
 }
+
+#endif
