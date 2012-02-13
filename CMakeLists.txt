@@ -12,7 +12,7 @@ project(hermes)
 	# if you want to override them, set them in CMake.vars
 
   # OpenMP
-  set(HERMES_OMP_NUM_THREADS "-1")
+  set(HERMES_OMP_NUM_THREADS 4)
   
 	# HermesCommon
 		set(HERMES_COMMON_DEBUG     YES)
