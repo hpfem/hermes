@@ -77,7 +77,7 @@ namespace Hermes
         return i;
       }
 
-      void Vectorizer::process_triangle(int iv0, int iv1, int iv2, int level,
+      void Vectorizer::process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
         double* xval, double* yval, double* phx, double* phy, int* idx)
       {
         if (level < LIN_MAX_LEVEL)
@@ -86,10 +86,10 @@ namespace Hermes
           if (!(level & 1))
           {
             // obtain solution values and physical element coordinates
-            xsln->set_quad_order(1, xitem);
-            ysln->set_quad_order(1, yitem);
-            xval = xsln->get_values(component_x, value_type_x);
-            yval = ysln->get_values(component_y, value_type_y);
+            fns[0]->set_quad_order(1, xitem);
+            fns[1]->set_quad_order(1, yitem);
+            xval = fns[0]->get_values(component_x, value_type_x);
+            yval = fns[1]->get_values(component_y, value_type_y);
             for (i = 0; i < lin_np_tri[1]; i++)
             {
               double m = (sqrt(sqr(xval[i]) + sqr(yval[i])));
@@ -98,7 +98,7 @@ namespace Hermes
 
             if (curved)
             {
-              RefMap* refmap = xsln->get_refmap();
+              RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
               phy = refmap->get_phys_y(1);
             }
@@ -166,10 +166,21 @@ namespace Hermes
               int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], xval[idx[2]], yval[idx[2]]);
 
               // recur to sub-elements
-              push_transform(0);  process_triangle(iv0, mid0, mid2,  level + 1, xval, yval, phx, phy, tri_indices[1]);  pop_transform();
-              push_transform(1);  process_triangle(mid0, iv1, mid1,  level + 1, xval, yval, phx, phy, tri_indices[2]);  pop_transform();
-              push_transform(2);  process_triangle(mid2, mid1, iv2,  level + 1, xval, yval, phx, phy, tri_indices[3]);  pop_transform();
-              push_transform(3);  process_triangle(mid1, mid2, mid0, level + 1, xval, yval, phx, phy, tri_indices[4]);  pop_transform();
+              fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0);
+              process_triangle(fns, iv0, mid0, mid2,  level + 1, xval, yval, phx, phy, tri_indices[1]);
+              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+
+              fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1);
+              process_triangle(fns, mid0, iv1, mid1,  level + 1, xval, yval, phx, phy, tri_indices[2]);
+              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+
+              fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2);
+              process_triangle(fns, mid2, mid1, iv2,  level + 1, xval, yval, phx, phy, tri_indices[3]);
+              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+
+              fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3);
+              process_triangle(fns, mid1, mid2, mid0, level + 1, xval, yval, phx, phy, tri_indices[4]);
+              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
               return;
           }
         }
@@ -178,7 +189,7 @@ namespace Hermes
         add_triangle(iv0, iv1, iv2);
       }
 
-      void Vectorizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
+      void Vectorizer::process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
         double* xval, double* yval, double* phx, double* phy, int* idx)
       {
         // try not to split through the vertex with the largest value
@@ -194,10 +205,10 @@ namespace Hermes
           if (!(level & 1))
           {
             // obtain solution values and physical element coordinates
-            xsln->set_quad_order(1, xitem);
-            ysln->set_quad_order(1, yitem);
-            xval = xsln->get_values(component_x, value_type_x);
-            yval = ysln->get_values(component_y, value_type_y);
+            fns[0]->set_quad_order(1, xitem);
+            fns[1]->set_quad_order(1, yitem);
+            xval = fns[0]->get_values(component_x, value_type_x);
+            yval = fns[1]->get_values(component_y, value_type_y);
             for (i = 0; i < lin_np_quad[1]; i++)
             {
               double m = sqrt(sqr(xval[i]) + sqr(yval[i]));
@@ -206,7 +217,7 @@ namespace Hermes
 
             if (curved)
             {
-              RefMap* refmap = xsln->get_refmap();
+              RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
               phy = refmap->get_phys_y(1);
             }
@@ -286,10 +297,10 @@ namespace Hermes
               int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
 
               // recur to sub-elements
-              push_transform(0);  process_quad(iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  pop_transform();
-              push_transform(1);  process_quad(mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  pop_transform();
-              push_transform(2);  process_quad(mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  pop_transform();
-              push_transform(3);  process_quad(mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  pop_transform();
+              fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0); process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+              fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1); process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+              fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2); process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+              fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3); process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
               return;
           }
         }
@@ -344,14 +355,9 @@ namespace Hermes
         Hermes::TimePeriod cpu_time;
 
         // initialization
-        this->xsln = xsln;
-        this->ysln = ysln;
         this->xitem = xitem_orig;
         this->yitem = yitem_orig;
         this->eps = eps;
-
-        Transformable* fns[2] = { xsln, ysln };
-        Traverse trav(true);
 
         // estimate the required number of vertices and triangles
         // (based on the assumption that the linear mesh will be
@@ -384,8 +390,28 @@ namespace Hermes
         old_quad_x = xsln->get_quad_2d();
         old_quad_y = ysln->get_quad_2d();
 
-        xsln->set_quad_2d((Quad2D*) &g_quad_lin);
-        ysln->set_quad_2d((Quad2D*) &g_quad_lin);
+        Hermes::vector<Mesh*> meshes; 
+        meshes.push_back(xsln->get_mesh());
+        meshes.push_back(xsln->get_mesh());
+
+        // Parallelization
+        MeshFunction<double>*** fns = new MeshFunction<double>**[Global<double>::Hermes_omp_get_max_threads()];
+        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+        {
+          fns[i] = new MeshFunction<double>*[2];
+          fns[i][0] = xsln->clone();
+          fns[i][0]->set_quad_2d(&g_quad_lin);
+          fns[i][1] = ysln->clone();
+          fns[i][1]->set_quad_2d(&g_quad_lin);
+        }
+
+        Transformable*** trfs = new Transformable**[Global<double>::Hermes_omp_get_max_threads()];
+        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+        {
+          trfs[i] = new Transformable*[2];
+          trfs[i][0] = fns[i][0];
+          trfs[i][1] = fns[i][1];
+        }
 
         // get the component and desired value from item.
         if (xitem >= 0x40)
@@ -412,93 +438,138 @@ namespace Hermes
         xitem = xitem_orig;
         yitem = yitem_orig;
 
-        Mesh** meshes = new Mesh*[2];
-        meshes[0] = xsln->get_mesh();
-        meshes[1] = ysln->get_mesh();
+        Traverse trav_master(true);
+        unsigned int num_states = trav_master.get_num_states(meshes);
 
-        trav.begin(2, meshes, fns);
-        Traverse::State* current_state;
-        while ((current_state = trav.get_next_state()) != NULL)
-        {
-          xsln->set_quad_order(0, xitem);
-          ysln->set_quad_order(0, yitem);
-          double* xval = xsln->get_values(component_x, value_type_x);
-          double* yval = ysln->get_values(component_y, value_type_y);
+        trav_master.begin(meshes.size(), &(meshes.front()));
 
-          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
-          {
-            double fx = xval[i];
-            double fy = yval[i];
-            if (fabs(sqrt(fx*fx + fy*fy)) > max) max = fabs(sqrt(fx*fx + fy*fy));
-          }
-        }
-        trav.finish();
+        Traverse* trav = new Traverse[Global<double>::Hermes_omp_get_max_threads()];
         
-        trav.begin(2, meshes, fns);
-        // process all elements of the mesh
-        while ((current_state = trav.get_next_state()) != NULL)
+        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
         {
-          xsln->set_quad_order(0, xitem);
-          ysln->set_quad_order(0, yitem);
-          double* xval = xsln->get_values(component_x, value_type_x);
-          double* yval = ysln->get_values(component_y, value_type_y);
+          trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
+          trav[i].stack = trav_master.stack;
+        }
 
-          double* x = xsln->get_refmap()->get_phys_x(0);
-          double* y = ysln->get_refmap()->get_phys_y(0);
-
-          int iv[4];
-          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
+        int state_i;
+        
+#define CHUNKSIZE 1
+#pragma omp parallel shared(trav_master) private(state_i)
+        {
+#pragma omp for schedule(dynamic, CHUNKSIZE)
+          for(state_i = 0; state_i < num_states; state_i++)
           {
-            double fx = xval[i];
-            double fy = yval[i];
-            iv[i] = create_vertex(x[i], y[i], fx, fy);
-          }
+            Traverse::State current_state;
+#pragma omp critical (get_next_state)
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
-          // we won't bother calculating physical coordinates from the refmap if this is not a curved element
-          this->curved = (current_state->e[0]->cm != NULL);
+            fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
+            fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
+            double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
+            double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
 
-          // recur to sub-elements
-          if (current_state->e[0]->is_triangle())
-            process_triangle(iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL);
-          else
-            process_quad(iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL);
-
-          // process edges and dashes (bold line for edge in both meshes, dashed line for edge in one of the meshes)
-          Trf* xctm = xsln->get_ctm();
-          Trf* yctm = ysln->get_ctm();
-          double r[4] = { -1.0, 1.0, 1.0, -1.0 };
-          double ref[4][2] = { {-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0} };
-          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
-          {
-            bool bold = false;
-            double px = ref[i][0];
-            double py = ref[i][1];
-            // for odd edges (1, 3) we check x coordinate after ctm transformation, if it's the same (1 or -1) in both meshes => bold
-            if (i & 1)
+            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
             {
-              if ((xctm->m[0]*px + xctm->t[0] == r[i]) && (yctm->m[0]*px + yctm->t[0] == r[i]))
-                bold = true;
-            }
-            // for even edges (0, 4) we check y coordinate after ctm transformation, if it's the same (-1 or 1) in both meshes => bold
-            else
-            {
-              if ((xctm->m[1]*py + xctm->t[1] == r[i]) && (yctm->m[1]*py + yctm->t[1] == r[i]))
-                bold = true;
-            }
-            int j = current_state->e[0]->next_vert(i);
-            // we draw a line only if both edges lies on the boundary or if the line is from left top to right bottom
-            if (((current_state->e[0]->en[i]->bnd) && (current_state->e[1]->en[i]->bnd)) ||
-              (verts[iv[i]][1] < verts[iv[j]][1]) ||
-              (verts[iv[i]][1] == verts[iv[j]][1] && verts[iv[i]][0] < verts[iv[j]][0]))
-            {
-              if (bold)
-                this->process_edge(iv[i], iv[j], current_state->e[0]->en[i]->marker);
-              else
-                this->process_dash(iv[i], iv[j]);
+              double fx = xval[i];
+              double fy = yval[i];
+#pragma omp critical (vectorizer_get_max)
+              if (fabs(sqrt(fx*fx + fy*fy)) > max) max = fabs(sqrt(fx*fx + fy*fy));
             }
           }
         }
-        trav.finish();
+
+        trav_master.finish();
+        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+          trav[i].finish();
+
+        trav_master.begin(meshes.size(), &(meshes.front()));
+
+        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+          trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
+        
+#pragma omp parallel shared(trav_master) private(state_i)
+        {
+#pragma omp for schedule(dynamic, CHUNKSIZE)
+          for(state_i = 0; state_i < num_states; state_i++)
+          {
+            Traverse::State current_state;
+#pragma omp critical (get_next_state)
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+
+            fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
+            fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
+            double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
+            double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
+
+            double* x = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0);
+            double* y = fns[omp_get_thread_num()][1]->get_refmap()->get_phys_y(0);
+
+            int iv[4];
+            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+            {
+              double fx = xval[i];
+              double fy = yval[i];
+              iv[i] = create_vertex(x[i], y[i], fx, fy);
+            }
+
+            // we won't bother calculating physical coordinates from the refmap if this is not a curved element
+            this->curved = (current_state.e[0]->cm != NULL);
+
+            // recur to sub-elements
+            if (current_state.e[0]->is_triangle())
+              process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL);
+            else
+              process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL);
+
+            // process edges and dashes (bold line for edge in both meshes, dashed line for edge in one of the meshes)
+            Trf* xctm = fns[omp_get_thread_num()][0]->get_ctm();
+            Trf* yctm = fns[omp_get_thread_num()][1]->get_ctm();
+            double r[4] = { -1.0, 1.0, 1.0, -1.0 };
+            double ref[4][2] = { {-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0} };
+            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+            {
+              bool bold = false;
+              double px = ref[i][0];
+              double py = ref[i][1];
+              // for odd edges (1, 3) we check x coordinate after ctm transformation, if it's the same (1 or -1) in both meshes => bold
+              if (i & 1)
+              {
+                if ((xctm->m[0]*px + xctm->t[0] == r[i]) && (yctm->m[0]*px + yctm->t[0] == r[i]))
+                  bold = true;
+              }
+              // for even edges (0, 4) we check y coordinate after ctm transformation, if it's the same (-1 or 1) in both meshes => bold
+              else
+              {
+                if ((xctm->m[1]*py + xctm->t[1] == r[i]) && (yctm->m[1]*py + yctm->t[1] == r[i]))
+                  bold = true;
+              }
+              int j = current_state.e[0]->next_vert(i);
+              // we draw a line only if both edges lies on the boundary or if the line is from left top to right bottom
+              if (((current_state.e[0]->en[i]->bnd) && (current_state.e[1]->en[i]->bnd)) ||
+                (verts[iv[i]][1] < verts[iv[j]][1]) ||
+                (verts[iv[i]][1] == verts[iv[j]][1] && verts[iv[i]][0] < verts[iv[j]][0]))
+              {
+                if (bold)
+                  this->process_edge(iv[i], iv[j], current_state.e[0]->en[i]->marker);
+                else
+                  this->process_dash(iv[i], iv[j]);
+              }
+            }
+          }
+        }
+
+        trav_master.finish();
+        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+        {
+          trav[i].finish();
+          for(unsigned int j = 0; j < 2; j++)
+            delete fns[i][j];
+          delete [] fns[i];
+          delete [] trfs[i];
+        }
+        delete [] fns;
+        delete [] trfs;
+        delete [] trav;
 
         find_min_max();
 

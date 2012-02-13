@@ -89,6 +89,8 @@ namespace Hermes
         int num;
         int isurf;
       friend class Traverse;
+      friend class Views::Linearizer;
+      friend class Views::Vectorizer;
       template<typename Scalar> friend class DiscreteProblem;
       };
 

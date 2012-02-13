@@ -71,10 +71,10 @@ namespace Hermes
 
         void pop_transform();
 
-        void process_triangle(int iv0, int iv1, int iv2, int level,
+        void process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
           double* xval, double* yval, double* phx, double* phy, int* indices);
 
-        void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
+        void process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
           double* xval, double* yval, double* phx, double* phy, int* indices);
 
         void find_min_max();
