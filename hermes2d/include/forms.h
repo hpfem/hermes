@@ -230,6 +230,7 @@ namespace Hermes
       friend Geom<Hermes::Ord>* init_geom_ord();
       friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
       friend Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
+      friend Geom<double>* init_geom_surf(RefMap *rm, int surf_num, int marker, const int order, double3* tan);
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class InterfaceGeom;
       template<typename Scalar> friend class KellyTypeAdapt;
@@ -274,6 +275,7 @@ namespace Hermes
     HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
     /// Init element geometry for surface integrals.
     HERMES_API Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
+    HERMES_API Geom<double>* init_geom_surf(RefMap *rm, int surf_num, int marker, const int order, double3* tan);
 
     /// Init the function for calculation the integration order.
     HERMES_API Func<Hermes::Ord>* init_fn_ord(const int order);

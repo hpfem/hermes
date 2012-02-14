@@ -247,6 +247,14 @@ namespace Hermes
       }
       else return ((-1 - index) >> 3) & 15;
     }
+    int Shapeset::get_order(int index, int mode_) const
+    {
+      if (index >= 0) {
+        assert(index >= 0 && index <= max_index[mode_]);
+        return index_to_order[mode_][index];
+      }
+      else return ((-1 - index) >> 3) & 15;
+    }
 
     /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
     /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.

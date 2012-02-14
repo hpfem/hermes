@@ -348,7 +348,7 @@ namespace Hermes
 
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
-      template<typename T> friend class Continuity;
+      template<typename T> friend class CalculationContinuity;
 
       /// Saves this space into a file.
       bool save(const char *filename) const;

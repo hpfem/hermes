@@ -87,6 +87,7 @@ namespace Hermes
       /// If on quads, it returns encoded orders. The orders has to be decoded through macros
       /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
       int get_order(int index) const;
+      int get_order(int index, int mode_) const;
 
     protected:
       /// Selects HERMES_MODE_TRIANGLE or HERMES_MODE_QUAD.

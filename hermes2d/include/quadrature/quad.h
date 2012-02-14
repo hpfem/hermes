@@ -78,6 +78,17 @@ namespace Hermes
 
       inline double2* get_ref_vertex(int n) { return &ref_vert[mode][n]; }
 
+      inline int get_num_points(int order, int mode_)  const { return np[mode_][order]; };
+      inline double3* get_points(int order, int mode_) const { assert(order < num_tables[mode_]); return tables[mode_][order]; }
+      inline int get_edge_points(int edge, int mode_)  const { return max_order[mode_]+1 + (3*(1-mode) + 4*mode)*max_order[mode_] + edge; }
+      inline int get_edge_points(int edge, int order, int mode_) {return  max_order[mode_]+1 + (3*(1-mode) + 4*mode)*order + edge;}
+
+      inline int get_max_order(int mode_) const { return max_order[mode_]; }
+      inline int get_safe_max_order(int mode_) const { return safe_max_order[mode_]; }
+      inline int get_num_tables(int mode_) const { return num_tables[mode_]; }
+
+      inline double2* get_ref_vertex(int n, int mode_) { return &ref_vert[mode_][n]; }
+
     protected:
 
       int mode;

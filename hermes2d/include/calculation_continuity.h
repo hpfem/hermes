@@ -34,7 +34,7 @@ namespace Hermes
     /// Class used for resuming an interrupted calculation.
     /// Its purpose is to store everything necessary to resume it from a certain point.
     template<typename Scalar>
-    class HERMES_API Continuity
+    class HERMES_API CalculationContinuity
     {
     public:
       /// Choose an identification method of records.
@@ -46,7 +46,7 @@ namespace Hermes
         onlyNumber
       };
 
-      Continuity(IdentificationMethod identification_method);
+      CalculationContinuity(IdentificationMethod identification_method);
 
       /// One record of the calculation. Stores every information to resume a calculation from this one point.
       class HERMES_API Record

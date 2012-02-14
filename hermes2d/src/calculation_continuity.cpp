@@ -26,7 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Continuity<Scalar>::Continuity(IdentificationMethod identification_method) : last_record(NULL), record_available(false), identification_method(identification_method), num(0)
+    CalculationContinuity<Scalar>::CalculationContinuity(IdentificationMethod identification_method) : last_record(NULL), record_available(false), identification_method(identification_method), num(0)
     {
       double last_time;
       unsigned int last_number;
@@ -68,22 +68,22 @@ namespace Hermes
         }
         ifile.close();
 
-        Continuity<Scalar>::Record* record;
+        CalculationContinuity<Scalar>::Record* record;
         switch(identification_method)
         {
         case timeAndNumber:
-          record = new Continuity<Scalar>::Record(last_time, last_number);
-          this->records.insert(std::pair<std::pair<double, unsigned int>, Continuity<Scalar>::Record*>(std::pair<double, unsigned int>(last_time, last_number), record));
+          record = new CalculationContinuity<Scalar>::Record(last_time, last_number);
+          this->records.insert(std::pair<std::pair<double, unsigned int>, CalculationContinuity<Scalar>::Record*>(std::pair<double, unsigned int>(last_time, last_number), record));
           this->last_record = record;
           break;
         case onlyTime:
-          record = new Continuity<Scalar>::Record(last_time);
-          this->time_records.insert(std::pair<double, Continuity<Scalar>::Record*>(last_time, record));
+          record = new CalculationContinuity<Scalar>::Record(last_time);
+          this->time_records.insert(std::pair<double, CalculationContinuity<Scalar>::Record*>(last_time, record));
           this->last_record = record;
           break;
         case onlyNumber:
-          record = new Continuity<Scalar>::Record(last_number);
-          this->numbered_records.insert(std::pair<unsigned int, Continuity<Scalar>::Record*>(last_number, record));
+          record = new CalculationContinuity<Scalar>::Record(last_number);
+          this->numbered_records.insert(std::pair<unsigned int, CalculationContinuity<Scalar>::Record*>(last_number, record));
           this->last_record = record;
           break;
         }
@@ -91,7 +91,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::add_record(double time, unsigned int number)
+    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number)
     {
       if(last_record != NULL)
       {
@@ -102,13 +102,13 @@ namespace Hermes
           ofile.close();
         }
       }
-      Continuity<Scalar>::Record* record = new Continuity<Scalar>::Record(time, number);
-      this->records.insert(std::pair<std::pair<double, unsigned int>, Continuity<Scalar>::Record*>(std::pair<double, unsigned int>(time, number), record));
+      CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time, number);
+      this->records.insert(std::pair<std::pair<double, unsigned int>, CalculationContinuity<Scalar>::Record*>(std::pair<double, unsigned int>(time, number), record));
       this->last_record = record;
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::add_record(double time)
+    void CalculationContinuity<Scalar>::add_record(double time)
     {
       std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
       if(ofile)
@@ -116,13 +116,13 @@ namespace Hermes
         ofile << time << std::endl;
         ofile.close();
       }
-      Continuity<Scalar>::Record* record = new Continuity<Scalar>::Record(time);
-      this->time_records.insert(std::pair<double, Continuity<Scalar>::Record*>(time, record));
+      CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time);
+      this->time_records.insert(std::pair<double, CalculationContinuity<Scalar>::Record*>(time, record));
       this->last_record = record;
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::add_record(unsigned int number)
+    void CalculationContinuity<Scalar>::add_record(unsigned int number)
     {
       if(last_record != NULL)
       {
@@ -133,154 +133,154 @@ namespace Hermes
           ofile.close();
         }
       }
-      Continuity<Scalar>::Record* record = new Continuity<Scalar>::Record(number);
-      this->numbered_records.insert(std::pair<unsigned int, Continuity<Scalar>::Record*>(number, record));
+      CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(number);
+      this->numbered_records.insert(std::pair<unsigned int, CalculationContinuity<Scalar>::Record*>(number, record));
       this->last_record = record;
     }
 
     template<typename Scalar>
-    Continuity<Scalar>::Record::Record(double time, unsigned int number) : time(time), number(number)
+    CalculationContinuity<Scalar>::Record::Record(double time, unsigned int number) : time(time), number(number)
     {
     }
 
     template<typename Scalar>
-    Continuity<Scalar>::Record::Record(double time) : time(time), number(0)
+    CalculationContinuity<Scalar>::Record::Record(double time) : time(time), number(0)
     {
     }
 
     template<typename Scalar>
-    Continuity<Scalar>::Record::Record(unsigned int number) : time(0.0), number(number)
+    CalculationContinuity<Scalar>::Record::Record(unsigned int number) : time(0.0), number(number)
     {
     }
 
     template<typename Scalar>
-    bool Continuity<Scalar>::have_record_available()
+    bool CalculationContinuity<Scalar>::have_record_available()
     {
       return this->record_available;
     }
 
     template<typename Scalar>
-    typename Continuity<Scalar>::Record* Continuity<Scalar>::get_last_record() const
+    typename CalculationContinuity<Scalar>::Record* CalculationContinuity<Scalar>::get_last_record() const
     {
       return this->last_record;
     }
 
     template<typename Scalar>
-    int Continuity<Scalar>::get_num() const
+    int CalculationContinuity<Scalar>::get_num() const
     {
       return this->num;
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_meshes(Hermes::vector<Mesh*> meshes)
+    void CalculationContinuity<Scalar>::Record::save_meshes(Hermes::vector<Mesh*> meshes)
     {
       MeshReaderH2DXML reader;
       for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::meshFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::meshFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
         reader.save(filename.str().c_str(), meshes[i]);
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_mesh(Mesh* mesh)
+    void CalculationContinuity<Scalar>::Record::save_mesh(Mesh* mesh)
     {
       MeshReaderH2DXML reader;
       std::stringstream filename;
-      filename << Continuity<Scalar>::meshFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::meshFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       reader.save(filename.str().c_str(), mesh);
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_spaces(Hermes::vector<Space<Scalar>*> spaces)
+    void CalculationContinuity<Scalar>::Record::save_spaces(Hermes::vector<Space<Scalar>*> spaces)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::spaceFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::spaceFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
         spaces[i]->save(filename.str().c_str());
       }
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_space(Space<Scalar>* space)
+    void CalculationContinuity<Scalar>::Record::save_space(Space<Scalar>* space)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       space->save(filename.str().c_str());
     }
 
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_solutions(Hermes::vector<Solution<Scalar>*> solutions)
+    void CalculationContinuity<Scalar>::Record::save_solutions(Hermes::vector<Solution<Scalar>*> solutions)
     {
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::solutionFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::solutionFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
         solutions[i]->save(filename.str().c_str());
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_solution(Solution<Scalar>* solution)
+    void CalculationContinuity<Scalar>::Record::save_solution(Solution<Scalar>* solution)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       solution->save(filename.str().c_str());
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_time_step_length(double time_step_length_to_save)
+    void CalculationContinuity<Scalar>::Record::save_time_step_length(double time_step_length_to_save)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::timeStepFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::timeStepFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       std::ofstream out(filename.str().c_str());
       out << time_step_length_to_save;
       out.close();
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_time_step_length_n_minus_one(double time_step_length_to_save)
+    void CalculationContinuity<Scalar>::Record::save_time_step_length_n_minus_one(double time_step_length_to_save)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::timeStepNMinusOneFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::timeStepNMinusOneFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       std::ofstream out(filename.str().c_str());
       out << time_step_length_to_save;
       out.close();
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::save_error(double error)
+    void CalculationContinuity<Scalar>::Record::save_error(double error)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::errorFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::errorFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       std::ofstream out(filename.str().c_str());
       out << error;
       out.close();
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_meshes(Hermes::vector<Mesh*> meshes)
+    void CalculationContinuity<Scalar>::Record::load_meshes(Hermes::vector<Mesh*> meshes)
     {
       MeshReaderH2DXML reader;
       for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::meshFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::meshFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
         reader.load(filename.str().c_str(), meshes[i]);
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_mesh(Mesh* mesh)
+    void CalculationContinuity<Scalar>::Record::load_mesh(Mesh* mesh)
     {
       MeshReaderH2DXML reader;
       std::stringstream filename;
-      filename << Continuity<Scalar>::meshFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::meshFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       reader.load(filename.str().c_str(), mesh);
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
+    void CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
     {
       if(shapesets == Hermes::vector<Shapeset*>())
         for(unsigned int i = 0; i < spaces.size(); i++)
@@ -289,7 +289,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::spaceFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::spaceFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
 
         spaces[i]->free();
 
@@ -312,7 +312,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapesets)
+    void CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapesets)
     {
       if(shapesets == Hermes::vector<Shapeset*>())
         for(unsigned int i = 0; i < spaces.size(); i++)
@@ -321,7 +321,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::spaceFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::spaceFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
 
         spaces[i]->free();
 
@@ -344,10 +344,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    void CalculationContinuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::spaceFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
 
       space->free();
 
@@ -378,14 +378,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Space<Scalar>*> spaces)
+    void CalculationContinuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Space<Scalar>*> spaces)
     {
       if(solutions.size() != spaces.size())
         throw Exceptions::LengthException(1, 2, solutions.size(), spaces.size());
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         std::stringstream filename;
-        filename << Continuity<Scalar>::solutionFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::solutionFileName << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
         solutions[i]->load(filename.str().c_str(), spaces[i]->get_mesh());
         solutions[i]->space = spaces[i];
         solutions[i]->space_type = spaces[i]->get_type();
@@ -393,10 +393,10 @@ namespace Hermes
       }
     }
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, Space<Scalar>* space)
+    void CalculationContinuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, Space<Scalar>* space)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::solutionFileName << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       solution->load(filename.str().c_str(), space->get_mesh());
       solution->space = space;
       solution->space_type = space->get_type();
@@ -404,91 +404,91 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_time_step_length(double & time_step_length)
+    void CalculationContinuity<Scalar>::Record::load_time_step_length(double & time_step_length)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::timeStepFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::timeStepFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       std::ifstream in(filename.str().c_str());
       in >> time_step_length;
       in.close();
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_time_step_length_n_minus_one(double & time_step_length)
+    void CalculationContinuity<Scalar>::Record::load_time_step_length_n_minus_one(double & time_step_length)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::timeStepNMinusOneFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::timeStepNMinusOneFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       std::ifstream in(filename.str().c_str());
       in >> time_step_length;
       in.close();
     }
 
     template<typename Scalar>
-    void Continuity<Scalar>::Record::load_error(double & error)
+    void CalculationContinuity<Scalar>::Record::load_error(double & error)
     {
       std::stringstream filename;
-      filename << Continuity<Scalar>::errorFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::errorFileName << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       std::ifstream in(filename.str().c_str());
       in >> error;
       in.close();
     }
 
     template<typename Scalar>
-    double Continuity<Scalar>::Record::get_time()
+    double CalculationContinuity<Scalar>::Record::get_time()
     {
       return this->time;
     }
 
     template<typename Scalar>
-    unsigned int Continuity<Scalar>::Record::get_number()
+    unsigned int CalculationContinuity<Scalar>::Record::get_number()
     {
       return this->number;
     }
 
     template<typename Scalar>
-    std::string Continuity<Scalar>::meshFileName = "Mesh-";
+    std::string CalculationContinuity<Scalar>::meshFileName = "Mesh-";
 
     template<typename Scalar>
-    std::string Continuity<Scalar>::spaceFileName = "Space-";
+    std::string CalculationContinuity<Scalar>::spaceFileName = "Space-";
 
     template<typename Scalar>
-    std::string Continuity<Scalar>::solutionFileName = "Solution-";
+    std::string CalculationContinuity<Scalar>::solutionFileName = "Solution-";
 
     template<typename Scalar>
-    std::string Continuity<Scalar>::timeStepFileName = "TimeStep_";
+    std::string CalculationContinuity<Scalar>::timeStepFileName = "TimeStep_";
     template<typename Scalar>
-    std::string Continuity<Scalar>::timeStepNMinusOneFileName = "TimeStepNMinusOne_";
+    std::string CalculationContinuity<Scalar>::timeStepNMinusOneFileName = "TimeStepNMinusOne_";
 
     template<typename Scalar>
-    std::string Continuity<Scalar>::errorFileName = "Error_";
+    std::string CalculationContinuity<Scalar>::errorFileName = "Error_";
 
     template<typename Scalar>
-    void Continuity<Scalar>::set_meshFileName(std::string meshFileNameToSet)
+    void CalculationContinuity<Scalar>::set_meshFileName(std::string meshFileNameToSet)
     {
       meshFileName = meshFileNameToSet;
     }
     template<typename Scalar>
-    void Continuity<Scalar>::set_spaceFileName(std::string spaceFileNameToSet)
+    void CalculationContinuity<Scalar>::set_spaceFileName(std::string spaceFileNameToSet)
     {
       spaceFileName = spaceFileNameToSet;
     }
     template<typename Scalar>
-    void Continuity<Scalar>::set_solutionFileName(std::string solutionFileNameToSet)
+    void CalculationContinuity<Scalar>::set_solutionFileName(std::string solutionFileNameToSet)
     {
       solutionFileName = solutionFileNameToSet;
     }
     template<typename Scalar>
-    void Continuity<Scalar>::set_timeStepFileName(std::string timeStepFileNameToSet)
+    void CalculationContinuity<Scalar>::set_timeStepFileName(std::string timeStepFileNameToSet)
     {
       timeStepFileName = timeStepFileNameToSet;
     }
     template<typename Scalar>
-    void Continuity<Scalar>::set_errorFileName(std::string errorFileNameToSet)
+    void CalculationContinuity<Scalar>::set_errorFileName(std::string errorFileNameToSet)
     {
       errorFileName = errorFileNameToSet;
     }
 
-    template class HERMES_API Continuity<double>;
-    template class HERMES_API Continuity<std::complex<double> >;
+    template class HERMES_API CalculationContinuity<double>;
+    template class HERMES_API CalculationContinuity<std::complex<double> >;
   }
 }
