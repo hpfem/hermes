@@ -515,9 +515,9 @@ namespace Hermes
         // initialization
         this->sln = sln;
         if(!user_xdisp)
-          xdisp = new ZeroSolution(sln->get_mesh());
+          xdisp = new ZeroSolution<double>(sln->get_mesh());
         if(!user_ydisp)
-          ydisp = new ZeroSolution(sln->get_mesh());
+          ydisp = new ZeroSolution<double>(sln->get_mesh());
 
         this->item = item;
         this->eps = eps;

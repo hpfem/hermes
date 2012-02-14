@@ -69,18 +69,22 @@ namespace Hermes
       return Ord(0);
     }
 
-    ZeroSolution::ZeroSolution(Mesh* mesh) : ExactSolutionScalar<double>(mesh) {};
+    template<typename Scalar>
+    ZeroSolution<Scalar>::ZeroSolution(Mesh* mesh) : ExactSolutionScalar<Scalar>(mesh) {};
 
-    double ZeroSolution::value (double x, double y) const {
+    template<typename Scalar>
+    Scalar ZeroSolution<Scalar>::value (double x, double y) const {
       return 0.0;
     };
 
-    void ZeroSolution::derivatives (double x, double y, double& dx, double& dy) const {
+    template<typename Scalar>
+    void ZeroSolution<Scalar>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
       dx = 0;
       dy = 0;
     };
 
-    Ord ZeroSolution::ord(Ord x, Ord y) const {
+    template<typename Scalar>
+    Ord ZeroSolution<Scalar>::ord(Ord x, Ord y) const {
       return Ord(0);
     }
 
@@ -103,18 +107,22 @@ namespace Hermes
       return Ord(0);
     }
 
-    ZeroSolutionVector::ZeroSolutionVector(Mesh* mesh) : ExactSolutionVector<double>(mesh) {};
+    template<typename Scalar>
+    ZeroSolutionVector<Scalar>::ZeroSolutionVector(Mesh* mesh) : ExactSolutionVector<Scalar>(mesh) {};
 
-    Scalar2<double> ZeroSolutionVector::value (double x, double y) const {
-      return Scalar2<double>(0.0, 0.0);
+    template<typename Scalar>
+    Scalar2<Scalar> ZeroSolutionVector<Scalar>::value (double x, double y) const {
+      return Scalar2<Scalar>(0.0, 0.0);
     };
 
-    void ZeroSolutionVector::derivatives (double x, double y, Scalar2<double>& dx, Scalar2<double>& dy) const {
-      dx = Scalar2<double>(0.0, 0.0);
-      dy = Scalar2<double>(0.0, 0.0);
+    template<typename Scalar>
+    void ZeroSolutionVector<Scalar>::derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const {
+      dx = Scalar2<Scalar>(0.0, 0.0);
+      dy = Scalar2<Scalar>(0.0, 0.0);
     };
 
-    Ord ZeroSolutionVector::ord(Ord x, Ord y) const {
+    template<typename Scalar>
+    Ord ZeroSolutionVector<Scalar>::ord(Ord x, Ord y) const {
       return Ord(0);
     }
 
@@ -122,6 +130,8 @@ namespace Hermes
     template HERMES_API class ExactSolutionScalar<std::complex<double> >;
     template HERMES_API class ExactSolutionVector<double>;
     template HERMES_API class ExactSolutionVector<std::complex<double> >;
+    template HERMES_API class ZeroSolution<double>;
+    template HERMES_API class ZeroSolution<std::complex<double> >;
     template HERMES_API class ConstantSolution<double>;
     template HERMES_API class ConstantSolution<std::complex<double> >;
     template HERMES_API class ConstantSolutionVector<double>;

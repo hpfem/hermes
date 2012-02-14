@@ -110,14 +110,15 @@ namespace Hermes
       Scalar constant;
     };
 
-    class HERMES_API ZeroSolution : public ExactSolutionScalar<double>
+    template<typename Scalar>
+    class HERMES_API ZeroSolution : public ExactSolutionScalar<Scalar>
     {
     public:
       ZeroSolution(Mesh* mesh);
 
-      virtual double value (double x, double y) const;
+      virtual Scalar value (double x, double y) const;
 
-      virtual void derivatives (double x, double y, double& dx, double& dy) const;
+      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
     };
@@ -138,14 +139,15 @@ namespace Hermes
       Scalar constantY;
     };
 
-    class HERMES_API ZeroSolutionVector : public ExactSolutionVector<double>
+    template<typename Scalar>
+    class HERMES_API ZeroSolutionVector : public ExactSolutionVector<Scalar>
     {
     public:
       ZeroSolutionVector(Mesh* mesh);
 
-      virtual Scalar2<double> value (double x, double y) const;
+      virtual Scalar2<Scalar> value (double x, double y) const;
 
-      virtual void derivatives (double x, double y, Scalar2<double>& dx, Scalar2<double>& dy) const;
+      virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
     };
