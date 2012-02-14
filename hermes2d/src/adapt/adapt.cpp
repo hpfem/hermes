@@ -88,7 +88,7 @@ namespace Hermes
 
       for (int i = 0; i < this->num; i++)
       {
-        error_form[i][i] = new MatrixFormVolError(proj_norms[i]);
+        error_form[i][i] = new MatrixFormVolError(i, i, proj_norms[i]);
         norm_form[i][i] = error_form[i][i];
         own_forms[i][i] = true;
       }
@@ -134,7 +134,7 @@ namespace Hermes
       }
 
       // assign norm weak forms  according to norms selection
-      error_form[0][0] = new MatrixFormVolError(proj_norm);
+      error_form[0][0] = new MatrixFormVolError(0, 0, proj_norm);
       norm_form[0][0] = error_form[0][0];
       own_forms[0][0] = true;
     }
@@ -362,14 +362,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError()
+    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(int i, int j) : MatrixFormVol<Scalar>(i, j)
     {
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(ProjNormType type)
+    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(int i, int j, ProjNormType type) : MatrixFormVol<Scalar>(i, j), projNormType(type)
     {
-      this->projNormType = type;
     }
 
     template<typename Scalar>
