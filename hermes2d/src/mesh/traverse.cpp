@@ -874,6 +874,9 @@ namespace Hermes
 
       if(master)
       {
+        delete [] subs;
+        delete [] sons;
+        
         if(stack == NULL) return;
 
         for (int i = 0; i < size; i++)
@@ -882,9 +885,6 @@ namespace Hermes
 
         delete [] stack;
         stack = NULL;
-
-        delete [] subs;
-        delete [] sons;
       }
     }
 

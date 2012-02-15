@@ -1599,14 +1599,14 @@ namespace Hermes
             else
               oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order() + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
           else
-
             oi[i] = init_fn_ord(0);
       else
         for(int i = 0; i < prev_size; i++)
           oi[i] = init_fn_ord(0);
 
       oext->nf = form->ext.size();
-      oext->fn = new Func<Hermes::Ord>*[oext->nf];
+      if(oext->nf > 0)
+        oext->fn = new Func<Hermes::Ord>*[oext->nf];
       for (int i = 0; i < oext->nf; i++)
         if(surface_form)
           oext->fn[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));

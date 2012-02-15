@@ -626,6 +626,12 @@ namespace Hermes
         result[i] = values[i].real();
     };
 
+    MeshFunction<double>* RealFilter::clone()
+    {
+      RealFilter* filter = new RealFilter(this->sln_complex->clone(), this->item);
+      return filter;
+    }
+
     RealFilter::RealFilter(MeshFunction<std::complex<double> >* solution, int item)
       : ComplexFilter(solution, item)
     {
