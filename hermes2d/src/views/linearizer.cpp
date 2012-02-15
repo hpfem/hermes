@@ -711,7 +711,7 @@ namespace Hermes
 #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
             
-            fns[omp_get_thread_num()][0]->set_quad_order(0, item);
+            fns[omp_get_thread_num()][0]->set_quad_order(0);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
             if (val == NULL)
               error("Item not defined in the solution.");
