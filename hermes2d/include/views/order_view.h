@@ -70,6 +70,20 @@ namespace Hermes
         virtual const char* get_help_text() const;
 
       };
+#else
+      class HERMES_API OrderView : public View
+      {
+      public:
+
+        OrderView(const char* title = "OrderView", WinGeom* wg = NULL) { error("GLUT disabled."); }
+        //#ifndef _MSC_VER
+        //	OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
+        //#endif
+        OrderView(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+
+        template<typename Scalar>
+        void show(const Space<Scalar>* space) { error("GLUT disabled."); }
+      };
 #endif
     }
   }
