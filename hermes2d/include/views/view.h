@@ -237,6 +237,51 @@ namespace Hermes
         friend int remove_view_in_thread(void*);
         friend void on_create(int);
       };
+#else
+class HERMES_API View
+      {
+      public:
+
+        void init() { error("GLUT disabled."); }
+        View() { error("GLUT disabled."); }
+        View(const char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+        View(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+
+        int  create() { error("GLUT disabled."); return -1; }
+        void close() { error("GLUT disabled."); }
+        void refresh() { error("GLUT disabled."); }
+
+        /// Changes the window name (in its title-bar) to 'title'.
+        void set_title(const char* title) { error("GLUT disabled."); }
+
+        void set_min_max_range(double min, double max) { error("GLUT disabled."); }
+        void auto_min_max_range() { error("GLUT disabled."); }
+        void get_min_max_range(double& min, double& max) { error("GLUT disabled."); }
+
+        void show_scale(bool show = true) { error("GLUT disabled."); }
+        void set_scale_position(int horz, int vert) { error("GLUT disabled."); }
+        void set_scale_size(int width, int height, int numticks) { error("GLUT disabled."); }
+        void set_scale_format(const char* fmt) { error("GLUT disabled."); }
+        void fix_scale_width(int width = 80) { error("GLUT disabled."); }
+
+        /// Saves the current content of the window to a .BMP file.
+        /// If 'high_quality' is true, an anti-aliased frame is rendered and saved.
+        void save_screenshot(const char* bmpname, bool high_quality = false) { error("GLUT disabled."); }
+        /// Like save_screenshot(), but forms the file name in printf-style using the 'number'
+        /// parameter, e.g., format = "screen%03d.bmp" and number = 5 gives the file name "screen005.bmp".
+        void save_numbered_screenshot(const char* format, int number, bool high_quality = false) { error("GLUT disabled."); }
+
+        void set_palette(ViewPaletteType type) { error("GLUT disabled."); }
+        void set_num_palette_steps(int num) { error("GLUT disabled."); }
+        void set_palette_filter(bool linear) { error("GLUT disabled."); }
+
+        void wait_for_keypress(const char* text = NULL) { error("GLUT disabled."); }
+        void wait_for_close() { error("GLUT disabled."); }
+        void wait_for_draw() { error("GLUT disabled."); }
+
+        static void wait(const char* text) { error("GLUT disabled."); }
+        static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL) { error("GLUT disabled."); }
+      };
 #endif
     }
   }

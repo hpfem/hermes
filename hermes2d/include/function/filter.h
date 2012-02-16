@@ -252,6 +252,8 @@ namespace Hermes
     {
     public:
       RealFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
+      
+      virtual MeshFunction<double>* clone();
 
     protected:
       virtual void filter_fn(int n, std::complex<double>* values, double* result);

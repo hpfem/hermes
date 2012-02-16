@@ -65,6 +65,20 @@ namespace Hermes
         virtual const char* get_help_text() const;
 
       };
+#else
+      template<typename Scalar>
+      class HERMES_API VectorBaseView : public VectorView
+      {
+      public:
+        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL) { error("GLUT disabled."); }
+        
+        VectorBaseView(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+
+        void show(Space<Scalar>* space) { error("GLUT disabled."); }
+
+        virtual void set_title(const char* t) { error("GLUT disabled."); }
+      };
+      
 #endif
     }
   }

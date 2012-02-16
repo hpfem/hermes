@@ -237,6 +237,29 @@ namespace Hermes
         virtual void on_reshape(int width, int height);
 
       };
+#else
+class HERMES_API ScalarView : public View
+      {
+      public:
+        void init() { error("GLUT disabled."); }
+#ifndef _MSC_VER
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { error("GLUT disabled."); }
+#endif
+        ScalarView(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+
+        void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+          MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0) { error("GLUT disabled."); }
+
+        void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0) { error("GLUT disabled."); }
+
+        inline void show_mesh(bool show = true) { error("GLUT disabled."); }
+        inline void show_bounding_box(bool show = true) { error("GLUT disabled."); }
+        void show_contours(double step, double orig = 0.0) { error("GLUT disabled."); }
+        inline void hide_contours() { error("GLUT disabled."); }
+        inline void set_3d_mode(bool enable = true) { error("GLUT disabled."); }
+        void set_vertical_scaling(double sc) { error("GLUT disabled."); }
+        void set_min_max_range(double min, double max) { error("GLUT disabled."); }
+      };
 #endif
     }
   }

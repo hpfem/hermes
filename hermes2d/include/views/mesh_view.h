@@ -73,6 +73,15 @@ namespace Hermes
 
         Mesh* mesh;
       };
+#else
+      class HERMES_API MeshView : public View
+      {
+      public:
+
+        MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { error("GLUT disabled."); }
+        MeshView(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+        void show(Mesh* mesh) { error("GLUT disabled."); }
+      };
 #endif
     }
   }

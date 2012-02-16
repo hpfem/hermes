@@ -321,12 +321,12 @@ namespace Hermes
 
       RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
       Solution<Scalar>** current_rslns;
-
+      int id_to_refine;
 #define CHUNKSIZE 1
-#pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns)
+#pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
-        for(int id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
+        for(id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
         {
           current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
           current_rslns = rslns[omp_get_thread_num()];
@@ -338,7 +338,7 @@ namespace Hermes
           ElementToRefine elem_ref(ids[id_to_refine], components[id_to_refine]);
           
           // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-          bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(e, current_orders[components[id_to_refine]], current_rslns[components[id_to_refine]], elem_ref);
+          bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(e, current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref);
 
           //add to a list of elements that are going to be refined
 #pragma omp critical (elem_inx_to_proc)
