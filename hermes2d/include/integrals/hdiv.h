@@ -25,7 +25,7 @@ namespace Hermes
     {
       Quad2D* quad = rg->get_quad_2d();
       int o = fg->get_fn_order() + fh->get_fn_order() + 2 + rg->get_inv_ref_order();
-      limit_order(o);
+      limit_order(o, rg->get_active_element()->get_mode());
       fg->set_quad_order(o, H2D_FN_VAL);
       fh->set_quad_order(o, H2D_FN_VAL);
 
