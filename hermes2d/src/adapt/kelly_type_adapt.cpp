@@ -468,9 +468,9 @@ namespace Hermes
 
       Solution<Scalar>*sol = static_cast<Solution<Scalar>*>(sln);
       if(sol && sol->get_type() == HERMES_EXACT)
-        limit_order_nowarn(order);
+        limit_order_nowarn(order, rm->get_active_element()->get_mode());
       else
-        limit_order(order);
+        limit_order(order, rm->get_active_element()->get_mode());
 
       ou->free_ord(); delete ou;
       delete fake_e;
@@ -518,7 +518,7 @@ namespace Hermes
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
-      limit_order(order);
+      limit_order(order, rm->get_active_element()->get_mode());
 
       // Clean up.
       for (int i = 0; i < this->num; i++)
@@ -599,7 +599,8 @@ namespace Hermes
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
-      limit_order(order);
+      limit_order(order, rm->get_active_element()->get_mode());
+
 
       // Clean up.
       for (int i = 0; i < this->num; i++)
@@ -685,7 +686,8 @@ namespace Hermes
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
-      limit_order(order);
+      limit_order(order, rm->get_active_element()->get_mode());
+
 
       // Clean up.
       if (fake_ui != NULL)

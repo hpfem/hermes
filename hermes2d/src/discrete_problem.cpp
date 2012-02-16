@@ -2198,7 +2198,7 @@ namespace Hermes
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, ru->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -2426,7 +2426,7 @@ namespace Hermes
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, rv->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -2488,7 +2488,7 @@ namespace Hermes
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, rv->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -2710,7 +2710,7 @@ namespace Hermes
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, ru->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -2771,7 +2771,7 @@ namespace Hermes
         // Increase due to reference map.
         order = ru->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, ru->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -2986,7 +2986,7 @@ namespace Hermes
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, rv->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -3046,7 +3046,7 @@ namespace Hermes
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, rv->get_active_element()->get_mode());
 
         // Cleanup.
         delete [] oi;
@@ -3180,7 +3180,7 @@ namespace Hermes
         order = ru->get_inv_ref_order();
 
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, ru->get_active_element()->get_mode());
 
         // Clean up.
         if (u_ext != Hermes::vector<Solution<Scalar>*>())
@@ -3347,7 +3347,7 @@ namespace Hermes
         // Increase due to reference map.
         order = rv->get_inv_ref_order();
         order += o.get_order();
-        limit_order(order);
+        limit_order(order, rv->get_active_element()->get_mode());
 
         // Clean up.
         if (u_ext != Hermes::vector<Solution<Scalar>*>())

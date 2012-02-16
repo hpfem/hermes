@@ -590,7 +590,7 @@ namespace Hermes
         // Loop through all elements.
         while ((e = trav.get_next_state(NULL, NULL)) != NULL)
         {
-          sln->set_quad_order(0);
+          sln->set_quad_order(0, item);
           double* val = sln->get_values(component, value_type);
           if (val == NULL)
             error("Item not defined in the solution.");
