@@ -600,7 +600,7 @@ namespace Hermes
         this->dmult = dmult;
       }
 
-      void Linearizer::process_solution(MeshFunction<double>* sln, int item, double eps)
+      void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
       {
         lock_data();
         Hermes::TimePeriod time_period;
@@ -612,7 +612,7 @@ namespace Hermes
         if(!user_ydisp)
           ydisp = new ZeroSolution<double>(sln->get_mesh());
 
-        this->item = item;
+        this->item = item_;
         this->eps = eps;
 
         // get the component and desired value from item.
@@ -626,6 +626,8 @@ namespace Hermes
           item >>= 1;
           value_type++;
         }
+
+        this->item = item_;
 
         int nn = this->sln->get_mesh()->get_num_elements();
 
