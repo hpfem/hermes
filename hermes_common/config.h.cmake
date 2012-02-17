@@ -1,5 +1,5 @@
 // OpenMP
-#cmakedefine HERMES_OMP_NUM_THREADS ${HERMES_OMP_NUM_THREADS}
+#cmakedefine NUM_THREADS ${NUM_THREADS}
 
 #cmakedefine HAVE_FMEMOPEN
 #cmakedefine HAVE_LOG2

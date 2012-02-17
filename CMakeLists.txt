@@ -11,8 +11,10 @@ project(hermes)
 	# The values below are sane defaults to produce a build on all platforms,
 	# if you want to override them, set them in CMake.vars
 
-  # OpenMP
-  set(HERMES_OMP_NUM_THREADS 4)
+	# OpenMP
+  # "-1" stands for using as many threads as is the number of available cores.
+  # Please be aware that the variable OMP_NUM_THREADS, that is often used for this purpose, is ignored.
+	set(NUM_THREADS -1)
   
 	# HermesCommon
 		set(HERMES_COMMON_DEBUG     YES)
@@ -161,6 +163,21 @@ project(hermes)
 
 	# Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
+  
+  # Determine the number of cores.
+  if(${NUM_THREADS} MATCHES -1)
+    if(WIN32)
+      set(NUM_THREADS "$ENV{NUMBER_OF_PROCESSORS}")
+    else(WIN32)
+      set(cpuinfo_file "/proc/cpuinfo")
+  if(EXISTS "${cpuinfo_file}")
+    file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
+    list(LENGTH procs NUM_THREADS)
+  endif()
+    endif(WIN32)
+  endif(${NUM_THREADS} MATCHES -1)
+  
+  MESSAGE(STATUS "Hermes will be using ${NUM_THREADS} threads for calculation.")
 
 	macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
 		if (WITH_${HXD})

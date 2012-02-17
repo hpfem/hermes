@@ -45,7 +45,7 @@ namespace Hermes
     template<typename Scalar>
     int Global<Scalar>::Hermes_omp_get_max_threads()
     { 
-      return HERMES_OMP_NUM_THREADS == -1 ? omp_get_max_threads() : HERMES_OMP_NUM_THREADS; 
+      return NUM_THREADS;
     }
 
     template<typename Scalar>

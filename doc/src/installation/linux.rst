@@ -33,28 +33,28 @@ network at Github.
 Once you have a local copy of the Hermes repository on your computer, change dir 
 to hermes/. There you will find a CMakeLists.txt file that contains the lines
 ::
-
+    # OpenMP
+    # "-1" stands for using as many threads as is the number of available cores.
+    # Please be aware that the variable OMP_NUM_THREADS, that is often used for this purpose, is ignored.
+    set(NUM_THREADS -1)
+    
     # Testing.
     set(WITH_TESTS                YES)
     
-    # Optional parts of the library:
-    set(WITH_H1D                  YES)
-        # Release and debug versions.
-        set(H1D_DEBUG             YES)
-        ...
-  
-    set(WITH_H2D                  YES)
-        # Real/complex version of the library (you can build either one or both):
-        set(H2D_REAL              YES)
-        set(H2D_COMPLEX           YES)
-        # Release and debug versions.
-        set(H2D_DEBUG             YES)
-        ...
-  
-    set(WITH_H3D                  YES)
-        # Real/complex version of the library.
-        set(H3D_REAL              YES)
-        ...
+    # HermesCommon
+      set(HERMES_COMMON_DEBUG     YES)
+		  set(HERMES_COMMON_RELEASE   YES)
+      ...
+      
+    # Hermes2D:
+    set(WITH_H2D                        YES)
+      set(H2D_DEBUG               YES)
+		  set(H2D_RELEASE             YES)
+		  # Optional parts of the library.
+		  set(H2D_WITH_GLUT 					YES)
+		  set(H2D_WITH_VIEWER_GUI 		NO)
+      ...
+      
     set(WITH_SUPERLU            NO)
     ...
 
