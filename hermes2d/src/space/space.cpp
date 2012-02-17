@@ -26,6 +26,7 @@
 #endif
 
 #include <iostream>
+#include "exceptions.h"
 
 namespace Hermes
 {
@@ -38,7 +39,7 @@ namespace Hermes
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       _F_;
-      if (mesh == NULL) error("Space must be initialized with an existing mesh.");
+      if (mesh == NULL) throw Hermes::Exceptions::NullException(1);
       this->default_tri_order = -1;
       this->default_quad_order = -1;
       this->ndata = NULL;
@@ -54,7 +55,7 @@ namespace Hermes
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
             if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end())
-              error("A boundary condition defined on a non-existent marker.");
+              throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
 
       own_shapeset = (shapeset == NULL);
     }
@@ -955,7 +956,7 @@ namespace Hermes
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
             if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end())
-              error("A boundary condition defined on a non-existent marker.");
+              throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
 
       this->resize_tables();
 
