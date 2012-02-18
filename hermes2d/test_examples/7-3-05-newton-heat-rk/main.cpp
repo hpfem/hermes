@@ -148,10 +148,6 @@ int main(int argc, char* argv[])
   }
   while (current_time < T_FINAL);
 
-  // Cleanup.
-  delete sln_time_prev;
-  delete sln_time_new;
-
   // Wait for the view to be closed.
   Hermes::Hermes2D::Views::View::wait();
   return 0;
