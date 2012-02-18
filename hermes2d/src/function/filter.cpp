@@ -688,6 +688,12 @@ namespace Hermes
     {
     };
 
+    MeshFunction<double>* ImagFilter::clone()
+    {
+      ImagFilter* filter = new ImagFilter(this->sln_complex->clone(), this->item);
+      return filter;
+    }
+
     void ComplexAbsFilter::filter_fn(int n, std::complex<double>* values, double* result)
     {
       for (int i = 0; i < n; i++)
