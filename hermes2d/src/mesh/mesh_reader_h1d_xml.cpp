@@ -34,6 +34,11 @@ namespace Hermes
 
     bool MeshReaderH1DXML::load(const char *filename, Mesh *mesh)
     {
+      return load(filename, mesh, HERMES_2D_1D_Y);
+    }
+
+    bool MeshReaderH1DXML::load(const char *filename, Mesh *mesh, double y_size)
+    {
       mesh->free();
 
       try
@@ -115,7 +120,7 @@ namespace Hermes
         Node* node;
         for_all_nodes(node, mesh)
           if(node->y != 0)
-            node->y = (b-a) / HERMES_2D_1D_Y;
+            node->y = (b-a) / y_size;
 
         // Important, stores the boundaries in the mesh.
         mesh->a = a;

@@ -31,7 +31,7 @@
 
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
 
-#define HERMES_2D_1D_Y 200 ///< Inverted value of (Y-size of 1D meshes compared to the x-size).
+#define HERMES_2D_1D_Y 100 ///< Inverted value of (Y-size of 1D meshes compared to the x-size).
 
 #define HERMES_ONE NULL
 #define HERMES_DEFAULT_FUNCTION NULL

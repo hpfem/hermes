@@ -45,6 +45,7 @@ namespace Hermes
 
       /// This method loads a single mesh from a file.
       virtual bool load(const char *filename, Mesh *mesh);
+      virtual bool load(const char *filename, Mesh *mesh, double y_size);
 
       /// This method saves a single mesh to a file.
       bool save(const char *filename, Mesh *mesh);

@@ -48,6 +48,8 @@ namespace Hermes
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, spaces);
 
+      ndof = Space<Scalar>::get_num_dofs(spaces);
+
       // Initial coefficient vector for the Newton's method.
       Scalar* coeff_vec = new Scalar[ndof];
       memset(coeff_vec, 0, ndof*sizeof(Scalar));
@@ -73,7 +75,7 @@ namespace Hermes
       NewtonSolverNOX<Scalar> newton_nox(&dp);
 
       // Set NOX parameters.
-      newton_nox.set_verbose_output(false);
+      newton_nox.set_verbose_output(true);
       newton_nox.set_output_flags(message_type);
       newton_nox.set_ls_type(iterative_method);
       newton_nox.set_ls_tolerance(ls_tolerance);
