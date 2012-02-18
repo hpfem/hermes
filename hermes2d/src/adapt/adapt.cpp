@@ -314,8 +314,7 @@ namespace Hermes
         rslns[i] = new Solution<Scalar>*[this->num];
         for (int j = 0; j < this->num; j++)
         {
-          rslns[i][j] = new Solution<Scalar>(spaces[j]->get_mesh());
-          rslns[i][j]->copy(rsln[j]);
+          rslns[i][j] = dynamic_cast<Solution<Scalar>*>(rsln[j]->clone());
         }
       }
 

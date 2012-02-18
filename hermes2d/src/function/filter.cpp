@@ -23,6 +23,17 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    Filter<Scalar>::Filter(MeshFunction<Scalar>** solutions, int num) : MeshFunction<Scalar>()
+    {
+      this->num = num;
+      if(num > 10)
+        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+      for(int i = 0; i < this->num; i++)
+        this->sln[i] = solutions[i];
+      this->init();
+    }
+
+      template<typename Scalar>
     Filter<Scalar>::Filter(const Hermes::vector<MeshFunction<Scalar>*>& solutions) : MeshFunction<Scalar>()
     {
       this->num = solutions.size();
@@ -555,6 +566,20 @@ namespace Hermes
     template<typename Scalar>
     DiffFilter<Scalar>::DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
 
+    template<typename Scalar>
+    MeshFunction<Scalar>* DiffFilter<Scalar>::clone()
+    {
+      Hermes::vector<MeshFunction<Scalar>*> slns;
+      Hermes::vector<int> items;
+      for(int i = 0; i < this->num; i++)
+      {
+        slns.push_back(this->sln[i]->clone());
+        items.push_back(this->item[i]);
+      }
+      DiffFilter* filter = new DiffFilter<Scalar>(slns, items);
+      return filter;
+    }
+
 
     template<typename Scalar>
     void SumFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
@@ -618,6 +643,20 @@ namespace Hermes
       init_components();
 
     };
+    
+    MeshFunction<double>* AbsFilter::clone()
+    {
+      Hermes::vector<MeshFunction<double>*> slns;
+      Hermes::vector<int> items;
+      for(int i = 0; i < this->num; i++)
+      {
+        slns.push_back(this->sln[i]->clone());
+        items.push_back(this->item[i]);
+      }
+      AbsFilter* filter = new AbsFilter(slns, items);
+      return filter;
+    }
+
 
 
     void RealFilter::filter_fn(int n, std::complex<double>* values, double* result)
@@ -654,6 +693,13 @@ namespace Hermes
       for (int i = 0; i < n; i++)
         result[i] = sqrt(sqr(values[i].real()) + sqr(values[i].imag()));
     };
+
+    
+    MeshFunction<double>* ComplexAbsFilter::clone()
+    {
+      ComplexAbsFilter* filter = new ComplexAbsFilter(this->sln_complex->clone(), this->item);
+      return filter;
+    }
 
     ComplexAbsFilter::ComplexAbsFilter(MeshFunction<std::complex<double> >* solution, int item)
       : ComplexFilter(solution, item)
@@ -732,6 +778,24 @@ namespace Hermes
       this->item2 = item2;
     }
 
+    VonMisesFilter::VonMisesFilter(MeshFunction<double>** solutions, int num, double lambda, double mu,
+        int cyl, int item1, int item2): Filter<double>(solutions, num)
+    {
+      this->mu = mu;
+      this->lambda = lambda;
+      this->cyl = cyl;
+      this->item1 = item1;
+      this->item2 = item2;
+    }
+
+    MeshFunction<double>* VonMisesFilter::clone()
+    {
+      MeshFunction<double>** slns = new MeshFunction<double>*[num];
+      for(int i = 0; i < num; i++)
+        slns[i] = sln[i]->clone();
+      VonMisesFilter* filter = new VonMisesFilter(sln, num, lambda, mu, cyl, item1, item2);
+      return filter;
+    }
 
     template<typename Scalar>
     void LinearFilter<Scalar>::precalculate(int order, int mask)
