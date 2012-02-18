@@ -46,8 +46,11 @@ namespace Hermes
 
     void PrecalcShapeset::update_max_index()
     {
-      shapeset->set_mode(HERMES_MODE_TRIANGLE);
-      max_index[0] = shapeset->get_max_index();
+      if(this->shapeset->get_space_type() != HERMES_HDIV_SPACE)
+      {
+        shapeset->set_mode(HERMES_MODE_TRIANGLE);
+        max_index[0] = shapeset->get_max_index();
+      }
       shapeset->set_mode(HERMES_MODE_QUAD);
       max_index[1] = shapeset->get_max_index();
     }
