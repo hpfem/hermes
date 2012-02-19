@@ -15,6 +15,10 @@ project(hermes_common)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/third_party_codes/trilinos-teuchos)
 
+	if(NOT COLOR_LOGGING)
+		add_definitions(-DNO_COLOR_LOGGING)
+	endif(NOT COLOR_LOGGING)
+
 	#
 	# Source files for the Hermes_common library.
 	#

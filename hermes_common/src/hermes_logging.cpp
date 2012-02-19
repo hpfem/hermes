@@ -105,6 +105,9 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
   else
     return false;
 #else //Linux platform
+#ifdef NO_COLOR_LOGGING
+  printf("%s", text);
+#else //color logging
 # define FOREGROUND_RED 1
 # define FOREGROUND_GREEN 2
 # define FOREGROUND_BLUE 4
@@ -133,8 +136,9 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
 
   //print text and reset settings
   printf("%s\033[0m", text);
-  fflush(stdout);
+#endif
 
+  fflush(stdout);
   return true;
 #endif
 }
