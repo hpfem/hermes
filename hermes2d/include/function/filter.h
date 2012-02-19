@@ -202,6 +202,55 @@ namespace Hermes
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
 
+    /// TopValFilter takes functions and puts a threshold on their highest values.
+    class HERMES_API TopValFilter : public SimpleFilter<double>
+    {
+    public:
+      TopValFilter() {};
+
+      TopValFilter(Hermes::vector<MeshFunction<double>*> solutions, Hermes::vector<double> limits, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
+      TopValFilter(MeshFunction<double>* sln, double limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
+      virtual MeshFunction<double>* clone();
+
+    protected:
+      virtual void filter_fn(int n, Hermes::vector<double*> values, double* result);
+      Hermes::vector<double> limits;
+    };
+
+    /// BottomValFilter takes functions and puts a threshold on their lowest values.
+    class HERMES_API BottomValFilter : public SimpleFilter<double>
+    {
+    public:
+      BottomValFilter() {};
+
+      BottomValFilter(Hermes::vector<MeshFunction<double>*> solutions, Hermes::vector<double> limits, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
+      BottomValFilter(MeshFunction<double>* sln, double limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
+      virtual MeshFunction<double>* clone();
+
+    protected:
+      virtual void filter_fn(int n, Hermes::vector<double*> values, double* result);
+      Hermes::vector<double> limits;
+    };
+
+    /// ValFilter takes functions and puts a threshold on their lowest AND highest values.
+    class HERMES_API ValFilter : public SimpleFilter<double>
+    {
+    public:
+      ValFilter() {};
+
+      ValFilter(Hermes::vector<MeshFunction<double>*> solutions, Hermes::vector<double> low_limits, Hermes::vector<double> high_limits, Hermes::vector<int> items = *(new Hermes::vector<int>));
+
+      ValFilter(MeshFunction<double>* sln, double low_limit, double high_limit, int item = H2D_FN_VAL_0); ///< for vector-valued sln1
+      virtual MeshFunction<double>* clone();
+
+    protected:
+      virtual void filter_fn(int n, Hermes::vector<double*> values, double* result);
+      Hermes::vector<double> low_limits;
+      Hermes::vector<double> high_limits;
+    };
+
 
     /// Calculates the difference of two functions.
     template<typename Scalar>
