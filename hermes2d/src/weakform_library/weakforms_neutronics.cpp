@@ -379,7 +379,12 @@ namespace Hermes
               // Now, we surely have Sigma_r ...
 
               if (scattering_multigroup_structure.empty())
-                scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, true));
+              {
+                scattering_multigroup_structure = bool2(G);
+                for(int G_i = 0; G_i < G; G_i++)
+                  for(int G_j = 0; G_j < G; G_j++)
+                    scattering_multigroup_structure[G_i].push_back(true);
+              }
 
               if (!Sigma_s_given)
               {

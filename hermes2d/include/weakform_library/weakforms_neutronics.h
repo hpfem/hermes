@@ -897,10 +897,10 @@ namespace Hermes
 
                 void update_keff(double new_keff) { keff = new_keff; }
 
+                double keff;
               private:
 
                 unsigned int g;
-                double keff;
               };
 
               template<typename Scalar>
@@ -1195,7 +1195,7 @@ namespace Hermes
               void update_keff(double new_keff);
               /// \todo This is needed by 4-group adapt, however it must have been removed, so I provided this dummy method to
               /// get over it.
-              double get_keff() { return 0.0; };
+              double get_keff() { return keff_iteration_forms[0]->keff; };
             };
           }
         }
