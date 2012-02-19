@@ -556,6 +556,19 @@ namespace Hermes
         error("The single-argument constructor is intended for vector-valued solutions.");
     };
 
+    template<typename Scalar>
+    MeshFunction<Scalar>* MagFilter<Scalar>::clone()
+    {
+      Hermes::vector<MeshFunction<Scalar>*> slns;
+      Hermes::vector<int> items;
+      for(int i = 0; i < this->num; i++)
+      {
+        slns.push_back(this->sln[i]->clone());
+        items.push_back(this->item[i]);
+      }
+      MagFilter<Scalar>* filter = new MagFilter<Scalar>(slns, items);
+      return filter;
+    }
 
     template<typename Scalar>
     void DiffFilter<Scalar>::filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result)
@@ -595,6 +608,19 @@ namespace Hermes
     template<typename Scalar>
     SumFilter<Scalar>::SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
 
+    template<typename Scalar>
+    MeshFunction<Scalar>* SumFilter<Scalar>::clone()
+    {
+      Hermes::vector<MeshFunction<Scalar>*> slns;
+      Hermes::vector<int> items;
+      for(int i = 0; i < this->num; i++)
+      {
+        slns.push_back(this->sln[i]->clone());
+        items.push_back(this->item[i]);
+      }
+      SumFilter<Scalar>* filter = new SumFilter<Scalar>(slns, items);
+      return filter;
+    }
 
     template<>
     void SquareFilter<double>::filter_fn(int n, Hermes::vector<double *> v1, double* result)
@@ -617,6 +643,20 @@ namespace Hermes
       if (solutions.size() > 1)
         error("SquareFilter only supports one MeshFunction.");
     };
+
+    template<typename Scalar>
+    MeshFunction<Scalar>* SquareFilter<Scalar>::clone()
+    {
+      Hermes::vector<MeshFunction<Scalar>*> slns;
+      Hermes::vector<int> items;
+      for(int i = 0; i < this->num; i++)
+      {
+        slns.push_back(this->sln[i]->clone());
+        items.push_back(this->item[i]);
+      }
+      SquareFilter<Scalar>* filter = new SquareFilter<Scalar>(slns, items);
+      return filter;
+    }
 
     void AbsFilter::filter_fn(int n, Hermes::vector<double*> v1, double * result)
     {

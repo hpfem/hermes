@@ -196,6 +196,7 @@ namespace Hermes
       MagFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
 
       MagFilter(MeshFunction<Scalar>* sln1, int item1 = H2D_FN_VAL); ///< for vector-valued sln1
+      virtual MeshFunction<Scalar>* clone();
 
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
@@ -221,6 +222,7 @@ namespace Hermes
     {
     public:
       SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      virtual MeshFunction<Scalar>* clone();
 
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
@@ -233,6 +235,7 @@ namespace Hermes
     {
     public:
       SquareFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      virtual MeshFunction<Scalar>* clone();
 
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
@@ -336,6 +339,7 @@ namespace Hermes
       LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac = 1);
 
       virtual Scalar get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
+      virtual MeshFunction<Scalar>* clone();
 
     protected:
       double tau_frac;

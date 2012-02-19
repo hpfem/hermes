@@ -331,6 +331,11 @@ namespace Hermes
           if (fabs(mfvol[i]->scaling_factor) > 1e-12)
             blocks[mfvol[i]->j][mfvol[i]->i] = true;
       }
+      for (unsigned i = 0; i < mfsurf.size(); i++)
+      {
+        if (fabs(mfsurf[i]->scaling_factor) > 1e-12)
+          blocks[mfsurf[i]->i][mfsurf[i]->j] = true;
+      }
 
       return blocks;
     }
