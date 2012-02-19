@@ -133,6 +133,7 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
 
   //print text and reset settings
   printf("%s\033[0m", text);
+  fflush(stdout);
 
   return true;
 #endif
