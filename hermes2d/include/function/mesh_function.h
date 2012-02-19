@@ -66,6 +66,8 @@ namespace Hermes
 
       virtual void pop_transform();
 
+      MeshFunction<Scalar>* clone() { return this; }
+
     protected:
 
       int mode;
