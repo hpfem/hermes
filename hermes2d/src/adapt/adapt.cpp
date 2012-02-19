@@ -314,7 +314,8 @@ namespace Hermes
         rslns[i] = new Solution<Scalar>*[this->num];
         for (int j = 0; j < this->num; j++)
         {
-          rslns[i][j] = dynamic_cast<Solution<Scalar>*>(rsln[j]->clone());
+          if(rsln[j] != NULL)
+            rslns[i][j] = dynamic_cast<Solution<Scalar>*>(rsln[j]->clone());
         }
       }
 
@@ -364,7 +365,8 @@ namespace Hermes
         if(rslns[i] != NULL)
         {
           for (unsigned int j = 0; j < this->num; j++)
-            delete rslns[i][j];
+            if(rsln[j] != NULL)
+              delete rslns[i][j];
           delete [] rslns[i];
         }
       }
