@@ -114,8 +114,8 @@ namespace Hermes
 
       this->have_coarse_solutions = true;
 
-      Mesh** meshes = new Mesh*[num];
-      Transformable** fns = new Transformable*[num];
+      Mesh** meshes = new Mesh*[this->num];
+      Transformable** fns = new Transformable*[this->num];
 
       this->num_act_elems = 0;
       for (int i = 0; i < this->num; i++)
@@ -253,9 +253,9 @@ namespace Hermes
 
                 // Determine the minimum mesh seq in this stage.
                 unsigned int min_dg_mesh_seq = 0;
-                for(unsigned int i = 0; i < spaces.size(); i++)
-                  if(spaces[i]->get_mesh()->get_seq() < min_dg_mesh_seq || i == 0)
-                    min_dg_mesh_seq = spaces[i]->get_mesh()->get_seq();
+                for(unsigned int i = 0; i < this->spaces.size(); i++)
+                  if(this->spaces[i]->get_mesh()->get_seq() < min_dg_mesh_seq || i == 0)
+                    min_dg_mesh_seq = this->spaces[i]->get_mesh()->get_seq();
 
                 ns_index = meshes[i]->get_seq() - min_dg_mesh_seq; // = 0 for single mesh
 
@@ -318,7 +318,7 @@ namespace Hermes
                   // Push all the necessary transformations to all functions of this stage.
                   // The important thing is that the transformations to the current subelement are already there.
                   // Also store the current neighbor element and neighbor edge in neighb_el, neighbor_edge.
-                  for(unsigned int fns_i = 0; fns_i < num; fns_i++)
+                  for(unsigned int fns_i = 0; fns_i < this->num; fns_i++)
                   {
                     NeighborSearch<Scalar> *ns = neighbor_searches.get(meshes[fns_i]->get_seq() - min_dg_mesh_seq);
                     if (ns->central_transformations.present(neighbor))
@@ -368,7 +368,7 @@ namespace Hermes
                   // BEGIN COPY FROM DISCRETE_PROBLEM.CPP 
 
                   // Clear the transformations from the RefMaps and all functions.
-                  for(unsigned int fns_i = 0; fns_i < num; fns_i++)
+                  for(unsigned int fns_i = 0; fns_i < this->num; fns_i++)
                     fns[fns_i]->set_transform(neighbor_searches.get(meshes[fns_i]->get_seq() - min_dg_mesh_seq)->original_central_el_transform);
 
                   rm->set_transform(neighbor_searches.get(ns_index)->original_central_el_transform);
