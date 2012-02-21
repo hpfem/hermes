@@ -957,7 +957,8 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::ExtendedShapeset::~ExtendedShapeset() 
     {
-      delete [] dof; delete neighbor_al;
+      delete [] dof;
+      delete neighbor_al;
     }
 
     template<typename Scalar>

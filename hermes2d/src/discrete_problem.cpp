@@ -1829,13 +1829,17 @@ namespace Hermes
         }
 
         // Delete the neighbor_searches array.
+        for(unsigned int i = 0; i < (*neighbor_searches[current_state->isurf]).get_size(); i++)
+          if((*neighbor_searches[current_state->isurf]).present(i))
+            delete (*neighbor_searches[current_state->isurf]).get(i);
         delete neighbor_searches[current_state->isurf];
         delete [] processed[current_state->isurf];
       }
 
       delete [] processed;
       delete [] neighbor_searches;
-
+      delete [] num_neighbors;
+      
       // Deinitialize neighbor pss's, refmaps.
       if(DG_matrix_forms_present)
       {
