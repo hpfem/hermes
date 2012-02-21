@@ -152,6 +152,8 @@ namespace Hermes
       Form(std::string area = HERMES_ANY, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+      virtual ~Form() {};
+
       /// Multiple areas constructor.
       Form(Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
@@ -198,6 +200,8 @@ namespace Hermes
         Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+      virtual ~MatrixForm() {};
+
       unsigned int j;
       
       int sym;
@@ -225,6 +229,8 @@ namespace Hermes
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+      virtual ~MatrixFormVol() {};
+
       virtual MatrixFormVol* clone();
     };
 
@@ -242,6 +248,8 @@ namespace Hermes
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+      virtual ~MatrixFormSurf() {};
+
       virtual MatrixFormSurf* clone();
     };
 
@@ -258,6 +266,8 @@ namespace Hermes
       VectorForm(unsigned int i, Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
+
+      virtual ~VectorForm() {};
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -280,6 +290,8 @@ namespace Hermes
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
 
+      virtual ~VectorFormVol() {};
+
       virtual VectorFormVol* clone();
     };
 
@@ -296,6 +308,8 @@ namespace Hermes
       VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
         Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
         double scaling_factor = 1.0, int u_ext_offset = 0);
+
+      virtual ~VectorFormSurf() {};
 
       virtual VectorFormSurf* clone();
     };

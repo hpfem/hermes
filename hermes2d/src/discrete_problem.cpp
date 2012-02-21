@@ -2070,6 +2070,8 @@ namespace Hermes
           e->free();
           delete e;
 
+          delete [] jacobian_x_weights;
+
           delete ext_asmlist_u;
           delete ext_asmlist_v;
         }
@@ -2161,6 +2163,7 @@ namespace Hermes
 
           e->free();
           delete e;
+          delete [] jacobian_x_weights;
         }
       }
 
