@@ -2065,6 +2065,9 @@ namespace Hermes
 
           e->free();
           delete e;
+
+          delete ext_asmlist_u;
+          delete ext_asmlist_v;
         }
       }
 

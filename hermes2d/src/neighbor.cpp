@@ -789,12 +789,9 @@ namespace Hermes
     typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(const Space<Scalar>*space, AsmList<Scalar>* al)
     {
       _F_;
-      if (supported_shapes == NULL)
-        supported_shapes = new ExtendedShapeset(this, al, space);
-      else
-        supported_shapes->update(this, space);
+      ExtendedShapeset* new_supp_shapes = new ExtendedShapeset(this, al, space);
 
-      return supported_shapes;
+      return new_supp_shapes;
     }
 
     template<typename Scalar>
