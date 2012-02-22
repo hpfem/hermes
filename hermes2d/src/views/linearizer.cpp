@@ -506,7 +506,7 @@ namespace Hermes
 
       void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
       {
-        if (item == 0){
+        if (item_ == 0){
           throw Exceptions::ValueException("item",item,1);
         }
         lock_data();
