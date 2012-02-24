@@ -26,7 +26,5 @@ else()
 endif()
 SET(WITH_TRILINOS YES)
 
-# Experimental
-# Turn on Zoltan AND MPI
-# SET(WITH_ZOLTAN YES)
-# SET(WITH_MPI NO)
+# Turn on colored logging (disabled by default)
+set(COLOR_LOGGING           YES)

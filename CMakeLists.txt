@@ -16,7 +16,7 @@ project(hermes)
 		set(HERMES_COMMON_RELEASE   YES)
 		# Tests settings.
 		set(HERMES_COMMON_WITH_TESTS YES)
-		set(COLOR_LOGGING	    YES)
+		set(COLOR_LOGGING	    NO)
 
 	# Hermes2D:
 	set(WITH_H2D                        YES)
