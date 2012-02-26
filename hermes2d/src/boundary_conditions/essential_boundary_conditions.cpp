@@ -78,9 +78,8 @@ namespace Hermes
     template<typename Scalar>
     DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_,
       ExactSolutionScalar<Scalar>* exact_solution)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution(exact_solution)
+      : EssentialBoundaryCondition<Scalar>(markers_), exact_solution(exact_solution)
     {
-      for (unsigned int i = 0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
     };
 
     template<typename Scalar>
@@ -100,9 +99,8 @@ namespace Hermes
     template<typename Scalar>
     DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
       ExactSolutionVector<Scalar>* exact_solution2)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2)
+      : EssentialBoundaryCondition<Scalar>(markers_), exact_solution2(exact_solution2)
     {
-      for (unsigned int i = 0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
     };
 
     template<typename Scalar>
@@ -142,9 +140,9 @@ namespace Hermes
     template<typename Scalar>
     void EssentialBCs<Scalar>::add_boundary_conditions(Hermes::vector<EssentialBoundaryCondition<Scalar> *> boundary_conditions)
     {
+
       for(typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
         all.push_back(*it);
-
       this->markers.clear();
       create_marker_cache();
     };
