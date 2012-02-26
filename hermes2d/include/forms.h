@@ -86,7 +86,7 @@ namespace Hermes
       int get_num_gip() const;
 
     protected:
-      const int num_gip; ///< Number of integration points used by this intance.
+      const int num_gip; ///< Number of integration points used by this instance.
       const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
       
       /// Constructor.
@@ -218,14 +218,17 @@ namespace Hermes
       virtual void free_ord() {};
       int elem_marker;       ///< Element marker (for both volumetric and surface forms).
       int edge_marker;       ///< Edge marker (for surface forms only).
-      
+
+      int get_num_gip(); ///< Returns the number of integration points used by this instance.
+
     protected:
+      int num_gip; ///< Number of integration points used by this instance.
       int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
       ///< otherwise 1 (each edge has a unique global normal).
       ///< Only for edge.
 
       /// Constructor.
-      Geom();
+      Geom(int num_gip);
 
       friend Geom<Hermes::Ord>* init_geom_ord();
       friend Geom<double>* init_geom_vol(RefMap *rm, const int order);

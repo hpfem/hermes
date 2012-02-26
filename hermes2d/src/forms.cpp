@@ -236,7 +236,7 @@ namespace Hermes
     }
 
     template<typename T>
-    Geom<T>::Geom()
+    Geom<T>::Geom(int num_gip) : num_gip(num_gip)
     {
       elem_marker = -1;
       edge_marker = -1;
@@ -244,6 +244,12 @@ namespace Hermes
       x = y = NULL;
       nx = ny = NULL;
       tx = ty = NULL;
+    }
+
+    template<typename T>
+    int Geom<T>::get_num_gip()
+    {
+      return num_gip;
     }
 
     template<typename T>
@@ -279,7 +285,7 @@ namespace Hermes
 
     template<typename T>
     InterfaceGeom<T>::InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam) :
-    Geom<T>(), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
+    Geom<T>(geom->get_num_gip()), neighb_marker(n_marker), neighb_id(n_id), neighb_diam(n_diam)
     {
       // Let this class expose the standard Geom interface.
       this->edge_marker = geom->edge_marker;
@@ -330,7 +336,7 @@ namespace Hermes
 
     Geom<Hermes::Ord>* init_geom_ord()
     {
-      Geom<Hermes::Ord>* e = new Geom<Hermes::Ord>;
+      Geom<Hermes::Ord>* e = new Geom<Hermes::Ord>(1);
       static Hermes::Ord x[] = { Hermes::Ord(1) };
       static Hermes::Ord y[] = { Hermes::Ord(1) };
 
@@ -354,7 +360,8 @@ namespace Hermes
 
     Geom<double>* init_geom_vol(RefMap *rm, const int order)
     {
-      Geom<double>* e = new Geom<double>;
+      Quad2D* quad = rm->get_quad_2d();
+      Geom<double>* e = new Geom<double>(quad->get_num_points(order));
       e->diam = rm->get_active_element()->get_diameter();
       e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
@@ -366,7 +373,9 @@ namespace Hermes
 
     Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order)
     {
-      Geom<double>* e = new Geom<double>;
+      Quad2D* quad = rm->get_quad_2d();
+      int np = quad->get_num_points(order);
+      Geom<double>* e = new Geom<double>(np);
       e->edge_marker = surf_pos->marker;
       e->elem_marker = rm->get_active_element()->marker;
       e->diam = rm->get_active_element()->get_diameter();
@@ -377,8 +386,6 @@ namespace Hermes
       double3 *tan;
       tan = rm->get_tangent(surf_pos->surf_num, order);
 
-      Quad2D* quad = rm->get_quad_2d();
-      int np = quad->get_num_points(order);
       e->tx = new double [np];
       e->ty = new double [np];
       e->nx = new double [np];
@@ -394,7 +401,9 @@ namespace Hermes
 
     Geom<double>* init_geom_surf(RefMap *rm, int surf_num, int marker, const int order, double3* tan)
     {
-      Geom<double>* e = new Geom<double>;
+      Quad2D* quad = rm->get_quad_2d();
+      int np = quad->get_num_points(order);
+      Geom<double>* e = new Geom<double>(np);
       e->edge_marker = marker;
       e->elem_marker = rm->get_active_element()->marker;
       e->diam = rm->get_active_element()->get_diameter();
@@ -404,8 +413,6 @@ namespace Hermes
       e->y = rm->get_phys_y(order);
       tan = rm->get_tangent(surf_num, order);
 
-      Quad2D* quad = rm->get_quad_2d();
-      int np = quad->get_num_points(order);
       e->tx = new double [np];
       e->ty = new double [np];
       e->nx = new double [np];
@@ -784,6 +791,7 @@ namespace Hermes
     template class HERMES_API DiscontinuousFunc<std::complex<double> >;
     template class HERMES_API Geom<Hermes::Ord>;
     template class HERMES_API Geom<double>;
+    template class HERMES_API Geom<std::complex<double> >;
     template class HERMES_API InterfaceGeom<Hermes::Ord>;
     template class HERMES_API InterfaceGeom<double>;
     template class HERMES_API ExtData<Hermes::Ord>;

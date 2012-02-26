@@ -31,7 +31,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1), geom_ord(Geom<Hermes::Ord>(1))
     {
       _F_;
       if (spaces.empty()) throw Exceptions::NullException(2);
@@ -47,7 +47,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
-      : wf(wf), wf_seq(-1)
+      : wf(wf), wf_seq(-1), geom_ord(Geom<Hermes::Ord>(1))
     {
       _F_;
       spaces.push_back(space);
@@ -57,7 +57,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL), pss(NULL)
+    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL), pss(NULL), geom_ord(Geom<Hermes::Ord>(1))
     {
       // Set all attributes for which we don't need to acces wf or spaces.
       // This is important for the destructor to properly detect what needs to be deallocated.
