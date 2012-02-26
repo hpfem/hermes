@@ -118,8 +118,8 @@ namespace Hermes
     public:
       // Tangential values given by a vector-valued solution.
       DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
-        ExactSolutionVector<Scalar>* exact_solution2 = NULL); 
-      DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2 = NULL); 
+        ExactSolutionVector<Scalar>* exact_solution = NULL); 
+      DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution = NULL); 
 
       ~DefaultEssentialBCNonConstHcurl() {};
 
@@ -128,7 +128,7 @@ namespace Hermes
       /// Function giving info that u_Essential is a non-constant function.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_FUNCTION; }
 
-      ExactSolutionVector<Scalar>* exact_solution2;
+      ExactSolutionVector<Scalar>* exact_solution;
     };
 
     /// Class encapsulating all boundary conditions of one problem.

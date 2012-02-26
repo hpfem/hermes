@@ -98,14 +98,14 @@ namespace Hermes
 
     template<typename Scalar>
     DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
-      ExactSolutionVector<Scalar>* exact_solution2)
-      : EssentialBoundaryCondition<Scalar>(markers_), exact_solution2(exact_solution2)
+      ExactSolutionVector<Scalar>* exact_solution)
+      : EssentialBoundaryCondition<Scalar>(markers_), exact_solution(exact_solution)
     {
     };
 
     template<typename Scalar>
-    DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2)
+    DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution)
+      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution(exact_solution)
     {
       this->markers.push_back(marker);
     };
@@ -113,7 +113,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar DefaultEssentialBCNonConstHcurl<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
     {
-      Scalar2<Scalar> val = exact_solution2->value(x, y);
+      Scalar2<Scalar> val = exact_solution->value(x, y);
       return val[0] * t_x + val[1] * t_y;
     };
 
