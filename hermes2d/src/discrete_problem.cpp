@@ -2231,8 +2231,6 @@ namespace Hermes
       // of NeighborSearches with multiple neighbors.
       for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
       {
-        if(i > 0 && spaces[i - 1]->get_mesh()->get_seq() == spaces[i]->get_mesh()->get_seq())
-          continue;
         if(neighbor_searches.present(i))
         {
           neighbor_searches.get(i)->set_active_edge_multimesh(current_state->isurf);
