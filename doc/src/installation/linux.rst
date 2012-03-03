@@ -34,28 +34,24 @@ Once you have a local copy of the Hermes repository on your computer, change dir
 to hermes/. There you will find a CMakeLists.txt file that contains the lines
 ::
 
-    # Testing.
-    set(WITH_TESTS                YES)
-    
-    # Optional parts of the library:
-    set(WITH_H1D                  YES)
+    # HermesCommon
+        set(HERMES_COMMON_DEBUG     YES)
+        set(HERMES_COMMON_RELEASE   YES)
+        # Tests settings.
+        set(HERMES_COMMON_WITH_TESTS YES)
+
+    # Hermes2D:
+	set(WITH_H2D                        YES)
         # Release and debug versions.
-        set(H1D_DEBUG             YES)
-        ...
-  
-    set(WITH_H2D                  YES)
-        # Real/complex version of the library (you can build either one or both):
-        set(H2D_REAL              YES)
-        set(H2D_COMPLEX           YES)
-        # Release and debug versions.
-        set(H2D_DEBUG             YES)
-        ...
-  
-    set(WITH_H3D                  YES)
-        # Real/complex version of the library.
-        set(H3D_REAL              YES)
-        ...
-    set(WITH_SUPERLU            NO)
+        set(H2D_DEBUG               YES)
+        set(H2D_RELEASE             YES)
+        # Optional parts of the library.
+        set(H2D_WITH_GLUT 					YES)
+        set(H2D_WITH_VIEWER_GUI 		NO)
+		
+        # Tests settings.
+        set(H2D_WITH_TEST_EXAMPLES  YES)
+        set(H2D_WITH_TESTS          YES)
     ...
 
 
@@ -68,29 +64,13 @@ After that, type::
     make
 
 If you have more than one CPU, you can use "make -jN" where N is
-the number of CPUs of your computer.
-
-Tests
-~~~~~
-
-To execute all tests, do::
-
-    ctest -jN
-
-where N is the number of your cores. Note that some tests (especially for adaptivity 
-algorithms) take a longer time to finish. To just execute the short running tests, type::
-
-    make test-quick
+the number of threads you want to use for building the code.
 
 More options
 ~~~~~~~~~~~~
 
 You can turn on and off various components to build, just create the CMake.vars
-file and add the following::
-
-    set(WITH_EXAMPLES NO)
-
-(and any other option that you would like to change, see CMakeLists.txt for the
+file and add any option that you would like to change, see CMakeLists.txt for the
 whole list).
 
 You can also easily generate it from a script (e.g. a debian/rules file) by:
@@ -98,14 +78,12 @@ You can also easily generate it from a script (e.g. a debian/rules file) by:
 .. sourcecode::
     .
 
-    python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)"' > CMake.vars
+    python -c 'print "set(H2D_WITH_VIEWER_GUI no)\nset(WITH_GLUT no)"' > CMake.vars
 
 .. latexcode::
     .
 
-    python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)
-    \nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)
-    \nset(WITH_UTIL no)"' > CMake.vars
+    python -c 'print "set(H2D_WITH_VIEWER_GUI no)\nset(WITH_GLUT no)"' > CMake.vars
 
 If you are on OS X, you have to disable GLUT as the glut library is not easily
 installable on OS X. To do so, just put the following line into your
