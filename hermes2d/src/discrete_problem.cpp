@@ -2048,6 +2048,8 @@ namespace Hermes
           #pragma omp critical (mat)
           current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
           
+          delete [] local_stiffness_matrix;
+
           // Clean up.
           for (int i = 0; i < prev_size; i++)
           {
