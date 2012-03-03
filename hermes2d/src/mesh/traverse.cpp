@@ -187,13 +187,13 @@ namespace Hermes
       }
       else
       {
-        if(son != 0 && son != 1 && son != 4)
+        if(son != 0 && son != 1 && son != 4 && son != 6 && son != 7)
           bnd[0] = false;
-        if(son != 1 && son != 2 && son != 7)
+        if(son != 1 && son != 2 && son != 7 && son != 4 && son != 5)
           bnd[1] = false;
-        if(son != 2 && son != 3 && son != 5)
+        if(son != 2 && son != 3 && son != 5 && son != 6 && son != 7)
           bnd[2] = false;
-        if(son != 3 && son != 0 && son != 6)
+        if(son != 3 && son != 0 && son != 6 && son != 4 && son != 5)
           bnd[3] = false;
       }
     }

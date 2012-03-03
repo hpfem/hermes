@@ -704,7 +704,7 @@ namespace Hermes
         int state_i;
 
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master) private(state_i)
+#pragma omp parallel shared(trav_master) private(state_i) num_threads(Global<double>::Hermes_omp_get_max_threads())
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
