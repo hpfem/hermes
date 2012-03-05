@@ -241,6 +241,7 @@ namespace Hermes
       elem_marker = -1;
       edge_marker = -1;
       id = 0;
+      isurf = 4;
       x = y = NULL;
       nx = ny = NULL;
       tx = ty = NULL;
@@ -285,6 +286,7 @@ namespace Hermes
       this->edge_marker = geom->edge_marker;
       this->elem_marker = geom->elem_marker;
       this->id = geom->id;
+      this->isurf = geom->isurf;
       this->diam = geom->diam;
       this->area = geom->area;
       this->x = geom->x;
@@ -372,6 +374,7 @@ namespace Hermes
       e->diam = rm->get_active_element()->get_diameter();
       e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
+      e->isurf = isurf;
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
       
