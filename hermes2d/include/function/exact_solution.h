@@ -35,6 +35,9 @@ namespace Hermes
 
       /// Dimension of result - either 1 or 2.
       virtual unsigned int get_dimension() const = 0;
+
+      virtual MeshFunction<Scalar>* clone();
+
     protected:
       /// For scaling of the solution.
       Scalar exact_multiplicator;

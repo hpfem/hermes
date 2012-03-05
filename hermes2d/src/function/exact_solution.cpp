@@ -25,6 +25,13 @@ namespace Hermes
       this->num_dofs = -1;
       this->exact_multiplicator = 1.0;
     }
+    
+    template<typename Scalar>
+    MeshFunction<Scalar>* ExactSolution<Scalar>::clone()
+    {
+      error("Solution<Scalar>::clone() must be overridden in the case of exact solutions.");
+      return NULL;
+    }
 
     template<typename Scalar>
     ExactSolutionScalar<Scalar>::ExactSolutionScalar(Mesh* mesh) : ExactSolution<Scalar>(mesh)
