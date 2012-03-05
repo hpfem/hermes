@@ -260,6 +260,9 @@ namespace Hermes
             if (curved && !split)
             {
               double cerr = 0.0, cden = 0.0; // fixme
+              RefMap* refmap = fns[0]->get_refmap();
+              phx = refmap->get_phys_x(1);
+              phy = refmap->get_phys_y(1);
               for (i = 0; i < 5; i++)
               {
                 cerr += fabs(phx[idx[i]] - midval[0][i]) + fabs(phy[idx[i]] - midval[1][i]);
@@ -283,25 +286,30 @@ namespace Hermes
           if (split)
           {
             if (curved)
+            {
+              RefMap* refmap = fns[0]->get_refmap();
+              phx = refmap->get_phys_x(1);
+              phy = refmap->get_phys_y(1);
               for (i = 0; i < 5; i++)
               {
                 midval[0][i] = phx[idx[i]];
                 midval[1][i] = phy[idx[i]];
               }
+            }
 
-              // obtain mid-edge and mid-element vertices
-              int mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], xval[idx[0]], yval[idx[0]]);
-              int mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], xval[idx[1]], yval[idx[1]]);
-              int mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], xval[idx[2]], yval[idx[2]]);
-              int mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], xval[idx[3]], yval[idx[3]]);
-              int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
+            // obtain mid-edge and mid-element vertices
+            int mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], xval[idx[0]], yval[idx[0]]);
+            int mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], xval[idx[1]], yval[idx[1]]);
+            int mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], xval[idx[2]], yval[idx[2]]);
+            int mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], xval[idx[3]], yval[idx[3]]);
+            int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
 
-              // recur to sub-elements
-              fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0); process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-              fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1); process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-              fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2); process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-              fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3); process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-              return;
+            // recur to sub-elements
+            fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0); process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+            fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1); process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+            fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2); process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+            fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3); process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+            return;
           }
         }
 
