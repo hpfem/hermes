@@ -182,6 +182,25 @@ namespace Hermes
       strcpy(msg, e.getMsg());
       message=msg;
     }
+
+    FunctionNotOverridenException::FunctionNotOverridenException(const char * function_name)
+    {
+      char * msg =  new char[34 + strlen(function_name)];
+      sprintf(msg, "Linear solver failed because:\"%s\"", function_name);
+      message = msg;
+    }
+
+    FunctionNotOverridenException::~FunctionNotOverridenException()
+    {
+      delete[] message;
+    }
+
+    FunctionNotOverridenException::FunctionNotOverridenException(const FunctionNotOverridenException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg, e.getMsg());
+      message=msg;
+    }
     
     ValueException::ValueException(const char * name, double value, double allowed)
     {

@@ -594,8 +594,7 @@ namespace Hermes
         {
           sln->set_quad_order(0, item);
           double* val = sln->get_values(component, value_type);
-          if (val == NULL)
-            error("Item not defined in the solution.");
+          assert(val != NULL);
 
           xdisp->set_quad_order(0, H2D_FN_VAL);
           ydisp->set_quad_order(0, H2D_FN_VAL);
@@ -729,7 +728,8 @@ namespace Hermes
       void Linearizer::save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char *quantity_name,
         bool mode_3D, int item, double eps){
         std::ofstream fstream(filename);
-        if (!fstream.is_open()) error("Could not open %s for writing.", filename);
+        if (!fstream.is_open())
+          throw std::ios_base::failure("Could not open %s for writing.");
 
         save_solution_vtk(sln, fstream, quantity_name, mode_3D, item, eps);
 

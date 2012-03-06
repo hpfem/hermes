@@ -98,7 +98,7 @@ namespace Hermes
     Scalar MatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      error("MatrixFormVol<Scalar>::value must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::value must be overrided.");
       return 0.0;
     }
 
@@ -106,14 +106,14 @@ namespace Hermes
     Hermes::Ord MatrixFormVol<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      error("MatrixFormVol<Scalar>::ord must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::ord must be overrided.");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
     MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone()
     {
-      error("MatrixFormVol<Scalar>::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::clone() must be overridden.");
       return NULL;
     }
 
@@ -135,7 +135,7 @@ namespace Hermes
     Scalar MatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      error("MatrixFormSurf<Scalar>::value must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::value must be overrided.");
       return 0.0;
     }
 
@@ -143,14 +143,14 @@ namespace Hermes
     Hermes::Ord MatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      error("MatrixFormSurf<Scalar>::ord must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::ord must be overrided.");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
     MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone()
     {
-      error("MatrixFormSurf<Scalar>::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::clone() must be overridden.");
       return NULL;
     }
 
@@ -172,7 +172,7 @@ namespace Hermes
     Scalar VectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      error("VectorFormVol<Scalar>::value must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::value must be overrided.");
       return 0.0;
     }
 
@@ -180,14 +180,14 @@ namespace Hermes
     Hermes::Ord VectorFormVol<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      error("VectorFormVol<Scalar>::ord must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::ord must be overrided.");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
     VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone()
     {
-      error("VectorFormVol<Scalar>::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::clone() must be overridden.");
       return NULL;
     }
 
@@ -210,7 +210,7 @@ namespace Hermes
     Scalar VectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      error("VectorFormSurf<Scalar>::value must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::value must be overrided.");
       return 0.0;
     }
 
@@ -218,14 +218,14 @@ namespace Hermes
     Hermes::Ord VectorFormSurf<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      error("VectorFormSurf<Scalar>::ord must be overrided.");
+      throw Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::ord must be overrided.");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
     VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone()
     {
-      error("VectorFormSurf<Scalar>::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::clone() must be overridden.");
       return NULL;
     }
 
@@ -244,7 +244,7 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentMatrixFormVol<Scalar>* MultiComponentMatrixFormVol<Scalar>::clone()
     {
-      error("MultiComponentMatrixFormVol::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("MultiComponentMatrixFormVol::clone() must be overridden.");
       return NULL;
     }
 
@@ -264,7 +264,7 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentMatrixFormSurf<Scalar>* MultiComponentMatrixFormSurf<Scalar>::clone()
     {
-      error("WeakForm::MatrixFormSurf::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("WeakForm::MatrixFormSurf::clone() must be overridden.");
       return NULL;
     }
 
@@ -284,7 +284,7 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentVectorFormVol<Scalar>* MultiComponentVectorFormVol<Scalar>::clone()
     {
-      error("WeakForm::VectorFormVol::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("WeakForm::VectorFormVol::clone() must be overridden.");
       return NULL;
     }
 
@@ -304,7 +304,7 @@ namespace Hermes
     template<typename Scalar>
     MultiComponentVectorFormSurf<Scalar>* MultiComponentVectorFormSurf<Scalar>::clone()
     {
-      error("WeakForm::VectorFormVol::clone() must be overridden.");
+      throw Exceptions::FunctionNotOverridenException("WeakForm::VectorFormVol::clone() must be overridden.");
       return NULL;
     }
 
@@ -314,16 +314,11 @@ namespace Hermes
     {
       _F_;
 
-      if (form->i >= neq || form->j >= neq)
-        error("Invalid equation number.");
-      if (form->sym < -1 || form->sym > 1)
-        error("\"sym\" must be -1, 0 or 1.");
-      if (form->sym < 0 && form->i == form->j)
-        error("Only off-diagonal forms can be antisymmetric.");
+      assert(form->i < neq && form->j < neq);
+      assert(form->sym >= -1 && form->sym <= 1);
+      assert (form->sym >= 0 || form->i != form->j);
       if (mfvol.size() > 100)
-      {
         warn("Large number of forms (> 100). Is this the intent?");
-      }
 
       form->set_weakform(this);
       mfvol.push_back(form);
@@ -334,8 +329,7 @@ namespace Hermes
     void WeakForm<Scalar>::add_matrix_form_surf(MatrixFormSurf<Scalar>* form)
     {
       _F_;
-      if (form->i >= neq || form->j >= neq)
-        error("Invalid equation number.");
+      assert(form->i < neq && form->j < neq);
 
       form->set_weakform(this);
       mfsurf.push_back(form);
@@ -346,8 +340,7 @@ namespace Hermes
     void WeakForm<Scalar>::add_vector_form(VectorFormVol<Scalar>* form)
     {
       _F_;
-      if (form->i >= neq)
-        error("Invalid equation number.");
+      assert(form->i < neq);
       form->set_weakform(this);
       vfvol.push_back(form);
       seq++;
@@ -357,8 +350,7 @@ namespace Hermes
     void WeakForm<Scalar>::add_vector_form_surf(VectorFormSurf<Scalar>* form)
     {
       _F_;
-      if (form->i >= neq)
-        error("Invalid equation number.");
+      assert(form->i < neq);
 
       form->set_weakform(this);
       vfsurf.push_back(form);
@@ -372,10 +364,8 @@ namespace Hermes
 
       for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
       {
-        if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
-          error("Invalid equation number.");
-        if (form->sym < 0 && form->coordinates.at(form_i).first == form->coordinates.at(form_i).second)
-          error("Only off-diagonal forms can be antisymmetric.");
+        assert(form->coordinates.at(form_i).first < neq && form->coordinates.at(form_i).second < neq);
+        assert(form->sym >= 0 || form->coordinates.at(form_i).first != form->coordinates.at(form_i).second);
       }
       if (form->sym < -1 || form->sym > 1)
         error("\"sym\" must be -1, 0 or 1.");
@@ -394,8 +384,9 @@ namespace Hermes
     {
       _F_;
       for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-        if(form->coordinates.at(form_i).first >= neq || form->coordinates.at(form_i).second >= neq)
-          error("Invalid equation number.");
+      {
+        assert(form->coordinates.at(form_i).first < neq && form->coordinates.at(form_i).second < neq);
+      }
 
       form->set_weakform(this);
       mfsurf_mc.push_back(form);
@@ -407,8 +398,7 @@ namespace Hermes
     {
       _F_;
       for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-        if(form->coordinates.at(form_i) >= neq)
-          error("Invalid equation number.");
+        assert(form->coordinates.at(form_i) < neq);
       form->set_weakform(this);
       vfvol_mc.push_back(form);
       seq++;
@@ -419,8 +409,7 @@ namespace Hermes
     {
       _F_;
       for(unsigned int form_i = 0; form_i < form->coordinates.size(); form_i++)
-        if(form->coordinates.at(form_i) >= neq)
-          error("Invalid equation number.");
+        assert(form->coordinates.at(form_i) < neq);
 
       form->set_weakform(this);
       vfsurf_mc.push_back(form);
@@ -509,10 +498,8 @@ namespace Hermes
           Mesh* the_one_mesh = spaces[mfvol_mc.at(i)->coordinates.at(0).first]->get_mesh();
           for(unsigned int form_i = 0; form_i < mfvol_mc.at(i)->coordinates.size(); form_i++)
           {
-            if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-            if(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
+            assert(spaces[mfvol_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() == the_one_mesh->get_seq());
+            assert(spaces[mfvol_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() == the_one_mesh->get_seq());
           }
 
           Stage<Scalar>* s = find_stage(stages, mfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfvol_mc[i]->ext, u_ext, one_stage);
@@ -523,10 +510,8 @@ namespace Hermes
           Mesh* the_one_mesh = spaces[mfsurf_mc.at(i)->coordinates.at(0).first]->get_mesh();
           for(unsigned int form_i = 0; form_i < mfsurf_mc.at(i)->coordinates.size(); form_i++)
           {
-            if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
-            if(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
+            assert(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).first]->get_mesh()->get_seq() == the_one_mesh->get_seq());
+            assert(spaces[mfsurf_mc.at(i)->coordinates.at(form_i).second]->get_mesh()->get_seq() == the_one_mesh->get_seq());
           }
 
           Stage<Scalar>* s = find_stage(stages, mfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, mfsurf_mc[i]->ext, u_ext, one_stage);
@@ -558,8 +543,7 @@ namespace Hermes
         {
           Mesh* the_one_mesh = spaces[vfvol_mc.at(i)->coordinates.at(0)]->get_mesh();
           for(unsigned int form_i = 0; form_i < vfvol_mc.at(i)->coordinates.size(); form_i++)
-            if(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
+            assert(spaces[vfvol_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() == the_one_mesh->get_seq());
 
           Stage<Scalar>*s = find_stage(stages, vfvol_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfvol_mc[i]->ext, u_ext, one_stage);
           s->vfvol_mc.push_back(vfvol_mc[i]);
@@ -569,8 +553,7 @@ namespace Hermes
         {
           Mesh* the_one_mesh = spaces[vfsurf_mc.at(i)->coordinates.at(0)]->get_mesh();
           for(unsigned int form_i = 0; form_i < vfsurf_mc.at(i)->coordinates.size(); form_i++)
-            if(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() != the_one_mesh->get_seq())
-              error("When using multi-component forms, the Meshes have to be identical.");
+            assert(spaces[vfsurf_mc.at(i)->coordinates.at(form_i)]->get_mesh()->get_seq() == the_one_mesh->get_seq());
 
           Stage<Scalar>*s = find_stage(stages, vfsurf_mc.at(i)->coordinates, the_one_mesh, the_one_mesh, vfsurf_mc[i]->ext, u_ext, one_stage);
           s->vfsurf_mc.push_back(vfsurf_mc[i]);
@@ -626,7 +609,8 @@ namespace Hermes
       for (unsigned i = 0; i < ext.size(); i++)
       {
         mmm = ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+        if (mmm == NULL)
+          error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
         seq.insert(mmm->get_seq());
       }
       for (unsigned i = 0; i < u_ext.size(); i++)
@@ -634,7 +618,8 @@ namespace Hermes
         if (u_ext[i] != NULL)
         {
           mmm = u_ext[i]->get_mesh();
-          if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
+          if (mmm == NULL)
+            error("NULL Mesh pointer detected in u_ext during assembling.");
           seq.insert(mmm->get_seq());
         }
       }
@@ -704,7 +689,8 @@ namespace Hermes
       for (unsigned i = 0; i < ext.size(); i++)
       {
         mmm = ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+        if (mmm == NULL)
+          error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
         seq.insert(mmm->get_seq());
       }
       for (unsigned i = 0; i < u_ext.size(); i++)
@@ -712,7 +698,8 @@ namespace Hermes
         if (u_ext[i] != NULL)
         {
           mmm = u_ext[i]->get_mesh();
-          if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
+          if (mmm == NULL)
+            error("NULL Mesh pointer detected in u_ext during assembling.");
           seq.insert(mmm->get_seq());
         }
       }
@@ -785,7 +772,8 @@ namespace Hermes
       for (unsigned i = 0; i < ext.size(); i++)
       {
         mmm = ext[i]->get_mesh();
-        if (mmm == NULL) error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
+        if (mmm == NULL)
+          error("NULL Mesh pointer detected in ExtData during assembling.\n  Have you initialized all external functions?");
         seq.insert(mmm->get_seq());
       }
       for (unsigned i = 0; i < u_ext.size(); i++)
@@ -793,7 +781,8 @@ namespace Hermes
         if (u_ext[i] != NULL)
         {
           mmm = u_ext[i]->get_mesh();
-          if (mmm == NULL) error("NULL Mesh pointer detected in u_ext during assembling.");
+          if (mmm == NULL)
+            error("NULL Mesh pointer detected in u_ext during assembling.");
           seq.insert(mmm->get_seq());
         }
       }

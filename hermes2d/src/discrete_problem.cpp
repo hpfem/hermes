@@ -83,12 +83,10 @@ namespace Hermes
 
       // Sanity checks.
       if(wf == NULL)
-        error("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
+        throw Exceptions::ValueException("wf", NULL, 1);
 
       if (spaces.size() != (unsigned) wf->get_neq())
-        error("Bad number of spaces in DiscreteProblem.");
-      if (spaces.size() == 0)
-        error("Zero number of spaces in DiscreteProblem.");
+        throw Exceptions::ValueException("spaces.size()", spaces.size(), (unsigned) wf->get_neq());
 
       // Internal variables settings.
       sp_seq = new int[wf->get_neq()];
@@ -104,12 +102,8 @@ namespace Hermes
 
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
-        pss[i] = NULL;
-        Shapeset *shapeset = spaces[i]->shapeset;
-        if (shapeset == NULL) error("Internal in DiscreteProblem<Scalar>::init_spaces().");
-        PrecalcShapeset *p = new PrecalcShapeset(shapeset);
-        if (p == NULL) error("New PrecalcShapeset could not be allocated in DiscreteProblem<Scalar>::init_spaces().");
-        pss[i] = p;
+        assert(spaces[i]->shapeset != NULL);
+        pss[i] = new PrecalcShapeset(spaces[i]->shapeset);
       }
 
       // There is a special function that sets a DiscreteProblem to be FVM.
@@ -475,8 +469,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
     {
       if(this->spaces.size() != spaces.size())
-        error("DiscreteProblem can not change the number of spaces.");
-
+        throw Exceptions::ValueException("spaces.size()", spaces.size(), this->spaces.size());
       // After derefinement, the spaces' sizes can go down, in this case there is no sense in reallocing stuff, freeing and allocating again is the way.
       bool smaller_spaces = false;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -498,16 +491,6 @@ namespace Hermes
       Hermes::vector<const Space<Scalar>*> spaces;
       spaces.push_back(space);
       set_spaces(spaces);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_sanity_checks(Table* block_weights)
-    {
-      _F_;
-
-      for (unsigned int i = 0; i < wf->get_neq(); i++)
-        if (this->spaces[i] == NULL) error("A space is NULL in assemble().");
-
     }
 
     template<typename Scalar>
@@ -540,8 +523,6 @@ namespace Hermes
     {
       _F_
 
-      // Sanity checks.
-      assemble_sanity_checks(block_weights);
       // Check that the block scaling table have proper dimension.
       if (block_weights != NULL)
         if (block_weights->get_size() != wf->get_neq())
@@ -1108,7 +1089,7 @@ namespace Hermes
           if(num_neighbors == 0)
             num_neighbors = ns->n_neighbors;
           if(ns->n_neighbors != num_neighbors)
-            error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
+            throw Exceptions::ValueException("ns->n_neighbors in DiscreteProblem<Scalar>::assemble_surface_integrals()", ns->n_neighbors, num_neighbors);
         }
 
         // Create neighbor psss, refmaps.
@@ -1350,9 +1331,8 @@ namespace Hermes
         // The right one also exists, check that it is the right one, or return an error.
         else if(node->get_right_son() != NULL)
         {
-          if(node->get_right_son()->get_transformation() == transformations[0])
-            insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
-          else error("More than two possible sons in insert_into_multimesh_tree().");
+          assert(node->get_right_son()->get_transformation() == transformations[0]);
+          insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
         }
         // If the right one does not exist and the left one was not correct, create a right son and continue this way.
         else
@@ -1466,7 +1446,7 @@ namespace Hermes
         }
       }
       // We always should be able to empty the transformations array.
-      error("Transformation of a central element not found in the multimesh tree.");
+      assert(node->get_left_son() != NULL || node->get_right_son() != NULL);
       return NULL;
     }
 
@@ -1479,8 +1459,7 @@ namespace Hermes
       // Also check the assertion that if one son is null, then the other too.
       if(node->get_left_son() == NULL)
       {
-        if(node->get_right_son() != NULL)
-          error("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
+        assert(node->get_right_son() == NULL);
         return 0;
       }
 

@@ -154,7 +154,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::assign(Solution<Scalar>* sln)
     {
-      if (sln->sln_type == HERMES_UNDEF) error("Solution being assigned is uninitialized.");
+      assert(sln->sln_type != HERMES_UNDEF);
       if (sln->sln_type != HERMES_SLN) { copy(sln); return; }
 
       free();
@@ -186,7 +186,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::copy(const Solution<Scalar>* sln)
     {
-      if (sln->sln_type == HERMES_UNDEF) error("Solution being copied is uninitialized.");
+      assert(sln->sln_type != HERMES_UNDEF);
 
       free();
 
@@ -503,7 +503,7 @@ namespace Hermes
         }
       }
 
-      if(this->mesh == NULL) error("mesh == NULL.\n");
+      assert(this->mesh != NULL);
       init_dxdy_buffer();
       this->element = NULL;
     }
@@ -530,7 +530,7 @@ namespace Hermes
       }
       else 
       {
-        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        assert(start_indices.size() == spaces.size());
         for (int i=0; i < spaces.size(); i++) 
         {
           start_indices_new.push_back(start_indices[i]);
@@ -582,7 +582,7 @@ namespace Hermes
       }
       else 
       {
-        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        assert(start_indices.size() == spaces.size());
         for (int i=0; i < spaces.size(); i++) 
         {
           start_indices_new.push_back(start_indices[i]);
@@ -635,7 +635,7 @@ namespace Hermes
       }
       else 
       {
-        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        assert(start_indices.size() == spaces.size());
         for (int i=0; i < spaces.size(); i++) 
         {
           start_indices_new.push_back(start_indices[i]);
@@ -748,7 +748,7 @@ namespace Hermes
     void Solution<Scalar>::set_active_element(Element* e)
     {
       // if (e == element) return; // FIXME
-      if (!e->active) error("Cannot select inactive element. Wrong mesh?");
+      assert(e->active);
       MeshFunction<Scalar>::set_active_element(e);
 
       // try finding an existing table for e
@@ -1527,7 +1527,7 @@ namespace Hermes
         return space;
       else
       {
-        error("Solution<Scalar>::get_space() called with an instance where FEM space is not defined.");
+        throw Exceptions::ValueException("Solution<Scalar>::space", NULL, 1);
         return NULL;
       }
     }
@@ -1539,7 +1539,7 @@ namespace Hermes
         return space_seq;
       else
       {
-        error("Solution<Scalar>::get_space_seq() called with an instance where FEM space is not defined.");
+        throw Exceptions::ValueException("Solution<Scalar>::space", NULL, 1);
         return NULL;
       }
     }
@@ -1551,7 +1551,7 @@ namespace Hermes
         return sln_vector;
       else
       {
-        error("Solution<Scalar>::get_sln_vector() called with an instance where FEM space is not defined.");
+        throw Exceptions::ValueException("Solution<Scalar>::space", NULL, 1);
         return NULL;
       }
     }

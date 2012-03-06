@@ -110,11 +110,21 @@ namespace Hermes
       public:
         /// \brief Linear solver failed from unknown reason.
         LinearSolverException();
-        /// Linear solver failed from spevific reason.
-        /// \param[in] reasen specification of solver fail.
+        /// Linear solver failed from specific reason.
+        /// \param[in] reason specification of solver fail.
         LinearSolverException(const char * reason);
         ~LinearSolverException();
         LinearSolverException(const LinearSolverException & e);
+    };
+
+    /// \brief Function has to be overriden.
+    class HERMES_API FunctionNotOverridenException : public Exception
+    {
+      public:
+        /// \param[in] function_name name to be overriden.
+        FunctionNotOverridenException(const char * function_name);
+        ~FunctionNotOverridenException();
+        FunctionNotOverridenException(const FunctionNotOverridenException & e);
     };
 
     /// \brief Value is out of allowed range

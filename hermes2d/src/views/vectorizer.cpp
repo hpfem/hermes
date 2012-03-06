@@ -338,7 +338,7 @@ namespace Hermes
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
       {
         // sanity check
-        if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
+        assert(xsln != NULL && ysln != NULL);
 
         lock_data();
         Hermes::TimePeriod cpu_time;
