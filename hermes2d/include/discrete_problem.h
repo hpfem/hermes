@@ -305,7 +305,7 @@ namespace Hermes
         int order, unsigned int min_dg_mesh_seq);
 
       /// Initialize neighbors.
-      void init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Traverse::State* current_state, unsigned int min_dg_mesh_seq);
+      bool init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Traverse::State* current_state, unsigned int min_dg_mesh_seq);
 
       /// Initialize the tree for traversing multimesh neighbors.
       void build_multimesh_tree(NeighborNode* root, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);

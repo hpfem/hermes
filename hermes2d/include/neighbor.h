@@ -105,7 +105,7 @@ namespace Hermes
       void set_active_edge(int edge);
 
       /// Enhancement of set_active_edge for multimesh assembling.
-      void set_active_edge_multimesh(const int& edge);
+      bool set_active_edge_multimesh(const int& edge);
 
       /// Extract transformations in the correct direction from the provided sub_idx.
       Hermes::vector<unsigned int> get_transforms(uint64_t sub_idx) const;
@@ -244,7 +244,6 @@ namespace Hermes
                                 ///< (0 - same orientation, 1 - reverse orientation).
       };
 
-
       /// When creating sparse structure of a matrix using this class, we want to ignore errors
       /// and do nothing instead when set_active_edge() function is called for a non-boundary edge.
       bool ignore_errors;
@@ -276,7 +275,7 @@ namespace Hermes
       /// Transformations of an element to one of its neighbors.
       struct Transformations
       {
-      private:
+      public:
         static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
                                                                        ///< in a go-down neighborhood) - see Transformable::push_transform.
 
@@ -308,7 +307,6 @@ namespace Hermes
         template<typename T> friend class DiscontinuousFunc;
         template<typename T> friend class DiscreteProblem;
       };
-
 
     private:
 

@@ -243,7 +243,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::set_active_edge_multimesh(const int& edge)
+    bool NeighborSearch<Scalar>::set_active_edge_multimesh(const int& edge)
     {
       _F_;
       Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
@@ -252,26 +252,13 @@ namespace Hermes
       {
         set_active_edge(edge);
         update_according_to_sub_idx(transformations);
+        return true;
       }
       // Intra-element edge.
       else
       {
-        neighb_el = central_el;
-
-        neighbor_transformations.add(new Transformations(transformations), 0);
-
-        neighbor_edge.local_num_of_edge = active_edge = edge;
-        NeighborEdgeInfo local_edge_info;
-        local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
-        // The "opposite" view of the same edge has the same orientation.
-        local_edge_info.orientation = 0;
-        neighbor_edges.push_back(local_edge_info);
-
-        n_neighbors = 1;
-        neighbors.push_back(neighb_el);
-        neighborhood_type = H2D_DG_NO_TRANSF;
+        return false;
       }
-      return;
     }
 
     template<typename Scalar>

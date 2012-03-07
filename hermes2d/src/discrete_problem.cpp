@@ -1714,31 +1714,14 @@ namespace Hermes
 
       // Initialize neighbor precalc shapesets and refmaps.
       // This is only needed when there are matrix DG forms present.
-
-
       if(DG_matrix_forms_present)
       {
         for (unsigned int i = 0; i < spaces.size(); i++)
         {
           PrecalcShapeset* new_ps = new PrecalcShapeset(spaces[i]->shapeset);
           npss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_ps));
-        }
-      }
-
-      if(DG_matrix_forms_present)
-      {
-        for (unsigned int i = 0; i < spaces.size(); i++)
-        {
           PrecalcShapeset* new_pss = new PrecalcShapeset(npss[i]);
           nspss.insert(std::pair<unsigned int, PrecalcShapeset*>(i, new_pss));
-        }
-      }
-
-
-      if(DG_matrix_forms_present)
-      {
-        for (unsigned int i = 0; i < spaces.size(); i++)
-        {
           RefMap* new_rm = new RefMap();
           new_rm->set_quad_2d(&g_quad_2d_std);
           nrefmap.insert(std::pair<unsigned int, RefMap*>(i, new_rm));
@@ -1749,6 +1732,10 @@ namespace Hermes
       LightArray<NeighborSearch<Scalar>*>** neighbor_searches = new LightArray<NeighborSearch<Scalar>*>*[current_state->rep->get_num_surf()];
       (5);
       unsigned int* num_neighbors = new unsigned int[current_state->rep->get_num_surf()];
+
+      bool intra_edge_passed_DG[4];
+      for(int a = 0; a < 4; a++)
+        intra_edge_passed_DG[a] = false;
 
 #pragma omp critical (DG)
       {
@@ -1761,7 +1748,11 @@ namespace Hermes
           {
             neighbor_searches[current_state->isurf] = new LightArray<NeighborSearch<Scalar>*>(5);
 
-            init_neighbors((*neighbor_searches[current_state->isurf]), current_state, min_dg_mesh_seq);
+            if(!init_neighbors((*neighbor_searches[current_state->isurf]), current_state, min_dg_mesh_seq))
+            {
+              intra_edge_passed_DG[current_state->isurf] = true;
+              continue;
+            }
 
             // Create a multimesh tree;
             NeighborNode* root = new NeighborNode(NULL, 0);
@@ -1815,6 +1806,8 @@ namespace Hermes
 
       for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
       {
+        if(intra_edge_passed_DG[current_state->isurf])
+          continue;
         if(current_state->rep->en[current_state->isurf]->marker != 0)
           continue;
 
@@ -2210,7 +2203,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
+    bool DiscreteProblem<Scalar>::init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
       Traverse::State* current_state, unsigned int min_dg_mesh_seq)
     {
       _F_;
@@ -2231,14 +2224,15 @@ namespace Hermes
       // Calculate respective neighbors.
       // Also clear the initial_sub_idxs from the central element transformations
       // of NeighborSearches with multiple neighbors.
-      for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
+      // If all DG meshes have this edge as intra-edge, pass.
+      bool DG_intra = false;
+      for(unsigned int i = 0; i < spaces.size(); i++)
       {
-        if(neighbor_searches.present(i))
-        {
-          neighbor_searches.get(i)->set_active_edge_multimesh(current_state->isurf);
-          neighbor_searches.get(i)->clear_initial_sub_idx();
-        }
+        if(neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_active_edge_multimesh(current_state->isurf) && spaces[i]->get_type() == HERMES_L2_SPACE)
+          DG_intra = true;
+        neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->clear_initial_sub_idx();
       }
+      return DG_intra;
     }
 
     template<typename Scalar>

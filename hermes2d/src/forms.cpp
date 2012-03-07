@@ -376,6 +376,7 @@ namespace Hermes
       e->diam = rm->get_active_element()->get_diameter();
       e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
+      e->isurf = isurf;
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
       
