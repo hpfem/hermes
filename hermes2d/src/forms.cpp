@@ -31,6 +31,7 @@ namespace Hermes
       curl = NULL;
       div = NULL;
       laplace = NULL;
+      sub_idx = 99999;
     }
 
     template<typename T>
@@ -147,6 +148,7 @@ namespace Hermes
       fn_neighbor(NULL),
       reverse_neighbor_side(reverse)
     {
+      this->sub_idx = fn->sub_idx;
       assert_msg(fn != NULL, "Invalid arguments to DiscontinuousFunc constructor.");
       if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
     }
@@ -374,7 +376,6 @@ namespace Hermes
       e->diam = rm->get_active_element()->get_diameter();
       e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
-      e->isurf = isurf;
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
       
@@ -630,6 +631,7 @@ namespace Hermes
       else
         error("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
 
+      u->sub_idx = rm->get_transform();
       return u;
     }
 
@@ -674,6 +676,7 @@ namespace Hermes
         Scalar *dy1 = fu->get_dy_values(1);
         for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
       }
+      u->sub_idx = fu->get_transform();
       return u;
     }
 
@@ -743,6 +746,7 @@ namespace Hermes
         Scalar *dy1 = fu->get_dy_values(1);
         for (int i = 0; i < np; i++) u->div[i] = dx0[i] + dy1[i];
       }
+      u->sub_idx = fu->get_transform();
       return u;
     }
 
