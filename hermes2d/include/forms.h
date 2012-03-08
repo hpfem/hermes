@@ -203,6 +203,7 @@ namespace Hermes
       ///< (undefined for element).
       T *tx, *ty;       ///< Tangents [in physical domain]. Only for edge.
       int id;           ///< ID number of the element (undefined for edge).
+      int isurf;        ///< Order number of an edge of the element.
 
       /// Methods designed for discontinuous functions, return errors here.
       virtual int get_neighbor_marker() const { error(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
