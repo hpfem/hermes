@@ -111,7 +111,7 @@ namespace Hermes
         user_ydisp = false;
       }
 
-      void Linearizer::process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
+      void Linearizer::process_triangle(int iv0, int iv1, int iv2, int level,
         double* val, double* phx, double* phy, int* idx)
       {
         double midval[3][3];
@@ -122,8 +122,8 @@ namespace Hermes
           if (!(level & 1))
           {
             // obtain solution values
-            fns[0]->set_quad_order(1, item);
-            val = fns[0]->get_values(component, value_type);
+            sln->set_quad_order(1, item);
+            val = sln->get_values(component, value_type);
             if (auto_max)
               for (i = 0; i < lin_np_tri[1]; i++)
               {
@@ -132,14 +132,14 @@ namespace Hermes
               }
 
             // obtain physical element coordinates
-            RefMap* refmap = fns[0]->get_refmap();
+            RefMap* refmap = sln->get_refmap();
             phx = refmap->get_phys_x(1);
             phy = refmap->get_phys_y(1);
 
-            fns[1]->set_quad_order(1, H2D_FN_VAL);
-            fns[2]->set_quad_order(1, H2D_FN_VAL);
-            double* dx = fns[1]->get_fn_values();
-            double* dy = fns[2]->get_fn_values();
+            xdisp->set_quad_order(1, H2D_FN_VAL);
+            ydisp->set_quad_order(1, H2D_FN_VAL);
+            double* dx = xdisp->get_fn_values();
+            double* dy = ydisp->get_fn_values();
             for (i = 0; i < lin_np_tri[1]; i++)
             {
               phx[i] += dmult*dx[i];
@@ -211,53 +211,21 @@ namespace Hermes
             int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], val[idx[2]]);
 
             // recur to sub-elements
-            fns[0]->push_transform(0);
-            if(fns[1] != fns[0])
-              fns[1]->push_transform(0);
-            if(fns[2] != fns[1])
-              fns[2]->push_transform(0);
-            process_triangle(fns, iv0, mid0, mid2,  level + 1, val, phx, phy, tri_indices[1]);
-            fns[0]->pop_transform();
-            if(fns[1] != fns[0])
-              fns[1]->pop_transform();
-            if(fns[2] != fns[1])
-              fns[2]->pop_transform();
+            sln->push_transform(0);
+            process_triangle(iv0, mid0, mid2,  level + 1, val, phx, phy, tri_indices[1]);
+            sln->pop_transform();
 
-            fns[0]->push_transform(1);
-            if(fns[1] != fns[0])
-              fns[1]->push_transform(1);
-            if(fns[2] != fns[1])
-              fns[2]->push_transform(1);
-            process_triangle(fns, mid0, iv1, mid1,  level + 1, val, phx, phy, tri_indices[2]);
-            fns[0]->pop_transform();
-            if(fns[1] != fns[0])
-              fns[1]->pop_transform();
-            if(fns[2] != fns[1])
-              fns[2]->pop_transform();
+            sln->push_transform(1);
+            process_triangle(mid0, iv1, mid1,  level + 1, val, phx, phy, tri_indices[2]);
+            sln->pop_transform();
 
-            fns[0]->push_transform(2);
-            if(fns[1] != fns[0])
-              fns[1]->push_transform(2);
-            if(fns[2] != fns[1])
-              fns[2]->push_transform(2);
-            process_triangle(fns, mid2, mid1, iv2,  level + 1, val, phx, phy, tri_indices[3]);
-            fns[0]->pop_transform();
-            if(fns[1] != fns[0])
-              fns[1]->pop_transform();
-            if(fns[2] != fns[1])
-              fns[2]->pop_transform();
+            sln->push_transform(2);
+            process_triangle(mid2, mid1, iv2,  level + 1, val, phx, phy, tri_indices[3]);
+            sln->pop_transform();
 
-            fns[0]->push_transform(3);
-            if(fns[1] != fns[0])
-              fns[1]->push_transform(3);
-            if(fns[2] != fns[1])
-              fns[2]->push_transform(3);
-            process_triangle(fns, mid1, mid2, mid0, level + 1, val, phx, phy, tri_indices[4]);
-            fns[0]->pop_transform();
-            if(fns[1] != fns[0])
-              fns[1]->pop_transform();
-            if(fns[2] != fns[1])
-              fns[2]->pop_transform();
+            sln->push_transform(3);
+            process_triangle(mid1, mid2, mid0, level + 1, val, phx, phy, tri_indices[4]);
+            sln->pop_transform();
             return;
           }
         }
@@ -266,7 +234,7 @@ namespace Hermes
         add_triangle(iv0, iv1, iv2);
       }
 
-      void Linearizer::process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
+      void Linearizer::process_quad(int iv0, int iv1, int iv2, int iv3, int level,
         double* val, double* phx, double* phy, int* idx)
       {
         double midval[3][5];
@@ -283,8 +251,8 @@ namespace Hermes
           if (!(level & 1)) // this is an optimization: do the following only every other time
           {
             // obtain solution values
-            fns[0]->set_quad_order(1, item);
-            val = fns[0]->get_values(component, value_type);
+            sln->set_quad_order(1, item);
+            val = sln->get_values(component, value_type);
             if (auto_max)
               for (i = 0; i < lin_np_quad[1]; i++)
               {
@@ -298,14 +266,14 @@ namespace Hermes
 
             // obtain physical element coordinates
 
-            RefMap* refmap = fns[0]->get_refmap();
+            RefMap* refmap = sln->get_refmap();
             phx = refmap->get_phys_x(1);
             phy = refmap->get_phys_y(1);
 
-            fns[1]->set_quad_order(1, H2D_FN_VAL);
-            fns[2]->set_quad_order(1, H2D_FN_VAL);
-            double* dx = fns[1]->get_fn_values();
-            double* dy = fns[2]->get_fn_values();
+            xdisp->set_quad_order(1, H2D_FN_VAL);
+            ydisp->set_quad_order(1, H2D_FN_VAL);
+            double* dx = xdisp->get_fn_values();
+            double* dy = ydisp->get_fn_values();
             for (i = 0; i < lin_np_quad[1]; i++)
             {
               phx[i] += dmult*dx[i];
@@ -404,106 +372,42 @@ namespace Hermes
             // recur to sub-elements
             if (split == 3)
             {
-              fns[0]->push_transform(0);
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(0);
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(0);
-              process_quad(fns, iv0, mid0, mid4, mid3, level + 1, val, phx, phy, quad_indices[1]);
-              fns[0]->pop_transform();
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+              sln->push_transform(0);
+              process_quad(iv0, mid0, mid4, mid3, level + 1, val, phx, phy, quad_indices[1]);
+              sln->pop_transform();
 
-              fns[0]->push_transform(1);
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(1);
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(1);
-              process_quad(fns, mid0, iv1, mid1, mid4, level + 1, val, phx, phy, quad_indices[2]);
-              fns[0]->pop_transform();
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+              sln->push_transform(1);
+              process_quad(mid0, iv1, mid1, mid4, level + 1, val, phx, phy, quad_indices[2]);
+              sln->pop_transform();
 
-              fns[0]->push_transform(2);
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(2);
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(2);
-              process_quad(fns, mid4, mid1, iv2, mid2, level + 1, val, phx, phy, quad_indices[3]);
-              fns[0]->pop_transform();
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+              sln->push_transform(2);
+              process_quad(mid4, mid1, iv2, mid2, level + 1, val, phx, phy, quad_indices[3]);
+              sln->pop_transform();
 
-              fns[0]->push_transform(3);
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(3);
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(3);
-              process_quad(fns, mid3, mid4, mid2, iv3, level + 1, val, phx, phy, quad_indices[4]);
-              fns[0]->pop_transform();
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+              sln->push_transform(3);
+              process_quad(mid3, mid4, mid2, iv3, level + 1, val, phx, phy, quad_indices[4]);
+              sln->pop_transform();
             }
             else
               if (split == 1) // h-split
               {
-                fns[0]->push_transform(4);
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(4);
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(4);
-                process_quad(fns, iv0, iv1, mid1, mid3, level + 1, val, phx, phy, quad_indices[5]);
-                fns[0]->pop_transform();
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+                sln->push_transform(4);
+                process_quad(iv0, iv1, mid1, mid3, level + 1, val, phx, phy, quad_indices[5]);
+                sln->pop_transform();
 
-                fns[0]->push_transform(5);
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(5);
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(5);
-                process_quad(fns, mid3, mid1, iv2, iv3, level + 1, val, phx, phy, quad_indices[6]);
-                fns[0]->pop_transform();
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+                sln->push_transform(5);
+                process_quad(mid3, mid1, iv2, iv3, level + 1, val, phx, phy, quad_indices[6]);
+                sln->pop_transform();
               }
               else // v-split
               {
-                fns[0]->push_transform(6);
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(6);
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(6);
-                process_quad(fns, iv0, mid0, mid2, iv3, level + 1, val, phx, phy, quad_indices[7]);
-                fns[0]->pop_transform();
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+                sln->push_transform(6);
+                process_quad(iv0, mid0, mid2, iv3, level + 1, val, phx, phy, quad_indices[7]);
+                sln->pop_transform();
 
-                fns[0]->push_transform(7);
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(7);
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(7);
-                process_quad(fns, mid0, iv1, iv2, mid2, level + 1, val, phx, phy, quad_indices[8]);
-                fns[0]->pop_transform();
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+                sln->push_transform(7);
+                process_quad(mid0, iv1, iv2, mid2, level + 1, val, phx, phy, quad_indices[8]);
+                sln->pop_transform();
               }
             return;
           }
@@ -600,7 +504,7 @@ namespace Hermes
         this->dmult = dmult;
       }
 
-      void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
+      void Linearizer::process_solution(MeshFunction<double>* sln, int item, double eps)
       {
         lock_data();
         Hermes::TimePeriod time_period;
@@ -612,7 +516,7 @@ namespace Hermes
         if(!user_ydisp)
           ydisp = new ZeroSolution<double>(sln->get_mesh());
 
-        this->item = item_;
+        this->item = item;
         this->eps = eps;
 
         // get the component and desired value from item.
@@ -626,8 +530,6 @@ namespace Hermes
           item >>= 1;
           value_type++;
         }
-
-        this->item = item_;
 
         int nn = this->sln->get_mesh()->get_num_elements();
 
@@ -651,8 +553,11 @@ namespace Hermes
         // select the linearization quadratures
         Quad2D *old_quad, *old_quad_x = NULL, *old_quad_y = NULL;
         old_quad = sln->get_quad_2d();
+        sln->set_quad_2d(&g_quad_lin);
         old_quad_x = xdisp->get_quad_2d();
+        xdisp->set_quad_2d(&g_quad_lin);
         old_quad_y = ydisp->get_quad_2d();
+        ydisp->set_quad_2d(&g_quad_lin);
 
         // create all top-level vertices (corresponding to vertex nodes), with
         // all parent-son relations preserved; this is necessary for regularization to
@@ -661,113 +566,118 @@ namespace Hermes
 
         // obtain the solution in vertices, estimate the maximum solution value
         // meshes.
-        Hermes::vector<Mesh*> meshes; 
-        meshes.push_back(sln->get_mesh());
-        meshes.push_back(xdisp->get_mesh());
-        meshes.push_back(ydisp->get_mesh());
+        Mesh** meshes = new Mesh*[3];
 
-        // Parallelization
-        MeshFunction<double>*** fns = new MeshFunction<double>**[Global<double>::Hermes_omp_get_max_threads()];
-        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+        meshes[0] = sln->get_mesh();
+        meshes[1] = xdisp->get_mesh();
+        meshes[2] = ydisp->get_mesh();
+
+        // functions.
+        Transformable** trfs = new Transformable*[3];
+        trfs[0] = sln;
+        trfs[1] = xdisp;
+        trfs[2] = ydisp;
+
+        /* Parallelization
+        - cloning of sln, xdisp, ydisp:
+        for(unsigned int i = 0; i < omp_get_max_threads(); i++)
         {
-          fns[i] = new MeshFunction<double>*[3];
-          fns[i][0] = sln->clone();
-          fns[i][0]->set_quad_2d(&g_quad_lin);
-          fns[i][1] = xdisp->clone();
-          fns[i][1]->set_quad_2d(&g_quad_lin);
-          fns[i][2] = ydisp->clone();
-          fns[i][2]->set_quad_2d(&g_quad_lin);
+          ext[i] = new MeshFunction<Scalar>*[ext_functions.size()];
+          for (int j = 0; j < ext_functions.size(); j++)
+            ext[i][j] = ext_functions[j]->clone();
         }
 
-        Transformable*** trfs = new Transformable**[Global<double>::Hermes_omp_get_max_threads()];
-        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
-        {
-          trfs[i] = new Transformable*[3];
-          trfs[i][0] = fns[i][0];
-          trfs[i][1] = fns[i][1];
-          trfs[i][2] = fns[i][2];
-        }
-
+        - cloning of traverse:
         Traverse trav_master(true);
         unsigned int num_states = trav_master.get_num_states(meshes);
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        Traverse* trav = new Traverse[Global<double>::Hermes_omp_get_max_threads()];
-        
-        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+        Traverse* trav = new Traverse[omp_get_max_threads()];
+        Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[omp_get_max_threads()];
+        for(unsigned int i = 0; i < omp_get_max_threads(); i++)
         {
-          trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
-          trav[i].stack = trav_master.stack;
-        }
-
-        int state_i;
-
-#define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master) private(state_i) num_threads(Global<double>::Hermes_omp_get_max_threads())
-        {
-#pragma omp for schedule(dynamic, CHUNKSIZE)
-          for(state_i = 0; state_i < num_states; state_i++)
+          for (unsigned j = 0; j < spaces.size(); j++)
+            fns[i].push_back(pss[i][j]);
+          for (unsigned j = 0; j < ext_functions.size(); j++)
           {
-            Traverse::State current_state;
-#pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-            
-            fns[omp_get_thread_num()][0]->set_quad_order(0, item);
-            double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
-            if (val == NULL)
-              error("Item not defined in the solution.");
-
-            fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
-            fns[omp_get_thread_num()][2]->set_quad_order(0, H2D_FN_VAL);
-
-            double *dx = fns[omp_get_thread_num()][1]->get_fn_values();
-            double *dy = fns[omp_get_thread_num()][2]->get_fn_values();
-
-            int iv[4];
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
-            {
-              double f = val[i];
-              if (this->auto_max && finite(f) && fabs(f) > this->max)
-                this->max = fabs(f);
-
-              double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
-              double y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
-
-              x_disp += dmult * dx[i];
-              y_disp += dmult * dy[i];
-
-              iv[i] = this->get_vertex(-rand(), -rand(), x_disp, y_disp, f);
-            }
-
-            // we won't bother calculating physical coordinates from the refmap if this is not a curved element
-            this->curved = current_state.e[0]->is_curved();
-            cmax = current_state.e[0]->get_diameter();
-
-            // recur to sub-elements
-            if (current_state.e[0]->is_triangle())
-              process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL);
-            else
-              process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL);
-
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
-              process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
-
+            fns[i].push_back(ext[i][j]);
+            ext[i][j]->set_quad_2d(&g_quad_2d_std);
           }
         }
 
-        trav_master.finish();
-        for(unsigned int i = 0; i < Global<double>::Hermes_omp_get_max_threads(); i++)
+        trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
+          trav[i].stack = trav_master.stack;
+
+        int state_i;
+
+        - zadny formy klonovat treba nejsou, ani pss, nic
+
+#define CHUNKSIZE 1
+#pragma omp parallel shared(trav_master) private(state_i)
+            {
+#pragma omp for schedule(dynamic, CHUNKSIZE)
+              for(state_i = 0; state_i < num_states; state_i++)
+              {
+                Traverse::State current_state;
+#pragma omp critical (get_next_state)
+                current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+
+                ...
+              }
+            }
+
+        */
+
+        // Init multi-mesh traversal.
+        Traverse trav(true);
+        trav.begin(3, meshes, trfs);
+
+        // Loop through all elements.
+        Traverse::State *current_state;
+        // Loop through all elements.
+        while ((current_state = trav.get_next_state()) != NULL)
         {
-          trav[i].finish();
-          for(unsigned int j = 0; j < 3; j++)
-            delete fns[i][j];
-          delete [] fns[i];
-          delete [] trfs[i];
+          sln->set_quad_order(0, item);
+          double* val = sln->get_values(component, value_type);
+          if (val == NULL)
+            error("Item not defined in the solution.");
+
+          xdisp->set_quad_order(0, H2D_FN_VAL);
+          ydisp->set_quad_order(0, H2D_FN_VAL);
+
+          double *dx = xdisp->get_fn_values();
+          double *dy = ydisp->get_fn_values();
+
+          int iv[4];
+          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
+          {
+            double f = val[i];
+            if (this->auto_max && finite(f) && fabs(f) > this->max)
+              this->max = fabs(f);
+
+            double x_disp = sln->get_refmap()->get_phys_x(0)[i];
+            double y_disp = sln->get_refmap()->get_phys_y(0)[i];
+
+            x_disp += dmult * dx[i];
+            y_disp += dmult * dy[i];
+
+            iv[i] = this->get_vertex(-rand(), -rand(), x_disp, y_disp, f);
+          }
+
+          // we won't bother calculating physical coordinates from the refmap if this is not a curved element
+          this->curved = current_state->e[0]->is_curved();
+          cmax = current_state->e[0]->get_diameter();
+
+          // recur to sub-elements
+          if (current_state->e[0]->is_triangle())
+            process_triangle(iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL);
+          else
+            process_quad(iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL);
+
+          for (unsigned int i = 0; i < current_state->e[0]->get_num_surf(); i++)
+            process_edge(iv[i], iv[current_state->e[0]->next_vert(i)], current_state->e[0]->en[i]->marker);
         }
-        delete [] fns;
-        delete [] trfs;
-        delete [] trav;
 
         find_min_max();
 
@@ -831,16 +741,13 @@ namespace Hermes
 
       int Linearizer::add_vertex()
       {
-#pragma omp critical(realloc_vertices)
+        if (this->vertex_count >= this->vertex_size)
         {
-          if (this->vertex_count >= this->vertex_size)
-          {
-            this->vertex_size *= 2;
-            verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
-            this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
-            this->hash_table = (int*) realloc(hash_table, sizeof(int) * vertex_size);
-            memset(this->hash_table + this->vertex_size / 2, 0xff, sizeof(int) * this->vertex_size / 2);
-          }
+          this->vertex_size *= 2;
+          verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
+          this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
+          this->hash_table = (int*) realloc(hash_table, sizeof(int) * vertex_size);
+          memset(this->hash_table + this->vertex_size / 2, 0xff, sizeof(int) * this->vertex_size / 2);
         }
         return this->vertex_count++;
       }

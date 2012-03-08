@@ -79,10 +79,10 @@ namespace Hermes
         int get_vertex(int p1, int p2, double x, double y, double value);
         int get_top_vertex(int id, double value);
 
-        void process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
+        void process_triangle(int iv0, int iv1, int iv2, int level,
           double* val, double* phx, double* phy, int* indices);
 
-        void process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
+        void process_quad(int iv0, int iv1, int iv2, int iv3, int level,
           double* val, double* phx, double* phy, int* indices);
 
         void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
