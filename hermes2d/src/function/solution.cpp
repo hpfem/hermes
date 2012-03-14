@@ -1521,10 +1521,10 @@ namespace Hermes
 
 
     template<typename Scalar>
-    const Space<Scalar>* Solution<Scalar>::get_space()
+    Space<Scalar>* Solution<Scalar>::get_space()
     {
       if(this->sln_type == HERMES_SLN)
-        return space;
+        return const_cast<Space<Scalar>*>(space);
       else
       {
         throw Exceptions::ValueException("Solution<Scalar>::space", NULL, 1);

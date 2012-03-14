@@ -136,7 +136,7 @@ namespace Hermes
 
       /// In case this is valid it returns a pointer to the space this solution belongs to.
       /// Only use when get_space() == get_space_seq();
-      const Space<Scalar>* get_space();
+      Space<Scalar>* get_space();
 
       /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
       /// Only use when get_space() == get_space_seq();
