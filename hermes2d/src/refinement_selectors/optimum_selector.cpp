@@ -657,6 +657,11 @@ namespace Hermes
        
         //set orders
         set_current_order_range(element);
+
+        // To generate always at least the unchanged candidate.
+        if(current_max_order < std::max(order_h, order_v))
+          current_max_order = std::max(order_h, order_v);
+
         //build candidates
         int inx_cand, inx_h_cand;
         create_candidates(element, quad_order
