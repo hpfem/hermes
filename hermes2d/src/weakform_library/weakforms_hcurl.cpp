@@ -47,7 +47,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol()
       {
-        if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if (function_coeff == HERMES_DEFAULT_FUNCTION)
+          delete function_coeff;
       };
 
       template<typename Scalar>
@@ -105,14 +106,16 @@ namespace Hermes
         idx_j(j), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        if (c_spline == HERMES_DEFAULT_SPLINE)
+          this->spline_coeff = new CubicSpline(1.0);
         else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
       DefaultJacobianCurlCurl<Scalar>::~DefaultJacobianCurlCurl()
       {
-        if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
+        if (spline_coeff == HERMES_DEFAULT_SPLINE)
+          delete spline_coeff;
       };
 
       template<typename Scalar>
@@ -182,8 +185,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol()
       {
-        if (function_coeff0 != HERMES_DEFAULT_FUNCTION) delete function_coeff0;
-        if (function_coeff1 != HERMES_DEFAULT_FUNCTION) delete function_coeff1;
+        if (function_coeff0 == HERMES_DEFAULT_FUNCTION) delete function_coeff0;
+        if (function_coeff1 == HERMES_DEFAULT_FUNCTION) delete function_coeff1;
       };
 
       template<typename Scalar>
@@ -240,7 +243,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualVol<Scalar>::~DefaultResidualVol()
       {
-        if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if (function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
       };
 
       template<typename Scalar>
@@ -312,7 +315,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualCurlCurl<Scalar>::~DefaultResidualCurlCurl()
       {
-        if (spline_coeff != HERMES_DEFAULT_SPLINE) delete spline_coeff;
+        if (spline_coeff == HERMES_DEFAULT_SPLINE) delete spline_coeff;
       };
 
       template<typename Scalar>
@@ -391,7 +394,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf()
       {
-        if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if (function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
       };
 
       template<typename Scalar>
@@ -454,7 +457,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
       {
-        if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if (function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
       };
 
       template<typename Scalar>
@@ -522,7 +525,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf()
       {
-        if (function_coeff != HERMES_DEFAULT_FUNCTION) delete function_coeff;
+        if (function_coeff == HERMES_DEFAULT_FUNCTION) delete function_coeff;
       };
 
       template<typename Scalar>
