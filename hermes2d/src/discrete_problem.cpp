@@ -2229,9 +2229,11 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         if(!(i > 0 && spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq == spaces[i-1]->get_mesh()->get_seq() - min_dg_mesh_seq))
+        {
           if(neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_active_edge_multimesh(current_state->isurf) && spaces[i]->get_type() == HERMES_L2_SPACE)
             DG_intra = true;
-        neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->clear_initial_sub_idx();
+          neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->clear_initial_sub_idx();
+        }
       }
       return DG_intra;
     }
