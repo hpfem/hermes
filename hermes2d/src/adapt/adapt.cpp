@@ -264,6 +264,9 @@ namespace Hermes
             current_orders.push_back(this->spaces[comp]->get_element_order(id));
             spaces[comp]->edata[id].changed_in_last_adaptation = true;
           }
+          else
+            if(priority_queue.empty())
+              break;
         }
         // Priority - refine no matter what.
         else
