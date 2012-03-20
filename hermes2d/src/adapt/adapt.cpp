@@ -610,7 +610,10 @@ namespace Hermes
 
       RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
 
-      #pragma omp parallel private(current_refinement_selectors)
+      #define CHUNKSIZE 1
+#pragma omp parallel private(current_refinement_selectors)
+      {
+#pragma omp for schedule(dynamic, CHUNKSIZE)
         for(int inx = 0; inx < num_elem_to_proc; inx++)
         {
           current_refinement_selectors = refinement_selectors[omp_get_thread_num()];
@@ -677,6 +680,7 @@ namespace Hermes
             }
           }
         }
+      }
     }
 
     template<typename Scalar>
