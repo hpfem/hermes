@@ -254,14 +254,15 @@ namespace Hermes
     public:
       int neighb_id;
       T   neighb_diam;
-    private:
-      /// Constructor.
-      InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
-      Geom<T>* wrapped_geom;
       int get_neighbor_marker() const;
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
 
+    private:
+      /// Constructor.
+      InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
+      Geom<T>* wrapped_geom;
+      
       virtual void free();
       virtual void free_ord();
 
