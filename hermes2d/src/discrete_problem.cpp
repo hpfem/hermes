@@ -1934,12 +1934,6 @@ namespace Hermes
           nbs_u->set_quad_order(order);
           nbs_v->set_quad_order(order);
 
-          // Evaluate the form using just calculated order.
-          Quad2D* quad = current_pss[0]->get_quad_2d();
-          int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
-          int np = quad->get_num_points(eo, current_state->rep->get_mode());
-          double3* pt = quad->get_points(eo, current_state->rep->get_mode());
-
           // Init geometry.
           int n_quadrature_points;
           Geom<double>* geometry = NULL;
@@ -2023,7 +2017,7 @@ namespace Hermes
                 DiscontinuousFunc<double>* v = new DiscontinuousFunc<double>(init_fn(fv, rv, nbs_v->get_quad_eo(support_neigh_v)),
                   support_neigh_v, nbs_v->neighbor_edge.orientation);
 
-                Scalar res = mfs->value(np, jacobian_x_weights, prev, u, v, e, ext) * mfs->scaling_factor;
+                Scalar res = mfs->value(n_quadrature_points, jacobian_x_weights, prev, u, v, e, ext) * mfs->scaling_factor;
 
                 u->free_fn();
                 delete u;
@@ -2091,12 +2085,6 @@ namespace Hermes
             
           NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq));
 
-          // Evaluate the form using just calculated order.
-          Quad2D* quad = current_spss[m]->get_quad_2d();
-          int eo = quad->get_edge_points(current_state->isurf, order, current_state->rep->get_mode());
-          int np = quad->get_num_points(eo, current_state->rep->get_mode());
-          double3* pt = quad->get_points(eo, current_state->rep->get_mode());
-
           // Init geometry and jacobian*weights.
           // Init geometry.
           int n_quadrature_points;
@@ -2129,10 +2117,10 @@ namespace Hermes
               continue;
             current_spss[m]->set_active_shape(current_als[m]->idx[dof_i]);
 
-            Func<double>* v = init_fn(current_spss[m], current_refmaps[m], eo);
+            Func<double>* v = init_fn(current_spss[m], current_refmaps[m], nbs_v->get_quad_eo());
             
 #pragma omp critical (rhs)
-            current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(np, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
+            current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
 
             v->free_fn();
             delete v;
