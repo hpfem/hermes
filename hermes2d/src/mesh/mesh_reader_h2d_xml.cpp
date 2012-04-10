@@ -328,9 +328,27 @@ namespace Hermes
             {
               XMLSubdomains::domain::edges_type::edge_type* edge;
               if(boundary_edge_number_count == parsed_xml_domain->edges().edge().size())
-                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(boundary_edge_number_i)->second);
+              {
+                for(unsigned int to_find_i = 0; to_find_i < parsed_xml_domain->edges().edge().size(); to_find_i++)
+                {
+                  if(parsed_xml_domain->edges().edge().at(to_find_i).i() == edge_is.find(boundary_edge_number_i)->second)
+                  {
+                    edge = &parsed_xml_domain->edges().edge().at(to_find_i);
+                    break;
+                  }
+                }
+              } 
               else
-                edge = &parsed_xml_domain->edges().edge().at(edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i))->second);
+              {
+                for(unsigned int to_find_i = 0; to_find_i < parsed_xml_domain->edges().edge().size(); to_find_i++)
+                {
+                  if(parsed_xml_domain->edges().edge().at(to_find_i).i() == edge_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i))->second)
+                  {
+                    edge = &parsed_xml_domain->edges().edge().at(to_find_i);
+                    break;
+                  }
+                }
+              }
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if (en == NULL)
                 error("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
@@ -1029,7 +1047,7 @@ namespace Hermes
           int v2 = parsed_xml_domain->edges().edge().at(edge_i).v2();
 
           // insert into the map.
-          edge_is.insert(std::pair<unsigned int, unsigned int>(parsed_xml_domain->edges().edge().at(edge_i).i(), edge_i));
+          edge_is.insert(std::pair<unsigned int, unsigned int>(edge_i, parsed_xml_domain->edges().edge().at(edge_i).i()));
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
