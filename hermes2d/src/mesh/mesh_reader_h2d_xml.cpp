@@ -329,10 +329,21 @@ namespace Hermes
               XMLSubdomains::domain::edges_type::edge_type* edge;
               for(unsigned int to_find_i = 0; to_find_i < parsed_xml_domain->edges().edge().size(); to_find_i++)
               {
-                if(parsed_xml_domain->edges().edge().at(to_find_i).i() == parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i))
+                if(boundary_edge_number_count != parsed_xml_domain->edges().edge().size())
                 {
-                  edge = &parsed_xml_domain->edges().edge().at(to_find_i);
-                  break;
+                  if(parsed_xml_domain->edges().edge().at(to_find_i).i() == parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i))
+                  {
+                    edge = &parsed_xml_domain->edges().edge().at(to_find_i);
+                    break;
+                  }
+                }
+                else
+                {
+                  if(parsed_xml_domain->edges().edge().at(to_find_i).i() == edge_is.find(boundary_edge_number_i)->second)
+                  {
+                    edge = &parsed_xml_domain->edges().edge().at(to_find_i);
+                    break;
+                  }
                 }
               }
 
