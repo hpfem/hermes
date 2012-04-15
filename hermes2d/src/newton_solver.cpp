@@ -192,7 +192,8 @@ namespace Hermes
             delete this->timer;
             this->timer = NULL;
           }
-          throw Exceptions::ValueException("iterations", it, newton_max_iter);
+          warn("Newton solver would iterate more, but the threshold has been reached.");
+          return;
         }
 
         this->timer->tick();
