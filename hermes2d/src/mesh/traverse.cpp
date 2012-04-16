@@ -841,6 +841,10 @@ namespace Hermes
         }
         // take one mesh at a time and compare element areas to the areas[] array
         double tolerance = min_elem_area/100.;
+
+        if(min_elem_area < 0)
+          throw Exceptions::ValueException("min_elem_area", 0.0, 1e-10);
+
         for (int i = 1; i < n; i++)
         {
           counter = 0;
