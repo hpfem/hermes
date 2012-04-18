@@ -26,7 +26,9 @@
 
 #ifndef HAVE_FMEMOPEN
 /// Implementation of GNU fmemopen. Intended to be used if the current platform does not support it.
+#if defined(WIN32) || defined(_WINDOWS)
 FILE *fmemopen (void *buf, size_t size, const char *opentype);
+#endif
 #endif
 
 // Windows DLL export/import definitions
