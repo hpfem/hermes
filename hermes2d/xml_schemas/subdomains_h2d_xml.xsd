@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <schema targetNamespace="XMLSubdomains"
-	xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:mesh="XMLMesh"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  xmlns:mesh="XMLMesh"
   xmlns:subdomains="XMLSubdomains">
-	<import namespace="XMLMesh" 
-  schemaLocation="mesh_h2d_xml.xsd"/>	
+  <import namespace="XMLMesh" 
+  schemaLocation="mesh_h2d_xml.xsd"/>  
   <element name="domain">
-		<complexType>
+    <complexType>
       <sequence>
         <element minOccurs="0" maxOccurs="1" name="variables"
         type="mesh:variables_type" />
@@ -18,62 +18,62 @@
         type="subdomains:edges_type" />
         <element minOccurs="0" maxOccurs="1" name="curves"
         type="mesh:curves_type" />
-				<element name="subdomains">
-					<complexType>
-						<sequence>
-							<element minOccurs="1" maxOccurs="unbounded" name="subdomain">
-								<complexType mixed="true">
-									<sequence>
-										<element minOccurs="0" maxOccurs="1" name="vertices">
-											<complexType>
+        <element name="subdomains">
+          <complexType>
+            <sequence>
+              <element minOccurs="1" maxOccurs="unbounded" name="subdomain">
+                <complexType mixed="true">
+                  <sequence>
+                    <element minOccurs="0" maxOccurs="1" name="vertices">
+                      <complexType>
                         <sequence>
-                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                          <element minOccurs="0" maxOccurs="unbounded" name="i" type="integer" />
                         </sequence>
-											</complexType>
-										</element>
-										<element minOccurs="0" maxOccurs="1" name="elements">
-											<complexType>
+                      </complexType>
+                    </element>
+                    <element minOccurs="0" maxOccurs="1" name="elements">
+                      <complexType>
                         <sequence>
-                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                          <element minOccurs="0" maxOccurs="unbounded" name="i" type="integer" />
                         </sequence>
-											</complexType>
-										</element>										
-										<element minOccurs="0" maxOccurs="1" name="boundary_edges">
-											<complexType>
-												<sequence>
-                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                      </complexType>
+                    </element>                    
+                    <element minOccurs="0" maxOccurs="1" name="boundary_edges">
+                      <complexType>
+                        <sequence>
+                          <element minOccurs="0" maxOccurs="unbounded" name="i" type="integer" />
                         </sequence>
-											</complexType>
-										</element>
+                      </complexType>
+                    </element>
                     <element minOccurs="0" maxOccurs="1" name="inner_edges">
-											<complexType>
-												<sequence>
-                          <element minOccurs="1" maxOccurs="unbounded" name="i" type="integer" />
+                      <complexType>
+                        <sequence>
+                          <element minOccurs="0" maxOccurs="unbounded" name="i" type="integer" />
                         </sequence>
-											</complexType>
-										</element>
+                      </complexType>
+                    </element>
                     <element minOccurs="0" maxOccurs="1" name="refinements" type="mesh:refinements_type" />
-									</sequence>
-									<attribute name="name" type="string" use="required" />
-								</complexType>
-							</element>
-						</sequence>
-					</complexType>
-				</element>
+                  </sequence>
+                  <attribute name="name" type="string" use="required" />
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
       </sequence>
     </complexType>
   </element>
     
-	<element name="element" abstract="true" type="subdomains:element_type" />
+  <element name="element" abstract="true" type="subdomains:element_type" />
   <element name="triangle" substitutionGroup="subdomains:element" type="subdomains:triangle_type" />
   <element name="quad" substitutionGroup="subdomains:element" type="subdomains:quad_type" />
-	
+  
   <complexType name="elements_type">
     <sequence>
       <element ref="subdomains:element" maxOccurs="unbounded" />
     </sequence>
   </complexType>
-		
+    
     <complexType name="element_type" abstract="true">
       <attribute name="v1" type="integer" use="required" />
       <attribute name="v2" type="integer" use="required" />
