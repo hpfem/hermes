@@ -125,7 +125,6 @@ namespace Hermes
         return new DefaultMatrixFormVol<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff,
@@ -302,7 +301,6 @@ namespace Hermes
         return new DefaultJacobianAdvection<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
@@ -387,7 +385,6 @@ namespace Hermes
         return new DefaultVectorFormVol<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
@@ -471,7 +468,6 @@ namespace Hermes
       {
         return new DefaultResidualVol(*this);
       }
-
 
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, std::string area,
@@ -787,13 +783,6 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf()
-      {
-        // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
-      };
-
-      template<typename Scalar>
       Scalar DefaultVectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
@@ -907,6 +896,318 @@ namespace Hermes
       */
 
       template<typename Scalar>
+      DefaultVectorFormSurfNormalX<Scalar>::DefaultVectorFormSurfNormalX(int i, std::string area,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, area), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfNormalX<Scalar>::DefaultVectorFormSurfNormalX(int i, Hermes::vector<std::string> areas,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, areas), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      Scalar DefaultVectorFormSurfNormalX<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const
+      {
+        Scalar result = 0;
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->nx[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->nx[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->nx[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      Ord DefaultVectorFormSurfNormalX<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+        Geom<Ord> *e, ExtData<Ord> *ext) const
+      {
+        Ord result = Ord(0);
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->nx[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->nx[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->nx[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      VectorFormSurf<Scalar>* DefaultVectorFormSurfNormalX<Scalar>::clone()
+      {
+        return new DefaultVectorFormSurfNormalX<Scalar>(*this);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfNormalY<Scalar>::DefaultVectorFormSurfNormalY(int i, std::string area,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, area), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfNormalY<Scalar>::DefaultVectorFormSurfNormalY(int i, Hermes::vector<std::string> areas,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, areas), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      Scalar DefaultVectorFormSurfNormalY<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const
+      {
+        Scalar result = 0;
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ny[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ny[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ny[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      Ord DefaultVectorFormSurfNormalY<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+        Geom<Ord> *e, ExtData<Ord> *ext) const
+      {
+        Ord result = Ord(0);
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ny[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ny[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ny[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      VectorFormSurf<Scalar>* DefaultVectorFormSurfNormalY<Scalar>::clone()
+      {
+        return new DefaultVectorFormSurfNormalY<Scalar>(*this);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfIntegralX<Scalar>::DefaultVectorFormSurfIntegralX(int i, std::string area,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, area), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfIntegralX<Scalar>::DefaultVectorFormSurfIntegralX(int i, Hermes::vector<std::string> areas,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, areas), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      Scalar DefaultVectorFormSurfIntegralX<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const
+      {
+        Scalar result = 0;
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      Ord DefaultVectorFormSurfIntegralX<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+        Geom<Ord> *e, ExtData<Ord> *ext) const
+      {
+        Ord result = Ord(0);
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      VectorFormSurf<Scalar>* DefaultVectorFormSurfIntegralX<Scalar>::clone()
+      {
+        return new DefaultVectorFormSurfIntegralX<Scalar>(*this);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfIntegralY<Scalar>::DefaultVectorFormSurfIntegralY(int i, std::string area,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, area), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      DefaultVectorFormSurfIntegralY<Scalar>::DefaultVectorFormSurfIntegralY(int i, Hermes::vector<std::string> areas,
+        Hermes2DFunction<Scalar>* coeff,
+        GeomType gt)
+        : VectorFormSurf<Scalar>(i, areas), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      Scalar DefaultVectorFormSurfIntegralY<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+        Geom<double> *e, ExtData<Scalar> *ext) const
+      {
+        Scalar result = 0;
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      Ord DefaultVectorFormSurfIntegralY<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+        Geom<Ord> *e, ExtData<Ord> *ext) const
+      {
+        Ord result = Ord(0);
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      VectorFormSurf<Scalar>* DefaultVectorFormSurfIntegralY<Scalar>::clone()
+      {
+        return new DefaultVectorFormSurfIntegralY<Scalar>(*this);
+      }
+
+      template<typename Scalar>
       DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
         GeomType gt)
@@ -990,7 +1291,6 @@ namespace Hermes
       {
         return new DefaultResidualSurf(*this);
       }
-
 
       template<typename Scalar>
       DefaultWeakFormLaplace<Scalar>::DefaultWeakFormLaplace(std::string area,

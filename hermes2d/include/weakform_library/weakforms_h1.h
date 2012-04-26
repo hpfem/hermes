@@ -331,7 +331,97 @@ namespace Hermes
         DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
           GeomType gt = HERMES_PLANAR);
 
-        ~DefaultVectorFormSurf();
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
+
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+
+        virtual VectorFormSurf<Scalar>* clone();
+
+      private:
+
+        Hermes2DFunction<Scalar>* coeff;
+        GeomType gt;
+      };
+
+      template<typename Scalar>
+      class HERMES_API DefaultVectorFormSurfNormalX : public VectorFormSurf<Scalar>
+      {
+      public:
+        DefaultVectorFormSurfNormalX(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+        DefaultVectorFormSurfNormalX(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
+
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+
+        virtual VectorFormSurf<Scalar>* clone();
+
+      private:
+
+        Hermes2DFunction<Scalar>* coeff;
+        GeomType gt;
+      };
+
+      template<typename Scalar>
+      class HERMES_API DefaultVectorFormSurfNormalY : public VectorFormSurf<Scalar>
+      {
+      public:
+        DefaultVectorFormSurfNormalY(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+        DefaultVectorFormSurfNormalY(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
+
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+
+        virtual VectorFormSurf<Scalar>* clone();
+
+      private:
+
+        Hermes2DFunction<Scalar>* coeff;
+        GeomType gt;
+      };
+
+      template<typename Scalar>
+      class HERMES_API DefaultVectorFormSurfIntegralX : public VectorFormSurf<Scalar>
+      {
+      public:
+        DefaultVectorFormSurfIntegralX(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+        DefaultVectorFormSurfIntegralX(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+          Geom<double> *e, ExtData<Scalar> *ext) const;
+
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+
+        virtual VectorFormSurf<Scalar>* clone();
+
+      private:
+
+        Hermes2DFunction<Scalar>* coeff;
+        GeomType gt;
+      };
+
+      template<typename Scalar>
+      class HERMES_API DefaultVectorFormSurfIntegralY : public VectorFormSurf<Scalar>
+      {
+      public:
+        DefaultVectorFormSurfIntegralY(int i, std::string area = HERMES_ANY, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
+        DefaultVectorFormSurfIntegralY(int i, Hermes::vector<std::string> areas, Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
+          GeomType gt = HERMES_PLANAR);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, ExtData<Scalar> *ext) const;
