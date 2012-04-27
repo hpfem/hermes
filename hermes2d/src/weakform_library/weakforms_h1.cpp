@@ -1336,8 +1336,18 @@ namespace Hermes
       template class HERMES_API DefaultResidualDiffusion<std::complex<double> >;
       template class HERMES_API DefaultMatrixFormSurf<double>;
       template class HERMES_API DefaultMatrixFormSurf<std::complex<double> >;
+
       template class HERMES_API DefaultVectorFormSurf<double>;
       template class HERMES_API DefaultVectorFormSurf<std::complex<double> >;
+      template class HERMES_API DefaultVectorFormSurfNormalX<double>;
+      template class HERMES_API DefaultVectorFormSurfNormalX<std::complex<double> >;
+      template class HERMES_API DefaultVectorFormSurfNormalY<double>;
+      template class HERMES_API DefaultVectorFormSurfNormalY<std::complex<double> >;
+      template class HERMES_API DefaultVectorFormSurfIntegralX<double>;
+      template class HERMES_API DefaultVectorFormSurfIntegralX<std::complex<double> >;
+      template class HERMES_API DefaultVectorFormSurfIntegralY<double>;
+      template class HERMES_API DefaultVectorFormSurfIntegralY<std::complex<double> >;
+
       template class HERMES_API DefaultVectorFormVol<double>;
       template class HERMES_API DefaultVectorFormVol<std::complex<double> >;
       template class HERMES_API DefaultJacobianFormSurf<double>;
