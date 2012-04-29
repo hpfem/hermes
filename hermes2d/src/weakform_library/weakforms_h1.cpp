@@ -1078,18 +1078,18 @@ namespace Hermes
         Scalar result = 0;
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->nx[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->nx[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->nx[i];
             }
           }
         }
@@ -1104,18 +1104,18 @@ namespace Hermes
         Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->nx[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->nx[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->tx[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->nx[i];
             }
           }
         }
@@ -1156,18 +1156,18 @@ namespace Hermes
         Scalar result = 0;
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->ny[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->ny[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->ny[i];
             }
           }
         }
@@ -1182,18 +1182,18 @@ namespace Hermes
         Ord result = Ord(0);
         if (gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
-            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+            result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->ny[i];
           }
         }
         else {
           if (gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+              result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->ny[i];
             }
           }
           else {
             for (int i = 0; i < n; i++) {
-              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * e->ty[i];
+              result += wt[i] * e->x[i] * coeff->value(e->x[i], e->y[i]) * v->val[i] * Hermes::sqrt(e->tx[i] * e->tx[i] + e->ty[i] * e->ty[i]) * e->ny[i];
             }
           }
         }
