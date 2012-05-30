@@ -30,11 +30,17 @@ namespace Hermes
     template<typename Scalar>
     LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL), matrix_solver_type(SOLVER_UMFPACK)
     {
+      this->jacobian = create_matrix<Scalar>(this->matrix_solver_type);
+      this->residual = create_vector<Scalar>(this->matrix_solver_type);
+      this->matrix_solver = create_linear_solver<Scalar>(this->matrix_solver_type, this->jacobian, this->residual);
     }
 
     template<typename Scalar>
     LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : dp(dp), sln_vector(NULL), matrix_solver_type(matrix_solver_type)
     {
+      this->jacobian = create_matrix<Scalar>(this->matrix_solver_type);
+      this->residual = create_vector<Scalar>(this->matrix_solver_type);
+      this->matrix_solver = create_linear_solver<Scalar>(this->matrix_solver_type, this->jacobian, this->residual);
     }
 
     template<typename Scalar>
@@ -42,27 +48,17 @@ namespace Hermes
     {
       if(sln_vector != NULL)
         delete [] sln_vector;
+      delete jacobian;
+      delete residual;
+      delete matrix_solver;
     }
 
     template<typename Scalar>
     void LinearSolver<Scalar>::solve()
     {
-      /// Jacobian.
-      SparseMatrix<Scalar>* jacobian;
+      dp->assemble(this->jacobian, this->residual);
 
-      /// Residual.
-      Vector<Scalar>* residual;
-
-      /// Linear solver.
-      LinearMatrixSolver<Scalar>* matrix_solver;
-
-      jacobian = create_matrix<Scalar>(matrix_solver_type);
-      residual = create_vector<Scalar>(matrix_solver_type);
-      matrix_solver = create_linear_solver<Scalar>(matrix_solver_type, jacobian, residual);
-      
-      dp->assemble(jacobian, residual);
-
-      matrix_solver->solve();
+      this->matrix_solver->solve();
 
       this->sln_vector = matrix_solver->get_sln_vector();
     }

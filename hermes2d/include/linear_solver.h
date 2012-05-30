@@ -49,6 +49,15 @@ namespace Hermes
       /// The solution vector.
       Scalar* sln_vector;
 
+      /// Jacobian.
+      SparseMatrix<Scalar>* jacobian;
+
+      /// Residual.
+      Vector<Scalar>* residual;
+
+      /// Linear solver.
+      LinearMatrixSolver<Scalar>* matrix_solver;
+      
       /// Linear solver to use, choices:
       /// SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
       /// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
