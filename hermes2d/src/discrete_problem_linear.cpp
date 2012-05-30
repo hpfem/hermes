@@ -32,12 +32,12 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : DiscreteProblem(wf, spaces)
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : DiscreteProblem<Scalar>(wf, spaces)
     {
     }
 
     template<typename Scalar>
-    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : DiscreteProblem(wf, space)
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : DiscreteProblem<Scalar>(wf, space)
     {
     }
 
@@ -68,18 +68,18 @@ namespace Hermes
       this->create_sparse_structure();
 
       Hermes::vector<MeshFunction<Scalar>*> ext_functions;
-      for(unsigned int form_i = 0; form_i < wf->mfvol.size(); form_i++)
-        for(unsigned int ext_i = 0; ext_i < wf->mfvol.at(form_i)->ext.size(); ext_i++)
-          ext_functions.push_back(wf->mfvol.at(form_i)->ext[ext_i]);
-      for(unsigned int form_i = 0; form_i < wf->mfsurf.size(); form_i++)
-        for(unsigned int ext_i = 0; ext_i < wf->mfsurf.at(form_i)->ext.size(); ext_i++)
-          ext_functions.push_back(wf->mfsurf.at(form_i)->ext[ext_i]);
-      for(unsigned int form_i = 0; form_i < wf->vfvol.size(); form_i++)
-        for(unsigned int ext_i = 0; ext_i < wf->vfvol.at(form_i)->ext.size(); ext_i++)
-          ext_functions.push_back(wf->vfvol.at(form_i)->ext[ext_i]);
-      for(unsigned int form_i = 0; form_i < wf->vfsurf.size(); form_i++)
-        for(unsigned int ext_i = 0; ext_i < wf->vfsurf.at(form_i)->ext.size(); ext_i++)
-          ext_functions.push_back(wf->vfsurf.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < this->wf->mfvol.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->mfvol.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(this->wf->mfvol.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < this->wf->mfsurf.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->mfsurf.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(this->wf->mfsurf.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < this->wf->vfvol.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->vfvol.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(this->wf->vfvol.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < this->wf->vfsurf.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->vfsurf.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(this->wf->vfsurf.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
       PrecalcShapeset*** pss = new PrecalcShapeset**[Global<Scalar>::Hermes_omp_get_max_threads()];
@@ -183,12 +183,12 @@ namespace Hermes
       delete [] trav;
 
       /// \todo Should this be really here? Or in assemble()?
-      if (current_mat != NULL)
-        current_mat->finish();
-      if (current_rhs != NULL)
-        current_rhs->finish();
+      if (this->current_mat != NULL)
+        this->current_mat->finish();
+      if (this->current_rhs != NULL)
+        this->current_rhs->finish();
 
-      if(DG_matrix_forms_present || DG_vector_forms_present)
+      if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
       {
         Element* element_to_set_nonvisited;
         for(unsigned int mesh_i = 0; mesh_i < meshes.size(); mesh_i++)
@@ -212,12 +212,12 @@ namespace Hermes
       Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als[form->i]->cnt, current_als[form->j]->cnt));
 
       // Init external functions.
-      Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
+      Func<Scalar>** u_ext = new Func<Scalar>*[this->RungeKutta ? this->RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
       ExtData<Scalar> ext;
       init_ext(form, u_ext, &ext, order, current_u_ext, current_state);
 
       // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
+      if(this->RungeKutta)
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
@@ -299,7 +299,7 @@ namespace Hermes
 
       // Insert the local stiffness matrix into the global one.
 #pragma omp critical (mat)
-      current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
+      this->current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
       if (tra)
@@ -308,7 +308,7 @@ namespace Hermes
           chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
         transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
 #pragma omp critical (mat)
-        current_mat->add(current_als[form->j]->cnt, current_als[form->i]->cnt, local_stiffness_matrix, current_als[form->j]->dof, current_als[form->i]->dof);
+        this->current_mat->add(current_als[form->j]->cnt, current_als[form->i]->cnt, local_stiffness_matrix, current_als[form->j]->dof, current_als[form->i]->dof);
 
         // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
         for (unsigned int j = 0; j < current_als[form->i]->cnt; j++)
