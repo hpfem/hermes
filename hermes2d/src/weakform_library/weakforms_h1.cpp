@@ -229,6 +229,90 @@ namespace Hermes
       }
 
       template<typename Scalar>
+      DefaultMatrixFormDiffusion<Scalar>::DefaultMatrixFormDiffusion(int i, int j, std::string area,
+        Hermes1DFunction<Scalar>* coeff,
+        SymFlag sym, GeomType gt)
+        : MatrixFormVol<Scalar>(i, j, area, sym), idx_j(j), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+      };
+
+      template<typename Scalar>
+      DefaultMatrixFormDiffusion<Scalar>::DefaultMatrixFormDiffusion(int i, int j, Hermes::vector<std::string> areas,
+        Hermes1DFunction<Scalar>* coeff, SymFlag sym, GeomType gt)
+        : MatrixFormVol<Scalar>(i, j, areas, sym), idx_j(j), coeff(coeff), gt(gt)
+      {
+        // If coeff is HERMES_ONE, initialize it to be constant 1.0.
+        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+      }
+
+      template<typename Scalar>
+      DefaultMatrixFormDiffusion<Scalar>::~DefaultMatrixFormDiffusion()
+      {
+        // FIXME: Should be deleted here only if it was created here.
+        //if (coeff != HERMES_ONE) delete coeff;
+      };
+
+      template<typename Scalar>
+      Scalar DefaultMatrixFormDiffusion<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+      {
+        Scalar result = 0;
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      Ord DefaultMatrixFormDiffusion<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+        Geom<Ord> *e, ExtData<Ord> *ext) const
+      {
+        Ord result = Ord(0);
+        if (gt == HERMES_PLANAR) {
+          for (int i = 0; i < n; i++) {
+            result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+          }
+        }
+        else {
+          if (gt == HERMES_AXISYM_X) {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+            }
+          }
+          else {
+            for (int i = 0; i < n; i++) {
+              result += wt[i] * e->x[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+            }
+          }
+        }
+
+        return result;
+      }
+
+      template<typename Scalar>
+      MatrixFormVol<Scalar>* DefaultMatrixFormDiffusion<Scalar>::clone()
+      {
+        return new DefaultMatrixFormDiffusion<Scalar>(*this);
+      }
+
+      template<typename Scalar>
       DefaultJacobianAdvection<Scalar>::DefaultJacobianAdvection(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff1,
         Hermes1DFunction<Scalar>* coeff2,
@@ -967,6 +1051,8 @@ namespace Hermes
       template class HERMES_API DefaultMatrixFormVol<std::complex<double> >;
       template class HERMES_API DefaultJacobianDiffusion<double>;
       template class HERMES_API DefaultJacobianDiffusion<std::complex<double> >;
+      template class HERMES_API DefaultMatrixFormDiffusion<double>;
+      template class HERMES_API DefaultMatrixFormDiffusion<std::complex<double> >;
       template class HERMES_API DefaultResidualAdvection<double>;
       template class HERMES_API DefaultResidualAdvection<std::complex<double> >;
       template class HERMES_API DefaultJacobianAdvection<double>;

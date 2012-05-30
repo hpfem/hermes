@@ -92,6 +92,33 @@ namespace Hermes
         GeomType gt;
       };
 
+       template<typename Scalar>
+      class HERMES_API DefaultMatrixFormDiffusion : public MatrixFormVol<Scalar>
+      {
+      public:
+        DefaultMatrixFormDiffusion(int i, int j, std::string area = HERMES_ANY, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
+
+        DefaultMatrixFormDiffusion(int i, int j, Hermes::vector<std::string> areas, Hermes1DFunction<Scalar>* coeff = HERMES_ONE,
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
+
+        ~DefaultMatrixFormDiffusion();
+
+        virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+
+        virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+
+        virtual MatrixFormVol<Scalar>* clone();
+
+      private:
+        int idx_j;
+
+        Hermes1DFunction<Scalar>* coeff;
+        GeomType gt;
+      };
+
       /* Default volumetric matrix form
       \int_{area} spline_coeff1`(u_ext[0]) * u * u_ext[0]->dx * v
       + spline_coeff1(u_ext[0]) * u->dx * v
