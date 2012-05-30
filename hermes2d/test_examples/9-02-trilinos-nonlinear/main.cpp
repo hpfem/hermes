@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
   SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
   Vector<double>* rhs = create_vector<double>(matrix_solver_type);
-  LinearSolver<double>* solver = create_linear_solver<double>(matrix_solver_type, matrix, rhs);
+  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix_solver_type, matrix, rhs);
 
   // Initialize the solution.
   Solution<double> sln1;

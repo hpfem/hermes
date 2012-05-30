@@ -34,15 +34,15 @@ project(hermes_common)
 		src/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
 		
 		src/solvers/dp_interface.cpp
-		src/solvers/linear_solver.cpp
-		src/solvers/nonlinear_solver.cpp
+		src/solvers/linear_matrix_solver.cpp
+    src/solvers/nonlinear_solver.cpp
 		src/solvers/newton_solver_nox.cpp
 		src/solvers/epetra.cpp
 		src/solvers/aztecoo_solver.cpp
 		src/solvers/amesos_solver.cpp
 		src/solvers/mumps_solver.cpp
-    src/solvers/superlu_real.cpp
-    src/solvers/superlu_cplx.cpp
+		src/solvers/superlu_real.cpp
+		src/solvers/superlu_cplx.cpp
 		src/solvers/superlu_solver.cpp
 		src/solvers/petsc_solver.cpp
 		src/solvers/umfpack_solver.cpp
@@ -66,7 +66,7 @@ project(hermes_common)
 		include/exceptions.h
 		include/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp
 		include/solvers/dp_interface.h
-		include/solvers/linear_solver.h
+		include/solvers/linear_matrix_solver.h
 		include/solvers/nonlinear_solver.h
 		include/solvers/newton_solver_nox.h
 		include/solvers/epetra.h

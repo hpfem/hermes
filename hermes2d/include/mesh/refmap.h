@@ -227,6 +227,7 @@ namespace Hermes
       double2  lin_coeffs[4];
       template<typename T> friend class MeshFunction;
       template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class Solution;
       template<typename T> friend class ExactSolution;
       template<typename T> friend class ExactSolutionScalar;

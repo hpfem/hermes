@@ -25,15 +25,15 @@ using namespace Hermes::Algebra;
 
 namespace Hermes
 {
-  namespace Solvers
+  namespace Hermes2D
   {
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblemInterface<Scalar>* dp) : dp(dp), sln_vector(NULL), matrix_solver_type(SOLVER_UMFPACK)
+    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL), matrix_solver_type(SOLVER_UMFPACK)
     {
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblemInterface<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : dp(dp), sln_vector(NULL), matrix_solver_type(matrix_solver_type)
+    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : dp(dp), sln_vector(NULL), matrix_solver_type(matrix_solver_type)
     {
     }
 

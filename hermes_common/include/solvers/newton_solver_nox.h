@@ -22,7 +22,7 @@
 #ifndef __HERMES_COMMON_NEWTON_SOLVER_NOX_H_
 #define __HERMES_COMMON_NEWTON_SOLVER_NOX_H_
 
-#include "linear_solver.h"
+#include "linear_matrix_solver.h"
 #include "nonlinear_solver.h"
 #include "epetra.h"
 #if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)

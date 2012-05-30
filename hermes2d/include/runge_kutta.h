@@ -170,7 +170,7 @@ namespace Hermes
       Vector<Scalar>* vector_right;
 
       /// Matrix solver.
-      LinearSolver<Scalar>* solver;
+      LinearMatrixSolver<Scalar>* solver;
 
       /// Weak formulation.
       const WeakForm<Scalar>* wf;

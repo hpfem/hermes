@@ -108,7 +108,8 @@ project(hermes2d)
     src/asmlist.cpp
     src/newton_solver.cpp
     src/picard_solver.cpp
-
+    src/linear_solver.cpp
+		
     src/calculation_continuity.cpp
 
     src/adapt/adapt.cpp
@@ -189,6 +190,7 @@ project(hermes2d)
     src/graph.cpp
     src/global.cpp
     src/discrete_problem.cpp
+    src/discrete_problem_linear.cpp
     src/runge_kutta.cpp
     src/spline.cpp
 
@@ -208,6 +210,7 @@ project(hermes2d)
     include/asmlist.h
     include/newton_solver.h
     include/picard_solver.h
+    include/linear_solver.h
 
     include/calculation_continuity.h
 
@@ -292,6 +295,7 @@ project(hermes2d)
     include/graph.h
     include/global.h
     include/discrete_problem.h
+    include/discrete_problem_linear.h
     include/runge_kutta.h
     include/spline.h
 

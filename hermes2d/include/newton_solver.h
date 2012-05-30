@@ -85,7 +85,7 @@ namespace Hermes
       Vector<Scalar>* residual;
 
       /// Linear solver.
-      LinearSolver<Scalar>* linear_solver;
+      LinearMatrixSolver<Scalar>* linear_solver;
 
       /// Used by method solve_keep_jacobian().
       SparseMatrix<Scalar>* kept_jacobian;

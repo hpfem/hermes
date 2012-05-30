@@ -24,7 +24,7 @@
 #include "../config.h"
 #ifdef HAVE_AZTECOO
 #include "epetra.h"
-#include "linear_solver.h"
+#include "linear_matrix_solver.h"
 #include "precond_ifpack.h"
 #include <AztecOO.h>
 
@@ -78,7 +78,7 @@ namespace Hermes
 
       Precond<Scalar> *pc;
 
-      template<typename T> friend LinearSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
     };
   }
 }

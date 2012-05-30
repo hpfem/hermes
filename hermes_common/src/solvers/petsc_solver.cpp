@@ -519,7 +519,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    PetscLinearSolver<Scalar>::PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
+    PetscLinearMatrixSolver<Scalar>::PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs)
       : DirectSolver<Scalar>(), m(mat), rhs(rhs)
     {
       _F_;
@@ -527,20 +527,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PetscLinearSolver<Scalar>::~PetscLinearSolver()
+    PetscLinearMatrixSolver<Scalar>::~PetscLinearMatrixSolver()
     {
       _F_;
       remove_petsc_object();
     }
 
     template<typename Scalar>
-    bool PetscLinearSolver<Scalar>::get_matrix_size()
+    bool PetscLinearMatrixSolver<Scalar>::get_matrix_size()
     {
       return m->size();
     }
 
     template<typename Scalar>
-    bool PetscLinearSolver<Scalar>::solve()
+    bool PetscLinearMatrixSolver<Scalar>::solve()
     {
       _F_;
       assert(m != NULL);
@@ -585,8 +585,8 @@ namespace Hermes
       return true;
     }
 
-    template class HERMES_API PetscLinearSolver<double>;
-    template class HERMES_API PetscLinearSolver<std::complex<double> >;
+    template class HERMES_API PetscLinearMatrixSolver<double>;
+    template class HERMES_API PetscLinearMatrixSolver<std::complex<double> >;
   }
 }
 #endif

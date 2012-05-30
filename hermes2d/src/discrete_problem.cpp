@@ -1094,7 +1094,7 @@ namespace Hermes
           {
             if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) < 1e-12)
               continue;
-            if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+            //if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_mfvol[current_mfvol_i]->i]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->i]->idx[i]);
               test_fns[i] = init_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
@@ -1105,7 +1105,7 @@ namespace Hermes
           {
             if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) < 1e-12)
               continue;
-            if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
+            //if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
             {
               current_pss[current_mfvol[current_mfvol_i]->j]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->j]->idx[j]);
 

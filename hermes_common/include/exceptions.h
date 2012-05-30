@@ -105,16 +105,16 @@ namespace Hermes
     };
 
     /// \brief Linear solver failed.
-    class HERMES_API LinearSolverException : public Exception
+    class HERMES_API LinearMatrixSolverException : public Exception
     {
       public:
         /// \brief Linear solver failed from unknown reason.
-        LinearSolverException();
+        LinearMatrixSolverException();
         /// Linear solver failed from spevific reason.
         /// \param[in] reasen specification of solver fail.
-        LinearSolverException(const char * reason);
-        ~LinearSolverException();
-        LinearSolverException(const LinearSolverException & e);
+        LinearMatrixSolverException(const char * reason);
+        ~LinearMatrixSolverException();
+        LinearMatrixSolverException(const LinearMatrixSolverException & e);
     };
 
     /// \brief Value is out of allowed range

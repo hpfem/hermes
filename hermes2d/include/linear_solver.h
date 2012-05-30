@@ -22,9 +22,6 @@
 #ifndef __HERMES_COMMON_LINEAR_SOLVER_H_
 #define __HERMES_COMMON_LINEAR_SOLVER_H_
 
-#include "precond.h"
-#include "dp_interface.h"
-#include "linear_matrix_solver.h"
 #include "discrete_problem_linear.h"
 
 namespace Hermes

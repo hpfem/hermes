@@ -118,7 +118,7 @@ int main(int argc, char* args[])
     // Set up the solver, matrix, and rhs according to the solver selection.
     SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
     Vector<double>* rhs = create_vector<double>(matrix_solver);
-    LinearSolver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
+    LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
 
     // Assemble the linear problem.
     info("Assembling (ndof: %d).", Space<double>::get_num_dofs(ref_space));

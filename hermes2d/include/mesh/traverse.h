@@ -92,6 +92,7 @@ namespace Hermes
       friend class Views::Linearizer;
       friend class Views::Vectorizer;
       template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class DiscreteProblemLinear;
       };
 
       void begin(int n, Mesh** meshes, Transformable** fn = NULL);
@@ -134,6 +135,7 @@ namespace Hermes
       template<typename T> friend class Adapt;
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class Filter;
       template<typename T> friend class SimpleFilter;
       template<typename T> friend class Global;

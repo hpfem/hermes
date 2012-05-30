@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  //LinearSolverException test
+  //1/2Exception test
   
   UMFPackMatrix<double> mat;
   int ap[]={0,1,1};
@@ -56,14 +56,14 @@ int main(int argc, char* argv[])
   mat.create(2,1,ap,ai,ax);
   UMFPackVector<double> vec(2);
 
-  UMFPackLinearSolver<double> linsolv(&mat,&vec);
+  UMFPackLinearMatrixSolver<double> linsolv(&mat,&vec);
   try
   {
     linsolv.solve();
     info("Failure!");
     return TEST_FAILURE;
   }
-  catch(Exceptions::LinearSolverException &e)
+  catch(Exceptions::LinearMatrixSolverException &e)
   {
   }
 

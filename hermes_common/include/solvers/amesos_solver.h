@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_AMESOS_SOLVER_H_
 #include "../config.h"
 #ifdef HAVE_AMESOS
-#include "linear_solver.h"
+#include "linear_matrix_solver.h"
 #include "epetra.h"
 #include "compat.h"
 #include <Amesos.h>
@@ -60,7 +60,7 @@ namespace Hermes
       EpetraVector<Scalar> *rhs;
 
       bool setup_factorization();
-      template<typename T> friend LinearSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
     };
   }
 }

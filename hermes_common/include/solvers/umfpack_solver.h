@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
 #include "config.h"
 #ifdef WITH_UMFPACK
-#include "linear_solver.h"
+#include "linear_matrix_solver.h"
 #include "matrix.h"
 #include "exceptions.h"
 
@@ -33,7 +33,7 @@ namespace Hermes
 {
   namespace Solvers
   {
-    template <typename Scalar> class HERMES_API UMFPackLinearSolver;
+    template <typename Scalar> class HERMES_API UMFPackLinearMatrixSolver;
     template <typename Scalar> class HERMES_API UMFPackIterator;
   }
 
@@ -113,7 +113,7 @@ namespace Hermes
       int *Ap;
       /// Number of non-zero entries ( =  Ap[size]).
       unsigned int nnz;
-      template <typename T> friend class Hermes::Solvers::UMFPackLinearSolver;
+      template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
       template<typename T> friend SparseMatrix<T>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
     };
@@ -122,7 +122,7 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> 
     {
-      template <typename T> friend class Hermes::Solvers::UMFPackLinearSolver;
+      template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
       template<typename T> friend SparseMatrix<T>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
     };
@@ -158,7 +158,7 @@ namespace Hermes
     protected:
       /// UMFPack specific data structures for storing the rhs.
       Scalar *v;
-      template <typename T> friend class Hermes::Solvers::UMFPackLinearSolver;
+      template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
       template<typename T> friend Vector<T>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
     };
@@ -169,14 +169,14 @@ namespace Hermes
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API UMFPackLinearSolver : public DirectSolver<Scalar> 
+    class HERMES_API UMFPackLinearMatrixSolver : public DirectSolver<Scalar> 
     {
     public:
       /// Constructor of UMFPack solver.
       /// @param[in] m pointer to matrix
       /// @param[in] rhs pointer to right hand side vector
-      UMFPackLinearSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
-      virtual ~UMFPackLinearSolver();
+      UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
+      virtual ~UMFPackLinearMatrixSolver();
       virtual bool solve();
       virtual int get_matrix_size();
     protected:
@@ -197,7 +197,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
-      template<typename T> friend LinearSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
     };
 
     /// \brief UMFPack matrix iterator. \todo document members

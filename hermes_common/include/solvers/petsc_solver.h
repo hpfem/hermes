@@ -23,7 +23,7 @@
 #define __HERMES_COMMON_PETSC_SOLVER_H_
 
 #include "matrix.h"
-#include "linear_solver.h"
+#include "linear_matrix_solver.h"
 
 #ifdef WITH_PETSC
 #include <petsc.h>
@@ -35,7 +35,7 @@ namespace Hermes
 {
   namespace Solvers
   {
-    template <typename Scalar> class PetscLinearSolver;
+    template <typename Scalar> class PetscLinearMatrixSolver;
   }
 }
 
@@ -103,7 +103,7 @@ namespace Hermes
       /// Is matrix inited (allocated)?
       bool inited;
 
-      friend class Solvers::PetscLinearSolver<Scalar>;
+      friend class Solvers::PetscLinearMatrixSolver<Scalar>;
     };
 
     /// Wrapper of PETSc vector, to store vectors used with PETSc in its native format.
@@ -136,7 +136,7 @@ namespace Hermes
       /// Is vector initiated (allocated)?
       bool inited;
 
-      friend class Solvers::PetscLinearSolver<Scalar>;
+      friend class Solvers::PetscLinearMatrixSolver<Scalar>;
     };
   }
   namespace Solvers
@@ -145,11 +145,11 @@ namespace Hermes
     ///
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API PetscLinearSolver : public DirectSolver<Scalar>
+    class HERMES_API PetscLinearMatrixSolver : public DirectSolver<Scalar>
     {
     protected:
-      PetscLinearSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
-      virtual ~PetscLinearSolver();
+      PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
+      virtual ~PetscLinearMatrixSolver();
 
       virtual bool solve();
       virtual int get_matrix_size();

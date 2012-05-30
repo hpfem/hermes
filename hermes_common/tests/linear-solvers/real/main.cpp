@@ -253,7 +253,7 @@ void build_matrix_block(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std:
 }
 
 // Test code.
-void solve(LinearSolver<double> &solver, int n) {
+void solve(LinearMatrixSolver<double> &solver, int n) {
   if (!solver.solve())
     printf("Unable to solve.\n");
 }
@@ -299,7 +299,7 @@ double* sln;
     PetscVector<double> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    PetscLinearSolver<double> solver(&mat, &rhs);
+    PetscLinearMatrixSolver<double> solver(&mat, &rhs);
     solve(solver, n);
 	sln = solver.get_sln_vector();
 #endif
@@ -310,7 +310,7 @@ double* sln;
     PetscVector<double> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    PetscLinearSolver<double> solver(&mat, &rhs);
+    PetscLinearMatrixSolver<double> solver(&mat, &rhs);
     solve(solver, n);
 	sln = solver.get_sln_vector();
 #endif
@@ -321,7 +321,7 @@ double* sln;
     UMFPackVector<double> rhs;
     build_matrix(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    UMFPackLinearSolver<double> solver(&mat, &rhs);
+    UMFPackLinearMatrixSolver<double> solver(&mat, &rhs);
     solve(solver, n);
 	sln = solver.get_sln_vector();
 #endif
@@ -332,7 +332,7 @@ double* sln;
     UMFPackVector<double> rhs;
     build_matrix_block(n, ar_mat, ar_rhs, &mat, &rhs);
 
-    UMFPackLinearSolver<double> solver(&mat, &rhs);
+    UMFPackLinearMatrixSolver<double> solver(&mat, &rhs);
     solve(solver, n);
 	sln = solver.get_sln_vector();
 #endif

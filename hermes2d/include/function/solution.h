@@ -250,6 +250,7 @@ namespace Hermes
       template<typename T> friend class Func;
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class NeighborSearch;
       template<typename T> friend HERMES_API Func<T>* init_fn(Solution<T>*fu, const int order);
       template<typename T> friend class RefinementSelectors::ProjBasedSelector;

@@ -70,27 +70,22 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
+  Hermes::Hermes2D::DiscreteProblemLinear<double> dp(&wf, &space);
 
-  // Initial coefficient vector for the Newton's method.
-  double* coeff_vec = new double[ndof];
-  memset(coeff_vec, 0, ndof*sizeof(double));
-
-  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+  // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
-
-  try
-  {
-    newton.solve(coeff_vec);
-  }
-  catch(Hermes::Exceptions::Exception e)
-  {
-    e.printMsg();
-    error("Newton's iteration failed.");
-  }
   
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  // Initialize linear solver.
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp, matrix_solver_type);
+
+  // Solve the linear problem.
+  linear_solver.solve();
+
+  // Get the solution vector.
+  double* sln_vector = linear_solver.get_sln_vector();
+
+  // Translate the solution vector into the previously initialized Solution.
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
 
   cpu_time.tick();
   printf("Duration %lf\n", cpu_time.accumulated());
@@ -122,9 +117,6 @@ int main(int argc, char* argv[])
     view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_HIGH);
     Hermes::Hermes2D::Views::View::wait();
   }
-
-  // Clean up.
-  delete [] coeff_vec;
 
   return 0;
 }

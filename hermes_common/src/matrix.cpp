@@ -24,7 +24,7 @@
 #include "error.h"
 #include "callstack.h"
 
-#include "solvers/linear_solver.h"
+#include "solvers/linear_matrix_solver.h"
 #include "solvers/umfpack_solver.h"
 #include "solvers/superlu_solver.h"
 #include "solvers/amesos_solver.h"

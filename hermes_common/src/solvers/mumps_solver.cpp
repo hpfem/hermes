@@ -730,7 +730,7 @@ namespace Hermes
       // the system matrix.
       if ( !setup_factorization() )
       {
-        throw Exceptions::LinearSolverException("LU factorization could not be completed.");
+        throw Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
       }
 
       // Specify the right-hand side (will be replaced by the solution).

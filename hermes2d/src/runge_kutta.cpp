@@ -299,7 +299,7 @@ namespace Hermes
 
         // Solve the linear system.
         if(!solver->solve())
-          throw Exceptions::LinearSolverException();
+          throw Exceptions::LinearMatrixSolverException();
 
         // Add \deltaK^{n + 1} to K^n.
         for (unsigned int i = 0; i < num_stages*ndof; i++)
