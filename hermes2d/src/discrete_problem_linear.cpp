@@ -134,9 +134,10 @@ namespace Hermes
       MatrixFormSurf<Scalar>** current_mfsurf;
       VectorFormVol<Scalar>** current_vfvol;
       VectorFormSurf<Scalar>** current_vfsurf;
-
+      
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(HermesApi.getParamValue("num_threads"))
+      int num_threads_used = HermesApi.getParamValue("num_threads");
+#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)

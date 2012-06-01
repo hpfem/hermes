@@ -211,7 +211,7 @@ namespace Hermes
     ValueException::ValueException(const char * name, std::string passed)
     {
       char * msg= new char[70+strlen(name)];
-      sprintf(msg, "Variable %s does not support value %s.", name, passed);
+      sprintf(msg, "Variable %s does not support value %s.", name, passed.c_str());
       message=msg;
     }
 

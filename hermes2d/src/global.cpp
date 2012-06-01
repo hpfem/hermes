@@ -39,7 +39,7 @@ namespace Hermes
 
     Api::Api()
     {
-      this->parameters.insert(pair<std::string, Parameter*> ("num_threads",new Parameter(NUM_THREADS)));
+      this->parameters.insert(std::pair<std::string, Parameter*> ("num_threads",new Parameter(NUM_THREADS)));
     }
 
     Api::~Api()

@@ -328,7 +328,8 @@ namespace Hermes
       Solution<Scalar>** current_rslns;
       int id_to_refine;
 #define CHUNKSIZE 1
-#pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine)
+      int num_threads_used = HermesApi.getParamValue("num_threads");
+#pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
