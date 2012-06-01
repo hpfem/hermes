@@ -179,7 +179,7 @@ namespace Hermes
       virtual ~UMFPackLinearMatrixSolver();
       virtual bool solve();
       virtual int get_matrix_size();
-    protected:
+
       /// Matrix to solve.
       UMFPackMatrix<Scalar> *m;
       /// Right hand side vector.

@@ -76,7 +76,7 @@ namespace Hermes
     template <typename Scalar>
     class MumpsMatrix : public SparseMatrix<Scalar>
     {
-    protected:
+    public:
       MumpsMatrix();
       virtual ~MumpsMatrix();
 
@@ -124,13 +124,14 @@ namespace Hermes
       unsigned int *Ap;          ///< Index to Ax/Ai, where each column starts.
 
       friend class Solvers::MumpsSolver<Scalar>;
+      template<typename T> friend SparseMatrix<T>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
     };
 
     /** \brief Vector used with MUMPS solver */
     template <typename Scalar>
     class MumpsVector : public Vector<Scalar>
     {
-    protected:
+    public:
       MumpsVector();
       virtual ~MumpsVector();
 
@@ -163,9 +164,7 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API MumpsSolver : public DirectSolver<Scalar>
     {
-    private:
-      void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
-    protected:
+    public:
       /// Constructor of MumpsSolver.
       /// @param[in] m matrix pointer
       /// @param[in] rhs right hand side pointer
@@ -175,7 +174,6 @@ namespace Hermes
       virtual bool solve();
       virtual int get_matrix_size();
 
-    protected:
       /// Matrix to solve.
       MumpsMatrix<Scalar> *m;
       /// Right hand side.
@@ -196,6 +194,8 @@ namespace Hermes
       bool reinit();
       /// True if solver is inited.
       bool inited;
+    private:
+      void mumps_c(typename mumps_type<Scalar>::mumps_struct * param);  //wrapper around dmums_c or zmumps_c
     };
   }
 }

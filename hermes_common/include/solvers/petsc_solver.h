@@ -47,7 +47,7 @@ namespace Hermes
     template <typename Scalar>
     class PetscMatrix : public SparseMatrix<Scalar>
     {
-    protected:
+    public:
       PetscMatrix();
       virtual ~PetscMatrix();
 
@@ -111,7 +111,7 @@ namespace Hermes
     template <typename Scalar>
     class PetscVector : public Vector<Scalar>
     {
-    protected:
+    public:
       PetscVector();
       virtual ~PetscVector();
 
@@ -147,14 +147,13 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API PetscLinearMatrixSolver : public DirectSolver<Scalar>
     {
-    protected:
+    public:
       PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
       virtual ~PetscLinearMatrixSolver();
 
       virtual bool solve();
       virtual int get_matrix_size();
 
-    protected:
       /// Matrix to solve.
       PetscMatrix<Scalar> *m;
       /// Right hand side vector.
