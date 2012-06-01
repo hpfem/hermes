@@ -168,6 +168,9 @@ namespace Hermes
       int num_spaces = this->slns_prev_iter.size();
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_num_dofs();
       Hermes::vector<const Space<Scalar>* > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      Hermes::vector<bool> add_dir_lift;
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        add_dir_lift.push_back(false);
       LinearSolver<Scalar> linear_solver(static_cast<DiscreteProblemLinear<Scalar>*>(this->dp), this->matrix_solver_type);
 
       // Delete solution vector if there is any.
@@ -193,7 +196,6 @@ namespace Hermes
       Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces, this->slns_prev_iter);
 
       int it = 1;
-      int vec_in_memory = 1;   // There is already one vector in the memory.
       
       while (true)
       {
@@ -207,11 +209,13 @@ namespace Hermes
         double last_iter_vec_norm = 0;
         for (int i = 0; i < ndof; i++) 
           last_iter_vec_norm += std::abs(last_iter_vector[i] * last_iter_vector[i]);
+
         last_iter_vec_norm = sqrt(last_iter_vec_norm);
+        
         double abs_error = 0;
-        for (int i = 0; i < ndof; i++) abs_error += std::abs((this->sln_vector[i] - last_iter_vector[i]) *
-          (this->sln_vector[i] - last_iter_vector[i]));
+        for (int i = 0; i < ndof; i++) abs_error += std::abs((this->sln_vector[i] - last_iter_vector[i]) * (this->sln_vector[i] - last_iter_vector[i]));
           abs_error = sqrt(abs_error);
+
         double rel_error = abs_error / last_iter_vec_norm;
 
         // Output for the user.
@@ -222,6 +226,7 @@ namespace Hermes
         if (rel_error < tol)
         {
           delete [] last_iter_vector;
+          Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
           return true;
         }
 
@@ -239,7 +244,8 @@ namespace Hermes
         it++;
 
         // Renew the last iteration vector.
-        for (int i = 0; i < ndof; i++) last_iter_vector[i] = this->sln_vector[i];
+        for (int i = 0; i < ndof; i++)
+          last_iter_vector[i] = this->sln_vector[i];
 
         // Translate the last coefficient vector into previous Solution(s).
         Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
