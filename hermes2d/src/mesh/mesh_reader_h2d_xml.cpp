@@ -421,7 +421,9 @@ namespace Hermes
                   p1 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->arc().at(curves_i).v1())->second;
                   p2 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->arc().at(curves_i).v2())->second;
 
-                  nurbs = load_arc(meshes[subdomains_i], parsed_xml_domain, curves_i, &en, p1, p2);
+                  nurbs = load_arc(meshes[subdomains_i], parsed_xml_domain, curves_i, &en, p1, p2, true);
+                  if(nurbs == NULL)
+                    continue;
                 }
               }
               else
@@ -435,7 +437,9 @@ namespace Hermes
                   p1 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->NURBS().at(curves_i - arc_count).v1())->second;
                   p2 = vertex_vertex_numbers.find(parsed_xml_domain->curves()->NURBS().at(curves_i - arc_count).v2())->second;
 
-                  nurbs = load_nurbs(meshes[subdomains_i], parsed_xml_domain, curves_i - arc_count, &en, p1, p2);
+                  nurbs = load_nurbs(meshes[subdomains_i], parsed_xml_domain, curves_i - arc_count, &en, p1, p2, true);
+                  if(nurbs == NULL)
+                    continue;
                 }
               }
 
@@ -1194,14 +1198,22 @@ namespace Hermes
     }
 
     template<typename T>
-    Nurbs* MeshReaderH2DXML::load_arc(Mesh *mesh, std::auto_ptr<T>& parsed_xml_entity, int id, Node** en, int p1, int p2)
+    Nurbs* MeshReaderH2DXML::load_arc(Mesh *mesh, std::auto_ptr<T>& parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
     {
       Nurbs* nurbs = new Nurbs;
       nurbs->arc = true;
 
       *en = mesh->peek_edge_node(p1, p2);
+
+      parsed_xml_entity.get();
+
       if (*en == NULL)
-        error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+      {
+        if(!skip_check)
+          error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+        else
+          return NULL;
+      }
 
       // degree of an arc == 2.
       nurbs->degree = 2;
@@ -1242,15 +1254,21 @@ namespace Hermes
     }
 
     template<typename T>
-    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2)
+    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
     {
       Nurbs* nurbs = new Nurbs;
       nurbs->arc = false;
 
       *en = mesh->peek_edge_node(p1, p2);
+      
       if (*en == NULL)
-        error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
-
+      {
+        if(!skip_check)
+          error("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+        else
+          return NULL;
+      }
+      
       // degree of curved edge
       nurbs->degree = parsed_xml_entity->curves()->NURBS().at(id).degree();
 
