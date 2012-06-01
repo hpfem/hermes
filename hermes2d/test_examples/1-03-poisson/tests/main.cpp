@@ -6,9 +6,8 @@
 // CAUTION: This test will fail when any changes to the shapeset
 // are made, but it is easy to fix (see below).
 
-const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
-
+const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
 
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
@@ -46,39 +45,27 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the FE problem.
-  Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
+  Hermes::Hermes2D::DiscreteProblemLinear<double> dp(&wf, &space);
 
-  // Initial coefficient vector for the Newton's method.
-  double* coeff_vec = new double[ndof];
-  memset(coeff_vec, 0, ndof*sizeof(double));
-
-  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+  // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
-  try
-  {
-    newton.solve(coeff_vec);
-  }
-  catch(Hermes::Exceptions::Exception e)
-  {
-    e.printMsg();
-    error("Newton's iteration failed.");
-  }
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  
+  // Initialize linear solver.
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp, matrix_solver_type);
+
+  // Solve the linear problem.
+  linear_solver.solve();
 
   // Actual test. The values of 'sum' depend on the
   // current shapeset. If you change the shapeset,
   // you need to correct these numbers.
   double sum = 0;
   for (int i = 0; i < ndof; i++)
-    sum += newton.get_sln_vector()[i];
-  printf("coefficient sum = %g\n", sum);
-
-  // Clean up.
-  delete [] coeff_vec;
+    sum += linear_solver.get_sln_vector()[i];
+  printf("coefficient sum = %f\n", sum);
 
   bool success = true;
-  if (std::abs(sum + 0.357318) > 1e-4) success = false;
+  if (std::abs(sum + 2761.840589) > 1e-4) success = false;
 
   if (success == true)
   {
