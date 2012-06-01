@@ -46,8 +46,6 @@ namespace Hermes
     template<typename Scalar>
     LinearSolver<Scalar>::~LinearSolver()
     {
-      if(sln_vector != NULL)
-        delete [] sln_vector;
       delete jacobian;
       delete residual;
       delete matrix_solver;
