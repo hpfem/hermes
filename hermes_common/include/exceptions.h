@@ -23,6 +23,7 @@
 #define __HERMES_COMMON_EXCEPTIONS_H_
 
 #include<stdio.h>
+#include<string>
 #include"callstack.h"
 #include<string.h>
 
@@ -132,6 +133,8 @@ namespace Hermes
         /// \param[in] min minimum allowed value.
         /// \param[in] max minimum allowed value.
         ValueException(const char * name, double value, double min, double max);
+        /// String value is not supported.
+        ValueException(const char * name, std::string passed);
         /// \return bad value of variable.
         double getValue() const;
         /// return allowed value of variable.

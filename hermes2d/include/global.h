@@ -133,10 +133,32 @@ namespace Hermes
       static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
 
       static double get_l2_norm(Vector<Scalar>* vec);
-
-      static int Hermes_omp_get_max_threads();
-
     };
+
+    /// API Class.
+    class HERMES_API Api 
+    {
+    public:
+      Api();
+      ~Api();
+    private:
+      class Parameter
+      {
+      public:
+        Parameter(int defaultVal);
+        bool userSet;
+        int userVal;
+        int defaultVal;
+      };
+
+      std::map<std::string, Parameter*> parameters;
+    public:
+      int getParamValue(std::string param);
+      void setParamValue(std::string param, int value);
+    };
+
+    // Global declarations.
+    extern HERMES_API Hermes::Hermes2D::Api HermesApi;
 
     /// Projection norms.
     /// Used in projections and adaptivity.

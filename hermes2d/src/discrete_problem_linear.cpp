@@ -82,16 +82,16 @@ namespace Hermes
           ext_functions.push_back(this->wf->vfsurf.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[Global<Scalar>::Hermes_omp_get_max_threads()];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[Global<Scalar>::Hermes_omp_get_max_threads()];
-      RefMap*** refmaps = new RefMap**[Global<Scalar>::Hermes_omp_get_max_threads()];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Global<Scalar>::Hermes_omp_get_max_threads()];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[Global<Scalar>::Hermes_omp_get_max_threads()];
-      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Global<Scalar>::Hermes_omp_get_max_threads()];
-      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Global<Scalar>::Hermes_omp_get_max_threads()];
-      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Global<Scalar>::Hermes_omp_get_max_threads()];
-      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Global<Scalar>::Hermes_omp_get_max_threads()];
-      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Global<Scalar>::Hermes_omp_get_max_threads()];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[HermesApi.getParamValue("num_threads")];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[HermesApi.getParamValue("num_threads")];
+      RefMap*** refmaps = new RefMap**[HermesApi.getParamValue("num_threads")];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[HermesApi.getParamValue("num_threads")];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[HermesApi.getParamValue("num_threads")];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[HermesApi.getParamValue("num_threads")];
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[HermesApi.getParamValue("num_threads")];
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[HermesApi.getParamValue("num_threads")];
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[HermesApi.getParamValue("num_threads")];
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[HermesApi.getParamValue("num_threads")];
 
       // Fill these structures.
       this->init_assembling(NULL, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
@@ -108,9 +108,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[Global<Scalar>::Hermes_omp_get_max_threads()];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Global<Scalar>::Hermes_omp_get_max_threads()];
-      for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
+      Traverse* trav = new Traverse[HermesApi.getParamValue("num_threads")];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[HermesApi.getParamValue("num_threads")];
+      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
       {
         for (unsigned j = 0; j < this->spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -136,7 +136,7 @@ namespace Hermes
       VectorFormSurf<Scalar>** current_vfsurf;
 
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(Global<Scalar>::Hermes_omp_get_max_threads())
+#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(HermesApi.getParamValue("num_threads"))
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
@@ -172,10 +172,10 @@ namespace Hermes
       deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
+      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < Global<Scalar>::Hermes_omp_get_max_threads(); i++)
+      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
       {
         fns[i].clear();
       }

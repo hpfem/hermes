@@ -29,6 +29,42 @@ namespace Hermes
   {
     class Transformable;
 
+    Hermes::Hermes2D::Api HermesApi;
+
+    Api::Parameter::Parameter(int defaultVal)
+    {
+      this->defaultVal = defaultVal;
+      this->userSet = false;
+    }
+
+    Api::Api()
+    {
+      this->parameters.insert(pair<std::string, Parameter*> ("num_threads",new Parameter(NUM_THREADS)));
+    }
+
+    Api::~Api()
+    {
+      this->parameters.clear();
+    }
+
+    int Api::getParamValue(std::string param)
+    {
+      if(this->parameters.find(param) == parameters.end())
+        throw new Hermes::Exceptions::ValueException("parameter name", param);
+      if(this->parameters.find(param)->second->userSet)
+        return this->parameters.find(param)->second->userVal;
+      else
+        return this->parameters.find(param)->second->defaultVal;
+    }
+
+    void Api::setParamValue(std::string param, int value)
+    {
+      if(this->parameters.find(param) == parameters.end())
+        throw new Hermes::Exceptions::ValueException("parameter name", param);
+      this->parameters.find(param)->second->userSet = true;
+      this->parameters.find(param)->second->userVal = value;
+    }
+
     template<typename Scalar>
     double Global<Scalar>::get_l2_norm(Vector<Scalar>* vec)
     {
@@ -40,12 +76,6 @@ namespace Hermes
         val = val + inc*conj(inc);
       }
       return sqrt(std::abs(val));
-    }
-
-    template<typename Scalar>
-    int Global<Scalar>::Hermes_omp_get_max_threads()
-    { 
-      return NUM_THREADS;
     }
 
     template<typename Scalar>
