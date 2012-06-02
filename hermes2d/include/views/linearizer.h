@@ -38,7 +38,7 @@ namespace Hermes
       {
       public:
 
-        Linearizer();
+        Linearizer(bool auto_max = true);
         ~Linearizer();
 
         void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);

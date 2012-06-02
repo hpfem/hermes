@@ -39,6 +39,7 @@ namespace Hermes
       {
         tris = NULL;
         edges = NULL;
+        max = -1e100;
 
         vertex_count = triangle_count = edges_count = 0;
 

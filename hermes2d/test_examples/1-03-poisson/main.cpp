@@ -26,7 +26,7 @@
 //
 // The following parameters can be changed:
 
-const bool HERMES_VISUALIZATION = false;           // Set to "false" to suppress Hermes OpenGL visualization.
+const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
@@ -100,7 +100,9 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Views::Linearizer lin;
     bool mode_3D = false;
     cpu_time.tick();
-    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, 0.5);
+
+    std::cout << lin.get_num_edges() << std::endl;
     info("Solution in VTK format saved to file %s.", "sln.vtk");
     cpu_time.tick();
 

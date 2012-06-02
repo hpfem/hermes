@@ -102,7 +102,7 @@ namespace Hermes
       double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
       double3** lin_tables[2]      = { lin_tables_tri, lin_tables_quad };
 
-      Linearizer::Linearizer() : LinearizerBase(auto_max), dmult(1.0), component(0), value_type(0)
+      Linearizer::Linearizer(bool auto_max) : LinearizerBase(auto_max), dmult(1.0), component(0), value_type(0)
       {
         verts = NULL;
         xdisp = NULL;
@@ -317,7 +317,8 @@ namespace Hermes
               for (i = 0; i < lin_np_quad[1]; i++)
               {
                 double v = val[i];
-                if (finite(v) && fabs(v) > max) max = fabs(v);
+                if (finite(v) && fabs(v) > max)
+                  max = fabs(v);
               }
 
               // This is just to make some sense.
@@ -835,7 +836,6 @@ namespace Hermes
 
             for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
               process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
-
           }
         }
 

@@ -93,7 +93,8 @@ namespace Hermes
             for (i = 0; i < lin_np_tri[1]; i++)
             {
               double m = (sqrt(sqr(xval[i]) + sqr(yval[i])));
-              if (finite(m) && fabs(m) > max) max = fabs(m);
+              if (finite(m) && fabs(m) > max)
+                max = fabs(m);
             }
 
             if (curved)
@@ -212,7 +213,8 @@ namespace Hermes
             for (i = 0; i < lin_np_quad[1]; i++)
             {
               double m = sqrt(sqr(xval[i]) + sqr(yval[i]));
-              if (finite(m) && fabs(m) > max) max = fabs(m);
+              if (finite(m) && fabs(m) > max)
+                max = fabs(m);
             }
 
             if (curved)
@@ -481,7 +483,8 @@ namespace Hermes
               double fx = xval[i];
               double fy = yval[i];
 #pragma omp critical (vectorizer_get_max)
-              if (fabs(sqrt(fx*fx + fy*fy)) > max) max = fabs(sqrt(fx*fx + fy*fy));
+              if (fabs(sqrt(fx*fx + fy*fy)) > max)
+                max = fabs(sqrt(fx*fx + fy*fy));
             }
           }
         }
