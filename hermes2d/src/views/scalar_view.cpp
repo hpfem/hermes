@@ -235,6 +235,7 @@ namespace Hermes
         lin->lock_data();
 
         lin->process_solution(sln, item, eps);
+
         update_mesh_info();
 
         // Initialize mesh nodes for displaying and selection.

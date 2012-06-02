@@ -26,7 +26,7 @@
 //
 // The following parameters can be changed:
 
-const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
+const bool HERMES_VISUALIZATION = false;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
@@ -44,7 +44,7 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
-  Hermes::Hermes2D::HermesApi.setParamValue("num_threads", 8);
+  Hermes::Hermes2D::HermesApi.setParamValue("num_threads", 16);
 
   // Time measurement.
   Hermes::TimePeriod cpu_time;
@@ -98,9 +98,11 @@ int main(int argc, char* argv[])
   {
     // Output solution in VTK format.
     Hermes::Hermes2D::Views::Linearizer lin;
-    bool mode_3D = true;
-    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
+    bool mode_3D = false;
+    cpu_time.tick();
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
     info("Solution in VTK format saved to file %s.", "sln.vtk");
+    cpu_time.tick();
 
     // Output mesh and element orders in VTK format.
     Hermes::Hermes2D::Views::Orderizer ord;
@@ -117,8 +119,10 @@ int main(int argc, char* argv[])
     // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default),
     // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows
     // considerably with more accurate representation, so use it wisely.
-    view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_HIGH);
-    Hermes::Hermes2D::Views::View::wait();
+    cpu_time.tick();
+    view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+    cpu_time.tick();
+Hermes::Hermes2D::Views::View::wait();
   }
 
   return 0;
