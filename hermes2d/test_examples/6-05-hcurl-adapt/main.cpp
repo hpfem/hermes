@@ -24,6 +24,8 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 //
 //  The following parameters can be changed:
 
+// Set to "false" to suppress Hermes OpenGL visualization.
+const bool HERMES_VISUALIZATION = false;
 // Initial polynomial degree. NOTE: The meaning is different from
 // standard continuous elements in the space H1. Here, P_INIT refers
 // to the maximum poly order of the tangential component, and polynomials
@@ -62,7 +64,7 @@ const int MESH_REGULARITY = -1;
 const double CONV_EXP = 1.0;
 // Stopping criterion for adaptivity (rel. error tolerance between the
 // reference mesh and coarse mesh solution in percent).
-const double ERR_STOP = 111.0;
+const double ERR_STOP = 1.0;
 // Adaptivity process stops when the number of degrees of freedom grows
 // over this limit. This is to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
@@ -167,9 +169,12 @@ int main(int argc, char* argv[])
     OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type);
 
     // View the coarse mesh solution and polynomial orders.
-    RealFilter real_filter(&sln);
-    v_view.show(&real_filter);
-    o_view.show(&space);
+    if(HERMES_VISUALIZATION)
+    {
+      RealFilter real_filter(&sln);
+      v_view.show(&real_filter);
+      o_view.show(&space);
+    }
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");
@@ -214,20 +219,25 @@ int main(int argc, char* argv[])
     delete [] coeff_vec;
     delete adaptivity;
     if(done == false)
+    {
       delete ref_space->get_mesh();
-    delete ref_space;
+      delete ref_space;
+    }
   }
   while (done == false);
 
   verbose("Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
-  v_view.set_title("Fine mesh solution (magnitude)");
-  RealFilter real_filter(&ref_sln);
-  v_view.show(&real_filter);
+  if(HERMES_VISUALIZATION)
+  {
+    v_view.set_title("Fine mesh solution (magnitude)");
+    RealFilter real_filter(&ref_sln);
+    v_view.show(&real_filter);
 
-  // Wait for all views to be closed.
-  Views::View::wait();
+    // Wait for all views to be closed.
+    Views::View::wait();
+  }
   return 0;
 }
 
