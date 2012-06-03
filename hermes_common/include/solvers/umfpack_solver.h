@@ -25,7 +25,6 @@
 #ifdef WITH_UMFPACK
 #include "linear_matrix_solver.h"
 #include "matrix.h"
-#include "exceptions.h"
 
 using namespace Hermes::Algebra;
 

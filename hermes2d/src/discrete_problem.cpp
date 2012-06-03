@@ -1117,7 +1117,7 @@ namespace Hermes
 
           for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
             if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) >= 1e-12)
-              if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
+              //if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
               {
                 base_fns[j]->free_fn();
                 delete base_fns[j];
@@ -1126,7 +1126,7 @@ namespace Hermes
               for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
               {
                 if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) >= 1e-12)
-                  if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+                  //if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
                   {
                     test_fns[i]->free_fn();
                     delete test_fns[i];
@@ -1150,7 +1150,7 @@ namespace Hermes
           {
             if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) < 1e-12)
               continue;
-            if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
+            //if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_vfvol[current_vfvol_i]->i]->set_active_shape(current_als[current_vfvol[current_vfvol_i]->i]->idx[i]);
 
@@ -1163,7 +1163,7 @@ namespace Hermes
           for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
           {
             if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) >= 1e-12)
-              if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
+              //if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
               {
                 test_fns[i]->free_fn();
                 delete test_fns[i];
@@ -1197,7 +1197,7 @@ namespace Hermes
               if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
 
-              if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
+              //if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_mfsurf[current_mfsurf_i]->i]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->i]->idx[i]);
 
@@ -1209,7 +1209,7 @@ namespace Hermes
             {
               if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) < 1e-12)
                 continue;
-              if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
+              //if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
               {
                 current_pss[current_mfsurf[current_mfsurf_i]->j]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->j]->idx[j]);
 
@@ -1222,7 +1222,7 @@ namespace Hermes
             for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
             {
               if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) >= 1e-12)
-                if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
+                //if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
                 {
                   base_fns[j]->free_fn();
                   delete base_fns[j];
@@ -1232,7 +1232,7 @@ namespace Hermes
             for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
             {
               if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) >= 1e-12)
-                if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
+                //if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
                 {
                   test_fns[i]->free_fn();
                   delete test_fns[i];
@@ -1257,7 +1257,7 @@ namespace Hermes
             {
               if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
-              if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
+              //if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_vfsurf[current_vfsurf_i]->i]->set_active_shape(current_als[current_vfsurf[current_vfsurf_i]->i]->idx[i]);
 
@@ -1270,7 +1270,7 @@ namespace Hermes
             for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
             {
               if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) >= 1e-12)
-                if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
+                //if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
                 {
                   test_fns[i]->free_fn();
                   delete test_fns[i];

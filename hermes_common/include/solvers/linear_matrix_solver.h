@@ -24,6 +24,7 @@
 
 #include "precond.h"
 #include "dp_interface.h"
+#include "exceptions.h"
 
 using namespace Hermes::Algebra;
 

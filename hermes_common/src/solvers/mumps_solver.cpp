@@ -710,7 +710,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool MumpsSolver<Scalar>::get_matrix_size()
+    int MumpsSolver<Scalar>::get_matrix_size()
     {
       return m->size();
     }
@@ -730,7 +730,7 @@ namespace Hermes
       // the system matrix.
       if ( !setup_factorization() )
       {
-        throw Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
+        throw Hermes::Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
       }
 
       // Specify the right-hand side (will be replaced by the solution).

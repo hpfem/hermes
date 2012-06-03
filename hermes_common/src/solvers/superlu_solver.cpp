@@ -677,7 +677,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool SuperLUSolver<Scalar>::get_matrix_size()
+    int SuperLUSolver<Scalar>::get_matrix_size()
     {
       return m->size();
     }
