@@ -89,7 +89,7 @@ namespace Hermes
 
       void LinearizerBase::add_edge(int iv1, int iv2, int marker)
       {
-#pragma omp critical(realloc_vertices)
+#pragma omp critical(realloc_edges)
         { 
           if (edges_count >= edges_size)
             edges = (int3*) realloc(edges, sizeof(int3) * (edges_size = edges_size * 3 / 2));
@@ -116,7 +116,7 @@ namespace Hermes
       void LinearizerBase::add_triangle(int iv0, int iv1, int iv2)
       {
         int index;
-#pragma omp critical(realloc_vertices)
+#pragma omp critical(realloc_triangles)
         {
           if (triangle_count >= triangle_size)
           {

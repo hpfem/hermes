@@ -76,10 +76,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    RefMap* MeshFunction<Scalar>::get_refmap()
+    RefMap* MeshFunction<Scalar>::get_refmap(bool update)
     {
-      this->update_refmap();
+      if(update)
+        this->update_refmap();
       return refmap;
+    }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::set_refmap(RefMap* refmap_to_set)
+    {
+      this->refmap = refmap_to_set;
     }
 
     template<typename Scalar>

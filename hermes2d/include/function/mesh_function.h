@@ -51,7 +51,8 @@ namespace Hermes
       virtual void set_active_element(Element* e);
 
       Mesh*   get_mesh() const;
-      RefMap* get_refmap();
+      RefMap* get_refmap(bool update = true);
+      void set_refmap(RefMap* refmap_to_set);
 
       virtual int get_edge_fn_order(int edge);
 

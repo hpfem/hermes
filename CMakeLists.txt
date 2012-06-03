@@ -177,7 +177,7 @@ project(hermes)
     endif(WIN32)
   endif(${NUM_THREADS} MATCHES -1)
   
-  MESSAGE(STATUS "Hermes will be using ${NUM_THREADS} threads for calculation.")
+  MESSAGE(STATUS "Hermes will by default be using ${NUM_THREADS} threads for calculation.")
 
 	macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
 		if (WITH_${HXD})

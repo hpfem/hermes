@@ -443,7 +443,7 @@ namespace Hermes
             if (split == 3)
             {
               fns[0]->push_transform(0);
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->push_transform(0);
               if(this->ydisp != NULL)
@@ -451,7 +451,7 @@ namespace Hermes
                   fns[2]->push_transform(0);
               process_quad(fns, iv0, mid0, mid4, mid3, level + 1, val, phx, phy, quad_indices[1]);
               fns[0]->pop_transform();
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->pop_transform();
               if(this->ydisp != NULL)
@@ -459,7 +459,7 @@ namespace Hermes
                   fns[2]->pop_transform();
 
               fns[0]->push_transform(1);
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->push_transform(1);
               if(this->ydisp != NULL)
@@ -467,7 +467,7 @@ namespace Hermes
                   fns[2]->push_transform(1);
               process_quad(fns, mid0, iv1, mid1, mid4, level + 1, val, phx, phy, quad_indices[2]);
               fns[0]->pop_transform();
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->pop_transform();
               if(this->ydisp != NULL)
@@ -475,7 +475,7 @@ namespace Hermes
                   fns[2]->pop_transform();
 
               fns[0]->push_transform(2);
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->push_transform(2);
               if(this->ydisp != NULL)
@@ -483,7 +483,7 @@ namespace Hermes
                   fns[2]->push_transform(2);
               process_quad(fns, mid4, mid1, iv2, mid2, level + 1, val, phx, phy, quad_indices[3]);
               fns[0]->pop_transform();
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->pop_transform();
               if(this->ydisp != NULL)
@@ -491,7 +491,7 @@ namespace Hermes
                   fns[2]->pop_transform();
 
               fns[0]->push_transform(3);
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->push_transform(3);
               if(this->ydisp != NULL)
@@ -499,7 +499,7 @@ namespace Hermes
                   fns[2]->push_transform(3);
               process_quad(fns, mid3, mid4, mid2, iv3, level + 1, val, phx, phy, quad_indices[4]);
               fns[0]->pop_transform();
-              if(this->ydisp != NULL)
+              if(this->xdisp != NULL)
                 if(fns[1] != fns[0])
                   fns[1]->pop_transform();
               if(this->ydisp != NULL)
@@ -518,7 +518,7 @@ namespace Hermes
                     fns[2]->push_transform(4);
                 process_quad(fns, iv0, iv1, mid1, mid3, level + 1, val, phx, phy, quad_indices[5]);
                 fns[0]->pop_transform();
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->pop_transform();
                 if(this->ydisp != NULL)
@@ -526,7 +526,7 @@ namespace Hermes
                     fns[2]->pop_transform();
 
                 fns[0]->push_transform(5);
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->push_transform(5);
                 if(this->ydisp != NULL)
@@ -534,7 +534,7 @@ namespace Hermes
                     fns[2]->push_transform(5);
                 process_quad(fns, mid3, mid1, iv2, iv3, level + 1, val, phx, phy, quad_indices[6]);
                 fns[0]->pop_transform();
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->pop_transform();
                 if(this->ydisp != NULL)
@@ -544,7 +544,7 @@ namespace Hermes
               else // v-split
               {
                 fns[0]->push_transform(6);
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->push_transform(6);
                 if(this->ydisp != NULL)
@@ -552,7 +552,7 @@ namespace Hermes
                     fns[2]->push_transform(6);
                 process_quad(fns, iv0, mid0, mid2, iv3, level + 1, val, phx, phy, quad_indices[7]);
                 fns[0]->pop_transform();
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->pop_transform();
                 if(this->ydisp != NULL)
@@ -560,7 +560,7 @@ namespace Hermes
                     fns[2]->pop_transform();
 
                 fns[0]->push_transform(7);
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->push_transform(7);
                 if(this->ydisp != NULL)
@@ -568,7 +568,7 @@ namespace Hermes
                     fns[2]->push_transform(7);
                 process_quad(fns, mid0, iv1, iv2, mid2, level + 1, val, phx, phy, quad_indices[8]);
                 fns[0]->pop_transform();
-                if(this->ydisp != NULL)
+                if(this->xdisp != NULL)
                   if(fns[1] != fns[0])
                     fns[1]->pop_transform();
                 if(this->ydisp != NULL)
@@ -703,13 +703,13 @@ namespace Hermes
         this->triangle_count = 0;
         this->edges_count = 0;
         //    reuse or allocate vertex, triangle and edge arrays.
-        this->verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
-        this->tris = (int3*) realloc(tris, sizeof(int3) * triangle_size);
-        this->edges = (int3*) realloc(edges, sizeof(int3) * edges_size);
-        this->info = (int4*) malloc(sizeof(int4) * vertex_size);
+        this->verts = (double3*) realloc(this->verts, sizeof(double3) * this->vertex_size);
+        this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
+        this->edges = (int3*) realloc(this->edges, sizeof(int3) * this->edges_size);
+        this->info = (int4*) malloc(sizeof(int4) * this->vertex_size);
         //    initialize the hash table
-        hash_table = (int*) malloc(sizeof(int) * vertex_size);
-        memset(hash_table, 0xff, sizeof(int) * vertex_size);
+        this->hash_table = (int*) malloc(sizeof(int) * this->vertex_size);
+        memset(this->hash_table, 0xff, sizeof(int) * this->vertex_size);
 
         // select the linearization quadratures
         Quad2D *old_quad, *old_quad_x = NULL, *old_quad_y = NULL;
@@ -734,15 +734,18 @@ namespace Hermes
         {
           fns[i] = new MeshFunction<double>*[3];
           fns[i][0] = sln->clone();
+          fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
           if(xdisp != NULL)
           {        
             fns[i][1] = xdisp->clone();
+            fns[i][1]->set_refmap(new RefMap);
             fns[i][1]->set_quad_2d(&g_quad_lin);
           }
           if(ydisp != NULL)
           {
             fns[i][2] = ydisp->clone();
+            fns[i][2]->set_refmap(new RefMap);
             fns[i][2]->set_quad_2d(&g_quad_lin);
           }
         }
@@ -774,7 +777,8 @@ namespace Hermes
         int state_i;
 
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master) private(state_i) num_threads(1)
+        int num_threads_used = HermesApi.getParamValue("num_threads");
+#pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
@@ -783,7 +787,7 @@ namespace Hermes
 #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
-            fns[omp_get_thread_num()][0]->set_quad_order(0, item);
+            fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
             if (val == NULL)
               error("Item not defined in the solution.");
@@ -807,8 +811,8 @@ namespace Hermes
               if (this->auto_max && finite(f) && fabs(f) > this->max)
                 this->max = fabs(f);
 
-              double x_disp = 0;
-              double y_disp = 0;
+              double x_disp = 0.;
+              double y_disp = 0.;
               if(xdisp != NULL)
               {
                 x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
