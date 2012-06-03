@@ -173,7 +173,7 @@ namespace Hermes
           if (eps >= 1.0)
           {
             // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-            split = (level < eps);
+            split = (level + 5 < eps);
           }
           else
           {
@@ -739,13 +739,13 @@ namespace Hermes
           if(xdisp != NULL)
           {        
             fns[i][1] = xdisp->clone();
-            fns[i][1]->set_refmap(new RefMap);
+            //fns[i][1]->set_refmap(new RefMap);
             fns[i][1]->set_quad_2d(&g_quad_lin);
           }
           if(ydisp != NULL)
           {
             fns[i][2] = ydisp->clone();
-            fns[i][2]->set_refmap(new RefMap);
+            //fns[i][2]->set_refmap(new RefMap);
             fns[i][2]->set_quad_2d(&g_quad_lin);
           }
         }
@@ -784,9 +784,10 @@ namespace Hermes
           for(state_i = 0; state_i < num_states; state_i++)
           {
             Traverse::State current_state;
+            
 #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-
+            
             fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
             if (val == NULL)
@@ -808,24 +809,18 @@ namespace Hermes
             for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
             {
               double f = val[i];
+#pragma omp critical (max)
               if (this->auto_max && finite(f) && fabs(f) > this->max)
                 this->max = fabs(f);
 
-              double x_disp = 0.;
-              double y_disp = 0.;
-              if(xdisp != NULL)
-              {
-                x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
+              double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
+              double y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
+              if(this->xdisp != NULL)
                 x_disp += dmult * dx[i];
-              }
-              if(ydisp != NULL)
-              {
-                y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
-
+              if(this->ydisp != NULL)
                 y_disp += dmult * dy[i];
-              }
 
-              iv[i] = this->get_vertex(-rand(), -rand(), x_disp, y_disp, f);
+              iv[i] = this->get_vertex(-rand()-omp_get_thread_num()*17*rand(), -rand()-omp_get_thread_num()*rand(), x_disp, y_disp, f);
             }
 
             // we won't bother calculating physical coordinates from the refmap if this is not a curved element
@@ -896,8 +891,13 @@ namespace Hermes
         int i = this->hash_table[index];
         while (i >= 0)
         {
-          if (this->info[i][0] == p1 && this->info[i][1] == p2 &&
-            (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-4)) return i;
+          if (
+            this->info[i][0] == p1 && this->info[i][1] == p2 && 
+            (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-4) &&
+            (fabs(x - verts[i][0]) < 1e-6) && 
+            (fabs(y - verts[i][1]) < 1e-6)
+            ) 
+            return i;
           // note that we won't return a vertex with a different value than the required one;
           // this takes care for discontinuities in the solution, where more vertices
           // with different values will be created
