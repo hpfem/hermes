@@ -63,8 +63,7 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
     {
-      _F_
-        // Obtain the number of degrees of freedom.
+      // Obtain the number of degrees of freedom.
         int ndof = this->dp->get_num_dofs();
 
       // If coeff_vec == NULL then create a zero vector.

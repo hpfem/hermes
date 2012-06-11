@@ -24,6 +24,7 @@
 #include "mesh/refmap.h"
 #include "function/solution.h"
 #include "neighbor.h"
+#include "api2d.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -52,8 +53,7 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
-      _F_;
-
+      
       this->current_mat = mat;
       this->current_rhs = rhs;
       this->current_force_diagonal_blocks = force_diagonal_blocks;
@@ -82,16 +82,16 @@ namespace Hermes
           ext_functions.push_back(this->wf->vfsurf.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[HermesApi.getParamValue("num_threads")];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[HermesApi.getParamValue("num_threads")];
-      RefMap*** refmaps = new RefMap**[HermesApi.getParamValue("num_threads")];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[HermesApi.getParamValue("num_threads")];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[HermesApi.getParamValue("num_threads")];
-      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[HermesApi.getParamValue("num_threads")];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
+      RefMap*** refmaps = new RefMap**[Hermes2DApi.getParamValue("num_threads")];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
 
       // Fill these structures.
       this->init_assembling(NULL, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
@@ -108,9 +108,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[HermesApi.getParamValue("num_threads")];
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.getParamValue("num_threads")];
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned j = 0; j < this->spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -136,7 +136,7 @@ namespace Hermes
       VectorFormSurf<Scalar>** current_vfsurf;
       
 #define CHUNKSIZE 1
-      int num_threads_used = HermesApi.getParamValue("num_threads");
+      int num_threads_used = Hermes2DApi.getParamValue("num_threads");
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -173,10 +173,10 @@ namespace Hermes
       deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         fns[i].clear();
       }
@@ -201,7 +201,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemLinear<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
-      _F_;
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
 
       double block_scaling_coef = this->block_scaling_coeff(form);

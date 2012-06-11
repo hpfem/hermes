@@ -30,7 +30,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -41,7 +41,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -60,7 +60,7 @@ namespace Hermes
         {
           result = const_coeff * int_e_f<double, Scalar>(n, wt, u, v);
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -74,7 +74,7 @@ namespace Hermes
         {
           result = const_coeff * int_e_f<Ord, Ord>(n, wt, u, v);
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -95,7 +95,7 @@ namespace Hermes
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       };
 
       template<typename Scalar>
@@ -108,7 +108,7 @@ namespace Hermes
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE)
           this->spline_coeff = new CubicSpline(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -127,7 +127,7 @@ namespace Hermes
         {
           result = const_coeff * int_curl_e_curl_f<double, Scalar>(n, wt, u, v);
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -141,7 +141,7 @@ namespace Hermes
         {
           result = const_coeff * int_curl_e_curl_f<Ord, Ord>(n, wt, u, v);
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -162,9 +162,9 @@ namespace Hermes
       {
         // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
         if (f_coeff1 == HERMES_DEFAULT_FUNCTION) this->function_coeff1 = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -177,9 +177,9 @@ namespace Hermes
       {
         // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
         if (f_coeff1 == HERMES_DEFAULT_FUNCTION) this->function_coeff1 = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -225,7 +225,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant functions in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -237,7 +237,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant functions in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -259,7 +259,7 @@ namespace Hermes
               u_ext[idx_i]->val1[i] * v->val1[i]);
           }
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return const_coeff * result;
       }
@@ -276,7 +276,7 @@ namespace Hermes
             result += wt[i] * function_coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -297,7 +297,7 @@ namespace Hermes
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       };
 
       template<typename Scalar>
@@ -309,7 +309,7 @@ namespace Hermes
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -335,7 +335,7 @@ namespace Hermes
               * (u_prev->curl[i] * conj(v->curl[i]));
           }
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -357,7 +357,7 @@ namespace Hermes
               * (u_prev->curl[i] * conj(v->curl[i]));
           }
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -377,7 +377,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant functions in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -388,7 +388,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant functions in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -406,7 +406,7 @@ namespace Hermes
         {
           result = const_coeff * int_e_tau_f_tau<double, Scalar>(n, wt, u, v, e);
         }
-        else error("Axisymmetric Hcurl forms not implemnted yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemnted yet.");
 
         return result;
       }
@@ -420,7 +420,7 @@ namespace Hermes
         {
           result = const_coeff * int_e_tau_f_tau<Ord, Ord>(n, wt, u, v, e);
         }
-        else error("Axisymmetric Hcurl forms not implemnted yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemnted yet.");
 
         return result;
       }
@@ -440,7 +440,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant functions in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -451,7 +451,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant functions in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -472,7 +472,7 @@ namespace Hermes
             conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
           result *= const_coeff;
         }
-        else error("Axisymmetric Hcurl forms not implemnted yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemnted yet.");
 
         return result;
       }
@@ -488,7 +488,7 @@ namespace Hermes
             result += wt[i] * (  (u_ext[0]->val0[i] * e->tx[i] + u_ext[0]->val1[i] * e->ty[i]) *
             conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
         }
-        else error("Axisymmetric Hcurl forms not implemnted yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemnted yet.");
 
         return result;
       }
@@ -508,7 +508,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -519,7 +519,7 @@ namespace Hermes
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if (f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
-        else error("Nonconstant coefficients in Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
       }
 
       template<typename Scalar>
@@ -540,7 +540,7 @@ namespace Hermes
             result += wt[i] * conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]);
           }
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }
@@ -557,7 +557,7 @@ namespace Hermes
             result += wt[i] * conj(v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]);
           }
         }
-        else error("Axisymmetric Hcurl forms not implemented yet.");
+        else throw new Hermes::Exceptions::Exception("Axisymmetric Hcurl forms not implemented yet.");
 
         return result;
       }

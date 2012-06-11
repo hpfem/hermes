@@ -36,7 +36,7 @@ namespace Hermes
       lsize = 0;
 
       // set uniform poly order in elements
-      if (p_init < 0) error("P_INIT must be >= 0 in an L2 space.");
+      if (p_init < 0) throw new Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -47,7 +47,6 @@ namespace Hermes
     L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
-      _F_;
       init(shapeset, p_init);
     }
 
@@ -76,8 +75,7 @@ namespace Hermes
     template<typename Scalar>
     void L2Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
-      _F_;
-
+      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -103,7 +101,7 @@ namespace Hermes
         this->own_shapeset = false;
       }
       else
-        error("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
+        throw new Hermes::Exceptions::Exception("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>
@@ -140,9 +138,9 @@ namespace Hermes
     {
       // some checks
       if (e->id >= this->esize || this->edata[e->id].order < 0)
-        error("Uninitialized element order (id = #%d).", e->id);
+        throw new Hermes::Exceptions::Exception("Uninitialized element order (id = #%d).", e->id);
       if (!this->is_up_to_date())
-        error("The space is out of date. You need to update it with assign_dofs()"
+        throw new Hermes::Exceptions::Exception("The space is out of date. You need to update it with assign_dofs()"
         " any time the mesh changes.");
 
       // add bubble functions to the assembly list
@@ -177,7 +175,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      error("Method get_bc_projection() called from an L2Space.");
+      throw new Hermes::Exceptions::Exception("Method get_bc_projection() called from an L2Space.");
       return NULL;
     }
 

@@ -1,4 +1,4 @@
-// This file is part of HermesCommon
+// This file is part of Hermes2D
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
 // Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
@@ -16,25 +16,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file c99_functions.h
-\brief File containing definitions from the C99 standard that are missing in MSVC.
-*/
-#ifndef __HERMES_COMMON_C99_FUNCTIONS_H
-#define __HERMES_COMMON_C99_FUNCTIONS_H
 
-#include "compat.h"
-#ifdef IMPLEMENT_C99
+#include "callstack.h"
+#include "api.h"
+#include "common.h"
+#include "exceptions.h"
+#include "api2d.h"
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    Api2D::Api2D() : Api(false) 
+    {
+      init();
+    }
 
-/// \brief Not-a-number constant.
-#define NAN 0x7fffffffffffffffL;
+    void Api2D::init()
+    {
+      this->parameters.insert(std::pair<std::string, Parameter*> ("num_threads",new Parameter(NUM_THREADS)));
+    }
 
-/// \brief The exp2 function from C99 standard.
-HERMES_API double exp2(double x);
-/// \brief The log2 function from C99 standard.
-HERMES_API double log2(double x);
-/// \brief The cbrt function from C99 standard.
-HERMES_API double cbrt(double x);
-
-#endif /* IMPLEMENT_C99 */
-
-#endif
+    Hermes::Hermes2D::Api2D Hermes2DApi;
+  }
+}

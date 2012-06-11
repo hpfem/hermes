@@ -97,7 +97,6 @@ namespace Hermes
     ///
     static int find_position(int *Ai, int Alen, int idx)
     {
-      _F_;
       assert (idx >= 0);
 
       register int lo = 0, hi = Alen - 1, mid;
@@ -120,7 +119,6 @@ namespace Hermes
     template<typename Scalar>
     SuperLUMatrix<Scalar>::SuperLUMatrix()
     {
-      _F_;
       this->size = 0; nnz = 0;
       Ax = NULL;
       Ap = NULL;
@@ -130,14 +128,12 @@ namespace Hermes
     template<typename Scalar>
     SuperLUMatrix<Scalar>::~SuperLUMatrix()
     {
-      _F_;
       this->free();
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::alloc()
     {
-      _F_;
       assert(this->pages != NULL);
 
       // Initialize the arrays Ap and Ai.
@@ -168,7 +164,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::free()
     {
-      _F_;
       nnz = 0;
       delete [] Ap; Ap = NULL;
       delete [] Ai; Ai = NULL;
@@ -178,7 +173,6 @@ namespace Hermes
     template<typename Scalar>
     Scalar SuperLUMatrix<Scalar>::get(unsigned int m, unsigned int n)
     {
-      _F_;
       // Find m-th row in the n-th column.
       int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Return 0 if the entry has not been found.
@@ -191,21 +185,19 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::zero()
     {
-      _F_;
       memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
-      _F_;
       if (v != 0.0) // ignore zero values.
       {
         // Find m-th row in the n-th column.
         int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
         // Make sure we are adding to an existing non-zero entry.
         if (pos < 0)
-          error("Sparse matrix entry not found");
+          throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
         // Add offset to the n-th column.
         pos += Ap[n];
         Ax[pos] += v;
@@ -226,7 +218,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
     {
-      _F_;
       for (unsigned int i = 0; i < m; i++)       // rows
         for (unsigned int j = 0; j < n; j++)     // cols
           if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
@@ -238,7 +229,6 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     {
-      _F_;
       // TODO
       switch (fmt)
       {
@@ -288,24 +278,21 @@ namespace Hermes
     template<typename Scalar>
     double SuperLUMatrix<Scalar>::get_fill_in() const
     {
-      _F_;
       return nnz / (double) (this->size * this->size);
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_matrix(SuperLUMatrix<Scalar>* mat)
     {
-      _F_;
       add_as_block(0, 0, mat);
     }
 
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, SuperLUMatrix<Scalar>* mat)
     {
-      _F_;
       int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof)
-        error("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
+        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
       {
@@ -322,7 +309,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, SuperLUMatrix<Scalar>* mat)
     {
-      _F_;
       int idx;
       for (unsigned int col = 0;col<mat->get_size();col++)
       {
@@ -330,7 +316,7 @@ namespace Hermes
         {
           idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
           if (idx<0)
-            error("Sparse matrix entry not found");
+            throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
           idx += Ap[col + j];
           Ax[idx] +=mat->Ax[n];
         }
@@ -342,7 +328,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
     {
-      _F_;
       for(unsigned int i = 0;i<this->size;i++)
       {
         vector_out[i] = 0;
@@ -360,7 +345,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::multiply_with_Scalar(Scalar value)
     {
-      _F_;
       int n = nnz;
       for(int i = 0;i<n;i++)
       {
@@ -372,7 +356,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
     {
-      _F_;
       this->nnz = nnz;
       this->size = size;
       this->Ap = new unsigned int[this->size + 1]; assert(this->Ap != NULL);
@@ -394,7 +377,6 @@ namespace Hermes
     template<typename Scalar>
     SuperLUMatrix<Scalar>* SuperLUMatrix<Scalar>::duplicate()
     {
-      _F_;
       SuperLUMatrix<Scalar> * nmat = new SuperLUMatrix<Scalar>();
 
       nmat->nnz = nnz;
@@ -419,7 +401,6 @@ namespace Hermes
     template<typename Scalar>
     SuperLUVector<Scalar>::SuperLUVector()
     {
-      _F_;
       v = NULL;
       this->size = 0;
     }
@@ -427,14 +408,12 @@ namespace Hermes
     template<typename Scalar>
     SuperLUVector<Scalar>::~SuperLUVector()
     {
-      _F_;
       this->free();
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::alloc(unsigned int n)
     {
-      _F_;
       this->free();
       this->size = n;
       v = new Scalar[n];
@@ -444,21 +423,18 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUVector<Scalar>::zero()
     {
-      _F_;
       memset(v, 0, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::change_sign()
     {
-      _F_;
       for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::free()
     {
-      _F_;
       delete [] v;
       v = NULL;
       this->size = 0;
@@ -467,21 +443,18 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUVector<Scalar>::set(unsigned int idx, Scalar y)
     {
-      _F_;
       v[idx] = y;
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::add(unsigned int idx, Scalar y)
     {
-      _F_;
       v[idx] += y;
     }
 
     template<typename Scalar>
     void SuperLUVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
     {
-      _F_;
       for (unsigned int i = 0; i < n; i++)
       {
         v[idx[i]] += y[i];
@@ -516,7 +489,6 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
     {
-      _F_;
       switch (fmt)
       {
       case DF_NATIVE:
@@ -564,7 +536,6 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::check_status(unsigned int info)
     {
-      _F_;
       if (info == 0)
       {
         // Success.
@@ -597,7 +568,6 @@ namespace Hermes
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
       , local_Ax(NULL), local_rhs(NULL)
     {
-      _F_;
       R = NULL;
       C = NULL;
       perm_r = NULL;
@@ -665,7 +635,6 @@ namespace Hermes
     template<typename Scalar>
     SuperLUSolver<Scalar>::~SuperLUSolver()
     {
-      _F_;
       free_factorization_data();
       free_matrix();
       free_rhs();
@@ -685,7 +654,6 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::solve()
     {
-      _F_;
       assert(m != NULL);
       assert(rhs != NULL);
 
@@ -768,7 +736,7 @@ namespace Hermes
       SuperMatrix X;
       typename SuperLuType<Scalar>::Scalar *x;
       if ( !(x = new typename SuperLuType<Scalar>::Scalar[m->size]) )
-        error("Malloc fails for x[].");
+        throw new Hermes::Exceptions::Exception("Malloc fails for x[].");
       create_dense_matrix(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
 
       // Solve the system.
@@ -860,7 +828,6 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::setup_factorization()
     {
-      _F_;
       unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
       if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
       {
@@ -895,15 +862,15 @@ namespace Hermes
 
         // Allocate the row/column reordering vectors.
         if ( !(perm_c = intMalloc(m->size)) )
-          error("Malloc fails for perm_c[].");
+          throw new Hermes::Exceptions::Exception("Malloc fails for perm_c[].");
         if ( !(perm_r = intMalloc(m->size)) )
-          error("Malloc fails for perm_r[].");
+          throw new Hermes::Exceptions::Exception("Malloc fails for perm_r[].");
 
         // Allocate vectors with row/column scaling factors.
         if ( !(R = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
-          error("SUPERLU_MALLOC fails for R[].");
+          throw new Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for R[].");
         if ( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
-          error("SUPERLU_MALLOC fails for C[].");
+          throw new Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for C[].");
 
 #ifdef SLU_MT
         options.fact = EQUILIBRATE;
@@ -914,7 +881,7 @@ namespace Hermes
         // Allocate additional structures used by the driver routine of sequential SuperLU.
         // Elimination tree is contained in the options structure in SuperLU_MT.
         if ( !(etree = intMalloc(m->size)) )
-          error("Malloc fails for etree[].");
+          throw new Hermes::Exceptions::Exception("Malloc fails for etree[].");
 
         options.Fact = DOFACT;
 #endif
@@ -965,7 +932,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_matrix()
     {
-      _F_;
       if (has_A)
       {
         Destroy_SuperMatrix_Store(&A);
@@ -976,7 +942,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_rhs()
     {
-      _F_;
       if (has_B)
       {
         Destroy_SuperMatrix_Store(&B);
@@ -987,7 +952,6 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_factorization_data()
     {
-      _F_;
       if (inited)
       {
 #ifdef SLU_MT

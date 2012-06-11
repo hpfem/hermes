@@ -49,7 +49,6 @@ void Hermes::Error::h_exit(int line, const char *func, const char *file, char co
   va_start(params, fmt);
   report_w_loc("FATAL: ", file, line, func, fmt, params);
   va_end(params);
-  callstack.dump();
   exit(128);
 }
 
@@ -80,7 +79,6 @@ void Hermes::Error::h_mem_check(int line, const char *func, const char *file, vo
   {
     //report_w_loc("FATAL: ", file, line, func, "Out of memory.", params);
     report_w_loc("FATAL: ", file, line, func, "Out of memory.", NULL);
-    callstack.dump();
     exit(EXIT_FAILURE);
   }
 }

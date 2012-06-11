@@ -22,10 +22,8 @@
 #ifndef __HERMES_COMMON_EXCEPTIONS_H_
 #define __HERMES_COMMON_EXCEPTIONS_H_
 
-#include<stdio.h>
-#include<string>
-#include"callstack.h"
-#include<string.h>
+#include "common.h"
+#include "compat.h"
 
 namespace Hermes
 {
@@ -39,7 +37,7 @@ namespace Hermes
         Exception();
         /// Init exception with message.
         /// \param[in] msg message
-        Exception(const char * msg);
+        Exception(const char * msg, ...);
         /// \brief print error message to stderr
         void printMsg() const;
         /// \brief get pointer to error message
@@ -49,8 +47,6 @@ namespace Hermes
         virtual ~Exception(){};
       protected:
         const char * message;
-      private:
-        const char * func;
     };
 
     /// \brief Null parameter exception.
@@ -118,7 +114,7 @@ namespace Hermes
         LinearMatrixSolverException(const LinearMatrixSolverException & e);
     };
 
-    /// \brief Value is out of allowed range
+    /// \brief Numeric value is out of allowed range
     class HERMES_API ValueException : public Exception
     {
       public:

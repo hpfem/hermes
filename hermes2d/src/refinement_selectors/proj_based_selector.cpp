@@ -110,8 +110,6 @@ namespace Hermes
       template<typename Scalar>
       double* ProjBasedSelector<Scalar>::TrfShapeExp::operator[](int inx_expansion) 
       {
-        assert_msg(values != NULL, "Function expansions not allocated.");
-        assert_msg(inx_expansion < num_expansion, "Index (%d) of an expansion out of range [0, %d]", inx_expansion, num_expansion-1);
         return values[inx_expansion];
       }
 
@@ -164,7 +162,7 @@ namespace Hermes
               break;
 
             default:
-              error("Unknown split type \"%d\" at candidate %d", c.split, i);
+              throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
             }
           }
           else { //quad
@@ -198,7 +196,7 @@ namespace Hermes
               break;
 
             default:
-              error("Unknown split type \"%d\" at candidate %d", c.split, i);
+              throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
             }
           }
 
@@ -212,7 +210,7 @@ namespace Hermes
           case H2D_REFINEMENT_ANISO_H:
           case H2D_REFINEMENT_ANISO_V: c.error *= error_weight_aniso; break;
           case H2D_REFINEMENT_P: c.error *= error_weight_p; break;
-          default: error("Unknown split type \"%d\" at candidate %d", c.split, i);
+          default: throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
           }
 
           //calculate statistics
@@ -231,10 +229,6 @@ namespace Hermes
       template<typename Scalar>
       void ProjBasedSelector<Scalar>::calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const  typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4])
       {
-        assert_msg(info_h.is_empty() || (H2D_GET_H_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_h.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of H-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_h.max_quad_order), H2D_GET_V_ORDER(info_h.max_quad_order));
-        assert_msg(info_p.is_empty() || (H2D_GET_H_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_p.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of P-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_p.max_quad_order), H2D_GET_V_ORDER(info_p.max_quad_order));
-        assert_msg(info_aniso.is_empty() || (H2D_GET_H_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER && H2D_GET_V_ORDER(info_aniso.max_quad_order) <= H2DRS_MAX_ORDER), "Maximum allowed order of a son of ANISO-candidate is %d but order (H:%d, V:%d) requested.", H2DRS_MAX_ORDER, H2D_GET_H_ORDER(info_aniso.max_quad_order), H2D_GET_V_ORDER(info_aniso.max_quad_order));
-
         ElementMode2D mode = e->get_mode();
 
         // select quadrature, obtain integration points and weights
@@ -252,7 +246,7 @@ namespace Hermes
         if(base_element->active)
         {
           info("Have you calculated element errors twice with solutions_for_adaptivity == true?");
-          error("Program is aborting based on a failed assertion in ProjBasedSelector<Scalar>::calc_projection_errors().");
+          throw new Hermes::Exceptions::Exception("Program is aborting based on a failed assertion in ProjBasedSelector<Scalar>::calc_projection_errors().");
         };
         for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
         {
@@ -399,7 +393,8 @@ namespace Hermes
             typename OptimumSelector<Scalar>::ShapeInx& shape = full_shape_indices[inx_shape];
             if (order_h >= shape.order_h && order_v >= shape.order_v)
             {
-              assert_msg(num_shapes < max_num_shapes, "more shapes than predicted, possible incosistency");
+              if(num_shapes >= max_num_shapes)
+                throw new Exceptions::Exception("more shapes than predicted, possible incosistency");
               shape_inxs[num_shapes] = shape.inx;
               num_shapes++;
             }

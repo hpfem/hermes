@@ -40,7 +40,6 @@ namespace Hermes
       have_coarse_solutions(false),
       have_reference_solutions(false)
     {
-      _F_;
       // sanity check
       if (proj_norms.size() > 0 && spaces.size() != proj_norms.size())
         throw Exceptions::LengthException(1, 2, spaces.size(), proj_norms.size());
@@ -73,7 +72,7 @@ namespace Hermes
           case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
           case HERMES_HDIV_SPACE: proj_norms.push_back(HERMES_HDIV_NORM); break;
           case HERMES_L2_SPACE: proj_norms.push_back(HERMES_L2_NORM); break;
-          default: error("Unknown space type in Adapt<Scalar>::Adapt().");
+          default: throw new Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
           }
         }
       }
@@ -102,7 +101,6 @@ namespace Hermes
       have_coarse_solutions(false),
       have_reference_solutions(false)
     {
-      _F_;
       if (space == NULL) throw Exceptions::NullException(1);
       spaces.push_back(space);
 
@@ -129,7 +127,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-        default: error("Unknown space type in Adapt<Scalar>::Adapt().");
+        default: throw new Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
         }
       }
 
@@ -159,8 +157,8 @@ namespace Hermes
     bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double thr, int strat,
       int regularize, double to_be_processed)
     {
-      _F_;
-      error_if(!have_errors, "element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
+      if(!have_errors)
+        throw new Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
 
       if (refinement_selectors.empty())
         throw Exceptions::NullException(1);
@@ -292,9 +290,9 @@ namespace Hermes
       }
 
       // RefinementSelectors cloning.
-      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[HermesApi.getParamValue("num_threads")];
+      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[Hermes::Hermes2D::Hermes2DApi.getParamValue("num_threads")];
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
@@ -312,9 +310,9 @@ namespace Hermes
       }
 
       // Solution cloning.
-      Solution<Scalar>*** rslns = new Solution<Scalar>**[HermesApi.getParamValue("num_threads")];
+      Solution<Scalar>*** rslns = new Solution<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         rslns[i] = new Solution<Scalar>*[this->num];
         for (int j = 0; j < this->num; j++)
@@ -328,7 +326,7 @@ namespace Hermes
       Solution<Scalar>** current_rslns;
       int id_to_refine;
 #define CHUNKSIZE 1
-      int num_threads_used = HermesApi.getParamValue("num_threads");
+      int num_threads_used = Hermes2DApi.getParamValue("num_threads");
 #pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -366,7 +364,7 @@ namespace Hermes
       }
       delete [] global_refinement_selectors;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         if(rslns[i] != NULL)
         {
@@ -479,7 +477,7 @@ namespace Hermes
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
 
-      error("hdiv error form not implemented yet in hdiv.h.");
+      throw new Hermes::Exceptions::Exception("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
       SolFunctionDomain result = SolFunctionDomain(0);
@@ -519,7 +517,7 @@ namespace Hermes
       case HERMES_HDIV_NORM:
         return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       default:
-        error("Unknown projection type");
+        throw new Hermes::Exceptions::Exception("Unknown projection type");
         return 0.0;
       }
     }
@@ -542,7 +540,7 @@ namespace Hermes
       case HERMES_HDIV_NORM:
         return hdiv_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
       default:
-        error("Unknown projection type");
+        throw new Hermes::Exceptions::Exception("Unknown projection type");
         return Hermes::Ord();
       }
     }
@@ -551,7 +549,6 @@ namespace Hermes
     double Adapt<Scalar>::calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      _F_;
       if (num != 1)
         throw Exceptions::LengthException(1, 1, num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
@@ -562,7 +559,6 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      _F_;
       if (slns.size() != num)
         throw Exceptions::LengthException(1, slns.size(), num);
       if (rslns.size() != num)
@@ -574,7 +570,6 @@ namespace Hermes
     double Adapt<Scalar>::calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      _F_;
       if (num != 1)
         throw Exceptions::LengthException(1, 1, num);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
@@ -585,7 +580,6 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      _F_;
       if (slns.size() != num)
         throw Exceptions::LengthException(1, slns.size(), num);
       if (rslns.size() != num)
@@ -597,7 +591,6 @@ namespace Hermes
     bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat,
       int regularize, double to_be_processed)
     {
-      _F_;
       if (refinement_selector==NULL)
         throw Exceptions::NullException(1);
       Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
@@ -684,7 +677,8 @@ namespace Hermes
     template<typename Scalar>
     double Adapt<Scalar>::get_element_error_squared(int component, int id) const
     {
-      error_if(!have_errors, "Element errors have to be calculated first, call calc_err_est().");
+      if(!have_errors)
+        throw new Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
       return errors[component][id];
     };
 
@@ -771,8 +765,10 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::set_error_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
     {
-      error_if(i < 0 || i >= this->num || j < 0 || j >= this->num,
-        "invalid component number (%d, %d), max. supported components: %d", i, j, H2D_MAX_COMPONENTS);
+      if(form->i < 0 || form->i >= this->num)
+        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
+      if(form->j < 0 || form->j >= this->num)
+        throw new Exceptions::ValueException("component number", form->j, 0, this->num);
 
       // FIXME: Memory leak - always for i == j (see the constructor), may happen for i != j
       //        if user does not delete previously set error forms by himself.
@@ -792,8 +788,10 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::set_norm_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
     {
-      error_if(i < 0 || i >= this->num || j < 0 || j >= this->num,
-        "invalid component number (%d, %d), max. supported components: %d", i, j, H2D_MAX_COMPONENTS);
+      if(form->i < 0 || form->i >= this->num)
+        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
+      if(form->j < 0 || form->j >= this->num)
+        throw new Exceptions::ValueException("component number", form->j, 0, this->num);
 
       norm_form[i][j] = form;
     }
@@ -932,7 +930,6 @@ namespace Hermes
     double Adapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
-      _F_;
       int i, j;
 
       int n = slns.size();
@@ -1027,7 +1024,7 @@ namespace Hermes
             component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else
           {
-            error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+            throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
             return -1.0;
           }
         }
@@ -1085,7 +1082,7 @@ namespace Hermes
         return sqrt(total_error / total_norm);
       else
       {
-        error("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+        throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
     }
@@ -1116,8 +1113,6 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::fill_regular_queue(Mesh** meshes)
     {
-      assert_msg(num_act_elems > 0, "Number of active elements (%d) is invalid.", num_act_elems);
-
       //prepare space for queue (it is assumed that it will only grow since we can just split)
       regular_queue.clear();
       if (num_act_elems < (int)regular_queue.capacity())

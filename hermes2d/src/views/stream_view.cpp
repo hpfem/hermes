@@ -58,7 +58,7 @@ namespace Hermes
         if(this->vec == NULL)
           this->vec = new Vectorizer;
         if (xsln == ysln)
-          error("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
+          throw new Hermes::Exceptions::Exception("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
         show(xsln, ysln, marker, step, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 
@@ -295,7 +295,7 @@ namespace Hermes
         if (x1 > x2) return 1;
         if (x1 == x2 && y1 > y2) return 1;
         if (x1 == x2 && y1 == y2) return 0;
-        error("internal error: reached end of non-void function");
+        throw new Hermes::Exceptions::Exception("internal error: reached end of non-void function");
         return 0;
       }
 
@@ -420,17 +420,14 @@ namespace Hermes
         Hermes::TimePeriod cpu_time;
         root = new Node;
         build_tree();
-        report_time("Time to build searching tree: %g s", cpu_time.tick().last());
 
         double2* initial_points;
         find_initial_points(marker, step, initial_points);
-        report_time("Time to find initial points: %g s", cpu_time.tick().last());
 
         streamlines = (double2**) malloc(sizeof(double2*) * (num_stream));
         streamlength = (int*) malloc(sizeof(int) * (num_stream));
         for (int i = 0; i < num_stream; i++)
           streamlength[i] =  create_streamline(initial_points[i][0], initial_points[i][1], i);
-        report_time("Time to create streamlines: %g s", cpu_time.tick().last());
 
         delete [] initial_points;
 
@@ -447,14 +444,13 @@ namespace Hermes
       void StreamView::add_streamline(double x, double y)
       {
         if (root == NULL)
-          error("Function add_streamline must be called after StreamView::show().");
+          throw new Hermes::Exceptions::Exception("Function add_streamline must be called after StreamView::show().");
         Hermes::TimePeriod cpu_time;
         streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
         streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
         streamlength[num_stream] = create_streamline(x, y, num_stream);
         num_stream++;
         refresh();
-        report_time("Time to create streamline: %g s", cpu_time.tick().last());
       }
 
       static int n_vert(int i) { return (i + 1) % 3; }
@@ -606,7 +602,6 @@ namespace Hermes
           streamlength[num_stream] = create_streamline(untransform_x(x), untransform_y(y), num_stream);
           num_stream++;
           refresh();
-          report_time("Time to create streamline: %g s", cpu_time.tick().last());
         }
       }
 

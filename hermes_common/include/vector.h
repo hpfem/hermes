@@ -85,16 +85,16 @@ namespace Hermes
         if ((*this)[i] == x)
           return i;
       }
-      throw std::runtime_error("Index not found");
+      throw std::runtime_throw new Hermes::Exceptions::GenericException("Index not found");
     }
 
     // Returns maximum of the vector<T> in case of T == int.
     int max() {
       if (this->size() == 0)
-        throw std::runtime_error("Empty vector");
+        throw std::runtime_throw new Hermes::Exceptions::GenericException("Empty vector");
       int m;
       if(typeid((*this)[0]) != typeid(m))
-        throw std::runtime_error("vector<T>::max() called and T != int.");
+        throw std::runtime_throw new Hermes::Exceptions::GenericException("vector<T>::max() called and T != int.");
       m = (int)(*this)[0];
       for (unsigned int i=1; i < this->size(); i++)
         if ((int)(*this)[i] > m)
@@ -105,10 +105,10 @@ namespace Hermes
     // Returns minimum of the vector<T> in case of T == int.
     int min() {
       if (this->size() == 0)
-        throw std::runtime_error("Empty vector");
+        throw std::runtime_throw new Hermes::Exceptions::GenericException("Empty vector");
       int m;
       if(typeid((*this)[0]) != typeid(m))
-        throw std::runtime_error("vector<T>::max() called and T != int.");
+        throw std::runtime_throw new Hermes::Exceptions::GenericException("vector<T>::max() called and T != int.");
       m = (int)(*this)[0];
       for (unsigned int i=1; i < this->size(); i++)
         if ((int)(*this)[i] < m)
@@ -121,13 +121,13 @@ namespace Hermes
     int find_index(int x, bool throw_exception=true) {
       if (this->size() == 0) {
         if (throw_exception) {
-          throw std::runtime_error("Empty vector");
+          throw std::runtime_throw new Hermes::Exceptions::GenericException("Empty vector");
         }
         else return -1;
       }
       int idx;
       if(typeid((*this)[0]) != typeid(idx))
-        throw std::runtime_error("vector<T>::find_index() called and T != int.");
+        throw std::runtime_throw new Hermes::Exceptions::GenericException("vector<T>::find_index() called and T != int.");
 
       if (this->_permut.size() == 0) {
         // Initialize the permut array
@@ -144,7 +144,7 @@ namespace Hermes
         if (throw_exception) {
           std::ostringstream s;
           s << "Index '" << x << "' not found";
-          throw std::runtime_error(s.str());
+          throw std::runtime_throw new Hermes::Exceptions::GenericException(s.str());
         }
         else
           return -1;

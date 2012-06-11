@@ -73,7 +73,7 @@ namespace Hermes
       void OrderView::show(const Space<Scalar>* space)
       {
         if (!space->is_up_to_date())
-          error("The space is not up to date.");
+          throw new Hermes::Exceptions::Exception("The space is not up to date.");
 
         ord.lock_data();
         ord.process_space(space);
@@ -96,7 +96,6 @@ namespace Hermes
           if ((int) vert[i][2] < min) min = (int) vert[i][2];
           if ((int) vert[i][2] > max) max = (int) vert[i][2];
         }
-        assert_msg(max <= H2DV_MAX_VIEWABLE_ORDER, "Maximum order in data is %d but OrderView supports only order %d", max, H2DV_MAX_VIEWABLE_ORDER);
 
         num_boxes = max - min + 1;
         char* buf = text_buffer;
@@ -228,9 +227,8 @@ namespace Hermes
             case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
             case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
             case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
-            default: error("Invalid palette type");
+            default: throw new Hermes::Exceptions::Exception("Invalid palette type");
             }
-            debug_log("Switched to palette type %d in view \"%s\"", (int)pal_type, title.c_str());
             ord.lock_data();
             init_order_palette(ord.get_vertices());
             ord.unlock_data();

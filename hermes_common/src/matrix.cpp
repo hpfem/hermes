@@ -36,7 +36,6 @@
 
 void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx, double *d)
 {
-  _F_;
   int i, imax = 0, j, k;
   double big, dum, sum, temp;
   double *vv = new double[n];
@@ -94,7 +93,6 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
 
 void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[])
 {
-  _F_;
   int i, j, k;
   for (i = 0; i < n; i++)
   {
@@ -116,7 +114,6 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
 template<typename Scalar>
 Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix()
 {
-  _F_;
   this->size = 0;
   pages = NULL;
 
@@ -127,7 +124,6 @@ Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix()
 template<typename Scalar>
 Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
 {
-  _F_;
   this->size = size;
   pages = NULL;
 
@@ -138,7 +134,6 @@ Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
 template<typename Scalar>
 Hermes::Algebra::SparseMatrix<Scalar>::~SparseMatrix()
 {
-  _F_;
   if (pages)
   {
     for (unsigned int i = 0; i < this->size; i++)
@@ -151,7 +146,6 @@ Hermes::Algebra::SparseMatrix<Scalar>::~SparseMatrix()
 template<typename Scalar>
 void Hermes::Algebra::SparseMatrix<Scalar>::prealloc(unsigned int n)
 {
-  _F_;
   this->size = n;
 
   pages = new Page *[n];
@@ -162,7 +156,6 @@ void Hermes::Algebra::SparseMatrix<Scalar>::prealloc(unsigned int n)
 template<typename Scalar>
 void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
-  _F_;
   if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE)
   {
     Page *new_page = new Page;
@@ -177,7 +170,6 @@ void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigne
 template<typename Scalar>
 int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *max)
 {
-  _F_;
   // gather all pages in the buffer, deleting them along the way
   int *end = buffer;
   while (page != NULL)
@@ -200,7 +192,6 @@ int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, in
 template<typename Scalar>
 int Hermes::Algebra::SparseMatrix<Scalar>::get_num_indices()
 {
-  _F_;
   int total = 0;
   for (unsigned int i = 0; i < this->size; i++)
     for (Page *page = pages[i]; page != NULL; page = page->next)
@@ -212,7 +203,6 @@ int Hermes::Algebra::SparseMatrix<Scalar>::get_num_indices()
 template<typename Scalar>
 SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type)
 {
-  _F_;
   switch (matrix_solver_type)
   {
   case Hermes::SOLVER_AMESOS:
@@ -220,7 +210,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
       return new EpetraMatrix<Scalar>;
 #else
-      error("Amesos not installed.");
+      throw new Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
       break;
     }
@@ -229,7 +219,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
       return new EpetraMatrix<Scalar>;
 #else
-      error("AztecOO not installed.");
+      throw new Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
       break;
     }
@@ -238,7 +228,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #ifdef WITH_MUMPS
       return new MumpsMatrix<Scalar>;
 #else
-      error("MUMPS not installed.");
+      throw new Hermes::Exceptions::Exception("MUMPS not installed.");
 #endif
       break;
     }
@@ -247,7 +237,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #ifdef WITH_PETSC
       return new PetscMatrix<Scalar>;
 #else
-      error("PETSc not installed.");
+      throw new Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
       break;
     }
@@ -256,7 +246,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #ifdef WITH_UMFPACK
       return new UMFPackMatrix<Scalar>;
 #else
-      error("UMFPACK was not installed.");
+      throw new Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
       break;
     }
@@ -265,12 +255,12 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 #ifdef WITH_SUPERLU
       return new SuperLUMatrix<Scalar>;
 #else
-      error("SuperLU was not installed.");
+      throw new Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
       break;
     }
   default:
-    error("Unknown matrix solver requested.");
+    throw new Hermes::Exceptions::Exception("Unknown matrix solver requested.");
   }
   return NULL;
 }
@@ -278,7 +268,6 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 template<typename Scalar>
 Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type)
 {
-  _F_;
   switch (matrix_solver_type)
   {
   case Hermes::SOLVER_AMESOS:
@@ -286,7 +275,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
       return new EpetraVector<Scalar>;
 #else
-      error("Amesos not installed.");
+      throw new Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
       break;
     }
@@ -295,7 +284,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
       return new EpetraVector<Scalar>;
 #else
-      error("AztecOO not installed.");
+      throw new Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
       break;
     }
@@ -304,7 +293,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #ifdef WITH_MUMPS
       return new MumpsVector<Scalar>;
 #else
-      error("MUMPS was not installed.");
+      throw new Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
       break;
     }
@@ -313,7 +302,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #ifdef WITH_PETSC
       return new PetscVector<Scalar>;
 #else
-      error("PETSc not installed.");
+      throw new Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
       break;
     }
@@ -322,7 +311,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #ifdef WITH_UMFPACK
       return new UMFPackVector<Scalar>;
 #else
-      error("UMFPACK was not installed.");
+      throw new Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
       break;
     }
@@ -331,12 +320,12 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 #ifdef WITH_SUPERLU
       return new SuperLUVector<Scalar>;
 #else
-      error("SuperLU was not installed.");
+      throw new Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
       break;
     }
   default:
-    error("Unknown matrix solver requested.");
+    throw new Hermes::Exceptions::Exception("Unknown matrix solver requested.");
   }
   return NULL;
 }

@@ -254,10 +254,6 @@ namespace Hermes
         // it would disallow the observation of the process from a manually set viewpoint.
         refresh();
 
-        verbose("Showing data in view \"%s\"", title.c_str());
-        verbose(" Used value range [%g; %g]", range_min, range_max);
-        verbose(" Value range of data: [%g, %g]", lin->get_min_value(), lin->get_max_value());
-
         // Now we reset the active element if it was set before the MeshFunction sln entered this method.
         // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
         if(dynamic_cast<Solution<double>*>(sln) != NULL)
@@ -281,10 +277,6 @@ namespace Hermes
         reset_view(false); // setting true here makes the view always reset after calling 'show'; particularly in the adaptivity process,
         // it would disallow the observation of the process from a manually set viewpoint.
         refresh();
-
-        verbose("Showing data in view \"%s\"", title.c_str());
-        verbose(" Used value range [%g; %g]", range_min, range_max);
-        verbose(" Value range of data: [%g, %g]", lin->get_min_value(), lin->get_max_value());
       }
 
       void ScalarView::update_mesh_info()
@@ -674,7 +666,8 @@ namespace Hermes
 
       void ScalarView::show_contours(double step, double orig)
       {
-        if (step == 0.0) error("'step' cannot be zero.");
+        if (step == 0.0)
+          throw new Exceptions::ValueException("step", step, 0.0);
         contours = true;
         cont_orig = orig;
         cont_step = step;
@@ -840,7 +833,6 @@ namespace Hermes
           }
           catch(std::exception &e)
           { //out-of-memory or any other failure
-            debug_log("Unable to use VBO: %s", e.what());
             if (gl_coord_buffer) { glDeleteBuffersARB(1, &gl_coord_buffer); gl_coord_buffer = 0; }
             if (gl_index_buffer) { glDeleteBuffersARB(1, &gl_index_buffer); gl_index_buffer = 0; }
             if (gl_edge_inx_buffer) { glDeleteBuffersARB(1, &gl_edge_inx_buffer); gl_edge_inx_buffer = 0; }
@@ -850,8 +842,6 @@ namespace Hermes
 
       void ScalarView::draw_values_2d()
       {
-        assert_msg(gl_pallete_tex_id != 0, "Palette GL texture ID is zero, palette not set");
-
         //set texture for coloring
         glEnable(GL_TEXTURE_1D);
         glBindTexture(GL_TEXTURE_1D, gl_pallete_tex_id);

@@ -77,8 +77,7 @@ namespace Hermes
 
     void Transformable::set_active_element(Element* e)
     {
-      _F_
-        if (e==NULL) throw Exceptions::NullException(1);
+      if (e==NULL) throw Exceptions::NullException(1);
       element = e;
       this->reset_transform();
     }
@@ -101,7 +100,7 @@ namespace Hermes
     {
       assert(element != NULL);
       if (top >= H2D_MAX_TRN_LEVEL)
-        error("Too deep transform.");
+        throw new Hermes::Exceptions::Exception("Too deep transform.");
 
       Trf* mat = stack + (++top);
       Trf* tr = (element->is_triangle() ? tri_trf + son : quad_trf + son);

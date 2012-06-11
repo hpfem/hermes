@@ -28,7 +28,6 @@ namespace Hermes
 
     static int get_split_and_sons(Element* e, Rect* cr, Rect* er, int4& sons)
     {
-      _F_;
       uint64_t hmid = (er->l + er->r) >> 1;
       uint64_t vmid = (er->t + er->b) >> 1;
 
@@ -75,7 +74,6 @@ namespace Hermes
 
     static void move_to_son(Rect* rnew, Rect* rold, int son)
     {
-      _F_;
       uint64_t hmid = (rold->l + rold->r) >> 1;
       uint64_t vmid = (rold->t + rold->b) >> 1;
       if(rnew != rold)
@@ -122,7 +120,6 @@ namespace Hermes
 
     Traverse::State::State()
     {
-      _F_;
       memset(this, 0, sizeof(Traverse::State));
       for(int i = 0; i < 4; i++)
         this->bnd[i] = true;
@@ -134,7 +131,6 @@ namespace Hermes
 
     void Traverse::State::operator=(const State * other)
     {
-      _F_;
       // Delete part.
       if(e != NULL)
         delete [] e;
@@ -156,7 +152,6 @@ namespace Hermes
 
     Traverse::State::~State()
     {
-      _F_;
       if(e != NULL)
         delete [] e;
       if(sub_idx != NULL)
@@ -165,8 +160,7 @@ namespace Hermes
 
     void Traverse::State::push_transform(int son, int i, bool is_triangle)
     {
-      _F_;
-
+      
       this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
 
       if(is_triangle)
@@ -200,18 +194,16 @@ namespace Hermes
 
     uint64_t Traverse::State::get_transform(int i)
     {
-      _F_;
       return this->sub_idx[i];
     }
 
     Traverse::State* Traverse::push_state(int* top_by_ref)
     {
-      _F_;
-
+      
       int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
 
       if(*top_f >= size) 
-        error("Stack overflow. Increase stack size.");
+        throw new Hermes::Exceptions::Exception("Stack overflow. Increase stack size.");
 
       if(stack[*top_f].e == NULL)
       {
@@ -252,7 +244,6 @@ namespace Hermes
 
     int Traverse::get_num_states(Hermes::vector<Mesh*> meshes)
     {
-      _F_;
       // This will be returned.
       int count = 0;
 
@@ -525,7 +516,6 @@ namespace Hermes
 
     Traverse::State* Traverse::get_next_state(int* top_by_ref, int* id_by_ref)
     {
-      _F_;
       // Serial / parallel code.
       int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
       int* id_f = (id_by_ref == NULL) ? &this->id : id_by_ref;
@@ -795,7 +785,6 @@ namespace Hermes
 
     void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
     {
-      _F_;
       //if(stack != NULL) finish();
 
       assert(n > 0);
@@ -821,12 +810,12 @@ namespace Hermes
         int base_elem_num = meshes[0]->get_num_base_elements();
         for (int i = 1; i < n; i++)
           if(base_elem_num != meshes[i]->get_num_base_elements())
-            error("Meshes not compatible in Traverse::begin().");
+            throw new Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
 
         // Test whether areas of corresponding elements are the same.
         double *areas = new double [base_elem_num];
         memset(areas, 0, base_elem_num*sizeof(double));
-        if(areas == NULL) error("Not enough memory in Traverse::begin().");
+        if(areas == NULL) throw new Hermes::Exceptions::Exception("Not enough memory in Traverse::begin().");
         // Read base element areas from the first mesh,
         // Also get minimum element area.
         int counter = 0;
@@ -853,7 +842,7 @@ namespace Hermes
             if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0)
             {
               printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
-              error("Meshes not compatible in Traverse::begin().");
+              throw new Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
             }
             counter++;
           }
@@ -865,7 +854,6 @@ namespace Hermes
 
     void Traverse::free_state(Traverse::State* state)
     {
-      _F_;
       delete [] state->e;
       delete [] state->er;
       delete [] state->sub_idx;
@@ -874,8 +862,7 @@ namespace Hermes
 
     void Traverse::finish()
     {
-      _F_;
-
+      
       if(master)
       {
         delete [] subs;
@@ -894,7 +881,6 @@ namespace Hermes
 
     uint64_t Traverse::init_idx(Rect* cr, Rect* er)
     {
-      _F_;
       Rect r;
       memcpy(&r, er, sizeof(Rect));
 
@@ -922,7 +908,6 @@ namespace Hermes
 
     void Traverse::union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni)
     {
-      _F_;
       int i, j, son;
 
       // are we at the bottom?
@@ -1066,7 +1051,6 @@ namespace Hermes
 
     UniData** Traverse::construct_union_mesh(Mesh* unimesh)
     {
-      _F_;
       int i;
       Element** e = new Element*[num];
       Rect* er = new Rect[num];

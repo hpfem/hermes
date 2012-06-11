@@ -46,7 +46,7 @@ namespace Hermes
 
     HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
     {
-      if (n < 24) error("Hermes::Order limit tables must have at least 24 entries.");
+      if (n < 24) throw new Hermes::Exceptions::Exception("Hermes::Order limit tables must have at least 24 entries.");
       g_order_table_tri  = tri_table;
       g_order_table_quad = quad_table;
     }

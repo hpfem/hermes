@@ -358,7 +358,6 @@ namespace Hermes
     void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, const Vector<Scalar>* vec, 
         bool add_dir_lift, int start_index)
     {
-      _F_
       // Sanity check.
       if (space == NULL) throw Exceptions::NullException(1);
       if (vec == NULL) throw Exceptions::NullException(2);
@@ -374,7 +373,6 @@ namespace Hermes
     void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, const Scalar* coeffs, 
         bool add_dir_lift, int start_index)
     {
-      _F_
       // Sanity check.
       if (space == NULL) throw Exceptions::NullException(1);
 
@@ -391,7 +389,6 @@ namespace Hermes
     void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss, 
         const Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
-      _F_
       int o;
 
       // Sanity checks.
@@ -519,7 +516,6 @@ namespace Hermes
         Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions, 
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
-      _F_
       if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
@@ -558,7 +554,6 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
-      _F_
       // Sanity checks.
       if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
@@ -571,8 +566,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
       Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
-      _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
       // If start indices are not given, calculate them using the dimension of each space.
@@ -610,8 +604,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solution(const Vector<Scalar>* solution_vector, const Space<Scalar>* space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
-      _F_
-        // Sanity checks.
+      // Sanity checks.
         if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
@@ -624,7 +617,6 @@ namespace Hermes
         Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss, 
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
-      _F_;
       if (solution_vector==NULL) throw Exceptions::NullException(1);
       if (spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
 
@@ -663,8 +655,7 @@ namespace Hermes
     void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
         PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
-      _F_
-        if (solution_vector == NULL) throw Exceptions::NullException(1);
+      if (solution_vector == NULL) throw Exceptions::NullException(1);
       if (space == NULL) throw Exceptions::NullException(2);
       if (solution == NULL) throw Exceptions::NullException(3);
       if (pss == NULL) throw Exceptions::NullException(4);
@@ -1299,8 +1290,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
     {
-      _F_
-        if (e==NULL) throw Exceptions::NullException(1);
+      if (e==NULL) throw Exceptions::NullException(1);
       set_active_element(e);
 
       int o = elem_orders[e->id];
@@ -1331,8 +1321,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
     {
-      _F_
-        if (e==NULL) throw Exceptions::NullException(1);
+      if (e==NULL) throw Exceptions::NullException(1);
       if (this->num_components == 1)
       {
         if (b == 0)

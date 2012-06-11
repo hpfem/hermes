@@ -320,7 +320,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, area, HERMES_NONSYM),
         idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
+        if (gt != HERMES_PLANAR) throw new Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
         if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
@@ -335,7 +335,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, areas, HERMES_NONSYM),
         idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
+        if (gt != HERMES_PLANAR) throw new Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
         if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
@@ -637,7 +637,7 @@ namespace Hermes
         GeomType gt)
         : VectorFormVol<Scalar>(i, area), idx_i(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
+        if (gt != HERMES_PLANAR) throw new Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
         if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
@@ -652,7 +652,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, areas),
         idx_i(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) error("Axisymmetric advection forms not implemented yet.");
+        if (gt != HERMES_PLANAR) throw new Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
         if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);

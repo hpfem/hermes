@@ -38,7 +38,7 @@ namespace Hermes
       this->chol_p   = h1_chol_p;
 
       // set uniform poly order in elements
-      if (p_init < 1) error("P_INIT must be >=  1 in an H1 space.");
+      if (p_init < 1) throw new Hermes::Exceptions::Exception("P_INIT must be >=  1 in an H1 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -49,7 +49,6 @@ namespace Hermes
     H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
-      _F_;
       init(shapeset, p_init);
     }
 
@@ -57,14 +56,12 @@ namespace Hermes
     H1Space<Scalar>::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
-      _F_;
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
     H1Space<Scalar>::~H1Space()
     {
-      _F_;
       if (!--h1_proj_ref)
       {
         delete [] h1_proj_mat;
@@ -83,13 +80,12 @@ namespace Hermes
         this->own_shapeset = false;
       }
       else
-        error("Wrong shapeset type in H1Space<Scalar>::set_shapeset()");
+        throw new Hermes::Exceptions::Exception("Wrong shapeset type in H1Space<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>
     Space<Scalar>* H1Space<Scalar>::dup(Mesh* mesh, int order_increase) const
     {
-      _F_;
       H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
 
       // Set all elements not to have changed from the adaptation.
@@ -104,8 +100,7 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
-      _F_;
-
+      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -127,8 +122,7 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
-      _F_;
-
+      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -150,7 +144,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::assign_vertex_dofs()
     {
-      _F_;
       // Before assigning vertex DOFs, we must know which boundary vertex nodes are part of
       // a natural BC and which are part of an essential BC. The critical are those which
       // lie at an interface of both types of BCs and which must be treated as belonging
@@ -236,7 +229,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const
     {
-      _F_;
       Node* vn = e->vn[iv];
       typename Space<Scalar>::NodeData* nd = &this->ndata[vn->id];
       int index = this->shapeset->get_vertex_index(iv, e->get_mode());
@@ -260,7 +252,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const
     {
-      _F_;
       Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
       if (this->get_element_order(e->id) == 0)
@@ -297,7 +288,6 @@ namespace Hermes
     template<typename Scalar>
     Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      _F_;
       assert(order >= 1);
       Scalar* proj = new Scalar[order + 1];
 
@@ -374,7 +364,6 @@ namespace Hermes
     inline void H1Space<Scalar>::output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
       Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs)
     {
-      _F_;
       // if the dof is already in the list, just add half of the other coef
       if (last != NULL && last->dof == min->dof)
       {
@@ -405,7 +394,6 @@ namespace Hermes
     typename Space<Scalar>::BaseComponent* H1Space<Scalar>::merge_baselists(typename Space<Scalar>::BaseComponent* l1, int n1, typename Space<Scalar>::BaseComponent* l2, int n2,
       Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents)
     {
-      _F_;
       // estimate the upper bound of the result size
       int max_result = n1 + n2;
       if (edge != NULL) max_result += this->ndata[edge->id].n;
@@ -454,7 +442,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3)
     {
-      _F_;
       int j, k;
       EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
@@ -607,7 +594,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::update_constraints()
     {
-      _F_;
       Element* e;
       for_all_base_elements(e, this->mesh)
         update_constrained_nodes(e, NULL, NULL, NULL, NULL);
@@ -616,7 +602,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::fix_vertex(int id, Scalar value)
     {
-      _F_;
       FixedVertex fv = { id, value };
       fixed_vertices.push_back(fv);
     }
@@ -624,7 +609,6 @@ namespace Hermes
     template<typename Scalar>
     bool H1Space<Scalar>::is_fixed_vertex(int id) const
     {
-      _F_;
       for (unsigned int i = 0; i < fixed_vertices.size(); i++)
         if (fixed_vertices[i].id == id)
           return true;
@@ -635,7 +619,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::post_assign()
     {
-      _F_;
       // process fixed vertices -- put their values into nd->vertex_bc_coef
       for (unsigned int i = 0; i < fixed_vertices.size(); i++)
       {

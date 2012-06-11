@@ -29,46 +29,9 @@ namespace Hermes
   {
     class Transformable;
 
-    Hermes::Hermes2D::Api HermesApi;
-
-    Api::Parameter::Parameter(int defaultVal)
-    {
-      this->defaultVal = defaultVal;
-      this->userSet = false;
-    }
-
-    Api::Api()
-    {
-      this->parameters.insert(std::pair<std::string, Parameter*> ("num_threads",new Parameter(NUM_THREADS)));
-    }
-
-    Api::~Api()
-    {
-      this->parameters.clear();
-    }
-
-    int Api::getParamValue(std::string param)
-    {
-      if(this->parameters.find(param) == parameters.end())
-        throw new Hermes::Exceptions::ValueException("parameter name", param);
-      if(this->parameters.find(param)->second->userSet)
-        return this->parameters.find(param)->second->userVal;
-      else
-        return this->parameters.find(param)->second->defaultVal;
-    }
-
-    void Api::setParamValue(std::string param, int value)
-    {
-      if(this->parameters.find(param) == parameters.end())
-        throw new Hermes::Exceptions::ValueException("parameter name", param);
-      this->parameters.find(param)->second->userSet = true;
-      this->parameters.find(param)->second->userVal = value;
-    }
-
     template<typename Scalar>
     double Global<Scalar>::get_l2_norm(Vector<Scalar>* vec)
     {
-      _F_;
       Scalar val = 0;
       for (unsigned int i = 0; i < vec->length(); i++)
       {
@@ -82,8 +45,8 @@ namespace Hermes
     double Global<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type)
     {
       // sanity checks
-      if (sln1 == NULL) error("sln1 is NULL in calc_abs_error().");
-      if (sln2 == NULL) error("sln2 is NULL in calc_abs_error().");
+      if (sln1 == NULL) throw new Hermes::Exceptions::Exception("sln1 is NULL in calc_abs_error().");
+      if (sln2 == NULL) throw new Hermes::Exceptions::Exception("sln2 is NULL in calc_abs_error().");
 
       Quad2D* quad = &g_quad_2d_std;
       sln1->set_quad_2d(quad);
@@ -116,7 +79,7 @@ namespace Hermes
         case HERMES_HDIV_NORM:
           error += error_fn_hdiv(sln1, sln2, ru, rv);
           break;
-        default: error("Unknown norm in calc_error().");
+        default: throw new Hermes::Exceptions::Exception("Unknown norm in calc_error().");
         }
       }
       trav.finish();
@@ -164,7 +127,7 @@ namespace Hermes
         case HERMES_HDIV_NORM:
           norm += norm_fn_hdiv(sln, ru);
           break;
-        default: error("Unknown norm in calc_norm().");
+        default: throw new Hermes::Exceptions::Exception("Unknown norm in calc_norm().");
         }
       }
       return sqrt(norm);
@@ -184,7 +147,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
         case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
         case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
-        default: error("Internal in calc_norms(): unknown space type.");
+        default: throw new Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
         }
       }
       // Calculate the resulting norm.
@@ -208,7 +171,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: errors.push_back(calc_abs_error(slns1[i], slns2[i], HERMES_HCURL_NORM)); break;
         case HERMES_HDIV_SPACE: errors.push_back(calc_abs_error(slns1[i], slns2[i], HERMES_HDIV_NORM)); break;
         case HERMES_L2_SPACE: errors.push_back(calc_abs_error(slns1[i], slns2[i], HERMES_L2_NORM)); break;
-        default: error("Internal in calc_norms(): unknown space type.");
+        default: throw new Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
         }
       }
       // Calculate the resulting error.
@@ -385,7 +348,7 @@ namespace Hermes
     template<typename Scalar>
     double Global<Scalar>::error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv)
     {
-      error("error_fn_hdiv() not implemented yet.");
+      throw new Hermes::Exceptions::Exception("error_fn_hdiv() not implemented yet.");
 
       // Hcurl code
       Quad2D* quad = sln1->get_quad_2d();
@@ -411,7 +374,7 @@ namespace Hermes
     template<typename Scalar>
     double Global<Scalar>::norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru)
     {
-      error("norm_fn_hdiv() not implemented yet.");
+      throw new Hermes::Exceptions::Exception("norm_fn_hdiv() not implemented yet.");
 
       // Hcurl code
       Quad2D* quad = sln->get_quad_2d();
@@ -428,12 +391,7 @@ namespace Hermes
       h1_integrate_expression(Hermes::sqr(uval0[i]) + Hermes::sqr(uval1[i]) + Hermes::sqr(udx1[i] - udy0[i]));
       return result;
     }
-
-    HERMES_API void throw_exception(char *text)
-    {
-      throw std::runtime_error(text);
-    }
-
+    
     template class HERMES_API Global<double>;
     template class HERMES_API Global<std::complex<double> >;
   }

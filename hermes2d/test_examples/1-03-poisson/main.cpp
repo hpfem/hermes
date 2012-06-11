@@ -1,6 +1,5 @@
 #define HERMES_REPORT_ALL
 #include "definitions.h"
-#include "exceptions.h"
 
 // This example shows how to solve a simple PDE that describes stationary
 // heat transfer in an object consisting of two materials (aluminum and
@@ -26,7 +25,7 @@
 //
 // The following parameters can be changed:
 
-const bool HERMES_VISUALIZATION = false;           // Set to "false" to suppress Hermes OpenGL visualization.
+const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
@@ -44,7 +43,21 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
-  Hermes::Hermes2D::HermesApi.setParamValue("num_threads", 4);
+  Hermes::HermesCommonApi.setParamValue("exceptions print stacktrace", 0);
+  Hermes::Hermes2D::Hermes2DApi.setParamValue("num_threads", 4);
+
+  try
+  {
+    throw new Hermes::Exceptions::Exception("asdf");
+  }
+  catch(Hermes::Exceptions::Exception* e)
+  {
+    e->printMsg();
+  }
+  catch(std::exception& e)
+  {
+    std::cout << 'a';
+  }
 
   // Time measurement.
   Hermes::TimePeriod cpu_time;

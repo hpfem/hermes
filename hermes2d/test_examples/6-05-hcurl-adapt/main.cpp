@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  verbose("Total running time: %g s", cpu_time.accumulated());
+  info("Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
   if(HERMES_VISUALIZATION)

@@ -17,6 +17,7 @@
 #include "refmap.h"
 #include "traverse.h"
 #include "mesh.h"
+#include "api2d.h"
 
 namespace Hermes
 {
@@ -359,7 +360,7 @@ namespace Hermes
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
       {
         // sanity check
-        if (xsln == NULL || ysln == NULL) error("One of the solutions is NULL in Vectorizer:process_solution().");
+        if (xsln == NULL || ysln == NULL) throw new Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
 
         lock_data();
         Hermes::TimePeriod cpu_time;
@@ -405,8 +406,8 @@ namespace Hermes
         meshes.push_back(xsln->get_mesh());
 
         // Parallelization
-        MeshFunction<double>*** fns = new MeshFunction<double>**[HermesApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.getParamValue("num_threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           fns[i] = new MeshFunction<double>*[2];
           fns[i][0] = xsln->clone();
@@ -415,8 +416,8 @@ namespace Hermes
           fns[i][1]->set_quad_2d(&g_quad_lin);
         }
 
-        Transformable*** trfs = new Transformable**[HermesApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        Transformable*** trfs = new Transformable**[Hermes2DApi.getParamValue("num_threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           trfs[i] = new Transformable*[2];
           trfs[i][0] = fns[i][0];
@@ -453,9 +454,9 @@ namespace Hermes
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        Traverse* trav = new Traverse[HermesApi.getParamValue("num_threads")];
+        Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
         
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
           trav[i].stack = trav_master.stack;
@@ -490,12 +491,12 @@ namespace Hermes
         }
 
         trav_master.finish();
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
           trav[i].finish();
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
         
 #pragma omp parallel shared(trav_master) private(state_i)
@@ -570,7 +571,7 @@ namespace Hermes
         }
 
         trav_master.finish();
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           trav[i].finish();
           for(unsigned int j = 0; j < 2; j++)
@@ -584,7 +585,8 @@ namespace Hermes
 
         find_min_max();
 
-        verbose("Vectorizercreated %d verts and %d tris in %0.3g s", this->vertex_count, nt, cpu_time.tick().last());
+        info("Vectorizer created %d verts and %d tris in %0.3g s", this->vertex_count, this->triangle_count, cpu_time.tick().last());
+
         //if (verbose_mode) print_hash_stats();
         unlock_data();
 
@@ -614,7 +616,9 @@ namespace Hermes
 
       void Vectorizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
-        assert_msg(verts!= NULL, "Cannot calculate AABB from NULL vertices");
+        if(verts == NULL)
+          throw new Exceptions::Exception("Cannot calculate AABB from NULL vertices");
+
         LinearizerBase::calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), this->vertex_count, min_x, max_x, min_y, max_y);
       }
 

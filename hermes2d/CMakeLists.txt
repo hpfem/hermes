@@ -4,7 +4,7 @@ project(hermes2d)
   if(WIN32)
     execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_win.bat" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
   else(WIN32)
-      execute_process(COMMAND "chmod 700 ${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/")
+    execute_process(COMMAND "chmod 700 ${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/")
     execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
   endif(WIN32)
 
@@ -109,7 +109,7 @@ project(hermes2d)
     src/newton_solver.cpp
     src/picard_solver.cpp
     src/linear_solver.cpp
-		
+    
     src/calculation_continuity.cpp
 
     src/adapt/adapt.cpp
@@ -125,6 +125,8 @@ project(hermes2d)
     src/function/mesh_function.cpp
     src/function/solution_h2d_xml.cpp
 
+    src/api2d.cpp
+    
     src/mesh/refmap.cpp
     src/mesh/curved.cpp
     src/mesh/refinement_type.cpp
@@ -231,6 +233,8 @@ project(hermes2d)
     include/integrals/h1.h
     include/integrals/hdiv.h
     include/integrals/hcurl.h
+    
+    include/api2d.h
     
     include/mesh/refmap.h
     include/mesh/curved.h

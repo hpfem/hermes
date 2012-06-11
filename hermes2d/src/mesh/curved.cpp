@@ -57,7 +57,6 @@ namespace Hermes
 
     double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
     {
-      _F_;
       if (k == 0)
       {
         return (t >= knot[i] && t <= knot[i + 1] && knot[i] < knot[i + 1]) ? 1.0 : 0.0;
@@ -83,7 +82,6 @@ namespace Hermes
     void CurvMap::nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x,
       double& y, double& n_x, double& n_y, double& t_x, double& t_y)
     {
-      _F_;
       // Nurbs curves are parametrized from 0 to 1.
       t = (t + 1.0) / 2.0;
 
@@ -173,7 +171,7 @@ namespace Hermes
           double R = sqrt(sqr(SA[0]) + sqr(SA[1]));
           double R2 = sqrt(sqr(SB[0]) + sqr(SB[1]));
           if (std::abs(R - R2) > 1e-6)
-            error("Internal error in nurbs_edge() - bad radius R.");
+            throw new Hermes::Exceptions::Exception("Internal error in nurbs_edge() - bad radius R.");
 
           // Normal vectors to circular arc at edge end points A, B.
           double2 normal_A, normal_B;
@@ -303,7 +301,6 @@ namespace Hermes
     // calculation of nonpolynomial reference mapping on curved element
     void CurvMap::calc_ref_map_tri(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double& x, double& y)
     {
-      _F_;
       double  fx,  fy;
       x = y = 0.0;
 
@@ -360,7 +357,6 @@ namespace Hermes
     void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
       double& x, double& y)
     {
-      _F_;
       double ex[4], ey[4];
 
       double n_x, n_y, t_x, t_y;
@@ -383,7 +379,6 @@ namespace Hermes
 
     void CurvMap::calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
     {
-      _F_;
       if (e->get_mode() == HERMES_MODE_QUAD)
         calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
       else
@@ -396,8 +391,7 @@ namespace Hermes
     // preparation of projection matrices, Cholesky factorization
     void CurvMap::precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      _F_;
-
+      
       int order = ref_map_shapeset->get_max_order();
       int n = order - 1; // number of edge basis functions
 
@@ -510,7 +504,6 @@ namespace Hermes
     // calculate the H1 seminorm products (\phi_i, \phi_j) for all 0 <= i, j < n, n is the number of bubble functions
     double** CurvMap::calculate_bubble_projection_matrix(int nb, int* indices, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss, ElementMode2D mode)
     {
-      _F_;
       double** mat = new_matrix<double>(nb, nb);
 
       for (int i = 0; i < nb; i++)
@@ -543,7 +536,6 @@ namespace Hermes
 
     void CurvMap::precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      _F_;
       
       // *** triangles ***
       int order = ref_map_shapeset->get_max_order();
@@ -583,7 +575,6 @@ namespace Hermes
     // compute point (x, y) in reference element, edge vector (v1, v2)
     void CurvMap::edge_coord(Element* e, int edge, double t, double2& x, double2& v)
     {
-      _F_;
       int mode = e->get_mode();
       double2 a, b;
       a[0] = ctm.m[0] * ref_vert[mode][edge][0] + ctm.t[0];
@@ -602,7 +593,6 @@ namespace Hermes
 
     void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      _F_;
       
       ref_map_pss->set_active_element(e);
 
@@ -704,7 +694,6 @@ namespace Hermes
 
     void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      _F_;
       
       int mo2 = quad2d.get_max_order(e->get_mode());
       int np = quad2d.get_num_points(mo2, e->get_mode());
@@ -740,7 +729,6 @@ namespace Hermes
 
     void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      _F_;
       
       ref_map_pss->set_active_element(e);
 
@@ -815,7 +803,6 @@ namespace Hermes
 
     void CurvMap::ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      _F_;
       // vertex part
       for (unsigned int i = 0; i < e->get_num_surf(); i++)
       {
@@ -836,8 +823,7 @@ namespace Hermes
 
     void CurvMap::update_refmap_coeffs(Element* e)
     {
-      _F_;
-
+      
       H1ShapesetJacobi ref_map_shapeset;
       PrecalcShapeset ref_map_pss(&ref_map_shapeset);
 
@@ -889,7 +875,6 @@ namespace Hermes
 
     void CurvMap::get_mid_edge_points(Element* e, double2* pt, int n)
     {
-      _F_;
       Nurbs** nurbs = this->nurbs;
       Transformable tran;
       tran.set_active_element(e);
@@ -913,7 +898,6 @@ namespace Hermes
 
     void Nurbs::unref()
     {
-      _F_;
       if (!--ref) // fixme: possible leak, we need ~Nurbs too
       {
         delete [] pt;
@@ -924,7 +908,6 @@ namespace Hermes
 
     CurvMap::CurvMap(CurvMap* cm)
     {
-      _F_;
       memcpy(this, cm, sizeof(CurvMap));
       coeffs = new double2[nc];
       memcpy(coeffs, cm->coeffs, sizeof(double2) * nc);
@@ -937,7 +920,6 @@ namespace Hermes
 
     CurvMap::~CurvMap()
     {
-      _F_;
       if (coeffs != NULL)
       {
         delete [] coeffs;

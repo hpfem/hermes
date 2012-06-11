@@ -28,8 +28,8 @@ namespace Hermes
       neighb_el(NULL),
       quad(&g_quad_2d_std)
     {
-      assert_msg(central_el != NULL && central_el->active == 1,
-        "You must pass an active element to the NeighborSearch constructor.");
+      if(central_el == NULL || central_el->active != 1)
+        throw new Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
@@ -50,7 +50,6 @@ namespace Hermes
       neighbor_edge(ns.neighbor_edge),
       active_segment(ns.active_segment)
     {
-      _F_;
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
@@ -69,8 +68,8 @@ namespace Hermes
             this->neighbor_transformations.add(tmp, j);
           }
 
-          assert_msg(central_el != NULL && central_el->active == 1,
-            "You must pass an active element to the NeighborSearch constructor.");
+          if(central_el == NULL || central_el->active != 1)
+            throw new Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
 
           for(unsigned int i = 0; i < ns.neighbors.size(); i++)
             this->neighbors.push_back(ns.neighbors[i]);
@@ -88,7 +87,6 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::~NeighborSearch()
     {
-      _F_;
       neighbor_edges.clear();
       neighbors.clear();
       clear_supported_shapes();
@@ -128,8 +126,7 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::reset_neighb_info()
     {
-      _F_;
-
+      
       // Reset transformations.
       for(unsigned int i = 0; i < n_neighbors; i++)
       {
@@ -156,7 +153,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::set_active_edge(int edge)
     {
-      _F_;
       reset_neighb_info();
       active_edge = edge;
 
@@ -239,13 +235,12 @@ namespace Hermes
       }
       else
         if(!ignore_errors)
-          error("The given edge isn't inner");
+          throw new Hermes::Exceptions::Exception("The given edge isn't inner");
     }
 
     template<typename Scalar>
     bool NeighborSearch<Scalar>::set_active_edge_multimesh(const int& edge)
     {
-      _F_;
       Hermes::vector<unsigned int> transformations = get_transforms(original_central_el_transform);
       // Inter-element edge.
       if(is_inter_edge(edge, transformations))
@@ -278,7 +273,6 @@ namespace Hermes
     template<typename Scalar>
     Hermes::vector<unsigned int> NeighborSearch<Scalar>::get_transforms(uint64_t sub_idx) const
     {
-      _F_;
       Hermes::vector<unsigned int> transformations_backwards;
       while (sub_idx > 0)
       {
@@ -295,7 +289,6 @@ namespace Hermes
     template<typename Scalar>
     bool NeighborSearch<Scalar>::is_inter_edge(const int& edge, const Hermes::vector<unsigned int>& transformations) const
     {
-      _F_;
       // No subelements => of course this edge is an inter-element one.
       if(transformations.size() == 0)
         return true;
@@ -324,7 +317,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
     {
-      _F_;
       if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP)
       {
         if (!neighbor_transformations.present(0)) // in case of neighborhood_type == H2D_DG_NO_TRANSF
@@ -359,7 +351,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::handle_sub_idx_way_down(const Hermes::vector<unsigned int>& transformations)
     {
-      _F_;
       Hermes::vector<unsigned int> neighbors_to_be_deleted;
       Hermes::vector<unsigned int> neighbors_not_to_be_deleted;
 
@@ -439,7 +430,6 @@ namespace Hermes
     template<typename Scalar>
     bool NeighborSearch<Scalar>::compatible_transformations(unsigned int a, unsigned int b, int edge) const
     {
-      _F_;
       if(a == b)
         return true;
       if(edge == 0)
@@ -480,7 +470,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::clear_initial_sub_idx()
     {
-      _F_;
       if(neighborhood_type != H2D_DG_GO_DOWN)
         return;
       // Obtain the transformations sequence.
@@ -582,7 +571,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::delete_neighbor(unsigned int position)
     {
-      _F_;
       for(unsigned int i = position; i < n_neighbors - 1; i++)
         central_transformations.get(i)->copy_from(central_transformations.get(i + 1));
 
@@ -610,7 +598,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::find_act_elem_up( Element* elem, int* orig_vertex_id, Node** par_mid_vertices, int n_parents)
     {
-      _F_;
       Node* edge = NULL;
       Node* vertex = NULL;
 
@@ -635,7 +622,7 @@ namespace Hermes
           par_mid_vertices[n_parents++] = vertex;
         else
           if (n_parents == Transformations::max_level - 1)
-            error("Maximum number of intermediate parents exceeded in NeighborSearch<Scalar>::finding_act_elem_up");
+            throw new Hermes::Exceptions::Exception("Maximum number of intermediate parents exceeded in NeighborSearch<Scalar>::finding_act_elem_up");
           else
             if(par_mid_vertices[n_parents - 1]->id != vertex->id)
               par_mid_vertices[n_parents++] = vertex;
@@ -663,7 +650,7 @@ namespace Hermes
                 neighbor_edge.local_num_of_edge = j;
                 break;
               }
-              if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
+              if(neighbor_edge.local_num_of_edge == -1) throw new Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
               Node* n = NULL;
 
@@ -728,7 +715,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::find_act_elem_down( Node* vertex, int* bounding_verts_id, int* sons, unsigned int n_sons)
     {
-      _F_;
       int mid_vert = vertex->id; // ID of vertex in between vertices from par_vertex_id.
       int bnd_verts[2];
       bnd_verts[0] = bounding_verts_id[0];
@@ -749,7 +735,7 @@ namespace Hermes
           // Get the middle vertex of this edge and try again on the segments into which this vertex splits the edge.
           Node * n = mesh->peek_vertex_node(mid_vert, bnd_verts[i]);
           if(n == NULL)
-            error("wasn't able to find middle vertex");
+            throw new Hermes::Exceptions::Exception("wasn't able to find middle vertex");
           else
           {
             // Make sure the next visited segment has the same orientation as the original central element's active edge.
@@ -781,7 +767,7 @@ namespace Hermes
                   break;
                 }
 
-                if(neighbor_edge.local_num_of_edge == -1) error("Neighbor edge wasn't found");
+                if(neighbor_edge.local_num_of_edge == -1) throw new Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
                 assert(!central_transformations.present(n_neighbors));
 
@@ -812,7 +798,6 @@ namespace Hermes
     template<typename Scalar>
     int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const
     {
-      _F_;
       if (segment == 0)
       {
         // neighbor edge goes from parent1 to middle vertex
@@ -841,7 +826,6 @@ namespace Hermes
     template<typename Scalar>
     typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(const Space<Scalar>*space, AsmList<Scalar>* al)
     {
-      _F_;
       ExtendedShapeset* new_supp_shapes = new ExtendedShapeset(this, al, space);
 
       return new_supp_shapes;
@@ -850,7 +834,6 @@ namespace Hermes
     template<typename Scalar>
     typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(const Space<Scalar> *space, AsmList<Scalar>* al)
     {
-      _F_;
       if (supported_shapes != NULL)
         delete supported_shapes;
 
@@ -862,7 +845,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::set_quad_order(int order)
     {
-      _F_;
       neighb_quad_order = quad->get_edge_points(neighbor_edge.local_num_of_edge, order, neighbors[active_segment]->get_mode());
       central_quad_order = quad->get_edge_points(active_edge, order, central_el->get_mode());
     }
@@ -870,7 +852,6 @@ namespace Hermes
     template<typename Scalar>
     int NeighborSearch<Scalar>::get_quad_eo(bool on_neighbor) const
     {
-      _F_;
       if (on_neighbor)
         return neighb_quad_order;
       else
@@ -880,16 +861,14 @@ namespace Hermes
     template<typename Scalar>
     int NeighborSearch<Scalar>::get_active_segment() const
     {
-      _F_;
       return this->active_segment;
     }
 
     template<typename Scalar>
     void NeighborSearch<Scalar>::set_active_segment(unsigned int index)
     {
-      _F_;
       if(index >= n_neighbors)
-        error("NeighborSearch<Scalar>::set_active_segment() called with an incorrect index.");
+        throw new Hermes::Exceptions::Exception("NeighborSearch<Scalar>::set_active_segment() called with an incorrect index.");
 
       this->active_segment = index;
       this->neighb_el = this->neighbors[index];
@@ -899,21 +878,18 @@ namespace Hermes
     template<typename Scalar>
     Element* NeighborSearch<Scalar>::get_neighb_el() const
     {
-      _F_;
       return this->neighb_el;
     }
 
     template<typename Scalar>
     typename NeighborSearch<Scalar>::NeighborEdgeInfo NeighborSearch<Scalar>::get_neighbor_edge() const
     {
-      _F_;
       return this->neighbor_edge;
     }
 
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_n_trans(unsigned int index) const
     {
-      _F_;
       if (this->central_transformations.present(index))
         return this->central_transformations.get(index)->num_levels;
       else
@@ -923,11 +899,10 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2) const
     {
-      _F_;
       if (!this->central_transformations.present(index_1))
-        error("Out of bounds of central_transformations.");
+        throw new Hermes::Exceptions::Exception("Out of bounds of central_transformations.");
       if (index_2 >= (unsigned) Transformations::max_level)
-        error("Trying to access transformation deeper than allowed.");
+        throw new Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
 
       return this->central_transformations.get(index_1)->transf[index_2];
     }
@@ -935,7 +910,6 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index) const
     {
-      _F_;
       if (this->neighbor_transformations.present(index))
         return this->neighbor_transformations.get(index)->num_levels;
       else
@@ -945,11 +919,10 @@ namespace Hermes
     template<typename Scalar>
     unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2) const
     {
-      _F_;
       if (!this->neighbor_transformations.present(index_1))
-        error("Out of bounds of neighbor_transformations.");
+        throw new Hermes::Exceptions::Exception("Out of bounds of neighbor_transformations.");
       if (index_2 >= (unsigned) Transformations::max_level)
-        error("Trying to access transformation deeper than allowed.");
+        throw new Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
 
       return this->neighbor_transformations.get(index_1)->transf[index_2];
     }
@@ -957,7 +930,6 @@ namespace Hermes
     template<typename Scalar>
     DiscontinuousFunc<Scalar>* NeighborSearch<Scalar>::init_ext_fn(MeshFunction<Scalar>* fu)
     {
-      _F_;
       Func<Scalar>* fn_central = init_fn(fu, get_quad_eo(false));
 
       uint64_t original_transform = fu->get_transform();
@@ -991,7 +963,6 @@ namespace Hermes
     NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, const Space<Scalar>* space) :
     central_al(central_al)
     {
-      _F_;
       neighbor_al = new AsmList<Scalar>();
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
       combine_assembly_lists();

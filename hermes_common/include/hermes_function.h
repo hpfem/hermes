@@ -18,9 +18,15 @@
 
 #include "compat.h"
 #include "ord.h"
+#include "exceptions.h"
 
 namespace Hermes
 {
+  struct HERMES_API SplineCoeff
+  {
+    double a, b, c, d;		// four coefficients of a cubic spline.
+  };
+  
   /// Generic class for functions of one variable.
   template<typename Scalar>
   class HERMES_API Hermes1DFunction

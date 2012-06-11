@@ -86,7 +86,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_biform<double, Scalar>(n, wt, u_ext, u, v, e, ext);
           default:
-            error("Unknown projection type");
+            throw new Hermes::Exceptions::Exception("Unknown projection type");
             return 0.0;
           }
         }
@@ -107,7 +107,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_biform<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
           default:
-            error("Unknown projection type");
+            throw new Hermes::Exceptions::Exception("Unknown projection type");
             return Hermes::Ord();
           }
         }
@@ -119,7 +119,6 @@ namespace Hermes
         static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
-          _F_
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u->val[i] * v->val[i] + u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
@@ -130,7 +129,6 @@ namespace Hermes
         static SolFunctionDomain h1_semi_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
-          _F_
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
@@ -141,7 +139,6 @@ namespace Hermes
         static SolFunctionDomain l2_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
-          _F_
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u->val[i] * v->val[i]);
@@ -152,7 +149,6 @@ namespace Hermes
         static SolFunctionDomain hcurl_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
-          _F_
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u->curl[i] * conj(v->curl[i]));
@@ -165,7 +161,6 @@ namespace Hermes
         static SolFunctionDomain hdiv_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
           Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
         {
-          _F_
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u->div[i] * conj(v->div[i]));
@@ -202,7 +197,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_residual<double, Scalar>(n, wt, u_ext, v, e, ext);
           default:
-            error("Unknown projection type");
+            throw new Hermes::Exceptions::Exception("Unknown projection type");
             return 0.0;
           }
         }
@@ -223,7 +218,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_residual<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
           default:
-            error("Unknown projection type");
+            throw new Hermes::Exceptions::Exception("Unknown projection type");
             return Hermes::Ord();
           }
         }
@@ -235,8 +230,7 @@ namespace Hermes
         SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
-          _F_
-            SolFunctionDomain result = SolFunctionDomain(0);
+          SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * ((u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i]
           + (u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i]
@@ -248,8 +242,7 @@ namespace Hermes
         SolFunctionDomain h1_semi_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
-          _F_
-            SolFunctionDomain result = SolFunctionDomain(0);
+          SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * ((u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i]
           + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
@@ -260,8 +253,7 @@ namespace Hermes
         SolFunctionDomain l2_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
-          _F_
-            SolFunctionDomain result = SolFunctionDomain(0);
+          SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
             result += wt[i] * (u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i];
           return result;
@@ -271,8 +263,7 @@ namespace Hermes
         SolFunctionDomain hcurl_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
-          _F_
-            SolFunctionDomain result = SolFunctionDomain(0);
+          SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u_ext[this->i]->curl[i] - ext->fn[0]->curl[i]) * conj(v->curl[i]);
             result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
@@ -286,8 +277,7 @@ namespace Hermes
         SolFunctionDomain hdiv_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
           Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
         {
-          _F_
-            SolFunctionDomain result = SolFunctionDomain(0);
+          SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u_ext[this->i]->div[i] - ext->fn[0]->div[i]) * conj(v->div[i]);
             result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])

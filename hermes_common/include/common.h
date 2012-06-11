@@ -12,38 +12,40 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+
 /*! \file common.h
     \brief File containing common definitions, and basic global enums etc. for HermesCommon.
 */
 #ifndef __HERMES_COMMON_COMMON_H
 #define __HERMES_COMMON_COMMON_H
 
-#ifdef _POSIX_C_SOURCE
-# undef _POSIX_C_SOURCE	// typeinfo defines it
-#endif
-#ifdef _XOPEN_SOURCE
-# undef _XOPEN_SOURCE	// typeinfo defines it
-#endif
-
 // In Trilinos preconditioning, unistd.h is used if this flag is not defined.
 #ifdef _MSC_VER
 #define ICL
 #endif
 
-#include <typeinfo>
 #include <complex>
 
 #include <stdexcept>
 #include <cstdarg>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h> //allows to use offsetof
+#include <stddef.h>
 #include <assert.h>
 #include <math.h>
 #include <time.h>
 #include <float.h>
 #include <errno.h>
 #include <cmath>
+
+#include <pthread.h>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
+#include <map>
+#include <cstdio>
+#include <stdarg.h>
+#include <sstream>
 
 #include <algorithm>
 #include <vector>
@@ -53,25 +55,11 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
-
+#include <iostream>
 #include <omp.h>
+#include <signal.h>
 
-#include "hermes_logging.h"
-#include "hermes_function.h"
-#include "common_time_period.h"
-#include "compat.h"
-#include "callstack.h"
-#include "error.h"
-#include "vector.h"
-#include "tables.h"
-#include "array.h"
-#include "qsort.h"
-#include "ord.h"
-
-#ifndef CONFIG_H_INCLUDED
-#define CONFIG_H_INCLUDED
 #include "config.h"
-#endif
 
 typedef int int2[2];
 typedef int int3[3];
@@ -162,11 +150,6 @@ namespace Hermes
     "Trilinos/AztecOO"
   };
 
-  struct HERMES_API SplineCoeff
-  {
-    double a, b, c, d;		// four coefficients of a cubic spline.
-  };
-
   inline double sqr(int x) { return x*x; }
   inline double sqr(double x) { return x*x; }
   inline double sqrt(double x) { return std::sqrt(x); }
@@ -210,38 +193,6 @@ namespace Hermes
     {
       fprintf(f, "(%lf, %lf)", x.real(), x.imag());
     }
-
-    /// This class makes command line arguments available to any other method in Hermes.
-    class HERMES_API CommandLineArgs
-    {
-    public:
-      CommandLineArgs() {};
-
-      int m_argc;
-      char** m_argv;
-
-      void set(int argc_in, char** argv_in)
-      {
-        m_argc = argc_in;
-        m_argv = argv_in;
-      }
-      bool check()
-      {
-        return (m_argc > 0);
-      }
-      void missing_error()
-      {
-        error("Command line arguments have not been set.");
-      }
-      int& get_argc()
-      {
-        return m_argc;
-      }
-      char**& get_argv()
-      {
-        return m_argv;
-      }
-    };
   }
 
   namespace BLAS

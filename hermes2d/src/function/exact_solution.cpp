@@ -29,7 +29,7 @@ namespace Hermes
     template<typename Scalar>
     MeshFunction<Scalar>* ExactSolution<Scalar>::clone()
     {
-      error("Solution<Scalar>::clone() must be overridden in the case of exact solutions.");
+      throw new Hermes::Exceptions::Exception("Solution<Scalar>::clone() must be overridden in the case of exact solutions.");
       return NULL;
     }
 

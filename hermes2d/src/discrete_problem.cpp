@@ -27,6 +27,7 @@
 #include "mesh/refmap.h"
 #include "function/solution.h"
 #include "neighbor.h"
+#include "api2d.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -40,7 +41,6 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
     {
-      _F_;
       if (spaces.empty()) throw Exceptions::NullException(2);
       unsigned int first_dof_running = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -56,7 +56,6 @@ namespace Hermes
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
       : wf(wf), wf_seq(-1)
     {
-      _F_;
       spaces.push_back(space);
       this->spaces_first_dofs.push_back(0);
 
@@ -78,8 +77,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init()
     {
-      _F_
-
+      
         // Initialize special variable for Runge-Kutta time integration.
         RungeKutta = false;
       RK_original_spaces_count = 0;
@@ -88,12 +86,12 @@ namespace Hermes
 
       // Sanity checks.
       if(wf == NULL)
-        error("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
+        throw new Hermes::Exceptions::Exception("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
 
       if (spaces.size() != (unsigned) wf->get_neq())
-        error("Bad number of spaces in DiscreteProblem.");
+        throw new Hermes::Exceptions::Exception("Bad number of spaces in DiscreteProblem.");
       if (spaces.size() == 0)
-        error("Zero number of spaces in DiscreteProblem.");
+        throw new Hermes::Exceptions::Exception("Zero number of spaces in DiscreteProblem.");
 
       // Internal variables settings.
       sp_seq = new int[wf->get_neq()];
@@ -129,7 +127,6 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-      _F_;
       if (wf != NULL)
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
       wf_seq = -1;
@@ -139,7 +136,6 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::get_num_dofs()
     {
-      _F_;
       ndof = 0;
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         ndof += spaces[i]->get_num_dofs();
@@ -173,7 +169,6 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::is_up_to_date()
     {
-      _F_;
       // check if we can reuse the matrix structure
       bool up_to_date = true;
       if (!have_matrix)
@@ -404,13 +399,12 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::create_sparse_structure()
     {
-      _F_;
-
+      
       if (is_up_to_date())
       {
         if (current_mat != NULL)
         {
-          verbose("Reusing matrix sparse structure.");
+          info("Reusing matrix sparse structure.");
           current_mat->zero();
         }
         if (current_rhs != NULL)
@@ -607,7 +601,6 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs,
       bool force_diagonal_blocks, Table* block_weights)
     {
-      _F_;
       Scalar* coeff_vec = NULL;
       assemble(coeff_vec, mat, rhs, force_diagonal_blocks, block_weights);
     }
@@ -616,7 +609,6 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble(Vector<Scalar>* rhs,
       bool force_diagonal_blocks, Table* block_weights)
     {
-      _F_;
       assemble(NULL, NULL, rhs, force_diagonal_blocks, block_weights);
     }
 
@@ -624,19 +616,19 @@ namespace Hermes
     void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
       Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf)
     {
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         pss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         spss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           spss[i][j] = new PrecalcShapeset(pss[i][j]);
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         refmaps[i] = new RefMap*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
@@ -645,7 +637,7 @@ namespace Hermes
           refmaps[i][j]->set_quad_2d(&g_quad_2d_std);
         }
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         if (coeff_vec != NULL)
         {
@@ -672,19 +664,19 @@ namespace Hermes
         else
           u_ext[i] = NULL;
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         als[i] = new AsmList<Scalar>*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           als[i][j] = new AsmList<Scalar>();
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         ext[i] = new MeshFunction<Scalar>*[ext_functions.size()];
         for (int j = 0; j < ext_functions.size(); j++)
           ext[i][j] = ext_functions[j]->clone();
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->mfvol.size(); j++)
         {
@@ -705,7 +697,7 @@ namespace Hermes
           }
         }
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->mfsurf.size(); j++)
         {
@@ -726,7 +718,7 @@ namespace Hermes
           }
         }
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->vfvol.size(); j++)
         {
@@ -748,7 +740,7 @@ namespace Hermes
           }
         }
       }
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->vfsurf.size(); j++)
         {
@@ -775,7 +767,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
       Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf)
     {
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete pss[i][j];
@@ -783,7 +775,7 @@ namespace Hermes
       }
       delete [] pss;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete spss[i][j];
@@ -791,7 +783,7 @@ namespace Hermes
       }
       delete [] spss;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete refmaps[i][j];
@@ -799,7 +791,7 @@ namespace Hermes
       }
       delete [] refmaps;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         if(u_ext[i] != NULL)
         {
@@ -810,7 +802,7 @@ namespace Hermes
       }
       delete [] u_ext;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete als[i][j];
@@ -818,7 +810,7 @@ namespace Hermes
       }
       delete [] als;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned int j = 0; j < ext_functions.size(); j++)
           delete ext[i][j];
@@ -826,28 +818,28 @@ namespace Hermes
       }
       delete [] ext;
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->mfvol.size(); j++)
           delete mfvol[i][j];
         mfvol[i].clear();
       }
       delete [] mfvol;
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->mfsurf.size(); j++)
           delete mfsurf[i][j];
         mfsurf[i].clear();
       }
       delete [] mfsurf;
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->vfvol.size(); j++)
           delete vfvol[i][j];
         vfvol[i].clear();
       }
       delete [] vfvol;
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (int j = 0; j < wf->vfsurf.size(); j++)
           delete vfsurf[i][j];
@@ -862,8 +854,7 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
-      _F_;
-
+      
       current_mat = mat;
       current_rhs = rhs;
       current_force_diagonal_blocks = force_diagonal_blocks;
@@ -892,16 +883,16 @@ namespace Hermes
           ext_functions.push_back(wf->vfsurf.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[HermesApi.getParamValue("num_threads")];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[HermesApi.getParamValue("num_threads")];
-      RefMap*** refmaps = new RefMap**[HermesApi.getParamValue("num_threads")];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[HermesApi.getParamValue("num_threads")];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[HermesApi.getParamValue("num_threads")];
-      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[HermesApi.getParamValue("num_threads")];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
+      RefMap*** refmaps = new RefMap**[Hermes2DApi.getParamValue("num_threads")];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
 
       // Fill these structures.
       init_assembling(coeff_vec, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
@@ -921,9 +912,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[HermesApi.getParamValue("num_threads")];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[HermesApi.getParamValue("num_threads")];
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.getParamValue("num_threads")];
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         for (unsigned j = 0; j < spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -956,7 +947,7 @@ namespace Hermes
       VectorFormSurf<Scalar>** current_vfsurf;
 
 #define CHUNKSIZE 1
-      int num_threads_used = HermesApi.getParamValue("num_threads");
+      int num_threads_used = Hermes2DApi.getParamValue("num_threads");
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -993,10 +984,10 @@ namespace Hermes
       deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
       {
         fns[i].clear();
       }
@@ -1022,15 +1013,13 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, Vector<Scalar>* rhs,
       bool force_diagonal_blocks, Table* block_weights)
     {
-      _F_;
       assemble(coeff_vec, NULL, rhs, force_diagonal_blocks, block_weights);
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
-      _F_;
-
+      
       // Obtain assembly lists for the element at all spaces of the stage, set appropriate mode for each pss.
       // NOTE: Active elements and transformations for external functions (including the solutions from previous
       // Newton's iteration) as well as basis functions (master PrecalcShapesets) have already been set in
@@ -1058,7 +1047,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_surface_state(AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
-      _F_;
       // Obtain the list of shape functions which are nonzero on this surface.
       for (unsigned int i = 0; i < spaces.size(); i++)
       {
@@ -1073,8 +1061,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state,
       MatrixFormVol<Scalar>** current_mfvol, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormVol<Scalar>** current_vfvol, VectorFormSurf<Scalar>** current_vfsurf)
     {
-      _F_;
-
+      
       // Initialize the state, return a non-NULL element; if no such element found, return.
       init_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
 
@@ -1285,8 +1272,7 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::calc_order_matrix_form(MatrixForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
-      _F_;
-
+      
       int order;
 
       if(is_fvm)
@@ -1342,7 +1328,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
-      _F_;
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
 
       double block_scaling_coef = this->block_scaling_coeff(form);
@@ -1451,8 +1436,7 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::calc_order_vector_form(VectorForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
-      _F_;
-
+      
       int order;
 
       if(is_fvm)
@@ -1496,7 +1480,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
-      _F_;
       bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
 
       // Init geometry.
@@ -1550,7 +1533,6 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      _F_;
       double3* pt = reference_mapping->get_quad_2d()->get_points(order, reference_mapping->get_active_element()->get_mode());
       int np = reference_mapping->get_quad_2d()->get_num_points(order, reference_mapping->get_active_element()->get_mode());
 
@@ -1573,7 +1555,6 @@ namespace Hermes
     template<typename Scalar>
     int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      _F_;
       int eo = reference_mapping->get_quad_2d()->get_edge_points(current_state->isurf, order, reference_mapping->get_active_element()->get_mode());
       double3* pt = reference_mapping->get_quad_2d()->get_points(eo, reference_mapping->get_active_element()->get_mode());
       int np = reference_mapping->get_quad_2d()->get_num_points(eo, reference_mapping->get_active_element()->get_mode());
@@ -1591,7 +1572,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
-      _F_;
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
@@ -1621,7 +1601,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
     {
-      _F_;
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       for(int i = 0; i < prev_size; i++)
       {
@@ -1643,7 +1622,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
-      _F_;
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
 
       if (current_u_ext != NULL)
@@ -1669,7 +1647,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext)
     {
-      _F_;
       // Values of the previous Newton iteration, shape functions
       // and external functions in quadrature points.
       int prev_size = this->wf->get_neq() - form->u_ext_offset;
@@ -1693,7 +1670,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps)
     {
-      _F_;
       // Increase due to reference map.
       order = current_refmaps[form->i]->get_inv_ref_order();
       order += o->get_order();
@@ -1704,7 +1680,6 @@ namespace Hermes
     void DiscreteProblem<Scalar>::assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
       Traverse::State* current_state, MatrixFormSurf<Scalar>** current_mfsurf, VectorFormSurf<Scalar>** current_vfsurf, Transformable** fn)
     {
-      _F_;
       // Determine the minimum mesh seq.
       unsigned int min_dg_mesh_seq = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -1826,7 +1801,7 @@ namespace Hermes
                 if(num_neighbors[current_state->isurf] == 0)
                   num_neighbors[current_state->isurf] = ns->n_neighbors;
                 if(ns->n_neighbors != num_neighbors[current_state->isurf])
-                  error("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
+                  throw new Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
               }
             }
 
@@ -1905,7 +1880,6 @@ namespace Hermes
       std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap, 
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches, unsigned int min_dg_mesh_seq)
     {
-      _F_;
       // Set the active segment in all NeighborSearches
       for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
       {
@@ -2229,7 +2203,6 @@ namespace Hermes
     ExtData<Scalar>* DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int order, unsigned int min_dg_mesh_seq)
     {
-      _F_;
       Func<Scalar>** ext_fns = new Func<Scalar>*[ext.size()];
       for(unsigned int j = 0; j < ext.size(); j++)
       {
@@ -2248,7 +2221,6 @@ namespace Hermes
     bool DiscreteProblem<Scalar>::init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
       Traverse::State* current_state, unsigned int min_dg_mesh_seq)
     {
-      _F_;
       // Initialize the NeighborSearches.
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
@@ -2284,7 +2256,6 @@ namespace Hermes
     void DiscreteProblem<Scalar>::build_multimesh_tree(NeighborNode* root,
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches)
     {
-      _F_;
       for(unsigned int i = 0; i < neighbor_searches.get_size(); i++)
         if(neighbor_searches.present(i))
         {
@@ -2303,7 +2274,6 @@ namespace Hermes
       unsigned int* transformations,
       unsigned int transformation_count)
     {
-      _F_;
       // If we are already in the leaf.
       if(transformation_count == 0)
         return;
@@ -2325,7 +2295,7 @@ namespace Hermes
         {
           if(node->get_right_son()->get_transformation() == transformations[0])
             insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
-          else error("More than two possible sons in insert_into_multimesh_tree().");
+          else throw new Hermes::Exceptions::Exception("More than two possible sons in insert_into_multimesh_tree().");
         }
         // If the right one does not exist and the left one was not correct, create a right son and continue this way.
         else
@@ -2339,7 +2309,6 @@ namespace Hermes
     template<typename Scalar>
     Hermes::vector<Hermes::vector<unsigned int>*> DiscreteProblem<Scalar>::get_multimesh_neighbors_transformations(NeighborNode* multimesh_tree)
     {
-      _F_;
       // Initialize the vector.
       Hermes::vector<Hermes::vector<unsigned int>*> running_transformations;
       // Prepare the first neighbor's vector.
@@ -2353,7 +2322,6 @@ namespace Hermes
     void DiscreteProblem<Scalar>::traverse_multimesh_tree(NeighborNode* node,
       Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations)
     {
-      _F_;
       // If we are in the root.
       if(node->get_transformation() == 0)
       {
@@ -2396,7 +2364,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::update_neighbor_search(NeighborSearch<Scalar>* ns, NeighborNode* multimesh_tree)
     {
-      _F_;
       // This has to be done, because we pass ns by reference and the number of neighbors is changing.
       unsigned int num_neighbors = ns->get_num_neighbors();
 
@@ -2421,7 +2388,6 @@ namespace Hermes
       unsigned int transformation_count,
       NeighborNode* node)
     {
-      _F_;
       // If there are no transformations left.
       if(transformation_count == 0)
         return node;
@@ -2439,7 +2405,7 @@ namespace Hermes
         }
       }
       // We always should be able to empty the transformations array.
-      error("Transformation of a central element not found in the multimesh tree.");
+      throw new Hermes::Exceptions::Exception("Transformation of a central element not found in the multimesh tree.");
       return NULL;
     }
 
@@ -2447,7 +2413,6 @@ namespace Hermes
     int DiscreteProblem<Scalar>::update_ns_subtree(NeighborSearch<Scalar>* ns,
       NeighborNode* node, unsigned int ith_neighbor)
     {
-      _F_;
       int current_count = ns->get_num_neighbors();
 
       // No subtree => no work.
@@ -2455,7 +2420,7 @@ namespace Hermes
       if(node->get_left_son() == NULL)
       {
         if(node->get_right_son() != NULL)
-          error("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
+          throw new Hermes::Exceptions::Exception("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
         return 0;
       }
 
@@ -2528,7 +2493,6 @@ namespace Hermes
       Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations,
       const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode)
     {
-      _F_;
       // If we are in a leaf.
       if(node->get_left_son() == NULL && node->get_right_son() == NULL)
       {

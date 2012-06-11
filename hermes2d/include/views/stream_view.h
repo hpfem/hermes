@@ -123,17 +123,17 @@ namespace Hermes
       class HERMES_API StreamView : public View
       {
       public:
-        StreamView(const char* title = "StreamView", WinGeom* wg = NULL) { error("GLUT disabled."); }
-        StreamView(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+        StreamView(const char* title = "StreamView", WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        StreamView(char* title, WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
 
         /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
         /// and the distance between starting points is "step"
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) { error("GLUT disabled."); }
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem) { error("GLUT disabled."); }
+        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
 
         /// Creates additional streamline with strarting point (x, y)
         /// Note: Can be called only after StreamView::show
-        void add_streamline(double x, double y) { error("GLUT disabled."); }
+        void add_streamline(double x, double y) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

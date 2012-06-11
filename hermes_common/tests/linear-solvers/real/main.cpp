@@ -261,8 +261,6 @@ void solve(LinearMatrixSolver<double> &solver, int n) {
 int main(int argc, char *argv[]) {
   int ret = TEST_SUCCESS;
 
-  if (argc < 3) error("Not enough parameters.");
-
   int n;
   int nnz;
   bool cplx_2_real;
@@ -274,22 +272,6 @@ int main(int argc, char *argv[]) {
     cplx_2_real = true;
   else
     cplx_2_real = false;
-
-  switch(atoi(argv[2]))
-  {
-  case 1:
-  if (read_matrix_and_rhs((char*)"in/linsys-1", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
-    error("Failed to read the matrix and rhs.");
-break;
-  case 2:
-  if (read_matrix_and_rhs((char*)"in/linsys-2", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
-    error("Failed to read the matrix and rhs.");
-break;
-  case 3:
-  if (read_matrix_and_rhs((char*)"in/linsys-3", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
-    error("Failed to read the matrix and rhs.");
-break;
-}
 
 double* sln;
 

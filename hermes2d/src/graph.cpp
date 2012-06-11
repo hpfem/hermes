@@ -80,7 +80,7 @@ namespace Hermes
       if (!rows.size()) add_row(NULL);
       if (fabs(x) < 1e-12) return;  // this is to avoid problems with plotting in log-log scale
       // (sometimes the CPU time was zero and plotting crashed)
-      if (row < 0 || row >= (int)rows.size()) error("Invalid row number.");
+      if (row < 0 || row >= (int)rows.size()) throw new Hermes::Exceptions::Exception("Invalid row number.");
       Values xy = { x, y };
       rows[row].data.push_back(xy);
     }
@@ -116,10 +116,10 @@ namespace Hermes
 
     void SimpleGraph::save(const char* filename)
     {
-      if (!rows.size()) error("No data rows defined.");
+      if (!rows.size()) throw new Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if (f == NULL) error("Error writing to %s.", filename);
+      if (f == NULL) throw new Hermes::Exceptions::Exception("Error writing to %s.", filename);
 
       for (unsigned int i = 0; i < rows.size(); i++)
       {
@@ -130,17 +130,17 @@ namespace Hermes
 
       fclose(f);
 
-      verbose("Graph saved to file '%s'.", filename);
+      info("Graph saved to file '%s'.", filename);
     }
 
     void MatlabGraph::save(const char* filename)
     {
       int j, k;
 
-      if (!rows.size()) error("No data rows defined.");
+      if (!rows.size()) throw new Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if (f == NULL) error("Error writing to %s", filename);
+      if (f == NULL) throw new Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       if (!logx && !logy)
         fprintf(f, "plot(");
@@ -190,7 +190,7 @@ namespace Hermes
 
       fclose(f);
 
-      verbose("Graph saved. Run the file '%s' in Matlab.", filename);
+      info("Graph saved. Run the file '%s' in Matlab.", filename);
     }
 
     static void get_style_types(std::string line, std::string mark, std::string col, int& lt, int& pt, int& ct)
@@ -241,10 +241,10 @@ namespace Hermes
     {
       int j;
 
-      if (!rows.size()) error("No data rows defined.");
+      if (!rows.size()) throw new Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if (f == NULL) error("Error writing to %s", filename);
+      if (f == NULL) throw new Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       fprintf(f, "%s", terminal_str.c_str());
 
@@ -311,7 +311,7 @@ namespace Hermes
       fprintf(f, "set terminal x11\n");
       fclose(f);
 
-      verbose("Graph saved. Process the file '%s' with gnuplot.", filename);
+      info("Graph saved. Process the file '%s' with gnuplot.", filename);
     }
 
     PNGGraph::PNGGraph( const char* title, const char* x_axis_name, const char* y_axis_name, const double lines_width,

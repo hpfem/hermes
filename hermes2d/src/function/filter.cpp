@@ -27,7 +27,7 @@ namespace Hermes
     {
       this->num = num;
       if(num > 10)
-        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+        throw new Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions[i];
       this->init();
@@ -38,7 +38,7 @@ namespace Hermes
     {
       this->num = solutions.size();
       if(num > 10)
-        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+        throw new Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions.at(i);
       this->init();
@@ -49,7 +49,7 @@ namespace Hermes
     {
       this->num = solutions.size();
       if(num > 10)
-        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+        throw new Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions.at(i);
       this->init();
@@ -61,7 +61,7 @@ namespace Hermes
     {
       this->num = solutions.size();
       if(num > 10)
-        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+        throw new Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions.at(i);
       this->init();
@@ -83,7 +83,7 @@ namespace Hermes
         if (meshes[i] == NULL)
         {
           warn("You may be initializing a Filter with Solution that is missing a Mesh.");
-          error("this->meshes[%d] is NULL in Filter<Scalar>::init().", i);
+          throw new Hermes::Exceptions::Exception("this->meshes[%d] is NULL in Filter<Scalar>::init().", i);
         }
         if (meshes[i]->get_seq() != this->mesh->get_seq())
         {
@@ -228,10 +228,10 @@ namespace Hermes
     {
       this->num = solutions.size();
       if(this->num > 10)
-        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+        throw new Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       if(items.size() != (unsigned) this->num)
         if(items.size() > 0)
-          error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
+          throw new Hermes::Exceptions::Exception("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
 
       for(int i = 0; i < this->num; i++)
 
@@ -251,10 +251,10 @@ namespace Hermes
     {
       this->num = solutions.size();
       if(this->num > 10)
-        error("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
+        throw new Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       if(items.size() != (unsigned) this->num)
         if(items.size() > 0)
-          error("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
+          throw new Hermes::Exceptions::Exception("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
 
       for(int i = 0; i < this->num; i++)
       {
@@ -285,7 +285,7 @@ namespace Hermes
     void SimpleFilter<Scalar>::precalculate(int order, int mask)
     {
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        error("Filter not defined for derivatives.");
+        throw new Hermes::Exceptions::Exception("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
@@ -305,7 +305,7 @@ namespace Hermes
           if (mask >= 0x40) { a = 1; mask >>= 6; }
           while (!(mask & 1)) { mask >>= 1; b++; }
           tab[i] = this->sln[i]->get_values(this->num_components == 1 ? a : j, b);
-          if (tab[i] == NULL) error("Value of 'item%d' is incorrect in filter definition.", i + 1);
+          if (tab[i] == NULL) throw new Hermes::Exceptions::Exception("Value of 'item%d' is incorrect in filter definition.", i + 1);
         }
 
         Hermes::vector<Scalar*> values;
@@ -329,7 +329,7 @@ namespace Hermes
     Scalar SimpleFilter<Scalar>::get_pt_value(double x, double y, int it)
     {
       if (it & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        error("Filter not defined for derivatives.");
+        throw new Hermes::Exceptions::Exception("Filter not defined for derivatives.");
       Scalar val[10];
       for (int i = 0; i < this->num; i++)
         val[i] = this->sln[i]->get_pt_value(x, y, item[i]);
@@ -412,7 +412,7 @@ namespace Hermes
     void ComplexFilter::precalculate(int order, int mask)
     {
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        error("Filter not defined for derivatives.");
+        throw new Hermes::Exceptions::Exception("Filter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
@@ -437,7 +437,7 @@ namespace Hermes
     double ComplexFilter::get_pt_value(double x, double y, int it)
     {
       if (it & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        error("Filter not defined for derivatives.");
+        throw new Hermes::Exceptions::Exception("Filter not defined for derivatives.");
       std::complex<double> val = this->sln_complex->get_pt_value(x, y, it);
 
       double result;
@@ -466,7 +466,7 @@ namespace Hermes
       this->num_components = this->sln[0]->get_num_components();
       for (int i = 1; i < this->num; i++)
         if (this->sln[i]->get_num_components() != this->num_components)
-          error("Filter: Solutions do not have the same number of components!");
+          throw new Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
     }
 
     template<typename Scalar>
@@ -553,7 +553,7 @@ namespace Hermes
       Hermes::vector<int>(item1 & H2D_FN_COMPONENT_0, item1 & H2D_FN_COMPONENT_1))
     {
       if (sln1->get_num_components() < 2)
-        error("The single-argument constructor is intended for vector-valued solutions.");
+        throw new Hermes::Exceptions::Exception("The single-argument constructor is intended for vector-valued solutions.");
     };
 
     template<typename Scalar>
@@ -767,7 +767,7 @@ namespace Hermes
       : SimpleFilter<Scalar>(solutions, items)
     {
       if (solutions.size() > 1)
-        error("SquareFilter only supports one MeshFunction.");
+        throw new Hermes::Exceptions::Exception("SquareFilter only supports one MeshFunction.");
     };
 
     template<typename Scalar>
@@ -794,7 +794,7 @@ namespace Hermes
       : SimpleFilter<double>(solutions, items)
     {
       if (solutions.size() > 1)
-        error("AbsFilter only supports one MeshFunction.");
+        throw new Hermes::Exceptions::Exception("AbsFilter only supports one MeshFunction.");
     };
 
     AbsFilter::AbsFilter(MeshFunction<double>* solution)
@@ -888,14 +888,14 @@ namespace Hermes
       : SimpleFilter<std::complex<double> >(solutions, items)
     {
       if (solutions.size() > 1)
-        error("RealFilter only supports one MeshFunction.");
+        throw new Hermes::Exceptions::Exception("RealFilter only supports one MeshFunction.");
     };
 
 
     void VonMisesFilter::precalculate(int order, int mask)
     {
       if (mask & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        error("VonMisesFilter not defined for derivatives.");
+        throw new Hermes::Exceptions::Exception("VonMisesFilter not defined for derivatives.");
 
       Quad2D* quad = this->quads[this->cur_quad];
       int np = quad->get_num_points(order, this->element->get_mode());
@@ -1042,7 +1042,7 @@ namespace Hermes
       this->num_components = this->sln[0]->get_num_components();
       for (int i = 1; i < this->num; i++)
         if (this->sln[i]->get_num_components() != this->num_components)
-          error("Filter: Solutions do not have the same number of components!");
+          throw new Hermes::Exceptions::Exception("Filter: Solutions do not have the same number of components!");
     }
 
     template<typename Scalar>

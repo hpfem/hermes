@@ -18,6 +18,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include"exceptions.h"
+#include"api.h"
+#include"callstack.h"
 
 namespace Hermes
 {
@@ -27,13 +29,19 @@ namespace Hermes
     Exception::Exception()
     {
       message = NULL;
-      func = callstack.getLastFunc();
     }
 
-    Exception::Exception(const char * msg)
+    Exception::Exception(const char * msg, ...)
     {
-      message = msg;
-      func = callstack.getLastFunc();
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, msg);
+      vsprintf(text, msg, arglist);
+      va_end(arglist);
+
+      message = text;
     }
 
     void Exception::printMsg() const
@@ -42,13 +50,8 @@ namespace Hermes
         fprintf(stderr, "%s\n", message);
       else
         fprintf(stderr, "Default exception\n");
-      if (func)
-        fprintf(stderr, "in %s\n", func);
-    }
-
-    const char * Exception::getFuncName() const
-    {
-      return func;
+      if(Hermes::HermesCommonApi.getParamValue("exceptions print stacktrace") == 1)
+        CallStack::dump(0);
     }
 
     const char * Exception::getMsg() const
@@ -238,6 +241,5 @@ namespace Hermes
       this->value=e.getValue();
       this->allowed=e.getAllowed();
     }
-
   }
 }

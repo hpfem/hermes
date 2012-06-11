@@ -231,8 +231,6 @@ void solve(LinearMatrixSolver<std::complex<double> > &solver, int n) {
 int main(int argc, char *argv[]) {
   int ret = TEST_SUCCESS;
 
-  if (argc < 2) error("Not enough parameters.");
-
   int n;
   int nnz;
   bool cplx_2_real;
@@ -244,9 +242,6 @@ int main(int argc, char *argv[]) {
     cplx_2_real = true;
   else
     cplx_2_real = false;
-
-  if (read_matrix_and_rhs((char*)"in/linsys-cplx-4", n, nnz, ar_mat, ar_rhs, cplx_2_real) != TEST_SUCCESS)
-    error("Failed to read the matrix and rhs.");
 
   std::complex<double>* sln;
 

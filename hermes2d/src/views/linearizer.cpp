@@ -17,6 +17,7 @@
 #include "refmap.h"
 #include "traverse.h"
 #include "exact_solution.h"
+#include "api2d.h"
 
 namespace Hermes
 {
@@ -729,8 +730,8 @@ namespace Hermes
           meshes.push_back(ydisp->get_mesh());
 
         // Parallelization
-        MeshFunction<double>*** fns = new MeshFunction<double>**[HermesApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.getParamValue("num_threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           fns[i] = new MeshFunction<double>*[3];
           fns[i][0] = sln->clone();
@@ -750,8 +751,8 @@ namespace Hermes
           }
         }
 
-        Transformable*** trfs = new Transformable**[HermesApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        Transformable*** trfs = new Transformable**[Hermes2DApi.getParamValue("num_threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           trfs[i] = new Transformable*[3];
           trfs[i][0] = fns[i][0];
@@ -766,9 +767,9 @@ namespace Hermes
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        Traverse* trav = new Traverse[HermesApi.getParamValue("num_threads")];
+        Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
 
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
           trav[i].stack = trav_master.stack;
@@ -777,7 +778,7 @@ namespace Hermes
         int state_i;
 
 #define CHUNKSIZE 1
-        int num_threads_used = HermesApi.getParamValue("num_threads");
+        int num_threads_used = Hermes2DApi.getParamValue("num_threads");
 #pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -791,7 +792,7 @@ namespace Hermes
             fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
             if (val == NULL)
-              error("Item not defined in the solution.");
+              throw new Hermes::Exceptions::Exception("Item not defined in the solution.");
 
             if(xdisp != NULL)
               fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
@@ -839,7 +840,7 @@ namespace Hermes
         }
 
         trav_master.finish();
-        for(unsigned int i = 0; i < HermesApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
         {
           trav[i].finish();
           for(unsigned int j = 0; j < (1 + (xdisp != NULL? 1 : 0) + (ydisp != NULL ? 1 : 0)); j++)
@@ -959,7 +960,7 @@ namespace Hermes
         process_solution(sln, item, eps);
 
         FILE* f = fopen(filename, "wb");
-        if (f == NULL) error("Could not open %s for writing.", filename);
+        if (f == NULL) throw new Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
         lock_data();
 
         // Output header for vertices.
@@ -1008,7 +1009,8 @@ namespace Hermes
 
       void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
-        assert_msg(verts != NULL, "Cannot calculate AABB from NULL vertices");
+        if(verts == NULL)
+          throw new Exceptions::Exception("Cannot calculate AABB from NULL vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }
 

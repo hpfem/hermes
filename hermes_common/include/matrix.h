@@ -24,6 +24,8 @@
 
 #include "common.h"
 #include "error.h"
+#include "vector.h"
+#include "exceptions.h"
 
 using namespace Hermes::Error;
 
@@ -94,7 +96,7 @@ namespace Hermes
         std::ofstream fout(fname.c_str());
         if (!fout.is_open())
         {
-          error("Unable to save a matrix to a file \"%s\"", fname.c_str());
+          throw new Hermes::Exceptions::Exception("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
         }
 
@@ -130,7 +132,7 @@ namespace Hermes
         std::ofstream fout(fname.c_str());
         if (!fout.is_open())
         {
-          error("Unable to save a matrix to a file \"%s\"", fname.c_str());
+          throw new Hermes::Exceptions::Exception("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
         }
 
@@ -366,7 +368,7 @@ namespace Hermes
       /// @param mat matrix to add
       virtual void add_sparse_matrix(SparseMatrix* mat)
       {
-        error("add_sparse_matrix() undefined.");
+        throw new Hermes::Exceptions::Exception("add_sparse_matrix() undefined.");
       };
 
       /// Add matrix to diagonal
@@ -375,7 +377,7 @@ namespace Hermes
       /// @param[in] mat added matrix
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
       {
-        error("add_sparse_to_diagonal_blocks() undefined.");
+        throw new Hermes::Exceptions::Exception("add_sparse_to_diagonal_blocks() undefined.");
       };
 
       /// Return the number of entries in a specified row
@@ -414,12 +416,12 @@ namespace Hermes
 
       /// Multiply with a vector.
       virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) {
-        error("multiply_with_vector() undefined.");
+        throw new Hermes::Exceptions::Exception("multiply_with_vector() undefined.");
       };
 
       /// Multiply with a Scalar.
       virtual void multiply_with_Scalar(Scalar value) {
-        error("multiply_with_Scalar() undefined.");
+        throw new Hermes::Exceptions::Exception("multiply_with_Scalar() undefined.");
       };
 
       /// Duplicate sparse matrix (including allocation).
@@ -434,7 +436,7 @@ namespace Hermes
       /// get number of nonzero numbers in matrix
       /// @return number of nonzero numbers in matrix
       virtual unsigned int get_nnz() const {
-        error("get_nnz() undefined.");
+        throw new Hermes::Exceptions::Exception("get_nnz() undefined.");
         return 0;
       }
 

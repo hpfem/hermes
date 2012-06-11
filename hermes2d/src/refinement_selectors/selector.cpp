@@ -44,8 +44,10 @@ namespace Hermes
       POnlySelector<Scalar>::POnlySelector(int max_order, int order_h_inc, int order_v_inc)
         : Selector<Scalar>(max_order), order_h_inc(order_h_inc), order_v_inc(order_v_inc)
       {
-        error_if(order_h_inc >= 0, "Horizontal increase has to be greater or equal to zero.");
-        error_if(order_v_inc >= 0, "Vertical increase has to be greater or equal to zero.");
+        if(order_h_inc < 0)
+          throw new Hermes::Exceptions::ValueException("horizontal increase", order_h_inc, 0);
+        if(order_v_inc < 0)
+          throw new Hermes::Exceptions::ValueException("vertical increase", order_v_inc, 0);
       }
 
       template<typename Scalar>

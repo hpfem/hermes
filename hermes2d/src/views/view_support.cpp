@@ -158,12 +158,12 @@ namespace Hermes
         {
           ThreadInfo* new_thread_info = NULL;
           try { new_thread_info = new ThreadInfo(); }
-          catch(std::bad_alloc&) { error("Failed to allocate structure for view thread"); }
+          catch(std::bad_alloc&) { throw new Hermes::Exceptions::Exception("Failed to allocate structure for view thread"); }
           int err = pthread_create(&new_thread_info->thread, NULL, view_thread_func, new_thread_info);
           if (err)
           {
             delete new_thread_info;
-            error("Failed to create main thread, error: %d", err);
+            throw new Hermes::Exceptions::Exception("Failed to create main thread, error: %d", err);
           }
           view_thread = new_thread_info;
         }
@@ -187,12 +187,11 @@ namespace Hermes
       /// Sets a title of a view. Function has to be called just from the inside of view thread with a locked sync_view.
       static int set_view_title_in_thread(void* title_pars_ptr)
       {
-        error_if(need_safe_call(), "Calling set_view_title_in_thread from other thread.");
         TitleParams& title_params = *((TitleParams*)title_pars_ptr);
         std::map<int, View*>::iterator found_view = view_instances.find(title_params.view_id);
         if (found_view == view_instances.end())
         {
-          debug_log("Settings title of a view that is not registered.");
+          throw new Exceptions::Exception("Settings title of a view that is not registered.");
           return -1;
         }
 
@@ -206,7 +205,6 @@ namespace Hermes
       /// Adds a new view. Function has to be called just from the inside of view thread with a locked sync_view.
       int add_view_in_thread(void* view_pars_ptr)
       {
-        error_if(need_safe_call(), "Calling add_view_in_thread from other thread.");
         ViewParams& view_params = *((ViewParams*)view_pars_ptr);
 
         //create GLUT window
@@ -217,7 +215,8 @@ namespace Hermes
 
         //initialize GLEW
         GLenum err = glewInit();
-        error_if(err != GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
+        if(err != GLEW_OK)
+          throw new Exceptions::Exception("GLEW error: %s", glewGetErrorString(err));
         glew_initialized = true;
 
         //register callbacks
@@ -243,12 +242,11 @@ namespace Hermes
       /// Removes a new view. Function has to be called just from the inside of view thread with a locked sync_view.
       int remove_view_in_thread(void* remove_params_ptr)
       {
-        error_if(need_safe_call(), "Calling remove_view_in_thread from other thread.");
         RemoveParams& params = *(RemoveParams*)remove_params_ptr;
         std::map<int, View*>::iterator found_view = view_instances.find(params.view_id);
         if (found_view == view_instances.end())
         {
-          debug_log("Removing of a view that is not registered");
+          throw new Exceptions::Exception("Removing of a view that is not registered");
           return -1;
         }
 
@@ -287,10 +285,10 @@ namespace Hermes
       /// Forces a redisplay of a view. Function has to be called just from the inside of view thread.
       static int refresh_view_in_thread(void* view_id_ptr)
       {
-        error_if(need_safe_call(), "Calling refresh_view_in_thread from other thread.");
         int view_id = *((int*)view_id_ptr);
         std::map<int, View*>::iterator found_view = view_instances.find(view_id);
-        assert_msg(found_view != view_instances.end(), "Refreshing a view that is not registered");
+        if(found_view == view_instances.end())
+          throw new Exceptions::Exception("Refreshing a view that is not registered");
 
         //redisplay
         if (found_view != view_instances.end())

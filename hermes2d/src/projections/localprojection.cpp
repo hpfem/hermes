@@ -43,7 +43,7 @@ namespace Hermes
           case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
           case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
           case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-          default: error("Unknown space type in OGProjection<Scalar>::project_global().");
+          default: throw new Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
         }
       }
 
@@ -100,7 +100,6 @@ namespace Hermes
         Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
         Hermes::MatrixSolverType matrix_solver, ProjNormType proj_norm)
     {
-      _F_
       int ndof = space->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];
       project_local(space, source_sln, coeff_vec, matrix_solver, proj_norm);
@@ -113,7 +112,6 @@ namespace Hermes
         Hermes::vector<MeshFunction<Scalar>*> meshfns, Scalar* target_vec, 
         Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
-      _F_
       int n = spaces.size();
 
       if (n != meshfns.size()) throw Exceptions::LengthException(1, 2, n, meshfns.size());
@@ -136,7 +134,6 @@ namespace Hermes
         Hermes::vector<Solution<Scalar>*> slns, Scalar* target_vec, 
         Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms)
     {
-      _F_
       int n = spaces.size();
 
       // Sanity checks.
@@ -160,7 +157,6 @@ namespace Hermes
       Hermes::vector<Solution<Scalar>*> target_slns, Hermes::MatrixSolverType matrix_solver,
       Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {
-      _F_
       int n = spaces.size();
 
       // Sanity checks.

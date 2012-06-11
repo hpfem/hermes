@@ -78,8 +78,8 @@ namespace Hermes
     template<typename Scalar>
     void KellyTypeAdapt<Scalar>::add_error_estimator_vol(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
     {
-      error_if(form->i < 0 || form->i >= this->num,
-        "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
+      if(form->i < 0 || form->i >= this->num)
+        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
 
       form->adapt = this;
       this->error_estimators_vol.push_back(form);
@@ -88,8 +88,8 @@ namespace Hermes
     template<typename Scalar>
     void KellyTypeAdapt<Scalar>::add_error_estimator_surf(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
     {
-      error_if (form->i < 0 || form->i >= this->num,
-        "Invalid component number (%d), max. supported components: %d", form->i, H2D_MAX_COMPONENTS);
+      if(form->i < 0 || form->i >= this->num)
+        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
 
       form->adapt = this;
       this->error_estimators_surf.push_back(form);
@@ -100,13 +100,12 @@ namespace Hermes
                                                      Hermes::vector<double>* component_errors,
                                                      unsigned int error_flags)
     {
-      int n = slns.size();
-      error_if (n != this->num,
-        "Wrong number of solutions.");
+      if(slns.size() != this->num)
+        throw new Hermes::Exceptions::LengthException(0, slns.size(), this->num);
 
       Hermes::TimePeriod tmr;
 
-      for (int i = 0; i < n; i++)
+      for (int i = 0; i < this->num; i++)
       {
         this->sln[i] = slns[i];
         this->sln[i]->set_quad_2d(&g_quad_2d_std);
@@ -145,7 +144,7 @@ namespace Hermes
       }
 
       double *errors_components = new double[this->num];
-      memset(errors_components, 0.0, this->num * sizeof(double));
+      memset(errors_components, 0, this->num * sizeof(double));
       this->errors_squared_sum = 0.0;
       double total_error = 0.0;
 
@@ -253,9 +252,9 @@ namespace Hermes
 
                 // Determine the minimum mesh seq in this stage.
                 unsigned int min_dg_mesh_seq = 0;
-                for(unsigned int i = 0; i < this->spaces.size(); i++)
-                  if(this->spaces[i]->get_mesh()->get_seq() < min_dg_mesh_seq || i == 0)
-                    min_dg_mesh_seq = this->spaces[i]->get_mesh()->get_seq();
+                for(unsigned int j = 0; j < this->spaces.size(); j++)
+                  if(this->spaces[j]->get_mesh()->get_seq() < min_dg_mesh_seq || j == 0)
+                    min_dg_mesh_seq = this->spaces[j]->get_mesh()->get_seq();
 
                 ns_index = meshes[i]->get_seq() - min_dg_mesh_seq; // = 0 for single mesh
 
@@ -280,7 +279,7 @@ namespace Hermes
                     if(num_neighbors == 0)
                       num_neighbors = ns->n_neighbors;
                     if(ns->n_neighbors != num_neighbors)
-                      error("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt<Scalar>::calc_err_internal.");
+                      throw new Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt<Scalar>::calc_err_internal.");
                   }
                 }
 
@@ -339,7 +338,7 @@ namespace Hermes
                   // (use the central element's diameter).
                   if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
                     if(!element_markers_conversion.get_user_marker(ee->e[i]->marker).valid)
-                      error("Marker not valid.");
+                      throw new Hermes::Exceptions::Exception("Marker not valid.");
                     else
                       central_err *= interface_scaling_fns[i]->value(ee->e[i]->get_diameter(), element_markers_conversion.get_user_marker(ee->e[i]->marker).marker);
 
@@ -353,7 +352,7 @@ namespace Hermes
                     // (use the diameter of the element on the other side).
                     if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
                       if(!element_markers_conversion.get_user_marker(neighb->marker).valid)
-                      error("Marker not valid.");
+                      throw new Hermes::Exceptions::Exception("Marker not valid.");
                     else
                       neighb_err *= interface_scaling_fns[i]->value(neighb->get_diameter(), element_markers_conversion.get_user_marker(neighb->marker).marker);
 
@@ -420,7 +419,7 @@ namespace Hermes
             component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else
           {
-            error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
+            throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
             return -1.0;
           }
         }
@@ -463,7 +462,7 @@ namespace Hermes
         return sqrt(total_error / total_norm);
       else
       {
-        error("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
+        throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
     }

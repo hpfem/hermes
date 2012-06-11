@@ -27,7 +27,7 @@ namespace Hermes
         case H2D_HP_ANISO_H: return "HP_ANISO_H";
         case H2D_HP_ANISO_P: return "HP_ANISO_P";
         case H2D_HP_ANISO: return "HP_ANISO";
-        default: error("Invalid adapt type %d.", cand_list); return NULL;
+        default: throw new Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return NULL;
         }
       }
 
@@ -43,7 +43,7 @@ namespace Hermes
         case H2D_HP_ANISO_H:
         case H2D_HP_ANISO_P:
         case H2D_HP_ANISO: return true; break;
-        default: error("Invalid adapt type %d.", cand_list); return false;
+        default: throw new Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
         }
       }
 
@@ -59,7 +59,7 @@ namespace Hermes
         case H2D_HP_ANISO_H: return false;
         case H2D_HP_ANISO_P: return true;
         case H2D_HP_ANISO: return true;
-        default: error("Invalid adapt type %d.", cand_list); return false;
+        default: throw new Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
         }
       }
 
@@ -74,7 +74,8 @@ namespace Hermes
         conv_exp(conv_exp),
         shapeset(shapeset)
       {
-        error_if(shapeset == NULL, "Shapeset is NULL.");
+        if(shapeset == NULL)
+          throw new Exceptions::NullException(3);
 
         num_shapes = new int***[2];
         for(int i = 0; i < 2; i++)
@@ -468,7 +469,7 @@ namespace Hermes
           if (cand->split == H2D_REFINEMENT_H) info = &info_h;
           else if (cand->split == H2D_REFINEMENT_P) info = &info_p;
           else if (cand->split == H2D_REFINEMENT_ANISO_H || cand->split == H2D_REFINEMENT_ANISO_V) info = &info_aniso;
-          else { error("Invalid candidate type: %d.", cand->split); };
+          else { throw new Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand->split); };
 
           //evaluate elements of candidates
           const int num_elems = cand->get_num_elems();
@@ -524,7 +525,7 @@ namespace Hermes
               break;
 
             default:
-              error("Unknown split type \"%d\" at candidate %d (element #%d)", c.split, i, e->id);
+              throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d (element #%d)", c.split, i, e->id);
             }
           }
           else { //quad
@@ -563,7 +564,7 @@ namespace Hermes
               break;
 
             default:
-              error("Unknown split type \"%d\" at candidate %d", c.split, i);
+              throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
             }
           }
         }
@@ -658,14 +659,10 @@ namespace Hermes
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
         if (element->is_triangle())
         {
-          assert_msg(order_v == 0, "Element %d is a triangle but order_v (%d) is not zero", element->id, order_v);
           order_v = order_h;
           quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v); //in a case of a triangle, order_v is zero. Set it to order_h in order to simplify the routines.
         }
 
-        //check validity
-        assert_msg(std::max(order_h, order_v) <= H2DRS_MAX_ORDER, "Given order (%d, %d) exceedes the maximum supported order %d.", order_h, order_v, H2DRS_MAX_ORDER);
-       
         //set orders
         set_current_order_range(element);
 
@@ -712,9 +709,11 @@ namespace Hermes
         {
           for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
           {
-            assert_msg(H2D_GET_V_ORDER(refinement.p[i]) == 0 || H2D_GET_H_ORDER(refinement.p[i]) == H2D_GET_V_ORDER(refinement.p[i]), "Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.p[i]), H2D_GET_V_ORDER(refinement.p[i]), i);
+            if(!(H2D_GET_V_ORDER(refinement.p[i]) == 0 || H2D_GET_H_ORDER(refinement.p[i]) == H2D_GET_V_ORDER(refinement.p[i])))
+              throw new Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.p[i]), H2D_GET_V_ORDER(refinement.p[i]), i);
             refinement.p[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.p[i]), 0);
-            assert_msg(H2D_GET_V_ORDER(refinement.q[i]) == 0 || H2D_GET_H_ORDER(refinement.q[i]) == H2D_GET_V_ORDER(refinement.q[i]), "Triangle processed but the resulting q-order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.q[i]), H2D_GET_V_ORDER(refinement.q[i]), i);
+            if(!(H2D_GET_V_ORDER(refinement.q[i]) == 0 || H2D_GET_H_ORDER(refinement.q[i]) == H2D_GET_V_ORDER(refinement.q[i])))
+              throw new Exceptions::Exception("Triangle processed but the resulting q-order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.q[i]), H2D_GET_V_ORDER(refinement.q[i]), i);
             refinement.q[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.q[i]), 0);
           }
         }
@@ -728,7 +727,8 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders)
       {
-        assert_msg(refinement != H2D_REFINEMENT_P, "P-candidate not supported for updating shared orders");
+        if(refinement == H2D_REFINEMENT_P)
+          throw new Exceptions::Exception("P-candidate not supported for updating shared orders");
         const int num_sons = get_refin_sons(refinement);
         if (suggested_quad_orders != NULL)
         {
@@ -771,7 +771,7 @@ namespace Hermes
         {
         case H2D_PREFER_SYMMETRIC_MESH: opt_symmetric_mesh = enable; break;
         case H2D_APPLY_CONV_EXP_DOF: opt_apply_exp_dof = enable; break;
-        default: error("Unknown option %d.", (int)option);
+        default: throw new Hermes::Exceptions::Exception("Unknown option %d.", (int)option);
         }
       }
       

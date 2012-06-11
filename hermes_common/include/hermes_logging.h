@@ -36,14 +36,10 @@
 *  \section s_example Supported Directives
 *  The following list contains directives that controls even logging.
 *  - ::HERMES_REPORT_WARN: Define to allow warning.
-*  - ::HERMES_REPORT_WARN_INTRO: Define to allow warning about integration issues.
 *  - ::HERMES_REPORT_INFO: Define to allow info.
-*  - ::HERMES_REPORT_VERBOSE: Define to allow verbose.
-*  - ::HERMES_REPORT_TIME: Define to allow time measurement reports.
-*  - ::HERMES_REPORT_TRACE: Define to allow execution tracing.
 *  - ::HERMES_REPORT_FILE "my_file.log": Define to direct output of a file \c my_file_log.
 *  - ::HERMES_REPORT_NO_FILE: Define to avoid any output file. It always overrides ::HERMES_REPORT_FILE.
-*  - ::HERMES_REPORT_REPORT_ALL: Define to allow all events to be reported except integration warnings (::HERMES_REPORT_WARN_INTRO). It overrides all settings.
+*  - ::HERMES_REPORT_REPORT_ALL: Define to allow all events to be reported. It overrides all settings.
 *  - ::HERMES_REPORT_RUNTIME_CONTROL: Define to allow controling of event logging through boolean variables.
 *    Notice this will enforce evaluation of all parameters of logging macros even though a logging of a given event
 *    is not enabled.
@@ -90,14 +86,7 @@ I Done. \endverbatim on screen if all events are enabled.
 #define __HERMES_COMMON_LOGGING_H_
 
 #include "compat.h"
-#include <pthread.h>
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
-#include <map>
-#include <cstdio>
-#include <stdarg.h>
-#include <sstream>
+#include "common.h"
 
 namespace Hermes
 {
@@ -124,7 +113,7 @@ namespace Hermes
     };
 
     /// Exits the application if the condition is true. \internal
-    /** Used by macros error() and error_if().
+    /** Used by macros throw new Hermes::Exceptions::Exception() and error_if().
     *  \param[in] cond True if the function should exit.
     *  \param[in] code Exit code returned by the application throught exit(). */
     HERMES_API void hermes_exit_if(bool cond, int code = -1);
@@ -223,28 +212,12 @@ using namespace Hermes::Logging;
 // Builds info about an event. \internal
 #define HERMES_BUILD_LOG_INFO(__event) HermesLogEventInfo(__event, HERMES_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__)
 
-/* error and assert macros */
-#define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
-#define error_if(__cond, ...) hermes_exit_if(hermes_log_message_if(__cond, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
-#ifndef NDEBUG
-# define assert_msg(__cond, ...) assert(!hermes_log_message_if(!(__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_ASSERT), __VA_ARGS__))
-#else
-# define assert_msg(__cond, ...)
-#endif
-
 /* reporting macros */
 #ifdef HERMES_REPORT_ALL
 # undef HERMES_REPORT_WARNING
 # define HERMES_REPORT_WARNING
-# undef HERMES_REPORT_NO_INTR_WARNING
 # undef HERMES_REPORT_INFO
 # define HERMES_REPORT_INFO
-# undef HERMES_REPORT_VERBOSE
-# define HERMES_REPORT_VERBOSE
-# undef HERMES_REPORT_TRACE
-# define HERMES_REPORT_TRACE
-# undef HERMES_REPORT_TIME
-# define HERMES_REPORT_TIME
 #endif
 
 #if defined(_DEBUG) || !defined(NDEBUG)
@@ -260,36 +233,11 @@ using namespace Hermes::Logging;
 # define warn(...)
 # define warn_if(__cond, ...)
 #endif
-#if defined(HERMES_REPORT_INTR_WARNING)
-# define warn_intr(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
-#else
-# define warn_intr(...)
-#endif
 #if defined(HERMES_REPORT_INFO)
 # define info(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
 # define info_if(__cond, ...) hermes_log_message_if((__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
 #else
 # define info(...)
 # define info_if(__cond, ...)
-#endif
-#if defined(HERMES_REPORT_VERBOSE)
-# define verbose(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_VERBOSE), __VA_ARGS__)
-#else
-# define verbose(...)
-#endif
-#if defined(HERMES_REPORT_TRACE)
-# define trace(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_TRACE), __VA_ARGS__)
-#else
-# define trace(...)
-#endif
-#if defined(HERMES_REPORT_TIME)
-# define report_time(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_TIME), __VA_ARGS__)
-#else
-# define report_time(...)
-#endif
-#if defined(_DEBUG) || !defined(NDEBUG)
-# define debug_log(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_DEBUG), __VA_ARGS__)
-#else
-# define debug_log(...)
 #endif
 #endif

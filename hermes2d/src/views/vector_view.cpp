@@ -61,7 +61,7 @@ namespace Hermes
         if(vec == NULL)
           vec = new Vectorizer;
         if (vsln->get_num_components() < 2)
-          error("The single-argument version of show() is only for vector-valued solutions.");
+          throw new Hermes::Exceptions::Exception("The single-argument version of show() is only for vector-valued solutions.");
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 

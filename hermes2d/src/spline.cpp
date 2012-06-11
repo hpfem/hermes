@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <typeinfo>
 #include "spline.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
@@ -31,7 +30,7 @@ namespace Hermes
     {
       this->is_const = false;
       bool success = this->calculate_coeffs();
-      if (!success) error("There was a problem constructing a cubic spline.");
+      if (!success) throw new Hermes::Exceptions::Exception("There was a problem constructing a cubic spline.");
     }
 
     CubicSpline::CubicSpline(double const_value) : Hermes::Hermes1DFunction<double>(const_value)
@@ -153,7 +152,7 @@ namespace Hermes
     void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) const
     {
       FILE *f = fopen(filename, "wb");
-      if (f == NULL) error("Could not open a spline file for writing.");
+      if (f == NULL) throw new Hermes::Exceptions::Exception("Could not open a spline file for writing.");
 
       // Plotting on the left of the area of definition.
       double x_left = point_left - extension;

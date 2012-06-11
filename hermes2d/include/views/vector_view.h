@@ -70,14 +70,14 @@ namespace Hermes
       class HERMES_API VectorView : public View
       {
       public:
-        VectorView(const char* title = "VectorView", WinGeom* wg = NULL) { error("GLUT disabled."); }
-        VectorView(char* title, WinGeom* wg = NULL) { error("GLUT disabled."); }
+        VectorView(const char* title = "VectorView", WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        VectorView(char* title, WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show(MeshFunction<double>* vsln, double eps = HERMES_EPS_NORMAL) { error("GLUT disabled."); }
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps = HERMES_EPS_NORMAL) { error("GLUT disabled."); }
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem) { error("GLUT disabled."); }
+        void show(MeshFunction<double>* vsln, double eps = HERMES_EPS_NORMAL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps = HERMES_EPS_NORMAL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        inline void set_grid_type(bool hexa) { error("GLUT disabled."); }
+        inline void set_grid_type(bool hexa) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

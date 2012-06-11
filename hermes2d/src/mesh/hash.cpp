@@ -38,7 +38,7 @@ namespace Hermes
       nqueries = ncollisions = 0;
 
       mask = size-1;
-      if (size & mask) error("Parameter 'size' must be a power of two.");
+      if (size & mask) throw new Hermes::Exceptions::Exception("Parameter 'size' must be a power of two.");
 
       // allocate and initialize the hash tables
       v_table = new Node*[size];

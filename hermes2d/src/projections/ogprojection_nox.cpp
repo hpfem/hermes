@@ -37,11 +37,10 @@ namespace Hermes
     void OGProjectionNOX<Scalar>::project_internal(const Space<Scalar>* space, WeakForm<Scalar>* wf,
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, double newton_tol, int newton_max_iter)
     {
-      _F_
-
+      
         // Sanity check.
         if(space == NULL) 
-          error("this->space == NULL in project_internal().");
+          throw new Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
 
       // Get dimension of the space.
       int ndof = space->get_num_dofs();
@@ -103,8 +102,7 @@ namespace Hermes
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, 
       double newton_tol, int newton_max_iter)
     {
-      _F_
-
+      
       // Define projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
       proj_wf->add_matrix_form(custom_projection_jacobian);
@@ -123,8 +121,7 @@ namespace Hermes
       Hermes::MatrixSolverType matrix_solver, ProjNormType proj_norm, 
       double newton_tol, int newton_max_iter)
     {
-      _F_;
-
+      
       bool sln_vector_loaded = true;
 
       if(dynamic_cast<Solution<Scalar>*>(source_meshfn) != NULL && dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_type() == HERMES_SLN)
@@ -158,7 +155,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: norm = HERMES_L2_NORM; break;
-        default: error("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
+        default: throw new Hermes::Exceptions::Exception("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
         }
       }
       else norm = proj_norm;
@@ -192,7 +189,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-        default: error("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
+        default: throw new Hermes::Exceptions::Exception("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
         }
       }
 
@@ -215,8 +212,7 @@ namespace Hermes
       Hermes::vector<ProjNormType> proj_norms, 
       double newton_tol, int newton_max_iter)
     {
-      _F_
-        int n = spaces.size();
+      int n = spaces.size();
 
       // Sanity checks.
       if (n != source_meshfns.size()) throw Exceptions::LengthException(1, 2, n, source_meshfns.size());
@@ -240,8 +236,7 @@ namespace Hermes
       Scalar* target_vec, Hermes::MatrixSolverType matrix_solver, Hermes::vector<ProjNormType> proj_norms, 
       double newton_tol, int newton_max_iter)
     {
-      _F_
-        int n = spaces.size();
+      int n = spaces.size();
 
       // Sanity checks.
       if (n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
@@ -265,8 +260,7 @@ namespace Hermes
       Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes, 
       double newton_tol, int newton_max_iter)
     {
-      _F_
-        int n = spaces.size();
+      int n = spaces.size();
 
       // Sanity checks.
       if (n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());

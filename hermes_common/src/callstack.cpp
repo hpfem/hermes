@@ -23,44 +23,10 @@
 #include <signal.h>
 #include <stdlib.h>
 
-/// Definition of the global CallStack instance.
-CallStack callstack;
-
-CallStackObj::CallStackObj(int ln, const char *func, const char *file)
+void CallStack::dump(int signalCode)
 {
-}
-
-CallStackObj::~CallStackObj()
-{
-}
-
-static void sighandler(int signo)
-{
-}
-
-void callstack_initialize()
-{
-}
-
-void callstack_finalize()
-{
-}
-
-CallStack::CallStack(int max_size)
-{
-}
-
-CallStack::~CallStack()
-{
-}
-
-void CallStack::dump()
-{
-}
-const char * CallStack::getLastFunc()
-{
-  if (size>0)
-    return stack[size-1]->func;
-  else
-    return NULL;
+#ifdef WIN32
+  MyStackWalker sw;
+  sw.ShowCallstack();
+#endif
 }

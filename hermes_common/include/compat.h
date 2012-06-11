@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*! \file compat.h
-    \brief File containing platform compatibility layer, especially for Win / MSVC.
+\brief File containing platform compatibility layer, especially for Win / MSVC.
 */
 
 #ifndef __HERMES_COMMON_COMPAT_H
@@ -33,11 +33,11 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #if defined(WIN32) || defined(_WINDOWS)
   // Visual Studio 2010.
   #if defined(EXPORT_HERMES_DLL)
-    // when building DLL (target project defines this macro)
+  // when building DLL (target project defines this macro)
     #define HERMES_API __declspec(dllexport)
   #else  
-    // when using the DLL by a client project
-    #define HERMES_API __declspec(dllimport)
+  // when using the DLL by a client project
+  #define HERMES_API __declspec(dllimport)
   #endif
 #else 
   #define HERMES_API
@@ -61,32 +61,24 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
 #define strcasecmp strcmp
 #endif
 
-
-// Comment this out to stop using Teuchos stacktrace.
-// Teuchos stacktrace not used for WIN32 
-// (execinfo.h and cxxabi.h absent).
-#ifndef _WIN32
-#define HERMES_USE_TEUCHOS_STACKTRACE
-#endif
-
 //C99 functions
 #include "c99_functions.h"
 
 // Microsoft does not recognize long double and handles it just like double.
 #ifdef _MSC_VER
-#ifdef strtold
-#undef strtold
-#endif
-#define strtold strtod
+  #ifdef strtold
+    #undef strtold
+  #endif
+  #define strtold strtod
 #endif
 
 #ifdef __GNUC__
-#define NORETURN __attribute__((noreturn))
+  #define NORETURN __attribute__((noreturn))
 #else
-#define NORETURN
-#ifndef __attribute__
-#define __attribute__(x)
-#endif
+  #define NORETURN
+  #ifndef __attribute__
+    #define __attribute__(x)
+  #endif
 #endif
 
 #endif

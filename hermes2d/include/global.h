@@ -135,38 +135,6 @@ namespace Hermes
       static double get_l2_norm(Vector<Scalar>* vec);
     };
 
-    /// API Class containing settings for the whole Hermes.
-    class HERMES_API Api 
-    {
-    public:
-      Api();
-      ~Api();
-    private:
-      /// Parameter class, representing one parameter.
-      /// Its identifier is a string identifier according to which, the instance is inserted into Api::parameters.
-      class Parameter
-      {
-      public:
-        /// Constructor.
-        /// \param[in] defaultVal Default value, if the user does not specify his own.
-        Parameter(int defaultVal);
-        bool userSet;
-        int userVal;
-        int defaultVal;
-      };
-      /// The storage of parameters.
-      /// This storage is not optimized for speed, but for comfort of users.
-      /// There should not be any parameters, values of which are sought very often, because of the above reason.
-
-      std::map<std::string, Parameter*> parameters;
-    public:
-      int getParamValue(std::string param);
-      void setParamValue(std::string param, int value);
-    };
-
-    // Global declarations.
-    extern HERMES_API Hermes::Hermes2D::Api HermesApi;
-
     /// Projection norms.
     /// Used in projections and adaptivity.
     enum ProjNormType

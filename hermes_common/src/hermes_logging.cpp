@@ -76,15 +76,15 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
   bool console_bold = false;
   switch(code)
   {
-  case HERMES_EC_ERROR:
-  case HERMES_EC_ASSERT: console_attrs |= console_attr_red; break;
-  case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
-  case HERMES_EC_INFO: console_bold = true;
-  case HERMES_EC_VERBOSE: console_attrs |= console_attr_red | console_attr_green | console_attr_blue; break;
-  case HERMES_EC_TRACE: console_attrs |= console_attr_blue; break;
-  case HERMES_EC_TIME: console_attrs |= console_attr_green | console_attr_blue; break;
-  case HERMES_EC_DEBUG: console_attrs |= console_attr_red | console_attr_blue; break;
-  default: printf("Unknown error code: '%c'", code); exit(-1);
+    case HERMES_EC_ERROR:
+    case HERMES_EC_ASSERT: console_attrs |= console_attr_red; break;
+    case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
+    case HERMES_EC_INFO: console_bold = true;
+    case HERMES_EC_VERBOSE: console_attrs |= console_attr_red | console_attr_green | console_attr_blue; break;
+    case HERMES_EC_TRACE: console_attrs |= console_attr_blue; break;
+    case HERMES_EC_TIME: console_attrs |= console_attr_green | console_attr_blue; break;
+    case HERMES_EC_DEBUG: console_attrs |= console_attr_red | console_attr_blue; break;
+    default: printf("Unknown error code: '%c'", code); exit(-1);
   }
   if (console_bold && !emphasize)
     console_attrs |= FOREGROUND_INTENSITY;

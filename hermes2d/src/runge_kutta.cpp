@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <typeinfo>
 #include "runge_kutta.h"
 #include "discrete_problem.h"
 #include "projections/ogprojection.h"
@@ -30,7 +29,6 @@ namespace Hermes
       stage_wf_left(spaces.size()), start_from_zero_K_vector(start_from_zero_K_vector), 
       residual_as_vector(residual_as_vector), iteration(0) , matrix_solver(matrix_solver)
     {
-      _F_;
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces.push_back(const_cast<const Space<Scalar>*>(spaces.at(i)));
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -65,8 +63,7 @@ namespace Hermes
       stage_wf_left(1), start_from_zero_K_vector(start_from_zero_K_vector), 
       residual_as_vector(residual_as_vector), iteration(0) , matrix_solver(matrix_solver)
     {
-      _F_;
-
+      
       spaces.push_back(const_cast<const Space<Scalar>*>(space));
       spaces_mutable.push_back(space);
 
@@ -156,7 +153,7 @@ namespace Hermes
     {
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
       if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
-        error("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
+        throw new Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       // All Spaces of the problem.
       Hermes::vector<const Space<Scalar>*> stage_spaces_vector;

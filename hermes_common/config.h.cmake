@@ -1,3 +1,6 @@
+#ifndef __HERMES_CONFIG_H_
+#define __HERMES_CONFIG_H_
+
 // OpenMP
 #cmakedefine NUM_THREADS ${NUM_THREADS}
 
@@ -14,11 +17,7 @@
 #cmakedefine WITH_MPI
 
 // stacktrace
-#cmakedefine HAVE_TEUCHOS_LINK
-#cmakedefine HAVE_TEUCHOS_BFD
-#cmakedefine HAVE_EXECINFO
-#cmakedefine HAVE_VASPRINTF
-#cmakedefine HAVE_CXXABI
+#cmakedefine WITH_STACKTRACE
 
 // trilinos
 #cmakedefine WITH_TRILINOS
@@ -33,3 +32,5 @@
 
 // no logo
 #cmakedefine HERMES_NO_LOGO
+
+#endif

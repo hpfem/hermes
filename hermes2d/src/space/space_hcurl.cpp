@@ -39,7 +39,7 @@ namespace Hermes
         this->shapeset = new HcurlShapeset;
         this->own_shapeset = true;
       }
-      if (this->shapeset->get_num_components() < 2) error("HcurlSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) throw new Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
       {
@@ -50,7 +50,7 @@ namespace Hermes
       this->chol_p   = hcurl_chol_p;
 
       // set uniform poly order in elements
-      if (p_init < 0) error("P_INIT must be >= 0 in an Hcurl space.");
+      if (p_init < 0) throw new Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -61,7 +61,6 @@ namespace Hermes
     HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
-      _F_;
       init(shapeset, p_init);
     }
 
@@ -69,7 +68,6 @@ namespace Hermes
     HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
-      _F_;
       init(shapeset, p_init);
     }
 
@@ -103,8 +101,7 @@ namespace Hermes
     template<typename Scalar>
     void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
-      _F_;
-
+      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -116,7 +113,7 @@ namespace Hermes
         this->shapeset = shapeset;
 
       if (this->shapeset->get_num_components() < 2)
-        error("HcurlSpace requires a vector shapeset.");
+        throw new Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
         this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
@@ -130,7 +127,6 @@ namespace Hermes
     template<typename Scalar>
     void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
-      _F_;
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -142,7 +138,7 @@ namespace Hermes
         this->shapeset = shapeset;
 
       if (this->shapeset->get_num_components() < 2)
-        error("HcurlSpace requires a vector shapeset.");
+        throw new Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
         this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
@@ -162,7 +158,7 @@ namespace Hermes
         this->own_shapeset = false;
       }
       else
-        error("Wrong shapeset type in HcurlSpace<Scalar>::set_shapeset()");
+        throw new Hermes::Exceptions::Exception("Wrong shapeset type in HcurlSpace<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>
@@ -253,7 +249,6 @@ namespace Hermes
     template<typename Scalar>
     Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      _F_;
       assert(order >= 0);
       Scalar* proj = new Scalar[order + 1];
 

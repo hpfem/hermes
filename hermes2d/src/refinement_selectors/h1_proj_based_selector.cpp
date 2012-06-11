@@ -91,7 +91,8 @@ namespace Hermes
               inx_trf = H2D_TRF_IDENTITY;
           }
         }
-        error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+        if(!done)
+          throw new Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
       }
 
       template<typename Scalar>
@@ -145,7 +146,8 @@ namespace Hermes
                   inx_trf = H2D_TRF_IDENTITY;
               }
             }
-            error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+            if(!done)
+              throw new Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
           }
 
           //normalize
@@ -160,7 +162,8 @@ namespace Hermes
             norm_squared += gip_points[k][H2D_GIP2D_W] * sum;
           }
           double norm = sqrt(norm_squared);
-          assert_msg(finite(1/norm), "Norm (%g) is almost zero.", norm);
+          if(!finite(1/norm))
+            throw new Exceptions::Exception("Norm (%g) is almost zero.", norm);
 
           //for all transformations: normalize
           int inx_trf = 0;
@@ -185,7 +188,8 @@ namespace Hermes
                 inx_trf = H2D_TRF_IDENTITY;
             }
           }
-          error_if(!done, "All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+          if(!done)
+            throw new Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
         }
       }
 

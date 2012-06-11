@@ -119,15 +119,12 @@ namespace Hermes
 #pragma omp critical(realloc_triangles)
         {
           if (triangle_count >= triangle_size)
-          {
             tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size = triangle_size * 2));
-            verbose("Linearizer::add_triangle(): realloc to %d", triangle_size);
-          }
-        index = triangle_count++;
+          index = triangle_count++;
 
-        tris[index][0] = iv0;
-        tris[index][1] = iv1;
-        tris[index][2] = iv2;
+          tris[index][0] = iv0;
+          tris[index][1] = iv1;
+          tris[index][2] = iv2;
         }
       }
 

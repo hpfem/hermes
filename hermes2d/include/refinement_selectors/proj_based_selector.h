@@ -97,7 +97,8 @@ namespace Hermes
           const TrfShapeExp& operator = (const TrfShapeExp& other)
           {
             delete[] values; values = NULL;
-            error_if(other.values != NULL, "Unable to assign a non-empty values. Use references instead.");
+            if(other.values == NULL)
+              throw new Exceptions::Exception("Unable to assign a non-empty values. Use references instead.");
             return *this;
           }
         private:

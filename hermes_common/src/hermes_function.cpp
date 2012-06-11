@@ -57,7 +57,7 @@ namespace Hermes
       return const_value;
     else
     {
-      error("Abstract function call (case 1).");
+      throw new Hermes::Exceptions::Exception("Abstract function called.");
       return 0.0;
     }
   };
@@ -68,7 +68,7 @@ namespace Hermes
       return const_value;
     else
     {
-      error("Abstract function call (case 2).");
+      throw new Hermes::Exceptions::Exception("Abstract function called.");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -80,7 +80,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      error("Abstract function call (case 3).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return Ord(99);
     }
   };
@@ -92,7 +92,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      error("Abstract function call (case 4).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return 0.0;
     }
   };
@@ -103,7 +103,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      error("Abstract function call (case 5).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -115,7 +115,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      error("Abstract function call (case 6).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return Ord(99);
     }
   };
@@ -141,7 +141,7 @@ namespace Hermes
       return const_value;
     else
     {
-      error("Abstract function call (case 7).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return 0.0;
     }
   };
@@ -153,7 +153,7 @@ namespace Hermes
       return const_value;
     else
     {
-      error("Abstract function call (case 8).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -165,7 +165,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      error("Abstract function call (case 9).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return Ord(99);
     }
   };
@@ -177,7 +177,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      error("Abstract function call (case 10).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return 0.0;
     }
   };
@@ -188,7 +188,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      error("Abstract function call (case 11).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -200,7 +200,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      error("Abstract function call (case 12).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return Ord(99);
     }
   };
@@ -225,7 +225,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      error("Abstract function call (case 13).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return 0.0;
     }
   };
@@ -236,7 +236,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      error("Abstract function call (case 14).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -249,7 +249,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      error("Abstract function call (case 15).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return Ord(99);
     }
   };
@@ -261,7 +261,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      error("Abstract function call (case 16).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return 0.0;
     }
   };
@@ -272,7 +272,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      error("Abstract function call (case 17).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -284,7 +284,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      error("Abstract function call (case 18).");
+      throw new Hermes::Exceptions::Exception("Abstract function call.");
       return Ord(99);
     }
   };
