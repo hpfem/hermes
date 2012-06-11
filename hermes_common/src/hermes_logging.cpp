@@ -20,7 +20,6 @@
 \brief Functions and support for logging of events.
 */
 #include "hermes_logging.h"
-#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 #ifdef WIN32 //Windows platform
 #include <Windows.h>
 #endif
@@ -163,8 +162,6 @@ bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::He
     }
     else
     {
-      if (info.code == 'E')
-        Teuchos::show_stacktrace();
       text[0] = info.code;
       text[1] = ' ';
       text_contents++;

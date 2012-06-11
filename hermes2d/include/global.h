@@ -156,7 +156,8 @@ namespace Hermes
       };
       /// The storage of parameters.
       /// This storage is not optimized for speed, but for comfort of users.
-      /// There should not be parameters, which value is sought very often, because of the above reason.
+      /// There should not be any parameters, values of which are sought very often, because of the above reason.
+
       std::map<std::string, Parameter*> parameters;
     public:
       int getParamValue(std::string param);

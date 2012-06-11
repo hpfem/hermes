@@ -27,7 +27,6 @@
 #include "view.h"
 #include "solution.h"
 #include "view_data.cpp"
-#include "third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp"
 
 namespace Hermes
 {
@@ -561,7 +560,6 @@ namespace Hermes
         //signal(SIGSEGV, old_segv);
         //signal(SIGABRT, old_abrt);
         // So we just restore it by calling the original handler:
-        Teuchos::print_stack_on_segfault();
       }
 
       double View::get_tick_count()

@@ -13,8 +13,7 @@ project(hermes_common)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/third_party_codes/trilinos-teuchos)
-
+	
 	#
 	# Source files for the Hermes_common library.
 	#
@@ -30,12 +29,9 @@ project(hermes_common)
 		src/ord.cpp
 		src/hermes_function.cpp
 		src/exceptions.cpp
-		
-		src/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.cpp
-		
 		src/solvers/dp_interface.cpp
 		src/solvers/linear_matrix_solver.cpp
-    src/solvers/nonlinear_solver.cpp
+		src/solvers/nonlinear_solver.cpp
 		src/solvers/newton_solver_nox.cpp
 		src/solvers/epetra.cpp
 		src/solvers/aztecoo_solver.cpp
@@ -48,8 +44,8 @@ project(hermes_common)
 		src/solvers/umfpack_solver.cpp
 		src/solvers/precond_ml.cpp
 		src/solvers/precond_ifpack.cpp
-	 # src/solvers/eigensolver.cpp
-	 # src/solvers/eigen.cpp
+		# src/solvers/eigensolver.cpp
+		# src/solvers/eigen.cpp
 	)
 
   set(HEADERS
@@ -64,7 +60,6 @@ project(hermes_common)
 		include/ord.h
 		include/hermes_function.h
 		include/exceptions.h
-		include/third_party_codes/trilinos-teuchos/Teuchos_stacktrace.hpp
 		include/solvers/dp_interface.h
 		include/solvers/linear_matrix_solver.h
 		include/solvers/nonlinear_solver.h
@@ -84,8 +79,8 @@ project(hermes_common)
 	# Subdirectories with CMakeLists.txt
 	#
 	if(HERMES_COMMON_WITH_TESTS)
-			enable_testing()
-			add_subdirectory(tests)
+		enable_testing()
+		add_subdirectory(tests)
 	endif(HERMES_COMMON_WITH_TESTS)
 
 	# Create file with preprocessor definitions exposing the build settings to the source code.
@@ -129,10 +124,6 @@ project(hermes_common)
 				IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 						target_link_libraries(${HERMES_COMMON_LIB} "rt")
 				ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-				if(HAVE_TEUCHOS_BFD)
-						# stacktrace code needs binutils:
-						target_link_libraries(${HERMES_COMMON_LIB} bfd iberty)
-				endif(HAVE_TEUCHOS_BFD)
 		endif(NOT MSVC)
 	endmacro(BUILD_COMMON_LIB)
 
@@ -164,7 +155,5 @@ project(hermes_common)
 
 	file(GLOB INC_COMMON    "include/*.h")
 	file(GLOB INC_SOLVER    "include/solvers/*.h")
-	file(GLOB INC_TP        "include/third_party_codes/trilinos-teuchos/*.h*")
 	install(FILES ${INC_COMMON}    DESTINATION ${TARGET_ROOT}/include/hermes_common)
 	install(FILES ${INC_SOLVER}    DESTINATION ${TARGET_ROOT}/include/hermes_common/solvers)
-	install(FILES ${INC_TP}        DESTINATION ${TARGET_ROOT}/include/hermes_common/third_party_codes/trilinos-teuchos)

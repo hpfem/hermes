@@ -31,14 +31,5 @@
 #cmakedefine HAVE_NOX
 #cmakedefine HAVE_KOMPLEX
 
-#cmakedefine TRACING
-#cmakedefine DEBUG
-#cmakedefine DEBUG_ORDER
-
-// elements
-#cmakedefine WITH_TETRA
-#cmakedefine WITH_HEX
-#cmakedefine WITH_PRISM
-
 // no logo
 #cmakedefine HERMES_NO_LOGO
