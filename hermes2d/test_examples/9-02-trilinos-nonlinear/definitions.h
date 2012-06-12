@@ -1,5 +1,7 @@
 #include "hermes2d.h"
 
+extern const std::string MatrixSolverNames[6];
+
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
 

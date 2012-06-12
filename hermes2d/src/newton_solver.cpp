@@ -335,13 +335,13 @@ namespace Hermes
 #ifdef HAVE_AZTECOO
       if(this->matrix_solver_type != SOLVER_AZTECOO)
       {
-        warning("Trying to set iterative method for a different solver than AztecOO.");
+        warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
       }
       if (this->matrix_solver_type == SOLVER_AZTECOO)
         dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(iterative_method_name);
 #else
-      warning("Trying to set iterative method without AztecOO present.");
+      warn("Trying to set iterative method without AztecOO present.");
 #endif
     }
 
@@ -353,13 +353,13 @@ namespace Hermes
 #ifdef HAVE_AZTECOO
       if(this->matrix_solver_type != SOLVER_AZTECOO)
       {
-        warning("Trying to set iterative method for a different solver than AztecOO.");
+        warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
       }
       if (this->matrix_solver_type == SOLVER_AZTECOO)
         dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(preconditioner_name);
 #else
-      warning("Trying to set iterative method without AztecOO present.");
+      warn("Trying to set iterative method without AztecOO present.");
 #endif
     }
 

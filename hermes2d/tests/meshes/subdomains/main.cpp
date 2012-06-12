@@ -53,12 +53,12 @@ int main(int argc, char* argv[])
   if(ndof_whole_domain == 225 && ndof_bottom_left_corner == 56 && ndof_complement == 161)
   {
     info("Success!");
-    return TEST_SUCCESS;
+    return 0;
   }
   else
   {
     info("Failure!");
-    return TEST_FAILURE;
+    return -1;
   }
 
   return 0;

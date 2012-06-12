@@ -277,7 +277,7 @@ namespace Hermes
       bool assemble_this_form = false;
       for (unsigned int ss = 0; ss < form->areas.size(); ss++)
       {
-        if(form->areas[ss] == HERMES_ANY || form->areas[ss] == H2D_DG_BOUNDARY_EDGE)
+        if(form->areas[ss] == HERMES_ANY)
         {
           assemble_this_form = true;
           break;
@@ -364,7 +364,7 @@ namespace Hermes
       bool assemble_this_form = false;
       for (unsigned int ss = 0; ss < form->areas.size(); ss++)
       {
-        if(form->areas[ss] == HERMES_ANY || form->areas[ss] == H2D_DG_BOUNDARY_EDGE)
+        if(form->areas[ss] == HERMES_ANY)
         {
           assemble_this_form = true;
           break;

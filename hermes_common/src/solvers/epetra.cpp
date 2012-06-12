@@ -22,10 +22,7 @@
 #include "config.h"
 #ifdef HAVE_EPETRA
 #include "epetra.h"
-#include "error.h"
 #include "callstack.h"
-
-using namespace Hermes::Error;
 
 namespace Hermes
 {
@@ -71,8 +68,8 @@ namespace Hermes
     {
       this->size = n;
       // alloc trilinos structs
-      std_map = new Epetra_Map(n, 0, seq_comm); MEM_CHECK(std_map);
-      grph = new Epetra_CrsGraph(Copy, *std_map, 0); MEM_CHECK(grph);
+      std_map = new Epetra_Map(n, 0, seq_comm);
+      grph = new Epetra_CrsGraph(Copy, *std_map, 0);
     }
 
     template<typename Scalar>
@@ -100,7 +97,7 @@ namespace Hermes
     {
       grph->FillComplete();
       // create the matrix
-      mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
+      mat = new Epetra_CrsMatrix(Copy, *grph);
     }
 
     template<>
@@ -108,8 +105,8 @@ namespace Hermes
     {
       grph->FillComplete();
       // create the matrix
-      mat = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat);
-      mat_im = new Epetra_CrsMatrix(Copy, *grph); MEM_CHECK(mat_im);
+      mat = new Epetra_CrsMatrix(Copy, *grph);
+      mat_im = new Epetra_CrsMatrix(Copy, *grph);
     }
 
     template<>
@@ -326,9 +323,9 @@ namespace Hermes
     {
       free();
       this->size = n;
-      std_map = new Epetra_Map(this->size, 0, seq_comm); MEM_CHECK(std_map);
-      vec = new Epetra_Vector(*std_map); MEM_CHECK(vec);
-      vec_im = new Epetra_Vector(*std_map); MEM_CHECK(vec_im);
+      std_map = new Epetra_Map(this->size, 0, seq_comm);
+      vec = new Epetra_Vector(*std_map);
+      vec_im = new Epetra_Vector(*std_map);
       zero();
     }
 

@@ -101,7 +101,7 @@ namespace Hermes
     Scalar MatrixForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      throw new Hermes::Exceptions::Exception("MatrixForm<Scalar>::value must be overrided.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::value");
       return 0.0;
     }
 
@@ -109,7 +109,7 @@ namespace Hermes
     Hermes::Ord MatrixForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      throw new Hermes::Exceptions::Exception("MatrixForm<Scalar>::ord must be overrided.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::ord");
       return Hermes::Ord();
     }
 
@@ -133,7 +133,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::Exception("MatrixFormVol<Scalar>::clone() must be overridden.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::clone()");
       return NULL;
     }
 
@@ -154,7 +154,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::Exception("MatrixFormSurf<Scalar>::clone() must be overridden.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::clone()");
       return NULL;
     }
 
@@ -192,7 +192,7 @@ namespace Hermes
     Scalar VectorForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      throw new Hermes::Exceptions::Exception("VectorForm<Scalar>::value must be overrided.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::value");
       return 0.0;
     }
 
@@ -200,14 +200,14 @@ namespace Hermes
     Hermes::Ord VectorForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      throw new Hermes::Exceptions::Exception("VectorForm<Scalar>::ord must be overrided.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::ord");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
     VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::Exception("VectorFormVol<Scalar>::clone() must be overridden.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::clone()");
       return NULL;
     }
 
@@ -229,7 +229,7 @@ namespace Hermes
     template<typename Scalar>
     VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::Exception("VectorFormSurf<Scalar>::clone() must be overridden.");
+      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::clone()");
       return NULL;
     }
 

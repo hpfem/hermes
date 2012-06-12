@@ -22,13 +22,9 @@
 #include "config.h"
 #ifdef WITH_SUPERLU
 #include "superlu_solver.h"
-#include "trace.h"
-#include "error.h"
 #include "callstack.h"
 #include <slu_ddefs.h>
 #include <slu_zdefs.h>
-
-using namespace Hermes::Error;
 
 namespace Hermes
 {
@@ -140,10 +136,8 @@ namespace Hermes
 
       // Initialize the arrays Ap and Ai.
       Ap = new unsigned int [this->size + 1];
-      MEM_CHECK(Ap);
       int aisize = this->get_num_indices();
       Ai = new int [aisize];
-      MEM_CHECK(Ai);
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i, pos = 0;
@@ -545,18 +539,18 @@ namespace Hermes
       }
       else if (info <= m->size)
       {
-        warning("SuperLU: Factor U is singular, solution could not be computed.");
+        warn("SuperLU: Factor U is singular, solution could not be computed.");
         return false;
       }
       else if (info == m->size + 1)
       {
-        warning("SuperLU: RCOND is less than machine precision "
+        warn("SuperLU: RCOND is less than machine precision "
           "(system matrix is singular to working precision).");
         return true;
       }
       else if (info > m->size + 1)
       {
-        warning("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
+        warn("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
           (info - m->size)/1e6);
         return false;
       }
@@ -685,7 +679,7 @@ namespace Hermes
 
       if ( !setup_factorization() )
       {
-        warning("LU factorization could not be completed.");
+        warn("LU factorization could not be completed.");
         return false;
       }
 
@@ -833,7 +827,7 @@ namespace Hermes
       unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
       if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
       {
-        warning("You cannot reuse factorization structures for factorizing matrices of different sizes.");
+        warn("You cannot reuse factorization structures for factorizing matrices of different sizes.");
         return false;
       }
 

@@ -155,11 +155,11 @@ int main(int argc, char* argv[])
   if (space.get_mesh()->get_num_active_elements() == 1)
   {
     info("Success!");
-    return TEST_SUCCESS;
+    return 0;
   }
   else {
     info("Failure!");
-    return TEST_FAILURE;
+    return -1;
   }
 }
 

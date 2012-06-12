@@ -22,17 +22,13 @@
 #include "config.h"
 #ifdef WITH_UMFPACK
 #include "umfpack_solver.h"
-#include "trace.h"
-#include "error.h"
-#include "common_time_period.h"
+#include "time_period.h"
 #include "hermes_logging.h"
 
 extern "C"
 {
 #include <umfpack.h>
 }
-
-using namespace Hermes::Error;
 
 namespace Hermes
 {
@@ -114,10 +110,8 @@ namespace Hermes
 
       // initialize the arrays Ap and Ai
       Ap = new int [this->size + 1];
-      MEM_CHECK(Ap);
       int aisize = this->get_num_indices();
       Ai = new int [aisize];
-      MEM_CHECK(Ai);
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i;
@@ -135,7 +129,6 @@ namespace Hermes
       nnz = Ap[this->size];
 
       Ax = new Scalar [nnz];
-      MEM_CHECK(Ax);
       memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
@@ -607,7 +600,6 @@ namespace Hermes
       free();
       this->size = n;
       v = new Scalar [n];
-      MEM_CHECK(v);
       this->zero();
     }
 
@@ -780,17 +772,17 @@ namespace Hermes
       switch (status)
       {
       case UMFPACK_OK: break;
-      case UMFPACK_WARNING_singular_matrix:       warning("%s: singular matrix!", fn_name); break;
-      case UMFPACK_ERROR_out_of_memory:           warning("%s: out of memory!", fn_name); break;
-      case UMFPACK_ERROR_argument_missing:        warning("%s: argument missing", fn_name); break;
-      case UMFPACK_ERROR_invalid_Symbolic_object: warning("%s: invalid Symbolic object", fn_name); break;
-      case UMFPACK_ERROR_invalid_Numeric_object:  warning("%s: invalid Numeric object", fn_name); break;
-      case UMFPACK_ERROR_different_pattern:       warning("%s: different pattern", fn_name); break;
-      case UMFPACK_ERROR_invalid_system:          warning("%s: invalid system", fn_name); break;
-      case UMFPACK_ERROR_n_nonpositive:           warning("%s: n nonpositive", fn_name); break;
-      case UMFPACK_ERROR_invalid_matrix:          warning("%s: invalid matrix", fn_name); break;
-      case UMFPACK_ERROR_internal_error:          warning("%s: internal error", fn_name); break;
-      default:                                    warning("%s: unknown error (%d)", fn_name, status); break;
+      case UMFPACK_WARNING_singular_matrix:       warn("%s: singular matrix!", fn_name); break;
+      case UMFPACK_ERROR_out_of_memory:           warn("%s: out of memory!", fn_name); break;
+      case UMFPACK_ERROR_argument_missing:        warn("%s: argument missing", fn_name); break;
+      case UMFPACK_ERROR_invalid_Symbolic_object: warn("%s: invalid Symbolic object", fn_name); break;
+      case UMFPACK_ERROR_invalid_Numeric_object:  warn("%s: invalid Numeric object", fn_name); break;
+      case UMFPACK_ERROR_different_pattern:       warn("%s: different pattern", fn_name); break;
+      case UMFPACK_ERROR_invalid_system:          warn("%s: invalid system", fn_name); break;
+      case UMFPACK_ERROR_n_nonpositive:           warn("%s: n nonpositive", fn_name); break;
+      case UMFPACK_ERROR_invalid_matrix:          warn("%s: invalid matrix", fn_name); break;
+      case UMFPACK_ERROR_internal_error:          warn("%s: internal error", fn_name); break;
+      default:                                    warn("%s: unknown error (%d)", fn_name, status); break;
       }
     }
 
@@ -878,7 +870,8 @@ namespace Hermes
           check_status("umfpack_di_symbolic", status);
           return false;
         }
-        if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
+        if (symbolic == NULL)
+          throw new Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
@@ -891,7 +884,8 @@ namespace Hermes
           check_status("umfpack_di_numeric", status);
           return false;
         }
-        if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
+        if (numeric == NULL)
+          throw new Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
 
       return true;
@@ -938,7 +932,8 @@ namespace Hermes
           check_status("umfpack_di_symbolic", status);
           return false;
         }
-        if (symbolic == NULL) EXIT("umfpack_di_symbolic error: symbolic == NULL");
+        if (symbolic == NULL)
+          throw new Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
@@ -951,7 +946,8 @@ namespace Hermes
           check_status("umfpack_di_numeric", status);
           return false;
         }
-        if (numeric == NULL) EXIT("umfpack_di_numeric error: numeric == NULL");
+        if (numeric == NULL)
+          throw new Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
 
       return true;
@@ -993,7 +989,6 @@ namespace Hermes
       if(sln)
         delete [] sln;
       sln = new double[m->get_size()];
-      MEM_CHECK(sln);
       memset(sln, 0, m->get_size() * sizeof(double));
       status = umfpack_di_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
       if (status != UMFPACK_OK)
@@ -1022,14 +1017,13 @@ namespace Hermes
 
       if ( !setup_factorization() )
       {
-        warning("LU factorization could not be completed.");
+        warn("LU factorization could not be completed.");
         return false;
       }
 
       if(sln)
         delete [] sln;
       sln = new std::complex<double>[m->get_size()];
-      MEM_CHECK(sln);
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
       status = umfpack_zi_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
       if (status != UMFPACK_OK)

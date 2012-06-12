@@ -16,11 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file common_time_period.h
+/*! \file time_period.h
     \brief File containing the class TimePeriod and relevant definitions for measuring time.
 */
-#ifndef __HERMES_COMMON_TIME_PERIOD_H
-#define __HERMES_COMMON_TIME_PERIOD_H
+#ifndef __HERMES_time_period_H
+#define __HERMES_time_period_H
 
 // For uint64_t type on windows.
 #include "compat.h"

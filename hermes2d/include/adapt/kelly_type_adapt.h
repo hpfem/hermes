@@ -104,7 +104,7 @@ namespace Hermes
                              Func<Scalar> *u, Geom<double> *e,
                              ExtData<Scalar> *ext) const
         {
-          error_function("KellyTypeAdapt::ErrorEstimatorForm::value() must be overridden.");
+          throw new Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::value()");
           return 0.0;
         }
 
@@ -113,7 +113,7 @@ namespace Hermes
                                 Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
                                 ExtData<Hermes::Ord> *ext) const
         {
-          error_function("KellyTypeAdapt::ErrorEstimatorForm::ord() must be overridden.");
+          throw new Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::ord().");
           return Hermes::Ord();
         }
 
@@ -269,7 +269,8 @@ namespace Hermes
       double calc_err_est(Solution<Scalar>*sln,
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
-        if (this->num != 1) error_function("Wrong number of solutions.");
+        if (this->num != 1)
+          throw new Exceptions::Exception("Wrong number of solutions.");
         Hermes::vector<Solution<Scalar>*> slns;
         slns.push_back(sln);
         return calc_err_est(slns, NULL, error_flags);

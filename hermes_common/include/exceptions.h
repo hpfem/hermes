@@ -108,7 +108,7 @@ namespace Hermes
         /// \brief Linear solver failed from unknown reason.
         LinearMatrixSolverException();
         /// Linear solver failed from spevific reason.
-        /// \param[in] reasen specification of solver fail.
+        /// \param[in] reason specification of solver fail.
         LinearMatrixSolverException(const char * reason);
         ~LinearMatrixSolverException();
         LinearMatrixSolverException(const LinearMatrixSolverException & e);
@@ -139,6 +139,17 @@ namespace Hermes
         ValueException(const ValueException & e);
       private:
         double value, allowed;
+    };
+
+    /// \brief Linear solver failed.
+    class HERMES_API FunctionNotOverridenException : public Exception
+    {
+      public:
+        /// Constructor
+        /// \param[in] name Name of the function.
+        FunctionNotOverridenException(const char * reason);
+        ~FunctionNotOverridenException();
+        FunctionNotOverridenException(const FunctionNotOverridenException & e);
     };
   }
 }

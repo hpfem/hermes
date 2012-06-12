@@ -87,7 +87,7 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
 {
   FILE *file = fopen(file_name, "r");
   if (file == NULL)
-    return TEST_FAILURE;
+    return -1;
 
   enum EState {
     STATE_N,
@@ -192,7 +192,7 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
   // Clear pointer.
   rhs_buffer = NULL;
 
-  return TEST_SUCCESS;
+  return 0;
 }
 
 void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, double > &ar_rhs,
@@ -259,7 +259,7 @@ void solve(LinearMatrixSolver<double> &solver, int n) {
 }
 
 int main(int argc, char *argv[]) {
-  int ret = TEST_SUCCESS;
+  int ret = 0;
 
   int n;
   int nnz;
@@ -390,32 +390,32 @@ double* sln;
 #endif
   }
   else
-    ret = TEST_FAILURE;
+    ret = -1;
 
 switch(atoi(argv[2]))
   {
   case 1:
   if (std::abs(sln[0] - 4) > 1E-6 || std::abs(sln[1] - 2) > 1E-6 || std::abs(sln[2] - 3) > 1E-6)
-    ret = TEST_FAILURE;
+    ret = -1;
 else
-    ret = TEST_SUCCESS;
+    ret = 0;
 break;
   case 2:
   if (std::abs(sln[0] - 2) > 1E-6 || std::abs(sln[1] - 3) > 1E-6 || std::abs(sln[2] - 1) > 1E-6 || std::abs(sln[3] + 3) > 1E-6 || std::abs(sln[4] + 1) > 1E-6)
-    ret = TEST_FAILURE;
+    ret = -1;
 else
-    ret = TEST_SUCCESS;
+    ret = 0;
 break;
   case 3:
   if (std::abs(sln[0] - 1) > 1E-6 || std::abs(sln[1] - 2) > 1E-6 || std::abs(sln[2] - 3) > 1E-6 || std::abs(sln[3] - 4) > 1E-6 || std::abs(sln[4] - 5) > 1E-6)
-    ret = TEST_FAILURE;
+    ret = -1;
 else
-    ret = TEST_SUCCESS;
+    ret = 0;
 break;
 }
 
   // Test
-  if (ret == TEST_FAILURE)
+  if (ret == -1)
     printf("Failure!\n");
   else
     printf("Success!\n");

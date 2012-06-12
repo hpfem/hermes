@@ -2017,9 +2017,6 @@ namespace Hermes
       if(internal_marker == H2D_DG_INNER_EDGE_INT)
         return StringValid(H2D_DG_INNER_EDGE, true);
 
-      if(internal_marker == H2D_DG_BOUNDARY_EDGE_INT)
-        return StringValid(H2D_DG_INNER_EDGE, true);
-
       if(conversion_table.find(internal_marker) == conversion_table.end())
         return StringValid("-999", false);
 
@@ -2031,9 +2028,6 @@ namespace Hermes
     {
       if(user_marker == H2D_DG_INNER_EDGE)
         return IntValid(H2D_DG_INNER_EDGE_INT, true);
-
-      if(user_marker == H2D_DG_BOUNDARY_EDGE)
-        return IntValid(H2D_DG_BOUNDARY_EDGE_INT, true);
 
       if(conversion_table_inverse.find(user_marker) == conversion_table_inverse.end())
         return IntValid(-999, false);

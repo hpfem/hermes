@@ -23,10 +23,8 @@
 #ifdef HAVE_AZTECOO
 #include "aztecoo_solver.h"
 #include "callstack.h"
-#include "common_time_period.h"
+#include "time_period.h"
 #include <Komplex_LinearProblem.h>
-
-using namespace Hermes::Error;
 
 namespace Hermes
 {
@@ -149,7 +147,6 @@ namespace Hermes
 
       delete [] this->sln;
       this->sln = new double[m->size];
-      MEM_CHECK(this->sln);
       memset(this->sln, 0, m->size * sizeof(double));
 
       // copy the solution into sln vector
@@ -186,7 +183,6 @@ namespace Hermes
 
       delete [] this->sln;
       this->sln = new std::complex<double>[m->size];
-      MEM_CHECK(this->sln);
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector

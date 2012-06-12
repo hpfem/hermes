@@ -1,5 +1,14 @@
 #include "definitions.h"
 
+const std::string MatrixSolverNames[6] = {
+  "UMFPACK",
+  "PETSc",
+  "MUMPS",
+  "SuperLU",
+  "Trilinos/Amesos",
+  "Trilinos/AztecOO"
+};
+
 double CustomRightHandSide::value(double x, double y) const
 {
   return - kx(x, y) * dudx(x, y) - ky(x, y) * dudy(x, y) - k(x, y) * (dudxx(x, y) + dudyy(x, y));

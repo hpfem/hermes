@@ -70,12 +70,12 @@ int main(int argc, char* argv[])
   if (success == true)
   {
     printf("Success!\n");
-    return TEST_SUCCESS;
+    return 0;
   }
   else
   {
     printf("Failure!\n");
-    return TEST_FAILURE;
+    return -1;
   }
 }
 

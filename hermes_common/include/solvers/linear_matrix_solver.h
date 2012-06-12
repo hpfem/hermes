@@ -25,6 +25,7 @@
 #include "precond.h"
 #include "dp_interface.h"
 #include "exceptions.h"
+#include "hermes_logging.h"
 
 using namespace Hermes::Algebra;
 

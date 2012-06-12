@@ -34,8 +34,6 @@ namespace Hermes
     {
       this->mesh = mesh;
       this->refmap = new RefMap;
-      // FIXME - this was in H3D: MEM_CHECK(this->refmap);
-      this->element = NULL;		// this comes with Transformable
     }
 
     template<typename Scalar>

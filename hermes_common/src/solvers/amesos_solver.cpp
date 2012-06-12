@@ -23,11 +23,8 @@
 #ifdef HAVE_AMESOS
 #include "amesos_solver.h"
 #include "callstack.h"
-#include "error.h"
-#include "common_time_period.h"
+#include "time_period.h"
 #include <Amesos_ConfigDefs.h>
-
-using namespace Hermes::Error;
 
 namespace Hermes
 {
@@ -93,7 +90,7 @@ namespace Hermes
 
       if (!setup_factorization())
       {
-        warning("AmesosSolver: LU factorization could not be completed");
+        warn("AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
@@ -108,7 +105,7 @@ namespace Hermes
       this->time = tmr.accumulated();
 
       delete [] this->sln;
-      this->sln = new double[m->size]; MEM_CHECK(this->sln);
+      this->sln = new double[m->size];
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(double));
 
@@ -131,7 +128,7 @@ namespace Hermes
 
       if (!setup_factorization())
       {
-        warning("AmesosSolver: LU factorization could not be completed");
+        warn("AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
@@ -146,7 +143,7 @@ namespace Hermes
       this->time = tmr.accumulated();
 
       delete [] this->sln;
-      this->sln = new std::complex<double>[m->size]; MEM_CHECK(this->sln);
+      this->sln = new std::complex<double>[m->size];
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
@@ -172,7 +169,7 @@ namespace Hermes
         status = solver->SymbolicFactorization();
         if (status != 0)
         {
-          warning("Symbolic factorization failed.");
+          warn("Symbolic factorization failed.");
           return false;
         }
 
@@ -181,7 +178,7 @@ namespace Hermes
         status = solver->NumericFactorization();
         if (status != 0)
         {
-          warning("Numeric factorization failed.");
+          warn("Numeric factorization failed.");
           return false;
         }
       }

@@ -194,10 +194,10 @@ int main(int argc, char* argv[])
   if (ndof == 382) // Tested value as of 12 Jul 2011.
   {
     printf("Success!\n");
-    return TEST_SUCCESS;
+    return 0;
   }
   else {
     printf("Failure!\n");
-    return TEST_FAILURE;
+    return -1;
   }
 }

@@ -25,7 +25,7 @@
 #include "traverse.h"
 #include "refinement_selectors/selector.h"
 #include "matrix.h"
-#include "common_time_period.h"
+#include "time_period.h"
 
 namespace Hermes
 {
@@ -932,19 +932,19 @@ namespace Hermes
     {
       int i, j;
 
-      int n = slns.size();
-      if (n != this->num) EXIT("Wrong number of solutions.");
+      if (slns.size() != this->num)
+        throw new Exceptions::LengthException(0, slns.size(), this->num);
 
       Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
       Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];
 
-      for (i = 0; i < n; i++)
+      for (i = 0; i < this->num; i++)
       {
         slns_original[i] = this->sln[i];
         this->sln[i] = slns[i];
         sln[i]->set_quad_2d(&g_quad_2d_std);
       }
-      for (i = 0; i < n; i++)
+      for (i = 0; i < this->num; i++)
       {
         rslns_original[i] = this->rsln[i];
         this->rsln[i] = rslns[i];
@@ -1062,7 +1062,7 @@ namespace Hermes
       }
       else
       {
-        for (i = 0; i < n; i++)
+        for (i = 0; i < this->num; i++)
         {
           this->sln[i] = slns_original[i];
           this->rsln[i] = rslns_original[i];

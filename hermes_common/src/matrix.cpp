@@ -21,7 +21,6 @@
 */
 #include "common.h"
 #include "matrix.h"
-#include "error.h"
 #include "callstack.h"
 
 #include "solvers/linear_matrix_solver.h"
@@ -39,14 +38,14 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
   int i, imax = 0, j, k;
   double big, dum, sum, temp;
   double *vv = new double[n];
-  MEM_CHECK(vv);
 
   *d = 1.0;
   for (i = 0; i < n; i++)
   {
     big = 0.0;
     for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
-    if (big == 0.0) EXIT("Singular matrix in routine LUDCMP!");
+    if (big == 0.0)
+      throw new Exceptions::Exception("Singular matrix in routine LUDCMP!");
     vv[i] = 1.0 / big;
   }
   for (j = 0; j < n; j++)
@@ -103,7 +102,8 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
       while (--k >= 0) sum -= a[i][k] * a[j][k];
       if (i == j)
       {
-        if (sum <= 0.0) EXIT("CHOLDC failed!");
+        if (sum <= 0.0) 
+          throw new Exceptions::Exception("CHOLDC failed!");
         else p[i] = sqrt(sum);
       }
       else a[j][i] = sum / p[i];
@@ -149,7 +149,6 @@ void Hermes::Algebra::SparseMatrix<Scalar>::prealloc(unsigned int n)
   this->size = n;
 
   pages = new Page *[n];
-  MEM_CHECK(pages);
   memset(pages, 0, n * sizeof(Page *));
 }
 
@@ -159,7 +158,6 @@ void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigne
   if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE)
   {
     Page *new_page = new Page;
-    MEM_CHECK(new_page);
     new_page->count = 0;
     new_page->next = pages[col];
     pages[col] = new_page;

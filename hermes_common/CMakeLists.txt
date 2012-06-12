@@ -18,9 +18,8 @@ project(hermes_common)
   #
   set(SRC
     src/hermes_logging.cpp
-    src/common_time_period.cpp
+    src/time_period.cpp
     src/callstack.cpp
-    src/error.cpp
     src/matrix.cpp
     src/api.cpp
     src/tables.cpp
@@ -48,10 +47,9 @@ project(hermes_common)
 
   set(HEADERS
     include/hermes_logging.h
-    include/common_time_period.h
+    include/time_period.h
     include/callstack.h
     include/common.h
-    include/error.h
     include/matrix.h
     include/api.h
     include/tables.h

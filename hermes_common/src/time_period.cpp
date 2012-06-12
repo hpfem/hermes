@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-/*! \file common_time_period.cpp
+/*! \file time_period.cpp
     \brief File containing the class TimePeriod and relevant definitions for measuring time.
 */
 #include <math.h>
@@ -27,7 +27,7 @@
 #include <sstream>
 #include <fstream>
 
-#include "common_time_period.h"
+#include "time_period.h"
 
 namespace Hermes
 {

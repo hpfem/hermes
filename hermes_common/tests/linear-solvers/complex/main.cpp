@@ -86,7 +86,7 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
   std::map<unsigned int, MatrixEntry> &mat, std::map<unsigned int, std::complex<double> > &rhs, bool &cplx_2_real)
 {
   FILE *file = fopen(file_name, "r");
-  if (file == NULL) return TEST_FAILURE;
+  if (file == NULL) return -1;
 
   enum EState {
     STATE_N,
@@ -154,7 +154,7 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
   // Clear pointer.
   rhs_buffer = NULL;
 
-  return TEST_SUCCESS;
+  return 0;
 }
 
 void build_matrix(int n, std::map<unsigned int, MatrixEntry> &ar_mat, std::map<unsigned int, std::complex<double> > &ar_rhs,
@@ -229,7 +229,7 @@ void solve(LinearMatrixSolver<std::complex<double> > &solver, int n) {
 }
 
 int main(int argc, char *argv[]) {
-  int ret = TEST_SUCCESS;
+  int ret = 0;
 
   int n;
   int nnz;
@@ -360,17 +360,17 @@ sln = solver.get_sln_vector();
 #endif
   }
   else
-    ret = TEST_FAILURE;
+    ret = -1;
 
 std::cout << sln[0] << sln[1] << sln[2];
 
   if (std::abs(sln[0] - std::complex<double>(0.800000, -0.600000)) > 1E-6 || std::abs(sln[1] - std::complex<double>(0.470588, -0.882353)) > 1E-6 || std::abs(sln[2] - std::complex<double>(0.486486, -0.918919)) > 1E-6)
-    ret = TEST_FAILURE;
+    ret = -1;
   else
-    ret = TEST_SUCCESS;
+    ret = 0;
 
   // Test
-  if (ret == TEST_FAILURE)
+  if (ret == -1)
     printf("Failure!\n");
   else
     printf("Success!\n");

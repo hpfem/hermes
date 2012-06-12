@@ -22,11 +22,7 @@
 #include "config.h"
 #ifdef WITH_MUMPS
 #include "mumps_solver.h"
-#include "trace.h"
-#include "error.h"
 #include "callstack.h"
-
-using namespace Hermes::Error;
 
 namespace Hermes
 {
@@ -97,10 +93,8 @@ namespace Hermes
 
       // initialize the arrays Ap and Ai
       Ap = new unsigned int [this->size + 1];
-      MEM_CHECK(Ap);
       int aisize = this->get_num_indices();
       Ai = new int [aisize];
-      MEM_CHECK(Ai);
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i, pos = 0;
@@ -601,9 +595,9 @@ namespace Hermes
       switch (param.INFOG(1))
       {
       case 0: return true; // no error
-      case -1: warning("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
+      case -1: warn("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
         /// \todo add the rest according to the MUMPS docs
-      default: warning("INFOG(1) = %d", param.INFOG(1)); break;
+      default: warn("INFOG(1) = %d", param.INFOG(1)); break;
       }
       return false;
     }

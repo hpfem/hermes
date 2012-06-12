@@ -358,8 +358,6 @@ namespace Hermes
       e->nx = nx; e->ny = ny;
       e->tx = tx; e->ty = ty;
       e->diam = diam;
-      e->edge_marker = HERMES_DUMMY_EDGE_MARKER;
-      e->elem_marker = HERMES_DUMMY_ELEM_MARKER;
 
       return e;
     }

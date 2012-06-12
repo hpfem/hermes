@@ -23,14 +23,21 @@
 #define __HERMES_COMMON_MATRIX_H
 
 #include "common.h"
-#include "error.h"
 #include "vector.h"
 #include "exceptions.h"
 
-using namespace Hermes::Error;
-
 namespace Hermes
 {
+  enum MatrixSolverType
+  {
+    SOLVER_UMFPACK = 0,
+    SOLVER_PETSC,
+    SOLVER_MUMPS,
+    SOLVER_SUPERLU,
+    SOLVER_AMESOS,
+    SOLVER_AZTECOO
+  };
+
   /// \brief Namespace containing classes for vector / matrix operations.
   namespace Algebra
   {
@@ -45,7 +52,6 @@ namespace Hermes
       {
         if (!n) n = m;
         T **vec = (T **) new char[sizeof(T *) * m + sizeof(T) * m * n];
-        MEM_CHECK(vec);
         memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
         T *row = (T *) (vec + m);
         for (unsigned int i = 0; i < m; i++, row += n) vec[i] = row;
@@ -57,7 +63,6 @@ namespace Hermes
       {
         if (!n) n = m;
         T **vec = (T **) malloc(sizeof(T *) * m + sizeof(T) * m * n);
-        MEM_CHECK(vec);
         memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
         T *row = (T *) (vec + m);
         for (unsigned int i = 0; i < m; i++, row += n) vec[i] = row;

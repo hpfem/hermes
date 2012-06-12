@@ -19,7 +19,7 @@
 #include <ostream>
 #include "order_permutator.h"
 #include "selector.h"
-#include "common_time_period.h"
+#include "time_period.h"
 
 namespace Hermes
 {

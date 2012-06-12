@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
   if (argc != 3)
   {
     printf("Missing mesh filename and domain perimeter as command-line parameters.");
-    return TEST_FAILURE;
+    return -1;
   }
 
   // Load the mesh.
@@ -130,11 +130,11 @@ int main(int argc, char* argv[])
 
   if (fabs(perimeter - bdryLengthInput) < 1e-6) {
     printf("Success!\n");
-    return TEST_SUCCESS;
+    return 0;
   }
   else {
     printf("Failure!\n");
-    return TEST_FAILURE;
+    return -1;
   }
 
 

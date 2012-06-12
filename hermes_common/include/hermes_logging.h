@@ -220,12 +220,6 @@ using namespace Hermes::Logging;
 # define HERMES_REPORT_INFO
 #endif
 
-#if defined(_DEBUG) || !defined(NDEBUG)
-# define __HERMES_REP_DEBG true
-#else
-# define __HERMES_REP_DEBG false
-#endif
-
 #if defined(HERMES_REPORT_WARNING)
 # define warn(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 # define warn_if(__cond, ...) hermes_log_message_if((__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)

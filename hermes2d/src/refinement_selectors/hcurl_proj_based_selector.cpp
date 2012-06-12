@@ -18,8 +18,8 @@ namespace Hermes
       {
         if(user_shapeset != NULL)
         {
-          warning("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
-          warning("Warning: The functionality for cloning user shapeset is to be implemented yet.");
+          warn("Warning: The user shapeset provided for the selector has to have a correct copy constructor implemented.");
+          warn("Warning: The functionality for cloning user shapeset is to be implemented yet.");
         }
       }
 

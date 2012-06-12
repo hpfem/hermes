@@ -22,8 +22,6 @@
 #include "config.h"
 #ifdef WITH_PETSC
 #include "petsc_solver.h"
-#include "trace.h"
-#include "error.h"
 #include "callstack.h"
 
 /// \todo Check #ifdef WITH_MPI and use the parallel methods from PETSc accordingly.
@@ -106,12 +104,10 @@ namespace Hermes
 
       // calc nnz
       int *nnz_array = new int[this->size];
-      MEM_CHECK(nnz_array);
 
       // fill in nnz_array
       int aisize = this->get_num_indices();
       int *ai = new int[aisize];
-      MEM_CHECK(ai);
 
       // sort the indices and remove duplicities, insert into ai
       int pos = 0;
@@ -516,12 +512,10 @@ namespace Hermes
       // allocate memory for solution vector
       delete [] this->sln;
       this->sln = new Scalar [m->size];
-      MEM_CHECK(this->sln);
       memset(this->sln, 0, m->size * sizeof(Scalar));
 
       // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
       int *idx = new int [m->size];
-      MEM_CHECK(idx);
       for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
       // copy solution to the output solution vector

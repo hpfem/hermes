@@ -20,6 +20,7 @@
 \brief General nonlinear solver functionality.
 */
 #include "nonlinear_solver.h"
+#include "hermes_logging.h"
 
 using namespace Hermes::Algebra;
 
@@ -74,7 +75,7 @@ namespace Hermes
     {
       if(this->matrix_solver_type != SOLVER_AZTECOO)
       {
-        warning("Trying to set iterative method for a different solver than AztecOO.");
+        warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
       }
       else
@@ -88,7 +89,7 @@ namespace Hermes
     {
       if(this->matrix_solver_type != SOLVER_AZTECOO)
       {
-        warning("Trying to set iterative method for a different solver than AztecOO.");
+        warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
       }
       else
