@@ -23,6 +23,7 @@
 #ifdef WITH_MUMPS
 #include "mumps_solver.h"
 #include "callstack.h"
+#include "time_period.h"
 
 namespace Hermes
 {
