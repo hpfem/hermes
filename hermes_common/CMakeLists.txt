@@ -58,6 +58,7 @@ project(hermes_common)
     include/ord.h
     include/hermes_function.h
     include/exceptions.h
+    include/vector.h
     include/solvers/dp_interface.h
     include/solvers/linear_matrix_solver.h
     include/solvers/nonlinear_solver.h
