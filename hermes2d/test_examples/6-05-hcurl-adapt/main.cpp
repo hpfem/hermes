@@ -25,7 +25,7 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 //  The following parameters can be changed:
 
 // Set to "false" to suppress Hermes OpenGL visualization.
-const bool HERMES_VISUALIZATION = false;
+const bool HERMES_VISUALIZATION = true;
 // Initial polynomial degree. NOTE: The meaning is different from
 // standard continuous elements in the space H1. Here, P_INIT refers
 // to the maximum poly order of the tangential component, and polynomials

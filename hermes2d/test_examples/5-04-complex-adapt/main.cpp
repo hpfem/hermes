@@ -132,9 +132,11 @@ int main(int argc, char* argv[])
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
     // For iterative solver.
-    newton.set_iterative_method(iterative_method);
-    newton.set_preconditioner(preconditioner);
-    
+    if(matrix_solver_type == SOLVER_AZTECOO)
+    {
+      newton.set_iterative_method(iterative_method);
+      newton.set_preconditioner(preconditioner);
+    }
     try{
       newton.solve(coeff_vec);
     }

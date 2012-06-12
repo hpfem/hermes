@@ -986,7 +986,7 @@ namespace Hermes
       if ( !setup_factorization() )
         throw new Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
-      if(sln)
+      if(sln != NULL)
         delete [] sln;
       sln = new double[m->get_size()];
       memset(sln, 0, m->get_size() * sizeof(double));

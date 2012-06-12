@@ -39,7 +39,7 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
-  Hermes::HermesCommonApi.setParamValue("exceptions print stacktrace", 0);
+  Hermes::HermesCommonApi.setParamValue("Exception print call stack", 0);
   Hermes::Hermes2D::Hermes2DApi.setParamValue("Number of threads", 4);
 
   try

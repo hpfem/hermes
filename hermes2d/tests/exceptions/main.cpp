@@ -31,7 +31,6 @@ int main(int argc, char* argv[])
   Hermes::vector<const Hermes2D::Space<double>*> spaces(NULL,NULL,NULL,NULL);
   Hermes::vector<Hermes2D::Solution<double>*> solutions(NULL,NULL,NULL);
 
-
   try
   {
     sln.vector_to_solutions(solution_vector,spaces,solutions);
@@ -63,10 +62,9 @@ int main(int argc, char* argv[])
     info("Failure!");
     return -1;
   }
-  catch(Exceptions::LinearMatrixSolverException &e)
+  catch(Exceptions::LinearMatrixSolverException *e)
   {
   }
-
 
   //ValueException test
   Hermes::vector<Hermes2D::Space<double>*> spaces2;

@@ -267,13 +267,28 @@ int main(int argc, char *argv[]) {
 
   std::map<unsigned int, MatrixEntry> ar_mat;
   std::map<unsigned int, double > ar_rhs;
-
+  
   if (argc == 4 && strcasecmp(argv[3], "complex-matrix-to-real") == 0)
     cplx_2_real = true;
   else
     cplx_2_real = false;
 
 double* sln;
+  switch(atoi(argv[2]))
+  {
+  case 1:
+    if (read_matrix_and_rhs((char*)"in/linsys-1", n, nnz, ar_mat, ar_rhs, cplx_2_real) != 0)
+      throw new Hermes::Exceptions::Exception("Failed to read the matrix and rhs.");
+    break;
+  case 2:
+    if (read_matrix_and_rhs((char*)"in/linsys-2", n, nnz, ar_mat, ar_rhs, cplx_2_real) != 0)
+      throw new Hermes::Exceptions::Exception("Failed to read the matrix and rhs.");
+    break;
+  case 3:
+    if (read_matrix_and_rhs((char*)"in/linsys-3", n, nnz, ar_mat, ar_rhs, cplx_2_real) != 0)
+      throw new Hermes::Exceptions::Exception("Failed to read the matrix and rhs.");
+    break;
+  }
 
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC

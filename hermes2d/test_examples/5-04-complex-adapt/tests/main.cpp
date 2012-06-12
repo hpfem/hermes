@@ -53,6 +53,9 @@ const char* iterative_method = "bicgstab";
 // Possibilities: none, jacobi, neumann, least-squares, or a
 // preconditioner from IFPACK (see solver/aztecoo.h).
 const char* preconditioner = "least-squares";
+// Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
+// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
+Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
 
 // Problem parameters.
 const double MU_0 = 4.0*M_PI*1e-7;
@@ -123,9 +126,11 @@ int main(int argc, char* argv[])
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
     // For iterative solver.
-    newton.set_iterative_method(iterative_method);
-    newton.set_preconditioner(preconditioner);
-    
+    if(matrix_solver_type == Hermes::SOLVER_AZTECOO)
+    {
+      newton.set_iterative_method(iterative_method);
+      newton.set_preconditioner(preconditioner);
+    }
     try
     {
       newton.solve(coeff_vec);
