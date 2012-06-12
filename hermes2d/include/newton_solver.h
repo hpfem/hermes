@@ -37,7 +37,6 @@ namespace Hermes
     {
     public:
       NewtonSolver(DiscreteProblem<Scalar>* dp);
-      NewtonSolver(DiscreteProblem<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
       void init_linear_solver();
 
       ~NewtonSolver();

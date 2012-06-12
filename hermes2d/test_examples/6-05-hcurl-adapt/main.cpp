@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
 
     try
     {
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type);
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln);
 
     // View the coarse mesh solution and polynomial orders.
     if(HERMES_VISUALIZATION)

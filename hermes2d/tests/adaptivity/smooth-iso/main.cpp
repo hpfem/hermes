@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     double* coeff_vec = new double[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(double));
 
-    NewtonSolver<double> newton(&dp, matrix_solver);
+    NewtonSolver<double> newton(&dp);
     newton.set_verbose_output(false);
 
     Solution<double> ref_sln;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Calculating error estimate and exact error.");
-    OGProjection<double>::project_global(&space, &ref_sln, &sln, matrix_solver);
+    OGProjection<double>::project_global(&space, &ref_sln, &sln);
 
     // Calculate element errors and total error estimate.
     Adapt<double> adaptivity(&space);

@@ -21,6 +21,7 @@
 #include "api.h"
 #include "common.h"
 #include "exceptions.h"
+#include "matrix.h"
 
 namespace Hermes
 {
@@ -45,7 +46,9 @@ namespace Hermes
     signal(SIGSEGV, CallStack::dump);
     signal(SIGTERM, CallStack::dump);
 
-    this->parameters.insert(std::pair<std::string, Parameter*> ("exceptions print stacktrace",new Parameter(0)));
+    this->parameters.insert(std::pair<std::string, Parameter*> ("Exception print call stack",new Parameter(0)));
+    this->parameters.insert(std::pair<std::string, Parameter*> ("Number of threads",new Parameter(NUM_THREADS)));
+    this->parameters.insert(std::pair<std::string, Parameter*> ("Matrix solver type",new Parameter(SOLVER_UMFPACK)));
   }
 
   Api::~Api()

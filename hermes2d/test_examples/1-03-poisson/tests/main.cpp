@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::Solution<double> sln;
   
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp, matrix_solver_type);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
 
   // Solve the linear problem.
   linear_solver.solve();

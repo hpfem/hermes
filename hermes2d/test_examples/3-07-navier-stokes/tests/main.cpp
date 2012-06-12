@@ -40,10 +40,6 @@ const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of N
 // velocity profile at inlet).
 const double H = 5;
 
-// Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
-// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
-Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
-
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
 const std::string BDY_RIGHT = "2";
@@ -110,7 +106,7 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -118,8 +114,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   OGProjection<double>::project_global(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space),
     Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-    coeff_vec, matrix_solver_type,
-    Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   // Time-stepping loop:
   int num_time_steps = T_FINAL / TAU;

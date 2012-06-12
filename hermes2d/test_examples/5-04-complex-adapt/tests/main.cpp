@@ -53,9 +53,6 @@ const char* iterative_method = "bicgstab";
 // Possibilities: none, jacobi, neumann, least-squares, or a
 // preconditioner from IFPACK (see solver/aztecoo.h).
 const char* preconditioner = "least-squares";
-// Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;
 
 // Problem parameters.
 const double MU_0 = 4.0*M_PI*1e-7;
@@ -110,7 +107,7 @@ int main(int argc, char* argv[])
     DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
     
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
 
     int ndof_ref = ref_space->get_num_dofs();
 
@@ -126,12 +123,11 @@ int main(int argc, char* argv[])
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
     // For iterative solver.
-    if (matrix_solver_type == SOLVER_AZTECOO)
+    newton.set_iterative_method(iterative_method);
+    newton.set_preconditioner(preconditioner);
+    
+    try
     {
-      newton.set_iterative_method(iterative_method);
-      newton.set_preconditioner(preconditioner);
-    }
-    try{
       newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception e)
@@ -143,7 +139,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type);
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate.");

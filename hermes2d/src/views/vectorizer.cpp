@@ -406,8 +406,8 @@ namespace Hermes
         meshes.push_back(xsln->get_mesh());
 
         // Parallelization
-        MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.getParamValue("Number of threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           fns[i] = new MeshFunction<double>*[2];
           fns[i][0] = xsln->clone();
@@ -416,8 +416,8 @@ namespace Hermes
           fns[i][1]->set_quad_2d(&g_quad_lin);
         }
 
-        Transformable*** trfs = new Transformable**[Hermes2DApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        Transformable*** trfs = new Transformable**[Hermes2DApi.getParamValue("Number of threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           trfs[i] = new Transformable*[2];
           trfs[i][0] = fns[i][0];
@@ -454,9 +454,9 @@ namespace Hermes
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
+        Traverse* trav = new Traverse[Hermes2DApi.getParamValue("Number of threads")];
         
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
           trav[i].stack = trav_master.stack;
@@ -491,12 +491,12 @@ namespace Hermes
         }
 
         trav_master.finish();
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
           trav[i].finish();
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
         
 #pragma omp parallel shared(trav_master) private(state_i)
@@ -571,7 +571,7 @@ namespace Hermes
         }
 
         trav_master.finish();
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           trav[i].finish();
           for(unsigned int j = 0; j < 2; j++)

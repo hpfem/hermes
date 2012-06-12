@@ -124,7 +124,7 @@ namespace Hermes
       unsigned int *Ap;          ///< Index to Ax/Ai, where each column starts.
 
       friend class Solvers::MumpsSolver<Scalar>;
-      template<typename T> friend SparseMatrix<T>*  create_matrix(Hermes::MatrixSolverType matrix_solver_type);
+      template<typename T> friend SparseMatrix<T>*  create_matrix();
     };
 
     /** \brief Vector used with MUMPS solver */

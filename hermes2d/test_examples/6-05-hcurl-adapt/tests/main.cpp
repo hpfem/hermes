@@ -59,10 +59,6 @@ const double ERR_STOP = 10.0;
 // over this limit. This is to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
 
-// Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;
-
 // Problem parameters.
 const double MU_R   = 1.0;
 const double KAPPA  = 1.0;
@@ -130,7 +126,7 @@ int main(int argc, char* argv[])
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp, matrix_solver_type);
+    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
 
     try{
       newton.solve(coeff_vec);
@@ -147,7 +143,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     info("Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln, matrix_solver_type);
+    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln);
 
     // Calculate element errors and total error estimate.
     info("Calculating error estimate and exact error.");

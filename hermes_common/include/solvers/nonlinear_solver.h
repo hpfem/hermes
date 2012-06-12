@@ -36,7 +36,6 @@ namespace Hermes
     {
     public:
       NonlinearSolver(DiscreteProblemInterface<Scalar>* dp);
-      NonlinearSolver(DiscreteProblemInterface<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
 
       ~NonlinearSolver();
 
@@ -72,12 +71,6 @@ namespace Hermes
       int error;
 
       double time;  ///< time spent on solving (in secs)
-
-      /// Linear solver to use, choices:
-      /// SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-      /// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-      /// Default: SOLVER_UMFPACK.
-      Hermes::MatrixSolverType matrix_solver_type;
 
       /// Verbose output.
       /// Set to 'true' by default.

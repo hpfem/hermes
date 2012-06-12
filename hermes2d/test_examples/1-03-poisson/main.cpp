@@ -30,10 +30,6 @@ const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
 
-// Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
-
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
@@ -44,7 +40,7 @@ int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
   Hermes::HermesCommonApi.setParamValue("exceptions print stacktrace", 0);
-  Hermes::Hermes2D::Hermes2DApi.setParamValue("num_threads", 4);
+  Hermes::Hermes2D::Hermes2DApi.setParamValue("Number of threads", 4);
 
   try
   {
@@ -92,7 +88,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::Solution<double> sln;
   
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp, matrix_solver_type);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
 
   // Solve the linear problem.
   linear_solver.solve();

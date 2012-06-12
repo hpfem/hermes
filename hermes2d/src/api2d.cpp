@@ -33,7 +33,6 @@ namespace Hermes
 
     void Api2D::init()
     {
-      this->parameters.insert(std::pair<std::string, Parameter*> ("num_threads",new Parameter(NUM_THREADS)));
     }
 
     Hermes::Hermes2D::Api2D Hermes2DApi;

@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof*sizeof(double));
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;

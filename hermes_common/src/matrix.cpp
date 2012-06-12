@@ -32,6 +32,7 @@
 #include "solvers/newton_solver_nox.h"
 #include "solvers/aztecoo_solver.h"
 #include "qsort.h"
+#include "api.h"
 
 void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx, double *d)
 {
@@ -199,9 +200,9 @@ int Hermes::Algebra::SparseMatrix<Scalar>::get_num_indices()
 }
 
 template<typename Scalar>
-SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type)
+SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 {
-  switch (matrix_solver_type)
+  switch (Hermes::HermesCommonApi.getParamValue("Matrix solver type"))
   {
   case Hermes::SOLVER_AMESOS:
     {
@@ -264,9 +265,9 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix(Hermes::MatrixSolverType ma
 }
 
 template<typename Scalar>
-Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type)
+Vector<Scalar>* Hermes::Algebra::create_vector()
 {
-  switch (matrix_solver_type)
+  switch (Hermes::HermesCommonApi.getParamValue("Matrix solver type"))
   {
   case Hermes::SOLVER_AMESOS:
     {
@@ -331,8 +332,8 @@ Vector<Scalar>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_s
 template class Hermes::Algebra::SparseMatrix<double>;
 template class Hermes::Algebra::SparseMatrix<std::complex<double> >;
 
-template HERMES_API Vector<double>* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
-template HERMES_API SparseMatrix<double>*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type);
+template HERMES_API Vector<double>* Hermes::Algebra::create_vector();
+template HERMES_API SparseMatrix<double>*  Hermes::Algebra::create_matrix();
 
-template HERMES_API Vector<std::complex<double> >* Hermes::Algebra::create_vector(Hermes::MatrixSolverType matrix_solver_type);
-template HERMES_API SparseMatrix<std::complex<double> >*  Hermes::Algebra::create_matrix(Hermes::MatrixSolverType matrix_solver_type);
+template HERMES_API Vector<std::complex<double> >* Hermes::Algebra::create_vector();
+template HERMES_API SparseMatrix<std::complex<double> >*  Hermes::Algebra::create_matrix();

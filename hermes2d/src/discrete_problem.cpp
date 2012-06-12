@@ -616,19 +616,19 @@ namespace Hermes
     void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
       Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf)
     {
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         pss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         spss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           spss[i][j] = new PrecalcShapeset(pss[i][j]);
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         refmaps[i] = new RefMap*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
@@ -637,7 +637,7 @@ namespace Hermes
           refmaps[i][j]->set_quad_2d(&g_quad_2d_std);
         }
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         if (coeff_vec != NULL)
         {
@@ -664,19 +664,19 @@ namespace Hermes
         else
           u_ext[i] = NULL;
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         als[i] = new AsmList<Scalar>*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           als[i][j] = new AsmList<Scalar>();
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         ext[i] = new MeshFunction<Scalar>*[ext_functions.size()];
         for (int j = 0; j < ext_functions.size(); j++)
           ext[i][j] = ext_functions[j]->clone();
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->mfvol.size(); j++)
         {
@@ -697,7 +697,7 @@ namespace Hermes
           }
         }
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->mfsurf.size(); j++)
         {
@@ -718,7 +718,7 @@ namespace Hermes
           }
         }
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->vfvol.size(); j++)
         {
@@ -740,7 +740,7 @@ namespace Hermes
           }
         }
       }
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->vfsurf.size(); j++)
         {
@@ -767,7 +767,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext, 
       Hermes::vector<MatrixFormVol<Scalar>*>* mfvol, Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf, Hermes::vector<VectorFormVol<Scalar>*>* vfvol, Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf)
     {
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete pss[i][j];
@@ -775,7 +775,7 @@ namespace Hermes
       }
       delete [] pss;
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete spss[i][j];
@@ -783,7 +783,7 @@ namespace Hermes
       }
       delete [] spss;
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete refmaps[i][j];
@@ -791,7 +791,7 @@ namespace Hermes
       }
       delete [] refmaps;
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         if(u_ext[i] != NULL)
         {
@@ -802,7 +802,7 @@ namespace Hermes
       }
       delete [] u_ext;
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete als[i][j];
@@ -810,7 +810,7 @@ namespace Hermes
       }
       delete [] als;
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned int j = 0; j < ext_functions.size(); j++)
           delete ext[i][j];
@@ -818,28 +818,28 @@ namespace Hermes
       }
       delete [] ext;
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->mfvol.size(); j++)
           delete mfvol[i][j];
         mfvol[i].clear();
       }
       delete [] mfvol;
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->mfsurf.size(); j++)
           delete mfsurf[i][j];
         mfsurf[i].clear();
       }
       delete [] mfsurf;
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->vfvol.size(); j++)
           delete vfvol[i][j];
         vfvol[i].clear();
       }
       delete [] vfvol;
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (int j = 0; j < wf->vfsurf.size(); j++)
           delete vfsurf[i][j];
@@ -883,16 +883,16 @@ namespace Hermes
           ext_functions.push_back(wf->vfsurf.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
-      RefMap*** refmaps = new RefMap**[Hermes2DApi.getParamValue("num_threads")];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
-      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue("Number of threads")];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.getParamValue("Number of threads")];
+      RefMap*** refmaps = new RefMap**[Hermes2DApi.getParamValue("Number of threads")];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.getParamValue("Number of threads")];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.getParamValue("Number of threads")];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
 
       // Fill these structures.
       init_assembling(coeff_vec, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
@@ -912,9 +912,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.getParamValue("num_threads")];
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      Traverse* trav = new Traverse[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.getParamValue("Number of threads")];
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned j = 0; j < spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -947,7 +947,7 @@ namespace Hermes
       VectorFormSurf<Scalar>** current_vfsurf;
 
 #define CHUNKSIZE 1
-      int num_threads_used = Hermes2DApi.getParamValue("num_threads");
+      int num_threads_used = Hermes2DApi.getParamValue("Number of threads");
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -984,10 +984,10 @@ namespace Hermes
       deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         fns[i].clear();
       }

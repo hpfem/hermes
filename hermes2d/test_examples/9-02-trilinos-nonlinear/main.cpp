@@ -87,14 +87,14 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp1(&wf1, &space);
 
   // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver_type);
-  Vector<double>* rhs = create_vector<double>(matrix_solver_type);
-  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix_solver_type, matrix, rhs);
+  SparseMatrix<double>* matrix = create_matrix<double>();
+  Vector<double>* rhs = create_vector<double>();
+  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix, rhs);
 
   // Initialize the solution.
   Solution<double> sln1;
 
-  if (matrix_solver_type == SOLVER_AZTECOO)
+  if (dynamic_cast<AztecOOSolver<double>*>(solver) != NULL)
   {
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
@@ -110,11 +110,11 @@ int main(int argc, char* argv[])
   // coefficient vector.
   //info("Projecting to obtain initial vector for the Newton's method.");
   //CustomInitialSolution sln_tmp(&mesh);
-  //OGProjection::project_global(&space, &sln_tmp, coeff_vec, matrix_solver);
+  //OGProjection::project_global(&space, &sln_tmp, coeff_vec);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp1, matrix_solver_type);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp1);
   newton.set_verbose_output(true);
   try{
     newton.solve(coeff_vec);
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
   // Calculate error.
   CustomExactSolution ex(&mesh);
   double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 1 (%s):  exact H1 error: %g%% (time %g s)", MatrixSolverNames[matrix_solver_type].c_str(), rel_err_1, time1);
+  info("Solution 1 (%s):  exact H1 error: %g%% (time %g s)", MatrixSolverNames[Hermes::HermesCommonApi.getParamValue("Matrix solver type")].c_str(), rel_err_1, time1);
 
   // TRILINOS PART:
 
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
   // coefficient vector.
   info("Projecting to obtain initial vector for the Newton's method.");
   ZeroSolution<double> sln_tmp(&mesh);
-  OGProjection<double>::project_global(&space, &sln_tmp, coeff_vec, matrix_solver_type);
+  OGProjection<double>::project_global(&space, &sln_tmp, coeff_vec);
 
   // Measure the projection time.
   double proj_time = cpu_time.tick().last();

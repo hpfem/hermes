@@ -28,6 +28,7 @@
 #include "newton_solver_nox.h"
 #include "aztecoo_solver.h"
 #include "hermes_logging.h"
+#include "api.h"
 
 using namespace Hermes::Algebra;
 
@@ -75,10 +76,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
+    LinearMatrixSolver<Scalar>* create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
     {
       Vector<Scalar>* rhs_dummy = NULL;
-      switch (matrix_solver_type)
+      switch (Hermes::HermesCommonApi.getParamValue("Matrix solver type"))
       {
       case Hermes::SOLVER_AZTECOO:
         {
@@ -170,11 +171,9 @@ namespace Hermes
       this->max_iters = iters;
     }
 
-    template HERMES_API LinearMatrixSolver<double>*  create_linear_solver(Hermes::MatrixSolverType matrix_solver,
-      Matrix<double>* matrix, Vector<double>* rhs);
+    template HERMES_API LinearMatrixSolver<double>*  create_linear_solver(Matrix<double>* matrix, Vector<double>* rhs);
 
-    template HERMES_API LinearMatrixSolver<std::complex<double> >*  create_linear_solver(Hermes::MatrixSolverType matrix_solver,
-      Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
+    template HERMES_API LinearMatrixSolver<std::complex<double> >*  create_linear_solver(Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
 
     template class HERMES_API LinearMatrixSolver<double>;
     template class HERMES_API LinearMatrixSolver<std::complex<double> >;

@@ -38,10 +38,6 @@ namespace Hermes
     public:
       PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter);
       PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
-      PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter,
-                   Hermes::MatrixSolverType matrix_solver_type);
-      PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > sln_prev_iter,
-                   Hermes::MatrixSolverType matrix_solver_type);
       
       /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
       void set_verbose_output_inner_newton(bool verbose_output_to_set);

@@ -35,7 +35,6 @@ namespace Hermes
     {
     public:
       LinearSolver(DiscreteProblemLinear<Scalar>* dp);
-      LinearSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type);
 
       ~LinearSolver();
 
@@ -57,12 +56,6 @@ namespace Hermes
 
       /// Linear solver.
       LinearMatrixSolver<Scalar>* matrix_solver;
-      
-      /// Linear solver to use, choices:
-      /// SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-      /// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-      /// Default: SOLVER_UMFPACK.
-      Hermes::MatrixSolverType matrix_solver_type;
     };
   }
 }

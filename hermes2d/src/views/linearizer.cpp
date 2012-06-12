@@ -730,8 +730,8 @@ namespace Hermes
           meshes.push_back(ydisp->get_mesh());
 
         // Parallelization
-        MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.getParamValue("Number of threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           fns[i] = new MeshFunction<double>*[3];
           fns[i][0] = sln->clone();
@@ -751,8 +751,8 @@ namespace Hermes
           }
         }
 
-        Transformable*** trfs = new Transformable**[Hermes2DApi.getParamValue("num_threads")];
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        Transformable*** trfs = new Transformable**[Hermes2DApi.getParamValue("Number of threads")];
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           trfs[i] = new Transformable*[3];
           trfs[i][0] = fns[i][0];
@@ -767,9 +767,9 @@ namespace Hermes
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 
-        Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
+        Traverse* trav = new Traverse[Hermes2DApi.getParamValue("Number of threads")];
 
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
           trav[i].stack = trav_master.stack;
@@ -778,7 +778,7 @@ namespace Hermes
         int state_i;
 
 #define CHUNKSIZE 1
-        int num_threads_used = Hermes2DApi.getParamValue("num_threads");
+        int num_threads_used = Hermes2DApi.getParamValue("Number of threads");
 #pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -840,7 +840,7 @@ namespace Hermes
         }
 
         trav_master.finish();
-        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+        for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         {
           trav[i].finish();
           for(unsigned int j = 0; j < (1 + (xdisp != NULL? 1 : 0) + (ydisp != NULL ? 1 : 0)); j++)

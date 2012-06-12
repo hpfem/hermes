@@ -50,14 +50,11 @@ namespace Hermes
       static void project_global(const Space<Scalar>* space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
-          Scalar* target_vec,
-          Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK, 
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Scalar* target_vec, double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /**
        \fn  static void OGProjection::project_global(Space<Scalar>* space,
         MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
-        Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
         ProjNormType proj_norm = HERMES_UNSET_NORM, double newton_tol = 1e-6, int newton_max_iter = 10);
       
        \brief The method checks source_meshfn if it is an instance of Solution, if so, it checks its sln_vector, and space_seq
@@ -74,34 +71,28 @@ namespace Hermes
        \param newton_tol              (optional) the newton tolerance.
        \param newton_max_iter         (optional) the newton maximum iterator.
        */
- 
       static void project_global(const Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          ProjNormType proj_norm = HERMES_UNSET_NORM, 
+          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM, 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper that delivers a Solution instead of coefficient vector. 
       static void project_global(const Space<Scalar>* space,
           Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
-          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           ProjNormType proj_norm = HERMES_UNSET_NORM, 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source MeshFunctions that delivers coefficient vector. 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
+          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source Solutions that delivers coefficient vector. 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
+          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       static void project_global(Hermes::vector<const Space<Scalar>*> spaces,
           Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
-          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false, 
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
@@ -112,7 +103,7 @@ namespace Hermes
       /// the weak form of the PDE. If you supply a weak form of the
       /// PDE, the PDE will just be solved.
       static void project_internal(const Space<Scalar>* space, WeakForm<Scalar>* proj_wf, Scalar* target_vec,
-      Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK, double newton_tol = 1e-6, int newton_max_iter = 10);
+        double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Jacobian matrix (same as stiffness matrix since projections are linear).
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>

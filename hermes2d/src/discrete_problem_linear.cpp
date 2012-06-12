@@ -82,16 +82,16 @@ namespace Hermes
           ext_functions.push_back(this->wf->vfsurf.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.getParamValue("num_threads")];
-      RefMap*** refmaps = new RefMap**[Hermes2DApi.getParamValue("num_threads")];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
-      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Hermes2DApi.getParamValue("num_threads")];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue("Number of threads")];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.getParamValue("Number of threads")];
+      RefMap*** refmaps = new RefMap**[Hermes2DApi.getParamValue("Number of threads")];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.getParamValue("Number of threads")];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.getParamValue("Number of threads")];
+      MeshFunction<Scalar>*** ext = new MeshFunction<Scalar>**[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<MatrixFormVol<Scalar>*>* mfvol = new Hermes::vector<MatrixFormVol<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<MatrixFormSurf<Scalar>*>* mfsurf = new Hermes::vector<MatrixFormSurf<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<VectorFormVol<Scalar>*>* vfvol = new Hermes::vector<VectorFormVol<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<VectorFormSurf<Scalar>*>* vfsurf = new Hermes::vector<VectorFormSurf<Scalar>*>[Hermes2DApi.getParamValue("Number of threads")];
 
       // Fill these structures.
       this->init_assembling(NULL, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
@@ -108,9 +108,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[Hermes2DApi.getParamValue("num_threads")];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.getParamValue("num_threads")];
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      Traverse* trav = new Traverse[Hermes2DApi.getParamValue("Number of threads")];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.getParamValue("Number of threads")];
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         for (unsigned j = 0; j < this->spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -136,7 +136,7 @@ namespace Hermes
       VectorFormSurf<Scalar>** current_vfsurf;
       
 #define CHUNKSIZE 1
-      int num_threads_used = Hermes2DApi.getParamValue("num_threads");
+      int num_threads_used = Hermes2DApi.getParamValue("Number of threads");
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -173,10 +173,10 @@ namespace Hermes
       deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("num_threads"); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.getParamValue("Number of threads"); i++)
       {
         fns[i].clear();
       }

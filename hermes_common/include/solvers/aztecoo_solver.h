@@ -78,7 +78,7 @@ namespace Hermes
 
       Precond<Scalar> *pc;
 
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Hermes::MatrixSolverType matrix_solver_type, Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
     };
   }
 }

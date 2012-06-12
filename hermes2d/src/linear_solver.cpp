@@ -28,19 +28,11 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL), matrix_solver_type(SOLVER_UMFPACK)
+    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL)
     {
-      this->jacobian = create_matrix<Scalar>(this->matrix_solver_type);
-      this->residual = create_vector<Scalar>(this->matrix_solver_type);
-      this->matrix_solver = create_linear_solver<Scalar>(this->matrix_solver_type, this->jacobian, this->residual);
-    }
-
-    template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::MatrixSolverType matrix_solver_type) : dp(dp), sln_vector(NULL), matrix_solver_type(matrix_solver_type)
-    {
-      this->jacobian = create_matrix<Scalar>(this->matrix_solver_type);
-      this->residual = create_vector<Scalar>(this->matrix_solver_type);
-      this->matrix_solver = create_linear_solver<Scalar>(this->matrix_solver_type, this->jacobian, this->residual);
+      this->jacobian = create_matrix<Scalar>();
+      this->residual = create_vector<Scalar>();
+      this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual);
     }
 
     template<typename Scalar>

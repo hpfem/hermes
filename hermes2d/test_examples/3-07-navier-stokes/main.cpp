@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver_type);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
 
   // Initialize views.
   Views::VectorView vview("velocity [m/s]", new Views::WinGeom(0, 0, 750, 240));
@@ -157,8 +157,7 @@ int main(int argc, char* argv[])
   info("Projecting initial condition to obtain initial vector for the Newton's method.");
   OGProjection<double>::project_global(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space),
     Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
-    coeff_vec, matrix_solver_type,
-    Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   // Time-stepping loop:
   char title[100];

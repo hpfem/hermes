@@ -55,9 +55,9 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp(&wf, &space);
 
   // Set up the solver, matrix, and rhs according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>(matrix_solver);
-  Vector<double>* rhs = create_vector<double>(matrix_solver);
-  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix_solver, matrix, rhs);
+  SparseMatrix<double>* matrix = create_matrix<double>();
+  Vector<double>* rhs = create_vector<double>();
+  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix, rhs);
 
   // Initial coefficient vector for the Newton's method.
   double* coeff_vec = new double[ndof];
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration.
   Hermes::Hermes2D::Solution<double> sln;
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp, matrix_solver);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
   try{
     newton.solve(coeff_vec);
   }

@@ -34,29 +34,23 @@ namespace Hermes
 
       // Main functionality.
       static void project_local(const Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          ProjNormType proj_norm = HERMES_UNSET_NORM);
+          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       // Wrapper that delivers a Solution instead of coefficient vector. 
       static void project_local(const Space<Scalar>* space,
-	  Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
-          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          ProjNormType proj_norm = HERMES_UNSET_NORM);
+	  Solution<Scalar>* source_sln, Solution<Scalar>* target_sln, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       // Wrapper that takes multiple MeshFunctions.
       static void project_local(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> meshfns,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       // Wrapper that takes multiple Solutions.
       static void project_local(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns,
-          Scalar* target_vec, Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       // Wrapper that delivers Solutions instead of a coefficient vector.
       static void project_local(Hermes::vector<const Space<Scalar>*> spaces,
           Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
-          Hermes::MatrixSolverType matrix_solver = SOLVER_UMFPACK,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
     protected:
