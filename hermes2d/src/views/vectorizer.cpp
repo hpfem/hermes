@@ -585,8 +585,6 @@ namespace Hermes
 
         find_min_max();
 
-        info("Vectorizer created %d verts and %d tris in %0.3g s", this->vertex_count, this->triangle_count, cpu_time.tick().last());
-
         //if (verbose_mode) print_hash_stats();
         unlock_data();
 
