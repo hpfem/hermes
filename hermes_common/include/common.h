@@ -19,11 +19,6 @@
 #ifndef __HERMES_COMMON_COMMON_H
 #define __HERMES_COMMON_COMMON_H
 
-// In Trilinos preconditioning, unistd.h is used if this flag is not defined.
-#ifdef _MSC_VER
-#define ICL
-#endif
-
 #include <complex>
 
 #include <stdexcept>
