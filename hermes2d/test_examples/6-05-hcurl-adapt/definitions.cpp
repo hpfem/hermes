@@ -74,14 +74,20 @@ public:
   virtual Scalar2<std::complex<double> > value(double x, double y) const 
   {
     Scalar2<std::complex<double> >ex(0.0, 0.0);
+#pragma omp critical (custom)
+    {
     exact_sol_val(x, y,  ex[0], ex[1]);
+    }
     return ex;
   };
 
   virtual void derivatives (double x, double y, Scalar2<std::complex<double> >& dx, Scalar2<std::complex<double> >& dy) const 
   {
     std::complex<double> e1dx, e0dy;
-    exact_sol_der(x, y, e1dx, e0dy);
+    #pragma omp critical (custom)
+    {
+      exact_sol_der(x, y, e1dx, e0dy);
+    }
     dx[0] = 0;
     dx[1] = e1dx;
     dy[0] = e0dy;
