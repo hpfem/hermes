@@ -117,14 +117,21 @@ namespace Hermes
       {
         int index;
 #pragma omp critical(realloc_triangles)
-        {
-          if (triangle_count >= triangle_size)
-            tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size = triangle_size * 2));
-          index = triangle_count++;
+        {        
+          if (this->del_slot >= 0) // reuse a slot after a deleted triangle
+          {
+            index = this->del_slot;
+            del_slot = -1;
+          }
+          {
+            if (triangle_count >= triangle_size)
+              tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size = triangle_size * 2));
+            index = triangle_count++;
 
-          tris[index][0] = iv0;
-          tris[index][1] = iv1;
-          tris[index][2] = iv2;
+            tris[index][0] = iv0;
+            tris[index][1] = iv1;
+            tris[index][2] = iv2;
+          }
         }
       }
 

@@ -73,8 +73,6 @@ namespace Hermes
         /// What kind of information do we want to get out of the solution.
         int item, component, value_type;
 
-        int del_slot;   ///< free slot index after a triangle which was deleted
-
         int add_vertex();
         int get_vertex(int p1, int p2, double x, double y, double value);
         int get_top_vertex(int id, double value);

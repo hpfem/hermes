@@ -852,6 +852,21 @@ namespace Hermes
         delete [] trfs;
         delete [] trav;
 
+        // regularize the linear mesh
+        int num = this->triangle_count;
+        for (int i = 0; i < num; i++)
+        {
+          int iv0 = tris[i][0], iv1 = tris[i][1], iv2 = tris[i][2];
+          int mid0 = peek_vertex(iv0, iv1);
+          int mid1 = peek_vertex(iv1, iv2);
+          int mid2 = peek_vertex(iv2, iv0);
+          if (mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
+          {
+            this->del_slot = i;
+            regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2);
+          }
+        }
+
         find_min_max();
 
         this->unlock_data();
@@ -894,9 +909,9 @@ namespace Hermes
         {
           if (
             this->info[i][0] == p1 && this->info[i][1] == p2 && 
-            (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-4) &&
-            (fabs(x - verts[i][0]) < 1e-6) && 
-            (fabs(y - verts[i][1]) < 1e-6)
+            (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-8) &&
+            (fabs(x - verts[i][0]) < 1e-8) && 
+            (fabs(y - verts[i][1]) < 1e-8)
             ) 
             return i;
           // note that we won't return a vertex with a different value than the required one;
@@ -936,7 +951,7 @@ namespace Hermes
       int Linearizer::get_top_vertex(int id, double value)
       {
         if (fabs(value - verts[id][2]) < max*1e-24) return id;
-        return get_vertex(-rand(), -rand(), verts[id][0], verts[id][1], value);
+        return get_vertex(-rand()-omp_get_thread_num()*17*rand(), -rand()-omp_get_thread_num()*rand(), verts[id][0], verts[id][1], value);
       }
 
       void Linearizer::free()

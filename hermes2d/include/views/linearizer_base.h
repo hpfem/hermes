@@ -112,6 +112,8 @@ namespace Hermes
 
         double min_val, max_val;
 
+        int del_slot;   ///< free slot index after a triangle which was deleted
+
         int peek_vertex(int p1, int p2);
 
         void add_edge(int iv1, int iv2, int marker);
