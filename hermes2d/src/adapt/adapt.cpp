@@ -72,7 +72,7 @@ namespace Hermes
           case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
           case HERMES_HDIV_SPACE: proj_norms.push_back(HERMES_HDIV_NORM); break;
           case HERMES_L2_SPACE: proj_norms.push_back(HERMES_L2_NORM); break;
-          default: throw new Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
+          default: throw Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
           }
         }
       }
@@ -127,7 +127,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-        default: throw new Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
+        default: throw Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
         }
       }
 
@@ -158,7 +158,7 @@ namespace Hermes
       int regularize, double to_be_processed)
     {
       if(!have_errors)
-        throw new Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
+        throw Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
 
       if (refinement_selectors.empty())
         throw Exceptions::NullException(1);
@@ -477,7 +477,7 @@ namespace Hermes
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
 
-      throw new Hermes::Exceptions::Exception("hdiv error form not implemented yet in hdiv.h.");
+      throw Hermes::Exceptions::Exception("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
       SolFunctionDomain result = SolFunctionDomain(0);
@@ -517,7 +517,7 @@ namespace Hermes
       case HERMES_HDIV_NORM:
         return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
       default:
-        throw new Hermes::Exceptions::Exception("Unknown projection type");
+        throw Hermes::Exceptions::Exception("Unknown projection type");
         return 0.0;
       }
     }
@@ -540,7 +540,7 @@ namespace Hermes
       case HERMES_HDIV_NORM:
         return hdiv_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
       default:
-        throw new Hermes::Exceptions::Exception("Unknown projection type");
+        throw Hermes::Exceptions::Exception("Unknown projection type");
         return Hermes::Ord();
       }
     }
@@ -678,7 +678,7 @@ namespace Hermes
     double Adapt<Scalar>::get_element_error_squared(int component, int id) const
     {
       if(!have_errors)
-        throw new Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
+        throw Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
       return errors[component][id];
     };
 
@@ -1024,7 +1024,7 @@ namespace Hermes
             component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else
           {
-            throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+            throw Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
             return -1.0;
           }
         }
@@ -1082,7 +1082,7 @@ namespace Hermes
         return sqrt(total_error / total_norm);
       else
       {
-        throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
+        throw Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
     }

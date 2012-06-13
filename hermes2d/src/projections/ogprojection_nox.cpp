@@ -40,7 +40,7 @@ namespace Hermes
       
         // Sanity check.
         if(space == NULL) 
-          throw new Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
+          throw Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
 
       // Get dimension of the space.
       int ndof = space->get_num_dofs();
@@ -155,7 +155,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: norm = HERMES_L2_NORM; break;
-        default: throw new Hermes::Exceptions::Exception("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
+        default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
         }
       }
       else norm = proj_norm;
@@ -189,7 +189,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-        default: throw new Hermes::Exceptions::Exception("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
+        default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjectionNOX<Scalar>::project_global().");
         }
       }
 

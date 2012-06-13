@@ -130,7 +130,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_biform<double, Scalar>(n, wt, u_ext, u, v, e, ext);
           default:
-            throw new Hermes::Exceptions::Exception("Unknown projection type");
+            throw Hermes::Exceptions::Exception("Unknown projection type");
             return 0.0;
           }
         }
@@ -151,7 +151,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_biform<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
           default:
-            throw new Hermes::Exceptions::Exception("Unknown projection type");
+            throw Hermes::Exceptions::Exception("Unknown projection type");
             return Hermes::Ord();
           }
         }
@@ -246,7 +246,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_residual<double, Scalar>(n, wt, u_ext, v, e, ext);
           default:
-            throw new Hermes::Exceptions::Exception("Unknown projection type");
+            throw Hermes::Exceptions::Exception("Unknown projection type");
             return 0.0;
           }
         }
@@ -267,7 +267,7 @@ namespace Hermes
           case HERMES_HDIV_NORM:
             return hdiv_projection_residual<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
           default:
-            throw new Hermes::Exceptions::Exception("Unknown projection type");
+            throw Hermes::Exceptions::Exception("Unknown projection type");
             return Hermes::Ord();
           }
         }

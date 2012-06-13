@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
   std::complex<double>* sln;
   
   if (read_matrix_and_rhs((char*)"in/linsys-cplx-4", n, nnz, ar_mat, ar_rhs, cplx_2_real) != 0)
-    throw new Hermes::Exceptions::Exception("Failed to read the matrix and rhs.");
+    throw Hermes::Exceptions::Exception("Failed to read the matrix and rhs.");
   
   if (strcasecmp(argv[1], "petsc") == 0) {
 #ifdef WITH_PETSC

@@ -46,7 +46,7 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
     big = 0.0;
     for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
     if (big == 0.0)
-      throw new Exceptions::Exception("Singular matrix in routine LUDCMP!");
+      throw Exceptions::Exception("Singular matrix in routine LUDCMP!");
     vv[i] = 1.0 / big;
   }
   for (j = 0; j < n; j++)
@@ -104,7 +104,7 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
       if (i == j)
       {
         if (sum <= 0.0) 
-          throw new Exceptions::Exception("CHOLDC failed!");
+          throw Exceptions::Exception("CHOLDC failed!");
         else p[i] = sqrt(sum);
       }
       else a[j][i] = sum / p[i];
@@ -209,7 +209,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
       return new EpetraMatrix<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("Amesos not installed.");
+      throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
       break;
     }
@@ -218,7 +218,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
       return new EpetraMatrix<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("AztecOO not installed.");
+      throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
       break;
     }
@@ -227,7 +227,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 #ifdef WITH_MUMPS
       return new MumpsMatrix<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("MUMPS not installed.");
+      throw Hermes::Exceptions::Exception("MUMPS not installed.");
 #endif
       break;
     }
@@ -236,7 +236,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 #ifdef WITH_PETSC
       return new PetscMatrix<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("PETSc not installed.");
+      throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
       break;
     }
@@ -245,7 +245,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 #ifdef WITH_UMFPACK
       return new UMFPackMatrix<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("UMFPACK was not installed.");
+      throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
       break;
     }
@@ -254,12 +254,12 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 #ifdef WITH_SUPERLU
       return new SuperLUMatrix<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("SuperLU was not installed.");
+      throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
       break;
     }
   default:
-    throw new Hermes::Exceptions::Exception("Unknown matrix solver requested.");
+    throw Hermes::Exceptions::Exception("Unknown matrix solver requested.");
   }
   return NULL;
 }
@@ -274,7 +274,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
       return new EpetraVector<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("Amesos not installed.");
+      throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
       break;
     }
@@ -283,7 +283,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
       return new EpetraVector<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("AztecOO not installed.");
+      throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
       break;
     }
@@ -292,7 +292,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
 #ifdef WITH_MUMPS
       return new MumpsVector<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("MUMPS was not installed.");
+      throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
       break;
     }
@@ -301,7 +301,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
 #ifdef WITH_PETSC
       return new PetscVector<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("PETSc not installed.");
+      throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
       break;
     }
@@ -310,7 +310,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
 #ifdef WITH_UMFPACK
       return new UMFPackVector<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("UMFPACK was not installed.");
+      throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
       break;
     }
@@ -319,12 +319,12 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
 #ifdef WITH_SUPERLU
       return new SuperLUVector<Scalar>;
 #else
-      throw new Hermes::Exceptions::Exception("SuperLU was not installed.");
+      throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
       break;
     }
   default:
-    throw new Hermes::Exceptions::Exception("Unknown matrix solver requested.");
+    throw Hermes::Exceptions::Exception("Unknown matrix solver requested.");
   }
   return NULL;
 }

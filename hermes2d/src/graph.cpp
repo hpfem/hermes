@@ -80,7 +80,7 @@ namespace Hermes
       if (!rows.size()) add_row(NULL);
       if (fabs(x) < 1e-12) return;  // this is to avoid problems with plotting in log-log scale
       // (sometimes the CPU time was zero and plotting crashed)
-      if (row < 0 || row >= (int)rows.size()) throw new Hermes::Exceptions::Exception("Invalid row number.");
+      if (row < 0 || row >= (int)rows.size()) throw Hermes::Exceptions::Exception("Invalid row number.");
       Values xy = { x, y };
       rows[row].data.push_back(xy);
     }
@@ -116,10 +116,10 @@ namespace Hermes
 
     void SimpleGraph::save(const char* filename)
     {
-      if (!rows.size()) throw new Hermes::Exceptions::Exception("No data rows defined.");
+      if (!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if (f == NULL) throw new Hermes::Exceptions::Exception("Error writing to %s.", filename);
+      if (f == NULL) throw Hermes::Exceptions::Exception("Error writing to %s.", filename);
 
       for (unsigned int i = 0; i < rows.size(); i++)
       {
@@ -137,10 +137,10 @@ namespace Hermes
     {
       int j, k;
 
-      if (!rows.size()) throw new Hermes::Exceptions::Exception("No data rows defined.");
+      if (!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if (f == NULL) throw new Hermes::Exceptions::Exception("Error writing to %s", filename);
+      if (f == NULL) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       if (!logx && !logy)
         fprintf(f, "plot(");
@@ -241,10 +241,10 @@ namespace Hermes
     {
       int j;
 
-      if (!rows.size()) throw new Hermes::Exceptions::Exception("No data rows defined.");
+      if (!rows.size()) throw Hermes::Exceptions::Exception("No data rows defined.");
 
       FILE* f = fopen(filename, "w");
-      if (f == NULL) throw new Hermes::Exceptions::Exception("Error writing to %s", filename);
+      if (f == NULL) throw Hermes::Exceptions::Exception("Error writing to %s", filename);
 
       fprintf(f, "%s", terminal_str.c_str());
 

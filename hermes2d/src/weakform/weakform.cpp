@@ -101,7 +101,7 @@ namespace Hermes
     Scalar MatrixForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::value");
+      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::value");
       return 0.0;
     }
 
@@ -109,7 +109,7 @@ namespace Hermes
     Hermes::Ord MatrixForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::ord");
+      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::ord");
       return Hermes::Ord();
     }
 
@@ -133,7 +133,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::clone()");
+      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::clone()");
       return NULL;
     }
 
@@ -154,7 +154,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::clone()");
+      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::clone()");
       return NULL;
     }
 
@@ -192,7 +192,7 @@ namespace Hermes
     Scalar VectorForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, ExtData<Scalar> *ext) const
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::value");
+      throw Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::value");
       return 0.0;
     }
 
@@ -200,14 +200,14 @@ namespace Hermes
     Hermes::Ord VectorForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::ord");
+      throw Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::ord");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
     VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::clone()");
+      throw Hermes::Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::clone()");
       return NULL;
     }
 
@@ -229,7 +229,7 @@ namespace Hermes
     template<typename Scalar>
     VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone()
     {
-      throw new Hermes::Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::clone()");
+      throw Hermes::Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::clone()");
       return NULL;
     }
 
@@ -238,11 +238,11 @@ namespace Hermes
     {
       
       if (form->i >= neq || form->j >= neq)
-        throw new Hermes::Exceptions::Exception("Invalid equation number.");
+        throw Hermes::Exceptions::Exception("Invalid equation number.");
       if (form->sym < -1 || form->sym > 1)
-        throw new Hermes::Exceptions::Exception("\"sym\" must be -1, 0 or 1.");
+        throw Hermes::Exceptions::Exception("\"sym\" must be -1, 0 or 1.");
       if (form->sym < 0 && form->i == form->j)
-        throw new Hermes::Exceptions::Exception("Only off-diagonal forms can be antisymmetric.");
+        throw Hermes::Exceptions::Exception("Only off-diagonal forms can be antisymmetric.");
       if (mfvol.size() > 100)
       {
         warn("Large number of forms (> 100). Is this the intent?");
@@ -257,7 +257,7 @@ namespace Hermes
     void WeakForm<Scalar>::add_matrix_form_surf(MatrixFormSurf<Scalar>* form)
     {
       if (form->i >= neq || form->j >= neq)
-        throw new Hermes::Exceptions::Exception("Invalid equation number.");
+        throw Hermes::Exceptions::Exception("Invalid equation number.");
 
       form->set_weakform(this);
       mfsurf.push_back(form);
@@ -268,7 +268,7 @@ namespace Hermes
     void WeakForm<Scalar>::add_vector_form(VectorFormVol<Scalar>* form)
     {
       if (form->i >= neq)
-        throw new Hermes::Exceptions::Exception("Invalid equation number.");
+        throw Hermes::Exceptions::Exception("Invalid equation number.");
       form->set_weakform(this);
       vfvol.push_back(form);
       seq++;
@@ -278,7 +278,7 @@ namespace Hermes
     void WeakForm<Scalar>::add_vector_form_surf(VectorFormSurf<Scalar>* form)
     {
       if (form->i >= neq)
-        throw new Hermes::Exceptions::Exception("Invalid equation number.");
+        throw Hermes::Exceptions::Exception("Invalid equation number.");
 
       form->set_weakform(this);
       vfsurf.push_back(form);

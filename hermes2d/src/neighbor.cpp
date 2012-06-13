@@ -29,7 +29,7 @@ namespace Hermes
       quad(&g_quad_2d_std)
     {
       if(central_el == NULL || central_el->active != 1)
-        throw new Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
+        throw Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
@@ -69,7 +69,7 @@ namespace Hermes
           }
 
           if(central_el == NULL || central_el->active != 1)
-            throw new Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
+            throw Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
 
           for(unsigned int i = 0; i < ns.neighbors.size(); i++)
             this->neighbors.push_back(ns.neighbors[i]);
@@ -235,7 +235,7 @@ namespace Hermes
       }
       else
         if(!ignore_errors)
-          throw new Hermes::Exceptions::Exception("The given edge isn't inner");
+          throw Hermes::Exceptions::Exception("The given edge isn't inner");
     }
 
     template<typename Scalar>
@@ -622,7 +622,7 @@ namespace Hermes
           par_mid_vertices[n_parents++] = vertex;
         else
           if (n_parents == Transformations::max_level - 1)
-            throw new Hermes::Exceptions::Exception("Maximum number of intermediate parents exceeded in NeighborSearch<Scalar>::finding_act_elem_up");
+            throw Hermes::Exceptions::Exception("Maximum number of intermediate parents exceeded in NeighborSearch<Scalar>::finding_act_elem_up");
           else
             if(par_mid_vertices[n_parents - 1]->id != vertex->id)
               par_mid_vertices[n_parents++] = vertex;
@@ -650,7 +650,7 @@ namespace Hermes
                 neighbor_edge.local_num_of_edge = j;
                 break;
               }
-              if(neighbor_edge.local_num_of_edge == -1) throw new Hermes::Exceptions::Exception("Neighbor edge wasn't found");
+              if(neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
               Node* n = NULL;
 
@@ -735,7 +735,7 @@ namespace Hermes
           // Get the middle vertex of this edge and try again on the segments into which this vertex splits the edge.
           Node * n = mesh->peek_vertex_node(mid_vert, bnd_verts[i]);
           if(n == NULL)
-            throw new Hermes::Exceptions::Exception("wasn't able to find middle vertex");
+            throw Hermes::Exceptions::Exception("wasn't able to find middle vertex");
           else
           {
             // Make sure the next visited segment has the same orientation as the original central element's active edge.
@@ -767,7 +767,7 @@ namespace Hermes
                   break;
                 }
 
-                if(neighbor_edge.local_num_of_edge == -1) throw new Hermes::Exceptions::Exception("Neighbor edge wasn't found");
+                if(neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
                 assert(!central_transformations.present(n_neighbors));
 
@@ -868,7 +868,7 @@ namespace Hermes
     void NeighborSearch<Scalar>::set_active_segment(unsigned int index)
     {
       if(index >= n_neighbors)
-        throw new Hermes::Exceptions::Exception("NeighborSearch<Scalar>::set_active_segment() called with an incorrect index.");
+        throw Hermes::Exceptions::Exception("NeighborSearch<Scalar>::set_active_segment() called with an incorrect index.");
 
       this->active_segment = index;
       this->neighb_el = this->neighbors[index];
@@ -900,9 +900,9 @@ namespace Hermes
     unsigned int NeighborSearch<Scalar>::get_central_transformations(unsigned int index_1, unsigned int index_2) const
     {
       if (!this->central_transformations.present(index_1))
-        throw new Hermes::Exceptions::Exception("Out of bounds of central_transformations.");
+        throw Hermes::Exceptions::Exception("Out of bounds of central_transformations.");
       if (index_2 >= (unsigned) Transformations::max_level)
-        throw new Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
+        throw Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
 
       return this->central_transformations.get(index_1)->transf[index_2];
     }
@@ -920,9 +920,9 @@ namespace Hermes
     unsigned int NeighborSearch<Scalar>::get_neighbor_transformations(unsigned int index_1, unsigned int index_2) const
     {
       if (!this->neighbor_transformations.present(index_1))
-        throw new Hermes::Exceptions::Exception("Out of bounds of neighbor_transformations.");
+        throw Hermes::Exceptions::Exception("Out of bounds of neighbor_transformations.");
       if (index_2 >= (unsigned) Transformations::max_level)
-        throw new Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
+        throw Hermes::Exceptions::Exception("Trying to access transformation deeper than allowed.");
 
       return this->neighbor_transformations.get(index_1)->transf[index_2];
     }

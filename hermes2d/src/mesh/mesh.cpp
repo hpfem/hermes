@@ -38,7 +38,7 @@ namespace Hermes
           if (elem[1] == NULL)
             elem[1] = e;
           else 
-            throw new Hermes::Exceptions::Exception(false, "No free slot 'elem'");
+            throw Hermes::Exceptions::Exception(false, "No free slot 'elem'");
         }
       }
       ref++;
@@ -253,7 +253,7 @@ namespace Hermes
       {
         Node* en = peek_edge_node(mark[i][0], mark[i][1]);
         if (en == NULL)
-          throw new Hermes::Exceptions::Exception("Boundary data error (edge does not exist)");
+          throw Hermes::Exceptions::Exception("Boundary data error (edge does not exist)");
 
         this->boundary_markers_conversion.insert_marker(this->boundary_markers_conversion.min_marker_unused, boundary_markers[i]);
 
@@ -270,35 +270,35 @@ namespace Hermes
 
     int Mesh::get_num_elements() const 
     {
-      if (this == NULL) throw new Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_elements().");
+      if (this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_elements().");
       return elements.get_num_items();
     }
 
     /// Returns the number of coarse mesh elements.
     int Mesh::get_num_base_elements() const
     {
-      if (this == NULL) throw new Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
+      if (this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
       return nbase;
     }
 
     /// Returns the current number of active elements in the mesh.
     int Mesh::get_num_active_elements() const
     {
-      if (this == NULL) throw new Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_active_elements().");
+      if (this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_active_elements().");
       return nactive;
     }
 
     /// Returns the maximum node id number plus one.
     int Mesh::get_max_element_id() const 
     {
-      if (this == NULL) throw new Hermes::Exceptions::Exception("this == NULL in Mesh::get_max_element_id().");
+      if (this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_max_element_id().");
       return elements.get_size();
     }
 
     Element* Mesh::get_element(int id) const
     {
       if (id < 0 || id >= elements.get_size())
-        throw new Hermes::Exceptions::Exception("Invalid element ID %d, current range: [0; %d]", id, elements.get_size());
+        throw Hermes::Exceptions::Exception("Invalid element ID %d, current range: [0; %d]", id, elements.get_size());
       return &(elements[id]);
     }
 
@@ -766,8 +766,8 @@ namespace Hermes
     void Mesh::refine_element_id(int id, int refinement)
     {
       Element* e = this->get_element(id);
-      if (!e->used) throw new Hermes::Exceptions::Exception("Invalid element id number.");
-      if (!e->active) throw new Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
+      if (!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
+      if (!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
       this->refine_element(e, refinement);
     }
 
@@ -926,7 +926,7 @@ namespace Hermes
     void Mesh::unrefine_element_id(int id)
     {
       Element* e = get_element(id);
-      if (!e->used) throw new Hermes::Exceptions::Exception("Invalid element id number.");
+      if (!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
       if (e->active) return;
 
       for (int i = 0; i < 4; i++)
@@ -1013,11 +1013,11 @@ namespace Hermes
         length_2 = vector_length(v2->x - v1->x, v2->y - v1->y),
         length_3 = vector_length(v0->x - v2->x, v0->y - v2->y);
       if(length_1 < 1e-14 || length_2 < 1e-14 || length_3 < 1e-14)
-        throw new Hermes::Exceptions::Exception("Edge of triangular element #%d has length less than 1e-14.", i);
+        throw Hermes::Exceptions::Exception("Edge of triangular element #%d has length less than 1e-14.", i);
 
       // checking that vertices do not lie on the same line
       if(same_line(v0->x, v0->y, v1->x, v1->y, v2->x, v2->y))
-        throw new Hermes::Exceptions::Exception("Triangular element #%d: all vertices lie on the same line.", i);
+        throw Hermes::Exceptions::Exception("Triangular element #%d: all vertices lie on the same line.", i);
 
       // checking positive orientation. If not positive, swapping vertices
       if (!is_convex(v1->x - v0->x, v1->y - v0->y, v2->x - v0->x, v2->y - v0->y))
@@ -1036,40 +1036,40 @@ namespace Hermes
         length_3 = vector_length(v3->x - v2->x, v3->y - v2->y),
         length_4 = vector_length(v0->x - v3->x, v0->y - v3->y);
       if(length_1 < 1e-14 || length_2 < 1e-14 || length_3 < 1e-14 || length_4 < 1e-14)
-        throw new Hermes::Exceptions::Exception("Edge of quad element #%d has length less than 1e-14.", i);
+        throw Hermes::Exceptions::Exception("Edge of quad element #%d has length less than 1e-14.", i);
 
       // checking that both diagonals have nonzero length
       double
         diag_1 = vector_length(v2->x - v0->x, v2->y - v0->y),
         diag_2 = vector_length(v3->x - v1->x, v3->y - v1->y);
       if(diag_1 < 1e-14 || diag_2 < 1e-14)
-        throw new Hermes::Exceptions::Exception("Diagonal of quad element #%d has length less than 1e-14.", i);
+        throw Hermes::Exceptions::Exception("Diagonal of quad element #%d has length less than 1e-14.", i);
 
       // checking that vertices v0, v1, v2 do not lie on the same line
       if(same_line(v0->x, v0->y, v1->x, v1->y, v2->x, v2->y))
-        throw new Hermes::Exceptions::Exception("Quad element #%d: vertices v0, v1, v2 lie on the same line.", i);
+        throw Hermes::Exceptions::Exception("Quad element #%d: vertices v0, v1, v2 lie on the same line.", i);
       // checking that vertices v0, v1, v3 do not lie on the same line
       if(same_line(v0->x, v0->y, v1->x, v1->y, v3->x, v3->y))
-        throw new Hermes::Exceptions::Exception("Quad element #%d: vertices v0, v1, v3 lie on the same line.", i);
+        throw Hermes::Exceptions::Exception("Quad element #%d: vertices v0, v1, v3 lie on the same line.", i);
       // checking that vertices v0, v2, v3 do not lie on the same line
       if(same_line(v0->x, v0->y, v2->x, v2->y, v3->x, v3->y))
-        throw new Hermes::Exceptions::Exception("Quad element #%d: vertices v0, v2, v3 lie on the same line.", i);
+        throw Hermes::Exceptions::Exception("Quad element #%d: vertices v0, v2, v3 lie on the same line.", i);
       // checking that vertices v1, v2, v3 do not lie on the same line
       if(same_line(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y))
-        throw new Hermes::Exceptions::Exception("Quad element #%d: vertices v1, v2, v3 lie on the same line.", i);
+        throw Hermes::Exceptions::Exception("Quad element #%d: vertices v1, v2, v3 lie on the same line.", i);
 
       // checking that vertex v1 lies on the right of the diagonal v2-v0
       int vertex_1_ok = is_convex(v1->x - v0->x, v1->y - v0->y, v2->x - v0->x, v2->y - v0->y);
-      if(!vertex_1_ok) throw new Hermes::Exceptions::Exception("Vertex v1 of quad element #%d does not lie on the right of the diagonal v2-v0.", i);
+      if(!vertex_1_ok) throw Hermes::Exceptions::Exception("Vertex v1 of quad element #%d does not lie on the right of the diagonal v2-v0.", i);
       // checking that vertex v3 lies on the left of the diagonal v2-v0
       int vertex_3_ok = is_convex(v2->x - v0->x, v2->y - v0->y, v3->x - v0->x, v3->y - v0->y);
-      if(!vertex_3_ok) throw new Hermes::Exceptions::Exception("Vertex v3 of quad element #%d does not lie on the left of the diagonal v2-v0.", i);
+      if(!vertex_3_ok) throw Hermes::Exceptions::Exception("Vertex v3 of quad element #%d does not lie on the left of the diagonal v2-v0.", i);
       // checking that vertex v2 lies on the right of the diagonal v3-v1
       int vertex_2_ok = is_convex(v2->x - v1->x, v2->y - v1->y, v3->x - v1->x, v3->y - v1->y);
-      if(!vertex_2_ok) throw new Hermes::Exceptions::Exception("Vertex v2 of quad element #%d does not lie on the right of the diagonal v3-v1.", i);
+      if(!vertex_2_ok) throw Hermes::Exceptions::Exception("Vertex v2 of quad element #%d does not lie on the right of the diagonal v3-v1.", i);
       // checking that vertex v0 lies on the left of the diagonal v3-v1
       int vertex_0_ok = is_convex(v3->x - v1->x, v3->y - v1->y, v0->x - v1->x, v0->y - v1->y);
-      if(!vertex_0_ok) throw new Hermes::Exceptions::Exception("Vertex v0 of quad element #%d does not lie on the left of the diagonal v2-v1.", i);
+      if(!vertex_0_ok) throw Hermes::Exceptions::Exception("Vertex v0 of quad element #%d does not lie on the left of the diagonal v2-v1.", i);
     }
 
     bool Mesh::rescale(double x_ref, double y_ref)
@@ -1724,8 +1724,8 @@ namespace Hermes
     void Mesh::refine_element_to_quads_id(int id)
     {
       Element* e = get_element(id);
-      if (!e->used) throw new Hermes::Exceptions::Exception("Invalid element id number.");
-      if (!e->active) throw new Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
+      if (!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
+      if (!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
 
       if (e->is_triangle())
         refine_triangle_to_quads(this, e);
@@ -1923,8 +1923,8 @@ namespace Hermes
     void Mesh::refine_element_to_triangles_id(int id)
     {
       Element* e = get_element(id);
-      if (!e->used) throw new Hermes::Exceptions::Exception("Invalid element id number.");
-      if (!e->active) throw new Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
+      if (!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
+      if (!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
 
       if (e->is_triangle())
         return;
@@ -1937,8 +1937,8 @@ namespace Hermes
     void Mesh::convert_element_to_base_id(int id)
     {
       Element* e = get_element(id);
-      if (!e->used) throw new Hermes::Exceptions::Exception("Invalid element id number.");
-      if (!e->active) throw new Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
+      if (!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
+      if (!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
 
       if (e->is_triangle())
         convert_triangles_to_base(e);
@@ -3047,7 +3047,7 @@ namespace Hermes
       {
         for_all_active_elements(e, this)
         {
-          if (e->is_curved()) throw new Hermes::Exceptions::Exception("Regularization of curved elements is not supported.");
+          if (e->is_curved()) throw Hermes::Exceptions::Exception("Regularization of curved elements is not supported.");
 
           if (e->is_triangle())
             regularize_triangle(e);

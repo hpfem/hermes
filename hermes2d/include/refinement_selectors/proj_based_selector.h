@@ -98,7 +98,7 @@ namespace Hermes
           {
             delete[] values; values = NULL;
             if(other.values == NULL)
-              throw new Exceptions::Exception("Unable to assign a non-empty values. Use references instead.");
+              throw Exceptions::Exception("Unable to assign a non-empty values. Use references instead.");
             return *this;
           }
         private:

@@ -158,12 +158,12 @@ namespace Hermes
         {
           ThreadInfo* new_thread_info = NULL;
           try { new_thread_info = new ThreadInfo(); }
-          catch(std::bad_alloc&) { throw new Hermes::Exceptions::Exception("Failed to allocate structure for view thread"); }
+          catch(std::bad_alloc&) { throw Hermes::Exceptions::Exception("Failed to allocate structure for view thread"); }
           int err = pthread_create(&new_thread_info->thread, NULL, view_thread_func, new_thread_info);
           if (err)
           {
             delete new_thread_info;
-            throw new Hermes::Exceptions::Exception("Failed to create main thread, error: %d", err);
+            throw Hermes::Exceptions::Exception("Failed to create main thread, error: %d", err);
           }
           view_thread = new_thread_info;
         }
@@ -191,7 +191,7 @@ namespace Hermes
         std::map<int, View*>::iterator found_view = view_instances.find(title_params.view_id);
         if (found_view == view_instances.end())
         {
-          throw new Exceptions::Exception("Settings title of a view that is not registered.");
+          throw Exceptions::Exception("Settings title of a view that is not registered.");
           return -1;
         }
 
@@ -216,7 +216,7 @@ namespace Hermes
         //initialize GLEW
         GLenum err = glewInit();
         if(err != GLEW_OK)
-          throw new Exceptions::Exception("GLEW error: %s", glewGetErrorString(err));
+          throw Exceptions::Exception("GLEW error: %s", glewGetErrorString(err));
         glew_initialized = true;
 
         //register callbacks
@@ -246,7 +246,7 @@ namespace Hermes
         std::map<int, View*>::iterator found_view = view_instances.find(params.view_id);
         if (found_view == view_instances.end())
         {
-          throw new Exceptions::Exception("Removing of a view that is not registered");
+          throw Exceptions::Exception("Removing of a view that is not registered");
           return -1;
         }
 
@@ -288,7 +288,7 @@ namespace Hermes
         int view_id = *((int*)view_id_ptr);
         std::map<int, View*>::iterator found_view = view_instances.find(view_id);
         if(found_view == view_instances.end())
-          throw new Exceptions::Exception("Refreshing a view that is not registered");
+          throw Exceptions::Exception("Refreshing a view that is not registered");
 
         //redisplay
         if (found_view != view_instances.end())

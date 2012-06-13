@@ -45,9 +45,9 @@ namespace Hermes
         : Selector<Scalar>(max_order), order_h_inc(order_h_inc), order_v_inc(order_v_inc)
       {
         if(order_h_inc < 0)
-          throw new Hermes::Exceptions::ValueException("horizontal increase", order_h_inc, 0);
+          throw Hermes::Exceptions::ValueException("horizontal increase", order_h_inc, 0);
         if(order_v_inc < 0)
-          throw new Hermes::Exceptions::ValueException("vertical increase", order_v_inc, 0);
+          throw Hermes::Exceptions::ValueException("vertical increase", order_v_inc, 0);
       }
 
       template<typename Scalar>

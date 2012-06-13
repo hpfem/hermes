@@ -360,7 +360,7 @@ namespace Hermes
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
       {
         // sanity check
-        if (xsln == NULL || ysln == NULL) throw new Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
+        if (xsln == NULL || ysln == NULL) throw Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
 
         lock_data();
         Hermes::TimePeriod cpu_time;
@@ -615,7 +615,7 @@ namespace Hermes
       void Vectorizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         if(verts == NULL)
-          throw new Exceptions::Exception("Cannot calculate AABB from NULL vertices");
+          throw Exceptions::Exception("Cannot calculate AABB from NULL vertices");
 
         LinearizerBase::calc_aabb(&verts[0][0], &verts[0][1], sizeof(double4), this->vertex_count, min_x, max_x, min_y, max_y);
       }

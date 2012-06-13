@@ -38,9 +38,9 @@ namespace Hermes
     void Func<T>::subtract(const Func<T>& func)
     {
       if(num_gip != func.num_gip)
-        throw new Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
       if(nc != func.nc)
-        throw new Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
 
       subtract(this->val, func.val);
       subtract(this->dx, func.dx);
@@ -80,9 +80,9 @@ namespace Hermes
     void Func<T>::add(const Func<T>& func)
     {
       if(num_gip != func.num_gip)
-        throw new Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
       if(nc != func.nc)
-        throw new Hermes::Exceptions::Exception("Unable to add a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
 
       add(this->val, func.val);
       add(this->dx, func.dx);
@@ -108,7 +108,7 @@ namespace Hermes
       if (attribute != NULL && other_attribute != NULL)
       {
         if(other_attribute == NULL)
-          throw new Hermes::Exceptions::Exception("Unable to add a function expansion, the desired attribute is NULL in the other function.");
+          throw Hermes::Exceptions::Exception("Unable to add a function expansion, the desired attribute is NULL in the other function.");
         for(int i = 0; i < num_gip; i++)
           attribute[i] += other_attribute[i];
       }
@@ -154,7 +154,7 @@ namespace Hermes
     {
       this->sub_idx = fn->sub_idx;
       if(fn == NULL)
-        throw new Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
+        throw Hermes::Exceptions::Exception("Invalid arguments to DiscontinuousFunc constructor.");
       if (support_on_neighbor) fn_neighbor = fn; else fn_central = fn;
     }
 
@@ -166,11 +166,11 @@ namespace Hermes
       reverse_neighbor_side(reverse)
     {
       if(fn_c == NULL)
-        throw new Hermes::Exceptions::NullException(0);
+        throw Hermes::Exceptions::NullException(0);
       if(fn_n == NULL)
-        throw new Hermes::Exceptions::NullException(1);
+        throw Hermes::Exceptions::NullException(1);
       if(fn_c->num_gip != fn_n->num_gip || fn_c->nc != fn_n->nc)
-        throw new Hermes::Exceptions::Exception("DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
+        throw Hermes::Exceptions::Exception("DiscontinuousFunc must be formed by two Func's with same number of integration points and components.");
     }
 
     // Explicit template specializations are needed here, general template<T> T DiscontinuousFunc<T>::zero = T(0) doesn't work.
@@ -636,7 +636,7 @@ namespace Hermes
           delete [] m;
       }
       else
-        throw new Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
+        throw Hermes::Exceptions::Exception("Wrong space type - space has to be either H1, Hcurl, Hdiv or L2");
 
       u->sub_idx = rm->get_transform();
       return u;
@@ -646,8 +646,8 @@ namespace Hermes
     Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order)
     {
       // Sanity checks.
-      if (fu == NULL) throw new Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
-      if (fu->get_mesh() == NULL) throw new Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+      if (fu == NULL) throw Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
+      if (fu->get_mesh() == NULL) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
       int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
@@ -691,8 +691,8 @@ namespace Hermes
     Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order)
     {
       // Sanity checks.
-      if (fu == NULL) throw new Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
-      if (fu->get_mesh() == NULL) throw new Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
+      if (fu == NULL) throw Hermes::Exceptions::Exception("NULL MeshFunction in Func<Scalar>*::init_fn().");
+      if (fu->get_mesh() == NULL) throw Hermes::Exceptions::Exception("Uninitialized MeshFunction used.");
 
       SpaceType space_type = fu->get_space_type();
       SolutionType sln_type = fu->get_type();

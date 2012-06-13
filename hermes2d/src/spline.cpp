@@ -30,7 +30,7 @@ namespace Hermes
     {
       this->is_const = false;
       bool success = this->calculate_coeffs();
-      if (!success) throw new Hermes::Exceptions::Exception("There was a problem constructing a cubic spline.");
+      if (!success) throw Hermes::Exceptions::Exception("There was a problem constructing a cubic spline.");
     }
 
     CubicSpline::CubicSpline(double const_value) : Hermes::Hermes1DFunction<double>(const_value)
@@ -152,7 +152,7 @@ namespace Hermes
     void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) const
     {
       FILE *f = fopen(filename, "wb");
-      if (f == NULL) throw new Hermes::Exceptions::Exception("Could not open a spline file for writing.");
+      if (f == NULL) throw Hermes::Exceptions::Exception("Could not open a spline file for writing.");
 
       // Plotting on the left of the area of definition.
       double x_left = point_left - extension;

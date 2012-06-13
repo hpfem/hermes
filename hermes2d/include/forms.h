@@ -52,21 +52,21 @@ namespace Hermes
       uint64_t sub_idx;  ///< Sub-element transformation.
       
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_val_central(int k) const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_val_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_val_neighbor(int k) const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_val_neighbor(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dx_central(int k) const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_dx_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dx_neighbor(int k) const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_dx_neighbor(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dy_central(int k) const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS);  return * new T; }
+      virtual T& get_dy_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS);  return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dy_neighbor(int k) const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_dy_neighbor(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_laplace_central(int k) { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_laplace_central(int k) { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_laplace_neighbor(int k) { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
+      virtual T& get_laplace_neighbor(int k) { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       
       /// Dellocates an instance of Func<Ord>
       virtual void free_ord();
@@ -208,11 +208,11 @@ namespace Hermes
       int isurf;        ///< Order number of an edge of the element.
 
       /// Methods designed for discontinuous functions, return errors here.
-      virtual int get_neighbor_marker() const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
+      virtual int get_neighbor_marker() const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual int get_neighbor_id()     const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
+      virtual int get_neighbor_id()     const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
       /// Methods designed for discontinuous functions, return errors here.
-      virtual T   get_neighbor_diam()   const { throw new Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
+      virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
       
       /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
       virtual ~Geom() {};

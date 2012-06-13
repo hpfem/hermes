@@ -39,7 +39,7 @@ namespace Hermes
         this->shapeset = new HcurlShapeset;
         this->own_shapeset = true;
       }
-      if (this->shapeset->get_num_components() < 2) throw new Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
       {
@@ -50,7 +50,7 @@ namespace Hermes
       this->chol_p   = hcurl_chol_p;
 
       // set uniform poly order in elements
-      if (p_init < 0) throw new Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
+      if (p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -113,7 +113,7 @@ namespace Hermes
         this->shapeset = shapeset;
 
       if (this->shapeset->get_num_components() < 2)
-        throw new Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
+        throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
         this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
@@ -138,7 +138,7 @@ namespace Hermes
         this->shapeset = shapeset;
 
       if (this->shapeset->get_num_components() < 2)
-        throw new Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
+        throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
       if (!hcurl_proj_ref++)
         this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
@@ -158,7 +158,7 @@ namespace Hermes
         this->own_shapeset = false;
       }
       else
-        throw new Hermes::Exceptions::Exception("Wrong shapeset type in HcurlSpace<Scalar>::set_shapeset()");
+        throw Hermes::Exceptions::Exception("Wrong shapeset type in HcurlSpace<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>

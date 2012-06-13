@@ -113,7 +113,7 @@ namespace Hermes
                 MaterialPropertyMap1::mapped_type::iterator it;
                 for (it = x.second.begin(); it != x.second.end(); ++it)
                   if (fabs(*it) > 1e-14)
-                    throw new Hermes::Exceptions::Exception(E_INVALID_COMBINATION);
+                    throw Hermes::Exceptions::Exception(E_INVALID_COMBINATION);
               }
             };
 
@@ -123,17 +123,17 @@ namespace Hermes
 
               void operator() (MaterialPropertyMap1::value_type x) {
                 if (x.second.size() != nrows)
-                  throw new Hermes::Exceptions::Exception(E_INVALID_SIZE);
+                  throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
               }
 
               void operator() (MaterialPropertyMap2::value_type x) {
                 if (x.second.size() != nrows)
-                  throw new Hermes::Exceptions::Exception(E_INVALID_SIZE);
+                  throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
                 MaterialPropertyMap2::mapped_type::iterator it;
                 for (it = x.second.begin(); it != x.second.end(); ++it)
                   if (it->size() != ncols)
-                    throw new Hermes::Exceptions::Exception(E_INVALID_SIZE);
+                    throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
               }
 
             private:
@@ -159,7 +159,7 @@ namespace Hermes
                   return 0.0;
                 else if (y == 0)
                 {
-                  throw new Hermes::Exceptions::Exception(E_INF_VALUE);
+                  throw Hermes::Exceptions::Exception(E_INF_VALUE);
                   return -1.0;
                 }
                 else
@@ -834,7 +834,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   if (g >= iterates.size())
-                    throw new Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
+                    throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 
                 OuterIterationForm( unsigned int g, std::string area,
@@ -847,7 +847,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   if (g >= iterates.size())
-                    throw new Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
+                    throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
                 
                 OuterIterationForm( unsigned int g,
@@ -860,7 +860,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   if (g >= iterates.size())
-                    throw new Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
+                    throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 
                 OuterIterationForm( unsigned int g, std::string area,
@@ -873,7 +873,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   if (g >= iterates.size())
-                    throw new Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
+                    throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 
                 template<typename Real, typename ScalarTestFns>

@@ -73,7 +73,7 @@ namespace Hermes
       void OrderView::show(const Space<Scalar>* space)
       {
         if (!space->is_up_to_date())
-          throw new Hermes::Exceptions::Exception("The space is not up to date.");
+          throw Hermes::Exceptions::Exception("The space is not up to date.");
 
         ord.lock_data();
         ord.process_space(space);
@@ -227,7 +227,7 @@ namespace Hermes
             case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
             case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
             case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
-            default: throw new Hermes::Exceptions::Exception("Invalid palette type");
+            default: throw Hermes::Exceptions::Exception("Invalid palette type");
             }
             ord.lock_data();
             init_order_palette(ord.get_vertices());

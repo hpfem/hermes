@@ -203,7 +203,7 @@ namespace Hermes
       int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
 
       if(*top_f >= size) 
-        throw new Hermes::Exceptions::Exception("Stack overflow. Increase stack size.");
+        throw Hermes::Exceptions::Exception("Stack overflow. Increase stack size.");
 
       if(stack[*top_f].e == NULL)
       {
@@ -810,12 +810,12 @@ namespace Hermes
         int base_elem_num = meshes[0]->get_num_base_elements();
         for (int i = 1; i < n; i++)
           if(base_elem_num != meshes[i]->get_num_base_elements())
-            throw new Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
+            throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
 
         // Test whether areas of corresponding elements are the same.
         double *areas = new double [base_elem_num];
         memset(areas, 0, base_elem_num*sizeof(double));
-        if(areas == NULL) throw new Hermes::Exceptions::Exception("Not enough memory in Traverse::begin().");
+        if(areas == NULL) throw Hermes::Exceptions::Exception("Not enough memory in Traverse::begin().");
         // Read base element areas from the first mesh,
         // Also get minimum element area.
         int counter = 0;
@@ -842,7 +842,7 @@ namespace Hermes
             if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0)
             {
               printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
-              throw new Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
+              throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
             }
             counter++;
           }

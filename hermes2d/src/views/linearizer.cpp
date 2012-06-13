@@ -792,7 +792,7 @@ namespace Hermes
             fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
             if (val == NULL)
-              throw new Hermes::Exceptions::Exception("Item not defined in the solution.");
+              throw Hermes::Exceptions::Exception("Item not defined in the solution.");
 
             if(xdisp != NULL)
               fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
@@ -960,7 +960,7 @@ namespace Hermes
         process_solution(sln, item, eps);
 
         FILE* f = fopen(filename, "wb");
-        if (f == NULL) throw new Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
+        if (f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
         lock_data();
 
         // Output header for vertices.
@@ -1010,7 +1010,7 @@ namespace Hermes
       void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         if(verts == NULL)
-          throw new Exceptions::Exception("Cannot calculate AABB from NULL vertices");
+          throw Exceptions::Exception("Cannot calculate AABB from NULL vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }
 

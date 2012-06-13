@@ -31,7 +31,7 @@ namespace Hermes
     {
 #ifdef WITH_EXODUSII
 #else
-      throw new Hermes::Exceptions::Exception("hermes2d was not compiled with ExodusII support");
+      throw Hermes::Exceptions::Exception("hermes2d was not compiled with ExodusII support");
 #endif
     }
 
@@ -74,7 +74,7 @@ namespace Hermes
       err = ex_get_init(exoid, title, &n_dims, &n_nodes, &n_elems, &n_eblocks, &n_nodesets, &n_sidesets);
       if (n_dims != 2)
       {
-        throw new Hermes::Exceptions::Exception("File '%s' does not contain 2D mesh", file_name);
+        throw Hermes::Exceptions::Exception("File '%s' does not contain 2D mesh", file_name);
         return false;
       }
 
@@ -134,7 +134,7 @@ namespace Hermes
         else if (n_elem_nodes == 4) n_quad += n_elems_in_blk;
         else
         {
-          throw new Hermes::Exceptions::Exception("Unknown type of element");
+          throw Hermes::Exceptions::Exception("Unknown type of element");
           return false;
         }
       }
@@ -195,7 +195,7 @@ namespace Hermes
           }
           else
           {
-            throw new Hermes::Exceptions::Exception("Unknown type of element");
+            throw Hermes::Exceptions::Exception("Unknown type of element");
             return false;
           }
           iel++;

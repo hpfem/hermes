@@ -192,7 +192,7 @@ namespace Hermes
         int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
         // Make sure we are adding to an existing non-zero entry.
         if (pos < 0)
-          throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
+          throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
         // Add offset to the n-th column.
         pos += Ap[n];
         Ax[pos] += v;
@@ -287,7 +287,7 @@ namespace Hermes
     {
       int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof)
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
       {
@@ -311,7 +311,7 @@ namespace Hermes
         {
           idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
           if (idx<0)
-            throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
+            throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
           idx += Ap[col + j];
           Ax[idx] +=mat->Ax[n];
         }
@@ -731,7 +731,7 @@ namespace Hermes
       SuperMatrix X;
       typename SuperLuType<Scalar>::Scalar *x;
       if ( !(x = new typename SuperLuType<Scalar>::Scalar[m->size]) )
-        throw new Hermes::Exceptions::Exception("Malloc fails for x[].");
+        throw Hermes::Exceptions::Exception("Malloc fails for x[].");
       create_dense_matrix(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
 
       // Solve the system.
@@ -857,15 +857,15 @@ namespace Hermes
 
         // Allocate the row/column reordering vectors.
         if ( !(perm_c = intMalloc(m->size)) )
-          throw new Hermes::Exceptions::Exception("Malloc fails for perm_c[].");
+          throw Hermes::Exceptions::Exception("Malloc fails for perm_c[].");
         if ( !(perm_r = intMalloc(m->size)) )
-          throw new Hermes::Exceptions::Exception("Malloc fails for perm_r[].");
+          throw Hermes::Exceptions::Exception("Malloc fails for perm_r[].");
 
         // Allocate vectors with row/column scaling factors.
         if ( !(R = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
-          throw new Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for R[].");
+          throw Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for R[].");
         if ( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
-          throw new Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for C[].");
+          throw Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for C[].");
 
 #ifdef SLU_MT
         options.fact = EQUILIBRATE;
@@ -876,7 +876,7 @@ namespace Hermes
         // Allocate additional structures used by the driver routine of sequential SuperLU.
         // Elimination tree is contained in the options structure in SuperLU_MT.
         if ( !(etree = intMalloc(m->size)) )
-          throw new Hermes::Exceptions::Exception("Malloc fails for etree[].");
+          throw Hermes::Exceptions::Exception("Malloc fails for etree[].");
 
         options.Fact = DOFACT;
 #endif

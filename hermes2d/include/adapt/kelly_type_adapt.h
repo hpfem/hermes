@@ -270,7 +270,7 @@ namespace Hermes
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
         if (this->num != 1)
-          throw new Exceptions::Exception("Wrong number of solutions.");
+          throw Exceptions::Exception("Wrong number of solutions.");
         Hermes::vector<Solution<Scalar>*> slns;
         slns.push_back(sln);
         return calc_err_est(slns, NULL, error_flags);

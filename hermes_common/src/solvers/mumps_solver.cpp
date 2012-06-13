@@ -178,7 +178,7 @@ namespace Hermes
       int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
       if (pos < 0)
-        throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
+        throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
       pos += Ap[n];
       Ax[pos] += v;
@@ -287,7 +287,7 @@ namespace Hermes
     {
       int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof)
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
       {
@@ -318,7 +318,7 @@ namespace Hermes
         {
           idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
           if (idx<0)
-            throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
+            throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
           idx +=Ap[col + j];
           Ax[idx] +=mat->Ax[n];
         }

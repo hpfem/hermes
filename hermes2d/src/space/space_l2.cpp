@@ -36,7 +36,7 @@ namespace Hermes
       lsize = 0;
 
       // set uniform poly order in elements
-      if (p_init < 0) throw new Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
+      if (p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -101,7 +101,7 @@ namespace Hermes
         this->own_shapeset = false;
       }
       else
-        throw new Hermes::Exceptions::Exception("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
+        throw Hermes::Exceptions::Exception("Wrong shapeset type in L2Space<Scalar>::set_shapeset()");
     }
 
     template<typename Scalar>
@@ -138,9 +138,9 @@ namespace Hermes
     {
       // some checks
       if (e->id >= this->esize || this->edata[e->id].order < 0)
-        throw new Hermes::Exceptions::Exception("Uninitialized element order (id = #%d).", e->id);
+        throw Hermes::Exceptions::Exception("Uninitialized element order (id = #%d).", e->id);
       if (!this->is_up_to_date())
-        throw new Hermes::Exceptions::Exception("The space is out of date. You need to update it with assign_dofs()"
+        throw Hermes::Exceptions::Exception("The space is out of date. You need to update it with assign_dofs()"
         " any time the mesh changes.");
 
       // add bubble functions to the assembly list
@@ -175,7 +175,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
     {
-      throw new Hermes::Exceptions::Exception("Method get_bc_projection() called from an L2Space.");
+      throw Hermes::Exceptions::Exception("Method get_bc_projection() called from an L2Space.");
       return NULL;
     }
 

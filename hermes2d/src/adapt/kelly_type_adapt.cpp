@@ -101,7 +101,7 @@ namespace Hermes
                                                      unsigned int error_flags)
     {
       if(slns.size() != this->num)
-        throw new Hermes::Exceptions::LengthException(0, slns.size(), this->num);
+        throw Hermes::Exceptions::LengthException(0, slns.size(), this->num);
 
       Hermes::TimePeriod tmr;
 
@@ -279,7 +279,7 @@ namespace Hermes
                     if(num_neighbors == 0)
                       num_neighbors = ns->n_neighbors;
                     if(ns->n_neighbors != num_neighbors)
-                      throw new Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt<Scalar>::calc_err_internal.");
+                      throw Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in KellyTypeAdapt<Scalar>::calc_err_internal.");
                   }
                 }
 
@@ -338,7 +338,7 @@ namespace Hermes
                   // (use the central element's diameter).
                   if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
                     if(!element_markers_conversion.get_user_marker(ee->e[i]->marker).valid)
-                      throw new Hermes::Exceptions::Exception("Marker not valid.");
+                      throw Hermes::Exceptions::Exception("Marker not valid.");
                     else
                       central_err *= interface_scaling_fns[i]->value(ee->e[i]->get_diameter(), element_markers_conversion.get_user_marker(ee->e[i]->marker).marker);
 
@@ -352,7 +352,7 @@ namespace Hermes
                     // (use the diameter of the element on the other side).
                     if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
                       if(!element_markers_conversion.get_user_marker(neighb->marker).valid)
-                      throw new Hermes::Exceptions::Exception("Marker not valid.");
+                      throw Hermes::Exceptions::Exception("Marker not valid.");
                     else
                       neighb_err *= interface_scaling_fns[i]->value(neighb->get_diameter(), element_markers_conversion.get_user_marker(neighb->marker).marker);
 
@@ -419,7 +419,7 @@ namespace Hermes
             component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else
           {
-            throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
+            throw Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
             return -1.0;
           }
         }
@@ -462,7 +462,7 @@ namespace Hermes
         return sqrt(total_error / total_norm);
       else
       {
-        throw new Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
+        throw Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & this->HERMES_TOTAL_ERROR_MASK);
         return -1.0;
       }
     }

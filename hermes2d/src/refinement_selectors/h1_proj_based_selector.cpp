@@ -92,7 +92,7 @@ namespace Hermes
           }
         }
         if(!done)
-          throw new Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+          throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
       }
 
       template<typename Scalar>
@@ -147,7 +147,7 @@ namespace Hermes
               }
             }
             if(!done)
-              throw new Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+              throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
           }
 
           //normalize
@@ -163,7 +163,7 @@ namespace Hermes
           }
           double norm = sqrt(norm_squared);
           if(!finite(1/norm))
-            throw new Exceptions::Exception("Norm (%g) is almost zero.", norm);
+            throw Exceptions::Exception("Norm (%g) is almost zero.", norm);
 
           //for all transformations: normalize
           int inx_trf = 0;
@@ -189,7 +189,7 @@ namespace Hermes
             }
           }
           if(!done)
-            throw new Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
+            throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
         }
       }
 

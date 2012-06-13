@@ -120,7 +120,7 @@ namespace Hermes
             case H2D_REFINEMENT_ANISO_V:
               return 2;
             default:
-              throw new Hermes::Exceptions::Exception("Invalid refinement type %d.", split);
+              throw Hermes::Exceptions::Exception("Invalid refinement type %d.", split);
               return -1;
               break;
             }

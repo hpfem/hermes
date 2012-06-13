@@ -171,7 +171,7 @@ namespace Hermes
         if (pos < 0)
         {
           info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
-          throw new Hermes::Exceptions::Exception("Sparse matrix entry not found");
+          throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
         }
 
         Ax[Ap[n] + pos] += v;
@@ -183,7 +183,7 @@ namespace Hermes
     {
       int ndof = mat_block->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof)
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
       {
@@ -211,12 +211,12 @@ namespace Hermes
 
       // Sanity check.
       bool this_not_empty = this_it.init();
-      if (!this_not_empty) throw new Hermes::Exceptions::Exception("Empty matrix detected in CSCMatrix<Scalar>::add_as_block().");
+      if (!this_not_empty) throw Hermes::Exceptions::Exception("Empty matrix detected in CSCMatrix<Scalar>::add_as_block().");
 
       // Iterate through the small matrix column by column and add all nonzeros
       // to the large one.
       bool mat_not_finished = mat_it.init();
-      if (!mat_not_finished) throw new Hermes::Exceptions::Exception("Empty matrix detected in CSCMatrix<Scalar>::add_as_block().");
+      if (!mat_not_finished) throw Hermes::Exceptions::Exception("Empty matrix detected in CSCMatrix<Scalar>::add_as_block().");
 
       int mat_i, mat_j;
       Scalar mat_val;
@@ -225,7 +225,7 @@ namespace Hermes
         mat_it.get_current_position(mat_i, mat_j, mat_val);
         bool found = this_it.move_to_position(mat_i + offset_i, mat_j + offset_j);
         if (!found) 
-          throw new Hermes::Exceptions::Exception("Nonzero matrix entry at %d, %d not found in CSCMatrix<Scalar>::add_as_block().",
+          throw Hermes::Exceptions::Exception("Nonzero matrix entry at %d, %d not found in CSCMatrix<Scalar>::add_as_block().",
           mat_i + offset_i, mat_j + offset_j);
         this_it.add_to_current_position(mat_val);
         mat_not_finished = mat_it.move_ptr();
@@ -259,7 +259,7 @@ namespace Hermes
           if (!this_not_finished)
           {
             printf("Entry %d %d does not exist in the matrix to which it is contributed.\n", mat_i, mat_j);
-            throw new Hermes::Exceptions::Exception("Incompatible matrices in add_umfpack_matrix().");
+            throw Hermes::Exceptions::Exception("Incompatible matrices in add_umfpack_matrix().");
           }
           this_it.get_current_position(this_i, this_j, this_val);
         }
@@ -267,7 +267,7 @@ namespace Hermes
         mat_not_finished = mat_it.move_ptr();
         this_not_finished = this_it.move_ptr();
         if (mat_not_finished && !this_not_finished)
-          throw new Hermes::Exceptions::Exception("Incompatible matrices in add_umfpack_matrix().");
+          throw Hermes::Exceptions::Exception("Incompatible matrices in add_umfpack_matrix().");
       }
     }
 
@@ -871,7 +871,7 @@ namespace Hermes
           return false;
         }
         if (symbolic == NULL)
-          throw new Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
+          throw Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
@@ -885,7 +885,7 @@ namespace Hermes
           return false;
         }
         if (numeric == NULL)
-          throw new Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
+          throw Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
 
       return true;
@@ -933,7 +933,7 @@ namespace Hermes
           return false;
         }
         if (symbolic == NULL)
-          throw new Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
+          throw Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
@@ -947,7 +947,7 @@ namespace Hermes
           return false;
         }
         if (numeric == NULL)
-          throw new Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
+          throw Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
 
       return true;

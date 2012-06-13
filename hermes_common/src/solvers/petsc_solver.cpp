@@ -69,7 +69,7 @@ namespace Hermes
       ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
 
       if (petsc_finalized == PETSC_TRUE)
-        throw new Hermes::Exceptions::Exception("PETSc cannot be used once it has been finalized. You must restart the application.");
+        throw Hermes::Exceptions::Exception("PETSc cannot be used once it has been finalized. You must restart the application.");
 
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
 
@@ -267,7 +267,7 @@ namespace Hermes
     {
       int ndof = mat->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof)
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
       {
@@ -285,7 +285,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
       if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
       unsigned int block_size = mat->get_size();
       for (unsigned int r = 0;r<block_size;r++)
       {

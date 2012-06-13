@@ -52,7 +52,7 @@ namespace Hermes
   int Api::getParamValue(HermesCommonApiParam param)
   {
     if(this->parameters.find(param) == parameters.end())
-      throw new Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
+      throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
     if(this->parameters.find(param)->second->userSet)
       return this->parameters.find(param)->second->userVal;
     else
@@ -62,7 +62,7 @@ namespace Hermes
   void Api::setParamValue(HermesCommonApiParam param, int value)
   {
     if(this->parameters.find(param) == parameters.end())
-      throw new Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
+      throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
     this->parameters.find(param)->second->userSet = true;
     this->parameters.find(param)->second->userVal = value;
   }

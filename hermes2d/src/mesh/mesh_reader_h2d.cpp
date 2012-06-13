@@ -49,7 +49,7 @@ namespace Hermes
 
       *en = mesh->peek_edge_node(p1, p2);
       if (*en == NULL)
-        throw new Hermes::Exceptions::Exception("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+        throw Hermes::Exceptions::Exception("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
       // degree of curved edge
       nurbs->degree = 2;
@@ -131,7 +131,7 @@ namespace Hermes
       nurbs->nk = nurbs->degree + nurbs->np + 1;
       outer = nurbs->nk - inner;
       if ((outer & 1) == 1)
-        throw new Hermes::Exceptions::Exception("Curve #%d: incorrect number of knot points.", id);
+        throw Hermes::Exceptions::Exception("Curve #%d: incorrect number of knot points.", id);
 
       // knot vector is completed by 0.0 on the left and by 1.0 on the right
       nurbs->kv = new double[nurbs->nk];
@@ -157,7 +157,7 @@ namespace Hermes
     {
       // Check if file exists
       std::ifstream s(filename);
-      if (!s.good()) throw new Hermes::Exceptions::Exception("Mesh file not found.");
+      if (!s.good()) throw Hermes::Exceptions::Exception("Mesh file not found.");
       s.close();
 
       int i, j, k, n;
@@ -173,8 +173,8 @@ namespace Hermes
       //// vertices ////////////////////////////////////////////////////////////////
 
       n = m.n_vert;
-      if (n < 0) throw new Hermes::Exceptions::Exception("File %s: 'vertices' must be a list.", filename);
-      if (n < 2) throw new Hermes::Exceptions::Exception("File %s: invalid number of vertices.", filename);
+      if (n < 0) throw Hermes::Exceptions::Exception("File %s: 'vertices' must be a list.", filename);
+      if (n < 2) throw Hermes::Exceptions::Exception("File %s: invalid number of vertices.", filename);
 
       // create a hash table large enough
       int size = HashTable::H2D_DEFAULT_HASH_SIZE;
@@ -199,8 +199,8 @@ namespace Hermes
       //// elements ////////////////////////////////////////////////////////////////
 
       n = m.n_el;
-      if (n < 0) throw new Hermes::Exceptions::Exception("File %s: 'elements' must be a list.", filename);
-      if (n < 1) throw new Hermes::Exceptions::Exception("File %s: no elements defined.", filename);
+      if (n < 0) throw Hermes::Exceptions::Exception("File %s: 'elements' must be a list.", filename);
+      if (n < 1) throw Hermes::Exceptions::Exception("File %s: no elements defined.", filename);
 
       // create elements
       mesh->nactive = 0;
@@ -219,7 +219,7 @@ namespace Hermes
         }
 
         if (nv < 4 || nv > 5)
-          throw new Hermes::Exceptions::Exception("File %s: element #%d: wrong number of vertex indices.", filename, i);
+          throw Hermes::Exceptions::Exception("File %s: element #%d: wrong number of vertex indices.", filename, i);
 
         if (nv == 4) {
           idx[0] = m.en1[i];
@@ -238,7 +238,7 @@ namespace Hermes
         }
         for (j = 0; j < nv-1; j++)
           if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
-            throw new Hermes::Exceptions::Exception("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
+            throw Hermes::Exceptions::Exception("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
 
         Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
 
@@ -279,7 +279,7 @@ namespace Hermes
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
-            throw new Hermes::Exceptions::Exception("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
+            throw Hermes::Exceptions::Exception("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
 
           std::string bnd_marker;
           bnd_marker = m.bdy_type[i];
@@ -306,7 +306,7 @@ namespace Hermes
       if (m.n_curv > 0)
       {
         n = m.n_curv;
-        if (n < 0) throw new Hermes::Exceptions::Exception("File %s: 'curves' must be a list.", filename);
+        if (n < 0) throw Hermes::Exceptions::Exception("File %s: 'curves' must be a list.", filename);
 
         // load curved edges
         for (i = 0; i < n; i++)
@@ -362,7 +362,7 @@ namespace Hermes
       if (m.n_ref > 0)
       {
         n = m.n_ref;
-        if (n < 0) throw new Hermes::Exceptions::Exception("File %s: 'refinements' must be a list.", filename);
+        if (n < 0) throw Hermes::Exceptions::Exception("File %s: 'refinements' must be a list.", filename);
 
         // perform initial refinements
         for (i = 0; i < n; i++)
@@ -439,7 +439,7 @@ namespace Hermes
 
       // open output file
       FILE* f = fopen(filename, "w");
-      if (f == NULL) throw new Hermes::Exceptions::Exception("Could not create mesh file.");
+      if (f == NULL) throw Hermes::Exceptions::Exception("Could not create mesh file.");
       //fprintf(f, "# hermes2d saved mesh\n\n");
 
       // save vertices

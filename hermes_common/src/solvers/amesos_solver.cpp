@@ -97,7 +97,7 @@ namespace Hermes
       int status = solver->Solve();
       if (status != 0)
       {
-        throw new Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
+        throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
         return false;
       }
 
@@ -124,7 +124,7 @@ namespace Hermes
 
       Hermes::TimePeriod tmr;
 
-      throw new Hermes::Exceptions::Exception("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
+      throw Hermes::Exceptions::Exception("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
       if (!setup_factorization())
       {
@@ -135,7 +135,7 @@ namespace Hermes
       int status = solver->Solve();
       if (status != 0)
       {
-        throw new Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
+        throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
         return false;
       }
 

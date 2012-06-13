@@ -70,13 +70,13 @@ namespace Hermes
       class HERMES_API VectorBaseView : public VectorView
       {
       public:
-        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        VectorBaseView(const char* title = "BaseView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         
-        VectorBaseView(char* title, WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        VectorBaseView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show(Space<Scalar>* space) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(Space<Scalar>* space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        virtual void set_title(const char* t) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        virtual void set_title(const char* t) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
       
 #endif

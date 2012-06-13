@@ -182,7 +182,7 @@ namespace Hermes
       {		// ignore zero values
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
-        if (ierr != 0) throw new Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
+        if (ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
       }
     }
 
@@ -194,7 +194,7 @@ namespace Hermes
         double v_r = std::real<double>(v);
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
-        if (ierr != 0) throw new Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
+        if (ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
         assert(ierr == 0);
         double v_i = std::imag<double>(v);
         ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);
@@ -217,7 +217,7 @@ namespace Hermes
     {
       int ndof = mat_block->get_size();
       if (this->get_size() != (unsigned int) num_stages * ndof)
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
       {
@@ -235,7 +235,7 @@ namespace Hermes
     void EpetraMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat)
     {
       if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
-        throw new Hermes::Exceptions::Exception("Incompatible matrix sizes in Epetra<Scalar>::add_as_block()");
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in Epetra<Scalar>::add_as_block()");
       unsigned int block_size = mat->get_size();
       for (unsigned int r = 0;r<block_size;r++)
       {

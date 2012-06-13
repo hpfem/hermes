@@ -79,7 +79,7 @@ namespace Hermes
               MaterialPropertyMap1 *mrmg_map)
             {
               if (materials_list.empty())
-                throw new Hermes::Exceptions::Exception(E_MR_EXTENSION);
+                throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
 
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
@@ -90,7 +90,7 @@ namespace Hermes
               MaterialPropertyMap1 *mrmg_map)
             {
               if (materials_list.empty())
-                throw new Hermes::Exceptions::Exception(E_MR_EXTENSION);
+                throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
               if (G == 1)
                 warn(W_MG_EXTENSION);
 
@@ -102,7 +102,7 @@ namespace Hermes
             void MaterialPropertyMaps::fill_with(double c, MaterialPropertyMap1 *mrmg_map)
             {
               if (materials_list.empty())
-                throw new Hermes::Exceptions::Exception(E_MR_EXTENSION);
+                throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
 
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
@@ -147,7 +147,7 @@ namespace Hermes
               }
 
               if ((nu.size() != Sigma_f.size()) || (nu.size() != chi.size()))
-                throw new Hermes::Exceptions::Exception(E_NONMATCHING_PROPERTIES);
+                throw Hermes::Exceptions::Exception(E_NONMATCHING_PROPERTIES);
 
               if (Sigma_f.size() > 0)
               {
@@ -186,7 +186,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -199,7 +199,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -212,7 +212,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -366,7 +366,7 @@ namespace Hermes
                     if (Sigma_f_given)
                       Sigma_t = Sigma_f;
                     else
-                      throw new Hermes::Exceptions::Exception(E_INSUFFICIENT_DATA);
+                      throw Hermes::Exceptions::Exception(E_INSUFFICIENT_DATA);
                   }
 
                   Sigma_t_given = true;
@@ -420,7 +420,7 @@ namespace Hermes
               }
 
               if ((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (src_given && D.size() != src.size()))
-                throw new Hermes::Exceptions::Exception(E_NONMATCHING_PROPERTIES);
+                throw Hermes::Exceptions::Exception(E_NONMATCHING_PROPERTIES);
 
               using ValidationFunctors::ensure_size;
               std::for_each(Sigma_s.begin(), Sigma_s.end(), ensure_size(G, G));
@@ -440,7 +440,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank2()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -453,7 +453,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -466,7 +466,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -479,7 +479,7 @@ namespace Hermes
                 return data->second;
               else
               {
-                throw new Hermes::Exceptions::Exception(E_INVALID_MARKER);
+                throw Hermes::Exceptions::Exception(E_INVALID_MARKER);
                 return *(new rank1()); // To avoid MSVC problems; execution should never come to this point.
               }
             }
@@ -829,7 +829,7 @@ namespace Hermes
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
               if (f_src.size() != matprop.get_G())
-                throw new Hermes::Exceptions::Exception(E_INVALID_SIZE);
+                throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
@@ -843,7 +843,7 @@ namespace Hermes
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
               if (f_src.size() != matprop.get_G())
-                throw new Hermes::Exceptions::Exception(E_INVALID_SIZE);
+                throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)

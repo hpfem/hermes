@@ -16761,7 +16761,7 @@ namespace Hermes
       {
         int nb = shapeset->get_num_bubbles(i, HERMES_MODE_TRIANGLE);
         if (nb != 3*(i-1) + (i-1)*(i-2))
-          throw new Hermes::Exceptions::Exception("Wrong bubble count");
+          throw Hermes::Exceptions::Exception("Wrong bubble count");
       }
 
       int size_a  = sizeof(leg_tri_fn_a)  / sizeof(Shapeset::shape_fn_t);
@@ -16772,10 +16772,10 @@ namespace Hermes
       int size_by = sizeof(leg_tri_fn_by) / sizeof(Shapeset::shape_fn_t);
 
       if (size_a != size_b || size_a != size_ax || size_a != size_bx || size_a != size_ay || size_a != size_by)
-        throw new Hermes::Exceptions::Exception("Function tables dont have equal length.");
+        throw Hermes::Exceptions::Exception("Function tables dont have equal length.");
 
       if (size_a != leg_tri_bubble_indices[10][leg_tri_bubble_count[10]-1] + 1)
-        throw new Hermes::Exceptions::Exception("Bad index of last bubble");
+        throw Hermes::Exceptions::Exception("Bad index of last bubble");
     }
 
     HcurlShapesetLegendre::HcurlShapesetLegendre()

@@ -59,13 +59,13 @@ namespace Hermes
 
   double Table::get_A(unsigned int i, unsigned int j)
   {
-    if (i > size || j > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size || j > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     return this->A[i][j];
   }
 
   void Table::set_A(unsigned int i, unsigned int j, double val)
   {
-    if (i > size || j > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size || j > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     this->A[i][j] = val;
   }
 
@@ -678,7 +678,7 @@ namespace Hermes
       this->set_C(6, 1.0);
       break;
 
-    default: throw new Hermes::Exceptions::Exception("Unknown Butcher's table.");
+    default: throw Hermes::Exceptions::Exception("Unknown Butcher's table.");
     }
   }
 
@@ -705,37 +705,37 @@ namespace Hermes
 
   double ButcherTable::get_B(unsigned int i)
   {
-    if (i > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     return this->B[i];
   }
 
   double ButcherTable::get_B2(unsigned int i)
   {
-    if (i > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     return this->B2[i];
   }
 
   double ButcherTable::get_C(unsigned int i)
   {
-    if (i > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     return this->C[i];
   }
 
   void ButcherTable::set_B(unsigned int i, double val)
   {
-    if (i > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     this->B[i] = val;
   }
 
   void ButcherTable::set_B2(unsigned int i, double val)
   {
-    if (i > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     this->B2[i] = val;
   }
 
   void ButcherTable::set_C(unsigned int i, double val)
   {
-    if (i > size) throw new Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
+    if (i > size) throw Hermes::Exceptions::Exception("Invalid access to a Butcher's table.");
     this->C[i] = val;
   }
 
@@ -797,7 +797,7 @@ namespace Hermes
   {
     // Test whether nonzero B2 row exists.
     if (this->is_embedded() == false)
-      throw new Hermes::Exceptions::Exception("ButcherTable::switch_B_rows(): Zero B2 row detected.");
+      throw Hermes::Exceptions::Exception("ButcherTable::switch_B_rows(): Zero B2 row detected.");
 
     // Switch B rows.
     for (unsigned int i = 0; i < size; i++)

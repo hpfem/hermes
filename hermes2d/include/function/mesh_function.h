@@ -69,7 +69,7 @@ namespace Hermes
 
       virtual MeshFunction<Scalar>* clone() 
       {
-        throw new Hermes::Exceptions::Exception("You need to implement MeshFunction::clone() to be able to use paralellization"); return NULL; 
+        throw Hermes::Exceptions::Exception("You need to implement MeshFunction::clone() to be able to use paralellization"); return NULL; 
       }
 
     protected:

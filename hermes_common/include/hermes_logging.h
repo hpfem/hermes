@@ -113,7 +113,7 @@ namespace Hermes
     };
 
     /// Exits the application if the condition is true. \internal
-    /** Used by macros throw new Hermes::Exceptions::Exception() and error_if().
+    /** Used by macros throw Hermes::Exceptions::Exception() and error_if().
     *  \param[in] cond True if the function should exit.
     *  \param[in] code Exit code returned by the application throught exit(). */
     HERMES_API void hermes_exit_if(bool cond, int code = -1);

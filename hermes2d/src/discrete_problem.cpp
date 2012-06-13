@@ -86,12 +86,12 @@ namespace Hermes
 
       // Sanity checks.
       if(wf == NULL)
-        throw new Hermes::Exceptions::Exception("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
+        throw Hermes::Exceptions::Exception("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
 
       if (spaces.size() != (unsigned) wf->get_neq())
-        throw new Hermes::Exceptions::Exception("Bad number of spaces in DiscreteProblem.");
+        throw Hermes::Exceptions::Exception("Bad number of spaces in DiscreteProblem.");
       if (spaces.size() == 0)
-        throw new Hermes::Exceptions::Exception("Zero number of spaces in DiscreteProblem.");
+        throw Hermes::Exceptions::Exception("Zero number of spaces in DiscreteProblem.");
 
       // Internal variables settings.
       sp_seq = new int[wf->get_neq()];
@@ -1801,7 +1801,7 @@ namespace Hermes
                 if(num_neighbors[current_state->isurf] == 0)
                   num_neighbors[current_state->isurf] = ns->n_neighbors;
                 if(ns->n_neighbors != num_neighbors[current_state->isurf])
-                  throw new Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
+                  throw Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
               }
             }
 
@@ -2295,7 +2295,7 @@ namespace Hermes
         {
           if(node->get_right_son()->get_transformation() == transformations[0])
             insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
-          else throw new Hermes::Exceptions::Exception("More than two possible sons in insert_into_multimesh_tree().");
+          else throw Hermes::Exceptions::Exception("More than two possible sons in insert_into_multimesh_tree().");
         }
         // If the right one does not exist and the left one was not correct, create a right son and continue this way.
         else
@@ -2405,7 +2405,7 @@ namespace Hermes
         }
       }
       // We always should be able to empty the transformations array.
-      throw new Hermes::Exceptions::Exception("Transformation of a central element not found in the multimesh tree.");
+      throw Hermes::Exceptions::Exception("Transformation of a central element not found in the multimesh tree.");
       return NULL;
     }
 
@@ -2420,7 +2420,7 @@ namespace Hermes
       if(node->get_left_son() == NULL)
       {
         if(node->get_right_son() != NULL)
-          throw new Hermes::Exceptions::Exception("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
+          throw Hermes::Exceptions::Exception("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
         return 0;
       }
 

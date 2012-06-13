@@ -58,7 +58,7 @@ namespace Hermes
         if(this->vec == NULL)
           this->vec = new Vectorizer;
         if (xsln == ysln)
-          throw new Hermes::Exceptions::Exception("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
+          throw Hermes::Exceptions::Exception("Identical solutions passed to the two-argument version of show(). This is most likely a mistake.");
         show(xsln, ysln, marker, step, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
 
@@ -295,7 +295,7 @@ namespace Hermes
         if (x1 > x2) return 1;
         if (x1 == x2 && y1 > y2) return 1;
         if (x1 == x2 && y1 == y2) return 0;
-        throw new Hermes::Exceptions::Exception("internal error: reached end of non-void function");
+        throw Hermes::Exceptions::Exception("internal error: reached end of non-void function");
         return 0;
       }
 
@@ -444,7 +444,7 @@ namespace Hermes
       void StreamView::add_streamline(double x, double y)
       {
         if (root == NULL)
-          throw new Hermes::Exceptions::Exception("Function add_streamline must be called after StreamView::show().");
+          throw Hermes::Exceptions::Exception("Function add_streamline must be called after StreamView::show().");
         Hermes::TimePeriod cpu_time;
         streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
         streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));

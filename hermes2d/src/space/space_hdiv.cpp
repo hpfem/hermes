@@ -38,7 +38,7 @@ namespace Hermes
         this->shapeset = new HdivShapeset;
         this->own_shapeset = true;
       }
-      if (this->shapeset->get_num_components() < 2) throw new Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
       {
@@ -49,7 +49,7 @@ namespace Hermes
       this->chol_p   = hdiv_chol_p;
 
       // set uniform poly order in elements
-      if (p_init < 0) throw new Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hdiv space.");
+      if (p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hdiv space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -108,7 +108,7 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) throw new Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
       {
@@ -135,7 +135,7 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) throw new Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
       {
@@ -158,7 +158,7 @@ namespace Hermes
         this->own_shapeset = false;
       }
       else
-        throw new Hermes::Exceptions::Exception("Wrong shapeset type in HdivSpace<Scalar>::set_shapeset()");
+        throw Hermes::Exceptions::Exception("Wrong shapeset type in HdivSpace<Scalar>::set_shapeset()");
     }
 
     //// dof assignment ////////////////////////////////////////////////////////////////////////////////

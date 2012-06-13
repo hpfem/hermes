@@ -15,15 +15,7 @@
 
 #include "exact_solution.h"
 
-// This is here mainly because XSD uses its own error, therefore it has to be undefined here.
-#ifdef error(...)
-#undef error(...)
-#endif
 #include "solution_h2d_xml.h"
-// This is here mainly because XSD uses its own error, therefore it had to be undefined previously.
-#ifndef error(...)
-#define error(...) hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), __VA_ARGS__))
-#endif
 
 #include <iostream>
 
@@ -153,7 +145,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::assign(Solution<Scalar>* sln)
     {
-      if (sln->sln_type == HERMES_UNDEF) error("Solution being assigned is uninitialized.");
+      if (sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being assigned is uninitialized.");
       if (sln->sln_type != HERMES_SLN) { copy(sln); return; }
 
       free();
@@ -185,7 +177,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::copy(const Solution<Scalar>* sln)
     {
-      if (sln->sln_type == HERMES_UNDEF) error("Solution being copied is uninitialized.");
+      if (sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being copied is uninitialized.");
 
       free();
 
@@ -225,7 +217,7 @@ namespace Hermes
           this->sln_vector[i] = sln->sln_vector[i];
       }
       else // Const, exact handled differently.
-        error("Undefined or exact solutions cannot be copied into an instance of Solution already coming from computation.");
+        throw Hermes::Exceptions::Exception("Undefined or exact solutions cannot be copied into an instance of Solution already coming from computation.");
 
       space = sln->space;
       space_seq = sln->space_seq;
@@ -506,7 +498,7 @@ namespace Hermes
         }
       }
 
-      if(this->mesh == NULL) error("mesh == NULL.\n");
+      if(this->mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL.\n");
       init_dxdy_buffer();
       this->element = NULL;
     }
@@ -532,7 +524,7 @@ namespace Hermes
       }
       else 
       {
-        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        if (start_indices.size() != spaces.size()) throw Hermes::Exceptions::Exception("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
         {
           start_indices_new.push_back(start_indices[i]);
@@ -582,7 +574,7 @@ namespace Hermes
       }
       else 
       {
-        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        if (start_indices.size() != spaces.size()) throw Hermes::Exceptions::Exception("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
         {
           start_indices_new.push_back(start_indices[i]);
@@ -633,7 +625,7 @@ namespace Hermes
       }
       else 
       {
-        if (start_indices.size() != spaces.size()) error("Mismatched start indices in vector_to_solutions().");
+        if (start_indices.size() != spaces.size()) throw Hermes::Exceptions::Exception("Mismatched start indices in vector_to_solutions().");
         for (int i=0; i < spaces.size(); i++) 
         {
           start_indices_new.push_back(start_indices[i]);
@@ -694,7 +686,7 @@ namespace Hermes
       else if (sln_type == HERMES_EXACT)
         dynamic_cast<ExactSolution<Scalar>*>(this)->exact_multiplicator *= coef;
       else
-        error("Uninitialized solution.");
+        throw Hermes::Exceptions::Exception("Uninitialized solution.");
     }
 
     template<typename Scalar>
@@ -745,7 +737,7 @@ namespace Hermes
     void Solution<Scalar>::set_active_element(Element* e)
     {
       // if (e == element) return; // FIXME
-      if (!e->active) error("Cannot select inactive element. Wrong mesh?");
+      if (!e->active) throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
       MeshFunction<Scalar>::set_active_element(e);
 
       // try finding an existing table for e
@@ -801,7 +793,7 @@ namespace Hermes
         this->order = Hermes::Hermes2D::g_max_quad;
       }
       else
-        error("Uninitialized solution.");
+        throw Hermes::Exceptions::Exception("Uninitialized solution.");
 
       this->sub_tables = tables[this->cur_quad][cur_elem];
 
@@ -1018,7 +1010,7 @@ namespace Hermes
       else if (sln_type == HERMES_EXACT)
       {
         if (mask & ~H2D_FN_DEFAULT)
-          error("Cannot obtain second derivatives of an exact solution.");
+          throw Hermes::Exceptions::Exception("Cannot obtain second derivatives of an exact solution.");
         node = this->new_node(mask = H2D_FN_DEFAULT, np);
 
         this->update_refmap();
@@ -1075,7 +1067,7 @@ namespace Hermes
       }
       else
       {
-        error("Cannot obtain values -- uninitialized solution. The solution was either "
+        throw Hermes::Exceptions::Exception("Cannot obtain values -- uninitialized solution. The solution was either "
           "not calculated yet or you used the assignment operator which destroys "
           "the solution on its right-hand side.");
       }
@@ -1093,9 +1085,9 @@ namespace Hermes
     void Solution<double>::save(const char* filename) const
     {
       if (sln_type == HERMES_EXACT)
-        error("Exact solution cannot be saved to a file.");
+        throw Exceptions::Exception("Exact solution cannot be saved to a file.");
       if (sln_type == HERMES_UNDEF)
-        error("Cannot save -- uninitialized solution.");
+        throw Exceptions::Exception("Cannot save -- uninitialized solution.");
 
       try
       {
@@ -1142,9 +1134,9 @@ namespace Hermes
     void Solution<std::complex<double> >::save(const char* filename) const
     {
       if (sln_type == HERMES_EXACT)
-        error("Exact solution cannot be saved to a file.");
+        throw Exceptions::Exception("Exact solution cannot be saved to a file.");
       if (sln_type == HERMES_UNDEF)
-        error("Cannot save -- uninitialized solution.");
+        throw Exceptions::Exception("Cannot save -- uninitialized solution.");
 
       try
       {
@@ -1373,9 +1365,9 @@ namespace Hermes
           if (a == 1) return m[1][0]*vx + m[1][1]*vy; // H2D_FN_VAL_1
         }
         else
-          error("Getting derivatives of the vector solution: Not implemented yet.");
+          throw Hermes::Exceptions::Exception("Getting derivatives of the vector solution: Not implemented yet.");
       }
-      error("internal error: reached end of non-void function");
+      throw Hermes::Exceptions::Exception("internal error: reached end of non-void function");
       return 0;
     }
 
@@ -1386,7 +1378,7 @@ namespace Hermes
 
       int a = 0, b = 0, mask = item; // a = component, b = val, dx, dy, dxx, dyy, dxy
       if (this->num_components == 1) mask = mask & H2D_FN_COMPONENT_0;
-      if ((mask & (mask - 1)) != 0) error("'item' is invalid. ");
+      if ((mask & (mask - 1)) != 0) throw Hermes::Exceptions::Exception("'item' is invalid. ");
       if (mask >= 0x40) { a = 1; mask >>= 6; }
       while (!(mask & 1)) { mask >>= 1; b++; }
 
@@ -1408,11 +1400,11 @@ namespace Hermes
           if (b == 1) return dx[a] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
           if (b == 2) return dy[a] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
         }
-        error("Cannot obtain second derivatives of an exact solution.");
+        throw Hermes::Exceptions::Exception("Cannot obtain second derivatives of an exact solution.");
       }
       else if (sln_type == HERMES_UNDEF)
       {
-        error("Cannot obtain values -- uninitialized solution. The solution was either "
+        throw Hermes::Exceptions::Exception("Cannot obtain values -- uninitialized solution. The solution was either "
           "not calculated yet or you used the assignment operator which destroys "
           "the solution on its right-hand side.");
       }
@@ -1463,7 +1455,7 @@ namespace Hermes
         return space;
       else
       {
-        error("Solution<Scalar>::get_space() called with an instance where FEM space is not defined.");
+        throw Hermes::Exceptions::Exception("Solution<Scalar>::get_space() called with an instance where FEM space is not defined.");
         return NULL;
       }
     }
@@ -1475,7 +1467,7 @@ namespace Hermes
         return space_seq;
       else
       {
-        error("Solution<Scalar>::get_space_seq() called with an instance where FEM space is not defined.");
+        throw Hermes::Exceptions::Exception("Solution<Scalar>::get_space_seq() called with an instance where FEM space is not defined.");
         return NULL;
       }
     }
@@ -1487,7 +1479,7 @@ namespace Hermes
         return sln_vector;
       else
       {
-        error("Solution<Scalar>::get_sln_vector() called with an instance where FEM space is not defined.");
+        throw Hermes::Exceptions::Exception("Solution<Scalar>::get_sln_vector() called with an instance where FEM space is not defined.");
         return NULL;
       }
     }

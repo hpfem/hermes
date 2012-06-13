@@ -241,24 +241,24 @@ namespace Hermes
 class HERMES_API ScalarView : public View
       {
       public:
-        void init() { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 #ifndef _MSC_VER
-        ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 #endif
-        ScalarView(char* title, WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        ScalarView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-          MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+          MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        inline void show_mesh(bool show = true) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        inline void show_bounding_box(bool show = true) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show_contours(double step, double orig = 0.0) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        inline void hide_contours() { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        inline void set_3d_mode(bool enable = true) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        void set_vertical_scaling(double sc) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        void set_min_max_range(double min, double max) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        inline void show_mesh(bool show = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        inline void show_bounding_box(bool show = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show_contours(double step, double orig = 0.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        inline void hide_contours() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        inline void set_3d_mode(bool enable = true) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void set_vertical_scaling(double sc) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void set_min_max_range(double min, double max) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

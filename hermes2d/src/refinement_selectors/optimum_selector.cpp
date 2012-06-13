@@ -27,7 +27,7 @@ namespace Hermes
         case H2D_HP_ANISO_H: return "HP_ANISO_H";
         case H2D_HP_ANISO_P: return "HP_ANISO_P";
         case H2D_HP_ANISO: return "HP_ANISO";
-        default: throw new Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return NULL;
+        default: throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return NULL;
         }
       }
 
@@ -43,7 +43,7 @@ namespace Hermes
         case H2D_HP_ANISO_H:
         case H2D_HP_ANISO_P:
         case H2D_HP_ANISO: return true; break;
-        default: throw new Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
+        default: throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
         }
       }
 
@@ -59,7 +59,7 @@ namespace Hermes
         case H2D_HP_ANISO_H: return false;
         case H2D_HP_ANISO_P: return true;
         case H2D_HP_ANISO: return true;
-        default: throw new Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
+        default: throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
         }
       }
 
@@ -469,7 +469,7 @@ namespace Hermes
           if (cand->split == H2D_REFINEMENT_H) info = &info_h;
           else if (cand->split == H2D_REFINEMENT_P) info = &info_p;
           else if (cand->split == H2D_REFINEMENT_ANISO_H || cand->split == H2D_REFINEMENT_ANISO_V) info = &info_aniso;
-          else { throw new Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand->split); };
+          else { throw Hermes::Exceptions::Exception("Invalid candidate type: %d.", cand->split); };
 
           //evaluate elements of candidates
           const int num_elems = cand->get_num_elems();
@@ -525,7 +525,7 @@ namespace Hermes
               break;
 
             default:
-              throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d (element #%d)", c.split, i, e->id);
+              throw Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d (element #%d)", c.split, i, e->id);
             }
           }
           else { //quad
@@ -564,7 +564,7 @@ namespace Hermes
               break;
 
             default:
-              throw new Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
+              throw Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
             }
           }
         }
@@ -710,10 +710,10 @@ namespace Hermes
           for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
           {
             if(!(H2D_GET_V_ORDER(refinement.p[i]) == 0 || H2D_GET_H_ORDER(refinement.p[i]) == H2D_GET_V_ORDER(refinement.p[i])))
-              throw new Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.p[i]), H2D_GET_V_ORDER(refinement.p[i]), i);
+              throw Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.p[i]), H2D_GET_V_ORDER(refinement.p[i]), i);
             refinement.p[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.p[i]), 0);
             if(!(H2D_GET_V_ORDER(refinement.q[i]) == 0 || H2D_GET_H_ORDER(refinement.q[i]) == H2D_GET_V_ORDER(refinement.q[i])))
-              throw new Exceptions::Exception("Triangle processed but the resulting q-order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.q[i]), H2D_GET_V_ORDER(refinement.q[i]), i);
+              throw Exceptions::Exception("Triangle processed but the resulting q-order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.q[i]), H2D_GET_V_ORDER(refinement.q[i]), i);
             refinement.q[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.q[i]), 0);
           }
         }
@@ -728,7 +728,7 @@ namespace Hermes
       void OptimumSelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders)
       {
         if(refinement == H2D_REFINEMENT_P)
-          throw new Exceptions::Exception("P-candidate not supported for updating shared orders");
+          throw Exceptions::Exception("P-candidate not supported for updating shared orders");
         const int num_sons = get_refin_sons(refinement);
         if (suggested_quad_orders != NULL)
         {
@@ -771,7 +771,7 @@ namespace Hermes
         {
         case H2D_PREFER_SYMMETRIC_MESH: opt_symmetric_mesh = enable; break;
         case H2D_APPLY_CONV_EXP_DOF: opt_apply_exp_dof = enable; break;
-        default: throw new Hermes::Exceptions::Exception("Unknown option %d.", (int)option);
+        default: throw Hermes::Exceptions::Exception("Unknown option %d.", (int)option);
         }
       }
       

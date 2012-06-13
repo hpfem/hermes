@@ -105,10 +105,10 @@ namespace Hermes
       void Orderizer::process_space(const Space<Scalar>* space)
       {
         // sanity check
-        if (space == NULL) throw new Hermes::Exceptions::Exception("Space is NULL in Orderizer:process_solution().");
+        if (space == NULL) throw Hermes::Exceptions::Exception("Space is NULL in Orderizer:process_solution().");
 
         if (!space->is_up_to_date())
-          throw new Hermes::Exceptions::Exception("The space is not up to date.");
+          throw Hermes::Exceptions::Exception("The space is not up to date.");
 
         int type = 1;
         label_count = 0;
@@ -120,7 +120,7 @@ namespace Hermes
         Mesh* mesh = space->get_mesh();
         if (mesh == NULL)
         {
-          throw new Hermes::Exceptions::Exception("Mesh is NULL in Orderizer:process_solution().");
+          throw Hermes::Exceptions::Exception("Mesh is NULL in Orderizer:process_solution().");
         }
         int nn = mesh->get_num_active_elements();
         vertex_size = 77 * nn;
@@ -225,7 +225,7 @@ namespace Hermes
         process_space(space);
 
         FILE* f = fopen(file_name, "wb");
-        if (f == NULL) throw new Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        if (f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
         lock_data();
 
         // Output header for vertices.
@@ -283,7 +283,7 @@ namespace Hermes
       void Orderizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         if(verts == NULL)
-          throw new Exceptions::Exception("Cannot calculate AABB from NULL vertices");
+          throw Exceptions::Exception("Cannot calculate AABB from NULL vertices");
         calc_aabb(&verts[0][0], &verts[0][1], sizeof(double3), vertex_count, min_x, max_x, min_y, max_y);
       }
 

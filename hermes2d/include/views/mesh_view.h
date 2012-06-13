@@ -78,9 +78,9 @@ namespace Hermes
       {
       public:
 
-        MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        MeshView(char* title, WinGeom* wg = NULL) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show(Mesh* mesh) { throw new Hermes::Exceptions::Exception("GLUT disabled."); }
+        MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        MeshView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(Mesh* mesh) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

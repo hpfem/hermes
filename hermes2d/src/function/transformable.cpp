@@ -100,7 +100,7 @@ namespace Hermes
     {
       assert(element != NULL);
       if (top >= H2D_MAX_TRN_LEVEL)
-        throw new Hermes::Exceptions::Exception("Too deep transform.");
+        throw Hermes::Exceptions::Exception("Too deep transform.");
 
       Trf* mat = stack + (++top);
       Trf* tr = (element->is_triangle() ? tri_trf + son : quad_trf + son);
