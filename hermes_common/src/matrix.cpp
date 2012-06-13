@@ -202,7 +202,7 @@ int Hermes::Algebra::SparseMatrix<Scalar>::get_num_indices()
 template<typename Scalar>
 SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 {
-  switch (Hermes::HermesCommonApi.getParamValue("Matrix solver type"))
+  switch (Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType))
   {
   case Hermes::SOLVER_AMESOS:
     {
@@ -267,7 +267,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
 template<typename Scalar>
 Vector<Scalar>* Hermes::Algebra::create_vector()
 {
-  switch (Hermes::HermesCommonApi.getParamValue("Matrix solver type"))
+  switch (Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType))
   {
   case Hermes::SOLVER_AMESOS:
     {

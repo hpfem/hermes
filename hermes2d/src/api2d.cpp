@@ -26,14 +26,45 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    Api2D::Api2D() : Api(false) 
+    Api2D::Parameter::Parameter(int defaultVal)
     {
-      init();
+      this->defaultVal = defaultVal;
+      this->userSet = false;
     }
 
-    void Api2D::init()
+    Api2D::Api2D()
     {
-      this->parameters.insert(std::pair<std::string, Parameter*> ("Number of threads",new Parameter(NUM_THREADS)));
+      signal(SIGABRT, CallStack::dump);
+      signal(SIGFPE, CallStack::dump);
+      signal(SIGILL, CallStack::dump);
+      signal(SIGINT, CallStack::dump);
+      signal(SIGSEGV, CallStack::dump);
+      signal(SIGTERM, CallStack::dump);
+
+      this->parameters.insert(std::pair<Hermes2DApiParam, Parameter*> (Hermes::Hermes2D::numThreads,new Parameter(NUM_THREADS)));
+    }
+
+    Api2D::~Api2D()
+    {
+      this->parameters.clear();
+    }
+
+    int Api2D::getParamValue(Hermes2DApiParam param)
+    {
+      if(this->parameters.find(param) == parameters.end())
+        throw new Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
+      if(this->parameters.find(param)->second->userSet)
+        return this->parameters.find(param)->second->userVal;
+      else
+        return this->parameters.find(param)->second->defaultVal;
+    }
+
+    void Api2D::setParamValue(Hermes2DApiParam param, int value)
+    {
+      if(this->parameters.find(param) == parameters.end())
+        throw new Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
+      this->parameters.find(param)->second->userSet = true;
+      this->parameters.find(param)->second->userVal = value;
     }
 
     Hermes::Hermes2D::Api2D Hermes2DApi;

@@ -26,12 +26,17 @@
 
 namespace Hermes
 {
+  enum HermesCommonApiParam
+  {
+    exceptionsPrintCallstack,
+    matrixSolverType
+  };
+
   /// API Class containing settings for the whole Hermes.
   class HERMES_API Api
   {
   public:
-    Api(bool init = true);
-    virtual void init();
+    Api();
     ~Api();
   protected:
     /// Parameter class, representing one parameter.
@@ -50,10 +55,10 @@ namespace Hermes
     /// This storage is not optimized for speed, but for comfort of users.
     /// There should not be any parameters, values of which are sought very often, because of the above reason.
 
-    std::map<std::string, Parameter*> parameters;
+    std::map<HermesCommonApiParam, Parameter*> parameters;
   public:
-    int getParamValue(std::string param);
-    void setParamValue(std::string param, int value);
+    int getParamValue(HermesCommonApiParam);
+    void setParamValue(HermesCommonApiParam, int value);
   };
 
   // Global declarations.

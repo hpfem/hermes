@@ -50,7 +50,7 @@ namespace Hermes
         fprintf(stderr, "%s\n", message);
       else
         fprintf(stderr, "Default exception\n");
-      if(Hermes::HermesCommonApi.getParamValue("Exception print call stack") == 1)
+      if(Hermes::HermesCommonApi.getParamValue(Hermes::exceptionsPrintCallstack) == 1)
         CallStack::dump(0);
     }
 

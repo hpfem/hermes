@@ -39,8 +39,8 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
-  Hermes::HermesCommonApi.setParamValue("Exception print call stack", 0);
-  Hermes::Hermes2D::Hermes2DApi.setParamValue("Number of threads", 4);
+  Hermes::HermesCommonApi.setParamValue(Hermes::exceptionsPrintCallstack, 0);
+  Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 4);
 
   // Time measurement.
   Hermes::TimePeriod cpu_time;

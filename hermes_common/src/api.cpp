@@ -31,13 +31,7 @@ namespace Hermes
     this->userSet = false;
   }
 
-  Api::Api(bool init)
-  {
-    if(init)
-      this->init();
-  }
-
-  void Api::init()
+  Api::Api()
   {
     signal(SIGABRT, CallStack::dump);
     signal(SIGFPE, CallStack::dump);
@@ -46,8 +40,8 @@ namespace Hermes
     signal(SIGSEGV, CallStack::dump);
     signal(SIGTERM, CallStack::dump);
 
-    this->parameters.insert(std::pair<std::string, Parameter*> ("Exception print call stack",new Parameter(0)));
-    this->parameters.insert(std::pair<std::string, Parameter*> ("Matrix solver type",new Parameter(SOLVER_UMFPACK)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::exceptionsPrintCallstack,new Parameter(0)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::matrixSolverType,new Parameter(SOLVER_UMFPACK)));
   }
 
   Api::~Api()
@@ -55,20 +49,20 @@ namespace Hermes
     this->parameters.clear();
   }
 
-  int Api::getParamValue(std::string param)
+  int Api::getParamValue(HermesCommonApiParam param)
   {
     if(this->parameters.find(param) == parameters.end())
-      throw new Hermes::Exceptions::ValueException("parameter name", param);
+      throw new Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
     if(this->parameters.find(param)->second->userSet)
       return this->parameters.find(param)->second->userVal;
     else
       return this->parameters.find(param)->second->defaultVal;
   }
 
-  void Api::setParamValue(std::string param, int value)
+  void Api::setParamValue(HermesCommonApiParam param, int value)
   {
     if(this->parameters.find(param) == parameters.end())
-      throw new Hermes::Exceptions::ValueException("parameter name", param);
+      throw new Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
     this->parameters.find(param)->second->userSet = true;
     this->parameters.find(param)->second->userVal = value;
   }
