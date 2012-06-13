@@ -59,7 +59,7 @@ namespace Hermes
       return message;
     }
 
-    NullException::NullException(int paramIdx)
+    NullException::NullException(int paramIdx) : Exception()
     {
       this->paramIdx = paramIdx;
       this->itemIdx = -1;
@@ -68,7 +68,7 @@ namespace Hermes
       message = msg;
     }
 
-    NullException::NullException(int paramIdx, int itemIdx)
+    NullException::NullException(int paramIdx, int itemIdx) : Exception()
     {
       this->paramIdx = paramIdx;
       this->itemIdx = itemIdx;
@@ -101,7 +101,7 @@ namespace Hermes
       itemIdx=e.getItemIdx();
     }
 
-    LengthException::LengthException(int paramIdx, int wrong, int right)
+    LengthException::LengthException(int paramIdx, int wrong, int right) : Exception()
     {
       fstParamIdx = paramIdx;
       this->wrong = wrong;
@@ -112,7 +112,7 @@ namespace Hermes
       message = msg;
     }
 
-    LengthException::LengthException(int fstParamIdx, int sndParamIdx, int first, int second)
+    LengthException::LengthException(int fstParamIdx, int sndParamIdx, int first, int second) : Exception()
     {
       this->fstParamIdx=fstParamIdx;
       this->sndParamIdx=sndParamIdx;
@@ -149,7 +149,7 @@ namespace Hermes
       delete[]message;
     }
 
-    LengthException::LengthException(const LengthException&e)
+    LengthException::LengthException(const LengthException&e) : Exception()
     {
       char * msg= new char[strlen(e.getMsg())+1];
       strcpy(msg, e.getMsg());
@@ -160,14 +160,14 @@ namespace Hermes
       this->right=e.getExpectedLength();
     }
 
-    LinearMatrixSolverException::LinearMatrixSolverException()
+    LinearMatrixSolverException::LinearMatrixSolverException() : Exception()
     {
       char * msg =  new char[22];
       sprintf(msg, "Linear solver failed.");
       message = msg;
     }
 
-    LinearMatrixSolverException::LinearMatrixSolverException(const char * reason)
+    LinearMatrixSolverException::LinearMatrixSolverException(const char * reason) : Exception()
     {
       char * msg =  new char[34 + strlen(reason)];
       sprintf(msg, "Linear solver failed because:\"%s\"", reason);
@@ -179,14 +179,14 @@ namespace Hermes
       delete[] message;
     }
 
-    LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e)
+    LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
     {
       char * msg= new char[strlen(e.getMsg())+1];
       strcpy(msg, e.getMsg());
       message=msg;
     }
     
-    ValueException::ValueException(const char * name, double value, double allowed)
+    ValueException::ValueException(const char * name, double value, double allowed) : Exception()
     {
       char * msg =  new char[55 + strlen(name)];
       if (value>allowed)
@@ -198,7 +198,7 @@ namespace Hermes
       this->allowed = allowed;
     }
 
-    ValueException::ValueException(const char * name, double value, double min, double max)
+    ValueException::ValueException(const char * name, double value, double min, double max) : Exception()
     {
       char * msg= new char[70+strlen(name)];
       sprintf(msg, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
@@ -211,7 +211,7 @@ namespace Hermes
     }
 
 
-    ValueException::ValueException(const char * name, std::string passed)
+    ValueException::ValueException(const char * name, std::string passed) : Exception()
     {
       char * msg= new char[70+strlen(name)];
       sprintf(msg, "Variable %s does not support value %s.", name, passed.c_str());
@@ -242,7 +242,7 @@ namespace Hermes
       this->allowed=e.getAllowed();
     }
 
-    FunctionNotOverridenException::FunctionNotOverridenException(const char * name)
+    FunctionNotOverridenException::FunctionNotOverridenException(const char * name) : Exception()
     {
       char * msg =  new char[34 + strlen(name)];
       sprintf(msg, "Linear solver failed because:\"%s\"", name);
