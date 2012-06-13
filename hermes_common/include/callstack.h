@@ -24,22 +24,24 @@
 
 #include "compat.h"
 #include "common.h"
-#ifdef WIN32
-  #include <windows.h>
-  #include "StackWalker.h"
+#ifdef WITH_STACKTRACE
+  #ifdef WIN32
+    #include <windows.h>
+    #include "StackWalker.h"
 
-  class MyStackWalker : public StackWalker
-  {
-  public:
-    MyStackWalker() : StackWalker(StackWalker::RetrieveSymbol & StackWalker::RetrieveLine, NULL, GetCurrentProcessId(), GetCurrentProcess()) 
+    class MyStackWalker : public StackWalker
     {
-      int a = 1;
-    }
-  protected:
-    virtual void OnOutput(LPCSTR szText)
-      { printf(szText);}
-  };
+    public:
+      MyStackWalker() : StackWalker(StackWalker::RetrieveSymbol & StackWalker::RetrieveLine, NULL, GetCurrentProcessId(), GetCurrentProcess()) 
+      {
+        int a = 1;
+      }
+    protected:
+      virtual void OnOutput(LPCSTR szText)
+        { printf(szText);}
+    };
 
+  #endif
 #endif
 
 /// Call stack class.

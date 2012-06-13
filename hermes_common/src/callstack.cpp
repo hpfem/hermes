@@ -25,8 +25,10 @@
 
 void CallStack::dump(int signalCode)
 {
-#ifdef WIN32
-  MyStackWalker sw;
-  sw.ShowCallstack();
+#ifdef WITH_STACKTRACE
+  #ifdef WIN32
+    MyStackWalker sw;
+    sw.ShowCallstack();
+  #endif
 #endif
 }

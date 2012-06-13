@@ -42,19 +42,6 @@ int main(int argc, char* argv[])
   Hermes::HermesCommonApi.setParamValue("Exception print call stack", 0);
   Hermes::Hermes2D::Hermes2DApi.setParamValue("Number of threads", 4);
 
-  try
-  {
-    throw new Hermes::Exceptions::Exception("asdf");
-  }
-  catch(Hermes::Exceptions::Exception* e)
-  {
-    e->printMsg();
-  }
-  catch(std::exception& e)
-  {
-    std::cout << 'a';
-  }
-
   // Time measurement.
   Hermes::TimePeriod cpu_time;
 
