@@ -403,10 +403,7 @@ namespace Hermes
       if (is_up_to_date())
       {
         if (current_mat != NULL)
-        {
-          info("Reusing matrix sparse structure.");
           current_mat->zero();
-        }
         if (current_rhs != NULL)
         {
           // If we use e.g. a new NewtonSolver (providing a new Vector) for this instance of DiscreteProblem that already assembled a system,
