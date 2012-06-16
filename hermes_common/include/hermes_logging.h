@@ -70,10 +70,10 @@
 *  copies the output to a file \c application.log.
 *
 *  The following code \code
-info("Result is %d", 32);
-info(" Probability of error is %g", 0.1);
+info(NULL, "Result is %d", 32);
+info(NULL, " Probability of error is %g", 0.1);
 trace("Computation is done.");
-info("!Done");
+info(NULL, "!Done");
 *  \endcode will generate \verbatim
 I Result is 32
 Probability of error is 0.1
@@ -123,11 +123,12 @@ namespace Hermes
     *  it can be used to call a function hermes2d_exit_if() or a function(). Thanks to that, the macro
     *  behaves as a function rather than a block of code. Also, this allows a debugger to a particular
     *  code.
+    *  \param[in] callback User function to be called with the content of the message passed as a parameter.
     *  \param[in] cond True if the event should be logged.
     *  \param[in] info Info about the event.
     *  \param[in] msg A message or prinf-like formatting string.
     *  \return A value of the parameter cond. */
-    HERMES_API bool hermes_log_message_if(bool cond, const HermesLogEventInfo& info, const char* msg, ...);
+    HERMES_API bool hermes_log_message_if(void (*callback)(const char*), bool cond, const HermesLogEventInfo& info, const char* msg, ...);
 
     /* file operations */
     void HERMES_API hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream);
@@ -221,17 +222,17 @@ using namespace Hermes::Logging;
 #endif
 
 #if defined(HERMES_REPORT_WARNING)
-# define warn(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
-# define warn_if(__cond, ...) hermes_log_message_if((__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
+# define warn(callback, ...) hermes_log_message_if(callback, true, HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
+# define warn_if(callback, __cond, ...) hermes_log_message_if(callback, (__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_WARNING), __VA_ARGS__)
 #else
-# define warn(...)
-# define warn_if(__cond, ...)
+# define warn(callback, ...)
+# define warn_if(callback, __cond, ...)
 #endif
 #if defined(HERMES_REPORT_INFO)
-# define info(...) hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
-# define info_if(__cond, ...) hermes_log_message_if((__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
+# define info(callback, ...) hermes_log_message_if(callback, true, HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
+# define info_if(callback, __cond, ...) hermes_log_message_if(callback, (__cond), HERMES_BUILD_LOG_INFO(HERMES_EC_INFO), __VA_ARGS__)
 #else
-# define info(...)
-# define info_if(__cond, ...)
+# define info(callback, ...)
+# define info_if(callback, __cond, ...)
 #endif
 #endif

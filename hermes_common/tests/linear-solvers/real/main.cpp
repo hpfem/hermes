@@ -56,13 +56,13 @@ void show_rhs(const char *msg, std::map<unsigned int, double > mp) {
 }
 
 bool testPrint(bool value, const char *msg, bool correct) {
-  info("%s...", msg);
+  info(NULL, "%s...", msg);
   if (value == correct) {
-    info("OK.");
+    info(NULL, "OK.");
     return true;
   }
   else {
-    info("failed.");
+    info(NULL, "failed.");
     return false;
   }
 }

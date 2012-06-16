@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   // Create an Hcurl space with default shapeset.
   HcurlSpace<std::complex<double> > space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  info("ndof = %d", ndof);
+  info(NULL, "ndof = %d", ndof);
 
   // Initialize the weak formulation.
   CustomWeakForm wf(MU_R, KAPPA);
@@ -130,14 +130,14 @@ int main(int argc, char* argv[])
   int as = 1; bool done = false;
   do
   {
-    info("---- Adaptivity step %d:", as);
+    info(NULL, "---- Adaptivity step %d:", as);
 
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize reference problem.
-    info("Solving on reference mesh.");
+    info(NULL, "Solving on reference mesh.");
     DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
 
     // Time measurement.
@@ -154,10 +154,9 @@ int main(int argc, char* argv[])
     {
       newton.solve(coeff_vec);
     }
-    catch(Hermes::Exceptions::Exception e)
+    catch(Hermes::Exceptions::Exception& e)
     {
       e.printMsg();
-      error("Newton's iteration failed.");
     }
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
@@ -165,7 +164,7 @@ int main(int argc, char* argv[])
     cpu_time.tick();
 
     // Project the fine mesh solution onto the coarse mesh.
-    info("Projecting reference solution on coarse mesh.");
+    info(NULL, "Projecting reference solution on coarse mesh.");
     OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln);
 
     // View the coarse mesh solution and polynomial orders.
@@ -177,7 +176,7 @@ int main(int argc, char* argv[])
     }
 
     // Calculate element errors and total error estimate.
-    info("Calculating error estimate and exact error.");
+    info(NULL, "Calculating error estimate and exact error.");
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
@@ -186,9 +185,9 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d",
+    info(NULL, "ndof_coarse: %d, ndof_fine: %d",
       space.get_num_dofs(), ref_space->get_num_dofs());
-    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
+    info(NULL, "err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // Time measurement.
     cpu_time.tick();
@@ -207,7 +206,7 @@ int main(int argc, char* argv[])
     if (err_est_rel < ERR_STOP) done = true;
     else
     {
-      info("Adapting coarse mesh.");
+      info(NULL, "Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
@@ -226,7 +225,7 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  info("Total running time: %g s", cpu_time.accumulated());
+  info(NULL, "Total running time: %g s", cpu_time.accumulated());
 
   // Show the reference solution - the final result.
   if(HERMES_VISUALIZATION)

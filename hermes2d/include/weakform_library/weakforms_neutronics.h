@@ -180,7 +180,7 @@ namespace Hermes
               static rank0 subtract(rank0 x, rank0 y) {
                 rank0 ret = x - y;
                 if(ret < 0)
-                  warn(W_NEG_VALUE);
+                  warn(NULL, W_NEG_VALUE);
                 return ret;
               }
 

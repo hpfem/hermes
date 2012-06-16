@@ -82,7 +82,7 @@ namespace Hermes
       {
         if (meshes[i] == NULL)
         {
-          warn("You may be initializing a Filter with Solution that is missing a Mesh.");
+          warn(NULL, "You may be initializing a Filter with Solution that is missing a Mesh.");
           throw Hermes::Exceptions::Exception("this->meshes[%d] is NULL in Filter<Scalar>::init().", i);
         }
         if (meshes[i]->get_seq() != this->mesh->get_seq())

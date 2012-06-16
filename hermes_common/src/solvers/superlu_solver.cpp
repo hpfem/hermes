@@ -538,18 +538,18 @@ namespace Hermes
       }
       else if (info <= m->size)
       {
-        warn("SuperLU: Factor U is singular, solution could not be computed.");
+        warn(NULL, "SuperLU: Factor U is singular, solution could not be computed.");
         return false;
       }
       else if (info == m->size + 1)
       {
-        warn("SuperLU: RCOND is less than machine precision "
+        warn(NULL, "SuperLU: RCOND is less than machine precision "
           "(system matrix is singular to working precision).");
         return true;
       }
       else if (info > m->size + 1)
       {
-        warn("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
+        warn(NULL, "SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
           (info - m->size)/1e6);
         return false;
       }
@@ -678,7 +678,7 @@ namespace Hermes
 
       if ( !setup_factorization() )
       {
-        warn("LU factorization could not be completed.");
+        warn(NULL, "LU factorization could not be completed.");
         return false;
       }
 
@@ -826,7 +826,7 @@ namespace Hermes
       unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
       if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
       {
-        warn("You cannot reuse factorization structures for factorizing matrices of different sizes.");
+        warn(NULL, "You cannot reuse factorization structures for factorizing matrices of different sizes.");
         return false;
       }
 

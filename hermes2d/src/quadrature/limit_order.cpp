@@ -66,7 +66,7 @@ namespace Hermes
     {
       if (!warned_order)
       {
-        warn("Not enough integration rules for exact integration.");
+        warn(NULL, "Not enough integration rules for exact integration.");
         warned_order = true;
       }
     }

@@ -261,11 +261,11 @@ namespace Hermes
         if (it == 1)
         {
           if(verbose)
-            info("---- Newton initial residual norm: %g", residual_norm);
+            info(NULL, "---- Newton initial residual norm: %g", residual_norm);
         }
         else
           if(verbose)
-            info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
+            info(NULL, "---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > newton_max_allowed_residual_norm)

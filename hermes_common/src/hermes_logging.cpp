@@ -137,7 +137,7 @@ bool Hermes::Logging::write_console(const char code, const bool emphasize, const
 #endif
 }
 
-bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::HermesLogEventInfo& info, const char* msg, ...)
+bool Hermes::Logging::hermes_log_message_if(void (*callback)(const char*), bool cond, const Hermes::Logging::HermesLogEventInfo& info, const char* msg, ...)
 {
   if (cond)
   {
@@ -222,6 +222,9 @@ bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::He
           fprintf(file, "\n\n");
         fprintf(file, "%s\t%s %s\n", time_buf, text, location.str().c_str());
         fclose(file);
+
+        if(callback != NULL)
+          callback(text);
       }
     }
 
@@ -233,16 +236,16 @@ bool Hermes::Logging::hermes_log_message_if(bool cond, const Hermes::Logging::He
 void Hermes::Logging::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream)
 {
   if (fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
-    hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Error writing to file: %s", strerror(ferror(stream))));
+    hermes_exit_if(hermes_log_message_if(NULL, true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Error writing to file: %s", strerror(ferror(stream))));
 }
 
 void Hermes::Logging::hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream)
 {
   size_t ret = fread(ptr, size, nitems, stream);
   if (ret < nitems)
-    hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Premature end of file."));
+    hermes_exit_if(hermes_log_message_if(NULL, true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Premature end of file."));
   else if (ferror(stream))
-    hermes_exit_if(hermes_log_message_if(true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Error reading file: %s", strerror(ferror(stream))));
+    hermes_exit_if(hermes_log_message_if(NULL, true, HERMES_BUILD_LOG_INFO(HERMES_EC_ERROR), "Error reading file: %s", strerror(ferror(stream))));
 }
 
 Hermes::Logging::HermesLogEventInfo::HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)

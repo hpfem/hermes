@@ -1410,7 +1410,7 @@ namespace Hermes
         /// \todo allow settin min = max, in which case draw the corresponding contour.
         if (fabs(max-min) < 1e-8)
         {
-          warn("Range (%f, %f) is too narrow: adjusted to (%f, %f)", min, max, min-0.5, max);
+          warn(NULL, "Range (%f, %f) is too narrow: adjusted to (%f, %f)", min, max, min-0.5, max);
           min -= 0.5;
         }
         View::set_min_max_range(min, max);

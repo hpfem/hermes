@@ -90,7 +90,7 @@ namespace Hermes
 
       if (!setup_factorization())
       {
-        warn("AmesosSolver: LU factorization could not be completed");
+        warn(NULL, "AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
@@ -128,7 +128,7 @@ namespace Hermes
 
       if (!setup_factorization())
       {
-        warn("AmesosSolver: LU factorization could not be completed");
+        warn(NULL, "AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
@@ -169,7 +169,7 @@ namespace Hermes
         status = solver->SymbolicFactorization();
         if (status != 0)
         {
-          warn("Symbolic factorization failed.");
+          warn(NULL, "Symbolic factorization failed.");
           return false;
         }
 
@@ -178,7 +178,7 @@ namespace Hermes
         status = solver->NumericFactorization();
         if (status != 0)
         {
-          warn("Numeric factorization failed.");
+          warn(NULL, "Numeric factorization failed.");
           return false;
         }
       }

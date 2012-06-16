@@ -125,11 +125,11 @@ namespace Hermes
         // Info for the user.
         if(it == 1) {
           if(this->verbose_output)
-            info("---- Newton initial residual norm: %g", residual_norm);
+            info(this->verbose_callback, "---- Newton initial residual norm: %g", residual_norm);
         }
         else
           if(this->verbose_output)
-            info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+            info(this->verbose_callback, "---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
@@ -254,11 +254,11 @@ namespace Hermes
         if(it == 1)
         {
           if(this->verbose_output)
-            info("---- Newton initial residual norm: %g", residual_norm);
+            info(this->verbose_callback, "---- Newton initial residual norm: %g", residual_norm);
         }
         else
           if(this->verbose_output)
-            info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+            info(this->verbose_callback, "---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
@@ -329,7 +329,7 @@ namespace Hermes
 #ifdef HAVE_AZTECOO
       dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(iterative_method_name);
 #else
-      warn("Trying to set iterative method without AztecOO present.");
+      warn(this->verbose_callback, "Trying to set iterative method without AztecOO present.");
 #endif
     }
 
@@ -341,7 +341,7 @@ namespace Hermes
 #ifdef HAVE_AZTECOO
       dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(preconditioner_name);
 #else
-      warn("Trying to set iterative method without AztecOO present.");
+      warn(this->verbose_callback, "Trying to set iterative method without AztecOO present.");
 #endif
     }
 

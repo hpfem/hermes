@@ -67,7 +67,7 @@ namespace Hermes
               MaterialPropertyMap1 *mrmg_map)
             {
               if (G == 1)
-                warn(W_MG_EXTENSION);
+                warn(NULL, W_MG_EXTENSION);
 
               MaterialPropertyMap0::const_iterator it;
               for (it = mrsg_map.begin(); it != mrsg_map.end(); ++it)
@@ -92,7 +92,7 @@ namespace Hermes
               if (materials_list.empty())
                 throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
               if (G == 1)
-                warn(W_MG_EXTENSION);
+                warn(NULL, W_MG_EXTENSION);
 
               std::set<std::string>::const_iterator it;
               for (it = materials_list.begin(); it != materials_list.end(); ++it)
@@ -140,7 +140,7 @@ namespace Hermes
               }
               else
               {
-                warn(W_NO_FISSION);
+                warn(NULL, W_NO_FISSION);
                 fill_with(0.0, &nu);
                 fill_with(0.0, &chi);
                 fill_with(0.0, &Sigma_f);
@@ -170,7 +170,7 @@ namespace Hermes
 
                   for ( ; a != ita->second.end(); ++a, ++f)
                     if (*a < *f)
-                      warn(W_SA_LT_SF);
+                      warn(NULL, W_SA_LT_SF);
                 }
               }
             }
@@ -340,7 +340,7 @@ namespace Hermes
                     {
                       // If only Sigma_t is given, we assume that all reaction terms are included in Sigma_t; all
                       // other x-sections will be set to zero.
-                      warn(W_NO_SCATTERING);
+                      warn(NULL, W_NO_SCATTERING);
                       fill_with(0.0, &Sigma_s);
                     }
 
@@ -353,7 +353,7 @@ namespace Hermes
 
                   if (!Sigma_s_given)
                   {
-                    warn(W_NO_SCATTERING);
+                    warn(NULL, W_NO_SCATTERING);
                     fill_with(0.0, &Sigma_s);
                     Sigma_s_given = true;
                   }
@@ -399,7 +399,7 @@ namespace Hermes
                 }
                 else
                 {
-                  warn(W_NO_SCATTERING);
+                  warn(NULL, W_NO_SCATTERING);
                   fill_with(0.0, &Sigma_s);
                   scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, false));
                 }

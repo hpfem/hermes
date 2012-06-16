@@ -255,7 +255,7 @@ namespace Hermes
         Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
         if (shape_expansion == NULL) { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined
           static int warned_mode = -1, warned_index = -1, warned_n = 1; //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
-          warn_if(warned_mode != mode || warned_index != index || warned_n != n, "Requested undefined expansion %d (mode: %d) of a shape %d, returning 0", n, mode, index);
+          warn_if(NULL, warned_mode != mode || warned_index != index || warned_n != n, "Requested undefined expansion %d (mode: %d) of a shape %d, returning 0", n, mode, index);
           warned_mode = mode; warned_index = index; warned_n = n;
           return 0;
         }

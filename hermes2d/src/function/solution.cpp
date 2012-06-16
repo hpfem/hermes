@@ -1443,7 +1443,7 @@ namespace Hermes
         }
       }
 
-      warn("Point (%g, %g) does not lie in any element.", x, y);
+      warn(NULL, "Point (%g, %g) does not lie in any element.", x, y);
       return NAN;
     }
 

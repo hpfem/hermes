@@ -59,9 +59,9 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = Space<double>::get_num_dofs(&space);
-  info("ndof: %d", ndof);
+  info(NULL, "ndof: %d", ndof);
 
-  info("Assembling by DiscreteProblem, solving by Umfpack:");
+  info(NULL, "Assembling by DiscreteProblem, solving by Umfpack:");
 
   // Time measurement.
   cpu_time.tick(HERMES_SKIP);
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof * sizeof(double));
   // Or we can project the initial condition to obtain the initial
   // coefficient vector.
-  //info("Projecting to obtain initial vector for the Newton's method.");
+  //info(NULL, "Projecting to obtain initial vector for the Newton's method.");
   //CustomInitialSolution sln_tmp(&mesh);
   //OGProjection::project_global(&space, &sln_tmp, coeff_vec);
 
@@ -104,10 +104,9 @@ int main(int argc, char* argv[])
   try{
     newton.solve(coeff_vec);
   }
-  catch(Hermes::Exceptions::Exception e)
+  catch(Hermes::Exceptions::Exception& e)
   {
     e.printMsg();
-    error("Newton's iteration failed.");
   }
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
@@ -129,7 +128,7 @@ int main(int argc, char* argv[])
 
   // Project the initial condition to obtain the initial
   // coefficient vector.
-  info("Projecting to obtain initial vector for the Newton's method.");
+  info(NULL, "Projecting to obtain initial vector for the Newton's method.");
   ZeroSolution<double> sln_tmp(&mesh);
   OGProjection<double>::project_global(&space, &sln_tmp, coeff_vec);
 
@@ -143,7 +142,7 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp2(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
-  info("Initializing NOX.");
+  info(NULL, "Initializing NOX.");
   NewtonSolverNOX<double> nox_solver(&dp2);
   nox_solver.set_output_flags(message_type);
   nox_solver.set_ls_tolerance(ls_tolerance);
@@ -159,20 +158,19 @@ int main(int argc, char* argv[])
   }
 
   // Solve the nonlinear problem using NOX.
-  info("Assembling by DiscreteProblem, solving by NOX.");
+  info(NULL, "Assembling by DiscreteProblem, solving by NOX.");
   Solution<double> sln2;
   try{
     nox_solver.solve(coeff_vec);
   }
-  catch(Hermes::Exceptions::Exception e)
+  catch(Hermes::Exceptions::Exception& e)
   {
     e.printMsg();
-    error("NOX failed.");
   }
   Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
-  info("Number of nonlin iterations: %d (norm of residual: %g)",
+  info(NULL, "Number of nonlin iterations: %d (norm of residual: %g)",
        nox_solver.get_num_iters(), nox_solver.get_residual());
-  info("Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
+  info(NULL, "Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
        nox_solver.get_num_lin_iters(), nox_solver.get_achieved_tol());
 
   // CPU time needed by NOX.
@@ -181,21 +179,21 @@ int main(int argc, char* argv[])
   // Calculate errors.
   CustomExactSolution ex(&mesh);
   double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[Hermes::HermesCommonApi.getParamValue("Matrix solver type")].c_str(), rel_err_1, time1);
+  info(NULL, "Solution 1 (%s):  exact H1 error: %g (time %g s)", MatrixSolverNames[Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType)].c_str(), rel_err_1, time1);
   double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
-  info("Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time + time2);
+  info(NULL, "Solution 2 (NOX): exact H1 error: %g (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time + time2);
 
-  info("Coordinate ( 0.6,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.6));
-  info("Coordinate ( 0.4,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.6));
-  info("Coordinate ( 0.4,  0.4) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.4));
-  info("Coordinate ( 0.6,  0.0) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.0));
-  info("Coordinate ( 0.5,  0.5) sln1 value = %lf", sln1.get_pt_value( 0.5,  0.5));
+  info(NULL, "Coordinate ( 0.6,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.6));
+  info(NULL, "Coordinate ( 0.4,  0.6) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.6));
+  info(NULL, "Coordinate ( 0.4,  0.4) sln1 value = %lf", sln1.get_pt_value( 0.4,  0.4));
+  info(NULL, "Coordinate ( 0.6,  0.0) sln1 value = %lf", sln1.get_pt_value( 0.6,  0.0));
+  info(NULL, "Coordinate ( 0.5,  0.5) sln1 value = %lf", sln1.get_pt_value( 0.5,  0.5));
 
-  info("Coordinate ( 0.6,  0.6) sln2 value = %lf", sln2.get_pt_value( 0.6,  0.6));
-  info("Coordinate ( 0.4,  0.6) sln2 value = %lf", sln2.get_pt_value( 0.4,  0.6));
-  info("Coordinate ( 0.4,  0.4) sln2 value = %lf", sln2.get_pt_value( 0.4,  0.4));
-  info("Coordinate ( 0.6,  0.0) sln2 value = %lf", sln2.get_pt_value( 0.6,  0.0));
-  info("Coordinate ( 0.5,  0.5) sln2 value = %lf", sln2.get_pt_value( 0.5,  0.5));
+  info(NULL, "Coordinate ( 0.6,  0.6) sln2 value = %lf", sln2.get_pt_value( 0.6,  0.6));
+  info(NULL, "Coordinate ( 0.4,  0.6) sln2 value = %lf", sln2.get_pt_value( 0.4,  0.6));
+  info(NULL, "Coordinate ( 0.4,  0.4) sln2 value = %lf", sln2.get_pt_value( 0.4,  0.4));
+  info(NULL, "Coordinate ( 0.6,  0.0) sln2 value = %lf", sln2.get_pt_value( 0.6,  0.0));
+  info(NULL, "Coordinate ( 0.5,  0.5) sln2 value = %lf", sln2.get_pt_value( 0.5,  0.5));
 
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1

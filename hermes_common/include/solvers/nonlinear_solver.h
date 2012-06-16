@@ -47,8 +47,12 @@ namespace Hermes
 
       double get_time();
 
-      /// Sets the attribute verbose_output to the paramater passed.
-      void set_verbose_output(bool verbose_output_to_set);
+      /// Sets the attribute verbose_output to the paramater option passed.
+      void set_verbose_output(bool to_set);
+
+      /// Provides a callback for logging.
+      /// \param [in] callback Function to be called for the messaging when verbose_output is set to yes.
+      void set_verbose_callback(void (*callback)(const char*));
 
       /// Set the name of the iterative method employed by AztecOO (ignored
       /// by the other solvers).
@@ -75,6 +79,9 @@ namespace Hermes
       /// Verbose output.
       /// Set to 'true' by default.
       bool verbose_output;
+
+      /// Verbose callback.
+      void (*verbose_callback)(const char*);
 
       /// Preconditioned solver.
       bool precond_yes;

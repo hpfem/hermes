@@ -14,14 +14,14 @@ int main(int argc, char* argv[])
   try
   {
     sln.get_ref_value(NULL,0,0,0,0);
-    info("Failure!");
+    info(NULL, "Failure!");
     return -1;
   }
   catch(Exceptions::NullException&e)
   {
     if (e.getParamIdx()!=1)
     {
-      info("Failure!");
+      info(NULL, "Failure!");
       return -1;
     }
   }
@@ -34,14 +34,14 @@ int main(int argc, char* argv[])
   try
   {
     sln.vector_to_solutions(solution_vector,spaces,solutions);
-    info("Failure!");
+    info(NULL, "Failure!");
     return -1;
   }
   catch(Exceptions::LengthException& e)
   {
     if (e.getFirstParamIdx()!=2 || e.getSecondParamIdx()!=3 || e.getFirstLength()!=4 || e.getExpectedLength()!=3)
     {
-      info("Failure!");
+      info(NULL, "Failure!");
       return -1;
     }
   }
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
   try
   {
     linsolv.solve();
-    info("Failure!");
+    info(NULL, "Failure!");
     return -1;
   }
   catch(Exceptions::LinearMatrixSolverException *e)
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   try
   {
     Hermes2D::Adapt<double> adapr(spaces2,proj_norms);
-    info("Failure!");
+    info(NULL, "Failure!");
     return -1;
   }
   catch(Exceptions::ValueException & e)
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   }
 
 
-  info("Success!");
+  info(NULL, "Success!");
   return 0;
 }
 

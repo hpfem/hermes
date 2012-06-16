@@ -922,6 +922,7 @@ namespace Hermes
         }
 
         // if not found, create a new one
+#pragma omp critical(realloc_vertices)
         i = add_vertex();
         verts[i][0] = x;
         verts[i][1] = y;
@@ -935,16 +936,13 @@ namespace Hermes
 
       int Linearizer::add_vertex()
       {
-#pragma omp critical(realloc_vertices)
+        if (this->vertex_count >= this->vertex_size)
         {
-          if (this->vertex_count >= this->vertex_size)
-          {
-            this->vertex_size *= 2;
-            verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
-            this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
-            this->hash_table = (int*) realloc(hash_table, sizeof(int) * vertex_size);
-            memset(this->hash_table + this->vertex_size / 2, 0xff, sizeof(int) * this->vertex_size / 2);
-          }
+          this->vertex_size *= 2;
+          verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
+          this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
+          this->hash_table = (int*) realloc(hash_table, sizeof(int) * vertex_size);
+          memset(this->hash_table + this->vertex_size / 2, 0xff, sizeof(int) * this->vertex_size / 2);
         }
         return this->vertex_count++;
       }

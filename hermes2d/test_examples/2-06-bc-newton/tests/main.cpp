@@ -51,10 +51,10 @@ int main(int argc, char* argv[])
   bool success = true;
   for (int p_init = 1; p_init <= 10; p_init++)
   {
-    info("********* p_init = %d *********\n", p_init);
+    info(NULL, "********* p_init = %d *********\n", p_init);
     space.set_uniform_order(p_init);
     int ndof = space.get_num_dofs();
-    info("ndof = %d", ndof);
+    info(NULL, "ndof = %d", ndof);
 
     // Initialize the FE problem.
     Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
@@ -69,10 +69,9 @@ int main(int argc, char* argv[])
     try{
       newton.solve(coeff_vec);
     }
-    catch(Hermes::Exceptions::Exception e)
+    catch(Hermes::Exceptions::Exception& e)
     {
       e.printMsg();
-      error("Newton's iteration failed.");
     }
     Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 

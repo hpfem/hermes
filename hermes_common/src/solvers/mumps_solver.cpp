@@ -596,9 +596,9 @@ namespace Hermes
       switch (param.INFOG(1))
       {
       case 0: return true; // no error
-      case -1: warn("Error occured on processor %d", MUMPS_INFO(param, 2)); break;
+      case -1: warn(NULL, "Error occured on processor %d", MUMPS_INFO(param, 2)); break;
         /// \todo add the rest according to the MUMPS docs
-      default: warn("INFOG(1) = %d", param.INFOG(1)); break;
+      default: warn(NULL, "INFOG(1) = %d", param.INFOG(1)); break;
       }
       return false;
     }

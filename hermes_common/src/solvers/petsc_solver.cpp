@@ -58,7 +58,7 @@ namespace Hermes
       {
         int ierr = PetscFinalize();
         CHKERRQ(ierr);
-        info("PETSc finalized. No more PETSc usage allowed until application restart.");
+        info(NULL, "PETSc finalized. No more PETSc usage allowed until application restart.");
       }
     }
 

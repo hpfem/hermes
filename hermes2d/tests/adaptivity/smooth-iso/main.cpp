@@ -91,9 +91,9 @@ int main(int argc, char* argv[])
     Space<double>* ref_space = Space<double>::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
 
-    info("---- Adaptivity step %d (%d DOF):", as, ndof_ref);
+    info(NULL, "---- Adaptivity step %d (%d DOF):", as, ndof_ref);
 
-    info("Solving on reference mesh.");
+    info(NULL, "Solving on reference mesh.");
 
     // Assemble the discrete problem.
     DiscreteProblem<double> dp(&wf, ref_space);
@@ -109,16 +109,15 @@ int main(int argc, char* argv[])
     try{
       newton.solve(coeff_vec);
     }
-    catch(Hermes::Exceptions::Exception e)
+    catch(Hermes::Exceptions::Exception& e)
     {
       e.printMsg();
-      error("Newton's iteration failed.");
     }
     // Translate the resulting coefficient vector into the instance of Solution.
     Solution<double>::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
-    info("Calculating error estimate and exact error.");
+    info(NULL, "Calculating error estimate and exact error.");
     OGProjection<double>::project_global(&space, &ref_sln, &sln);
 
     // Calculate element errors and total error estimate.
@@ -129,8 +128,8 @@ int main(int argc, char* argv[])
     double err_exact_rel = Global<double>::calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
 
     // Report results.
-    info("ndof_coarse: %d, ndof_fine: %d", space.get_num_dofs(), ref_space->get_num_dofs());
-    info("err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
+    info(NULL, "ndof_coarse: %d, ndof_fine: %d", space.get_num_dofs(), ref_space->get_num_dofs());
+    info(NULL, "err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
 
     // If err_est too large, adapt the mesh. The NDOF test must be here, so that the solution may be visualized
     // after ending due to this criterion.
@@ -154,11 +153,11 @@ int main(int argc, char* argv[])
 
   if (space.get_mesh()->get_num_active_elements() == 1)
   {
-    info("Success!");
+    info(NULL, "Success!");
     return 0;
   }
   else {
-    info("Failure!");
+    info(NULL, "Failure!");
     return -1;
   }
 }

@@ -138,7 +138,7 @@ namespace Hermes
     {
       if (ncollisions > 2*nqueries)
       {
-        warn("Hashtable: nqueries = %d ncollisions = %d", nqueries, ncollisions);
+        warn(NULL, "Hashtable: nqueries = %d ncollisions = %d", nqueries, ncollisions);
       }
     }
 

@@ -864,7 +864,7 @@ namespace Hermes
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
           if (en->ref < 2 && en->marker == 0)
-            warn("Boundary edge node does not have a boundary marker");
+            warn(NULL, "Boundary edge node does not have a boundary marker");
 
         // Curves //
         // Arcs & NURBSs //
@@ -1116,7 +1116,7 @@ namespace Hermes
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
           if (en->ref < 2 && en->marker == 0)
-            warn("Boundary edge node does not have a boundary marker");
+            warn(NULL, "Boundary edge node does not have a boundary marker");
 
         // Curves //
         // Arcs & NURBSs //

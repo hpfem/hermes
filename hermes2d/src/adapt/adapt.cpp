@@ -285,7 +285,7 @@ namespace Hermes
 
       if (ids.empty())
       {
-        warn("None of the elements selected for refinement was refined. Adaptivity step successful, returning 'true'.");
+        warn(NULL, "None of the elements selected for refinement was refined. Adaptivity step successful, returning 'true'.");
         return true;
       }
 
@@ -392,7 +392,7 @@ namespace Hermes
         if (regularize == 0)
         {
           regularize = 1;
-          warn("Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
+          warn(NULL, "Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
         }
         for (int i = 0; i < this->num; i++)
         {

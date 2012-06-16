@@ -170,7 +170,7 @@ namespace Hermes
         // Make sure we are adding to an existing non-zero entry.
         if (pos < 0)
         {
-          info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
+          info(NULL, "CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
           throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
         }
 
@@ -772,17 +772,17 @@ namespace Hermes
       switch (status)
       {
       case UMFPACK_OK: break;
-      case UMFPACK_WARNING_singular_matrix:       warn("%s: singular matrix!", fn_name); break;
-      case UMFPACK_ERROR_out_of_memory:           warn("%s: out of memory!", fn_name); break;
-      case UMFPACK_ERROR_argument_missing:        warn("%s: argument missing", fn_name); break;
-      case UMFPACK_ERROR_invalid_Symbolic_object: warn("%s: invalid Symbolic object", fn_name); break;
-      case UMFPACK_ERROR_invalid_Numeric_object:  warn("%s: invalid Numeric object", fn_name); break;
-      case UMFPACK_ERROR_different_pattern:       warn("%s: different pattern", fn_name); break;
-      case UMFPACK_ERROR_invalid_system:          warn("%s: invalid system", fn_name); break;
-      case UMFPACK_ERROR_n_nonpositive:           warn("%s: n nonpositive", fn_name); break;
-      case UMFPACK_ERROR_invalid_matrix:          warn("%s: invalid matrix", fn_name); break;
-      case UMFPACK_ERROR_internal_error:          warn("%s: internal error", fn_name); break;
-      default:                                    warn("%s: unknown error (%d)", fn_name, status); break;
+      case UMFPACK_WARNING_singular_matrix:       warn(NULL, "%s: singular matrix!", fn_name); break;
+      case UMFPACK_ERROR_out_of_memory:           warn(NULL, "%s: out of memory!", fn_name); break;
+      case UMFPACK_ERROR_argument_missing:        warn(NULL, "%s: argument missing", fn_name); break;
+      case UMFPACK_ERROR_invalid_Symbolic_object: warn(NULL, "%s: invalid Symbolic object", fn_name); break;
+      case UMFPACK_ERROR_invalid_Numeric_object:  warn(NULL, "%s: invalid Numeric object", fn_name); break;
+      case UMFPACK_ERROR_different_pattern:       warn(NULL, "%s: different pattern", fn_name); break;
+      case UMFPACK_ERROR_invalid_system:          warn(NULL, "%s: invalid system", fn_name); break;
+      case UMFPACK_ERROR_n_nonpositive:           warn(NULL, "%s: n nonpositive", fn_name); break;
+      case UMFPACK_ERROR_invalid_matrix:          warn(NULL, "%s: invalid matrix", fn_name); break;
+      case UMFPACK_ERROR_internal_error:          warn(NULL, "%s: internal error", fn_name); break;
+      default:                                    warn(NULL, "%s: unknown error (%d)", fn_name, status); break;
       }
     }
 
@@ -1017,7 +1017,7 @@ namespace Hermes
 
       if ( !setup_factorization() )
       {
-        warn("LU factorization could not be completed.");
+        warn(NULL, "LU factorization could not be completed.");
         return false;
       }
 

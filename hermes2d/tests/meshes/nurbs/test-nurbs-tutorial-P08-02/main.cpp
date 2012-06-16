@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 {
   // Check number of command-line parameters.
   if (argc < 2)
-    error("Not enough parameters.");
+    throw Hermes::Exceptions::Exception("Not enough parameters.");
 
   // Load the mesh.
   Mesh mesh;
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = Space<double>::get_num_dofs(&space);
-  info("ndof = %d", ndof);
+  info(NULL, "ndof = %d", ndof);
 
   // Initialize the weak formulation.
   WeakFormsH1::DefaultWeakFormPoisson<double> wf(HERMES_ANY, new Hermes1DFunction<double>(1.0), new Hermes2DFunction<double>(-const_f));
@@ -69,10 +69,9 @@ int main(int argc, char* argv[])
   try{
     newton.solve(coeff_vec);
   }
-  catch(Hermes::Exceptions::Exception e)
+  catch(Hermes::Exceptions::Exception& e)
   {
     e.printMsg();
-    error("Newton's iteration failed.");
   }
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
 
@@ -81,10 +80,10 @@ int main(int argc, char* argv[])
   delete matrix;
   delete rhs;
 
-  info("Coordinate ( 0.3, 0.5) value = %lf", sln.get_pt_value(0.3, 0.5));
-  info("Coordinate ( 0.7, 0.5) value = %lf", sln.get_pt_value(0.7, 0.5));
-  info("Coordinate ( 1.3, 0.5) value = %lf", sln.get_pt_value(1.3, 0.5));
-  info("Coordinate ( 1.7, 0.5) value = %lf", sln.get_pt_value(1.7, 0.5));
+  info(NULL, "Coordinate ( 0.3, 0.5) value = %lf", sln.get_pt_value(0.3, 0.5));
+  info(NULL, "Coordinate ( 0.7, 0.5) value = %lf", sln.get_pt_value(0.7, 0.5));
+  info(NULL, "Coordinate ( 1.3, 0.5) value = %lf", sln.get_pt_value(1.3, 0.5));
+  info(NULL, "Coordinate ( 1.7, 0.5) value = %lf", sln.get_pt_value(1.7, 0.5));
 
   double coor_x[4] = {0.3, 0.7, 1.3, 1.7};
   double coor_y = 0.5;
