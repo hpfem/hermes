@@ -38,7 +38,7 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 void processOutput(const char* aha)
 {
-  std::cout << (std::string)"Hermes I saying:" << aha << std::endl;
+  std::cout << (std::string)"Hermes2D is saying:" << aha << std::endl;
 }
 
 int main(int argc, char* argv[])
