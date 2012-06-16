@@ -76,7 +76,7 @@ public:
     Scalar2<std::complex<double> >ex(0.0, 0.0);
 #pragma omp critical (custom)
     {
-    exact_sol_val(x, y,  ex[0], ex[1]);
+      exact_sol_val(x, y,  ex[0], ex[1]);
     }
     return ex;
   };
@@ -84,7 +84,7 @@ public:
   virtual void derivatives (double x, double y, Scalar2<std::complex<double> >& dx, Scalar2<std::complex<double> >& dy) const 
   {
     std::complex<double> e1dx, e0dy;
-    #pragma omp critical (custom)
+#pragma omp critical (custom)
     {
       exact_sol_der(x, y, e1dx, e0dy);
     }
@@ -134,18 +134,21 @@ public:
       Func<double> *v, Geom<double> *e, ExtData<std::complex<double> > *ext) const 
     {
       std::complex<double> result = 0;
-      for (int i = 0; i < n; i++) {
-        double r = std::sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);
-        double theta = std::atan2(e->y[i], e->x[i]);
-        if (theta < 0) theta += 2.0*M_PI;
-        double j13    = jv(-1.0/3.0, r),    j23    = jv(+2.0/3.0, r);
-        double cost   = std::cos(theta),         sint   = std::sin(theta);
-        double cos23t = std::cos(2.0/3.0*theta), sin23t = std::sin(2.0/3.0*theta);
+#pragma omp critical (jv)
+      {
+        for (int i = 0; i < n; i++) {
+          double r = std::sqrt(e->x[i] * e->x[i] + e->y[i] * e->y[i]);
+          double theta = std::atan2(e->y[i], e->x[i]);
+          if (theta < 0) theta += 2.0*M_PI;
+          double j13    = jv(-1.0/3.0, r),    j23    = jv(+2.0/3.0, r);
+          double cost   = std::cos(theta),         sint   = std::sin(theta);
+          double cos23t = std::cos(2.0/3.0*theta), sin23t = std::sin(2.0/3.0*theta);
 
-        double Etau = e->tx[i] * (cos23t*sint*j13 - 2.0/(3.0*r)*j23*(cos23t*sint + sin23t*cost)) +
-          e->ty[i] * (-cos23t*cost*j13 + 2.0/(3.0*r)*j23*(cos23t*cost - sin23t*sint));
+          double Etau = e->tx[i] * (cos23t*sint*j13 - 2.0/(3.0*r)*j23*(cos23t*sint + sin23t*cost)) +
+            e->ty[i] * (-cos23t*cost*j13 + 2.0/(3.0*r)*j23*(cos23t*cost - sin23t*sint));
 
-        result += wt[i] * std::complex<double>(cos23t*j23, -Etau) * ((v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
+          result += wt[i] * std::complex<double>(cos23t*j23, -Etau) * ((v->val0[i] * e->tx[i] + v->val1[i] * e->ty[i]));
+        }
       }
       return -result;
     }
