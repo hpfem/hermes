@@ -75,7 +75,6 @@ namespace Hermes
 
         int add_vertex();
         int get_vertex(int p1, int p2, double x, double y, double value);
-        int get_top_vertex(int id, double value);
 
         void process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
           double* val, double* phx, double* phy, int* indices);

@@ -821,7 +821,8 @@ namespace Hermes
               if(this->ydisp != NULL)
                 y_disp += dmult * dy[i];
 
-              iv[i] = this->get_vertex(-rand()-omp_get_thread_num()*17*rand(), -rand()-omp_get_thread_num()*rand(), x_disp, y_disp, f);
+
+              iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x_disp, y_disp, f);
             }
 
             // we won't bother calculating physical coordinates from the refmap if this is not a curved element
@@ -853,10 +854,10 @@ namespace Hermes
         delete [] trav;
 
         // regularize the linear mesh
-        int num = this->triangle_count;
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < this->triangle_count; i++)
         {
           int iv0 = tris[i][0], iv1 = tris[i][1], iv2 = tris[i][2];
+
           int mid0 = peek_vertex(iv0, iv1);
           int mid1 = peek_vertex(iv1, iv2);
           int mid2 = peek_vertex(iv2, iv0);
@@ -946,12 +947,6 @@ namespace Hermes
           }
         }
         return this->vertex_count++;
-      }
-
-      int Linearizer::get_top_vertex(int id, double value)
-      {
-        if (fabs(value - verts[id][2]) < max*1e-24) return id;
-        return get_vertex(-rand()-omp_get_thread_num()*17*rand(), -rand()-omp_get_thread_num()*rand(), verts[id][0], verts[id][1], value);
       }
 
       void Linearizer::free()
