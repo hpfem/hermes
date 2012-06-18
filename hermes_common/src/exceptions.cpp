@@ -260,5 +260,24 @@ namespace Hermes
       strcpy(msg, e.getMsg());
       message=msg;
     }
+
+    MeshLoadFailureException::MeshLoadFailureException(const char * name) : Exception()
+    {
+      char * msg =  new char[34 + strlen(name)];
+      sprintf(msg, "Mesh loading failed because:\"%s\"", name);
+      message = msg;
+    }
+
+    MeshLoadFailureException::~MeshLoadFailureException()
+    {
+      delete[] message;
+    }
+
+    MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg, e.getMsg());
+      message=msg;
+    }
   }
 }

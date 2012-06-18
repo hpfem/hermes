@@ -85,6 +85,16 @@ int main(int argc, char* argv[])
   {
   }
 
+  try
+  {
+    Hermes::Hermes2D::Mesh mesh;
+    Hermes::Hermes2D::MeshReaderH2DXML reader;
+    reader.load("domain.xml", &mesh);
+  }
+  catch(Exceptions::MeshLoadFailureException& e)
+  {
+    e.printMsg();
+  }
 
   info(NULL, "Success!");
   return 0;

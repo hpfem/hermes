@@ -151,6 +151,17 @@ namespace Hermes
         ~FunctionNotOverridenException();
         FunctionNotOverridenException(const FunctionNotOverridenException & e);
     };
+
+    /// \brief Linear solver failed.
+    class HERMES_API MeshLoadFailureException : public Exception
+    {
+      public:
+        /// Constructor
+        /// \param[in] name Name of the function.
+        MeshLoadFailureException(const char * reason);
+        ~MeshLoadFailureException();
+        MeshLoadFailureException(const MeshLoadFailureException & e);
+    };
   }
 }
 #endif
