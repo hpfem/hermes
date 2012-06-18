@@ -147,7 +147,7 @@ namespace Hermes
       public:
         /// Constructor
         /// \param[in] name Name of the function.
-        FunctionNotOverridenException(const char * reason);
+        FunctionNotOverridenException(const char * msg, ...);
         ~FunctionNotOverridenException();
         FunctionNotOverridenException(const FunctionNotOverridenException & e);
     };
@@ -158,7 +158,7 @@ namespace Hermes
       public:
         /// Constructor
         /// \param[in] name Name of the function.
-        MeshLoadFailureException(const char * reason);
+        MeshLoadFailureException(const char * msg, ...);
         ~MeshLoadFailureException();
         MeshLoadFailureException(const MeshLoadFailureException & e);
     };

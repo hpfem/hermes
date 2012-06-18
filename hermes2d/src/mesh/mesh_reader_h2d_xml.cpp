@@ -147,7 +147,10 @@ namespace Hermes
         std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename));
 
         std::map<unsigned int, unsigned int> vertex_is;
-        std::map<unsigned int, unsigned int> element_is;
+        int* element_is = new int[10000000];
+        for(int i = 0; i < 10000000; i++)
+          element_is[i] = -1;
+
         std::map<unsigned int, unsigned int> edge_is;
 
         if(!load(parsed_xml_domain, &global_mesh, vertex_is, element_is, edge_is))
@@ -156,7 +159,7 @@ namespace Hermes
         // Subdomains //
         unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
         if(subdomains_count != meshes.size())
-          throw Hermes::Exceptions::Exception("Number of subdomains( = %u) does not equal the number of provided meshes in the vector( = %u).", subdomains_count, meshes.size());
+          throw Hermes::Exceptions::MeshLoadFailureException("Number of subdomains( = %u) does not equal the number of provided meshes in the vector( = %u).", subdomains_count, meshes.size());
 
         for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
         {
@@ -240,10 +243,10 @@ namespace Hermes
                   int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
                   for(int i = 0; i < dot_position; i++)
                     if(strncmp(x.c_str() + i, "0", 1) != 0)
-                      throw Hermes::Exceptions::Exception("Wrong syntax in the x coordinate of vertex no. %i.", vertex_number + 1);
+                      throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the x coordinate of vertex no. %i.", vertex_number + 1);
                   for(int i = dot_position + 1; i < x.length(); i++)
                     if(strncmp(x.c_str() + i, "0", 1) != 0)
-                      throw Hermes::Exceptions::Exception("Wrong syntax in the x coordinate of vertex no. %i.", vertex_number + 1);
+                      throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the x coordinate of vertex no. %i.", vertex_number + 1);
                   x_value = std::strtod(x.c_str(), NULL);
                 }
 
@@ -256,10 +259,10 @@ namespace Hermes
                     int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
                     for(int i = 0; i < dot_position; i++)
                       if(strncmp(y.c_str() + i, "0", 1) != 0)
-                        throw Hermes::Exceptions::Exception("Wrong syntay in the y coordinate of vertey no. %i.", vertex_number + 1);
+                        throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_number + 1);
                     for(int i = dot_position + 1; i < y.length(); i++)
                       if(strncmp(y.c_str() + i, "0", 1) != 0)
-                        throw Hermes::Exceptions::Exception("Wrong syntay in the y coordinate of vertey no. %i.", vertex_number + 1);
+                        throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_number + 1);
                     y_value = std::strtod(y.c_str(), NULL);
                   }
 
@@ -275,18 +278,19 @@ namespace Hermes
             meshes[subdomains_i]->nactive = meshes[subdomains_i]->ninitial = element_number_count;
 
             Element* e;
+            bool* elements_existing = new bool[element_count];
+            for(int i = 0; i < element_count; i++)
+              elements_existing[i] = false;
+            for (int element_number_i = 0; element_number_i < element_number_count; element_number_i++)
+              elements_existing[element_is[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i)]] = true;
+
             for (int element_i = 0; element_i < element_count; element_i++)
             {
               bool found = false;
               if(element_number_count == 0)
                 found = true;
               else
-                for (int element_number_i = 0; element_number_i < element_number_count; element_number_i++)
-                  if(element_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i))->second == element_i)
-                  {
-                     found = true;
-                     break;
-                  }
+                found = elements_existing[element_i];
 
               if(!found)
               {
@@ -348,7 +352,7 @@ namespace Hermes
 
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if (en == NULL)
-                throw Hermes::Exceptions::Exception("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
+                throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
 
               // Trim whitespaces.
               unsigned int begin = edge->marker().find_first_not_of(" \t\n");
@@ -381,7 +385,7 @@ namespace Hermes
 
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if (en == NULL)
-                throw Hermes::Exceptions::Exception("Inner data error (edge %i does not exist)", inner_edge_number_i);
+                throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist)", inner_edge_number_i);
 
               // Trim whitespaces.
               unsigned int begin = edge->marker().find_first_not_of(" \t\n");
@@ -760,10 +764,10 @@ namespace Hermes
               int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
               for(int i = 0; i < dot_position; i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Hermes::Exceptions::Exception("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+                  throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
               for(int i = dot_position + 1; i < x.length(); i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Hermes::Exceptions::Exception("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+                  throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
               x_value = std::strtod(x.c_str(), NULL);
             }
 
@@ -776,10 +780,10 @@ namespace Hermes
                 int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
                 for(int i = 0; i < dot_position; i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::Exception("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
                 for(int i = dot_position + 1; i < y.length(); i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::Exception("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
                 y_value = std::strtod(y.c_str(), NULL);
               }
 
@@ -832,7 +836,7 @@ namespace Hermes
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
-            throw Hermes::Exceptions::Exception("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
+            throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
 
           std::string edge_marker = parsed_xml_mesh->edges().edge().at(edge_i).marker();
 
@@ -941,7 +945,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is, std::map<unsigned int, unsigned int>& element_is, std::map<unsigned int, unsigned int>& edge_is)
+    bool MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is, int* element_is, std::map<unsigned int, unsigned int>& edge_is)
     {
       try
       {
@@ -1005,10 +1009,10 @@ namespace Hermes
               int dot_position = strchr(x.c_str(), '.') == NULL ? -1 : strchr(x.c_str(), '.') - x.c_str();
               for(int i = 0; i < dot_position; i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Hermes::Exceptions::Exception("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+                  throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
               for(int i = dot_position + 1; i < x.length(); i++)
                 if(strncmp(x.c_str() + i, "0", 1) != 0)
-                  throw Hermes::Exceptions::Exception("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
+                  throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the x coordinate of vertex no. %i.", vertex_i + 1);
               x_value = std::strtod(x.c_str(), NULL);
             }
 
@@ -1021,10 +1025,10 @@ namespace Hermes
                 int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
                 for(int i = 0; i < dot_position; i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::Exception("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
                 for(int i = dot_position + 1; i < y.length(); i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::Exception("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
                 y_value = std::strtod(y.c_str(), NULL);
               }
 
@@ -1044,7 +1048,10 @@ namespace Hermes
           XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(element_i);
 
           // insert into the map.
-          element_is.insert(std::pair<unsigned int, unsigned int>(parsed_xml_domain->elements().element().at(element_i).i(), element_i));
+          if(parsed_xml_domain->elements().element().at(element_i).i() > 9999999)
+            throw Exceptions::MeshLoadFailureException("The index 'i' of element in the mesh file must be lower than 10e7.");
+          
+          element_is[parsed_xml_domain->elements().element().at(element_i).i()] = element_i;
 
           // Trim whitespaces.
           unsigned int begin = element->marker().find_first_not_of(" \t\n");
@@ -1083,7 +1090,7 @@ namespace Hermes
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
-            throw Hermes::Exceptions::Exception("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
+            throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
 
           std::string edge_marker = parsed_xml_domain->edges().edge().at(edge_i).marker();
 
@@ -1206,7 +1213,7 @@ namespace Hermes
       if (*en == NULL)
       {
         if(!skip_check)
-          throw Hermes::Exceptions::Exception("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+          throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
         else
           return NULL;
       }
@@ -1260,7 +1267,7 @@ namespace Hermes
       if (*en == NULL)
       {
         if(!skip_check)
-          throw Hermes::Exceptions::Exception("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
+          throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
         else
           return NULL;
       }
@@ -1295,7 +1302,7 @@ namespace Hermes
       nurbs->nk = nurbs->degree + nurbs->np + 1;
       int outer = nurbs->nk - inner;
       if ((outer & 1) == 1)
-        throw Hermes::Exceptions::Exception("Curve #%d: incorrect number of knot points.", id);
+        throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: incorrect number of knot points.", id);
 
       // knot vector is completed by 0.0 on the left and by 1.0 on the right
       nurbs->kv = new double[nurbs->nk];
