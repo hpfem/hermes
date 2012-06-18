@@ -244,12 +244,14 @@ namespace Hermes
 
     FunctionNotOverridenException::FunctionNotOverridenException(const char * msg, ...) : Exception()
     {
+      char * msgOwn = new char[strlen(msg)+1];
+      strcpy(msgOwn, msg);
       char text[1024];
 
       //print the message
       va_list arglist;
-      va_start(arglist, msg);
-      vsprintf(text, msg, arglist);
+      va_start(arglist, msgOwn);
+      vsprintf(text, msgOwn, arglist);
       va_end(arglist);
 
       message = text;
@@ -257,7 +259,6 @@ namespace Hermes
 
     FunctionNotOverridenException::~FunctionNotOverridenException()
     {
-      delete[] message;
     }
 
     FunctionNotOverridenException::FunctionNotOverridenException(const FunctionNotOverridenException&e)
@@ -269,12 +270,14 @@ namespace Hermes
 
     MeshLoadFailureException::MeshLoadFailureException(const char * msg, ...) : Exception()
     {
+      char * msgOwn = new char[strlen(msg)+1];
+      strcpy(msgOwn, msg);
       char text[1024];
 
       //print the message
       va_list arglist;
-      va_start(arglist, msg);
-      vsprintf(text, msg, arglist);
+      va_start(arglist, msgOwn);
+      vsprintf(text, msgOwn, arglist);
       va_end(arglist);
 
       message = text;
@@ -282,7 +285,6 @@ namespace Hermes
 
     MeshLoadFailureException::~MeshLoadFailureException()
     {
-      delete[] message;
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
