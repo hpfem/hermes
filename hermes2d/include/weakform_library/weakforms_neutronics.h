@@ -179,8 +179,6 @@ namespace Hermes
               template <typename NDArrayType>
               static rank0 subtract(rank0 x, rank0 y) {
                 rank0 ret = x - y;
-                if(ret < 0)
-                  warn(NULL, W_NEG_VALUE);
                 return ret;
               }
 
@@ -295,7 +293,7 @@ namespace Hermes
 #undef for_each_element_in_map
             };
 
-            class HERMES_API MaterialPropertyMaps
+            class HERMES_API MaterialPropertyMaps : public Hermes::Mixins::Loggable
             {
             protected:
 

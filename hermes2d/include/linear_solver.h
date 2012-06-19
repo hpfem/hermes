@@ -31,7 +31,7 @@ namespace Hermes
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class LinearSolver
+    class LinearSolver : public Hermes::Mixins::Loggable
     {
     public:
       LinearSolver(DiscreteProblemLinear<Scalar>* dp);

@@ -234,7 +234,7 @@ namespace Hermes
 
       void View::pre_display()
       {
-        //info(NULL, "display: lock");
+        //this->info("display: lock");
         view_sync.enter();
 
         //begin time measuring
@@ -525,7 +525,7 @@ namespace Hermes
 
       void View::wait_for_keypress(const char* text)
       {
-        warn(NULL, "Function View::wait_for_keypress deprecated: use View::wait instead");
+        this->warn("Function View::wait_for_keypress deprecated: use View::wait instead");
         View::wait(HERMES_WAIT_KEYPRESS, text);
       }
 
@@ -696,7 +696,7 @@ namespace Hermes
         if (max < min)
         {
           std::swap(min, max);
-          warn(NULL, "Upper bound set below the lower bound: reversing to (%f, %f).", min, max);
+          this->warn("Upper bound set below the lower bound: reversing to (%f, %f).", min, max);
         }
         view_sync.enter();
         range_min = min;
@@ -848,7 +848,7 @@ namespace Hermes
         glReadPixels(0, 0, output_width, output_height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 #else
         glReadPixels(0, 0, output_width, output_height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); // FIXME!!!
-        warn(NULL, "BGRA format not supported. Saved image will have inverted colors");
+        this->warn("BGRA format not supported. Saved image will have inverted colors");
 #endif
         // opening file for binary writing
         FILE* file = fopen(file_name, "wb");

@@ -270,7 +270,7 @@ namespace Hermes
       if(edata == NULL) throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
       if (id >= esize)
       {
-        warn(NULL, "Element index %d in Space<Scalar>::get_element_order() while maximum is %d.", id, esize);
+        this->warn("Element index %d in Space<Scalar>::get_element_order() while maximum is %d.", id, esize);
         throw Hermes::Exceptions::Exception("Wring element index in Space<Scalar>::get_element_order().");
       }
       return edata[id].order;
@@ -364,7 +364,7 @@ namespace Hermes
       {
         if(e->is_triangle())
         {
-          warn(NULL, "Using quad version of Space<Scalar>::adjust_element_order(), only horizontal orders will be used.");
+          this->warn("Using quad version of Space<Scalar>::adjust_element_order(), only horizontal orders will be used.");
           set_element_order_internal(e->id, std::max<int>(horizontal_min_order, get_element_order(e->id) + horizontal_order_change));
         }
         else

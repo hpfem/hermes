@@ -103,7 +103,7 @@ namespace Hermes
       if(slns.size() != this->num)
         throw Hermes::Exceptions::LengthException(0, slns.size(), this->num);
 
-      Hermes::TimePeriod tmr;
+      this->tick();
 
       for (int i = 0; i < this->num; i++)
       {
@@ -425,8 +425,8 @@ namespace Hermes
         }
       }
 
-      tmr.tick();
-      this->error_time = tmr.accumulated();
+      this->tick();
+      this->error_time = this->accumulated();
 
       // Make the error relative if needed.
       if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)

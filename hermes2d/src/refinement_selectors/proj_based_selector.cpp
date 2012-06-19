@@ -245,7 +245,7 @@ namespace Hermes
         Element* base_element = rsln->get_mesh()->get_element(e->id);
         if(base_element->active)
         {
-          info(NULL, "Have you calculated element errors twice with solutions_for_adaptivity == true?");
+          this->info("Have you calculated element errors twice with solutions_for_adaptivity == true?");
           throw Hermes::Exceptions::Exception("Program is aborting based on a failed assertion in ProjBasedSelector<Scalar>::calc_projection_errors().");
         };
         for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
@@ -290,7 +290,7 @@ namespace Hermes
           warn_uniform_orders = true;
           if (this->cand_list == H2D_H_ISO || this->cand_list == H2D_H_ANISO || this->cand_list == H2D_P_ISO || this->cand_list == H2D_HP_ISO || this->cand_list == H2D_HP_ANISO_H)
           {
-            warn_if(NULL, !info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(this->cand_list));
+            warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(this->cand_list));
           }
         }
           

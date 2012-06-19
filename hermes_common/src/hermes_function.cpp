@@ -14,7 +14,6 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "hermes_function.h"
-#include "hermes_logging.h"
 
 namespace Hermes
 {

@@ -23,7 +23,6 @@
 #ifdef HAVE_AMESOS
 #include "amesos_solver.h"
 #include "callstack.h"
-#include "time_period.h"
 #include <Amesos_ConfigDefs.h>
 
 namespace Hermes
@@ -81,8 +80,6 @@ namespace Hermes
 
       assert(m->size == rhs->size);
 
-      Hermes::TimePeriod tmr;
-
       problem.SetOperator(m->mat);
       problem.SetRHS(rhs->vec);
       Epetra_Vector x(*rhs->std_map);
@@ -90,7 +87,7 @@ namespace Hermes
 
       if (!setup_factorization())
       {
-        warn(NULL, "AmesosSolver: LU factorization could not be completed");
+        this->warn("AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
@@ -101,8 +98,8 @@ namespace Hermes
         return false;
       }
 
-      tmr.tick();
-      this->time = tmr.accumulated();
+      this->tick();
+      this->time = this->accumulated();
 
       delete [] this->sln;
       this->sln = new double[m->size];
@@ -122,13 +119,11 @@ namespace Hermes
 
       assert(m->size == rhs->size);
 
-      Hermes::TimePeriod tmr;
-
       throw Hermes::Exceptions::Exception("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
       if (!setup_factorization())
       {
-        warn(NULL, "AmesosSolver: LU factorization could not be completed");
+        this->warn("AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
@@ -139,8 +134,8 @@ namespace Hermes
         return false;
       }
 
-      tmr.tick();
-      this->time = tmr.accumulated();
+      this->tick();
+      this->time = this->accumulated();
 
       delete [] this->sln;
       this->sln = new std::complex<double>[m->size];
@@ -169,7 +164,7 @@ namespace Hermes
         status = solver->SymbolicFactorization();
         if (status != 0)
         {
-          warn(NULL, "Symbolic factorization failed.");
+          this->warn("Symbolic factorization failed.");
           return false;
         }
 
@@ -178,7 +173,7 @@ namespace Hermes
         status = solver->NumericFactorization();
         if (status != 0)
         {
-          warn(NULL, "Numeric factorization failed.");
+          this->warn("Numeric factorization failed.");
           return false;
         }
       }

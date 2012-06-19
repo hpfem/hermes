@@ -70,12 +70,6 @@ namespace Hermes
       double get_assemble_time() const { return assemble_time; }
       double get_solve_time() const { return solve_time; }
 
-      /// Attach an external timer to which this instance of NewtonSolver will accumulate time spent in it.
-      void attach_timer(TimePeriod *timer) { this->timer = timer; reset_times(); }
-
-      /// Reset times to zero.
-      void reset_times() { setup_time = assemble_time = solve_time = 0.; }
-
     protected:
       /// Jacobian.
       SparseMatrix<Scalar>* jacobian;
@@ -98,9 +92,6 @@ namespace Hermes
       double setup_time;
       double assemble_time;
       double solve_time;
-
-      /// Pointer to an external timer to which this instance of NewtonSolver accumulates time spent in it.
-      TimePeriod *timer;
     };
   }
 }

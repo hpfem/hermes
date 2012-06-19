@@ -217,17 +217,17 @@ namespace Hermes
       // Basic sanity checks.
       if (points.empty() || values.empty())
       {
-        warn(NULL, "Empty points or values vector in CubicSpline, returning false.");
+        this->warn("Empty points or values vector in CubicSpline, returning false.");
         return false;
       }
       if (points.size() < 2 || values.size() < 2)
       {
-        warn(NULL, "At least two points and values required in CubicSpline, returning false.");
+        this->warn("At least two points and values required in CubicSpline, returning false.");
         return false;
       }
       if (points.size() != values.size())
       {
-        warn(NULL, "Mismatched number fo points and values in CubicSpline, returning false.");
+        this->warn("Mismatched number fo points and values in CubicSpline, returning false.");
         return false;
       }
 
@@ -237,7 +237,7 @@ namespace Hermes
       {
         if (points[i + 1] < points[i] + eps)
         {
-          warn(NULL, "Duplicated or improperly ordered points in CubicSpline detected, returning false.");
+          this->warn("Duplicated or improperly ordered points in CubicSpline detected, returning false.");
           return false;
         }
       }

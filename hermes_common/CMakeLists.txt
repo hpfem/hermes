@@ -17,8 +17,7 @@ project(hermes_common)
   # Source files for the Hermes_common library.
   #
   set(SRC
-    src/hermes_logging.cpp
-    src/time_period.cpp
+    src/mixins.cpp
     src/callstack.cpp
     src/matrix.cpp
     src/api.cpp
@@ -46,8 +45,7 @@ project(hermes_common)
   )
 
   set(HEADERS
-    include/hermes_logging.h
-    include/time_period.h
+    include/mixins.h
     include/callstack.h
     include/common.h
     include/matrix.h

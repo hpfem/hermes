@@ -27,7 +27,7 @@ namespace Hermes
     /// Abstract class for mesh readers
     ///
     /// @ingroup mesh_readers
-    class HERMES_API MeshReader
+    class HERMES_API MeshReader : public Hermes::Mixins::Loggable
     {
     public:
       virtual ~MeshReader() { }

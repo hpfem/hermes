@@ -38,7 +38,7 @@ namespace Hermes
     /// HashTable is a base class for Mesh. It serves as a container for all nodes
     /// of a mesh. Moreover, it has node searching functions based on hash tables.
     ///
-    class HERMES_API HashTable
+    class HERMES_API HashTable : public Hermes::Mixins::Loggable
     {
     public:
       /// Retrieves a node by its id number.

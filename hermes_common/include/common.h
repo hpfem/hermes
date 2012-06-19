@@ -140,6 +140,50 @@ namespace Hermes
   inline double pow(double x, double y) { return std::pow(x, y); }
   inline double log(double x) { return std::log(x); }
 
+  
+  /* log file */
+  #undef HERMES_LOG_FILE
+  #ifdef HERMES_REPORT_NO_FILE
+  #  define HERMES_LOG_FILE NULL
+  #else
+  # ifdef HERMES_REPORT_FILE
+  #  define HERMES_LOG_FILE HERMES_REPORT_FILE
+  # else
+  #  ifndef HERMES_TEST
+  #    define HERMES_LOG_FILE "hermes.log" // default filename for a library
+  #  else
+  #    define HERMES_LOG_FILE "test.log" // default filename for a library test
+  #  endif
+  # endif
+  # endif
+
+  /* event codes */
+  #define HERMES_EC_ERROR 'E' ///< An event code: errors. \internal
+  #define HERMES_EC_ASSERT 'X' ///< An event code: asserts. \internal
+  #define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
+  #define HERMES_EC_INFO 'I' ///< An event code: info about results. \internal
+  #define HERMES_EC_VERBOSE 'V' ///< An event code: more details about details. \internal
+  #define HERMES_EC_TRACE 'R' ///< An event code: execution tracing. \internal
+  #define HERMES_EC_TIME 'T' ///< An event code: time measurements. \internal
+  #define HERMES_EC_DEBUG 'D' ///< An event code: general debugging messages. \internal
+  
+  /// A size of a delimiter in a log file. \internal \ingroup g_logging
+  #define HERMES_LOG_FILE_DELIM_SIZE 80
+  #define BUF_SZ 2048
+
+  /* function name */
+  /** \def __CURRENT_FUNCTION
+  *  \brief A platform-dependent string defining a current function. \internal */
+  #ifdef _WIN32 //Win32
+  # ifdef __MINGW32__ //MinGW
+  #   define __CURRENT_FUNCTION __func__
+  # else //MSVC and other compilers
+  #   define __CURRENT_FUNCTION __FUNCTION__
+  # endif
+  #else //Linux and Mac
+  # define __CURRENT_FUNCTION __PRETTY_FUNCTION__
+  #endif
+
   // Represents "any" part of the boundary when deciding where (on which elements) to assemble the form at hand.
   const std::string HERMES_ANY = "-1234";
   // For internal use.

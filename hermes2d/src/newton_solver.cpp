@@ -27,7 +27,7 @@ namespace Hermes
     double NewtonSolver<Scalar>::max_allowed_residual_norm = 1E9;
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), timer(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL)
     {
       init_linear_solver();
     }
@@ -39,8 +39,6 @@ namespace Hermes
       jacobian = create_matrix<Scalar>();
       residual = create_vector<Scalar>();
       linear_solver = create_linear_solver<Scalar>(jacobian, residual);
-      reset_times();
-      this->timer = NULL;
     }
 
     template<typename Scalar>
@@ -79,22 +77,17 @@ namespace Hermes
       double residual_norm;
       int it = 1;
 
-      if (this->timer != NULL)
-      {      
-        this->timer->tick();
-        setup_time += this->timer->last();
-      }
+      this->tick();
+      setup_time += this->last();
 
       while (true)
       {
         // Assemble just the residual vector.
         this->dp->assemble(coeff_vec, residual);
 
-        if (this->timer != NULL)
-        {
-          this->timer->tick();
-          assemble_time += this->timer->last();
-        }
+        this->tick();
+        assemble_time += this->last();
+        
         // Measure the residual norm.
         if (residual_as_function)
         {
@@ -123,13 +116,10 @@ namespace Hermes
         }
 
         // Info for the user.
-        if(it == 1) {
-          if(this->verbose_output)
-            info(this->verbose_callback, "---- Newton initial residual norm: %g", residual_norm);
-        }
+        if(it == 1)
+          info("---- Newton initial residual norm: %g", residual_norm);
         else
-          if(this->verbose_output)
-            info(this->verbose_callback, "---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+          info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
@@ -146,11 +136,8 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          if (this->timer != NULL)
-          {
-            this->timer->tick();
-            solve_time += this->timer->last();
-          }
+          this->tick();
+          solve_time += this->last();
 
           if (delete_coeff_vec) 
           {
@@ -161,18 +148,14 @@ namespace Hermes
           return;
         }
 
-        if (this->timer != NULL)
-        {
-          this->timer->tick();
-          solve_time += this->timer->last();
-        }
+        this->tick();
+        solve_time += this->last();
+        
         // Assemble just the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
-        if (this->timer != NULL)
-        {
-          this->timer->tick();
-          assemble_time += this->timer->last();
-        }
+          
+        this->tick();
+        assemble_time += this->last();
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
@@ -192,11 +175,8 @@ namespace Hermes
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
 
-        if (this->timer != NULL)
-        {
-          this->timer->tick();
-          solve_time += this->timer->last();
-        }
+        this->tick();
+        solve_time += this->last();
       }
     }
 
@@ -252,19 +232,13 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-        {
-          if(this->verbose_output)
-            info(this->verbose_callback, "---- Newton initial residual norm: %g", residual_norm);
-        }
+          info("---- Newton initial residual norm: %g", residual_norm);
         else
-          if(this->verbose_output)
-            info(this->verbose_callback, "---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+          info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
-        {
           throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
-        }
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
@@ -329,7 +303,7 @@ namespace Hermes
 #ifdef HAVE_AZTECOO
       dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(iterative_method_name);
 #else
-      warn(this->verbose_callback, "Trying to set iterative method without AztecOO present.");
+      this->warn("Trying to set iterative method without AztecOO present.");
 #endif
     }
 
@@ -341,7 +315,7 @@ namespace Hermes
 #ifdef HAVE_AZTECOO
       dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(preconditioner_name);
 #else
-      warn(this->verbose_callback, "Trying to set iterative method without AztecOO present.");
+      this->warn("Trying to set iterative method without AztecOO present.");
 #endif
     }
 

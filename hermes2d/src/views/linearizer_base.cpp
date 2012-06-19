@@ -143,7 +143,7 @@ namespace Hermes
       void LinearizerBase::set_max_absolute_value(double max_abs)
       {
         if(max_abs < 0.0)
-          warn(NULL, "Setting of maximum absolute value in Linearizer with a negative value");
+          this->warn("Setting of maximum absolute value in Linearizer with a negative value");
         else
         {
           this->auto_max = false;

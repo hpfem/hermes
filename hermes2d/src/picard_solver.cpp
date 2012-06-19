@@ -25,18 +25,17 @@ namespace Hermes
   {
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter)
-        : NonlinearSolver<Scalar>(dp)
+        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false)
     {
       int n = slns_prev_iter.size();
       if(dp->get_spaces().size() != n)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
-      verbose_output_inner_newton = false;
     }
 
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
-        : NonlinearSolver<Scalar>(dp)
+        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false)
     {
       int n = slns_prev_iter.size();
       if(dp->get_spaces().size() != n)
@@ -45,13 +44,12 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
-      verbose_output_inner_newton = false;
     }
     
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_verbose_output_inner_newton(bool to_set)
+    void PicardSolver<Scalar>::set_verbose_output_linear_solver(bool to_set)
     {
-      this->verbose_output_inner_newton = to_set;
+      this->verbose_output_linear_solver = to_set;
     }
 
     template<typename Scalar>
@@ -149,6 +147,9 @@ namespace Hermes
         add_dir_lift.push_back(false);
       LinearSolver<Scalar> linear_solver(static_cast<DiscreteProblemLinear<Scalar>*>(this->dp));
 
+      linear_solver.set_verbose_output(this->verbose_output_linear_solver);
+      linear_solver.set_verbose_callback(this->get_verbose_callback());
+
       // Delete solution vector if there is any.
       if(this->sln_vector != NULL)
       {
@@ -158,9 +159,11 @@ namespace Hermes
 
       // Project slns_prev_iter on the FE space(s) to obtain initial
       // coefficient vector for the Picard's method.
-      info(this->verbose_callback, "Projecting to obtain initial vector for the Picard's method.");
+      info("Projecting to obtain initial vector for the Picard's method.");
       this->sln_vector = new Scalar[ndof];
-      OGProjection<Scalar>::project_global(spaces, this->slns_prev_iter, this->sln_vector);
+
+      OGProjection<Scalar> ogProjection;
+      ogProjection.project_global(spaces, this->slns_prev_iter, this->sln_vector);
 
       // Save the coefficient vector, it will be used to calculate increment error
       // after a new coefficient vector is calculated.
@@ -195,8 +198,7 @@ namespace Hermes
         double rel_error = abs_error / last_iter_vec_norm;
 
         // Output for the user.
-        if (this->verbose_output)
-          info(this->verbose_callback, "---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
+        info("---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
 
         // Stopping because error is sufficiently low.
         if (rel_error < tol)
@@ -209,8 +211,7 @@ namespace Hermes
         // Stopping because maximum number of iterations reached.
         if (it >= max_iter)
         {
-          if (this->verbose_output)
-            info(this->verbose_callback, "Maximum allowed number of Picard iterations exceeded, returning false.");
+          info("Maximum allowed number of Picard iterations exceeded, returning false.");
           delete [] last_iter_vector;
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
           return false;

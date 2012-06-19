@@ -26,10 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    int OGProjectionNOX<Scalar>::ndof = 0;
-
-    template<typename Scalar>
-    OGProjectionNOX<Scalar>::OGProjectionNOX()
+    OGProjectionNOX<Scalar>::OGProjectionNOX() : ndof(0)
     {
     }
 

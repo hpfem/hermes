@@ -96,7 +96,7 @@ namespace Hermes
     ///
 
     template<typename Scalar>
-    class HERMES_API Space
+    class HERMES_API Space : public Hermes::Mixins::Loggable
     {
     public:
       Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init);

@@ -417,7 +417,7 @@ namespace Hermes
         min_tau = initial_tau / 50;
         max_mag = vec->get_max_value();
 
-        Hermes::TimePeriod cpu_time;
+        this->tick();
         root = new Node;
         build_tree();
 
@@ -445,7 +445,7 @@ namespace Hermes
       {
         if (root == NULL)
           throw Hermes::Exceptions::Exception("Function add_streamline must be called after StreamView::show().");
-        Hermes::TimePeriod cpu_time;
+        this->tick();
         streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
         streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
         streamlength[num_stream] = create_streamline(x, y, num_stream);
@@ -596,7 +596,7 @@ namespace Hermes
         // adding streamline (initial point set at (x, y))
         if (!scale_focused && glutGetModifiers() == GLUT_ACTIVE_CTRL)
         {
-          Hermes::TimePeriod cpu_time;
+          this->tick();
           streamlines = (double2**) realloc(streamlines, sizeof(double2*) * (num_stream + 1));
           streamlength = (int*) realloc(streamlength, sizeof(int) * (num_stream + 1));
           streamlength[num_stream] = create_streamline(untransform_x(x), untransform_y(y), num_stream);

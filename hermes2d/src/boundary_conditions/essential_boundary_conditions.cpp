@@ -70,7 +70,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar DefaultEssentialBCConst<Scalar>::value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
     {
-      warn(NULL, "EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
+      this->warn("EssentialBoundaryCondition::Function used either for a constant condition, or not redefined for nonconstant condition.");
       return 0.0;
     }
 

@@ -197,6 +197,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      void check_status(const char *fn_name, int status);
     };
 
     /// \brief UMFPack matrix iterator. \todo document members
@@ -210,7 +211,6 @@ namespace Hermes
       bool move_to_position(int i, int j);
       bool move_ptr();
       void add_to_current_position(Scalar val);
-
     protected:
       int size;
       int nnz;

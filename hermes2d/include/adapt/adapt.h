@@ -54,7 +54,7 @@ namespace Hermes
     *  and it acts as a container for the calculated errors.
     */
     template<typename Scalar>
-    class HERMES_API Adapt
+    class HERMES_API Adapt : public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::Loggable
     {
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,

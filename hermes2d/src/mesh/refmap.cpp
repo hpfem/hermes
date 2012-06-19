@@ -493,7 +493,7 @@ namespace Hermes
       }
       if (o >= 10)
       {
-        warn(NULL, "Element #%d is too distorted (iro ~ %d).", element->id, o);
+        this->warn("Element #%d is too distorted (iro ~ %d).", element->id, o);
       }
       return o;
     }
@@ -597,7 +597,7 @@ namespace Hermes
           xi2 = xi2_old - (m[0][1] * (vx - x) + m[1][1] * (vy - y));
           if (fabs(xi1 - xi1_old) < TOL && fabs(xi2 - xi2_old) < TOL) return;
           if (it > 1 && (xi1 > 1.5 || xi2 > 1.5 || xi1 < -1.5 || xi2 < -1.5)) return;
-          if (it > 100) { warn(NULL, "Could not find reference coordinates - Newton method did not converge."); return; }
+          if (it > 100) { this->warn("Could not find reference coordinates - Newton method did not converge."); return; }
           xi1_old = xi1;
           xi2_old = xi2;
           it++;

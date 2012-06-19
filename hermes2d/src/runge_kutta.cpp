@@ -261,11 +261,11 @@ namespace Hermes
         if (it == 1)
         {
           if(verbose)
-            info(NULL, "---- Newton initial residual norm: %g", residual_norm);
+            this->info("---- Newton initial residual norm: %g", residual_norm);
         }
         else
           if(verbose)
-            info(NULL, "---- Newton iter %d, residual norm: %g", it-1, residual_norm);
+            this->info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > newton_max_allowed_residual_norm)
@@ -319,14 +319,26 @@ namespace Hermes
       //         spaces are the same (if spatial adaptivity is not used).
       Scalar* coeff_vec = new Scalar[ndof];
       if (do_global_projections)
-        OGProjection<Scalar>::project_global(spaces, slns_time_prev, coeff_vec);
-      else 
-        LocalProjection<Scalar>::project_local(spaces, slns_time_prev, coeff_vec);
+      {
+        OGProjection<Scalar> ogProjection;
+        ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
+      }
+      else
+      {
+        LocalProjection<Scalar> ogProjection;
+        ogProjection.project_local(spaces, slns_time_prev, coeff_vec);
+      }
 
       if (do_global_projections)
-        OGProjection<Scalar>::project_global(spaces, slns_time_prev, coeff_vec);
-      else 
-        LocalProjection<Scalar>::project_local(spaces, slns_time_prev, coeff_vec);
+      {
+        OGProjection<Scalar> ogProjection;
+        ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
+      }
+      else
+      {
+        LocalProjection<Scalar> ogProjection;
+        ogProjection.project_local(spaces, slns_time_prev, coeff_vec);
+      }
 
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)

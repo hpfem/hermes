@@ -69,7 +69,7 @@ namespace Hermes
     //     (he has them online), and possibly in his book.
 
     template<typename Scalar>
-    class HERMES_API RungeKutta
+    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable
     {
 
     public:

@@ -20,7 +20,6 @@
 \brief General nonlinear solver functionality.
 */
 #include "nonlinear_solver.h"
-#include "hermes_logging.h"
 #include "api.h"
 
 using namespace Hermes::Algebra;
@@ -30,7 +29,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : dp(dp), sln_vector(NULL), time(-1.0), verbose_output(true), verbose_callback(NULL)
+    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Hermes::Mixins::Loggable(true, NULL), dp(dp), sln_vector(NULL), time(-1.0)
     {
     }
 
@@ -61,23 +60,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NonlinearSolver<Scalar>::set_verbose_output(bool to_set)
-    {
-      this->verbose_output = to_set;
-    }
-
-    template<typename Scalar>
-    void NonlinearSolver<Scalar>::set_verbose_callback(void (*callback)(const char*))
-    {
-      this->verbose_callback = callback;
-    }
-
-    template<typename Scalar>
     void NonlinearSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
     {
       if(Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType) != SOLVER_AZTECOO)
       {
-        warn(this->verbose_callback, "Trying to set iterative method for a different solver than AztecOO.");
+        this->warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
       }
       else
@@ -91,7 +78,7 @@ namespace Hermes
     {
       if(Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType) != SOLVER_AZTECOO)
       {
-        warn(this->verbose_callback, "Trying to set iterative method for a different solver than AztecOO.");
+        this->warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
       }
       else

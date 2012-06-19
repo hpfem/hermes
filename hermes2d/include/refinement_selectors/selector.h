@@ -73,7 +73,8 @@ namespace Hermes
       *  - selecting a refinement based on a reference soution,
       *  - updating orders of a mesh shared among components. */
       template<typename Scalar>
-      class HERMES_API Selector {
+      class HERMES_API Selector : public Hermes::Mixins::Loggable
+      {
       protected:
         const int max_order; ///< A maximum allowed order.
         /// Constructor

@@ -40,7 +40,7 @@ namespace Hermes
       PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
       
       /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
-      void set_verbose_output_inner_newton(bool verbose_output_to_set);
+      void set_verbose_output_linear_solver(bool verbose_output_to_set);
 
       /// Solve with default tolerances.
       virtual bool solve();
@@ -50,7 +50,7 @@ namespace Hermes
       bool solve(double tol, int max_iter, int num_last_vectors_used = 3, double anderson_beta = 1.0);
     private:
       Hermes::vector<Solution<Scalar>* > slns_prev_iter;
-      bool verbose_output_inner_newton;
+      bool verbose_output_linear_solver;
     };
   }
 }

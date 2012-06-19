@@ -674,7 +674,7 @@ namespace Hermes
       void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
       {
         lock_data();
-        Hermes::TimePeriod time_period;
+        this->tick();
 
         // Initialization of 'global' stuff.
         this->sln = sln;

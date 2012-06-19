@@ -25,6 +25,7 @@
 #include "common.h"
 #include "vector.h"
 #include "exceptions.h"
+#include "mixins.h"
 
 namespace Hermes
 {
@@ -278,7 +279,7 @@ namespace Hermes
 
     /// \brief General (abstract) matrix representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Matrix
+    class HERMES_API Matrix : public Hermes::Mixins::Loggable
     {
     public:
       /// get size of matrix
@@ -479,7 +480,8 @@ namespace Hermes
 
     /// \brief General (abstract) vector representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Vector {
+    class HERMES_API Vector : public Hermes::Mixins::Loggable
+    {
     public:
       virtual ~Vector() { }
 

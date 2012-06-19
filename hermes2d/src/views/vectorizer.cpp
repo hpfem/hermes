@@ -363,7 +363,7 @@ namespace Hermes
         if (xsln == NULL || ysln == NULL) throw Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
 
         lock_data();
-        Hermes::TimePeriod cpu_time;
+        this->tick();
 
         // initialization
         this->xitem = xitem_orig;

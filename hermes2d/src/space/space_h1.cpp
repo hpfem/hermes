@@ -176,7 +176,7 @@ namespace Hermes
                 this->next_dof += this->stride;
                 //double x = vn->x;
                 //double y = vn->y;
-                //info(NULL, "Assigning dof %d to vertex %g %g\n", nd->dof, x, y);
+                //this->info("Assigning dof %d to vertex %g %g\n", nd->dof, x, y);
               }
               nd->n = 1;
             }

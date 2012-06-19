@@ -70,7 +70,7 @@ namespace Hermes
             Node* vn = e->vn[j];
             double x = e->vn[j]->x;
             double y = e->vn[j]->y;
-            //info(NULL, "Probing vertex %g %g\n", x, y);
+            //this->info("Probing vertex %g %g\n", x, y);
             typename Space<Scalar>::NodeData* nd = space->ndata + vn->id;
             if (!vn->is_constrained_vertex() && nd->dof >= 0)
             {

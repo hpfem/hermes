@@ -56,7 +56,7 @@ namespace Hermes
     /// function values on elements. These classes (PrecalcShapeset, Solution, RefMap) inherit
     /// from Transformable the ability to transform integration points to the sub-elements
     /// of an element.
-    class HERMES_API Transformable
+    class HERMES_API Transformable : public Hermes::Mixins::Loggable
     {
     public:
       /// \return The element associated with the function being represented by the class.

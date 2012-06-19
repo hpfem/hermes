@@ -23,10 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    int OGProjection<Scalar>::ndof = 0;
-
-    template<typename Scalar>
-    OGProjection<Scalar>::OGProjection()
+    OGProjection<Scalar>::OGProjection() : ndof(0)
     {
     }
 
@@ -51,7 +48,8 @@ namespace Hermes
 
       // Initialize Newton solver.
       NewtonSolver<Scalar> newton(&dp);
-      newton.set_verbose_output(false);
+      newton.set_verbose_output(this->get_verbose_output());
+      newton.set_verbose_callback(this->get_verbose_callback());
 
       // Perform Newton iteration.
       try

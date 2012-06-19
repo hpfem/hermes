@@ -245,7 +245,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Only off-diagonal forms can be antisymmetric.");
       if (mfvol.size() > 100)
       {
-        warn(NULL, "Large number of forms (> 100). Is this the intent?");
+        this->warn("Large number of forms (> 100). Is this the intent?");
       }
 
       form->set_weakform(this);

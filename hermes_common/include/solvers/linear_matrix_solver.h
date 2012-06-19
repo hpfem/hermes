@@ -25,7 +25,7 @@
 #include "precond.h"
 #include "dp_interface.h"
 #include "exceptions.h"
-#include "hermes_logging.h"
+#include "mixins.h"
 
 using namespace Hermes::Algebra;
 
@@ -94,7 +94,7 @@ namespace Hermes
     ///\todo Adjust interface to support faster update of matrix and rhs
     ///
     template <typename Scalar>
-    class LinearMatrixSolver
+    class LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
     {
     public:
       LinearMatrixSolver();

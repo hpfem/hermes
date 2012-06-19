@@ -130,7 +130,7 @@ namespace Hermes
 
       fclose(f);
 
-      info(NULL, "Graph saved to file '%s'.", filename);
+      this->info("Graph saved to file '%s'.", filename);
     }
 
     void MatlabGraph::save(const char* filename)
@@ -190,7 +190,7 @@ namespace Hermes
 
       fclose(f);
 
-      info(NULL, "Graph saved. Run the file '%s' in Matlab.", filename);
+      this->info("Graph saved. Run the file '%s' in Matlab.", filename);
     }
 
     static void get_style_types(std::string line, std::string mark, std::string col, int& lt, int& pt, int& ct)
@@ -311,7 +311,7 @@ namespace Hermes
       fprintf(f, "set terminal x11\n");
       fclose(f);
 
-      info(NULL, "Graph saved. Process the file '%s' with gnuplot.", filename);
+      this->info("Graph saved. Process the file '%s' with gnuplot.", filename);
     }
 
     PNGGraph::PNGGraph( const char* title, const char* x_axis_name, const char* y_axis_name, const double lines_width,

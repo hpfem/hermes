@@ -58,7 +58,7 @@ namespace Hermes
       {
         int ierr = PetscFinalize();
         CHKERRQ(ierr);
-        info(NULL, "PETSc finalized. No more PETSc usage allowed until application restart.");
+        this->info("PETSc finalized. No more PETSc usage allowed until application restart.");
       }
     }
 
@@ -495,7 +495,7 @@ namespace Hermes
       KSP ksp;
       Vec x;
 
-      Hermes::TimePeriod tmr;
+      this->tick();
 
       KSPCreate(PETSC_COMM_WORLD, &ksp);
 
@@ -506,8 +506,8 @@ namespace Hermes
       ec = KSPSolve(ksp, rhs->vec, x);
       if (ec) return false;
 
-      tmr.tick();
-      this->time = tmr.accumulated();
+      this->tick();
+      this->time = this->accumulated();
 
       // allocate memory for solution vector
       delete [] this->sln;

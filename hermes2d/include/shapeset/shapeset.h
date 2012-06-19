@@ -82,7 +82,7 @@ namespace Hermes
     ///
     /// Shape functions are always Real-valued.
     ///
-    class HERMES_API Shapeset
+    class HERMES_API Shapeset : public Hermes::Mixins::Loggable
     {
     public:
       ~Shapeset();

@@ -29,7 +29,7 @@ namespace Hermes
     ///  Please note that this is a base class that cannot be instantiated.
     ///  Use MatlabGraph, GnuplotGraph or SimpleGraph instead.
     ///
-    class HERMES_API Graph
+    class HERMES_API Graph : public Hermes::Mixins::Loggable
     {
     public:
 

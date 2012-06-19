@@ -19,6 +19,7 @@
 #include "compat.h"
 #include "ord.h"
 #include "exceptions.h"
+#include "mixins.h"
 
 namespace Hermes
 {
@@ -29,7 +30,7 @@ namespace Hermes
   
   /// Generic class for functions of one variable.
   template<typename Scalar>
-  class HERMES_API Hermes1DFunction
+  class HERMES_API Hermes1DFunction : public Hermes::Mixins::Loggable
   {
   public:
     /// Constructor.
@@ -63,7 +64,7 @@ namespace Hermes
 
   /// Generic class for functions of two variables.
   template<typename Scalar>
-  class HERMES_API Hermes2DFunction
+  class HERMES_API Hermes2DFunction : public Hermes::Mixins::Loggable
   {
   public:
     /// Constructor.
@@ -97,7 +98,7 @@ namespace Hermes
 
   /// Generic class for functions of two variables.
   template<typename Scalar>
-  class HERMES_API Hermes3DFunction
+  class HERMES_API Hermes3DFunction : public Hermes::Mixins::Loggable
   {
   public:
     /// Constructor.

@@ -23,7 +23,6 @@
 #ifdef HAVE_AZTECOO
 #include "aztecoo_solver.h"
 #include "callstack.h"
-#include "time_period.h"
 #include <Komplex_LinearProblem.h>
 
 namespace Hermes
@@ -121,8 +120,6 @@ namespace Hermes
       assert(rhs != NULL);
       assert(m->size == rhs->size);
 
-      Hermes::TimePeriod tmr;
-
       // no output
       aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
 
@@ -142,8 +139,8 @@ namespace Hermes
       // solve it
       aztec.Iterate(this->max_iters, this->tolerance);
 
-      tmr.tick();
-      this->time = tmr.accumulated();
+      this->tick();
+      this->time = this->accumulated();
 
       delete [] this->sln;
       this->sln = new double[m->size];
@@ -160,8 +157,6 @@ namespace Hermes
       assert(m != NULL);
       assert(rhs != NULL);
       assert(m->size == rhs->size);
-
-      Hermes::TimePeriod tmr;
 
       // no output
       aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary

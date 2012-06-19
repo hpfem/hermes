@@ -72,7 +72,7 @@ namespace Hermes
 
       /// Base class for Linearizer, Orderizer, Vectorizer.
 
-      class HERMES_API LinearizerBase
+      class HERMES_API LinearizerBase : public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::Loggable
       {
       public:
         void set_max_absolute_value(double max_abs);

@@ -25,7 +25,6 @@
 #include "traverse.h"
 #include "refinement_selectors/selector.h"
 #include "matrix.h"
-#include "time_period.h"
 
 namespace Hermes
 {
@@ -285,7 +284,7 @@ namespace Hermes
 
       if (ids.empty())
       {
-        warn(NULL, "None of the elements selected for refinement was refined. Adaptivity step successful, returning 'true'.");
+        this->warn("None of the elements selected for refinement was refined. Adaptivity step successful, returning 'true'.");
         return true;
       }
 
@@ -392,7 +391,7 @@ namespace Hermes
         if (regularize == 0)
         {
           regularize = 1;
-          warn(NULL, "Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
+          this->warn("Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
         }
         for (int i = 0; i < this->num; i++)
         {
