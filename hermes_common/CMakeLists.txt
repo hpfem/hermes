@@ -43,8 +43,6 @@ project(hermes_common)
     src/solvers/umfpack_solver.cpp
     src/solvers/precond_ml.cpp
     src/solvers/precond_ifpack.cpp
-    # src/solvers/eigensolver.cpp
-    # src/solvers/eigen.cpp
   )
 
   set(HEADERS
