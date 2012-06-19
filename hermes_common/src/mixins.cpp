@@ -131,15 +131,9 @@ namespace Hermes
       bool console_bold = false;
       switch(code)
       {
-        case HERMES_EC_ERROR:
-        case HERMES_EC_ASSERT: console_attrs |= console_attr_red; break;
         case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
         case HERMES_EC_INFO: console_bold = true;
-        case HERMES_EC_VERBOSE: console_attrs |= console_attr_red | console_attr_green | console_attr_blue; break;
-        case HERMES_EC_TRACE: console_attrs |= console_attr_blue; break;
-        case HERMES_EC_TIME: console_attrs |= console_attr_green | console_attr_blue; break;
-        case HERMES_EC_DEBUG: console_attrs |= console_attr_red | console_attr_blue; break;
-        default: printf("Unknown error code: '%c'", code); exit(-1);
+        default: throw Hermes::Exceptions::Exception("Unknown error code: '%c'", code);
       }
 
       //set new console settings
@@ -165,22 +159,15 @@ namespace Hermes
       bool console_bold = false;
       switch(code)
       {
-      case HERMES_EC_ERROR:
-      case HERMES_EC_ASSERT: console_attrs |= FOREGROUND_RED; break;
       case HERMES_EC_WARNING: console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN; break;
       case HERMES_EC_INFO: console_bold = true;
-      case HERMES_EC_VERBOSE: console_attrs |= FOREGROUND_BLUE; break;
-      case HERMES_EC_TRACE: console_attrs |= FOREGROUND_BLUE; break;
-      case HERMES_EC_TIME: console_attrs |= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-      case HERMES_EC_DEBUG: console_attrs |= FOREGROUND_RED | FOREGROUND_BLUE; break;
-      default: printf("Unknown error code: '%c'", code); exit(-1);
+      default: throw Hermes::Exceptions::Exception("Unknown error code: '%c'", code);
       }
+
       printf("\033[%dm", console_attrs + 30);
 
       //emphasize and console bold
-      if (emphasize)
-        printf("\033[7m");
-      else if (console_bold)
+      if (console_bold)
         printf("\033[1m");
 
       //print text and reset settings

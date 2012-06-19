@@ -158,14 +158,8 @@ namespace Hermes
   # endif
 
   /* event codes */
-  #define HERMES_EC_ERROR 'E' ///< An event code: errors. \internal
-  #define HERMES_EC_ASSERT 'X' ///< An event code: asserts. \internal
   #define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
   #define HERMES_EC_INFO 'I' ///< An event code: info about results. \internal
-  #define HERMES_EC_VERBOSE 'V' ///< An event code: more details about details. \internal
-  #define HERMES_EC_TRACE 'R' ///< An event code: execution tracing. \internal
-  #define HERMES_EC_TIME 'T' ///< An event code: time measurements. \internal
-  #define HERMES_EC_DEBUG 'D' ///< An event code: general debugging messages. \internal
   
   /// A size of a delimiter in a log file. \internal \ingroup g_logging
   #define HERMES_LOG_FILE_DELIM_SIZE 80

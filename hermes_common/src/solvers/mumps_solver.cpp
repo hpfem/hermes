@@ -240,14 +240,14 @@ namespace Hermes
 
       case DF_HERMES_BIN:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
+          this->hermes_fwrite("HERMESX\001", 1, 8, file);
           int ssize = sizeof(Scalar);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
+          this->hermes_fwrite(&ssize, sizeof(int), 1, file);
+          this->hermes_fwrite(&this->size, sizeof(int), 1, file);
+          this->hermes_fwrite(&nnz, sizeof(int), 1, file);
+          this->hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          this->hermes_fwrite(Ai, sizeof(int), nnz, file);
+          this->hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
           return true;
         }
 
@@ -544,11 +544,11 @@ namespace Hermes
 
       case DF_HERMES_BIN:
         {
-          hermes_fwrite("HERMESR\001", 1, 8, file);
+          this->hermes_fwrite("HERMESR\001", 1, 8, file);
           int ssize = sizeof(Scalar);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(v, sizeof(Scalar), this->size, file);
+          this->hermes_fwrite(&ssize, sizeof(int), 1, file);
+          this->hermes_fwrite(&this->size, sizeof(int), 1, file);
+          this->hermes_fwrite(v, sizeof(Scalar), this->size, file);
           return true;
         }
 
