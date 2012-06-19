@@ -117,9 +117,9 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          info("---- Newton initial residual norm: %g", residual_norm);
+          this->info("---- Newton initial residual norm: %g", residual_norm);
         else
-          info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+          this->info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)
@@ -232,9 +232,9 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          info("---- Newton initial residual norm: %g", residual_norm);
+          this->info("---- Newton initial residual norm: %g", residual_norm);
         else
-          info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+          this->info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if (residual_norm > max_allowed_residual_norm)

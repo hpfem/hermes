@@ -159,7 +159,7 @@ namespace Hermes
 
       // Project slns_prev_iter on the FE space(s) to obtain initial
       // coefficient vector for the Picard's method.
-      info("Projecting to obtain initial vector for the Picard's method.");
+      this->info("Projecting to obtain initial vector for the Picard's method.");
       this->sln_vector = new Scalar[ndof];
 
       OGProjection<Scalar> ogProjection;
@@ -198,7 +198,7 @@ namespace Hermes
         double rel_error = abs_error / last_iter_vec_norm;
 
         // Output for the user.
-        info("---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
+        this->info("---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
 
         // Stopping because error is sufficiently low.
         if (rel_error < tol)
@@ -211,7 +211,7 @@ namespace Hermes
         // Stopping because maximum number of iterations reached.
         if (it >= max_iter)
         {
-          info("Maximum allowed number of Picard iterations exceeded, returning false.");
+          this->info("Maximum allowed number of Picard iterations exceeded, returning false.");
           delete [] last_iter_vector;
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
           return false;
