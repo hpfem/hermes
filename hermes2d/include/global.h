@@ -31,6 +31,8 @@
 
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
 
+#define H2D_MAX_NODE_ID 10000000
+
 #define HERMES_ONE NULL
 #define HERMES_DEFAULT_FUNCTION NULL
 #define HERMES_DEFAULT_SPLINE NULL

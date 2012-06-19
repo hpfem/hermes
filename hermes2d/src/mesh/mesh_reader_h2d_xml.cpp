@@ -146,12 +146,17 @@ namespace Hermes
       {
         std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename));
 
-        std::map<unsigned int, unsigned int> vertex_is;
-        int* element_is = new int[10000000];
-        for(int i = 0; i < 10000000; i++)
+        int* vertex_is = new int[H2D_MAX_NODE_ID];
+        for(int i = 0; i < H2D_MAX_NODE_ID; i++)
+          vertex_is[i] = -1;
+
+        int* element_is = new int[H2D_MAX_NODE_ID];
+        for(int i = 0; i < H2D_MAX_NODE_ID; i++)
           element_is[i] = -1;
 
-        std::map<unsigned int, unsigned int> edge_is;
+        int* edge_is = new int[H2D_MAX_NODE_ID];
+        for(int i = 0; i < H2D_MAX_NODE_ID; i++)
+          edge_is[i] = -1;
 
         if(!load(parsed_xml_domain, &global_mesh, vertex_is, element_is, edge_is))
           return false;
@@ -200,9 +205,9 @@ namespace Hermes
             {
               unsigned int vertex_number;
               if(vertex_number_count == parsed_xml_domain->vertices().vertex().size())
-                vertex_number = vertex_is.find(vertex_numbers_i)->second;
+                vertex_number = vertex_is[vertex_numbers_i];
               else
-                vertex_number = vertex_is.find(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().at(vertex_numbers_i))->second;
+                vertex_number =  vertex_is[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().at(vertex_numbers_i)];
 
               vertex_vertex_numbers.insert(std::pair<unsigned int, unsigned int>(vertex_number, vertex_numbers_i));
               Node* node = meshes[subdomains_i]->nodes.add();
@@ -342,7 +347,7 @@ namespace Hermes
                 }
                 else
                 {
-                  if(parsed_xml_domain->edges().edge().at(to_find_i).i() == edge_is.find(boundary_edge_number_i)->second)
+                  if(parsed_xml_domain->edges().edge().at(to_find_i).i() == edge_is[boundary_edge_number_i])
                   {
                     edge = &parsed_xml_domain->edges().edge().at(to_find_i);
                     break;
@@ -945,7 +950,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is, int* element_is, std::map<unsigned int, unsigned int>& edge_is)
+    bool MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, int* vertex_is, int* element_is, int* edge_is)
     {
       try
       {
@@ -978,9 +983,12 @@ namespace Hermes
           // variables matching.
           std::string x = parsed_xml_domain->vertices().vertex().at(vertex_i).x();
           std::string y = parsed_xml_domain->vertices().vertex().at(vertex_i).y();
+          
+          if(parsed_xml_domain->vertices().vertex().at(vertex_i).i() > H2D_MAX_NODE_ID - 1)
+            throw Exceptions::MeshLoadFailureException("The index 'i' of vertex in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
 
-          // insert into the map.
-          vertex_is.insert(std::pair<unsigned int, unsigned int>(parsed_xml_domain->vertices().vertex().at(vertex_i).i(), vertex_i));
+          // insert
+          vertex_is[parsed_xml_domain->vertices().vertex().at(vertex_i).i()] = vertex_i;
 
           double x_value;
           double y_value;
@@ -1047,9 +1055,9 @@ namespace Hermes
         {
           XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(element_i);
 
-          // insert into the map.
-          if(parsed_xml_domain->elements().element().at(element_i).i() > 9999999)
-            throw Exceptions::MeshLoadFailureException("The index 'i' of element in the mesh file must be lower than 10e7.");
+          // insert.
+          if(parsed_xml_domain->elements().element().at(element_i).i() > H2D_MAX_NODE_ID - 1)
+            throw Exceptions::MeshLoadFailureException("The index 'i' of element in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
           
           element_is[parsed_xml_domain->elements().element().at(element_i).i()] = element_i;
 
@@ -1085,8 +1093,11 @@ namespace Hermes
           int v1 = parsed_xml_domain->edges().edge().at(edge_i).v1();
           int v2 = parsed_xml_domain->edges().edge().at(edge_i).v2();
 
-          // insert into the map.
-          edge_is.insert(std::pair<unsigned int, unsigned int>(edge_i, parsed_xml_domain->edges().edge().at(edge_i).i()));
+          // insert
+          if(parsed_xml_domain->edges().edge().at(edge_i).i() > H2D_MAX_NODE_ID - 1)
+            throw Exceptions::MeshLoadFailureException("The index 'i' of edge in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
+
+          edge_is[edge_i] = parsed_xml_domain->edges().edge().at(edge_i).i();
 
           en = mesh->peek_edge_node(v1, v2);
           if (en == NULL)
