@@ -508,6 +508,13 @@ namespace Hermes
             meshes[subdomains_i]->seq = g_mesh_seq++;
           }
         }
+
+        delete [] vertex_is;
+
+        delete [] element_is;
+
+        delete [] edge_is;
+
         return true;
       }
       catch (const xml_schema::exception& e)
