@@ -79,10 +79,6 @@ int main(int argc, char* args[])
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
 
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Display the mesh.
   OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
   oview.show(&space);
@@ -101,14 +97,12 @@ int main(int argc, char* args[])
   int as = 1; bool done = false;
   do
   {
-    info(NULL, "---- Adaptivity step %d:", as);
-
+    
     // Construct globally refined reference mesh
     // and setup reference space.
     Space<double>* ref_space = Space<double>::construct_refined_space(&space);
 
-    info(NULL, "Solving on reference mesh.");
-
+    
     // Initialize the FE problem.
     DiscreteProblem<double>* dp = new DiscreteProblem<double>(&wf, ref_space);
     
@@ -118,53 +112,35 @@ int main(int argc, char* args[])
     LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix, rhs);
 
     // Assemble the linear problem.
-    info(NULL, "Assembling (ndof: %d).", Space<double>::get_num_dofs(ref_space));
     dp->assemble(matrix, rhs);
 
     // Solve the linear system. If successful, obtain the solution.
-    info(NULL, "Solving.");
     if(solver->solve())
       Solution<double>::vector_to_solution(solver->get_sln_vector(), ref_space, &ref_sln);
     else 
       throw Hermes::Exceptions::Exception("Matrix solver failed.\n");
     
     // Project the fine mesh solution onto the coarse mesh.
-    info(NULL, "Projecting reference solution on coarse mesh.");
-    OGProjection<double>::project_global(&space, &ref_sln, &sln, HERMES_L2_NORM);  
-
-    // Time measurement.
-    cpu_time.tick();
+    OGProjection<double> ogProjection;
+    ogProjection.project_global(&space, &ref_sln, &sln, HERMES_L2_NORM);  
 
     // View the coarse mesh solution.
     view1.show(&sln);
     oview.show(&space);
     bview.show(&space);
-    // Skip visualization time.
-    cpu_time.tick(HERMES_SKIP);
 
     // Calculate element errors and total error estimate.
-    info(NULL, "Calculating error estimate."); 
     Adapt<double>* adaptivity = new Adapt<double>(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
  
-    // Report results.
-    info(NULL, "ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", 
-         Space<double>::get_num_dofs(&space), Space<double>::get_num_dofs(ref_space), err_est_rel);
-
-    // Time measurement.
-    cpu_time.tick();
-
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space<double>::get_num_dofs(&space), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel);
-    graph_cpu_est.save("conv_cpu_est.dat");
 
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else 
     {
-      info(NULL, "Adapting the coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       if (Space<double>::get_num_dofs(&space) >= NDOF_STOP) 
@@ -188,8 +164,6 @@ int main(int argc, char* args[])
   }
   while (done == false);
 
-  info(NULL, "Total running time: %g s", cpu_time.accumulated());
-  
   // Wait for keyboard or mouse input.
   View::wait();
   return 0;

@@ -153,7 +153,6 @@ int main(int argc, char* argv[])
     dofs_in >> dofs_test;
     if(dofs_test != dofs[dofs_in_i])
     {
-      info(NULL, "Failure!");
       return -1;
     }
   }
@@ -167,13 +166,11 @@ int main(int argc, char* argv[])
       bc_values_in >> bc_values_test;
       if(std::abs(bc_values[bc_values_in_i][value_i] - bc_values_test) > 1E-8)
       {
-        info(NULL, "Failure!");
         return -1;
       }
     }
   bc_values_in.close();
 
-  info(NULL, "Success!");
   return 0;
 }
 

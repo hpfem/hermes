@@ -51,11 +51,9 @@ int main(int argc, char* argv[])
   bool success = true;
   for (int p_init = 1; p_init <= 10; p_init++)
   {
-    info(NULL, "********* p_init = %d *********\n", p_init);
     space.set_uniform_order(p_init);
     int ndof = space.get_num_dofs();
-    info(NULL, "ndof = %d", ndof);
-
+    
     // Initialize the FE problem.
     Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
 

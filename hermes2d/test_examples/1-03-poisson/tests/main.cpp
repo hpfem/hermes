@@ -42,8 +42,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  info(NULL, "ndof = %d", ndof);
-
+  
   // Initialize the FE problem.
   Hermes::Hermes2D::DiscreteProblemLinear<double> dp(&wf, &space);
 

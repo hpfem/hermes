@@ -60,8 +60,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  info(NULL, "ndof = %d", ndof);
-
+  
   // Initialize the FE problem.
   Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
 
@@ -89,13 +88,11 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Views::Linearizer lin;
     bool mode_3D = true;
     lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D);
-    info(NULL, "Solution in VTK format saved to file %s.", "sln.vtk");
-
+    
     // Output mesh and element orders in VTK format.
     Hermes::Hermes2D::Views::Orderizer ord;
     ord.save_orders_vtk(&space, "ord.vtk");
-    info(NULL, "Element orders in VTK format saved to file %s.", "ord.vtk");
-  }
+    }
 
   // Visualize the solution.
   if (HERMES_VISUALIZATION) {

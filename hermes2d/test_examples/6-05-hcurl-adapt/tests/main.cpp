@@ -69,10 +69,6 @@ const double LAMBDA = 1.0;
 
 int main(int argc, char* argv[])
 {
-  // Time measurement
-  Hermes::TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
@@ -90,8 +86,7 @@ int main(int argc, char* argv[])
   // Create an Hcurl space with default shapeset.
   HcurlSpace<std::complex<double> > space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  info(NULL, "ndof = %d", ndof);
-
+  
   // Initialize the weak formulation.
   CustomWeakForm wf(MU_R, KAPPA);
 
@@ -108,18 +103,13 @@ int main(int argc, char* argv[])
   int as = 1; bool done = false;
   do
   {
-    info(NULL, "---- Adaptivity step %d:", as);
-
+    
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize reference problem.
-    info(NULL, "Solving on reference mesh.");
     DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
-
-    // Time measurement.
-    cpu_time.tick();
 
     // Initial coefficient vector for the Newton's method.
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
@@ -137,15 +127,11 @@ int main(int argc, char* argv[])
     }
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
-    // Time measurement.
-    cpu_time.tick();
-
     // Project the fine mesh solution onto the coarse mesh.
-    info(NULL, "Projecting reference solution on coarse mesh.");
-    OGProjection<std::complex<double> >::project_global(&space, &ref_sln, &sln);
+    OGProjection<std::complex<double> > ogProjection;
+    ogProjection.project_global(&space, &ref_sln, &sln);
 
     // Calculate element errors and total error estimate.
-    info(NULL, "Calculating error estimate and exact error.");
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
@@ -153,19 +139,10 @@ int main(int argc, char* argv[])
     bool solutions_for_adapt = false;
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
-    // Report results.
-    info(NULL, "ndof_coarse: %d, ndof_fine: %d",
-      space.get_num_dofs(), ref_space->get_num_dofs());
-    info(NULL, "err_est_rel: %g%%, err_exact_rel: %g%%", err_est_rel, err_exact_rel);
-
-    // Time measurement.
-    cpu_time.tick();
-
     // If err_est_rel too large, adapt the mesh.
     if (err_est_rel < ERR_STOP) done = true;
     else
     {
-      info(NULL, "Adapting coarse mesh.");
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
@@ -181,8 +158,6 @@ int main(int argc, char* argv[])
     delete ref_space;
   }
   while (done == false);
-
-  info(NULL, "Total running time: %g s", cpu_time.accumulated());
 
   ndof = space.get_num_dofs();
 

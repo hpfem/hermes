@@ -111,23 +111,17 @@ int main(int argc, char* argv[])
 
   // Calculate the length of the four boundaries segments.
   double l1 = CalculateBoundaryLength(&mesh, 1);
-  info(NULL, "Length of boundary 1 = %g\n", l1);
-
+  
   double l2 = CalculateBoundaryLength(&mesh, 2);
-  info(NULL, "Length of boundary 2 = %g\n", l2);
-
+  
   double l3 = CalculateBoundaryLength(&mesh, 3);
-  info(NULL, "Length of boundary 3 = %g\n", l3);
-
+  
   double l4 = CalculateBoundaryLength(&mesh, 4);
-  info(NULL, "Length of boundary 4 = %g\n", l4);
-
+  
   double perimeter = l1 + l2 + l3 + l4;
-  info(NULL, "Computed perimeter = %10.15f\n", perimeter);
-
+  
   // Set exact value from CMakeLists.txt file
-  info(NULL, "Exact perimeter = %g\n", bdryLengthInput);
-
+  
   if (fabs(perimeter - bdryLengthInput) < 1e-6) {
     printf("Success!\n");
     return 0;

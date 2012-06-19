@@ -53,10 +53,6 @@ int max_iters = 100;                              // Max number of iterations.
 
 int main(int argc, char* argv[])
 {
-  // Time measurement.
-  TimePeriod cpu_time;
-  cpu_time.tick();
-
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
@@ -73,13 +69,8 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = Space<double>::get_num_dofs(&space);
-  info(NULL, "ndof: %d", ndof);
-
-  info(NULL, "Assembling by DiscreteProblem, solving by Umfpack:");
-
-  // Time measurement.
-  cpu_time.tick(HERMES_SKIP);
-
+  
+  
   // Initialize weak formulation,
   CustomWeakForm wf1;
 
@@ -108,8 +99,7 @@ int main(int argc, char* argv[])
   memset(coeff_vec, 0, ndof * sizeof(double));
   // Or we can project the initial condition to obtain the initial
   // coefficient vector.
-  //info(NULL, "Projecting to obtain initial vector for the Newton's method.");
-  //CustomInitialSolution sln_tmp(&mesh);
+  ////CustomInitialSolution sln_tmp(&mesh);
   //OGProjection::project_global(&space, &sln_tmp, coeff_vec);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
@@ -133,12 +123,6 @@ int main(int argc, char* argv[])
   delete(rhs);
   delete(solver);
 
-  // CPU time needed by UMFpack
-  double time1 = cpu_time.tick().last();
-
-  // Time measurement.
-  cpu_time.tick(HERMES_SKIP);
-
   // Show UMFPACK solution.
   Views::ScalarView view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
   view1.show(&sln1);
@@ -146,18 +130,14 @@ int main(int argc, char* argv[])
   // Calculate error.
   CustomExactSolution ex(&mesh);
   double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
-  info(NULL, "Solution 1 (%s):  exact H1 error: %g%% (time %g s)", MatrixSolverNames[Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType)].c_str(), rel_err_1, time1);
-
+  
   // TRILINOS PART:
 
   // Project the initial condition to obtain the initial
   // coefficient vector.
-  info(NULL, "Projecting to obtain initial vector for the Newton's method.");
   ZeroSolution<double> sln_tmp(&mesh);
-  OGProjection<double>::project_global(&space, &sln_tmp, coeff_vec);
-
-  // Measure the projection time.
-  double proj_time = cpu_time.tick().last();
+  OGProjection<double> ogProjection;
+  ogProjection.project_global(&space, &sln_tmp, coeff_vec);
 
   // Initialize the weak formulation for Trilinos.
   CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
@@ -166,7 +146,6 @@ int main(int argc, char* argv[])
   DiscreteProblem<double> dp2(&wf2, &space);
 
   // Initialize the NOX solver with the vector "coeff_vec".
-  info(NULL, "Initializing NOX.");
   NewtonSolverNOX<double> nox_solver(&dp2);
   nox_solver.set_output_flags(message_type);
   nox_solver.set_ls_tolerance(ls_tolerance);
@@ -182,7 +161,6 @@ int main(int argc, char* argv[])
   }
 
   // Solve the nonlinear problem using NOX.
-  info(NULL, "Assembling by DiscreteProblem, solving by NOX.");
   Solution<double> sln2;
   try{
     nox_solver.solve(coeff_vec);
@@ -192,18 +170,10 @@ int main(int argc, char* argv[])
     e.printMsg();
   }
   Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
-  info(NULL, "Number of nonlin iterations: %d (norm of residual: %g)",
-       nox_solver.get_num_iters(), nox_solver.get_residual());
-  info(NULL, "Total number of iterations in linsolver: %d (achieved tolerance in the last step: %g)",
-       nox_solver.get_num_lin_iters(), nox_solver.get_achieved_tol());
-
-  // CPU time needed by NOX.
-  double time2 = cpu_time.tick().last();
-
+  
   // Calculate error.
   double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
-  info(NULL, "Solution 2 (NOX): exact H1 error: %g%% (time %g + %g = %g [s])", rel_err_2, proj_time, time2, proj_time + time2);
-
+  
   // Show NOX solution.
   Views::ScalarView view2("Solution 2", new Views::WinGeom(510, 0, 500, 400));
   view2.show(&sln2);

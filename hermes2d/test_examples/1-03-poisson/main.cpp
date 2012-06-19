@@ -36,19 +36,11 @@ const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatur
 const double VOLUME_HEAT_SRC = 5e2;        // Volume heat sources generated (for example) by electric current.
 const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
-void processOutput(const char* aha)
-{
-  std::cout << (std::string)"Hermes2D is saying:" << aha << std::endl;
-}
-
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
   Hermes::HermesCommonApi.setParamValue(Hermes::exceptionsPrintCallstack, 0);
   Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 8);
-
-  // Time measurement.
-  Hermes::TimePeriod cpu_time;
 
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
@@ -71,7 +63,6 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  info(processOutput, "ndof = %d", ndof);
 
   // Initialize the FE problem.
   Hermes::Hermes2D::DiscreteProblemLinear<double> dp(&wf, &space);
@@ -91,9 +82,6 @@ int main(int argc, char* argv[])
   // Translate the solution vector into the previously initialized Solution.
   Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
 
-  cpu_time.tick();
-  info(processOutput, "Duration %lf\n", cpu_time.accumulated());
-
   // VTK output.
   if (VTK_VISUALIZATION)
   {
@@ -101,12 +89,10 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Views::Linearizer lin;
     bool mode_3D = false;
     lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
-    info(processOutput, "Solution in VTK format saved to file %s.", "sln.vtk");
 
     // Output mesh and element orders in VTK format.
     Hermes::Hermes2D::Views::Orderizer ord;
     ord.save_orders_vtk(&space, "ord.vtk");
-    info(processOutput, "Element orders in VTK format saved to file %s.", "ord.vtk");
   }
 
   // Visualize the solution.
