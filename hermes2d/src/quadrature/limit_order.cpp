@@ -67,7 +67,7 @@ namespace Hermes
       if (!warned_order)
       {
         /// \todo Fix this, so that it complies with the rest of the code.
-        std::cout << ("Warning: Not enough integration rules for exact integration.");
+        std::cout << "Warning: Not enough integration rules for exact integration." << std::endl;
         warned_order = true;
       }
     }

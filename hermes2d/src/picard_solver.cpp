@@ -196,7 +196,7 @@ namespace Hermes
           abs_error = sqrt(abs_error);
 
         double rel_error = abs_error / last_iter_vec_norm;
-
+         
         // Output for the user.
         this->info("---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
 
