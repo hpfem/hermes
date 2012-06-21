@@ -15,6 +15,9 @@
 
 #ifndef __H2D_TRAVERSE_H
 #define __H2D_TRAVERSE_H
+
+#include "hermes_common.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -65,7 +68,7 @@ namespace Hermes
     /// same base mesh it walks through all (pseudo-)elements of the union of all
     /// the N meshes.
     ///
-    class HERMES_API Traverse
+    class HERMES_API Traverse : public Hermes::Mixins::Loggable
     {
     public:
       Traverse(bool master = false);

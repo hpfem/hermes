@@ -841,7 +841,7 @@ namespace Hermes
           {
             if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] != 0)
             {
-              printf("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
+              this->info("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
               throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
             }
             counter++;

@@ -132,7 +132,7 @@ namespace Hermes
       switch(code)
       {
         case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
-        case HERMES_EC_INFO: console_bold = true; break;
+        case HERMES_EC_INFO:console_attrs |= console_attr_green;  break;
         default: throw Hermes::Exceptions::Exception("Unknown error code: '%c'", code);
       }
 
