@@ -101,7 +101,11 @@ namespace Hermes
     
     /// Class for global functions.
     template<typename Scalar>
-    class HERMES_API Global {
+    class HERMES_API Global : public Hermes::Mixins::Loggable
+    {
+    public:
+      Global() : Hermes::Mixins::Loggable() {};
+      friend void warn_order();
     public:
       /// Error calculation in Hermes, useful for non-adaptive computations.
       // Note: coarse mesh sln has to be first, then
