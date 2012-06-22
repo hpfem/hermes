@@ -66,9 +66,14 @@ namespace Hermes
     {
       if (!warned_order)
       {
-        /// \todo Fix this, so that it complies with the rest of the code.
-        std::cout << "Warning: Not enough integration rules for exact integration." << std::endl;
-        warned_order = true;
+#pragma omp critical (warn_oder)
+        if (!warned_order)
+        {
+          Global<double> logger;
+          /// \todo Fix this, so that it complies with the rest of the code.
+          logger.warn("Warning: Not enough integration rules for exact integration.");
+          warned_order = true;
+        }
       }
     }
 

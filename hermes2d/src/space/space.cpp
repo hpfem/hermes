@@ -919,8 +919,7 @@ namespace Hermes
       }
       catch (const xml_schema::exception& e)
       {
-        std::cerr << e << std::endl;
-        std::exit(1);
+        throw Hermes::Exceptions::SpaceLoadFailureException(e.what());
       }
 
       this->assign_dofs();
