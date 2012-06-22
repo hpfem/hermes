@@ -293,5 +293,83 @@ namespace Hermes
       strcpy(msg, e.getMsg());
       message=msg;
     }
+
+    SpaceLoadFailureException::SpaceLoadFailureException(const char * msg, ...) : Exception()
+    {
+      char * msgOwn = new char[strlen(msg)+1];
+      strcpy(msgOwn, msg);
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, msgOwn);
+      vsprintf(text, msgOwn, arglist);
+      va_end(arglist);
+
+      message = text;
+    }
+
+    SpaceLoadFailureException::~SpaceLoadFailureException()
+    {
+    }
+
+    SpaceLoadFailureException::SpaceLoadFailureException(const SpaceLoadFailureException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg, e.getMsg());
+      message=msg;
+    }
+
+    SolutionSaveFailureException::SolutionSaveFailureException(const char * msg, ...) : Exception()
+    {
+      char * msgOwn = new char[strlen(msg)+1];
+      strcpy(msgOwn, msg);
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, msgOwn);
+      vsprintf(text, msgOwn, arglist);
+      va_end(arglist);
+
+      message = text;
+    }
+
+    SolutionSaveFailureException::~SolutionSaveFailureException()
+    {
+    }
+
+    SolutionSaveFailureException::SolutionSaveFailureException(const SolutionSaveFailureException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg, e.getMsg());
+      message=msg;
+    }
+
+    SolutionLoadFailureException::SolutionLoadFailureException(const char * msg, ...) : Exception()
+    {
+      char * msgOwn = new char[strlen(msg)+1];
+      strcpy(msgOwn, msg);
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, msgOwn);
+      vsprintf(text, msgOwn, arglist);
+      va_end(arglist);
+
+      message = text;
+    }
+
+    SolutionLoadFailureException::~SolutionLoadFailureException()
+    {
+    }
+
+    SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
+    {
+      char * msg= new char[strlen(e.getMsg())+1];
+      strcpy(msg, e.getMsg());
+      message=msg;
+    }
   }
 }

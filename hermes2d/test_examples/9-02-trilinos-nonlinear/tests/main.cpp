@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp1);
+  
   newton.set_verbose_output(true);
   try{
     newton.solve(coeff_vec);

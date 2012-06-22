@@ -1,6 +1,5 @@
 #define HERMES_REPORT_WARN
 #define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #define PI 4.0*atan(1.0)
 #include "hermes2d.h"

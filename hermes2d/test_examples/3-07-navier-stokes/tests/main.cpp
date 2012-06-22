@@ -1,6 +1,5 @@
 #define HERMES_REPORT_WARN
 #define HERMES_REPORT_INFO
-#define HERMES_REPORT_VERBOSE
 #define HERMES_REPORT_FILE "application.log"
 #include "hermes2d.h"
 
@@ -127,10 +126,8 @@ int main(int argc, char* argv[])
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
 
-    // Perform Newton's iteration.
-    bool verbose = true;
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
-    newton.set_verbose_output(verbose);
+    newton.set_verbose_output(true);
     try{
       newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER);
     }

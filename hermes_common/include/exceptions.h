@@ -162,6 +162,41 @@ namespace Hermes
         ~MeshLoadFailureException();
         MeshLoadFailureException(const MeshLoadFailureException & e);
     };
+
+    /// \brief Linear solver failed.
+    class HERMES_API SpaceLoadFailureException : public Exception
+    {
+      public:
+        /// Constructor
+        /// \param[in] name Name of the function.
+        SpaceLoadFailureException(const char * msg, ...);
+        ~SpaceLoadFailureException();
+        SpaceLoadFailureException(const SpaceLoadFailureException & e);
+    };
+
+    /// \brief Linear solver failed.
+    class HERMES_API SolutionSaveFailureException : public Exception
+    {
+      public:
+        /// Constructor
+        /// \param[in] name Name of the function.
+        SolutionSaveFailureException(const char * msg, ...);
+        ~SolutionSaveFailureException();
+        SolutionSaveFailureException(const SolutionSaveFailureException & e);
+    };
+
+    /// \brief Linear solver failed.
+    class HERMES_API SolutionLoadFailureException : public Exception
+    {
+      public:
+        /// Constructor
+        /// \param[in] name Name of the function.
+        SolutionLoadFailureException(const char * msg, ...);
+        ~SolutionLoadFailureException();
+        SolutionLoadFailureException(const SolutionLoadFailureException & e);
+    };
+
+
   }
 }
 #endif

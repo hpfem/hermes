@@ -84,11 +84,11 @@ int main(int argc, char* argv[])
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     bool freeze_jacobian = true;
-    bool verbose = true;
+    runge_kutta.set_verbose_output(false);
     try
     {
       runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
-                                  sln_time_new, freeze_jacobian, verbose);
+                                  sln_time_new, freeze_jacobian);
     }catch(Exceptions::Exception& e){
       e.printMsg();
     }
