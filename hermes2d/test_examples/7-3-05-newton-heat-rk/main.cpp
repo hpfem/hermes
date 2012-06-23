@@ -106,6 +106,7 @@ int main(int argc, char* argv[])
   {
     continuity.get_last_record()->load_mesh(&mesh);
     continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
+    space.set_essential_bcs(&bcs);
     continuity.get_last_record()->load_solution(sln_time_prev, &space);
     current_time = continuity.get_last_record()->get_time();
   }
@@ -128,6 +129,9 @@ int main(int argc, char* argv[])
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
+  // Iteration number.
+  int iteration = 0;
+
   // Time stepping loop:
   do
   {
@@ -149,17 +153,21 @@ int main(int argc, char* argv[])
     Tview.set_title(title);
     Tview.show(sln_time_new);
 
+    // Save the progress.
+    if(iteration > 0)
+    {
+      continuity.add_record(current_time);
+      continuity.get_last_record()->save_mesh(&mesh);
+      continuity.get_last_record()->save_space(&space);
+      continuity.get_last_record()->save_solution(sln_time_prev);
+    }
+
     // Copy solution for the new time step.
     sln_time_prev->copy(sln_time_new);
 
-    // Save the progress.
-    continuity.add_record(current_time);
-    continuity.get_last_record()->save_mesh(&mesh);
-    continuity.get_last_record()->save_space(&space);
-    continuity.get_last_record()->save_solution(sln_time_prev);
-    
     // Increase current time and time step counter.
     current_time += time_step;
+    iteration++;
   }
   while (current_time < T_FINAL);
 
