@@ -1199,6 +1199,7 @@ namespace Hermes
         this->num_dofs = parsed_xml_solution->num_dofs();
 
         this->mono_coeffs = new double[num_coeffs];
+        memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(double));
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
           elem_coeffs[component_i] = new int[num_elems];
@@ -1246,6 +1247,7 @@ namespace Hermes
         this->num_dofs = parsed_xml_solution->num_dofs();
 
         this->mono_coeffs = new std::complex<double>[num_coeffs];
+        memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(std::complex<double>));
 
         for(unsigned int component_i = 0; component_i < num_components; component_i++)
           elem_coeffs[component_i] = new int[num_elems];
