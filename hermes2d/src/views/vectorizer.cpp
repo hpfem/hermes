@@ -41,7 +41,9 @@ namespace Hermes
 
       int Vectorizer::create_vertex(double x, double y, double xvalue, double yvalue)
       {
-        int i = add_vertex();
+        int i;
+#pragma omp critical(realloc_vertices)
+        i = add_vertex();
         verts[i][0] = x;
         verts[i][1] = y;
         verts[i][2] = xvalue;
@@ -66,6 +68,7 @@ namespace Hermes
         }
 
         // if not found, create a new one
+#pragma omp critical(realloc_vertices)
         i = add_vertex();
         verts[i][0] = x;
         verts[i][1] = y;
@@ -94,6 +97,7 @@ namespace Hermes
             for (i = 0; i < lin_np_tri[1]; i++)
             {
               double m = (sqrt(sqr(xval[i]) + sqr(yval[i])));
+#pragma omp critical(vectorizer_get_max)
               if (finite(m) && fabs(m) > max)
                 max = fabs(m);
             }
@@ -465,13 +469,14 @@ namespace Hermes
         int state_i;
         
 #define CHUNKSIZE 1
-#pragma omp parallel shared(trav_master) private(state_i)
+int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
+#pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
             Traverse::State current_state;
-#pragma omp critical (get_next_state)
+#pragma omp critical(get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
             fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
@@ -483,7 +488,7 @@ namespace Hermes
             {
               double fx = xval[i];
               double fy = yval[i];
-#pragma omp critical (vectorizer_get_max)
+#pragma omp critical(vectorizer_get_max)
               if (fabs(sqrt(fx*fx + fy*fy)) > max)
                 max = fabs(sqrt(fx*fx + fy*fy));
             }
@@ -499,14 +504,13 @@ namespace Hermes
         for(unsigned int i = 0; i < Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads); i++)
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
         
-#pragma omp parallel shared(trav_master) private(state_i)
+#pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
-#pragma omp critical (get_next_state)
-          {
             Traverse::State current_state;
+#pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
             fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
@@ -568,7 +572,6 @@ namespace Hermes
                   this->process_dash(iv[i], iv[j]);
               }
             }
-          }
           }
         }
 
