@@ -39,23 +39,30 @@ namespace Hermes
 
     void Loggable::warn(const char* msg, ...) const
     {
-        bool new_block = true;
-        char text[BUF_SZ];
-        char* text_contents = text + 1;
-        
-        text[0] = HERMES_EC_WARNING;
-        text[1] = ' ';
-        text_contents++;
+      if(!this->verbose_output)
+        return;
 
-        //print the message
-        va_list arglist;
-        va_start(arglist, msg);
-        vsprintf(text_contents, msg, arglist);
-        va_end(arglist);
-        hermes_log_message(HERMES_EC_WARNING, text_contents);
+      bool new_block = true;
+      char text[BUF_SZ];
+      char* text_contents = text + 1;
+        
+      text[0] = HERMES_EC_WARNING;
+      text[1] = ' ';
+      text_contents++;
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, msg);
+      vsprintf(text_contents, msg, arglist);
+      va_end(arglist);
+      hermes_log_message(HERMES_EC_WARNING, text_contents);
     }
+
     void Loggable::warn_if(bool cond, const char* msg, ...) const
     {
+      if(!this->verbose_output)
+        return;
+
       if(cond)
       {
         bool new_block = true;
@@ -76,6 +83,9 @@ namespace Hermes
     }
     void Loggable::info(const char* msg, ...) const
     {
+      if(!this->verbose_output)
+        return;
+
       bool new_block = true;
       char text[BUF_SZ];
       char* text_contents = text + 1;
@@ -93,6 +103,9 @@ namespace Hermes
     }
     void Loggable::info_if(bool cond, const char* msg, ...) const
     {
+      if(!this->verbose_output)
+        return;
+
       if(cond)
       {
         bool new_block = true;

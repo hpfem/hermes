@@ -23,7 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    OGProjection<Scalar>::OGProjection() : ndof(0)
+    OGProjection<Scalar>::OGProjection() : Hermes::Mixins::Loggable(), ndof(0)
     {
     }
 

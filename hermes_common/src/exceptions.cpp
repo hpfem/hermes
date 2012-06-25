@@ -242,19 +242,11 @@ namespace Hermes
       this->allowed=e.getAllowed();
     }
 
-    FunctionNotOverridenException::FunctionNotOverridenException(const char * msg, ...) : Exception()
+    FunctionNotOverridenException::FunctionNotOverridenException(const char * name, ...) : Exception()
     {
-      char * msgOwn = new char[strlen(msg)+1];
-      strcpy(msgOwn, msg);
-      char text[1024];
-
-      //print the message
-      va_list arglist;
-      va_start(arglist, msgOwn);
-      vsprintf(text, msgOwn, arglist);
-      va_end(arglist);
-
-      message = text;
+      char * msg= new char[70+strlen(name)];
+      sprintf(msg, "Method %s must be overriden.", name);
+      message=msg;
     }
 
     FunctionNotOverridenException::~FunctionNotOverridenException()
@@ -268,19 +260,11 @@ namespace Hermes
       message=msg;
     }
 
-    MeshLoadFailureException::MeshLoadFailureException(const char * msg, ...) : Exception()
+    MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * msgOwn = new char[strlen(msg)+1];
-      strcpy(msgOwn, msg);
-      char text[1024];
-
-      //print the message
-      va_list arglist;
-      va_start(arglist, msgOwn);
-      vsprintf(text, msgOwn, arglist);
-      va_end(arglist);
-
-      message = text;
+      char * msg= new char[strlen(reason)];
+      sprintf(msg, "%s", reason);
+      message=msg;
     }
 
     MeshLoadFailureException::~MeshLoadFailureException()
@@ -294,19 +278,11 @@ namespace Hermes
       message=msg;
     }
 
-    SpaceLoadFailureException::SpaceLoadFailureException(const char * msg, ...) : Exception()
+    SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * msgOwn = new char[strlen(msg)+1];
-      strcpy(msgOwn, msg);
-      char text[1024];
-
-      //print the message
-      va_list arglist;
-      va_start(arglist, msgOwn);
-      vsprintf(text, msgOwn, arglist);
-      va_end(arglist);
-
-      message = text;
+      char * msg= new char[strlen(reason)];
+      sprintf(msg, "%s", reason);
+      message=msg;
     }
 
     SpaceLoadFailureException::~SpaceLoadFailureException()
@@ -320,19 +296,11 @@ namespace Hermes
       message=msg;
     }
 
-    SolutionSaveFailureException::SolutionSaveFailureException(const char * msg, ...) : Exception()
+    SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
     {
-      char * msgOwn = new char[strlen(msg)+1];
-      strcpy(msgOwn, msg);
-      char text[1024];
-
-      //print the message
-      va_list arglist;
-      va_start(arglist, msgOwn);
-      vsprintf(text, msgOwn, arglist);
-      va_end(arglist);
-
-      message = text;
+      char * msg= new char[strlen(reason)];
+      sprintf(msg, "%s", reason);
+      message=msg;
     }
 
     SolutionSaveFailureException::~SolutionSaveFailureException()
@@ -346,19 +314,11 @@ namespace Hermes
       message=msg;
     }
 
-    SolutionLoadFailureException::SolutionLoadFailureException(const char * msg, ...) : Exception()
+    SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * msgOwn = new char[strlen(msg)+1];
-      strcpy(msgOwn, msg);
-      char text[1024];
-
-      //print the message
-      va_list arglist;
-      va_start(arglist, msgOwn);
-      vsprintf(text, msgOwn, arglist);
-      va_end(arglist);
-
-      message = text;
+      char * msg= new char[strlen(reason)];
+      sprintf(msg, "%s", reason);
+      message=msg;
     }
 
     SolutionLoadFailureException::~SolutionLoadFailureException()
