@@ -504,8 +504,9 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
-            Traverse::State current_state;
 #pragma omp critical (get_next_state)
+          {
+            Traverse::State current_state;
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
             fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
@@ -567,6 +568,7 @@ namespace Hermes
                   this->process_dash(iv[i], iv[j]);
               }
             }
+          }
           }
         }
 
