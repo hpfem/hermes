@@ -25,6 +25,62 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    CalculationContinuityException::CalculationContinuityException() : Exception()
+    {
+    }
+
+    CalculationContinuityException::CalculationContinuityException(exceptionEntityType type, const char * reason) : Exception()
+    {
+      this->init(type, reason);
+    }
+
+    void CalculationContinuityException::init(exceptionEntityType type, const char * reason)
+    {
+      char * msg =  new char[34 + strlen(reason)];
+      char * typeMsg = new char[15];
+      switch(type)
+      {
+      case meshes:
+        sprintf(typeMsg, "meshes");
+        break;
+      case spaces:
+        sprintf(typeMsg, "spaces");
+        break;
+      case solutions:
+        sprintf(typeMsg, "solutions");
+        break;
+      case time_steps:
+        sprintf(typeMsg, "time steps");
+        break;
+      case error:
+        sprintf(typeMsg, "error info");
+        break;
+      case general:
+        sprintf(typeMsg, "general");
+        break;
+      }
+
+      sprintf(msg, "Exception in CalculationContinuity (%s): \"%s\"", typeMsg, reason);
+      message = msg;
+    }
+
+    IOCalculationContinuityException::IOCalculationContinuityException(exceptionEntityType type, inputOutput inputOutput, const char * filename) : CalculationContinuityException()
+    {
+      char * msg =  new char[34 + strlen(filename)];
+      char * typeMsg = new char[6];
+      switch(inputOutput)
+      {
+      case input:
+        sprintf(typeMsg, "input");
+        break;
+      case output:
+        sprintf(typeMsg, "output");
+        break;
+      }
+      sprintf(msg, "I/O: %s, filename: \"%s\"", typeMsg, filename);
+      this->init(type, msg);
+    }
+
     template<typename Scalar>
     CalculationContinuity<Scalar>::CalculationContinuity(IdentificationMethod identification_method) : last_record(NULL), record_available(false), identification_method(identification_method), num(0)
     {
@@ -91,7 +147,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number)
+    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number, Mesh* mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
       if(last_record != NULL)
       {
@@ -103,12 +159,54 @@ namespace Hermes
         }
       }
       CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time, number);
+      record->save_mesh(mesh);
+      if(space != NULL)
+        record->save_space(space);
+      if(sln != NULL)
+        record->save_solution(sln);
+      if(time_step > 0.0)
+        record->save_time_step_length(time_step);
+      if(time_step_n_minus_one > 0.0)
+        record->save_time_step_length_n_minus_one(time_step_n_minus_one);
+      if(error > 0.0)
+        record->save_error(error);
+
       this->records.insert(std::pair<std::pair<double, unsigned int>, CalculationContinuity<Scalar>::Record*>(std::pair<double, unsigned int>(time, number), record));
       this->last_record = record;
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(double time)
+    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
+    {
+      if(last_record != NULL)
+      {
+        std::ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
+        if(ofile)
+        {
+          ofile << time << ' ' << number << std::endl;
+          ofile.close();
+        }
+      }
+      CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time, number);
+      record->save_meshes(meshes);
+      if(spaces != Hermes::vector<Space<Scalar>*>())
+        record->save_spaces(spaces);
+      if(slns != Hermes::vector<Solution<Scalar>*>())
+        record->save_solutions(slns);
+      if(time_step > 0.0)
+        record->save_time_step_length(time_step);
+      if(time_step_n_minus_one > 0.0)
+        record->save_time_step_length_n_minus_one(time_step_n_minus_one);
+      if(error > 0.0)
+        record->save_error(error);
+
+      this->records.insert(std::pair<std::pair<double, unsigned int>, CalculationContinuity<Scalar>::Record*>(std::pair<double, unsigned int>(time, number), record));
+      this->last_record = record;
+    }
+
+    
+    template<typename Scalar>
+    void CalculationContinuity<Scalar>::add_record(double time, Mesh* mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
       if(ofile)
@@ -117,12 +215,49 @@ namespace Hermes
         ofile.close();
       }
       CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time);
+      record->save_mesh(mesh);
+      if(space != NULL)
+        record->save_space(space);
+      if(sln != NULL)
+        record->save_solution(sln);
+      if(time_step > 0.0)
+        record->save_time_step_length(time_step);
+      if(time_step_n_minus_one > 0.0)
+        record->save_time_step_length_n_minus_one(time_step_n_minus_one);
+      if(error > 0.0)
+        record->save_error(error);
+
       this->time_records.insert(std::pair<double, CalculationContinuity<Scalar>::Record*>(time, record));
       this->last_record = record;
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(unsigned int number)
+    void CalculationContinuity<Scalar>::add_record(double time, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
+    {
+      std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
+      if(ofile)
+      {
+        ofile << time << std::endl;
+        ofile.close();
+      }
+      CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time);
+      record->save_meshes(meshes);
+      if(spaces != Hermes::vector<Space<Scalar>*>())
+        record->save_spaces(spaces);
+      if(slns != Hermes::vector<Solution<Scalar>*>())
+        record->save_solutions(slns);
+      if(time_step > 0.0)
+        record->save_time_step_length(time_step);
+      if(time_step_n_minus_one > 0.0)
+        record->save_time_step_length_n_minus_one(time_step_n_minus_one);
+      if(error > 0.0)
+        record->save_error(error);
+      this->time_records.insert(std::pair<double, CalculationContinuity<Scalar>::Record*>(time, record));
+      this->last_record = record;
+    }
+
+    template<typename Scalar>
+    void CalculationContinuity<Scalar>::add_record(unsigned int number, Mesh* mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
       if(last_record != NULL)
       {
@@ -134,6 +269,46 @@ namespace Hermes
         }
       }
       CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(number);
+      record->save_mesh(mesh);
+      if(space != NULL)
+        record->save_space(space);
+      if(sln != NULL)
+        record->save_solution(sln);
+      if(time_step > 0.0)
+        record->save_time_step_length(time_step);
+      if(time_step_n_minus_one > 0.0)
+        record->save_time_step_length_n_minus_one(time_step_n_minus_one);
+      if(error > 0.0)
+        record->save_error(error);
+
+      this->numbered_records.insert(std::pair<unsigned int, CalculationContinuity<Scalar>::Record*>(number, record));
+      this->last_record = record;
+    }
+
+    template<typename Scalar>
+    void CalculationContinuity<Scalar>::add_record(unsigned int number, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
+    {
+      if(last_record != NULL)
+      {
+        std::ofstream ofile("onlyNumber.h2d", std::ios_base::app);
+        if(ofile)
+        {
+          ofile << number << std::endl;
+          ofile.close();
+        }
+      }
+      CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(number);
+      record->save_meshes(meshes);
+      if(spaces != Hermes::vector<Space<Scalar>*>())
+        record->save_spaces(spaces);
+      if(slns != Hermes::vector<Solution<Scalar>*>())
+        record->save_solutions(slns);
+      if(time_step > 0.0)
+        record->save_time_step_length(time_step);
+      if(time_step_n_minus_one > 0.0)
+        record->save_time_step_length_n_minus_one(time_step_n_minus_one);
+      if(error > 0.0)
+        record->save_error(error);
       this->numbered_records.insert(std::pair<unsigned int, CalculationContinuity<Scalar>::Record*>(number, record));
       this->last_record = record;
     }

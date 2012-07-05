@@ -28,6 +28,36 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Own exception class to catch all potential exceptions that might occur in saving / loading entities using the subsequent classes.
+    class HERMES_API CalculationContinuityException : public Hermes::Exceptions::Exception
+    {
+    public:
+      enum exceptionEntityType
+      {
+        meshes,
+        spaces,
+        solutions,
+        time_steps,
+        error,
+        general
+      };
+      CalculationContinuityException();
+      CalculationContinuityException(exceptionEntityType type, const char * msg);
+      void init(exceptionEntityType type, const char * msg);
+    };
+
+    /// A derived exception for I/O
+    class HERMES_API IOCalculationContinuityException : public CalculationContinuityException
+    {
+    public:
+      enum inputOutput
+      {
+        input,
+        output
+      };
+      IOCalculationContinuityException(exceptionEntityType type, inputOutput inputOutput, const char * filename);
+    };
+
     /// Class used for resuming an interrupted calculation.
     /// Its purpose is to store everything necessary to resume it from a certain point.
     template<typename Scalar>
@@ -117,12 +147,6 @@ namespace Hermes
         /// Storage of filenames of needed solution files.
         Hermes::vector<std::string> solutionFiles;
 
-        /// Optional time step length information.
-        double time_step_length;
-
-        /// Optional spatial error estimate information.
-        double error;
-
         /// Internals. Used for identifying.
         double time;
         unsigned int number;
@@ -130,15 +154,18 @@ namespace Hermes
 
       /// Add a record.
       /// See records.
-      void add_record(double time, unsigned int number);
+      void add_record(double time, unsigned int number, Mesh* mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(double time, unsigned int number, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
 
       /// Add a record.
       /// See time_records.
-      void add_record(double time);
+      void add_record(double time, Mesh* mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(double time, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
 
       /// Add a record.
       /// See numbered_records.
-      void add_record(unsigned int number);
+      void add_record(unsigned int number, Mesh* mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(unsigned int number, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
 
       /// Returns the value of record_available.
       /// See record_available.

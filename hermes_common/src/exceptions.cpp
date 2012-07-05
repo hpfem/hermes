@@ -244,9 +244,15 @@ namespace Hermes
 
     FunctionNotOverridenException::FunctionNotOverridenException(const char * name, ...) : Exception()
     {
-      char * msg= new char[70+strlen(name)];
-      sprintf(msg, "Method %s must be overriden.", name);
-      message=msg;
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, name);
+      vsprintf(text, name, arglist);
+      va_end(arglist);
+
+      message = text;
     }
 
     FunctionNotOverridenException::~FunctionNotOverridenException()
@@ -262,9 +268,15 @@ namespace Hermes
 
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * msg= new char[strlen(reason)];
-      sprintf(msg, "%s", reason);
-      message=msg;
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, reason);
+      vsprintf(text, reason, arglist);
+      va_end(arglist);
+
+      message = text;
     }
 
     MeshLoadFailureException::~MeshLoadFailureException()
@@ -280,9 +292,15 @@ namespace Hermes
 
     SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * msg= new char[strlen(reason)];
-      sprintf(msg, "%s", reason);
-      message=msg;
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, reason);
+      vsprintf(text, reason, arglist);
+      va_end(arglist);
+
+      message = text;
     }
 
     SpaceLoadFailureException::~SpaceLoadFailureException()
@@ -298,9 +316,15 @@ namespace Hermes
 
     SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
     {
-      char * msg= new char[strlen(reason)];
-      sprintf(msg, "%s", reason);
-      message=msg;
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, reason);
+      vsprintf(text, reason, arglist);
+      va_end(arglist);
+
+      message = text;
     }
 
     SolutionSaveFailureException::~SolutionSaveFailureException()
@@ -316,9 +340,15 @@ namespace Hermes
 
     SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
-      char * msg= new char[strlen(reason)];
-      sprintf(msg, "%s", reason);
-      message=msg;
+      char text[1024];
+
+      //print the message
+      va_list arglist;
+      va_start(arglist, reason);
+      vsprintf(text, reason, arglist);
+      va_end(arglist);
+
+      message = text;
     }
 
     SolutionLoadFailureException::~SolutionLoadFailureException()

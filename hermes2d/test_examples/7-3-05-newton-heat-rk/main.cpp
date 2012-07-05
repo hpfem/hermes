@@ -156,10 +156,7 @@ int main(int argc, char* argv[])
     // Save the progress.
     if(iteration > 0)
     {
-      continuity.add_record(current_time);
-      continuity.get_last_record()->save_mesh(&mesh);
-      continuity.get_last_record()->save_space(&space);
-      continuity.get_last_record()->save_solution(sln_time_prev);
+      continuity.add_record(current_time, &mesh, &space, sln_time_prev);
     }
 
     // Copy solution for the new time step.
