@@ -242,6 +242,11 @@ project(hermes)
     find_package(PTHREAD REQUIRED)
     find_package(XSD REQUIRED)
     find_package(XERCES REQUIRED)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      if(WITH_STACKTRACE)
+        find_package(EXECINFO OPTIONAL)
+      endif(WITH_STACKTRACE)
+    endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     
     # Solvers.
     if(WITH_UMFPACK)
@@ -278,6 +283,7 @@ project(hermes)
       endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
     endif(MSVC)
 
+    
     if(WITH_PETSC)
       find_package(PETSC REQUIRED)
       # For some header files, PETSc uses the same name for both real and complex

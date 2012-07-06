@@ -18,6 +18,7 @@
 
 // stacktrace
 #cmakedefine WITH_STACKTRACE
+#cmakedefine EXECINFO_FOUND
 
 // trilinos
 #cmakedefine WITH_TRILINOS
