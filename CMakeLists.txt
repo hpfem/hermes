@@ -244,7 +244,7 @@ project(hermes)
     find_package(XERCES REQUIRED)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       if(WITH_STACKTRACE)
-        find_package(EXECINFO OPTIONAL)
+        find_package(EXECINFO)
       endif(WITH_STACKTRACE)
     endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     
