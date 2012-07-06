@@ -44,7 +44,7 @@ namespace Hermes
         virtual const char * what() const;
         /// \return name of function where exception was created.
         const char * getFuncName() const;
-        virtual ~Exception(){};
+        virtual ~Exception() throw () {};
         
       protected:
         const char * message;
