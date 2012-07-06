@@ -56,6 +56,7 @@ namespace Hermes
         output
       };
       IOCalculationContinuityException(exceptionEntityType type, inputOutput inputOutput, const char * filename);
+      IOCalculationContinuityException(exceptionEntityType type, inputOutput inputOutput, const char * filename, const char * reason);
     };
 
     /// Class used for resuming an interrupted calculation.
