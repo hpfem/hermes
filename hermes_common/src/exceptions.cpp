@@ -54,7 +54,7 @@ namespace Hermes
         CallStack::dump(0);
     }
 
-    const char * Exception::what() const
+    const char * Exception::what() const throw ()
     {
       return message;
     }
@@ -87,10 +87,6 @@ namespace Hermes
       return itemIdx;
     }
 
-    NullException::~NullException()
-    {
-      delete[] message;
-    }
 
     NullException::NullException(const NullException & e)
     {
@@ -144,11 +140,6 @@ namespace Hermes
       return right;
     }
 
-    LengthException::~LengthException()
-    {
-      delete[]message;
-    }
-
     LengthException::LengthException(const LengthException&e) : Exception()
     {
       char * msg= new char[strlen(e.what())+1];
@@ -172,11 +163,6 @@ namespace Hermes
       char * msg =  new char[34 + strlen(reason)];
       sprintf(msg, "Linear solver failed because:\"%s\"", reason);
       message = msg;
-    }
-
-    LinearMatrixSolverException::~LinearMatrixSolverException()
-    {
-      delete[] message;
     }
 
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
@@ -228,11 +214,6 @@ namespace Hermes
       return allowed;
     }
 
-    ValueException::~ValueException()
-    {
-      delete[] message;
-    }
-
     ValueException::ValueException(const ValueException&e)
     {
       char * msg= new char[strlen(e.what())+1];
@@ -255,10 +236,6 @@ namespace Hermes
       message = text;
     }
 
-    FunctionNotOverridenException::~FunctionNotOverridenException()
-    {
-    }
-
     FunctionNotOverridenException::FunctionNotOverridenException(const FunctionNotOverridenException&e)
     {
       char * msg= new char[strlen(e.what())+1];
@@ -277,10 +254,6 @@ namespace Hermes
       va_end(arglist);
 
       message = text;
-    }
-
-    MeshLoadFailureException::~MeshLoadFailureException()
-    {
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
@@ -303,10 +276,6 @@ namespace Hermes
       message = text;
     }
 
-    SpaceLoadFailureException::~SpaceLoadFailureException()
-    {
-    }
-
     SpaceLoadFailureException::SpaceLoadFailureException(const SpaceLoadFailureException&e)
     {
       char * msg= new char[strlen(e.what())+1];
@@ -327,10 +296,6 @@ namespace Hermes
       message = text;
     }
 
-    SolutionSaveFailureException::~SolutionSaveFailureException()
-    {
-    }
-
     SolutionSaveFailureException::SolutionSaveFailureException(const SolutionSaveFailureException&e)
     {
       char * msg= new char[strlen(e.what())+1];
@@ -349,10 +314,6 @@ namespace Hermes
       va_end(arglist);
 
       message = text;
-    }
-
-    SolutionLoadFailureException::~SolutionLoadFailureException()
-    {
     }
 
     SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
