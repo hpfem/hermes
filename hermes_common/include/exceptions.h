@@ -30,7 +30,7 @@ namespace Hermes
   namespace Exceptions
   {
     /// \brief Exception interface
-    class HERMES_API Exception
+    class HERMES_API Exception : public std::exception
     {
       public:
         /// \brief Init exception with default message.
@@ -41,10 +41,11 @@ namespace Hermes
         /// \brief print error message to stderr
         void printMsg() const;
         /// \brief get pointer to error message
-        const char * getMsg() const;
+        virtual const char * what() const;
         /// \return name of function where exception was created.
         const char * getFuncName() const;
         virtual ~Exception(){};
+        
       protected:
         const char * message;
     };

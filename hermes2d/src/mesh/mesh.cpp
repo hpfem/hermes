@@ -149,8 +149,10 @@ namespace Hermes
     Element* Element::get_neighbor(int ie) const
     {
       Element** elem = en[ie]->elem;
-      if (elem[0] == this) return elem[1];
-      if (elem[1] == this) return elem[0];
+      if (elem[0] == this) 
+        return elem[1];
+      if (elem[1] == this) 
+        return elem[0];
       assert(0);
       return NULL;
     }
@@ -408,11 +410,13 @@ namespace Hermes
     {
       // if the top three bits of part are nonzero, we would overflow
       // -- make the element non-curvilinear
-      if (e->cm->part & 0xe000000000000000ULL) return NULL;
+      if (e->cm->part & 0xe000000000000000ULL)
+        return NULL;
 
       // if the parent element is already almost straight-edged,
       // the son will be even more straight-edged
-      if (e->iro_cache == 0) return NULL;
+      if (e->iro_cache == 0) 
+        return NULL;
 
       CurvMap* cm = new CurvMap;
       if (e->cm->toplevel == false)
@@ -2043,8 +2047,8 @@ namespace Hermes
 
     Mesh::CurvedException::CurvedException(const CurvedException & e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
       elementId = e.elementId;
     }

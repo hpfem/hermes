@@ -41,7 +41,8 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
     {
-      if (spaces.empty()) throw Exceptions::NullException(2);
+      if (spaces.empty()) 
+        throw Exceptions::NullException(2);
       unsigned int first_dof_running = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
@@ -2292,7 +2293,8 @@ namespace Hermes
         {
           if(node->get_right_son()->get_transformation() == transformations[0])
             insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
-          else throw Hermes::Exceptions::Exception("More than two possible sons in insert_into_multimesh_tree().");
+          else 
+            throw Hermes::Exceptions::Exception("More than two possible sons in insert_into_multimesh_tree().");
         }
         // If the right one does not exist and the left one was not correct, create a right son and continue this way.
         else
@@ -2402,7 +2404,8 @@ namespace Hermes
         }
       }
       // We always should be able to empty the transformations array.
-      throw Hermes::Exceptions::Exception("Transformation of a central element not found in the multimesh tree.");
+      throw 
+        Hermes::Exceptions::Exception("Transformation of a central element not found in the multimesh tree.");
       return NULL;
     }
 

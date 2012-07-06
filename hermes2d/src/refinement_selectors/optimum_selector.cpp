@@ -27,7 +27,9 @@ namespace Hermes
         case H2D_HP_ANISO_H: return "HP_ANISO_H";
         case H2D_HP_ANISO_P: return "HP_ANISO_P";
         case H2D_HP_ANISO: return "HP_ANISO";
-        default: throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return NULL;
+        default: 
+          throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); 
+          return NULL;
         }
       }
 

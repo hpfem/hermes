@@ -259,7 +259,7 @@ SparseMatrix<Scalar>* Hermes::Algebra::create_matrix()
       break;
     }
   default:
-    throw Hermes::Exceptions::Exception("Unknown matrix solver requested.");
+    throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_matrix().");
   }
   return NULL;
 }
@@ -324,7 +324,7 @@ Vector<Scalar>* Hermes::Algebra::create_vector()
       break;
     }
   default:
-    throw Hermes::Exceptions::Exception("Unknown matrix solver requested.");
+    throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_vector().");
   }
   return NULL;
 }

@@ -102,7 +102,8 @@ namespace Hermes
       ExactSolutionVector<Scalar>* exact_solution2)
       : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2)
     {
-      for (unsigned int i = 0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
+      for (unsigned int i = 0; i < this->markers.size(); i++) 
+        this->markers.push_back(markers_[i]);
     };
 
     template<typename Scalar>
@@ -191,7 +192,7 @@ namespace Hermes
     EssentialBoundaryCondition<Scalar>* EssentialBCs<Scalar>::get_boundary_condition(std::string marker)
     {
       if(this->markers.find(marker) == this->markers.end())
-        return NULL;
+        throw Hermes::Exceptions::Exception("Attempt to get a BC on the part of the boundary with marker '%s'.", marker.c_str());
       else
         return this->markers[marker];
     }

@@ -108,7 +108,8 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) 
+        throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
       {
@@ -135,7 +136,8 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
+      if (this->shapeset->get_num_components() < 2) 
+        throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
       {
@@ -214,8 +216,6 @@ namespace Hermes
         this->next_dof += ed->n * this->stride;
       }
     }
-
-
 
     //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 

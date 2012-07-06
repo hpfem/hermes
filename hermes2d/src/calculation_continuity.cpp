@@ -455,7 +455,7 @@ namespace Hermes
         }
         catch(Hermes::Exceptions::SolutionSaveFailureException& e)
         {
-          throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::output, filename.str().c_str(), e.getMsg());
+          throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::output, filename.str().c_str(), e.what());
         }
       }
     }
@@ -470,7 +470,7 @@ namespace Hermes
       }
       catch(Hermes::Exceptions::SolutionSaveFailureException& e)
       {
-        throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::output, filename.str().c_str(), e.getMsg());
+        throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::output, filename.str().c_str(), e.what());
       }
     }
 
@@ -539,7 +539,7 @@ namespace Hermes
         }
         catch(Hermes::Exceptions::MeshLoadFailureException& e)
         {
-          throw IOCalculationContinuityException(CalculationContinuityException::meshes, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+          throw IOCalculationContinuityException(CalculationContinuityException::meshes, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
         }
       }
     }
@@ -556,7 +556,7 @@ namespace Hermes
       }
       catch(Hermes::Exceptions::MeshLoadFailureException& e)
       {
-        throw IOCalculationContinuityException(CalculationContinuityException::meshes, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+        throw IOCalculationContinuityException(CalculationContinuityException::meshes, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
       }
     }
 
@@ -593,7 +593,7 @@ namespace Hermes
         }
         catch(Hermes::Exceptions::SpaceLoadFailureException& e)
         {
-          throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+          throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
         }
         catch(std::exception& e)
         {
@@ -636,7 +636,7 @@ namespace Hermes
         }
         catch(Hermes::Exceptions::SpaceLoadFailureException& e)
         {
-          throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+          throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
         }
         catch(std::exception& e)
         {
@@ -682,7 +682,7 @@ namespace Hermes
       }
       catch(Hermes::Exceptions::SpaceLoadFailureException& e)
       {
-        throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+        throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
       }
       catch(std::exception& e)
       {
@@ -709,7 +709,7 @@ namespace Hermes
         }
         catch(Hermes::Exceptions::SolutionLoadFailureException& e)
         {
-          throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+          throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
         }
         catch(std::exception& e)
         {
@@ -731,7 +731,7 @@ namespace Hermes
       }
       catch(Hermes::Exceptions::SolutionLoadFailureException& e)
       {
-        throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::input, filename.str().c_str(), e.getMsg());
+        throw IOCalculationContinuityException(CalculationContinuityException::solutions, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
       }
       catch(std::exception& e)
       {

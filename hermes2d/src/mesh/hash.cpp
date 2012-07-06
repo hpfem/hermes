@@ -147,7 +147,8 @@ namespace Hermes
       nqueries++;
       while (node != NULL)
       {
-        if (node->p1 == p1 && node->p2 == p2) return node;
+        if (node->p1 == p1 && node->p2 == p2)
+          return node;
         node = node->next_hash;
         ncollisions++;
       }

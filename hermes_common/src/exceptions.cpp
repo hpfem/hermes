@@ -26,12 +26,12 @@ namespace Hermes
   namespace Exceptions
   {
 
-    Exception::Exception()
+    Exception::Exception() : std::exception()
     {
       message = NULL;
     }
 
-    Exception::Exception(const char * msg, ...)
+    Exception::Exception(const char * msg, ...) : std::exception()
     {
       char text[1024];
 
@@ -54,7 +54,7 @@ namespace Hermes
         CallStack::dump(0);
     }
 
-    const char * Exception::getMsg() const
+    const char * Exception::what() const
     {
       return message;
     }
@@ -94,8 +94,8 @@ namespace Hermes
 
     NullException::NullException(const NullException & e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
       paramIdx=e.getParamIdx();
       itemIdx=e.getItemIdx();
@@ -151,8 +151,8 @@ namespace Hermes
 
     LengthException::LengthException(const LengthException&e) : Exception()
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
       this->fstParamIdx=e.getFirstParamIdx();
       this->sndParamIdx=e.getSecondParamIdx();
@@ -181,8 +181,8 @@ namespace Hermes
 
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
     }
     
@@ -235,8 +235,8 @@ namespace Hermes
 
     ValueException::ValueException(const ValueException&e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
       this->value=e.getValue();
       this->allowed=e.getAllowed();
@@ -261,8 +261,8 @@ namespace Hermes
 
     FunctionNotOverridenException::FunctionNotOverridenException(const FunctionNotOverridenException&e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
     }
 
@@ -285,8 +285,8 @@ namespace Hermes
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
     }
 
@@ -309,8 +309,8 @@ namespace Hermes
 
     SpaceLoadFailureException::SpaceLoadFailureException(const SpaceLoadFailureException&e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
     }
 
@@ -333,8 +333,8 @@ namespace Hermes
 
     SolutionSaveFailureException::SolutionSaveFailureException(const SolutionSaveFailureException&e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
     }
 
@@ -357,8 +357,8 @@ namespace Hermes
 
     SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
     {
-      char * msg= new char[strlen(e.getMsg())+1];
-      strcpy(msg, e.getMsg());
+      char * msg= new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
       message=msg;
     }
   }

@@ -141,7 +141,7 @@ namespace Hermes
           break;
         }
       default:
-        throw Hermes::Exceptions::Exception("Unknown matrix solver requested.");
+        throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
       }
       return NULL;
     }
