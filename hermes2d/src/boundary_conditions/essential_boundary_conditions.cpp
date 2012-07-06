@@ -192,7 +192,7 @@ namespace Hermes
     EssentialBoundaryCondition<Scalar>* EssentialBCs<Scalar>::get_boundary_condition(std::string marker)
     {
       if(this->markers.find(marker) == this->markers.end())
-        throw Hermes::Exceptions::Exception("Attempt to get a BC on the part of the boundary with marker '%s'.", marker.c_str());
+        return NULL;
       else
         return this->markers[marker];
     }
