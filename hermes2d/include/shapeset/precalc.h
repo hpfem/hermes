@@ -31,7 +31,7 @@ namespace Hermes
     ///
     class HERMES_API PrecalcShapeset : public Function<double>
     {
-    public:      
+    public:
       /// Returns type of space
       SpaceType get_space_type() const;
 
@@ -50,7 +50,7 @@ namespace Hermes
 
       /// Destructor.
       virtual ~PrecalcShapeset();
-    
+
     private:
       virtual void set_quad_2d(Quad2D* quad_2d);
 

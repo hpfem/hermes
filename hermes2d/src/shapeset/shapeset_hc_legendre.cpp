@@ -22,9 +22,7 @@ namespace Hermes
   {
     // Shape functions for the curl operator for triangles, based on Legendre polynomials
 
-
     //Shape functions
-
 
     // ORDER 0
 
@@ -74,25 +72,21 @@ namespace Hermes
     inline double leg_tri_f1_ax1(double x, double y)
     {
      return -leg_tri_f1_ax0(x, y);
-
     }
 
     inline double leg_tri_f1_ay1(double x, double y)
     {
      return -leg_tri_f1_ay0(x, y);
-
     }
 
     inline double leg_tri_f1_bx1(double x, double y)
     {
      return -leg_tri_f1_bx0(x, y);
-
     }
 
     inline double leg_tri_f1_by1(double x, double y)
     {
      return -leg_tri_f1_by0(x, y);
-
     }
 
     // number 2
@@ -139,25 +133,21 @@ namespace Hermes
     inline double leg_tri_f2_ax1(double x, double y)
     {
      return -leg_tri_f2_ax0(x, y);
-
     }
 
     inline double leg_tri_f2_ay1(double x, double y)
     {
      return -leg_tri_f2_ay0(x, y);
-
     }
 
     inline double leg_tri_f2_bx1(double x, double y)
     {
      return -leg_tri_f2_bx0(x, y);
-
     }
 
     inline double leg_tri_f2_by1(double x, double y)
     {
      return -leg_tri_f2_by0(x, y);
-
     }
 
     // number 3
@@ -204,27 +194,22 @@ namespace Hermes
     inline double leg_tri_f3_ax1(double x, double y)
     {
      return -leg_tri_f3_ax0(x, y);
-
     }
 
     inline double leg_tri_f3_ay1(double x, double y)
     {
      return -leg_tri_f3_ay0(x, y);
-
     }
 
     inline double leg_tri_f3_bx1(double x, double y)
     {
      return -leg_tri_f3_bx0(x, y);
-
     }
 
     inline double leg_tri_f3_by1(double x, double y)
     {
      return -leg_tri_f3_by0(x, y);
-
     }
-
 
     // ORDER 1
 
@@ -322,7 +307,6 @@ namespace Hermes
     {
       return (psi1e3y_2(x, y)) / 1.0;
     }
-
 
     // ORDER 2
 
@@ -601,7 +585,6 @@ namespace Hermes
       return -leg_tri_f9_by0(x, y);
     }
 
-
     // Edge-base bubble functions (normal functions), order 2
 
     // number 10
@@ -799,7 +782,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // ORDER 3
 
     // Edge functions, order 3
@@ -986,7 +968,6 @@ namespace Hermes
       dy = 2.0 / 3.0 * Legendre1(L2 - L1);
       return (ay * psi1e3_2(x, y) + by * psi1e3y_2(x, y) - cy * psi0e3_2(x, y) - dy * psi0e3y_2(x, y)) / 1.0;
     }
-
 
     // Edge-base bubble functions (normal functions), order 3
 
@@ -1185,7 +1166,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 3
 
     // number 19
@@ -1212,7 +1192,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f19_ay(double x, double y)
@@ -1229,7 +1208,6 @@ namespace Hermes
     inline double leg_tri_f19_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f19_by(double x, double y)
@@ -1255,7 +1233,6 @@ namespace Hermes
     inline double leg_tri_f20_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f20_ay(double x, double y)
@@ -1272,7 +1249,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f20_by(double x, double y)
@@ -1285,7 +1261,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 4
 
@@ -1564,7 +1539,6 @@ namespace Hermes
       return -leg_tri_f23_by0(x, y);
     }
 
-
     // Edge-base bubble functions (normal functions), order 4
 
     // number 24
@@ -1762,7 +1736,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 4
 
     // number 27
@@ -1789,7 +1762,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f27_ay(double x, double y)
@@ -1806,7 +1778,6 @@ namespace Hermes
     inline double leg_tri_f27_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f27_by(double x, double y)
@@ -1832,7 +1803,6 @@ namespace Hermes
     inline double leg_tri_f28_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f28_ay(double x, double y)
@@ -1849,7 +1819,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f28_by(double x, double y)
@@ -1887,7 +1856,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f29_ay(double x, double y)
@@ -1904,7 +1872,6 @@ namespace Hermes
     inline double leg_tri_f29_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f29_by(double x, double y)
@@ -1930,7 +1897,6 @@ namespace Hermes
     inline double leg_tri_f30_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f30_ay(double x, double y)
@@ -1947,7 +1913,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f30_by(double x, double y)
@@ -1960,7 +1925,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 5
 
@@ -2148,7 +2112,6 @@ namespace Hermes
       dy = 4.0 / 5.0 * Legendre3(L2 - L1);
       return (ay * psi1e3_2(x, y) + by * psi1e3y_2(x, y) - cy * psi0e3_2(x, y) - dy * psi0e3y_2(x, y)) / 1.0;
     }
-
 
     // Edge-base bubble functions (normal functions), order 5
 
@@ -2347,7 +2310,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 5
 
     // number 37
@@ -2374,7 +2336,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f37_ay(double x, double y)
@@ -2391,7 +2352,6 @@ namespace Hermes
     inline double leg_tri_f37_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f37_by(double x, double y)
@@ -2417,7 +2377,6 @@ namespace Hermes
     inline double leg_tri_f38_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f38_ay(double x, double y)
@@ -2434,7 +2393,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f38_by(double x, double y)
@@ -2472,7 +2430,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f39_ay(double x, double y)
@@ -2489,7 +2446,6 @@ namespace Hermes
     inline double leg_tri_f39_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f39_by(double x, double y)
@@ -2515,7 +2471,6 @@ namespace Hermes
     inline double leg_tri_f40_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f40_ay(double x, double y)
@@ -2532,7 +2487,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f40_by(double x, double y)
@@ -2570,7 +2524,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f41_ay(double x, double y)
@@ -2587,7 +2540,6 @@ namespace Hermes
     inline double leg_tri_f41_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f41_by(double x, double y)
@@ -2613,7 +2565,6 @@ namespace Hermes
     inline double leg_tri_f42_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f42_ay(double x, double y)
@@ -2630,7 +2581,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f42_by(double x, double y)
@@ -2643,7 +2593,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 6
 
@@ -2922,7 +2871,6 @@ namespace Hermes
       return -leg_tri_f45_by0(x, y);
     }
 
-
     // Edge-base bubble functions (normal functions), order 6
 
     // number 46
@@ -3120,7 +3068,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 6
 
     // number 49
@@ -3147,7 +3094,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f49_ay(double x, double y)
@@ -3164,7 +3110,6 @@ namespace Hermes
     inline double leg_tri_f49_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f49_by(double x, double y)
@@ -3190,7 +3135,6 @@ namespace Hermes
     inline double leg_tri_f50_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f50_ay(double x, double y)
@@ -3207,7 +3151,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f50_by(double x, double y)
@@ -3245,7 +3188,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f51_ay(double x, double y)
@@ -3262,7 +3204,6 @@ namespace Hermes
     inline double leg_tri_f51_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f51_by(double x, double y)
@@ -3288,7 +3229,6 @@ namespace Hermes
     inline double leg_tri_f52_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f52_ay(double x, double y)
@@ -3305,7 +3245,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f52_by(double x, double y)
@@ -3343,7 +3282,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f53_ay(double x, double y)
@@ -3360,7 +3298,6 @@ namespace Hermes
     inline double leg_tri_f53_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f53_by(double x, double y)
@@ -3386,7 +3323,6 @@ namespace Hermes
     inline double leg_tri_f54_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f54_ay(double x, double y)
@@ -3403,7 +3339,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f54_by(double x, double y)
@@ -3441,7 +3376,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f55_ay(double x, double y)
@@ -3458,7 +3392,6 @@ namespace Hermes
     inline double leg_tri_f55_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f55_by(double x, double y)
@@ -3484,7 +3417,6 @@ namespace Hermes
     inline double leg_tri_f56_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f56_ay(double x, double y)
@@ -3501,7 +3433,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f56_by(double x, double y)
@@ -3514,7 +3445,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 7
 
@@ -3702,7 +3632,6 @@ namespace Hermes
       dy = 6.0 / 7.0 * Legendre5(L2 - L1);
       return (ay * psi1e3_2(x, y) + by * psi1e3y_2(x, y) - cy * psi0e3_2(x, y) - dy * psi0e3y_2(x, y)) / 1.0;
     }
-
 
     // Edge-base bubble functions (normal functions), order 7
 
@@ -3901,7 +3830,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 7
 
     // number 63
@@ -3928,7 +3856,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f63_ay(double x, double y)
@@ -3945,7 +3872,6 @@ namespace Hermes
     inline double leg_tri_f63_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f63_by(double x, double y)
@@ -3971,7 +3897,6 @@ namespace Hermes
     inline double leg_tri_f64_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f64_ay(double x, double y)
@@ -3988,7 +3913,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f64_by(double x, double y)
@@ -4026,7 +3950,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f65_ay(double x, double y)
@@ -4043,7 +3966,6 @@ namespace Hermes
     inline double leg_tri_f65_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f65_by(double x, double y)
@@ -4069,7 +3991,6 @@ namespace Hermes
     inline double leg_tri_f66_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f66_ay(double x, double y)
@@ -4086,7 +4007,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f66_by(double x, double y)
@@ -4124,7 +4044,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f67_ay(double x, double y)
@@ -4141,7 +4060,6 @@ namespace Hermes
     inline double leg_tri_f67_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f67_by(double x, double y)
@@ -4167,7 +4085,6 @@ namespace Hermes
     inline double leg_tri_f68_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f68_ay(double x, double y)
@@ -4184,7 +4101,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f68_by(double x, double y)
@@ -4222,7 +4138,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f69_ay(double x, double y)
@@ -4239,7 +4154,6 @@ namespace Hermes
     inline double leg_tri_f69_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f69_by(double x, double y)
@@ -4265,7 +4179,6 @@ namespace Hermes
     inline double leg_tri_f70_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f70_ay(double x, double y)
@@ -4282,7 +4195,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f70_by(double x, double y)
@@ -4320,7 +4232,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f71_ay(double x, double y)
@@ -4337,7 +4248,6 @@ namespace Hermes
     inline double leg_tri_f71_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f71_by(double x, double y)
@@ -4363,7 +4273,6 @@ namespace Hermes
     inline double leg_tri_f72_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f72_ay(double x, double y)
@@ -4380,7 +4289,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f72_by(double x, double y)
@@ -4393,7 +4301,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 8
 
@@ -4672,7 +4579,6 @@ namespace Hermes
       return -leg_tri_f75_by0(x, y);
     }
 
-
     // Edge-base bubble functions (normal functions), order 8
 
     // number 76
@@ -4870,7 +4776,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 8
 
     // number 79
@@ -4897,7 +4802,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre5x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f79_ay(double x, double y)
@@ -4914,7 +4818,6 @@ namespace Hermes
     inline double leg_tri_f79_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f79_by(double x, double y)
@@ -4940,7 +4843,6 @@ namespace Hermes
     inline double leg_tri_f80_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f80_ay(double x, double y)
@@ -4957,7 +4859,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre5x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f80_by(double x, double y)
@@ -4995,7 +4896,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f81_ay(double x, double y)
@@ -5012,7 +4912,6 @@ namespace Hermes
     inline double leg_tri_f81_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f81_by(double x, double y)
@@ -5038,7 +4937,6 @@ namespace Hermes
     inline double leg_tri_f82_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f82_ay(double x, double y)
@@ -5055,7 +4953,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f82_by(double x, double y)
@@ -5093,7 +4990,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f83_ay(double x, double y)
@@ -5110,7 +5006,6 @@ namespace Hermes
     inline double leg_tri_f83_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f83_by(double x, double y)
@@ -5136,7 +5031,6 @@ namespace Hermes
     inline double leg_tri_f84_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f84_ay(double x, double y)
@@ -5153,7 +5047,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f84_by(double x, double y)
@@ -5191,7 +5084,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f85_ay(double x, double y)
@@ -5208,7 +5100,6 @@ namespace Hermes
     inline double leg_tri_f85_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f85_by(double x, double y)
@@ -5234,7 +5125,6 @@ namespace Hermes
     inline double leg_tri_f86_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f86_ay(double x, double y)
@@ -5251,7 +5141,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f86_by(double x, double y)
@@ -5289,7 +5178,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f87_ay(double x, double y)
@@ -5306,7 +5194,6 @@ namespace Hermes
     inline double leg_tri_f87_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f87_by(double x, double y)
@@ -5332,7 +5219,6 @@ namespace Hermes
     inline double leg_tri_f88_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f88_ay(double x, double y)
@@ -5349,7 +5235,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f88_by(double x, double y)
@@ -5387,7 +5272,6 @@ namespace Hermes
       Leg1x = Legendre5x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f89_ay(double x, double y)
@@ -5404,7 +5288,6 @@ namespace Hermes
     inline double leg_tri_f89_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f89_by(double x, double y)
@@ -5430,7 +5313,6 @@ namespace Hermes
     inline double leg_tri_f90_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f90_ay(double x, double y)
@@ -5447,7 +5329,6 @@ namespace Hermes
       Leg1x = Legendre5x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f90_by(double x, double y)
@@ -5460,7 +5341,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 9
 
@@ -5648,7 +5528,6 @@ namespace Hermes
       dy = 8.0 / 9.0 * Legendre7(L2 - L1);
       return (ay * psi1e3_2(x, y) + by * psi1e3y_2(x, y) - cy * psi0e3_2(x, y) - dy * psi0e3y_2(x, y)) / 1.0;
     }
-
 
     // Edge-base bubble functions (normal functions), order 9
 
@@ -5847,7 +5726,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 9
 
     // number 97
@@ -5874,7 +5752,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre6x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f97_ay(double x, double y)
@@ -5891,7 +5768,6 @@ namespace Hermes
     inline double leg_tri_f97_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f97_by(double x, double y)
@@ -5917,7 +5793,6 @@ namespace Hermes
     inline double leg_tri_f98_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f98_ay(double x, double y)
@@ -5934,7 +5809,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre6x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f98_by(double x, double y)
@@ -5972,7 +5846,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre5x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f99_ay(double x, double y)
@@ -5989,7 +5862,6 @@ namespace Hermes
     inline double leg_tri_f99_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f99_by(double x, double y)
@@ -6015,7 +5887,6 @@ namespace Hermes
     inline double leg_tri_f100_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f100_ay(double x, double y)
@@ -6032,7 +5903,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre5x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f100_by(double x, double y)
@@ -6070,7 +5940,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f101_ay(double x, double y)
@@ -6087,7 +5956,6 @@ namespace Hermes
     inline double leg_tri_f101_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f101_by(double x, double y)
@@ -6113,7 +5981,6 @@ namespace Hermes
     inline double leg_tri_f102_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f102_ay(double x, double y)
@@ -6130,7 +5997,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f102_by(double x, double y)
@@ -6168,7 +6034,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f103_ay(double x, double y)
@@ -6185,7 +6050,6 @@ namespace Hermes
     inline double leg_tri_f103_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f103_by(double x, double y)
@@ -6211,7 +6075,6 @@ namespace Hermes
     inline double leg_tri_f104_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f104_ay(double x, double y)
@@ -6228,7 +6091,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f104_by(double x, double y)
@@ -6266,7 +6128,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f105_ay(double x, double y)
@@ -6283,7 +6144,6 @@ namespace Hermes
     inline double leg_tri_f105_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f105_by(double x, double y)
@@ -6309,7 +6169,6 @@ namespace Hermes
     inline double leg_tri_f106_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f106_ay(double x, double y)
@@ -6326,7 +6185,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f106_by(double x, double y)
@@ -6364,7 +6222,6 @@ namespace Hermes
       Leg1x = Legendre5x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f107_ay(double x, double y)
@@ -6381,7 +6238,6 @@ namespace Hermes
     inline double leg_tri_f107_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f107_by(double x, double y)
@@ -6407,7 +6263,6 @@ namespace Hermes
     inline double leg_tri_f108_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f108_ay(double x, double y)
@@ -6424,7 +6279,6 @@ namespace Hermes
       Leg1x = Legendre5x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f108_by(double x, double y)
@@ -6462,7 +6316,6 @@ namespace Hermes
       Leg1x = Legendre6x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f109_ay(double x, double y)
@@ -6479,7 +6332,6 @@ namespace Hermes
     inline double leg_tri_f109_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f109_by(double x, double y)
@@ -6505,7 +6357,6 @@ namespace Hermes
     inline double leg_tri_f110_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f110_ay(double x, double y)
@@ -6522,7 +6373,6 @@ namespace Hermes
       Leg1x = Legendre6x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f110_by(double x, double y)
@@ -6535,7 +6385,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     // ORDER 10
 
@@ -6814,7 +6663,6 @@ namespace Hermes
       return -leg_tri_f113_by0(x, y);
     }
 
-
     // Edge-base bubble functions (normal functions), order 10
 
     // number 114
@@ -7012,7 +6860,6 @@ namespace Hermes
       return  (ky * n32) / 1.0;
     }
 
-
     // Genuine bubble functions, order 10
 
     // number 117
@@ -7039,7 +6886,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre7x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f117_ay(double x, double y)
@@ -7056,7 +6902,6 @@ namespace Hermes
     inline double leg_tri_f117_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f117_by(double x, double y)
@@ -7082,7 +6927,6 @@ namespace Hermes
     inline double leg_tri_f118_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f118_ay(double x, double y)
@@ -7099,7 +6943,6 @@ namespace Hermes
       Leg1x = Legendre0x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre7x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f118_by(double x, double y)
@@ -7137,7 +6980,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre6x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f119_ay(double x, double y)
@@ -7154,7 +6996,6 @@ namespace Hermes
     inline double leg_tri_f119_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f119_by(double x, double y)
@@ -7180,7 +7021,6 @@ namespace Hermes
     inline double leg_tri_f120_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f120_ay(double x, double y)
@@ -7197,7 +7037,6 @@ namespace Hermes
       Leg1x = Legendre1x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre6x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f120_by(double x, double y)
@@ -7235,7 +7074,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre5x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f121_ay(double x, double y)
@@ -7252,7 +7090,6 @@ namespace Hermes
     inline double leg_tri_f121_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f121_by(double x, double y)
@@ -7278,7 +7115,6 @@ namespace Hermes
     inline double leg_tri_f122_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f122_ay(double x, double y)
@@ -7295,7 +7131,6 @@ namespace Hermes
       Leg1x = Legendre2x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre5x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f122_by(double x, double y)
@@ -7333,7 +7168,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f123_ay(double x, double y)
@@ -7350,7 +7184,6 @@ namespace Hermes
     inline double leg_tri_f123_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f123_by(double x, double y)
@@ -7376,7 +7209,6 @@ namespace Hermes
     inline double leg_tri_f124_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f124_ay(double x, double y)
@@ -7393,7 +7225,6 @@ namespace Hermes
       Leg1x = Legendre3x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre4x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f124_by(double x, double y)
@@ -7431,7 +7262,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f125_ay(double x, double y)
@@ -7448,7 +7278,6 @@ namespace Hermes
     inline double leg_tri_f125_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f125_by(double x, double y)
@@ -7474,7 +7303,6 @@ namespace Hermes
     inline double leg_tri_f126_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f126_ay(double x, double y)
@@ -7491,7 +7319,6 @@ namespace Hermes
       Leg1x = Legendre4x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre3x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f126_by(double x, double y)
@@ -7529,7 +7356,6 @@ namespace Hermes
       Leg1x = Legendre5x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f127_ay(double x, double y)
@@ -7546,7 +7372,6 @@ namespace Hermes
     inline double leg_tri_f127_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f127_by(double x, double y)
@@ -7572,7 +7397,6 @@ namespace Hermes
     inline double leg_tri_f128_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f128_ay(double x, double y)
@@ -7589,7 +7413,6 @@ namespace Hermes
       Leg1x = Legendre5x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre2x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f128_by(double x, double y)
@@ -7627,7 +7450,6 @@ namespace Hermes
       Leg1x = Legendre6x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f129_ay(double x, double y)
@@ -7644,7 +7466,6 @@ namespace Hermes
     inline double leg_tri_f129_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f129_by(double x, double y)
@@ -7670,7 +7491,6 @@ namespace Hermes
     inline double leg_tri_f130_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f130_ay(double x, double y)
@@ -7687,7 +7507,6 @@ namespace Hermes
       Leg1x = Legendre6x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre1x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f130_by(double x, double y)
@@ -7725,7 +7544,6 @@ namespace Hermes
       Leg1x = Legendre7x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f131_ay(double x, double y)
@@ -7742,7 +7560,6 @@ namespace Hermes
     inline double leg_tri_f131_bx(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f131_by(double x, double y)
@@ -7768,7 +7585,6 @@ namespace Hermes
     inline double leg_tri_f132_ax(double x, double y)
     {
       return 0.0;
-
     }
 
     inline double leg_tri_f132_ay(double x, double y)
@@ -7785,7 +7601,6 @@ namespace Hermes
       Leg1x = Legendre7x(l3 - l2) * (l3x - l2x);
       Leg2x = Legendre0x(l2 - l1) * (l2x - l1x);
       return l1x * l2 * l3 * Leg1 * Leg2 + l1 * l2x * l3 * Leg1 * Leg2 + l1 * l2 * l3x * Leg1 * Leg2 + l1 * l2 * l3 * Leg1x * Leg2 + l1 * l2 * l3 * Leg1 * Leg2x;
-
     }
 
     inline double leg_tri_f132_by(double x, double y)
@@ -7798,7 +7613,6 @@ namespace Hermes
       Leg2y = Legendre0x(l2 - l1) * (l2y - l1y);
       return l1y * l2 * l3 * Leg1 * Leg2 + l1 * l2y * l3 * Leg1 * Leg2 + l1 * l2 * l3y * Leg1 * Leg2 + l1 * l2 * l3 * Leg1y * Leg2 + l1 * l2 * l3 * Leg1 * Leg2y;
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -7923,7 +7737,6 @@ namespace Hermes
       leg_tri_f127_ay,  leg_tri_f128_ay,  leg_tri_f129_ay,  leg_tri_f130_ay,  leg_tri_f131_ay,  leg_tri_f132_ay
     };
 
-
     static Shapeset::shape_fn_t leg_tri_fn_bx[] =
     {
     leg_tri_f1_bx0,  leg_tri_f1_bx1,  leg_tri_f2_bx0,  leg_tri_f2_bx1,  leg_tri_f3_bx0,
@@ -7957,7 +7770,6 @@ namespace Hermes
       leg_tri_f123_bx,  leg_tri_f124_bx,  leg_tri_f125_bx,  leg_tri_f126_bx,  leg_tri_f127_bx,
       leg_tri_f128_bx,  leg_tri_f129_bx,  leg_tri_f130_bx,  leg_tri_f131_bx,  leg_tri_f132_bx
     };
-
 
     static Shapeset::shape_fn_t leg_tri_fn_by[] =
     {
@@ -7993,7 +7805,6 @@ namespace Hermes
       leg_tri_f128_by,  leg_tri_f129_by,  leg_tri_f130_by,  leg_tri_f131_by,  leg_tri_f132_by
     };
 
-
     static int leg_tri_bubble_indices_all_orders[]=
     {
       15, 16, 17,
@@ -8006,7 +7817,6 @@ namespace Hermes
       108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124 ,
       131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149
     };
-
 
     static int* leg_tri_bubble_indices[11] =
     {
@@ -8021,7 +7831,6 @@ namespace Hermes
       leg_tri_bubble_indices_all_orders,
       leg_tri_bubble_indices_all_orders
     };
-
 
     static int leg_tri_bubble_count[11] = {0, 0, 3, 8, 15, 24, 35, 48, 63, 80, 99};
 
@@ -8038,7 +7847,6 @@ namespace Hermes
 
     static int leg_tri_vertex_indices[3] = { -1, -1, -1 };
 
-
     static int leg_tri_index_to_order[150] =
     {
       /*6*/  1, 1, 1, 1, 1, 1,
@@ -8053,7 +7861,6 @@ namespace Hermes
       /*20*/ 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
       /*25*/ 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
     };
-
 
     static Shapeset::shape_fn_t* leg_tri_shape_fn_table[2] =
     {
@@ -8072,7 +7879,6 @@ namespace Hermes
       leg_tri_fn_ay,
       leg_tri_fn_by
     };
-
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16607,7 +16413,6 @@ namespace Hermes
       static int qb_10_9[] = { 88, 89, 90, 91, 92, 93, 94, 95, 96, 198, 98, 199, 99, 200, 100, 201, 101, 202, 102, 203, 103, 204, 104, 205, 105, 206, 106, 207, 209, 108, 210, 109, 211, 110, 212, 111, 213, 112, 214, 113, 215, 114, 216, 115, 217, 116, 218, 220, 118, 221, 119, 222, 120, 223, 121, 224, 122, 225, 123, 226, 124, 227, 125, 228, 126, 229, 231, 128, 232, 129, 233, 130, 234, 131, 235, 132, 236, 133, 237, 134, 238, 135, 239, 136, 240, 242, 138, 243, 139, 244, 140, 245, 141, 246, 142, 247, 143, 248, 144, 249, 145, 250, 146, 251, 253, 148, 254, 149, 255, 150, 256, 151, 257, 152, 258, 153, 259, 154, 260, 155, 261, 156, 262, 264, 158, 265, 159, 266, 160, 267, 161, 268, 162, 269, 163, 270, 164, 271, 165, 272, 166, 273, 275, 168, 276, 169, 277, 170, 278, 171, 279, 172, 280, 173, 281, 174, 282, 175, 283, 176, 284, 286, 178, 287, 179, 288, 180, 289, 181, 290, 182, 291, 183, 292, 184, 293, 185, 294, 186, 295, 297, 188, 298, 189, 299, 190, 300, 191, 301, 192, 302, 193, 303, 194, 304, 195, 305, 196, 306, };
       static int qb_10_10[] = { 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 198, 98, 199, 99, 200, 100, 201, 101, 202, 102, 203, 103, 204, 104, 205, 105, 206, 106, 207, 107, 208, 209, 108, 210, 109, 211, 110, 212, 111, 213, 112, 214, 113, 215, 114, 216, 115, 217, 116, 218, 117, 219, 220, 118, 221, 119, 222, 120, 223, 121, 224, 122, 225, 123, 226, 124, 227, 125, 228, 126, 229, 127, 230, 231, 128, 232, 129, 233, 130, 234, 131, 235, 132, 236, 133, 237, 134, 238, 135, 239, 136, 240, 137, 241, 242, 138, 243, 139, 244, 140, 245, 141, 246, 142, 247, 143, 248, 144, 249, 145, 250, 146, 251, 147, 252, 253, 148, 254, 149, 255, 150, 256, 151, 257, 152, 258, 153, 259, 154, 260, 155, 261, 156, 262, 157, 263, 264, 158, 265, 159, 266, 160, 267, 161, 268, 162, 269, 163, 270, 164, 271, 165, 272, 166, 273, 167, 274, 275, 168, 276, 169, 277, 170, 278, 171, 279, 172, 280, 173, 281, 174, 282, 175, 283, 176, 284, 177, 285, 286, 178, 287, 179, 288, 180, 289, 181, 290, 182, 291, 183, 292, 184, 293, 185, 294, 186, 295, 187, 296, 297, 188, 298, 189, 299, 190, 300, 191, 301, 192, 302, 193, 303, 194, 304, 195, 305, 196, 306, 197, 307, };
 
-
     #define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL,
 
     static int* leg_quad_bubble_indices[] =
@@ -16679,9 +16484,6 @@ namespace Hermes
       oo(0, 2),  oo(0, 3),  oo(0, 4),  oo(0, 5),  oo(0, 6),  oo(0, 7),  oo(0, 8),  oo(0, 9),  oo(0, 10),  oo(0, 11),  oo(1, 2),  oo(1, 3),  oo(1, 4),  oo(1, 5),  oo(1, 6),  oo(1, 7),  oo(1, 8),  oo(1, 9),  oo(1, 10),  oo(1, 11),  oo(2, 2),  oo(2, 3),  oo(2, 4),  oo(2, 5),  oo(2, 6),  oo(2, 7),  oo(2, 8),  oo(2, 9),  oo(2, 10),  oo(2, 11),  oo(3, 2),  oo(3, 3),  oo(3, 4),  oo(3, 5),  oo(3, 6),  oo(3, 7),  oo(3, 8),  oo(3, 9),  oo(3, 10),  oo(3, 11),  oo(4, 2),  oo(4, 3),  oo(4, 4),  oo(4, 5),  oo(4, 6),  oo(4, 7),  oo(4, 8),  oo(4, 9),  oo(4, 10),  oo(4, 11),  oo(5, 2),  oo(5, 3),  oo(5, 4),  oo(5, 5),  oo(5, 6),  oo(5, 7),  oo(5, 8),  oo(5, 9),  oo(5, 10),  oo(5, 11),  oo(6, 2),  oo(6, 3),  oo(6, 4),  oo(6, 5),  oo(6, 6),  oo(6, 7),  oo(6, 8),  oo(6, 9),  oo(6, 10),  oo(6, 11),  oo(7, 2),  oo(7, 3),  oo(7, 4),  oo(7, 5),  oo(7, 6),  oo(7, 7),  oo(7, 8),  oo(7, 9),  oo(7, 10),  oo(7, 11),  oo(8, 2),  oo(8, 3),  oo(8, 4),  oo(8, 5),  oo(8, 6),  oo(8, 7),  oo(8, 8),  oo(8, 9),  oo(8, 10),  oo(8, 11),  oo(9, 2),  oo(9, 3),  oo(9, 4),  oo(9, 5),  oo(9, 6),  oo(9, 7),  oo(9, 8),  oo(9, 9),  oo(9, 10),  oo(9, 11),  oo(10, 2),  oo(10, 3),  oo(10, 4),  oo(10, 5),  oo(10, 6),  oo(10, 7),  oo(10, 8),  oo(10, 9),  oo(10, 10),  oo(10, 11),  oo(2, 0),  oo(2, 1),  oo(2, 2),  oo(2, 3),  oo(2, 4),  oo(2, 5),  oo(2, 6),  oo(2, 7),  oo(2, 8),  oo(2, 9),  oo(2, 10),  oo(3, 0),  oo(3, 1),  oo(3, 2),  oo(3, 3),  oo(3, 4),  oo(3, 5),  oo(3, 6),  oo(3, 7),  oo(3, 8),  oo(3, 9),  oo(3, 10),  oo(4, 0),  oo(4, 1),  oo(4, 2),  oo(4, 3),  oo(4, 4),  oo(4, 5),  oo(4, 6),  oo(4, 7),  oo(4, 8),  oo(4, 9),  oo(4, 10),  oo(5, 0),  oo(5, 1),  oo(5, 2),  oo(5, 3),  oo(5, 4),  oo(5, 5),  oo(5, 6),  oo(5, 7),  oo(5, 8),  oo(5, 9),  oo(5, 10),  oo(6, 0),  oo(6, 1),  oo(6, 2),  oo(6, 3),  oo(6, 4),  oo(6, 5),  oo(6, 6),  oo(6, 7),  oo(6, 8),  oo(6, 9),  oo(6, 10),  oo(7, 0),  oo(7, 1),  oo(7, 2),  oo(7, 3),  oo(7, 4),  oo(7, 5),  oo(7, 6),  oo(7, 7),  oo(7, 8),  oo(7, 9),  oo(7, 10),  oo(8, 0),  oo(8, 1),  oo(8, 2),  oo(8, 3),  oo(8, 4),  oo(8, 5),  oo(8, 6),  oo(8, 7),  oo(8, 8),  oo(8, 9),  oo(8, 10),  oo(9, 0),  oo(9, 1),  oo(9, 2),  oo(9, 3),  oo(9, 4),  oo(9, 5),  oo(9, 6),  oo(9, 7),  oo(9, 8),  oo(9, 9),  oo(9, 10),  oo(10, 0),  oo(10, 1),  oo(10, 2),  oo(10, 3),  oo(10, 4),  oo(10, 5),  oo(10, 6),  oo(10, 7),  oo(10, 8),  oo(10, 9),  oo(10, 10),  oo(11, 0),  oo(11, 1),  oo(11, 2),  oo(11, 3),  oo(11, 4),  oo(11, 5),  oo(11, 6),  oo(11, 7),  oo(11, 8),  oo(11, 9),  oo(11, 10),
     };
 
-
-
-
     static Shapeset::shape_fn_t* leg_quad_shape_fn_table[2] =
     {
       leg_quad_fn_a,
@@ -16708,7 +16510,6 @@ namespace Hermes
       leg_quad_shape_fn_table
     };
 
-
     static Shapeset::shape_fn_t** leg_shape_fn_table_x[2] =
     {
       leg_tri_shape_fn_table_x,
@@ -16727,13 +16528,11 @@ namespace Hermes
       leg_quad_vertex_indices
     };
 
-
     static int** leg_edge_indices[2] =
     {
       leg_tri_edge_indices,
       leg_quad_edge_indices
     };
-
 
     static int** leg_bubble_indices[2] =
     {
@@ -16741,13 +16540,11 @@ namespace Hermes
       leg_quad_bubble_indices
     };
 
-
     static int* leg_bubble_count[2] =
     {
       leg_tri_bubble_count,
       leg_quad_bubble_count
     };
-
 
     static int* leg_index_to_order[2] =
     {

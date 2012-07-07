@@ -260,7 +260,6 @@ namespace Hermes
         }
       }
 
-
       const char* MeshView::get_help_text() const
       {
         return

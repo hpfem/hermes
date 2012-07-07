@@ -89,7 +89,7 @@ namespace Hermes
       void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
       // Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
-      
+
       // Duplicates a matrix (including allocation).
       CSCMatrix* duplicate();
       // Exposes pointers to the CSC arrays.
@@ -119,7 +119,7 @@ namespace Hermes
 
     /// \brief This class is to be used with UMFPack solver only.
     template <typename Scalar>
-    class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar> 
+    class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar>
     {
       template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::UMFPackIterator;
@@ -128,7 +128,7 @@ namespace Hermes
 
     /// \brief Class representing the vector for UMFPACK.
     template <typename Scalar>
-    class HERMES_API UMFPackVector : public Vector<Scalar> 
+    class HERMES_API UMFPackVector : public Vector<Scalar>
     {
     public:
       UMFPackVector();
@@ -168,7 +168,7 @@ namespace Hermes
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API UMFPackLinearMatrixSolver : public DirectSolver<Scalar> 
+    class HERMES_API UMFPackLinearMatrixSolver : public DirectSolver<Scalar>
     {
     public:
       /// Constructor of UMFPack solver.

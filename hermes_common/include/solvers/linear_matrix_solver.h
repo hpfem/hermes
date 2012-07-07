@@ -132,7 +132,6 @@ namespace Hermes
       double time;  ///< Time spent on solving (in secs).
     };
 
-
     /// \brief Base class for defining interface for direct linear solvers.
     ///
     template <typename Scalar>

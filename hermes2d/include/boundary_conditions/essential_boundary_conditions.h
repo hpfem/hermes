@@ -50,10 +50,10 @@ namespace Hermes
       /// Pure virtual function reporting the type of the essential boundary condition.
       virtual EssentialBCValueType get_value_type() const = 0;
 
-      /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the 
+      /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the
       /// normal and tangential vectors.
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
-      
+
       /// Sets the current time for time-dependent boundary conditions.
       void set_current_time(double time);
       double get_current_time() const;
@@ -95,10 +95,10 @@ namespace Hermes
     class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
     {
     public:
-      DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_, 
-        ExactSolutionScalar<Scalar>* exact_solution); 
+      DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_,
+        ExactSolutionScalar<Scalar>* exact_solution);
 
-      DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution); 
+      DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution);
 
       ~DefaultEssentialBCNonConst() {};
 
@@ -110,16 +110,16 @@ namespace Hermes
       ExactSolutionScalar<Scalar>* exact_solution;
     };
 
-    /// Class representing non-constant essential boundary condition 
+    /// Class representing non-constant essential boundary condition
     /// (tangential component for Hcurl approximations).
     template<typename Scalar>
     class HERMES_API DefaultEssentialBCNonConstHcurl : public EssentialBoundaryCondition<Scalar>
     {
     public:
       // Tangential values given by a vector-valued solution.
-      DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_, 
-        ExactSolutionVector<Scalar>* exact_solution2); 
-      DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2); 
+      DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
+        ExactSolutionVector<Scalar>* exact_solution2);
+      DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2);
 
       ~DefaultEssentialBCNonConstHcurl() {};
 
@@ -180,4 +180,3 @@ namespace Hermes
   }
 }
 #endif
-

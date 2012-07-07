@@ -39,7 +39,7 @@ namespace Hermes
     class HERMES_API AztecOOSolver : public IterSolver<Scalar>
     {
     public:
-      
+
       /// Set the type of the solver
       /// @param[in] solver - name of the solver [ gmres | cg | cgs | tfqmr | bicgstab ]
       void set_solver(const char *solver);
@@ -53,7 +53,7 @@ namespace Hermes
       /// Set Aztec internal preconditioner
       /// @param[in] name - name of the preconditioner [ none | jacobi | neumann | least-squares ]
       virtual void set_precond(const char *name);
-      
+
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();
       virtual bool solve();

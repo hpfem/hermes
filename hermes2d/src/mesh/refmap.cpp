@@ -37,42 +37,42 @@ namespace Hermes
     void set_quad_2d(Quad2D* quad_2d);
 
     /// Returns the current quadrature points.
-    Quad2D* RefMap::get_quad_2d() const 
-    { 
+    Quad2D* RefMap::get_quad_2d() const
+    {
       return quad_2d;
     }
 
     /// Returns the 1D quadrature for use in surface integrals.
-    const Quad1D* RefMap::get_quad_1d() const 
+    const Quad1D* RefMap::get_quad_1d() const
     {
-      return &quad_1d; 
+      return &quad_1d;
     }
 
     /// Returns true if the jacobian of the reference map is constant (which
     /// is the case for non-curvilinear triangular elements), false otherwise.
-    bool RefMap::is_jacobian_const() const 
+    bool RefMap::is_jacobian_const() const
     {
-      return is_const; 
+      return is_const;
     }
 
     /// Returns the increase in the integration order due to the reference map.
-    int RefMap::get_inv_ref_order() const 
+    int RefMap::get_inv_ref_order() const
     {
-      return inv_ref_order; 
+      return inv_ref_order;
     }
 
     /// If the jacobian of the reference map is constant, this is the fast
     /// way to obtain it.
-    double RefMap::get_const_jacobian() const 
+    double RefMap::get_const_jacobian() const
     {
-      return const_jacobian; 
+      return const_jacobian;
     }
 
     /// If the reference map is constant, this is the fast way to obtain
     /// its inverse matrix.
     double2x2* RefMap::get_const_inv_ref_map()
     {
-      return &const_inv_ref_map; 
+      return &const_inv_ref_map;
     }
 
     /// Returns the jacobian of the reference map precalculated at the integration
@@ -89,7 +89,7 @@ namespace Hermes
     /// jacobian elements.
     double2x2* RefMap::get_inv_ref_map(int order)
     {
-      if (cur_node->inv_ref_map[order] == NULL) 
+      if (cur_node->inv_ref_map[order] == NULL)
         calc_inv_ref_map(order);
       return cur_node->inv_ref_map[order];
     }

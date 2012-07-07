@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
-  
+
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
 
@@ -110,4 +110,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-

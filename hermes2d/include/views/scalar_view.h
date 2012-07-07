@@ -75,7 +75,6 @@ namespace Hermes
         void set_vertical_scaling(double sc);  ///< Sets the scaling on the vertical axis programmatically.
         void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
 
-
       public:
         Linearizer* lin;
 
@@ -163,7 +162,6 @@ namespace Hermes
 
         void draw_normals_3d(); ////< Draws normals of the 3d mesh. Used for debugging purposses only.
 
-
       protected: //edges
         bool show_edges; ///< true to show edges of mesh
         bool show_aabb;  ///< true to show the bounding box
@@ -197,7 +195,6 @@ namespace Hermes
         double value_irange, value_range_avg;
 
         double3* normals;
-
 
         /// This function calculates the distance that the model (3D plot of the solution over the whole solution domain) must be
         /// translated along the z-axis of the eye coordinate system, so that it fills the actual viewport without being clipped.
@@ -235,7 +232,6 @@ namespace Hermes
         virtual void on_left_mouse_up(int x, int y);
         virtual void on_right_mouse_up(int x, int y);
         virtual void on_reshape(int width, int height);
-
       };
 #else
 class HERMES_API ScalarView : public View

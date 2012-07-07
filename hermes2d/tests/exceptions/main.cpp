@@ -5,7 +5,6 @@ using namespace Hermes;
 
 // This is a test of excptions.
 
-
 int main(int argc, char* argv[])
 {
   Hermes2D::Solution<double> sln;
@@ -43,7 +42,7 @@ int main(int argc, char* argv[])
   }
 
   //1/2Exception test
-  
+
   UMFPackMatrix<double> mat;
   int ap[]={0,1,1};
   int ai[]={0};
@@ -92,4 +91,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-

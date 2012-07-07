@@ -62,9 +62,9 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorBaseView<Scalar>::~VectorBaseView() 
-      { 
-        free(); 
+      VectorBaseView<Scalar>::~VectorBaseView()
+      {
+        free();
       }
 
       template<typename Scalar>
@@ -73,7 +73,6 @@ namespace Hermes
         if (pss != NULL) { delete pss; pss = NULL; }
         if (sln != NULL) { delete sln; sln = NULL; }
       }
-
 
       template<>
       void VectorBaseView<double>::update_solution()
@@ -106,7 +105,6 @@ namespace Hermes
         delete [] coeffs;
       }
 
-
       template<typename Scalar>
       void VectorBaseView<Scalar>::update_title()
       {
@@ -116,7 +114,6 @@ namespace Hermes
           str << " (Dirichlet lift)";
         View::set_title(str.str().c_str());
       }
-
 
       template<typename Scalar>
       void VectorBaseView<Scalar>::on_special_key(int key, int x, int y)
@@ -137,7 +134,6 @@ namespace Hermes
           VectorView::on_special_key(key, x, y);
         }
       }
-
 
       template<typename Scalar>
       const char* VectorBaseView<Scalar>::get_help_text() const

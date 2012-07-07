@@ -401,7 +401,7 @@ namespace Hermes
               meshes[subdomains_i]->boundary_markers_conversion.insert_marker(meshes[subdomains_i]->boundary_markers_conversion.min_marker_unused, edge->marker());
 
                en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->marker()).marker;
-              
+
                en->bnd = 0;
             }
 
@@ -689,7 +689,6 @@ namespace Hermes
         subdomains.subdomain().push_back(subdomain);
       }
 
-
       XMLSubdomains::domain xmldomain(vertices, elements, edges, subdomains);
       xmldomain.curves().set(curves);
 
@@ -947,7 +946,6 @@ namespace Hermes
         for_all_elements(e, mesh)
           if (e->cm != NULL)
             e->cm->update_refmap_coeffs(e);
-
       }
       catch (const xml_schema::exception& e)
       {
@@ -990,7 +988,7 @@ namespace Hermes
           // variables matching.
           std::string x = parsed_xml_domain->vertices().vertex().at(vertex_i).x();
           std::string y = parsed_xml_domain->vertices().vertex().at(vertex_i).y();
-          
+
           if(parsed_xml_domain->vertices().vertex().at(vertex_i).i() > H2D_MAX_NODE_ID - 1)
             throw Exceptions::MeshLoadFailureException("The index 'i' of vertex in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
 
@@ -1065,7 +1063,7 @@ namespace Hermes
           // insert.
           if(parsed_xml_domain->elements().element().at(element_i).i() > H2D_MAX_NODE_ID - 1)
             throw Exceptions::MeshLoadFailureException("The index 'i' of element in the mesh file must be lower than %i.", H2D_MAX_NODE_ID);
-          
+
           element_is[parsed_xml_domain->elements().element().at(element_i).i()] = element_i;
 
           // Trim whitespaces.
@@ -1155,7 +1153,6 @@ namespace Hermes
           Nurbs* nurbs;
           if(curves_i < arc_count)
           {
-
             // read the end point indices
             p1 = parsed_xml_domain->curves()->arc().at(curves_i).v1();
             p2 = parsed_xml_domain->curves()->arc().at(curves_i).v2();
@@ -1208,7 +1205,6 @@ namespace Hermes
         for_all_elements(e, mesh)
           if (e->cm != NULL)
             e->cm->update_refmap_coeffs(e);
-
       }
       catch (const xml_schema::exception& e)
       {
@@ -1281,7 +1277,7 @@ namespace Hermes
       nurbs->arc = false;
 
       *en = mesh->peek_edge_node(p1, p2);
-      
+
       if (*en == NULL)
       {
         if(!skip_check)
@@ -1289,7 +1285,7 @@ namespace Hermes
         else
           return NULL;
       }
-      
+
       // degree of curved edge
       nurbs->degree = parsed_xml_entity->curves()->NURBS().at(id).degree();
 

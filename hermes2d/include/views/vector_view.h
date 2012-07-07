@@ -64,7 +64,6 @@ namespace Hermes
         virtual void on_mouse_move(int x, int y);
         virtual void on_key_down(unsigned char key, int x, int y);
         virtual const char* get_help_text() const;
-
       };
 #else
       class HERMES_API VectorView : public View

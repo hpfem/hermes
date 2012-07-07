@@ -1547,9 +1547,7 @@ namespace Hermes
       std_pts_94_95_1d, std_pts_94_95_1d,
       std_pts_96_97_1d, std_pts_96_97_1d,
       std_pts_98_99_1d, std_pts_98_99_1d
-
     };
-
 
     static int std_np_1d[] =
     {
@@ -1655,7 +1653,6 @@ namespace Hermes
       sizeof(std_pts_98_99_1d) / sizeof(double2)
     };
 
-
     Quad1DStd::Quad1DStd()
     {
       tables = std_tables_1d;
@@ -1664,7 +1661,6 @@ namespace Hermes
       ref_vert[1] = 1.0;
       max_order = g_max_quad;
     }
-
 
     //// 2D quadrature tables (triangle) ///////////////////////////////////////////////////////////////
 
@@ -2384,7 +2380,6 @@ namespace Hermes
       { -0.978904561411718,  0.859512343113706,  0.007147818771900 }
     };
 
-
     static int std_np_2d_tri[g_max_tri + 1 + 3*g_max_tri + 3] =
     {
       sizeof(std_pts_0_2d_tri) / sizeof(double3),
@@ -2482,9 +2477,7 @@ namespace Hermes
       std_np_2d_quad
     };
 
-
     static int quad_pt_ref = 0;
-
 
     Quad2DStd::Quad2DStd()
     {
@@ -2540,7 +2533,6 @@ namespace Hermes
       np = std_np_2d;
     }
 
-
     Quad2DStd::~Quad2DStd()
     {
       int i;
@@ -2553,7 +2545,6 @@ namespace Hermes
           delete [] std_tables_2d_quad[i];
       }
     }
-
 
     //// global standard 1d and 2d quadrature //////////////////////////////////////////////////////////
 

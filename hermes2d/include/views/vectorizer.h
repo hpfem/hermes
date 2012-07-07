@@ -78,7 +78,6 @@ namespace Hermes
           double* xval, double* yval, double* phx, double* phy, int* indices);
 
         void find_min_max();
-
       };
     }
   }

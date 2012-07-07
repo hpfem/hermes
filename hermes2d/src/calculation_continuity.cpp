@@ -223,7 +223,6 @@ namespace Hermes
       this->last_record = record;
     }
 
-
     template<typename Scalar>
     void CalculationContinuity<Scalar>::add_record(double time, Mesh* mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
@@ -439,7 +438,6 @@ namespace Hermes
         throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::output, filename.str().c_str(), e.what());
       }
     }
-
 
     template<typename Scalar>
     void CalculationContinuity<Scalar>::Record::save_solutions(Hermes::vector<Solution<Scalar>*> solutions)
@@ -688,7 +686,6 @@ namespace Hermes
       {
         throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
       }
-
     }
 
     template<typename Scalar>

@@ -24,7 +24,6 @@ namespace Hermes
   {
     namespace Views
     {
-
       StreamView::StreamView(const char* title, WinGeom* wg)
         : View(title, wg), vec(NULL)
       {
@@ -38,7 +37,6 @@ namespace Hermes
         root = NULL;
       }
 
-
       StreamView::StreamView(char* title, WinGeom* wg)
         : View(title, wg), vec(NULL)
       {
@@ -51,7 +49,6 @@ namespace Hermes
         root_y_max = -1e100;
         root = NULL;
       }
-
 
       void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps)
       {
@@ -80,7 +77,6 @@ namespace Hermes
         else
           return false;
       }
-
 
       void StreamView::add_element_to_tree(Node* father, int e_idx, double x_min, double x_max, double y_min, double y_max)
       {
@@ -125,7 +121,6 @@ namespace Hermes
         }
       }
 
-
       void StreamView::build_tree()
       {
         root->leaf = true;
@@ -136,7 +131,6 @@ namespace Hermes
           add_element_to_tree(root, i, root_x_min, root_x_max, root_y_min, root_y_max);
         }
       }
-
 
       int StreamView::find_triangle_in_tree(double x, double y, Node* father, double x_min, double x_max, double y_min, double y_max, double3& bar)
       {
@@ -168,7 +162,6 @@ namespace Hermes
         }
       }
 
-
       bool StreamView::get_solution_values(double x, double y, double& xval, double& yval)
       {
         double4* vert = vec->get_vertices();
@@ -182,7 +175,6 @@ namespace Hermes
         return true;
       }
 
-
       void StreamView::delete_tree(Node* father)
       {
         if (father->leaf == false)
@@ -192,7 +184,6 @@ namespace Hermes
         }
         delete [] father;
       }
-
 
       int StreamView::create_streamline(double x_start, double y_start, int idx)
       {
@@ -271,7 +262,6 @@ namespace Hermes
           }
           while (!tau_ok);
           if (end) break; // get out from both while cycles
-
         }
 
         streamlines[idx] = new double2[k];
@@ -298,7 +288,6 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("internal error: reached end of non-void function");
         return 0;
       }
-
 
       int StreamView::find_initial_edge(int num_edges, int3* edges)
       {
@@ -327,7 +316,6 @@ namespace Hermes
         else
           return edge - edges;
       }
-
 
       void StreamView::find_initial_points(int marker, double step, double2*& initial_points)
       {
@@ -380,13 +368,11 @@ namespace Hermes
             tmp_step = tmp_step - remaining_len;
           }
           while ((idx = find_next_edge(num_edges, bnd_edges, bnd_edges[idx][1])) != -1);
-
         }
         num_stream = k;
 
         delete [] bnd_edges;
       }
-
 
       void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem)
       {
@@ -440,7 +426,6 @@ namespace Hermes
         wait_for_draw();
       }
 
-
       void StreamView::add_streamline(double x, double y)
       {
         if (root == NULL)
@@ -456,7 +441,6 @@ namespace Hermes
       static int n_vert(int i) { return (i + 1) % 3; }
       static int p_vert(int i) { return (i + 2) % 3; }
 
-
       void StreamView::on_display()
       {
         set_ortho_projection();
@@ -464,7 +448,6 @@ namespace Hermes
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_1D);
         glPolygonMode(GL_FRONT_AND_BACK, pmode ? GL_LINE : GL_FILL);
-
 
         // transform all vertices
         vec->lock_data();
@@ -542,12 +525,10 @@ namespace Hermes
         vec->unlock_data();
       }
 
-
       void StreamView::on_mouse_move(int x, int y)
       {
         View::on_mouse_move(x, y);
       }
-
 
       void StreamView::on_key_down(unsigned char key, int x, int y)
       {
@@ -588,7 +569,6 @@ namespace Hermes
         }
       }
 
-
       void StreamView::on_left_mouse_down(int x, int y)
       {
         View::on_left_mouse_down(x, y);
@@ -604,7 +584,6 @@ namespace Hermes
           refresh();
         }
       }
-
 
       const char* StreamView::get_help_text() const
       {
@@ -624,7 +603,6 @@ namespace Hermes
           "  F1 - this help\n"
           "  Esc, Q - quit";
       }
-
 
       StreamView::~StreamView()
       {

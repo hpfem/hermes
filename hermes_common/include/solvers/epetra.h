@@ -84,7 +84,7 @@ namespace Hermes
       Epetra_CrsGraph *grph;
       Epetra_CrsMatrix *mat;
       /// \brief Imaginary part of the matrix, mat holds the real part.
-      Epetra_CrsMatrix *mat_im;		
+      Epetra_CrsMatrix *mat_im;
       bool owner;
 
       friend class Hermes::Solvers::AmesosSolver<Scalar>;

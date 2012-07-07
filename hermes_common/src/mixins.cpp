@@ -45,7 +45,7 @@ namespace Hermes
       bool new_block = true;
       char text[BUF_SZ];
       char* text_contents = text + 1;
-        
+
       text[0] = HERMES_EC_WARNING;
       text[1] = ' ';
       text_contents++;
@@ -68,7 +68,7 @@ namespace Hermes
         bool new_block = true;
         char text[BUF_SZ];
         char* text_contents = text + 1;
-        
+
         text[0] = HERMES_EC_WARNING;
         text[1] = ' ';
         text_contents++;
@@ -89,7 +89,7 @@ namespace Hermes
       bool new_block = true;
       char text[BUF_SZ];
       char* text_contents = text + 1;
-        
+
       text[0] = HERMES_EC_INFO;
       text[1] = ' ';
       text_contents++;
@@ -111,7 +111,7 @@ namespace Hermes
         bool new_block = true;
         char text[BUF_SZ];
         char* text_contents = text + 1;
-        
+
         text[0] = HERMES_EC_INFO;
         text[1] = ' ';
         text_contents++;
@@ -139,7 +139,7 @@ namespace Hermes
 
       //generate console settings
       WORD console_attr_red = FOREGROUND_RED, console_attr_green = FOREGROUND_GREEN, console_attr_blue = FOREGROUND_BLUE;
-      
+
       WORD console_attrs = 0;
       bool console_bold = false;
       switch(code)
@@ -359,30 +359,29 @@ namespace Hermes
       return *this;
     }
 
-    const std::string& TimeMeasurable::name() const 
-    { 
-      return period_name; 
-    }
-
-    double TimeMeasurable::accumulated() const 
-    { 
-      return accum; 
-    }
-
-    std::string TimeMeasurable::accumulated_str() const { 
-      return to_string(accum); 
-    }
-
-    double TimeMeasurable::last() const 
-    { 
-      return last_period; 
-    }
-
-    std::string TimeMeasurable::last_str() const 
+    const std::string& TimeMeasurable::name() const
     {
-      return to_string(last_period); 
+      return period_name;
     }
 
+    double TimeMeasurable::accumulated() const
+    {
+      return accum;
+    }
+
+    std::string TimeMeasurable::accumulated_str() const {
+      return to_string(accum);
+    }
+
+    double TimeMeasurable::last() const
+    {
+      return last_period;
+    }
+
+    std::string TimeMeasurable::last_str() const
+    {
+      return to_string(last_period);
+    }
 
     const TimeMeasurable& TimeMeasurable::tick_reset()
     {

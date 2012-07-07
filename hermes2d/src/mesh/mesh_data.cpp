@@ -100,7 +100,7 @@ namespace Hermes
             temp.append("\t");
           else if (str[i] == '=')
             temp.append("=\t");
-          else	
+          else
             temp.append(1,str[i]);
         }
       }
@@ -119,7 +119,7 @@ namespace Hermes
       for (size_t i = 0; i < str.length(); i++)
       {
         if (str[i] == ' ')
-        {	
+        {
           if (str[i + 1] != ' ' && str[i + 1] != '\t' && str[i + 1] != '=' && str[i - 1] != ' ' && str[i - 1] != '\t')
             temp.append(1,';'); // Meaningful blank spaces are temporarily replaced with ';'
         }
@@ -137,7 +137,7 @@ namespace Hermes
       for (size_t i = 0; i < str.length(); i++)
       {
         if (str[i] != '"')
-        {	
+        {
           if (str[i] == ';')
             temp.append(1,' ');
           else
@@ -164,12 +164,12 @@ namespace Hermes
       bool isVert(false), isElt(false), isBdy(false), isCurv(false), isRef(false), isVar(false);
 
       while (std::getline(inFile,line))
-      {		
+      {
         // Remove all comments, unnecessary blank spaces, commas and paranthesis
         strip(line);
 
         if (line.find_first_not_of("\t ") != line.npos)
-        {			
+        {
           std::istringstream stream(line);
           stream >> word;
 
@@ -250,7 +250,7 @@ namespace Hermes
               if (!(istr >> dummy_dbl))
                 bdy_first.push_back(atof(vars_[restore(word)][0].c_str()));
               else
-                bdy_first.push_back(atof(word.c_str()));					
+                bdy_first.push_back(atof(word.c_str()));
 
               ++counter;
             }
@@ -281,7 +281,7 @@ namespace Hermes
               vars_[temp_word].push_back(restore(word));
               ++counter;
             }
-          }	
+          }
 
           if (isVert)
           {
@@ -290,14 +290,14 @@ namespace Hermes
               std::istringstream istr(word);
 
               if (counter%2 == 0)
-              {	
+              {
                 if (!(istr >> dummy_dbl))
                   x_vertex.push_back(atof(vars_[restore(word)][0].c_str()));
                 else
                   x_vertex.push_back(atof(word.c_str()));
               }
               else
-              {	
+              {
                 if (!(istr >> dummy_dbl))
                   y_vertex.push_back(atof(vars_[restore(word)][0].c_str()));
                 else
@@ -307,7 +307,7 @@ namespace Hermes
               ++counter;
             }
           }
-          else if (isElt)		
+          else if (isElt)
           {
             while (stream >> word)
             {
@@ -337,7 +337,7 @@ namespace Hermes
               else if (counter%5 == 3)
               {
                 if (!(istr >> dummy_int))
-                {	
+                {
                   en4.push_back(-1);
                   e_mtl.push_back(restore(word));
 
@@ -381,7 +381,7 @@ namespace Hermes
           else if (isCurv)
           {
             while (stream >> word)
-            {	
+            {
               std::istringstream istr(word);
 
               if (counter%5 == 0)
@@ -405,7 +405,7 @@ namespace Hermes
                   curv_third.push_back(atof(word.c_str()));
                 }
                 else
-                {	
+                {
                   curv_third.push_back(atof(vars_[restore(word)][0].c_str()));
                 }
 
@@ -421,12 +421,12 @@ namespace Hermes
                   counter += 2;
                 }
                 else
-                {	
+                {
                   curv_nurbs.push_back(true);
-                }	
+                }
               }
               else if (counter%5 == 3)
-              {	
+              {
                 curv_inner_pts.push_back(restore(next_word));
                 curv_knots.push_back(restore(word));
                 ++counter;
@@ -452,7 +452,7 @@ namespace Hermes
               {
                 if (!(istr >> dummy_int))
                   ref_type.push_back(atoi(vars_[restore(word)][0].c_str()));
-                else	
+                else
                   ref_type.push_back(atoi(word.c_str()));
               }
 

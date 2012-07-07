@@ -112,7 +112,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::clear_supported_shapes() 
+    void NeighborSearch<Scalar>::clear_supported_shapes()
     {
       if (supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
     }
@@ -126,7 +126,6 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::reset_neighb_info()
     {
-      
       // Reset transformations.
       for(unsigned int i = 0; i < n_neighbors; i++)
       {
@@ -549,7 +548,6 @@ namespace Hermes
         }
 
         central_transformations.get(i)->strip_initial_transformations(j);
-
       }
     }
 
@@ -979,20 +977,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::ExtendedShapeset::~ExtendedShapeset() 
+    NeighborSearch<Scalar>::ExtendedShapeset::~ExtendedShapeset()
     {
       delete [] dof;
       delete neighbor_al;
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::ExtendedShapeset::free_central_al() 
+    void NeighborSearch<Scalar>::ExtendedShapeset::free_central_al()
     {
       delete central_al;
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, const Space<Scalar>* space) 
+    void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, const Space<Scalar>* space)
     {
       delete [] this->dof;
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);
@@ -1002,7 +1000,7 @@ namespace Hermes
     template<typename Scalar>
     bool NeighborSearch<Scalar>::ExtendedShapeset::has_support_on_neighbor(unsigned int index) const
     {
-      return (index >= central_al->cnt); 
+      return (index >= central_al->cnt);
     }
 
     template<typename Scalar>
@@ -1012,15 +1010,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::Transformations::Transformations(const Transformations* t) 
+    NeighborSearch<Scalar>::Transformations::Transformations(const Transformations* t)
     {
-      copy_from(t); 
+      copy_from(t);
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::Transformations::Transformations(const Hermes::vector<unsigned int>& t) 
+    NeighborSearch<Scalar>::Transformations::Transformations(const Hermes::vector<unsigned int>& t)
     {
-      copy_from(t); 
+      copy_from(t);
     }
 
     template<typename Scalar>

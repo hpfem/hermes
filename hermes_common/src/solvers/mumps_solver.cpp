@@ -36,7 +36,6 @@ namespace Hermes
 
 #define USE_COMM_WORLD  -987654
 
-
     /// Binary search for the location of a particular CSC/CSR matrix entry.
     ///
     /// Typically, we search for the index into Ax that corresponds to a given
@@ -268,7 +267,6 @@ namespace Hermes
       return nnz;
     }
 
-
     template<typename Scalar>
     double MumpsMatrix<Scalar>::get_fill_in() const
     {
@@ -493,15 +491,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar MumpsVector<Scalar>::get(unsigned int idx) 
-    { 
-      return v[idx]; 
+    Scalar MumpsVector<Scalar>::get(unsigned int idx)
+    {
+      return v[idx];
     }
 
     template<typename Scalar>
-    void MumpsVector<Scalar>::extract(Scalar *v) const 
-    { 
-      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    void MumpsVector<Scalar>::extract(Scalar *v) const
+    {
+      memcpy(v, this->v, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
@@ -588,7 +586,6 @@ namespace Hermes
       zmumps_c(param);
     }
 
-
     template<typename Scalar>
     bool MumpsSolver<Scalar>::check_status()
     {
@@ -642,7 +639,6 @@ namespace Hermes
 
       return inited;
     }
-
 
     template<typename Scalar>
     MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :

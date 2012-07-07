@@ -33,7 +33,7 @@ namespace Hermes
     {
       numThreads
     };
-    
+
     /// API Class containing settings for the whole Hermes.
     class HERMES_API Api2D
     {

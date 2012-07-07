@@ -160,7 +160,6 @@ namespace Hermes
 
     void Traverse::State::push_transform(int son, int i, bool is_triangle)
     {
-      
       this->sub_idx[i] = (sub_idx[i] << 3) + son + 1;
 
       if(is_triangle)
@@ -199,10 +198,9 @@ namespace Hermes
 
     Traverse::State* Traverse::push_state(int* top_by_ref)
     {
-      
       int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
 
-      if(*top_f >= size) 
+      if(*top_f >= size)
         throw Hermes::Exceptions::Exception("Stack overflow. Increase stack size.");
 
       if(stack[*top_f].e == NULL)
@@ -470,7 +468,7 @@ namespace Hermes
                   {
                     ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
                     move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
-                    if (ns->e[i]->active) 
+                    if (ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
@@ -740,7 +738,7 @@ namespace Hermes
                   {
                     ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
                     move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
-                    if (ns->e[i]->active) 
+                    if (ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
@@ -801,7 +799,7 @@ namespace Hermes
 
         sons = new int4[num];
         subs = new uint64_t[num];
-      
+
         id = 0;
         top = 0;
 
@@ -831,7 +829,7 @@ namespace Hermes
             if(areas[counter] < min_elem_area)
               min_elem_area = areas[counter];
           }
-          
+
           counter++;
         }
         // take one mesh at a time and compare element areas to the areas[] array
@@ -869,12 +867,11 @@ namespace Hermes
 
     void Traverse::finish()
     {
-      
       if(master)
       {
         delete [] subs;
         delete [] sons;
-        
+
         if(stack == NULL) return;
 
         for (int i = 0; i < size; i++)

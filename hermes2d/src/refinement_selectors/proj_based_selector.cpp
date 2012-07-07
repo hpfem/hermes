@@ -13,7 +13,6 @@ namespace Hermes
   {
     namespace RefinementSelectors
     {
-
       template<typename Scalar>
       ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, double conv_exp, int
         max_order, Shapeset* shapeset, const typename OptimumSelector<Scalar>::Range& vertex_order, const
@@ -73,33 +72,32 @@ namespace Hermes
       template<typename Scalar>
       double ProjBasedSelector<Scalar>::get_error_weight_h() const
       {
-        return error_weight_h; 
+        return error_weight_h;
       }
 
       template<typename Scalar>
       double ProjBasedSelector<Scalar>::get_error_weight_p() const
       {
-        return error_weight_p; 
+        return error_weight_p;
       }
 
       template<typename Scalar>
       double ProjBasedSelector<Scalar>::get_error_weight_aniso() const
       {
-        return error_weight_aniso; 
+        return error_weight_aniso;
       }
 
       template<typename Scalar>
       ProjBasedSelector<Scalar>::TrfShapeExp::TrfShapeExp() : num_gip(0), num_expansion(0), values(NULL) {};
 
-
       template<typename Scalar>
-      ProjBasedSelector<Scalar>::TrfShapeExp::~TrfShapeExp() 
+      ProjBasedSelector<Scalar>::TrfShapeExp::~TrfShapeExp()
       {
-        delete[] values; 
+        delete[] values;
       }
 
       template<typename Scalar>
-      void ProjBasedSelector<Scalar>::TrfShapeExp::allocate(int num_expansion, int num_gip) 
+      void ProjBasedSelector<Scalar>::TrfShapeExp::allocate(int num_expansion, int num_gip)
       {
         delete[] values;
         values = new_matrix<double>(num_expansion, num_gip);
@@ -108,7 +106,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      double* ProjBasedSelector<Scalar>::TrfShapeExp::operator[](int inx_expansion) 
+      double* ProjBasedSelector<Scalar>::TrfShapeExp::operator[](int inx_expansion)
       {
         return values[inx_expansion];
       }
@@ -116,7 +114,7 @@ namespace Hermes
       template<typename Scalar>
       bool ProjBasedSelector<Scalar>::TrfShapeExp::empty() const
       {
-        return values == NULL; 
+        return values == NULL;
       }
 
       template<typename Scalar>
@@ -293,7 +291,7 @@ namespace Hermes
             warn_if(!info_h.uniform_orders || !info_aniso.uniform_orders || !info_p.uniform_orders, "Possible inefficiency: %s might be more efficient if the input mesh contains elements with uniform orders strictly.", get_cand_list_str(this->cand_list));
           }
         }
-          
+
         TrfShape& svals = cached_shape_vals[mode];
         TrfShape& ortho_svals = cached_shape_ortho_vals[mode];
 

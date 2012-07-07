@@ -55,9 +55,7 @@ namespace Hermes
       int max_order;
 
       virtual void dummy_fn() = 0; // to prevent this class from being instantiated
-
     };
-
 
     /// Quad2D is a base class for all 2D quadrature points on triangles and quads.
     ///

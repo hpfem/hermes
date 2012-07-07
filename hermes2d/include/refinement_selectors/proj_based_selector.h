@@ -66,7 +66,7 @@ namespace Hermes
         double get_error_weight_h() const;
         double get_error_weight_p() const;
         double get_error_weight_aniso() const;
-        
+
         /// Evaluated shapes for all possible transformations for all points. The first index is a transformation, the second index is an index of a shape function.
         typedef Hermes::vector<TrfShapeExp> TrfShape[H2D_TRF_NUM];
 
@@ -92,7 +92,7 @@ namespace Hermes
 
           /// Desructor.
           virtual ~TrfShapeExp();
-          
+
           /// Assignment operator. Prevent unauthorized copying of the pointer.
           const TrfShapeExp& operator = (const TrfShapeExp& other)
           {
@@ -105,7 +105,7 @@ namespace Hermes
           int num_gip; ///< A number of integration points.
           int num_expansion; ///< A number of expansions.
           double** values; ///< Values. The first index is index of a functions expansion, the second index is an index of a an integration point.
-          
+
           /// Allocates a space for function expansions.
           /** \param[in] num_expansion A number of expansions.
           *  \param[in] num_gip A number of itegration points. */

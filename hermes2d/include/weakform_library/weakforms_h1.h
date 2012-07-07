@@ -415,7 +415,6 @@ namespace Hermes
           GeomType gt = HERMES_PLANAR);
       };
 
-
       /* Default weak form for the Poisson equation -div(const_coeff spline_coeff(u) grad u) - rhs = 0. */
 
       template<typename Scalar>

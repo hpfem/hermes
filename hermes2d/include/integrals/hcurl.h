@@ -23,7 +23,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-
     template<typename Real, typename Scalar>
     Scalar int_e_f(int n, double *wt, Func<Real> *u, Func<Real> *v)
     {
@@ -70,7 +69,7 @@ namespace Hermes
         result += wt[i] * (u->curl[i] * conj(v->curl[i]));
       return result;
     }
-      
+
     template<typename Real, typename Scalar>
     Scalar int_v0(int n, double *wt, Func<Scalar> *v)
     {
@@ -110,4 +109,3 @@ namespace Hermes
   }
 }
 #endif
-

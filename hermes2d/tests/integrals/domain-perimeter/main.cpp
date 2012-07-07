@@ -110,17 +110,17 @@ int main(int argc, char* argv[])
 
   // Calculate the length of the four boundaries segments.
   double l1 = CalculateBoundaryLength(&mesh, 1);
-  
+
   double l2 = CalculateBoundaryLength(&mesh, 2);
-  
+
   double l3 = CalculateBoundaryLength(&mesh, 3);
-  
+
   double l4 = CalculateBoundaryLength(&mesh, 4);
-  
+
   double perimeter = l1 + l2 + l3 + l4;
-  
+
   // Set exact value from CMakeLists.txt file
-  
+
   if (fabs(perimeter - bdryLengthInput) < 1e-6) {
     printf("Success!\n");
     return 0;
@@ -129,7 +129,6 @@ int main(int argc, char* argv[])
     printf("Failure!\n");
     return -1;
   }
-
 
   return 0;
 }

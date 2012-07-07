@@ -129,7 +129,7 @@ namespace Hermes
               for (i = 0; i < lin_np_tri[1]; i++)
               {
                 double v = val[i];
-                if (finite(v) && fabs(v) > max) 
+                if (finite(v) && fabs(v) > max)
                   max = fabs(v);
               }
 
@@ -722,7 +722,7 @@ namespace Hermes
 
         // obtain the solution in vertices, estimate the maximum solution value
         // meshes.
-        Hermes::vector<Mesh*> meshes; 
+        Hermes::vector<Mesh*> meshes;
         meshes.push_back(sln->get_mesh());
         if(xdisp != NULL)
           meshes.push_back(xdisp->get_mesh());
@@ -738,7 +738,7 @@ namespace Hermes
           fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
           if(xdisp != NULL)
-          {        
+          {
             fns[i][1] = xdisp->clone();
             //fns[i][1]->set_refmap(new RefMap);
             fns[i][1]->set_quad_2d(&g_quad_lin);
@@ -785,10 +785,10 @@ namespace Hermes
           for(state_i = 0; state_i < num_states; state_i++)
           {
             Traverse::State current_state;
-            
+
 #pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-            
+
             fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
             if (val == NULL)
@@ -820,7 +820,6 @@ namespace Hermes
                 x_disp += dmult * dx[i];
               if(this->ydisp != NULL)
                 y_disp += dmult * dy[i];
-
 
               iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x_disp, y_disp, f);
             }
@@ -909,11 +908,11 @@ namespace Hermes
         while (i >= 0)
         {
           if (
-            this->info[i][0] == p1 && this->info[i][1] == p2 && 
+            this->info[i][0] == p1 && this->info[i][1] == p2 &&
             (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-8) &&
-            (fabs(x - verts[i][0]) < 1e-8) && 
+            (fabs(x - verts[i][0]) < 1e-8) &&
             (fabs(y - verts[i][1]) < 1e-8)
-            ) 
+            )
             return i;
           // note that we won't return a vertex with a different value than the required one;
           // this takes care for discontinuities in the solution, where more vertices

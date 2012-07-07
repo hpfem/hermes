@@ -96,7 +96,6 @@ namespace Hermes
       /// Removes an edge node with parent id's p1 and p2.
       void remove_edge_node(int id);
 
-
       // Internal members
     private:
 

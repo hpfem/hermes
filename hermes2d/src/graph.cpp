@@ -28,22 +28,22 @@ namespace Hermes
 
     void Graph::set_log_x(bool log)
     {
-      logx = log; 
+      logx = log;
     }
 
-    void Graph::set_log_y(bool log) 
+    void Graph::set_log_y(bool log)
     {
-      logy = log; 
+      logy = log;
     }
 
-    void Graph::show_legend(bool show) 
-    { 
+    void Graph::show_legend(bool show)
+    {
       legend = show;
     }
 
     void Graph::show_grid(bool show)
     {
-      grid = show; 
+      grid = show;
     }
 
     void Graph::set_captions(const char* title, const char* x_axis_name, const char* y_axis_name)

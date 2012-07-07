@@ -57,7 +57,7 @@ namespace Hermes
       void warn_if(bool cond, const char* msg, ...) const;
       void info(const char* msg, ...) const;
       void info_if(bool cond, const char* msg, ...) const;
-            
+
       /* file operations */
       void hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const;
       void hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream) const;
@@ -70,7 +70,7 @@ namespace Hermes
       bool write_console(const char code, const char* text) const;
 
       /// Info about a log record. Used for output log function. \internal
-      class HERMES_API HermesLogEventInfo 
+      class HERMES_API HermesLogEventInfo
       {
       public:
         HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line);
@@ -85,21 +85,21 @@ namespace Hermes
 
       /// Logging output monitor. \internal \ingroup g_logging
       /** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
-      class LoggerMonitor 
+      class LoggerMonitor
       {
         pthread_mutexattr_t mutex_attr; ///< Mutext attributes.
         pthread_mutex_t mutex; ///< Mutex that protects monitor.
 
       public:
         /// Constructor. Creates a mutex.
-        LoggerMonitor() 
+        LoggerMonitor()
         {
           pthread_mutexattr_init(&mutex_attr);
           pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
           pthread_mutex_init(&mutex, &mutex_attr);
         };
         /// Destructor. Deletes a mutex.
-        ~LoggerMonitor() 
+        ~LoggerMonitor()
         {
           pthread_mutex_destroy(&mutex);
           pthread_mutexattr_destroy(&mutex_attr);
@@ -124,7 +124,7 @@ namespace Hermes
       *  \param[in] code Code of the message.
       *  \param[in] msg A message. */
       void hermes_log_message(const char code, const char* msg) const;
-    
+
       /// Verbose output.
       /// Set to 'true' by default.
       bool verbose_output;
@@ -167,7 +167,7 @@ namespace Hermes
 
       /// Returns last measured period in human readable form.
       std::string last_str() const;
-  
+
     private:
   #ifdef WIN32 //Windows
       typedef uint64_t SysTime;

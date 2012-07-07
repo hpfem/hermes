@@ -214,7 +214,6 @@ namespace Hermes
                        interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
                      Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>());
 
-
       KellyTypeAdapt(Space<Scalar>* space,
                      bool ignore_visited_segments = true,
                      const InterfaceEstimatorScalingFunction* interface_scaling_fn_ = NULL,
@@ -275,7 +274,6 @@ namespace Hermes
         slns.push_back(sln);
         return calc_err_est(slns, NULL, error_flags);
       }
-
 
       double calc_err_est(Hermes::vector<Solution<Scalar>*> slns,
                           Hermes::vector<double>* component_errors = NULL,

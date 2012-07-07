@@ -34,7 +34,7 @@ namespace Hermes
     public:
       /// Constructor.
       AsmList();
-      
+
       /// Destructor.
       ~AsmList();
 
@@ -50,7 +50,7 @@ namespace Hermes
       Scalar* coef;  ///< array of coefficients
       unsigned int cnt;       ///< the number of items in the arrays idx, dof and coef
       unsigned int cap;       ///< internal
-      
+
       /// Adds a record for one basis function (shape functions index, basis functions index, coefficient).
       void add_triplet(int i, int d, Scalar c);
 

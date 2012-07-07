@@ -60,7 +60,7 @@ namespace Hermes
 
       // If coeff_vec == NULL then create a zero vector.
       bool delete_coeff_vec = false;
-      if(coeff_vec == NULL) 
+      if(coeff_vec == NULL)
       {
         coeff_vec = new Scalar[ndof];
         memset(coeff_vec, 0, ndof*sizeof(Scalar));
@@ -87,7 +87,7 @@ namespace Hermes
 
         this->tick();
         assemble_time += this->last();
-        
+
         // Measure the residual norm.
         if (residual_as_function)
         {
@@ -99,7 +99,7 @@ namespace Hermes
             dir_lift_false.push_back(false);
           }
 
-          Solution<Scalar>::vector_to_solutions(residual, 
+          Solution<Scalar>::vector_to_solutions(residual,
             static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
@@ -129,7 +129,7 @@ namespace Hermes
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
-        if (residual_norm < newton_tol && it > 1) 
+        if (residual_norm < newton_tol && it > 1)
         {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];
@@ -139,7 +139,7 @@ namespace Hermes
           this->tick();
           solve_time += this->last();
 
-          if (delete_coeff_vec) 
+          if (delete_coeff_vec)
           {
             delete [] coeff_vec;
             coeff_vec = NULL;
@@ -150,10 +150,10 @@ namespace Hermes
 
         this->tick();
         solve_time += this->last();
-        
+
         // Assemble just the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
-          
+
         this->tick();
         assemble_time += this->last();
 
@@ -181,7 +181,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol, 
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol,
       int newton_max_iter, bool residual_as_function)
     {
       // Obtain the number of degrees of freedom.
@@ -189,7 +189,7 @@ namespace Hermes
 
       // If coeff_vec == NULL then create a zero vector.
       bool delete_coeff_vec = false;
-      if(coeff_vec == NULL) 
+      if(coeff_vec == NULL)
       {
         coeff_vec = new Scalar[ndof];
         memset(coeff_vec, 0, ndof*sizeof(Scalar));
@@ -214,7 +214,7 @@ namespace Hermes
             solutions.push_back(new Solution<Scalar>());
             dir_lift_false.push_back(false);
           }
-          Solution<Scalar>::vector_to_solutions(residual, 
+          Solution<Scalar>::vector_to_solutions(residual,
             static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), solutions, dir_lift_false);
 
           // Calculate the norm.
@@ -248,7 +248,7 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          if (delete_coeff_vec) 
+          if (delete_coeff_vec)
           {
             delete [] coeff_vec;
             coeff_vec = NULL;

@@ -85,7 +85,6 @@ namespace Hermes
         return new DefaultMatrixFormVol<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, std::string area, Scalar const_coeff,
         CubicSpline* c_spline,
@@ -152,7 +151,6 @@ namespace Hermes
         return new DefaultJacobianCurlCurl(*this);
       }
 
-
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::string area, Scalar const_coeff0, Scalar const_coeff1,
         Hermes2DFunction<Scalar>* f_coeff0, Hermes2DFunction<Scalar>* f_coeff1,
@@ -214,7 +212,6 @@ namespace Hermes
       {
         return new DefaultVectorFormVol<Scalar>(*this);
       }
-
 
       template<typename Scalar>
       DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area, Scalar const_coeff,
@@ -286,7 +283,6 @@ namespace Hermes
       {
         return new DefaultResidualVol(*this);
       }
-
 
       template<typename Scalar>
       DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, std::string area, Scalar const_coeff,
@@ -368,7 +364,6 @@ namespace Hermes
         return new DefaultResidualCurlCurl(*this);
       }
 
-
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, std::string area,
         Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff,
@@ -430,7 +425,6 @@ namespace Hermes
       {
         return new DefaultMatrixFormSurf<Scalar>(*this);
       }
-
 
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area,
@@ -498,7 +492,6 @@ namespace Hermes
       {
         return new DefaultResidualSurf(*this);
       }
-
 
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, std::string area, Scalar const_coeff,

@@ -277,7 +277,6 @@ namespace Hermes
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
 
-
       Scalar *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
       Scalar *udx1  = sln1->get_dx_values(1), *udy0  = sln1->get_dy_values(0);
       Scalar *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
@@ -317,7 +316,6 @@ namespace Hermes
 
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
-
 
       Scalar *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
       Scalar *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
@@ -359,7 +357,6 @@ namespace Hermes
       sln1->set_quad_order(o);
       sln2->set_quad_order(o);
 
-
       Scalar *uval0 = sln1->get_fn_values(0), *uval1 = sln1->get_fn_values(1);
       Scalar *udx1  = sln1->get_dx_values(1), *udy0  = sln1->get_dy_values(0);
       Scalar *vval0 = sln2->get_fn_values(0), *vval1 = sln2->get_fn_values(1);
@@ -391,7 +388,7 @@ namespace Hermes
       h1_integrate_expression(Hermes::sqr(uval0[i]) + Hermes::sqr(uval1[i]) + Hermes::sqr(udx1[i] - udy0[i]));
       return result;
     }
-    
+
     template class HERMES_API Global<double>;
     template class HERMES_API Global<std::complex<double> >;
   }

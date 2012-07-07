@@ -46,7 +46,7 @@ namespace Hermes
       /// Wrap ML object.
       MlPrecond(ML_Epetra::MultiLevelPreconditioner *mpc);
       virtual ~MlPrecond();
-      
+
       void set_param(const char *name, const char *value);
       void set_param(const char *name, int value);
       void set_param(const char *name, double value);

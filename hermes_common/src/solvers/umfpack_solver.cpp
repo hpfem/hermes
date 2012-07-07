@@ -160,7 +160,6 @@ namespace Hermes
     template<typename Scalar>
     void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
-      
       if (v != 0.0)   // ignore zero values.
       {
         // Find m-th row in the n-th column.
@@ -188,7 +187,7 @@ namespace Hermes
         this->add_as_block(ndof*i, ndof*i, mat_block);
       }
     }
-    
+
     template<typename Scalar>
     void CSCMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
     {
@@ -196,7 +195,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    unsigned int CSCMatrix<Scalar>::get_nnz() const 
+    unsigned int CSCMatrix<Scalar>::get_nnz() const
     {
       return this->nnz;
     }
@@ -222,7 +221,7 @@ namespace Hermes
       {
         mat_it.get_current_position(mat_i, mat_j, mat_val);
         bool found = this_it.move_to_position(mat_i + offset_i, mat_j + offset_j);
-        if (!found) 
+        if (!found)
           throw Hermes::Exceptions::Exception("Nonzero matrix entry at %d, %d not found in CSCMatrix<Scalar>::add_as_block().",
           mat_i + offset_i, mat_j + offset_j);
         this_it.add_to_current_position(mat_val);
@@ -642,14 +641,14 @@ namespace Hermes
 
     template<typename Scalar>
     Scalar UMFPackVector<Scalar>::get(unsigned int idx)
-    { 
-      return v[idx]; 
+    {
+      return v[idx];
     }
 
     template<typename Scalar>
-    void UMFPackVector<Scalar>::extract(Scalar *v) const 
-    { 
-      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    void UMFPackVector<Scalar>::extract(Scalar *v) const
+    {
+      memcpy(v, this->v, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
@@ -701,7 +700,6 @@ namespace Hermes
           fprintf(file, "\n");
           for (unsigned int i = 0; i < size; i++)
           {
-
             Hermes::Helpers::fprint_num(file, v[i]);
             fprintf(file, "\n");
           }
@@ -897,12 +895,12 @@ namespace Hermes
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
         eff_fact_scheme = factorization_scheme;
-      
+
       int status;
       switch(eff_fact_scheme)
       {
         case HERMES_FACTORIZE_FROM_SCRATCH:
-          if (symbolic != NULL) 
+          if (symbolic != NULL)
             umfpack_zi_free_symbolic(&symbolic);
 
           status = umfpack_zi_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, &symbolic, NULL, NULL);
@@ -916,7 +914,7 @@ namespace Hermes
 
         case HERMES_REUSE_MATRIX_REORDERING:
         case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
-          if (numeric != NULL) 
+          if (numeric != NULL)
             umfpack_zi_free_numeric(&numeric);
 
         status = umfpack_zi_numeric(m->get_Ap(), m->get_Ai(), (double *) m->get_Ax(), NULL, symbolic, &numeric, NULL, NULL);

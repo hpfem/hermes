@@ -120,7 +120,6 @@ namespace Hermes
         + this->coeffs[m].d * x3;
     }
 
-
     double CubicSpline::get_derivative_from_interval(double x_in, int m) const
     {
       double x2 = x_in * x_in;

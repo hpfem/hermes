@@ -43,14 +43,14 @@ int main(int argc, char* argv[])
 {
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
-  
+
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
   mloader.load("../cathedral.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_REF_NUM; i++) 
+  for(int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
   mesh.refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
   mesh.refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  
+
   // Initialize the FE problem.
   DiscreteProblem<double> dp(&wf, &space);
 
@@ -103,7 +103,6 @@ int main(int argc, char* argv[])
 
   /* Begin test */
 
-  
   bool success = true;
 
   if (fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-6) success = false;
@@ -123,4 +122,3 @@ int main(int argc, char* argv[])
     return -1;
   }
 }
-

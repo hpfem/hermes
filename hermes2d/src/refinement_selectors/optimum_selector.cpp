@@ -14,7 +14,6 @@ namespace Hermes
   {
     namespace RefinementSelectors
     {
-
       HERMES_API const char* get_cand_list_str(const CandList cand_list)
       {
         switch(cand_list)
@@ -27,8 +26,8 @@ namespace Hermes
         case H2D_HP_ANISO_H: return "HP_ANISO_H";
         case H2D_HP_ANISO_P: return "HP_ANISO_P";
         case H2D_HP_ANISO: return "HP_ANISO";
-        default: 
-          throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); 
+        default:
+          throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list);
           return NULL;
         }
       }
@@ -656,7 +655,6 @@ namespace Hermes
       template<typename Scalar>
       bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement)
       {
-          
         //make an uniform order in a case of a triangle
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
         if (element->is_triangle())
@@ -677,12 +675,11 @@ namespace Hermes
         create_candidates(element, quad_order
           , H2D_MAKE_QUAD_ORDER(current_max_order, current_max_order)
           , H2D_MAKE_QUAD_ORDER(current_max_order, current_max_order));
-         
+
         if (candidates.size() > 1) { //there are candidates to choose from
           // evaluate candidates (sum partial projection errors, calculate dofs)
           double avg_error, dev_error;
           evaluate_candidates(element, rsln, &avg_error, &dev_error);
-          
 
           //select candidate
           select_best_candidate(element, avg_error, dev_error, &inx_cand, &inx_h_cand);
@@ -691,7 +688,7 @@ namespace Hermes
           inx_cand = 0;
           inx_h_cand = 0;
         }
-        
+
         //copy result to output
         Cand& cand = candidates[inx_cand];
         Cand& cand_h = candidates[inx_h_cand];
@@ -705,7 +702,6 @@ namespace Hermes
           ElementToRefine::copy_orders(refinement.q, h_cand_orders);
         }
 
-        
         //modify orders in a case of a triangle such that order_v is zero
         if (element->is_triangle())
         {
@@ -776,53 +772,53 @@ namespace Hermes
         default: throw Hermes::Exceptions::Exception("Unknown option %d.", (int)option);
         }
       }
-      
+
       template<typename Scalar>
       OptimumSelector<Scalar>::Range::Range() : empty_range(true) {}
 
       template<typename Scalar>
-      OptimumSelector<Scalar>::Range::Range(const int& lower_bound, const int& upper_bound) : lower_bound(lower_bound), upper_bound(upper_bound), empty_range(lower_bound > upper_bound) 
+      OptimumSelector<Scalar>::Range::Range(const int& lower_bound, const int& upper_bound) : lower_bound(lower_bound), upper_bound(upper_bound), empty_range(lower_bound > upper_bound)
       {
-      }
-  
-      template<typename Scalar>
-      bool OptimumSelector<Scalar>::Range::empty() const 
-      {
-        return empty_range; 
       }
 
       template<typename Scalar>
-      const int& OptimumSelector<Scalar>::Range::lower() const 
+      bool OptimumSelector<Scalar>::Range::empty() const
       {
-        return lower_bound; 
+        return empty_range;
       }
 
       template<typename Scalar>
-      const int& OptimumSelector<Scalar>::Range::upper() const 
+      const int& OptimumSelector<Scalar>::Range::lower() const
       {
-        return upper_bound; 
+        return lower_bound;
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::Range::is_in_closed(const typename OptimumSelector<Scalar>::Range& range) const 
+      const int& OptimumSelector<Scalar>::Range::upper() const
       {
-        return (range.lower_bound >= lower_bound && range.upper_bound <= upper_bound); 
+        return upper_bound;
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::Range::is_in_closed(const int& value) const 
+      bool OptimumSelector<Scalar>::Range::is_in_closed(const typename OptimumSelector<Scalar>::Range& range) const
       {
-        return (value >= lower_bound && value <= upper_bound); 
+        return (range.lower_bound >= lower_bound && range.upper_bound <= upper_bound);
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::Range::is_in_open(const int& value) const 
+      bool OptimumSelector<Scalar>::Range::is_in_closed(const int& value) const
       {
-        return (value > lower_bound && value < upper_bound); 
+        return (value >= lower_bound && value <= upper_bound);
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::Range::enlarge_to_include(const int& value) 
+      bool OptimumSelector<Scalar>::Range::is_in_open(const int& value) const
+      {
+        return (value > lower_bound && value < upper_bound);
+      }
+
+      template<typename Scalar>
+      void OptimumSelector<Scalar>::Range::enlarge_to_include(const int& value)
       {
         if (empty_range) {
           lower_bound = upper_bound = value;

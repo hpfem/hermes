@@ -55,7 +55,6 @@ namespace Hermes
         };
 
         virtual void dummy_fn() {}
-
       } quad_ord;
 
       Orderizer::Orderizer() : LinearizerBase()

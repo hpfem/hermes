@@ -71,9 +71,7 @@ namespace Hermes
       };
 
       Hermes::vector<Row> rows;
-
     };
-
 
     ///  Outputs just two numbers per row.
     ///
@@ -85,9 +83,7 @@ namespace Hermes
         : Graph(title, x_axis_name, y_axis_name) {}
 
       virtual void save(const char* filename);
-
     };
-
 
     ///  Outputs a MATLAB graph.
     ///
@@ -99,9 +95,7 @@ namespace Hermes
         : Graph(title, x_axis_name, y_axis_name) {}
 
       virtual void save(const char* filename);
-
     };
-
 
     ///  Basic class for outputting a graph via GNUPLOT.
     ///

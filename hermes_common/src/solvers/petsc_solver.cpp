@@ -75,7 +75,6 @@ namespace Hermes
 
       if (petsc_initialized != PETSC_TRUE)
       {
-          
         ierr = PetscInitializeNoArguments();
         CHKERRQ(ierr);
       }
@@ -241,7 +240,6 @@ namespace Hermes
     {
       return (double) nnz / ((double)this->size*this->size);
     }
-
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)

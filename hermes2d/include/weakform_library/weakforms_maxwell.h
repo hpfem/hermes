@@ -24,7 +24,6 @@ namespace Hermes
   namespace Hermes2D
   {
     namespace WeakFormsMaxwell {
-
       /* Default volumetric matrix form \int_{area} coeff_spline(u_ext[0]) \curl u \curl v d\bfx
       spline_coeff... nonconstant parameter given by cubic spline
       */

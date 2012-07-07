@@ -26,7 +26,7 @@ namespace Hermes
     /// H1 shapeset with orthogonalized bubble functions for improved conditioning.
     class HERMES_API H1ShapesetOrtho : public Shapeset
     {
-    public: 
+    public:
       H1ShapesetOrtho();
       virtual Shapeset* clone() { return new H1ShapesetOrtho(*this); };
     private:
@@ -35,11 +35,10 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
-
     /// Shape functions based on integrated Jacobi polynomials.
     class HERMES_API H1ShapesetJacobi : public Shapeset
     {
-    public: 
+    public:
       H1ShapesetJacobi();
       virtual Shapeset* clone() { return new H1ShapesetJacobi(*this); };
     private:
@@ -48,11 +47,10 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
-
     /// Experimental.
     class HERMES_API H1ShapesetEigen : public Shapeset
     {
-    public: 
+    public:
       H1ShapesetEigen();
       virtual Shapeset* clone() { return new H1ShapesetEigen(*this); };
     private:
@@ -60,7 +58,6 @@ namespace Hermes
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
-
 
     /// This is the default shapeset typedef
     typedef H1ShapesetJacobi H1Shapeset;

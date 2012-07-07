@@ -22,7 +22,6 @@ namespace Hermes
   {
     // Shape functions for the curl operator for triangles,
 
-
     //Shape functions
 
     ///////////////////////////////// ORDER 0 //////////////////////////////////
@@ -6639,8 +6638,6 @@ namespace Hermes
       gradleg_tri_p2_b1_a,   gradleg_tri_p2_b2_a,   gradleg_tri_p2_b3_a,   gradleg_tri_p3_b1_a,   gradleg_tri_p3_b2_a,   gradleg_tri_p3_b3_a,   gradleg_tri_p4_b1_a,   gradleg_tri_p4_b2_a,   gradleg_tri_p4_b3_a,   gradleg_tri_p5_b1_a,   gradleg_tri_p5_b2_a,   gradleg_tri_p5_b3_a,   gradleg_tri_p6_b1_a,   gradleg_tri_p6_b2_a,   gradleg_tri_p6_b3_a,   gradleg_tri_p7_b1_a,   gradleg_tri_p7_b2_a,   gradleg_tri_p7_b3_a,   gradleg_tri_p8_b1_a,   gradleg_tri_p8_b2_a,   gradleg_tri_p8_b3_a,   gradleg_tri_p9_b1_a,   gradleg_tri_p9_b2_a,   gradleg_tri_p9_b3_a,   gradleg_tri_p10_b1_a,   gradleg_tri_p10_b2_a,   gradleg_tri_p10_b3_a,
 
       gradleg_tri_b1_b1_1_a, gradleg_tri_b1_b1_2_a,  gradleg_tri_b1_b2_1_a, gradleg_tri_b1_b2_2_a,  gradleg_tri_b2_b1_1_a, gradleg_tri_b2_b1_2_a,  gradleg_tri_b1_b3_1_a, gradleg_tri_b1_b3_2_a,  gradleg_tri_b2_b2_1_a, gradleg_tri_b2_b2_2_a,  gradleg_tri_b3_b1_1_a, gradleg_tri_b3_b1_2_a,  gradleg_tri_b1_b4_1_a, gradleg_tri_b1_b4_2_a,  gradleg_tri_b2_b3_1_a, gradleg_tri_b2_b3_2_a,  gradleg_tri_b3_b2_1_a, gradleg_tri_b3_b2_2_a,  gradleg_tri_b4_b1_1_a, gradleg_tri_b4_b1_2_a,  gradleg_tri_b1_b5_1_a, gradleg_tri_b1_b5_2_a,  gradleg_tri_b2_b4_1_a, gradleg_tri_b2_b4_2_a,  gradleg_tri_b3_b3_1_a, gradleg_tri_b3_b3_2_a,  gradleg_tri_b4_b2_1_a, gradleg_tri_b4_b2_2_a,  gradleg_tri_b5_b1_1_a, gradleg_tri_b5_b1_2_a,  gradleg_tri_b1_b6_1_a, gradleg_tri_b1_b6_2_a,  gradleg_tri_b2_b5_1_a, gradleg_tri_b2_b5_2_a,  gradleg_tri_b3_b4_1_a, gradleg_tri_b3_b4_2_a,  gradleg_tri_b4_b3_1_a, gradleg_tri_b4_b3_2_a,  gradleg_tri_b5_b2_1_a, gradleg_tri_b5_b2_2_a,  gradleg_tri_b6_b1_1_a, gradleg_tri_b6_b1_2_a,  gradleg_tri_b1_b7_1_a, gradleg_tri_b1_b7_2_a,  gradleg_tri_b2_b6_1_a, gradleg_tri_b2_b6_2_a,  gradleg_tri_b3_b5_1_a, gradleg_tri_b3_b5_2_a,  gradleg_tri_b4_b4_1_a, gradleg_tri_b4_b4_2_a,  gradleg_tri_b5_b3_1_a, gradleg_tri_b5_b3_2_a,  gradleg_tri_b6_b2_1_a, gradleg_tri_b6_b2_2_a,  gradleg_tri_b7_b1_1_a, gradleg_tri_b7_b1_2_a,  gradleg_tri_b1_b8_1_a, gradleg_tri_b1_b8_2_a,  gradleg_tri_b2_b7_1_a, gradleg_tri_b2_b7_2_a,  gradleg_tri_b3_b6_1_a, gradleg_tri_b3_b6_2_a,  gradleg_tri_b4_b5_1_a, gradleg_tri_b4_b5_2_a,  gradleg_tri_b5_b4_1_a, gradleg_tri_b5_b4_2_a,  gradleg_tri_b6_b3_1_a, gradleg_tri_b6_b3_2_a,  gradleg_tri_b7_b2_1_a, gradleg_tri_b7_b2_2_a,  gradleg_tri_b8_b1_1_a, gradleg_tri_b8_b1_2_a,
-
-
     };
 
     static Shapeset::shape_fn_t gradleg_tri_fn_b[] =
@@ -6660,8 +6657,6 @@ namespace Hermes
       gradleg_tri_p2_b1_b,   gradleg_tri_p2_b2_b,   gradleg_tri_p2_b3_b,   gradleg_tri_p3_b1_b,   gradleg_tri_p3_b2_b,   gradleg_tri_p3_b3_b,   gradleg_tri_p4_b1_b,   gradleg_tri_p4_b2_b,   gradleg_tri_p4_b3_b,   gradleg_tri_p5_b1_b,   gradleg_tri_p5_b2_b,   gradleg_tri_p5_b3_b,   gradleg_tri_p6_b1_b,   gradleg_tri_p6_b2_b,   gradleg_tri_p6_b3_b,   gradleg_tri_p7_b1_b,   gradleg_tri_p7_b2_b,   gradleg_tri_p7_b3_b,   gradleg_tri_p8_b1_b,   gradleg_tri_p8_b2_b,   gradleg_tri_p8_b3_b,   gradleg_tri_p9_b1_b,   gradleg_tri_p9_b2_b,   gradleg_tri_p9_b3_b,   gradleg_tri_p10_b1_b,   gradleg_tri_p10_b2_b,   gradleg_tri_p10_b3_b,
 
       gradleg_tri_b1_b1_1_b, gradleg_tri_b1_b1_2_b,  gradleg_tri_b1_b2_1_b, gradleg_tri_b1_b2_2_b,  gradleg_tri_b2_b1_1_b, gradleg_tri_b2_b1_2_b,  gradleg_tri_b1_b3_1_b, gradleg_tri_b1_b3_2_b,  gradleg_tri_b2_b2_1_b, gradleg_tri_b2_b2_2_b,  gradleg_tri_b3_b1_1_b, gradleg_tri_b3_b1_2_b,  gradleg_tri_b1_b4_1_b, gradleg_tri_b1_b4_2_b,  gradleg_tri_b2_b3_1_b, gradleg_tri_b2_b3_2_b,  gradleg_tri_b3_b2_1_b, gradleg_tri_b3_b2_2_b,  gradleg_tri_b4_b1_1_b, gradleg_tri_b4_b1_2_b,  gradleg_tri_b1_b5_1_b, gradleg_tri_b1_b5_2_b,  gradleg_tri_b2_b4_1_b, gradleg_tri_b2_b4_2_b,  gradleg_tri_b3_b3_1_b, gradleg_tri_b3_b3_2_b,  gradleg_tri_b4_b2_1_b, gradleg_tri_b4_b2_2_b,  gradleg_tri_b5_b1_1_b, gradleg_tri_b5_b1_2_b,  gradleg_tri_b1_b6_1_b, gradleg_tri_b1_b6_2_b,  gradleg_tri_b2_b5_1_b, gradleg_tri_b2_b5_2_b,  gradleg_tri_b3_b4_1_b, gradleg_tri_b3_b4_2_b,  gradleg_tri_b4_b3_1_b, gradleg_tri_b4_b3_2_b,  gradleg_tri_b5_b2_1_b, gradleg_tri_b5_b2_2_b,  gradleg_tri_b6_b1_1_b, gradleg_tri_b6_b1_2_b,  gradleg_tri_b1_b7_1_b, gradleg_tri_b1_b7_2_b,  gradleg_tri_b2_b6_1_b, gradleg_tri_b2_b6_2_b,  gradleg_tri_b3_b5_1_b, gradleg_tri_b3_b5_2_b,  gradleg_tri_b4_b4_1_b, gradleg_tri_b4_b4_2_b,  gradleg_tri_b5_b3_1_b, gradleg_tri_b5_b3_2_b,  gradleg_tri_b6_b2_1_b, gradleg_tri_b6_b2_2_b,  gradleg_tri_b7_b1_1_b, gradleg_tri_b7_b1_2_b,  gradleg_tri_b1_b8_1_b, gradleg_tri_b1_b8_2_b,  gradleg_tri_b2_b7_1_b, gradleg_tri_b2_b7_2_b,  gradleg_tri_b3_b6_1_b, gradleg_tri_b3_b6_2_b,  gradleg_tri_b4_b5_1_b, gradleg_tri_b4_b5_2_b,  gradleg_tri_b5_b4_1_b, gradleg_tri_b5_b4_2_b,  gradleg_tri_b6_b3_1_b, gradleg_tri_b6_b3_2_b,  gradleg_tri_b7_b2_1_b, gradleg_tri_b7_b2_2_b,  gradleg_tri_b8_b1_1_b, gradleg_tri_b8_b1_2_b,
-
-
     };
 
     static Shapeset::shape_fn_t gradleg_tri_fn_ax[] =
@@ -6681,8 +6676,6 @@ namespace Hermes
       gradleg_tri_p2_b1_ax,   gradleg_tri_p2_b2_ax,   gradleg_tri_p2_b3_ax,   gradleg_tri_p3_b1_ax,   gradleg_tri_p3_b2_ax,   gradleg_tri_p3_b3_ax,   gradleg_tri_p4_b1_ax,   gradleg_tri_p4_b2_ax,   gradleg_tri_p4_b3_ax,   gradleg_tri_p5_b1_ax,   gradleg_tri_p5_b2_ax,   gradleg_tri_p5_b3_ax,   gradleg_tri_p6_b1_ax,   gradleg_tri_p6_b2_ax,   gradleg_tri_p6_b3_ax,   gradleg_tri_p7_b1_ax,   gradleg_tri_p7_b2_ax,   gradleg_tri_p7_b3_ax,   gradleg_tri_p8_b1_ax,   gradleg_tri_p8_b2_ax,   gradleg_tri_p8_b3_ax,   gradleg_tri_p9_b1_ax,   gradleg_tri_p9_b2_ax,   gradleg_tri_p9_b3_ax,   gradleg_tri_p10_b1_ax,   gradleg_tri_p10_b2_ax,   gradleg_tri_p10_b3_ax,
 
       gradleg_tri_b1_b1_1_ax, gradleg_tri_b1_b1_2_ax,  gradleg_tri_b1_b2_1_ax, gradleg_tri_b1_b2_2_ax,  gradleg_tri_b2_b1_1_ax, gradleg_tri_b2_b1_2_ax,  gradleg_tri_b1_b3_1_ax, gradleg_tri_b1_b3_2_ax,  gradleg_tri_b2_b2_1_ax, gradleg_tri_b2_b2_2_ax,  gradleg_tri_b3_b1_1_ax, gradleg_tri_b3_b1_2_ax,  gradleg_tri_b1_b4_1_ax, gradleg_tri_b1_b4_2_ax,  gradleg_tri_b2_b3_1_ax, gradleg_tri_b2_b3_2_ax,  gradleg_tri_b3_b2_1_ax, gradleg_tri_b3_b2_2_ax,  gradleg_tri_b4_b1_1_ax, gradleg_tri_b4_b1_2_ax,  gradleg_tri_b1_b5_1_ax, gradleg_tri_b1_b5_2_ax,  gradleg_tri_b2_b4_1_ax, gradleg_tri_b2_b4_2_ax,  gradleg_tri_b3_b3_1_ax, gradleg_tri_b3_b3_2_ax,  gradleg_tri_b4_b2_1_ax, gradleg_tri_b4_b2_2_ax,  gradleg_tri_b5_b1_1_ax, gradleg_tri_b5_b1_2_ax,  gradleg_tri_b1_b6_1_ax, gradleg_tri_b1_b6_2_ax,  gradleg_tri_b2_b5_1_ax, gradleg_tri_b2_b5_2_ax,  gradleg_tri_b3_b4_1_ax, gradleg_tri_b3_b4_2_ax,  gradleg_tri_b4_b3_1_ax, gradleg_tri_b4_b3_2_ax,  gradleg_tri_b5_b2_1_ax, gradleg_tri_b5_b2_2_ax,  gradleg_tri_b6_b1_1_ax, gradleg_tri_b6_b1_2_ax,  gradleg_tri_b1_b7_1_ax, gradleg_tri_b1_b7_2_ax,  gradleg_tri_b2_b6_1_ax, gradleg_tri_b2_b6_2_ax,  gradleg_tri_b3_b5_1_ax, gradleg_tri_b3_b5_2_ax,  gradleg_tri_b4_b4_1_ax, gradleg_tri_b4_b4_2_ax,  gradleg_tri_b5_b3_1_ax, gradleg_tri_b5_b3_2_ax,  gradleg_tri_b6_b2_1_ax, gradleg_tri_b6_b2_2_ax,  gradleg_tri_b7_b1_1_ax, gradleg_tri_b7_b1_2_ax,  gradleg_tri_b1_b8_1_ax, gradleg_tri_b1_b8_2_ax,  gradleg_tri_b2_b7_1_ax, gradleg_tri_b2_b7_2_ax,  gradleg_tri_b3_b6_1_ax, gradleg_tri_b3_b6_2_ax,  gradleg_tri_b4_b5_1_ax, gradleg_tri_b4_b5_2_ax,  gradleg_tri_b5_b4_1_ax, gradleg_tri_b5_b4_2_ax,  gradleg_tri_b6_b3_1_ax, gradleg_tri_b6_b3_2_ax,  gradleg_tri_b7_b2_1_ax, gradleg_tri_b7_b2_2_ax,  gradleg_tri_b8_b1_1_ax, gradleg_tri_b8_b1_2_ax,
-
-
     };
 
     static Shapeset::shape_fn_t gradleg_tri_fn_bx[] =
@@ -6702,8 +6695,6 @@ namespace Hermes
       gradleg_tri_p2_b1_bx,   gradleg_tri_p2_b2_bx,   gradleg_tri_p2_b3_bx,   gradleg_tri_p3_b1_bx,   gradleg_tri_p3_b2_bx,   gradleg_tri_p3_b3_bx,   gradleg_tri_p4_b1_bx,   gradleg_tri_p4_b2_bx,   gradleg_tri_p4_b3_bx,   gradleg_tri_p5_b1_bx,   gradleg_tri_p5_b2_bx,   gradleg_tri_p5_b3_bx,   gradleg_tri_p6_b1_bx,   gradleg_tri_p6_b2_bx,   gradleg_tri_p6_b3_bx,   gradleg_tri_p7_b1_bx,   gradleg_tri_p7_b2_bx,   gradleg_tri_p7_b3_bx,   gradleg_tri_p8_b1_bx,   gradleg_tri_p8_b2_bx,   gradleg_tri_p8_b3_bx,   gradleg_tri_p9_b1_bx,   gradleg_tri_p9_b2_bx,   gradleg_tri_p9_b3_bx,   gradleg_tri_p10_b1_bx,   gradleg_tri_p10_b2_bx,   gradleg_tri_p10_b3_bx,
 
       gradleg_tri_b1_b1_1_bx, gradleg_tri_b1_b1_2_bx,  gradleg_tri_b1_b2_1_bx, gradleg_tri_b1_b2_2_bx,  gradleg_tri_b2_b1_1_bx, gradleg_tri_b2_b1_2_bx,  gradleg_tri_b1_b3_1_bx, gradleg_tri_b1_b3_2_bx,  gradleg_tri_b2_b2_1_bx, gradleg_tri_b2_b2_2_bx,  gradleg_tri_b3_b1_1_bx, gradleg_tri_b3_b1_2_bx,  gradleg_tri_b1_b4_1_bx, gradleg_tri_b1_b4_2_bx,  gradleg_tri_b2_b3_1_bx, gradleg_tri_b2_b3_2_bx,  gradleg_tri_b3_b2_1_bx, gradleg_tri_b3_b2_2_bx,  gradleg_tri_b4_b1_1_bx, gradleg_tri_b4_b1_2_bx,  gradleg_tri_b1_b5_1_bx, gradleg_tri_b1_b5_2_bx,  gradleg_tri_b2_b4_1_bx, gradleg_tri_b2_b4_2_bx,  gradleg_tri_b3_b3_1_bx, gradleg_tri_b3_b3_2_bx,  gradleg_tri_b4_b2_1_bx, gradleg_tri_b4_b2_2_bx,  gradleg_tri_b5_b1_1_bx, gradleg_tri_b5_b1_2_bx,  gradleg_tri_b1_b6_1_bx, gradleg_tri_b1_b6_2_bx,  gradleg_tri_b2_b5_1_bx, gradleg_tri_b2_b5_2_bx,  gradleg_tri_b3_b4_1_bx, gradleg_tri_b3_b4_2_bx,  gradleg_tri_b4_b3_1_bx, gradleg_tri_b4_b3_2_bx,  gradleg_tri_b5_b2_1_bx, gradleg_tri_b5_b2_2_bx,  gradleg_tri_b6_b1_1_bx, gradleg_tri_b6_b1_2_bx,  gradleg_tri_b1_b7_1_bx, gradleg_tri_b1_b7_2_bx,  gradleg_tri_b2_b6_1_bx, gradleg_tri_b2_b6_2_bx,  gradleg_tri_b3_b5_1_bx, gradleg_tri_b3_b5_2_bx,  gradleg_tri_b4_b4_1_bx, gradleg_tri_b4_b4_2_bx,  gradleg_tri_b5_b3_1_bx, gradleg_tri_b5_b3_2_bx,  gradleg_tri_b6_b2_1_bx, gradleg_tri_b6_b2_2_bx,  gradleg_tri_b7_b1_1_bx, gradleg_tri_b7_b1_2_bx,  gradleg_tri_b1_b8_1_bx, gradleg_tri_b1_b8_2_bx,  gradleg_tri_b2_b7_1_bx, gradleg_tri_b2_b7_2_bx,  gradleg_tri_b3_b6_1_bx, gradleg_tri_b3_b6_2_bx,  gradleg_tri_b4_b5_1_bx, gradleg_tri_b4_b5_2_bx,  gradleg_tri_b5_b4_1_bx, gradleg_tri_b5_b4_2_bx,  gradleg_tri_b6_b3_1_bx, gradleg_tri_b6_b3_2_bx,  gradleg_tri_b7_b2_1_bx, gradleg_tri_b7_b2_2_bx,  gradleg_tri_b8_b1_1_bx, gradleg_tri_b8_b1_2_bx,
-
-
     };
 
     static Shapeset::shape_fn_t gradleg_tri_fn_ay[] =
@@ -6723,8 +6714,6 @@ namespace Hermes
       gradleg_tri_p2_b1_ay,   gradleg_tri_p2_b2_ay,   gradleg_tri_p2_b3_ay,   gradleg_tri_p3_b1_ay,   gradleg_tri_p3_b2_ay,   gradleg_tri_p3_b3_ay,   gradleg_tri_p4_b1_ay,   gradleg_tri_p4_b2_ay,   gradleg_tri_p4_b3_ay,   gradleg_tri_p5_b1_ay,   gradleg_tri_p5_b2_ay,   gradleg_tri_p5_b3_ay,   gradleg_tri_p6_b1_ay,   gradleg_tri_p6_b2_ay,   gradleg_tri_p6_b3_ay,   gradleg_tri_p7_b1_ay,   gradleg_tri_p7_b2_ay,   gradleg_tri_p7_b3_ay,   gradleg_tri_p8_b1_ay,   gradleg_tri_p8_b2_ay,   gradleg_tri_p8_b3_ay,   gradleg_tri_p9_b1_ay,   gradleg_tri_p9_b2_ay,   gradleg_tri_p9_b3_ay,   gradleg_tri_p10_b1_ay,   gradleg_tri_p10_b2_ay,   gradleg_tri_p10_b3_ay,
 
       gradleg_tri_b1_b1_1_ay, gradleg_tri_b1_b1_2_ay,  gradleg_tri_b1_b2_1_ay, gradleg_tri_b1_b2_2_ay,  gradleg_tri_b2_b1_1_ay, gradleg_tri_b2_b1_2_ay,  gradleg_tri_b1_b3_1_ay, gradleg_tri_b1_b3_2_ay,  gradleg_tri_b2_b2_1_ay, gradleg_tri_b2_b2_2_ay,  gradleg_tri_b3_b1_1_ay, gradleg_tri_b3_b1_2_ay,  gradleg_tri_b1_b4_1_ay, gradleg_tri_b1_b4_2_ay,  gradleg_tri_b2_b3_1_ay, gradleg_tri_b2_b3_2_ay,  gradleg_tri_b3_b2_1_ay, gradleg_tri_b3_b2_2_ay,  gradleg_tri_b4_b1_1_ay, gradleg_tri_b4_b1_2_ay,  gradleg_tri_b1_b5_1_ay, gradleg_tri_b1_b5_2_ay,  gradleg_tri_b2_b4_1_ay, gradleg_tri_b2_b4_2_ay,  gradleg_tri_b3_b3_1_ay, gradleg_tri_b3_b3_2_ay,  gradleg_tri_b4_b2_1_ay, gradleg_tri_b4_b2_2_ay,  gradleg_tri_b5_b1_1_ay, gradleg_tri_b5_b1_2_ay,  gradleg_tri_b1_b6_1_ay, gradleg_tri_b1_b6_2_ay,  gradleg_tri_b2_b5_1_ay, gradleg_tri_b2_b5_2_ay,  gradleg_tri_b3_b4_1_ay, gradleg_tri_b3_b4_2_ay,  gradleg_tri_b4_b3_1_ay, gradleg_tri_b4_b3_2_ay,  gradleg_tri_b5_b2_1_ay, gradleg_tri_b5_b2_2_ay,  gradleg_tri_b6_b1_1_ay, gradleg_tri_b6_b1_2_ay,  gradleg_tri_b1_b7_1_ay, gradleg_tri_b1_b7_2_ay,  gradleg_tri_b2_b6_1_ay, gradleg_tri_b2_b6_2_ay,  gradleg_tri_b3_b5_1_ay, gradleg_tri_b3_b5_2_ay,  gradleg_tri_b4_b4_1_ay, gradleg_tri_b4_b4_2_ay,  gradleg_tri_b5_b3_1_ay, gradleg_tri_b5_b3_2_ay,  gradleg_tri_b6_b2_1_ay, gradleg_tri_b6_b2_2_ay,  gradleg_tri_b7_b1_1_ay, gradleg_tri_b7_b1_2_ay,  gradleg_tri_b1_b8_1_ay, gradleg_tri_b1_b8_2_ay,  gradleg_tri_b2_b7_1_ay, gradleg_tri_b2_b7_2_ay,  gradleg_tri_b3_b6_1_ay, gradleg_tri_b3_b6_2_ay,  gradleg_tri_b4_b5_1_ay, gradleg_tri_b4_b5_2_ay,  gradleg_tri_b5_b4_1_ay, gradleg_tri_b5_b4_2_ay,  gradleg_tri_b6_b3_1_ay, gradleg_tri_b6_b3_2_ay,  gradleg_tri_b7_b2_1_ay, gradleg_tri_b7_b2_2_ay,  gradleg_tri_b8_b1_1_ay, gradleg_tri_b8_b1_2_ay,
-
-
     };
 
     static Shapeset::shape_fn_t gradleg_tri_fn_by[] =
@@ -6744,8 +6733,6 @@ namespace Hermes
       gradleg_tri_p2_b1_by,   gradleg_tri_p2_b2_by,   gradleg_tri_p2_b3_by,   gradleg_tri_p3_b1_by,   gradleg_tri_p3_b2_by,   gradleg_tri_p3_b3_by,   gradleg_tri_p4_b1_by,   gradleg_tri_p4_b2_by,   gradleg_tri_p4_b3_by,   gradleg_tri_p5_b1_by,   gradleg_tri_p5_b2_by,   gradleg_tri_p5_b3_by,   gradleg_tri_p6_b1_by,   gradleg_tri_p6_b2_by,   gradleg_tri_p6_b3_by,   gradleg_tri_p7_b1_by,   gradleg_tri_p7_b2_by,   gradleg_tri_p7_b3_by,   gradleg_tri_p8_b1_by,   gradleg_tri_p8_b2_by,   gradleg_tri_p8_b3_by,   gradleg_tri_p9_b1_by,   gradleg_tri_p9_b2_by,   gradleg_tri_p9_b3_by,   gradleg_tri_p10_b1_by,   gradleg_tri_p10_b2_by,   gradleg_tri_p10_b3_by,
 
       gradleg_tri_b1_b1_1_by, gradleg_tri_b1_b1_2_by,  gradleg_tri_b1_b2_1_by, gradleg_tri_b1_b2_2_by,  gradleg_tri_b2_b1_1_by, gradleg_tri_b2_b1_2_by,  gradleg_tri_b1_b3_1_by, gradleg_tri_b1_b3_2_by,  gradleg_tri_b2_b2_1_by, gradleg_tri_b2_b2_2_by,  gradleg_tri_b3_b1_1_by, gradleg_tri_b3_b1_2_by,  gradleg_tri_b1_b4_1_by, gradleg_tri_b1_b4_2_by,  gradleg_tri_b2_b3_1_by, gradleg_tri_b2_b3_2_by,  gradleg_tri_b3_b2_1_by, gradleg_tri_b3_b2_2_by,  gradleg_tri_b4_b1_1_by, gradleg_tri_b4_b1_2_by,  gradleg_tri_b1_b5_1_by, gradleg_tri_b1_b5_2_by,  gradleg_tri_b2_b4_1_by, gradleg_tri_b2_b4_2_by,  gradleg_tri_b3_b3_1_by, gradleg_tri_b3_b3_2_by,  gradleg_tri_b4_b2_1_by, gradleg_tri_b4_b2_2_by,  gradleg_tri_b5_b1_1_by, gradleg_tri_b5_b1_2_by,  gradleg_tri_b1_b6_1_by, gradleg_tri_b1_b6_2_by,  gradleg_tri_b2_b5_1_by, gradleg_tri_b2_b5_2_by,  gradleg_tri_b3_b4_1_by, gradleg_tri_b3_b4_2_by,  gradleg_tri_b4_b3_1_by, gradleg_tri_b4_b3_2_by,  gradleg_tri_b5_b2_1_by, gradleg_tri_b5_b2_2_by,  gradleg_tri_b6_b1_1_by, gradleg_tri_b6_b1_2_by,  gradleg_tri_b1_b7_1_by, gradleg_tri_b1_b7_2_by,  gradleg_tri_b2_b6_1_by, gradleg_tri_b2_b6_2_by,  gradleg_tri_b3_b5_1_by, gradleg_tri_b3_b5_2_by,  gradleg_tri_b4_b4_1_by, gradleg_tri_b4_b4_2_by,  gradleg_tri_b5_b3_1_by, gradleg_tri_b5_b3_2_by,  gradleg_tri_b6_b2_1_by, gradleg_tri_b6_b2_2_by,  gradleg_tri_b7_b1_1_by, gradleg_tri_b7_b1_2_by,  gradleg_tri_b1_b8_1_by, gradleg_tri_b1_b8_2_by,  gradleg_tri_b2_b7_1_by, gradleg_tri_b2_b7_2_by,  gradleg_tri_b3_b6_1_by, gradleg_tri_b3_b6_2_by,  gradleg_tri_b4_b5_1_by, gradleg_tri_b4_b5_2_by,  gradleg_tri_b5_b4_1_by, gradleg_tri_b5_b4_2_by,  gradleg_tri_b6_b3_1_by, gradleg_tri_b6_b3_2_by,  gradleg_tri_b7_b2_1_by, gradleg_tri_b7_b2_2_by,  gradleg_tri_b8_b1_1_by, gradleg_tri_b8_b1_2_by,
-
-
     };
 
     static int gradleg_tri_bubble_indices_all_orders[] =
@@ -6761,7 +6748,6 @@ namespace Hermes
      90, 91, 92, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164,
     };
 
-
     static int* gradleg_tri_bubble_indices[11] =
     {
       NULL, NULL,
@@ -6775,7 +6761,6 @@ namespace Hermes
       gradleg_tri_bubble_indices_all_orders,
       gradleg_tri_bubble_indices_all_orders
     };
-
 
     static int gradleg_tri_bubble_count[11] = { 0, 0, 3, 8, 15, 24, 35, 48, 63, 80, 99, };
 
@@ -6822,10 +6807,7 @@ namespace Hermes
      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
      9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
      10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-
     };
-
-
 
     static Shapeset::shape_fn_t* gradleg_tri_shape_fn_table[2] =
     {
@@ -6844,7 +6826,6 @@ namespace Hermes
       gradleg_tri_fn_ay,
       gradleg_tri_fn_by
     };
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -15536,7 +15517,6 @@ namespace Hermes
 
       gradleg_quad_p0p2_b1_by,   gradleg_quad_p0p3_b1_by,   gradleg_quad_p0p4_b1_by,   gradleg_quad_p0p5_b1_by,   gradleg_quad_p0p6_b1_by,   gradleg_quad_p0p7_b1_by,   gradleg_quad_p0p8_b1_by,   gradleg_quad_p0p9_b1_by,   gradleg_quad_p0p10_b1_by,   gradleg_quad_p0p11_b1_by,   gradleg_quad_p1p2_b1_by,   gradleg_quad_p1p3_b1_by,   gradleg_quad_p1p4_b1_by,   gradleg_quad_p1p5_b1_by,   gradleg_quad_p1p6_b1_by,   gradleg_quad_p1p7_b1_by,   gradleg_quad_p1p8_b1_by,   gradleg_quad_p1p9_b1_by,   gradleg_quad_p1p10_b1_by,   gradleg_quad_p1p11_b1_by,   gradleg_quad_p2p2_b1_by,   gradleg_quad_p2p3_b1_by,   gradleg_quad_p2p4_b1_by,   gradleg_quad_p2p5_b1_by,   gradleg_quad_p2p6_b1_by,   gradleg_quad_p2p7_b1_by,   gradleg_quad_p2p8_b1_by,   gradleg_quad_p2p9_b1_by,   gradleg_quad_p2p10_b1_by,   gradleg_quad_p2p11_b1_by,   gradleg_quad_p3p2_b1_by,   gradleg_quad_p3p3_b1_by,   gradleg_quad_p3p4_b1_by,   gradleg_quad_p3p5_b1_by,   gradleg_quad_p3p6_b1_by,   gradleg_quad_p3p7_b1_by,   gradleg_quad_p3p8_b1_by,   gradleg_quad_p3p9_b1_by,   gradleg_quad_p3p10_b1_by,   gradleg_quad_p3p11_b1_by,   gradleg_quad_p4p2_b1_by,   gradleg_quad_p4p3_b1_by,   gradleg_quad_p4p4_b1_by,   gradleg_quad_p4p5_b1_by,   gradleg_quad_p4p6_b1_by,   gradleg_quad_p4p7_b1_by,   gradleg_quad_p4p8_b1_by,   gradleg_quad_p4p9_b1_by,   gradleg_quad_p4p10_b1_by,   gradleg_quad_p4p11_b1_by,   gradleg_quad_p5p2_b1_by,   gradleg_quad_p5p3_b1_by,   gradleg_quad_p5p4_b1_by,   gradleg_quad_p5p5_b1_by,   gradleg_quad_p5p6_b1_by,   gradleg_quad_p5p7_b1_by,   gradleg_quad_p5p8_b1_by,   gradleg_quad_p5p9_b1_by,   gradleg_quad_p5p10_b1_by,   gradleg_quad_p5p11_b1_by,   gradleg_quad_p6p2_b1_by,   gradleg_quad_p6p3_b1_by,   gradleg_quad_p6p4_b1_by,   gradleg_quad_p6p5_b1_by,   gradleg_quad_p6p6_b1_by,   gradleg_quad_p6p7_b1_by,   gradleg_quad_p6p8_b1_by,   gradleg_quad_p6p9_b1_by,   gradleg_quad_p6p10_b1_by,   gradleg_quad_p6p11_b1_by,   gradleg_quad_p7p2_b1_by,   gradleg_quad_p7p3_b1_by,   gradleg_quad_p7p4_b1_by,   gradleg_quad_p7p5_b1_by,   gradleg_quad_p7p6_b1_by,   gradleg_quad_p7p7_b1_by,   gradleg_quad_p7p8_b1_by,   gradleg_quad_p7p9_b1_by,   gradleg_quad_p7p10_b1_by,   gradleg_quad_p7p11_b1_by,   gradleg_quad_p8p2_b1_by,   gradleg_quad_p8p3_b1_by,   gradleg_quad_p8p4_b1_by,   gradleg_quad_p8p5_b1_by,   gradleg_quad_p8p6_b1_by,   gradleg_quad_p8p7_b1_by,   gradleg_quad_p8p8_b1_by,   gradleg_quad_p8p9_b1_by,   gradleg_quad_p8p10_b1_by,   gradleg_quad_p8p11_b1_by,   gradleg_quad_p9p2_b1_by,   gradleg_quad_p9p3_b1_by,   gradleg_quad_p9p4_b1_by,   gradleg_quad_p9p5_b1_by,   gradleg_quad_p9p6_b1_by,   gradleg_quad_p9p7_b1_by,   gradleg_quad_p9p8_b1_by,   gradleg_quad_p9p9_b1_by,   gradleg_quad_p9p10_b1_by,   gradleg_quad_p9p11_b1_by,   gradleg_quad_p10p2_b1_by,   gradleg_quad_p10p3_b1_by,   gradleg_quad_p10p4_b1_by,   gradleg_quad_p10p5_b1_by,   gradleg_quad_p10p6_b1_by,   gradleg_quad_p10p7_b1_by,   gradleg_quad_p10p8_b1_by,   gradleg_quad_p10p9_b1_by,   gradleg_quad_p10p10_b1_by,   gradleg_quad_p10p11_b1_by,   gradleg_quad_p2p0_b2_by,   gradleg_quad_p2p1_b2_by,   gradleg_quad_p2p2_b2_by,   gradleg_quad_p2p3_b2_by,   gradleg_quad_p2p4_b2_by,   gradleg_quad_p2p5_b2_by,   gradleg_quad_p2p6_b2_by,   gradleg_quad_p2p7_b2_by,   gradleg_quad_p2p8_b2_by,   gradleg_quad_p2p9_b2_by,   gradleg_quad_p2p10_b2_by,   gradleg_quad_p3p0_b2_by,   gradleg_quad_p3p1_b2_by,   gradleg_quad_p3p2_b2_by,   gradleg_quad_p3p3_b2_by,   gradleg_quad_p3p4_b2_by,   gradleg_quad_p3p5_b2_by,   gradleg_quad_p3p6_b2_by,   gradleg_quad_p3p7_b2_by,   gradleg_quad_p3p8_b2_by,   gradleg_quad_p3p9_b2_by,   gradleg_quad_p3p10_b2_by,   gradleg_quad_p4p0_b2_by,   gradleg_quad_p4p1_b2_by,   gradleg_quad_p4p2_b2_by,   gradleg_quad_p4p3_b2_by,   gradleg_quad_p4p4_b2_by,   gradleg_quad_p4p5_b2_by,   gradleg_quad_p4p6_b2_by,   gradleg_quad_p4p7_b2_by,   gradleg_quad_p4p8_b2_by,   gradleg_quad_p4p9_b2_by,   gradleg_quad_p4p10_b2_by,   gradleg_quad_p5p0_b2_by,   gradleg_quad_p5p1_b2_by,   gradleg_quad_p5p2_b2_by,   gradleg_quad_p5p3_b2_by,   gradleg_quad_p5p4_b2_by,   gradleg_quad_p5p5_b2_by,   gradleg_quad_p5p6_b2_by,   gradleg_quad_p5p7_b2_by,   gradleg_quad_p5p8_b2_by,   gradleg_quad_p5p9_b2_by,   gradleg_quad_p5p10_b2_by,   gradleg_quad_p6p0_b2_by,   gradleg_quad_p6p1_b2_by,   gradleg_quad_p6p2_b2_by,   gradleg_quad_p6p3_b2_by,   gradleg_quad_p6p4_b2_by,   gradleg_quad_p6p5_b2_by,   gradleg_quad_p6p6_b2_by,   gradleg_quad_p6p7_b2_by,   gradleg_quad_p6p8_b2_by,   gradleg_quad_p6p9_b2_by,   gradleg_quad_p6p10_b2_by,   gradleg_quad_p7p0_b2_by,   gradleg_quad_p7p1_b2_by,   gradleg_quad_p7p2_b2_by,   gradleg_quad_p7p3_b2_by,   gradleg_quad_p7p4_b2_by,   gradleg_quad_p7p5_b2_by,   gradleg_quad_p7p6_b2_by,   gradleg_quad_p7p7_b2_by,   gradleg_quad_p7p8_b2_by,   gradleg_quad_p7p9_b2_by,   gradleg_quad_p7p10_b2_by,   gradleg_quad_p8p0_b2_by,   gradleg_quad_p8p1_b2_by,   gradleg_quad_p8p2_b2_by,   gradleg_quad_p8p3_b2_by,   gradleg_quad_p8p4_b2_by,   gradleg_quad_p8p5_b2_by,   gradleg_quad_p8p6_b2_by,   gradleg_quad_p8p7_b2_by,   gradleg_quad_p8p8_b2_by,   gradleg_quad_p8p9_b2_by,   gradleg_quad_p8p10_b2_by,   gradleg_quad_p9p0_b2_by,   gradleg_quad_p9p1_b2_by,   gradleg_quad_p9p2_b2_by,   gradleg_quad_p9p3_b2_by,   gradleg_quad_p9p4_b2_by,   gradleg_quad_p9p5_b2_by,   gradleg_quad_p9p6_b2_by,   gradleg_quad_p9p7_b2_by,   gradleg_quad_p9p8_b2_by,   gradleg_quad_p9p9_b2_by,   gradleg_quad_p9p10_b2_by,   gradleg_quad_p10p0_b2_by,   gradleg_quad_p10p1_b2_by,   gradleg_quad_p10p2_b2_by,   gradleg_quad_p10p3_b2_by,   gradleg_quad_p10p4_b2_by,   gradleg_quad_p10p5_b2_by,   gradleg_quad_p10p6_b2_by,   gradleg_quad_p10p7_b2_by,   gradleg_quad_p10p8_b2_by,   gradleg_quad_p10p9_b2_by,   gradleg_quad_p10p10_b2_by,   gradleg_quad_p11p0_b2_by,   gradleg_quad_p11p1_b2_by,   gradleg_quad_p11p2_b2_by,   gradleg_quad_p11p3_b2_by,   gradleg_quad_p11p4_b2_by,   gradleg_quad_p11p5_b2_by,   gradleg_quad_p11p6_b2_by,   gradleg_quad_p11p7_b2_by,   gradleg_quad_p11p8_b2_by,   gradleg_quad_p11p9_b2_by,   gradleg_quad_p11p10_b2_by, };
 
-
     static int qb_0_1[] = { 88, };
       static int qb_0_2[] = { 88, 89, };
       static int qb_0_3[] = { 88, 89, 90, };
@@ -15658,7 +15638,6 @@ namespace Hermes
       static int qb_10_9[] = { 88, 89, 90, 91, 92, 93, 94, 95, 96, 198, 98, 199, 99, 200, 100, 201, 101, 202, 102, 203, 103, 204, 104, 205, 105, 206, 106, 207, 209, 108, 210, 109, 211, 110, 212, 111, 213, 112, 214, 113, 215, 114, 216, 115, 217, 116, 218, 220, 118, 221, 119, 222, 120, 223, 121, 224, 122, 225, 123, 226, 124, 227, 125, 228, 126, 229, 231, 128, 232, 129, 233, 130, 234, 131, 235, 132, 236, 133, 237, 134, 238, 135, 239, 136, 240, 242, 138, 243, 139, 244, 140, 245, 141, 246, 142, 247, 143, 248, 144, 249, 145, 250, 146, 251, 253, 148, 254, 149, 255, 150, 256, 151, 257, 152, 258, 153, 259, 154, 260, 155, 261, 156, 262, 264, 158, 265, 159, 266, 160, 267, 161, 268, 162, 269, 163, 270, 164, 271, 165, 272, 166, 273, 275, 168, 276, 169, 277, 170, 278, 171, 279, 172, 280, 173, 281, 174, 282, 175, 283, 176, 284, 286, 178, 287, 179, 288, 180, 289, 181, 290, 182, 291, 183, 292, 184, 293, 185, 294, 186, 295, 297, 188, 298, 189, 299, 190, 300, 191, 301, 192, 302, 193, 303, 194, 304, 195, 305, 196, 306, };
       static int qb_10_10[] = { 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 198, 98, 199, 99, 200, 100, 201, 101, 202, 102, 203, 103, 204, 104, 205, 105, 206, 106, 207, 107, 208, 209, 108, 210, 109, 211, 110, 212, 111, 213, 112, 214, 113, 215, 114, 216, 115, 217, 116, 218, 117, 219, 220, 118, 221, 119, 222, 120, 223, 121, 224, 122, 225, 123, 226, 124, 227, 125, 228, 126, 229, 127, 230, 231, 128, 232, 129, 233, 130, 234, 131, 235, 132, 236, 133, 237, 134, 238, 135, 239, 136, 240, 137, 241, 242, 138, 243, 139, 244, 140, 245, 141, 246, 142, 247, 143, 248, 144, 249, 145, 250, 146, 251, 147, 252, 253, 148, 254, 149, 255, 150, 256, 151, 257, 152, 258, 153, 259, 154, 260, 155, 261, 156, 262, 157, 263, 264, 158, 265, 159, 266, 160, 267, 161, 268, 162, 269, 163, 270, 164, 271, 165, 272, 166, 273, 167, 274, 275, 168, 276, 169, 277, 170, 278, 171, 279, 172, 280, 173, 281, 174, 282, 175, 283, 176, 284, 177, 285, 286, 178, 287, 179, 288, 180, 289, 181, 290, 182, 291, 183, 292, 184, 293, 185, 294, 186, 295, 187, 296, 297, 188, 298, 189, 299, 190, 300, 191, 301, 192, 302, 193, 303, 194, 304, 195, 305, 196, 306, 197, 307, };
 
-
     #define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL,
 
     static int* gradleg_quad_bubble_indices[] =
@@ -15692,7 +15671,6 @@ namespace Hermes
       9, 28, 47, 66, 85, 104, 123, 142, 161, 180, 199, 0,  0,  0,  0,  0, zero16
       10, 31, 52, 73, 94, 115, 136, 157, 178, 199, 220, 0,  0,  0,  0,  0, zero16
     };
-
 
     static int gradleg_quad_vertex_indices[4] ={-1, -1, -1, -1};
 
@@ -15759,7 +15737,6 @@ namespace Hermes
       gradleg_quad_shape_fn_table
     };
 
-
     static Shapeset::shape_fn_t** gradleg_shape_fn_table_x[2] =
     {
       gradleg_tri_shape_fn_table_x,
@@ -15778,13 +15755,11 @@ namespace Hermes
       gradleg_quad_vertex_indices
     };
 
-
     static int** gradleg_edge_indices[2] =
     {
       gradleg_tri_edge_indices,
       gradleg_quad_edge_indices
     };
-
 
     static int** gradleg_bubble_indices[2] =
     {
@@ -15792,13 +15767,11 @@ namespace Hermes
       gradleg_quad_bubble_indices
     };
 
-
     static int* gradleg_bubble_count[2] =
     {
       gradleg_tri_bubble_count,
       gradleg_quad_bubble_count
     };
-
 
     static int* gradleg_index_to_order[2] =
     {

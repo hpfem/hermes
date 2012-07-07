@@ -310,16 +310,16 @@ namespace Hermes
     }
 
     template<typename T>
-    void InterfaceGeom<T>::free() 
+    void InterfaceGeom<T>::free()
     {
-      wrapped_geom->free(); 
-      delete wrapped_geom; 
+      wrapped_geom->free();
+      delete wrapped_geom;
     }
-    
+
     template<typename T>
-    void InterfaceGeom<T>::free_ord() 
+    void InterfaceGeom<T>::free_ord()
     {
-      delete wrapped_geom; 
+      delete wrapped_geom;
     }
 
     template<typename T>
@@ -385,7 +385,7 @@ namespace Hermes
       e->isurf = isurf;
       e->x = rm->get_phys_x(order);
       e->y = rm->get_phys_y(order);
-      
+
       tan = rm->get_tangent(isurf, order);
 
       Quad2D* quad = rm->get_quad_2d();
@@ -472,7 +472,6 @@ namespace Hermes
             m[i][1][0] = const_inv_ref_map[1][0];
             m[i][1][1] = const_inv_ref_map[1][1];
           }
-
         }
         else
           m = rm->get_inv_ref_map(order);
@@ -776,6 +775,5 @@ namespace Hermes
     template class HERMES_API ExtData<Hermes::Ord>;
     template class HERMES_API ExtData<double>;
     template class HERMES_API ExtData<std::complex<double> >;
-
   }
 }

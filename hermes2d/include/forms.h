@@ -50,7 +50,7 @@ namespace Hermes
       T *curl;           ///< Components of the curl of a vector field.
       T *div;            ///< Components of the div of a vector field.
       uint64_t sub_idx;  ///< Sub-element transformation.
-      
+
       /// Methods designed for discontinuous functions, return errors here.
       virtual T& get_val_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
@@ -67,7 +67,7 @@ namespace Hermes
       virtual T& get_laplace_central(int k) { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
       /// Methods designed for discontinuous functions, return errors here.
       virtual T& get_laplace_neighbor(int k) { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      
+
       /// Dellocates an instance of Func<Ord>
       virtual void free_ord();
 
@@ -80,7 +80,7 @@ namespace Hermes
       /// Alternatively, both Func::get_*_central and Func::get_*_neighbor could return the central values as
       /// expected from a continuous function.
       virtual ~Func() { };
-      
+
       void subtract(const Func<T>& func);
       void add(T* attribute, T* other_attribute);
 
@@ -89,7 +89,7 @@ namespace Hermes
     protected:
       const int num_gip; ///< Number of integration points used by this intance.
       const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
-      
+
       /// Constructor.
       /** \param[in] num_gip A number of integration points.
       *  \param[in] num_comps A number of components. */
@@ -213,7 +213,7 @@ namespace Hermes
       virtual int get_neighbor_id()     const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return -1; }
       /// Methods designed for discontinuous functions, return errors here.
       virtual T   get_neighbor_diam()   const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return  T(); }
-      
+
       /// Virtual destructor allowing deallocation of inherited classes (InterfaceGeom) in polymorphic cases.
       virtual ~Geom() {};
 
@@ -222,7 +222,7 @@ namespace Hermes
       virtual void free_ord() {};
       int elem_marker;       ///< Element marker (for both volumetric and surface forms).
       int edge_marker;       ///< Edge marker (for surface forms only).
-      
+
     protected:
       int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
       ///< otherwise 1 (each edge has a unique global normal).
@@ -244,7 +244,6 @@ namespace Hermes
       template<typename Scalar> friend class Adapt;
     };
 
-
     /// Small class which contains information about the element on the other side of an interface.
     ///
     /// It just appends three new parameters to an instance of Geom. During destruction, the wrapped
@@ -265,7 +264,7 @@ namespace Hermes
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
       Geom<T>* wrapped_geom;
-      
+
       virtual void free();
       virtual void free_ord();
 
@@ -282,7 +281,6 @@ namespace Hermes
     HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
     /// Init element geometry for surface integrals.
     HERMES_API Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
-
 
     /// Init the function for calculation the integration order.
     HERMES_API Func<Hermes::Ord>* init_fn_ord(const int order);

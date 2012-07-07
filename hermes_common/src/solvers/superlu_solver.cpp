@@ -457,25 +457,25 @@ namespace Hermes
 
     template<typename Scalar>
     Scalar SuperLUVector<Scalar>::get(unsigned int idx)
-    { 
-      return v[idx]; 
+    {
+      return v[idx];
     }
-    
+
     template<typename Scalar>
-    void SuperLUVector<Scalar>::extract(Scalar *v) const 
-    { 
-      memcpy(v, this->v, this->size * sizeof(Scalar)); 
+    void SuperLUVector<Scalar>::extract(Scalar *v) const
+    {
+      memcpy(v, this->v, this->size * sizeof(Scalar));
     }
-    
+
     template<typename Scalar>
-    void SuperLUVector<Scalar>::add_vector(Vector<Scalar>* vec) 
+    void SuperLUVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
       assert(this->length() == vec->length());
       for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
     }
 
     template<typename Scalar>
-    void SuperLUVector<Scalar>::add_vector(Scalar* vec) 
+    void SuperLUVector<Scalar>::add_vector(Scalar* vec)
     {
       for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
@@ -555,7 +555,6 @@ namespace Hermes
 
       return false;
     }
-
 
     template<typename Scalar>
     SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs)

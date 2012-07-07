@@ -25,7 +25,6 @@ namespace Hermes
   namespace Hermes2D
   {
     namespace RefinementSelectors {
-
       /// Predefined list of candidates. \ingroup g_selectors
       enum CandList {
         H2D_NONE,  ///< No adaptivity. (Used only in modules.)
@@ -281,9 +280,9 @@ namespace Hermes
           *  \param[in] type A type of the shape function. */
           ShapeInx(int order_h, int order_v, int inx, ShapeType type) : order_h(order_h), order_v(order_v), inx(inx), type(type) {};
         };
-        
+
         /// Range of values.
-        class Range 
+        class Range
         {
         protected:
           int lower_bound;    ///< Lower boundary.

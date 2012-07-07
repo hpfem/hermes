@@ -40,7 +40,6 @@ namespace Hermes
 {
   namespace Solvers
   {
-
     /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
     template <typename Scalar>
@@ -112,7 +111,6 @@ namespace Hermes
 
       /// \name linear solver setters
       ///@{
-
       ///Determine the iterative technique used in the solve. The following options are valid:
       /// - "GMRES" - Restarted generalized minimal residual (default).
       /// - "CG" - Conjugate gradient.
@@ -131,7 +129,6 @@ namespace Hermes
 
       /// \name convergence params
       /// @{
-
       /// Type of norm
       /// - NOX::Abstract::Vector::OneNorm \f[ \|x\| = \sum_{i = 1}^n \| x_i \| \f]
       /// - NOX::Abstract::Vector::TwoNorm \f[ \|x\| = \sqrt{\sum_{i = 1}^n \| x_i^2 \|} \f]

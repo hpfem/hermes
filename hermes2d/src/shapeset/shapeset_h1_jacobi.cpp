@@ -17,7 +17,6 @@
 #include "shapeset_common.h"
 #include "shapeset_h1_all.h"
 
-
 /// \file Shape functions based on integrated Jacobi polynomials (by Sven Beuchler). Implementation
 /// of all shape functions on the
 /// reference element up to the polynomial degree 10. Vertex functions: barycentric
@@ -97,7 +96,6 @@ namespace Hermes
     {
       return 0.0;
     }
-
 
     // number 3
     inline double jacobi_f3(double x, double y)
@@ -3968,8 +3966,6 @@ namespace Hermes
           9.5599990735481933233210123163023868*a)*a)*a)*a)*a)*a)*a)*a;
     }
 
-
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static Shapeset::shape_fn_t jacobi_tri_fn[] =
@@ -4068,7 +4064,6 @@ namespace Hermes
       jacobi_f66_dxy
     };
 
-
     static int jacobi_tri_bubble_indices_all_orders[] =
     {
       12,
@@ -4109,14 +4104,12 @@ namespace Hermes
 
     static int jacobi_tri_vertex_indices[3] = { 0, 1, 2 };
 
-
     static int jacobi_tri_index_to_order[78] =
     {
       1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6,
       7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
       10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
     };
-
 
     static Shapeset::shape_fn_t* jacobi_tri_shape_fn_table[1] =
     {
@@ -4148,11 +4141,9 @@ namespace Hermes
       jacobi_tri_fn_dxy
     };
 
-
     //// triangle and quad tables and class constructor ///////////////////////////////////////////////
 
     #include "shapeset_h1_quad.h"
-
 
     static Shapeset::shape_fn_t** jacobi_shape_fn_table[2] =
     {
@@ -4196,13 +4187,11 @@ namespace Hermes
       simple_quad_vertex_indices
     };
 
-
     static int** jacobi_edge_indices[2] =
     {
       jacobi_tri_edge_indices,
       simple_quad_edge_indices
     };
-
 
     static int** jacobi_bubble_indices[2] =
     {
@@ -4210,20 +4199,17 @@ namespace Hermes
       simple_quad_bubble_indices
     };
 
-
     static int* jacobi_bubble_count[2] =
     {
       jacobi_tri_bubble_count,
       simple_quad_bubble_count
     };
 
-
     static int* jacobi_index_to_order[2] =
     {
       jacobi_tri_index_to_order,
       simple_quad_index_to_order
     };
-
 
     H1ShapesetJacobi::H1ShapesetJacobi()
     {

@@ -72,7 +72,6 @@ namespace Hermes
               MaterialPropertyMap0::const_iterator it;
               for (it = mrsg_map.begin(); it != mrsg_map.end(); ++it)
                 (*mrmg_map)[it->first].assign(G, it->second);
-
             }
 
             void MaterialPropertyMaps::extend_to_multiregion(const rank1& srmg_array,
@@ -178,7 +177,7 @@ namespace Hermes
             const rank1& MaterialPropertyMaps::get_Sigma_f(std::string material) const
             {
               if (material == "-999") return this->Sigma_f.begin()->second;
-              
+
               // Note that prop[e->elem_marker] cannot be used since 'prop' is a constant std::map for
               // which operator[] is undefined.
               MaterialPropertyMap1::const_iterator data = this->Sigma_f.find(material);
@@ -193,7 +192,7 @@ namespace Hermes
             const rank1& MaterialPropertyMaps::get_nu(std::string material) const
             {
               if (material == "-999") return this->nu.begin()->second;
-              
+
               MaterialPropertyMap1::const_iterator data = this->nu.find(material);
               if (data != this->nu.end())
                 return data->second;
@@ -206,7 +205,7 @@ namespace Hermes
             const rank1& MaterialPropertyMaps::get_chi(std::string material) const
             {
               if (material == "-999") return this->chi.begin()->second;
-              
+
               MaterialPropertyMap1::const_iterator data = this->chi.find(material);
               if (data != this->chi.end())
                 return data->second;
@@ -432,7 +431,7 @@ namespace Hermes
             const rank2& MaterialPropertyMaps::get_Sigma_s(std::string material) const
             {
               if (material == "-999") return this->Sigma_s.begin()->second;
-              
+
               // Note that prop[e->elem_marker] cannot be used since 'prop' is a constant std::map for
               // which operator[] is undefined.
               MaterialPropertyMap2::const_iterator data = this->Sigma_s.find(material);
@@ -447,7 +446,7 @@ namespace Hermes
             const rank1& MaterialPropertyMaps::get_Sigma_r(std::string material) const
             {
               if (material == "-999") return this->Sigma_r.begin()->second;
-              
+
               MaterialPropertyMap1::const_iterator data = this->Sigma_r.find(material);
               if (data != this->Sigma_r.end())
                 return data->second;
@@ -460,7 +459,7 @@ namespace Hermes
             const rank1& MaterialPropertyMaps::get_D(std::string material) const
             {
               if (material == "-999") return this->D.begin()->second;
-              
+
               MaterialPropertyMap1::const_iterator data = this->D.find(material);
               if (data != this->D.end())
                 return data->second;
@@ -473,7 +472,7 @@ namespace Hermes
             const rank1& MaterialPropertyMaps::get_src(std::string material) const
             {
               if (material == "-999") return this->src.begin()->second;
-              
+
               MaterialPropertyMap1::const_iterator data = this->src.find(material);
               if (data != this->src.end())
                 return data->second;
@@ -897,12 +896,12 @@ namespace Hermes
         {
           void SourceFilter::filter_fn(int n, Hermes::vector<double*> values, double* result)
           {
-            for (int i = 0; i < n; i++) 
+            for (int i = 0; i < n; i++)
             {
               result[i] = 0;
               for (unsigned int j = 0; j < values.size(); j++)
                 result[i] += nu[j] * Sigma_f[j] * values.at(j)[i];
-            } 
+            }
           }
         }
       }
@@ -931,16 +930,16 @@ namespace Hermes
             template class HERMES_API VacuumBoundaryCondition::Jacobian<std::complex<double> >;
             template class HERMES_API VacuumBoundaryCondition::Residual<double>;
             template class HERMES_API VacuumBoundaryCondition::Residual<std::complex<double> >;
-            
+
             template double VacuumBoundaryCondition::Jacobian<double>::matrix_form<double, double>(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
               Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
-            
+
             template double VacuumBoundaryCondition::Residual<double>::vector_form<double, double>(int n, double *wt, Func<double> *u_ext[],
               Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
-            
+
             template double DiffusionReaction::Jacobian<double>::matrix_form<double, double>(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
               Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
-              
+
             template double DiffusionReaction::Residual<double>::vector_form<double, double>(int n, double *wt, Func<double> *u_ext[],
               Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
 
@@ -960,7 +959,7 @@ namespace Hermes
               Func<double> *v, Geom<double> *e, ExtData<double> *ext ) const;
 
             template double ExternalSources::LinearForm<double>::vector_form<double, double>(int n, double *wt, Func<double> *u_ext[],
-              Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;                                                                                                   
+              Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
           }
         }
 

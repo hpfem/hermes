@@ -119,7 +119,6 @@ namespace Hermes
         return new DefaultJacobianMagnetostatics(*this);
       }
 
-
       template<typename Scalar>
       DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, std::string area, Scalar const_coeff,
         CubicSpline* c_spline,
@@ -182,7 +181,7 @@ namespace Hermes
       {
         return new DefaultResidualMagnetostatics(*this);
       }
-      
+
       template class HERMES_API DefaultJacobianMagnetostatics<double>;
       template class HERMES_API DefaultResidualMagnetostatics<double>;
     }

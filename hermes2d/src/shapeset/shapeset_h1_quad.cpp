@@ -4407,7 +4407,6 @@ namespace Hermes
     static int qb_10_9[] = { 32, 33, 34, 35, 36, 37, 38, 39, 45, 46, 47, 48, 49, 50, 51, 52, 56, 57, 58, 59, 60, 61, 62, 63, 69, 70, 71, 72, 73, 74, 75, 76, 80, 81, 82, 83, 84, 85, 86, 87, 93, 94, 95, 96, 97, 98, 99, 100, 104, 105, 106, 107, 108, 109, 110, 111, 117, 118, 119, 120, 121, 122, 123, 124, 128, 129, 130, 131, 132, 133, 134, 135, };
     static int qb_10_10[] = { 32, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 47, 48, 49, 50, 51, 52, 53, 56, 57, 58, 59, 60, 61, 62, 63, 64, 69, 70, 71, 72, 73, 74, 75, 76, 77, 80, 81, 82, 83, 84, 85, 86, 87, 88, 93, 94, 95, 96, 97, 98, 99, 100, 101, 104, 105, 106, 107, 108, 109, 110, 111, 112, 117, 118, 119, 120, 121, 122, 123, 124, 125, 128, 129, 130, 131, 132, 133, 134, 135, 136, };
 
-
 #define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL
 
     int* simple_quad_bubble_indices[] =
@@ -4449,7 +4448,6 @@ namespace Hermes
     static int simple_quad_edge_indices_2[22] =  { 16,  1,  1, 16, 31, 31, 43, 44, 55, 55, 67, 68, 79, 79, 91, 92, 103, 103, 115, 116, 127, 127 };
     static int simple_quad_edge_indices_3[22] =  {  1,  0,  0,  1,  2,  2,  3,  4,  5,  5,  6,  7,  8,  8,  9, 10,  11,  11,  12,  13,  14,  14 };
 
-
     int* simple_quad_edge_indices[4] =
     {
       simple_quad_edge_indices_0,
@@ -4457,7 +4455,6 @@ namespace Hermes
       simple_quad_edge_indices_2,
       simple_quad_edge_indices_3
     };
-
 
 #define oo H2D_MAKE_QUAD_ORDER
 #define XX(a, b) oo(a, b), oo(a, b)

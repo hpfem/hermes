@@ -22,7 +22,6 @@ namespace Hermes
   namespace Hermes2D
   {
     namespace RefinementSelectors {
-
       /// A projection-based selector for H1 space. \ingroup g_selectors
       /** This class is designed to be used with the class H1Adapt.
       *  Since an initialization of the class may take a long time,

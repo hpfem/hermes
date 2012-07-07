@@ -152,7 +152,7 @@ namespace Hermes
         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Refines elements based on results from calc_err_est().
-      /** 
+      /**
       *  \param[in] refinement_selectors Vector of selectors.
       *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
       *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
@@ -164,7 +164,7 @@ namespace Hermes
         int regularize = -1, double to_be_processed = 0.0);
 
       /// Refines elements based on results from calc_err_est().
-      /** 
+      /**
       *  \param[in] refinement_selector A pointer to a selector which will select a refinement.
       *  \param[in] thr A threshold. The meaning of the threshold is defined by the parameter strat.
       *  \param[in] strat A strategy. It specifies a stop condition which quits processing elements in the Adapt::regular_queue. Possible values are 0, 1, 2, and 3.
@@ -181,7 +181,7 @@ namespace Hermes
       *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
       double get_element_error_squared(int component, int id) const;
     protected:
-      
+
       /// A reference to an element.
       struct ElementReference {
         int id; ///< An element ID. Invalid if below 0.

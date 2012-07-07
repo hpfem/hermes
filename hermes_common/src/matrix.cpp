@@ -103,7 +103,7 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
       while (--k >= 0) sum -= a[i][k] * a[j][k];
       if (i == j)
       {
-        if (sum <= 0.0) 
+        if (sum <= 0.0)
           throw Exceptions::Exception("CHOLDC failed!");
         else p[i] = sqrt(sum);
       }

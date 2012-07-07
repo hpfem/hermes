@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
   // Create an Hcurl space with default shapeset.
   HcurlSpace<std::complex<double> > space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  
+
   // Initialize the weak formulation.
   CustomWeakForm wf(MU_R, KAPPA);
 
@@ -125,7 +125,6 @@ int main(int argc, char* argv[])
   int as = 1; bool done = false;
   do
   {
-    
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
@@ -210,4 +209,3 @@ int main(int argc, char* argv[])
   }
   return 0;
 }
-

@@ -186,7 +186,6 @@ namespace Hermes
 
         mesh->nodes[v1_2].bnd = 1;
         mesh->nodes[v2_2].bnd = 1;
-
       }
       catch (const xml_schema::exception& e)
       {

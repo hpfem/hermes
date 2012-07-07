@@ -27,7 +27,7 @@ namespace Hermes
   {
     double a, b, c, d;		// four coefficients of a cubic spline.
   };
-  
+
   /// Generic class for functions of one variable.
   template<typename Scalar>
   class HERMES_API Hermes1DFunction : public Hermes::Mixins::Loggable

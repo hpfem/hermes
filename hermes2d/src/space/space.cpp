@@ -27,7 +27,7 @@ namespace Hermes
     Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
-      if (mesh == NULL) 
+      if (mesh == NULL)
         throw Hermes::Exceptions::NullException(0);
       this->default_tri_order = -1;
       this->default_quad_order = -1;
@@ -64,15 +64,15 @@ namespace Hermes
       if (nsize) { ::free(ndata); ndata = NULL; }
       if (esize) { ::free(edata); edata = NULL; }
     }
-    
+
     template<typename Scalar>
     Node* Space<Scalar>::get_mid_edge_vertex_node(Element* e, int i, int j)
     {
-      if (e->is_triangle()) 
+      if (e->is_triangle())
         return e->sons[3]->vn[e->prev_vert(i)];
-      else if (e->sons[2] == NULL) 
+      else if (e->sons[2] == NULL)
         return i == 1 ? e->sons[0]->vn[2] : i == 3 ? e->sons[0]->vn[3] : NULL;
-      else if (e->sons[0] == NULL) 
+      else if (e->sons[0] == NULL)
         return i == 0 ? e->sons[2]->vn[1] : i == 2 ? e->sons[2]->vn[2] : NULL;
       else return e->sons[i]->vn[j];
     }
@@ -100,9 +100,9 @@ namespace Hermes
       if ((esize < mesh->get_max_element_id()) || (edata == NULL))
       {
         int oldsize = esize;
-        if (!esize) 
+        if (!esize)
           esize = 1024;
-        while (esize < mesh->get_max_element_id()) 
+        while (esize < mesh->get_max_element_id())
           esize = esize * 3 / 2;
         edata = (ElementData*) realloc(edata, sizeof(ElementData) * esize);
         for (int i = oldsize; i < esize; i++)
@@ -268,14 +268,13 @@ namespace Hermes
       return ndof;
     }
 
-
     template<typename Scalar>
     int Space<Scalar>::get_element_order(int id) const
     {
       // sanity checks (for internal purposes)
-      if (this->mesh == NULL) 
+      if (this->mesh == NULL)
         throw Hermes::Exceptions::Exception("NULL Mesh pointer detected in Space<Scalar>::get_element_order().");
-      if(edata == NULL) 
+      if(edata == NULL)
         throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
       if (id >= esize)
       {
@@ -653,9 +652,9 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::assign_dofs(int first_dof, int stride)
     {
-      if (first_dof < 0) 
+      if (first_dof < 0)
         throw Hermes::Exceptions::ValueException("first_dof", first_dof, 0);
-      if (stride < 1)    
+      if (stride < 1)
         throw Hermes::Exceptions::ValueException("stride", stride, 1);
 
       resize_tables();
@@ -670,7 +669,7 @@ namespace Hermes
           printf("e->id = %d\n", e->id);
           printf("esize = %d\n", esize);
           printf("edata[%d].order = %d\n", e->id, edata[e->id].order);
-          throw 
+          throw
             Hermes::Exceptions::Exception("Uninitialized element order in Space::assign_dofs().");
         }
       }

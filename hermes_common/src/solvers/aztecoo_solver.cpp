@@ -60,22 +60,22 @@ namespace Hermes
 
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_tolerance(double tol)
-    { 
+    {
       this->tolerance = tol;
     }
 
     template<typename Scalar>
     void AztecOOSolver<Scalar>::set_max_iters(int iters)
-    { 
-      this->max_iters = iters; 
+    {
+      this->max_iters = iters;
     }
 
     template<typename Scalar>
-    
+
     void AztecOOSolver<Scalar>::set_precond(Precond<Scalar> *pc)
     {
-      this->precond_yes = true; 
-      this->pc = pc; 
+      this->precond_yes = true;
+      this->pc = pc;
     }
 
     template<typename Scalar>

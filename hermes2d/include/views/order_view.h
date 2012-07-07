@@ -31,7 +31,7 @@ namespace Hermes
     {
       // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
-      
+
       static const int H2DV_MAX_VIEWABLE_ORDER = 10; ///< Maximum viewable order.
 
       /// \brief Displays the polynomial degrees of elements.
@@ -68,7 +68,6 @@ namespace Hermes
         virtual void scale_dispatch();
         virtual int measure_scale_labels();
         virtual const char* get_help_text() const;
-
       };
 #else
       class HERMES_API OrderView : public View

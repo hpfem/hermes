@@ -83,7 +83,6 @@ namespace Hermes
       return lambda1y (x, y);
     }
 
-
     // ORDER 2
 
     // Edge functions, order 2
@@ -98,8 +97,6 @@ namespace Hermes
       l3 = lambda3 (x, y);
       return l2 * l3 * phi0 (l3 - l2);
     }
-
-
 
     inline double
     ortho2_f4x (double x, double y)
@@ -200,7 +197,6 @@ namespace Hermes
       l3y = lambda3y (x, y);
       return (l1y * l2 + l1 * l2y) * phi0 (l2 - l1) + l1 * l2 * phi0x (l2 - l1) * (l2y - l1y);
     }
-
 
     // ORDER 3
 
@@ -522,7 +518,6 @@ namespace Hermes
       l3y = lambda3y (x, y);
       return (l1y * l2 + l1 * l2y) * phi2 (l2 - l1) + l1 * l2 * phi2x (l2 - l1) * (l2y - l1y);
     }
-
 
     // Bubble functions, order 4
 
@@ -1094,7 +1089,6 @@ namespace Hermes
       return t66;
     }
 
-
     // ORDER 6
 
     // Edge functions, order 6
@@ -1221,7 +1215,6 @@ namespace Hermes
 								       l1) *
         (l2y - l1y);
     }
-
 
     // Bubble functions, order 6
 
@@ -1818,7 +1811,6 @@ namespace Hermes
       double t137 = t89 + t136;
       return t137;
     }
-
 
     // ORDER 7
 
@@ -3209,7 +3201,6 @@ namespace Hermes
       return t247;
     }
 
-
     // ORDER 8
 
     // Edge functions, order 8
@@ -3336,7 +3327,6 @@ namespace Hermes
 								       l1) *
         (l2y - l1y);
     }
-
 
     // Bubble functions, order 8
 
@@ -5659,7 +5649,6 @@ namespace Hermes
       double t406 = t80 + t142 + t196 + t242 + t291 + t325 + t367 + t403;
       return t406;
     }
-
 
     // ORDER 9
 
@@ -8332,9 +8321,6 @@ namespace Hermes
     double
     ortho2_f53y (double x, double y)
     {
-
-
-
       double t1 = 0.5 * y;
       double t2 = 0.5 + t1;
       double t3 = 0.5 * x;
@@ -10042,7 +10028,6 @@ namespace Hermes
 								       l1) *
         (l2y - l1y);
     }
-
 
     // Bubble functions, order 10
 
@@ -12371,7 +12356,6 @@ namespace Hermes
     double
     ortho2_f62 (double x, double y)
     {
-
       double t1 = 0.5 * y;
       double t3 = 0.5 * x;
       double t5 = (-t3 - t1) * (0.5 + t1);
@@ -14958,7 +14942,6 @@ namespace Hermes
     double
     ortho2_f65 (double x, double y)
     {
-
       double t1 = 0.5 * y;
       double t3 = 0.5 * x;
       double t5 = (-t3 - t1) * (0.5 + t1);
@@ -16841,7 +16824,6 @@ namespace Hermes
       ortho2_f66
     };
 
-
     static Shapeset::shape_fn_t ortho2_tri_fn_dx[] =
     {
      ortho2_f1x,    ortho2_f2x,    ortho2_f3x,    ortho2_f4x,    ortho2_f5x,    ortho2_f6x,    ortho2_f7x_0,
@@ -16914,14 +16896,12 @@ namespace Hermes
 
     static int ortho2_tri_vertex_indices[3] = { 0, 1, 2 };
 
-
     static int ortho2_tri_index_to_order[78] =
     {
       1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6,
       7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
       10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
     };
-
 
     static Shapeset::shape_fn_t* ortho2_tri_shape_fn_table[1] =
     {
@@ -16938,18 +16918,15 @@ namespace Hermes
       ortho2_tri_fn_dy
     };
 
-
     //// triangle and quad tables and class constructor ///////////////////////////////////////////////
 
     #include "shapeset_h1_quad.h"
-
 
     static Shapeset::shape_fn_t** ortho2_shape_fn_table[2] =
     {
       ortho2_tri_shape_fn_table,
       simple_quad_shape_fn_table
     };
-
 
     static Shapeset::shape_fn_t** ortho2_shape_fn_table_dx[2] =
     {
@@ -16969,13 +16946,11 @@ namespace Hermes
       simple_quad_vertex_indices
     };
 
-
     static int** ortho2_edge_indices[2] =
     {
       ortho2_tri_edge_indices,
       simple_quad_edge_indices
     };
-
 
     static int** ortho2_bubble_indices[2] =
     {
@@ -16983,21 +16958,17 @@ namespace Hermes
       simple_quad_bubble_indices
     };
 
-
     static int* ortho2_bubble_count[2] =
     {
       ortho2_tri_bubble_count,
       simple_quad_bubble_count
     };
 
-
     static int* ortho2_index_to_order[2] =
     {
       ortho2_tri_index_to_order,
       simple_quad_index_to_order
     };
-
-
 
     H1ShapesetOrtho::H1ShapesetOrtho()
     {

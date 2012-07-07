@@ -71,7 +71,6 @@ namespace Hermes
 
         virtual void on_special_key(int key, int x, int y);
         virtual const char* get_help_text() const;
-
       };
 #else
       template<typename Scalar>
@@ -83,7 +82,7 @@ namespace Hermes
 
         void show(const Space<Scalar>* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
-      
+
 #endif
     }
   }

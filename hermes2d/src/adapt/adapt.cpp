@@ -207,7 +207,6 @@ namespace Hermes
       int num_not_changed = 0; //a number of element that were not changed
       int num_priority_elem = 0; //a number of elements that were processed using priority queue
 
-
       // Structures traversed in reality using strategies.
       Hermes::vector<int> ids;
       Hermes::vector<int> components;
@@ -239,7 +238,7 @@ namespace Hermes
           // refine elements until prescribed amount of error is processed
           // if more elements have similar error refine all to keep the mesh symmetric
           if ((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
-            && fabs((err_squared - err0_squared)/err0_squared) > 1e-3) 
+            && fabs((err_squared - err0_squared)/err0_squared) > 1e-3)
             error_level_reached = true;
 
           // second refinement strategy:
@@ -475,7 +474,6 @@ namespace Hermes
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
       Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
     {
-
       throw Hermes::Exceptions::Exception("hdiv error form not implemented yet in hdiv.h.");
 
       // this is Hcurl code:
@@ -1072,7 +1070,6 @@ namespace Hermes
       delete [] tr;
       delete [] norms;
       delete [] errors_components;
-
 
       // Return error value.
       if ((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)

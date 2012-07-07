@@ -70,7 +70,6 @@ namespace Hermes
         bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
 
       virtual void invalidate_matrix() = 0;
-
     };
   }
 }

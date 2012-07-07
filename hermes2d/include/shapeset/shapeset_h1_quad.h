@@ -16,7 +16,6 @@
 #ifndef __H2D_SHAPESET_H1_QUAD_H
 #define __H2D_SHAPESET_H1_QUAD_H
 
-
 extern Shapeset::shape_fn_t* simple_quad_shape_fn_table[1];
 extern Shapeset::shape_fn_t* simple_quad_shape_fn_table_dx[1];
 extern Shapeset::shape_fn_t* simple_quad_shape_fn_table_dy[1];
@@ -29,6 +28,5 @@ extern int* simple_quad_edge_indices[4];
 extern int* simple_quad_bubble_indices[];
 extern int simple_quad_bubble_count[];
 extern int simple_quad_index_to_order[];
-
 
 #endif

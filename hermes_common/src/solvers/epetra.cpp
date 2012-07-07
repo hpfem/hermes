@@ -391,15 +391,15 @@ namespace Hermes
 
     template<typename Scalar>
     Scalar EpetraVector<Scalar>::get(unsigned int idx)
-    { 
+    {
       return (*vec)[idx];
     }
 
     template<typename Scalar>
-    void EpetraVector<Scalar>::extract(Scalar *v) const 
-    { 
+    void EpetraVector<Scalar>::extract(Scalar *v) const
+    {
       vec->ExtractCopy((double *)v); ///< \todo this can't be used with complex numbers
-    } 
+    }
 
     template<typename Scalar>
     void EpetraVector<Scalar>::add_vector(Vector<Scalar>* vec)

@@ -377,7 +377,6 @@ namespace Hermes
 
       mesh->seq = g_mesh_seq++;
 
-
       return true;
     }
 

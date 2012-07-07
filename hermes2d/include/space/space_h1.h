@@ -54,7 +54,7 @@ namespace Hermes
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
     protected:
-      
+
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
       /// Common code for the constructors.

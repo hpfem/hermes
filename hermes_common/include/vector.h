@@ -31,7 +31,6 @@
 
 namespace Hermes
 {
-
   /// A vector of values.
   /** This class is used to pass a variable number of parameters in a type-safe fashion.
   *  \par Suggested Use
@@ -160,7 +159,6 @@ namespace Hermes
     std::vector<int> _permut;
     int _min, _max;
   };
-
 } // namespace Hermes
 
 #endif

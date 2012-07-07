@@ -167,16 +167,12 @@ namespace Hermes
 
     Shapeset::~Shapeset() { free_constrained_edge_combinations(); }
 
-    /// Returns the maximum poly degree for all shape functions.
     int Shapeset::get_max_order() const { return max_order; }
 
-    /// Returns the highest shape function index.
     int Shapeset::get_max_index(ElementMode2D mode) const { return max_index[mode]; }
 
-    /// Returns 2 if this is a vector shapeset, 1 otherwise.
     int Shapeset::get_num_components() const { return num_components; }
 
-    /// Returns the index of a vertex shape function associated with the specified vertex.
     int Shapeset::get_vertex_index(int vertex, ElementMode2D mode) const
     {
       if(mode == HERMES_MODE_TRIANGLE)
@@ -186,9 +182,6 @@ namespace Hermes
       return vertex_indices[mode][vertex];
     }
 
-    /// Returns the index of an edge function associated with the specified edge and of the
-    /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
-    /// shapesets with non-symmetric edge functions).
     int Shapeset::get_edge_index(int edge, int ori, int order, ElementMode2D mode) const
     {
       if(mode == HERMES_MODE_TRIANGLE)
@@ -200,7 +193,6 @@ namespace Hermes
       return edge_indices[mode][edge][2*order + ori];
     }
 
-    /// Returns a complete set of indices of bubble functions for an element of the given order.
     int* Shapeset::get_bubble_indices(int order, ElementMode2D mode) const
     {
       assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
@@ -211,7 +203,6 @@ namespace Hermes
       return bubble_indices[mode][index];
     }
 
-    /// Returns the number of bubble functions for an element of the given order.
     int Shapeset::get_num_bubbles(int order, ElementMode2D mode) const
     {
       assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
@@ -219,8 +210,6 @@ namespace Hermes
       return bubble_count[mode][order];
     }
 
-    /// Returns the index of a constrained edge function. 'part' is 0 or 1 for edge
-    /// halves, 2, 3, 4, 5 for edge quarters, etc. See shapeset.cpp.
     int Shapeset::get_constrained_edge_index(int edge, int order, int ori, int part, ElementMode2D mode) const
     {
       if(mode == HERMES_MODE_TRIANGLE)
@@ -233,9 +222,6 @@ namespace Hermes
       return -1 - ((part << 7) + (order << 3) + (edge << 1) + ori);
     }
 
-    /// Returns the polynomial degree of the specified shape function.
-    /// If on quads, it returns encoded orders. The orders has to be decoded through macros
-    /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.
     int Shapeset::get_order(int index, ElementMode2D mode) const
     {
       if (index >= 0) {
@@ -245,15 +231,14 @@ namespace Hermes
       else return ((-1 - index) >> 3) & 15;
     }
 
-    /// Obtains the value of the given shape function. (x,y) is a coordinate in the reference
-    /// domain, component is 0 for Scalar shapesets and 0 or 1 for vector shapesets.
     double Shapeset::get_value(int n, int index, double x, double y, int component, ElementMode2D mode)
     {
       if (index >= 0)
       {
         assert(index >= 0 && index <= max_index[mode]); assert(component >= 0 && component < num_components);
         Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
-        if (shape_expansion == NULL) { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined
+        if (shape_expansion == NULL)
+        { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined
           static int warned_mode = -1, warned_index = -1, warned_n = 1; //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
           this->warn_if(warned_mode != mode || warned_index != index || warned_n != n, "Requested undefined expansion %d (mode: %d) of a shape %d, returning 0", n, mode, index);
           warned_mode = mode; warned_index = index; warned_n = n;

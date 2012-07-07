@@ -86,10 +86,10 @@ namespace Hermes
     {
     public:
       ~Shapeset();
-      
+
       /// Shape-function function type. Internal.
       typedef double (*shape_fn_t)(double, double);
-      
+
       /// Returns the polynomial degree of the specified shape function.
       /// If on quads, it returns encoded orders. The orders has to be decoded through macros
       /// H2D_GET_H_ORDER and H2D_GET_V_ORDER.

@@ -53,7 +53,7 @@ namespace Hermes
       /// Wrap IFPACK object.
       IfpackPrecond(Ifpack_Preconditioner *ipc);
       virtual ~IfpackPrecond();
-      
+
       void set_param(const char *name, const char *value);
       void set_param(const char *name, int value);
       void set_param(const char *name, double value);

@@ -16,7 +16,6 @@ Ord CustomExactSolution::ord(Ord x, Ord y) const
   return Ord(7);
 }
 
-
 double CustomFunction::value(double x, double y) const
 {
   return -2*Hermes::sin(x)*Hermes::sin(y);

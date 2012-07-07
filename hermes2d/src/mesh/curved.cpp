@@ -353,7 +353,6 @@ namespace Hermes
       }
     }
 
-
     void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
       double& x, double& y)
     {
@@ -376,7 +375,6 @@ namespace Hermes
         (1 + xi_1)*(1 + xi_2)/4.0 * e->vn[2]->y - (1-xi_1)*(1 + xi_2)/4.0 * e->vn[3]->y;
     }
 
-
     void CurvMap::calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
     {
       if (e->get_mode() == HERMES_MODE_QUAD)
@@ -385,13 +383,11 @@ namespace Hermes
         calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
     }
 
-
     //// projection based interpolation ////////////////////////////////////////////////////////////////
 
     // preparation of projection matrices, Cholesky factorization
     void CurvMap::precalculate_cholesky_projection_matrix_edge(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      
       int order = ref_map_shapeset->get_max_order();
       int n = order - 1; // number of edge basis functions
 
@@ -536,7 +532,6 @@ namespace Hermes
 
     void CurvMap::precalculate_cholesky_projection_matrices_bubble(H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      
       // *** triangles ***
       int order = ref_map_shapeset->get_max_order();
 
@@ -569,7 +564,6 @@ namespace Hermes
       }
     }
 
-
     //// edge part of projection based interpolation ///////////////////////////////////////////////////
 
     // compute point (x, y) in reference element, edge vector (v1, v2)
@@ -593,7 +587,6 @@ namespace Hermes
 
     void CurvMap::calc_edge_projection(Element* e, int edge, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      
       ref_map_pss->set_active_element(e);
 
       int i, j, k;
@@ -694,7 +687,6 @@ namespace Hermes
 
     void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      
       int mo2 = quad2d.get_max_order(e->get_mode());
       int np = quad2d.get_num_points(mo2, e->get_mode());
 
@@ -729,7 +721,6 @@ namespace Hermes
 
     void CurvMap::calc_bubble_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
-      
       ref_map_pss->set_active_element(e);
 
       int i, j, k;
@@ -798,7 +789,6 @@ namespace Hermes
       delete [] fn;
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void CurvMap::ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
@@ -823,7 +813,6 @@ namespace Hermes
 
     void CurvMap::update_refmap_coeffs(Element* e)
     {
-      
       H1ShapesetJacobi ref_map_shapeset;
       PrecalcShapeset ref_map_pss(&ref_map_shapeset);
 
@@ -831,11 +820,11 @@ namespace Hermes
       ref_map_pss.set_active_element(e);
 
       // calculation of projection matrices
-      if (edge_proj_matrix == NULL) 
+      if (edge_proj_matrix == NULL)
         precalculate_cholesky_projection_matrix_edge(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_tri == NULL && e->get_mode() == HERMES_MODE_TRIANGLE) 
+      if (bubble_proj_matrix_tri == NULL && e->get_mode() == HERMES_MODE_TRIANGLE)
         precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_quad == NULL && e->get_mode() == HERMES_MODE_QUAD) 
+      if (bubble_proj_matrix_quad == NULL && e->get_mode() == HERMES_MODE_QUAD)
         precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
 
       // allocate projection coefficients

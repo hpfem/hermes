@@ -93,7 +93,6 @@ namespace Hermes
   {
     switch (butcher_table)
     {
-
       /* EXPLICIT METHODS */
 
       // Explicit Euler.

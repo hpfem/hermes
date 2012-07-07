@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = Space<double>::get_num_dofs(&space);
-  
+
   // Initialize the weak formulation.
   WeakFormsH1::DefaultWeakFormPoisson<double> wf(HERMES_ANY, new Hermes1DFunction<double>(1.0), new Hermes2DFunction<double>(-const_f));
 
@@ -79,7 +79,6 @@ int main(int argc, char* argv[])
   delete matrix;
   delete rhs;
 
-  
   double coor_x[4] = {0.3, 0.7, 1.3, 1.7};
   double coor_y = 0.5;
 
@@ -117,4 +116,3 @@ int main(int argc, char* argv[])
     return -1;
   }
 }
-

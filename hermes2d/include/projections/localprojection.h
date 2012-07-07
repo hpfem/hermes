@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __H2D_LOCALPROJECTION_H
 #define __H2D_LOCALPROJECTION_H
 
@@ -36,7 +35,7 @@ namespace Hermes
       static void project_local(const Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
           Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      // Wrapper that delivers a Solution instead of coefficient vector. 
+      // Wrapper that delivers a Solution instead of coefficient vector.
       static void project_local(const Space<Scalar>* space,
 	  Solution<Scalar>* source_sln, Solution<Scalar>* target_sln, ProjNormType proj_norm = HERMES_UNSET_NORM);
 

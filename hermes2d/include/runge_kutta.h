@@ -71,12 +71,11 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API RungeKutta : public Hermes::Mixins::Loggable
     {
-
     public:
       /// Constructor.
       /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
       /// as an initial guess for the Newton's method, instead zero vector will be used.
-      RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt, 
+      RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt,
           bool start_from_zero_K_vector = false, bool residual_as_vector = true);
 
       /// Constructor for one equation.
@@ -137,12 +136,12 @@ namespace Hermes
 
       /**
        \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
-      
+
        \brief Sets the filters to reinitialize.
-      
+
        \author  Lk
        \date  10/29/2011
-      
+
        \param [in]  filters_to_reinit the filters to reinitialize.
        */
 

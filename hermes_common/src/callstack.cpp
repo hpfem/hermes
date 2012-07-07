@@ -26,7 +26,7 @@
 // Basically GNU stuff
 #ifdef EXECINFO_FOUND
   #include <execinfo.h>
-  void handler(int sig) 
+  void handler(int sig)
   {
     void *array[20];
     size_t size;

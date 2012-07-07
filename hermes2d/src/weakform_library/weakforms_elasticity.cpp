@@ -158,7 +158,7 @@ namespace Hermes
         return lambda * int_dudy_dvdx<Ord, Ord>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdy<Ord, Ord>(n, wt, u_ext[1], v);
       }
-      
+
       template<typename Scalar>
       VectorFormVol<Scalar>* DefaultResidualElasticity_0_1<Scalar>::clone()
       {
@@ -231,7 +231,6 @@ namespace Hermes
           mu * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[1], v);
       }
 
-      
       template<typename Scalar>
       VectorFormVol<Scalar>* DefaultResidualElasticity_1_1<Scalar>::clone()
       {

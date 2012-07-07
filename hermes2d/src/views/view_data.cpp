@@ -1,4 +1,3 @@
-
 const int num_pal_entries = 256;
 
 const float palette_data[num_pal_entries + 1][3] =
@@ -69,4 +68,3 @@ const float palette_data[num_pal_entries + 1][3] =
   { 0.5515f, 0.0000f, 0.0000f }, { 0.5374f, 0.0000f, 0.0000f }, { 0.5232f, 0.0000f, 0.0000f }, { 0.5091f, 0.0000f, 0.0000f },
   { 0.4950f, 0.0000f, 0.0000f }
 };
-

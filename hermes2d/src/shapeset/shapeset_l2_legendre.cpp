@@ -3949,7 +3949,6 @@ namespace Hermes
     static int qb_10_9[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, };
     static int qb_10_10[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, };
 
-
     #define NULL16 NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  NULL, NULL, NULL, NULL, NULL
 
     int* leg_quad_bubble_indices[] =
@@ -3991,7 +3990,6 @@ namespace Hermes
     static int leg_quad_edge_indices_2[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
     static int leg_quad_edge_indices_3[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
 
-
     int* leg_quad_edge_indices[4] =
     {
       leg_quad_edge_indices_0,
@@ -3999,7 +3997,6 @@ namespace Hermes
       leg_quad_edge_indices_2,
       leg_quad_edge_indices_3
     };
-
 
     #define oo H2D_MAKE_QUAD_ORDER
     #define XX(a, b) oo(a, b), oo(a, b)
@@ -4019,9 +4016,7 @@ namespace Hermes
       oo(10, 0),   oo(10, 1),   oo(10, 2),   oo(10, 3),   oo(10, 4),   oo(10, 5),   oo(10, 6),   oo(10, 7),   oo(10, 8),   oo(10, 9),   oo(10, 10),
     };
 
-
     //// triangle legendre shapeset /////////////////////////////////////////////////////////////////
-
 
     static double leg_tri_l0_l0(double x, double y)
     {
@@ -5476,7 +5471,6 @@ namespace Hermes
     static int qb_9[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 51, 52, 53, 54, 55, 56, 57, 60, 61, 62, };
     static int qb_10[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, };
 
-
     int* leg_tri_bubble_indices[11] = {  qb_0,   qb_1,   qb_2,   qb_3,   qb_4,   qb_5,   qb_6,   qb_7,   qb_8,   qb_9,   qb_10 };
 
     int leg_tri_bubble_count[11] = { 1,  3,  6,  10,  15,  21,  28,  36,  45,  55,  66 };
@@ -5488,7 +5482,6 @@ namespace Hermes
     static int leg_tri_edge_indices_2[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
     static int leg_tri_edge_indices_3[22] =  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  };
 
-
     int* leg_tri_edge_indices[4] =
     {
       leg_tri_edge_indices_0,
@@ -5496,7 +5489,6 @@ namespace Hermes
       leg_tri_edge_indices_2,
       leg_tri_edge_indices_3
     };
-
 
     int leg_tri_index_to_order[] =
     {
@@ -5552,13 +5544,11 @@ namespace Hermes
       leg_quad_vertex_indices
     };
 
-
     static int** leg_edge_indices[2] =
     {
       leg_tri_edge_indices,
       leg_quad_edge_indices
     };
-
 
     static int** leg_bubble_indices[2] =
     {
@@ -5566,20 +5556,17 @@ namespace Hermes
       leg_quad_bubble_indices
     };
 
-
     static int* leg_bubble_count[2] =
     {
       leg_tri_bubble_count,
       leg_quad_bubble_count
     };
 
-
     static int* leg_index_to_order[2] =
     {
       leg_tri_index_to_order,
       leg_quad_index_to_order
     };
-
 
     L2ShapesetLegendre::L2ShapesetLegendre()
     {

@@ -21,10 +21,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    bool Node::is_constrained_vertex() const 
-    { 
-      assert(type == HERMES_TYPE_VERTEX); 
-      return ref <= 3 && !bnd; 
+    bool Node::is_constrained_vertex() const
+    {
+      assert(type == HERMES_TYPE_VERTEX);
+      return ref <= 3 && !bnd;
     }
 
     void Node::ref_element(Element* e)
@@ -37,7 +37,7 @@ namespace Hermes
         {
           if (elem[1] == NULL)
             elem[1] = e;
-          else 
+          else
             throw Hermes::Exceptions::Exception(false, "No free slot 'elem'");
         }
       }
@@ -85,73 +85,73 @@ namespace Hermes
 
     Element::Element() : visited(false) {};
 
-    bool Element::is_triangle() const 
+    bool Element::is_triangle() const
     {
       return nvert == 3;
     }
 
-    bool Element::is_quad() const 
+    bool Element::is_quad() const
     {
-      return nvert == 4; 
+      return nvert == 4;
     }
 
-    bool Element::is_curved() const 
+    bool Element::is_curved() const
     {
-      return cm != NULL; 
+      return cm != NULL;
     }
 
-    int Element::get_nvert() const 
+    int Element::get_nvert() const
     {
-      return this->nvert; 
+      return this->nvert;
     }
 
-    ElementMode2D Element::get_mode() const 
+    ElementMode2D Element::get_mode() const
     {
-      return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD; 
+      return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD;
     }
 
-    unsigned int Element::get_num_surf() 
+    unsigned int Element::get_num_surf()
     {
-      return nvert; 
+      return nvert;
     }
 
-    int Element::next_vert(int i) const 
+    int Element::next_vert(int i) const
     {
-      return (i < (int)nvert-1) ? i + 1 : 0; 
+      return (i < (int)nvert-1) ? i + 1 : 0;
     }
 
-    int Element::prev_vert(int i) const 
+    int Element::prev_vert(int i) const
     {
-      return (i > 0) ? i-1 : nvert-1; 
+      return (i > 0) ? i-1 : nvert-1;
     }
 
-    bool Element::hsplit() const 
+    bool Element::hsplit() const
     {
       if(active)
         return false;
-      return sons[0] != NULL; 
+      return sons[0] != NULL;
     }
 
-    bool Element::vsplit() const 
+    bool Element::vsplit() const
     {
       if(active)
         return false;
-      return sons[2] != NULL; 
+      return sons[2] != NULL;
     }
 
-    bool Element::bsplit() const 
+    bool Element::bsplit() const
     {
       if(active)
         return false;
-      return sons[0] != NULL && sons[2] != NULL; 
+      return sons[0] != NULL && sons[2] != NULL;
     }
 
     Element* Element::get_neighbor(int ie) const
     {
       Element** elem = en[ie]->elem;
-      if (elem[0] == this) 
+      if (elem[0] == this)
         return elem[1];
-      if (elem[1] == this) 
+      if (elem[1] == this)
         return elem[0];
       assert(0);
       return NULL;
@@ -270,7 +270,7 @@ namespace Hermes
       seq = g_mesh_seq++;
     }
 
-    int Mesh::get_num_elements() const 
+    int Mesh::get_num_elements() const
     {
       if (this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_elements().");
       return elements.get_num_items();
@@ -291,7 +291,7 @@ namespace Hermes
     }
 
     /// Returns the maximum node id number plus one.
-    int Mesh::get_max_element_id() const 
+    int Mesh::get_max_element_id() const
     {
       if (this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_max_element_id().");
       return elements.get_size();
@@ -309,12 +309,12 @@ namespace Hermes
       return seq;
     }
 
-    void Mesh::set_seq(unsigned seq) 
+    void Mesh::set_seq(unsigned seq)
     {
-      this->seq = seq; 
+      this->seq = seq;
     }
 
-    Element* Mesh::get_element_fast(int id) const 
+    Element* Mesh::get_element_fast(int id) const
     {
       return &(elements[id]);
     }
@@ -415,7 +415,7 @@ namespace Hermes
 
       // if the parent element is already almost straight-edged,
       // the son will be even more straight-edged
-      if (e->iro_cache == 0) 
+      if (e->iro_cache == 0)
         return NULL;
 
       CurvMap* cm = new CurvMap;
@@ -547,7 +547,7 @@ namespace Hermes
       // remember the markers of the edge nodes
       int bnd[4] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
       int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
-      
+
       // deactivate this element and unregister from its nodes
       e->active = false;
       nactive--;
@@ -1344,7 +1344,6 @@ namespace Hermes
       loader_mesh_tmp_for_convert.load(mesh_file_tmp, &mesh_tmp_for_convert);
       remove(mesh_file_tmp);
       copy(&mesh_tmp_for_convert);
-
     }
 
     void Mesh::convert_quads_to_triangles()
@@ -1447,7 +1446,7 @@ namespace Hermes
       {
         // for base element.
         if (e->cm->toplevel == true)
-        {	
+        {
           for (unsigned int n = 0; n < e->get_num_surf(); n++)
           {
             if (e->cm->nurbs[n] != NULL)
@@ -1460,7 +1459,7 @@ namespace Hermes
         else
           // one level refinement.
           if (e->parent->cm->toplevel == true)
-          {	
+          {
             for (unsigned int n = 0; n < e->get_num_surf(); n++)
             {
               if (e->parent->cm->nurbs[n] != NULL)
@@ -1473,7 +1472,7 @@ namespace Hermes
           else
             // two level refinements.
             if (e->parent->parent->cm->toplevel == true)
-            {	
+            {
               for (unsigned int n = 0; n < e->get_num_surf(); n++)
               {
                 if (e->parent->parent->cm->nurbs[n] != NULL)
@@ -1486,7 +1485,7 @@ namespace Hermes
             else
               // three level refinements.
               if (e->parent->parent->parent->cm->toplevel == true)
-              {	
+              {
                 for (unsigned int n = 0; n < e->get_num_surf(); n++)
                 {
                   if (e->parent->parent->parent->cm->nurbs[n] != NULL)
@@ -1499,7 +1498,7 @@ namespace Hermes
               else
                 // four level refinements.
                 if (e->parent->parent->parent->parent->cm->toplevel == true)
-                {	
+                {
                   for (unsigned int n = 0; n < e->get_num_surf(); n++)
                   {
                     if (e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
@@ -1951,52 +1950,52 @@ namespace Hermes
       seq = g_mesh_seq++;
     }
 
-    Mesh::MarkersConversion::MarkersConversion() : min_marker_unused(1) 
+    Mesh::MarkersConversion::MarkersConversion() : min_marker_unused(1)
     {
     }
 
-    Mesh::MarkersConversion::StringValid::StringValid() 
+    Mesh::MarkersConversion::StringValid::StringValid()
     {
     }
 
-    Mesh::MarkersConversion::StringValid::StringValid(std::string marker, bool valid) : marker(marker), valid(valid) 
+    Mesh::MarkersConversion::StringValid::StringValid(std::string marker, bool valid) : marker(marker), valid(valid)
     {
     }
 
-    Mesh::MarkersConversion::IntValid::IntValid() 
+    Mesh::MarkersConversion::IntValid::IntValid()
     {
     }
 
-    Mesh::MarkersConversion::IntValid::IntValid(int marker, bool valid) : marker(marker), valid(valid) 
+    Mesh::MarkersConversion::IntValid::IntValid(int marker, bool valid) : marker(marker), valid(valid)
     {
     }
 
-    Mesh::ElementMarkersConversion::ElementMarkersConversion() 
+    Mesh::ElementMarkersConversion::ElementMarkersConversion()
     {
     }
 
-    Mesh::MarkersConversion::MarkersConversionType Mesh::ElementMarkersConversion::get_type() 
+    Mesh::MarkersConversion::MarkersConversionType Mesh::ElementMarkersConversion::get_type()
     {
       return HERMES_ELEMENT_MARKERS_CONVERSION;
     }
 
-    Mesh::BoundaryMarkersConversion::BoundaryMarkersConversion() 
+    Mesh::BoundaryMarkersConversion::BoundaryMarkersConversion()
     {
     }
 
-    Mesh::MarkersConversion::MarkersConversionType Mesh::BoundaryMarkersConversion::get_type() 
+    Mesh::MarkersConversion::MarkersConversionType Mesh::BoundaryMarkersConversion::get_type()
     {
       return HERMES_BOUNDARY_MARKERS_CONVERSION;
     }
 
-    Mesh::ElementMarkersConversion &Mesh::get_element_markers_conversion() 
+    Mesh::ElementMarkersConversion &Mesh::get_element_markers_conversion()
     {
       return element_markers_conversion;
     }
 
-    Mesh::BoundaryMarkersConversion &Mesh::get_boundary_markers_conversion() 
+    Mesh::BoundaryMarkersConversion &Mesh::get_boundary_markers_conversion()
     {
-      return boundary_markers_conversion; 
+      return boundary_markers_conversion;
     }
 
     void Mesh::MarkersConversion::insert_marker(int internal_marker, std::string user_marker)
@@ -2024,7 +2023,6 @@ namespace Hermes
         return StringValid("-999", false);
 
       return StringValid(conversion_table.find(internal_marker)->second, true);
-
     }
 
     Mesh::MarkersConversion::IntValid Mesh::MarkersConversion::get_internal_marker(std::string user_marker)
@@ -2078,7 +2076,7 @@ namespace Hermes
       {
         // for base element.
         if (e->cm->toplevel == true)
-        {	
+        {
           for (unsigned int n = 0; n < e->get_num_surf(); n++)
           {
             if (e->cm->nurbs[n] != NULL)
@@ -2091,7 +2089,7 @@ namespace Hermes
         else
           // one level refinement.
           if (e->parent->cm->toplevel == true)
-          {	
+          {
             for (unsigned int n = 0; n < e->get_num_surf(); n++)
             {
               if (e->parent->cm->nurbs[n] != NULL)
@@ -2104,7 +2102,7 @@ namespace Hermes
           else
             // two level refinements.
             if (e->parent->parent->cm->toplevel == true)
-            {	
+            {
               for (unsigned int n = 0; n < e->get_num_surf(); n++)
               {
                 if (e->parent->parent->cm->nurbs[n] != NULL)
@@ -2117,7 +2115,7 @@ namespace Hermes
             else
               // three level refinements.
               if (e->parent->parent->parent->cm->toplevel == true)
-              {	
+              {
                 for (unsigned int n = 0; n < e->get_num_surf(); n++)
                 {
                   if (e->parent->parent->parent->cm->nurbs[n] != NULL)
@@ -2130,7 +2128,7 @@ namespace Hermes
               else
                 // four level refinements.
                 if (e->parent->parent->parent->parent->cm->toplevel == true)
-                {	
+                {
                   for (unsigned int n = 0; n < e->get_num_surf(); n++)
                   {
                     if (e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
@@ -2256,7 +2254,7 @@ namespace Hermes
       {
         // for base element.
         if (e->cm->toplevel == true)
-        {	
+        {
           for (unsigned int n = 0; n < e->get_num_surf(); n++)
           {
             if ((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2269,7 +2267,7 @@ namespace Hermes
         else
           // one level refinement.
           if (e->parent->cm->toplevel == true)
-          {	
+          {
             for (unsigned int n = 0; n < e->get_num_surf(); n++)
             {
               if ((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2282,7 +2280,7 @@ namespace Hermes
           else
             // two level refinements.
             if (e->parent->parent->cm->toplevel == true)
-            {	
+            {
               for (unsigned int n = 0; n < e->get_num_surf(); n++)
               {
                 if ((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2295,7 +2293,7 @@ namespace Hermes
             else
               // three level refinements.
               if (e->parent->parent->parent->cm->toplevel == true)
-              {	
+              {
                 for (unsigned int n = 0; n < e->get_num_surf(); n++)
                 {
                   if ((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2308,7 +2306,7 @@ namespace Hermes
               else
                 // four level refinements.
                 if (e->parent->parent->parent->parent->cm->toplevel == true)
-                {	
+                {
                   for (unsigned int n = 0; n < e->get_num_surf(); n++)
                   {
                     if ((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2454,7 +2452,7 @@ namespace Hermes
       {
         // for base element.
         if (e->cm->toplevel == true)
-        {	
+        {
           for (unsigned int n = 0; n < e->get_num_surf(); n++)
           {
             if ((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2467,7 +2465,7 @@ namespace Hermes
         else
           // one level refinement.
           if (e->parent->cm->toplevel == true)
-          {	
+          {
             for (unsigned int n = 0; n < e->get_num_surf(); n++)
             {
               if ((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2480,7 +2478,7 @@ namespace Hermes
           else
             // two level refinements.
             if (e->parent->parent->cm->toplevel == true)
-            {	
+            {
               for (unsigned int n = 0; n < e->get_num_surf(); n++)
               {
                 if ((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2493,7 +2491,7 @@ namespace Hermes
             else
               // three level refinements.
               if (e->parent->parent->parent->cm->toplevel == true)
-              {	
+              {
                 for (unsigned int n = 0; n < e->get_num_surf(); n++)
                 {
                   if ((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2506,7 +2504,7 @@ namespace Hermes
               else
                 // four level refinements.
                 if (e->parent->parent->parent->parent->cm->toplevel == true)
-                {	
+                {
                   for (unsigned int n = 0; n < e->get_num_surf(); n++)
                   {
                     if ((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
@@ -2806,7 +2804,6 @@ namespace Hermes
           e->sons[2] = t[2];
           e->sons[3] = NULL;
         }
-
       }
 
       // store id of parent
@@ -2923,9 +2920,7 @@ namespace Hermes
 
           regularize_quad(e->sons[n]);
           regularize_quad(e->sons[m]);
-
         }
-
       }
 
       // store id of parent
@@ -3045,7 +3040,6 @@ namespace Hermes
       }
       while (!ok);
 
-
       if (reg)
       {
         for_all_active_elements(e, this)
@@ -3061,7 +3055,6 @@ namespace Hermes
       }
 
       return parents;
-
     }
   }
 }

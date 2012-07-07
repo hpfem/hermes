@@ -95,7 +95,6 @@ namespace Hermes
       refmap->set_quad_2d(quad_2d);
     }
 
-
     template<typename Scalar>
     void MeshFunction<Scalar>::set_active_element(Element* e)
     {

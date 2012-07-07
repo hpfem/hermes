@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<std::complex<double> > space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
-  
+
   // Initialize the weak formulation.
   CustomWeakForm wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
     "Wire", MU_0, std::complex<double>(J_EXT, 0.0), OMEGA);
@@ -103,7 +103,6 @@ int main(int argc, char* argv[])
   int as = 1; bool done = false;
   do
   {
-    
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
 
@@ -115,7 +114,7 @@ int main(int argc, char* argv[])
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initialize reference problem.
-    
+
     // Initial coefficient vector for the Newton's method.
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));

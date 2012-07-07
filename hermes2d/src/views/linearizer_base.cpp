@@ -65,13 +65,13 @@ namespace Hermes
       }
 
       void LinearizerBase::lock_data() const
-      { 
+      {
         pthread_mutex_lock(&data_mutex);
       }
 
-      void LinearizerBase::unlock_data() const 
+      void LinearizerBase::unlock_data() const
       {
-        pthread_mutex_unlock(&data_mutex); 
+        pthread_mutex_unlock(&data_mutex);
       }
 
       void LinearizerBase::process_edge(int iv1, int iv2, int marker)
@@ -86,11 +86,10 @@ namespace Hermes
           add_edge(iv1, iv2, marker);
       }
 
-
       void LinearizerBase::add_edge(int iv1, int iv2, int marker)
       {
 #pragma omp critical(realloc_edges)
-        { 
+        {
           if (edges_count >= edges_size)
             edges = (int3*) realloc(edges, sizeof(int3) * (edges_size = edges_size * 3 / 2));
         edges[edges_count][0] = iv1;
@@ -117,7 +116,7 @@ namespace Hermes
       {
         int index;
 #pragma omp critical(realloc_triangles)
-        {        
+        {
           if (this->del_slot >= 0) // reuse a slot after a deleted triangle
           {
             index = this->del_slot;

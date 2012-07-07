@@ -558,7 +558,6 @@ namespace Hermes
     /// @return created matrix
     template<typename Scalar> HERMES_API
       SparseMatrix<Scalar>*  create_matrix();
-
   }
 }
 #endif

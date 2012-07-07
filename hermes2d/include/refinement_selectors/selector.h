@@ -32,7 +32,6 @@ namespace Hermes
 #include "../mesh/element_to_refine.h"
 #endif
 
-
 /** \defgroup g_selectors Refinement Selectors
 *  \brief Refinement selectors allows to select a refinement
 *  according to an error of a candidate.
@@ -66,7 +65,6 @@ namespace Hermes
 
     /// Namespace which encapsulates all refinement selectors. \ingroup g_selectors
     namespace RefinementSelectors {
-
       /// A parent of all refinement selectors. Abstract class. \ingroup g_selectors
       /** All refinement selectors have to derive from this class or its children.
       *  The interface of the class provides methods for:
@@ -139,7 +137,7 @@ namespace Hermes
         *  \param[in] order_h_inc An increase of the horizontal order in a quadrilateral and an order in a triangle. The increase has to be greater or equal to 0.
         *  \param[in] order_v_inc An increase of the vertical order in a quadrilateral. The increase has to be greater or equal to 0. */
         POnlySelector(int max_order, int order_h_inc, int order_v_inc);
-        
+
         /// Cloning for paralelism.
         virtual Selector<Scalar>* clone();
 

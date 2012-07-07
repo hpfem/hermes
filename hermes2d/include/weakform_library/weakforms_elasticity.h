@@ -31,7 +31,6 @@ namespace Hermes
   namespace Hermes2D
   {
     namespace WeakFormsElasticity {
-
       /* Single-component version -- to be used for multimesh assembling */
 
       template<typename Scalar>

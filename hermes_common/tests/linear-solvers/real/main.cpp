@@ -149,7 +149,6 @@ int read_matrix_and_rhs(char *file_name, int &n, int &nnz,
     case STATE_RHS:
       if (cplx_2_real) {
         if (read_n_nums(row, 3, buffer)) {
-
           if (buffer[0] != (int) n/2-1) // Then this is not the last line in the input file
           {
             rhs[((int) buffer[0])] = (double) buffer[1];
@@ -263,7 +262,7 @@ int main(int argc, char *argv[]) {
 
   std::map<unsigned int, MatrixEntry> ar_mat;
   std::map<unsigned int, double > ar_rhs;
-  
+
   if (argc == 4 && strcasecmp(argv[3], "complex-matrix-to-real") == 0)
     cplx_2_real = true;
   else
@@ -430,5 +429,4 @@ break;
     printf("Failure!\n");
   else
     printf("Success!\n");
-
 }

@@ -25,7 +25,7 @@ namespace Hermes
       this->num_dofs = -1;
       this->exact_multiplicator = 1.0;
     }
-    
+
     template<typename Scalar>
     MeshFunction<Scalar>* ExactSolution<Scalar>::clone()
     {
@@ -93,7 +93,6 @@ namespace Hermes
       return 0.0;
     };
 
-    
     template<typename Scalar>
     MeshFunction<Scalar>* ZeroSolution<Scalar>::clone()
     {
@@ -117,7 +116,6 @@ namespace Hermes
     template<typename Scalar>
     ConstantSolutionVector<Scalar>::ConstantSolutionVector(Mesh* mesh, Scalar constantX, Scalar constantY) : ExactSolutionVector<Scalar>(mesh), constantX(constantX), constantY(constantY) {};
 
-    
     template<typename Scalar>
     MeshFunction<Scalar>* ConstantSolutionVector<Scalar>::clone()
     {
@@ -161,7 +159,7 @@ namespace Hermes
     Ord ZeroSolutionVector<Scalar>::ord(Ord x, Ord y) const {
       return Ord(0);
     }
-    
+
     template<typename Scalar>
     MeshFunction<Scalar>* ZeroSolutionVector<Scalar>::clone()
     {

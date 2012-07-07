@@ -312,10 +312,10 @@ namespace Hermes
             int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
 
             // recur to sub-elements
-            fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0); process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-            fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1); process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-            fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2); process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
-            fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3); process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform(); 
+            fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0); process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+            fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1); process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+            fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2); process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+            fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3); process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4]);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
             return;
           }
         }
@@ -358,7 +358,6 @@ namespace Hermes
         }
         this->max_val = sqrt(this->max_val);
         this->min_val = sqrt(this->min_val);
-
       }
 
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
@@ -405,7 +404,7 @@ namespace Hermes
         old_quad_x = xsln->get_quad_2d();
         old_quad_y = ysln->get_quad_2d();
 
-        Hermes::vector<Mesh*> meshes; 
+        Hermes::vector<Mesh*> meshes;
         meshes.push_back(xsln->get_mesh());
         meshes.push_back(xsln->get_mesh());
 
@@ -459,7 +458,7 @@ namespace Hermes
         trav_master.begin(meshes.size(), &(meshes.front()));
 
         Traverse* trav = new Traverse[Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads)];
-        
+
         for(unsigned int i = 0; i < Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads); i++)
         {
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
@@ -467,7 +466,7 @@ namespace Hermes
         }
 
         int state_i;
-        
+
 #define CHUNKSIZE 1
 int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
@@ -503,7 +502,7 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 
         for(unsigned int i = 0; i < Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads); i++)
           trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
-        
+
 #pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -600,7 +599,6 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
         // clean up
         ::free(this->hash_table);
         ::free(this->info);
-
       }
 
       Vectorizer::~Vectorizer()

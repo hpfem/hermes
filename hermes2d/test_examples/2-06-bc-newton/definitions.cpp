@@ -41,4 +41,3 @@ double CustomDirichletCondition::value(double x, double y, double n_x, double n_
 {
   return A*x + B*y + C;
 }
-

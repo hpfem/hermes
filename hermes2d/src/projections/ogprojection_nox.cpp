@@ -34,9 +34,8 @@ namespace Hermes
     void OGProjectionNOX<Scalar>::project_internal(const Space<Scalar>* space, WeakForm<Scalar>* wf,
       Scalar* target_vec, double newton_tol, int newton_max_iter)
     {
-      
         // Sanity check.
-        if(space == NULL) 
+        if(space == NULL)
           throw Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
 
       // Get dimension of the space.
@@ -96,10 +95,9 @@ namespace Hermes
     void OGProjectionNOX<Scalar>::project_global(const Space<Scalar>* space,
       MatrixFormVol<Scalar>* custom_projection_jacobian,
       VectorFormVol<Scalar>* custom_projection_residual,
-      Scalar* target_vec, 
+      Scalar* target_vec,
       double newton_tol, int newton_max_iter)
     {
-      
       // Define projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
       proj_wf->add_matrix_form(custom_projection_jacobian);
@@ -113,17 +111,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(const Space<Scalar>* space, 
-      MeshFunction<Scalar>* source_meshfn, Scalar* target_vec, 
-      ProjNormType proj_norm, 
+    void OGProjectionNOX<Scalar>::project_global(const Space<Scalar>* space,
+      MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
+      ProjNormType proj_norm,
       double newton_tol, int newton_max_iter)
     {
-      
       bool sln_vector_loaded = true;
 
       if(dynamic_cast<Solution<Scalar>*>(source_meshfn) != NULL && dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_type() == HERMES_SLN)
         if(dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_space() != NULL)
-          if(dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_space_seq() == space->get_seq() 
+          if(dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_space_seq() == space->get_seq()
             && dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_sln_vector() != NULL)
             for(int j = 0; j < space->get_num_dofs(); j++)
               target_vec[j] = dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_sln_vector()[j];
@@ -174,11 +171,11 @@ namespace Hermes
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(const Space<Scalar>* space,
       Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
-      ProjNormType proj_norm, 
+      ProjNormType proj_norm,
       double newton_tol, int newton_max_iter)
     {
-      if (proj_norm == HERMES_UNSET_NORM) 
-      { 
+      if (proj_norm == HERMES_UNSET_NORM)
+      {
         SpaceType space_type = space->get_type();
         switch (space_type)
         {
@@ -203,9 +200,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, 
+    void OGProjectionNOX<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces,
       Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-      Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms, 
+      Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
       int n = spaces.size();
@@ -216,7 +213,7 @@ namespace Hermes
       if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
       {
         if (proj_norms.empty())
           project_global(spaces[i], source_meshfns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
@@ -229,7 +226,7 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
-      Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms, 
+      Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms,
       double newton_tol, int newton_max_iter)
     {
       int n = spaces.size();
@@ -240,7 +237,7 @@ namespace Hermes
       if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
       {
         if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM, newton_tol, newton_max_iter);
@@ -253,7 +250,7 @@ namespace Hermes
     template<typename Scalar>
     void OGProjectionNOX<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
       Hermes::vector<Solution<Scalar>*> target_slns,
-      Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes, 
+      Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes,
       double newton_tol, int newton_max_iter)
     {
       int n = spaces.size();
@@ -264,7 +261,7 @@ namespace Hermes
       if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
-      for (int i = 0; i < n; i++) 
+      for (int i = 0; i < n; i++)
       {
         if (proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM, newton_tol, newton_max_iter);

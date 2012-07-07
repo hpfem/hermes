@@ -71,7 +71,6 @@ namespace Hermes
       typedef double mumps_Scalar;
     };
 
-
     /** \brief Matrix used with MUMPS solver */
     template <typename Scalar>
     class MumpsMatrix : public SparseMatrix<Scalar>

@@ -127,7 +127,7 @@ namespace Hermes
       /// Recursively removes all son elements of the given element and
       /// makes it active. Also handles element orders.
       void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
-      
+
       /// Updates element orders when the underlying mesh has been refined.
       void update_element_orders_after_refinement();
 
@@ -145,7 +145,7 @@ namespace Hermes
       /// \brief Returns the number of basis functions contained in the spaces.
       static int get_num_dofs(Hermes::vector<const Space<Scalar>*> spaces);
       static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
-      
+
       /// \brief Returns the number of basis functions contained in the space.
       static int get_num_dofs(const Space<Scalar>* space);
       static int get_num_dofs(Space<Scalar>* space);
@@ -157,10 +157,10 @@ namespace Hermes
 
       /// \brief Sets a (new) mesh seq, and mesh_seq.
       void set_mesh_seq(int seq);
-      
+
       /// Sets the boundary condition.
       void set_essential_bcs(EssentialBCs<Scalar>* essential_bcs);
-      
+
       /// Obtains an boundary conditions
       EssentialBCs<Scalar>* get_essential_bcs() const;
 
@@ -169,12 +169,12 @@ namespace Hermes
       void update_essential_bc_values();
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
-      
+
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 
       Shapeset* get_shapeset() const;
-      
+
       /// Sets element polynomial order. This version does not call assign_dofs() and is
       /// intended primarily for internal use.
       virtual void set_element_order_internal(int id, int order);
@@ -186,7 +186,7 @@ namespace Hermes
       /// \param stride [in] The difference between the DOF numbers of successive basis functions.
       /// \return The number of basis functions contained in the space.
       virtual int assign_dofs(int first_dof = 0, int stride = 1);
-      
+
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
@@ -205,10 +205,10 @@ namespace Hermes
 
       /// \brief Returns the DOF number of the last basis function.
       int get_max_dof() const;
-      
+
       /// Returns true if the space is ready for computation, false otherwise.
       bool is_up_to_date() const;
-      
+
       /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
       void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 

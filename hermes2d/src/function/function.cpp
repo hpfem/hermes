@@ -51,7 +51,7 @@ namespace Hermes
 
     template<typename Scalar>
     int Function<Scalar>::get_fn_order() const
-    { 
+    {
       return order;
     }
 
@@ -168,9 +168,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Quad2D* Function<Scalar>::get_quad_2d() const 
+    Quad2D* Function<Scalar>::get_quad_2d() const
     {
-      return quads[cur_quad]; 
+      return quads[cur_quad];
     }
 
     template<typename Scalar>
@@ -179,7 +179,6 @@ namespace Hermes
       { H2D_FN_VAL_0, H2D_FN_VAL_1 }, { H2D_FN_DX_0,  H2D_FN_DX_1  }, { H2D_FN_DY_0,  H2D_FN_DY_1  },
       { H2D_FN_DXX_0, H2D_FN_DXX_1 }, { H2D_FN_DYY_0, H2D_FN_DYY_1 }, { H2D_FN_DXY_0, H2D_FN_DXY_1 }
     };
-
 
     template<typename Scalar>
     typename Function<Scalar>::Node* Function<Scalar>::new_node(int mask, int num_points)

@@ -48,14 +48,12 @@ namespace Hermes
     struct State;
     struct Rect;
 
-
     struct UniData
     {
       Element* e;
       uint64_t idx;
     };
-    
-      
+
     static const uint64_t ONE = (uint64_t) 1 << 63;
 
     struct Rect
@@ -63,7 +61,6 @@ namespace Hermes
       uint64_t l, b, r, t;
     };
 
-      
     /// Traverse is a multi-mesh traversal utility class. Given N meshes sharing the
     /// same base mesh it walks through all (pseudo-)elements of the union of all
     /// the N meshes.
@@ -108,7 +105,7 @@ namespace Hermes
       void init_transforms(State* s, int i);
 
       UniData** construct_union_mesh(Mesh* unimesh);
-      
+
       int num;
       Mesh** meshes;
       Transformable** fn;

@@ -26,7 +26,6 @@
 #include "discrete_problem.h"
 #include "exceptions.h"
 
-
 namespace Hermes
 {
   namespace Hermes2D
@@ -48,12 +47,12 @@ namespace Hermes
       ///                                 since in the FE space not all components in the residual vector have the same weight.
       ///                                 On the other hand, this is slower as it requires global norm calculation, and thus
       ///                                 numerical integration over the entire domain. Therefore this option is off by default.
-      void solve(Scalar* coeff_vec = NULL, double newton_tol = 1e-8, 
+      void solve(Scalar* coeff_vec = NULL, double newton_tol = 1e-8,
                  int newton_max_iter = 100, bool residual_as_function = false);
 
       /// A solve() method where the jacobian is reused.
       /// Version with user-defined tolerances.
-      void solve_keep_jacobian(Scalar* coeff_vec = NULL, double newton_tol = 1e-8, 
+      void solve_keep_jacobian(Scalar* coeff_vec = NULL, double newton_tol = 1e-8,
                                int newton_max_iter = 100, bool residual_as_function = false);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
@@ -96,4 +95,3 @@ namespace Hermes
   }
 }
 #endif
-

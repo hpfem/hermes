@@ -126,7 +126,7 @@ namespace Hermes
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
       unsigned int get_num_surf();  ///< returns number of edges (same as number of vertices)
-      
+
       /// Calculates the area of the element. For curved elements, this is only
       /// an approximation: the curvature is not accounted for.
       double get_area() const;
@@ -134,7 +134,7 @@ namespace Hermes
       /// Returns the length of the longest edge for triangles, and the
       /// length of the longer diagonal for quads. Ignores element curvature.
       double get_diameter() const;
-      
+
       Node* vn[4];   ///< vertex node pointers
       union
       {
@@ -153,7 +153,7 @@ namespace Hermes
       bool is_quad() const;
       bool is_curved() const;
       int get_nvert() const;
-      
+
       bool hsplit() const;
       bool vsplit() const;
       bool bsplit() const;
@@ -311,10 +311,10 @@ namespace Hermes
       /// original state. However, it is not exactly an inverse to
       /// refine_all_elements().
       void unrefine_all_elements(bool keep_initial_refinements = true);
-      
+
       /// For internal use.
       Element* get_element_fast(int id) const;
-      
+
       /// For internal use.
       unsigned get_seq() const;
 
@@ -441,7 +441,7 @@ namespace Hermes
         friend class Space<std::complex<double> >;
         friend class Mesh;
       };
-      
+
       /// \brief Curved element exception.
       /// Exception occurs when there is a curved element where we only process not curved.
       class HERMES_API CurvedException : public Hermes::Exceptions::Exception
@@ -561,7 +561,6 @@ namespace Hermes
                                                   vn[0]      vn[1]   vn[0]        vn[1]
         vn[0]           en[0]           vn[1]
 
-
         node and son numbering on a quad:          refinement '0':
 
         vn[3]           en[2]           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
@@ -583,7 +582,6 @@ namespace Hermes
             *-------------*-------------*
                                                     vn[0]        vn[1] vn[0]        vn[1]
         vn[0]           en[0]           vn[1]
-
 
       refinement '1':                             refinement '2':
 

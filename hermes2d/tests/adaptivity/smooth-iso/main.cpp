@@ -91,8 +91,6 @@ int main(int argc, char* argv[])
     Space<double>* ref_space = Space<double>::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
 
-    
-    
     // Assemble the discrete problem.
     DiscreteProblem<double> dp(&wf, ref_space);
 
@@ -126,7 +124,7 @@ int main(int argc, char* argv[])
     double err_exact_rel = Global<double>::calc_rel_error(&sln, &exact_sln, HERMES_H1_NORM) * 100;
 
     // Report results.
-    
+
     // If err_est too large, adapt the mesh. The NDOF test must be here, so that the solution may be visualized
     // after ending due to this criterion.
     if (err_exact_rel < ERR_STOP || space.get_num_dofs() >= NDOF_STOP)
@@ -155,5 +153,3 @@ int main(int argc, char* argv[])
     return -1;
   }
 }
-
-

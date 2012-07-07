@@ -35,7 +35,6 @@ namespace Hermes
     return is_const;
   };
 
-
   template<typename Scalar>
   Hermes1DFunction<Scalar>::Hermes1DFunction()
   {
@@ -118,7 +117,6 @@ namespace Hermes
       return Ord(99);
     }
   };
-
 
   template<typename Scalar>
   Hermes2DFunction<Scalar>::Hermes2DFunction()
@@ -239,7 +237,6 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     }
   };
-
 
   template<typename Scalar>
   Ord Hermes3DFunction<Scalar>::value(Ord x, Ord y, Ord z) const

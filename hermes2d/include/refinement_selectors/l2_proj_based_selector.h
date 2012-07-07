@@ -22,7 +22,6 @@ namespace Hermes
   namespace Hermes2D
   {
     namespace RefinementSelectors {
-
       /// A projection-based selector for L2 space. \ingroup g_selectors
       /** This class is designed to be used with the class L2Adapt.
       *  Since an initialization of the class may take a long time,
@@ -37,7 +36,7 @@ namespace Hermes
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used, see HcurlProjBasedSelector::H2DRS_MAX_L2_ORDER.
         *  \param[in] user_shapeset A shapeset. If NULL, it will use internal instance of the class L2Shapeset. */
         L2ProjBasedSelector(CandList cand_list = H2D_HP_ANISO, double conv_exp = 1.0, int max_order = H2DRS_DEFAULT_ORDER, L2Shapeset* user_shapeset = NULL);
-        
+
         /// Cloning for paralelism.
         virtual Selector<Scalar>* clone();
 

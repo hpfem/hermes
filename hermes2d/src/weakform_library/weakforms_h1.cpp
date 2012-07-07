@@ -125,7 +125,6 @@ namespace Hermes
         return new DefaultMatrixFormVol<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultJacobianDiffusion<Scalar>::DefaultJacobianDiffusion(int i, int j, std::string area,
         Hermes1DFunction<Scalar>* coeff,
@@ -385,7 +384,6 @@ namespace Hermes
         return new DefaultJacobianAdvection<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
@@ -470,7 +468,6 @@ namespace Hermes
         return new DefaultVectorFormVol<Scalar>(*this);
       }
 
-
       template<typename Scalar>
       DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area,
         Hermes2DFunction<Scalar>* coeff,
@@ -554,7 +551,6 @@ namespace Hermes
       {
         return new DefaultResidualVol(*this);
       }
-
 
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::DefaultResidualDiffusion(int i, std::string area,
@@ -1013,7 +1009,6 @@ namespace Hermes
       {
         return new DefaultResidualSurf(*this);
       }
-
 
       template<typename Scalar>
       DefaultWeakFormLaplace<Scalar>::DefaultWeakFormLaplace(std::string area,

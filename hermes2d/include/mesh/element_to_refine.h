@@ -43,7 +43,7 @@ namespace Hermes
 
       /// Copy-contructor.
       ElementToRefine(const ElementToRefine &orig);
-      
+
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
     private:

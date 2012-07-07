@@ -25,7 +25,6 @@ namespace Hermes
   {
     namespace Views
     {
-
       VectorView::VectorView(const char* title, WinGeom* wg)
         : View(title, wg), vec(NULL)
       {
@@ -37,7 +36,6 @@ namespace Hermes
         pmode = false;
         length_coef = 1.0;
       }
-
 
       VectorView::VectorView(char* title, WinGeom* wg)
         : View(title, wg), vec(NULL)
@@ -65,7 +63,6 @@ namespace Hermes
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 
-
       void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps)
       {
         if(vec == NULL)
@@ -74,7 +71,6 @@ namespace Hermes
           this->warn("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
         show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
       }
-
 
       void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem)
       {
@@ -99,7 +95,6 @@ namespace Hermes
       static int n_vert(int i) { return (i + 1) % 3; }
       static int p_vert(int i) { return (i + 2) % 3; }
 
-
       void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if (mode == 1)
@@ -117,7 +112,6 @@ namespace Hermes
         double xnew = x + gs * xval * mag / (max * Real_mag) * length_coef;
         double ynew = y - gs * yval * mag / (max * Real_mag) * length_coef;
 
-
         if ((mag)/(max - min) < 1e-5)
         {
           glTranslated(x, y, 0.0);
@@ -131,7 +125,6 @@ namespace Hermes
         }
         else
         {
-
           glBegin(GL_LINES);
           glVertex2d(x, y);
           glVertex2d(xnew, ynew);
@@ -155,7 +148,6 @@ namespace Hermes
           get_palette_color((mag - min)/(max - min), color); //  0.0 -- 1.0
           glColor3f(color[0], color[1], color[2]);
 
-
           if (mag/(max - min) < 1e-5)
           {
             glBegin(GL_QUADS);
@@ -167,7 +159,6 @@ namespace Hermes
           }
           else
           {
-
             glBegin(GL_LINES);
             glVertex2d(x, y);
             glVertex2d(xnew, ynew);
@@ -186,7 +177,6 @@ namespace Hermes
           }
         }
       }
-
 
       void VectorView::on_display()
       {
@@ -397,7 +387,6 @@ namespace Hermes
         vec->unlock_data();
       }
 
-
       void VectorView::on_mouse_move(int x, int y)
       {
         if (dragging)
@@ -407,7 +396,6 @@ namespace Hermes
         }
         View::on_mouse_move(x, y);
       }
-
 
       void VectorView::on_key_down(unsigned char key, int x, int y)
       {
@@ -453,7 +441,6 @@ namespace Hermes
           break;
         }
       }
-
 
       const char* VectorView::get_help_text() const
       {

@@ -35,37 +35,36 @@ namespace Hermes
 {
   namespace Solvers
   {
-
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::LinearMatrixSolver() 
-    { 
-      sln = NULL; 
-      time = -1.0; 
+    LinearMatrixSolver<Scalar>::LinearMatrixSolver()
+    {
+      sln = NULL;
+      time = -1.0;
     }
 
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::~LinearMatrixSolver() 
-    { 
-      if (sln != NULL) 
-        delete [] sln; 
+    LinearMatrixSolver<Scalar>::~LinearMatrixSolver()
+    {
+      if (sln != NULL)
+        delete [] sln;
     }
 
     template<typename Scalar>
-    Scalar *LinearMatrixSolver<Scalar>::get_sln_vector() 
-    { 
-      return sln; 
+    Scalar *LinearMatrixSolver<Scalar>::get_sln_vector()
+    {
+      return sln;
     }
 
     template<typename Scalar>
-    int LinearMatrixSolver<Scalar>::get_error() 
-    { 
-      return error; 
+    int LinearMatrixSolver<Scalar>::get_error()
+    {
+      return error;
     }
 
     template<typename Scalar>
-    double LinearMatrixSolver<Scalar>::get_time() 
-    { 
-      return time; 
+    double LinearMatrixSolver<Scalar>::get_time()
+    {
+      return time;
     }
 
     template<typename Scalar>

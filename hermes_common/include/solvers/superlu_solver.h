@@ -184,11 +184,9 @@ namespace Hermes
 
       friend class Solvers::SuperLUSolver<Scalar>;
     };
-
   }
   namespace Solvers
   {
-
     /// Encapsulation of SUPERLU linear solver.
     ///
     /// @ingroup solvers
@@ -248,7 +246,6 @@ namespace Hermes
         double *rcond, double *ferr, double *berr, slu_memusage_t *mem_usage, SuperLUStat_t *stat, int *info);
       void create_dense_matrix (SuperMatrix *X, int m, int n, typename SuperLuType<Scalar>::Scalar *x, int ldx, Stype_t stype, Dtype_t dtype, Mtype_t mtype);
 #endif  //SLU_MT
-    
 
 #ifndef SLU_MT
       char equed[1];              ///< Form of equilibration that was done on A.

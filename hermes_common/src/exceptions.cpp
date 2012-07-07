@@ -25,7 +25,6 @@ namespace Hermes
 {
   namespace Exceptions
   {
-
     Exception::Exception() : std::exception()
     {
       message = NULL;
@@ -87,7 +86,6 @@ namespace Hermes
       return itemIdx;
     }
 
-
     NullException::NullException(const NullException & e)
     {
       char * msg= new char[strlen(e.what())+1];
@@ -115,7 +113,7 @@ namespace Hermes
       this->wrong=first;
       this->right=second;
       char * msg = new char[110];
-      sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same", 
+      sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
             fstParamIdx, wrong, sndParamIdx, right);
       message = msg;
     }
@@ -171,7 +169,7 @@ namespace Hermes
       strcpy(msg, e.what());
       message=msg;
     }
-    
+
     ValueException::ValueException(const char * name, double value, double allowed) : Exception()
     {
       char * msg =  new char[55 + strlen(name)];
@@ -195,7 +193,6 @@ namespace Hermes
       else
         this->allowed = min;
     }
-
 
     ValueException::ValueException(const char * name, std::string passed) : Exception()
     {

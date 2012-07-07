@@ -140,7 +140,7 @@ namespace Hermes
       /// \param component [in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
       Scalar* get_dxy_values(int component = 0);
-      
+
       /// \brief Returns the current quadrature points.
       Quad2D* get_quad_2d() const;
 
@@ -151,9 +151,9 @@ namespace Hermes
       ///   H2D_FN_DXX, H2D_FN_DYY, H2D_FN_DXY specifying the values which should be precalculated. The default is
       ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
       void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
-      
+
       Scalar* get_values(int a, int b);
-      
+
       /// \brief Returns the polynomial degree of the function being represented by the class.
       int get_fn_order() const;
 
@@ -183,7 +183,6 @@ namespace Hermes
 
         Node& operator=(const Node& other) { return *this; }; ///< Assignment is not allowed.
       };
-
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.
       /// \param edge [in] Edge at which the order should be evaluated. (0-3)
@@ -230,7 +229,7 @@ namespace Hermes
       void replace_cur_node(Node* node);
 
       static void check_params(int component, Node* cur_node, int num_components);
-    
+
       static void check_table(int component, Node* cur_node, int n, const char* msg);
 
       static int idx2mask[6][2];  ///< index to mask table
@@ -242,7 +241,7 @@ namespace Hermes
       friend class Views::Orderizer;
       friend class Views::Vectorizer;
       friend class Views::Linearizer;
-      
+
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;

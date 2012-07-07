@@ -55,8 +55,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = Space<double>::get_num_dofs(&space);
-  
-  
+
   // Initialize weak formulation,
   CustomWeakForm wf1;
 
@@ -90,7 +89,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp1);
-  
+
   newton.set_verbose_output(true);
   try{
     newton.solve(coeff_vec);
@@ -116,7 +115,6 @@ int main(int argc, char* argv[])
   ZeroSolution<double> sln_tmp(&mesh);
   OGProjection<double> ogProjection;
   ogProjection.project_global(&space, &sln_tmp, coeff_vec);
-
 
   // Initialize the weak formulation for Trilinos.
   CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
@@ -154,9 +152,7 @@ int main(int argc, char* argv[])
   CustomExactSolution ex(&mesh);
   double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
   double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
-  
-  
-  
+
 #define ERROR_SUCCESS                                0
 #define ERROR_FAILURE                               -1
   int success = 1;

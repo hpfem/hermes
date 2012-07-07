@@ -23,17 +23,16 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt, 
+    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt,
         bool start_from_zero_K_vector, bool residual_as_vector)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
-      stage_wf_left(spaces.size()), start_from_zero_K_vector(start_from_zero_K_vector), 
+      stage_wf_left(spaces.size()), start_from_zero_K_vector(start_from_zero_K_vector),
       residual_as_vector(residual_as_vector), iteration(0)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces.push_back(const_cast<const Space<Scalar>*>(spaces.at(i)));
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces_mutable.push_back(spaces.at(i));
-
 
       if (bt==NULL) throw Exceptions::NullException(2);
 
@@ -57,13 +56,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Space<Scalar>* space, ButcherTable* bt, 
+    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Space<Scalar>* space, ButcherTable* bt,
         bool start_from_zero_K_vector, bool residual_as_vector)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
-      stage_wf_left(1), start_from_zero_K_vector(start_from_zero_K_vector), 
+      stage_wf_left(1), start_from_zero_K_vector(start_from_zero_K_vector),
       residual_as_vector(residual_as_vector), iteration(0)
     {
-      
       spaces.push_back(const_cast<const Space<Scalar>*>(space));
       spaces_mutable.push_back(space);
 
@@ -224,7 +222,7 @@ namespace Hermes
         if(this->filters_to_reinit.size() > 0)
         {
           Solution<Scalar>::vector_to_solutions(u_ext_vec, spaces, slns_time_new);
-        
+
           for(unsigned int filters_i = 0; filters_i < this->filters_to_reinit.size(); filters_i++)
             filters_to_reinit.at(filters_i)->reinit();
         }

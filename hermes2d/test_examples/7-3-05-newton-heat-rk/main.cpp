@@ -81,17 +81,17 @@ int main(int argc, char* argv[])
 
   // Mesh.
   Mesh mesh;
-  
+
   // Init mesh.
   MeshReaderH2D mloader;
   mloader.load("cathedral.mesh", &mesh);
 
   // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_REF_NUM; i++) 
+  for(int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
   mesh.refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
   mesh.refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
-  
+
   // Initialize boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
   Solution<double>* sln_time_new = new Solution<double>(&mesh);
 
   int ndof = space.get_num_dofs();
-  
+
   // Initialize views.
   Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
   Tview.set_min_max_range(0, 20);

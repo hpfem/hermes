@@ -45,7 +45,7 @@ namespace Hermes
         /// \return name of function where exception was created.
         const char * getFuncName() const;
         virtual ~Exception() throw () {};
-        
+
       protected:
         const char * message;
     };
@@ -196,8 +196,6 @@ namespace Hermes
         ~SolutionLoadFailureException() throw () {};
         SolutionLoadFailureException(const SolutionLoadFailureException & e);
     };
-
-
   }
 }
 #endif

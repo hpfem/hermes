@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
   {
     space.set_uniform_order(p_init);
     int ndof = space.get_num_dofs();
-    
+
     // Initialize the FE problem.
     Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
 

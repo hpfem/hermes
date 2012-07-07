@@ -364,7 +364,7 @@ namespace Hermes
                   else
                     err += central_err;
 
-                  // BEGIN COPY FROM DISCRETE_PROBLEM.CPP 
+                  // BEGIN COPY FROM DISCRETE_PROBLEM.CPP
 
                   // Clear the transformations from the RefMaps and all functions.
                   for(unsigned int fns_i = 0; fns_i < this->num; fns_i++)
@@ -386,7 +386,6 @@ namespace Hermes
                     delete neighbor_searches.get(j);
 
                 // END COPY FROM DISCRETE_PROBLEM.CPP
-
               }
             }
           }

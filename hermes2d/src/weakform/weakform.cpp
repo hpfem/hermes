@@ -27,7 +27,6 @@ namespace Hermes
     template<typename Scalar>
     WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
     {
-      
       this->neq = neq;
       this->seq = 0;
       this->is_matfree = mat_free;
@@ -38,7 +37,7 @@ namespace Hermes
     {
       delete_all();
     }
-    
+
     template<typename Scalar>
     void WeakForm<Scalar>::delete_all()
     {
@@ -236,7 +235,6 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::add_matrix_form(MatrixFormVol<Scalar>* form)
     {
-      
       if (form->i >= neq || form->j >= neq)
         throw Hermes::Exceptions::Exception("Invalid equation number.");
       if (form->sym < -1 || form->sym > 1)

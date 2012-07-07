@@ -45,7 +45,7 @@ namespace Hermes
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
     }
-    
+
     template<typename Scalar>
     void PicardSolver<Scalar>::set_verbose_output_linear_solver(bool to_set)
     {
@@ -175,7 +175,7 @@ namespace Hermes
       Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces, this->slns_prev_iter);
 
       int it = 1;
-      
+
       while (true)
       {
         linear_solver.solve();
@@ -186,17 +186,17 @@ namespace Hermes
         // FIXME: this is wrong in the complex case (complex conjugation must be used).
         // FIXME: This will crash is norm of last_iter_vector[] is zero.
         double last_iter_vec_norm = 0;
-        for (int i = 0; i < ndof; i++) 
+        for (int i = 0; i < ndof; i++)
           last_iter_vec_norm += std::abs(last_iter_vector[i] * last_iter_vector[i]);
 
         last_iter_vec_norm = sqrt(last_iter_vec_norm);
-        
+
         double abs_error = 0;
         for (int i = 0; i < ndof; i++) abs_error += std::abs((this->sln_vector[i] - last_iter_vector[i]) * (this->sln_vector[i] - last_iter_vector[i]));
           abs_error = sqrt(abs_error);
 
         double rel_error = abs_error / last_iter_vec_norm;
-         
+
         // Output for the user.
         this->info("---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
 

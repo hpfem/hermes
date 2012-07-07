@@ -44,7 +44,7 @@ namespace Hermes
       Filter(const Hermes::vector<Solution<Scalar>*>& solutions);
 
       virtual ~Filter();
-      
+
       virtual void reinit();
 
     protected:
@@ -86,7 +86,6 @@ namespace Hermes
       UniData** unidata;
 
       void copy_base(Filter* flt);
-
     };
 
     /// SimpleFilter is a base class for predefined simple filters (MagFilter, DiffFilter...).
@@ -124,7 +123,6 @@ namespace Hermes
 
       void init_components();
       virtual void precalculate(int order, int mask);
-
     };
 
     /// ComplexFilter is used to transform complex solutions into its real parts.
@@ -136,7 +134,7 @@ namespace Hermes
 
     protected:
       virtual double get_pt_value(double x, double y, int item = H2D_FN_VAL_0);
-      
+
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       virtual void set_active_element(Element* e);
@@ -144,7 +142,7 @@ namespace Hermes
       virtual void push_transform(int son);
 
       virtual void pop_transform();
-      
+
       virtual void free();
       MeshFunction<std::complex<double> >* sln_complex;
 
@@ -182,7 +180,6 @@ namespace Hermes
 
       virtual void precalculate(int order, int mask);
     };
-
 
     /// MagFilter takes two functions representing the components of a vector function and
     /// calculates the vector magnitude, sqrt(x^2 + y^2).
@@ -251,7 +248,6 @@ namespace Hermes
       Hermes::vector<double> high_limits;
     };
 
-
     /// Calculates the difference of two functions.
     template<typename Scalar>
     class HERMES_API DiffFilter : public SimpleFilter<Scalar>
@@ -264,7 +260,6 @@ namespace Hermes
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
 
-
     /// Calculates the sum of two functions.
     template<typename Scalar>
     class HERMES_API SumFilter : public SimpleFilter<Scalar>
@@ -276,7 +271,6 @@ namespace Hermes
     protected:
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result);
     };
-
 
     /// Calculates the square of a function.
     template<typename Scalar>
@@ -307,13 +301,12 @@ namespace Hermes
     {
     public:
       RealFilter(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
-      
+
       virtual MeshFunction<double>* clone();
 
     protected:
       virtual void filter_fn(int n, std::complex<double>* values, double* result);
     };
-
 
     /// ImagFilter puts the imaginary part of the input function to the Real part of the
     /// output, allowing it to be visualized.
@@ -349,7 +342,6 @@ namespace Hermes
       virtual void filter_fn(int n, Hermes::vector<std::complex<double>*> values, double* result);
     };
 
-
     /// VonMisesFilter is a postprocessing filter for visualizing elastic stresses in a body.
     /// It calculates the stress tensor and applies the Von Mises equivalent stress formula
     /// to obtain the resulting stress measure.
@@ -374,7 +366,6 @@ namespace Hermes
 
       virtual void precalculate(int order, int mask);
     };
-
 
     /// Linearization filter for use in nonlinear problems. From one or two previous
     /// solution values it extrapolates an estimate of the new one.
@@ -402,4 +393,3 @@ namespace Hermes
   }
 }
 #endif
-

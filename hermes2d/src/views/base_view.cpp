@@ -151,7 +151,6 @@ namespace Hermes
         }
       }
 
-
       template<typename Scalar>
       const char* BaseView<Scalar>::get_help_text() const
       {

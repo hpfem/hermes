@@ -140,7 +140,6 @@ namespace Hermes
   inline double pow(double x, double y) { return std::pow(x, y); }
   inline double log(double x) { return std::log(x); }
 
-  
   /* log file */
   #undef HERMES_LOG_FILE
   #ifdef HERMES_REPORT_NO_FILE
@@ -160,7 +159,7 @@ namespace Hermes
   /* event codes */
   #define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
   #define HERMES_EC_INFO 'I' ///< An event code: info about results. \internal
-  
+
   /// A size of a delimiter in a log file. \internal \ingroup g_logging
   #define HERMES_LOG_FILE_DELIM_SIZE 80
   #define BUF_SZ 2048
@@ -185,7 +184,7 @@ namespace Hermes
   /// This is to be used by weak forms specifying numerical flux through interior edges.
   /// Forms with this identifier will receive DiscontinuousFunc representations of shape
   /// and ext. functions, which they may query for values on either side of given interface.
-  const std::string H2D_DG_INNER_EDGE = "-1234567";    
+  const std::string H2D_DG_INNER_EDGE = "-1234567";
   // For internal use.
   const int H2D_DG_INNER_EDGE_INT = -1234567;
 
@@ -209,7 +208,7 @@ namespace Hermes
 
     // Complex part.
 #ifdef __cplusplus
-    extern "C" 
+    extern "C"
     {
 #endif
       extern int zscal_(int *, std::complex<double> *, std::complex<double> *, int *);

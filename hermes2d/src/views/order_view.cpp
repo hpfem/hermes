@@ -33,7 +33,6 @@ namespace Hermes
   {
     namespace Views
     {
-
       OrderView::OrderView(const char* title, WinGeom* wg)
         : View(title, wg)
       {

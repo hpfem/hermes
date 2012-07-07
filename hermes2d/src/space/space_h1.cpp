@@ -100,7 +100,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
-      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -122,7 +121,6 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
-      
       this->mesh = mesh;
 
       if (shapeset == NULL)

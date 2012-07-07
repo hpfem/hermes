@@ -82,7 +82,6 @@ namespace Hermes
         delete this->shapeset;
     }
 
-
     template<typename Scalar>
     Space<Scalar>* HdivSpace<Scalar>::dup(Mesh* mesh, int order_increase) const
     {
@@ -97,7 +96,6 @@ namespace Hermes
     template<typename Scalar>
     void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
-      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -108,7 +106,7 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) 
+      if (this->shapeset->get_num_components() < 2)
         throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
@@ -118,7 +116,6 @@ namespace Hermes
 
       this->proj_mat = hdiv_proj_mat;
       this->chol_p   = hdiv_chol_p;
-
 
       Space<Scalar>::load(filename, essential_bcs);
     }
@@ -136,7 +133,7 @@ namespace Hermes
       else
         this->shapeset = shapeset;
 
-      if (this->shapeset->get_num_components() < 2) 
+      if (this->shapeset->get_num_components() < 2)
         throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
 
       if (!hdiv_proj_ref++)
@@ -146,7 +143,6 @@ namespace Hermes
 
       this->proj_mat = hdiv_proj_mat;
       this->chol_p   = hdiv_chol_p;
-
 
       Space<Scalar>::load(filename);
     }
@@ -203,7 +199,6 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void HdivSpace<Scalar>::assign_bubble_dofs()
     {
@@ -251,7 +246,6 @@ namespace Hermes
       }
     }
 
-
     template<typename Scalar>
     void HdivSpace<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
@@ -262,7 +256,6 @@ namespace Hermes
       for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride)
         al->add_triplet(*indices++, dof, 1.0);
     }
-
 
     //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
@@ -347,7 +340,6 @@ namespace Hermes
       // the element has sons - update mid-edge constrained vertex nodes
       else
       {
-
         // create new edge infos where we don't have them yet
         EdgeInfo ei_data[4];
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
@@ -423,7 +415,6 @@ namespace Hermes
         }
       }
     }
-
 
     template<typename Scalar>
     void HdivSpace<Scalar>::update_constraints()

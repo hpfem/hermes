@@ -83,7 +83,6 @@ namespace Hermes
         delete this->shapeset;
     }
 
-
     template<typename Scalar>
     Space<Scalar>* HcurlSpace<Scalar>::dup(Mesh* mesh, int order_increase) const
     {
@@ -101,7 +100,6 @@ namespace Hermes
     template<typename Scalar>
     void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
-      
       this->mesh = mesh;
 
       if (shapeset == NULL)
@@ -195,7 +193,6 @@ namespace Hermes
           this->ndata[en->id].n = -1;
       }
     }
-
 
     template<typename Scalar>
     void HcurlSpace<Scalar>::assign_bubble_dofs()
@@ -323,7 +320,6 @@ namespace Hermes
       // the element has sons - update mid-edge constrained vertex nodes
       else
       {
-
         // create new edge infos where we don't have them yet
         EdgeInfo ei_data[4];
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
@@ -399,7 +395,6 @@ namespace Hermes
         }
       }
     }
-
 
     template<typename Scalar>
     void HcurlSpace<Scalar>::update_constraints()

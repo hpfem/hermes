@@ -53,7 +53,6 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
-      
       this->current_mat = mat;
       this->current_rhs = rhs;
       this->current_force_diagonal_blocks = force_diagonal_blocks;
@@ -134,7 +133,7 @@ namespace Hermes
       MatrixFormSurf<Scalar>** current_mfsurf;
       VectorFormVol<Scalar>** current_vfvol;
       VectorFormSurf<Scalar>** current_vfsurf;
-      
+
 #define CHUNKSIZE 1
       int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
@@ -236,7 +235,7 @@ namespace Hermes
         if (current_als[form->i]->dof[i] < 0)
           continue;
 
-        if ((!tra || surface_form) && current_als[form->i]->dof[i] < 0) 
+        if ((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
           continue;
         if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
           continue;
@@ -325,7 +324,7 @@ namespace Hermes
       geometry->free();
       delete geometry;
     }
-    
+
     template class HERMES_API DiscreteProblemLinear<double>;
     template class HERMES_API DiscreteProblemLinear<std::complex<double> >;
   }

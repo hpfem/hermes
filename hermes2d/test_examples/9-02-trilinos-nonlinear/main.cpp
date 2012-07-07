@@ -69,8 +69,7 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = Space<double>::get_num_dofs(&space);
-  
-  
+
   // Initialize weak formulation,
   CustomWeakForm wf1;
 
@@ -130,7 +129,7 @@ int main(int argc, char* argv[])
   // Calculate error.
   CustomExactSolution ex(&mesh);
   double rel_err_1 = Global<double>::calc_rel_error(&sln1, &ex, HERMES_H1_NORM) * 100;
-  
+
   // TRILINOS PART:
 
   // Project the initial condition to obtain the initial
@@ -170,10 +169,10 @@ int main(int argc, char* argv[])
     e.printMsg();
   }
   Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
-  
+
   // Calculate error.
   double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;
-  
+
   // Show NOX solution.
   Views::ScalarView view2("Solution 2", new Views::WinGeom(510, 0, 500, 400));
   view2.show(&sln2);
