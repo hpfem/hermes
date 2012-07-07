@@ -103,14 +103,14 @@ namespace Hermes
         uint64_t vmid = (r.t + r.b) >> 1;
         int son;
 
-        if (s->cr.r <= hmid && s->cr.t <= vmid) son = 0;
-        else if (s->cr.l >= hmid && s->cr.t <= vmid) son = 1;
-        else if (s->cr.l >= hmid && s->cr.b >= vmid) son = 2;
-        else if (s->cr.r <= hmid && s->cr.b >= vmid) son = 3;
-        else if (s->cr.r <= hmid) son = 6;
-        else if (s->cr.l >= hmid) son = 7;
-        else if (s->cr.t <= vmid) son = 4;
-        else if (s->cr.b >= vmid) son = 5;
+        if(s->cr.r <= hmid && s->cr.t <= vmid) son = 0;
+        else if(s->cr.l >= hmid && s->cr.t <= vmid) son = 1;
+        else if(s->cr.l >= hmid && s->cr.b >= vmid) son = 2;
+        else if(s->cr.r <= hmid && s->cr.b >= vmid) son = 3;
+        else if(s->cr.r <= hmid) son = 6;
+        else if(s->cr.l >= hmid) son = 7;
+        else if(s->cr.t <= vmid) son = 4;
+        else if(s->cr.b >= vmid) son = 5;
         else assert(0);
 
         s->push_transform(son, i, s->rep->is_triangle());
@@ -224,9 +224,9 @@ namespace Hermes
     {
       Element* e = NULL;
       for (int i = 0; i < num; i++)
-        if ((e = s->e[i]) != NULL) break;
+        if((e = s->e[i]) != NULL) break;
 
-      if (s->rep->is_triangle())
+      if(s->rep->is_triangle())
       {
         for (int i = 0; i < 3; i++)
           (s->bnd[i] = (s->bnd[i] && e->en[i]->bnd));
@@ -304,7 +304,7 @@ namespace Hermes
 
           (id)++;
 
-          if (s->rep->is_triangle())
+          if(s->rep->is_triangle())
             for (i = 0; i < 3; i++)
               s->bnd[i] = true;
         }
@@ -314,9 +314,9 @@ namespace Hermes
         for (i = 0; i < num; i++)
         {
           // ..where the element is used ..
-          if (s->e[i] != NULL)
-            if (s->sub_idx[i] == 0 && s->e[i]->active)
-              if (!s->rep->is_triangle())
+          if(s->e[i] != NULL)
+            if(s->sub_idx[i] == 0 && s->e[i]->active)
+              if(!s->rep->is_triangle())
                 init_transforms(s, i);
         }
 
@@ -366,7 +366,7 @@ namespace Hermes
               {
                 ns->e[i] = s->e[i]->sons[son];
                 // If the son's element is active.
-                if (ns->e[i]->active)
+                if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
@@ -374,7 +374,7 @@ namespace Hermes
             }
 
             // Determine boundary flags and positions for the new state.
-            if (son < 3)
+            if(son < 3)
             {
               memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
 
@@ -429,7 +429,7 @@ namespace Hermes
                     ns->e[i] = s->e[i]->sons[current_sons[i][son] & 3];
                     // Sets the son's "current mesh" rectangle correctly.
                     move_to_son(ns->er + i, s->er + i, current_sons[i][son]);
-                    if (ns->e[i]->active)
+                    if(ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
@@ -439,10 +439,10 @@ namespace Hermes
             }
           }
           // V or h split, recur to two sons.
-          else if (split > 0)
+          else if(split > 0)
           {
             int son0 = 4, son1 = 5;
-            if (split == 2) { son0 = 6; son1 = 7; }
+            if(split == 2) { son0 = 6; son1 = 7; }
 
             for (son = son0; son <= son1; son++)
             {
@@ -468,7 +468,7 @@ namespace Hermes
                   {
                     ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
                     move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
-                    if (ns->e[i]->active)
+                    if(ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
@@ -490,7 +490,7 @@ namespace Hermes
               {
                 ns->e[i] = NULL;
               }
-              else if (s->e[i]->active)
+              else if(s->e[i]->active)
               {
                 ns->e[i] = s->e[i];
                 memcpy(&ns->er[i], &ns->cr, sizeof(Rect));
@@ -499,7 +499,7 @@ namespace Hermes
               {
                 ns->e[i] = s->e[i]->sons[current_sons[i][0] & 3];
                 move_to_son(ns->er + i, s->er + i, current_sons[i][0]);
-                if (ns->e[i]->active)
+                if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
@@ -570,7 +570,7 @@ namespace Hermes
 
           (*id_f)++;
 
-          if (s->rep->is_triangle())
+          if(s->rep->is_triangle())
             for (i = 0; i < 3; i++)
               s->bnd[i] = true;
         }
@@ -580,9 +580,9 @@ namespace Hermes
         for (i = 0; i < num; i++)
         {
           // ..where the element is used ..
-          if (s->e[i] != NULL)
-            if (s->sub_idx[i] == 0 && s->e[i]->active)
-              if (!s->rep->is_triangle())
+          if(s->e[i] != NULL)
+            if(s->sub_idx[i] == 0 && s->e[i]->active)
+              if(!s->rep->is_triangle())
                 init_transforms(s, i);
         }
 
@@ -639,7 +639,7 @@ namespace Hermes
               {
                 ns->e[i] = s->e[i]->sons[son];
                 // If the son's element is active.
-                if (ns->e[i]->active)
+                if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
@@ -647,7 +647,7 @@ namespace Hermes
             }
 
             // Determine boundary flags and positions for the new state.
-            if (son < 3)
+            if(son < 3)
             {
               memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
 
@@ -689,7 +689,7 @@ namespace Hermes
                 {
                   ns->e[i] = NULL;
                 }
-                else if (s->e[i]->active)
+                else if(s->e[i]->active)
                 {
                   ns->e[i] = s->e[i];
                   ns->sub_idx[i] = s->sub_idx[i];
@@ -700,7 +700,7 @@ namespace Hermes
                   ns->e[i] = s->e[i]->sons[current_sons[i][son] & 3];
                   // Sets the son's "current mesh" rectangle correctly.
                   move_to_son(ns->er + i, s->er + i, current_sons[i][son]);
-                  if (ns->e[i]->active)
+                  if(ns->e[i]->active)
                     ns->sub_idx[i] = 0;
                 }
                 if(ns->e[i] != NULL)
@@ -709,10 +709,10 @@ namespace Hermes
             }
           }
           // V or h split, recur to two sons.
-          else if (split > 0)
+          else if(split > 0)
           {
             int son0 = 4, son1 = 5;
-            if (split == 2) { son0 = 6; son1 = 7; }
+            if(split == 2) { son0 = 6; son1 = 7; }
 
             for (son = son0; son <= son1; son++)
             {
@@ -738,7 +738,7 @@ namespace Hermes
                   {
                     ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
                     move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
-                    if (ns->e[i]->active)
+                    if(ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
@@ -760,7 +760,7 @@ namespace Hermes
               {
                 ns->e[i] = NULL;
               }
-              else if (s->e[i]->active)
+              else if(s->e[i]->active)
               {
                 ns->e[i] = s->e[i];
                 memcpy(&ns->er[i], &ns->cr, sizeof(Rect));
@@ -769,7 +769,7 @@ namespace Hermes
               {
                 ns->e[i] = s->e[i]->sons[current_sons[i][0] & 3];
                 move_to_son(ns->er + i, s->er + i, current_sons[i][0]);
-                if (ns->e[i]->active)
+                if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
                   ns->rep = ns->e[i];
@@ -812,9 +812,9 @@ namespace Hermes
 
         Element* e;
         // Test whether areas of corresponding elements are the same.
-        double *areas = new double [base_elem_num];
+        double *areas = new double[base_elem_num];
         memset(areas, 0, base_elem_num*sizeof(double));
-        if(areas == NULL) throw Hermes::Exceptions::Exception("Not enough memory in Traverse::begin().");
+
         // Read base element areas from the first mesh,
         // Also get minimum element area.
         int counter = 0;

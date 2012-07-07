@@ -50,11 +50,11 @@ namespace Hermes
       PetscTruth petsc_initialized, petsc_finalized;
       int ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
-      if (petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
+      if(petsc_finalized == PETSC_TRUE || petsc_initialized == PETSC_FALSE)
         // This should never happen here.
         return -1;
 
-      if (--num_petsc_objects == 0)
+      if(--num_petsc_objects == 0)
       {
         int ierr = PetscFinalize();
         CHKERRQ(ierr);
@@ -68,12 +68,12 @@ namespace Hermes
       PetscTruth petsc_initialized, petsc_finalized;
       ierr = PetscFinalized(&petsc_finalized); CHKERRQ(ierr);
 
-      if (petsc_finalized == PETSC_TRUE)
+      if(petsc_finalized == PETSC_TRUE)
         throw Hermes::Exceptions::Exception("PETSc cannot be used once it has been finalized. You must restart the application.");
 
       ierr = PetscInitialized(&petsc_initialized); CHKERRQ(ierr);
 
-      if (petsc_initialized != PETSC_TRUE)
+      if(petsc_initialized != PETSC_TRUE)
       {
         ierr = PetscInitializeNoArguments();
         CHKERRQ(ierr);
@@ -122,8 +122,8 @@ namespace Hermes
 
       //
       MatCreateSeqAIJ(PETSC_COMM_SELF, this->size, this->size, 0, nnz_array, &matrix);
-      //	MatSetOption(matrix, MAT_ROW_ORIENTED);
-      //	MatSetOption(matrix, MAT_ROWS_SORTED);
+      //  MatSetOption(matrix, MAT_ROW_ORIENTED);
+      //  MatSetOption(matrix, MAT_ROWS_SORTED);
 
       delete [] nnz_array;
 
@@ -133,7 +133,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::free()
     {
-      if (inited) MatDestroy(matrix);
+      if(inited) MatDestroy(matrix);
       inited = false;
     }
 
@@ -181,8 +181,8 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
-      if (v != 0.0)
-      {		// ignore zero values.
+      if(v != 0.0)
+      {    // ignore zero values.
         MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
       }
     }
@@ -203,8 +203,8 @@ namespace Hermes
     {
       /// \todo pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
       // row and cols for -1)
-      for (unsigned int i = 0; i < m; i++)				// rows
-        for (unsigned int j = 0; j < n; j++)			// cols
+      for (unsigned int i = 0; i < m; i++)        // rows
+        for (unsigned int j = 0; j < n; j++)      // cols
           if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
             add(rows[i], cols[j], mat[i][j]);
     }
@@ -247,7 +247,7 @@ namespace Hermes
       for (unsigned int i = 0;i<this->size;i++)
       {
         vector_out[i] = 0;
-        for (unsigned int j = 0;j<this->size;j++)
+        for (unsigned int j = 0; j<this->size; j++)
         {
           vector_out[i] +=vector_in[j]*get(i, j);
         }
@@ -264,7 +264,7 @@ namespace Hermes
     void PetscMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, PetscMatrix<Scalar>* mat)
     {
       int ndof = mat->get_size();
-      if (this->get_size() != (unsigned int) num_stages * ndof)
+      if(this->get_size() != (unsigned int) num_stages * ndof)
         throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
@@ -276,13 +276,13 @@ namespace Hermes
     template<typename Scalar>
     void PetscMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
     {
-      add_to_diagonal_blocks(num_stages, dynamic_cast<PetscMatrix<Scalar>*>(mat));
+      add_to_diagonal_blocks(num_stages, static_cast<PetscMatrix<Scalar>*>(mat));
     }
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
     {
-      if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
+      if((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
         throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
       unsigned int block_size = mat->get_size();
       for (unsigned int r = 0;r<block_size;r++)
@@ -351,7 +351,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::free()
     {
-      if (inited) VecDestroy(vec);
+      if(inited) VecDestroy(vec);
       inited = false;
     }
 
@@ -383,7 +383,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::extract(Scalar *v) const
     {
-      int *idx = new int [this->size];
+      int *idx = new int[this->size];
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       vec_get_value(vec, this->size, idx, v);
       delete [] idx;
@@ -398,8 +398,8 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::change_sign()
     {
-      PetscScalar* y = new PetscScalar [this->size];
-      int *idx = new int [this->size];
+      PetscScalar* y = new PetscScalar[this->size];
+      int *idx = new int[this->size];
       for (unsigned int i = 0; i < this->size; i++) idx[i] = i;
       VecGetValues(vec, this->size, idx, y);
       for (unsigned int i = 0; i < this->size; i++) y[i] *= -1.;
@@ -502,18 +502,18 @@ namespace Hermes
       VecDuplicate(rhs->vec, &x);
 
       ec = KSPSolve(ksp, rhs->vec, x);
-      if (ec) return false;
+      if(ec) return false;
 
       this->tick();
       this->time = this->accumulated();
 
       // allocate memory for solution vector
       delete [] this->sln;
-      this->sln = new Scalar [m->size];
+      this->sln = new Scalar[m->size];
       memset(this->sln, 0, m->size * sizeof(Scalar));
 
       // index map vector (basic serial code uses the map sln[i] = x[i] for all dofs.
-      int *idx = new int [m->size];
+      int *idx = new int[m->size];
       for (unsigned int i = 0; i < m->size; i++) idx[i] = i;
 
       // copy solution to the output solution vector

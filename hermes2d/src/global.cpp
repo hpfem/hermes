@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "global.h"
+#include <algorithm>
 #include "quadrature/quad_all.h"
 #include "mesh.h"
 #include "traverse.h"
@@ -45,8 +46,8 @@ namespace Hermes
     double Global<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type)
     {
       // sanity checks
-      if (sln1 == NULL) throw Hermes::Exceptions::Exception("sln1 is NULL in calc_abs_error().");
-      if (sln2 == NULL) throw Hermes::Exceptions::Exception("sln2 is NULL in calc_abs_error().");
+      if(sln1 == NULL) throw Hermes::Exceptions::Exception("sln1 is NULL in calc_abs_error().");
+      if(sln2 == NULL) throw Hermes::Exceptions::Exception("sln2 is NULL in calc_abs_error().");
 
       Quad2D* quad = &g_quad_2d_std;
       sln1->set_quad_2d(quad);

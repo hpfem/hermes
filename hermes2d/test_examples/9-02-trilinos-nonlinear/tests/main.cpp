@@ -131,9 +131,9 @@ int main(int argc, char* argv[])
 
   // Choose preconditioning.
   MlPrecond<double> pc("sa");
-  if (PRECOND)
+  if(PRECOND)
   {
-    if (JFNK) nox_solver.set_precond(pc);
+    if(JFNK) nox_solver.set_precond(pc);
     else nox_solver.set_precond("ML");
   }
 
@@ -157,49 +157,49 @@ int main(int argc, char* argv[])
 #define ERROR_FAILURE                               -1
   int success = 1;
   double eps = 1e-5;
-  if (fabs(sln2.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
+  if(fabs(sln2.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
     printf("Coordinate (0.6, 0.6) sln2 value is %g\n", sln2.get_pt_value(0.6, 0.6));
     success = 0;
   }
-  if (fabs(sln2.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
+  if(fabs(sln2.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
     printf("Coordinate ( 0.4, 0.6) sln2 value is %g\n", sln2.get_pt_value( 0.4, 0.6));
     success = 0;
   }
-  if (fabs(sln2.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
+  if(fabs(sln2.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
     printf("Coordinate ( 0.4,  0.4) sln2 value is %g\n", sln2.get_pt_value( 0.4,  0.4));
     success = 0;
   }
-  if (fabs(sln2.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
+  if(fabs(sln2.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
     printf("Coordinate (0.6,  0.0) sln2 value is %g\n", sln2.get_pt_value(0.6,  0.0));
     success = 0;
   }
-  if (fabs(sln2.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
+  if(fabs(sln2.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
     printf("Coordinate ( 0.5,  0.5) sln2 value is %g\n", sln2.get_pt_value( 0.5,  0.5));
     success = 0;
   }
 
-  if (fabs(sln1.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
+  if(fabs(sln1.get_pt_value(0.6, 0.6) - 0.057600) > eps) {
     printf("Coordinate (0.6, 0.6) sln1 value is %g\n", sln1.get_pt_value(0.6, 0.6));
     success = 0;
   }
-  if (fabs(sln1.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
+  if(fabs(sln1.get_pt_value( 0.4, 0.6) - 0.057600) > eps) {
     printf("Coordinate ( 0.4, 0.6) sln1 value is %g\n", sln1.get_pt_value( 0.4, 0.6));
     success = 0;
   }
-  if (fabs(sln1.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
+  if(fabs(sln1.get_pt_value( 0.4,  0.4) - 0.057600) > eps) {
     printf("Coordinate ( 0.4,  0.4) sln1 value is %g\n", sln1.get_pt_value( 0.4,  0.4));
     success = 0;
   }
-  if (fabs(sln1.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
+  if(fabs(sln1.get_pt_value(0.6,  0.0) - 0.000000) > eps) {
     printf("Coordinate (0.6,  0.0) sln1 value is %g\n", sln1.get_pt_value(0.6,  0.0));
     success = 0;
   }
-  if (fabs(sln1.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
+  if(fabs(sln1.get_pt_value( 0.5,  0.5) - 0.062500) > eps) {
     printf("Coordinate ( 0.5,  0.5) sln1 value is %g\n", sln1.get_pt_value( 0.5,  0.5));
     success = 0;
   }
 
-  if (success == 1) {
+  if(success == 1) {
     printf("Success!\n");
     return ERROR_SUCCESS;
   }

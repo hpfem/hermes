@@ -49,11 +49,11 @@ namespace Hermes
     {
       bool operator()(Vertex a, Vertex b) const
       {
-        if (a.x < b.x) return true;
-        else if (a.x > b.x) return false;
+        if(a.x < b.x) return true;
+        else if(a.x > b.x) return false;
         else
         {
-          if (a.y < b.y) return true;
+          if(a.y < b.y) return true;
           return false;
         }
       }
@@ -63,8 +63,8 @@ namespace Hermes
     {
 #ifdef WITH_EXODUSII
       int err;
-      int cpu_ws = sizeof(double);		// use float or double
-      int io_ws = 8;						// store variables as doubles
+      int cpu_ws = sizeof(double);    // use float or double
+      int io_ws = 8;            // store variables as doubles
       float version;
       int exoid = ex_open(file_name, EX_READ, &cpu_ws, &io_ws, &version);
 
@@ -72,27 +72,27 @@ namespace Hermes
       int n_dims, n_nodes, n_elems, n_eblocks, n_nodesets, n_sidesets;
       char title[MAX_LINE_LENGTH + 1];
       err = ex_get_init(exoid, title, &n_dims, &n_nodes, &n_elems, &n_eblocks, &n_nodesets, &n_sidesets);
-      if (n_dims != 2)
+      if(n_dims != 2)
       {
         throw Hermes::Exceptions::Exception("File '%s' does not contain 2D mesh", file_name);
         return false;
       }
 
       // load coordinates
-      double *x = new double [n_nodes];
-      double *y = new double [n_nodes];
+      double *x = new double[n_nodes];
+      double *y = new double[n_nodes];
       err = ex_get_coord(exoid, x, y, NULL);
 
       // remove duplicate vertices and build renumbering map
-      std::map<Vertex, int, VCompare> vtx_list;				// map for eliminating duplicities
-      std::map<int, int> vmap;								// reindexing map
-      Hermes::vector<Vertex> vtx_arr;							// vertex array
+      std::map<Vertex, int, VCompare> vtx_list;        // map for eliminating duplicities
+      std::map<int, int> vmap;                // reindexing map
+      Hermes::vector<Vertex> vtx_arr;              // vertex array
       int vid = 0;
       for (int i = 0; i < n_nodes; i++)
       {
         int k;
         Vertex v = { x[i], y[i] };
-        if (vtx_list.count(v) == 0)
+        if(vtx_list.count(v) == 0)
         {
           vtx_arr.push_back(v);
           k = vid++;
@@ -107,18 +107,18 @@ namespace Hermes
       delete [] y;
 
       int n_vtx = vtx_arr.size();
-      double2 *vtx = new double2 [n_vtx];
+      double2 *vtx = new double2[n_vtx];
       for (int i = 0; i < n_vtx; i++)
       {
         vtx[i][0] = vtx_arr[i].x;
         vtx[i][1] = vtx_arr[i].y;
       }
 
-      int n_tri = 0;		// number of triangles
-      int n_quad = 0;		// number of quads
+      int n_tri = 0;    // number of triangles
+      int n_quad = 0;    // number of quads
 
       // get info about element blocks
-      int *eid_blocks = new int [n_eblocks];
+      int *eid_blocks = new int[n_eblocks];
       err = ex_get_elem_blk_ids(exoid, eid_blocks);
       // go over all element blocks
       for (int i = 0; i < n_eblocks; i++)
@@ -130,22 +130,23 @@ namespace Hermes
         int n_elems_in_blk, n_elem_nodes, n_attrs;
         err = ex_get_elem_block(exoid, id, elem_type, &n_elems_in_blk, &n_elem_nodes, &n_attrs);
 
-        if (n_elem_nodes == 3) n_tri += n_elems_in_blk;
-        else if (n_elem_nodes == 4) n_quad += n_elems_in_blk;
+        if(n_elem_nodes == 3) n_tri += n_elems_in_blk;
+        else if(n_elem_nodes == 4) n_quad += n_elems_in_blk;
         else
         {
+          delete [] vtx;
           throw Hermes::Exceptions::Exception("Unknown type of element");
           return false;
         }
       }
-      int3 *tri = n_tri > 0 ? new int3 [n_tri] : NULL;		// triangles
-      std::string *tri_markers = n_tri > 0 ? new std::string [n_tri] : NULL;
-      int4 *quad = n_quad > 0 ? new int4 [n_quad] : NULL;		// quads
-      std::string *quad_markers = n_quad > 0 ? new std::string [n_quad] : NULL;
+      int3 *tri = n_tri > 0 ? new int3[n_tri] : NULL;    // triangles
+      std::string *tri_markers = n_tri > 0 ? new std::string[n_tri] : NULL;
+      int4 *quad = n_quad > 0 ? new int4[n_quad] : NULL;    // quads
+      std::string *quad_markers = n_quad > 0 ? new std::string[n_quad] : NULL;
 
-      int n_els = n_tri + n_quad;								// total number of elements
-      int **els = n_els > 0 ? new int * [n_els] : NULL;		// elements
-      int *el_nv = n_els > 0 ? new int [n_els] : NULL;		// number of vertices for each element
+      int n_els = n_tri + n_quad;                // total number of elements
+      int **els = n_els > 0 ? new int *[n_els] : NULL;    // elements
+      int *el_nv = n_els > 0 ? new int[n_els] : NULL;    // number of vertices for each element
 
       int it = 0, iq = 0, iel = 0;
       for (int i = 0; i < n_eblocks; i++)
@@ -158,7 +159,7 @@ namespace Hermes
         err = ex_get_elem_block(exoid, id, elem_type, &n_elems_in_blk, &n_elem_nodes, &n_attrs);
 
         // read connectivity array
-        int *connect = new int [n_elem_nodes * n_elems_in_blk];
+        int *connect = new int[n_elem_nodes * n_elems_in_blk];
         err = ex_get_elem_conn(exoid, id, connect);
 
         // Update the mesh' internal array element_markers_conversion.
@@ -174,7 +175,7 @@ namespace Hermes
         for (int j = 0; j < n_elems_in_blk; j++)
         {
           el_nv[iel] = n_elem_nodes;
-          if (n_elem_nodes == 3)
+          if(n_elem_nodes == 3)
           {
             tri[it][0] = vmap[connect[ic++]];
             tri[it][1] = vmap[connect[ic++]];
@@ -183,7 +184,7 @@ namespace Hermes
             els[iel] = tri[it];
             it++;
           }
-          else if (n_elem_nodes == 4)
+          else if(n_elem_nodes == 4)
           {
             quad[iq][0] = vmap[connect[ic++]];
             quad[iq][1] = vmap[connect[ic++]];
@@ -195,6 +196,7 @@ namespace Hermes
           }
           else
           {
+            delete [] vtx;
             throw Hermes::Exceptions::Exception("Unknown type of element");
             return false;
           }
@@ -205,11 +207,11 @@ namespace Hermes
       delete [] eid_blocks;
 
       // query number of side sets
-      int *sid_blocks = new int [n_sidesets];
+      int *sid_blocks = new int[n_sidesets];
       err = ex_get_side_set_ids(exoid, sid_blocks);
 
       // go over the sidesets
-      int n_mark = 0;		// number of markers
+      int n_mark = 0;    // number of markers
       for (int i = 0; i < n_sidesets; i++)
       {
         int sid = sid_blocks[i];
@@ -217,8 +219,8 @@ namespace Hermes
         err = ex_get_side_set_param(exoid, sid, &n_sides_in_set, &n_df_in_set);
         n_mark += n_sides_in_set;
       }
-      int2 *marks = new int2 [n_mark];
-      std::string *bnd_markers = new std::string [n_mark];
+      int2 *marks = new int2[n_mark];
+      std::string *bnd_markers = new std::string[n_mark];
 
       int im = 0;
       for (int i = 0; i < n_sidesets; i++)
@@ -228,8 +230,8 @@ namespace Hermes
         err = ex_get_side_set_param(exoid, sid, &n_sides_in_set, &n_df_in_set);
         int num_elem_in_set = n_sides_in_set;
 
-        int *elem_list = new int [num_elem_in_set];
-        int *side_list = new int [n_sides_in_set];
+        int *elem_list = new int[num_elem_in_set];
+        int *side_list = new int[n_sides_in_set];
         err = ex_get_side_set(exoid, sid, elem_list, side_list);
 
         // Update the mesh' internal array boundary_markers_conversion.
@@ -243,7 +245,7 @@ namespace Hermes
 
         for (int j = 0; j < num_elem_in_set; j++)
         {
-          int nv = el_nv[side_list[j] - 1];			// # of vertices of the element
+          int nv = el_nv[side_list[j] - 1];      // # of vertices of the element
           int vt = side_list[j] - 1;
           marks[im][0] = els[elem_list[j] - 1][vt];
           marks[im][1] = els[elem_list[j] - 1][(vt + 1) % nv];

@@ -18,7 +18,7 @@ double log2(double x)
 
 double cbrt(double x)
 {
-  if (!_isnan(x))
+  if(!_isnan(x))
     return pow(x, 1.0 / 3.0);
   else
     return x;

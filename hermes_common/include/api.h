@@ -32,7 +32,7 @@ namespace Hermes
     matrixSolverType
   };
 
-  /// API Class containing settings for the whole Hermes.
+  /// API Class containing settings for the whole HermesCommon.
   class HERMES_API Api
   {
   public:
@@ -61,7 +61,7 @@ namespace Hermes
     void setParamValue(HermesCommonApiParam, int value);
   };
 
-  // Global declarations.
+  /// Global instance used inside Hermes which is also accessible to users.
   extern HERMES_API Hermes::Api HermesCommonApi;
 }
 #endif

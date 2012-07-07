@@ -25,20 +25,20 @@ namespace Hermes
     template<typename Scalar>
     void H1Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
-      if (shapeset == NULL)
+      if(shapeset == NULL)
       {
         this->shapeset = new H1Shapeset;
         this->own_shapeset = true;
       }
 
-      if (!h1_proj_ref++)
+      if(!h1_proj_ref++)
         // FIXME: separate projection matrices for different shapesets
         this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
       this->proj_mat = h1_proj_mat;
       this->chol_p   = h1_chol_p;
 
       // set uniform poly order in elements
-      if (p_init < 1) throw Hermes::Exceptions::Exception("P_INIT must be >=  1 in an H1 space.");
+      if(p_init < 1) throw Hermes::Exceptions::Exception("P_INIT must be >=  1 in an H1 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -62,12 +62,12 @@ namespace Hermes
     template<typename Scalar>
     H1Space<Scalar>::~H1Space()
     {
-      if (!--h1_proj_ref)
+      if(!--h1_proj_ref)
       {
         delete [] h1_proj_mat;
         delete [] h1_chol_p;
       }
-      if (this->own_shapeset)
+      if(this->own_shapeset)
         delete this->shapeset;
     }
 
@@ -102,7 +102,7 @@ namespace Hermes
     {
       this->mesh = mesh;
 
-      if (shapeset == NULL)
+      if(shapeset == NULL)
       {
         this->shapeset = new H1Shapeset;
         this->own_shapeset = true;
@@ -110,7 +110,7 @@ namespace Hermes
       else
         shapeset = shapeset;
 
-      if (!h1_proj_ref++)
+      if(!h1_proj_ref++)
         this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
       this->proj_mat = h1_proj_mat;
       this->chol_p   = h1_chol_p;
@@ -123,7 +123,7 @@ namespace Hermes
     {
       this->mesh = mesh;
 
-      if (shapeset == NULL)
+      if(shapeset == NULL)
       {
         this->shapeset = new H1Shapeset;
         this->own_shapeset = true;
@@ -131,7 +131,7 @@ namespace Hermes
       else
         shapeset = shapeset;
 
-      if (!h1_proj_ref++)
+      if(!h1_proj_ref++)
         this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
       this->proj_mat = h1_proj_mat;
       this->chol_p   = h1_chol_p;
@@ -155,16 +155,16 @@ namespace Hermes
       for_all_active_elements(e, this->mesh)
       {
         int order = this->get_element_order(e->id);
-        if (order > 0)
+        if(order > 0)
         {
           for (unsigned int i = 0; i < e->get_nvert(); i++)
           {
             // vertex dofs
             Node* vn = e->vn[i];
             typename Space<Scalar>::NodeData* nd = this->ndata + vn->id;
-            if (!vn->is_constrained_vertex() && nd->dof == this->H2D_UNASSIGNED_DOF)
+            if(!vn->is_constrained_vertex() && nd->dof == this->H2D_UNASSIGNED_DOF)
             {
-              if (nd->n == 0 || is_fixed_vertex(vn->id))
+              if(nd->n == 0 || is_fixed_vertex(vn->id))
               {
                 nd->dof = this->H2D_CONSTRAINED_DOF;
               }
@@ -182,15 +182,15 @@ namespace Hermes
             // edge dofs
             Node* en = e->en[i];
             nd = this->ndata + en->id;
-            if (nd->dof == this->H2D_UNASSIGNED_DOF)
+            if(nd->dof == this->H2D_UNASSIGNED_DOF)
             {
               // If the edge node is not constrained, assign it dofs.
-              if (en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
+              if(en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
               {
                 int ndofs = this->get_edge_order_internal(en) - 1;
                 nd->n = ndofs;
 
-                if (en->bnd)
+                if(en->bnd)
                   if(this->essential_bcs != NULL)
                     if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker).marker) != NULL)
                       nd->dof = this->H2D_CONSTRAINED_DOF;
@@ -230,9 +230,9 @@ namespace Hermes
       Node* vn = e->vn[iv];
       typename Space<Scalar>::NodeData* nd = &this->ndata[vn->id];
       int index = this->shapeset->get_vertex_index(iv, e->get_mode());
-      if (this->get_element_order(e->id) == 0) return;
+      if(this->get_element_order(e->id) == 0) return;
 
-      if (!vn->is_constrained_vertex()) // unconstrained
+      if(!vn->is_constrained_vertex()) // unconstrained
       {
         al->add_triplet(index, nd->dof, (nd->dof >= 0) ? 1.0 : *(nd->vertex_bc_coef));
       }
@@ -240,7 +240,7 @@ namespace Hermes
       {
         //debug_log("! B cause of the triplet\n");
         for (int j = 0; j < nd->ncomponents; j++)
-          if (nd->baselist[j].coef != (Scalar) 0)
+          if(nd->baselist[j].coef != (Scalar) 0)
           {
             al->add_triplet(index, nd->baselist[j].dof, nd->baselist[j].coef);
           }
@@ -252,12 +252,12 @@ namespace Hermes
     {
       Node* en = e->en[surf_num];
       typename Space<Scalar>::NodeData* nd = &this->ndata[en->id];
-      if (this->get_element_order(e->id) == 0)
+      if(this->get_element_order(e->id) == 0)
         return;
 
-      if (nd->n >= 0) // unconstrained
+      if(nd->n >= 0) // unconstrained
       {
-        if (nd->dof >= 0)
+        if(nd->dof >= 0)
         {
           int ori = (e->vn[surf_num]->id < e->vn[e->next_vert(surf_num)]->id) ? 0 : 1;
           for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
@@ -275,7 +275,7 @@ namespace Hermes
       {
         int part = nd->part;
         int ori = part < 0 ? 1 : 0;
-        if (part < 0) part ^=  ~0;
+        if(part < 0) part ^=  ~0;
 
         nd = &this->ndata[nd->base->id];
         for (int j = 0, dof = nd->dof; j < nd->n; j++, dof += this->stride)
@@ -293,11 +293,11 @@ namespace Hermes
       // If the BC on this part of the boundary is constant.
       EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
 
-      if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
+      if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
         proj[0] = proj[1] = bc->value_const;
       } // If the BC is not constant.
-      else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
+      else if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
       {
         surf_pos->t = surf_pos->lo;
         // Find out the (x, y) coordinates for the first endpoint.
@@ -313,7 +313,7 @@ namespace Hermes
         proj[1] = bc->value(x, y, n_x, n_y, t_x, t_y);
       }
 
-      if (order-- > 1)
+      if(order-- > 1)
       {
         Quad1DStd quad1d;
         Scalar* rhs = proj + 2;
@@ -334,11 +334,11 @@ namespace Hermes
             // If the BC on this part of the boundary is constant.
             EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
 
-            if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
+            if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
               rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())
               * (bc->value_const - l);
             // If the BC is not constant.
-            else if (bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
+            else if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_FUNCTION)
             {
               // Find out the (x, y) coordinate.
               double x, y, n_x, n_y, t_x, t_y;
@@ -363,19 +363,19 @@ namespace Hermes
       Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs)
     {
       // if the dof is already in the list, just add half of the other coef
-      if (last != NULL && last->dof == min->dof)
+      if(last != NULL && last->dof == min->dof)
       {
         last->coef += min->coef * 0.5;
         return;
       }
 
       // leave space for edge node dofs if they belong in front of the current minimum dof
-      if (edge != NULL && this->ndata[edge->id].dof <= min->dof)
+      if(edge != NULL && this->ndata[edge->id].dof <= min->dof)
       {
         edge_dofs = current;
 
         // (reserve space only if the edge dofs are not in the list yet)
-        if (this->ndata[edge->id].dof != min->dof)
+        if(this->ndata[edge->id].dof != min->dof)
         {
           current += this->ndata[edge->id].n;
         }
@@ -394,7 +394,7 @@ namespace Hermes
     {
       // estimate the upper bound of the result size
       int max_result = n1 + n2;
-      if (edge != NULL) max_result += this->ndata[edge->id].n;
+      if(edge != NULL) max_result += this->ndata[edge->id].n;
 
       typename Space<Scalar>::BaseComponent* result = (typename Space<Scalar>::BaseComponent*) malloc(max_result * sizeof(typename Space<Scalar>::BaseComponent));
       typename Space<Scalar>::BaseComponent* current = result;
@@ -404,7 +404,7 @@ namespace Hermes
       int i1 = 0, i2 = 0;
       while (i1 < n1 && i2 < n2)
       {
-        if (l1[i1].dof < l2[i2].dof)
+        if(l1[i1].dof < l2[i2].dof)
           output_component(current, last, l1 + i1++, edge, edge_dofs);
         else
           output_component(current, last, l2 + i2++, edge, edge_dofs);
@@ -415,7 +415,7 @@ namespace Hermes
       while (i2 < n2) output_component(current, last, l2 + i2++, edge, edge_dofs);
 
       // don't forget to reserve space for edge dofs if we haven't done that already
-      if (edge != NULL)
+      if(edge != NULL)
       {
         edge_dofs = current;
         current += this->ndata[edge->id].n;
@@ -424,10 +424,10 @@ namespace Hermes
       // if we produced less components than we expected, reallocate the resulting array
       // ...this should be OK as we are always shrinking the array so no copying should occur
       ncomponents = current - result;
-      if (ncomponents < max_result)
+      if(ncomponents < max_result)
       {
         typename Space<Scalar>::BaseComponent* reallocated_result = (typename Space<Scalar>::BaseComponent*) realloc(result, ncomponents * sizeof(typename Space<Scalar>::BaseComponent));
-        if (edge_dofs != NULL)
+        if(edge_dofs != NULL)
         {
           edge_dofs = reallocated_result + (edge_dofs - result);
         }
@@ -444,19 +444,19 @@ namespace Hermes
       EdgeInfo* ei[4] = { ei0, ei1, ei2, ei3 };
       typename Space<Scalar>::NodeData* nd;
 
-      if (this->get_element_order(e->id) == 0) return;
+      if(this->get_element_order(e->id) == 0) return;
 
       // on non-refined elements all we have to do is update edge nodes lying on constrained edges
-      if (e->active)
+      if(e->active)
       {
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
-          if (ei[i] != NULL)
+          if(ei[i] != NULL)
           {
             nd = &this->ndata[e->en[i]->id];
             nd->base = ei[i]->node;
             nd->part = ei[i]->part;
-            if (ei[i]->ori) nd->part ^=  ~0;
+            if(ei[i]->ori) nd->part ^=  ~0;
           }
         }
       }
@@ -467,14 +467,14 @@ namespace Hermes
         EdgeInfo ei_data[4];
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
-          if (ei[i] == NULL)
+          if(ei[i] == NULL)
           {
             j = e->next_vert(i);
             Node* mid_vn = this->get_mid_edge_vertex_node(e, i, j);
-            if (mid_vn != NULL && mid_vn->is_constrained_vertex())
+            if(mid_vn != NULL && mid_vn->is_constrained_vertex())
             {
               Node* mid_en = this->mesh->peek_edge_node(e->vn[i]->id, e->vn[j]->id);
-              if (mid_en != NULL)
+              if(mid_en != NULL)
               {
                 ei[i] = ei_data + i;
                 ei[i]->node = mid_en;
@@ -490,11 +490,11 @@ namespace Hermes
         // create a baselist for each mid-edge vertex node
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
-          if (ei[i] == NULL) continue;
+          if(ei[i] == NULL) continue;
           j = e->next_vert(i);
 
           Node* mid_vn = this->get_mid_edge_vertex_node(e, i, j);
-          if (mid_vn == NULL) continue;
+          if(mid_vn == NULL) continue;
 
           Node* vn[2] = { e->vn[i], e->vn[j] }; // endpoint vertex nodes
           Node* en = ei[i]->node; // constraining edge node
@@ -505,7 +505,7 @@ namespace Hermes
           for (k = 0; k < 2; k++)
           {
             nd = &this->ndata[vn[k]->id];
-            if (vn[k]->is_constrained_vertex())
+            if(vn[k]->is_constrained_vertex())
             {
               bl[k] = nd->baselist;
               nc[k] = nd->ncomponents;
@@ -542,7 +542,7 @@ namespace Hermes
         EdgeInfo* half_ei[4][2];
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
-          if (ei[i] == NULL)
+          if(ei[i] == NULL)
           {
             half_ei[i][0] = half_ei[i][1] = NULL;
           }
@@ -562,19 +562,19 @@ namespace Hermes
         }
 
         // recur to sons
-        if (e->is_triangle())
+        if(e->is_triangle())
         {
           update_constrained_nodes(e->sons[0], half_ei[0][0], NULL, half_ei[2][1], NULL);
           update_constrained_nodes(e->sons[1], half_ei[0][1], half_ei[1][0], NULL, NULL);
           update_constrained_nodes(e->sons[2], NULL, half_ei[1][1], half_ei[2][0], NULL);
           update_constrained_nodes(e->sons[3], NULL, NULL, NULL, NULL);
         }
-        else if (e->sons[2] == NULL) // 'horizontally' split quad
+        else if(e->sons[2] == NULL) // 'horizontally' split quad
         {
           update_constrained_nodes(e->sons[0], ei[0], half_ei[1][0], NULL, half_ei[3][1]);
           update_constrained_nodes(e->sons[1], NULL, half_ei[1][1], ei[2], half_ei[3][0]);
         }
-        else if (e->sons[0] == NULL) // 'vertically' split quad
+        else if(e->sons[0] == NULL) // 'vertically' split quad
         {
           update_constrained_nodes(e->sons[2], half_ei[0][0], NULL, half_ei[2][1], ei[3]);
           update_constrained_nodes(e->sons[3], half_ei[0][1], ei[1], half_ei[2][0], NULL);
@@ -608,7 +608,7 @@ namespace Hermes
     bool H1Space<Scalar>::is_fixed_vertex(int id) const
     {
       for (unsigned int i = 0; i < fixed_vertices.size(); i++)
-        if (fixed_vertices[i].id == id)
+        if(fixed_vertices[i].id == id)
           return true;
 
       return false;

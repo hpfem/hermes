@@ -66,7 +66,7 @@ namespace Hermes
             void MaterialPropertyMaps::extend_to_multigroup(const MaterialPropertyMap0& mrsg_map,
               MaterialPropertyMap1 *mrmg_map)
             {
-              if (G == 1)
+              if(G == 1)
                 this->warn(W_MG_EXTENSION);
 
               MaterialPropertyMap0::const_iterator it;
@@ -77,7 +77,7 @@ namespace Hermes
             void MaterialPropertyMaps::extend_to_multiregion(const rank1& srmg_array,
               MaterialPropertyMap1 *mrmg_map)
             {
-              if (materials_list.empty())
+              if(materials_list.empty())
                 throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
 
               std::set<std::string>::const_iterator it;
@@ -88,9 +88,9 @@ namespace Hermes
             void MaterialPropertyMaps::extend_to_multiregion_multigroup(const rank0& srsg_value,
               MaterialPropertyMap1 *mrmg_map)
             {
-              if (materials_list.empty())
+              if(materials_list.empty())
                 throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
-              if (G == 1)
+              if(G == 1)
                 this->warn(W_MG_EXTENSION);
 
               std::set<std::string>::const_iterator it;
@@ -100,7 +100,7 @@ namespace Hermes
 
             void MaterialPropertyMaps::fill_with(double c, MaterialPropertyMap1 *mrmg_map)
             {
-              if (materials_list.empty())
+              if(materials_list.empty())
                 throw Hermes::Exceptions::Exception(E_MR_EXTENSION);
 
               std::set<std::string>::const_iterator it;
@@ -112,10 +112,10 @@ namespace Hermes
             {
               using namespace ValidationFunctors;
 
-              if (fission_multigroup_structure.empty())
+              if(fission_multigroup_structure.empty())
                 fission_multigroup_structure = bool1(G, true);
 
-              if (chi.empty())
+              if(chi.empty())
               {
                 fill_with(0.0, &chi);
                 MaterialPropertyMap1::iterator it = chi.begin();
@@ -125,13 +125,13 @@ namespace Hermes
                 fission_multigroup_structure[0] = true;
               }
 
-              if (nu.empty() && !nuSigma_f.empty() && !Sigma_f.empty())
+              if(nu.empty() && !nuSigma_f.empty() && !Sigma_f.empty())
                 nu = NDArrayMapOp::divide<rank1>(nuSigma_f, Sigma_f);
-              else if (nuSigma_f.empty() && !nu.empty() && !Sigma_f.empty())
+              else if(nuSigma_f.empty() && !nu.empty() && !Sigma_f.empty())
                 nuSigma_f = NDArrayMapOp::multiply<rank1>(nu, Sigma_f);
-              else if (Sigma_f.empty() && !nuSigma_f.empty() && !nu.empty())
+              else if(Sigma_f.empty() && !nuSigma_f.empty() && !nu.empty())
                 Sigma_f = NDArrayMapOp::divide<rank1>(nuSigma_f, nu);
-              else if (!Sigma_f.empty() && !nuSigma_f.empty() && !nu.empty())
+              else if(!Sigma_f.empty() && !nuSigma_f.empty() && !nu.empty())
               {
                 MaterialPropertyMap1 diff = NDArrayMapOp::subtract<rank1>(nuSigma_f,
                   NDArrayMapOp::multiply<rank1>(nu, Sigma_f) );
@@ -145,17 +145,17 @@ namespace Hermes
                 fill_with(0.0, &Sigma_f);
               }
 
-              if ((nu.size() != Sigma_f.size()) || (nu.size() != chi.size()))
+              if((nu.size() != Sigma_f.size()) || (nu.size() != chi.size()))
                 throw Hermes::Exceptions::Exception(E_NONMATCHING_PROPERTIES);
 
-              if (Sigma_f.size() > 0)
+              if(Sigma_f.size() > 0)
               {
                 std::for_each(nu.begin(), nu.end(), ensure_size(G));
                 std::for_each(Sigma_f.begin(), Sigma_f.end(), ensure_size(G));
                 std::for_each(chi.begin(), chi.end(), ensure_size(G));
               }
 
-              if (Sigma_a.size() > 0)
+              if(Sigma_a.size() > 0)
               {
                 // Warn if \Sigma_a < \Sigma_f for any region (this indicates an unphysical situation, since
                 // by definition \Sigma_a = \Sigma_f + \Sigma_c + \Sigma_{n, p} + other possible reactions
@@ -168,7 +168,7 @@ namespace Hermes
                   rank1::const_iterator f = itf->second.begin();
 
                   for ( ; a != ita->second.end(); ++a, ++f)
-                    if (*a < *f)
+                    if(*a < *f)
                       this->warn(W_SA_LT_SF);
                 }
               }
@@ -176,12 +176,12 @@ namespace Hermes
 
             const rank1& MaterialPropertyMaps::get_Sigma_f(std::string material) const
             {
-              if (material == "-999") return this->Sigma_f.begin()->second;
+              if(material == "-999") return this->Sigma_f.begin()->second;
 
               // Note that prop[e->elem_marker] cannot be used since 'prop' is a constant std::map for
               // which operator[] is undefined.
               MaterialPropertyMap1::const_iterator data = this->Sigma_f.find(material);
-              if (data != this->Sigma_f.end())
+              if(data != this->Sigma_f.end())
                 return data->second;
               else
               {
@@ -191,10 +191,10 @@ namespace Hermes
             }
             const rank1& MaterialPropertyMaps::get_nu(std::string material) const
             {
-              if (material == "-999") return this->nu.begin()->second;
+              if(material == "-999") return this->nu.begin()->second;
 
               MaterialPropertyMap1::const_iterator data = this->nu.find(material);
-              if (data != this->nu.end())
+              if(data != this->nu.end())
                 return data->second;
               else
               {
@@ -204,10 +204,10 @@ namespace Hermes
             }
             const rank1& MaterialPropertyMaps::get_chi(std::string material) const
             {
-              if (material == "-999") return this->chi.begin()->second;
+              if(material == "-999") return this->chi.begin()->second;
 
               MaterialPropertyMap1::const_iterator data = this->chi.find(material);
-              if (data != this->chi.end())
+              if(data != this->chi.end())
                 return data->second;
               else
               {
@@ -322,15 +322,15 @@ namespace Hermes
               bool Sigma_f_given = !Sigma_f.empty();
               bool src_given = !src.empty();
 
-              if (!Sigma_r_given)
+              if(!Sigma_r_given)
               {
                 // If Sigma_r is not given, we can calculate it from Sigma_t and Sigma_s.
 
-                if (Sigma_t_given)
+                if(Sigma_t_given)
                 {
-                  if (!Sigma_s_given)
+                  if(!Sigma_s_given)
                   {
-                    if (Sigma_a_given)
+                    if(Sigma_a_given)
                     {
                       // If Sigma_s is not given, but Sigma_a is, we can calculate Sigma_s from Sigma_t and Sigma_a.
                       Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_a));
@@ -350,19 +350,19 @@ namespace Hermes
                 {
                   // If Sigma_t is not given, but Sigma_a and Sigma_s are, we can obtain Sigma_t from the latter two.
 
-                  if (!Sigma_s_given)
+                  if(!Sigma_s_given)
                   {
                     this->warn(W_NO_SCATTERING);
                     fill_with(0.0, &Sigma_s);
                     Sigma_s_given = true;
                   }
 
-                  if (Sigma_a_given)
+                  if(Sigma_a_given)
                     Sigma_t = Common::NDArrayMapOp::add<rank1>(Sigma_a, sum_map2_columns(Sigma_s));
                   else
                   {
                     // If neither Sigma_r, Sigma_t, Sigma_a are given, we may have a purely fissioning system.
-                    if (Sigma_f_given)
+                    if(Sigma_f_given)
                       Sigma_t = Sigma_f;
                     else
                       throw Hermes::Exceptions::Exception(E_INSUFFICIENT_DATA);
@@ -377,23 +377,23 @@ namespace Hermes
 
               // Now, we surely have Sigma_r ...
 
-              if (scattering_multigroup_structure.empty())
+              if(scattering_multigroup_structure.empty())
                 scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, true));
 
-              if (!Sigma_s_given)
+              if(!Sigma_s_given)
               {
                 // If Sigma_s is not given, but Sigma_t is, we can obtain the former from the latter and from Sigma_r.
                 // Note that the execution will come here only if the user entered Sigma_r himself - otherwise, Sigma_s
                 // has been already set in the previous test case.
 
-                if (Sigma_t_given)
+                if(Sigma_t_given)
                 {
                   Sigma_s = create_map2_by_diagonals(Common::NDArrayMapOp::subtract<rank1>(Sigma_t, Sigma_r));
 
                   scattering_multigroup_structure = bool2(G, Hermes::vector<bool>(G, false));
                   for (unsigned int gto = 0; gto < G; gto++)
                     for (unsigned int gfrom = 0; gfrom < G; gfrom++)
-                      if (gto == gfrom)
+                      if(gto == gfrom)
                         scattering_multigroup_structure[gto][gfrom] = true;
                 }
                 else
@@ -408,7 +408,7 @@ namespace Hermes
 
               // Now, we surely have Sigma_s and Sigma_r, one parameter to go ...
 
-              if (!D_given)
+              if(!D_given)
               {
                 MaterialPropertyMap1::const_iterator Sr_elem = Sigma_r.begin();
                 for ( ; Sr_elem != Sigma_r.end(); ++Sr_elem)
@@ -418,7 +418,7 @@ namespace Hermes
                 D_given = true;
               }
 
-              if ((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (src_given && D.size() != src.size()))
+              if((D.size() != Sigma_r.size()) || (D.size() != Sigma_s.size()) || (src_given && D.size() != src.size()))
                 throw Hermes::Exceptions::Exception(E_NONMATCHING_PROPERTIES);
 
               using ValidationFunctors::ensure_size;
@@ -430,12 +430,12 @@ namespace Hermes
 
             const rank2& MaterialPropertyMaps::get_Sigma_s(std::string material) const
             {
-              if (material == "-999") return this->Sigma_s.begin()->second;
+              if(material == "-999") return this->Sigma_s.begin()->second;
 
               // Note that prop[e->elem_marker] cannot be used since 'prop' is a constant std::map for
               // which operator[] is undefined.
               MaterialPropertyMap2::const_iterator data = this->Sigma_s.find(material);
-              if (data != this->Sigma_s.end())
+              if(data != this->Sigma_s.end())
                 return data->second;
               else
               {
@@ -445,10 +445,10 @@ namespace Hermes
             }
             const rank1& MaterialPropertyMaps::get_Sigma_r(std::string material) const
             {
-              if (material == "-999") return this->Sigma_r.begin()->second;
+              if(material == "-999") return this->Sigma_r.begin()->second;
 
               MaterialPropertyMap1::const_iterator data = this->Sigma_r.find(material);
-              if (data != this->Sigma_r.end())
+              if(data != this->Sigma_r.end())
                 return data->second;
               else
               {
@@ -458,10 +458,10 @@ namespace Hermes
             }
             const rank1& MaterialPropertyMaps::get_D(std::string material) const
             {
-              if (material == "-999") return this->D.begin()->second;
+              if(material == "-999") return this->D.begin()->second;
 
               MaterialPropertyMap1::const_iterator data = this->D.find(material);
-              if (data != this->D.end())
+              if(data != this->D.end())
                 return data->second;
               else
               {
@@ -471,10 +471,10 @@ namespace Hermes
             }
             const rank1& MaterialPropertyMaps::get_src(std::string material) const
             {
-              if (material == "-999") return this->src.begin()->second;
+              if(material == "-999") return this->src.begin()->second;
 
               MaterialPropertyMap1::const_iterator data = this->src.find(material);
-              if (data != this->src.end())
+              if(data != this->src.end())
                 return data->second;
               else
               {
@@ -506,7 +506,7 @@ namespace Hermes
                   os << setw(10) << matprop.get_D(mat)[gto];
                   os << setw(10) << matprop.get_Sigma_r(mat)[gto];
                   os << setw(10);
-                  if (matprop.src.empty())
+                  if(matprop.src.empty())
                     os << "N/A";
                   else
                     os << matprop.get_src(mat)[gto];
@@ -534,9 +534,9 @@ namespace Hermes
             {
               Scalar result;
 
-              if (geom_type == HERMES_PLANAR)
+              if(geom_type == HERMES_PLANAR)
                 result = 0.5 * int_u_v<Real, Scalar>(n, wt, u, v);
-              else if (geom_type == HERMES_AXISYM_X)
+              else if(geom_type == HERMES_AXISYM_X)
                 result = 0.5 * int_y_u_v<Real, Scalar>(n, wt, u, v, e);
               else
                 result = 0.5 * int_x_u_v<Real, Scalar>(n, wt, u, v, e);
@@ -551,9 +551,9 @@ namespace Hermes
             {
               Scalar result;
 
-              if (geom_type == HERMES_PLANAR)
+              if(geom_type == HERMES_PLANAR)
                 result = 0.5 * int_u_ext_v<Real, Scalar>(n, wt, u_ext[g], v);
-              else if (geom_type == HERMES_AXISYM_X)
+              else if(geom_type == HERMES_AXISYM_X)
                 result = 0.5 * int_y_u_ext_v<Real, Scalar>(n, wt, u_ext[g], v, e);
               else
                 result = 0.5 * int_x_u_ext_v<Real, Scalar>(n, wt, u_ext[g], v, e);
@@ -572,14 +572,14 @@ namespace Hermes
               rank1 D_elem = matprop.get_D(mat);
               rank1 Sigma_r_elem = matprop.get_Sigma_r(mat);
 
-              if (geom_type == HERMES_PLANAR)
+              if(geom_type == HERMES_PLANAR)
               {
                 result = D_elem[g] * int_grad_u_grad_v<Real, Scalar>(n, wt, u, v) +
                   Sigma_r_elem[g] * int_u_v<Real, Scalar>(n, wt, u, v);
               }
               else
               {
-                if (geom_type == HERMES_AXISYM_X)
+                if(geom_type == HERMES_AXISYM_X)
                 {
                   result = D_elem[g] * int_y_grad_u_grad_v<Real, Scalar>(n, wt, u, v, e) +
                     Sigma_r_elem[g] * int_y_u_v<Real, Scalar>(n, wt, u, v, e);
@@ -604,14 +604,14 @@ namespace Hermes
               rank1 D_elem = matprop.get_D(mat);
               rank1 Sigma_r_elem = matprop.get_Sigma_r(mat);
 
-              if (geom_type == HERMES_PLANAR)
+              if(geom_type == HERMES_PLANAR)
               {
                 result = D_elem[g] * int_grad_u_ext_grad_v<Real, Scalar>(n, wt, u_ext[g], v) +
                   Sigma_r_elem[g] * int_u_ext_v<Real, Scalar>(n, wt, u_ext[g], v);
               }
               else
               {
-                if (geom_type == HERMES_AXISYM_X)
+                if(geom_type == HERMES_AXISYM_X)
                 {
                   result = D_elem[g] * int_y_grad_u_ext_grad_v<Real, Scalar>(n, wt, u_ext[g], v, e) +
                     Sigma_r_elem[g] * int_y_u_ext_v<Real, Scalar>(n, wt, u_ext[g], v, e);
@@ -630,14 +630,14 @@ namespace Hermes
             Scalar FissionYield::Jacobian<ScalarClass>::matrix_form( int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u,
               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext) const
             {
-              if (!matprop.get_fission_multigroup_structure()[gto])
+              if(!matprop.get_fission_multigroup_structure()[gto])
                 return Scalar(0.0);
 
               Scalar result = Scalar(0);
-              if (geom_type == HERMES_PLANAR) result = int_u_v<Real, Scalar>(n, wt, u, v);
+              if(geom_type == HERMES_PLANAR) result = int_u_v<Real, Scalar>(n, wt, u, v);
               else
               {
-                if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<Real, Scalar>(n, wt, u, v, e);
+                if(geom_type == HERMES_AXISYM_X) result = int_y_u_v<Real, Scalar>(n, wt, u, v, e);
                 else result = int_x_u_v<Real, Scalar>(n, wt, u, v, e);
               }
 
@@ -654,7 +654,7 @@ namespace Hermes
             Scalar FissionYield::OuterIterationForm<ScalarClass>::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext ) const
             {
-              if (!matprop.get_fission_multigroup_structure()[g])
+              if(!matprop.get_fission_multigroup_structure()[g])
                 return Scalar(0.0);
 
               std::string mat = this->mesh->get_element_markers_conversion().get_user_marker(e->elem_marker).marker;
@@ -671,9 +671,9 @@ namespace Hermes
 
                 local_res = local_res * wt[i] * v->val[i];
 
-                if (geom_type == HERMES_AXISYM_X)
+                if(geom_type == HERMES_AXISYM_X)
                   local_res = local_res * e->y[i];
-                else if (geom_type == HERMES_AXISYM_Y)
+                else if(geom_type == HERMES_AXISYM_Y)
                   local_res = local_res * e->x[i];
 
                 result += local_res;
@@ -687,14 +687,14 @@ namespace Hermes
             Scalar FissionYield::Residual<ScalarClass>::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext ) const
             {
-              if (!matprop.get_fission_multigroup_structure()[gto])
+              if(!matprop.get_fission_multigroup_structure()[gto])
                 return Scalar(0.0);
 
               Scalar result = Scalar(0);
-              if (geom_type == HERMES_PLANAR) result = int_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v);
+              if(geom_type == HERMES_PLANAR) result = int_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v);
               else
               {
-                if (geom_type == HERMES_AXISYM_X) result = int_y_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
+                if(geom_type == HERMES_AXISYM_X) result = int_y_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
                 else result = int_x_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
               }
 
@@ -712,10 +712,10 @@ namespace Hermes
               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext  ) const
             {
               Scalar result = Scalar(0);
-              if (geom_type == HERMES_PLANAR) result = int_u_v<Real, Scalar>(n, wt, u, v);
+              if(geom_type == HERMES_PLANAR) result = int_u_v<Real, Scalar>(n, wt, u, v);
               else
               {
-                if (geom_type == HERMES_AXISYM_X) result = int_y_u_v<Real, Scalar>(n, wt, u, v, e);
+                if(geom_type == HERMES_AXISYM_X) result = int_y_u_v<Real, Scalar>(n, wt, u, v, e);
                 else result = int_x_u_v<Real, Scalar>(n, wt, u, v, e);
               }
 
@@ -728,10 +728,10 @@ namespace Hermes
               Func<Real> *v, Geom<Real> *e, ExtData<Scalar> *ext ) const
             {
               Scalar result = Scalar(0);
-              if (geom_type == HERMES_PLANAR) result = int_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v);
+              if(geom_type == HERMES_PLANAR) result = int_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v);
               else
               {
-                if (geom_type == HERMES_AXISYM_X) result = int_y_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
+                if(geom_type == HERMES_AXISYM_X) result = int_y_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
                 else result = int_x_u_ext_v<Real, Scalar>(n, wt, u_ext[gfrom], v, e);
               }
 
@@ -745,11 +745,11 @@ namespace Hermes
             {
                             std::string mat = this->mesh->get_element_markers_conversion().get_user_marker(e->elem_marker).marker;
 
-              if (geom_type == HERMES_PLANAR)
+              if(geom_type == HERMES_PLANAR)
                 return matprop.get_src(mat)[g] * int_v<Real>(n, wt, v);
               else
               {
-                if (geom_type == HERMES_AXISYM_X)
+                if(geom_type == HERMES_AXISYM_X)
                   return matprop.get_src(mat)[g] * int_y_v<Real>(n, wt, v, e);
                 else
                   return matprop.get_src(mat)[g] * int_x_v<Real>(n, wt, v, e);
@@ -776,13 +776,13 @@ namespace Hermes
 
                 for (unsigned int gfrom = 0; gfrom < G; gfrom++)
                 {
-                  if (Ss_nnz[gto][gfrom])
+                  if(Ss_nnz[gto][gfrom])
                   {
                     add_matrix_form(new Scattering::Jacobian<Scalar>(gto, gfrom, matprop, mesh, geom_type));
                     add_vector_form(new Scattering::Residual<Scalar>(gto, gfrom, matprop, mesh, geom_type));
                   }
 
-                  if (chi_nnz[gto])
+                  if(chi_nnz[gto])
                   {
                     add_matrix_form(new FissionYield::Jacobian<Scalar>(gto, gfrom, matprop, mesh, geom_type));
                     add_vector_form(new FissionYield::Residual<Scalar>(gto, gfrom, matprop, mesh, geom_type));
@@ -827,7 +827,7 @@ namespace Hermes
               std::string src_area,
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
-              if (f_src.size() != matprop.get_G())
+              if(f_src.size() != matprop.get_G())
                 throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
@@ -841,7 +841,7 @@ namespace Hermes
               Hermes::vector<std::string> src_areas,
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {
-              if (f_src.size() != matprop.get_G())
+              if(f_src.size() != matprop.get_G())
                 throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
@@ -864,7 +864,7 @@ namespace Hermes
 
                 for (unsigned int gfrom = 0; gfrom < matprop.get_G(); gfrom++)
                 {
-                  if (Ss_nnz[gto][gfrom])
+                  if(Ss_nnz[gto][gfrom])
                   {
                     add_matrix_form(new Scattering::Jacobian<Scalar>(gto, gfrom, matprop, mesh, geom_type));
                     add_vector_form(new Scattering::Residual<Scalar>(gto, gfrom, matprop, mesh, geom_type));

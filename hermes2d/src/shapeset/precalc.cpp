@@ -116,9 +116,9 @@ namespace Hermes
       {
         for (k = 0; k < 6; k++)
         {
-          if (newmask & idx2mask[k][j])
+          if(newmask & idx2mask[k][j])
           {
-            if (oldmask & idx2mask[k][j])
+            if(oldmask & idx2mask[k][j])
               memcpy(node->values[j][k], cur_node->values[j][k], np * sizeof(double));
             else
               for (i = 0; i < np; i++)
@@ -138,7 +138,7 @@ namespace Hermes
 
     void PrecalcShapeset::free()
     {
-      if (master_pss != NULL) return;
+      if(master_pss != NULL) return;
 
       for(unsigned int i = 0; i < tables.get_size(); i++)
         if(tables.present(i))

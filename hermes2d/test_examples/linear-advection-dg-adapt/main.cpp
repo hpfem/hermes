@@ -10,7 +10,7 @@
 //
 //  Domain: Square (0, 1) x (0, 1).
 //
-//  BC:		Dirichlet, u = 1 where \Beta(x) \cdot n(x) < 0, that is on [0,0.5] x {0}, and g = 0 anywhere else.
+//  BC:    Dirichlet, u = 1 where \Beta(x) \cdot n(x) < 0, that is on[0,0.5] x {0}, and g = 0 anywhere else.
 //
 //  The following parameters can be changed:
 
@@ -136,12 +136,12 @@ int main(int argc, char* args[])
     graph_dof_est.save("conv_dof_est.dat");
 
     // If err_est_rel too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
+    if(err_est_rel < ERR_STOP) done = true;
     else
     {
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if (Space<double>::get_num_dofs(&space) >= NDOF_STOP)
+      if(Space<double>::get_num_dofs(&space) >= NDOF_STOP)
       {
         done = true;
         break;

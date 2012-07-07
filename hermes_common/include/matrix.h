@@ -51,7 +51,7 @@ namespace Hermes
       template<typename T>
       T **new_matrix(unsigned int m, unsigned int n = 0)
       {
-        if (!n) n = m;
+        if(!n) n = m;
         T **vec = (T **) new char[sizeof(T *) * m + sizeof(T) * m * n];
         memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
         T *row = (T *) (vec + m);
@@ -62,7 +62,7 @@ namespace Hermes
       template<typename T>
       T **new_matrix_malloc(unsigned int m, unsigned int n = 0)
       {
-        if (!n) n = m;
+        if(!n) n = m;
         T **vec = (T **) malloc(sizeof(T *) * m + sizeof(T) * m * n);
         memset(vec, 0, sizeof(T *) * m + sizeof(T) * m * n);
         T *row = (T *) (vec + m);
@@ -75,7 +75,7 @@ namespace Hermes
       template<typename T>
       void copy_matrix(T** dest, T** src, unsigned int m, unsigned int n = 0)
       {
-        if (n == 0) n = m;
+        if(n == 0) n = m;
         for(unsigned int i = 0; i < m; i++)
         {
           memcpy(dest[i], src[i], n*sizeof(T));
@@ -91,16 +91,16 @@ namespace Hermes
       template<typename T>
       void save_matrix_octave(const std::string& matrix_name, T** matrix, unsigned int m, unsigned int n = 0, const std::string& filename = std::string())
       {
-        if (n == 0) n = m;
+        if(n == 0) n = m;
 
         //create filename
         std::string fname = filename;
-        if (fname.empty())
+        if(fname.empty())
           fname = matrix_name + ".mat";
 
         //open file
         std::ofstream fout(fname.c_str());
-        if (!fout.is_open())
+        if(!fout.is_open())
         {
           throw Hermes::Exceptions::Exception("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
@@ -131,12 +131,12 @@ namespace Hermes
       {
         // create filename
         std::string fname = filename;
-        if (fname.empty())
+        if(fname.empty())
           fname = matrix_name + ".mat";
 
         // open file
         std::ofstream fout(fname.c_str());
-        if (!fout.is_open())
+        if(!fout.is_open())
         {
           throw Hermes::Exceptions::Exception("Unable to save a matrix to a file \"%s\"", fname.c_str());
           return;
@@ -168,11 +168,11 @@ namespace Hermes
           for (unsigned int j = i + 1; j < min; j++)
             std::swap(matrix[i][j], matrix[j][i]);
 
-        if (m < n)
+        if(m < n)
           for (unsigned int i = 0; i < m; i++)
             for (unsigned int j = m; j < n; j++)
               matrix[j][i] = matrix[i][j];
-        else if (n < m)
+        else if(n < m)
           for (unsigned int i = n; i < m; i++)
             for (unsigned int j = 0; j < n; j++)
               matrix[j][i] = matrix[i][j];
@@ -273,7 +273,7 @@ namespace Hermes
       /// \brief Hermes binary format
       ///
       DF_HERMES_BIN,
-      DF_NATIVE, 	 ///< native format for the linear solver,
+      DF_NATIVE,    ///< native format for the linear solver,
       DF_MATRIX_MARKET ///< Matrix Market which can be read by pysparse library
     };
 

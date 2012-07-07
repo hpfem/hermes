@@ -58,7 +58,7 @@ namespace Hermes
         static const int H2DRS_MAX_HCURL_ORDER; ///< A maximum used order in this Hcurl-space selector. \todo Replace the numerical constant after a symbolic constant is added to Hcurl shapeset which would declare the maximum supported order.
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
-        /** The default order range is [1, ::H2DRS_MAX_HCURL_ORDER]. If curved, the upper boundary of the range becomes lower.
+        /** The default order range is[1, ::H2DRS_MAX_HCURL_ORDER]. If curved, the upper boundary of the range becomes lower.
         *  Overriden function. For details, see OptimumSelector::set_current_order_range(). */
         virtual void set_current_order_range(Element* element);
 

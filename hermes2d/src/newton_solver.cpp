@@ -89,7 +89,7 @@ namespace Hermes
         assemble_time += this->last();
 
         // Measure the residual norm.
-        if (residual_as_function)
+        if(residual_as_function)
         {
           // Prepare solutions for measuring residual norm.
           Hermes::vector<Solution<Scalar>*> solutions;
@@ -122,14 +122,14 @@ namespace Hermes
           this->info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
-        if (residual_norm > max_allowed_residual_norm)
+        if(residual_norm > max_allowed_residual_norm)
         {
           throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
-        if (residual_norm < newton_tol && it > 1)
+        if(residual_norm < newton_tol && it > 1)
         {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];
@@ -139,7 +139,7 @@ namespace Hermes
           this->tick();
           solve_time += this->last();
 
-          if (delete_coeff_vec)
+          if(delete_coeff_vec)
           {
             delete [] coeff_vec;
             coeff_vec = NULL;
@@ -170,7 +170,7 @@ namespace Hermes
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
-        if (it++ >= newton_max_iter)
+        if(it++ >= newton_max_iter)
         {
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
@@ -205,7 +205,7 @@ namespace Hermes
         this->dp->assemble(coeff_vec, residual);
 
         // Measure the residual norm.
-        if (residual_as_function)
+        if(residual_as_function)
         {
           // Prepare solutions for measuring residual norm.
           Hermes::vector<Solution<Scalar>* > solutions;
@@ -237,18 +237,18 @@ namespace Hermes
           this->info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
-        if (residual_norm > max_allowed_residual_norm)
+        if(residual_norm > max_allowed_residual_norm)
           throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
-        if (residual_norm < newton_tol && it > 1) {
+        if(residual_norm < newton_tol && it > 1) {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          if (delete_coeff_vec)
+          if(delete_coeff_vec)
           {
             delete [] coeff_vec;
             coeff_vec = NULL;
@@ -288,7 +288,7 @@ namespace Hermes
           coeff_vec[i] += linear_solver->get_sln_vector()[i];
 
         // Increase the number of iterations and test if we are still under the limit.
-        if (it++ >= newton_max_iter)
+        if(it++ >= newton_max_iter)
         {
           throw Exceptions::ValueException("newton iterations", it, newton_max_iter);
         }

@@ -31,7 +31,7 @@ namespace Hermes
         order_increase(order_increase)
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
       template<typename Scalar>
       DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
@@ -45,7 +45,7 @@ namespace Hermes
         order_increase(order_increase)
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
 
       template<typename Scalar>
@@ -57,18 +57,18 @@ namespace Hermes
         for (int i = 0; i < n; i++)
         {
           Scalar B_i = sqrt(sqr(u_ext[idx_j]->dx[i]) + sqr(u_ext[idx_j]->dy[i]));
-          if (std::abs(B_i) > 1e-12)
+          if(std::abs(B_i) > 1e-12)
           {
             planar_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
               * (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i]);
-            if (gt == HERMES_AXISYM_X)
+            if(gt == HERMES_AXISYM_X)
             {
               axisym_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i / e->y[i]
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
                 * u_ext[idx_j]->val[i] * v->dy[i];
             }
-            else if (gt == HERMES_AXISYM_Y)
+            else if(gt == HERMES_AXISYM_Y)
             {
               axisym_part += wt[i] * const_coeff*spline_coeff->derivative(B_i) / B_i / e->x[i]
               * (u_ext[idx_j]->dx[i] * u->dx[i] + u_ext[idx_j]->dy[i] * u->dy[i])
@@ -77,12 +77,12 @@ namespace Hermes
           }
           planar_part += wt[i] * const_coeff*spline_coeff->value(B_i)
             * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
-          if (gt == HERMES_AXISYM_X)
+          if(gt == HERMES_AXISYM_X)
           {
             axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
             * u->val[i] * v->dy[i];
           }
-          else if (gt == HERMES_AXISYM_Y)
+          else if(gt == HERMES_AXISYM_Y)
           {
             axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
             * u->val[i] * v->dx[i];
@@ -128,7 +128,7 @@ namespace Hermes
         gt(gt), order_increase(order_increase)
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
 
       template<typename Scalar>
@@ -139,7 +139,7 @@ namespace Hermes
         order_increase(order_increase)
       {
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
-        if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
+        if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
 
       template<typename Scalar>
@@ -153,9 +153,9 @@ namespace Hermes
           Scalar B_i = sqrt(sqr(u_ext[idx_i]->dx[i]) + sqr(u_ext[idx_i]->dy[i]));
           planar_part += wt[i] * const_coeff*spline_coeff->value(B_i) *
             (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
-          if (gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
+          if(gt == HERMES_AXISYM_X) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->y[i]
           * u_ext[idx_i]->val[i] * v->dy[i];
-          else if (gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
+          else if(gt == HERMES_AXISYM_Y) axisym_part += wt[i] * const_coeff*spline_coeff->value(B_i) / e->x[i]
           * u_ext[idx_i]->val[i] * v->dx[i];
         }
         return planar_part + axisym_part;

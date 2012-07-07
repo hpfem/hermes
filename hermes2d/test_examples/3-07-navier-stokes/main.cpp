@@ -141,8 +141,8 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
 
   // Initialize views.
-  Views::VectorView vview("velocity [m/s]", new Views::WinGeom(0, 0, 750, 240));
-  Views::ScalarView pview("pressure [Pa]", new Views::WinGeom(0, 290, 750, 240));
+  Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));
+  Views::ScalarView pview("pressure[Pa]", new Views::WinGeom(0, 290, 750, 240));
   vview.set_min_max_range(0, 1.6);
   vview.fix_scale_width(80);
   //pview.set_min_max_range(-0.9, 1.0);
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     current_time += TAU;
 
     // Update time-dependent essential BCs.
-    if (current_time <= STARTUP_TIME)
+    if(current_time <= STARTUP_TIME)
     {
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
     }

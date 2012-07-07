@@ -46,7 +46,7 @@ namespace Hermes
 
     HERMES_API void set_order_limit_table(int* tri_table, int* quad_table, int n)
     {
-      if (n < 24) throw Hermes::Exceptions::Exception("Hermes::Order limit tables must have at least 24 entries.");
+      if(n < 24) throw Hermes::Exceptions::Exception("Hermes::Order limit tables must have at least 24 entries.");
       g_order_table_tri  = tri_table;
       g_order_table_quad = quad_table;
     }
@@ -64,10 +64,10 @@ namespace Hermes
 
     HERMES_API void warn_order()
     {
-      if (!warned_order)
+      if(!warned_order)
       {
 #pragma omp critical (warn_oder)
-        if (!warned_order)
+        if(!warned_order)
         {
           Global<double> logger;
           /// \todo Fix this, so that it complies with the rest of the code.
@@ -79,7 +79,7 @@ namespace Hermes
 
     HERMES_API void limit_order(int& o, ElementMode2D mode)
     {
-      if (o > g_quad_2d_std.get_safe_max_order(mode))
+      if(o > g_quad_2d_std.get_safe_max_order(mode))
       {
         o = g_quad_2d_std.get_safe_max_order(mode);
         warn_order();
@@ -92,7 +92,7 @@ namespace Hermes
 
     HERMES_API void limit_order_nowarn(int& o, ElementMode2D mode)
     {
-      if (o > g_quad_2d_std.get_safe_max_order(mode))
+      if(o > g_quad_2d_std.get_safe_max_order(mode))
         o = g_quad_2d_std.get_safe_max_order(mode);
       if(mode == HERMES_MODE_TRIANGLE)
         o = g_order_table_tri[o];

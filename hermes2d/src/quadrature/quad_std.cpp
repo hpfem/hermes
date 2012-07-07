@@ -2505,7 +2505,7 @@ namespace Hermes
 
       // create quad tables and edge tables
       int i, j, k, l;
-      if (!quad_pt_ref++)
+      if(!quad_pt_ref++)
       {
         for (i = 0; i <= max_order[0]; i++)
         {
@@ -2536,7 +2536,7 @@ namespace Hermes
     Quad2DStd::~Quad2DStd()
     {
       int i;
-      if (!--quad_pt_ref)
+      if(!--quad_pt_ref)
       {
         for (i = 0; i <= 3 * max_order[0] + 2; i++)
           delete [] std_tables_2d_tri[max_order[0] + 1 + i];

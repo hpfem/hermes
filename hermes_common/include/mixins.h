@@ -44,7 +44,7 @@ namespace Hermes
       bool get_verbose_output() const;
 
       /// Provides a callback for logging.
-      /// \param [in] callback Function to be called for the messaging when verbose_output is set to yes.
+      /// \param[in] callback Function to be called for the messaging when verbose_output is set to yes.
       void set_verbose_callback(callbackFn callback);
     public:
       /// Returns the current value of verbose_callback;

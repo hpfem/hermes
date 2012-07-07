@@ -13,11 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "curved.h"
+#include <algorithm>
 #include "global.h"
 #include "shapeset/shapeset_h1_all.h"
 #include "shapeset/shapeset_common.h"
 #include "shapeset/precalc.h"
-#include "curved.h"
 #include "mesh.h"
 #include "quad_all.h"
 #include "matrix.h"
@@ -57,7 +58,7 @@ namespace Hermes
 
     double CurvMap::nurbs_basis_fn(int i, int k, double t, double* knot)
     {
-      if (k == 0)
+      if(k == 0)
       {
         return (t >= knot[i] && t <= knot[i + 1] && knot[i] < knot[i + 1]) ? 1.0 : 0.0;
       }
@@ -67,11 +68,11 @@ namespace Hermes
         double N2 = nurbs_basis_fn(i + 1, k-1, t, knot);
 
         double result = 0.0;
-        if (knot[i + k] != knot[i])
+        if(knot[i + k] != knot[i])
         {
           result += ((t - knot[i]) / (knot[i + k] - knot[i])) * N1;
         }
-        if (knot[i + k+1] != knot[i + 1])
+        if(knot[i + k+1] != knot[i + 1])
         {
           result += ((knot[i + k+1] - t) / (knot[i + k+1] - knot[i + 1])) * N2;
         }
@@ -99,7 +100,7 @@ namespace Hermes
       double abs_v = sqrt(sqr(v[0]) + sqr(v[1]));
 
       // Straight line.
-      if (nurbs == NULL)
+      if(nurbs == NULL)
       {
         x = A[0] + t * v[0];
         y = A[1] + t * v[1];
@@ -170,7 +171,7 @@ namespace Hermes
           SB[1] = B[1] - S[1];
           double R = sqrt(sqr(SA[0]) + sqr(SA[1]));
           double R2 = sqrt(sqr(SB[0]) + sqr(SB[1]));
-          if (std::abs(R - R2) > 1e-6)
+          if(std::abs(R - R2) > 1e-6)
             throw Hermes::Exceptions::Exception("Internal error in nurbs_edge() - bad radius R.");
 
           // Normal vectors to circular arc at edge end points A, B.
@@ -187,7 +188,7 @@ namespace Hermes
           double2 SB_ref;
           SB_ref[0] = R * cos(alpha_rad);
           SB_ref[1] = R * sin(alpha_rad);
-          // First we need to invert the matrix [(R 0)^T, SB_ref^T].
+          // First we need to invert the matrix[(R 0)^T, SB_ref^T].
           double m_11, m_12, m_21, m_22;
           m_11 = R;
           m_12 = SB_ref[0];
@@ -233,7 +234,7 @@ namespace Hermes
 
           // Correcting sign so that the normal points outside
           // if the angle is negative.
-          if (nurbs->angle < 0)
+          if(nurbs->angle < 0)
           {
             n_x *= -1;
             n_y *= -1;
@@ -340,7 +341,7 @@ namespace Hermes
         x += e->vn[j]->x * l_a;
         y += e->vn[j]->y * l_a;
 
-        if (!(((ref_vert[0][va][0] == xi_1) && (ref_vert[0][va][1] == xi_2)) ||
+        if(!(((ref_vert[0][va][0] == xi_1) && (ref_vert[0][va][1] == xi_2)) ||
           ((ref_vert[0][vb][0] == xi_1) && (ref_vert[0][vb][1] == xi_2))))
         {
           // edge part
@@ -377,7 +378,7 @@ namespace Hermes
 
     void CurvMap::calc_ref_map(Element* e, Nurbs** nurbs, double xi_1, double xi_2, double2& f)
     {
-      if (e->get_mode() == HERMES_MODE_QUAD)
+      if(e->get_mode() == HERMES_MODE_QUAD)
         calc_ref_map_quad(e, nurbs, xi_1, xi_2, f[0], f[1]);
       else
         calc_ref_map_tri(e, nurbs, xi_1, xi_2, f[0], f[1]);
@@ -391,7 +392,7 @@ namespace Hermes
       int order = ref_map_shapeset->get_max_order();
       int n = order - 1; // number of edge basis functions
 
-      if (!edge_proj_matrix)
+      if(!edge_proj_matrix)
         edge_proj_matrix = new_matrix<double>(n, n);
 
       // calculate projection matrix of maximum order
@@ -492,7 +493,7 @@ namespace Hermes
       }
 
       // Cholesky factorization of the matrix
-      if (!edge_p)
+      if(!edge_p)
         edge_p = new double[n];
       choldc(edge_proj_matrix, n, edge_p);
     }
@@ -536,7 +537,7 @@ namespace Hermes
       int order = ref_map_shapeset->get_max_order();
 
       // calculate projection matrix of maximum order
-      if (ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE)
+      if(ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_TRIANGLE)
       {
         int nb = ref_map_shapeset->get_num_bubbles(order, HERMES_MODE_TRIANGLE);
         int* indices = ref_map_shapeset->get_bubble_indices(order, HERMES_MODE_TRIANGLE);
@@ -550,7 +551,7 @@ namespace Hermes
       // *** quads ***
 
       // calculate projection matrix of maximum order
-      if (ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_QUAD)
+      if(ref_map_pss->get_active_element()->get_mode() == HERMES_MODE_QUAD)
       {
         order = H2D_MAKE_QUAD_ORDER(order, order);
         int nb = ref_map_shapeset->get_num_bubbles(order, HERMES_MODE_QUAD);
@@ -772,7 +773,7 @@ namespace Hermes
         }
 
         // solve
-        if (e->get_mode() == HERMES_MODE_TRIANGLE)
+        if(e->get_mode() == HERMES_MODE_TRIANGLE)
           cholsl(bubble_proj_matrix_tri, nb, bubble_tri_p, rhside[k], rhside[k]);
         else
           cholsl(bubble_proj_matrix_quad, nb, bubble_quad_p, rhside[k], rhside[k]);
@@ -800,7 +801,7 @@ namespace Hermes
         proj[i][1] = e->vn[i]->y;
       }
 
-      if (e->cm->toplevel == false)
+      if(e->cm->toplevel == false)
         e = e->cm->parent;
 
       // edge part
@@ -820,11 +821,11 @@ namespace Hermes
       ref_map_pss.set_active_element(e);
 
       // calculation of projection matrices
-      if (edge_proj_matrix == NULL)
+      if(edge_proj_matrix == NULL)
         precalculate_cholesky_projection_matrix_edge(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_tri == NULL && e->get_mode() == HERMES_MODE_TRIANGLE)
+      if(bubble_proj_matrix_tri == NULL && e->get_mode() == HERMES_MODE_TRIANGLE)
         precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
-      if (bubble_proj_matrix_quad == NULL && e->get_mode() == HERMES_MODE_QUAD)
+      if(bubble_proj_matrix_quad == NULL && e->get_mode() == HERMES_MODE_QUAD)
         precalculate_cholesky_projection_matrices_bubble(&ref_map_shapeset, &ref_map_pss);
 
       // allocate projection coefficients
@@ -833,7 +834,7 @@ namespace Hermes
       int qo = e->is_quad() ? H2D_MAKE_QUAD_ORDER(order, order) : order;
       int nb = ref_map_shapeset.get_num_bubbles(qo, e->get_mode());
       nc = nv + nv*ne + nb;
-      if (coeffs != NULL)
+      if(coeffs != NULL)
       {
         delete [] coeffs;
         coeffs = NULL;
@@ -844,7 +845,7 @@ namespace Hermes
       // RefMap::set_active_element() has to be changed too.
 
       Nurbs** nurbs;
-      if (toplevel == false)
+      if(toplevel == false)
       {
         ref_map_pss.set_active_element(e);
         ref_map_pss.set_transform(part);
@@ -868,7 +869,7 @@ namespace Hermes
       Transformable tran;
       tran.set_active_element(e);
 
-      if (toplevel == false)
+      if(toplevel == false)
       {
         tran.set_transform(part);
         e = e->cm->parent;
@@ -887,7 +888,7 @@ namespace Hermes
 
     void Nurbs::unref()
     {
-      if (!--ref) // fixme: possible leak, we need ~Nurbs too
+      if(!--ref) // fixme: possible leak, we need ~Nurbs too
       {
         delete [] pt;
         delete [] kv;
@@ -901,23 +902,23 @@ namespace Hermes
       coeffs = new double2[nc];
       memcpy(coeffs, cm->coeffs, sizeof(double2) * nc);
 
-      if (toplevel)
+      if(toplevel)
         for (int i = 0; i < 4; i++)
-          if (nurbs[i] != NULL)
+          if(nurbs[i] != NULL)
             nurbs[i]->ref++;
     }
 
     CurvMap::~CurvMap()
     {
-      if (coeffs != NULL)
+      if(coeffs != NULL)
       {
         delete [] coeffs;
         coeffs = NULL;
       }
 
-      if (toplevel)
+      if(toplevel)
         for (int i = 0; i < 4; i++)
-          if (nurbs[i] != NULL)
+          if(nurbs[i] != NULL)
             nurbs[i]->unref();
     }
   }

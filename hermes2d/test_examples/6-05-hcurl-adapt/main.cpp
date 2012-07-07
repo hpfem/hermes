@@ -176,15 +176,15 @@ int main(int argc, char* argv[])
     graph_dof_exact.save("conv_dof_exact.dat");
 
     // If err_est_rel too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
+    if(err_est_rel < ERR_STOP) done = true;
     else
     {
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
-      if (done == false)  as++;
+      if(done == false)  as++;
     }
-    if (space.get_num_dofs() >= NDOF_STOP) done = true;
+    if(space.get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;

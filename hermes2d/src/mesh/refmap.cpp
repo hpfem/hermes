@@ -33,7 +33,7 @@ namespace Hermes
     RefMap::~RefMap() { free(); }
 
     /// Sets the quadrature points in which the reference map will be evaluated.
-    /// \param quad_2d [in] The quadrature points.
+    /// \param quad_2d[in] The quadrature points.
     void set_quad_2d(Quad2D* quad_2d);
 
     /// Returns the current quadrature points.
@@ -79,7 +79,7 @@ namespace Hermes
     /// points of the specified order. Intended for non-constant jacobian elements.
     double* RefMap::get_jacobian(int order)
     {
-      if (cur_node->inv_ref_map[order] == NULL)
+      if(cur_node->inv_ref_map[order] == NULL)
         calc_inv_ref_map(order);
       return cur_node->jacobian[order];
     }
@@ -89,7 +89,7 @@ namespace Hermes
     /// jacobian elements.
     double2x2* RefMap::get_inv_ref_map(int order)
     {
-      if (cur_node->inv_ref_map[order] == NULL)
+      if(cur_node->inv_ref_map[order] == NULL)
         calc_inv_ref_map(order);
       return cur_node->inv_ref_map[order];
     }
@@ -97,7 +97,7 @@ namespace Hermes
     /// Returns coefficients for weak forms with second derivatives.
     double3x2* RefMap::get_second_ref_map(int order)
     {
-      if (cur_node->second_ref_map[order] == NULL) calc_second_ref_map(order);
+      if(cur_node->second_ref_map[order] == NULL) calc_second_ref_map(order);
       return cur_node->second_ref_map[order];
     }
 
@@ -106,7 +106,7 @@ namespace Hermes
     /// variables.
     double* RefMap::get_phys_x(int order)
     {
-      if (cur_node->phys_x[order] == NULL) calc_phys_x(order);
+      if(cur_node->phys_x[order] == NULL) calc_phys_x(order);
       return cur_node->phys_x[order];
     }
 
@@ -115,11 +115,11 @@ namespace Hermes
     /// variables.
     double* RefMap::get_phys_y(int order)
     {
-      if (cur_node->phys_y[order] == NULL) calc_phys_y(order);
+      if(cur_node->phys_y[order] == NULL) calc_phys_y(order);
       return cur_node->phys_y[order];
     }
 
-    /// Returns the triples [x, y, norm] of the tangent to the specified (possibly
+    /// Returns the triples[x, y, norm] of the tangent to the specified (possibly
     /// curved) edge at the 1D integration points along the edge. The maximum
     /// 1D quadrature rule is used by default, but the user may specify his own
     /// order. In this case, the edge pseudo-order is expected (as returned by
@@ -128,13 +128,13 @@ namespace Hermes
     {
       if(quad_2d == NULL)
         throw Hermes::Exceptions::Exception("2d quadrature wasn't set.");
-      if (order == -1)
+      if(order == -1)
         order = quad_2d->get_edge_points(edge, quad_2d->get_max_order(element->get_mode()), element->get_mode());
 
       // NOTE: Hermes::Order-based caching of geometric data is already employed in DiscreteProblem.
       if(cur_node->tan[edge] != NULL)
       {
-        delete[] cur_node->tan[edge];
+        delete [] cur_node->tan[edge];
         cur_node->tan[edge] = NULL;
       }
       calc_tangent(edge, order);
@@ -151,13 +151,13 @@ namespace Hermes
 
     void RefMap::set_active_element(Element* e)
     {
-      if (e != element) free();
+      if(e != element) free();
 
       ref_map_pss.set_active_element(e);
       num_tables = quad_2d->get_num_tables(e->get_mode());
       assert(num_tables <= H2D_MAX_TABLES);
 
-      if (e == element) return;
+      if(e == element) return;
       Transformable::set_active_element(e);
 
       update_cur_node();
@@ -171,7 +171,7 @@ namespace Hermes
         indices[k++] = ref_map_shapeset.get_vertex_index(i, e->get_mode());
 
       // straight-edged element
-      if (e->cm == NULL)
+      if(e->cm == NULL)
       {
         for (unsigned int i = 0; i < e->get_num_surf(); i++)
         {
@@ -188,7 +188,7 @@ namespace Hermes
           for (j = 2; j <= o; j++)
             indices[k++] = ref_map_shapeset.get_edge_index(i, 0, j, e->get_mode());
 
-        if (e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
+        if(e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
         memcpy(indices + k, ref_map_shapeset.get_bubble_indices(o, e->get_mode()),
           ref_map_shapeset.get_num_bubbles(o, e->get_mode()) * sizeof(int));
 
@@ -197,14 +197,14 @@ namespace Hermes
       }
 
       // calculate the order of the inverse reference map
-      if (element->iro_cache == -1 && quad_2d->get_max_order(e->get_mode()) > 1)
+      if(element->iro_cache == -1 && quad_2d->get_max_order(e->get_mode()) > 1)
       {
         element->iro_cache = is_const ? 0 : calc_inv_ref_order();
       }
       inv_ref_order = element->iro_cache;
 
       // constant inverse reference map
-      if (is_const) calc_const_inv_ref_map(); else const_jacobian = 0.0;
+      if(is_const) calc_const_inv_ref_map(); else const_jacobian = 0.0;
     }
 
     void RefMap::push_transform(int son)
@@ -255,9 +255,15 @@ namespace Hermes
         jac[i] = (m[i][0][0] * m[i][1][1] - m[i][0][1] * m[i][1][0]);
         double ij = 1.0 / jac[i];
         if(!finite(ij))
+        {
+          delete [] m;
           throw Hermes::Exceptions::Exception("1/jac[%d] is infinity when calculating inv. ref. map for order %d (jac = %g)", i, order);
+        }
         if(ij != ij)
+        {
+          delete [] m;
           throw Hermes::Exceptions::Exception("1/jac[%d] is NaN when calculating inv. ref. map for order %d (jac = %g)", i, order);
+        }
 
         // invert and transpose the matrix
         irm[i][0][0] =  m[i][1][1] * ij;
@@ -336,14 +342,14 @@ namespace Hermes
 
     void RefMap::calc_const_inv_ref_map()
     {
-      if (element == NULL)
+      if(element == NULL)
         throw Hermes::Exceptions::Exception("The element variable must not be NULL.");
       int k = element->is_triangle() ? 2 : 3;
       double m[2][2] = { { element->vn[1]->x - element->vn[0]->x,  element->vn[k]->x - element->vn[0]->x },
       { element->vn[1]->y - element->vn[0]->y,  element->vn[k]->y - element->vn[0]->y } };
 
       const_jacobian = 0.25 * (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
-      if (const_jacobian <= 0.0)
+      if(const_jacobian <= 0.0)
         throw Hermes::Exceptions::Exception("Element #%d is concave or badly oriented.", element->id);
 
       double ij = 0.5 / const_jacobian;
@@ -397,7 +403,7 @@ namespace Hermes
       double3* tan = cur_node->tan[edge] = new double3[np];
       int a = edge, b = element->next_vert(edge);
 
-      if (!element->is_curved())
+      if(!element->is_curved())
       {
         // straight edges: the tangent at each point is just the edge length
         tan[0][0] = element->vn[b]->x - element->vn[a]->x;
@@ -463,7 +469,7 @@ namespace Hermes
       double2x2* m = get_inv_ref_map(mo);
       double* jac = get_jacobian(mo);
       for (i = 0; i < quad->get_num_points(mo, element->get_mode()); i++)
-        if (jac[i] <= 0.0)
+        if(jac[i] <= 0.0)
           throw Hermes::Exceptions::Exception("Element #%d is concave or badly oriented.", element->id);
 
       // next, estimate the "exact" value of the typical integral int_grad_u_grad_v
@@ -488,10 +494,10 @@ namespace Hermes
           result1 += pt[i][2] * jac[i] * (sqr((*m)[0][0] + (*m)[0][1]) + sqr((*m)[1][0] + (*m)[1][1]));
           result2 += pt[i][2] / jac[i] ;
         }
-        if ((fabs((exact1 - result1) / exact1) < 1e-8) &&
+        if((fabs((exact1 - result1) / exact1) < 1e-8) &&
           (fabs((exact2 - result2) / exact2) < 1e-8)) break;
       }
-      if (o >= 10)
+      if(o >= 10)
       {
         this->warn("Element #%d is too distorted (iro ~ %d).", element->id, o);
       }
@@ -577,7 +583,7 @@ namespace Hermes
     {
       const double TOL = 1e-12;
 
-      if (is_const)
+      if(is_const)
       {
         double dx = e->vn[0]->x - x;
         double dy = e->vn[0]->y - y;
@@ -595,9 +601,9 @@ namespace Hermes
           inv_ref_map_at_point(xi1_old, xi2_old, vx, vy, m);
           xi1 = xi1_old - (m[0][0] * (vx - x) + m[1][0] * (vy - y));
           xi2 = xi2_old - (m[0][1] * (vx - x) + m[1][1] * (vy - y));
-          if (fabs(xi1 - xi1_old) < TOL && fabs(xi2 - xi2_old) < TOL) return;
-          if (it > 1 && (xi1 > 1.5 || xi2 > 1.5 || xi1 < -1.5 || xi2 < -1.5)) return;
-          if (it > 100) { this->warn("Could not find reference coordinates - Newton method did not converge."); return; }
+          if(fabs(xi1 - xi1_old) < TOL && fabs(xi2 - xi2_old) < TOL) return;
+          if(it > 1 && (xi1 > 1.5 || xi2 > 1.5 || xi1 < -1.5 || xi2 < -1.5)) return;
+          if(it > 100) { this->warn("Could not find reference coordinates - Newton method did not converge."); return; }
           xi1_old = xi1;
           xi2_old = xi2;
           it++;
@@ -619,18 +625,18 @@ namespace Hermes
       // destroy all precalculated tables
       for (int i = 0; i < num_tables; i++)
       {
-        if (node->inv_ref_map[i] != NULL)
+        if(node->inv_ref_map[i] != NULL)
         {
           delete [] node->inv_ref_map[i];
           delete [] node->jacobian[i];
         }
-        if (node->second_ref_map[i] != NULL) delete [] node->second_ref_map[i];
-        if (node->phys_x[i] != NULL) delete [] node->phys_x[i];
-        if (node->phys_y[i] != NULL) delete [] node->phys_y[i];
+        if(node->second_ref_map[i] != NULL) delete [] node->second_ref_map[i];
+        if(node->phys_x[i] != NULL) delete [] node->phys_x[i];
+        if(node->phys_y[i] != NULL) delete [] node->phys_y[i];
       }
 
       for (int i = 0; i < 4; i++)
-        if (node->tan[i] != NULL)
+        if(node->tan[i] != NULL)
           delete [] node->tan[i];
 
       delete node;
@@ -640,10 +646,10 @@ namespace Hermes
     {
       std::map<uint64_t, Node*>::iterator it;
 
-      for (it = nodes.begin(); it != nodes.end(); it++)
+      for (it = nodes.begin(); it != nodes.end(); ++it)
         free_node(it->second);
       nodes.clear();
-      if (overflow != NULL)
+      if(overflow != NULL)
       {
         free_node(overflow); overflow = NULL;
       }
@@ -651,7 +657,7 @@ namespace Hermes
 
     RefMap::Node* RefMap::handle_overflow()
     {
-      if (overflow != NULL)
+      if(overflow != NULL)
         free_node(overflow);
       overflow = new Node;
       init_node(overflow);

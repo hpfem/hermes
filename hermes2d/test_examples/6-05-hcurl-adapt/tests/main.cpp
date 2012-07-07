@@ -138,15 +138,15 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
     // If err_est_rel too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
+    if(err_est_rel < ERR_STOP) done = true;
     else
     {
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
       // Increase the counter of performed adaptivity steps.
-      if (done == false)  as++;
+      if(done == false)  as++;
     }
-    if (space.get_num_dofs() >= NDOF_STOP) done = true;
+    if(space.get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
   ndof = space.get_num_dofs();
 
-  if (ndof == 382) // Tested value as of 12 Jul 2011.
+  if(ndof == 382) // Tested value as of 12 Jul 2011.
   {
     printf("Success!\n");
     return 0;

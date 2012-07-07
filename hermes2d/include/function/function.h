@@ -105,39 +105,39 @@ namespace Hermes
       int get_num_components() const;
 
       /// \brief Returns function values.
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param component[in] The component of the function (0 or 1).
       /// \return The values of the function at all points of the current integration rule.
       Scalar* get_fn_values(int component = 0);
 
       /// \brief Returns the x partial derivative.
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param component[in] The component of the function (0 or 1).
       /// \return The x partial derivative of the function at all points of the current integration rule.
       Scalar* get_dx_values(int component = 0);
 
       /// \brief Returns the y partial derivative.
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param component[in] The component of the function (0 or 1).
       /// \return The y partial derivative of the function at all points of the current integration rule.
       Scalar* get_dy_values(int component = 0);
 
       /// \brief Returns both x and y partial derivatives.
       /// This function provides the both often-used dx and dy values in one call.
-      /// \param dx [out] Variable which receives the pointer to the first partial derivatives by x
-      /// \param dy [out] Variable which receives the pointer to the first partial derivatives by y
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param dx[out] Variable which receives the pointer to the first partial derivatives by x
+      /// \param dy[out] Variable which receives the pointer to the first partial derivatives by y
+      /// \param component[in] The component of the function (0 or 1).
       void get_dx_dy_values(Scalar*& dx, Scalar*& dy, int component = 0);
 
       /// \brief Returns the second x partial derivative.
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param component[in] The component of the function (0 or 1).
       /// \return The x second partial derivative of the function at all points of the current integration rule.
       Scalar* get_dxx_values(int component = 0);
 
       /// \brief Returns the second y partial derivative.
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param component[in] The component of the function (0 or 1).
       /// \return The y second partial derivative of the function at all points of the current integration rule.
       Scalar* get_dyy_values(int component = 0);
 
       /// \brief Returns the second mixed derivative.
-      /// \param component [in] The component of the function (0 or 1).
+      /// \param component[in] The component of the function (0 or 1).
       /// \return The second mixed derivative of the function at all points of the current integration rule.
       Scalar* get_dxy_values(int component = 0);
 
@@ -146,8 +146,8 @@ namespace Hermes
 
       /// Activates an integration rule of the specified order. Subsequent calls to
       /// get_values(), get_dx_values() etc. will be returning function values at these points.
-      /// \param order [in] Integration rule order.
-      /// \param mask [in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY,
+      /// \param order[in] Integration rule order.
+      /// \param mask[in] A combination of one or more of the constants H2D_FN_VAL, H2D_FN_DX, H2D_FN_DY,
       ///   H2D_FN_DXX, H2D_FN_DYY, H2D_FN_DXY specifying the values which should be precalculated. The default is
       ///   H2D_FN_VAL | H2D_FN_DX | H2D_FN_DY. You can also use H2D_FN_ALL to precalculate everything.
       void set_quad_order(unsigned int order, int mask = H2D_FN_DEFAULT);
@@ -162,7 +162,7 @@ namespace Hermes
       /// \details It is possible to switch back and forth between different quadrature
       /// points: no precalculated values are freed. The standard quadrature is
       /// always selected by default already.
-      /// \param quad_2d [in] The quadrature points.
+      /// \param quad_2d[in] The quadrature points.
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       /// \brief Frees all precalculated tables.
@@ -185,7 +185,7 @@ namespace Hermes
       };
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.
-      /// \param edge [in] Edge at which the order should be evaluated. (0-3)
+      /// \param edge[in] Edge at which the order should be evaluated. (0-3)
       virtual int get_edge_fn_order(int edge) const;
 
       /// precalculates the current function at the current integration points.

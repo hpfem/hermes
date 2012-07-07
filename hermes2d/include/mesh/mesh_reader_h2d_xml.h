@@ -66,14 +66,14 @@ namespace Hermes
       bool load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, int* vertex_is, int* element_is, int* edge_is);
 
       /// Loads one circular arc.
-      /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
-      /// \param [in] skip_check Skip check that the edge exists, in case of subdomains.
+      /// \param[in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
+      /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
       template<typename T>
       Nurbs* load_arc(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check = false);
 
       /// Loads one general NURBS curve.
-      /// \param [in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
-      /// \param [in] skip_check Skip check that the edge exists, in case of subdomains.
+      /// \param[in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
+      /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
       template<typename T>
       Nurbs* load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check = false);
 

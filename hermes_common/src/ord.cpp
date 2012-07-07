@@ -16,6 +16,7 @@
 \brief Contains class Ord for calculation of integration order.
 */
 #include "ord.h"
+#include <algorithm>
 
 namespace Hermes
 {

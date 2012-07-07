@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
     current_time += TAU;
 
     // Update time-dependent essential BCs.
-    if (current_time <= STARTUP_TIME)
+    if(current_time <= STARTUP_TIME)
     {
       Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
     }
@@ -143,57 +143,57 @@ int main(int argc, char* argv[])
 
   int success = 1;
   double eps = 1e-5;
-  if (fabs(xvel_prev_time.get_pt_value(0.0, 2.5) - 0.200000) > eps) {
+  if(fabs(xvel_prev_time.get_pt_value(0.0, 2.5) - 0.200000) > eps) {
     printf("Coordinate (   0, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(0.0, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(5, 2.5) - 0.134291) > eps) {
+  if(fabs(xvel_prev_time.get_pt_value(5, 2.5) - 0.134291) > eps) {
     printf("Coordinate (   5, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(5, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(7.5, 2.5) - 0.135088) > eps) {
+  if(fabs(xvel_prev_time.get_pt_value(7.5, 2.5) - 0.135088) > eps) {
     printf("Coordinate ( 7.5, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(7.5, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(10, 2.5) - 0.134944) > eps) {
+  if(fabs(xvel_prev_time.get_pt_value(10, 2.5) - 0.134944) > eps) {
     printf("Coordinate (  10, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(10, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(12.5, 2.5) - 0.134888) > eps) {
+  if(fabs(xvel_prev_time.get_pt_value(12.5, 2.5) - 0.134888) > eps) {
     printf("Coordinate (12.5, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(12.5, 2.5));
     success = 0;
   }
-  if (fabs(xvel_prev_time.get_pt_value(15, 2.5) - 0.134864) > eps) {
+  if(fabs(xvel_prev_time.get_pt_value(15, 2.5) - 0.134864) > eps) {
     printf("Coordinate (  15, 2.5) xvel value is %g\n", xvel_prev_time.get_pt_value(15, 2.5));
     success = 0;
   }
 
-  if (fabs(yvel_prev_time.get_pt_value(0.0, 2.5) - 0.000000) > eps) {
+  if(fabs(yvel_prev_time.get_pt_value(0.0, 2.5) - 0.000000) > eps) {
     printf("Coordinate (   0, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(0.0, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(5, 2.5) - 0.000493) > eps) {
+  if(fabs(yvel_prev_time.get_pt_value(5, 2.5) - 0.000493) > eps) {
     printf("Coordinate (   5, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(5, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(7.5, 2.5) - 0.000070) > eps) {
+  if(fabs(yvel_prev_time.get_pt_value(7.5, 2.5) - 0.000070) > eps) {
     printf("Coordinate ( 7.5, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(7.5, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(10, 2.5) - 0.000008) > eps) {
+  if(fabs(yvel_prev_time.get_pt_value(10, 2.5) - 0.000008) > eps) {
     printf("Coordinate (  10, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(10, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(12.5, 2.5) + 0.000003) > eps) {
+  if(fabs(yvel_prev_time.get_pt_value(12.5, 2.5) + 0.000003) > eps) {
     printf("Coordinate (12.5, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(12.5, 2.5));
     success = 0;
   }
-  if (fabs(yvel_prev_time.get_pt_value(15, 2.5) + 0.000006) > eps) {
+  if(fabs(yvel_prev_time.get_pt_value(15, 2.5) + 0.000006) > eps) {
     printf("Coordinate (  15, 2.5) yvel value is %g\n", yvel_prev_time.get_pt_value(15, 2.5));
     success = 0;
   }
 
-  if (success == 1) {
+  if(success == 1) {
     printf("Success!\n");
     return 0;
   }

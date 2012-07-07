@@ -39,7 +39,7 @@ namespace Hermes
     class HERMES_API MlPrecond : public Precond<Scalar>
     {
     public:
-      /// @param[in] type - type of the preconditioner [ sa | dd ]
+      /// @param[in] type - type of the preconditioner[ sa | dd ]
       /// - sa = smooth aggregation
       /// - dd = domain decomposition
       MlPrecond(const char *type);

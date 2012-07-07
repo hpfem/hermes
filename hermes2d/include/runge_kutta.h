@@ -142,7 +142,7 @@ namespace Hermes
        \author  Lk
        \date  10/29/2011
 
-       \param [in]  filters_to_reinit the filters to reinitialize.
+       \param[in]  filters_to_reinit the filters to reinitialize.
        */
 
       void set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);

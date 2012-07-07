@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
 
   // VTK output.
-  if (VTK_VISUALIZATION)
+  if(VTK_VISUALIZATION)
   {
     // Output solution in VTK format.
     Hermes::Hermes2D::Views::Linearizer lin;
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
   }
 
   // Visualize the solution.
-  if (HERMES_VISUALIZATION)
+  if(HERMES_VISUALIZATION)
   {
     Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
     // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear

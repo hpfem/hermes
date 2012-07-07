@@ -82,7 +82,7 @@ namespace Hermes
     // Look up an integer number in an array.
     int find_index_slow(const T& x) {
       for (int i=0; i < this->size(); i++) {
-        if ((*this)[i] == x)
+        if((*this)[i] == x)
           return i;
       }
       throw Hermes::Exceptions::Exception("Index not found");
@@ -90,28 +90,28 @@ namespace Hermes
 
     // Returns maximum of the vector<T> in case of T == int.
     int max() {
-      if (this->size() == 0)
+      if(this->size() == 0)
         throw Hermes::Exceptions::Exception("Empty vector");
       int m;
       if(typeid((*this)[0]) != typeid(m))
         throw Hermes::Exceptions::Exception("vector<T>::max() called and T != int.");
       m = (int)(*this)[0];
       for (unsigned int i=1; i < this->size(); i++)
-        if ((int)(*this)[i] > m)
+        if((int)(*this)[i] > m)
           m = (int)(*this)[i];
       return m;
     }
 
     // Returns minimum of the vector<T> in case of T == int.
     int min() {
-      if (this->size() == 0)
+      if(this->size() == 0)
         throw Hermes::Exceptions::Exception("Empty vector");
       int m;
       if(typeid((*this)[0]) != typeid(m))
         throw Hermes::Exceptions::Exception("vector<T>::max() called and T != int.");
       m = (int)(*this)[0];
       for (unsigned int i=1; i < this->size(); i++)
-        if ((int)(*this)[i] < m)
+        if((int)(*this)[i] < m)
           m = (int)(*this)[i];
       return m;
     }
@@ -119,8 +119,8 @@ namespace Hermes
     // Look up an integer number in an array.
     // This prepares a permut array, so subsequent calls are very fast
     int find_index(int x, bool throw_exception=true) {
-      if (this->size() == 0) {
-        if (throw_exception) {
+      if(this->size() == 0) {
+        if(throw_exception) {
           throw Hermes::Exceptions::Exception("Empty vector");
         }
         else return -1;
@@ -129,19 +129,19 @@ namespace Hermes
       if(typeid((*this)[0]) != typeid(idx))
         throw Hermes::Exceptions::Exception("vector<T>::find_index() called and T != int.");
 
-      if (this->_permut.size() == 0) {
+      if(this->_permut.size() == 0) {
         // Initialize the permut array
         this->_min = this->min();
         this->_max = this->max();
         for (int i=0; i < (int)this->_max+1; i++) this->_permut.push_back(-1);
         for (unsigned int i=0; i < this->size(); i++) this->_permut[(int)(*this)[i]] = i;
       }
-      if (((int)this->_min <= x) && (x <= (int)this->_max))
+      if(((int)this->_min <= x) && (x <= (int)this->_max))
         idx = this->_permut[x];
       else
         idx = -1;
-      if (idx == -1) {
-        if (throw_exception)
+      if(idx == -1) {
+        if(throw_exception)
           throw Hermes::Exceptions::Exception("Index in the vector not found");
         else
           return -1;

@@ -34,7 +34,7 @@ namespace Hermes
       void L2ProjBasedSelector<Scalar>::set_current_order_range(Element* element)
       {
         this->current_max_order = this->max_order;
-        if (this->current_max_order == H2DRS_DEFAULT_ORDER)
+        if(this->current_max_order == H2DRS_DEFAULT_ORDER)
           this->current_max_order = (20 - element->iro_cache)/2 - 2; // default
         else
           this->current_max_order = std::min(this->current_max_order, (20 - element->iro_cache)/2 - 2); // user specified
@@ -79,12 +79,12 @@ namespace Hermes
           }
 
           //move to the next transformation
-          if (inx_trf == H2D_TRF_IDENTITY)
+          if(inx_trf == H2D_TRF_IDENTITY)
             done = true;
           else
           {
             inx_trf++;
-            if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+            if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
               inx_trf = H2D_TRF_IDENTITY;
           }
         }
@@ -102,7 +102,7 @@ namespace Hermes
 
         //clear list of candidates
         this->candidates.clear();
-        if (this->candidates.capacity() < H2DRS_ASSUMED_MAX_CANDS)
+        if(this->candidates.capacity() < H2DRS_ASSUMED_MAX_CANDS)
           this->candidates.reserve(H2DRS_ASSUMED_MAX_CANDS);
 
         //generate all P-candidates (start from intention of generating all possible candidates
@@ -138,7 +138,7 @@ namespace Hermes
         this->append_candidates_split(start_quad_order, last_quad_order, H2D_REFINEMENT_H, tri || iso_p);
 
         //generate all ANISO-candidates
-        if (!tri && e->iro_cache < 8 /** \todo Find and why is iro_cache compared with the number 8. What does the number 8 mean? */
+        if(!tri && e->iro_cache < 8 /** \todo Find and why is iro_cache compared with the number 8. What does the number 8 mean? */
           && (this->cand_list == H2D_H_ANISO || this->cand_list == H2D_HP_ANISO_H || this->cand_list == H2D_HP_ANISO))
         {
           iso_p = false;
@@ -154,7 +154,7 @@ namespace Hermes
             break; //only one candidate will be created
           case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
           }
-          if (iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
+          if(iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
             int order = std::min(H2D_GET_H_ORDER(start_quad_order_hz), H2D_GET_V_ORDER(start_quad_order_hz));
             start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
             order = std::min(H2D_GET_H_ORDER(start_quad_order_vt), H2D_GET_V_ORDER(start_quad_order_vt));
@@ -208,12 +208,12 @@ namespace Hermes
               }
 
               //move to the next transformation
-              if (inx_trf == H2D_TRF_IDENTITY)
+              if(inx_trf == H2D_TRF_IDENTITY)
                 done = true;
               else
               {
                 inx_trf++;
-                if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+                if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                   inx_trf = H2D_TRF_IDENTITY;
               }
             }
@@ -247,12 +247,12 @@ namespace Hermes
             }
 
             //move to the next transformation
-            if (inx_trf == H2D_TRF_IDENTITY)
+            if(inx_trf == H2D_TRF_IDENTITY)
               done = true;
             else
             {
               inx_trf++;
-              if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+              if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                 inx_trf = H2D_TRF_IDENTITY;
             }
           }

@@ -182,8 +182,8 @@ namespace Hermes
       /// \brief Builds basis functions and assigns DOF numbers to them.
       /// \details This functions must be called \b after assigning element orders, and \b before
       /// using the space in a computation, otherwise an error will occur.
-      /// \param first_dof [in] The DOF number of the first basis function.
-      /// \param stride [in] The difference between the DOF numbers of successive basis functions.
+      /// \param first_dof[in] The DOF number of the first basis function.
+      /// \param stride[in] The difference between the DOF numbers of successive basis functions.
       /// \return The number of basis functions contained in the space.
       virtual int assign_dofs(int first_dof = 0, int stride = 1);
 

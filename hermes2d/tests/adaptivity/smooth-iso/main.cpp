@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
   mloader.load("square_quad.mesh", &mesh);
 
   // Avoid zero ndof situation.
-  if (P_INIT == 1) {
-    if (is_hp(CAND_LIST)) P_INIT++;
+  if(P_INIT == 1) {
+    if(is_hp(CAND_LIST)) P_INIT++;
     else mesh.refine_element_id(0, 0);
   }
 
@@ -127,13 +127,13 @@ int main(int argc, char* argv[])
 
     // If err_est too large, adapt the mesh. The NDOF test must be here, so that the solution may be visualized
     // after ending due to this criterion.
-    if (err_exact_rel < ERR_STOP || space.get_num_dofs() >= NDOF_STOP)
+    if(err_exact_rel < ERR_STOP || space.get_num_dofs() >= NDOF_STOP)
       done = true;
     else
       done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
     // Increase the counter of adaptivity steps.
-    if (done == false)
+    if(done == false)
       as++;
 
     // Clean up.
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  if (space.get_mesh()->get_num_active_elements() == 1)
+  if(space.get_mesh()->get_num_active_elements() == 1)
   {
     return 0;
   }

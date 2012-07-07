@@ -112,7 +112,7 @@ namespace Hermes
               void operator() (MaterialPropertyMap1::value_type x) {
                 MaterialPropertyMap1::mapped_type::iterator it;
                 for (it = x.second.begin(); it != x.second.end(); ++it)
-                  if (fabs(*it) > 1e-14)
+                  if(fabs(*it) > 1e-14)
                     throw Hermes::Exceptions::Exception(E_INVALID_COMBINATION);
               }
             };
@@ -122,17 +122,17 @@ namespace Hermes
                 : nrows(nrows), ncols(ncols) {};
 
               void operator() (MaterialPropertyMap1::value_type x) {
-                if (x.second.size() != nrows)
+                if(x.second.size() != nrows)
                   throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
               }
 
               void operator() (MaterialPropertyMap2::value_type x) {
-                if (x.second.size() != nrows)
+                if(x.second.size() != nrows)
                   throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
 
                 MaterialPropertyMap2::mapped_type::iterator it;
                 for (it = x.second.begin(); it != x.second.end(); ++it)
-                  if (it->size() != ncols)
+                  if(it->size() != ncols)
                     throw Hermes::Exceptions::Exception(E_INVALID_SIZE);
               }
 
@@ -155,9 +155,9 @@ namespace Hermes
 
               template <typename NDArrayType>
               static rank0 divide(rank0 x, rank0 y) {
-                if (x == 0 && y == 0)
+                if(x == 0 && y == 0)
                   return 0.0;
-                else if (y == 0)
+                else if(y == 0)
                 {
                   throw Hermes::Exceptions::Exception(E_INF_VALUE);
                   return -1.0;
@@ -831,7 +831,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
-                  if (g >= iterates.size())
+                  if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 
@@ -844,7 +844,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
-                  if (g >= iterates.size())
+                  if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 
@@ -857,7 +857,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
-                  if (g >= iterates.size())
+                  if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 
@@ -870,7 +870,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
-                  if (g >= iterates.size())
+                  if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
 

@@ -20,6 +20,7 @@
 \brief EpetraMatrix and EpetraVector storage classes for Amesos, AztecOO, ... .
 */
 #include "config.h"
+#include <vector>
 #ifdef HAVE_EPETRA
 #include "epetra.h"
 #include "callstack.h"
@@ -112,7 +113,7 @@ namespace Hermes
     template<>
     void EpetraMatrix<double>::free()
     {
-      if (owner)
+      if(owner)
       {
         delete mat; mat = NULL;
         delete grph; grph = NULL;
@@ -123,7 +124,7 @@ namespace Hermes
     template<>
     void EpetraMatrix<std::complex<double> >::free()
     {
-      if (owner)
+      if(owner)
       {
         delete mat; mat = NULL;
         delete mat_im; mat_im = NULL;
@@ -140,7 +141,7 @@ namespace Hermes
       Hermes::vector<int> idxs(n_entries);
       mat->ExtractGlobalRowCopy(m, n_entries, n_entries, &vals[0], &idxs[0]);
       for (int i = 0; i < n_entries; i++)
-        if (idxs[i] == (int)n)
+        if(idxs[i] == (int)n)
           return vals[i];
       return 0.0;
     }
@@ -178,23 +179,23 @@ namespace Hermes
     template<>
     void EpetraMatrix<double>::add(unsigned int m, unsigned int n, double v)
     {
-      if (v != 0.0)
-      {		// ignore zero values
+      if(v != 0.0)
+      {    // ignore zero values
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v, &n_to_pass);
-        if (ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
+        if(ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
       }
     }
 
     template<>
     void EpetraMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
-      if (v != 0.0)
-      {		// ignore zero values
+      if(v != 0.0)
+      {    // ignore zero values
         double v_r = std::real<double>(v);
         int n_to_pass = n;
         int ierr = mat->SumIntoGlobalValues(m, 1, &v_r, &n_to_pass);
-        if (ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
+        if(ierr != 0) throw Hermes::Exceptions::Exception("Failed to insert into Epetra matrix");
         assert(ierr == 0);
         double v_i = std::imag<double>(v);
         ierr = mat_im->SumIntoGlobalValues(m, 1, &v_i, &n_to_pass);
@@ -216,7 +217,7 @@ namespace Hermes
     void EpetraMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, EpetraMatrix<Scalar>* mat_block)
     {
       int ndof = mat_block->get_size();
-      if (this->get_size() != (unsigned int) num_stages * ndof)
+      if(this->get_size() != (unsigned int) num_stages * ndof)
         throw Hermes::Exceptions::Exception("Incompatible matrix sizes in CSCMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
@@ -234,12 +235,12 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat)
     {
-      if ((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
+      if((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
         throw Hermes::Exceptions::Exception("Incompatible matrix sizes in Epetra<Scalar>::add_as_block()");
       unsigned int block_size = mat->get_size();
-      for (unsigned int r = 0;r<block_size;r++)
+      for (unsigned int r = 0; r<block_size; r++)
       {
-        for (unsigned int c = 0;c<block_size;c++)
+        for (unsigned int c = 0; c<block_size; c++)
         {
           this->add(i + r, j + c, mat->get(r, c));
         }
@@ -249,10 +250,10 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
     {
-      for (unsigned int i = 0;i<this->size;i++) //probably can be optimized by use native vectors
+      for (unsigned int i = 0; i<this->size; i++) //probably can be optimized by use native vectors
       {
         vector_out[i] = 0;
-        for (unsigned int j = 0;j<this->size;j++)
+        for (unsigned int j = 0; j<this->size; j++)
         {
           vector_out[i] +=vector_in[j]*get(i, j);
         }
@@ -262,8 +263,8 @@ namespace Hermes
     template<typename Scalar>
     void EpetraMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
     {
-      for (unsigned int i = 0; i < m; i++)				// rows
-        for (unsigned int j = 0; j < n; j++)			// cols
+      for (unsigned int i = 0; i < m; i++)        // rows
+        for (unsigned int j = 0; j < n; j++)      // cols
           if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
             add(rows[i], cols[j], mat[i][j]);
     }
@@ -315,7 +316,7 @@ namespace Hermes
     template<typename Scalar>
     EpetraVector<Scalar>::~EpetraVector()
     {
-      if (owner) free();
+      if(owner) free();
     }
 
     template<typename Scalar>
@@ -333,7 +334,7 @@ namespace Hermes
     void EpetraVector<Scalar>::zero()
     {
       for (unsigned int i = 0; i < this->size; i++) (*vec)[i] = 0.0;
-      if (vec_im)
+      if(vec_im)
         for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] = 0.0;
     }
 

@@ -16557,7 +16557,7 @@ namespace Hermes
       for (int i = 1; i <= 10; i++)
       {
         int nb = shapeset->get_num_bubbles(i, HERMES_MODE_TRIANGLE);
-        if (nb != 3*(i-1) + (i-1)*(i-2))
+        if(nb != 3*(i-1) + (i-1)*(i-2))
           throw Hermes::Exceptions::Exception("Wrong bubble count");
       }
 
@@ -16568,10 +16568,10 @@ namespace Hermes
       int size_ay = sizeof(leg_tri_fn_ay) / sizeof(Shapeset::shape_fn_t);
       int size_by = sizeof(leg_tri_fn_by) / sizeof(Shapeset::shape_fn_t);
 
-      if (size_a != size_b || size_a != size_ax || size_a != size_bx || size_a != size_ay || size_a != size_by)
+      if(size_a != size_b || size_a != size_ax || size_a != size_bx || size_a != size_ay || size_a != size_by)
         throw Hermes::Exceptions::Exception("Function tables dont have equal length.");
 
-      if (size_a != leg_tri_bubble_indices[10][leg_tri_bubble_count[10]-1] + 1)
+      if(size_a != leg_tri_bubble_indices[10][leg_tri_bubble_count[10]-1] + 1)
         throw Hermes::Exceptions::Exception("Bad index of last bubble");
     }
 

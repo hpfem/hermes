@@ -27,7 +27,7 @@ namespace Hermes
     template<typename Scalar>
     void L2Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
-      if (shapeset == NULL)
+      if(shapeset == NULL)
       {
         this->shapeset = new L2Shapeset;
         this->own_shapeset = true;
@@ -36,7 +36,7 @@ namespace Hermes
       lsize = 0;
 
       // set uniform poly order in elements
-      if (p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
+      if(p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an L2 space.");
       else this->set_uniform_order_internal(p_init, HERMES_ANY_INT);
 
       // enumerate basis functions
@@ -54,7 +54,7 @@ namespace Hermes
     L2Space<Scalar>::~L2Space()
     {
       ::free(ldata);
-      if (this->own_shapeset)
+      if(this->own_shapeset)
         delete this->shapeset;
     }
 
@@ -77,7 +77,7 @@ namespace Hermes
     {
       this->mesh = mesh;
 
-      if (shapeset == NULL)
+      if(shapeset == NULL)
       {
         this->shapeset = new L2Shapeset;
         this->own_shapeset = true;
@@ -106,9 +106,9 @@ namespace Hermes
     template<typename Scalar>
     void L2Space<Scalar>::resize_tables()
     {
-      if (lsize < this->mesh->get_max_element_id())
+      if(lsize < this->mesh->get_max_element_id())
       {
-        if (!lsize) lsize = 1000;
+        if(!lsize) lsize = 1000;
         while (lsize < this->mesh->get_max_element_id()) lsize = lsize * 3 / 2;
         ldata = (L2Data*) realloc(ldata, sizeof(L2Data) * lsize);
       }
@@ -136,9 +136,9 @@ namespace Hermes
     void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
     {
       // some checks
-      if (e->id >= this->esize || this->edata[e->id].order < 0)
+      if(e->id >= this->esize || this->edata[e->id].order < 0)
         throw Hermes::Exceptions::Exception("Uninitialized element order (id = #%d).", e->id);
-      if (!this->is_up_to_date())
+      if(!this->is_up_to_date())
         throw Hermes::Exceptions::Exception("The space is out of date. You need to update it with assign_dofs()"
         " any time the mesh changes.");
 
@@ -155,7 +155,7 @@ namespace Hermes
     void L2Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
-      if (!ed->n) return;
+      if(!ed->n) return;
 
       int* indices = this->shapeset->get_bubble_indices(ed->order, e->get_mode());
       for (int i = 0, dof = ed->bdof; i < ed->n; i++, dof += this->stride)

@@ -34,12 +34,12 @@ namespace Hermes
     struct SurfPos
     {
       int marker;    ///< surface marker (surface = edge in 2D and face in 3D)
-      int surf_num;	 ///< local element surface number
+      int surf_num;   ///< local element surface number
 
       Element *base; ///< for internal use
 
       int v1, v2;    ///< H2D only: edge endpoint vertex id numbers
-      double t;      ///< H2D only: position between v1 and v2 in the range [0..1]
+      double t;      ///< H2D only: position between v1 and v2 in the range[0..1]
       double lo, hi; ///< H2D only: for internal use
     };
 

@@ -44,7 +44,7 @@ namespace Hermes
     ///
     static int find_position(int *Ai, int Alen, int idx)
     {
-      assert (idx >= 0);
+      assert(idx >= 0);
 
       register int lo = 0, hi = Alen - 1, mid;
 
@@ -52,13 +52,13 @@ namespace Hermes
       {
         mid = (lo + hi) >> 1;
 
-        if (idx < Ai[mid]) hi = mid - 1;
-        else if (idx > Ai[mid]) lo = mid + 1;
+        if(idx < Ai[mid]) hi = mid - 1;
+        else if(idx > Ai[mid]) lo = mid + 1;
         else break;
 
         // Sparse matrix entry not found (raise an error when trying to add
         // value to this position, return 0 when obtaining value there).
-        if (lo > hi)
+        if(lo > hi)
         {
           mid = -1;
           break;
@@ -91,9 +91,9 @@ namespace Hermes
       assert(this->pages != NULL);
 
       // initialize the arrays Ap and Ai
-      Ap = new unsigned int [this->size + 1];
+      Ap = new unsigned int[this->size + 1];
       int aisize = this->get_num_indices();
-      Ai = new int [aisize];
+      Ai = new int[aisize];
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i, pos = 0;
@@ -125,11 +125,11 @@ namespace Hermes
     void MumpsMatrix<Scalar>::free()
     {
       nnz = 0;
-      delete[] Ap; Ap = NULL;
-      delete[] Ai; Ai = NULL;
-      delete[] Ax; Ax = NULL;
-      delete[] irn; irn = NULL;
-      delete[] jcn; jcn = NULL;
+      delete [] Ap; Ap = NULL;
+      delete [] Ai; Ai = NULL;
+      delete [] Ax; Ax = NULL;
+      delete [] irn; irn = NULL;
+      delete [] jcn; jcn = NULL;
     }
 
     inline double mumps_to_Scalar(double x)
@@ -148,9 +148,9 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Return 0 if the entry has not been found.
-      if (mid < 0) return 0.0;
+      if(mid < 0) return 0.0;
       // Otherwise, add offset to the n-th column and return the value.
-      if (mid >= 0) mid += Ap[n];
+      if(mid >= 0) mid += Ap[n];
       return mumps_to_Scalar(Ax[mid]);
     }
 
@@ -175,7 +175,7 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Make sure we are adding to an existing non-zero entry.
-      if (pos < 0)
+      if(pos < 0)
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
       pos += Ap[n];
@@ -225,7 +225,7 @@ namespace Hermes
         return true;
 
       case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n", this->size, this->size, Ap[this->size], Ap[this->size]);
         for (unsigned int j = 0; j < this->size; j++)
           for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
           {
@@ -283,7 +283,7 @@ namespace Hermes
     void MumpsMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, MumpsMatrix<Scalar>* mat)
     {
       int ndof = mat->get_size();
-      if (this->get_size() != (unsigned int) num_stages * ndof)
+      if(this->get_size() != (unsigned int) num_stages * ndof)
         throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
@@ -295,7 +295,7 @@ namespace Hermes
     template<typename Scalar>
     void MumpsMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
     {
-      add_to_diagonal_blocks(num_stages, dynamic_cast<MumpsMatrix*>(mat));
+      add_to_diagonal_blocks(num_stages, static_cast<MumpsMatrix*>(mat));
     }
 
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, ZMUMPS_COMPLEX b)
@@ -314,7 +314,7 @@ namespace Hermes
         for (unsigned int n = mat->Ap[col];n<mat->Ap[col + 1];n++)
         {
           idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
-          if (idx<0)
+          if(idx<0)
             throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
           idx +=Ap[col + j];
           Ax[idx] +=mat->Ax[n];
@@ -531,7 +531,7 @@ namespace Hermes
         return true;
 
       case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
         for (unsigned int i = 0; i < this->size; i++)
         {
           Hermes::Helpers::fprint_num(file, v[i]);
@@ -602,7 +602,7 @@ namespace Hermes
     template<typename Scalar>
     bool MumpsSolver<Scalar>::reinit()
     {
-      if (inited)
+      if(inited)
       {
         // If there is already an instance of MUMPS running,
         // terminate it.
@@ -618,7 +618,7 @@ namespace Hermes
       mumps_c(&param);
       inited = check_status();
 
-      if (inited)
+      if(inited)
       {
         // No printings.
         param.ICNTL(1) = -1;
@@ -657,13 +657,13 @@ namespace Hermes
     MumpsSolver<Scalar>::~MumpsSolver()
     {
       // Terminate the current instance of MUMPS.
-      if (inited)
+      if(inited)
       {
         param.job = JOB_END;
         mumps_c(&param);
       }
 
-      if (param.rhs != NULL) delete [] param.rhs;
+      if(param.rhs != NULL) delete [] param.rhs;
     }
 
     template<typename Scalar>
@@ -684,7 +684,7 @@ namespace Hermes
       // Prepare the MUMPS data structure with input for the solver driver
       // (according to the chosen factorization reuse strategy), as well as
       // the system matrix.
-      if ( !setup_factorization() )
+      if( !setup_factorization() )
       {
         throw Hermes::Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
       }
@@ -698,7 +698,7 @@ namespace Hermes
 
       ret = check_status();
 
-      if (ret)
+      if(ret)
       {
         delete [] this->sln;
         this->sln = new Scalar[m->size];
@@ -721,7 +721,7 @@ namespace Hermes
       // When called for the first time, all three phases (analysis, factorization,
       // solution) must be performed.
       int eff_fact_scheme = this->factorization_scheme;
-      if (!inited)
+      if(!inited)
         if( this->factorization_scheme == HERMES_REUSE_MATRIX_REORDERING ||
           this->factorization_scheme == HERMES_REUSE_FACTORIZATION_COMPLETELY )
           eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
@@ -751,7 +751,7 @@ namespace Hermes
         // Perform scaling along with reordering during the symbolic analysis phase
         // and then reuse it during subsequent factorizations. New instance of MUMPS
         // has to be created before the analysis phase.
-        if (param.INFOG(33) != -2)
+        if(param.INFOG(33) != -2)
         {
           reinit();
           param.ICNTL(6) = 5;

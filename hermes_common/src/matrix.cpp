@@ -44,9 +44,14 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
   for (i = 0; i < n; i++)
   {
     big = 0.0;
-    for (j = 0; j < n; j++) if ((temp = fabs(a[i][j])) > big) big = temp;
-    if (big == 0.0)
+    for (j = 0; j < n; j++)
+      if((temp = fabs(a[i][j])) > big)
+        big = temp;
+    if(big == 0.0)
+    {
+      delete [] vv;
       throw Exceptions::Exception("Singular matrix in routine LUDCMP!");
+    }
     vv[i] = 1.0 / big;
   }
   for (j = 0; j < n; j++)
@@ -63,13 +68,13 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
       sum = a[i][j];
       for (k = 0; k < j; k++) sum -= a[i][k]*a[k][j];
       a[i][j] = sum;
-      if ((dum = vv[i]*fabs(sum)) >= big)
+      if((dum = vv[i]*fabs(sum)) >= big)
       {
         big = dum;
         imax = i;
       }
     }
-    if (j != imax)
+    if(j != imax)
     {
       for (k = 0; k < n; k++)
       {
@@ -81,8 +86,8 @@ void Hermes::Algebra::DenseMatrixOperations::ludcmp(double **a, int n, int *indx
       vv[imax] = vv[j];
     }
     indx[j] = imax;
-    if (a[j][j] == 0.0) a[j][j] = 1.0e-20;
-    if (j != n-1)
+    if(a[j][j] == 0.0) a[j][j] = 1.0e-20;
+    if(j != n-1)
     {
       dum = 1.0 / (a[j][j]);
       for (i = j + 1; i < n; i++) a[i][j] *= dum;
@@ -101,9 +106,9 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
       double sum = a[i][j];
       k = i;
       while (--k >= 0) sum -= a[i][k] * a[j][k];
-      if (i == j)
+      if(i == j)
       {
-        if (sum <= 0.0)
+        if(sum <= 0.0)
           throw Exceptions::Exception("CHOLDC failed!");
         else p[i] = sqrt(sum);
       }
@@ -135,7 +140,7 @@ Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix(unsigned int size)
 template<typename Scalar>
 Hermes::Algebra::SparseMatrix<Scalar>::~SparseMatrix()
 {
-  if (pages)
+  if(pages)
   {
     for (unsigned int i = 0; i < this->size; i++)
       if(pages[i])
@@ -156,7 +161,7 @@ void Hermes::Algebra::SparseMatrix<Scalar>::prealloc(unsigned int n)
 template<typename Scalar>
 void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
 {
-  if (pages[col] == NULL || pages[col]->count >= PAGE_SIZE)
+  if(pages[col] == NULL || pages[col]->count >= PAGE_SIZE)
   {
     Page *new_page = new Page;
     new_page->count = 0;
@@ -183,7 +188,7 @@ int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, in
   // sort the indices and remove duplicities
   qsort_int(buffer, end - buffer);
   int *q = buffer;
-  for (int *p = buffer, last = -1; p < end; p++) if (*p != last) *q++= last = *p;
+  for (int *p = buffer, last = -1; p < end; p++) if(*p != last) *q++= last = *p;
 
   return q - buffer;
 }

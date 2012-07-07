@@ -45,7 +45,7 @@ namespace Hermes
           return false;
 
         // refinements.
-        if (parsed_xml_mesh->refinements().present() && parsed_xml_mesh->refinements()->refinement().size() > 0)
+        if(parsed_xml_mesh->refinements().present() && parsed_xml_mesh->refinements()->refinement().size() > 0)
         {
           // perform initial refinements
           for (unsigned int i = 0; i < parsed_xml_mesh->refinements()->refinement().size(); i++)
@@ -88,8 +88,8 @@ namespace Hermes
       for (int i = 0; i < mesh->get_num_base_elements(); i++)
       {
         e = mesh->get_element_fast(i);
-        if (e->used)
-          if (e->is_triangle())
+        if(e->used)
+          if(e->is_triangle())
             elements.element().push_back(XMLMesh::triangle_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str()));
           else
             elements.element().push_back(XMLMesh::quad_type(e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->vn[3]->id));
@@ -98,15 +98,15 @@ namespace Hermes
       XMLMesh::edges_type edges;
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->get_num_surf(); i++)
-          if (mesh->get_base_edge_node(e, i)->marker)
+          if(mesh->get_base_edge_node(e, i)->marker)
             edges.edge().push_back(XMLMesh::edge(e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str()));
 
       // save curved edges
       XMLMesh::curves_type curves;
       for_all_base_elements(e, mesh)
-        if (e->is_curved())
+        if(e->is_curved())
           for (unsigned i = 0; i < e->get_num_surf(); i++)
-            if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
+            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
               if(e->cm->nurbs[i]->arc)
                 save_arc(mesh, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i], curves);
               else
@@ -356,7 +356,7 @@ namespace Hermes
               }
 
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
-              if (en == NULL)
+              if(en == NULL)
                 throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
 
               // Trim whitespaces.
@@ -389,7 +389,7 @@ namespace Hermes
               }
 
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
-              if (en == NULL)
+              if(en == NULL)
                 throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist)", inner_edge_number_i);
 
               // Trim whitespaces.
@@ -455,9 +455,9 @@ namespace Hermes
               for (unsigned int node_i = 0; node_i < 2; node_i++)
               {
                 Element* e = en->elem[node_i];
-                if (e == NULL) continue;
+                if(e == NULL) continue;
 
-                if (e->cm == NULL)
+                if(e->cm == NULL)
                 {
                   e->cm = new CurvMap;
                   memset(e->cm, 0, sizeof(CurvMap));
@@ -467,10 +467,10 @@ namespace Hermes
 
                 int idx = -1;
                 for (unsigned j = 0; j < e->get_num_surf(); j++)
-                  if (e->en[j] == en) { idx = j; break; }
+                  if(e->en[j] == en) { idx = j; break; }
                   assert(idx >= 0);
 
-                  if (e->vn[idx]->id == p1)
+                  if(e->vn[idx]->id == p1)
                   {
                     e->cm->nurbs[idx] = nurbs;
                     nurbs->ref++;
@@ -482,16 +482,16 @@ namespace Hermes
                     nurbs_rev->ref++;
                   }
               }
-              if (!nurbs->ref) delete nurbs;
+              if(!nurbs->ref) delete nurbs;
             }
 
             // update refmap coeffs of curvilinear elements
             for_all_elements(e, meshes[subdomains_i])
-              if (e->cm != NULL)
+              if(e->cm != NULL)
                 e->cm->update_refmap_coeffs(e);
 
             // refinements.
-            if (parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().size() > 0)
+            if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().size() > 0)
             {
               // perform initial refinements
               for (unsigned int i = 0; i < parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->refinement().size(); i++)
@@ -506,6 +506,7 @@ namespace Hermes
             }
 
             meshes[subdomains_i]->seq = g_mesh_seq++;
+            delete [] elements_existing;
           }
         }
 
@@ -587,9 +588,9 @@ namespace Hermes
         for (int i = 0; i < meshes[meshes_i]->get_num_base_elements(); i++)
         {
           e = meshes[meshes_i]->get_element_fast(i);
-          if (e->used)
+          if(e->used)
           {
-            if (e->is_triangle())
+            if(e->is_triangle())
             {
               bool present = false;
               for(unsigned int elements_i = 0; elements_i < elements.element().size(); elements_i++)
@@ -633,7 +634,7 @@ namespace Hermes
         {
           for (unsigned i = 0; i < e->get_num_surf(); i++)
           {
-            if (meshes[meshes_i]->get_base_edge_node(e, i)->bnd)
+            if(meshes[meshes_i]->get_base_edge_node(e, i)->bnd)
             {
               if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
               {
@@ -654,7 +655,7 @@ namespace Hermes
           for_all_base_elements(e, meshes[meshes_i])
           for (unsigned i = 0; i < e->get_num_surf(); i++)
           {
-            if (!meshes[meshes_i]->get_base_edge_node(e, i)->bnd)
+            if(!meshes[meshes_i]->get_base_edge_node(e, i)->bnd)
             {
               if(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_boundaries.end())
               {
@@ -669,9 +670,9 @@ namespace Hermes
 
         // save curved edges
         for_all_base_elements(e, meshes[meshes_i])
-          if (e->is_curved())
+          if(e->is_curved())
             for (unsigned i = 0; i < e->get_num_surf(); i++)
-              if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
+              if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
                 if(vertices_to_curves.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second))) == vertices_to_curves.end())
                 {
                   if(e->cm->nurbs[i]->arc)
@@ -846,7 +847,7 @@ namespace Hermes
           int v2 = vertex_is.find(parsed_xml_mesh->edges().edge().at(edge_i).v2())->second;
 
           en = mesh->peek_edge_node(v1, v2);
-          if (en == NULL)
+          if(en == NULL)
             throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
 
           std::string edge_marker = parsed_xml_mesh->edges().edge().at(edge_i).marker();
@@ -866,7 +867,7 @@ namespace Hermes
 
           // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
           // for the inner edges.
-          if (marker > 0)
+          if(marker > 0)
           {
             mesh->nodes[v1].bnd = 1;
             mesh->nodes[v2].bnd = 1;
@@ -876,7 +877,7 @@ namespace Hermes
 
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
-          if (en->ref < 2 && en->marker == 0)
+          if(en->ref < 2 && en->marker == 0)
             this->warn("Boundary edge node does not have a boundary marker");
 
         // Curves //
@@ -912,9 +913,9 @@ namespace Hermes
           for (unsigned int node_i = 0; node_i < 2; node_i++)
           {
             Element* e = en->elem[node_i];
-            if (e == NULL) continue;
+            if(e == NULL) continue;
 
-            if (e->cm == NULL)
+            if(e->cm == NULL)
             {
               e->cm = new CurvMap;
               memset(e->cm, 0, sizeof(CurvMap));
@@ -924,10 +925,10 @@ namespace Hermes
 
             int idx = -1;
             for (unsigned j = 0; j < e->get_num_surf(); j++)
-              if (e->en[j] == en) { idx = j; break; }
+              if(e->en[j] == en) { idx = j; break; }
               assert(idx >= 0);
 
-              if (e->vn[idx]->id == p1)
+              if(e->vn[idx]->id == p1)
               {
                 e->cm->nurbs[idx] = nurbs;
                 nurbs->ref++;
@@ -939,12 +940,12 @@ namespace Hermes
                 nurbs_rev->ref++;
               }
           }
-          if (!nurbs->ref) delete nurbs;
+          if(!nurbs->ref) delete nurbs;
         }
 
         // update refmap coeffs of curvilinear elements
         for_all_elements(e, mesh)
-          if (e->cm != NULL)
+          if(e->cm != NULL)
             e->cm->update_refmap_coeffs(e);
       }
       catch (const xml_schema::exception& e)
@@ -1105,7 +1106,7 @@ namespace Hermes
           edge_is[edge_i] = parsed_xml_domain->edges().edge().at(edge_i).i();
 
           en = mesh->peek_edge_node(v1, v2);
-          if (en == NULL)
+          if(en == NULL)
             throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
 
           std::string edge_marker = parsed_xml_domain->edges().edge().at(edge_i).marker();
@@ -1125,7 +1126,7 @@ namespace Hermes
 
           // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
           // for the inner edges.
-          if (marker > 0)
+          if(marker > 0)
           {
             mesh->nodes[v1].bnd = 1;
             mesh->nodes[v2].bnd = 1;
@@ -1135,7 +1136,7 @@ namespace Hermes
 
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
-          if (en->ref < 2 && en->marker == 0)
+          if(en->ref < 2 && en->marker == 0)
             this->warn("Boundary edge node does not have a boundary marker");
 
         // Curves //
@@ -1171,9 +1172,9 @@ namespace Hermes
           for (unsigned int node_i = 0; node_i < 2; node_i++)
           {
             Element* e = en->elem[node_i];
-            if (e == NULL) continue;
+            if(e == NULL) continue;
 
-            if (e->cm == NULL)
+            if(e->cm == NULL)
             {
               e->cm = new CurvMap;
               memset(e->cm, 0, sizeof(CurvMap));
@@ -1183,10 +1184,10 @@ namespace Hermes
 
             int idx = -1;
             for (unsigned j = 0; j < e->get_num_surf(); j++)
-              if (e->en[j] == en) { idx = j; break; }
+              if(e->en[j] == en) { idx = j; break; }
               assert(idx >= 0);
 
-              if (e->vn[idx]->id == p1)
+              if(e->vn[idx]->id == p1)
               {
                 e->cm->nurbs[idx] = nurbs;
                 nurbs->ref++;
@@ -1198,12 +1199,12 @@ namespace Hermes
                 nurbs_rev->ref++;
               }
           }
-          if (!nurbs->ref) delete nurbs;
+          if(!nurbs->ref) delete nurbs;
         }
 
         // update refmap coeffs of curvilinear elements
         for_all_elements(e, mesh)
-          if (e->cm != NULL)
+          if(e->cm != NULL)
             e->cm->update_refmap_coeffs(e);
       }
       catch (const xml_schema::exception& e)
@@ -1224,7 +1225,7 @@ namespace Hermes
 
       parsed_xml_entity.get();
 
-      if (*en == NULL)
+      if(*en == NULL)
       {
         if(!skip_check)
           throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
@@ -1278,7 +1279,7 @@ namespace Hermes
 
       *en = mesh->peek_edge_node(p1, p2);
 
-      if (*en == NULL)
+      if(*en == NULL)
       {
         if(!skip_check)
           throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
@@ -1315,7 +1316,7 @@ namespace Hermes
       inner = parsed_xml_entity->curves()->NURBS().at(id).knot().size();
       nurbs->nk = nurbs->degree + nurbs->np + 1;
       int outer = nurbs->nk - inner;
-      if ((outer & 1) == 1)
+      if((outer & 1) == 1)
         throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: incorrect number of knot points.", id);
 
       // knot vector is completed by 0.0 on the left and by 1.0 on the right
@@ -1324,7 +1325,7 @@ namespace Hermes
       for (int i = 0; i < outer/2; i++)
         nurbs->kv[i] = 0.0;
 
-      if (inner > 0)
+      if(inner > 0)
         for (int i = outer/2; i < inner + outer/2; i++)
           nurbs->kv[i] = parsed_xml_entity->curves()->NURBS().at(id).knot().at(i - (outer/2)).value();
 

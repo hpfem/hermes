@@ -25,13 +25,13 @@
 #include "linear_matrix_solver.h"
 #include "nonlinear_solver.h"
 #include "epetra.h"
-#if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
+#if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 #include <NOX.H>
 #ifdef _POSIX_C_SOURCE
-# undef _POSIX_C_SOURCE	// pyconfig.h included by NOX_Epetra defines it
+# undef _POSIX_C_SOURCE  // pyconfig.h included by NOX_Epetra defines it
 #endif
 #ifdef _XOPEN_SOURCE
-# undef _XOPEN_SOURCE	// pyconfig.h included by NOX_Epetra defines it
+# undef _XOPEN_SOURCE  // pyconfig.h included by NOX_Epetra defines it
 #endif
 #include <NOX_Epetra.H>
 #include "exceptions.h"

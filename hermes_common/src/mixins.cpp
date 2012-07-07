@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes; if not, see <http://www.gnu.prg/licenses/>.
 #include "mixins.h"
+#include <map>
+#include <string>
 #include "common.h"
 
 namespace Hermes
@@ -42,7 +44,6 @@ namespace Hermes
       if(!this->verbose_output)
         return;
 
-      bool new_block = true;
       char text[BUF_SZ];
       char* text_contents = text + 1;
 
@@ -65,7 +66,6 @@ namespace Hermes
 
       if(cond)
       {
-        bool new_block = true;
         char text[BUF_SZ];
         char* text_contents = text + 1;
 
@@ -86,7 +86,6 @@ namespace Hermes
       if(!this->verbose_output)
         return;
 
-      bool new_block = true;
       char text[BUF_SZ];
       char* text_contents = text + 1;
 
@@ -108,7 +107,6 @@ namespace Hermes
 
       if(cond)
       {
-        bool new_block = true;
         char text[BUF_SZ];
         char* text_contents = text + 1;
 
@@ -127,21 +125,21 @@ namespace Hermes
 
     bool Loggable::write_console(const char code, const char* text) const
     {
-    #ifdef WIN32 //Windows platform
+      //Windows platform
+    #ifdef WIN32
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
-      if (h_console == INVALID_HANDLE_VALUE)
+      if(h_console == INVALID_HANDLE_VALUE)
         return false;
 
       //read current console settings
       CONSOLE_SCREEN_BUFFER_INFO console_info;
-      if (!GetConsoleScreenBufferInfo(h_console, &console_info))
+      if(!GetConsoleScreenBufferInfo(h_console, &console_info))
         return false;
 
       //generate console settings
       WORD console_attr_red = FOREGROUND_RED, console_attr_green = FOREGROUND_GREEN, console_attr_blue = FOREGROUND_BLUE;
 
       WORD console_attrs = 0;
-      bool console_bold = false;
       switch(code)
       {
         case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
@@ -159,11 +157,12 @@ namespace Hermes
       //return previous settings
       SetConsoleTextAttribute(h_console, console_info.wAttributes);
 
-      if (write_success)
+      if(write_success)
         return true;
       else
         return false;
-    #else //Linux platform
+    //Linux platform
+    #else
     # define FOREGROUND_RED 1
     # define FOREGROUND_GREEN 2
     # define FOREGROUND_BLUE 4
@@ -180,7 +179,7 @@ namespace Hermes
       printf("\033[%dm", console_attrs + 30);
 
       //emphasize and console bold
-      if (console_bold)
+      if(console_bold)
         printf("\033[1m");
 
       //print text and reset settings
@@ -197,16 +196,16 @@ namespace Hermes
 
     void Loggable::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const
     {
-      if (fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
+      if(fwrite(ptr, size, nitems, stream) != nitems || ferror(stream))
         throw Hermes::Exceptions::Exception("Error writing to file: %s", strerror(ferror(stream)));
     }
 
     void Loggable::hermes_fread(void* ptr, size_t size, size_t nitems, FILE* stream) const
     {
       size_t ret = fread(ptr, size, nitems, stream);
-      if (ret < nitems)
+      if(ret < nitems)
         throw Hermes::Exceptions::Exception("Premature end of file.");
-      else if (ferror(stream))
+      else if(ferror(stream))
         throw Hermes::Exceptions::Exception("Error reading file: %s", strerror(ferror(stream)));
     }
 
@@ -219,21 +218,21 @@ namespace Hermes
       logger_monitor.enter();
 
       //print the message
-      if (!write_console(code, msg))
-        printf("%s", msg); //safe fallback
-      printf("\n"); //write a new line
+      if(!write_console(code, msg))
+        printf("%s", msg);  //safe fallback
+      printf("\n");  //write a new line
 
       HermesLogEventInfo* info = this->hermes_build_log_info(code);
 
       //print to file
-      if (info->log_file != NULL)
+      if(info->log_file != NULL)
       {
         FILE* file = fopen(info->log_file, "at");
-        if (file != NULL)
+        if(file != NULL)
         {
           //check whether log file was already written
           std::map<std::string, bool>::const_iterator found = logger_written.find(info->log_file);
-          if (found == logger_written.end()) { //first write, write delimited to a file
+          if(found == logger_written.end()) {  //first write, write delimited to a file
             logger_written[info->log_file] = true;
             fprintf(file, "\n");
             for(int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
@@ -244,20 +243,21 @@ namespace Hermes
           //build a long version of location
           std::ostringstream location;
           location << '(';
-          if (info->src_function != NULL)
+          if(info->src_function != NULL)
           {
             location << info->src_function;
-            if (info->src_file != NULL)
+            if(info->src_file != NULL)
               location << '@';
           }
-          if (info->src_file != NULL)
+          if(info->src_file != NULL)
             location << info->src_file << ':' << info->src_line;
           location << ')';
 
           //get time
           time_t now;
           time(&now);
-          struct tm* now_tm = gmtime(&now);
+          struct tm* now_tm;
+          gmtime_r(&now, now_tm);
           char time_buf[BUF_SZ];
           strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
 
@@ -288,20 +288,20 @@ namespace Hermes
     TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == NULL ? "unnamed" : name)
     {
       //initialization
-  #ifdef WIN32 //Windows
+  #ifdef WIN32  //Windows
       LARGE_INTEGER freq;
-      if (QueryPerformanceFrequency(&freq))
+      if(QueryPerformanceFrequency(&freq))
         frequency = (double)freq.QuadPart;
       else
         frequency = -1;
-  #endif //Linux
+  #endif  //Linux
       tick_reset();
     }
 
     TimeMeasurable::SysTime TimeMeasurable::get_time() const
     {
-  #ifdef WIN32 //Windows
-      if (frequency > 0)
+  #ifdef WIN32  //Windows
+      if(frequency > 0)
       {
         LARGE_INTEGER ticks;
         QueryPerformanceCounter(&ticks);
@@ -311,11 +311,11 @@ namespace Hermes
       {
         return clock();
       }
-  #elif defined(__APPLE__) //Mac
+  #elif defined(__APPLE__)  //Mac
       // FIXME: implement time measurement on Mac
       timespec tm;
       return tm;
-  #else //Linux
+  #else  //Linux
       timespec tm;
       clock_gettime(CLOCK_REALTIME, &tm);
       return tm;
@@ -324,16 +324,16 @@ namespace Hermes
 
     double TimeMeasurable::period_in_seconds(const SysTime& begin, const SysTime& end) const
     {
-  #ifdef WIN32 //Windows
+  #ifdef WIN32  //Windows
       uint64_t period = end - begin;
-      if (frequency > 0)
+      if(frequency > 0)
         return period / frequency;
       else
         return period / (double)CLOCKS_PER_SEC;
-  #else //Linux
+  #else  //Linux
       int sec_corr = 0;
       long period_nsec = end.tv_nsec - begin.tv_nsec;
-      if (period_nsec < 0)
+      if(period_nsec < 0)
       {
         sec_corr += -1;
         period_nsec += 1000000000UL;
@@ -346,7 +346,7 @@ namespace Hermes
     const TimeMeasurable& TimeMeasurable::tick(TimerPeriodTickType type)
     {
       SysTime cur_time = get_time();
-      if (type == HERMES_ACCUMULATE)
+      if(type == HERMES_ACCUMULATE)
       {
         double secs = period_in_seconds(last_time, cur_time);
         accum += secs;
@@ -400,7 +400,7 @@ namespace Hermes
 
     std::string TimeMeasurable::to_string(double secs) const
     {
-      if (secs < 0)
+      if(secs < 0)
         return "NO TIME";
       else
       {
@@ -409,9 +409,9 @@ namespace Hermes
         secs = fmod(secs, 60);
 
         std::stringstream str;
-        if (hours > 0)
+        if(hours > 0)
           str << hours << "h ";
-        if (hours > 0 || mins > 0)
+        if(hours > 0 || mins > 0)
           str << mins << "m ";
         str << secs << "s";
 

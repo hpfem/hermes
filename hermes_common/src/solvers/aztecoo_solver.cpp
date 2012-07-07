@@ -23,7 +23,7 @@
 #ifdef HAVE_AZTECOO
 #include "aztecoo_solver.h"
 #include "callstack.h"
-#include <Komplex_LinearProblem.h>
+#include "Komplex_LinearProblem.h"
 
 namespace Hermes
 {
@@ -45,15 +45,19 @@ namespace Hermes
     void AztecOOSolver<Scalar>::set_solver(const char *name)
     {
       int az_solver;
-      if (name)
+      if(name)
       {
-        if (strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
-        else if (strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
-        else if (strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
-        else if (strcasecmp(name, "tfqmr") == 0) az_solver = AZ_tfqmr;
-        else if (strcasecmp(name, "bicgstab") == 0) az_solver = AZ_bicgstab;
+        if(strcasecmp(name, "gmres") == 0) az_solver = AZ_gmres;
+        else if(strcasecmp(name, "cg") == 0) az_solver = AZ_cg;
+        else if(strcasecmp(name, "cgs") == 0) az_solver = AZ_cgs;
+        else if(strcasecmp(name, "tfqmr") == 0) az_solver = AZ_tfqmr;
+        else if(strcasecmp(name, "bicgstab") == 0) az_solver = AZ_bicgstab;
         else az_solver = AZ_gmres;
-      }else az_solver = AZ_gmres;
+      }
+      else
+      {
+        az_solver = AZ_gmres;
+      }
 
       aztec.SetAztecOption(AZ_solver, az_solver);
     }
@@ -82,14 +86,21 @@ namespace Hermes
     void AztecOOSolver<Scalar>::set_precond(const char *name)
     {
       int az_precond;
-      if (name)
+      if(name)
       {
-        if (strcasecmp(name, "none") == 0) az_precond = AZ_none;
-        else if (strcasecmp(name, "jacobi") == 0) az_precond = AZ_Jacobi;
-        else if (strcasecmp(name, "neumann") == 0) az_precond = AZ_Neumann;
-        else if (strcasecmp(name, "least-squares") == 0) az_precond = AZ_ls;
-        else az_precond = AZ_none;
-      }else az_precond = AZ_none; //asi by to melo byt nastaveno
+        if(strcasecmp(name, "none") == 0)
+          az_precond = AZ_none;
+        else if(strcasecmp(name, "jacobi") == 0)
+          az_precond = AZ_Jacobi;
+        else if(strcasecmp(name, "neumann") == 0)
+          az_precond = AZ_Neumann;
+        else if(strcasecmp(name, "least-squares") == 0)
+          az_precond = AZ_ls;
+        else
+          az_precond = AZ_none;
+      }
+      else
+        az_precond = AZ_none; //asi by to melo byt nastaveno
 
       this->precond_yes = (az_precond != AZ_none);
       aztec.SetAztecOption(AZ_precond, az_precond);
@@ -121,7 +132,7 @@ namespace Hermes
       assert(m->size == rhs->size);
 
       // no output
-      aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
+      aztec.SetAztecOption(AZ_output, AZ_none);  // AZ_all | AZ_warnings | AZ_last | AZ_summary
 
       // setup the problem
       aztec.SetUserMatrix(m->mat);
@@ -129,10 +140,10 @@ namespace Hermes
       Epetra_Vector x(*rhs->std_map);
       aztec.SetLHS(&x);
 
-      if (pc != NULL)
+      if(pc != NULL)
       {
         Epetra_Operator *op = pc->get_obj();
-        assert(op != NULL);		// can work only with Epetra_Operators
+        assert(op != NULL);    // can work only with Epetra_Operators
         aztec.SetPrecOperator(op);
       }
 
@@ -159,7 +170,7 @@ namespace Hermes
       assert(m->size == rhs->size);
 
       // no output
-      aztec.SetAztecOption(AZ_output, AZ_none);	// AZ_all | AZ_warnings | AZ_last | AZ_summary
+      aztec.SetAztecOption(AZ_output, AZ_none);  // AZ_all | AZ_warnings | AZ_last | AZ_summary
 
       double c0r = 1.0, c0i = 0.0;
       double c1r = 0.0, c1i = 1.0;

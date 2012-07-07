@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
   }
   catch(Exceptions::NullException&e)
   {
-    if (e.getParamIdx()!=1)
+    if(e.getParamIdx()!=1)
     {
       return -1;
     }
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   }
   catch(Exceptions::LengthException& e)
   {
-    if (e.getFirstParamIdx()!=2 || e.getSecondParamIdx()!=3 || e.getFirstLength()!=4 || e.getExpectedLength()!=3)
+    if(e.getFirstParamIdx()!=2 || e.getSecondParamIdx()!=3 || e.getFirstLength()!=4 || e.getExpectedLength()!=3)
     {
       return -1;
     }

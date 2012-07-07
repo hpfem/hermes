@@ -26,7 +26,7 @@ namespace Hermes
         : MatrixFormVol<double>(i, j, area, sym), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE)
+        if(coeff == HERMES_ONE)
           this->coeff = new Hermes2DFunction<double>(1.0);
       }
       template<>
@@ -35,7 +35,7 @@ namespace Hermes
         : MatrixFormVol<std::complex<double> >(i, j, area, sym), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE)
+        if(coeff == HERMES_ONE)
           this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 1.0));
       }
 
@@ -46,7 +46,7 @@ namespace Hermes
         : MatrixFormVol<double>(i, j, areas, sym), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE)
+        if(coeff == HERMES_ONE)
           this->coeff = new Hermes2DFunction<double>(1.0);
       }
       template<>
@@ -56,7 +56,7 @@ namespace Hermes
         : MatrixFormVol<std::complex<double> >(i, j, areas, sym), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE)
+        if(coeff == HERMES_ONE)
           this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 1.0));
       }
 
@@ -64,7 +64,7 @@ namespace Hermes
       DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -72,13 +72,13 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
@@ -98,13 +98,13 @@ namespace Hermes
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
@@ -132,7 +132,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, area, sym), idx_j(j), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       };
 
       template<typename Scalar>
@@ -141,14 +141,14 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, areas, sym), idx_j(j), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultJacobianDiffusion<Scalar>::~DefaultJacobianDiffusion()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -156,7 +156,7 @@ namespace Hermes
         Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
               (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
@@ -165,7 +165,7 @@ namespace Hermes
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
                 (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
@@ -191,7 +191,7 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
               (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
@@ -200,7 +200,7 @@ namespace Hermes
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * (coeff->derivative(u_ext[idx_j]->val[i]) * u->val[i] *
                 (u_ext[idx_j]->dx[i] * v->dx[i] + u_ext[idx_j]->dy[i] * v->dy[i])
@@ -234,7 +234,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, area, sym), idx_j(j), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       };
 
       template<typename Scalar>
@@ -243,14 +243,14 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, areas, sym), idx_j(j), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultMatrixFormDiffusion<Scalar>::~DefaultMatrixFormDiffusion()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -258,13 +258,13 @@ namespace Hermes
         Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
             }
@@ -284,13 +284,13 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
             }
@@ -319,11 +319,11 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, area, HERMES_NONSYM),
         idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
+        if(gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
-        if (coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -334,19 +334,19 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j, areas, HERMES_NONSYM),
         idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
+        if(gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
-        if (coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultJacobianAdvection<Scalar>::~DefaultJacobianAdvection()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff1 != HERMES_ONE) delete coeff1;
-        //if (coeff2 != HERMES_ONE) delete coeff2;
+        //if(coeff1 != HERMES_ONE) delete coeff1;
+        //if(coeff2 != HERMES_ONE) delete coeff2;
       };
 
       template<typename Scalar>
@@ -391,7 +391,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, area), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -401,14 +401,14 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, areas), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -416,13 +416,13 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
@@ -441,13 +441,13 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
@@ -475,7 +475,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, area), idx_i(i), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -485,14 +485,14 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, areas), idx_i(i), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultResidualVol<Scalar>::~DefaultResidualVol()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -500,13 +500,13 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
@@ -525,13 +525,13 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
@@ -558,7 +558,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, area), idx_i(i), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       };
 
       template<typename Scalar>
@@ -567,14 +567,14 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, areas), idx_i(i), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::~DefaultResidualDiffusion()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -582,14 +582,14 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(u_ext[idx_i]->val[i])
               * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(u_ext[idx_i]->val[i])
                 * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
@@ -615,7 +615,7 @@ namespace Hermes
           result += wt[i] * coeff->value(u_ext[idx_i]->val[i])
             * (u_ext[idx_i]->dx[i] * v->dx[i] + u_ext[idx_i]->dy[i] * v->dy[i]);
         }
-        if (gt != HERMES_PLANAR) result = result * Ord(1);
+        if(gt != HERMES_PLANAR) result = result * Ord(1);
 
         return result;
       }
@@ -633,11 +633,11 @@ namespace Hermes
         GeomType gt)
         : VectorFormVol<Scalar>(i, area), idx_i(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
+        if(gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
-        if (coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -648,19 +648,19 @@ namespace Hermes
         : VectorFormVol<Scalar>(i, areas),
         idx_i(i), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
-        if (gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
+        if(gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
         // If coeff1 == HERMES_ONE or coeff22 == HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
-        if (coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff1 == HERMES_ONE) this->coeff1 = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff2 == HERMES_ONE) this->coeff2 = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultResidualAdvection<Scalar>::~DefaultResidualAdvection()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff1 != HERMES_ONE) delete coeff1;
-        //if (coeff2 != HERMES_ONE) delete coeff2;
+        //if(coeff1 != HERMES_ONE) delete coeff1;
+        //if(coeff2 != HERMES_ONE) delete coeff2;
       };
 
       template<typename Scalar>
@@ -702,7 +702,7 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j, area), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -712,14 +712,14 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j, areas), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -727,13 +727,13 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
@@ -753,13 +753,13 @@ namespace Hermes
         Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u->val[i] * v->val[i];
             }
@@ -788,7 +788,7 @@ namespace Hermes
         idx_j(j), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -798,14 +798,14 @@ namespace Hermes
         : MatrixFormSurf<Scalar>(i, j, areas), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultJacobianFormSurf<Scalar>::~DefaultJacobianFormSurf()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -847,7 +847,7 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i, area), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -857,14 +857,14 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i, areas), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -872,13 +872,13 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
@@ -898,13 +898,13 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * v->val[i];
             }
@@ -932,7 +932,7 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i, area), idx_i(i), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
@@ -942,14 +942,14 @@ namespace Hermes
         : VectorFormSurf<Scalar>(i, areas), idx_i(i), coeff(coeff), gt(gt)
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if (coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE) this->coeff = new Hermes2DFunction<Scalar>(1.0);
       }
 
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
       {
         // FIXME: Should be deleted here only if it was created here.
-        //if (coeff != HERMES_ONE) delete coeff;
+        //if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -957,13 +957,13 @@ namespace Hermes
         Geom<double> *e, ExtData<Scalar> *ext) const
       {
         Scalar result = 0;
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }
@@ -983,13 +983,13 @@ namespace Hermes
         Geom<Ord> *e, ExtData<Ord> *ext) const
       {
         Ord result = Ord(0);
-        if (gt == HERMES_PLANAR) {
+        if(gt == HERMES_PLANAR) {
           for (int i = 0; i < n; i++) {
             result += wt[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
           }
         }
         else {
-          if (gt == HERMES_AXISYM_X) {
+          if(gt == HERMES_AXISYM_X) {
             for (int i = 0; i < n; i++) {
               result += wt[i] * e->y[i] * coeff->value(e->x[i], e->y[i]) * u_ext[idx_i]->val[i] * v->val[i];
             }

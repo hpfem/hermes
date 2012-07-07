@@ -16,7 +16,7 @@
 \brief NOX (nonliner) solver interface.
 */
 #include "newton_solver_nox.h"
-#if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
+#if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
 namespace Hermes
 {
@@ -54,7 +54,7 @@ namespace Hermes
       Epetra_RowMatrix *jac = dynamic_cast<Epetra_RowMatrix *>(&op);
       assert(jac != NULL);
 
-      EpetraVector<Scalar> xx(x);			// wrap our structures around core Epetra objects
+      EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
       EpetraMatrix<Scalar> jacob(*jac);
 
       jacob.zero();
@@ -73,7 +73,7 @@ namespace Hermes
       Teuchos::ParameterList *precParams)
     {
       assert(precond != Teuchos::null);
-      EpetraVector<Scalar> xx(x);			// wrap our structures around core Epetra objects
+      EpetraVector<Scalar> xx(x);      // wrap our structures around core Epetra objects
 
       jacobian.zero();
 
@@ -332,7 +332,7 @@ namespace Hermes
       NOX::StatusTest::StatusType status = solver->solve();
 
       if(!this->dp->is_matrix_free())
-        jac_mat.release();	// release the ownership (we take care of jac_mat by ourselves)
+        jac_mat.release();  // release the ownership (we take care of jac_mat by ourselves)
 
       if(status == NOX::StatusTest::Converged)
       {

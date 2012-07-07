@@ -16,9 +16,10 @@
     \brief The QuickSort routine from glibc-2.5 modified for sorting int arrays.
 */
 
-#include <limits.h>
-#include <stdlib.h>
 #include "qsort.h"
+#include <limits.h>
+#include <algorithm>
+#include <stdlib.h>
 
 #define SWAP(a, b) { int c = *(a); *(a) = *(b); *(b) = c; }
 
@@ -42,9 +43,9 @@ void qsort_int(int* pbase, size_t total_elems)
 {
   register int *base_ptr = pbase;
 
-  if (total_elems == 0) return;
+  if(total_elems == 0) return;
 
-  if (total_elems > MAX_THRESH)
+  if(total_elems > MAX_THRESH)
   {
     int *lo = base_ptr;
     int *hi = lo + total_elems - 1;
@@ -66,13 +67,13 @@ void qsort_int(int* pbase, size_t total_elems)
 
       int *mid = lo + ((hi - lo) >> 1);
 
-      if (*mid < *lo)
+      if(*mid < *lo)
         SWAP (mid, lo);
-      if (*hi < *mid)
+      if(*hi < *mid)
         SWAP (mid, hi)
       else
       goto jump_over;
-      if (*mid < *lo)
+      if(*mid < *lo)
         SWAP(mid, lo);
 jump_over:
 
@@ -90,17 +91,17 @@ jump_over:
         while (*mid < *right_ptr)
           right_ptr--;
 
-        if (left_ptr < right_ptr)
+        if(left_ptr < right_ptr)
         {
           SWAP(left_ptr, right_ptr);
-          if (mid == left_ptr)
+          if(mid == left_ptr)
             mid = right_ptr;
-          else if (mid == right_ptr)
+          else if(mid == right_ptr)
             mid = left_ptr;
           left_ptr++;
           right_ptr--;
         }
-        else if (left_ptr == right_ptr)
+        else if(left_ptr == right_ptr)
         {
           left_ptr++;
           right_ptr--;
@@ -114,19 +115,19 @@ jump_over:
       // ignore one or both.  Otherwise, push the larger partition's
       // bounds on the stack and continue sorting the smaller one.
 
-      if ((size_t) (right_ptr - lo) <= MAX_THRESH)
+      if((size_t) (right_ptr - lo) <= MAX_THRESH)
       {
-        if ((size_t) (hi - left_ptr) <= MAX_THRESH)
+        if((size_t) (hi - left_ptr) <= MAX_THRESH)
           // Ignore both small partitions.
           POP(lo, hi);
         else
           // Ignore small left partition.
           lo = left_ptr;
       }
-      else if ((size_t) (hi - left_ptr) <= MAX_THRESH)
+      else if((size_t) (hi - left_ptr) <= MAX_THRESH)
         // Ignore small right partition.
         hi = right_ptr;
-      else if ((right_ptr - lo) > (hi - left_ptr))
+      else if((right_ptr - lo) > (hi - left_ptr))
       {
         // Push larger left partition indices.
         PUSH(lo, right_ptr);
@@ -157,10 +158,10 @@ jump_over:
     // and the operation speeds up insertion sort's inner loop.
 
     for (run_ptr = tmp_ptr + 1; run_ptr <= thresh; run_ptr++)
-      if (*run_ptr < *tmp_ptr)
+      if(*run_ptr < *tmp_ptr)
         tmp_ptr = run_ptr;
 
-    if (tmp_ptr != base_ptr)
+    if(tmp_ptr != base_ptr)
       SWAP(tmp_ptr, base_ptr);
 
     // Insertion sort, running from left-hand-side up to right-hand-side.
@@ -172,7 +173,7 @@ jump_over:
         tmp_ptr--;
 
       tmp_ptr++;
-      if (tmp_ptr != run_ptr)
+      if(tmp_ptr != run_ptr)
       {
         int c = *run_ptr;
         register int *hi, *lo;

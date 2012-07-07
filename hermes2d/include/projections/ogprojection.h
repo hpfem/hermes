@@ -58,9 +58,9 @@ namespace Hermes
        \author  LK
        \date  10/29/2011
 
-       \param [in]  space         If non-null, the space.
-       \param [in]  source_meshfn If non-null, source meshfn.
-       \param [out]  target_vec    If non-null, target vector.
+       \param[in]  space         If non-null, the space.
+       \param[in]  source_meshfn If non-null, source meshfn.
+       \param[out]  target_vec    If non-null, target vector.
        \param matrix_solver           (optional) the matrix solver.
        \param proj_norm               (optional) the project normalise.
        \param newton_tol              (optional) the newton tolerance.

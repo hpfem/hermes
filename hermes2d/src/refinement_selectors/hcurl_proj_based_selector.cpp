@@ -30,13 +30,13 @@ namespace Hermes
 
       HcurlProjBasedSelector::~HcurlProjBasedSelector()
       {
-        delete[] precalc_rvals_curl;
+        delete [] precalc_rvals_curl;
       }
 
       void HcurlProjBasedSelector::set_current_order_range(Element* element)
       {
         current_max_order = this->max_order;
-        if (current_max_order == H2DRS_DEFAULT_ORDER)
+        if(current_max_order == H2DRS_DEFAULT_ORDER)
           current_max_order = std::min(H2DRS_MAX_HCURL_ORDER, (20 - element->iro_cache)/2 - 1); // default
         else
           current_max_order = std::min(max_order, (20 - element->iro_cache)/2 - 1); // user specified
@@ -82,12 +82,12 @@ namespace Hermes
           }
 
           //move to the next transformation
-          if (inx_trf == H2D_TRF_IDENTITY)
+          if(inx_trf == H2D_TRF_IDENTITY)
             done = true;
           else
           {
             inx_trf++;
-            if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+            if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
               inx_trf = H2D_TRF_IDENTITY;
           }
         }
@@ -136,12 +136,12 @@ namespace Hermes
               }
 
               //move to the next transformation
-              if (inx_trf == H2D_TRF_IDENTITY)
+              if(inx_trf == H2D_TRF_IDENTITY)
                 done = true;
               else
               {
                 inx_trf++;
-                if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+                if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                   inx_trf = H2D_TRF_IDENTITY;
               }
             }
@@ -178,12 +178,12 @@ namespace Hermes
             }
 
             //move to the next transformation
-            if (inx_trf == H2D_TRF_IDENTITY)
+            if(inx_trf == H2D_TRF_IDENTITY)
               done = true;
             else
             {
               inx_trf++;
-              if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+              if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                 inx_trf = H2D_TRF_IDENTITY;
             }
           }
@@ -200,7 +200,7 @@ namespace Hermes
         const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 
         //allocate space for Curl
-        if (precalc_rvals_curl == NULL)
+        if(precalc_rvals_curl == NULL)
           precalc_rvals_curl = new_matrix<std::complex<double> >(H2D_MAX_ELEMENT_SONS, num_gip);
 
         //prepre for curl

@@ -80,22 +80,22 @@ int main(int argc, char* argv[])
     // Actual test. The values of 'sum' depend on the
     // current shapeset. If you change the shapeset,
     // you need to correct these numbers.
-    if (p_init == 1 && fabs(sum - 61.8227) > 1e-1) success = false;
-    if (p_init == 2 && fabs(sum - 60.8105) > 1e-1) success = false;
-    if (p_init == 3 && fabs(sum - 61.5511) > 1e-1) success = false;
-    if (p_init == 4 && fabs(sum - 60.8191) > 1e-1) success = false;
-    if (p_init == 5 && fabs(sum - 61.5304) > 1e-1) success = false;
-    if (p_init == 6 && fabs(sum - 60.8064) > 1e-1) success = false;
-    if (p_init == 7 && fabs(sum - 61.5323) > 1e-1) success = false;
-    if (p_init == 8 && fabs(sum - 60.7863) > 1e-1) success = false;
-    if (p_init == 9 && fabs(sum - 61.5408) > 1e-1) success = false;
-    if (p_init == 10 && fabs(sum - 60.7637) > 1e-1) success = false;
+    if(p_init == 1 && fabs(sum - 61.8227) > 1e-1) success = false;
+    if(p_init == 2 && fabs(sum - 60.8105) > 1e-1) success = false;
+    if(p_init == 3 && fabs(sum - 61.5511) > 1e-1) success = false;
+    if(p_init == 4 && fabs(sum - 60.8191) > 1e-1) success = false;
+    if(p_init == 5 && fabs(sum - 61.5304) > 1e-1) success = false;
+    if(p_init == 6 && fabs(sum - 60.8064) > 1e-1) success = false;
+    if(p_init == 7 && fabs(sum - 61.5323) > 1e-1) success = false;
+    if(p_init == 8 && fabs(sum - 60.7863) > 1e-1) success = false;
+    if(p_init == 9 && fabs(sum - 61.5408) > 1e-1) success = false;
+    if(p_init == 10 && fabs(sum - 60.7637) > 1e-1) success = false;
 
     // Clean up.
     delete [] coeff_vec;
   }
 
-  if (success == 1) {
+  if(success == 1) {
     printf("Success!\n");
     return 0;
   }

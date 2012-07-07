@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
   // Initialize the solution.
   Solution<double> sln1;
 
-  if (dynamic_cast<AztecOOSolver<double>*>(solver) != NULL)
+  if(dynamic_cast<AztecOOSolver<double>*>(solver) != NULL)
   {
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
     (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
@@ -153,9 +153,9 @@ int main(int argc, char* argv[])
 
   // Choose preconditioning.
   MlPrecond<double> pc("sa");
-  if (PRECOND)
+  if(PRECOND)
   {
-    if (JFNK) nox_solver.set_precond(pc);
+    if(JFNK) nox_solver.set_precond(pc);
     else nox_solver.set_precond("ML");
   }
 

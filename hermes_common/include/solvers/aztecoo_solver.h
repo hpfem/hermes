@@ -41,7 +41,7 @@ namespace Hermes
     public:
 
       /// Set the type of the solver
-      /// @param[in] solver - name of the solver [ gmres | cg | cgs | tfqmr | bicgstab ]
+      /// @param[in] solver - name of the solver[ gmres | cg | cgs | tfqmr | bicgstab ]
       void set_solver(const char *solver);
       /// Set the convergence tolerance
       /// @param[in] tol - the tolerance to set
@@ -51,7 +51,7 @@ namespace Hermes
       void set_max_iters(int iters);
 
       /// Set Aztec internal preconditioner
-      /// @param[in] name - name of the preconditioner [ none | jacobi | neumann | least-squares ]
+      /// @param[in] name - name of the preconditioner[ none | jacobi | neumann | least-squares ]
       virtual void set_precond(const char *name);
 
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);

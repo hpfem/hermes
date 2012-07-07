@@ -154,12 +154,12 @@ int main(int argc, char* argv[])
     graph_dof.save("conv_dof_est.dat");
 
     // If err_est too large, adapt the mesh.
-    if (err_est_rel < ERR_STOP) done = true;
+    if(err_est_rel < ERR_STOP) done = true;
     else
     {
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if (space.get_num_dofs() >= NDOF_STOP) done = true;
+    if(space.get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;

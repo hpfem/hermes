@@ -117,19 +117,19 @@ namespace Hermes
       {
         double midval[3][3];
 
-        if (level < LIN_MAX_LEVEL)
+        if(level < LIN_MAX_LEVEL)
         {
           int i;
-          if (!(level & 1))
+          if(!(level & 1))
           {
             // obtain solution values
             fns[0]->set_quad_order(1, item);
             val = fns[0]->get_values(component, value_type);
-            if (auto_max)
+            if(auto_max)
               for (i = 0; i < lin_np_tri[1]; i++)
               {
                 double v = val[i];
-                if (finite(v) && fabs(v) > max)
+                if(finite(v) && fabs(v) > max)
                   max = fabs(v);
               }
 
@@ -148,7 +148,7 @@ namespace Hermes
               if(this->ydisp != NULL)
               {
                 fns[2]->set_quad_order(1, H2D_FN_VAL);
-                double* dy = fns[2]->get_fn_values();
+                dy = fns[2]->get_fn_values();
               }
               for (i = 0; i < lin_np_tri[1]; i++)
               {
@@ -171,14 +171,14 @@ namespace Hermes
 
           // determine whether or not to split the element
           bool split;
-          if (eps >= 1.0)
+          if(eps >= 1.0)
           {
             // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
             split = (level + 5 < eps);
           }
           else
           {
-            if (!auto_max && fabs(verts[iv0][2]) > max && fabs(verts[iv1][2]) > max && fabs(verts[iv2][2]) > max)
+            if(!auto_max && fabs(verts[iv0][2]) > max && fabs(verts[iv1][2]) > max && fabs(verts[iv2][2]) > max)
             {
               // do not split if the whole triangle is above the specified maximum value
               split = false;
@@ -194,14 +194,14 @@ namespace Hermes
 
             // do the same for the curvature
             for (i = 0; i < 3; i++)
-              if (sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1.5e-3))
+              if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1.5e-3))
               {
                 split = true;
                 break;
               }
 
               // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
-              if (level == 0 && !split)
+              if(level == 0 && !split)
               {
                 split = (fabs(val[8] - 0.5*(midval[2][0] + midval[2][1])) +
                   fabs(val[9] - 0.5*(midval[2][1] + midval[2][2])) +
@@ -210,7 +210,7 @@ namespace Hermes
           }
 
           // split the triangle if the error is too large, otherwise produce a linear triangle
-          if (split)
+          if(split)
           {
             for (i = 0; i < 3; i++)
             {
@@ -306,19 +306,19 @@ namespace Hermes
         a = (verts[a][2] > verts[b][2]) ? a : b;
         int flip = (a == iv1 || a == iv3) ? 1 : 0;
 
-        if (level < LIN_MAX_LEVEL)
+        if(level < LIN_MAX_LEVEL)
         {
           int i;
-          if (!(level & 1)) // this is an optimization: do the following only every other time
+          if(!(level & 1)) // this is an optimization: do the following only every other time
           {
             // obtain solution values
             fns[0]->set_quad_order(1, item);
             val = fns[0]->get_values(component, value_type);
-            if (auto_max)
+            if(auto_max)
               for (i = 0; i < lin_np_quad[1]; i++)
               {
                 double v = val[i];
-                if (finite(v) && fabs(v) > max)
+                if(finite(v) && fabs(v) > max)
                   max = fabs(v);
               }
 
@@ -368,14 +368,14 @@ namespace Hermes
 
           // determine whether or not to split the element
           int split;
-          if (eps >= 1.0)
+          if(eps >= 1.0)
           {
             // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
             split = (level < eps) ? 3 : 0;
           }
           else
           {
-            if (!auto_max && fabs(verts[iv0][2]) > max && fabs(verts[iv1][2]) > max
+            if(!auto_max && fabs(verts[iv0][2]) > max && fabs(verts[iv1][2]) > max
               && fabs(verts[iv2][2]) > max && fabs(verts[iv3][2]) > max)
             {
               // do not split if the whole quad is above the specified maximum value
@@ -390,31 +390,31 @@ namespace Hermes
               split = (!finite(err) || err > max*4*eps) ? 3 : 0;
 
               // decide whether to split horizontally or vertically only
-              if (level > 0 && split)
+              if(level > 0 && split)
               {
-                if (herr > 5*verr)
+                if(herr > 5*verr)
                   split = 1; // h-split
-                else if (verr > 5*herr)
+                else if(verr > 5*herr)
                   split = 2; // v-split
               }
             }
 
             // also decide whether to split because of the curvature
-            if (split != 3)
+            if(split != 3)
             {
               double cm2 = sqr(cmax*5e-4);
-              if (sqr(phx[idx[1]] - midval[0][1]) + sqr(phy[idx[1]] - midval[1][1]) > cm2 ||
+              if(sqr(phx[idx[1]] - midval[0][1]) + sqr(phy[idx[1]] - midval[1][1]) > cm2 ||
                 sqr(phx[idx[3]] - midval[0][3]) + sqr(phy[idx[3]] - midval[1][3]) > cm2) split |= 1;
-              if (sqr(phx[idx[0]] - midval[0][0]) + sqr(phy[idx[0]] - midval[1][0]) > cm2 ||
+              if(sqr(phx[idx[0]] - midval[0][0]) + sqr(phy[idx[0]] - midval[1][0]) > cm2 ||
                 sqr(phx[idx[2]] - midval[0][2]) + sqr(phy[idx[2]] - midval[1][2]) > cm2) split |= 2;
 
               /*for (i = 0; i < 5; i++)
-              if (sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1e-3))
+              if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1e-3))
               { split = 1; break; }*/
             }
 
             // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
-            if (level == 0 && !split)
+            if(level == 0 && !split)
             {
               split = ((fabs(val[13] - 0.5*(midval[2][0] + midval[2][1])) +
                 fabs(val[17] - 0.5*(midval[2][1] + midval[2][2])) +
@@ -424,7 +424,7 @@ namespace Hermes
           }
 
           // split the quad if the error is too large, otherwise produce two linear triangles
-          if (split)
+          if(split)
           {
             for (i = 0; i < 5; i++)
             {
@@ -434,14 +434,14 @@ namespace Hermes
 
             // obtain mid-edge and mid-element vertices
             int mid0, mid1, mid2, mid3, mid4;
-            if (split != 1) mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], val[idx[0]]);
-            if (split != 2) mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], val[idx[1]]);
-            if (split != 1) mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], val[idx[2]]);
-            if (split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], val[idx[3]]);
-            if (split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], val[idx[4]]);
+            if(split != 1) mid0 = get_vertex(iv0,  iv1,  midval[0][0], midval[1][0], val[idx[0]]);
+            if(split != 2) mid1 = get_vertex(iv1,  iv2,  midval[0][1], midval[1][1], val[idx[1]]);
+            if(split != 1) mid2 = get_vertex(iv2,  iv3,  midval[0][2], midval[1][2], val[idx[2]]);
+            if(split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], val[idx[3]]);
+            if(split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], val[idx[4]]);
 
             // recur to sub-elements
-            if (split == 3)
+            if(split == 3)
             {
               fns[0]->push_transform(0);
               if(this->xdisp != NULL)
@@ -508,7 +508,7 @@ namespace Hermes
                   fns[2]->pop_transform();
             }
             else
-              if (split == 1) // h-split
+              if(split == 1) // h-split
               {
                 fns[0]->push_transform(4);
                 if(this->ydisp != NULL)
@@ -581,7 +581,7 @@ namespace Hermes
         }
 
         // output two linear triangles,
-        if (!flip)
+        if(!flip)
         {
           add_triangle(iv3, iv0, iv1);
           add_triangle(iv1, iv2, iv3);
@@ -597,10 +597,10 @@ namespace Hermes
       {
         // count the number of hanging mid-edge vertices
         int n = 0;
-        if (mid0 >= 0) n++;
-        if (mid1 >= 0) n++;
-        if (mid2 >= 0) n++;
-        if (n == 3)
+        if(mid0 >= 0) n++;
+        if(mid1 >= 0) n++;
+        if(mid2 >= 0) n++;
+        if(n == 3)
         {
           // three hanging vertices: split into four triangles
           regularize_triangle(iv0, mid0, mid2, peek_vertex(iv0, mid0), -1, peek_vertex(mid2, iv0));
@@ -608,16 +608,16 @@ namespace Hermes
           regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2));
           regularize_triangle(mid0, mid1, mid2, -1, -1, -1);
         }
-        else if (n == 2)
+        else if(n == 2)
         {
           // two hanging vertices: split into three triangles
-          if (mid0 < 0)
+          if(mid0 < 0)
           {
             regularize_triangle(iv0, iv1, mid1, peek_vertex(iv0, iv1), peek_vertex(iv1, mid1), -1);
             regularize_triangle(mid2, iv0, mid1, peek_vertex(mid2, iv0), -1, -1);
             regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2));
           }
-          else if (mid1 < 0)
+          else if(mid1 < 0)
           {
             regularize_triangle(iv1, iv2, mid2, peek_vertex(iv1, iv2), peek_vertex(iv2, mid2), -1);
             regularize_triangle(mid0, iv1, mid2, peek_vertex(mid0, iv1), -1, -1);
@@ -630,15 +630,15 @@ namespace Hermes
             regularize_triangle(mid1, mid0, iv1, -1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1));
           }
         }
-        else if (n == 1)
+        else if(n == 1)
         {
           // one hanging vertex: split into two triangles
-          if (mid0 >= 0)
+          if(mid0 >= 0)
           {
             regularize_triangle(iv0, mid0, iv2, peek_vertex(iv0, mid0), -1, peek_vertex(iv2, iv0));
             regularize_triangle(mid0, iv1, iv2, peek_vertex(mid0, iv1), peek_vertex(iv1, iv2), -1);
           }
-          else if (mid1 >= 0)
+          else if(mid1 >= 0)
           {
             regularize_triangle(iv1, mid1, iv0, peek_vertex(iv1, mid1), -1, peek_vertex(iv0, iv1));
             regularize_triangle(mid1, iv2, iv0, peek_vertex(mid1, iv2), peek_vertex(iv2, iv0), -1);
@@ -681,7 +681,7 @@ namespace Hermes
         this->item = item_;
         this->eps = eps;
         //   get the component and desired value from item.
-        if (item >= 0x40)
+        if(item >= 0x40)
         {
           component = 1;
           this->item >>= 6;
@@ -791,8 +791,11 @@ namespace Hermes
 
             fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
             double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
-            if (val == NULL)
+            if(val == NULL)
+            {
+              delete [] trav;
               throw Hermes::Exceptions::Exception("Item not defined in the solution.");
+            }
 
             if(xdisp != NULL)
               fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
@@ -811,7 +814,7 @@ namespace Hermes
             {
               double f = val[i];
 #pragma omp critical (max)
-              if (this->auto_max && finite(f) && fabs(f) > this->max)
+              if(this->auto_max && finite(f) && fabs(f) > this->max)
                 this->max = fabs(f);
 
               double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
@@ -829,7 +832,7 @@ namespace Hermes
             cmax = current_state.e[0]->get_diameter();
 
             // recur to sub-elements
-            if (current_state.e[0]->is_triangle())
+            if(current_state.e[0]->is_triangle())
               process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL);
             else
               process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL);
@@ -860,7 +863,7 @@ namespace Hermes
           int mid0 = peek_vertex(iv0, iv1);
           int mid1 = peek_vertex(iv1, iv2);
           int mid2 = peek_vertex(iv2, iv0);
-          if (mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
+          if(mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
           {
             this->del_slot = i;
             regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2);
@@ -894,20 +897,20 @@ namespace Hermes
         this->max_val = -1e100;
         for (int i = 0; i < this->vertex_count; i++)
         {
-          if (finite(verts[i][2]) && verts[i][2] < min_val) min_val = verts[i][2];
-          if (finite(verts[i][2]) && verts[i][2] > max_val) max_val = verts[i][2];
+          if(finite(verts[i][2]) && verts[i][2] < min_val) min_val = verts[i][2];
+          if(finite(verts[i][2]) && verts[i][2] > max_val) max_val = verts[i][2];
         }
       }
 
       int Linearizer::get_vertex(int p1, int p2, double x, double y, double value)
       {
         // search for an existing vertex
-        if (p1 > p2) std::swap(p1, p2);
+        if(p1 > p2) std::swap(p1, p2);
         int index = this->hash(p1, p2);
         int i = this->hash_table[index];
         while (i >= 0)
         {
-          if (
+          if(
             this->info[i][0] == p1 && this->info[i][1] == p2 &&
             (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-8) &&
             (fabs(x - verts[i][0]) < 1e-8) &&
@@ -935,7 +938,7 @@ namespace Hermes
 
       int Linearizer::add_vertex()
       {
-        if (this->vertex_count >= this->vertex_size)
+        if(this->vertex_count >= this->vertex_size)
         {
           this->vertex_size *= 2;
           verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
@@ -948,7 +951,7 @@ namespace Hermes
 
       void Linearizer::free()
       {
-        if (verts != NULL)
+        if(verts != NULL)
         {
           ::free(verts);
           verts = NULL;
@@ -967,7 +970,7 @@ namespace Hermes
         process_solution(sln, item, eps);
 
         FILE* f = fopen(filename, "wb");
-        if (f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
+        if(f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", filename);
         lock_data();
 
         // Output header for vertices.
@@ -980,7 +983,7 @@ namespace Hermes
         fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
         for (int i = 0; i < this->vertex_count; i++)
         {
-          if (mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
+          if(mode_3D == true) fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], this->verts[i][2]);
           else fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
         }
 

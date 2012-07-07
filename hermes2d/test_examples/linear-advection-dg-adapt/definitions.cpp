@@ -166,7 +166,7 @@ Real CustomWeakForm::CustomVectorFormSurface::F(Real x, Real y) const
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomVectorFormSurface::g(std::string ess_bdy_marker, Real x, Real y) const
 {
-  if (ess_bdy_marker == left_bottom_bnd_part) return 1; else return 0;
+  if(ess_bdy_marker == left_bottom_bnd_part) return 1; else return 0;
 }
 
 double CustomWeakForm::calculate_a_dot_v(double x, double y, double vx, double vy) const

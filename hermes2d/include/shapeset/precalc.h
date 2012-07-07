@@ -36,7 +36,7 @@ namespace Hermes
       SpaceType get_space_type() const;
 
       /// \brief Constructs a standard (master) precalculated shapeset class.
-      /// \param shapeset [in] Pointer to the shapeset to be precalculated.
+      /// \param shapeset[in] Pointer to the shapeset to be precalculated.
       PrecalcShapeset(Shapeset* shapeset);
 
       /// \brief Constructs a slave precalculated shapeset class.
@@ -45,7 +45,7 @@ namespace Hermes
       /// the slave can have different shape function active, different transform
       /// selected, etc. Slave pss's are used for test functions when calling
       /// bilinear forms, inside Solution so as not to disrupt user's pss, etc.
-      /// \param master_pss [in] Master precalculated shapeset pointer.
+      /// \param master_pss[in] Master precalculated shapeset pointer.
       PrecalcShapeset(PrecalcShapeset* master_pss);
 
       /// Destructor.
@@ -68,7 +68,7 @@ namespace Hermes
       /// Activates a shape function given by its index. The values of the shape function
       /// can then be obtained by setting the required integration rule order by calling
       /// set_quad_order() and after that calling get_values(), get_dx_values(), etc.
-      /// \param index [in] Shape index.
+      /// \param index[in] Shape index.
       void set_active_shape(int index);
 
       /// Returns the index of the active shape (can be negative if the shape is constrained).

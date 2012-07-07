@@ -51,7 +51,7 @@ namespace Hermes
       // function values at the endpoints (for subtracting of the linear part in H1)
       double c = 1.0;
       double f_lo = 0.0, f_hi = 0.0;
-      if (ebias == 2)
+      if(ebias == 2)
       {
         f_lo = get_value(0, idx[order], lo, -1.0, 0, mode);
         f_hi = get_value(0, idx[order], hi, -1.0, 0, mode);
@@ -103,14 +103,14 @@ namespace Hermes
       int index = 2*((max_order + 1 - ebias)*part + (order - ebias)) + ori;
 
       // allocate/reallocate the array if necessary
-      if (comb_table == NULL)
+      if(comb_table == NULL)
       {
         table_size = 1024;
         while (table_size <= index) table_size *= 2;
         comb_table = (double**) malloc(table_size * sizeof(double*));
         memset(comb_table, 0, table_size * sizeof(double*));
       }
-      else if (index >= table_size)
+      else if(index >= table_size)
       {
         // adjust table_size to accommodate the required depth
         int old_size = table_size;
@@ -122,7 +122,7 @@ namespace Hermes
       }
 
       // do we have the required linear combination yet?
-      if (comb_table[index] == NULL)
+      if(comb_table[index] == NULL)
       {
         // no, calculate it
         comb_table[index] = calculate_constrained_edge_combination(order, part, ori, mode);
@@ -134,10 +134,10 @@ namespace Hermes
 
     void Shapeset::free_constrained_edge_combinations()
     {
-      if (comb_table != NULL)
+      if(comb_table != NULL)
       {
         for (int i = 0; i < table_size; i++)
-          if (comb_table[i] != NULL)
+          if(comb_table[i] != NULL)
             delete [] comb_table[i];
 
         free(comb_table);
@@ -198,7 +198,7 @@ namespace Hermes
       assert(H2D_GET_H_ORDER(order) >= 0 && H2D_GET_H_ORDER(order) <= max_order);
       assert(H2D_GET_V_ORDER(order) >= 0 && H2D_GET_V_ORDER(order) <= max_order);
       int index = order;
-      if (mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
+      if(mode == HERMES_MODE_QUAD) //tables of bubble indices are transposed
         index = H2D_MAKE_QUAD_ORDER(H2D_GET_V_ORDER(order), H2D_GET_H_ORDER(order));
       return bubble_indices[mode][index];
     }
@@ -224,7 +224,7 @@ namespace Hermes
 
     int Shapeset::get_order(int index, ElementMode2D mode) const
     {
-      if (index >= 0) {
+      if(index >= 0) {
         assert(index >= 0 && index <= max_index[mode]);
         return index_to_order[mode][index];
       }
@@ -233,11 +233,11 @@ namespace Hermes
 
     double Shapeset::get_value(int n, int index, double x, double y, int component, ElementMode2D mode)
     {
-      if (index >= 0)
+      if(index >= 0)
       {
         assert(index >= 0 && index <= max_index[mode]); assert(component >= 0 && component < num_components);
         Shapeset::shape_fn_t** shape_expansion = shape_table[n][mode];
-        if (shape_expansion == NULL)
+        if(shape_expansion == NULL)
         { // requested exansion (f, df/dx, df/dy, ddf/dxdx, ...) is not defined
           static int warned_mode = -1, warned_index = -1, warned_n = 1; //just to keep the number of warnings low: warn just once about a given combinations of n, mode, and index.
           this->warn_if(warned_mode != mode || warned_index != index || warned_n != n, "Requested undefined expansion %d (mode: %d) of a shape %d, returning 0", n, mode, index);

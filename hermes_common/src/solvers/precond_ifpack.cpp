@@ -18,15 +18,15 @@
 #include "config.h"
 #ifdef HAVE_IFPACK
 #include "precond_ifpack.h"
-#include <Ifpack_PointRelaxation.h>
-#include <Ifpack_BlockRelaxation.h>
-#include <Ifpack_DenseContainer.h>
-#include <Ifpack_AdditiveSchwarz.h>
-#include <Ifpack_ILU.h>
-#include <Ifpack_ILUT.h>
-#include <Ifpack_IC.h>
-#include <Ifpack_ICT.h>
-#include <Ifpack_Graph_Epetra_CrsGraph.h>
+#include "Ifpack_PointRelaxation.h"
+#include "Ifpack_BlockRelaxation.h"
+#include "Ifpack_DenseContainer.h"
+#include "Ifpack_AdditiveSchwarz.h"
+#include "Ifpack_ILU.h"
+#include "Ifpack_ILUT.h"
+#include "Ifpack_IC.h"
+#include "Ifpack_ICT.h"
+#include "Ifpack_Graph_Epetra_CrsGraph.h"
 
 namespace Hermes
 {
@@ -60,13 +60,13 @@ namespace Hermes
     {
       this->prec = ipc;
       this->owner = false;
-      this->mat = NULL;		// FIXME: take the matrix from ipc
+      this->mat = NULL;    // FIXME: take the matrix from ipc
     }
 
     template<typename Scalar>
     IfpackPrecond<Scalar>::~IfpackPrecond()
     {
-      if (owner) delete prec;
+      if(owner) delete prec;
     }
 
     template<typename Scalar>
@@ -90,21 +90,21 @@ namespace Hermes
     template<typename Scalar>
     void IfpackPrecond<Scalar>::create(Matrix<Scalar> *m)
     {
-      EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
+      EpetraMatrix<Scalar> *mt = static_cast<EpetraMatrix<Scalar> *>(m);
       assert(mt != NULL);
       mat = mt;
-      if (strcmp(cls, "point-relax") == 0)
+      if(strcmp(cls, "point-relax") == 0)
       {
         create_point_relax(mat, type);
         apply_params();
         initialize();
       }
-      else if (strcmp(cls, "block-relax") == 0)
+      else if(strcmp(cls, "block-relax") == 0)
       {
         create_block_relax(mat, type);
         apply_params();
       }
-      else if (strcmp(cls, "add-schwartz") == 0)
+      else if(strcmp(cls, "add-schwartz") == 0)
       {
         create_add_schwartz(mat, type, overlap);
         apply_params();
@@ -128,7 +128,7 @@ namespace Hermes
       Ifpack_Partitioner *partitioner = new Ifpack_GreedyPartitioner(graph);
 
       Teuchos::ParameterList list;
-      list.set("partitioner: local parts", 1000);	//\todo parametrize me
+      list.set("partitioner: local parts", 1000);  //\todo parametrize me
       partitioner->SetParameters(list);
       partitioner->Compute();
 
@@ -141,19 +141,19 @@ namespace Hermes
     template<typename Scalar>
     void IfpackPrecond<Scalar>::create_add_schwartz(EpetraMatrix<Scalar> *a, const char *name, int overlap)
     {
-      if (strcasecmp(name, "ilu") == 0)
+      if(strcasecmp(name, "ilu") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ILU>(a->mat, overlap);
       }
-      else if (strcasecmp(name, "ilut") == 0)
+      else if(strcasecmp(name, "ilut") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ILUT>(a->mat, overlap);
       }
-      else if (strcasecmp(name, "ic") == 0)
+      else if(strcasecmp(name, "ic") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_IC>(a->mat, overlap);
       }
-      else if (strcasecmp(name, "ict") == 0)
+      else if(strcasecmp(name, "ict") == 0)
       {
         prec = new Ifpack_AdditiveSchwarz<Ifpack_ICT>(a->mat, overlap);
       }

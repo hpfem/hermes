@@ -48,7 +48,7 @@ namespace Hermes
       ~RefMap();
 
       /// Sets the quadrature points in which the reference map will be evaluated.
-      /// \param quad_2d [in] The quadrature points.
+      /// \param quad_2d[in] The quadrature points.
       void set_quad_2d(Quad2D* quad_2d);
 
       /// Returns the current quadrature points.
@@ -61,7 +61,7 @@ namespace Hermes
       /// Must be called prior to using all other functions in the class.
       virtual void set_active_element(Element* e);
 
-      /// Returns the triples [x, y, norm] of the tangent to the specified (possibly
+      /// Returns the triples[x, y, norm] of the tangent to the specified (possibly
       /// curved) edge at the 1D integration points along the edge. The maximum
       /// 1D quadrature rule is used by default, but the user may specify his own
       /// order. In this case, the edge pseudo-order is expected (as returned by
@@ -134,7 +134,7 @@ namespace Hermes
         stack[top] = *ctm;
         this->ctm = stack + top;
         update_cur_node();
-        if (is_const) calc_const_inv_ref_map();
+        if(is_const) calc_const_inv_ref_map();
       }
 
       Quad2D* quad_2d;
@@ -174,7 +174,7 @@ namespace Hermes
       {
         Node* updated_node = new Node;
 
-        if (sub_idx > H2D_MAX_IDX) {
+        if(sub_idx > H2D_MAX_IDX) {
           delete updated_node;
           cur_node = handle_overflow();
         }

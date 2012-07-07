@@ -41,13 +41,13 @@ namespace Hermes
     {
     public:
       /// Constructor for relaxation methods.
-      /// @param[in] cls - class of the preconditioner [ point-relax | block-relax ]
+      /// @param[in] cls - class of the preconditioner[ point-relax | block-relax ]
       /// @param[in] name - the name of the relaxation type
-      /// Possible values are: [ Jacobi | Gauss-Seidel | symmetric Gauss-Seidel ]
+      /// Possible values are:[ Jacobi | Gauss-Seidel | symmetric Gauss-Seidel ]
       IfpackPrecond(const char *cls, const char *type = "Jacobi");
       /// Constructor for domain decomposition methods
-      /// @param[in] cls - class of the preconditioner [ add-schwartz ]
-      /// @param[in] name: [ ic | ict | ilu | ilut ]
+      /// @param[in] cls - class of the preconditioner[ add-schwartz ]
+      /// @param[in] name:[ ic | ict | ilu | ilut ]
       /// @param[in] overlap - number
       IfpackPrecond(const char *cls, const char *type, int overlap);
       /// Wrap IFPACK object.
@@ -80,7 +80,7 @@ namespace Hermes
       Teuchos::ParameterList ilist;
       EpetraMatrix<Scalar> *mat;
       unsigned owner:1;
-      const char *cls;			// class of the preconditioner
+      const char *cls;      // class of the preconditioner
       const char *type;
       int overlap;
 

@@ -177,7 +177,7 @@ namespace Hermes
       for(this->iterator = begin(); iterator != end(); iterator++)
         for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); it++)
         {
-          if (this->markers[*it] != NULL)
+          if(this->markers[*it] != NULL)
             throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
           this->markers[*it] = *iterator;
         }

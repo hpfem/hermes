@@ -302,7 +302,7 @@ namespace Hermes
 #define h1_integrate_expression(exp) \
     {double3* pt = quad->get_points(o, ru->get_active_element()->get_mode()); \
     int np = quad->get_num_points(o, ru->get_active_element()->get_mode()); \
-    if (ru->is_jacobian_const()){ \
+    if(ru->is_jacobian_const()){ \
     for (int i = 0; i < np; i++) \
     result += pt[i][2] * (exp); \
     result *= ru->get_const_jacobian(); \

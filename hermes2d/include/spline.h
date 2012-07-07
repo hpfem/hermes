@@ -35,7 +35,7 @@ namespace Hermes
 
       /// Destructor.
       ~CubicSpline() {
-        if (coeffs != NULL)
+        if(coeffs != NULL)
           delete [] coeffs;
         points.clear();
         values.clear();

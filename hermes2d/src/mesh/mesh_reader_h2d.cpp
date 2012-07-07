@@ -48,12 +48,12 @@ namespace Hermes
       p2 = m->curv_second[id];
 
       *en = mesh->peek_edge_node(p1, p2);
-      if (*en == NULL)
+      if(*en == NULL)
         throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: edge %d-%d does not exist.", id, p1, p2);
 
       // degree of curved edge
       nurbs->degree = 2;
-      if (!circle)
+      if(!circle)
       {
         nurbs->degree = m->curv_third[id];
       }
@@ -62,13 +62,13 @@ namespace Hermes
       std::vector<double> vCP;
 
       int inner = 1, outer;
-      if (!circle)
+      if(!circle)
       {
         for (unsigned int i = 0; i < m->vars_[m->curv_inner_pts[id]].size(); ++i)
         {
           std::istringstream istr(m->vars_[m->curv_inner_pts[id]][i]);
 
-          if (!(istr >> dummy_dbl))
+          if(!(istr >> dummy_dbl))
             vCP.push_back(atof(m->vars_[m->vars_[m->curv_inner_pts[id]][i]][0].c_str()));
           else
             vCP.push_back(atof(m->vars_[m->curv_inner_pts[id]][i].c_str()));
@@ -86,7 +86,7 @@ namespace Hermes
       nurbs->pt[inner+1][1] = mesh->nodes[p2].y;
       nurbs->pt[inner+1][2] = 1.0;
 
-      if (!circle)
+      if(!circle)
       {
         // read inner control points
         for (int i = 0; i < inner; i++)
@@ -114,13 +114,13 @@ namespace Hermes
       std::vector<double> vKnots;
 
       inner = 0;
-      if (!circle)
+      if(!circle)
       {
         for (unsigned int i = 0; i < m->vars_[m->curv_knots[id]].size(); ++i)
         {
           std::istringstream istr(m->vars_[m->curv_knots[id]][i]);
 
-          if (!(istr >> dummy_dbl))
+          if(!(istr >> dummy_dbl))
             vKnots.push_back(atof(m->vars_[m->vars_[m->curv_knots[id]][i]][0].c_str()));
           else
             vKnots.push_back(atof(m->vars_[m->curv_knots[id]][i].c_str()));
@@ -130,7 +130,7 @@ namespace Hermes
 
       nurbs->nk = nurbs->degree + nurbs->np + 1;
       outer = nurbs->nk - inner;
-      if ((outer & 1) == 1)
+      if((outer & 1) == 1)
         throw Hermes::Exceptions::MeshLoadFailureException("Curve #%d: incorrect number of knot points.", id);
 
       // knot vector is completed by 0.0 on the left and by 1.0 on the right
@@ -139,7 +139,7 @@ namespace Hermes
       for (int i = 0; i < outer/2; i++)
         nurbs->kv[i] = 0.0;
 
-      if (inner) {
+      if(inner) {
         for (int i = outer/2; i < inner + outer/2; i++) {
           nurbs->kv[i] = vKnots[i - (outer/2)];
         }
@@ -157,7 +157,7 @@ namespace Hermes
     {
       // Check if file exists
       std::ifstream s(filename);
-      if (!s.good()) throw Hermes::Exceptions::MeshLoadFailureException("Mesh file not found.");
+      if(!s.good()) throw Hermes::Exceptions::MeshLoadFailureException("Mesh file not found.");
       s.close();
 
       int i, j, k, n;
@@ -173,8 +173,8 @@ namespace Hermes
       //// vertices ////////////////////////////////////////////////////////////////
 
       n = m.n_vert;
-      if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'vertices' must be a list.", filename);
-      if (n < 2) throw Hermes::Exceptions::MeshLoadFailureException("File %s: invalid number of vertices.", filename);
+      if(n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'vertices' must be a list.", filename);
+      if(n < 2) throw Hermes::Exceptions::MeshLoadFailureException("File %s: invalid number of vertices.", filename);
 
       // create a hash table large enough
       int size = HashTable::H2D_DEFAULT_HASH_SIZE;
@@ -199,8 +199,8 @@ namespace Hermes
       //// elements ////////////////////////////////////////////////////////////////
 
       n = m.n_el;
-      if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'elements' must be a list.", filename);
-      if (n < 1) throw Hermes::Exceptions::MeshLoadFailureException("File %s: no elements defined.", filename);
+      if(n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'elements' must be a list.", filename);
+      if(n < 1) throw Hermes::Exceptions::MeshLoadFailureException("File %s: no elements defined.", filename);
 
       // create elements
       mesh->nactive = 0;
@@ -208,20 +208,23 @@ namespace Hermes
       {
         // read and check vertex indices
         int nv;
-        if (m.en4[i] == -1)	nv = 4;
+        if(m.en4[i] == -1)  nv = 4;
         else nv = 5;
 
         int* idx = new int[nv-1];
         std::string el_marker;
-        if (!nv) {
+        if(!nv) {
           mesh->elements.skip_slot();
           continue;
         }
 
-        if (nv < 4 || nv > 5)
+        if(nv < 4 || nv > 5)
+        {
+          delete [] idx;
           throw Hermes::Exceptions::MeshLoadFailureException("File %s: element #%d: wrong number of vertex indices.", filename, i);
+        }
 
-        if (nv == 4) {
+        if(nv == 4) {
           idx[0] = m.en1[i];
           idx[1] = m.en2[i];
           idx[2] = m.en3[i];
@@ -237,8 +240,11 @@ namespace Hermes
           el_marker = m.e_mtl[i];
         }
         for (j = 0; j < nv-1; j++)
-          if (idx[j] < 0 || idx[j] >= mesh->ntopvert)
+          if(idx[j] < 0 || idx[j] >= mesh->ntopvert)
+          {
+            delete [] idx;
             throw Hermes::Exceptions::MeshLoadFailureException("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
+          }
 
         Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
 
@@ -266,7 +272,7 @@ namespace Hermes
       mesh->nbase = n;
 
       //// boundaries //////////////////////////////////////////////////////////////
-      if (m.n_bdy > 0)
+      if(m.n_bdy > 0)
       {
         n = m.n_bdy;
 
@@ -278,7 +284,7 @@ namespace Hermes
           v2 = m.bdy_second[i];
 
           en = mesh->peek_edge_node(v1, v2);
-          if (en == NULL)
+          if(en == NULL)
             throw Hermes::Exceptions::MeshLoadFailureException("File %s: boundary data #%d: edge %d-%d does not exist", filename, i, v1, v2);
 
           std::string bnd_marker;
@@ -293,7 +299,7 @@ namespace Hermes
 
           // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
           // for the inner edges.
-          if (marker > 0)
+          if(marker > 0)
           {
             mesh->nodes[v1].bnd = 1;
             mesh->nodes[v2].bnd = 1;
@@ -303,10 +309,10 @@ namespace Hermes
       }
 
       //// curves //////////////////////////////////////////////////////////////////
-      if (m.n_curv > 0)
+      if(m.n_curv > 0)
       {
         n = m.n_curv;
-        if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'curves' must be a list.", filename);
+        if(n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'curves' must be a list.", filename);
 
         // load curved edges
         for (i = 0; i < n; i++)
@@ -321,9 +327,9 @@ namespace Hermes
           for (k = 0; k < 2; k++)
           {
             Element* e = en->elem[k];
-            if (e == NULL) continue;
+            if(e == NULL) continue;
 
-            if (e->cm == NULL)
+            if(e->cm == NULL)
             {
               e->cm = new CurvMap;
               memset(e->cm, 0, sizeof(CurvMap));
@@ -333,10 +339,10 @@ namespace Hermes
 
             int idx = -1;
             for (unsigned j = 0; j < e->get_num_surf(); j++)
-              if (e->en[j] == en) { idx = j; break; }
+              if(e->en[j] == en) { idx = j; break; }
               assert(idx >= 0);
 
-              if (e->vn[idx]->id == p1)
+              if(e->vn[idx]->id == p1)
               {
                 e->cm->nurbs[idx] = nurbs;
                 nurbs->ref++;
@@ -348,21 +354,21 @@ namespace Hermes
                 nurbs_rev->ref++;
               }
           }
-          if (!nurbs->ref) delete nurbs;
+          if(!nurbs->ref) delete nurbs;
         }
       }
 
       // update refmap coeffs of curvilinear elements
       Element* e;
       for_all_elements(e, mesh)
-        if (e->cm != NULL)
+        if(e->cm != NULL)
           e->cm->update_refmap_coeffs(e);
 
       //// refinements /////////////////////////////////////////////////////////////
-      if (m.n_ref > 0)
+      if(m.n_ref > 0)
       {
         n = m.n_ref;
-        if (n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'refinements' must be a list.", filename);
+        if(n < 0) throw Hermes::Exceptions::MeshLoadFailureException("File %s: 'refinements' must be a list.", filename);
 
         // perform initial refinements
         for (i = 0; i < n; i++)
@@ -382,16 +388,16 @@ namespace Hermes
 
     void MeshReaderH2D::save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first)
     {
-      if (e->active) return;
+      if(e->active) return;
       fprintf(f, first ? "refinements =\n{\n" : ",\n"); first = false;
-      if (e->bsplit())
+      if(e->bsplit())
       {
         fprintf(f, "  { %d, 0 }", id);
         int sid = mesh->seq; mesh->seq += 4;
         for (int i = 0; i < 4; i++)
           save_refinements(mesh, f, e->sons[i], sid+i, first);
       }
-      else if (e->hsplit())
+      else if(e->hsplit())
       {
         fprintf(f, "  { %d, 1 }", id);
         int sid = mesh->seq; mesh->seq += 2;
@@ -409,9 +415,9 @@ namespace Hermes
 
     void MeshReaderH2D::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
     {
-      if (nurbs->arc)
+      if(nurbs->arc)
       {
-        fprintf(f, "  [ %d, %d, %.16g ]", p1, p2, nurbs->angle);
+        fprintf(f, " [ %d, %d, %.16g ]", p1, p2, nurbs->angle);
       }
       else
       {
@@ -423,7 +429,7 @@ namespace Hermes
           nurbs->pt[i][0], nurbs->pt[i][1], nurbs->pt[i][2],
           i < nurbs->np-2 ? "," : "");
 
-        fprintf(f, "], [ ");
+        fprintf(f, "],[ ");
         int max = nurbs->nk - (nurbs->degree+1);
         for (int i = nurbs->degree+1; i < max; i++)
           fprintf(f, "%.16g%s", nurbs->kv[i], i < max-1 ? "," : "");
@@ -438,13 +444,13 @@ namespace Hermes
 
       // open output file
       FILE* f = fopen(filename, "w");
-      if (f == NULL) throw Hermes::Exceptions::MeshLoadFailureException("Could not create mesh file.");
+      if(f == NULL) throw Hermes::Exceptions::MeshLoadFailureException("Could not create mesh file.");
       //fprintf(f, "# hermes2d saved mesh\n\n");
 
       // save vertices
       fprintf(f, "vertices =\n[\n");
       for (i = 0; i < mesh->ntopvert; i++)
-        fprintf(f, "  [ %.16g, %.16g ]%s\n", mesh->nodes[i].x, mesh->nodes[i].y, (i < mesh->ntopvert-1 ? "," : ""));
+        fprintf(f, " [ %.16g, %.16g ]%s\n", mesh->nodes[i].x, mesh->nodes[i].y, (i < mesh->ntopvert-1 ? "," : ""));
 
       // save elements
       fprintf(f, "]\n\nelements =\n[");
@@ -453,12 +459,12 @@ namespace Hermes
       {
         const char* nl = first ? "\n" : ",\n";  first = false;
         e = mesh->get_element_fast(i);
-        if (!e->used)
-          fprintf(f, "%s  [ ]", nl);
-        else if (e->is_triangle())
-          fprintf(f, "%s  [ %d, %d, %d, \"%s\" ]", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str());
+        if(!e->used)
+          fprintf(f, "%s [ ]", nl);
+        else if(e->is_triangle())
+          fprintf(f, "%s [ %d, %d, %d, \"%s\" ]", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str());
         else
-          fprintf(f, "%s  [ %d, %d, %d, %d, \"%s\" ]", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str());
+          fprintf(f, "%s [ %d, %d, %d, %d, \"%s\" ]", nl, e->vn[0]->id, e->vn[1]->id, e->vn[2]->id, e->vn[3]->id, mesh->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str());
       }
 
       // save boundary markers
@@ -466,22 +472,22 @@ namespace Hermes
       first = true;
       for_all_base_elements(e, mesh)
         for (unsigned i = 0; i < e->get_num_surf(); i++)
-          if ((mrk = mesh->get_base_edge_node(e, i)->marker)) {
+          if((mrk = mesh->get_base_edge_node(e, i)->marker)) {
             const char* nl = first ? "\n" : ",\n";  first = false;
-            fprintf(f, "%s  [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
+            fprintf(f, "%s [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
           }
           fprintf(f, "\n]\n\n");
 
           // save curved edges
           first = true;
           for_all_base_elements(e, mesh)
-            if (e->is_curved())
+            if(e->is_curved())
               for (unsigned i = 0; i < e->get_num_surf(); i++)
-                if (e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
+                if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
                   fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
                   save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
                 }
-                if (!first) fprintf(f, "\n]\n\n");
+                if(!first) fprintf(f, "\n]\n\n");
 
           // save refinements
           unsigned temp = mesh->seq;
@@ -489,7 +495,7 @@ namespace Hermes
           first = true;
           for_all_base_elements(e, mesh)
             save_refinements(mesh, f, e, e->id, first);
-          if (!first) fprintf(f, "\n]\n\n");
+          if(!first) fprintf(f, "\n]\n\n");
 
           mesh->seq = temp;
           fclose(f);

@@ -13,11 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "discrete_problem_linear.h"
 #include <iostream>
+#include <algorithm>
 #include "global.h"
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
-#include "discrete_problem_linear.h"
 #include "mesh/traverse.h"
 #include "space/space.h"
 #include "shapeset/precalc.h"
@@ -59,8 +60,8 @@ namespace Hermes
       this->current_block_weights = block_weights;
 
       // Check that the block scaling table have proper dimension.
-      if (block_weights != NULL)
-        if (block_weights->get_size() != this->wf->get_neq())
+      if(block_weights != NULL)
+        if(block_weights->get_size() != this->wf->get_neq())
           throw Exceptions::LengthException(6, block_weights->get_size(),this-> wf->get_neq());
 
       // Creating matrix sparse structure.
@@ -183,9 +184,9 @@ namespace Hermes
       delete [] trav;
 
       /// \todo Should this be really here? Or in assemble()?
-      if (this->current_mat != NULL)
+      if(this->current_mat != NULL)
         this->current_mat->finish();
-      if (this->current_rhs != NULL)
+      if(this->current_rhs != NULL)
         this->current_rhs->finish();
 
       if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
@@ -232,25 +233,25 @@ namespace Hermes
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
       {
-        if (current_als[form->i]->dof[i] < 0)
+        if(current_als[form->i]->dof[i] < 0)
           continue;
 
-        if ((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
+        if((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
           continue;
         if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
           continue;
-        if (!sym)
+        if(!sym)
         {
           for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
           {
             // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-            if (std::abs(current_als[form->j]->coef[j]) < 1e-12)
+            if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
               continue;
 
             Func<double>* u = base_fns[j];
             Func<double>* v = test_fns[i];
 
-            if (current_als[form->j]->dof[j] >= 0)
+            if(current_als[form->j]->dof[j] >= 0)
             {
               if(surface_form)
                 local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
@@ -274,10 +275,10 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
           {
-            if (j < i && current_als[form->j]->dof[j] >= 0)
+            if(j < i && current_als[form->j]->dof[j] >= 0)
               continue;
             // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-            if (std::abs(current_als[form->j]->coef[j]) < 1e-12)
+            if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
               continue;
 
             Func<double>* u = base_fns[j];
@@ -285,7 +286,7 @@ namespace Hermes
 
             Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
 
-            if (current_als[form->j]->dof[j] >= 0)
+            if(current_als[form->j]->dof[j] >= 0)
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             else
             {
@@ -301,9 +302,9 @@ namespace Hermes
       this->current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
-      if (tra)
+      if(tra)
       {
-        if (form->sym < 0)
+        if(form->sym < 0)
           chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
         transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
 #pragma omp critical (mat)
@@ -311,9 +312,9 @@ namespace Hermes
 
         // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
         for (unsigned int j = 0; j < current_als[form->i]->cnt; j++)
-          if (current_als[form->i]->dof[j] < 0)
+          if(current_als[form->i]->dof[j] < 0)
             for (unsigned int i = 0; i < current_als[form->j]->cnt; i++)
-              if (current_als[form->j]->dof[i] >= 0)
+              if(current_als[form->j]->dof[i] >= 0)
                 this->current_rhs->add(current_als[form->j]->dof[i], -local_stiffness_matrix[i][j]);
       }
 

@@ -23,13 +23,13 @@
 #include "../weakform/weakform.h"
 
 //#include "epetra.h"
-#if (defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
+#if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 #include <NOX.H>
 #ifdef _POSIX_C_SOURCE
-# undef _POSIX_C_SOURCE	// pyconfig.h included by NOX_Epetra defines it
+# undef _POSIX_C_SOURCE  // pyconfig.h included by NOX_Epetra defines it
 #endif
 #ifdef _XOPEN_SOURCE
-# undef _XOPEN_SOURCE	// pyconfig.h included by NOX_Epetra defines it
+# undef _XOPEN_SOURCE  // pyconfig.h included by NOX_Epetra defines it
 #endif
 #include <NOX_Epetra.H>
 
@@ -63,9 +63,9 @@ namespace Hermes
        \author  LK
        \date  10/29/2011
 
-       \param [in]  space         If non-null, the space.
-       \param [in]  source_meshfn If non-null, source meshfn.
-       \param [out]  target_vec    If non-null, target vector.
+       \param[in]  space         If non-null, the space.
+       \param[in]  source_meshfn If non-null, source meshfn.
+       \param[out]  target_vec    If non-null, target vector.
        \param matrix_solver           (optional) the matrix solver.
        \param proj_norm               (optional) the project normalise.
        \param newton_tol              (optional) the newton tolerance.

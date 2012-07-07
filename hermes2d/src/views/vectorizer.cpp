@@ -54,12 +54,12 @@ namespace Hermes
       int Vectorizer::get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue)
       {
         // search for an existing vertex
-        if (p1 > p2) std::swap(p1, p2);
+        if(p1 > p2) std::swap(p1, p2);
         int index = this->hash(p1, p2);
         int i = this->hash_table[index];
         while (i >= 0)
         {
-          if (this->info[i][0] == p1 && this->info[i][1] == p2 &&
+          if(this->info[i][0] == p1 && this->info[i][1] == p2 &&
             (fabs((xvalue - verts[i][2]) / xvalue) < 1e-4 && fabs((yvalue - verts[i][3]) / yvalue) < 1e-4)) return i;
           // note that we won't return a vertex with a different value than the required one;
           // this takes care for discontinuities in the solution, where more vertices
@@ -84,10 +84,10 @@ namespace Hermes
       void Vectorizer::process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
         double* xval, double* yval, double* phx, double* phy, int* idx)
       {
-        if (level < LIN_MAX_LEVEL)
+        if(level < LIN_MAX_LEVEL)
         {
           int i;
-          if (!(level & 1))
+          if(!(level & 1))
           {
             // obtain solution values and physical element coordinates
             fns[0]->set_quad_order(1, xitem);
@@ -98,11 +98,11 @@ namespace Hermes
             {
               double m = (sqrt(sqr(xval[i]) + sqr(yval[i])));
 #pragma omp critical(vectorizer_get_max)
-              if (finite(m) && fabs(m) > max)
+              if(finite(m) && fabs(m) > max)
                 max = fabs(m);
             }
 
-            if (curved)
+            if(curved)
             {
               RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
@@ -122,7 +122,7 @@ namespace Hermes
 
           // determine whether or not to split the element
           bool split;
-          if (eps >= 1.0)
+          if(eps >= 1.0)
           {
             //if eps > 1, the user wants a fixed number of refinements (no adaptivity)
             split = (level < eps);
@@ -136,7 +136,7 @@ namespace Hermes
             split = !finite(err) || err > max*3*eps;
 
             // do the same for the curvature
-            if (curved && !split)
+            if(curved && !split)
             {
               double cerr = 0.0, cden = 0.0; // fixme
               for (i = 0; i < 3; i++)
@@ -148,7 +148,7 @@ namespace Hermes
             }
 
             // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
-            if (level == 0 && !split)
+            if(level == 0 && !split)
             {
               split = (fabs(sqrt(sqr(xval[8]) + sqr(yval[8])) - 0.5*(sqrt(sqr(midval[2][0]) + sqr(midval[3][0])) + sqrt(sqr(midval[2][1]) + sqr(midval[3][1])))) +
                 fabs(sqrt(sqr(xval[9]) + sqr(yval[9])) - 0.5*(sqrt(sqr(midval[2][1]) + sqr(midval[3][1])) + sqrt(sqr(midval[2][2]) + sqr(midval[3][2])))) +
@@ -157,9 +157,9 @@ namespace Hermes
           }
 
           // split the triangle if the error is too large, otherwise produce a linear triangle
-          if (split)
+          if(split)
           {
-            if (curved)
+            if(curved)
               for (i = 0; i < 3; i++)
               {
                 midval[0][i] = phx[idx[i]];
@@ -205,10 +205,10 @@ namespace Hermes
 
         int flip = (a == iv1 || a == iv3) ? 1 : 0;
 
-        if (level < LIN_MAX_LEVEL)
+        if(level < LIN_MAX_LEVEL)
         {
           int i;
-          if (!(level & 1))
+          if(!(level & 1))
           {
             // obtain solution values and physical element coordinates
             fns[0]->set_quad_order(1, xitem);
@@ -218,11 +218,11 @@ namespace Hermes
             for (i = 0; i < lin_np_quad[1]; i++)
             {
               double m = sqrt(sqr(xval[i]) + sqr(yval[i]));
-              if (finite(m) && fabs(m) > max)
+              if(finite(m) && fabs(m) > max)
                 max = fabs(m);
             }
 
-            if (curved)
+            if(curved)
             {
               RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
@@ -246,7 +246,7 @@ namespace Hermes
           bool split;
 
           //if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-          if (eps >= 1.0)
+          if(eps >= 1.0)
             split = (level < eps);
 
           else
@@ -264,7 +264,7 @@ namespace Hermes
             split = !finite(err) || err > max*4*eps;
 
             // do the same for the curvature
-            if (curved && !split)
+            if(curved && !split)
             {
               double cerr = 0.0, cden = 0.0; // fixme
               RefMap* refmap = fns[0]->get_refmap();
@@ -279,7 +279,7 @@ namespace Hermes
             }
 
             // do extra tests at level 0, so as not to miss functions with zero error at edge midpoints
-            if (level == 0 && !split)
+            if(level == 0 && !split)
             {
               err = fabs(sqrt(sqr(xval[13]) + sqr(yval[13])) - 0.5*(sqrt(sqr(midval[2][0]) + sqr(midval[3][0])) + sqrt(sqr(midval[2][1]) + sqr(midval[3][1])))) +
                 fabs(sqrt(sqr(xval[17]) + sqr(yval[17])) - 0.5*(sqrt(sqr(midval[2][1]) + sqr(midval[3][1])) + sqrt(sqr(midval[2][2]) + sqr(midval[3][2])))) +
@@ -290,9 +290,9 @@ namespace Hermes
           }
 
           // split the quad if the error is too large, otherwise produce two linear triangles
-          if (split)
+          if(split)
           {
-            if (curved)
+            if(curved)
             {
               RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
@@ -321,7 +321,7 @@ namespace Hermes
         }
 
         // output two linear triangles,
-        if (!flip)
+        if(!flip)
         {
           add_triangle(iv3, iv0, iv1);
           add_triangle(iv1, iv2, iv3);
@@ -336,7 +336,7 @@ namespace Hermes
       void Vectorizer::process_dash(int iv1, int iv2)
       {
         int mid = this->peek_vertex(iv1, iv2);
-        if (mid != -1)
+        if(mid != -1)
         {
           process_dash(iv1, mid);
           process_dash(mid, iv2);
@@ -353,8 +353,8 @@ namespace Hermes
         for (int i = 0; i < this->vertex_count; i++)
         {
           double mag = (verts[i][2]*verts[i][2] + verts[i][3]*verts[i][3]);
-          if (finite(mag) && mag < this->min_val) this->min_val = mag;
-          if (finite(mag) && mag > this->max_val) this->max_val = mag;
+          if(finite(mag) && mag < this->min_val) this->min_val = mag;
+          if(finite(mag) && mag > this->max_val) this->max_val = mag;
         }
         this->max_val = sqrt(this->max_val);
         this->min_val = sqrt(this->min_val);
@@ -363,7 +363,7 @@ namespace Hermes
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
       {
         // sanity check
-        if (xsln == NULL || ysln == NULL) throw Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
+        if(xsln == NULL || ysln == NULL) throw Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
 
         lock_data();
         this->tick();
@@ -428,7 +428,7 @@ namespace Hermes
         }
 
         // get the component and desired value from item.
-        if (xitem >= 0x40)
+        if(xitem >= 0x40)
         {
           component_x = 1;
           xitem >>= 6;
@@ -439,7 +439,7 @@ namespace Hermes
           value_type_x++;
         }
         // get the component and desired value from item.
-        if (yitem >= 0x40)
+        if(yitem >= 0x40)
         {
           component_y = 1;
           yitem >>= 6;
@@ -488,7 +488,7 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
               double fx = xval[i];
               double fy = yval[i];
 #pragma omp critical(vectorizer_get_max)
-              if (fabs(sqrt(fx*fx + fy*fy)) > max)
+              if(fabs(sqrt(fx*fx + fy*fy)) > max)
                 max = fabs(sqrt(fx*fx + fy*fy));
             }
           }
@@ -532,7 +532,7 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
             this->curved = (current_state.e[0]->cm != NULL);
 
             // recur to sub-elements
-            if (current_state.e[0]->is_triangle())
+            if(current_state.e[0]->is_triangle())
               process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL);
             else
               process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL);
@@ -548,24 +548,24 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
               double px = ref[i][0];
               double py = ref[i][1];
               // for odd edges (1, 3) we check x coordinate after ctm transformation, if it's the same (1 or -1) in both meshes => bold
-              if (i & 1)
+              if(i & 1)
               {
-                if ((xctm->m[0]*px + xctm->t[0] == r[i]) && (yctm->m[0]*px + yctm->t[0] == r[i]))
+                if((xctm->m[0]*px + xctm->t[0] == r[i]) && (yctm->m[0]*px + yctm->t[0] == r[i]))
                   bold = true;
               }
               // for even edges (0, 4) we check y coordinate after ctm transformation, if it's the same (-1 or 1) in both meshes => bold
               else
               {
-                if ((xctm->m[1]*py + xctm->t[1] == r[i]) && (yctm->m[1]*py + yctm->t[1] == r[i]))
+                if((xctm->m[1]*py + xctm->t[1] == r[i]) && (yctm->m[1]*py + yctm->t[1] == r[i]))
                   bold = true;
               }
               int j = current_state.e[0]->next_vert(i);
               // we draw a line only if both edges lies on the boundary or if the line is from left top to right bottom
-              if (((current_state.e[0]->en[i]->bnd) && (current_state.e[1]->en[i]->bnd)) ||
+              if(((current_state.e[0]->en[i]->bnd) && (current_state.e[1]->en[i]->bnd)) ||
                 (verts[iv[i]][1] < verts[iv[j]][1]) ||
                 (verts[iv[i]][1] == verts[iv[j]][1] && verts[iv[i]][0] < verts[iv[j]][0]))
               {
-                if (bold)
+                if(bold)
                   this->process_edge(iv[i], iv[j], current_state.e[0]->en[i]->marker);
                 else
                   this->process_dash(iv[i], iv[j]);
@@ -589,7 +589,7 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 
         find_min_max();
 
-        //if (verbose_mode) print_hash_stats();
+        //if(verbose_mode) print_hash_stats();
         unlock_data();
 
         // select old quadratrues
@@ -643,7 +643,7 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 
       int Vectorizer::add_vertex()
       {
-        if (this->vertex_count >= this->vertex_size)
+        if(this->vertex_count >= this->vertex_size)
         {
           this->vertex_size *= 2;
           verts = (double4*) realloc(verts, sizeof(double4) * vertex_size);
@@ -656,7 +656,7 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 
       void Vectorizer::add_dash(int iv1, int iv2)
       {
-        if (this->dashes_count >= this->dashes_size)
+        if(this->dashes_count >= this->dashes_size)
         {
           this->dashes_size *= 2;
           dashes = (int2*) realloc(dashes, sizeof(int2) * dashes_size);
@@ -668,13 +668,13 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
       void Vectorizer::push_transform(int son)
       {
         xsln->push_transform(son);
-        if (ysln != xsln) ysln->push_transform(son);
+        if(ysln != xsln) ysln->push_transform(son);
       }
 
       void Vectorizer::pop_transform()
       {
         xsln->pop_transform();
-        if (ysln != xsln) ysln->pop_transform();
+        if(ysln != xsln) ysln->pop_transform();
       }
     }
   }

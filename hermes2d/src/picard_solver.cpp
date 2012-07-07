@@ -61,10 +61,10 @@ namespace Hermes
     template<typename Scalar>
     void calculate_anderson_coeffs(Scalar** previous_vectors, Scalar* anderson_coeffs, int num_last_vectors_used, int ndof)
     {
-      if (num_last_vectors_used <= 1) throw Hermes::Exceptions::Exception("Anderson acceleration makes sense only if at least two last iterations are used.");
+      if(num_last_vectors_used <= 1) throw Hermes::Exceptions::Exception("Anderson acceleration makes sense only if at least two last iterations are used.");
 
       // If num_last_vectors_used is 2, then there is only one residual, and thus only one alpha coeff which is 1.0.
-      if (num_last_vectors_used == 2)
+      if(num_last_vectors_used == 2)
       {
         anderson_coeffs[0] = 1.0;
         return;
@@ -135,7 +135,7 @@ namespace Hermes
         double anderson_beta)
     {
       // Sanity check.
-      if (num_last_vectors_used < 1)
+      if(num_last_vectors_used < 1)
         throw Hermes::Exceptions::Exception("PicardSolver: Bad number of last iterations to be used (must be at least one).");
 
       // Preliminaries.
@@ -201,7 +201,7 @@ namespace Hermes
         this->info("---- Picard iter %d, ndof %d, rel. error %g%%", it, ndof, rel_error);
 
         // Stopping because error is sufficiently low.
-        if (rel_error < tol)
+        if(rel_error < tol)
         {
           delete [] last_iter_vector;
           Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
@@ -209,7 +209,7 @@ namespace Hermes
         }
 
         // Stopping because maximum number of iterations reached.
-        if (it >= max_iter)
+        if(it >= max_iter)
         {
           this->info("Maximum allowed number of Picard iterations exceeded, returning false.");
           delete [] last_iter_vector;

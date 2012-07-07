@@ -23,7 +23,7 @@
 #ifdef HAVE_AMESOS
 #include "amesos_solver.h"
 #include "callstack.h"
-#include <Amesos_ConfigDefs.h>
+#include "Amesos_ConfigDefs.h"
 
 namespace Hermes
 {
@@ -68,7 +68,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int AmesosSolver<Scalar>::get_matrix_size(){
+    int AmesosSolver<Scalar>::get_matrix_size()
+    {
       return m->size;
     }
 
@@ -85,14 +86,14 @@ namespace Hermes
       Epetra_Vector x(*rhs->std_map);
       problem.SetLHS(&x);
 
-      if (!setup_factorization())
+      if(!setup_factorization())
       {
         this->warn("AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
       int status = solver->Solve();
-      if (status != 0)
+      if(status != 0)
       {
         throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
         return false;
@@ -121,14 +122,14 @@ namespace Hermes
 
       throw Hermes::Exceptions::Exception("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
-      if (!setup_factorization())
+      if(!setup_factorization())
       {
         this->warn("AmesosSolver: LU factorization could not be completed");
         return false;
       }
 
       int status = solver->Solve();
-      if (status != 0)
+      if(status != 0)
       {
         throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
         return false;
@@ -150,7 +151,7 @@ namespace Hermes
     {
       // Perform both factorization phases for the first time.
       int eff_fact_scheme;
-      if (this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH &&
+      if(this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH &&
         solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
@@ -162,7 +163,7 @@ namespace Hermes
       case HERMES_FACTORIZE_FROM_SCRATCH:
         //debug_log("Factorizing symbolically.");
         status = solver->SymbolicFactorization();
-        if (status != 0)
+        if(status != 0)
         {
           this->warn("Symbolic factorization failed.");
           return false;
@@ -171,7 +172,7 @@ namespace Hermes
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
         status = solver->NumericFactorization();
-        if (status != 0)
+        if(status != 0)
         {
           this->warn("Numeric factorization failed.");
           return false;

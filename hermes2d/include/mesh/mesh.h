@@ -99,13 +99,13 @@ namespace Hermes
     /// The element can be a triangle or a quad (nvert == 3 or nvert = 4), active or inactive.
     ///
     /// Vertex/node index number
-    ///        [2]
+    ///       [2]
     ///   (3)-------(2)
     ///    |         |
-    /// [3]|  quad.  |[1]
+    ///[3]|  quad.  |[1]
     ///    |         |
     ///   (0)-------(1)
-    ///        [0]
+    ///       [0]
     /// Active elements are actual existing elements in the mesh, which take part in the
     /// computation. Inactive elements are those which have once been active, but were refined,
     /// ie., replaced by several other (smaller) son elements. The purpose of the union is the
@@ -260,15 +260,15 @@ namespace Hermes
       int get_max_element_id() const;
 
       /// Refines an element.
-      /// \param id [in] Element id number.
-      /// \param refinement [in] Ignored for triangles. If the element
+      /// \param id[in] Element id number.
+      /// \param refinement[in] Ignored for triangles. If the element
       /// is a quad, 0 means refine in both directions, 1 means refine
       /// horizontally (with respect to the reference domain), 2 means
       /// refine vertically.
       void refine_element_id(int id, int refinement = 0);
 
       /// Refines all elements.
-      /// \param refinement [in] Same meaning as in refine_element_id().
+      /// \param refinement[in] Same meaning as in refine_element_id().
       void refine_all_elements(int refinement = 0, bool mark_as_initial = false);
 
       /// Selects elements to refine according to a given criterion and
@@ -320,11 +320,6 @@ namespace Hermes
 
       /// For internal use.
       void set_seq(unsigned seq);
-
-      /// Refines all triangle elements to quads.
-      /// It can refine a triangle element into three quadrilaterals.
-      /// Note: this function creates a base mesh.
-      void convert_triangles_to_quads();
 
     private:
       /// For internal use.
@@ -639,39 +634,39 @@ namespace Hermes
     /// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
     #define for_all_elements(e, mesh) \
             for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-              if (((e) = (mesh)->get_element_fast(_id))->used)
+              if(((e) = (mesh)->get_element_fast(_id))->used)
 
     #define for_all_base_elements(e, mesh) \
             for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-              if (((e) = (mesh)->get_element_fast(_id))->used)
+              if(((e) = (mesh)->get_element_fast(_id))->used)
 
     #define for_all_base_elements_incl_inactive(e, mesh) \
             for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-              if (((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
+              if(((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
 
     #define for_all_active_elements(e, mesh) \
             for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-              if (((e) = (mesh)->get_element_fast(_id))->used) \
-                if ((e)->active)
+              if(((e) = (mesh)->get_element_fast(_id))->used) \
+                if((e)->active)
 
     #define for_all_inactive_elements(e, mesh) \
             for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-              if (((e) = (mesh)->get_element_fast(_id))->used) \
-                if (!(e)->active)
+              if(((e) = (mesh)->get_element_fast(_id))->used) \
+                if(!(e)->active)
 
     #define for_all_nodes(n, mesh) \
             for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-              if (((n) = (mesh)->get_node(_id))->used)
+              if(((n) = (mesh)->get_node(_id))->used)
 
     #define for_all_vertex_nodes(n, mesh) \
             for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-              if (((n) = (mesh)->get_node(_id))->used) \
-                if (!(n)->type)
+              if(((n) = (mesh)->get_node(_id))->used) \
+                if(!(n)->type)
 
     #define for_all_edge_nodes(n, mesh) \
             for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-              if (((n) = (mesh)->get_node(_id))->used) \
-                if ((n)->type)
+              if(((n) = (mesh)->get_node(_id))->used) \
+                if((n)->type)
 
     const int TOP_LEVEL_REF = 123456;
   }

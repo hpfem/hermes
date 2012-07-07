@@ -75,7 +75,7 @@ namespace Hermes
       Array<Node> nodes; ///< Array storing all nodes
 
       /// Initializes the hash table.
-      /// \param size [in] Hash table size; must be a power of two.
+      /// \param size[in] Hash table size; must be a power of two.
       void init(int size = H2D_DEFAULT_HASH_SIZE);
 
       /// Copies another hash table contents

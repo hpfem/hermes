@@ -126,10 +126,10 @@ namespace Hermes
 
       protected: //FPS measurement
 #define FPS_FRAME_SIZE 5
-        double rendering_frames[FPS_FRAME_SIZE]; ///< time spend in rendering of frames [in ms]
+        double rendering_frames[FPS_FRAME_SIZE]; ///< time spend in rendering of frames[in ms]
         int rendering_frames_top; ///< the new location of the next FPS
         void draw_fps(); ///< draws current FPS
-        static double get_tick_count(); ///< returns a current time [in ms]
+        static double get_tick_count(); ///< returns a current time[in ms]
 
       protected: //view
         bool view_not_reset; ///< True if the view was not reset and therefore it has to be.

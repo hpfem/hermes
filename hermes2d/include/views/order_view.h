@@ -44,7 +44,7 @@ namespace Hermes
 
         OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
         //#ifndef _MSC_VER
-        //	OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
+        //  OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
         //#endif
         OrderView(char* title, WinGeom* wg = NULL);
 
@@ -76,7 +76,7 @@ namespace Hermes
 
         OrderView(const char* title = "OrderView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         //#ifndef _MSC_VER
-        //	OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
+        //  OrderView(const char* title = "OrderView", WinGeom* wg = NULL);
         //#endif
         OrderView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 

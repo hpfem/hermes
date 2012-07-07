@@ -16,11 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <iostream>
+#include "discrete_problem.h"
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 #include "global.h"
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
-#include "discrete_problem.h"
 #include "mesh/traverse.h"
 #include "space/space.h"
 #include "shapeset/precalc.h"
@@ -41,7 +45,7 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
     {
-      if (spaces.empty())
+      if(spaces.empty())
         throw Exceptions::NullException(2);
       unsigned int first_dof_running = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -88,9 +92,9 @@ namespace Hermes
       if(wf == NULL)
         throw Hermes::Exceptions::Exception("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
 
-      if (spaces.size() != (unsigned) wf->get_neq())
+      if(spaces.size() != (unsigned) wf->get_neq())
         throw Hermes::Exceptions::Exception("Bad number of spaces in DiscreteProblem.");
-      if (spaces.size() == 0)
+      if(spaces.size() == 0)
         throw Hermes::Exceptions::Exception("Zero number of spaces in DiscreteProblem.");
 
       // Internal variables settings.
@@ -108,11 +112,11 @@ namespace Hermes
       this->DG_vector_forms_present = false;
 
       for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++)
-        if (this->wf->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
+        if(this->wf->mfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
           this->DG_matrix_forms_present = true;
 
       for(unsigned int i = 0; i < this->wf->vfsurf.size(); i++)
-        if (this->wf->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
+        if(this->wf->vfsurf[i]->areas[0] == H2D_DG_INNER_EDGE)
           this->DG_vector_forms_present = true;
 
       Geom<Hermes::Ord> *tmp = init_geom_ord();
@@ -127,10 +131,10 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-      if (wf != NULL)
+      if(wf != NULL)
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
       wf_seq = -1;
-      if (sp_seq != NULL) delete [] sp_seq;
+      if(sp_seq != NULL) delete [] sp_seq;
     }
 
     template<typename Scalar>
@@ -171,19 +175,19 @@ namespace Hermes
     {
       // check if we can reuse the matrix structure
       bool up_to_date = true;
-      if (!have_matrix)
+      if(!have_matrix)
         up_to_date = false;
 
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
-        if (spaces[i]->get_seq() != sp_seq[i])
+        if(spaces[i]->get_seq() != sp_seq[i])
         {
           up_to_date = false;
           break;
         }
       }
 
-      if (wf->get_seq() != wf_seq)
+      if(wf->get_seq() != wf_seq)
         up_to_date = false;
 
       return up_to_date;
@@ -212,15 +216,15 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state)
     {
-      if (current_state->e[form->i] == NULL || current_state->e[form->j] == NULL)
+      if(current_state->e[form->i] == NULL || current_state->e[form->j] == NULL)
         return false;
-      if (fabs(form->scaling_factor) < 1e-12)
+      if(fabs(form->scaling_factor) < 1e-12)
         return false;
 
       // If a block scaling table is provided, and if the scaling coefficient
       // A_mn for this block is zero, then the form does not need to be assembled.
-      if (current_block_weights != NULL)
-        if (fabs(current_block_weights->get_A(form->i, form->j)) < 1e-12)
+      if(current_block_weights != NULL)
+        if(fabs(current_block_weights->get_A(form->i, form->j)) < 1e-12)
           return false;
       return true;
     }
@@ -251,14 +255,14 @@ namespace Hermes
           if(marker_on_space_n)
             marker_on_space_n = (this->spaces[form->j]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
 
-          if (marker_on_space_m && marker_on_space_n)
+          if(marker_on_space_m && marker_on_space_n)
           {
             assemble_this_form = true;
             break;
           }
         }
       }
-      if (!assemble_this_form)
+      if(!assemble_this_form)
         return false;
       return true;
     }
@@ -269,7 +273,7 @@ namespace Hermes
       if(current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
-      if (form->areas[0] == H2D_DG_INNER_EDGE)
+      if(form->areas[0] == H2D_DG_INNER_EDGE)
         return false;
       if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
         return false;
@@ -292,14 +296,14 @@ namespace Hermes
           if(marker_on_space_n)
             marker_on_space_n = (this->spaces[form->j]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[current_state->isurf]->marker);
 
-          if (marker_on_space_m && marker_on_space_n)
+          if(marker_on_space_m && marker_on_space_n)
           {
             assemble_this_form = true;
             break;
           }
         }
       }
-      if (assemble_this_form == false)
+      if(assemble_this_form == false)
         return false;
       return true;
     }
@@ -307,9 +311,9 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorForm<Scalar>* form, Traverse::State* current_state)
     {
-      if (current_state->e[form->i] == NULL)
+      if(current_state->e[form->i] == NULL)
         return false;
-      if (fabs(form->scaling_factor) < 1e-12)
+      if(fabs(form->scaling_factor) < 1e-12)
         return false;
 
       return true;
@@ -337,14 +341,14 @@ namespace Hermes
           if(marker_on_space_m)
             marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
 
-          if (marker_on_space_m)
+          if(marker_on_space_m)
           {
             assemble_this_form = true;
             break;
           }
         }
       }
-      if (!assemble_this_form)
+      if(!assemble_this_form)
         return false;
       return true;
     }
@@ -355,7 +359,7 @@ namespace Hermes
       if(current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
-      if (form->areas[0] == H2D_DG_INNER_EDGE)
+      if(form->areas[0] == H2D_DG_INNER_EDGE)
         return false;
 
       if(!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
@@ -375,14 +379,14 @@ namespace Hermes
           if(marker_on_space_m)
             marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[current_state->isurf]->marker);
 
-          if (marker_on_space_m)
+          if(marker_on_space_m)
           {
             assemble_this_form = true;
             break;
           }
         }
       }
-      if (assemble_this_form == false)
+      if(assemble_this_form == false)
         return false;
       return true;
     }
@@ -399,11 +403,11 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::create_sparse_structure()
     {
-      if (is_up_to_date())
+      if(is_up_to_date())
       {
-        if (current_mat != NULL)
+        if(current_mat != NULL)
           current_mat->zero();
-        if (current_rhs != NULL)
+        if(current_rhs != NULL)
         {
           // If we use e.g. a new NewtonSolver (providing a new Vector) for this instance of DiscreteProblem that already assembled a system,
           // we end up with everything up_to_date, but unallocated Vector.
@@ -435,7 +439,7 @@ namespace Hermes
         }
       }
 
-      if (current_mat != NULL)
+      if(current_mat != NULL)
       {
         // Spaces have changed: create the matrix from scratch.
         have_matrix = true;
@@ -471,7 +475,7 @@ namespace Hermes
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
-            if (current_state->e[i] != NULL)
+            if(current_state->e[i] != NULL)
               if(is_DG)
                 spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
               else
@@ -483,14 +487,14 @@ namespace Hermes
             int num_edges = current_state->e[0]->get_num_surf();
 
             // Allocation an array of arrays of neighboring elements for every mesh x edge.
-            Element **** neighbor_elems_arrays = new Element *** [wf->get_neq()];
+            Element **** neighbor_elems_arrays = new Element ***[wf->get_neq()];
             for(unsigned int i = 0; i < wf->get_neq(); i++)
-              neighbor_elems_arrays[i] = new Element ** [num_edges];
+              neighbor_elems_arrays[i] = new Element **[num_edges];
 
             // The same, only for number of elements
-            int ** neighbor_elems_counts = new int * [wf->get_neq()];
+            int ** neighbor_elems_counts = new int *[wf->get_neq()];
             for(unsigned int i = 0; i < wf->get_neq(); i++)
-              neighbor_elems_counts[i] = new int [num_edges];
+              neighbor_elems_counts[i] = new int[num_edges];
 
             // Get the neighbors.
             for(unsigned int el = 0; el < wf->get_neq(); el++)
@@ -506,7 +510,7 @@ namespace Hermes
                 const Hermes::vector<Element *> *neighbors = ns.get_neighbors();
 
                 neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
-                neighbor_elems_arrays[el][ed] = new Element * [neighbor_elems_counts[el][ed]];
+                neighbor_elems_arrays[el][ed] = new Element *[neighbor_elems_counts[el][ed]];
                 for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
                   neighbor_elems_arrays[el][ed][neigh] = (*neighbors)[neigh];
               }
@@ -517,7 +521,7 @@ namespace Hermes
               for(unsigned int el = 0; el < wf->get_neq(); el++)
                 for(int ed = 0; ed < num_edges; ed++)
                   for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
-                    if ((blocks[m][el] || blocks[el][m]) && current_state->e[m] != NULL)
+                    if((blocks[m][el] || blocks[el][m]) && current_state->e[m] != NULL)
                     {
                       AsmList<Scalar>*am = &(al[m]);
                       AsmList<Scalar>*an = new AsmList<Scalar>;
@@ -526,9 +530,9 @@ namespace Hermes
                       // pretend assembling of the element stiffness matrix
                       // register nonzero elements
                       for (unsigned int i = 0; i < am->cnt; i++)
-                        if (am->dof[i] >= 0)
+                        if(am->dof[i] >= 0)
                           for (unsigned int j = 0; j < an->cnt; j++)
-                            if (an->dof[j] >= 0)
+                            if(an->dof[j] >= 0)
                             {
                               if(blocks[m][el]) current_mat->pre_add_ij(am->dof[i], an->dof[j]);
                               if(blocks[el][m]) current_mat->pre_add_ij(an->dof[j], am->dof[i]);
@@ -557,16 +561,16 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < wf->get_neq(); n++)
             {
-              if (blocks[m][n] && current_state->e[m] != NULL && current_state->e[n] != NULL)
+              if(blocks[m][n] && current_state->e[m] != NULL && current_state->e[n] != NULL)
               {
                 AsmList<Scalar>*am = &(al[m]);
                 AsmList<Scalar>*an = &(al[n]);
 
                 // Pretend assembling of the element stiffness matrix.
                 for (unsigned int i = 0; i < am->cnt; i++)
-                  if (am->dof[i] >= 0)
+                  if(am->dof[i] >= 0)
                     for (unsigned int j = 0; j < an->cnt; j++)
-                      if (an->dof[j] >= 0)
+                      if(an->dof[j] >= 0)
                         current_mat->pre_add_ij(am->dof[i], an->dof[j]);
               }
             }
@@ -583,7 +587,7 @@ namespace Hermes
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
-      if (current_rhs != NULL)
+      if(current_rhs != NULL)
         current_rhs->alloc(ndof);
 
       // save space seq numbers and weakform seq number, so we can detect their changes
@@ -635,7 +639,7 @@ namespace Hermes
       }
       for(unsigned int i = 0; i < Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads); i++)
       {
-        if (coeff_vec != NULL)
+        if(coeff_vec != NULL)
         {
           u_ext[i] = new Solution<Scalar>*[wf->get_neq()];
           if(i == 0)
@@ -856,8 +860,8 @@ namespace Hermes
       current_block_weights = block_weights;
 
       // Check that the block scaling table have proper dimension.
-      if (block_weights != NULL)
-        if (block_weights->get_size() != wf->get_neq())
+      if(block_weights != NULL)
+        if(block_weights->get_size() != wf->get_neq())
           throw Exceptions::LengthException(6, block_weights->get_size(), wf->get_neq());
 
       // Creating matrix sparse structure.
@@ -898,7 +902,7 @@ namespace Hermes
         meshes.push_back(spaces[space_i]->get_mesh());
       for (unsigned j = 0; j < ext_functions.size(); j++)
         meshes.push_back(ext_functions[j]->get_mesh());
-      if (coeff_vec != NULL)
+      if(coeff_vec != NULL)
         for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
           meshes.push_back(spaces[space_i]->get_mesh());
 
@@ -918,7 +922,7 @@ namespace Hermes
           fns[i].push_back(ext[i][j]);
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
-        if (coeff_vec != NULL)
+        if(coeff_vec != NULL)
           for (unsigned j = 0; j < wf->get_neq(); j++)
           {
             fns[i].push_back(u_ext[i][j]);
@@ -990,9 +994,9 @@ namespace Hermes
       delete [] trav;
 
       /// \todo Should this be really here? Or in assemble()?
-      if (current_mat != NULL)
+      if(current_mat != NULL)
         current_mat->finish();
-      if (current_rhs != NULL)
+      if(current_rhs != NULL)
         current_rhs->finish();
 
       if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -1020,7 +1024,7 @@ namespace Hermes
       // trav.get_next_state(...).
       for (unsigned int i = 0; i < spaces.size(); i++)
       {
-        if (current_state->e[i] == NULL)
+        if(current_state->e[i] == NULL)
           continue;
 
         // \todo do not obtain again if the element was not changed.
@@ -1043,7 +1047,7 @@ namespace Hermes
       // Obtain the list of shape functions which are nonzero on this surface.
       for (unsigned int i = 0; i < spaces.size(); i++)
       {
-        if (current_state->e[i] == NULL)
+        if(current_state->e[i] == NULL)
           continue;
 
         spaces[i]->get_boundary_assembly_list(current_state->e[i], current_state->isurf, current_als[i], spaces_first_dofs[i]);
@@ -1057,7 +1061,7 @@ namespace Hermes
       // Initialize the state, return a non-NULL element; if no such element found, return.
       init_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state);
 
-      if (current_mat != NULL)
+      if(current_mat != NULL)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
         {
@@ -1071,9 +1075,9 @@ namespace Hermes
 
           for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
           {
-            if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) < 1e-12)
+            if(std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) < 1e-12)
               continue;
-            //if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+            //if(current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_mfvol[current_mfvol_i]->i]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->i]->idx[i]);
               test_fns[i] = init_fn(current_spss[current_mfvol[current_mfvol_i]->i], current_refmaps[current_mfvol[current_mfvol_i]->i], order);
@@ -1082,9 +1086,9 @@ namespace Hermes
 
           for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
           {
-            if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) < 1e-12)
+            if(std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) < 1e-12)
               continue;
-            //if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
+            //if(current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
             {
               current_pss[current_mfvol[current_mfvol_i]->j]->set_active_shape(current_als[current_mfvol[current_mfvol_i]->j]->idx[j]);
 
@@ -1095,8 +1099,8 @@ namespace Hermes
           assemble_matrix_form(current_mfvol[current_mfvol_i], order, base_fns, test_fns, current_refmaps, current_u_ext, current_als, current_state);
 
           for (unsigned int j = 0; j < current_als[current_mfvol[current_mfvol_i]->j]->cnt; j++)
-            if (std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) >= 1e-12)
-              //if (current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
+            if(std::abs(current_als[current_mfvol[current_mfvol_i]->j]->coef[j]) >= 1e-12)
+              //if(current_als[current_mfvol[current_mfvol_i]->j]->dof[j] >= 0)
               {
                 base_fns[j]->free_fn();
                 delete base_fns[j];
@@ -1104,8 +1108,8 @@ namespace Hermes
               delete [] base_fns;
               for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
               {
-                if (std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) >= 1e-12)
-                  //if (current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+                if(std::abs(current_als[current_mfvol[current_mfvol_i]->i]->coef[i]) >= 1e-12)
+                  //if(current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
                   {
                     test_fns[i]->free_fn();
                     delete test_fns[i];
@@ -1114,7 +1118,7 @@ namespace Hermes
               delete [] test_fns;
         }
       }
-      if (current_rhs != NULL)
+      if(current_rhs != NULL)
       {
         for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
         {
@@ -1127,9 +1131,9 @@ namespace Hermes
 
           for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
           {
-            if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) < 1e-12)
+            if(std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) < 1e-12)
               continue;
-            //if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
+            //if(current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
             {
               current_spss[current_vfvol[current_vfvol_i]->i]->set_active_shape(current_als[current_vfvol[current_vfvol_i]->i]->idx[i]);
 
@@ -1141,8 +1145,8 @@ namespace Hermes
 
           for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
           {
-            if (std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) >= 1e-12)
-              //if (current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
+            if(std::abs(current_als[current_vfvol[current_vfvol_i]->i]->coef[i]) >= 1e-12)
+              //if(current_als[current_vfvol[current_vfvol_i]->i]->dof[i] >= 0)
               {
                 test_fns[i]->free_fn();
                 delete test_fns[i];
@@ -1159,7 +1163,7 @@ namespace Hermes
           continue;
         init_surface_state(current_als, current_state);
 
-        if (current_mat != NULL)
+        if(current_mat != NULL)
         {
           for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
           {
@@ -1173,10 +1177,10 @@ namespace Hermes
 
             for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
             {
-              if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
+              if(std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
 
-              //if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
+              //if(current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_mfsurf[current_mfsurf_i]->i]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->i]->idx[i]);
 
@@ -1186,13 +1190,13 @@ namespace Hermes
 
             for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
             {
-              if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) < 1e-12)
+              if(std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) < 1e-12)
                 continue;
-              //if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
+              //if(current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
               {
                 current_pss[current_mfsurf[current_mfsurf_i]->j]->set_active_shape(current_als[current_mfsurf[current_mfsurf_i]->j]->idx[j]);
 
-                base_fns[j] = init_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j]->get_quad_2d()->get_edge_points(current_state->isurf, order,current_state->e[0]->get_mode()));
+                base_fns[j] = init_fn(current_pss[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j], current_refmaps[current_mfsurf[current_mfsurf_i]->j]->get_quad_2d()->get_edge_points(current_state->isurf, order, current_state->e[0]->get_mode()));
               }
             }
 
@@ -1200,8 +1204,8 @@ namespace Hermes
 
             for (unsigned int j = 0; j < current_als[current_mfsurf[current_mfsurf_i]->j]->cnt; j++)
             {
-              if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) >= 1e-12)
-                //if (current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
+              if(std::abs(current_als[current_mfsurf[current_mfsurf_i]->j]->coef[j]) >= 1e-12)
+                //if(current_als[current_mfsurf[current_mfsurf_i]->j]->dof[j] >= 0)
                 {
                   base_fns[j]->free_fn();
                   delete base_fns[j];
@@ -1210,8 +1214,8 @@ namespace Hermes
             delete [] base_fns;
             for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
             {
-              if (std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) >= 1e-12)
-                //if (current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
+              if(std::abs(current_als[current_mfsurf[current_mfsurf_i]->i]->coef[i]) >= 1e-12)
+                //if(current_als[current_mfsurf[current_mfsurf_i]->i]->dof[i] >= 0)
                 {
                   test_fns[i]->free_fn();
                   delete test_fns[i];
@@ -1221,7 +1225,7 @@ namespace Hermes
           }
         }
 
-        if (current_rhs != NULL)
+        if(current_rhs != NULL)
         {
           for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
           {
@@ -1234,9 +1238,9 @@ namespace Hermes
 
             for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
             {
-              if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) < 1e-12)
+              if(std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) < 1e-12)
                 continue;
-              //if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
+              //if(current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
               {
                 current_spss[current_vfsurf[current_vfsurf_i]->i]->set_active_shape(current_als[current_vfsurf[current_vfsurf_i]->i]->idx[i]);
 
@@ -1248,8 +1252,8 @@ namespace Hermes
 
             for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
             {
-              if (std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) >= 1e-12)
-                //if (current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
+              if(std::abs(current_als[current_vfsurf[current_vfsurf_i]->i]->coef[i]) >= 1e-12)
+                //if(current_als[current_vfsurf[current_vfsurf_i]->i]->dof[i] >= 0)
                 {
                   test_fns[i]->free_fn();
                   delete test_fns[i];
@@ -1290,10 +1294,10 @@ namespace Hermes
         for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
         {
           int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-          if (eo > max_order_i)
+          if(eo > max_order_i)
             max_order_i = eo;
           eo = this->spaces[form->j]->get_edge_order(current_state->e[form->j], k);
-          if (eo > max_order_j)
+          if(eo > max_order_j)
             max_order_j = eo;
         }
 
@@ -1351,21 +1355,21 @@ namespace Hermes
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
       {
-        if (current_als[form->i]->dof[i] < 0)
+        if(current_als[form->i]->dof[i] < 0)
           continue;
 
-        if ((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
+        if((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
           continue;
         if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
           continue;
-        if (!sym)
+        if(!sym)
         {
           for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
           {
-            if (current_als[form->j]->dof[j] >= 0)
+            if(current_als[form->j]->dof[j] >= 0)
             {
               // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if (std::abs(current_als[form->j]->coef[j]) < 1e-12)
+              if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
                 continue;
 
               Func<double>* u = base_fns[j];
@@ -1383,12 +1387,12 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
           {
-            if (j < i && current_als[form->j]->dof[j] >= 0)
+            if(j < i && current_als[form->j]->dof[j] >= 0)
               continue;
-            if (current_als[form->j]->dof[j] >= 0)
+            if(current_als[form->j]->dof[j] >= 0)
             {
               // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if (std::abs(current_als[form->j]->coef[j]) < 1e-12)
+              if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
                 continue;
 
               Func<double>* u = base_fns[j];
@@ -1407,9 +1411,9 @@ namespace Hermes
       current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
-      if (tra)
+      if(tra)
       {
-        if (form->sym < 0)
+        if(form->sym < 0)
           chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
         transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
 #pragma omp critical (mat)
@@ -1448,7 +1452,7 @@ namespace Hermes
         for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
         {
           int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-          if (eo > max_order_i)
+          if(eo > max_order_i)
             max_order_i = eo;
         }
         Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
@@ -1495,11 +1499,11 @@ namespace Hermes
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
       {
-        if (current_als[form->i]->dof[i] < 0)
+        if(current_als[form->i]->dof[i] < 0)
           continue;
 
         // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-        if (std::abs(current_als[form->i]->coef[i]) < 1e-12)
+        if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
           continue;
 
         Func<double>* v = test_fns[i];
@@ -1565,9 +1569,9 @@ namespace Hermes
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
-      if (current_u_ext != NULL)
+      if(current_u_ext != NULL)
         for(int i = 0; i < prev_size; i++)
-          if (current_u_ext[i + form->u_ext_offset] != NULL)
+          if(current_u_ext[i + form->u_ext_offset] != NULL)
             if(surface_form)
               oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf) + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
             else
@@ -1614,9 +1618,9 @@ namespace Hermes
     {
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
 
-      if (current_u_ext != NULL)
+      if(current_u_ext != NULL)
         for(int i = 0; i < prev_size; i++)
-          if (current_u_ext[i + form->u_ext_offset] != NULL)
+          if(current_u_ext[i + form->u_ext_offset] != NULL)
             u_ext[i] = current_state->e[i] == NULL ? NULL : init_fn(current_u_ext[i + form->u_ext_offset], order);
           else
             u_ext[i] = NULL;
@@ -1628,9 +1632,10 @@ namespace Hermes
       ext->fn = new Func<Scalar>*[ext->nf];
       for (unsigned i = 0; i < ext->nf; i++)
       {
-        if (form->ext[i] != NULL)
+        if(form->ext[i] != NULL)
           ext->fn[i] = init_fn(form->ext[i], order);
-        else ext->fn[i] = NULL;
+        else
+          ext->fn[i] = NULL;
       }
     }
 
@@ -1645,7 +1650,7 @@ namespace Hermes
         prev_size = this->RK_original_spaces_count;
 
       for(int i = 0; i < prev_size; i++)
-        if (u_ext[i] != NULL)
+        if(u_ext[i] != NULL)
         {
           u_ext[i]->free_fn();
           delete u_ext[i];
@@ -1653,7 +1658,7 @@ namespace Hermes
 
         delete [] u_ext;
 
-        if (ext != NULL)
+        if(ext != NULL)
           ext->free();
     }
 
@@ -1892,7 +1897,7 @@ namespace Hermes
         else
           mesh_i = (dynamic_cast<MeshFunction<Scalar>*>(fn[fns_i]))->get_mesh();
         NeighborSearch<Scalar>* ns = neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq);
-        if (ns->central_transformations.present(neighbor_i))
+        if(ns->central_transformations.present(neighbor_i))
           ns->central_transformations.get(neighbor_i)->apply_on(fn[fns_i]);
       }
 
@@ -1903,7 +1908,7 @@ namespace Hermes
         {
           NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[idx_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
           npss[idx_i]->set_active_element((*ns->get_neighbors())[neighbor_i]);
-          if (ns->neighbor_transformations.present(neighbor_i))
+          if(ns->neighbor_transformations.present(neighbor_i))
             ns->neighbor_transformations.get(neighbor_i)->apply_on(npss[idx_i]);
         }
       }
@@ -1937,7 +1942,7 @@ namespace Hermes
           int order = 24;
 
           MatrixFormSurf<Scalar>* mfs = current_mfsurf[current_mfsurf_i];
-          if (mfs->areas[0] != H2D_DG_INNER_EDGE)
+          if(mfs->areas[0] != H2D_DG_INNER_EDGE)
             continue;
           int m = mfs->i;
           int n = mfs->j;
@@ -1964,16 +1969,17 @@ namespace Hermes
           // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
           int prev_size = wf->get_neq() - mfs->u_ext_offset;
           Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-          if (current_u_ext != NULL)
+          if(current_u_ext != NULL)
           {
             for (int i = 0; i < prev_size; i++)
             {
-              if (current_u_ext[i + mfs->u_ext_offset] != NULL)
+              if(current_u_ext[i + mfs->u_ext_offset] != NULL)
               {
                 neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
                 prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
               }
-              else prev[i] = NULL;
+              else
+                prev[i] = NULL;
             }
           }
           else
@@ -1992,10 +1998,10 @@ namespace Hermes
           Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
           for (int i = 0; i < ext_asmlist_v->cnt; i++)
           {
-            if (ext_asmlist_v->dof[i] < 0)
+            if(ext_asmlist_v->dof[i] < 0)
               continue;
             // Choose the correct shapeset for the test function.
-            if (!ext_asmlist_v->has_support_on_neighbor(i))
+            if(!ext_asmlist_v->has_support_on_neighbor(i))
             {
               current_spss[m]->set_active_shape(ext_asmlist_v->central_al->idx[i]);
               fv = current_spss[m];
@@ -2012,7 +2018,7 @@ namespace Hermes
             for (int j = 0; j < ext_asmlist_u->cnt; j++)
             {
               // Choose the correct shapeset for the solution function.
-              if (!ext_asmlist_u->has_support_on_neighbor(j))
+              if(!ext_asmlist_u->has_support_on_neighbor(j))
               {
                 current_pss[n]->set_active_shape(ext_asmlist_u->central_al->idx[j]);
                 fu = current_pss[n];
@@ -2027,7 +2033,7 @@ namespace Hermes
                 support_neigh_u = true;
               }
 
-              if (ext_asmlist_u->dof[j] >= 0)
+              if(ext_asmlist_u->dof[j] >= 0)
               {
                 // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
                 DiscontinuousFunc<double>* u = new DiscontinuousFunc<double>(init_fn(fu, ru, nbs_u->get_quad_eo(support_neigh_u)),
@@ -2057,7 +2063,7 @@ namespace Hermes
           // Clean up.
           for (int i = 0; i < prev_size; i++)
           {
-            if (prev[i] != NULL)
+            if(prev[i] != NULL)
             {
               prev[i]->free_fn();
               delete prev[i];
@@ -2066,7 +2072,7 @@ namespace Hermes
 
           delete [] prev;
 
-          if (ext != NULL)
+          if(ext != NULL)
           {
             ext->free();
             delete ext;
@@ -2082,7 +2088,7 @@ namespace Hermes
         }
       }
 
-      if (current_rhs != NULL && DG_vector_forms_present)
+      if(current_rhs != NULL && DG_vector_forms_present)
       {
         for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
         {
@@ -2090,7 +2096,7 @@ namespace Hermes
           int order = 24;
 
           VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
-          if (vfs->areas[0] != H2D_DG_INNER_EDGE)
+          if(vfs->areas[0] != H2D_DG_INNER_EDGE)
             continue;
           int m = vfs->i;
 
@@ -2114,14 +2120,15 @@ namespace Hermes
           // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
           int prev_size = wf->get_neq() - vfs->u_ext_offset;
           Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-          if (current_u_ext != NULL)
+          if(current_u_ext != NULL)
             for (int i = 0; i < prev_size; i++)
-              if (current_u_ext[i + vfs->u_ext_offset] != NULL)
+              if(current_u_ext[i + vfs->u_ext_offset] != NULL)
               {
                 neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
                 prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
               }
-              else prev[i] = NULL;
+              else
+                prev[i] = NULL;
           else
             for (int i = 0; i < prev_size; i++)
               prev[i] = NULL;
@@ -2129,7 +2136,7 @@ namespace Hermes
           // Here we use the standard pss, possibly just transformed by NeighborSearch.
           for (unsigned int dof_i = 0; dof_i < current_als[m]->cnt; dof_i++)
           {
-            if (current_als[m]->dof[dof_i] < 0)
+            if(current_als[m]->dof[dof_i] < 0)
               continue;
             current_spss[m]->set_active_shape(current_als[m]->idx[dof_i]);
 
@@ -2145,7 +2152,7 @@ namespace Hermes
           // Clean up.
           for (int i = 0; i < prev_size; i++)
           {
-            if (prev[i] != NULL)
+            if(prev[i] != NULL)
             {
               prev[i]->free_fn();
               delete prev[i];
@@ -2154,7 +2161,7 @@ namespace Hermes
 
           delete [] prev;
 
-          if (ext != NULL)
+          if(ext != NULL)
           {
             ext->free();
             delete ext;
@@ -2248,11 +2255,11 @@ namespace Hermes
         if(neighbor_searches.present(i))
         {
           NeighborSearch<Scalar>* ns = neighbor_searches.get(i);
-          if (ns->n_neighbors == 1 &&
+          if(ns->n_neighbors == 1 &&
             (ns->central_transformations.get_size() == 0 || ns->central_transformations.get(0)->num_levels == 0))
             continue;
           for(unsigned int j = 0; j < ns->n_neighbors; j++)
-            if (ns->central_transformations.present(j))
+            if(ns->central_transformations.present(j))
               insert_into_multimesh_tree(root, ns->central_transformations.get(j)->transf, ns->central_transformations.get(j)->num_levels);
         }
     }
@@ -2360,7 +2367,7 @@ namespace Hermes
       {
         // Find the node corresponding to this neighbor in the tree.
         NeighborNode* node;
-        if (ns->central_transformations.present(i))
+        if(ns->central_transformations.present(i))
           node = find_node(ns->central_transformations.get(i)->transf, ns->central_transformations.get(i)->num_levels, multimesh_tree);
         else
           node = multimesh_tree;
@@ -2423,14 +2430,14 @@ namespace Hermes
       Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
       running_central_transformations.push_back(new Hermes::vector<unsigned int>);
-      if (ns->central_transformations.present(ith_neighbor))
+      if(ns->central_transformations.present(ith_neighbor))
         ns->central_transformations.get(ith_neighbor)->copy_to(running_central_transformations.back());
 
       // Initialize the vector for neighbor transformations->
       Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
       running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
-      if (ns->neighbor_transformations.present(ith_neighbor))
+      if(ns->neighbor_transformations.present(ith_neighbor))
         ns->neighbor_transformations.get(ith_neighbor)->copy_to(running_neighbor_transformations.back());
 
       // Delete the current neighbor.
@@ -2458,9 +2465,9 @@ namespace Hermes
         ns->neighbors.push_back(neighbor);
         ns->neighbor_edges.push_back(edge_info);
 
-        if (!ns->central_transformations.present(ns->n_neighbors))
+        if(!ns->central_transformations.present(ns->n_neighbors))
           ns->central_transformations.add(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
-        if (!ns->neighbor_transformations.present(ns->n_neighbors))
+        if(!ns->neighbor_transformations.present(ns->n_neighbors))
           ns->neighbor_transformations.add(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
         ns->central_transformations.get(ns->n_neighbors)->copy_from(*running_central_transformations[i]);
         ns->neighbor_transformations.get(ns->n_neighbors)->copy_from(*running_neighbor_transformations[i]);
@@ -2505,7 +2512,7 @@ namespace Hermes
         // Take care of the neighbor transformation.
         // Insert appropriate info from this leaf into the current running neighbor transformation, thus complete it.
         if(mode == HERMES_MODE_TRIANGLE)
-          if ((active_edge == 0 && node->get_transformation() == 0) ||
+          if((active_edge == 0 && node->get_transformation() == 0) ||
             (active_edge == 1 && node->get_transformation() == 1) ||
             (active_edge == 2 && node->get_transformation() == 2))
             running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
@@ -2513,7 +2520,7 @@ namespace Hermes
             running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
         // Quads.
         else
-          if ((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
+          if((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
             (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
             (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
             (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
@@ -2534,7 +2541,7 @@ namespace Hermes
         // Insert appropriate info from this leaf into the current running neighbor transformation, thus complete it.
         // Triangles.
         if(mode == HERMES_MODE_TRIANGLE)
-          if ((active_edge == 0 && node->get_transformation() == 0) ||
+          if((active_edge == 0 && node->get_transformation() == 0) ||
             (active_edge == 1 && node->get_transformation() == 1) ||
             (active_edge == 2 && node->get_transformation() == 2))
             running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
@@ -2542,7 +2549,7 @@ namespace Hermes
             running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 3));
         // Quads.
         else
-          if ((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
+          if((active_edge == 0 && (node->get_transformation() == 0 || node->get_transformation() == 6)) ||
             (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
             (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
             (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))

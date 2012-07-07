@@ -36,8 +36,6 @@ namespace Hermes
       double2 t; /// Translation vector.
     };
 
-    struct Rect;
-
     /// A total number of valid transformation of a triangle to a sub-domain.
     static const int H2D_TRF_TRI_NUM = 4;
         /// A total number of valid transformation of a quad to a sub-domain.
@@ -62,7 +60,7 @@ namespace Hermes
       Element* get_active_element() const;
 
       /// Sets the current transform at once as if it was created by multiple calls to push_transform().
-      /// \param idx [in] The number of the sub-element, as returned by get_transform().
+      /// \param idx[in] The number of the sub-element, as returned by get_transform().
       void set_transform(uint64_t idx);
 
       /// \return The current transform index.
@@ -73,7 +71,7 @@ namespace Hermes
       /// Multiplies the current transformation matrix on the right by a transformation to the
       /// specified son element and pushes it on top of the matrix stack. All integration
       /// points will then be transformed to this sub-element. This process can be repeated.
-      /// \param son [in] Son element number in the range [0-3] for triangles and [0-7] for quads.
+      /// \param son[in] Son element number in the range[0-3] for triangles and[0-7] for quads.
       virtual void push_transform(int son);
 
     protected:
@@ -83,7 +81,7 @@ namespace Hermes
       /// Called by the assembling procedure and by other functions. In PrecalcShapeset it
       /// sets an internal variable that can be later retrieved by get_active_element().
       /// In Solution it selects the element to retrieve solution values for, etc.
-      /// \param e [in] Element associated with the function being represented by the class.
+      /// \param e[in] Element associated with the function being represented by the class.
       virtual void set_active_element(Element* e);
 
       /// Removes the current transformation matrix from the top of the stack. The new top becomes

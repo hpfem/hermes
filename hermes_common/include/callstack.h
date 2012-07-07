@@ -48,7 +48,7 @@
 class HERMES_API CallStack
 {
 public:
-	// dump the call stack objects to standard error
-	static void dump(int signalCode);
+  // dump the call stack objects to standard error
+  static void dump(int signalCode);
 };
 #endif

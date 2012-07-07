@@ -30,8 +30,8 @@ namespace Hermes
       this->owner = true;
       this->mat = NULL;
 
-      if (strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
-      else if (strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
+      if(strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
+      else if(strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
     }
 
     template<typename Scalar>
@@ -39,13 +39,13 @@ namespace Hermes
     {
       this->prec = mpc;
       this->owner = false;
-      this->mat = NULL;			// FIXME: get the matrix from mpc
+      this->mat = NULL;      // FIXME: get the matrix from mpc
     }
 
     template<typename Scalar>
     MlPrecond<Scalar>::~MlPrecond()
     {
-      if (owner) delete prec;
+      if(owner) delete prec;
     }
 
     template<typename Scalar>
@@ -69,7 +69,7 @@ namespace Hermes
     template<typename Scalar>
     void MlPrecond<Scalar>::create(Matrix<Scalar> *m)
     {
-      EpetraMatrix<Scalar> *mt = dynamic_cast<EpetraMatrix<Scalar> *>(m);
+      EpetraMatrix<Scalar> *mt = static_cast<EpetraMatrix<Scalar> *>(m);
       assert(mt != NULL);
       mat = mt;
       delete prec;

@@ -199,11 +199,11 @@ namespace Hermes
     public:
       T diam;           ///< Element diameter (for edge, diameter of the parent element).
       T area;           ///< Element area (for edge, area of the parent element).
-      T *x, *y;         ///< Coordinates [in physical domain].
-      T *nx, *ny;       ///< Normals [in physical domain] (locally oriented
+      T *x, *y;         ///< Coordinates[in physical domain].
+      T *nx, *ny;       ///< Normals[in physical domain] (locally oriented
       ///< to point outside the element). Only for edge
       ///< (undefined for element).
-      T *tx, *ty;       ///< Tangents [in physical domain]. Only for edge.
+      T *tx, *ty;       ///< Tangents[in physical domain]. Only for edge.
       int id;           ///< ID number of the element (undefined for edge).
       int isurf;        ///< Order number of an edge of the element.
 
@@ -224,7 +224,7 @@ namespace Hermes
       int edge_marker;       ///< Edge marker (for surface forms only).
 
     protected:
-      int orientation;  ///< 0 .... if (nx, ny) is equal to the global normal,
+      int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
       ///< otherwise 1 (each edge has a unique global normal).
       ///< Only for edge.
 

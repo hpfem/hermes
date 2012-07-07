@@ -34,7 +34,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces_mutable.push_back(spaces.at(i));
 
-      if (bt==NULL) throw Exceptions::NullException(2);
+      if(bt==NULL) throw Exceptions::NullException(2);
 
       do_global_projections = true;
 
@@ -65,7 +65,7 @@ namespace Hermes
       spaces.push_back(const_cast<const Space<Scalar>*>(space));
       spaces_mutable.push_back(space);
 
-      if (bt==NULL) throw Exceptions::NullException(2);
+      if(bt==NULL) throw Exceptions::NullException(2);
 
       do_global_projections = true;
 
@@ -243,7 +243,7 @@ namespace Hermes
         vector_right->change_sign();
 
         // Measure the residual norm.
-        if (residual_as_vector)
+        if(residual_as_vector)
           // Calculate the l2-norm of residual vector.
           residual_norm = Global<Scalar>::get_l2_norm(vector_right);
         else
@@ -258,24 +258,24 @@ namespace Hermes
         }
 
         // Info for the user.
-        if (it == 1)
+        if(it == 1)
           this->info("---- Newton initial residual norm: %g", residual_norm);
         else
           this->info("---- Newton iter %d, residual norm: %g", it-1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
-        if (residual_norm > newton_max_allowed_residual_norm)
+        if(residual_norm > newton_max_allowed_residual_norm)
         {
           throw Exceptions::ValueException("residual norm", residual_norm, newton_max_allowed_residual_norm);
         }
 
         // If residual norm is within tolerance, or the maximum number
         // of iteration has been reached, or the problem is linear, then quit.
-        if ((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
+        if((residual_norm < newton_tol || it > newton_max_iter) && it > 1)
           break;
 
         bool rhs_only = (freeze_jacobian && it > 1);
-        if (!rhs_only)
+        if(!rhs_only)
         {
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
@@ -303,7 +303,7 @@ namespace Hermes
       }
 
       // If max number of iterations was exceeded, fail.
-      if (it >= newton_max_iter)
+      if(it >= newton_max_iter)
       {
         throw Exceptions::ValueException("Newton iterations", it, newton_max_iter);
       }
@@ -314,7 +314,7 @@ namespace Hermes
       // FIXME - this projection is not needed when the
       //         spaces are the same (if spatial adaptivity is not used).
       Scalar* coeff_vec = new Scalar[ndof];
-      if (do_global_projections)
+      if(do_global_projections)
       {
         OGProjection<Scalar> ogProjection;
         ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
@@ -325,7 +325,7 @@ namespace Hermes
         ogProjection.project_local(spaces, slns_time_prev, coeff_vec);
       }
 
-      if (do_global_projections)
+      if(do_global_projections)
       {
         OGProjection<Scalar> ogProjection;
         ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
@@ -345,7 +345,7 @@ namespace Hermes
 
       // If error_fn is not NULL, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
-      if (error_fns != Hermes::vector<Solution<Scalar>*>())
+      if(error_fns != Hermes::vector<Solution<Scalar>*>())
       {
         for (int i = 0; i < ndof; i++)
         {
@@ -465,7 +465,7 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < num_stages; j++)
           {
-            if (block_diagonal_jacobian && i != j) continue;
+            if(block_diagonal_jacobian && i != j) continue;
 
             MatrixFormVol<Scalar>* mfv_ij = mfvol_base[m]->clone();
 
@@ -497,7 +497,7 @@ namespace Hermes
         {
           for (unsigned int j = 0; j < num_stages; j++)
           {
-            if (block_diagonal_jacobian && i != j) continue;
+            if(block_diagonal_jacobian && i != j) continue;
 
             MatrixFormSurf<Scalar>* mfs_ij = mfsurf_base[m]->clone();
 

@@ -19,6 +19,7 @@
 /*! \file superlu_solver.cpp
 \brief SuperLU solver interface.
 */
+#include <algorithm>
 #include "config.h"
 #ifdef WITH_SUPERLU
 #include "superlu_solver.h"
@@ -93,7 +94,7 @@ namespace Hermes
     ///
     static int find_position(int *Ai, int Alen, int idx)
     {
-      assert (idx >= 0);
+      assert(idx >= 0);
 
       register int lo = 0, hi = Alen - 1, mid;
 
@@ -101,13 +102,13 @@ namespace Hermes
       {
         mid = (lo + hi) >> 1;
 
-        if (idx < Ai[mid]) hi = mid - 1;
-        else if (idx > Ai[mid]) lo = mid + 1;
+        if(idx < Ai[mid]) hi = mid - 1;
+        else if(idx > Ai[mid]) lo = mid + 1;
         else break;
 
         // Sparse matrix entry not found (raise an error when trying to add
         // value to this position, return 0 when obtaining value there).
-        if (lo > hi) mid = -1;
+        if(lo > hi) mid = -1;
       }
       return mid;
     }
@@ -133,9 +134,9 @@ namespace Hermes
       assert(this->pages != NULL);
 
       // Initialize the arrays Ap and Ai.
-      Ap = new unsigned int [this->size + 1];
+      Ap = new unsigned int[this->size + 1];
       int aisize = this->get_num_indices();
-      Ai = new int [aisize];
+      Ai = new int[aisize];
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i, pos = 0;
@@ -151,7 +152,7 @@ namespace Hermes
 
       nnz = Ap[this->size];
 
-      Ax = new Scalar [nnz];
+      Ax = new Scalar[nnz];
       memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
@@ -170,9 +171,9 @@ namespace Hermes
       // Find m-th row in the n-th column.
       int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
       // Return 0 if the entry has not been found.
-      if (mid < 0) return 0.0;
+      if(mid < 0) return 0.0;
       // Otherwise, add offset to the n-th column and return the value.
-      if (mid >= 0) mid += Ap[n];
+      if(mid >= 0) mid += Ap[n];
       return Ax[mid];
     }
 
@@ -185,12 +186,12 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
     {
-      if (v != 0.0) // ignore zero values.
+      if(v != 0.0) // ignore zero values.
       {
         // Find m-th row in the n-th column.
         int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
         // Make sure we are adding to an existing non-zero entry.
-        if (pos < 0)
+        if(pos < 0)
           throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
         // Add offset to the n-th column.
         pos += Ap[n];
@@ -227,7 +228,7 @@ namespace Hermes
       switch (fmt)
       {
       case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp = [\n", this->size, this->size, Ap[this->size], Ap[this->size]);
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n", this->size, this->size, Ap[this->size], Ap[this->size]);
         for (unsigned int j = 0; j < this->size; j++)
           for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
           {
@@ -285,7 +286,7 @@ namespace Hermes
     void SuperLUMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, SuperLUMatrix<Scalar>* mat)
     {
       int ndof = mat->get_size();
-      if (this->get_size() != (unsigned int) num_stages * ndof)
+      if(this->get_size() != (unsigned int) num_stages * ndof)
         throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
 
       for (int i = 0; i < num_stages; i++)
@@ -297,7 +298,7 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
     {
-      add_to_diagonal_blocks(num_stages, dynamic_cast<SuperLUMatrix*>(mat));
+      add_to_diagonal_blocks(num_stages, static_cast<SuperLUMatrix*>(mat));
     }
 
     template<typename Scalar>
@@ -309,7 +310,7 @@ namespace Hermes
         for (unsigned int n = mat->Ap[col];n<mat->Ap[col + 1];n++)
         {
           idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
-          if (idx<0)
+          if(idx<0)
             throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
           idx += Ap[col + j];
           Ax[idx] +=mat->Ax[n];
@@ -496,7 +497,7 @@ namespace Hermes
         return true;
 
       case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx1\n%s = [\n", this->size, var_name);
+        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
         for (unsigned int i = 0; i < this->size; i++)
         {
           Hermes::Helpers::fprint_num(file, v[i]);
@@ -530,23 +531,23 @@ namespace Hermes
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::check_status(unsigned int info)
     {
-      if (info == 0)
+      if(info == 0)
       {
         // Success.
         return true;
       }
-      else if (info <= m->size)
+      else if(info <= m->size)
       {
         this->warn("SuperLU: Factor U is singular, solution could not be computed.");
         return false;
       }
-      else if (info == m->size + 1)
+      else if(info == m->size + 1)
       {
         this->warn("SuperLU: RCOND is less than machine precision "
           "(system matrix is singular to working precision).");
         return true;
       }
-      else if (info > m->size + 1)
+      else if(info > m->size + 1)
       {
         this->warn("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
           (info - m->size)/1e6);
@@ -575,7 +576,7 @@ namespace Hermes
       // I am not sure if this will work well on Windows:
       // http://stackoverflow.com/questions/631664/accessing-environment-variables-in-c
       char *nt_var = getenv("OMP_NUM_THREADS");
-      if (nt_var)
+      if(nt_var)
         options.nprocs          = std::max(1, atoi(nt_var));
       else
         options.nprocs          = 1;
@@ -632,10 +633,10 @@ namespace Hermes
       free_matrix();
       free_rhs();
 
-      if (local_Ai)  delete [] local_Ai;
-      if (local_Ap)  delete [] local_Ap;
-      if (local_Ax)  delete [] local_Ax;
-      if (local_rhs) delete [] local_rhs;
+      if(local_Ai)  delete [] local_Ai;
+      if(local_Ap)  delete [] local_Ap;
+      if(local_Ax)  delete [] local_Ax;
+      if(local_rhs) delete [] local_rhs;
     }
 
     template<typename Scalar>
@@ -674,7 +675,7 @@ namespace Hermes
       options.lwork = lwork;
 #endif
 
-      if ( !setup_factorization() )
+      if( !setup_factorization() )
       {
         this->warn("LU factorization could not be completed.");
         return false;
@@ -684,24 +685,24 @@ namespace Hermes
       // keep the (possibly rescaled) matrix from the last factorization, otherwise recreate it
       // from the master SuperLUMatrix<Scalar> pointed to by this->m (this also applies to the case when
       // A does not yet exist).
-      if (!has_A || this->factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+      if(!has_A || this->factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
       {
-        if (A_changed)
+        if(A_changed)
           free_matrix();
 
-        if (!has_A)
+        if(!has_A)
         {
           // A will be created from the local copy of the value and index arrays, because these
           // may be modified by the solver driver.
-          if (local_Ai) delete [] local_Ai;
-          local_Ai = new int [m->nnz];
+          if(local_Ai) delete [] local_Ai;
+          local_Ai = new int[m->nnz];
           memcpy(local_Ai, m->Ai, m->nnz * sizeof(int));
 
-          if (local_Ap) delete [] local_Ap;
-          local_Ap = new int [m->size + 1];
+          if(local_Ap) delete [] local_Ap;
+          local_Ap = new int[m->size + 1];
           memcpy(local_Ap, m->Ap, (m->size + 1) * sizeof(int));
 
-          if (local_Ax) delete [] local_Ax;
+          if(local_Ax) delete [] local_Ax;
           local_Ax = new typename SuperLuType<Scalar>::Scalar[m->nnz];
           for (unsigned int i = 0;i<m->nnz;i++)
             to_superlu(local_Ax[i], m->Ax[i]);
@@ -716,7 +717,7 @@ namespace Hermes
       // Recreate the input rhs for the solver driver from a local copy of the new value array.
       free_rhs();
 
-      if (local_rhs) delete [] local_rhs;
+      if(local_rhs) delete [] local_rhs;
       local_rhs = new typename SuperLuType<Scalar>::Scalar[rhs->size];
       for (unsigned int i = 0;i<rhs->size;i++)
         to_superlu(local_rhs[i], rhs->v[i]);
@@ -728,7 +729,7 @@ namespace Hermes
       // Initialize the solution variable.
       SuperMatrix X;
       typename SuperLuType<Scalar>::Scalar *x;
-      if ( !(x = new typename SuperLuType<Scalar>::Scalar[m->size]) )
+      if( !(x = new typename SuperLuType<Scalar>::Scalar[m->size]) )
         throw Hermes::Exceptions::Exception("Malloc fails for x[].");
       create_dense_matrix(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
 
@@ -736,7 +737,7 @@ namespace Hermes
       int info;
 
 #ifdef SLU_MT
-      if (options.refact == NO)
+      if(options.refact == NO)
       {
         // Get column permutation vector perm_c[], according to the first argument:
         //  0: natural ordering
@@ -792,7 +793,7 @@ namespace Hermes
 
       bool factorized = check_status(info);
 
-      if (factorized)
+      if(factorized)
       {
         delete [] this->sln;
         this->sln = new Scalar[m->size];
@@ -804,7 +805,7 @@ namespace Hermes
       }
 
       // If required, print statistics.
-      if ( options.PrintStat ) SLU_PRINT_STAT(&stat);
+      if( options.PrintStat ) SLU_PRINT_STAT(&stat);
 
       // Free temporary local variables.
       StatFree(&stat);
@@ -822,7 +823,7 @@ namespace Hermes
     bool SuperLUSolver<Scalar>::setup_factorization()
     {
       unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
-      if (has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
+      if(has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
       {
         this->warn("You cannot reuse factorization structures for factorizing matrices of different sizes.");
         return false;
@@ -830,7 +831,7 @@ namespace Hermes
 
       // Always factorize from scratch for the first time.
       int eff_fact_scheme;
-      if (!inited)
+      if(!inited)
         eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
         eff_fact_scheme = this->factorization_scheme;
@@ -854,15 +855,15 @@ namespace Hermes
         free_factorization_data();
 
         // Allocate the row/column reordering vectors.
-        if ( !(perm_c = intMalloc(m->size)) )
+        if( !(perm_c = intMalloc(m->size)) )
           throw Hermes::Exceptions::Exception("Malloc fails for perm_c[].");
-        if ( !(perm_r = intMalloc(m->size)) )
+        if( !(perm_r = intMalloc(m->size)) )
           throw Hermes::Exceptions::Exception("Malloc fails for perm_r[].");
 
         // Allocate vectors with row/column scaling factors.
-        if ( !(R = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
+        if( !(R = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
           throw Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for R[].");
-        if ( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
+        if( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
           throw Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for C[].");
 
 #ifdef SLU_MT
@@ -873,7 +874,7 @@ namespace Hermes
 #else
         // Allocate additional structures used by the driver routine of sequential SuperLU.
         // Elimination tree is contained in the options structure in SuperLU_MT.
-        if ( !(etree = intMalloc(m->size)) )
+        if( !(etree = intMalloc(m->size)) )
           throw Hermes::Exceptions::Exception("Malloc fails for etree[].");
 
         options.Fact = DOFACT;
@@ -925,7 +926,7 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_matrix()
     {
-      if (has_A)
+      if(has_A)
       {
         Destroy_SuperMatrix_Store(&A);
         has_A = false;
@@ -935,7 +936,7 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_rhs()
     {
-      if (has_B)
+      if(has_B)
       {
         Destroy_SuperMatrix_Store(&B);
         has_B = false;
@@ -945,7 +946,7 @@ namespace Hermes
     template<typename Scalar>
     void SuperLUSolver<Scalar>::free_factorization_data()
     {
-      if (inited)
+      if(inited)
       {
 #ifdef SLU_MT
         SUPERLU_FREE(options.etree);
@@ -1022,7 +1023,7 @@ namespace Hermes
       /* ------------------------------------------------------------
       Diagonal scaling to equilibrate the matrix.
       ------------------------------------------------------------*/
-      if (dofact || equil)
+      if(dofact || equil)
       {
         *equed = NOEQUIL;
         rowequ = colequ = FALSE;
@@ -1033,7 +1034,7 @@ namespace Hermes
         colequ = (*equed == COL) || (*equed == BOTH);
       }
 
-      if ( equil )
+      if( equil )
       {
         t0 = SuperLU_timer_();
         /* Compute row and column scalings to equilibrate the matrix A. */
@@ -1041,7 +1042,7 @@ namespace Hermes
         double rowcnd, colcnd, amax;
         SLU_GSEQU(A, R, C, &rowcnd, &colcnd, &amax, &info1);
 
-        if ( info1 == 0 )
+        if( info1 == 0 )
         {
           /* Equilibrate matrix A. */
           SLU_LAQGS(A, R, C, rowcnd, colcnd, amax, equed);
@@ -1054,13 +1055,13 @@ namespace Hermes
       /* ------------------------------------------------------------
       Scale the right hand side.
       ------------------------------------------------------------*/
-      if ( notran )
+      if( notran )
       {
-        if ( rowequ )
+        if( rowequ )
           for (int i = 0; i < A->nrow; ++i)
             SLU_MULT(Bmat[i], R[i]);
       }
-      else if ( colequ )
+      else if( colequ )
       {
         for (int i = 0; i < A->nrow; ++i)
           SLU_MULT(Bmat[i], C[i]);
@@ -1069,11 +1070,11 @@ namespace Hermes
       /* ------------------------------------------------------------
       Perform the LU factorization.
       ------------------------------------------------------------*/
-      if ( dofact || equil )
+      if( dofact || equil )
       {
         /* Obtain column etree, the column count (colcnt_h) and supernode
         partition (part_super_h) for the Householder matrix. */
-        if (options->refact == NO)
+        if(options->refact == NO)
         {
           t0 = SuperLU_timer_();
           SLU_SP_COLORDER(A, perm_c, options, AC);
@@ -1089,21 +1090,21 @@ namespace Hermes
         for (int i = 0; i < options->nprocs; ++i) flopcnt += stat->procstat[i].fcops;
         stat->ops[FACT] = flopcnt;
 
-        if ( options->lwork == -1 )
+        if( options->lwork == -1 )
         {
-          if (memusage)
+          if(memusage)
             memusage->total_needed = *info - A->ncol;
           return;
         }
       }
 
-      if ( *info > 0 )
+      if( *info > 0 )
       {
-        if ( *info <= A->ncol )
+        if( *info <= A->ncol )
         {
           /* Compute the reciprocal pivot growth factor of the leading
           rank-deficient *info columns of A. */
-          if (recip_pivot_growth)
+          if(recip_pivot_growth)
             *recip_pivot_growth = SLU_PIVOT_GROWTH(*info, A, perm_c, L, U);
         }
       }
@@ -1112,13 +1113,13 @@ namespace Hermes
         /* ------------------------------------------------------------
         Compute the reciprocal pivot growth factor *recip_pivot_growth.
         ------------------------------------------------------------*/
-        if (recip_pivot_growth)
+        if(recip_pivot_growth)
           *recip_pivot_growth = SLU_PIVOT_GROWTH(A->ncol, A, perm_c, L, U);
 
         /* ------------------------------------------------------------
         Estimate the reciprocal of the condition number of A.
         ------------------------------------------------------------*/
-        if (rcond)
+        if(rcond)
         {
           t0 = SuperLU_timer_();
 
@@ -1147,7 +1148,7 @@ namespace Hermes
         Use iterative refinement to improve the computed solution and
         compute error bounds and backward error estimates for it.
         ------------------------------------------------------------*/
-        if (ferr && berr)
+        if(ferr && berr)
         {
           t0 = SuperLU_timer_();
           SLU_GSRFS(options->trans, A, L, U, perm_r, perm_c, *equed,
@@ -1159,13 +1160,13 @@ namespace Hermes
         Transform the solution matrix X to a solution of the original
         system.
         ------------------------------------------------------------*/
-        if ( notran )
+        if( notran )
         {
-          if ( colequ )
+          if( colequ )
             for (int i = 0; i < A->nrow; ++i)
               SLU_MULT(Xmat[i], C[i]);
         }
-        else if ( rowequ )
+        else if( rowequ )
         {
           for (int i = 0; i < A->nrow; ++i)
             SLU_MULT(Xmat[i], R[i]);
@@ -1174,10 +1175,10 @@ namespace Hermes
         /* Set INFO = A->ncol + 1 if the matrix is singular to
         working precision.*/
         char param[1]; param[0] = 'E';
-        if ( rcond && *rcond < SLU_LAMCH_(param) ) *info = A->ncol + 1;
+        if( rcond && *rcond < SLU_LAMCH_(param) ) *info = A->ncol + 1;
       }
 
-      if (memusage)
+      if(memusage)
         SLU_QUERY_SPACE(options->nprocs, L, U, options->panel_size, memusage);
     }
 #endif

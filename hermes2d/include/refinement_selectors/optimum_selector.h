@@ -173,7 +173,7 @@ namespace Hermes
         /// Fill a list of candidates.
         /** Override to generate or adjust generated candidates. The method has to initialize the array OptimumSelector::candidates.
         *  If triangle, all generated candidates have to have the vertical order equal to the horizontal order.
-        *  An order of any element of any candidate has to fit into a range [OptimumSelector::current_min_order, OptimumSelector::current_max_order].
+        *  An order of any element of any candidate has to fit into a range[OptimumSelector::current_min_order, OptimumSelector::current_max_order].
         *  \param[in] e An element that is being refined.
         *  \param[in] quad_order An encoded order of the element. If triangle, the vertical order is equal to the horizontal order.
         *  \param[in] max_ha_quad_order A maximum encoded order of an element of a H-candidate or an ANISO-candidate. In the case of ANIO-candidates, the maximum is applied only to modified orders.

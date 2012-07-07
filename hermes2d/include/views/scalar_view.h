@@ -39,7 +39,7 @@ namespace Hermes
 # ifdef ENABLE_VIEWER_GUI
 #   include <AntTweakBar.h>
 #   define VIEWER_GUI(__def) __def
-#   define VIEWER_GUI_CALLBACK(__clbk) if (__clbk) { refresh(); } else
+#   define VIEWER_GUI_CALLBACK(__clbk) if(__clbk) { refresh(); } else
 # else
 #   define TW_WND_ID_NONE -1
 #   define VIEWER_GUI(__def)
@@ -109,8 +109,8 @@ namespace Hermes
       protected:
         struct ElementInfo ///< element info structure
         {
-          float x, y; ///< location of center [in physical coordinates]
-          float width, height; ///< width, height of AABB [in physical coordinates]
+          float x, y; ///< location of center[in physical coordinates]
+          float width, height; ///< width, height of AABB[in physical coordinates]
           int id; ///< element ID
           ElementInfo() : x(0), y(0), width(0), height(0), id(-1) {};
           ElementInfo(int id, float x, float y, float width, float height) : x(x), y(y), width(width), height(height), id(id) {};

@@ -62,12 +62,13 @@ namespace Hermes
 
       sprintf(msg, "Exception in CalculationContinuity (%s): \"%s\"", typeMsg, reason);
       message = msg;
+      delete [] typeMsg;
     }
 
     IOCalculationContinuityException::IOCalculationContinuityException(exceptionEntityType type, inputOutput inputOutput, const char * filename) : CalculationContinuityException()
     {
       char * msg =  new char[34 + strlen(filename)];
-      char * typeMsg = new char[6];
+      char * typeMsg = new char[7];
       switch(inputOutput)
       {
       case input:
@@ -84,7 +85,7 @@ namespace Hermes
     IOCalculationContinuityException::IOCalculationContinuityException(exceptionEntityType type, inputOutput inputOutput, const char * filename, const char * reason) : CalculationContinuityException()
     {
       char * msg =  new char[34 + strlen(filename)];
-      char * typeMsg = new char[6];
+      char * typeMsg = new char[7];
       switch(inputOutput)
       {
       case input:

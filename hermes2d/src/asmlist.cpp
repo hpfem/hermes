@@ -73,7 +73,7 @@ namespace Hermes
     template<typename Scalar>
     void AsmList<Scalar>::add_triplet(int i, int d, Scalar c)
     {
-      if (cnt >= cap)
+      if(cnt >= cap)
         enlarge();
       idx[cnt] = i;
       dof[cnt] = d;

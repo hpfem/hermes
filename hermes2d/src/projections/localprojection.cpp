@@ -33,7 +33,7 @@ namespace Hermes
     void LocalProjection<Scalar>::project_local(const Space<Scalar>* space, MeshFunction<Scalar>* meshfn,
       Scalar* target_vec, ProjNormType proj_norm)
     {
-      if (proj_norm == HERMES_UNSET_NORM)
+      if(proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
@@ -61,7 +61,7 @@ namespace Hermes
       for_all_active_elements(e, mesh)
       {
         int order = space->get_element_order(e->id);
-        if (order > 0)
+        if(order > 0)
         {
           for (unsigned int j = 0; j < e->get_nvert(); j++)
           {
@@ -72,7 +72,7 @@ namespace Hermes
             double y = e->vn[j]->y;
             //this->info("Probing vertex %g %g\n", x, y);
             typename Space<Scalar>::NodeData* nd = space->ndata + vn->id;
-            if (!vn->is_constrained_vertex() && nd->dof >= 0)
+            if(!vn->is_constrained_vertex() && nd->dof >= 0)
             {
               int dof_num = nd->dof;
               // FIXME: If this is a Solution, the it would be MUCH faster to just
@@ -112,14 +112,14 @@ namespace Hermes
     {
       int n = spaces.size();
 
-      if (n != meshfns.size()) throw Exceptions::LengthException(1, 2, n, meshfns.size());
-      if (target_vec == NULL) throw Exceptions::NullException(3);
-      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if(n != meshfns.size()) throw Exceptions::LengthException(1, 2, n, meshfns.size());
+      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if(!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if (proj_norms.empty())
+        if(proj_norms.empty())
           project_local(spaces[i], meshfns[i], target_vec + start_index);
         else
           project_local(spaces[i], meshfns[i], target_vec + start_index, proj_norms[i]);
@@ -135,14 +135,14 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if (n != slns.size()) throw Exceptions::LengthException(1, 2, n, slns.size());
-      if (target_vec == NULL) throw Exceptions::NullException(3);
-      if (!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if(n != slns.size()) throw Exceptions::LengthException(1, 2, n, slns.size());
+      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if(!proj_norms.empty() && n!=proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if (proj_norms.empty())
+        if(proj_norms.empty())
           project_local(spaces[i], slns[i], target_vec + start_index);
         else
           project_local(spaces[i], slns[i], target_vec + start_index, proj_norms[i]);
@@ -157,13 +157,13 @@ namespace Hermes
       int n = spaces.size();
 
       // Sanity checks.
-      if (n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
-      if (n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
-      if (!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
+      if(n != source_slns.size()) throw Exceptions::LengthException(1, 2, n, source_slns.size());
+      if(n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
+      if(!proj_norms.empty() && n != proj_norms.size()) throw Exceptions::LengthException(1, 5, n, proj_norms.size());
 
       for (int i = 0; i < n; i++)
       {
-        if (proj_norms.empty())
+        if(proj_norms.empty())
           project_local(spaces[i], source_slns[i], target_slns[i]);
         else
           project_local(spaces[i], source_slns[i], target_slns[i], proj_norms[i]);

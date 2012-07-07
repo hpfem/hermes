@@ -1,7 +1,7 @@
 // This file is part of HermesCommon
 //
 // Copyright (c) 2009 hp-FEM group at the University of Nevada, Reno (UNR).
-// Email: hpfem-group@unr.edu, home page: http://hpfem.org/.
+// Email: hpfem-group@unr.edu, home page: http:// hpfem.org/.
 //
 // Hermes2D is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
@@ -17,9 +17,10 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include"exceptions.h"
-#include"api.h"
-#include"callstack.h"
+#include "exceptions.h"
+#include <string>
+#include "api.h"
+#include "callstack.h"
 
 namespace Hermes
 {
@@ -34,7 +35,7 @@ namespace Hermes
     {
       char text[1024];
 
-      //print the message
+      // print the message
       va_list arglist;
       va_start(arglist, msg);
       vsprintf(text, msg, arglist);
@@ -45,7 +46,7 @@ namespace Hermes
 
     void Exception::printMsg() const
     {
-      if (message)
+      if(message)
         fprintf(stderr, "%s\n", message);
       else
         fprintf(stderr, "Default exception\n");
@@ -53,7 +54,7 @@ namespace Hermes
         CallStack::dump(0);
     }
 
-    const char * Exception::what() const throw ()
+    const char * Exception::what() const throw()
     {
       return message;
     }
@@ -88,11 +89,11 @@ namespace Hermes
 
     NullException::NullException(const NullException & e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
-      paramIdx=e.getParamIdx();
-      itemIdx=e.getItemIdx();
+      message = msg;
+      paramIdx = e.getParamIdx();
+      itemIdx = e.getItemIdx();
     }
 
     LengthException::LengthException(int paramIdx, int wrong, int right) : Exception()
@@ -108,10 +109,10 @@ namespace Hermes
 
     LengthException::LengthException(int fstParamIdx, int sndParamIdx, int first, int second) : Exception()
     {
-      this->fstParamIdx=fstParamIdx;
-      this->sndParamIdx=sndParamIdx;
-      this->wrong=first;
-      this->right=second;
+      this->fstParamIdx = fstParamIdx;
+      this->sndParamIdx = sndParamIdx;
+      this->wrong = first;
+      this->right = second;
       char * msg = new char[110];
       sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
             fstParamIdx, wrong, sndParamIdx, right);
@@ -140,13 +141,13 @@ namespace Hermes
 
     LengthException::LengthException(const LengthException&e) : Exception()
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
-      this->fstParamIdx=e.getFirstParamIdx();
-      this->sndParamIdx=e.getSecondParamIdx();
-      this->wrong=e.getFirstLength();
-      this->right=e.getExpectedLength();
+      message = msg;
+      this->fstParamIdx = e.getFirstParamIdx();
+      this->sndParamIdx = e.getSecondParamIdx();
+      this->wrong = e.getFirstLength();
+      this->right = e.getExpectedLength();
     }
 
     LinearMatrixSolverException::LinearMatrixSolverException() : Exception()
@@ -165,15 +166,15 @@ namespace Hermes
 
     LinearMatrixSolverException::LinearMatrixSolverException(const LinearMatrixSolverException&e) : Exception()
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
+      message = msg;
     }
 
     ValueException::ValueException(const char * name, double value, double allowed) : Exception()
     {
       char * msg =  new char[55 + strlen(name)];
-      if (value>allowed)
+      if(value>allowed)
         sprintf(msg, "Variable %s is %f but maximum allowed value is %f", name, value, allowed);
       else
         sprintf(msg, "Variable %s is %f but minimum allowed value is %f", name, value, allowed);
@@ -184,11 +185,11 @@ namespace Hermes
 
     ValueException::ValueException(const char * name, double value, double min, double max) : Exception()
     {
-      char * msg= new char[70+strlen(name)];
+      char * msg = new char[70+strlen(name)];
       sprintf(msg, "Variable %s is %f allowed range is %f -- %f", name, value, min, max);
-      message=msg;
-      this->value=value;
-      if (value>min)
+      message = msg;
+      this->value = value;
+      if(value>min)
         this->allowed = max;
       else
         this->allowed = min;
@@ -196,9 +197,9 @@ namespace Hermes
 
     ValueException::ValueException(const char * name, std::string passed) : Exception()
     {
-      char * msg= new char[70+strlen(name)];
+      char * msg = new char[70+strlen(name)];
       sprintf(msg, "Variable %s does not support value %s.", name, passed.c_str());
-      message=msg;
+      message = msg;
     }
 
     double ValueException::getValue() const
@@ -213,18 +214,18 @@ namespace Hermes
 
     ValueException::ValueException(const ValueException&e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
-      this->value=e.getValue();
-      this->allowed=e.getAllowed();
+      message = msg;
+      this->value = e.getValue();
+      this->allowed = e.getAllowed();
     }
 
     FunctionNotOverridenException::FunctionNotOverridenException(const char * name, ...) : Exception()
     {
       char text[1024];
 
-      //print the message
+      // print the message
       va_list arglist;
       va_start(arglist, name);
       vsprintf(text, name, arglist);
@@ -235,16 +236,16 @@ namespace Hermes
 
     FunctionNotOverridenException::FunctionNotOverridenException(const FunctionNotOverridenException&e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
+      message = msg;
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
       char text[1024];
 
-      //print the message
+      // print the message
       va_list arglist;
       va_start(arglist, reason);
       vsprintf(text, reason, arglist);
@@ -255,16 +256,16 @@ namespace Hermes
 
     MeshLoadFailureException::MeshLoadFailureException(const MeshLoadFailureException&e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
+      message = msg;
     }
 
     SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
     {
       char text[1024];
 
-      //print the message
+      // print the message
       va_list arglist;
       va_start(arglist, reason);
       vsprintf(text, reason, arglist);
@@ -275,16 +276,16 @@ namespace Hermes
 
     SpaceLoadFailureException::SpaceLoadFailureException(const SpaceLoadFailureException&e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
+      message = msg;
     }
 
     SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
     {
       char text[1024];
 
-      //print the message
+      // print the message
       va_list arglist;
       va_start(arglist, reason);
       vsprintf(text, reason, arglist);
@@ -295,16 +296,16 @@ namespace Hermes
 
     SolutionSaveFailureException::SolutionSaveFailureException(const SolutionSaveFailureException&e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
+      message = msg;
     }
 
     SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
       char text[1024];
 
-      //print the message
+      // print the message
       va_list arglist;
       va_start(arglist, reason);
       vsprintf(text, reason, arglist);
@@ -315,9 +316,9 @@ namespace Hermes
 
     SolutionLoadFailureException::SolutionLoadFailureException(const SolutionLoadFailureException&e)
     {
-      char * msg= new char[strlen(e.what())+1];
+      char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
-      message=msg;
+      message = msg;
     }
   }
 }

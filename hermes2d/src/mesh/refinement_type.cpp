@@ -3,7 +3,7 @@
 
 HERMES_API bool is_refin_aniso(const int refin_type)
 {
-  if (refin_type == H2D_REFINEMENT_ANISO_H || refin_type == H2D_REFINEMENT_ANISO_V)
+  if(refin_type == H2D_REFINEMENT_ANISO_H || refin_type == H2D_REFINEMENT_ANISO_V)
     return true;
   else
     return false;

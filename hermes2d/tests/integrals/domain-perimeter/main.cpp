@@ -52,7 +52,7 @@ double CalculateBoundaryLength(Mesh* mesh, int bdryMarker)
   // Loop through all boundary faces of all active elements.
   for_all_active_elements(e, mesh) {
     for(int edge = 0; edge < e->get_num_surf(); ++edge) {
-      if ((e->en[edge]->bnd) && (e->en[edge]->marker == bdryMarker)) {
+      if((e->en[edge]->bnd) && (e->en[edge]->marker == bdryMarker)) {
         rm.set_active_element(e);
         points_location = quad->get_edge_points(edge, quad->get_max_order(e->get_mode()), e->get_mode());
         points = quad->get_points(points_location, e->get_mode());
@@ -73,7 +73,7 @@ double CalculateBoundaryLength(Mesh* mesh, int bdryMarker)
 //
 int main(int argc, char* argv[])
 {
-  if (argc != 3)
+  if(argc != 3)
   {
     printf("Missing mesh filename and domain perimeter as command-line parameters.");
     return -1;
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 
   // Set exact value from CMakeLists.txt file
 
-  if (fabs(perimeter - bdryLengthInput) < 1e-6) {
+  if(fabs(perimeter - bdryLengthInput) < 1e-6) {
     printf("Success!\n");
     return 0;
   }

@@ -53,8 +53,8 @@ namespace Hermes
 
       MeshView::~MeshView()
       {
-        if (nodes != NULL) delete [] nodes;
-        if (elems != NULL) delete [] elems;
+        if(nodes != NULL) delete [] nodes;
+        if(elems != NULL) delete [] elems;
         if(lin != NULL)
           delete this->lin;
       }
@@ -62,8 +62,8 @@ namespace Hermes
       void MeshView::show(Mesh* mesh)
       {
         ZeroSolution<double> sln(mesh);
-        if (mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL in MeshView::show().");
-        if (mesh->get_max_element_id() == 0) throw Hermes::Exceptions::Exception("Attempt to visualize empty mesh in MeshView::show().");
+        if(mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL in MeshView::show().");
+        if(mesh->get_max_element_id() == 0) throw Hermes::Exceptions::Exception("Attempt to visualize empty mesh in MeshView::show().");
 
         this->mesh = mesh;
 
@@ -77,7 +77,7 @@ namespace Hermes
 
         int i;
 
-        if (elems != NULL) delete [] elems;
+        if(elems != NULL) delete [] elems;
         ne = mesh->get_max_element_id() + 1;
         elems = new ObjInfo[ne];
         for (i = 0; i < ne; i++)
@@ -145,7 +145,7 @@ namespace Hermes
         {
           int mrk = b_markers ? edges[i][2] : 0;
 
-          if (!edges[i][2] &&
+          if(!edges[i][2] &&
             ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
             tvert[edges[i][0]][0] < tvert[edges[i][1]][0]) ||
             tvert[edges[i][0]][1] < tvert[edges[i][1]][1])) continue;
@@ -158,7 +158,7 @@ namespace Hermes
           glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);
           glEnd();
 
-          if (mrk)
+          if(mrk)
           {
             glEnable(GL_LINE_STIPPLE);
             glColor3f(0.4f, 0.4f, 0.4f);
@@ -171,23 +171,23 @@ namespace Hermes
         }
         glLineWidth(1.0);
 
-        if (b_ids)  // draw element ids
+        if(b_ids)  // draw element ids
         {
           glColor3f(0, 0, 0);
           for (i = 0; i < ne; i++)
           {
-            if (elems[i].id < 0) continue;
+            if(elems[i].id < 0) continue;
             char text[20];
             sprintf(text, "#%d", elems[i].id);
             draw_text(transform_x(elems[i].x), transform_y(elems[i].y), text, 0);
           }
         }
-        else if (b_elem_mrk)  // draw element markers
+        else if(b_elem_mrk)  // draw element markers
         {
           glColor3f(0, 0, 0);
           for (i = 0; i < ne; i++)
           {
-            if (elems[i].id < 0) continue;
+            if(elems[i].id < 0) continue;
             char text[2000];
             sprintf(text, "%s", mesh->get_element_markers_conversion().get_user_marker(elems[i].type).marker.c_str());
             draw_text(transform_x(elems[i].x), transform_y(elems[i].y), text, 0);
@@ -213,13 +213,13 @@ namespace Hermes
           break;
 
         case 'i':
-          if (b_elem_mrk) b_elem_mrk = false;
+          if(b_elem_mrk) b_elem_mrk = false;
           b_ids = !b_ids;
           refresh();
           break;
 
         case 'm':
-          if (b_ids) b_ids = false;
+          if(b_ids) b_ids = false;
           b_elem_mrk = !b_elem_mrk;
           refresh();
           break;
@@ -246,9 +246,9 @@ namespace Hermes
           { 0.8f, 0.8f, 0.0f },
         };
 
-        if (marker == 0)
+        if(marker == 0)
           return edgecol;
-        else if (marker > 0 && marker < 8)
+        else if(marker > 0 && marker < 8)
           return mc[marker];
         else
         {

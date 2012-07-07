@@ -52,7 +52,7 @@ namespace Hermes
         Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_L2FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
-        /** The default order range is [1, 8]. If curved, the upper boundary of the range becomes lower.
+        /** The default order range is[1, 8]. If curved, the upper boundary of the range becomes lower.
         *  Overriden function. For details, see OptimumSelector::set_current_order_range().
         *  \todo Replace calculations inside with calculations that uses symbolic constants instead of fixed numbers.
         *  \todo The original implementation uses subtracts 1 in H1 and Hcurl while L2 subtracts 2. Why? */

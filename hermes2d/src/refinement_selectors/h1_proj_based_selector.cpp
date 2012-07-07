@@ -35,7 +35,7 @@ namespace Hermes
       {
         this->current_max_order = this->max_order;
         int max_element_order = (20 - element->iro_cache)/2 - 1;
-        if (this->current_max_order == H2DRS_DEFAULT_ORDER)
+        if(this->current_max_order == H2DRS_DEFAULT_ORDER)
           this->current_max_order = max_element_order; // default
         else
           this->current_max_order = std::min(this->current_max_order, max_element_order); // user specified
@@ -82,12 +82,12 @@ namespace Hermes
           }
 
           //move to the next transformation
-          if (inx_trf == H2D_TRF_IDENTITY)
+          if(inx_trf == H2D_TRF_IDENTITY)
             done = true;
           else
           {
             inx_trf++;
-            if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+            if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
               inx_trf = H2D_TRF_IDENTITY;
           }
         }
@@ -137,12 +137,12 @@ namespace Hermes
               }
 
               //move to the next transformation
-              if (inx_trf == H2D_TRF_IDENTITY)
+              if(inx_trf == H2D_TRF_IDENTITY)
                 done = true;
               else
               {
                 inx_trf++;
-                if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+                if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                   inx_trf = H2D_TRF_IDENTITY;
               }
             }
@@ -179,12 +179,12 @@ namespace Hermes
             }
 
             //move to the next transformation
-            if (inx_trf == H2D_TRF_IDENTITY)
+            if(inx_trf == H2D_TRF_IDENTITY)
               done = true;
             else
             {
               inx_trf++;
-              if (inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
+              if(inx_trf >= num_noni_trfs) //if all transformations were processed, move to the identity transformation
                 inx_trf = H2D_TRF_IDENTITY;
             }
           }

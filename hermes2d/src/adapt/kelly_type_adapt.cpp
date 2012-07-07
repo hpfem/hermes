@@ -28,7 +28,7 @@ namespace Hermes
       error_estimators_surf.reserve(this->num);
       error_estimators_vol.reserve(this->num);
 
-      if (interface_scaling_fns_.size() == 0)
+      if(interface_scaling_fns_.size() == 0)
       {
         interface_scaling_fns_.reserve(this->num);
         for (int i = 0; i < this->num; i++)
@@ -50,7 +50,7 @@ namespace Hermes
                                            ProjNormType norm_)
       : Adapt<Scalar>(space_, norm_)
     {
-      if (interface_scaling_fn_ == NULL)
+      if(interface_scaling_fn_ == NULL)
         interface_scaling_fns.push_back(new ScaleByElementDiameter);
       else
         interface_scaling_fns.push_back(interface_scaling_fn_);
@@ -125,7 +125,7 @@ namespace Hermes
         this->num_act_elems += meshes[i]->get_num_active_elements();
         int max = meshes[i]->get_max_element_id();
 
-        if (this->errors[i] != NULL) delete [] this->errors[i];
+        if(this->errors[i] != NULL) delete [] this->errors[i];
         this->errors[i] = new double[max];
         memset(this->errors[i], 0, sizeof(double) * max);
       }
@@ -133,11 +133,11 @@ namespace Hermes
       double total_norm = 0.0;
 
       bool calc_norm = false;
-      if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
+      if((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL ||
         (error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL) calc_norm = true;
 
       double *norms = NULL;
-      if (calc_norm)
+      if(calc_norm)
       {
         norms = new double[this->num];
         memset(norms, 0, this->num * sizeof(double));
@@ -155,7 +155,7 @@ namespace Hermes
 
       // Reset the e->visited status of each element of each mesh (most likely it will be set to true from
       // the latest assembling procedure).
-      if (ignore_visited_segments)
+      if(ignore_visited_segments)
       {
         for (int i = 0; i < this->num; i++)
         {
@@ -187,7 +187,7 @@ namespace Hermes
         // Go through all solution components.
         for (int i = 0; i < this->num; i++)
         {
-          if (ee->e[i] == NULL)
+          if(ee->e[i] == NULL)
             continue;
 
           // Set maximum integration order for use in integrals, see limit_order()
@@ -203,11 +203,11 @@ namespace Hermes
             // Skip current error estimator if it is assigned to a different component or geometric area
             // different from that of the current active element.
 
-            if (error_estimators_vol[iest]->i != i)
+            if(error_estimators_vol[iest]->i != i)
               continue;
 
-            if (error_estimators_vol[iest]->area != HERMES_ANY)
-              if (!element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).valid || element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).marker != ee->e[i]->marker)
+            if(error_estimators_vol[iest]->area != HERMES_ANY)
+              if(!element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).valid || element_markers_conversion.get_internal_marker(error_estimators_vol[iest]->area).marker != ee->e[i]->marker)
                 continue;
 
             err += eval_volumetric_estimator(error_estimators_vol[iest], rm);
@@ -216,22 +216,22 @@ namespace Hermes
           // Go through all surface error estimators (includes both interface and boundary est's).
           for (unsigned int iest = 0; iest < error_estimators_surf.size(); iest++)
           {
-            if (error_estimators_surf[iest]->i != i)
+            if(error_estimators_surf[iest]->i != i)
               continue;
 
             for (int isurf = 0; isurf < ee->e[i]->get_num_surf(); isurf++)
             {
-              if (bnd[isurf])   // Boundary
+              if(bnd[isurf])   // Boundary
               {
-                if (error_estimators_surf[iest]->area != HERMES_ANY)
+                if(error_estimators_surf[iest]->area != HERMES_ANY)
                 {
                   if(!boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest]->area).valid)
                     continue;
                   int imarker = boundary_markers_conversion.get_internal_marker(error_estimators_surf[iest]->area).marker;
 
-                  if (imarker == H2D_DG_INNER_EDGE_INT)
+                  if(imarker == H2D_DG_INNER_EDGE_INT)
                     continue;
-                  if (imarker != surf_pos[isurf].marker)
+                  if(imarker != surf_pos[isurf].marker)
                     continue;
                 }
 
@@ -239,7 +239,7 @@ namespace Hermes
               }
               else              // Interface
               {
-                if (error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE)
+                if(error_estimators_surf[iest]->area != H2D_DG_INNER_EDGE)
                   continue;
 
                 // BEGIN COPY FROM DISCRETE_PROBLEM.CPP
@@ -287,7 +287,7 @@ namespace Hermes
                 // by hanging nodes on the other side of the interface).
                 for (unsigned int neighbor = 0; neighbor < num_neighbors; neighbor++)
                 {
-                  if (ignore_visited_segments)
+                  if(ignore_visited_segments)
                   {
                     bool processed = true;
                     for(unsigned int j = 0; j < neighbor_searches.get_size(); j++)
@@ -298,7 +298,7 @@ namespace Hermes
                           break;
                         }
 
-                    if (processed) continue;
+                    if(processed) continue;
                   }
 
                   // We do not use cache_e and cache_jwt here.
@@ -320,7 +320,7 @@ namespace Hermes
                   for(unsigned int fns_i = 0; fns_i < this->num; fns_i++)
                   {
                     NeighborSearch<Scalar> *ns = neighbor_searches.get(meshes[fns_i]->get_seq() - min_dg_mesh_seq);
-                    if (ns->central_transformations.present(neighbor))
+                    if(ns->central_transformations.present(neighbor))
                       ns->central_transformations.get(neighbor)->apply_on(fns[fns_i]);
                   }
 
@@ -336,7 +336,7 @@ namespace Hermes
 
                   // Scale the error estimate by the scaling function dependent on the element diameter
                   // (use the central element's diameter).
-                  if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
+                  if(use_aposteriori_interface_scaling && interface_scaling_fns[i])
                     if(!element_markers_conversion.get_user_marker(ee->e[i]->marker).valid)
                       throw Hermes::Exceptions::Exception("Marker not valid.");
                     else
@@ -344,13 +344,13 @@ namespace Hermes
 
                   // In the case this edge will be ignored when calculating the error for the element on
                   // the other side, add the now computed error to that element as well.
-                  if (ignore_visited_segments)
+                  if(ignore_visited_segments)
                   {
                     Element *neighb = neighbor_searches.get(ns_index)->neighb_el;
 
                     // Scale the error estimate by the scaling function dependent on the element diameter
                     // (use the diameter of the element on the other side).
-                    if (use_aposteriori_interface_scaling && interface_scaling_fns[i])
+                    if(use_aposteriori_interface_scaling && interface_scaling_fns[i])
                       if(!element_markers_conversion.get_user_marker(neighb->marker).valid)
                       throw Hermes::Exceptions::Exception("Marker not valid.");
                     else
@@ -390,7 +390,7 @@ namespace Hermes
             }
           }
 
-          if (calc_norm)
+          if(calc_norm)
           {
             double nrm = eval_solution_norm(this->norm_form[i][i], rm, this->sln[i]);
             norms[i] += nrm;
@@ -414,7 +414,7 @@ namespace Hermes
         {
           if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
             component_errors->push_back(sqrt(errors_components[i]));
-          else if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+          else if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
             component_errors->push_back(sqrt(errors_components[i]/norms[i]));
           else
           {
@@ -428,7 +428,7 @@ namespace Hermes
       this->error_time = this->accumulated();
 
       // Make the error relative if needed.
-      if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+      if((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
       {
         for (int i = 0; i < this->num; i++)
         {
@@ -443,21 +443,21 @@ namespace Hermes
       // Element error mask is used here, because this variable is used in the adapt()
       // function, where the processed error (sum of errors of processed element errors)
       // is matched to this variable.
-      if ((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
+      if((error_flags & this->HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
         this->errors_squared_sum /= total_norm;
 
       // Prepare an ordered list of elements according to an error.
       this->fill_regular_queue(meshes);
       this->have_errors = true;
 
-      if (calc_norm)
+      if(calc_norm)
         delete [] norms;
       delete [] errors_components;
 
       // Return error value.
-      if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
+      if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
         return sqrt(total_error);
-      else if ((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
+      else if((error_flags & this->HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
         return sqrt(total_error / total_norm);
       else
       {
@@ -519,7 +519,7 @@ namespace Hermes
       // Determine the integration order.
       int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
 
-      Func<Hermes::Ord>** oi = new Func<Hermes::Ord>* [this->num];
+      Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[this->num];
       for (int i = 0; i < this->num; i++)
         oi[i] = init_fn_ord(this->sln[i]->get_fn_order() + inc);
 
@@ -542,7 +542,7 @@ namespace Hermes
       // Clean up.
       for (int i = 0; i < this->num; i++)
       {
-        if (oi[i] != NULL)
+        if(oi[i] != NULL)
         {
           oi[i]->free_ord();
           delete oi[i];
@@ -566,7 +566,7 @@ namespace Hermes
         jwt[i] = pt[i][2] * jac[i];
 
       // Function values.
-      Func<Scalar>** ui = new Func<Scalar>* [this->num];
+      Func<Scalar>** ui = new Func<Scalar>*[this->num];
 
       for (int i = 0; i < this->num; i++)
         ui[i] = init_fn(this->sln[i], order);
@@ -575,9 +575,10 @@ namespace Hermes
       Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
-        if (err_est_form->ext[i] != NULL)
+        if(err_est_form->ext[i] != NULL)
           ext_fn[i] = init_fn(err_est_form->ext[i], order);
-        else ext_fn[i] = NULL;
+        else
+          ext_fn[i] = NULL;
       }
       ext->nf = err_est_form->ext.size();
       ext->fn = ext_fn;
@@ -586,7 +587,7 @@ namespace Hermes
 
       for (int i = 0; i < this->num; i++)
       {
-        if (ui[i] != NULL)
+        if(ui[i] != NULL)
         {
           ui[i]->free_fn();
           delete ui[i];
@@ -594,7 +595,7 @@ namespace Hermes
       }
       delete [] ui;
 
-      if (ext != NULL)
+      if(ext != NULL)
       {
         ext->free();
         delete ext;
@@ -614,7 +615,7 @@ namespace Hermes
     {
       // Determine the integration order.
       int inc = (this->sln[err_est_form->i]->get_num_components() == 2) ? 1 : 0;
-      Func<Hermes::Ord>** oi = new Func<Hermes::Ord>* [this->num];
+      Func<Hermes::Ord>** oi = new Func<Hermes::Ord>*[this->num];
       for (int i = 0; i < this->num; i++)
         oi[i] = init_fn_ord(this->sln[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
 
@@ -636,7 +637,7 @@ namespace Hermes
 
       // Clean up.
       for (int i = 0; i < this->num; i++)
-        if (oi[i] != NULL)
+        if(oi[i] != NULL)
         {
           oi[i]->free_ord();
           delete oi[i];
@@ -661,7 +662,7 @@ namespace Hermes
         jwt[i] = pt[i][2] * tan[i][2];
 
       // Function values
-      Func<Scalar>** ui = new Func<Scalar>* [this->num];
+      Func<Scalar>** ui = new Func<Scalar>*[this->num];
       for (int i = 0; i < this->num; i++)
         ui[i] = init_fn(this->sln[i], eo);
 
@@ -670,9 +671,10 @@ namespace Hermes
       Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
-        if (err_est_form->ext[i] != NULL)
+        if(err_est_form->ext[i] != NULL)
           ext_fn[i] = init_fn(err_est_form->ext[i], order);
-        else ext_fn[i] = NULL;
+        else
+          ext_fn[i] = NULL;
       }
       ext->nf = err_est_form->ext.size();
       ext->fn = ext_fn;
@@ -681,14 +683,14 @@ namespace Hermes
         err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
 
       for (int i = 0; i < this->num; i++)
-        if (ui[i] != NULL)
+        if(ui[i] != NULL)
         {
           ui[i]->free_fn();
           delete ui[i];
         }
 
       delete [] ui;
-      if (ext != NULL)
+      if(ext != NULL)
       {
         ext->free();
         delete ext;
@@ -743,7 +745,7 @@ namespace Hermes
       limit_order(order, rm->get_active_element()->get_mode());
 
       // Clean up.
-      if (fake_ui != NULL)
+      if(fake_ui != NULL)
       {
         for (int i = 0; i < this->num; i++)
           delete fake_ui->fn[i];
@@ -779,12 +781,12 @@ namespace Hermes
       Scalar res = interface_scaling_const *
         err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
 
-      if (ui != NULL)
+      if(ui != NULL)
       {
         ui->free();
         delete ui;
       }
-      //if (ext != NULL) { ext->free(); delete ext; }
+      //if(ext != NULL) { ext->free(); delete ext; }
 
       e->free();
       delete e;
