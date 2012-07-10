@@ -80,10 +80,12 @@ namespace Hermes
     virtual Hermes::Ord value(Hermes::Ord x, Hermes::Ord y) const;
 
     /// Two-dimensional function derivative value.
-    virtual Scalar derivative(Scalar x, Scalar y) const;
+    virtual Scalar derivativeX(Scalar x, Scalar y) const;
+    virtual Scalar derivativeY(Scalar x, Scalar y) const;
 
     /// Two-dimensional function derivative integration order.
-    virtual Hermes::Ord derivative(Hermes::Ord x, Hermes::Ord y) const;
+    virtual Hermes::Ord derivativeX(Hermes::Ord x, Hermes::Ord y) const;
+    virtual Hermes::Ord derivativeY(Hermes::Ord x, Hermes::Ord y) const;
 
     /// The function is constant.
     /// Returns the value of is_const.
@@ -114,10 +116,14 @@ namespace Hermes
     virtual Hermes::Ord value(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
 
     /// Two-dimensional function derivative value.
-    virtual Scalar derivative(Scalar x, Scalar y, Scalar z) const;
+    virtual Scalar derivativeX(Scalar x, Scalar y, Scalar z) const;
+    virtual Scalar derivativeY(Scalar x, Scalar y, Scalar z) const;
+    virtual Scalar derivativeZ(Scalar x, Scalar y, Scalar z) const;
 
     /// Two-dimensional function derivative integration order.
-    virtual Hermes::Ord derivative(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
+    virtual Hermes::Ord derivativeX(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
+    virtual Hermes::Ord derivativeY(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
+    virtual Hermes::Ord derivativeZ(Hermes::Ord x, Hermes::Ord y, Hermes::Ord z) const;
 
     /// The function is constant.
     /// Returns the value of is_const.
