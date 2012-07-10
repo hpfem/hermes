@@ -43,6 +43,8 @@ using namespace Hermes::Hermes2D;
 // tutorial for comparisons.
 const bool STOKES = false;
 
+const bool HERMES_VISUALIZATION = false;
+
 #define PRESSURE_IN_L2
 
 // Initial polynomial degree for velocity components.
@@ -147,6 +149,7 @@ int main(int argc, char* argv[])
   vview.fix_scale_width(80);
   //pview.set_min_max_range(-0.9, 1.0);
   pview.fix_scale_width(80);
+if(HERMES_VISUALIZATION)
   pview.show_mesh(true);
 
   // Project the initial condition on the FE space to obtain initial
@@ -184,17 +187,21 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
 
     // Show the solution at the end of time step.
-    sprintf(title, "Velocity, time %g", current_time);
-    vview.set_title(title);
-    vview.show(&xvel_prev_time, &yvel_prev_time, Views::HERMES_EPS_LOW);
-    sprintf(title, "Pressure, time %g", current_time);
-    pview.set_title(title);
-    pview.show(&p_prev_time);
+    if(HERMES_VISUALIZATION)
+    {
+      sprintf(title, "Velocity, time %g", current_time);
+      vview.set_title(title);
+      vview.show(&xvel_prev_time, &yvel_prev_time, Views::HERMES_EPS_LOW);
+      sprintf(title, "Pressure, time %g", current_time);
+      pview.set_title(title);
+      pview.show(&p_prev_time);
+    }
   }
 
   delete [] coeff_vec;
 
   // Wait for all views to be closed.
-  Views::View::wait();
+  if(HERMES_VISUALIZATION)
+    Views::View::wait();
   return 0;
 }
