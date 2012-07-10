@@ -79,12 +79,13 @@ int main(int argc, char* argv[])
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
+  bool freeze_jacobian = true;
+  runge_kutta.set_verbose_output(false);
+    
   // Time stepping loop:
   do
   {
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    bool freeze_jacobian = true;
-    runge_kutta.set_verbose_output(false);
     try
     {
       runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
@@ -105,11 +106,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if(fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-6) success = false;
-  if(fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-6) success = false;
-  if(fabs(sln_time_new->get_pt_value(0.0, 9.5) - 9.995515) > 1E-6) success = false;
-  if(fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-6) success = false;
-  if(fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-4) success = false;
+  if(fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-4) success = false;
+  if(fabs(sln_time_new->get_pt_value(0.0, 9.5) - 9.995515) > 1E-4) success = false;
+  if(fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-4) success = false;
+  if(fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-4) success = false;
 
   if(success)
   {
