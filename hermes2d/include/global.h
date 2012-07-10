@@ -55,6 +55,15 @@
     ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
     ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
 
+    /// A total number of valid transformation of a triangle to a sub-domain.
+    static const int H2D_TRF_TRI_NUM = 4;
+    /// A total number of valid transformation of a quad to a sub-domain.
+    static const int H2D_TRF_QUAD_NUM = 8;
+    /// A total number of transformations.
+    static const int H2D_TRF_NUM = (H2D_TRF_QUAD_NUM + 1);
+    /// An index of identity transformation.
+    static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
+    
     /// Enabling second derivatives in weak forms. Turned on by default. Second
     /// derivatives are employed, among others, by stabilization methods for
     /// transport equations. For usage see the example linear-convection-diffusion.

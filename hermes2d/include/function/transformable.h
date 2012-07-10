@@ -36,14 +36,6 @@ namespace Hermes
       double2 t; /// Translation vector.
     };
 
-    /// A total number of valid transformation of a triangle to a sub-domain.
-    static const int H2D_TRF_TRI_NUM = 4;
-        /// A total number of valid transformation of a quad to a sub-domain.
-    static const int H2D_TRF_QUAD_NUM = 8;
-        /// A total number of transformations.
-    static const int H2D_TRF_NUM = (H2D_TRF_QUAD_NUM + 1);
-        /// An index of identity transformation.
-    static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
     /// A table of triangle sub-subdomain transforms. Only first ::H2D_TRF_TRI_NUM transformations are valid, the rest are identity transformation.
     extern HERMES_API Trf tri_trf[H2D_TRF_NUM];
     /// A table of quad sub-subdomain transforms. Only first ::H2D_TRF_QUAD_NUM transformations are valid, the rest are identity transformation.
