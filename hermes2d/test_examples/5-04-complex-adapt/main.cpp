@@ -99,6 +99,8 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
+  DiscreteProblem<std::complex<double> > dp(&wf, &space);
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
@@ -106,7 +108,7 @@ int main(int argc, char* argv[])
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
 
-    DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
+    dp.set_space(ref_space);
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
     Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
@@ -126,7 +128,8 @@ int main(int argc, char* argv[])
       newton.set_iterative_method(iterative_method);
       newton.set_preconditioner(preconditioner);
     }
-    try{
+    try
+    {
       newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)

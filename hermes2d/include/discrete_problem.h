@@ -107,6 +107,10 @@ namespace Hermes
       /// Set this problem to Finite Volume.
       void set_fvm();
 
+      /// Sets new spaces for the instance.
+      void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
+      void set_space(const Space<Scalar>* space);
+
     protected:
 
       void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext,
@@ -172,16 +176,22 @@ namespace Hermes
       /// Matrix volumetric forms - assemble the form.
       virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
+      virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Solution<Scalar>** current_u_ext, 
+      AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+
       /// Vector volumetric forms - calculate the integration order.
       int calc_order_vector_form(VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, 
+      AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Init geometry, jacobian * weights, return the number of integration points.
       int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights);
-      int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
+      int init_surface_geometry_points(RefMap* reference_mapping, int order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
@@ -211,6 +221,7 @@ namespace Hermes
 
       /// Space instances for all equations in the system.
       Hermes::vector<const Space<Scalar>*> spaces;
+
       Hermes::vector<unsigned int> spaces_first_dofs;
 
       /// Seq numbers of Space instances in spaces.
@@ -250,6 +261,31 @@ namespace Hermes
       Vector<Scalar>* current_rhs;
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
+
+      class CacheRecordPerSubIdx
+      {
+      public:
+        Func<double>** fns;
+        Func<double>*** fnsSurface;
+        Geom<double>* geometry;
+        Geom<double>** geometrySurface;
+        double* jacobian_x_weights;
+        double** jacobian_x_weightsSurface;
+      };
+
+      class CacheRecordPerElement
+      {
+      public:
+        AsmList<Scalar>* asmlist;
+        AsmList<Scalar>** asmlistSurface;
+        int order;
+        int n_quadrature_points;
+        int* n_quadrature_pointsSurface;
+      };
+
+      std::map<uint64_t, CacheRecordPerSubIdx*>*** cache_records_sub_idx;
+      CacheRecordPerElement*** cache_records_element;
+      int cache_size;
 
       ///* DG *///
 
