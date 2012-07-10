@@ -106,11 +106,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if(fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-4) success = false;
-  if(fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-4) success = false;
-  if(fabs(sln_time_new->get_pt_value(0.0, 9.5) - 9.995515) > 1E-4) success = false;
-  if(fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-4) success = false;
-  if(fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-4) success = false;
+  if(fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(0.0, 9.5) - 9.995515) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-6) success = false;
 
   if(success)
   {

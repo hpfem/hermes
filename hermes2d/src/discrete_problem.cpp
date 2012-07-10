@@ -1912,7 +1912,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights)
+    int DiscreteProblem<Scalar>::init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       int eo = reference_mapping->get_quad_2d()->get_edge_points(current_state->isurf, order, reference_mapping->get_active_element()->get_mode());
       double3* pt = reference_mapping->get_quad_2d()->get_points(eo, reference_mapping->get_active_element()->get_mode());
@@ -1924,6 +1924,7 @@ namespace Hermes
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
+      order = eo;
       return np;
     }
 
@@ -2303,6 +2304,7 @@ namespace Hermes
             continue;
 
           int order = 24;
+          int order_base = 24;
 
           MatrixFormSurf<Scalar>* mfs = current_mfsurf[current_mfsurf_i];
           if(mfs->areas[0] != H2D_DG_INNER_EDGE)
@@ -2324,7 +2326,7 @@ namespace Hermes
           int n_quadrature_points;
           Geom<double>* geometry = NULL;
           double* jacobian_x_weights = NULL;
-          n_quadrature_points = init_surface_geometry_points(current_refmaps[mfs->i], order, current_state, geometry, jacobian_x_weights);
+          n_quadrature_points = init_surface_geometry_points(current_refmaps[mfs->i], order_base, current_state, geometry, jacobian_x_weights);
 
           Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_u->neighb_el->marker,
             nbs_u->neighb_el->id, nbs_u->neighb_el->get_diameter());
@@ -2456,6 +2458,7 @@ namespace Hermes
         for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
         {
           int order = 24;
+          int order_base = 24;
 
           VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
           if(vfs->areas[0] != H2D_DG_INNER_EDGE)
@@ -2474,7 +2477,7 @@ namespace Hermes
           int n_quadrature_points;
           Geom<double>* geometry = NULL;
           double* jacobian_x_weights = NULL;
-          n_quadrature_points = init_surface_geometry_points(current_refmaps[vfs->i], order, current_state, geometry, jacobian_x_weights);
+          n_quadrature_points = init_surface_geometry_points(current_refmaps[vfs->i], order_base, current_state, geometry, jacobian_x_weights);
 
           Geom<double>* e = new InterfaceGeom<double>(geometry, nbs_v->neighb_el->marker,
             nbs_v->neighb_el->id, nbs_v->neighb_el->get_diameter());
