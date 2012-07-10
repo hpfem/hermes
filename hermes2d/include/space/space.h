@@ -40,6 +40,9 @@ namespace Hermes
     };
     class Shapeset;
 
+    /// @defgroup spaces FEM Spaces handling
+
+    /// @ingroup spaces
     /// \brief Represents a finite element space over a domain.
     ///
     /// The Space class represents a finite element space over a domain defined by 'mesh', spanned

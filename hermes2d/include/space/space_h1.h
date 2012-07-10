@@ -23,6 +23,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup spaces
     /// H1Space represents a space of continuous Scalar functions over a domain (mesh).
     template<typename Scalar>
     class HERMES_API H1Space : public Space<Scalar>

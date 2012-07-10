@@ -39,7 +39,6 @@ namespace Hermes
     /// "http://devworld.apple.com/dev/techsupport/develop/issue25/schneider.html">
     /// here</a>.
     ///
-
     struct HERMES_API Nurbs
     {
       Nurbs()

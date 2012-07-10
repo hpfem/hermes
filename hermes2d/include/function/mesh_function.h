@@ -25,6 +25,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup meshFunctions
     /// \brief Represents a function defined on a mesh.
     ///
     /// MeshFunction is a base class for all classes representing an arbitrary function
@@ -40,7 +41,7 @@ namespace Hermes
     public:
 
       MeshFunction();
-      MeshFunction(Mesh *mesh);
+      MeshFunction(const Mesh *mesh);
       virtual ~MeshFunction();
 
       virtual void init();
@@ -50,7 +51,7 @@ namespace Hermes
 
       virtual void set_active_element(Element* e);
 
-      Mesh*   get_mesh() const;
+      const Mesh* get_mesh() const;
       RefMap* get_refmap(bool update = true);
       void set_refmap(RefMap* refmap_to_set);
 
@@ -76,7 +77,7 @@ namespace Hermes
     protected:
 
       ElementMode2D mode;
-      Mesh* mesh;
+      const Mesh* mesh;
       RefMap* refmap;
 
     public:

@@ -37,8 +37,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    //const ProjNormType HERMES_DEFAULT_PROJ_NORM = HERMES_H1_NORM;
-
+    /// @ingroup projections
     template<typename Scalar>
     class HERMES_API OGProjectionNOX : public Hermes::Mixins::Loggable
     {

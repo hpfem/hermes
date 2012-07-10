@@ -42,6 +42,9 @@ namespace Hermes
       /// Get info about presence of a matrix.
       virtual bool is_matrix_free() = 0;
 
+      /// Sets the integration order to be globally this number, no calculation.
+      void setGlobalIntegrationOrder(unsigned int order);
+
       /// Preassembling.
       /// Precalculate matrix sparse structure.
       /// If force_diagonal_block == true, then (zero) matrix
@@ -70,6 +73,10 @@ namespace Hermes
         bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
 
       virtual void invalidate_matrix() = 0;
+    protected:
+      DiscreteProblemInterface();
+      bool globalIntegrationOrderSet;
+      unsigned int globalIntegrationOrder;
     };
   }
 }

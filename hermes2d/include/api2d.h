@@ -29,6 +29,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Enumeration of potential keys in the Api2D::parameters storage.
     enum Hermes2DApiParam
     {
       numThreads

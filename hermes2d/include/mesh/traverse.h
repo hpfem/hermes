@@ -27,6 +27,10 @@ namespace Hermes
       class Linearizer;
       class Vectorizer;
     };
+
+    /// @defgroup inner Hermes hp-FEM/hp-DG assembling core
+
+    /// @ingroup inner
     /// \brief Determines the position on an element surface (edge in 2D and Face in 3D).
     /// \details Used for the retrieval of boundary condition values.
     /// \details Same in H2D and H3D.
@@ -48,19 +52,23 @@ namespace Hermes
     struct State;
     struct Rect;
 
+    /// @ingroup inner
     struct UniData
     {
       Element* e;
       uint64_t idx;
     };
 
+    /// @ingroup inner
     static const uint64_t ONE = (uint64_t) 1 << 63;
 
+    /// @ingroup inner
     struct Rect
     {
       uint64_t l, b, r, t;
     };
 
+    /// @ingroup inner
     /// Traverse is a multi-mesh traversal utility class. Given N meshes sharing the
     /// same base mesh it walks through all (pseudo-)elements of the union of all
     /// the N meshes.
@@ -95,11 +103,11 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblemLinear;
       };
 
-      void begin(int n, Mesh** meshes, Transformable** fn = NULL);
+      void begin(int n, const Mesh** meshes, Transformable** fn = NULL);
       void finish();
 
       State* get_next_state(int* top_by_ref = NULL, int* id_by_ref = NULL);
-      int get_num_states(Hermes::vector<Mesh*> meshes);
+      int get_num_states(Hermes::vector<const Mesh*> meshes);
       inline Element*  get_base() const { return base; }
 
       void init_transforms(State* s, int i);
@@ -107,7 +115,7 @@ namespace Hermes
       UniData** construct_union_mesh(Mesh* unimesh);
 
       int num;
-      Mesh** meshes;
+      const Mesh** meshes;
       Transformable** fn;
 
       State* stack;

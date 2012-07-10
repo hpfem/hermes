@@ -43,7 +43,7 @@ namespace Hermes
     double DiscreteProblem<Scalar>::fake_wt = 1.0;
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : wf(wf), wf_seq(-1)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf), wf_seq(-1)
     {
       if(spaces.empty())
         throw Exceptions::NullException(2);
@@ -59,7 +59,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
-      : wf(wf), wf_seq(-1)
+      : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf), wf_seq(-1)
     {
       spaces.push_back(space);
       this->spaces_first_dofs.push_back(0);
@@ -68,7 +68,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem() : wf(NULL)
+    DiscreteProblem<Scalar>::DiscreteProblem() : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(NULL)
     {
       // Set all attributes for which we don't need to acces wf or spaces.
       // This is important for the destructor to properly detect what needs to be deallocated.
@@ -447,7 +447,7 @@ namespace Hermes
         current_mat->prealloc(ndof);
 
         AsmList<Scalar>* al = new AsmList<Scalar>[wf->get_neq()];
-        Mesh** meshes = new Mesh*[wf->get_neq()];
+        const Mesh** meshes = new const Mesh*[wf->get_neq()];
         bool **blocks = wf->get_blocks(current_force_diagonal_blocks);
 
         // Init multi-mesh traversal.
@@ -897,7 +897,7 @@ namespace Hermes
       init_assembling(coeff_vec, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       // Vector of meshes.
-      Hermes::vector<Mesh*> meshes;
+      Hermes::vector<const Mesh*> meshes;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         meshes.push_back(spaces[space_i]->get_mesh());
       for (unsigned j = 0; j < ext_functions.size(); j++)
@@ -1071,7 +1071,7 @@ namespace Hermes
           Func<double>** base_fns = new Func<double>*[current_als[current_mfvol[current_mfvol_i]->j]->cnt];
           Func<double>** test_fns = new Func<double>*[current_als[current_mfvol[current_mfvol_i]->i]->cnt];
 
-          int order = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
+          int order = this->globalIntegrationOrderSet ? this->globalIntegrationOrder : calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
 
           for (unsigned int i = 0; i < current_als[current_mfvol[current_mfvol_i]->i]->cnt; i++)
           {
@@ -1127,7 +1127,7 @@ namespace Hermes
 
           Func<double>** test_fns = new Func<double>*[current_als[current_vfvol[current_vfvol_i]->i]->cnt];
 
-          int order = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
+          int order = this->globalIntegrationOrderSet ? this->globalIntegrationOrder : calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
 
           for (unsigned int i = 0; i < current_als[current_vfvol[current_vfvol_i]->i]->cnt; i++)
           {
@@ -1173,7 +1173,7 @@ namespace Hermes
             Func<double>** base_fns = new Func<double>*[current_als[current_mfsurf[current_mfsurf_i]->j]->cnt];
             Func<double>** test_fns = new Func<double>*[current_als[current_mfsurf[current_mfsurf_i]->i]->cnt];
 
-            int order = calc_order_matrix_form(current_mfsurf[current_mfsurf_i], current_refmaps, current_u_ext, current_state);
+            int order = this->globalIntegrationOrderSet ? this->globalIntegrationOrder : calc_order_matrix_form(current_mfsurf[current_mfsurf_i], current_refmaps, current_u_ext, current_state);
 
             for (unsigned int i = 0; i < current_als[current_mfsurf[current_mfsurf_i]->i]->cnt; i++)
             {
@@ -1234,7 +1234,7 @@ namespace Hermes
 
             Func<double>** test_fns = new Func<double>*[current_als[current_vfsurf[current_vfsurf_i]->i]->cnt];
 
-            int order = calc_order_vector_form(current_vfsurf[current_vfsurf_i], current_refmaps, current_u_ext, current_state);
+            int order = this->globalIntegrationOrderSet ? this->globalIntegrationOrder : calc_order_vector_form(current_vfsurf[current_vfsurf_i], current_refmaps, current_u_ext, current_state);
 
             for (unsigned int i = 0; i < current_als[current_vfsurf[current_vfsurf_i]->i]->cnt; i++)
             {
@@ -1891,7 +1891,7 @@ namespace Hermes
       // The important thing is that the transformations to the current subelement are already there.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        Mesh * mesh_i;
+        const Mesh * mesh_i;
         if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
           mesh_i = spaces[fns_i]->get_mesh();
         else
@@ -2177,7 +2177,7 @@ namespace Hermes
       // Clear the transformations from the RefMaps and all functions.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        Mesh * mesh_i;
+        const Mesh * mesh_i;
         if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
           mesh_i = spaces[fns_i]->get_mesh();
         else

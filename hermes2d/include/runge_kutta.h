@@ -68,6 +68,10 @@ namespace Hermes
     //     can be found, I think, in newer Butcher's papers or presentation
     //     (he has them online), and possibly in his book.
 
+
+    /// @defgroup userSolvingAPI Top-level solving
+
+    /// @ingroup userSolvingAPI
     template<typename Scalar>
     class HERMES_API RungeKutta : public Hermes::Mixins::Loggable
     {
@@ -146,6 +150,10 @@ namespace Hermes
        */
 
       void set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
+
+      /// Sets the integration order in DiscreteProblem instances used to be globally this number, no calculation.
+      void setGlobalIntegrationOrder(unsigned int order);
+
     protected:
       /// Creates an augmented weak formulation for the multi-stage Runge-Kutta problem.
       /// The original discretized equation is M\dot{Y} = F(t, Y) where M is the mass
@@ -211,6 +219,8 @@ namespace Hermes
       Hermes::vector<Filter<Scalar>*> filters_to_reinit;
     private:
       bool do_global_projections;
+      bool globalIntegrationOrderSet;
+      unsigned int globalIntegrationOrder;
     };
   }
 }

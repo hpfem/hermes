@@ -32,6 +32,7 @@ namespace Hermes
       class Vectorizer;
     };
 
+    /// @ingroup meshFunctions
     /// \brief Represents the reference mapping.
     ///
     /// RefMap represents the mapping from the reference to the physical element.

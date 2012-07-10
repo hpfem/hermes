@@ -27,6 +27,7 @@
 
 namespace Hermes
 {
+  /// Enumeration of potential keys in the Api::parameters storage.
   enum HermesCommonApiParam
   {
     exceptionsPrintCallstack,
@@ -55,8 +56,8 @@ namespace Hermes
     /// The storage of parameters.
     /// This storage is not optimized for speed, but for comfort of users.
     /// There should not be any parameters, values of which are sought very often, because of the above reason.
-
     std::map<HermesCommonApiParam, Parameter*> parameters;
+
   public:
     int getParamValue(HermesCommonApiParam);
     void setParamValue(HermesCommonApiParam, int value);

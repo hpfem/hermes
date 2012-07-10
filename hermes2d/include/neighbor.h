@@ -74,7 +74,7 @@ namespace Hermes
       /// \param[in]  el    Central element of the neighborhood (current active element in the assembling procedure).
       /// \param[in]  mesh  Mesh on which we search for the neighbors.
       ///
-      NeighborSearch(Element* el, Mesh* mesh);
+      NeighborSearch(Element* el, const Mesh* mesh);
       NeighborSearch(const NeighborSearch& ns);
 
       /// Destructor.
@@ -311,7 +311,7 @@ namespace Hermes
 
     private:
 
-      Mesh* mesh;
+      const Mesh* mesh;
 
       /*** Transformations. ***/
 

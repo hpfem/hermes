@@ -97,7 +97,7 @@ namespace Hermes
       this->init_assembling(NULL, pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
 
       // Vector of meshes.
-      Hermes::vector<Mesh*> meshes;
+      Hermes::vector<const Mesh*> meshes;
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
         meshes.push_back(this->spaces[space_i]->get_mesh());
       for (unsigned j = 0; j < ext_functions.size(); j++)

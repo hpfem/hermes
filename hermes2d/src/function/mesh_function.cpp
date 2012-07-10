@@ -29,7 +29,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunction<Scalar>::MeshFunction(Mesh *mesh) :
+    MeshFunction<Scalar>::MeshFunction(const Mesh *mesh) :
     Function<Scalar>()
     {
       this->mesh = mesh;
@@ -68,7 +68,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Mesh* MeshFunction<Scalar>::get_mesh() const
+    const Mesh* MeshFunction<Scalar>::get_mesh() const
     {
       return mesh;
     }

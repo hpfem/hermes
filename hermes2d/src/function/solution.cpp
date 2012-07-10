@@ -85,7 +85,6 @@ namespace Hermes
       sln_type = HERMES_UNDEF;
       sln_vector = NULL;
       space = NULL;
-      own_mesh = false;
       this->num_components = 0;
       e_last = NULL;
 
@@ -112,12 +111,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Solution<Scalar>::Solution(Mesh *mesh) : MeshFunction<Scalar>(mesh)
+    Solution<Scalar>::Solution(const Mesh *mesh) : MeshFunction<Scalar>(mesh)
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();
       this->mesh = mesh;
-      this->own_mesh = false;
     }
 
     template<typename Scalar>
@@ -127,7 +125,6 @@ namespace Hermes
       space = s;
       this->init();
       this->mesh = s->get_mesh();
-      this->own_mesh = false;
       Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
     }
 
@@ -138,7 +135,6 @@ namespace Hermes
       space = s;
       this->init();
       this->mesh = s->get_mesh();
-      this->own_mesh = false;
       Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
     }
 
@@ -156,9 +152,6 @@ namespace Hermes
       space = sln->space;
       space_type = sln->get_space_type();
       space_seq = sln->get_space_seq();
-
-      own_mesh = sln->own_mesh;
-      sln->own_mesh = false;
 
       mono_coeffs = sln->mono_coeffs;        sln->mono_coeffs = NULL;
       elem_coeffs[0] = sln->elem_coeffs[0];  sln->elem_coeffs[0] = NULL;
@@ -181,10 +174,7 @@ namespace Hermes
 
       free();
 
-      this->mesh = new Mesh;
-      //printf("Copying mesh from Solution and setting own_mesh = true.\n");
-      this->mesh->copy(sln->mesh);
-      own_mesh = true;
+      this->mesh = sln->mesh;
 
       sln_type = sln->sln_type;
       space_type = sln->get_space_type();
@@ -263,13 +253,6 @@ namespace Hermes
       for (int i = 0; i < this->num_components; i++)
         if(elem_coeffs[i] != NULL)
         { delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
-
-        if(own_mesh == true && this->mesh != NULL)
-        {
-          //printf("Deleting mesh in Solution (own_mesh == true).\n");
-          delete this->mesh;
-          own_mesh = false;
-        }
 
         e_last = NULL;
 

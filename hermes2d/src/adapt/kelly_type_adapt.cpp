@@ -113,7 +113,7 @@ namespace Hermes
 
       this->have_coarse_solutions = true;
 
-      Mesh** meshes = new Mesh*[this->num];
+      const Mesh** meshes = new const Mesh*[this->num];
       Transformable** fns = new Transformable*[this->num];
 
       this->num_act_elems = 0;

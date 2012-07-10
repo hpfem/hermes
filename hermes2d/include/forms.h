@@ -37,6 +37,7 @@ namespace Hermes
     template<typename Scalar> class OGProjection;
 
     /// Calculated function values (from the class Function) on an element for assembling.
+    /// @ingroup inner
     template<typename T>
     class HERMES_API Func
     {
@@ -119,6 +120,7 @@ namespace Hermes
       friend class ErrorEstimatorFormKelly;
     };
 
+    /// @ingroup inner
     /** \class DiscontinuousFunc forms.h "src/form/forms.h"
     *  \brief This class represents a function with jump discontinuity on an interface of two elements.
     *
@@ -193,6 +195,7 @@ namespace Hermes
     };
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
+    /// @ingroup inner
     template<typename T>
     class HERMES_API Geom
     {
@@ -250,6 +253,7 @@ namespace Hermes
     /// instance is not touched - it must be destroyed separately. You may call the overriden methods
     /// \c free or \c free_ord in order to do this via the instance of InterfaceGeom.
     ///
+    /// @ingroup inner
     template<typename T>
     class HERMES_API InterfaceGeom : public Geom<T>
     {
@@ -296,6 +300,7 @@ namespace Hermes
     /// User defined data that can go to the bilinear and linear forms.
     /// It also holds arbitraty number of functions, that user can use.
     /// Typically, these functions are solutions from the previous time/iteration levels.
+    /// @ingroup inner
     template<typename T>
     class HERMES_API ExtData
     {

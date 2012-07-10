@@ -29,12 +29,6 @@
 
 using namespace Hermes::Algebra;
 
-/// @defgroup solvers Solvers
-///
-///\todo description
-///
-/*@{*/ // Beginning of documentation group Solvers.
-
 /// \brief General namespace for the Hermes library.
 namespace Hermes
 {

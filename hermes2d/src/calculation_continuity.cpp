@@ -162,8 +162,6 @@ namespace Hermes
           break;
         }
       }
-      else
-        throw IOCalculationContinuityException(CalculationContinuityException::general, IOCalculationContinuityException::input, ss.str().c_str());
     }
 
     template<typename Scalar>

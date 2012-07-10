@@ -30,6 +30,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Namespace containing Views classes, Linearizer classes, and support for these.
     namespace Views
     {
       // Constants

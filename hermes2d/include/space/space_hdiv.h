@@ -22,11 +22,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup spaces
     /// HdivSpace represents a space of vector functions with continuous normal
     /// components over a domain (mesh).
-    ///
-    ///
-    ///
     template<typename Scalar>
     class HERMES_API HdivSpace : public Space<Scalar>
     {

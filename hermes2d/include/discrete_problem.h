@@ -32,6 +32,7 @@ namespace Hermes
   {
     class PrecalcShapeset;
 
+    /// @ingroup inner
     /// Multimesh neighbors traversal class.
     class NeighborNode
     {
@@ -52,6 +53,7 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
     };
 
+    /// @ingroup inner
     /// Discrete problem class.
     ///
     /// This class does assembling into external matrix / vector structures.

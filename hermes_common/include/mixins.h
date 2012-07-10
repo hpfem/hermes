@@ -28,6 +28,9 @@
 
 namespace Hermes
 {
+  /// \brief Namespace for mixin classes.
+  /// These classes always serve one particular purpose that multiple classes of the entire Hermes library
+  /// could use - logging, time measurement, ...
   namespace Mixins
   {
     /// Class the output of which is loggable, i.e. that uses functionality of info(), warn()

@@ -21,11 +21,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup spaces
     /// HcurlSpace represents a space of vector functions with continuous tangent
     /// components over a domain (mesh).
-    ///
-    ///
-    ///
     template<typename Scalar>
     class HERMES_API HcurlSpace : public Space<Scalar>
     {

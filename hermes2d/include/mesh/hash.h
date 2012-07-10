@@ -55,10 +55,10 @@ namespace Hermes
       ~HashTable();
 
       /// Returns a vertex node with parent id's p1 and p2 if it exists, NULL otherwise.
-      Node* peek_vertex_node(int p1, int p2);
+      Node* peek_vertex_node(int p1, int p2) const;
 
       /// Returns an edge node with parent id's p1 and p2 if it exists, NULL otherwise.
-      Node* peek_edge_node(int p1, int p2);
+      Node* peek_edge_node(int p1, int p2) const;
 
       /// Central function: obtains a vertex node pointer given the id
       /// numbers of its parents. If the vertex node does not exist, it is
@@ -87,9 +87,6 @@ namespace Hermes
       /// Frees all memory used by the instance.
       void free();
 
-      /// Prints hash table statistics for debugging purposes.
-      void dump_hash_stat();
-
       /// Removes a vertex node with parent id's p1 and p2.
       void remove_vertex_node(int id);
 
@@ -103,13 +100,12 @@ namespace Hermes
       Node** e_table; ///< Edge node hash table
 
       int mask;
-      int nqueries, ncollisions;
 
-      int hash(int p1, int p2) { return (984120265*p1 + 125965121*p2) & mask; }
+      inline int hash(int p1, int p2) const { return (984120265*p1 + 125965121*p2) & mask; }
 
       /// Searches a list of hash synonyms given the first list item.
       /// Returns the node matching the parent ids p1 and p2.
-      Node* search_list(Node* node, int p1, int p2);
+      Node* search_list(Node* node, int p1, int p2) const;
 
       /// Creates a copy of a hash synonym list.
       void copy_list(Node** ptr, Node* node);

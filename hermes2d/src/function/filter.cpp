@@ -70,7 +70,7 @@ namespace Hermes
     void Filter<Scalar>::init()
     {
       // construct the union mesh, if necessary
-      Mesh* meshes[10];
+      const Mesh* meshes[10];
       for(int i = 0; i < this->num; i++)
         meshes[i] = this->sln[i]->get_mesh();
       this->mesh = meshes[0];
@@ -95,9 +95,10 @@ namespace Hermes
       {
         Traverse trav;
         trav.begin(num, meshes);
-        this->mesh = new Mesh;
-        unidata = trav.construct_union_mesh(this->mesh);
+        Mesh* uniMesh = new Mesh;
+        unidata = trav.construct_union_mesh(uniMesh);
         trav.finish();
+        delete uniMesh;
       }
 
       // misc init

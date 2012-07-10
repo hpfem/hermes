@@ -24,7 +24,6 @@ namespace Hermes
     HashTable::HashTable()
     {
       v_table = NULL; e_table = NULL;
-      nqueries = ncollisions = 0;
     }
 
     HashTable::~HashTable()
@@ -35,7 +34,6 @@ namespace Hermes
     void HashTable::init(int size)
     {
       v_table = e_table = NULL;
-      nqueries = ncollisions = 0;
 
       mask = size-1;
       if(size & mask) throw Hermes::Exceptions::Exception("Parameter 'size' must be a power of two.");
@@ -46,8 +44,6 @@ namespace Hermes
 
       memset(v_table, 0, size * sizeof(Node*));
       memset(e_table, 0, size * sizeof(Node*));
-
-      nqueries = ncollisions = 0;
     }
 
     void HashTable::copy_list(Node** ptr, Node* node)
@@ -131,26 +127,15 @@ namespace Hermes
         delete [] e_table;
         e_table = NULL;
       }
-      dump_hash_stat();
     }
 
-    void HashTable::dump_hash_stat()
+    inline Node* HashTable::search_list(Node* node, int p1, int p2) const
     {
-      if(ncollisions > 2*nqueries)
-      {
-        this->warn("Hashtable: nqueries = %d ncollisions = %d", nqueries, ncollisions);
-      }
-    }
-
-    inline Node* HashTable::search_list(Node* node, int p1, int p2)
-    {
-      nqueries++;
       while (node != NULL)
       {
         if(node->p1 == p1 && node->p2 == p2)
           return node;
         node = node->next_hash;
-        ncollisions++;
       }
       return NULL;
     }
@@ -161,7 +146,8 @@ namespace Hermes
       if(p1 > p2) std::swap(p1, p2);
       int i = hash(p1, p2);
       Node* node = search_list(v_table[i], p1, p2);
-      if(node != NULL) return node;
+      if(node != NULL) 
+        return node;
 
       // not found - create a new one
       Node* newnode = nodes.add();
@@ -210,13 +196,13 @@ namespace Hermes
       return newnode;
     }
 
-    Node* HashTable::peek_vertex_node(int p1, int p2)
+    Node* HashTable::peek_vertex_node(int p1, int p2) const
     {
       if(p1 > p2) std::swap(p1, p2);
       return search_list(v_table[hash(p1, p2)], p1, p2);
     }
 
-    Node* HashTable::peek_edge_node(int p1, int p2)
+    Node* HashTable::peek_edge_node(int p1, int p2) const
     {
       if(p1 > p2) std::swap(p1, p2);
       return search_list(e_table[hash(p1, p2)], p1, p2);

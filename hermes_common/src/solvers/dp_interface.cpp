@@ -26,5 +26,18 @@ namespace Hermes
 {
   namespace Solvers
   {
+    template<typename Scalar>
+    DiscreteProblemInterface<Scalar>::DiscreteProblemInterface() : globalIntegrationOrderSet(false), globalIntegrationOrder(0)
+    {}
+
+    template<typename Scalar>
+    void DiscreteProblemInterface<Scalar>::setGlobalIntegrationOrder(unsigned int order)
+    {
+      this->globalIntegrationOrder = order;
+      this->globalIntegrationOrderSet = true;
+    }
+
+    template class HERMES_API DiscreteProblemInterface<double>;
+    template class HERMES_API DiscreteProblemInterface<std::complex<double> >;
   }
 }

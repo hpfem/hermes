@@ -24,6 +24,9 @@ This page provides an overview of the structure of the project, in a bottom-up f
 You can also visit the <a href="annotated.html">Class List</a> and the
 <a href="hierarchy.html">Class Hierarchy</a> pages.
 
+One is also advised to refer to
+<h1><a href="modules.html">Modules</a></h1>
+
 
 <br>
 <h2>Mesh Classes</h2>

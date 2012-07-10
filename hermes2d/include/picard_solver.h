@@ -31,6 +31,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup userSolvingAPI
     /// Class for the Picard's method.
     template<typename Scalar>
     class HERMES_API PicardSolver : public NonlinearSolver<Scalar>

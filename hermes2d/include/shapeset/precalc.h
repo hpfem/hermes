@@ -24,6 +24,7 @@ namespace Hermes
   namespace Hermes2D
   {
     enum SpaceType;
+    /// @ingroup meshFunctions
     /// \brief Caches precalculated shape function values.
     ///
     /// PrecalcShapeset is a cache of precalculated shape function values.

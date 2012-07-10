@@ -23,6 +23,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup spaces
     /// H1 shapeset with orthogonalized bubble functions for improved conditioning.
     class HERMES_API H1ShapesetOrtho : public Shapeset
     {
@@ -35,6 +36,7 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
+    /// @ingroup spaces
     /// Shape functions based on integrated Jacobi polynomials.
     class HERMES_API H1ShapesetJacobi : public Shapeset
     {
@@ -47,6 +49,7 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
+    /// @ingroup spaces
     /// Experimental.
     class HERMES_API H1ShapesetEigen : public Shapeset
     {

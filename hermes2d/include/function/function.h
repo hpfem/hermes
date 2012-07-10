@@ -69,6 +69,7 @@ namespace Hermes
     const int H2D_FN_COMPONENT_0 = H2D_FN_VAL_0 | H2D_FN_DX_0 | H2D_FN_DY_0 | H2D_FN_DXX_0 | H2D_FN_DYY_0 | H2D_FN_DXY_0;
     const int H2D_FN_COMPONENT_1 = H2D_FN_VAL_1 | H2D_FN_DX_1 | H2D_FN_DY_1 | H2D_FN_DXX_1 | H2D_FN_DYY_1 | H2D_FN_DXY_1;
 
+    /// @ingroup meshFunctions
     /// \brief Represents an arbitrary function defined on an element.
     ///
     /// The Function class is an abstraction of a function defined in integration points on an

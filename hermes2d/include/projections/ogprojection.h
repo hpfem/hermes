@@ -24,15 +24,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /**
-     \class OGProjection
+    /// @defgroup projections Projections
 
-     \brief Class for (global) orthogonal projecting. If the projection is not necessary (if a solution belongs to the space), then its solution vector is used.
-
-     \author  LK
-     \date  10/29/2011
-     */
-
+    /// @ingroup projections
+    /// \brief Class for (global) orthogonal projecting. If the projection is not necessary (if a solution belongs to the space), then its solution vector is used.
     template<typename Scalar>
     class HERMES_API OGProjection : public Hermes::Mixins::Loggable
     {

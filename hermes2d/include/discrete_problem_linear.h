@@ -27,6 +27,7 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
+    /// @ingroup inner
     class HERMES_API DiscreteProblemLinear : public DiscreteProblem<Scalar>
     {
     public:

@@ -30,6 +30,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup userSolvingAPI
     /// Class for Newton's method.
     template<typename Scalar>
     class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>

@@ -31,8 +31,6 @@
 #include <Epetra_Operator.h>
 #endif
 
-/// @defgroup preconds Preconditioners
-
 using namespace Hermes::Algebra;
 
 namespace Hermes

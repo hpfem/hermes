@@ -21,10 +21,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup spaces
     /// L2Space represents a space of Scalar functions with discontinuities along
     /// mesh edges.
-    ///
-    ///
     template<typename Scalar>
     class HERMES_API L2Space : public Space<Scalar>
     {

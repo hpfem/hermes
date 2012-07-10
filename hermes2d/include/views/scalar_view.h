@@ -99,7 +99,7 @@ namespace Hermes
         const int node_pixel_radius; ///< A radius of node selection, in pixels.
         const int node_widget_vert_cnt; ///< A number of vertices for a mesh node widget.
 
-        void init_vertex_nodes(Mesh* mesh); ///< Creates a copy of vertex nodes for purpose of displaying and selection.
+        void init_vertex_nodes(const Mesh* mesh); ///< Creates a copy of vertex nodes for purpose of displaying and selection.
         VertexNodeInfo* find_nearest_node_in_range(float x, float y, float radius); ///< Finds nearest node in range.
         static bool compare_vertex_nodes_x(const VertexNodeInfo& a, const VertexNodeInfo& b); ///< Returns true, if a's X-axis coordinate is lower than b's one. Used to sort mesh nodes for searching purposes.
         void draw_vertex_nodes(); ///< Draws vertex nodes.
@@ -121,7 +121,7 @@ namespace Hermes
 
         bool show_element_info; ///< true, to draw element info (currently ID) in 2D mode
 
-        void init_element_info(Mesh* mesh); ///< Creates element info from mesh.
+        void init_element_info(const Mesh* mesh); ///< Creates element info from mesh.
         void create_element_info_widgets(); ///< Creates element ID widgets if not created already.
         void draw_element_infos_2d(); ///< Draws elements infos in 2D mode.
 

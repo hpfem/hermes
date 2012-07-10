@@ -292,7 +292,7 @@ namespace Hermes
       *  If a special order of elements is requested, this method has to be overridden.
       *  /param[in] meshes An array of pointers to meshes of a (coarse) solution. An index into the array is an index of a component.
       *  /param[in] meshes An array of pointers to meshes of a reference solution. An index into the array is an index of a component. */
-      virtual void fill_regular_queue(Mesh** meshes);
+      virtual void fill_regular_queue(const Mesh** meshes);
 
     private:
       /// A functor that compares elements accoring to their error. Used by std::sort().

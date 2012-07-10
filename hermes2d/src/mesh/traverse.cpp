@@ -240,7 +240,7 @@ namespace Hermes
       }
     }
 
-    int Traverse::get_num_states(Hermes::vector<Mesh*> meshes)
+    int Traverse::get_num_states(Hermes::vector<const Mesh*> meshes)
     {
       // This will be returned.
       int count = 0;
@@ -781,7 +781,7 @@ namespace Hermes
       }
     }
 
-    void Traverse::begin(int n, Mesh** meshes, Transformable** fn)
+    void Traverse::begin(int n, const Mesh** meshes, Transformable** fn)
     {
       //if(stack != NULL) finish();
 
@@ -1061,7 +1061,7 @@ namespace Hermes
       Rect cr;
 
       this->unimesh = unimesh;
-      unimesh->copy_base(meshes[0]);
+      unimesh->copy_base(const_cast<Mesh*>(meshes[0]));
 
       udsize = 0;
       unidata = new UniData*[num];

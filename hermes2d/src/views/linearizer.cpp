@@ -696,9 +696,9 @@ namespace Hermes
 
         // Initialization of computation stuff.
         //    sizes.
-        this->vertex_size = std::max(32 * this->sln->get_mesh()->get_num_elements(), 10000);
-        this->triangle_size = std::max(64 * this->sln->get_mesh()->get_num_elements(), 20000);
-        this->edges_size = std::max(24 * this->sln->get_mesh()->get_num_elements(), 7500);
+        this->vertex_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), 50000);
+        this->triangle_size = std::max(150 * this->sln->get_mesh()->get_num_elements(), 75000);
+        this->edges_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), 50000);
         //    counts.
         this->vertex_count = 0;
         this->triangle_count = 0;
@@ -722,7 +722,7 @@ namespace Hermes
 
         // obtain the solution in vertices, estimate the maximum solution value
         // meshes.
-        Hermes::vector<Mesh*> meshes;
+        Hermes::vector<const Mesh*> meshes;
         meshes.push_back(sln->get_mesh());
         if(xdisp != NULL)
           meshes.push_back(xdisp->get_mesh());

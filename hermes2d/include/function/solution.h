@@ -31,6 +31,7 @@ namespace Hermes
     ///
     class Quad2DCheb;
 
+    /// @ingroup meshFunctions
     /// \brief Represents the solution of a PDE.
     ///
     /// The Solution class represents the solution of a PDE. Given a space and a solution vector,
@@ -77,7 +78,7 @@ namespace Hermes
     {
     public:
       Solution();
-      Solution(Mesh *mesh);
+      Solution(const Mesh *mesh);
       Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
       Solution (Space<Scalar>* s, Scalar* coeff_vec);
       virtual ~Solution();
@@ -163,9 +164,6 @@ namespace Hermes
 
       static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
           PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
-
-      /// If this is set to true, the mesh was created by this instance of this class.
-      bool own_mesh;
 
       /// Internal.
       virtual void set_active_element(Element* e);

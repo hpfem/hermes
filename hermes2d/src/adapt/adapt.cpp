@@ -187,9 +187,7 @@ namespace Hermes
       Element* e;
       for (int i = 0; i < this->num; i++)
         for_all_active_elements(e, this->spaces[i]->get_mesh())
-      {
-        this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
-      }
+          this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
 
       for(int j = 0; j < max_id; j++)
         for(int l = 0; l < this->num; l++)
@@ -953,7 +951,7 @@ namespace Hermes
       have_reference_solutions = true;
 
       // Prepare multi-mesh traversal and error arrays.
-      Mesh **meshes = new Mesh *[2 * num];
+      const Mesh **meshes = new const Mesh *[2 * num];
       Transformable **tr = new Transformable *[2 * num];
       Traverse trav(true);
       num_act_elems = 0;
@@ -1108,7 +1106,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fill_regular_queue(Mesh** meshes)
+    void Adapt<Scalar>::fill_regular_queue(const Mesh** meshes)
     {
       //prepare space for queue (it is assumed that it will only grow since we can just split)
       regular_queue.clear();

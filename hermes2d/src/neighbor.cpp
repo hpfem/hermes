@@ -21,7 +21,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    NeighborSearch<Scalar>::NeighborSearch(Element* el, Mesh* mesh) :
+    NeighborSearch<Scalar>::NeighborSearch(Element* el, const Mesh* mesh) :
     supported_shapes(NULL),
       mesh(mesh),
       central_transformations(LightArray<Transformations*>(4)),

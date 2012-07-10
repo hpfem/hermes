@@ -378,9 +378,9 @@ namespace Hermes
         // about four-times finer than the original mesh).
         int nn = xsln->get_mesh()->get_num_elements() + ysln->get_mesh()->get_num_elements();
 
-        vertex_size = std::max(32 * nn, 10000);
-        triangle_size = std::max(64 * nn, 20000);
-        edges_size = std::max(24 * nn, 7500);
+        this->vertex_size = std::max(100 * nn, 50000);
+        this->triangle_size = std::max(150 * nn, 75000);
+        this->edges_size = std::max(100 * nn, 50000);
         //dashes_size = edges_size;
 
         vertex_count = 0;
@@ -404,7 +404,7 @@ namespace Hermes
         old_quad_x = xsln->get_quad_2d();
         old_quad_y = ysln->get_quad_2d();
 
-        Hermes::vector<Mesh*> meshes;
+        Hermes::vector<const Mesh*> meshes;
         meshes.push_back(xsln->get_mesh());
         meshes.push_back(xsln->get_mesh());
 

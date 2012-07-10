@@ -256,8 +256,7 @@ namespace Hermes
           //get time
           time_t now;
           time(&now);
-          struct tm* now_tm;
-          gmtime_r(&now, now_tm);
+          struct tm* now_tm = gmtime(&now);
           char time_buf[BUF_SZ];
           strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
 

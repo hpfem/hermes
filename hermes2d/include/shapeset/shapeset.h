@@ -51,6 +51,7 @@ namespace Hermes
       HERMES_INVALID_SPACE = -9999
     };
 
+    /// @ingroup spaces
     /// \brief Defines a set of shape functions.
     ///
     /// This class stores mainly the definitions of the polynomials for all shape functions,

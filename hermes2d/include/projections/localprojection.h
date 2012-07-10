@@ -25,6 +25,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /// @ingroup projections
     template<typename Scalar>
     class HERMES_API LocalProjection
     {
