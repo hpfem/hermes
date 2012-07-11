@@ -171,7 +171,7 @@ namespace Hermes
   };
 
   template<>
-  double Hermes2DFunction<double>::derivative(double x, double y) const
+  double Hermes2DFunction<double>::derivativeX(double x, double y) const
   {
     if(this->is_const)
       return 0.0;
@@ -182,7 +182,7 @@ namespace Hermes
     }
   };
   template<>
-  std::complex<double> Hermes2DFunction<std::complex<double> >::derivative(std::complex<double> x, std::complex<double> y) const
+  std::complex<double> Hermes2DFunction<std::complex<double> >::derivativeX(std::complex<double> x, std::complex<double> y) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
@@ -194,13 +194,48 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes2DFunction<Scalar>::derivative(Ord x, Ord y) const
+  Ord Hermes2DFunction<Scalar>::derivativeX(Ord x, Ord y) const
   {
     if(this->is_const)
       return Ord(0);
     else
     {
       error("Abstract function call (case 12).");
+      return Ord(99);
+    }
+  };
+
+  template<>
+  double Hermes2DFunction<double>::derivativeY(double x, double y) const
+  {
+    if(this->is_const)
+      return 0.0;
+    else
+    {
+      error("Hermes2DFunction<double>::derivativeY");
+      return 0.0;
+    }
+  };
+  template<>
+  std::complex<double> Hermes2DFunction<std::complex<double> >::derivativeY(std::complex<double> x, std::complex<double> y) const
+  {
+    if(this->is_const)
+      return std::complex<double>(0.0, 0.0);
+    else
+    {
+      error("Hermes2DFunction<std::complex<double> >::derivativeY");
+      return std::complex<double>(0.0, 0.0);
+    }
+  };
+
+  template<typename Scalar>
+  Ord Hermes2DFunction<Scalar>::derivativeY(Ord x, Ord y) const
+  {
+    if(this->is_const)
+      return Ord(0);
+    else
+    {
+      error("Hermes2DFunction<Scalar>::derivativeY");
       return Ord(99);
     }
   };
@@ -255,18 +290,88 @@ namespace Hermes
   };
 
   template<>
-  double Hermes3DFunction<double>::derivative(double x, double y, double z) const
+  double Hermes3DFunction<double>::derivativeX(double x, double y, double z) const
   {
     if(this->is_const)
       return 0.0;
     else
     {
-      error("Abstract function call (case 16).");
+      error("Hermes3DFunction<double>::derivativeX");
       return 0.0;
     }
   };
   template<>
-  std::complex<double> Hermes3DFunction<std::complex<double> >::derivative(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
+  std::complex<double> Hermes3DFunction<std::complex<double> >::derivativeX(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
+  {
+    if(this->is_const)
+      return std::complex<double>(0.0, 0.0);
+    else
+    {
+      error("Hermes3DFunction<std::complex<double> >::derivativeX");
+      return std::complex<double>(0.0, 0.0);
+    }
+  };
+
+  template<typename Scalar>
+  Ord Hermes3DFunction<Scalar>::derivativeX(Ord x, Ord y, Ord z) const
+  {
+    if(this->is_const)
+      return Ord(0);
+    else
+    {
+      error("Hermes3DFunction<Scalar>::derivativeX");
+      return Ord(99);
+    }
+  };
+
+  template<>
+  double Hermes3DFunction<double>::derivativeY(double x, double y, double z) const
+  {
+    if(this->is_const)
+      return 0.0;
+    else
+    {
+      error("Hermes3DFunction<double>::derivativeY");
+      return 0.0;
+    }
+  };
+  template<>
+  std::complex<double> Hermes3DFunction<std::complex<double> >::derivativeY(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
+  {
+    if(this->is_const)
+      return std::complex<double>(0.0, 0.0);
+    else
+    {
+      error("Hermes3DFunction<std::complex<double> >::derivativeY");
+      return std::complex<double>(0.0, 0.0);
+    }
+  };
+
+  template<typename Scalar>
+  Ord Hermes3DFunction<Scalar>::derivativeY(Ord x, Ord y, Ord z) const
+  {
+    if(this->is_const)
+      return Ord(0);
+    else
+    {
+      error("Hermes3DFunction<Scalar>::derivativeY");
+      return Ord(99);
+    }
+  };
+
+  template<>
+  double Hermes3DFunction<double>::derivativeZ(double x, double y, double z) const
+  {
+    if(this->is_const)
+      return 0.0;
+    else
+    {
+      error("Hermes3DFunction<double>::derivativeZ");
+      return 0.0;
+    }
+  };
+  template<>
+  std::complex<double> Hermes3DFunction<std::complex<double> >::derivativeZ(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
@@ -278,7 +383,7 @@ namespace Hermes
   };
 
   template<typename Scalar>
-  Ord Hermes3DFunction<Scalar>::derivative(Ord x, Ord y, Ord z) const
+  Ord Hermes3DFunction<Scalar>::derivativeZ(Ord x, Ord y, Ord z) const
   {
     if(this->is_const)
       return Ord(0);
