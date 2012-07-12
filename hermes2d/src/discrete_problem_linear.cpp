@@ -326,6 +326,126 @@ namespace Hermes
       delete geometry;
     }
 
+    template<typename Scalar>
+    void DiscreteProblemLinear<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Solution<Scalar>** current_u_ext, 
+      AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
+    {
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
+
+      double block_scaling_coef = this->block_scaling_coeff(form);
+
+      bool tra = (form->i != form->j) && (form->sym != 0);
+      bool sym = (form->i == form->j) && (form->sym == 1);
+
+      // Assemble the local stiffness matrix for the form form.
+      Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als_i->cnt, current_als_j->cnt));
+
+      // Init external functions.
+      Func<Scalar>** u_ext = new Func<Scalar>*[this->RungeKutta ? this->RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
+      ExtData<Scalar> ext;
+      init_ext(form, u_ext, &ext, order, current_u_ext, current_state);
+
+      // Add the previous time level solution previously inserted at the back of ext.
+      if(this->RungeKutta)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+
+      // Actual form-specific calculation.
+      for (unsigned int i = 0; i < current_als_i->cnt; i++)
+      {
+        if(current_als_i->dof[i] < 0)
+          continue;
+
+        if((!tra || surface_form) && current_als_i->dof[i] < 0)
+          continue;
+        if(std::abs(current_als_i->coef[i]) < 1e-12)
+          continue;
+        if(!sym)
+        {
+          for (unsigned int j = 0; j < current_als_j->cnt; j++)
+          {
+            // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+            if(std::abs(current_als_j->coef[j]) < 1e-12)
+              continue;
+
+            Func<double>* u = base_fns[j];
+            Func<double>* v = test_fns[i];
+
+            if(current_als_j->dof[j] >= 0)
+            {
+              if(surface_form)
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+              else
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+            }
+            else
+            {
+#pragma omp critical (rhs)
+              {
+                if(surface_form)
+                  this->current_rhs->add(current_als_i->dof[i], -0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
+                else
+                  this->current_rhs->add(current_als_i->dof[i], -block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
+              }
+            }
+          }
+        }
+        // Symmetric block.
+        else
+        {
+          for (unsigned int j = 0; j < current_als_j->cnt; j++)
+          {
+            if(j < i && current_als_j->dof[j] >= 0)
+              continue;
+            // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+            if(std::abs(current_als_j->coef[j]) < 1e-12)
+              continue;
+
+            Func<double>* u = base_fns[j];
+            Func<double>* v = test_fns[i];
+
+            Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+
+            if(current_als_j->dof[j] >= 0)
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+            else
+            {
+#pragma omp critical (mat)
+              this->current_rhs->add(current_als_i->dof[i], -val);
+            }
+          }
+        }
+      }
+
+      // Insert the local stiffness matrix into the global one.
+#pragma omp critical (mat)
+      this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
+
+      // Insert also the off-diagonal (anti-)symmetric block, if required.
+      if(tra)
+      {
+        if(form->sym < 0)
+          chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
+        transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
+#pragma omp critical (mat)
+        this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
+
+        // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
+        for (unsigned int j = 0; j < current_als_i->cnt; j++)
+          if(current_als_i->dof[j] < 0)
+            for (unsigned int i = 0; i < current_als_j->cnt; i++)
+              if(current_als_j->dof[i] >= 0)
+                this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[i][j]);
+      }
+
+      // Cleanup.
+      deinit_ext(form, u_ext, &ext);
+      delete [] local_stiffness_matrix;
+      delete [] jacobian_x_weights;
+      geometry->free();
+      delete geometry;
+    }
+
     template class HERMES_API DiscreteProblemLinear<double>;
     template class HERMES_API DiscreteProblemLinear<std::complex<double> >;
   }
