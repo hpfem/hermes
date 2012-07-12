@@ -180,7 +180,7 @@ namespace Hermes
         if(pos < 0)
         {
           this->info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
-          throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
+          throw Hermes::Exceptions::Exception("Sparse matrix entry not found: [%i, %i]", m, n);
         }
 
         Ax[Ap[n] + pos] += v;

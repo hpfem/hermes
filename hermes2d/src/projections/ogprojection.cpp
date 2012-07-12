@@ -40,7 +40,8 @@ namespace Hermes
 
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, space);
-
+      dp.setDoNotUseCache();
+      
       // Initial coefficient vector for the Newton's method.
       Scalar* coeff_vec = new Scalar[ndof];
       memset(coeff_vec, 0, ndof*sizeof(Scalar));

@@ -177,7 +177,8 @@ namespace Hermes
       Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
       bool same_meshes = true;
       unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
-      for (unsigned int i = 0; i < coarse.size(); i++) {
+      for (unsigned int i = 0; i < coarse.size(); i++) 
+      {
         if(coarse[i]->get_mesh()->get_seq() != same_seq)
           same_meshes = false;
         Mesh* ref_mesh = new Mesh;
@@ -534,6 +535,7 @@ namespace Hermes
         o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
 
         copy_orders_recurrent(mesh->get_element(e->id), o);
+        
         if(space->edata[e->id].changed_in_last_adaptation)
         {
           if(mesh->get_element(e->id)->active)

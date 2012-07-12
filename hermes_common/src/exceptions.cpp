@@ -26,12 +26,11 @@ namespace Hermes
 {
   namespace Exceptions
   {
-    Exception::Exception() : std::exception()
+    Exception::Exception() : std::exception(), message(new char[1000])
     {
-      message = NULL;
     }
 
-    Exception::Exception(const char * msg, ...) : std::exception()
+    Exception::Exception(const char * msg, ...) : std::exception(), message(new char[1000])
     {
       char text[1024];
 
@@ -41,15 +40,15 @@ namespace Hermes
       vsprintf(text, msg, arglist);
       va_end(arglist);
 
-      message = text;
+      strcpy(message, text);
     }
 
     void Exception::printMsg() const
     {
       if(message)
-        fprintf(stderr, "%s\n", message);
+        printf("%s\n", message);
       else
-        fprintf(stderr, "Default exception\n");
+        printf("Default exception\n");
       if(Hermes::HermesCommonApi.getParamValue(Hermes::exceptionsPrintCallstack) == 1)
         CallStack::dump(0);
     }

@@ -98,15 +98,15 @@ namespace Hermes
 
       virtual Shapeset* clone() = 0;
 
+      /// Returns 2 if this is a vector shapeset, 1 otherwise.
+      int get_num_components() const;
+
     protected:
       /// Returns the maximum poly degree for all shape functions.
       int get_max_order() const;
 
       /// Returns the highest shape function index.
       int get_max_index(ElementMode2D mode) const;
-
-      /// Returns 2 if this is a vector shapeset, 1 otherwise.
-      int get_num_components() const;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
       int get_vertex_index(int vertex, ElementMode2D mode) const;

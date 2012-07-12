@@ -47,7 +47,7 @@ namespace Hermes
         virtual ~Exception() throw() {};
 
       protected:
-        const char * message;
+        char * message;
     };
 
     /// \brief Null parameter exception.

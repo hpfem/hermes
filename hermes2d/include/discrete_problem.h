@@ -266,8 +266,8 @@ namespace Hermes
       {
       public:
         void clear(Traverse::State* current_state);
-        AsmList<Scalar>* asmlist;
-        AsmList<Scalar>** asmlistSurface;
+        int asmlistCnt;
+        int* asmlistIdx;
         int order;
       };
 
@@ -284,12 +284,17 @@ namespace Hermes
         int n_quadrature_points;
         int* n_quadrature_pointsSurface;
         int* orderSurface;
+        int* asmlistSurfaceCnt;
       };
 
       std::map<uint64_t, CacheRecordPerSubIdx*>*** cache_records_sub_idx;
       CacheRecordPerElement*** cache_records_element;
       bool** cache_element_stored;
       int cache_size;
+      bool doNotUseCache;
+    public:
+      inline void setDoNotUseCache() { this->doNotUseCache = true; }
+    protected:
 
       ///* DG *///
 

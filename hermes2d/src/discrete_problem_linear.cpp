@@ -441,9 +441,6 @@ namespace Hermes
       // Cleanup.
       deinit_ext(form, u_ext, &ext);
       delete [] local_stiffness_matrix;
-      delete [] jacobian_x_weights;
-      geometry->free();
-      delete geometry;
     }
 
     template class HERMES_API DiscreteProblemLinear<double>;

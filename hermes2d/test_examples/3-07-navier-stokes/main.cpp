@@ -43,7 +43,7 @@ using namespace Hermes::Hermes2D;
 // tutorial for comparisons.
 const bool STOKES = false;
 
-const bool HERMES_VISUALIZATION = false;
+const bool HERMES_VISUALIZATION = true;
 
 #define PRESSURE_IN_L2
 
@@ -186,7 +186,7 @@ if(HERMES_VISUALIZATION)
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
 
     // Show the solution at the end of time step.
-    if(HERMES_VISUALIZATION)
+    if(HERMES_VISUALIZATION && ts > 10)
     {
       sprintf(title, "Velocity, time %g", current_time);
       vview.set_title(title);

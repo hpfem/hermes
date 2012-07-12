@@ -147,6 +147,8 @@ namespace Hermes
         memset(cache_records_element[i], NULL, this->cache_size * sizeof(CacheRecordPerElement*));
       }
       cache_element_stored = NULL;
+
+      this->doNotUseCache = false;
     }
 
     template<typename Scalar>
@@ -229,6 +231,11 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spacesToSet)
     {
+      /// \todo TEMPORARY There is something wrong with caching vector shapesets.
+      for(unsigned int i = 0; i < spacesToSet.size(); i++)
+        if(spacesToSet[i]->get_shapeset()->get_num_components() > 1)
+          this->doNotUseCache = true;
+
       if(this->spaces.size() != spacesToSet.size())
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces.size());
 
@@ -547,7 +554,7 @@ namespace Hermes
           if(is_DG)
           {
             // Number of edges ( =  number of vertices).
-            int num_edges = current_state->e[0]->get_num_surf();
+            int num_edges = current_state->e[0]->nvert;
 
             // Allocation an array of arrays of neighboring elements for every mesh x edge.
             Element **** neighbor_elems_arrays = new Element ***[wf->get_neq()];
@@ -1133,59 +1140,46 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear(CacheRecordPerElement* elementCacheInfo, Traverse::State* current_state)
     {
-      for(unsigned int i = 0; i < elementCacheInfo->asmlist->cnt; i++)
+      for(unsigned int i = 0; i < elementCacheInfo->asmlistCnt; i++)
       {
-        if(std::abs(elementCacheInfo->asmlist->coef[i]) > 1e-12)
-        {
-          this->fns[i]->free_fn();
-          delete this->fns[i];
-        }
+        this->fns[i]->free_fn();
+        delete this->fns[i];
       }
       delete [] this->fns;
-
-      for(unsigned int edge_i = 0; edge_i < current_state->rep->nvert; edge_i++)
-      {
-        if(!current_state->bnd[edge_i])
-          continue;
-        for(unsigned int i = 0; i < elementCacheInfo->asmlistSurface[edge_i]->cnt; i++)
-        {
-          if(std::abs(elementCacheInfo->asmlistSurface[edge_i]->coef[i]) > 1e-12)
-          {
-            this->fnsSurface[edge_i][i]->free_fn();
-            delete this->fnsSurface[edge_i][i];
-          }
-        }
-        delete [] this->fnsSurface[edge_i];
-      }
-      delete [] this->fnsSurface;
-
+      
       delete [] this->jacobian_x_weights;
       this->geometry->free();
       delete this->geometry;
 
       for(unsigned int edge_i = 0; edge_i < current_state->rep->nvert; edge_i++)
       {
-        if(!current_state->bnd[edge_i])
+        if(this->fnsSurface[edge_i] == NULL)
           continue;
         delete [] this->jacobian_x_weightsSurface[edge_i];
         this->geometrySurface[edge_i]->free();
         delete this->geometrySurface[edge_i];
+
+        for(unsigned int i = 0; i < this->asmlistSurfaceCnt[edge_i]; i++)
+        {
+          this->fnsSurface[edge_i][i]->free_fn();
+          delete this->fnsSurface[edge_i][i];
+        }
+        delete [] this->fnsSurface[edge_i];
       }
+
+      delete [] this->fnsSurface;
+      delete [] this->geometrySurface;
+      delete [] this->jacobian_x_weightsSurface;
+      
       delete [] this->n_quadrature_pointsSurface;
       delete [] this->orderSurface;
+      delete [] this->asmlistSurfaceCnt;
     }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::CacheRecordPerElement::clear(Traverse::State* current_state)
     {
-      delete this->asmlist;
-      for(unsigned int edge_i = 0; edge_i < current_state->rep->get_num_surf(); edge_i++)
-      {
-        if(!current_state->bnd[edge_i])
-          continue;
-        delete this->asmlistSurface[edge_i];
-      }
-      delete [] this->asmlistSurface;
+      delete [] this->asmlistIdx;
     }
 
     template<typename Scalar>
@@ -1202,7 +1196,36 @@ namespace Hermes
         }
       }
       
-      if(changedInLastAdaptation)
+      AsmList<Scalar>** current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
+
+      for(unsigned int i = 0; i < this->spaces.size(); i++)
+      {
+        spaces[i]->get_element_assembly_list(current_state->e[i], current_als[i], spaces_first_dofs[i]);
+
+        // Check of potential new constraints.
+        if(this->cache_records_element[i][current_state->e[i]->id] != NULL)
+        {
+          if(this->cache_records_element[i][current_state->e[i]->id]->asmlistCnt != current_als[i]->cnt)
+            changedInLastAdaptation = true;
+          else
+          {
+            for(unsigned int idx_i = 0; idx_i < current_als[i]->cnt; idx_i++)
+              if(current_als[i]->idx[idx_i] != this->cache_records_element[i][current_state->e[i]->id]->asmlistIdx[idx_i])
+                changedInLastAdaptation = true;
+          }
+        }
+
+        current_alsSurface[i] = new AsmList<Scalar>[current_state->rep->nvert];
+        for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+        {
+          if(!current_state->bnd[current_state->isurf])
+            continue;
+
+          spaces[i]->get_boundary_assembly_list(current_state->e[i], current_state->isurf, &current_alsSurface[i][current_state->isurf], spaces_first_dofs[i]);
+        }
+      }
+
+      if(changedInLastAdaptation || this->doNotUseCache)
       {
 #pragma omp critical (cache_for_subidx_preparation)
         {
@@ -1240,20 +1263,13 @@ namespace Hermes
               else
                 this->cache_records_element[i][current_state->e[i]->id]->clear(current_state);
 
-              this->cache_records_element[i][current_state->e[i]->id]->asmlist = new AsmList<Scalar>();
-              spaces[i]->get_element_assembly_list(current_state->e[i], this->cache_records_element[i][current_state->e[i]->id]->asmlist, spaces_first_dofs[i]);
-
-              this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface = new AsmList<Scalar>*[current_state->e[i]->get_num_surf()];
-              for(unsigned int edge_i = 0; edge_i < current_state->e[i]->get_num_surf(); edge_i++)
-              {
-                if(!current_state->bnd[edge_i])
-                  continue;
-                this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[edge_i] = new AsmList<Scalar>();
-                spaces[i]->get_boundary_assembly_list(current_state->e[i], edge_i, this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[edge_i], spaces_first_dofs[i]);
-              }
-
               int order = this->globalIntegrationOrderSet ? this->globalIntegrationOrder : 0;
-
+              
+              this->cache_records_element[i][current_state->e[i]->id]->asmlistCnt = current_als[i]->cnt;
+              this->cache_records_element[i][current_state->e[i]->id]->asmlistIdx = new int[current_als[i]->cnt];
+              for(unsigned int asmlist_i = 0; asmlist_i < current_als[i]->cnt; asmlist_i++)
+                this->cache_records_element[i][current_state->e[i]->id]->asmlistIdx[asmlist_i] = current_als[i]->idx[asmlist_i];
+              
               if(order == 0)
               {
                 if(current_mat != NULL)
@@ -1279,7 +1295,7 @@ namespace Hermes
                   }
                 }
 
-                for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+                for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
                 {
                   if(!current_state->bnd[current_state->isurf])
                     continue;
@@ -1322,25 +1338,25 @@ namespace Hermes
 
           // Set active element to reference mappings.
           current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
-          newRecord->fns = new Func<double>*[this->cache_records_element[i][current_state->e[i]->id]->asmlist->cnt];
-          for (unsigned int j = 0; j < this->cache_records_element[i][current_state->e[i]->id]->asmlist->cnt; j++)
+          newRecord->fns = new Func<double>*[current_als[i]->cnt];
+          for (unsigned int j = 0; j < current_als[i]->cnt; j++)
           {
-            if(std::abs(this->cache_records_element[i][current_state->e[i]->id]->asmlist->coef[j]) < 1e-12)
-              continue;
-            //if(current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
-            {
-              current_spss[i]->set_active_shape(this->cache_records_element[i][current_state->e[i]->id]->asmlist->idx[j]);
-              newRecord->fns[j] = init_fn(current_spss[i], current_refmaps[i], this->cache_records_element[i][current_state->e[i]->id]->order);
-            }
+            current_spss[i]->set_active_shape(current_als[i]->idx[j]);
+            newRecord->fns[j] = init_fn(current_spss[i], current_refmaps[i], this->cache_records_element[i][current_state->e[i]->id]->order);
           }
 
-          newRecord->geometrySurface = new Geom<double>*[current_state->rep->get_num_surf()];
-          newRecord->jacobian_x_weightsSurface = new double*[current_state->rep->get_num_surf()];
-          newRecord->n_quadrature_pointsSurface = new int[current_state->rep->get_num_surf()];
-          newRecord->orderSurface = new int[current_state->rep->get_num_surf()];
-              
+          newRecord->fnsSurface = new Func<double>**[current_state->rep->nvert];
+          memset(newRecord->fnsSurface, NULL, sizeof(Func<double>**) * current_state->rep->nvert);
+
+          newRecord->geometrySurface = new Geom<double>*[current_state->rep->nvert];
+          newRecord->jacobian_x_weightsSurface = new double*[current_state->rep->nvert];
+          
+          newRecord->n_quadrature_pointsSurface = new int[current_state->rep->nvert];
+          newRecord->orderSurface = new int[current_state->rep->nvert];
+          newRecord->asmlistSurfaceCnt = new int[current_state->rep->nvert];
+
           int order = this->cache_records_element[i][current_state->e[i]->id]->order;
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
           {
             if(!current_state->bnd[current_state->isurf])
               continue;
@@ -1349,21 +1365,17 @@ namespace Hermes
             order = this->cache_records_element[i][current_state->e[i]->id]->order;
           }
 
-          newRecord->fnsSurface = new Func<double>**[current_state->rep->get_num_surf()];
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
           {
             if(!current_state->bnd[current_state->isurf])
               continue;
-            newRecord->fnsSurface[current_state->isurf] = new Func<double>*[this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->cnt];
-            for (unsigned int j = 0; j < this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->cnt; j++)
+            newRecord->asmlistSurfaceCnt[current_state->isurf] = current_alsSurface[i][current_state->isurf].cnt;
+
+            newRecord->fnsSurface[current_state->isurf] = new Func<double>*[current_alsSurface[i][current_state->isurf].cnt];
+            for (unsigned int j = 0; j < current_alsSurface[i][current_state->isurf].cnt; j++)
             {
-              if(std::abs(this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->coef[j]) < 1e-12)
-                continue;
-              //if(current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
-              {
-                current_spss[i]->set_active_shape(this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->idx[j]);
-                newRecord->fnsSurface[current_state->isurf][j] = init_fn(current_spss[i], current_refmaps[i], newRecord->orderSurface[current_state->isurf]);
-              }
+              current_spss[i]->set_active_shape(current_alsSurface[i][current_state->isurf].idx[j]);
+              newRecord->fnsSurface[current_state->isurf][j] = init_fn(current_spss[i], current_refmaps[i], newRecord->orderSurface[current_state->isurf]);
             }
           }
             
@@ -1388,8 +1400,8 @@ namespace Hermes
           Func<double>** test_fns = CacheRecordPerSubIdxI->fns;
           int order = CacheRecordPerElementI->order;
 
-          AsmList<Scalar>* asmlist_i = CacheRecordPerElementI->asmlist;
-          AsmList<Scalar>* asmlist_j = CacheRecordPerElementJ->asmlist;
+          AsmList<Scalar>* asmlist_i = current_als[current_mfvol[current_mfvol_i]->i];
+          AsmList<Scalar>* asmlist_j = current_als[current_mfvol[current_mfvol_i]->j];
 
           int n_quadrature_points = CacheRecordPerSubIdxI->n_quadrature_points;
           Geom<double>* geometry = CacheRecordPerSubIdxI->geometry;
@@ -1411,7 +1423,7 @@ namespace Hermes
           Func<double>** test_fns = CacheRecordPerSubIdxI->fns;
           int order = CacheRecordPerElementI->order;
 
-          AsmList<Scalar>* asmlist_i = CacheRecordPerElementI->asmlist;
+          AsmList<Scalar>* asmlist_i = current_als[current_vfvol[current_vfvol_i]->i];
 
           int n_quadrature_points = CacheRecordPerSubIdxI->n_quadrature_points;
           Geom<double>* geometry = CacheRecordPerSubIdxI->geometry;
@@ -1421,7 +1433,7 @@ namespace Hermes
         }
       }
       // Assemble surface integrals now: loop through surfaces of the element.
-      for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+      for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
       {
         if(!current_state->bnd[current_state->isurf])
           continue;
@@ -1443,8 +1455,8 @@ namespace Hermes
             Func<double>** test_fns = CacheRecordPerSubIdxI->fnsSurface[current_state->isurf];
             int order = CacheRecordPerSubIdxI->orderSurface[current_state->isurf];
 
-            AsmList<Scalar>* asmlist_i = CacheRecordPerElementI->asmlistSurface[current_state->isurf];
-            AsmList<Scalar>* asmlist_j = CacheRecordPerElementJ->asmlistSurface[current_state->isurf];
+            AsmList<Scalar>* asmlist_i = &current_alsSurface[current_mfsurf[current_mfsurf_i]->i][current_state->isurf];
+            AsmList<Scalar>* asmlist_j = &current_alsSurface[current_mfsurf[current_mfsurf_i]->j][current_state->isurf];
 
             int n_quadrature_points = CacheRecordPerSubIdxI->n_quadrature_pointsSurface[current_state->isurf];
             Geom<double>* geometry = CacheRecordPerSubIdxI->geometrySurface[current_state->isurf];
@@ -1467,7 +1479,7 @@ namespace Hermes
             Func<double>** test_fns = CacheRecordPerSubIdxI->fnsSurface[current_state->isurf];
             int order = CacheRecordPerSubIdxI->orderSurface[current_state->isurf];
 
-            AsmList<Scalar>* asmlist_i = CacheRecordPerElementI->asmlistSurface[current_state->isurf];
+            AsmList<Scalar>* asmlist_i = &current_alsSurface[current_vfsurf[current_vfsurf_i]->i][current_state->isurf];
 
             int n_quadrature_points = CacheRecordPerSubIdxI->n_quadrature_pointsSurface[current_state->isurf];
             Geom<double>* geometry = CacheRecordPerSubIdxI->geometrySurface[current_state->isurf];
@@ -1477,6 +1489,10 @@ namespace Hermes
           }
         }
       }
+
+      for(unsigned int i = 0; i < this->spaces.size(); i++)
+        delete [] current_alsSurface[i];
+      delete [] current_alsSurface;
     }
 
     template<typename Scalar>
@@ -1505,7 +1521,7 @@ namespace Hermes
         else
           max_order_j = H2D_GET_H_ORDER(max_order_j);
 
-        for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
+        for (unsigned int k = 0; k < current_state->rep->nvert; k++)
         {
           int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
           if(eo > max_order_i)
@@ -1760,7 +1776,7 @@ namespace Hermes
         else
           max_order_i = H2D_GET_H_ORDER(max_order_i);
 
-        for (unsigned int k = 0; k < current_state->rep->get_num_surf(); k++)
+        for (unsigned int k = 0; k < current_state->rep->nvert; k++)
         {
           int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
           if(eo > max_order_i)
@@ -2054,10 +2070,10 @@ namespace Hermes
         }
       }
 
-      bool** processed = new bool*[current_state->rep->get_num_surf()];
-      LightArray<NeighborSearch<Scalar>*>** neighbor_searches = new LightArray<NeighborSearch<Scalar>*>*[current_state->rep->get_num_surf()];
+      bool** processed = new bool*[current_state->rep->nvert];
+      LightArray<NeighborSearch<Scalar>*>** neighbor_searches = new LightArray<NeighborSearch<Scalar>*>*[current_state->rep->nvert];
       (5);
-      unsigned int* num_neighbors = new unsigned int[current_state->rep->get_num_surf()];
+      unsigned int* num_neighbors = new unsigned int[current_state->rep->nvert];
 
       bool intra_edge_passed_DG[4];
       for(int a = 0; a < 4; a++)
@@ -2068,7 +2084,7 @@ namespace Hermes
         for(unsigned int i = 0; i < current_state->num; i++)
           current_state->e[i]->visited = true;
 
-        for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+        for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
           if(current_state->rep->en[current_state->isurf]->marker == 0)
           {
@@ -2179,7 +2195,7 @@ namespace Hermes
         }
       }
 
-      for(current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+      for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
       {
         if(intra_edge_passed_DG[current_state->isurf])
           continue;

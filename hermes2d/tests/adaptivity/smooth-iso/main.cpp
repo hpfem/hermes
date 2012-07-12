@@ -83,6 +83,9 @@ int main(int argc, char* argv[])
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
+  // Assemble the discrete problem.
+  DiscreteProblem<double> dp(&wf, &space);
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
@@ -91,8 +94,7 @@ int main(int argc, char* argv[])
     Space<double>* ref_space = Space<double>::construct_refined_space(&space);
     int ndof_ref = ref_space->get_num_dofs();
 
-    // Assemble the discrete problem.
-    DiscreteProblem<double> dp(&wf, ref_space);
+    dp.set_space(ref_space);
 
     // Initial coefficient vector for the Newton's method.
     double* coeff_vec = new double[ndof_ref];

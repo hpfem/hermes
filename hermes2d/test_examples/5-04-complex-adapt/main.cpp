@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   {
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-
+      
     dp.set_space(ref_space);
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
@@ -136,6 +136,7 @@ int main(int argc, char* argv[])
     {
       e.printMsg();
     }
+
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
@@ -151,6 +152,7 @@ int main(int argc, char* argv[])
     // Calculate element errors and total error estimate.
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    std::cout << (std::string)"Relative error: " << err_est_rel << std::endl;
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof.add_values(space.get_num_dofs(), err_est_rel);
@@ -160,6 +162,7 @@ int main(int argc, char* argv[])
     if(err_est_rel < ERR_STOP) done = true;
     else
     {
+      std::cout << (std::string)"Adapting..." << std::endl << std::endl;
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
     if(space.get_num_dofs() >= NDOF_STOP) done = true;
@@ -177,7 +180,7 @@ int main(int argc, char* argv[])
   sview.set_title("Fine mesh solution");
 
   RealFilter real_filter(&ref_sln);
-  sview.show(&real_filter);
+  sview.show(&real_filter, &real_filter);
 
   // Wait for all views to be closed.
   Views::View::wait();

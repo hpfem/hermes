@@ -121,16 +121,16 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_est, graph_cpu_est,
     graph_dof_exact, graph_cpu_exact;
 
+  DiscreteProblem<std::complex<double> > dp(&wf, &space);
+  
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
   {
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    dp.set_space(ref_space);
     int ndof_ref = ref_space->get_num_dofs();
-
-    // Initialize reference problem.
-    DiscreteProblem<std::complex<double> > dp(&wf, ref_space);
 
     // Initial coefficient vector for the Newton's method.
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
@@ -189,11 +189,6 @@ int main(int argc, char* argv[])
     // Clean up.
     delete [] coeff_vec;
     delete adaptivity;
-    if(done == false)
-    {
-      delete ref_space->get_mesh();
-      delete ref_space;
-    }
   }
   while (done == false);
 

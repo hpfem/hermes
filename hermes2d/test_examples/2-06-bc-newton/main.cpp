@@ -37,8 +37,6 @@ const double BDY_C_PARAM = 20.0;
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 1);
-
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::MeshReaderH2D mloader;
