@@ -1333,23 +1333,6 @@ namespace Hermes
               newRecord->fns[j] = init_fn(current_spss[i], current_refmaps[i], this->cache_records_element[i][current_state->e[i]->id]->order);
             }
           }
-          newRecord->fnsSurface = new Func<double>**[current_state->rep->get_num_surf()];
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
-          {
-            if(!current_state->bnd[current_state->isurf])
-              continue;
-            newRecord->fnsSurface[current_state->isurf] = new Func<double>*[this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->cnt];
-            for (unsigned int j = 0; j < this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->cnt; j++)
-            {
-              if(std::abs(this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->coef[j]) < 1e-12)
-                continue;
-              //if(current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
-              {
-                current_spss[i]->set_active_shape(this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->idx[j]);
-                newRecord->fnsSurface[current_state->isurf][j] = init_fn(current_spss[i], current_refmaps[i], this->cache_records_element[i][current_state->e[i]->id]->order);
-              }
-            }
-          }
 
           newRecord->geometrySurface = new Geom<double>*[current_state->rep->get_num_surf()];
           newRecord->jacobian_x_weightsSurface = new double*[current_state->rep->get_num_surf()];
@@ -1364,6 +1347,24 @@ namespace Hermes
             newRecord->n_quadrature_pointsSurface[current_state->isurf] = init_surface_geometry_points(current_refmaps[i], order, current_state, newRecord->geometrySurface[current_state->isurf], newRecord->jacobian_x_weightsSurface[current_state->isurf]);
             newRecord->orderSurface[current_state->isurf] = order;
             order = this->cache_records_element[i][current_state->e[i]->id]->order;
+          }
+
+          newRecord->fnsSurface = new Func<double>**[current_state->rep->get_num_surf()];
+          for (current_state->isurf = 0; current_state->isurf < current_state->rep->get_num_surf(); current_state->isurf++)
+          {
+            if(!current_state->bnd[current_state->isurf])
+              continue;
+            newRecord->fnsSurface[current_state->isurf] = new Func<double>*[this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->cnt];
+            for (unsigned int j = 0; j < this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->cnt; j++)
+            {
+              if(std::abs(this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->coef[j]) < 1e-12)
+                continue;
+              //if(current_als[current_mfvol[current_mfvol_i]->i]->dof[i] >= 0)
+              {
+                current_spss[i]->set_active_shape(this->cache_records_element[i][current_state->e[i]->id]->asmlistSurface[current_state->isurf]->idx[j]);
+                newRecord->fnsSurface[current_state->isurf][j] = init_fn(current_spss[i], current_refmaps[i], newRecord->orderSurface[current_state->isurf]);
+              }
+            }
           }
             
           newRecord->n_quadrature_points = init_geometry_points(current_refmaps[i], this->cache_records_element[i][current_state->e[i]->id]->order, newRecord->geometry, newRecord->jacobian_x_weights);
