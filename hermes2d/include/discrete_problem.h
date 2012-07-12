@@ -185,7 +185,7 @@ namespace Hermes
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
-      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, 
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Solution<Scalar>** current_u_ext, 
       AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
@@ -262,29 +262,33 @@ namespace Hermes
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
 
+      class CacheRecordPerElement
+      {
+      public:
+        void clear(Traverse::State* current_state);
+        AsmList<Scalar>* asmlist;
+        AsmList<Scalar>** asmlistSurface;
+        int order;
+      };
+
       class CacheRecordPerSubIdx
       {
       public:
+        void clear(CacheRecordPerElement* elementCacheInfo, Traverse::State* current_state);
         Func<double>** fns;
         Func<double>*** fnsSurface;
         Geom<double>* geometry;
         Geom<double>** geometrySurface;
         double* jacobian_x_weights;
         double** jacobian_x_weightsSurface;
-      };
-
-      class CacheRecordPerElement
-      {
-      public:
-        AsmList<Scalar>* asmlist;
-        AsmList<Scalar>** asmlistSurface;
-        int order;
         int n_quadrature_points;
         int* n_quadrature_pointsSurface;
+        int* orderSurface;
       };
 
       std::map<uint64_t, CacheRecordPerSubIdx*>*** cache_records_sub_idx;
       CacheRecordPerElement*** cache_records_element;
+      bool** cache_element_stored;
       int cache_size;
 
       ///* DG *///
