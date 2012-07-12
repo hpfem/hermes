@@ -1238,7 +1238,7 @@ namespace Hermes
         else
           for(unsigned int i = 0; i < this->spaces.size(); i++)
           {
-            std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i]); 
+            typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i]); 
             if(it != this->cache_records_sub_idx[i][current_state->e[i]->id]->end())
               (*it).second->clear(this->cache_records_element[i][current_state->e[i]->id], current_state);
             else
