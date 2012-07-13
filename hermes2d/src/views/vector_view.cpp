@@ -76,10 +76,14 @@ namespace Hermes
       {
         if(vec == NULL)
           vec = new Vectorizer;
+
         vec->lock_data();
         vec->process_solution(xsln, ysln, xitem, yitem, eps);
-        if(range_auto) { range_min = vec->get_min_value();
-        range_max = vec->get_max_value(); }
+        if(range_auto) 
+        { 
+          range_min = vec->get_min_value();
+          range_max = vec->get_max_value(); 
+        }
         vec->calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
         vec->unlock_data();
 

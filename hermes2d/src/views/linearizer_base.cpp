@@ -86,6 +86,69 @@ namespace Hermes
           add_edge(iv1, iv2, marker);
       }
 
+      void LinearizerBase::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2)
+      {
+        // count the number of hanging mid-edge vertices
+        int n = 0;
+        if(mid0 >= 0) n++;
+        if(mid1 >= 0) n++;
+        if(mid2 >= 0) n++;
+        if(n == 3)
+        {
+          // three hanging vertices: split into four triangles
+          regularize_triangle(iv0, mid0, mid2, peek_vertex(iv0, mid0), -1, peek_vertex(mid2, iv0));
+          regularize_triangle(mid0, iv1, mid1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1), -1);
+          regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2));
+          regularize_triangle(mid0, mid1, mid2, -1, -1, -1);
+        }
+        else if(n == 2)
+        {
+          // two hanging vertices: split into three triangles
+          if(mid0 < 0)
+          {
+            regularize_triangle(iv0, iv1, mid1, peek_vertex(iv0, iv1), peek_vertex(iv1, mid1), -1);
+            regularize_triangle(mid2, iv0, mid1, peek_vertex(mid2, iv0), -1, -1);
+            regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2));
+          }
+          else if(mid1 < 0)
+          {
+            regularize_triangle(iv1, iv2, mid2, peek_vertex(iv1, iv2), peek_vertex(iv2, mid2), -1);
+            regularize_triangle(mid0, iv1, mid2, peek_vertex(mid0, iv1), -1, -1);
+            regularize_triangle(mid0, mid2, iv0, -1, peek_vertex(mid2, iv0), peek_vertex(iv0, mid0));
+          }
+          else
+          {
+            regularize_triangle(iv2, iv0, mid0, peek_vertex(iv2, iv0), peek_vertex(iv0, mid0), -1);
+            regularize_triangle(mid1, iv2, mid0, peek_vertex(mid1, iv2), -1, -1);
+            regularize_triangle(mid1, mid0, iv1, -1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1));
+          }
+        }
+        else if(n == 1)
+        {
+          // one hanging vertex: split into two triangles
+          if(mid0 >= 0)
+          {
+            regularize_triangle(iv0, mid0, iv2, peek_vertex(iv0, mid0), -1, peek_vertex(iv2, iv0));
+            regularize_triangle(mid0, iv1, iv2, peek_vertex(mid0, iv1), peek_vertex(iv1, iv2), -1);
+          }
+          else if(mid1 >= 0)
+          {
+            regularize_triangle(iv1, mid1, iv0, peek_vertex(iv1, mid1), -1, peek_vertex(iv0, iv1));
+            regularize_triangle(mid1, iv2, iv0, peek_vertex(mid1, iv2), peek_vertex(iv2, iv0), -1);
+          }
+          else
+          {
+            regularize_triangle(iv2, mid2, iv1, peek_vertex(iv2, mid2), -1, peek_vertex(iv1, iv2));
+            regularize_triangle(mid2, iv0, iv1, peek_vertex(mid2, iv0), peek_vertex(iv0, iv1), -1);
+          }
+        }
+        else
+        {
+          // no hanging vertices: produce a single triangle
+          add_triangle(iv0, iv1, iv2);
+        }
+      }
+
       void LinearizerBase::add_edge(int iv1, int iv2, int marker)
       {
 #pragma omp critical(realloc_edges)
