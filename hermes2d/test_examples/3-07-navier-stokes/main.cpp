@@ -192,7 +192,7 @@ if(HERMES_VISUALIZATION)
     {
       sprintf(title, "Velocity, time %g", current_time);
       vview.set_title(title);
-      vview.show(&xvel_prev_time, &yvel_prev_time, Views::HERMES_EPS_LOW);
+      vview.show(&xvel_prev_time, &yvel_prev_time);
       sprintf(title, "Pressure, time %g", current_time);
       pview.set_title(title);
       pview.show(&p_prev_time);
