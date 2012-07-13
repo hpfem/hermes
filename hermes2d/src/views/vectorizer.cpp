@@ -218,6 +218,8 @@ namespace Hermes
             for (i = 0; i < lin_np_quad[1]; i++)
             {
               double m = sqrt(sqr(xval[i]) + sqr(yval[i]));
+              
+#pragma omp critical(vectorizer_get_max)
               if(finite(m) && fabs(m) > max)
                 max = fabs(m);
             }
@@ -285,7 +287,7 @@ namespace Hermes
                 fabs(sqrt(sqr(xval[17]) + sqr(yval[17])) - 0.5*(sqrt(sqr(midval[2][1]) + sqr(midval[3][1])) + sqrt(sqr(midval[2][2]) + sqr(midval[3][2])))) +
                 fabs(sqrt(sqr(xval[20]) + sqr(yval[20])) - 0.5*(sqrt(sqr(midval[2][2]) + sqr(midval[3][2])) + sqrt(sqr(midval[2][3]) + sqr(midval[3][3])))) +
                 fabs(sqrt(sqr(xval[9]) + sqr(yval[9]))  - 0.5*(sqrt(sqr(midval[2][3]) + sqr(midval[3][3])) + sqrt(sqr(midval[2][0]) + sqr(midval[3][0]))));
-              split = !finite(err) || (err) > max*2*eps; //?
+              split = !finite(err) || (err) > max*4*eps; //?
             }
           }
 

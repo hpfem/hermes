@@ -91,6 +91,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
+  Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 8);
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
@@ -166,6 +167,7 @@ if(HERMES_VISUALIZATION)
   int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
+    std::cout << ts << std::endl;
     current_time += TAU;
 
     // Update time-dependent essential BCs.
@@ -186,7 +188,7 @@ if(HERMES_VISUALIZATION)
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
 
     // Show the solution at the end of time step.
-    if(HERMES_VISUALIZATION && ts > 10)
+    if(HERMES_VISUALIZATION)
     {
       sprintf(title, "Velocity, time %g", current_time);
       vview.set_title(title);
