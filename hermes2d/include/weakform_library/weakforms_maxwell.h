@@ -33,11 +33,12 @@ namespace Hermes
       class HERMES_API DefaultJacobianMagnetostatics : public MatrixFormVol<Scalar>
       {
       public:
-        DefaultJacobianMagnetostatics(int i, int j, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
-          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
+        DefaultJacobianMagnetostatics(int i, int j, Scalar const_coeff = 1.0,
+          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE, std::string area = HERMES_ANY, 
+          SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR,
           int order_increase = 3);
-        DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
-          Scalar const_coeff, CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+        DefaultJacobianMagnetostatics(int i, int j, 
+          Scalar const_coeff, CubicSpline* c_spline, Hermes::vector<std::string> areas,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
@@ -61,12 +62,13 @@ namespace Hermes
       class HERMES_API DefaultResidualMagnetostatics : public VectorFormVol<Scalar>
       {
       public:
-        DefaultResidualMagnetostatics(int i, std::string area = HERMES_ANY, Scalar const_coeff = 1.0,
+        DefaultResidualMagnetostatics(int i, Scalar const_coeff = 1.0,
           CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+          std::string area = HERMES_ANY, 
           GeomType gt = HERMES_PLANAR,
           int order_increase = 3);
-        DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff = 1.0,
-          CubicSpline* c_spline = HERMES_DEFAULT_SPLINE,
+        DefaultResidualMagnetostatics(int i, Scalar const_coeff,
+          CubicSpline* c_spline, Hermes::vector<std::string> areas, 
           GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,

@@ -39,19 +39,19 @@ namespace Hermes
             {
               /* Jacobian */
               // Diffusion.
-              add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, regions[i], new Hermes1DFunction<Scalar>(D_map[i]),
-                HERMES_SYM));
+              add_matrix_form(new DefaultJacobianDiffusion<Scalar>(0, 0, new Hermes1DFunction<Scalar>(D_map[i]),
+                regions[i], HERMES_SYM));
               // Absorption.
-              add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i]),
-                HERMES_SYM));
+              add_matrix_form(new DefaultMatrixFormVol<Scalar>(0, 0, new Hermes2DFunction<Scalar>(Sigma_a_map[i]),
+                regions[i], HERMES_SYM));
 
               /* Residual */
               // Diffusion.
-              add_vector_form(new DefaultResidualDiffusion<Scalar>(0, regions[i], new Hermes1DFunction<Scalar>(D_map[i])));
+              add_vector_form(new DefaultResidualDiffusion<Scalar>(0, new Hermes1DFunction<Scalar>(D_map[i]), regions[i]));
               // Absorption.
-              add_vector_form(new DefaultResidualVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(Sigma_a_map[i])));
+              add_vector_form(new DefaultResidualVol<Scalar>(0, new Hermes2DFunction<Scalar>(Sigma_a_map[i]), regions[i]));
               // Sources.
-              add_vector_form(new DefaultVectorFormVol<Scalar>(0, regions[i], new Hermes2DFunction<Scalar>(-Q_map[i])));
+              add_vector_form(new DefaultVectorFormVol<Scalar>(0, new Hermes2DFunction<Scalar>(-Q_map[i]), regions[i]));
             }
           }
         }
@@ -813,7 +813,7 @@ namespace Hermes
             {
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, f_src, geom_type));
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, f_src, src_area, geom_type));
             }
 
             template<typename Scalar>
@@ -824,7 +824,7 @@ namespace Hermes
             {
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, f_src, geom_type));
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, f_src, src_areas, geom_type));
             }
 
             template<typename Scalar>
@@ -838,7 +838,7 @@ namespace Hermes
 
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_area, f_src[gto], geom_type));
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, f_src[gto], src_area, geom_type));
             }
 
             template<typename Scalar>
@@ -852,7 +852,7 @@ namespace Hermes
 
               lhs_init(matprop.get_G(), matprop, mesh, geom_type);
               for (unsigned int gto = 0; gto < matprop.get_G(); gto++)
-                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, src_areas, f_src[gto], geom_type));
+                add_vector_form(new WeakFormsH1::DefaultVectorFormVol<Scalar>(gto, f_src[gto], src_areas, geom_type));
             }
 
             template<typename Scalar>

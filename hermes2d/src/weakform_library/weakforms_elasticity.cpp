@@ -30,7 +30,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_0<Scalar>::DefaultJacobianElasticity_0_0
-        (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
+          (unsigned int i, unsigned int j, double lambda, double mu, std::string area)
         : MatrixFormVol<Scalar>(i, j, area, HERMES_SYM), lambda(lambda), mu(mu)
       {
       }
@@ -60,7 +60,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_1<Scalar>::DefaultJacobianElasticity_0_1
-        (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
+        (unsigned int i, unsigned int j, double lambda, double mu, std::string area)
         : MatrixFormVol<Scalar>(i, j, area, HERMES_SYM), lambda(lambda), mu(mu)
       {
       }
@@ -90,7 +90,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultResidualElasticity_0_0<Scalar>::DefaultResidualElasticity_0_0
-        (unsigned int i, std::string area, double lambda, double mu)
+        (unsigned int i, double lambda, double mu, std::string area)
         : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
       {
       }
@@ -120,7 +120,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultResidualElasticity_0_1<Scalar>::DefaultResidualElasticity_0_1
-        (unsigned int i, std::string area, double lambda, double mu)
+        (unsigned int i, double lambda, double mu, std::string area)
         : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
       {
       }
@@ -150,7 +150,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultResidualElasticity_1_0<Scalar>::DefaultResidualElasticity_1_0
-        (unsigned int i, std::string area, double lambda, double mu)
+        (unsigned int i, double lambda, double mu, std::string area)
         : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
       {
       }
@@ -181,7 +181,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultResidualElasticity_1_1<Scalar>::DefaultResidualElasticity_1_1
-        (unsigned int i, std::string area, double lambda, double mu)
+        (unsigned int i, double lambda, double mu, std::string area)
         : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
       {
       }
@@ -211,7 +211,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultJacobianElasticity_1_1<Scalar>::DefaultJacobianElasticity_1_1
-        (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
+        (unsigned int i, unsigned int j, double lambda, double mu, std::string area)
         : MatrixFormVol<Scalar>(i, j, area, HERMES_SYM), lambda(lambda), mu(mu)
       {
       }
@@ -241,7 +241,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultJacobianElasticity_00_11<Scalar>::DefaultJacobianElasticity_00_11
-        (Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, std::string area, double lambda, double mu)
+        (Hermes::vector<std::pair<unsigned int, unsigned int> >coordinates, double lambda, double mu, std::string area)
         : MultiComponentMatrixFormVol<Scalar>(coordinates, area, HERMES_SYM), lambda(lambda), mu(mu)
       {
       }
@@ -293,7 +293,7 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultResidualElasticity_00_11<Scalar>::DefaultResidualElasticity_00_11
-        (Hermes::vector<unsigned int> coordinates, std::string area, double lambda, double mu)
+        (Hermes::vector<unsigned int> coordinates, double lambda, double mu, std::string area)
         : MultiComponentVectorFormVol<Scalar>(coordinates, area), lambda(lambda), mu(mu)
       {
       }

@@ -22,8 +22,8 @@ namespace Hermes
     {
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
-        (int i, int j, std::string area, Scalar const_coeff,
-        Hermes2DFunction<Scalar>* f_coeff, SymFlag sym,
+        (int i, int j, Scalar const_coeff,
+        Hermes2DFunction<Scalar>* f_coeff, std::string area, SymFlag sym,
         GeomType gt)
         : MatrixFormVol<Scalar>(i, j, area, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
@@ -34,8 +34,8 @@ namespace Hermes
 
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::DefaultMatrixFormVol
-        (int i, int j, Hermes::vector<std::string> areas, Scalar const_coeff,
-        Hermes2DFunction<Scalar>* f_coeff, SymFlag sym, GeomType gt)
+        (int i, int j, Scalar const_coeff,
+        Hermes2DFunction<Scalar>* f_coeff, Hermes::vector<std::string> areas, SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j, areas, sym), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
@@ -85,8 +85,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, std::string area, Scalar const_coeff,
-        CubicSpline* c_spline,
+      DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, Scalar const_coeff,
+        CubicSpline* c_spline, std::string area, 
         SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j, area, sym),
         idx_j(j), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -97,8 +97,8 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, Hermes::vector<std::string> areas,
-        Scalar const_coeff, CubicSpline* c_spline,
+      DefaultJacobianCurlCurl<Scalar>::DefaultJacobianCurlCurl(int i, int j, 
+        Scalar const_coeff, CubicSpline* c_spline, Hermes::vector<std::string> areas,
         SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j, areas, sym),
         idx_j(j), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -150,8 +150,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, std::string area, Scalar const_coeff0, Scalar const_coeff1,
-        Hermes2DFunction<Scalar>* f_coeff0, Hermes2DFunction<Scalar>* f_coeff1,
+      DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, Scalar const_coeff0, Scalar const_coeff1,
+        Hermes2DFunction<Scalar>* f_coeff0, Hermes2DFunction<Scalar>* f_coeff1, std::string area, 
         GeomType gt)
         : VectorFormVol<Scalar>(i, area), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
         function_coeff0(f_coeff0), function_coeff1(f_coeff1), gt(gt)
@@ -164,9 +164,10 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, Hermes::vector<std::string> areas,
+      DefaultVectorFormVol<Scalar>::DefaultVectorFormVol(int i, 
         Scalar const_coeff0, Scalar const_coeff1,
         Hermes2DFunction<Scalar>* f_coeff0, Hermes2DFunction<Scalar>* f_coeff1,
+        Hermes::vector<std::string> areas,
         GeomType gt)
         : VectorFormVol<Scalar>(i, areas), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
         function_coeff0(f_coeff0), function_coeff1(f_coeff1), gt(gt)
@@ -213,8 +214,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultResidualVol<Scalar>::DefaultResidualVol(int i, std::string area, Scalar const_coeff,
-        Hermes2DFunction<Scalar>* f_coeff,
+      DefaultResidualVol<Scalar>::DefaultResidualVol(int i, Scalar const_coeff, 
+        Hermes2DFunction<Scalar>* f_coeff, std::string area, 
         GeomType gt)
         : VectorFormVol<Scalar>(i, area),
         idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -225,8 +226,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultResidualVol<Scalar>::DefaultResidualVol(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
-        Hermes2DFunction<Scalar>* f_coeff,
+      DefaultResidualVol<Scalar>::DefaultResidualVol(int i, Scalar const_coeff,
+        Hermes2DFunction<Scalar>* f_coeff, Hermes::vector<std::string> areas, 
         GeomType gt)
         : VectorFormVol<Scalar>(i, areas),
         idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
@@ -285,8 +286,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, std::string area, Scalar const_coeff,
-        CubicSpline* c_spline,
+      DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, Scalar const_coeff,
+        CubicSpline* c_spline, std::string area, 
         GeomType gt)
         : VectorFormVol<Scalar>(i, area),
         idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -297,8 +298,8 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
-        CubicSpline* c_spline,
+      DefaultResidualCurlCurl<Scalar>::DefaultResidualCurlCurl(int i, Scalar const_coeff,
+        CubicSpline* c_spline, Hermes::vector<std::string> areas, 
         GeomType gt)
         : VectorFormVol<Scalar>(i, areas),
         idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
@@ -366,8 +367,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, std::string area,
-        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff,
+      DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, 
+        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff, std::string area,
         GeomType gt)
         : MatrixFormSurf<Scalar>(i, j, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
@@ -377,8 +378,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, Hermes::vector<std::string> areas,
-        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff,
+      DefaultMatrixFormSurf<Scalar>::DefaultMatrixFormSurf(int i, int j, 
+        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff, Hermes::vector<std::string> areas,
         GeomType gt)
         : MatrixFormSurf<Scalar>(i, j, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
@@ -429,8 +430,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, std::string area,
-        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff,
+      DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, 
+        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff, std::string area,
         GeomType gt)
         : VectorFormSurf<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
@@ -440,8 +441,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, Hermes::vector<std::string> areas,
-        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff,
+      DefaultResidualSurf<Scalar>::DefaultResidualSurf(int i, 
+        Scalar const_coeff, Hermes2DFunction<Scalar>* f_coeff, Hermes::vector<std::string> areas,
         GeomType gt)
         : VectorFormSurf<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
@@ -497,8 +498,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, std::string area, Scalar const_coeff,
-        Hermes2DFunction<Scalar>* f_coeff,
+      DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, Scalar const_coeff,
+        Hermes2DFunction<Scalar>* f_coeff, std::string area, 
         GeomType gt)
         : VectorFormSurf<Scalar>(i, area), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
@@ -508,8 +509,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
-        Hermes2DFunction<Scalar>* f_coeff,
+      DefaultVectorFormSurf<Scalar>::DefaultVectorFormSurf(int i, Scalar const_coeff,
+        Hermes2DFunction<Scalar>* f_coeff, Hermes::vector<std::string> areas, 
         GeomType gt)
         : VectorFormSurf<Scalar>(i, areas), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {

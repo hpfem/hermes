@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation.
   Hermes1DFunction<double> lambda(1.0);
   CustomFunction f;
-  DefaultWeakFormPoisson<double> wf(Hermes::HERMES_ANY, &lambda, &f);
+  DefaultWeakFormPoisson<double> wf(&lambda, &f);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst<double> bc_essential("Bdy", 0.0);

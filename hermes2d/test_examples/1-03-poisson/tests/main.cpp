@@ -32,8 +32,8 @@ int main(int argc, char* argv[])
     mesh.refine_all_elements();
 
   // Initialize the weak formulation.
-  CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
+  CustomWeakFormPoisson wf(new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Aluminum", 
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), "Copper", new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
 
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),

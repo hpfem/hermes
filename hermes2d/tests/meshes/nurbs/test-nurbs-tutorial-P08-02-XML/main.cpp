@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  WeakFormsH1::DefaultWeakFormPoisson<double> wf(HERMES_ANY, new Hermes1DFunction<double>(1.0), new Hermes2DFunction<double>(-const_f));
+  WeakFormsH1::DefaultWeakFormPoisson<double> wf(new Hermes1DFunction<double>(1.0), new Hermes2DFunction<double>(-const_f));
 
   // Initialize the FE problem.
   DiscreteProblem<double> dp(&wf, &space);

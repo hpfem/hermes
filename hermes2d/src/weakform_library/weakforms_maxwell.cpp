@@ -21,8 +21,8 @@ namespace Hermes
     namespace WeakFormsMaxwell
     {
       template<typename Scalar>
-      DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, std::string area, Scalar const_coeff,
-        CubicSpline* c_spline,
+      DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, Scalar const_coeff,
+        CubicSpline* c_spline, std::string area, 
         SymFlag sym,
         GeomType gt,
         int order_increase)
@@ -34,9 +34,9 @@ namespace Hermes
         if (c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
       template<typename Scalar>
-      DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, Hermes::vector<std::string> areas,
+      DefaultJacobianMagnetostatics<Scalar>::DefaultJacobianMagnetostatics(int i, int j, 
         Scalar const_coeff,
-        CubicSpline* c_spline,
+        CubicSpline* c_spline, Hermes::vector<std::string> areas,
         SymFlag sym,
         GeomType gt,
         int order_increase)
@@ -121,8 +121,8 @@ namespace Hermes
 
 
       template<typename Scalar>
-      DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, std::string area, Scalar const_coeff,
-        CubicSpline* c_spline,
+      DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, Scalar const_coeff,
+        CubicSpline* c_spline, std::string area, 
         GeomType gt,
         int order_increase)
         : VectorFormVol<Scalar>(i, area), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline),
@@ -133,8 +133,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
-        CubicSpline* c_spline,
+      DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, Scalar const_coeff,
+        CubicSpline* c_spline, Hermes::vector<std::string> areas, 
         GeomType gt, int order_increase)
         : VectorFormVol<Scalar>(i, areas), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)

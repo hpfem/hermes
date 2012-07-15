@@ -89,8 +89,8 @@ int main(int argc, char* argv[])
   info("ndof = %d", ndof);
 
   // Initialize the weak formulation.
-  CustomWeakForm wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
-    "Wire", MU_0, std::complex<double>(J_EXT, 0.0), OMEGA);
+  CustomWeakForm wf(MU_0, "Air", MU_IRON, GAMMA_IRON, "Iron", 
+    MU_0, "Wire", std::complex<double>(J_EXT, 0.0), OMEGA);
 
   // Initialize coarse and reference mesh solution.
   Solution<std::complex<double> > sln, ref_sln;
