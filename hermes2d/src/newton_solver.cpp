@@ -84,6 +84,11 @@ namespace Hermes
       {
         // Assemble just the residual vector.
         this->dp->assemble(coeff_vec, residual);
+        
+        Element* e;
+        for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
+          for_all_active_elements(e, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces()[i]->get_mesh())
+            static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces()[i]->edata[e->id].changed_in_last_adaptation = true;
 
         this->tick();
         assemble_time += this->last();

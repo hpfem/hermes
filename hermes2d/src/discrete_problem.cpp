@@ -1250,10 +1250,6 @@ namespace Hermes
       {
 #pragma omp critical (cache_for_subidx_preparation)
         {
-          if(!this->doNotUseCache)
-            for(unsigned int i = 0; i < this->spaces.size(); i++)
-              this->spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation = false;
-
           if(this->cache_records_sub_idx[0][current_state->e[0]->id] == NULL)
             for(unsigned int i = 0; i < this->spaces.size(); i++)
             {

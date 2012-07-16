@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     linsolv.solve();
     return -1;
   }
-  catch(Exceptions::LinearMatrixSolverException *e)
+  catch(Exceptions::LinearMatrixSolverException& e)
   {
   }
 

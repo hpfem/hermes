@@ -361,6 +361,7 @@ namespace Hermes
       void load(const char *filename, EssentialBCs<Scalar>* essential_bcs = NULL);
 
       template<typename T> friend class OGProjection;
+      template<typename T> friend class NewtonSolver;
       template<typename T> friend class OGProjectionNOX;
       template<typename T> friend class LocalProjection;
       template<typename T> friend class Solution;
