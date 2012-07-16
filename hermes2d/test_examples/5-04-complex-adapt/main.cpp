@@ -66,6 +66,9 @@ const double OMEGA = 2 * M_PI * FREQ;
 
 int main(int argc, char* argv[])
 {
+  Hermes::Mixins::TimeMeasurable m;
+  m.tick();
+
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
@@ -181,6 +184,9 @@ int main(int argc, char* argv[])
 
   RealFilter real_filter(&ref_sln);
   sview.show(&real_filter, &real_filter);
+
+  m.tick();
+  std::cout << m.accumulated();
 
   // Wait for all views to be closed.
   Views::View::wait();

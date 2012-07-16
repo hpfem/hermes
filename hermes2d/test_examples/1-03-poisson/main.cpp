@@ -62,7 +62,6 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
 
   // Initialize the FE problem.
   Hermes::Hermes2D::DiscreteProblemLinear<double> dp(&wf, &space);
@@ -74,38 +73,40 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
 
   // Solve the linear problem.
-  linear_solver.solve();
-
-  // Get the solution vector.
-  double* sln_vector = linear_solver.get_sln_vector();
-
-  // Translate the solution vector into the previously initialized Solution.
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
-
-  // VTK output.
-  if(VTK_VISUALIZATION)
+  try
   {
-    // Output solution in VTK format.
-    Hermes::Hermes2D::Views::Linearizer lin;
-    bool mode_3D = false;
-    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+    linear_solver.solve();
 
-    // Output mesh and element orders in VTK format.
-    Hermes::Hermes2D::Views::Orderizer ord;
-    ord.save_orders_vtk(&space, "ord.vtk");
+    // Get the solution vector.
+    double* sln_vector = linear_solver.get_sln_vector();
+
+    // Translate the solution vector into the previously initialized Solution.
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
+
+    // VTK output.
+    if(VTK_VISUALIZATION)
+    {
+      // Output solution in VTK format.
+      Hermes::Hermes2D::Views::Linearizer lin;
+      bool mode_3D = false;
+      lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+
+      // Output mesh and element orders in VTK format.
+      Hermes::Hermes2D::Views::Orderizer ord;
+      ord.save_orders_vtk(&space, "ord.vtk");
+    }
+
+    // Visualize the solution.
+    if(HERMES_VISUALIZATION)
+    {
+      Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
+      view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      Hermes::Hermes2D::Views::View::wait();
+    }
   }
-
-  // Visualize the solution.
-  if(HERMES_VISUALIZATION)
+  catch(std::exception& e)
   {
-    Hermes::Hermes2D::Views::ScalarView view("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 440, 350));
-    // Hermes uses adaptive FEM to approximate higher-order FE solutions with linear
-    // triangles for OpenGL. The second parameter of View::show() sets the error
-    // tolerance for that. Options are HERMES_EPS_LOW, HERMES_EPS_NORMAL (default),
-    // HERMES_EPS_HIGH and HERMES_EPS_VERYHIGH. The size of the graphics file grows
-    // considerably with more accurate representation, so use it wisely.
-    view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
-    Hermes::Hermes2D::Views::View::wait();
+    std::cout << e.what();
   }
 
   return 0;
