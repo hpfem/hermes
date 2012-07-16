@@ -24,7 +24,7 @@ namespace Hermes
     PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>()
     {
       if(shapeset == NULL)
-        throw new Exceptions::NullException(0);
+        throw Exceptions::NullException(0);
       this->shapeset = shapeset;
       master_pss = NULL;
       num_components = shapeset->get_num_components();

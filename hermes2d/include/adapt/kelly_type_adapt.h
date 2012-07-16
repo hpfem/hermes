@@ -104,7 +104,7 @@ namespace Hermes
                              Func<Scalar> *u, Geom<double> *e,
                              ExtData<Scalar> *ext) const
         {
-          throw new Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::value()");
+          throw Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::value()");
           return 0.0;
         }
 
@@ -113,7 +113,7 @@ namespace Hermes
                                 Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
                                 ExtData<Hermes::Ord> *ext) const
         {
-          throw new Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::ord().");
+          throw Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::ord().");
           return Hermes::Ord();
         }
 

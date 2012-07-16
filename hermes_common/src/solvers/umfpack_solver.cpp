@@ -970,7 +970,7 @@ namespace Hermes
       this->tick();
 
       if( !setup_factorization() )
-        throw new Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
+        throw Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
 
       if(sln != NULL)
         delete [] sln;

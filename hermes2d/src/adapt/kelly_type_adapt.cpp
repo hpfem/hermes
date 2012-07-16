@@ -79,7 +79,7 @@ namespace Hermes
     void KellyTypeAdapt<Scalar>::add_error_estimator_vol(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
     {
       if(form->i < 0 || form->i >= this->num)
-        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
+        throw Exceptions::ValueException("component number", form->i, 0, this->num);
 
       form->adapt = this;
       this->error_estimators_vol.push_back(form);
@@ -89,7 +89,7 @@ namespace Hermes
     void KellyTypeAdapt<Scalar>::add_error_estimator_surf(typename KellyTypeAdapt<Scalar>::ErrorEstimatorForm* form)
     {
       if(form->i < 0 || form->i >= this->num)
-        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
+        throw Exceptions::ValueException("component number", form->i, 0, this->num);
 
       form->adapt = this;
       this->error_estimators_surf.push_back(form);

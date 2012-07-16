@@ -762,9 +762,9 @@ namespace Hermes
     void Adapt<Scalar>::set_error_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
     {
       if(form->i < 0 || form->i >= this->num)
-        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
+        throw Exceptions::ValueException("component number", form->i, 0, this->num);
       if(form->j < 0 || form->j >= this->num)
-        throw new Exceptions::ValueException("component number", form->j, 0, this->num);
+        throw Exceptions::ValueException("component number", form->j, 0, this->num);
 
       // FIXME: Memory leak - always for i == j (see the constructor), may happen for i != j
       //        if user does not delete previously set error forms by himself.
@@ -785,9 +785,9 @@ namespace Hermes
     void Adapt<Scalar>::set_norm_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
     {
       if(form->i < 0 || form->i >= this->num)
-        throw new Exceptions::ValueException("component number", form->i, 0, this->num);
+        throw Exceptions::ValueException("component number", form->i, 0, this->num);
       if(form->j < 0 || form->j >= this->num)
-        throw new Exceptions::ValueException("component number", form->j, 0, this->num);
+        throw Exceptions::ValueException("component number", form->j, 0, this->num);
 
       norm_form[i][j] = form;
     }
@@ -929,7 +929,7 @@ namespace Hermes
       int i, j;
 
       if(slns.size() != this->num)
-        throw new Exceptions::LengthException(0, slns.size(), this->num);
+        throw Exceptions::LengthException(0, slns.size(), this->num);
 
       Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
       Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];

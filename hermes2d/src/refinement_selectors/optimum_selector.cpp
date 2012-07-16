@@ -76,7 +76,7 @@ namespace Hermes
         shapeset(shapeset)
       {
         if(shapeset == NULL)
-          throw new Exceptions::NullException(3);
+          throw Exceptions::NullException(3);
 
         num_shapes = new int***[2];
         for(int i = 0; i < 2; i++)
