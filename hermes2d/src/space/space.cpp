@@ -674,6 +674,7 @@ namespace Hermes
           throw
             Hermes::Exceptions::Exception("Uninitialized element order in Space::assign_dofs().");
         }
+        this->edata[e->id].changed_in_last_adaptation = true;
       }
 
       this->first_dof = next_dof = first_dof;
