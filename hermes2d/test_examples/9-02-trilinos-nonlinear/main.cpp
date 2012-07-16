@@ -76,20 +76,8 @@ int main(int argc, char* argv[])
   // Initialize the discrete problem.
   DiscreteProblem<double> dp1(&wf1, &space);
 
-  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>();
-  Vector<double>* rhs = create_vector<double>();
-  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix, rhs);
-
   // Initialize the solution.
   Solution<double> sln1;
-
-  if(dynamic_cast<AztecOOSolver<double>*>(solver) != NULL)
-  {
-    (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
-    (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
-    // Using default iteration parameters (see solver/aztecoo.h).
-  }
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -105,7 +93,8 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp1);
   newton.set_verbose_output(true);
-  try{
+  try
+  {
     newton.solve(coeff_vec);
   }
   catch(Hermes::Exceptions::Exception& e)
@@ -116,11 +105,6 @@ int main(int argc, char* argv[])
 
   // Translate the resulting coefficient vector into the Solution sln1.
   Solution<double>::vector_to_solution(coeff_vec, &space, &sln1);
-
-  // Cleanup.
-  delete(matrix);
-  delete(rhs);
-  delete(solver);
 
   // Show UMFPACK solution.
   Views::ScalarView view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
