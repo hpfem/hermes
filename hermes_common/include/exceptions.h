@@ -46,6 +46,7 @@ namespace Hermes
         const char * getFuncName() const;
         virtual ~Exception() throw() {};
 
+        virtual Exception* clone();
       protected:
         char * message;
     };
@@ -68,6 +69,7 @@ namespace Hermes
         int getItemIdx() const;
         ~NullException() throw() {};
         NullException(const NullException & e);
+        virtual Exception* clone();
       private:
         int paramIdx, itemIdx;
     };
@@ -98,6 +100,7 @@ namespace Hermes
         int getExpectedLength() const;
         ~LengthException() throw() {};
         LengthException(const LengthException & e);
+        virtual Exception* clone();
       private:
         int fstParamIdx, sndParamIdx, wrong, right;
     };
@@ -113,6 +116,7 @@ namespace Hermes
         LinearMatrixSolverException(const char * reason);
         ~LinearMatrixSolverException() throw() {};
         LinearMatrixSolverException(const LinearMatrixSolverException & e);
+        virtual Exception* clone();
     };
 
     /// \brief Numeric value is out of allowed range
@@ -138,6 +142,7 @@ namespace Hermes
         double getAllowed() const;
         ~ValueException() throw() {};
         ValueException(const ValueException & e);
+        virtual Exception* clone();
       private:
         double value, allowed;
     };
@@ -151,6 +156,7 @@ namespace Hermes
         FunctionNotOverridenException(const char * msg, ...);
         ~FunctionNotOverridenException() throw() {};
         FunctionNotOverridenException(const FunctionNotOverridenException & e);
+        virtual Exception* clone();
     };
 
     /// \brief Linear solver failed.
@@ -162,6 +168,7 @@ namespace Hermes
         MeshLoadFailureException(const char * msg, ...);
         ~MeshLoadFailureException() throw() {};
         MeshLoadFailureException(const MeshLoadFailureException & e);
+        virtual Exception* clone();
     };
 
     /// \brief Linear solver failed.
@@ -173,6 +180,7 @@ namespace Hermes
         SpaceLoadFailureException(const char * msg, ...);
         ~SpaceLoadFailureException() throw() {};
         SpaceLoadFailureException(const SpaceLoadFailureException & e);
+        virtual Exception* clone();
     };
 
     /// \brief Linear solver failed.
@@ -184,6 +192,7 @@ namespace Hermes
         SolutionSaveFailureException(const char * msg, ...);
         ~SolutionSaveFailureException() throw() {};
         SolutionSaveFailureException(const SolutionSaveFailureException & e);
+        virtual Exception* clone();
     };
 
     /// \brief Linear solver failed.
@@ -195,6 +204,7 @@ namespace Hermes
         SolutionLoadFailureException(const char * msg, ...);
         ~SolutionLoadFailureException() throw() {};
         SolutionLoadFailureException(const SolutionLoadFailureException & e);
+        virtual Exception* clone();
     };
   }
 }

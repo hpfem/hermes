@@ -59,7 +59,7 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>
+    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>, public Hermes::Mixins::TimeMeasurable
     {
     public:
       /// Constructor for multiple components / equations.
@@ -262,6 +262,7 @@ namespace Hermes
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
 
+      /// Caching.
       class CacheRecordPerElement
       {
       public:
@@ -292,6 +293,9 @@ namespace Hermes
       bool** cache_element_stored;
       int cache_size;
       bool doNotUseCache;
+
+      /// Exception caught in a parallel region.
+      Hermes::Exceptions::Exception* caughtException;
     public:
       inline void setDoNotUseCache() { this->doNotUseCache = true; }
     protected:

@@ -363,6 +363,9 @@ namespace Hermes
 
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
       {
+        // Important, sets the current caughtException to NULL.
+        this->caughtException = NULL;
+
         // sanity check
         if(xsln == NULL || ysln == NULL) 
           throw Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
@@ -478,28 +481,41 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
-            Traverse::State current_state;
-#pragma omp critical(get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-
-            fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
-            fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
-            double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
-            double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
-
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+            try
             {
-              double fx = xval[i];
-              double fy = yval[i];
-              if(fabs(sqrt(fx*fx + fy*fy)) > max)
-#pragma omp critical(max)
+              Traverse::State current_state;
+#pragma omp critical(get_next_state)
+              current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+
+              fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
+              fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
+              double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
+              double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
+
+              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              {
+                double fx = xval[i];
+                double fy = yval[i];
                 if(fabs(sqrt(fx*fx + fy*fy)) > max)
-                  max = fabs(sqrt(fx*fx + fy*fy));
-              double c = current_state.e[0]->get_diameter();
-              if(c > this->cmax)
-#pragma omp critical(vectorizer_get_cmax)
+#pragma omp critical(max)
+                  if(fabs(sqrt(fx*fx + fy*fy)) > max)
+                    max = fabs(sqrt(fx*fx + fy*fy));
+                double c = current_state.e[0]->get_diameter();
                 if(c > this->cmax)
-                  this->cmax = c;
+#pragma omp critical(vectorizer_get_cmax)
+                  if(c > this->cmax)
+                    this->cmax = c;
+              }
+            }
+            catch(Hermes::Exceptions::Exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = e.clone();
+            }
+            catch(std::exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = new Hermes::Exceptions::Exception(e.what());
             }
           }
         }
@@ -518,35 +534,48 @@ int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
-            Traverse::State current_state;
-#pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-
-            fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
-            fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
-            double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
-            double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
-
-            double* x = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0);
-            double* y = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0);
-
-            int iv[4];
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+            try
             {
-              double fx = xval[i];
-              double fy = yval[i];
+              Traverse::State current_state;
+#pragma omp critical (get_next_state)
+              current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
-              iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x[i], y[i], fx, fy);
+              fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
+              fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
+              double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
+              double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
+
+              double* x = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0);
+              double* y = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0);
+
+              int iv[4];
+              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              {
+                double fx = xval[i];
+                double fy = yval[i];
+
+                iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x[i], y[i], fx, fy);
+              }
+
+              // recur to sub-elements
+              if(current_state.e[0]->is_triangle())
+                process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+              else
+                process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+
+              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+                process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
             }
-
-            // recur to sub-elements
-            if(current_state.e[0]->is_triangle())
-              process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
-            else
-              process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
-
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
-              process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
+            catch(Hermes::Exceptions::Exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = e.clone();
+            }
+            catch(std::exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = new Hermes::Exceptions::Exception(e.what());
+            }
           }
         }
 

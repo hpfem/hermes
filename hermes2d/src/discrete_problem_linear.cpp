@@ -54,6 +54,9 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
+      // Important, sets the current caughtException to NULL.
+      this->caughtException = NULL;
+
       this->current_mat = mat;
       this->current_rhs = rhs;
       this->current_force_diagonal_blocks = force_diagonal_blocks;
@@ -142,31 +145,44 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
         {
-          Traverse::State current_state;
+          try
+          {
+            Traverse::State current_state;
 
-#pragma omp critical (get_next_state)
-          current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+  #pragma omp critical (get_next_state)
+            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
-          current_pss = pss[omp_get_thread_num()];
-          current_spss = spss[omp_get_thread_num()];
-          current_refmaps = refmaps[omp_get_thread_num()];
-          current_als = als[omp_get_thread_num()];
+            current_pss = pss[omp_get_thread_num()];
+            current_spss = spss[omp_get_thread_num()];
+            current_refmaps = refmaps[omp_get_thread_num()];
+            current_als = als[omp_get_thread_num()];
 
-          current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
-          current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
-          current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
-          current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
+            current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
+            current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
+            current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
+            current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
 
-          // One state is a collection of (virtual) elements sharing
-          // the same physical location on (possibly) different meshes.
-          // This is then the same element of the virtual union mesh.
-          // The proper sub-element mappings to all the functions of
-          // this stage is supplied by the function Traverse::get_next_state()
-          // called in the while loop.
-          this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+            // One state is a collection of (virtual) elements sharing
+            // the same physical location on (possibly) different meshes.
+            // This is then the same element of the virtual union mesh.
+            // The proper sub-element mappings to all the functions of
+            // this stage is supplied by the function Traverse::get_next_state()
+            // called in the while loop.
+            this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
 
-          if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-            this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfsurf, current_vfsurf, trav[omp_get_thread_num()].fn);
+            if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfsurf, current_vfsurf, trav[omp_get_thread_num()].fn);
+          }
+          catch(Hermes::Exceptions::Exception& e)
+          {
+            if(this->caughtException == NULL)
+              this->caughtException = e.clone();
+          }
+          catch(std::exception& e)
+          {
+            if(this->caughtException == NULL)
+              this->caughtException = new Hermes::Exceptions::Exception(e.what());
+          }
         }
       }
 
@@ -196,6 +212,9 @@ namespace Hermes
           for_all_elements(element_to_set_nonvisited, meshes[mesh_i])
           element_to_set_nonvisited->visited = false;
       }
+
+      if(this->caughtException != NULL)
+        throw *(this->caughtException);
     }
 
     template<typename Scalar>

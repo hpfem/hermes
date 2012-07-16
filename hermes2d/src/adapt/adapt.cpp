@@ -156,6 +156,10 @@ namespace Hermes
     bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double thr, int strat,
       int regularize, double to_be_processed)
     {
+      this->tick();
+      // Important, sets the current caughtException to NULL.
+      this->caughtException = NULL;
+
       if(!have_errors)
         throw Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
 
@@ -328,29 +332,39 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
         {
-          current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
-          current_rslns = rslns[omp_get_thread_num()];
-
-          Mesh* mesh = meshes[components[id_to_refine]];
-          Element* e = mesh->get_element(ids[id_to_refine]);
-
-          // Get refinement suggestion
-          ElementToRefine elem_ref(ids[id_to_refine], components[id_to_refine]);
-
-          // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-          bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(e, current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref);
-
-          //add to a list of elements that are going to be refined
-#pragma omp critical (elem_inx_to_proc)
+          try
           {
-            idx[ids[id_to_refine]][components[id_to_refine]] = (int)elem_inx_to_proc.size();
-            elem_inx_to_proc.push_back(elem_ref);
+            current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
+            current_rslns = rslns[omp_get_thread_num()];
+
+            // Get refinement suggestion
+            ElementToRefine elem_ref(ids[id_to_refine], components[id_to_refine]);
+
+            // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
+            bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(meshes[components[id_to_refine]]->get_element(ids[id_to_refine]), current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref);
+
+            //add to a list of elements that are going to be refined
+  #pragma omp critical (elem_inx_to_proc)
+            {
+              idx[ids[id_to_refine]][components[id_to_refine]] = (int)elem_inx_to_proc.size();
+              elem_inx_to_proc.push_back(elem_ref);
+            }
+          }
+          catch(Hermes::Exceptions::Exception& e)
+          {
+            if(this->caughtException == NULL)
+              this->caughtException = e.clone();
+          }
+          catch(std::exception& e)
+          {
+            if(this->caughtException == NULL)
+              this->caughtException = new Hermes::Exceptions::Exception(e.what());
           }
         }
       }
 
-      //fix refinement if multimesh is used
-      fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
+      if(this->caughtException == NULL)
+        fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
 
       for(unsigned int i = 0; i < omp_get_num_threads(); i++)
       {
@@ -376,6 +390,9 @@ namespace Hermes
         delete [] idx[i];
       delete [] idx;
 
+      if(this->caughtException != NULL)
+        throw *(this->caughtException);
+      
       //apply refinements
       apply_refinements(elem_inx_to_proc);
 

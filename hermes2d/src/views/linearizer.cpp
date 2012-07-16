@@ -623,6 +623,9 @@ namespace Hermes
 
       void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
       {
+        // Important, sets the current caughtException to NULL.
+        this->caughtException = NULL;
+
         lock_data();
         this->tick();
 
@@ -734,24 +737,37 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
-            Traverse::State current_state;
-#pragma omp critical(get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-
-            fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
-            double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
-
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+            try
             {
-              double f = val[i];
+              Traverse::State current_state;
+#pragma omp critical(get_next_state)
+              current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+
+              fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
+              double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
+
+              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              {
+                double f = val[i];
 #pragma omp critical (max)
-              if(this->auto_max && finite(f) && fabs(f) > this->max)
-                this->max = fabs(f);
-              double c = current_state.e[0]->get_diameter();
-              if(c > this->cmax)
-#pragma omp critical(vectorizer_get_cmax)
+                if(this->auto_max && finite(f) && fabs(f) > this->max)
+                  this->max = fabs(f);
+                double c = current_state.e[0]->get_diameter();
                 if(c > this->cmax)
-                  this->cmax = c;
+#pragma omp critical(vectorizer_get_cmax)
+                  if(c > this->cmax)
+                    this->cmax = c;
+              }
+            }
+            catch(Hermes::Exceptions::Exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = e.clone();
+            }
+            catch(std::exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = new Hermes::Exceptions::Exception(e.what());
             }
           }
         }
@@ -771,53 +787,66 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
           for(state_i = 0; state_i < num_states; state_i++)
           {
-            Traverse::State current_state;
+            try
+            {
+              Traverse::State current_state;
 
 #pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+              current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
-            fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
-            double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
-            if(val == NULL)
-            {
-              delete [] trav;
-              throw Hermes::Exceptions::Exception("Item not defined in the solution.");
+              fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
+              double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
+              if(val == NULL)
+              {
+                delete [] trav;
+                throw Hermes::Exceptions::Exception("Item not defined in the solution.");
+              }
+
+              if(xdisp != NULL)
+                fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
+              if(ydisp != NULL)
+                fns[omp_get_thread_num()][2]->set_quad_order(0, H2D_FN_VAL);
+
+              double *dx = NULL;
+              double *dy = NULL;
+              if(xdisp != NULL)
+                dx = fns[omp_get_thread_num()][1]->get_fn_values();
+              if(ydisp != NULL)
+                dy = fns[omp_get_thread_num()][2]->get_fn_values();
+
+              int iv[4];
+              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              {
+                double f = val[i];
+                double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
+                double y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
+                if(this->xdisp != NULL)
+                  x_disp += dmult * dx[i];
+                if(this->ydisp != NULL)
+                  y_disp += dmult * dy[i];
+
+                iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x_disp, y_disp, f);
+              }
+
+              // recur to sub-elements
+              if(current_state.e[0]->is_triangle())
+                process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+              else
+                process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+
+              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+                process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
             }
-
-            if(xdisp != NULL)
-              fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
-            if(ydisp != NULL)
-              fns[omp_get_thread_num()][2]->set_quad_order(0, H2D_FN_VAL);
-
-            double *dx = NULL;
-            double *dy = NULL;
-            if(xdisp != NULL)
-              dx = fns[omp_get_thread_num()][1]->get_fn_values();
-            if(ydisp != NULL)
-              dy = fns[omp_get_thread_num()][2]->get_fn_values();
-
-            int iv[4];
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+            catch(Hermes::Exceptions::Exception& e)
             {
-              double f = val[i];
-              double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
-              double y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
-              if(this->xdisp != NULL)
-                x_disp += dmult * dx[i];
-              if(this->ydisp != NULL)
-                y_disp += dmult * dy[i];
-
-              iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x_disp, y_disp, f);
+              if(this->caughtException == NULL)
+                this->caughtException = e.clone();
             }
-
-            // recur to sub-elements
-            if(current_state.e[0]->is_triangle())
-              process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
-            else
-              process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
-
-            for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
-              process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
+            catch(std::exception& e)
+            {
+              if(this->caughtException == NULL)
+                this->caughtException = new Hermes::Exceptions::Exception(e.what());
+            }
           }
         }
 
@@ -833,6 +862,14 @@ namespace Hermes
         delete [] fns;
         delete [] trfs;
         delete [] trav;
+
+        if(this->caughtException != NULL)
+        {
+          this->unlock_data();
+          ::free(hash_table);
+          ::free(info);
+          throw *(this->caughtException);
+        }
 
         // regularize the linear mesh
         for (int i = 0; i < this->triangle_count; i++)

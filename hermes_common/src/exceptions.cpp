@@ -53,6 +53,11 @@ namespace Hermes
         CallStack::dump(0);
     }
 
+    Exception* Exception::clone()
+    {
+      return new Exception(*this);
+    }
+
     const char * Exception::what() const throw()
     {
       return message;
@@ -93,6 +98,11 @@ namespace Hermes
       message = msg;
       paramIdx = e.getParamIdx();
       itemIdx = e.getItemIdx();
+    }
+
+    Exception* NullException::clone()
+    {
+      return new NullException(*this);
     }
 
     LengthException::LengthException(int paramIdx, int wrong, int right) : Exception()
@@ -149,6 +159,11 @@ namespace Hermes
       this->right = e.getExpectedLength();
     }
 
+    Exception* LengthException::clone()
+    {
+      return new LengthException(*this);
+    }
+
     LinearMatrixSolverException::LinearMatrixSolverException() : Exception()
     {
       char * msg =  new char[22];
@@ -168,6 +183,11 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
+    }
+
+    Exception* LinearMatrixSolverException::clone()
+    {
+      return new LinearMatrixSolverException(*this);
     }
 
     ValueException::ValueException(const char * name, double value, double allowed) : Exception()
@@ -220,6 +240,11 @@ namespace Hermes
       this->allowed = e.getAllowed();
     }
 
+    Exception* ValueException::clone()
+    {
+      return new ValueException(*this);
+    }
+
     FunctionNotOverridenException::FunctionNotOverridenException(const char * name, ...) : Exception()
     {
       char text[1024];
@@ -238,6 +263,11 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
+    }
+
+    Exception* FunctionNotOverridenException::clone()
+    {
+      return new FunctionNotOverridenException(*this);
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
@@ -260,6 +290,11 @@ namespace Hermes
       message = msg;
     }
 
+    Exception* MeshLoadFailureException::clone()
+    {
+      return new MeshLoadFailureException(*this);
+    }
+
     SpaceLoadFailureException::SpaceLoadFailureException(const char * reason, ...) : Exception()
     {
       char text[1024];
@@ -278,6 +313,11 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
+    }
+
+    Exception* SpaceLoadFailureException::clone()
+    {
+      return new SpaceLoadFailureException(*this);
     }
 
     SolutionSaveFailureException::SolutionSaveFailureException(const char * reason, ...) : Exception()
@@ -300,6 +340,11 @@ namespace Hermes
       message = msg;
     }
 
+    Exception* SolutionSaveFailureException::clone()
+    {
+      return new SolutionSaveFailureException(*this);
+    }
+
     SolutionLoadFailureException::SolutionLoadFailureException(const char * reason, ...) : Exception()
     {
       char text[1024];
@@ -318,6 +363,11 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
+    }
+    
+    Exception* SolutionLoadFailureException::clone()
+    {
+      return new SolutionLoadFailureException(*this);
     }
   }
 }
