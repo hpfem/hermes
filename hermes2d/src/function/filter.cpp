@@ -95,10 +95,9 @@ namespace Hermes
       {
         Traverse trav;
         trav.begin(num, meshes);
-        Mesh* uniMesh = new Mesh;
-        unidata = trav.construct_union_mesh(uniMesh);
+        this->mesh = new Mesh;
+        unidata = trav.construct_union_mesh(const_cast<Hermes2D::Mesh*>(this->mesh));
         trav.finish();
-        delete uniMesh;
       }
 
       // misc init
@@ -954,7 +953,7 @@ namespace Hermes
       MeshFunction<double>** slns = new MeshFunction<double>*[num];
       for(int i = 0; i < num; i++)
         slns[i] = sln[i]->clone();
-      VonMisesFilter* filter = new VonMisesFilter(sln, num, lambda, mu, cyl, item1, item2);
+      VonMisesFilter* filter = new VonMisesFilter(slns, num, lambda, mu, cyl, item1, item2);
       return filter;
     }
 

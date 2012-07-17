@@ -31,7 +31,7 @@ namespace Hermes
 #else
 #include "../mesh/element_to_refine.h"
 #endif
-#include "mesh.h"
+#include "../mesh/mesh.h"
 
 /** \defgroup g_selectors Refinement Selectors
 *  \brief Refinement selectors allows to select a refinement

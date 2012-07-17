@@ -79,6 +79,8 @@ namespace Hermes
     /// points of the specified order. Intended for non-constant jacobian elements.
     double* RefMap::get_jacobian(int order)
     {
+      if(cur_node == NULL)
+        throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
       if(cur_node->inv_ref_map[order] == NULL)
         calc_inv_ref_map(order);
       return cur_node->jacobian[order];
@@ -89,6 +91,8 @@ namespace Hermes
     /// jacobian elements.
     double2x2* RefMap::get_inv_ref_map(int order)
     {
+      if(cur_node == NULL)
+        throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
       if(cur_node->inv_ref_map[order] == NULL)
         calc_inv_ref_map(order);
       return cur_node->inv_ref_map[order];
@@ -97,6 +101,8 @@ namespace Hermes
     /// Returns coefficients for weak forms with second derivatives.
     double3x2* RefMap::get_second_ref_map(int order)
     {
+      if(cur_node == NULL)
+        throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
       if(cur_node->second_ref_map[order] == NULL) calc_second_ref_map(order);
       return cur_node->second_ref_map[order];
     }
@@ -106,6 +112,8 @@ namespace Hermes
     /// variables.
     double* RefMap::get_phys_x(int order)
     {
+      if(cur_node == NULL)
+        throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
       if(cur_node->phys_x[order] == NULL) calc_phys_x(order);
       return cur_node->phys_x[order];
     }
@@ -115,6 +123,8 @@ namespace Hermes
     /// variables.
     double* RefMap::get_phys_y(int order)
     {
+      if(cur_node == NULL)
+        throw Hermes::Exceptions::Exception("Cur_node == NULL in RefMap - inner algorithms failed");
       if(cur_node->phys_y[order] == NULL) calc_phys_y(order);
       return cur_node->phys_y[order];
     }

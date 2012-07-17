@@ -27,8 +27,7 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter)
         : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false)
     {
-      int n = slns_prev_iter.size();
-      if(dp->get_spaces().size() != n)
+      if(dp->get_spaces().size() != 1)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
     }
@@ -44,6 +43,11 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
+    }
+
+    template<typename Scalar>
+    PicardSolver<Scalar>::~PicardSolver()
+    {
     }
 
     template<typename Scalar>

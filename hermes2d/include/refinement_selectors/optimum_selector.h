@@ -19,7 +19,7 @@
 #include <ostream>
 #include "order_permutator.h"
 #include "selector.h"
-#include "shapeset.h"
+#include "../shapeset/shapeset.h"
 
 namespace Hermes
 {

@@ -1250,14 +1250,14 @@ namespace Hermes
       {
 #pragma omp critical (cache_for_subidx_preparation)
         {
-          if(this->cache_records_sub_idx[0][current_state->e[0]->id] == NULL)
-            for(unsigned int i = 0; i < this->spaces.size(); i++)
+          for(unsigned int i = 0; i < this->spaces.size(); i++)
+          {
+            if(this->cache_records_sub_idx[i][current_state->e[i]->id] == NULL)
             {
               this->cache_records_sub_idx[i][current_state->e[i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
               this->cache_records_sub_idx[i][current_state->e[i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[i], new CacheRecordPerSubIdx));
             }
-          else
-            for(unsigned int i = 0; i < this->spaces.size(); i++)
+            else
             {
               typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i]); 
               if(it != this->cache_records_sub_idx[i][current_state->e[i]->id]->end())
@@ -1265,6 +1265,7 @@ namespace Hermes
               else
                 this->cache_records_sub_idx[i][current_state->e[i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[i], new CacheRecordPerSubIdx));
             }
+          }
         }
            
         // Set active element to reference mappings.
@@ -1293,55 +1294,43 @@ namespace Hermes
               
               if(order == 0)
               {
-                if(current_mat != NULL)
+                for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
                 {
-                  for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
-                  {
-                    if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
-                      continue;
-                    int orderTemp = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
-                    if(order < orderTemp)
-                      order = orderTemp;
-                  }
+                  if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
+                    continue;
+                  int orderTemp = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
+                  if(order < orderTemp)
+                    order = orderTemp;
                 }
-                if(current_rhs != NULL)
+                for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
                 {
-                  for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
-                  {
-                    if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
-                      continue;
-                    int orderTemp = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
-                    if(order < orderTemp)
-                      order = orderTemp;
-                  }
+                  if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
+                    continue;
+                  int orderTemp = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
+                  if(order < orderTemp)
+                    order = orderTemp;
                 }
 
                 for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
                 {
                   if(!current_state->bnd[current_state->isurf])
                     continue;
-                  if(current_mat != NULL)
+                  for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
                   {
-                    for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
-                    {
-                      if(!form_to_be_assembled(current_mfsurf[current_mfsurf_i], current_state))
-                        continue;
-                      int orderTemp = calc_order_matrix_form(current_mfsurf[current_mfsurf_i], current_refmaps, current_u_ext, current_state);
-                      if(order < orderTemp)
-                        order = orderTemp;
-                    }
+                    if(!form_to_be_assembled(current_mfsurf[current_mfsurf_i], current_state))
+                      continue;
+                    int orderTemp = calc_order_matrix_form(current_mfsurf[current_mfsurf_i], current_refmaps, current_u_ext, current_state);
+                    if(order < orderTemp)
+                      order = orderTemp;
                   }
 
-                  if(current_rhs != NULL)
+                  for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
                   {
-                    for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
-                    {
-                      if(!form_to_be_assembled(current_vfsurf[current_vfsurf_i], current_state))
-                        continue;
-                      int orderTemp = calc_order_vector_form(current_vfsurf[current_vfsurf_i], current_refmaps, current_u_ext, current_state);
-                      if(order < orderTemp)
-                        order = orderTemp;
-                    }
+                    if(!form_to_be_assembled(current_vfsurf[current_vfsurf_i], current_state))
+                      continue;
+                    int orderTemp = calc_order_vector_form(current_vfsurf[current_vfsurf_i], current_refmaps, current_u_ext, current_state);
+                    if(order < orderTemp)
+                      order = orderTemp;
                   }
                 }
               }
