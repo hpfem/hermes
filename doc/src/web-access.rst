@@ -1,39 +1,32 @@
-Interactive Web Accessibility
------------------------------
+Hermes on the Cloud in NCLab (http://nclab.com)
+-----------------------------------------------
 
-Anyone can use Hermes (and do many other types of symbolic and numerical computations) in any web browser, using the `Networked Computing Laboratory (NCLab) <http://nclab.com/>`_. 
+Hermes is fully wrapped in Python and available in `NCLab <http://nclab.com/>`_ where it can 
+be used to create advanced Python FEM programs in the web browser. Several tutorial examples
+have been translated into Python and are available as displayed projects in NCLab. They are
+accessible through the File Manager's Clone menu. Look for projects 
+"Hermes - Tutorial - Example A01" and similar.
 
-.. figure:: img/nclab.png
+Python wrappers
+~~~~~~~~~~~~~~~
+
+The use of the Python wrappers is intuitive as they follow the naming conventions of the 
+C++ library closely. More details can be found in this `document <http://femhub.com/docs/hermes_en.pdf>`_
+
+Geometry Editor, Mesh Editor, Postprocessor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NCLab also provides integractive graphical applications `Geometry Editor <http://femhub.com/docs/ge_en.pdf>`_, 
+`Mesh Editor <http://femhub.com/docs/me_en.pdf>`_ and `Postprocessor <http://femhub.com/docs/pp_en.pdf>`_
+that you can use with your Hermes FEM code (and any other Python FEM code for that matter). Their use is 
+illustrated in displayed projects whose names start with "GE and ME". 
+
+
+Illustrative screenshot (tutorial example A-linear/07-general):
+
+.. figure:: img/ex1.png
    :align: center
-   :scale: 55%
+   :scale: 90%
    :figclass: align-center
-   :alt: NCLab
-
-After login, the user sees a virtual desktop:
-
-.. figure:: img/nclab2.png
-   :align: center
-   :scale: 56%
-   :figclass: align-center
-   :alt: NCLab
-
-Here one can do unrestricted Python programming:
-
-.. figure:: img/nclab3.png
-   :align: center
-   :scale: 56%
-   :figclass: align-center
-   :alt: NCLab
-
-In NCLab one can use the complete Python scientific stack including SciPy, Numpy, Sympy, Pylab and 
-other packages. One can work with arbitrary numerical methods and of course also with Hermes:
-
-.. figure:: img/nclab4.png
-   :align: center
-   :scale: 31%
-   :figclass: align-center
-   :alt: NCLab
-
-
-See the `NCLab's overview page <http://femhub.com/?page_id=813>`_ for more information. 
+   :alt: Hermes in NCLab
 

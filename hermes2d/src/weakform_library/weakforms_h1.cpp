@@ -36,7 +36,7 @@ namespace Hermes
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
         if (coeff == HERMES_ONE)
-          this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 1.0));
+          this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 0.0));
       }
 
       template<>
@@ -57,7 +57,7 @@ namespace Hermes
       {
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
         if (coeff == HERMES_ONE)
-          this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 1.0));
+          this->coeff = new Hermes2DFunction<std::complex<double> >(std::complex<double>(1.0, 0.0));
       }
 
       template<typename Scalar>
