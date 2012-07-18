@@ -37,26 +37,32 @@ namespace Hermes
       OGProjection();
 
       /// Main functionality is in the protected method project_internal().
+      
       /// This method allows to specify your own OG-projection form.
       void project_global(const Space<Scalar>* space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
           Scalar* target_vec);
 
-      /// This is a wrapper that delivers a Solution instead of a coefficient vector.   
+      /// Wrapper that delivers a Solution instead of a coefficient vector.   
       void project_global(const Space<Scalar>* space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
-          Solution<Scalar>* target_sln,
-          Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK, 
+          Solution<Scalar>* target_sln, 
+          double newton_tol = 1e-6, int newton_max_iter = 10);
+      
+      /// This method allows to specify your own multiple OG-projection forms.
+      void project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
+          const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+          const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+          Scalar* target_vec,
           double newton_tol = 1e-6, int newton_max_iter = 10);
           
-      /// This is a wrapper that delivers a vector of Solutions instead of a coefficient vector.   
+      /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
       void project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
           const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
           const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
           const Hermes::vector<Solution<Scalar>*>& target_slns,
-          Hermes::MatrixSolverType matrix_solver = Hermes::SOLVER_UMFPACK, 
           double newton_tol = 1e-6, int newton_max_iter = 10);
           
       /**

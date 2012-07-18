@@ -72,17 +72,15 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
         MatrixFormVol<Scalar>* custom_projection_jacobian,
         VectorFormVol<Scalar>* custom_projection_residual,
-        Solution<Scalar>* target_sln, Hermes::MatrixSolverType matrix_solver, 
-        double newton_tol, int newton_max_iter)
+        Solution<Scalar>* target_sln, double newton_tol, int newton_max_iter)
     {
-      _F_
-
       // Calculate the coefficient vector.
       int ndof = space->get_num_dofs();
       Scalar* target_vec = new Scalar[ndof];
+               
       project_global(space, custom_projection_jacobian, custom_projection_residual, target_vec,
-                     matrix_solver, newton_tol, newton_max_iter);
-
+                     newton_tol, newton_max_iter);
+            
       // Translate coefficient vector into a Solution.
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
@@ -94,10 +92,33 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
-        const Hermes::vector<Solution<Scalar>*>& target_slns, Hermes::MatrixSolverType matrix_solver, 
+        Scalar* target_vec, double newton_tol, int newton_max_iter)
+    {
+      int n = spaces.size();
+
+      // Sanity checks.
+      if(target_vec == NULL) throw Exceptions::NullException(3);
+      if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
+      if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
+      
+      int start_index = 0;
+      for (int i = 0; i < n; i++) 
+      {
+                
+        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_vec + start_index,
+                       newton_tol, newton_max_iter);
+        
+        start_index += spaces[i]->get_num_dofs();                       
+      }
+    }
+    
+    template<typename Scalar>
+    void OGProjection<Scalar>::project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
+        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
+        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
+        const Hermes::vector<Solution<Scalar>*>& target_slns,
         double newton_tol, int newton_max_iter)
     {
-      _F_
       int n = spaces.size();
 
       // Sanity checks.
@@ -108,7 +129,7 @@ namespace Hermes
       for (int i = 0; i < n; i++) 
       {
         project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i],
-                       matrix_solver, newton_tol, newton_max_iter);
+                       newton_tol, newton_max_iter);
       }
     }
     
