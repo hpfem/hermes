@@ -578,6 +578,8 @@ namespace Hermes
       friend class Views::ScalarView;
       friend class Views::Orderizer;
     public:
+      const ElementMarkersConversion &get_element_markers_conversion() const;
+      const BoundaryMarkersConversion &get_boundary_markers_conversion() const;
       ElementMarkersConversion &get_element_markers_conversion();
       BoundaryMarkersConversion &get_boundary_markers_conversion();
 
