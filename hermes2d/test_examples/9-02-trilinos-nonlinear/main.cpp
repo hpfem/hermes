@@ -67,14 +67,15 @@ int main(int argc, char* argv[])
   EssentialBCs<double> bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = Space<double>::get_num_dofs(&space);
+  H1Space<double> space1(&mesh, &bcs, P_INIT);
+  H1Space<double> space2(&mesh, &bcs, P_INIT);
+  int ndof = Space<double>::get_num_dofs(&space1);
 
   // Initialize weak formulation,
   CustomWeakForm wf1;
 
   // Initialize the discrete problem.
-  DiscreteProblem<double> dp1(&wf1, &space);
+  DiscreteProblem<double> dp1(&wf1, &space1);
 
   // Initialize the solution.
   Solution<double> sln1;
@@ -101,10 +102,10 @@ int main(int argc, char* argv[])
   {
     e.printMsg();
   }
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space1, &sln);
 
   // Translate the resulting coefficient vector into the Solution sln1.
-  Solution<double>::vector_to_solution(coeff_vec, &space, &sln1);
+  Solution<double>::vector_to_solution(coeff_vec, &space1, &sln1);
 
   // Show UMFPACK solution.
   Views::ScalarView view1("Solution 1", new Views::WinGeom(0, 0, 500, 400));
@@ -120,13 +121,13 @@ int main(int argc, char* argv[])
   // coefficient vector.
   ZeroSolution<double> sln_tmp(&mesh);
   OGProjection<double> ogProjection;
-  ogProjection.project_global(&space, &sln_tmp, coeff_vec);
+  ogProjection.project_global(&space2, &sln_tmp, coeff_vec);
 
   // Initialize the weak formulation for Trilinos.
   CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
 
   // Initialize DiscreteProblem.
-  DiscreteProblem<double> dp2(&wf2, &space);
+  DiscreteProblem<double> dp2(&wf2, &space2);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   NewtonSolverNOX<double> nox_solver(&dp2);
@@ -152,7 +153,7 @@ int main(int argc, char* argv[])
   {
     e.printMsg();
   }
-  Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
+  Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space2, &sln2);
 
   // Calculate error.
   double rel_err_2 = Global<double>::calc_rel_error(&sln2, &ex, HERMES_H1_NORM) * 100;

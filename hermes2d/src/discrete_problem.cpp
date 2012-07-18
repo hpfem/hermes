@@ -1224,15 +1224,18 @@ namespace Hermes
         spaces[i]->get_element_assembly_list(current_state->e[i], current_als[i], spaces_first_dofs[i]);
 
         // Check of potential new constraints.
-        if(this->cache_records_element[i][current_state->e[i]->id] != NULL)
+        if(!this->doNotUseCache)
         {
-          if(this->cache_records_element[i][current_state->e[i]->id]->asmlistCnt != current_als[i]->cnt)
-            changedInLastAdaptation = true;
-          else
+          if(this->cache_records_element[i][current_state->e[i]->id] != NULL)
           {
-            for(unsigned int idx_i = 0; idx_i < current_als[i]->cnt; idx_i++)
-              if(current_als[i]->idx[idx_i] != this->cache_records_element[i][current_state->e[i]->id]->asmlistIdx[idx_i])
-                changedInLastAdaptation = true;
+            if(this->cache_records_element[i][current_state->e[i]->id]->asmlistCnt != current_als[i]->cnt)
+              changedInLastAdaptation = true;
+            else
+            {
+              for(unsigned int idx_i = 0; idx_i < current_als[i]->cnt; idx_i++)
+                if(current_als[i]->idx[idx_i] != this->cache_records_element[i][current_state->e[i]->id]->asmlistIdx[idx_i])
+                  changedInLastAdaptation = true;
+            }
           }
         }
 

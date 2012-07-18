@@ -53,28 +53,18 @@ int main(int argc, char* argv[])
   EssentialBCs<double> bcs(&bc);
 
   // Create an H1 space with default shapeset.
-  H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = Space<double>::get_num_dofs(&space);
+  H1Space<double> space1(&mesh, &bcs, P_INIT);
+  H1Space<double> space2(&mesh, &bcs, P_INIT);
+  int ndof = Space<double>::get_num_dofs(&space1);
 
   // Initialize weak formulation,
   CustomWeakForm wf1;
 
   // Initialize the discrete problem.
-  DiscreteProblem<double> dp1(&wf1, &space);
-
-  // Set up the solver, matrix, and rhs for the coarse mesh according to the solver selection.
-  SparseMatrix<double>* matrix = create_matrix<double>();
-  Vector<double>* rhs = create_vector<double>();
-  LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix, rhs);
+  DiscreteProblem<double> dp1(&wf1, &space1);
 
   // Initialize the solution.
   Solution<double> sln1;
-
-  if(dynamic_cast<AztecOOSolver<double>*>(solver) != NULL)
-    (dynamic_cast<AztecOOSolver<double>*>(solver))->set_solver(iterative_method);
-  if(dynamic_cast<AztecOOSolver<double>*>(solver) != NULL)
-    (dynamic_cast<AztecOOSolver<double>*>(solver))->set_precond(preconditioner);
-  // Using default iteration parameters (see solver/aztecoo.h).
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -89,24 +79,19 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   Hermes::Hermes2D::NewtonSolver<double> newton(&dp1);
-
   newton.set_verbose_output(true);
-  try{
+  try
+  {
     newton.solve(coeff_vec);
   }
   catch(Hermes::Exceptions::Exception& e)
   {
     e.printMsg();
   }
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space1, &sln);
 
   // Translate the resulting coefficient vector into the Solution sln1.
-  Solution<double>::vector_to_solution(coeff_vec, &space, &sln1);
-
-  // Cleanup.
-  delete(matrix);
-  delete(rhs);
-  delete(solver);
+  Solution<double>::vector_to_solution(coeff_vec, &space1, &sln1);
 
   // TRILINOS PART:
 
@@ -114,13 +99,13 @@ int main(int argc, char* argv[])
   // coefficient vector.
   ZeroSolution<double> sln_tmp(&mesh);
   OGProjection<double> ogProjection;
-  ogProjection.project_global(&space, &sln_tmp, coeff_vec);
+  ogProjection.project_global(&space2, &sln_tmp, coeff_vec);
 
   // Initialize the weak formulation for Trilinos.
   CustomWeakForm wf2(JFNK, PRECOND == 1, PRECOND == 2);
 
   // Initialize DiscreteProblem.
-  DiscreteProblem<double> dp2(&wf2, &space);
+  DiscreteProblem<double> dp2(&wf2, &space2);
 
   // Initialize the NOX solver with the vector "coeff_vec".
   NewtonSolverNOX<double> nox_solver(&dp2);
@@ -146,7 +131,7 @@ int main(int argc, char* argv[])
   {
     e.printMsg();
   }
-  Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space, &sln2);
+  Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space2, &sln2);
 
   // Calculate errors.
   CustomExactSolution ex(&mesh);

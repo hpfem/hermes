@@ -276,9 +276,9 @@ namespace Hermes
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
-            result += wt[i] * ((u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i]
-          + (u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i]
-          + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
+            result += wt[i] * ((ext->fn[0]->val[i]) * v->val[i]
+          + (ext->fn[0]->dx[i]) * v->dx[i]
+          + (ext->fn[0]->dy[i]) * v->dy[i]);
           return result;
         }
 
@@ -288,8 +288,8 @@ namespace Hermes
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
-            result += wt[i] * ((u_ext[this->i]->dx[i] - ext->fn[0]->dx[i]) * v->dx[i]
-          + (u_ext[this->i]->dy[i] - ext->fn[0]->dy[i]) * v->dy[i]);
+            result += wt[i] * ((ext->fn[0]->dx[i]) * v->dx[i]
+          + (ext->fn[0]->dy[i]) * v->dy[i]);
           return result;
         }
 
@@ -299,7 +299,7 @@ namespace Hermes
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
-            result += wt[i] * (u_ext[this->i]->val[i] - ext->fn[0]->val[i]) * v->val[i];
+            result += wt[i] * (ext->fn[0]->val[i]) * v->val[i];
           return result;
         }
 
@@ -309,9 +309,9 @@ namespace Hermes
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
-            result += wt[i] * (u_ext[this->i]->curl[i] - ext->fn[0]->curl[i]) * conj(v->curl[i]);
-            result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
-              + (u_ext[this->i]->val1[i] - ext->fn[0]->val1[i]) * conj(v->val1[i]));
+            result += wt[i] * (ext->fn[0]->curl[i]) * conj(v->curl[i]);
+            result += wt[i] * ((ext->fn[0]->val0[i]) * conj(v->val0[i])
+              + (ext->fn[0]->val1[i]) * conj(v->val1[i]));
           }
 
           return result;
@@ -323,9 +323,9 @@ namespace Hermes
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
-            result += wt[i] * (u_ext[this->i]->div[i] - ext->fn[0]->div[i]) * conj(v->div[i]);
-            result += wt[i] * ((u_ext[this->i]->val0[i] - ext->fn[0]->val0[i]) * conj(v->val0[i])
-              + (u_ext[this->i]->val1[i] - ext->fn[0]->val1[i]) * conj(v->val1[i]));
+            result += wt[i] * (ext->fn[0]->div[i]) * conj(v->div[i]);
+            result += wt[i] * ((ext->fn[0]->val0[i]) * conj(v->val0[i])
+              + (ext->fn[0]->val1[i]) * conj(v->val1[i]));
           }
 
           return result;

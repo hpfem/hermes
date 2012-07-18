@@ -177,7 +177,8 @@ if(HERMES_VISUALIZATION)
     }
 
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
-    try{
+    try
+    {
       newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER);
     }
     catch(Hermes::Exceptions::Exception& e)

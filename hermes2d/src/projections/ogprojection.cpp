@@ -15,8 +15,7 @@
 
 #include "projections/ogprojection.h"
 #include "space.h"
-#include "discrete_problem.h"
-#include "newton_solver.h"
+#include "linear_solver.h"
 
 namespace Hermes
 {
@@ -35,38 +34,26 @@ namespace Hermes
       if(space == NULL)
         throw Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
 
-      // Get dimension of the space.
-      int ndof = space->get_num_dofs();
-
       // Initialize DiscreteProblem.
-      DiscreteProblem<Scalar> dp(wf, space);
+      DiscreteProblemLinear<Scalar> dp(wf, space);
       dp.setDoNotUseCache();
-      
-      // Initial coefficient vector for the Newton's method.
-      Scalar* coeff_vec = new Scalar[ndof];
-      memset(coeff_vec, 0, ndof*sizeof(Scalar));
 
-      // Initialize Newton solver.
-      NewtonSolver<Scalar> newton(&dp);
-      newton.set_verbose_output(this->get_verbose_output());
-      newton.set_verbose_callback(this->get_verbose_callback());
+      // Initialize linear solver.
+      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp);
 
       // Perform Newton iteration.
       try
       {
-        newton.solve(coeff_vec, newton_tol, newton_max_iter);
+        linear_solver.solve();
       }
       catch(Hermes::Exceptions::Exception e)
       {
         e.printMsg();
-        throw Hermes::Exceptions::Exception("Newton's iteration in projection failed.");
       }
 
-      delete [] coeff_vec;
-
       if(target_vec != NULL)
-        for (int i = 0; i < ndof; i++)
-          target_vec[i] = newton.get_sln_vector()[i];
+        for (int i = 0; i < space->get_num_dofs(); i++)
+          target_vec[i] = linear_solver.get_sln_vector()[i];
     }
 
     template<typename Scalar>

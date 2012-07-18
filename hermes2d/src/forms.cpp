@@ -263,6 +263,7 @@ namespace Hermes
     template<typename T>
     void Geom<T>::free()
     {
+      delete [] x;    delete [] y;
       delete [] tx;    delete [] ty;
       delete [] nx;    delete [] ny;
     }
@@ -372,8 +373,17 @@ namespace Hermes
       e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
       e->elem_marker = rm->get_active_element()->marker;
-      e->x = rm->get_phys_x(order);
-      e->y = rm->get_phys_y(order);
+      Quad2D* quad = rm->get_quad_2d();
+      int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
+      e->x = new double[np];
+      e->y = new double[np];
+      double* x = rm->get_phys_x(order);
+      double* y = rm->get_phys_y(order);
+      for (int i = 0; i < np; i++)
+      {
+        e->x[i] = x[i];
+        e->y[i] = y[i];
+      }
       return e;
     }
 
@@ -386,19 +396,23 @@ namespace Hermes
       e->area = rm->get_active_element()->get_area();
       e->id = rm->get_active_element()->id;
       e->isurf = isurf;
-      e->x = rm->get_phys_x(order);
-      e->y = rm->get_phys_y(order);
-
+      
       tan = rm->get_tangent(isurf, order);
-
+      double* x = rm->get_phys_x(order);
+      double* y = rm->get_phys_y(order);
+      
       Quad2D* quad = rm->get_quad_2d();
       int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
+      e->x = new double[np];
+      e->y = new double[np];
       e->tx = new double[np];
       e->ty = new double[np];
       e->nx = new double[np];
       e->ny = new double[np];
       for (int i = 0; i < np; i++)
       {
+        e->x[i] = x[i];
+        e->y[i] = y[i];
         e->tx[i] = tan[i][0];  e->ty[i] =   tan[i][1];
         e->nx[i] = tan[i][1];  e->ny[i] = - tan[i][0];
       }
