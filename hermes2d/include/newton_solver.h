@@ -59,6 +59,9 @@ namespace Hermes
       /// Sets the maximum allowed norm of the residual during the calculation.
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
 
+      /// Sets minimum damping coefficient.
+      void set_min_allowed_damping_coeff(double min_allowed_damping_coeff);
+
       /// Call NonlinearSolver::set_iterative_method() and set the method to the linear solver (if applicable).
       virtual void set_iterative_method(const char* iterative_method_name);
 
@@ -87,6 +90,10 @@ namespace Hermes
       /// By default set to 1E6.
       /// Possible to change via method set_max_allowed_residual_norm().
       static double max_allowed_residual_norm;
+
+      static double min_allowed_damping_coeff;
+
+      double currentDampingCofficient;
 
       /// Times spent in individual phases of the computation.
       double setup_time;

@@ -110,7 +110,7 @@ double CustomWeakForm::JacobianFormVol::value(int n, double *wt, Func<double> *u
 {
   double result = 0;
   for (int i = 0; i < n; i++)
-    result += wt[i] * ( -0.5 * Hermes::pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -1.5) *
+    result += wt[i] * ( -2.75 * Hermes::pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -1.5) *
                        (2.0 * u_ext[0]->dx[i] * u->dx[i] + 2.0 * u_ext[0]->dx[i] * u->dx[i])
                        * (u_ext[0]->dx[i] * v->dx[i] + u_ext[0]->dy[i] * v->dy[i]) +
                        (Hermes::pow(1.0 + sqr(u_ext[0]->dx[i]) + sqr(u_ext[0]->dy[i]), -0.5))
