@@ -24,7 +24,7 @@ namespace Hermes
   {
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<Space<Scalar> *> spaces, ButcherTable* bt,
-        bool start_from_zero_K_vector, bool residual_as_vector)
+        bool start_from_zero_K_vector, bool residual_as_vector, bool block_diagonal_jacobian)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
       stage_wf_left(spaces.size()), start_from_zero_K_vector(start_from_zero_K_vector),
       residual_as_vector(residual_as_vector), iteration(0), globalIntegrationOrderSet(false), globalIntegrationOrder(0)
@@ -53,11 +53,13 @@ namespace Hermes
 
       // Vector for the left part of the residual.
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
+
+      this->create_stage_wf(spaces.size(), block_diagonal_jacobian);
     }
 
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Space<Scalar>* space, ButcherTable* bt,
-        bool start_from_zero_K_vector, bool residual_as_vector)
+        bool start_from_zero_K_vector, bool residual_as_vector, bool block_diagonal_jacobian)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
       stage_wf_left(1), start_from_zero_K_vector(start_from_zero_K_vector),
       residual_as_vector(residual_as_vector), iteration(0), globalIntegrationOrderSet(false), globalIntegrationOrder(0)
@@ -84,6 +86,8 @@ namespace Hermes
 
       // Vector for the left part of the residual.
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(spaces)];
+
+      this->create_stage_wf(spaces.size(), block_diagonal_jacobian);
     }
 
     template<typename Scalar>
@@ -167,8 +171,7 @@ namespace Hermes
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // Creates the stage weak formulation.
-      create_stage_wf(spaces.size(), current_time, time_step,
-                      slns_time_prev, block_diagonal_jacobian);
+      update_stage_wf(current_time, time_step, slns_time_prev);
 
       // Set the correct time to the essential boundary conditions.
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
@@ -423,9 +426,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::create_stage_wf(unsigned int size, double current_time, double time_step,
-                                             Hermes::vector<Solution<Scalar>*> slns_time_prev,
-                                             bool block_diagonal_jacobian)
+    void RungeKutta<Scalar>::create_stage_wf(unsigned int size, bool block_diagonal_jacobian)
     {
       // Clear the WeakForms.
       stage_wf_left.delete_all();
@@ -484,14 +485,7 @@ namespace Hermes
             mfv_ij->i = mfv_ij->i + i * spaces.size();
             mfv_ij->j = mfv_ij->j + j * spaces.size();
 
-            mfv_ij->scaling_factor = -time_step * bt->get_A(i, j);
-
             mfv_ij->u_ext_offset = i * spaces.size();
-
-            for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-              mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
-            mfv_ij->set_current_stage_time(current_time + bt->get_C(i)*time_step);
 
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
@@ -516,14 +510,7 @@ namespace Hermes
             mfs_ij->i = mfs_ij->i + i * spaces.size();
             mfs_ij->j = mfs_ij->j + j * spaces.size();
 
-            mfs_ij->scaling_factor = -time_step * bt->get_A(i, j);
-
             mfs_ij->u_ext_offset = i * spaces.size();
-
-            for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-              mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
-            mfs_ij->set_current_stage_time(current_time + bt->get_C(i)*time_step);
 
             // Add the matrix form to the corresponding block of the
             // stage Jacobian matrix.
@@ -546,11 +533,6 @@ namespace Hermes
           vfv_i->scaling_factor = -1.0;
           vfv_i->u_ext_offset = i * spaces.size();
 
-          for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-            vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
-          vfv_i->set_current_stage_time(current_time + bt->get_C(i)*time_step);
-
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
           stage_wf_right.add_vector_form(vfv_i);
@@ -571,15 +553,85 @@ namespace Hermes
           vfs_i->scaling_factor = -1.0;
           vfs_i->u_ext_offset = i * spaces.size();
 
-          for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-            vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
-          vfs_i->set_current_stage_time(current_time + bt->get_C(i)*time_step);
-
           // Add the matrix form to the corresponding block of the
           // stage Jacobian matrix.
           stage_wf_right.add_vector_form_surf(vfs_i);
         }
+      }
+    }
+
+    template<typename Scalar>
+    void RungeKutta<Scalar>::update_stage_wf(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev)
+    {
+      // Extracting volume and surface matrix and vector forms from the
+      // 'right' weak formulation.
+      Hermes::vector<MatrixFormVol<Scalar> *> mfvol = stage_wf_right.mfvol;
+      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf = stage_wf_right.mfsurf;
+      Hermes::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right.vfvol;
+      Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right.vfsurf;
+
+      // Duplicate matrix volume forms, scale them according
+      // to the Butcher's table, enhance them with additional
+      // external solutions, and anter them as blocks to the
+      // new stage Jacobian. If block_diagonal_jacobian = true
+      // then only diagonal blocks are considered.
+      for (unsigned int m = 0; m < mfvol.size(); m++)
+      {
+        MatrixFormVol<Scalar> *mfv_ij = mfvol[m];
+        mfv_ij->scaling_factor = -time_step * bt->get_A(mfv_ij->i / spaces.size(), mfv_ij->j / spaces.size());
+
+        mfv_ij->ext.clear();
+
+        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
+          mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
+
+        mfv_ij->set_current_stage_time(current_time + bt->get_C(mfv_ij->i / spaces.size()) * time_step);
+      }
+
+      // Duplicate matrix surface forms, enhance them with
+      // additional external solutions, and anter them as
+      // blocks of the stage Jacobian.
+      for (unsigned int m = 0; m < mfsurf.size(); m++)
+      {
+        MatrixFormSurf<Scalar> *mfs_ij = mfsurf[m];
+        mfs_ij->scaling_factor = -time_step * bt->get_A(mfs_ij->i / spaces.size(), mfs_ij->j / spaces.size());
+
+        mfs_ij->ext.clear();
+
+        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
+          mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
+
+        mfs_ij->set_current_stage_time(current_time + bt->get_C(mfs_ij->i / spaces.size()) * time_step);
+      }
+
+      // Duplicate vector volume forms, enhance them with
+      // additional external solutions, and anter them as
+      // blocks of the stage residual.
+      for (unsigned int m = 0; m < vfvol.size(); m++)
+      {
+        VectorFormVol<Scalar>* vfv_i = vfvol[m];
+
+        vfv_i->ext.clear();
+
+        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
+            vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
+
+        vfv_i->set_current_stage_time(current_time + bt->get_C(vfv_i->i / spaces.size())*time_step);
+      }
+
+      // Duplicate vector surface forms, enhance them with
+      // additional external solutions, and anter them as
+      // blocks of the stage residual.
+      for (unsigned int m = 0; m < vfsurf.size(); m++)
+      {
+        VectorFormSurf<Scalar>* vfs_i = vfsurf[m];
+
+        vfs_i->ext.clear();
+
+        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
+            vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
+
+        vfs_i->set_current_stage_time(current_time + bt->get_C(vfs_i->i / spaces.size())*time_step);
       }
     }
 

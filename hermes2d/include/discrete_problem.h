@@ -68,7 +68,7 @@ namespace Hermes
       /// Constructor for one equation.
       DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
 
-      /// Non-parameterized constructor (currently used only in KellyTypeAdapt to gain access to NeighborSearch methods).
+      /// Non-parameterized constructor.
       DiscreteProblem();
 
       /// Destuctor.
@@ -110,7 +110,6 @@ namespace Hermes
       /// Sets new spaces for the instance.
       void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
       void set_space(const Space<Scalar>* space);
-
     protected:
 
       void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, Hermes::vector<MeshFunction<Scalar>*>& ext_functions, MeshFunction<Scalar>*** ext,
