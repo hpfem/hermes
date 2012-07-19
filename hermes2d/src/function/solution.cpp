@@ -576,6 +576,50 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
+      Hermes::vector<Solution<Scalar>*> solutions, bool add_dir_lift)
+    {
+      if(solution_vector == NULL) throw Exceptions::NullException(1);
+      if(spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+
+      // If start indices are not given, calculate them using the dimension of each space.
+      Hermes::vector<int> start_indices_new;
+      int counter = 0;
+      for (int i=0; i < spaces.size(); i++)
+      {
+        start_indices_new.push_back(counter);
+        counter += spaces[i]->get_num_dofs();
+      }
+      
+      for(unsigned int i = 0; i < solutions.size(); i++)
+        Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift, start_indices_new[i]);
+
+      return;
+    }
+
+    template<typename Scalar>
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
+      Hermes::vector<Solution<Scalar>*> solutions, bool add_dir_lift)
+    {
+      if(solution_vector == NULL) throw Exceptions::NullException(1);
+      if(spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
+
+      // If start indices are not given, calculate them using the dimension of each space.
+      Hermes::vector<int> start_indices_new;
+      int counter = 0;
+      for (int i=0; i < spaces.size(); i++)
+      {
+        start_indices_new.push_back(counter);
+        counter += spaces[i]->get_num_dofs();
+      }
+      
+      for(unsigned int i = 0; i < solutions.size(); i++)
+        Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift, start_indices_new[i]);
+
+      return;
+    }
+
+    template<typename Scalar>
     void Solution<Scalar>::vector_to_solution(const Vector<Scalar>* solution_vector, const Space<Scalar>* space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {

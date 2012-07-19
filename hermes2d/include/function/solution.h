@@ -154,6 +154,14 @@ namespace Hermes
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
+      static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, Hermes::vector<const Space<Scalar> *> spaces,
+          Hermes::vector<Solution<Scalar>*> solutions,
+          bool add_dir_lift = false);
+
+      static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
+          Hermes::vector<Solution<Scalar>*> solutions,
+          bool add_dir_lift = false);
+
       static void vector_to_solution(const Vector<Scalar>* vec, const Space<Scalar>* space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
