@@ -355,7 +355,7 @@ public:
     double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v, Geom<double> *e, ExtData<double> *ext) const{
       double result = 0;
       if(!Stokes) {
-        Func<double>* yvel_prev_newton = u_ext[0];
+        Func<double>* yvel_prev_newton = u_ext[1];
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * v->val[i] * yvel_prev_newton->dx[i]);
       }
@@ -365,7 +365,7 @@ public:
     Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const{
       Ord result = Ord(0);
       if(!Stokes) {
-        Func<Ord>* yvel_prev_newton = u_ext[0];
+        Func<Ord>* yvel_prev_newton = u_ext[1];
         for (int i = 0; i < n; i++)
           result += wt[i] * (u->val[i] * v->val[i] * yvel_prev_newton->dx[i]);
       }
