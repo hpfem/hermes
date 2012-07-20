@@ -217,12 +217,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::invalidate_matrix()
-    {
-      have_matrix = false;
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::set_fvm()
     {
       this->is_fvm = true;
@@ -240,7 +234,7 @@ namespace Hermes
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces.size());
 
       this->spaces = spacesToSet;
-      this->invalidate_matrix();
+      have_matrix = false;
 
       int max_size = spacesToSet[0]->get_mesh()->get_max_element_id();
       for(unsigned int i = 1; i < spacesToSet.size(); i++)

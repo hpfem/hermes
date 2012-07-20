@@ -153,7 +153,6 @@ namespace Hermes
     {
       // FIXME: this does not destroy the "interface_", and Trilinos
       // complains at closing main.cpp.
-      this->dp->invalidate_matrix();
     }
 
     template<typename Scalar>

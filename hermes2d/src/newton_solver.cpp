@@ -52,7 +52,6 @@ namespace Hermes
       delete jacobian;
       delete residual;
       delete linear_solver;
-      static_cast<DiscreteProblem<Scalar>*>(this->dp)->invalidate_matrix();
     }
 
     template<typename Scalar>

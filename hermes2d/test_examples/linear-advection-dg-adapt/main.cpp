@@ -102,22 +102,21 @@ int main(int argc, char* args[])
     Space<double>* ref_space = Space<double>::construct_refined_space(&space);
 
     // Initialize the FE problem.
-    DiscreteProblem<double>* dp = new DiscreteProblem<double>(&wf, ref_space);
+    DiscreteProblemLinear<double> dp(&wf, ref_space);
 
-    // Set up the solver, matrix, and rhs according to the solver selection.
-    SparseMatrix<double>* matrix = create_matrix<double>();
-    Vector<double>* rhs = create_vector<double>();
-    LinearMatrixSolver<double>* solver = create_linear_solver<double>(matrix, rhs);
-
-    // Assemble the linear problem.
-    dp->assemble(matrix, rhs);
+    // Initialize linear solver.
+    Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
 
     // Solve the linear system. If successful, obtain the solution.
-    if(solver->solve())
-      Solution<double>::vector_to_solution(solver->get_sln_vector(), ref_space, &ref_sln);
-    else
-      throw Hermes::Exceptions::Exception("Matrix solver failed.\n");
-
+    try
+    {
+      linear_solver.solve();
+      Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, &ref_sln);
+    }
+    catch(std::exception& e)
+    {
+      std::cout << e.what();
+    }
     // Project the fine mesh solution onto the coarse mesh.
     OGProjection<double> ogProjection;
     ogProjection.project_global(&space, &ref_sln, &sln, HERMES_L2_NORM);
@@ -149,14 +148,10 @@ int main(int argc, char* args[])
     }
 
     // Clean up.
-    delete solver;
-    delete matrix;
-    delete rhs;
     delete adaptivity;
     if(done == false)
       delete ref_space->get_mesh();
     delete ref_space;
-    delete dp;
 
     as++;
   }

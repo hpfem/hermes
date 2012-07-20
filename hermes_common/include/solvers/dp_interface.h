@@ -72,7 +72,6 @@ namespace Hermes
       virtual void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
         bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
 
-      virtual void invalidate_matrix() = 0;
     protected:
       DiscreteProblemInterface();
       bool globalIntegrationOrderSet;

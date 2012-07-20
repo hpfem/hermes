@@ -40,12 +40,12 @@ namespace Hermes
       /// Destuctor.
       virtual ~DiscreteProblemLinear();
 
+    protected:
       /// Assembling.
       /// Light version, linear problems.
       virtual void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
         Table* block_weights = NULL);
 
-    protected:
       /// Methods different to those of the parent class.
       /// Matrix forms.
       virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
@@ -57,6 +57,7 @@ namespace Hermes
       template<typename T> friend class NewtonSolver;
       template<typename T> friend class PicardSolver;
       template<typename T> friend class RungeKutta;
+      template<typename T> friend class LinearSolver;
     };
   }
 }
