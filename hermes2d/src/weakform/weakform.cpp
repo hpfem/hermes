@@ -344,6 +344,18 @@ namespace Hermes
       return current_time;
     }
 
+    template<typename Scalar>
+    void WeakForm<Scalar>::set_current_time_step(double time_step)
+    {
+      current_time_step = time_step;
+    }
+
+    template<typename Scalar>
+    double WeakForm<Scalar>::get_current_time_step() const
+    {
+      return current_time_step;
+    }
+
     template class HERMES_API WeakForm<double>;
     template class HERMES_API WeakForm<std::complex<double> >;
     template class HERMES_API Form<double>;

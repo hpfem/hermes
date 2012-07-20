@@ -46,6 +46,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void PicardSolver<Scalar>::setTime(double time)
+    {
+      Hermes::vector<Space<Scalar>*> spaces;
+      for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
+        spaces.push_back(const_cast<Space<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(i)));
+
+      Space<Scalar>::update_essential_bc_values(spaces, time);
+      const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time(time);
+    }
+      
+    template<typename Scalar>
+    void PicardSolver<Scalar>::setTimeStep(double timeStep)
+    {
+      const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time_step(timeStep);
+    }
+
+    template<typename Scalar>
     PicardSolver<Scalar>::~PicardSolver()
     {
     }

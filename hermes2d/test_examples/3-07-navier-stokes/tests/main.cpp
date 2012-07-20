@@ -114,6 +114,9 @@ int main(int argc, char* argv[])
     Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
     coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
+  newton.set_newton_max_iter(NEWTON_MAX_ITER);
+  newton.set_newton_tol(NEWTON_TOL);
+
   // Time-stepping loop:
   int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
@@ -128,8 +131,9 @@ int main(int argc, char* argv[])
 
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     newton.set_verbose_output(true);
-    try{
-      newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER);
+    try
+    {
+      newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)
     {

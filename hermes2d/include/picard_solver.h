@@ -46,6 +46,10 @@ namespace Hermes
       /// Solve with default tolerances.
       virtual bool solve();
 
+      /// set time information for time-dependent problems.
+      virtual void setTime(double time);
+      virtual void setTimeStep(double timeStep);
+
       /// Solve with user-defined tolerances.
       /// num_last_vectors_used ... number of last vectors used for Anderson acceleration.
       bool solve(double tol, int max_iter, int num_last_vectors_used = 3, double anderson_beta = 1.0);

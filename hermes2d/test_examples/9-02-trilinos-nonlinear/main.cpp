@@ -146,7 +146,8 @@ int main(int argc, char* argv[])
 
   // Solve the nonlinear problem using NOX.
   Solution<double> sln2;
-  try{
+  try
+  {
     nox_solver.solve(coeff_vec);
   }
   catch(Hermes::Exceptions::Exception& e)

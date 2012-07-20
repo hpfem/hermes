@@ -48,13 +48,11 @@ namespace Hermes
       ///                                 since in the FE space not all components in the residual vector have the same weight.
       ///                                 On the other hand, this is slower as it requires global norm calculation, and thus
       ///                                 numerical integration over the entire domain. Therefore this option is off by default.
-      void solve(Scalar* coeff_vec = NULL, double newton_tol = 1e-8,
-                 int newton_max_iter = 100, bool residual_as_function = false);
+      void solve(Scalar* coeff_vec = NULL);
 
       /// A solve() method where the jacobian is reused.
       /// Version with user-defined tolerances.
-      void solve_keep_jacobian(Scalar* coeff_vec = NULL, double newton_tol = 1e-8,
-                               int newton_max_iter = 100, bool residual_as_function = false);
+      void solve_keep_jacobian(Scalar* coeff_vec = NULL);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
@@ -73,6 +71,14 @@ namespace Hermes
       double get_assemble_time() const { return assemble_time; }
       double get_solve_time() const { return solve_time; }
 
+      void set_newton_tol(double newton_tol);
+      void set_newton_max_iter(int newton_max_iter);
+      void set_residual_as_function();
+
+      /// set time information for time-dependent problems.
+      virtual void setTime(double time);
+      virtual void setTimeStep(double timeStep);
+
     protected:
       /// Jacobian.
       SparseMatrix<Scalar>* jacobian;
@@ -85,6 +91,10 @@ namespace Hermes
 
       /// Used by method solve_keep_jacobian().
       SparseMatrix<Scalar>* kept_jacobian;
+
+      double newton_tol;
+      int newton_max_iter;
+      bool residual_as_function;
 
       /// Maximum allowed residual norm. If this number is exceeded, the methods solve() return 'false'.
       /// By default set to 1E6.

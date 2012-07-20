@@ -46,7 +46,7 @@ namespace Hermes
     void Exception::printMsg() const
     {
       if(message)
-        printf("%s\n", message);
+        printf("Exception: %s\n", message);
       else
         printf("Default exception\n");
       if(Hermes::HermesCommonApi.getParamValue(Hermes::exceptionsPrintCallstack) == 1)

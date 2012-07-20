@@ -149,6 +149,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::setTime(double time)
+    {
+    }
+      
+    template<typename Scalar>
+    void NewtonSolverNOX<Scalar>::setTimeStep(double timeStep)
+    {
+    }
+
+    template<typename Scalar>
     NewtonSolverNOX<Scalar>::~NewtonSolverNOX()
     {
       // FIXME: this does not destroy the "interface_", and Trilinos

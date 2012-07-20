@@ -126,7 +126,6 @@ int main(int argc, char* argv[])
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
-  bool freeze_jacobian = false;
   runge_kutta.set_verbose_output(true);
   runge_kutta.setGlobalIntegrationOrder(10);
 
@@ -139,10 +138,10 @@ int main(int argc, char* argv[])
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     try
     {
-      runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev,
-                                  sln_time_new, freeze_jacobian, true);
+      runge_kutta.rk_time_step_newton(current_time, time_step, sln_time_prev, sln_time_new);
     }
-    catch(Exceptions::Exception& e){
+    catch(Exceptions::Exception& e)
+    {
       e.printMsg();
     }
 

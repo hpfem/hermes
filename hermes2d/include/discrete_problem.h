@@ -83,6 +83,23 @@ namespace Hermes
 
       /// If the cache should not be used for any reason.
       inline void setDoNotUseCache() { this->doNotUseCache = true; }
+
+      // GET functions.
+      /// Get pointer to n-th space.
+      const Space<Scalar>* get_space(int n);
+
+      /// Get the weak forms.
+      const WeakForm<Scalar>* get_weak_formulation();
+
+      /// Get all spaces as a Hermes::vector.
+      Hermes::vector<const Space<Scalar>*> get_spaces();
+
+       /// Get the number of unknowns.
+      int get_num_dofs();
+
+      /// Get info about presence of a matrix.
+      bool is_matrix_free();
+
     protected:
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the
@@ -128,22 +145,6 @@ namespace Hermes
 
       // Return scaling coefficient.
       double block_scaling_coeff(MatrixForm<Scalar>* form);
-
-      /// Get the number of unknowns.
-      int get_num_dofs();
-
-      /// Get info about presence of a matrix.
-      bool is_matrix_free();
-
-      // GET functions.
-      /// Get pointer to n-th space.
-      const Space<Scalar>* get_space(int n);
-
-      /// Get the weak forms.
-      const WeakForm<Scalar>* get_weak_formulation();
-
-      /// Get all spaces as a Hermes::vector.
-      Hermes::vector<const Space<Scalar>*> get_spaces();
 
       /// Preassembling.
       /// Precalculate matrix sparse structure.

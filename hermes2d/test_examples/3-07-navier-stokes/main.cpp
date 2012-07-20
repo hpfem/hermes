@@ -134,8 +134,7 @@ int main(int argc, char* argv[])
   ZeroSolution<double> xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh);
 
   // Initialize weak formulation.
-  WeakForm<double>* wf;
-  wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+  WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
   // Initialize the FE problem.
   DiscreteProblem<double> dp(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
@@ -162,6 +161,9 @@ if(HERMES_VISUALIZATION)
     Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
     coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
+  newton.set_newton_max_iter(NEWTON_MAX_ITER);
+  newton.set_newton_tol(NEWTON_TOL);
+
   // Time-stepping loop:
   char title[100];
   int num_time_steps = T_FINAL / TAU;
@@ -172,14 +174,12 @@ if(HERMES_VISUALIZATION)
 
     // Update time-dependent essential BCs.
     if(current_time <= STARTUP_TIME)
-    {
-      Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
-    }
+      newton.setTime(current_time);
 
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
     {
-      newton.solve(coeff_vec, NEWTON_TOL, NEWTON_MAX_ITER);
+      newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)
     {

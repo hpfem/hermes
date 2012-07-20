@@ -101,8 +101,10 @@ namespace Hermes
 
       /// For time-dependent right-hand side functions.
       void set_current_time(double time);
+      void set_current_time_step(double time_step);
 
       virtual double get_current_time() const;
+      virtual double get_current_time_step() const;
 
       Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol();
       Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf();
@@ -119,6 +121,7 @@ namespace Hermes
       bool** get_blocks(bool force_diagonal_blocks) const;
 
       double current_time;
+      double current_time_step;
 
       unsigned int neq;
 

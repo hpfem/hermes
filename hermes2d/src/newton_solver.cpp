@@ -30,9 +30,44 @@ namespace Hermes
     double NewtonSolver<Scalar>::min_allowed_damping_coeff = 1E-2;
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), currentDampingCofficient(1.0)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0)
     {
       init_linear_solver();
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_newton_tol(double newton_tol)
+    {
+      this->newton_tol = newton_tol;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_newton_max_iter(int newton_max_iter)
+    {
+      this->newton_max_iter = newton_max_iter;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_residual_as_function()
+    {
+      this->residual_as_function = true;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::setTime(double time)
+    {
+      Hermes::vector<Space<Scalar>*> spaces;
+      for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
+        spaces.push_back(const_cast<Space<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(i)));
+
+      Space<Scalar>::update_essential_bc_values(spaces, time);
+      const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time(time);
+    }
+      
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::setTimeStep(double timeStep)
+    {
+      const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time_step(timeStep);
     }
 
     template<typename Scalar>
@@ -55,7 +90,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve(Scalar* coeff_vec, double newton_tol, int newton_max_iter, bool residual_as_function)
+    void NewtonSolver<Scalar>::solve(Scalar* coeff_vec)
     {
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
@@ -84,9 +119,6 @@ namespace Hermes
       double residual_norm;
       double last_residual_norm;
       int it = 1;
-
-      this->tick();
-      setup_time += this->last();
 
       while (true)
       {
@@ -176,9 +208,6 @@ namespace Hermes
           for (int i = 0; i < ndof; i++)
             this->sln_vector[i] = coeff_vec[i];
 
-          this->tick();
-          solve_time += this->last();
-
           if(delete_coeff_vec)
           {
             delete [] coeff_vec;
@@ -217,17 +246,24 @@ namespace Hermes
         // Increase the number of iterations and test if we are still under the limit.
         if(it++ >= newton_max_iter)
         {
+          // We want to return the solution in a different structure.
+          this->sln_vector = new Scalar[ndof];
+          for (int i = 0; i < ndof; i++)
+            this->sln_vector[i] = coeff_vec[i];
+
+          if(delete_coeff_vec)
+          {
+            delete [] coeff_vec;
+            coeff_vec = NULL;
+          }
+
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
-
-        this->tick();
-        solve_time += this->last();
       }
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec, double newton_tol,
-      int newton_max_iter, bool residual_as_function)
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec)
     {
       // Obtain the number of degrees of freedom.
       int ndof = this->dp->get_num_dofs();
@@ -248,6 +284,11 @@ namespace Hermes
       {
         // Assemble the residual vector.
         this->dp->assemble(coeff_vec, residual);
+
+        Element* e;
+        for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
+          for_all_active_elements(e, static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces()[i]->get_mesh())
+            static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces()[i]->edata[e->id].changed_in_last_adaptation = false;
 
         // Measure the residual norm.
         if(residual_as_function)

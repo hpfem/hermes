@@ -93,6 +93,10 @@ namespace Hermes
 
       virtual ~NewtonSolverNOX();
 
+      /// set time information for time-dependent problems.
+      virtual void setTime(double time);
+      virtual void setTimeStep(double timeStep);
+
       virtual void solve(Scalar* coeff_vec);
 
       virtual int get_num_iters();
