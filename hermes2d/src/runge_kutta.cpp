@@ -90,6 +90,27 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void RungeKutta<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_spaces(spaces);
+      this->spaces = spaces;
+    }
+
+    template<typename Scalar>
+    void RungeKutta<Scalar>::set_space(const Space<Scalar>* space)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_space(space);
+      this->spaces.clear();
+      this->spaces.push_back(space);
+    }
+    
+    template<typename Scalar>
+    Hermes::vector<const Space<Scalar>*> RungeKutta<Scalar>::get_spaces() const
+    {
+      return this->spaces;
+    }
+
+    template<typename Scalar>
     void RungeKutta<Scalar>::init()
     {
       this->create_stage_wf(spaces.size(), block_diagonal_jacobian);

@@ -126,6 +126,7 @@ project(hermes2d)
     src/function/solution_h2d_xml.cpp
 
     src/api2d.cpp
+	src/mixins2d.cpp
     
     src/mesh/refmap.cpp
     src/mesh/curved.cpp
@@ -235,6 +236,7 @@ project(hermes2d)
     include/integrals/hcurl.h
     
     include/api2d.h
+	include/mixins2d.h
     
     include/mesh/refmap.h
     include/mesh/curved.h

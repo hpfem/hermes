@@ -196,20 +196,20 @@ namespace Hermes
     };
   
     /// Class that allows overriding integration order in its discrete problems
-    class HERMES_API integrableWithGlobalOrder
+    class HERMES_API IntegrableWithGlobalOrder
     {
     public:
-      integrableWithGlobalOrder();
+      IntegrableWithGlobalOrder();
       void setGlobalIntegrationOrder(unsigned int order);
       bool globalIntegrationOrderSet;
       unsigned int globalIntegrationOrder;
     };
 
     /// Class that allows overriding integration order in its discrete problems
-    class HERMES_API settableComputationTime
+    class HERMES_API SettableComputationTime
     {
     public:
-      settableComputationTime();
+      SettableComputationTime();
       /// set time information for time-dependent problems.
       virtual void setTime(double time);
       virtual void setTimeStep(double timeStep);

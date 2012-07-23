@@ -20,6 +20,7 @@
 #include "weakform/weakform.h"
 #include "function/filter.h"
 #include "exceptions.h"
+#include "mixins2d.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -73,7 +74,7 @@ namespace Hermes
 
     /// @ingroup userSolvingAPI
     template<typename Scalar>
-    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable, public Hermes::Mixins::integrableWithGlobalOrder, public Hermes::Mixins::settableComputationTime
+    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
     {
     public:
       /// Constructor.
@@ -118,6 +119,10 @@ namespace Hermes
       void set_newton_max_iter(int newton_max_iter);
       void set_newton_damping_coeff(double newton_damping_coeff);
       void set_newton_max_allowed_residual_norm(double newton_max_allowed_residual_norm);
+
+      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
+      virtual void set_space(const Space<Scalar>* space);
+      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
 
       /**
        \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);

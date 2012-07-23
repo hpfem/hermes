@@ -33,14 +33,14 @@ namespace Hermes
   {
     /// \brief Minimalistic DiscreteProblem interface required by NoxProblemInterface.
     template<typename Scalar>
-    class DiscreteProblemInterface : public Hermes::Mixins::integrableWithGlobalOrder, public Hermes::Mixins::settableComputationTime
+    class DiscreteProblemInterface : public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime
     {
     public:
       /// Get the number of unknowns.
-      virtual int get_num_dofs() = 0;
+      virtual int get_num_dofs() const = 0;
 
       /// Get info about presence of a matrix.
-      virtual bool is_matrix_free() = 0;
+      virtual bool is_matrix_free() const = 0;
 
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the

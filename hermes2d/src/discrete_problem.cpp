@@ -178,40 +178,31 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblem<Scalar>::get_num_dofs()
+    int DiscreteProblem<Scalar>::get_num_dofs() const
     {
-      ndof = 0;
-      for (unsigned int i = 0; i < wf->get_neq(); i++)
-        ndof += spaces[i]->get_num_dofs();
-      return ndof;
+      return this->ndof;
     }
 
     template<typename Scalar>
-    const Space<Scalar>* DiscreteProblem<Scalar>::get_space(int n)
-    {
-      return this->spaces[n];
-    }
-
-    template<typename Scalar>
-    const WeakForm<Scalar>* DiscreteProblem<Scalar>::get_weak_formulation()
-    {
-      return this->wf;
-    }
-
-    template<typename Scalar>
-    Hermes::vector<const Space<Scalar>*> DiscreteProblem<Scalar>::get_spaces()
+    Hermes::vector<const Space<Scalar>*> DiscreteProblem<Scalar>::get_spaces() const
     {
       return this->spaces;
     }
 
     template<typename Scalar>
-    bool DiscreteProblem<Scalar>::is_matrix_free()
+    const WeakForm<Scalar>* DiscreteProblem<Scalar>::get_weak_formulation() const
+    {
+      return this->wf;
+    }
+
+    template<typename Scalar>
+    bool DiscreteProblem<Scalar>::is_matrix_free() const
     {
       return wf->is_matrix_free();
     }
 
     template<typename Scalar>
-    bool DiscreteProblem<Scalar>::is_up_to_date()
+    bool DiscreteProblem<Scalar>::is_up_to_date() const
     {
       // check if we can reuse the matrix structure
       bool up_to_date = true;
@@ -289,7 +280,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double DiscreteProblem<Scalar>::block_scaling_coeff(MatrixForm<Scalar>* form)
+    double DiscreteProblem<Scalar>::block_scaling_coeff(MatrixForm<Scalar>* form) const
     {
       if(current_block_weights != NULL)
         return current_block_weights->get_A(form->i, form->j);

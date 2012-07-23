@@ -1,5 +1,5 @@
-#ifndef NEIGHBOR_H_
-#define NEIGHBOR_H_
+#ifndef __H2D_NEIGHBOR_H
+#define __H2D_NEIGHBOR_H
 
 #include "mesh/mesh.h"
 #include "quadrature/quad.h"

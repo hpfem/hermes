@@ -99,11 +99,8 @@ int main(int argc, char* argv[])
   // Initialize weak formulation.
   WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
 
-  // Initialize the FE problem.
-  DiscreteProblem<double> dp(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
-
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
+  Hermes::Hermes2D::NewtonSolver<double> newton(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -125,12 +122,9 @@ int main(int argc, char* argv[])
 
     // Update time-dependent essential BCs.
     if(current_time <= STARTUP_TIME)
-    {
-      Space<double>::update_essential_bc_values(Hermes::vector<Space<double> *>(&xvel_space, &yvel_space, &p_space), current_time);
-    }
+      newton.setTime(current_time);
 
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
-    newton.set_verbose_output(true);
     try
     {
       newton.solve(coeff_vec);

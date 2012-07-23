@@ -25,6 +25,7 @@
 #include "neighbor.h"
 #include "refinement_selectors/selector.h"
 #include "exceptions.h"
+#include "mixins2d.h"
 
 namespace Hermes
 {
@@ -59,7 +60,7 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>, public Hermes::Mixins::TimeMeasurable
+    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>, public Hermes::Mixins::TimeMeasurable, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
     {
     public:
       /// Constructor for multiple components / equations.
@@ -72,8 +73,8 @@ namespace Hermes
       void set_fvm();
 
       /// Sets new spaces for the instance.
-      void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-      void set_space(const Space<Scalar>* space);
+      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
+      virtual void set_space(const Space<Scalar>* space);
       
       /// Non-parameterized constructor.
       DiscreteProblem();
@@ -85,20 +86,17 @@ namespace Hermes
       inline void setDoNotUseCache() { this->doNotUseCache = true; }
 
       // GET functions.
-      /// Get pointer to n-th space.
-      const Space<Scalar>* get_space(int n);
-
       /// Get the weak forms.
-      const WeakForm<Scalar>* get_weak_formulation();
+      const WeakForm<Scalar>* get_weak_formulation() const;
 
       /// Get all spaces as a Hermes::vector.
-      Hermes::vector<const Space<Scalar>*> get_spaces();
+      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
 
        /// Get the number of unknowns.
-      int get_num_dofs();
+      int get_num_dofs() const;
 
       /// Get info about presence of a matrix.
-      bool is_matrix_free();
+      bool is_matrix_free() const;
       
       /// set time information for time-dependent problems.
       virtual void setTime(double time);
@@ -148,7 +146,7 @@ namespace Hermes
       bool form_to_be_assembled(VectorFormSurf<Scalar>* form, Traverse::State* current_state);
 
       // Return scaling coefficient.
-      double block_scaling_coeff(MatrixForm<Scalar>* form);
+      double block_scaling_coeff(MatrixForm<Scalar>* form) const;
 
       /// Preassembling.
       /// Precalculate matrix sparse structure.
@@ -215,7 +213,7 @@ namespace Hermes
       void init();
 
       /// Matrix structure as well as spaces and weak formulation is up-to-date.
-      bool is_up_to_date();
+      bool is_up_to_date() const;
 
       /// Weak formulation.
       const WeakForm<Scalar>* wf;

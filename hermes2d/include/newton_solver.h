@@ -33,10 +33,12 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for Newton's method.
     template<typename Scalar>
-    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>
+    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
     {
     public:
       NewtonSolver(DiscreteProblem<Scalar>* dp);
+      NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
+      NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
       void init_linear_solver();
 
       ~NewtonSolver();
@@ -79,6 +81,10 @@ namespace Hermes
       virtual void setTime(double time);
       virtual void setTimeStep(double timeStep);
 
+      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
+      virtual void set_space(const Space<Scalar>* space);
+      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+
     protected:
       /// Jacobian.
       SparseMatrix<Scalar>* jacobian;
@@ -109,6 +115,9 @@ namespace Hermes
       double setup_time;
       double assemble_time;
       double solve_time;
+      
+      /// This instance owns its DP.
+      const bool own_dp;
     };
   }
 }

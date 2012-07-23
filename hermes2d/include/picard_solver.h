@@ -34,11 +34,15 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for the Picard's method.
     template<typename Scalar>
-    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>
+    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
     {
     public:
       PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter);
       PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
+      PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Solution<Scalar>* sln_prev_iter);
+      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Solution<Scalar>* sln_prev_iter);
+      PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
+      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
       ~PicardSolver();
       /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
       void set_verbose_output_linear_solver(bool verbose_output_to_set);
@@ -50,12 +54,19 @@ namespace Hermes
       virtual void setTime(double time);
       virtual void setTimeStep(double timeStep);
 
+      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
+      virtual void set_space(const Space<Scalar>* space);
+      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+    
       /// Solve with user-defined tolerances.
       /// num_last_vectors_used ... number of last vectors used for Anderson acceleration.
       bool solve(double tol, int max_iter, int num_last_vectors_used = 3, double anderson_beta = 1.0);
     private:
       Hermes::vector<Solution<Scalar>* > slns_prev_iter;
       bool verbose_output_linear_solver;
+
+      /// This instance owns its DP.
+      const bool own_dp;
     };
   }
 }

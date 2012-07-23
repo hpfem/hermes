@@ -61,15 +61,12 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
 
-  // Initialize the FE problem.
-  Hermes::Hermes2D::DiscreteProblem<double> dp(&wf, &space);
-
   // Initial coefficient vector for the Newton's method.
   double* coeff_vec = new double[ndof];
   memset(coeff_vec, 0, ndof*sizeof(double));
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&dp);
+  Hermes::Hermes2D::NewtonSolver<double> newton(&wf, &space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;

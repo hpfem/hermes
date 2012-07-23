@@ -138,6 +138,7 @@ int main(int argc, char* argv[])
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     try
     {
+      runge_kutta.set_space(&space);
       runge_kutta.setTime(current_time);
       runge_kutta.setTimeStep(time_step);
       runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);

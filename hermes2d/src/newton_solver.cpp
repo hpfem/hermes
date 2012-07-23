@@ -30,7 +30,19 @@ namespace Hermes
     double NewtonSolver<Scalar>::min_allowed_damping_coeff = 1E-2;
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0), own_dp(false)
+    {
+      init_linear_solver();
+    }
+
+    template<typename Scalar>
+    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0), own_dp(true)
+    {
+      init_linear_solver();
+    }
+
+    template<typename Scalar>
+    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0), own_dp(true)
     {
       init_linear_solver();
     }
@@ -68,6 +80,24 @@ namespace Hermes
     void NewtonSolver<Scalar>::setTimeStep(double timeStep)
     {
       const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time_step(timeStep);
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_space(const Space<Scalar>* space)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
+    }
+    
+    template<typename Scalar>
+    Hermes::vector<const Space<Scalar>*> NewtonSolver<Scalar>::get_spaces() const
+    {
+      return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }
 
     template<typename Scalar>

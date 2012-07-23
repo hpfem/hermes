@@ -25,7 +25,7 @@ namespace Hermes
   {
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter)
-        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false)
+        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
       if(dp->get_spaces().size() != 1)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
@@ -34,10 +34,54 @@ namespace Hermes
 
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
-        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false)
+        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
       int n = slns_prev_iter.size();
       if(dp->get_spaces().size() != n)
+        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
+      for (int i = 0; i<n; i++)
+      {
+        this->slns_prev_iter.push_back(slns_prev_iter[i]);
+      }
+    }
+
+    template<typename Scalar>
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Solution<Scalar>* sln_prev_iter)
+        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
+    {
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != 1)
+        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
+      this->slns_prev_iter.push_back(sln_prev_iter);
+    }
+
+    template<typename Scalar>
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
+        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
+    {
+      int n = slns_prev_iter.size();
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != n)
+        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
+      for (int i = 0; i<n; i++)
+      {
+        this->slns_prev_iter.push_back(slns_prev_iter[i]);
+      }
+    }
+
+    template<typename Scalar>
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Solution<Scalar>* sln_prev_iter)
+        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
+    {
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != 1)
+        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
+      this->slns_prev_iter.push_back(sln_prev_iter);
+    }
+
+    template<typename Scalar>
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
+        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
+    {
+      int n = slns_prev_iter.size();
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != n)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
       for (int i = 0; i<n; i++)
       {
@@ -65,6 +109,24 @@ namespace Hermes
     template<typename Scalar>
     PicardSolver<Scalar>::~PicardSolver()
     {
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::set_space(const Space<Scalar>* space)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
+    }
+    
+    template<typename Scalar>
+    Hermes::vector<const Space<Scalar>*> PicardSolver<Scalar>::get_spaces() const
+    {
+      return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }
 
     template<typename Scalar>

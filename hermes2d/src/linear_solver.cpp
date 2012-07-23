@@ -28,7 +28,25 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL)
+    LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL), own_dp(false)
+    {
+      this->init();
+    }
+
+    template<typename Scalar>
+    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : dp(new DiscreteProblemLinear<Scalar>(wf, space)), sln_vector(NULL), own_dp(true)
+    {
+      this->init();
+    }
+
+    template<typename Scalar>
+    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces) : dp(new DiscreteProblemLinear<Scalar>(wf, spaces)), sln_vector(NULL), own_dp(true)
+    {
+      this->init();
+    }
+
+    template<typename Scalar>
+    void LinearSolver<Scalar>::init()
     {
       this->jacobian = create_matrix<Scalar>();
       this->residual = create_vector<Scalar>();
@@ -53,11 +71,31 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void LinearSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
+    }
+
+    template<typename Scalar>
+    void LinearSolver<Scalar>::set_space(const Space<Scalar>* space)
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
+    }
+    
+    template<typename Scalar>
+    Hermes::vector<const Space<Scalar>*> LinearSolver<Scalar>::get_spaces() const
+    {
+      return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+    }
+    
+    template<typename Scalar>
     LinearSolver<Scalar>::~LinearSolver()
     {
       delete jacobian;
       delete residual;
       delete matrix_solver;
+      if(own_dp)
+        delete this->dp;
     }
 
     template<typename Scalar>

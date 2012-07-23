@@ -41,16 +41,12 @@ int main(int argc, char* argv[])
 
   // Create an H1 space with default shapeset.
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
-
-  // Initialize the FE problem.
-  Hermes::Hermes2D::DiscreteProblemLinear<double> dp(&wf, &space);
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
 
   // Solve the linear problem.
   linear_solver.solve();
@@ -59,7 +55,7 @@ int main(int argc, char* argv[])
   // current shapeset. If you change the shapeset,
   // you need to correct these numbers.
   double sum = 0;
-  for (int i = 0; i < ndof; i++)
+  for (int i = 0; i < space.get_num_dofs(); i++)
     sum += linear_solver.get_sln_vector()[i];
   printf("coefficient sum = %f\n", sum);
 

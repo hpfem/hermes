@@ -33,7 +33,7 @@ namespace Hermes
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class NonlinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::integrableWithGlobalOrder, public Hermes::Mixins::settableComputationTime
+    class NonlinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime
     {
     public:
       NonlinearSolver(DiscreteProblemInterface<Scalar>* dp);

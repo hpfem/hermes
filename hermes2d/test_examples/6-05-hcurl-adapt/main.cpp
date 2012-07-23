@@ -122,23 +122,24 @@ int main(int argc, char* argv[])
     graph_dof_exact, graph_cpu_exact;
 
   DiscreteProblem<std::complex<double> > dp(&wf, &space);
-  
+
+  // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
+  Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
   {
     // Construct globally refined reference mesh and setup reference space.
     Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-    dp.set_space(ref_space);
+    newton.set_space(ref_space);
     int ndof_ref = ref_space->get_num_dofs();
 
     // Initial coefficient vector for the Newton's method.
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
 
-    // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-    Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
-
+    
     try
     {
       newton.solve(coeff_vec);
