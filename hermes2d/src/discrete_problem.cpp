@@ -86,7 +86,7 @@ namespace Hermes
       RungeKutta = false;
       RK_original_spaces_count = 0;
 
-      ndof = Space<Scalar>::get_num_dofs(spaces);
+      this->ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // Sanity checks.
       if(wf == NULL)
@@ -276,6 +276,8 @@ namespace Hermes
 
         this->cache_size = max_size;
       }
+
+      this->ndof = Space<Scalar>::get_num_dofs(this->spaces);
     }
     
     template<typename Scalar>
@@ -493,7 +495,7 @@ namespace Hermes
           // If we use e.g. a new NewtonSolver (providing a new Vector) for this instance of DiscreteProblem that already assembled a system,
           // we end up with everything up_to_date, but unallocated Vector.
           if(current_rhs->length() == 0)
-            current_rhs->alloc(ndof);
+            current_rhs->alloc(this->ndof);
           else
             current_rhs->zero();
         }
@@ -525,7 +527,7 @@ namespace Hermes
         // Spaces have changed: create the matrix from scratch.
         have_matrix = true;
         current_mat->free();
-        current_mat->prealloc(ndof);
+        current_mat->prealloc(this->ndof);
 
         AsmList<Scalar>* al = new AsmList<Scalar>[wf->get_neq()];
         const Mesh** meshes = new const Mesh*[wf->get_neq()];
@@ -669,7 +671,7 @@ namespace Hermes
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
       if(current_rhs != NULL)
-        current_rhs->alloc(ndof);
+        current_rhs->alloc(this->ndof);
 
       // save space seq numbers and weakform seq number, so we can detect their changes
       for (unsigned int i = 0; i < wf->get_neq(); i++)

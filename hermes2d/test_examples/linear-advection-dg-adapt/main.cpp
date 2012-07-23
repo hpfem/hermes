@@ -94,6 +94,12 @@ int main(int argc, char* args[])
   ScalarView view1("Solution", new WinGeom(900, 0, 450, 350));
   view1.fix_scale_width(60);
 
+  // Initialize the FE problem.
+  DiscreteProblemLinear<double> dp(&wf, &space);
+
+  // Initialize linear solver.
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
+
   int as = 1; bool done = false;
   do
   {
@@ -101,11 +107,7 @@ int main(int argc, char* args[])
     // and setup reference space.
     Space<double>* ref_space = Space<double>::construct_refined_space(&space);
 
-    // Initialize the FE problem.
-    DiscreteProblemLinear<double> dp(&wf, ref_space);
-
-    // Initialize linear solver.
-    Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
+    dp.set_space(ref_space);
 
     // Solve the linear system. If successful, obtain the solution.
     try
