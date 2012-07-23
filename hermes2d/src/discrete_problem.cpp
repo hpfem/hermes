@@ -2264,8 +2264,8 @@ namespace Hermes
         {
           NeighborSearch<Scalar>* ns = neighbor_searches.get(i);
           ns->active_segment = neighbor_i;
-          ns->neighb_el = neighbor_searches.get(i)->neighbors[neighbor_i];
-          ns->neighbor_edge = neighbor_searches.get(i)->neighbor_edges[neighbor_i];
+          ns->neighb_el = ns->neighbors[neighbor_i];
+          ns->neighbor_edge = ns->neighbor_edges[neighbor_i];
         }
       }
 

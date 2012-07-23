@@ -769,7 +769,7 @@ namespace Hermes
 
                 if(neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
-                assert(!central_transformations.present(n_neighbors));
+                //assert(!central_transformations.present(n_neighbors));
 
                 central_transformations.add(new Transformations, n_neighbors);
                 Transformations *tr = central_transformations.get(n_neighbors);
