@@ -33,7 +33,7 @@ namespace Hermes
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class NonlinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
+    class NonlinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::integrableWithGlobalOrder, public Hermes::Mixins::settableComputationTime
     {
     public:
       NonlinearSolver(DiscreteProblemInterface<Scalar>* dp);
@@ -55,11 +55,7 @@ namespace Hermes
       /// the other solvers).
       /// \param[in] preconditioner_name See the attribute preconditioner.
       void set_preconditioner(const char* preconditioner_name);
-
-      /// set time information for time-dependent problems.
-      virtual void setTime(double time);
-      virtual void setTimeStep(double timeStep);
-
+    
     protected:
       DiscreteProblemInterface<Scalar>* dp; ///< FE problem being solved (not NULL in case of using
       ///< NonlinearProblem(DiscreteProblemInterface *) ctor.

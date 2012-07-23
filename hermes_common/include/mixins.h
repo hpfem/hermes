@@ -194,6 +194,28 @@ namespace Hermes
       double period_in_seconds(const SysTime& begin, const SysTime& end) const; ///< Calculates distance between times (in platform specific units) and returns it in seconds.
       std::string to_string(const double time) const; ///< Converts time from seconds to human readable form.
     };
+  
+    /// Class that allows overriding integration order in its discrete problems
+    class HERMES_API integrableWithGlobalOrder
+    {
+    public:
+      integrableWithGlobalOrder();
+      void setGlobalIntegrationOrder(unsigned int order);
+      bool globalIntegrationOrderSet;
+      unsigned int globalIntegrationOrder;
+    };
+
+    /// Class that allows overriding integration order in its discrete problems
+    class HERMES_API settableComputationTime
+    {
+    public:
+      settableComputationTime();
+      /// set time information for time-dependent problems.
+      virtual void setTime(double time);
+      virtual void setTimeStep(double timeStep);
+      double time;
+      double timeStep;
+    };
   }
 }
 #endif

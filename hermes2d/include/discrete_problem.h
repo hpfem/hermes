@@ -99,6 +99,10 @@ namespace Hermes
 
       /// Get info about presence of a matrix.
       bool is_matrix_free();
+      
+      /// set time information for time-dependent problems.
+      virtual void setTime(double time);
+      virtual void setTimeStep(double timeStep);
 
     protected:
       /// Assembling.

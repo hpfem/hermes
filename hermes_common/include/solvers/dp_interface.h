@@ -33,7 +33,7 @@ namespace Hermes
   {
     /// \brief Minimalistic DiscreteProblem interface required by NoxProblemInterface.
     template<typename Scalar>
-    class DiscreteProblemInterface
+    class DiscreteProblemInterface : public Hermes::Mixins::integrableWithGlobalOrder, public Hermes::Mixins::settableComputationTime
     {
     public:
       /// Get the number of unknowns.
@@ -41,9 +41,6 @@ namespace Hermes
 
       /// Get info about presence of a matrix.
       virtual bool is_matrix_free() = 0;
-
-      /// Sets the integration order to be globally this number, no calculation.
-      void setGlobalIntegrationOrder(unsigned int order);
 
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the
@@ -74,8 +71,6 @@ namespace Hermes
       virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL) = 0;
 
       DiscreteProblemInterface();
-      bool globalIntegrationOrderSet;
-      unsigned int globalIntegrationOrder;
 
       template<typename T> friend class DiscreteProblemNOX;
     };

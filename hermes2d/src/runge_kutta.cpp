@@ -25,7 +25,7 @@ namespace Hermes
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces, ButcherTable* bt)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
-      stage_wf_left(spaces.size()), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0), globalIntegrationOrderSet(false), globalIntegrationOrder(0),
+      stage_wf_left(spaces.size()), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -60,7 +60,7 @@ namespace Hermes
     template<typename Scalar>
     RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, const Space<Scalar>* space, ButcherTable* bt)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
-      stage_wf_left(1), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0), globalIntegrationOrderSet(false), globalIntegrationOrder(0),
+      stage_wf_left(1), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
       spaces.push_back(space);
@@ -206,7 +206,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
+    void RungeKutta<Scalar>::rk_time_step_newton(Solution<Scalar>* sln_time_prev,
                                           Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn)
     {
       Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
@@ -215,13 +215,12 @@ namespace Hermes
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
       error_fns.push_back(error_fn);
-      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
+      return rk_time_step_newton(slns_time_prev, slns_time_new,
         error_fns);
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
-                                          Hermes::vector<Solution<Scalar>*> slns_time_prev,
+    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev,
                                           Hermes::vector<Solution<Scalar>*> slns_time_new,
                                           Hermes::vector<Solution<Scalar>*> error_fns)
     {
@@ -231,17 +230,17 @@ namespace Hermes
         this->init();
 
       // Creates the stage weak formulation.
-      update_stage_wf(current_time, time_step, slns_time_prev);
+      update_stage_wf(slns_time_prev);
 
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
       if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
         throw Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
-      info("Runge-Kutta time step, time: %f, time step: %f", current_time, time_step);
+      info("Runge-Kutta time step, time: %f, time step: %f", this->time, this->timeStep);
 
       // Set the correct time to the essential boundary conditions.
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
-        Space<Scalar>::update_essential_bc_values(spaces_mutable, current_time + bt->get_C(stage_i)*time_step);
+        Space<Scalar>::update_essential_bc_values(spaces_mutable, this->time + bt->get_C(stage_i)*this->timeStep);
 
       // All Spaces of the problem.
       Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
@@ -272,7 +271,7 @@ namespace Hermes
       while (true)
       {
         // Prepare vector h\sum_{j = 1}^s a_{ij} K_j.
-        prepare_u_ext_vec(time_step);
+        prepare_u_ext_vec();
 
         // Reinitialize filters.
         if(this->filters_to_reinit.size() > 0)
@@ -395,7 +394,7 @@ namespace Hermes
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
         for (unsigned int j = 0; j < num_stages; j++)
-          coeff_vec[i] += time_step * bt->get_B(j) * K_vector[j * ndof + i];
+          coeff_vec[i] += this->timeStep * bt->get_B(j) * K_vector[j * ndof + i];
 
       Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, slns_time_new);
 
@@ -408,7 +407,7 @@ namespace Hermes
           coeff_vec[i] = 0.;
           for (unsigned int j = 0; j < num_stages; j++)
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
-          coeff_vec[i] *= time_step;
+          coeff_vec[i] *= this->timeStep;
         }
         Solution<Scalar>::vector_to_solutions_common_dir_lift(coeff_vec, spaces, error_fns);
       }
@@ -429,24 +428,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step,
-                                          Hermes::vector<Solution<Scalar>*> slns_time_prev,
+    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev,
                                           Hermes::vector<Solution<Scalar>*> slns_time_new)
     {
-      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
+      return rk_time_step_newton(slns_time_prev, slns_time_new,
                           Hermes::vector<Solution<Scalar>*>());
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
-                                          Solution<Scalar>* sln_time_new)
+    void RungeKutta<Scalar>::rk_time_step_newton(Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new)
     {
       Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
       slns_time_prev.push_back(sln_time_prev);
       Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
       slns_time_new.push_back(sln_time_new);
       Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
-      return rk_time_step_newton(current_time, time_step, slns_time_prev, slns_time_new,
+      return rk_time_step_newton(slns_time_prev, slns_time_new,
                           error_fns);
     }
 
@@ -455,13 +452,6 @@ namespace Hermes
     {
       for(int i = 0; i < filters_to_reinit.size(); i++)
         this->filters_to_reinit.push_back(filters_to_reinit.at(i));
-    }
-
-    template<typename Scalar>
-    void RungeKutta<Scalar>::setGlobalIntegrationOrder(unsigned int order)
-    {
-      this->globalIntegrationOrder = order;
-      this->globalIntegrationOrderSet = true;
     }
 
     template<typename Scalar>
@@ -600,7 +590,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::update_stage_wf(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev)
+    void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<Solution<Scalar>*> slns_time_prev)
     {
       // Extracting volume and surface matrix and vector forms from the
       // 'right' weak formulation.
@@ -617,14 +607,14 @@ namespace Hermes
       for (unsigned int m = 0; m < mfvol.size(); m++)
       {
         MatrixFormVol<Scalar> *mfv_ij = mfvol[m];
-        mfv_ij->scaling_factor = -time_step * bt->get_A(mfv_ij->i / spaces.size(), mfv_ij->j / spaces.size());
+        mfv_ij->scaling_factor = -this->timeStep * bt->get_A(mfv_ij->i / spaces.size(), mfv_ij->j / spaces.size());
 
         mfv_ij->ext.clear();
 
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
           mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        mfv_ij->set_current_stage_time(current_time + bt->get_C(mfv_ij->i / spaces.size()) * time_step);
+        mfv_ij->set_current_stage_time(this->time + bt->get_C(mfv_ij->i / spaces.size()) * this->timeStep);
       }
 
       // Duplicate matrix surface forms, enhance them with
@@ -633,14 +623,14 @@ namespace Hermes
       for (unsigned int m = 0; m < mfsurf.size(); m++)
       {
         MatrixFormSurf<Scalar> *mfs_ij = mfsurf[m];
-        mfs_ij->scaling_factor = -time_step * bt->get_A(mfs_ij->i / spaces.size(), mfs_ij->j / spaces.size());
+        mfs_ij->scaling_factor = -this->timeStep * bt->get_A(mfs_ij->i / spaces.size(), mfs_ij->j / spaces.size());
 
         mfs_ij->ext.clear();
 
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
           mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        mfs_ij->set_current_stage_time(current_time + bt->get_C(mfs_ij->i / spaces.size()) * time_step);
+        mfs_ij->set_current_stage_time(this->time + bt->get_C(mfs_ij->i / spaces.size()) * this->timeStep);
       }
 
       // Duplicate vector volume forms, enhance them with
@@ -655,7 +645,7 @@ namespace Hermes
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
             vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        vfv_i->set_current_stage_time(current_time + bt->get_C(vfv_i->i / spaces.size())*time_step);
+        vfv_i->set_current_stage_time(this->time + bt->get_C(vfv_i->i / spaces.size())*this->timeStep);
       }
 
       // Duplicate vector surface forms, enhance them with
@@ -670,12 +660,12 @@ namespace Hermes
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
             vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        vfs_i->set_current_stage_time(current_time + bt->get_C(vfs_i->i / spaces.size())*time_step);
+        vfs_i->set_current_stage_time(this->time + bt->get_C(vfs_i->i / spaces.size())*this->timeStep);
       }
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::prepare_u_ext_vec(double time_step)
+    void RungeKutta<Scalar>::prepare_u_ext_vec()
     {
       unsigned int ndof = Space<Scalar>::get_num_dofs(spaces);
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
@@ -688,7 +678,7 @@ namespace Hermes
             Scalar increment = 0;
             for (unsigned int stage_j = 0; stage_j < num_stages; stage_j++)
               increment += bt->get_A(stage_i, stage_j) * K_vector[stage_j * ndof + running_space_ndofs + idx];
-            u_ext_vec[stage_i * ndof + running_space_ndofs + idx] = time_step * increment;
+            u_ext_vec[stage_i * ndof + running_space_ndofs + idx] = this->timeStep * increment;
           }
           running_space_ndofs += spaces[space_i]->get_num_dofs();
         }

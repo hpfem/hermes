@@ -73,7 +73,7 @@ namespace Hermes
 
     /// @ingroup userSolvingAPI
     template<typename Scalar>
-    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable
+    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable, public Hermes::Mixins::integrableWithGlobalOrder, public Hermes::Mixins::settableComputationTime
     {
     public:
       /// Constructor.
@@ -105,17 +105,13 @@ namespace Hermes
       //                    iteration of the Newton's method.
       // block_diagonal_jacobian... if true then the tensor product block Jacobian is
       //                            reduced to just the diagonal blocks.
-      void rk_time_step_newton(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev,
-                        Hermes::vector<Solution<Scalar>*> slns_time_new, Hermes::vector<Solution<Scalar>*> error_fns);
-      void rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* slns_time_prev,
-                        Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn);
+      void rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new, Hermes::vector<Solution<Scalar>*> error_fns);
+      void rk_time_step_newton(Solution<Scalar>* slns_time_prev, Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn);
 
       // This is a wrapper for the previous function if error_fn is not provided
       // (adaptive time stepping is not wanted).
-      void rk_time_step_newton(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev,
-                        Hermes::vector<Solution<Scalar>*> slns_time_new);
-      void rk_time_step_newton(double current_time, double time_step, Solution<Scalar>* sln_time_prev,
-                        Solution<Scalar>* sln_time_new);
+      void rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new);
+      void rk_time_step_newton(Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new);
 
       void set_freeze_jacobian();
       void set_newton_tol(double newton_tol);
@@ -135,9 +131,6 @@ namespace Hermes
        */
 
       void set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
-
-      /// Sets the integration order in DiscreteProblem instances used to be globally this number, no calculation.
-      void setGlobalIntegrationOrder(unsigned int order);
 
     protected:
       /// Initialization of DiscreteProblems.
@@ -160,10 +153,10 @@ namespace Hermes
       void create_stage_wf(unsigned int size, bool block_diagonal_jacobian);
       
       /// Updates the augmented weak formulation.
-      void update_stage_wf(double current_time, double time_step, Hermes::vector<Solution<Scalar>*> slns_time_prev);
+      void update_stage_wf(Hermes::vector<Solution<Scalar>*> slns_time_prev);
 
       // Prepare u_ext_vec.
-      void prepare_u_ext_vec(double time_step);
+      void prepare_u_ext_vec();
 
       /// Matrix for the time derivative part of the equation (left-hand side).
       SparseMatrix<Scalar>* matrix_left;
@@ -206,9 +199,6 @@ namespace Hermes
       unsigned int iteration;
 
       bool do_global_projections;
-      bool globalIntegrationOrderSet;
-      unsigned int globalIntegrationOrder;
-      
       bool freeze_jacobian;
       double newton_tol;
       int newton_max_iter;
@@ -226,7 +216,6 @@ namespace Hermes
 
       /// Vector for the left part of the residual.
       Scalar* vector_left;
-
       
       ///< The filters to reinitialize in every Newton's loop
       Hermes::vector<Filter<Scalar>*> filters_to_reinit;

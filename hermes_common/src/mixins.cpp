@@ -531,5 +531,28 @@ namespace Hermes
         return str.str();
       }
     }
+
+    integrableWithGlobalOrder::integrableWithGlobalOrder() : globalIntegrationOrderSet(false), globalIntegrationOrder(0)
+    {}
+
+    void integrableWithGlobalOrder::setGlobalIntegrationOrder(unsigned int order)
+    {
+      this->globalIntegrationOrder = order;
+      this->globalIntegrationOrderSet = true;
+    }
+
+    settableComputationTime::settableComputationTime() : time(0.0), timeStep(0.0)
+    {
+    }
+
+    void settableComputationTime::setTime(double time)
+    {
+      this->time = time;
+    }
+
+    void settableComputationTime::setTimeStep(double timeStep)
+    {
+      this->timeStep = timeStep;
+    }
   }
 }

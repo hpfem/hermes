@@ -31,7 +31,7 @@ namespace Hermes
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class LinearSolver : public Hermes::Mixins::Loggable
+    class LinearSolver : public Hermes::Mixins::Loggable, Hermes::Mixins::integrableWithGlobalOrder, Hermes::Mixins::settableComputationTime
     {
     public:
       LinearSolver(DiscreteProblemLinear<Scalar>* dp);
@@ -42,6 +42,10 @@ namespace Hermes
       virtual void solve();
 
       Scalar *get_sln_vector();
+      
+      /// set time information for time-dependent problems.
+      virtual void setTime(double time);
+      virtual void setTimeStep(double timeStep);
     protected:
       DiscreteProblemLinear<Scalar>* dp; ///< FE problem being solved.
 

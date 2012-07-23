@@ -54,16 +54,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NonlinearSolver<Scalar>::setTime(double time)
-    {
-    }
-      
-    template<typename Scalar>
-    void NonlinearSolver<Scalar>::setTimeStep(double timeStep)
-    {
-    }
-
-    template<typename Scalar>
     void NonlinearSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
     {
       if(Hermes::HermesCommonApi.getParamValue(Hermes::matrixSolverType) != SOLVER_AZTECOO)
