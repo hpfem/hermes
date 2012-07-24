@@ -179,7 +179,7 @@ namespace Hermes
         // Make sure we are adding to an existing non-zero entry.
         if(pos < 0)
         {
-          this->info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
+          this->Hermes::Mixins::Loggable::Static::info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
           throw Hermes::Exceptions::Exception("Sparse matrix entry not found: [%i, %i]", m, n);
         }
 

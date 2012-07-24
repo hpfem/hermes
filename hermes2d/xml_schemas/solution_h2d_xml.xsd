@@ -29,24 +29,10 @@
             <attribute name="component_number" type="integer" />
           </complexType>
         </element>
-        <element minOccurs="1" maxOccurs="1" name="sln_vector">
-          <complexType>
-            <sequence>
-              <element minOccurs="1" maxOccurs="unbounded" name="sln_coeff">
-                <complexType>
-                  <attribute name="id" type="integer" use="required" />
-                  <attribute name="real" type="decimal" use="required" />
-                  <attribute name="imaginary" type="decimal" />
-                </complexType>
-              </element>
-            </sequence>
-          </complexType>
-        </element>
       </sequence>
       <attribute name="num_components" type="integer" use="required" />
       <attribute name="num_elems" type="integer" use="required" />
       <attribute name="num_coeffs" type="integer" use="required" />
-      <attribute name="num_dofs" type="integer" use="required" />
     </complexType>
   </element>
 </schema>

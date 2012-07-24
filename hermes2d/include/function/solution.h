@@ -125,20 +125,7 @@ namespace Hermes
       /// Returns solution type.
       inline SolutionType get_type() const { return sln_type; };
 
-      /// Returns space type.
       inline SpaceType get_space_type() const { return space_type; };
-
-      /// In case there is a space this solution belongs to, this returns the seq number of the space.
-      /// This is used to check if the pointer returned by get_space() points to the same space, or if the space has changed.
-      int get_space_seq();
-
-      /// In case this is valid it returns a pointer to the space this solution belongs to.
-      /// Only use when get_space() == get_space_seq();
-      const Space<Scalar>* get_space();
-
-      /// In case this is valid it returns a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
-      /// Only use when get_space() == get_space_seq();
-      Scalar* get_sln_vector();
 
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
@@ -190,9 +177,6 @@ namespace Hermes
 
       virtual void free();
 
-      /// In case this is valid it is a vector of coefficient wrt. to the basis of the finite dimensional space this solution belongs to.
-      Scalar* sln_vector;
-
       /// Converts a coefficient vector into a Solution.
       virtual void set_coeff_vector(const Space<Scalar>* space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index);
 
@@ -202,12 +186,6 @@ namespace Hermes
 
       SolutionType sln_type;
       SpaceType space_type;
-
-      /// In case this is valid it contains a pointer to the space this solution belongs to.
-      const Space<Scalar>* space;
-
-      /// In case there is a space this solution belongs to, this is the seq number of the space.
-      int space_seq;
 
       bool transform;
 

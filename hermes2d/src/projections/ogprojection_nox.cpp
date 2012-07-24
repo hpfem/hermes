@@ -116,24 +116,6 @@ namespace Hermes
       ProjNormType proj_norm,
       double newton_tol, int newton_max_iter)
     {
-      bool sln_vector_loaded = true;
-
-      if(dynamic_cast<Solution<Scalar>*>(source_meshfn) != NULL && dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_type() == HERMES_SLN)
-        if(dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_space() != NULL)
-          if(dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_space_seq() == space->get_seq()
-            && dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_sln_vector() != NULL)
-            for(int j = 0; j < space->get_num_dofs(); j++)
-              target_vec[j] = dynamic_cast<Solution<Scalar>*>(source_meshfn)->get_sln_vector()[j];
-          else
-            sln_vector_loaded = false;
-        else
-          sln_vector_loaded = false;
-      else
-        sln_vector_loaded = false;
-
-      if(sln_vector_loaded)
-        return;
-
       // Sanity checks.
       if(target_vec == NULL) throw Exceptions::NullException(3);
 

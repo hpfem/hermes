@@ -846,7 +846,7 @@ namespace Hermes
             if(e->used)
               if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > 1e-15)
               {
-                this->info("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
+                this->Hermes::Mixins::Loggable::Static::info("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
                 throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
               }
             counter++;

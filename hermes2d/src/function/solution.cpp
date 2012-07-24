@@ -83,8 +83,6 @@ namespace Hermes
       memset(oldest, 0, sizeof(oldest));
       transform = true;
       sln_type = HERMES_UNDEF;
-      sln_vector = NULL;
-      space = NULL;
       this->num_components = 0;
       e_last = NULL;
 
@@ -122,7 +120,6 @@ namespace Hermes
     Solution<Scalar>::Solution(Space<Scalar>* s, Vector<Scalar>* coeff_vec) : MeshFunction<Scalar>(s->get_mesh())
     {
       space_type = s->get_type();
-      space = s;
       this->init();
       this->mesh = s->get_mesh();
       Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
@@ -132,7 +129,6 @@ namespace Hermes
     Solution<Scalar>::Solution(Space<Scalar>* s, Scalar* coeff_vec) : MeshFunction<Scalar>(s->get_mesh())
     {
       space_type = s->get_type();
-      space = s;
       this->init();
       this->mesh = s->get_mesh();
       Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
@@ -148,10 +144,7 @@ namespace Hermes
 
       this->mesh = sln->mesh;
       // Solution vector and space setting.
-      this->sln_vector = sln->sln_vector;
-      space = sln->space;
       space_type = sln->get_space_type();
-      space_seq = sln->get_space_seq();
 
       mono_coeffs = sln->mono_coeffs;        sln->mono_coeffs = NULL;
       elem_coeffs[0] = sln->elem_coeffs[0];  sln->elem_coeffs[0] = NULL;
@@ -199,18 +192,9 @@ namespace Hermes
         memcpy(elem_orders, sln->elem_orders, sizeof(int) * num_elems);
 
         init_dxdy_buffer();
-
-        if(this->sln_vector != NULL)
-          delete [] this->sln_vector;
-        this->sln_vector = new Scalar[sln->space->get_num_dofs()];
-        for(int i = 0; i < sln->space->get_num_dofs(); i++)
-          this->sln_vector[i] = sln->sln_vector[i];
       }
       else // Const, exact handled differently.
         throw Hermes::Exceptions::Exception("Undefined or exact solutions cannot be copied into an instance of Solution already coming from computation.");
-
-      space = sln->space;
-      space_seq = sln->space_seq;
 
       this->element = NULL;
     }
@@ -257,14 +241,6 @@ namespace Hermes
         e_last = NULL;
 
         free_tables();
-
-        space = NULL;
-
-        if(this->sln_vector != NULL)
-        {
-          delete [] this->sln_vector;
-          this->sln_vector = NULL;
-        }
     }
 
     template<typename Scalar>
@@ -272,7 +248,6 @@ namespace Hermes
     {
       free();
       space_type = HERMES_INVALID_SPACE;
-      space = NULL;
     }
 
     static struct mono_lu_init
@@ -379,19 +354,7 @@ namespace Hermes
 
       free();
 
-      if(this->sln_vector != NULL)
-        delete [] this->sln_vector;
-      int ndof = space->get_num_dofs();
-      this->sln_vector = new Scalar[ndof];
-      for(int i = 0; i < ndof; i++)
-      {
-        // By adding start_index we move to the desired section of coeff_vec.
-        this->sln_vector[i] = coeff_vec[i + start_index];
-      }
-
       this->space_type = space->get_type();
-      this->space = space;
-      this->space_seq = space->get_seq();
 
       this->num_components = pss->get_num_components();
       sln_type = HERMES_SLN;
@@ -1120,8 +1083,7 @@ namespace Hermes
 
       try
       {
-        XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components,
-          this->num_elems, this->num_coeffs, this->space->get_num_dofs());
+        XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs);
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
           xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i]));
@@ -1136,9 +1098,6 @@ namespace Hermes
           for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
-
-        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->space->get_num_dofs(); sln_coeff_i++)
-          xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i]));
 
         std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -1168,7 +1127,7 @@ namespace Hermes
 
       try
       {
-        XMLSolution::solution xmlsolution(XMLSolution::sln_vector(), this->num_components, this->num_elems, this->num_coeffs, this->space->get_num_dofs());
+        XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs);
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
         {
@@ -1185,12 +1144,6 @@ namespace Hermes
           xmlsolution.component().back().component_number() = component_i;
           for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
-        }
-
-        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->space->get_num_dofs(); sln_coeff_i++)
-        {
-          xmlsolution.sln_vector().sln_coeff().push_back(XMLSolution::sln_coeff(sln_coeff_i, this->sln_vector[sln_coeff_i].real()));
-          xmlsolution.sln_vector().sln_coeff().back().imaginary() = this->sln_vector[sln_coeff_i].imag();
         }
 
         std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
@@ -1225,7 +1178,6 @@ namespace Hermes
         this->num_coeffs = parsed_xml_solution->num_coeffs();
         this->num_elems = parsed_xml_solution->num_elems();
         this->num_components = parsed_xml_solution->num_components();
-        this->num_dofs = parsed_xml_solution->num_dofs();
 
         this->mono_coeffs = new double[num_coeffs];
         memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(double));
@@ -1234,7 +1186,6 @@ namespace Hermes
           elem_coeffs[component_i] = new int[num_elems];
 
         this->elem_orders = new int[num_elems];
-        this->sln_vector = new double[num_dofs];
 
         for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
           this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).real();
@@ -1245,9 +1196,6 @@ namespace Hermes
         for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
           for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
             this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).coeff();
-
-        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
-          this->sln_vector[parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).id()] = parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).real();
 
         init_dxdy_buffer();
       }
@@ -1272,7 +1220,6 @@ namespace Hermes
         this->num_coeffs = parsed_xml_solution->num_coeffs();
         this->num_elems = parsed_xml_solution->num_elems();
         this->num_components = parsed_xml_solution->num_components();
-        this->num_dofs = parsed_xml_solution->num_dofs();
 
         this->mono_coeffs = new std::complex<double>[num_coeffs];
         memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(std::complex<double>));
@@ -1281,7 +1228,6 @@ namespace Hermes
           elem_coeffs[component_i] = new int[num_elems];
 
         this->elem_orders = new int[num_elems];
-        this->sln_vector = new std::complex<double>[num_dofs];
 
         for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
           this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = std::complex<double>(parsed_xml_solution->mono_coeffs().at(coeffs_i).real(), parsed_xml_solution->mono_coeffs().at(coeffs_i).imaginary().get());
@@ -1292,9 +1238,6 @@ namespace Hermes
         for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
           for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
             this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).coeff();
-
-        for(unsigned int sln_coeff_i = 0; sln_coeff_i < this->num_dofs; sln_coeff_i++)
-          this->sln_vector[parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).id()] = std::complex<double>(parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).real(), parsed_xml_solution->sln_vector().sln_coeff().at(sln_coeff_i).imaginary().get());
 
         init_dxdy_buffer();
       }
@@ -1469,42 +1412,6 @@ namespace Hermes
 
       this->warn("Point (%g, %g) does not lie in any element.", x, y);
       return NAN;
-    }
-
-    template<typename Scalar>
-    const Space<Scalar>* Solution<Scalar>::get_space()
-    {
-      if(this->sln_type == HERMES_SLN)
-        return space;
-      else
-      {
-        throw Hermes::Exceptions::Exception("Solution<Scalar>::get_space() called with an instance where FEM space is not defined.");
-        return NULL;
-      }
-    }
-
-    template<typename Scalar>
-    int Solution<Scalar>::get_space_seq()
-    {
-      if(this->sln_type == HERMES_SLN)
-        return space_seq;
-      else
-      {
-        throw Hermes::Exceptions::Exception("Solution<Scalar>::get_space_seq() called with an instance where FEM space is not defined.");
-        return NULL;
-      }
-    }
-
-    template<typename Scalar>
-    Scalar* Solution<Scalar>::get_sln_vector()
-    {
-      if(this->sln_type == HERMES_SLN)
-        return sln_vector;
-      else
-      {
-        throw Hermes::Exceptions::Exception("Solution<Scalar>::get_sln_vector() called with an instance where FEM space is not defined.");
-        return NULL;
-      }
     }
 
     template class HERMES_API Solution<double>;

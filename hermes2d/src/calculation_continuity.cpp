@@ -699,9 +699,7 @@ namespace Hermes
         try
         {
           solutions[i]->load(filename.str().c_str(), spaces[i]->get_mesh());
-          solutions[i]->space = spaces[i];
           solutions[i]->space_type = spaces[i]->get_type();
-          solutions[i]->space_seq = spaces[i]->get_seq();
         }
         catch(Hermes::Exceptions::SolutionLoadFailureException& e)
         {
@@ -721,9 +719,7 @@ namespace Hermes
       try
       {
         solution->load(filename.str().c_str(), space->get_mesh());
-        solution->space = space;
         solution->space_type = space->get_type();
-        solution->space_seq = space->get_seq();
       }
       catch(Hermes::Exceptions::SolutionLoadFailureException& e)
       {

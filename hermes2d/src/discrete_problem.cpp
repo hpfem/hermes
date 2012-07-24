@@ -1264,6 +1264,7 @@ namespace Hermes
           {
             if(current_state->e[i] == NULL)
               continue;
+            
             if(this->cache_records_sub_idx[i][current_state->e[i]->id] == NULL)
             {
               this->cache_records_sub_idx[i][current_state->e[i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
@@ -1355,7 +1356,9 @@ namespace Hermes
             }
           }
 
-          CacheRecordPerSubIdx* newRecord = (*this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i])).second;
+          CacheRecordPerSubIdx* newRecord;
+#pragma omp critical (cache_for_subidx_preparation)
+          newRecord = (*this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i])).second;
                 
           // Set active element to all test functions.
           current_spss[i]->set_active_element(current_state->e[i]);
@@ -1414,9 +1417,12 @@ namespace Hermes
         {
           if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
             continue;
-
-          CacheRecordPerSubIdx* CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_mfvol[current_mfvol_i]->i][current_state->e[current_mfvol[current_mfvol_i]->i]->id]->find(current_state->sub_idx[current_mfvol[current_mfvol_i]->i])->second;
-          CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = this->cache_records_sub_idx[current_mfvol[current_mfvol_i]->j][current_state->e[current_mfvol[current_mfvol_i]->j]->id]->find(current_state->sub_idx[current_mfvol[current_mfvol_i]->j])->second;
+          CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+          CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
+#pragma omp critical (cache_for_subidx_preparation)
+          CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_mfvol[current_mfvol_i]->i][current_state->e[current_mfvol[current_mfvol_i]->i]->id]->find(current_state->sub_idx[current_mfvol[current_mfvol_i]->i])->second;
+#pragma omp critical (cache_for_subidx_preparation)
+          CacheRecordPerSubIdxJ = this->cache_records_sub_idx[current_mfvol[current_mfvol_i]->j][current_state->e[current_mfvol[current_mfvol_i]->j]->id]->find(current_state->sub_idx[current_mfvol[current_mfvol_i]->j])->second;
 
           assemble_matrix_form(current_mfvol[current_mfvol_i], 
             this->cache_records_element[current_mfvol[current_mfvol_i]->i][current_state->e[current_mfvol[current_mfvol_i]->i]->id]->order, 
@@ -1438,7 +1444,9 @@ namespace Hermes
           if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
             continue;
 
-          CacheRecordPerSubIdx* CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_vfvol[current_vfvol_i]->i][current_state->e[current_vfvol[current_vfvol_i]->i]->id]->find(current_state->sub_idx[current_vfvol[current_vfvol_i]->i])->second;
+          CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+#pragma omp critical (cache_for_subidx_preparation)
+          CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_vfvol[current_vfvol_i]->i][current_state->e[current_vfvol[current_vfvol_i]->i]->id]->find(current_state->sub_idx[current_vfvol[current_vfvol_i]->i])->second;
 
           assemble_vector_form(current_vfvol[current_vfvol_i], 
             this->cache_records_element[current_vfvol[current_vfvol_i]->i][current_state->e[current_vfvol[current_vfvol_i]->i]->id]->order, 
@@ -1464,8 +1472,12 @@ namespace Hermes
             if(!form_to_be_assembled(current_mfsurf[current_mfsurf_i], current_state))
               continue;
 
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_mfsurf[current_mfsurf_i]->i][current_state->e[current_mfsurf[current_mfsurf_i]->i]->id]->find(current_state->sub_idx[current_mfsurf[current_mfsurf_i]->i])->second;
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = this->cache_records_sub_idx[current_mfsurf[current_mfsurf_i]->j][current_state->e[current_mfsurf[current_mfsurf_i]->j]->id]->find(current_state->sub_idx[current_mfsurf[current_mfsurf_i]->j])->second;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
+#pragma omp critical (cache_for_subidx_preparation)
+            CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_mfsurf[current_mfsurf_i]->i][current_state->e[current_mfsurf[current_mfsurf_i]->i]->id]->find(current_state->sub_idx[current_mfsurf[current_mfsurf_i]->i])->second;
+#pragma omp critical (cache_for_subidx_preparation)
+            CacheRecordPerSubIdxJ = this->cache_records_sub_idx[current_mfsurf[current_mfsurf_i]->j][current_state->e[current_mfsurf[current_mfsurf_i]->j]->id]->find(current_state->sub_idx[current_mfsurf[current_mfsurf_i]->j])->second;
 
             assemble_matrix_form(current_mfsurf[current_mfsurf_i], 
               CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
@@ -1488,7 +1500,9 @@ namespace Hermes
             if(!form_to_be_assembled(current_vfsurf[current_vfsurf_i], current_state))
               continue;
 
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_vfsurf[current_vfsurf_i]->i][current_state->e[current_vfsurf[current_vfsurf_i]->i]->id]->find(current_state->sub_idx[current_vfsurf[current_vfsurf_i]->i])->second;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+#pragma omp critical (cache_for_subidx_preparation)
+            CacheRecordPerSubIdxI = this->cache_records_sub_idx[current_vfsurf[current_vfsurf_i]->i][current_state->e[current_vfsurf[current_vfsurf_i]->i]->id]->find(current_state->sub_idx[current_vfsurf[current_vfsurf_i]->i])->second;
 
             assemble_vector_form(current_vfsurf[current_vfsurf_i], 
               CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
