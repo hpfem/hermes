@@ -1258,13 +1258,13 @@ namespace Hermes
 
       if(changedInLastAdaptation || this->doNotUseCache)
       {
-#pragma omp critical (cache_for_subidx_preparation)
+        for(unsigned int i = 0; i < this->spaces.size(); i++)
         {
-          for(unsigned int i = 0; i < this->spaces.size(); i++)
-          {
-            if(current_state->e[i] == NULL)
-              continue;
+          if(current_state->e[i] == NULL)
+            continue;
             
+#pragma omp critical (cache_for_subidx_preparation)
+          {
             if(this->cache_records_sub_idx[i][current_state->e[i]->id] == NULL)
             {
               this->cache_records_sub_idx[i][current_state->e[i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
@@ -1665,7 +1665,7 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-#pragma omp critical (mat)
+
       current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
@@ -1674,7 +1674,7 @@ namespace Hermes
         if(form->sym < 0)
           chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
         transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
-#pragma omp critical (mat)
+
         current_mat->add(current_als[form->j]->cnt, current_als[form->i]->cnt, local_stiffness_matrix, current_als[form->j]->dof, current_als[form->i]->dof);
       }
 
@@ -1765,7 +1765,7 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-#pragma omp critical (mat)
+
       current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
@@ -1774,7 +1774,7 @@ namespace Hermes
         if(form->sym < 0)
           chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
         transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
-#pragma omp critical (mat)
+
         current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
       }
 
@@ -1868,7 +1868,7 @@ namespace Hermes
           val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
-#pragma omp critical (rhs)
+
         current_rhs->add(current_als[form->i]->dof[i], val);
       }
 
@@ -1912,7 +1912,7 @@ namespace Hermes
           val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als_i->coef[i];
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als_i->coef[i];
-#pragma omp critical (rhs)
+
         current_rhs->add(current_als_i->dof[i], val);
       }
 
@@ -2451,7 +2451,7 @@ namespace Hermes
             }
           }
 
-          #pragma omp critical (mat)
+
           current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
 
           delete [] local_stiffness_matrix;
@@ -2538,7 +2538,7 @@ namespace Hermes
 
             Func<double>* v = init_fn(current_spss[m], current_refmaps[m], nbs_v->get_quad_eo());
 
-#pragma omp critical (rhs)
+
             current_rhs->add(current_als[m]->dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights, prev, v, e, ext) * vfs->scaling_factor * current_als[m]->coef[dof_i]);
 
             v->free_fn();

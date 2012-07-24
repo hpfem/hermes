@@ -273,8 +273,9 @@ namespace Hermes
         // precalculate values of shape functions
         TrfShape empty_shape_vals;
 
+		if(!cached_shape_vals_valid[mode])
+		{
 #pragma omp critical (cached_shape_vals_valid)
-        {
           if(!cached_shape_vals_valid[mode])
           {
             precalc_ortho_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, this->shape_indices[mode], this->max_shape_inx[mode], cached_shape_ortho_vals[mode], mode);
@@ -282,6 +283,7 @@ namespace Hermes
             cached_shape_vals_valid[mode] = true;
           }
         }
+		
         //issue a warning if ortho values are defined and the selected cand_list might benefit from that but it cannot because elements do not have uniform orders
         if(!warn_uniform_orders && mode == HERMES_MODE_QUAD && !cached_shape_ortho_vals[mode][H2D_TRF_IDENTITY].empty())
         {

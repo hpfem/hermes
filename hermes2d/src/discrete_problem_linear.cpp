@@ -279,7 +279,7 @@ namespace Hermes
             }
             else
             {
-#pragma omp critical (rhs)
+
               {
                 if(surface_form)
                   this->current_rhs->add(current_als[form->i]->dof[i], -0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i]);
@@ -309,7 +309,7 @@ namespace Hermes
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             else
             {
-#pragma omp critical (mat)
+
               this->current_rhs->add(current_als[form->i]->dof[i], -val);
             }
           }
@@ -317,7 +317,7 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-#pragma omp critical (mat)
+
       this->current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
@@ -326,7 +326,7 @@ namespace Hermes
         if(form->sym < 0)
           chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
         transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
-#pragma omp critical (mat)
+
         this->current_mat->add(current_als[form->j]->cnt, current_als[form->i]->cnt, local_stiffness_matrix, current_als[form->j]->dof, current_als[form->i]->dof);
 
         // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
@@ -399,7 +399,7 @@ namespace Hermes
             }
             else
             {
-#pragma omp critical (rhs)
+
               {
                 if(surface_form)
                   this->current_rhs->add(current_als_i->dof[i], -0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
@@ -429,7 +429,7 @@ namespace Hermes
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             else
             {
-#pragma omp critical (mat)
+
               this->current_rhs->add(current_als_i->dof[i], -val);
             }
           }
@@ -437,7 +437,7 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-#pragma omp critical (mat)
+
       this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
@@ -446,7 +446,7 @@ namespace Hermes
         if(form->sym < 0)
           chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
         transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
-#pragma omp critical (mat)
+
         this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
 
         // Linear problems only: Subtracting Dirichlet lift contribution from the RHS:
