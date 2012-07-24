@@ -1214,17 +1214,20 @@ namespace Hermes
       bool changedInLastAdaptation = false;
       for(unsigned int i = 0; i < this->spaces.size(); i++)
       {
-        if(this->spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
-        {
-          changedInLastAdaptation = true;
-          break;
-        }
+        if(current_state->e[i] != NULL)
+          if(this->spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
+          {
+            changedInLastAdaptation = true;
+            break;
+          }
       }
       
       AsmList<Scalar>** current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
 
       for(unsigned int i = 0; i < this->spaces.size(); i++)
       {
+        if(current_state->e[i] == NULL)
+          continue;
         spaces[i]->get_element_assembly_list(current_state->e[i], current_als[i], spaces_first_dofs[i]);
 
         // Check of potential new constraints.
@@ -1259,6 +1262,8 @@ namespace Hermes
         {
           for(unsigned int i = 0; i < this->spaces.size(); i++)
           {
+            if(current_state->e[i] == NULL)
+              continue;
             if(this->cache_records_sub_idx[i][current_state->e[i]->id] == NULL)
             {
               this->cache_records_sub_idx[i][current_state->e[i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
@@ -1278,10 +1283,13 @@ namespace Hermes
         // Set active element to reference mappings.
         // Done because we need all the refmaps to be set for the order calculation
         for(unsigned int i = 0; i < this->spaces.size(); i++)
-          current_refmaps[i]->set_active_element(current_state->e[i]);
+          if(current_state->e[i] != NULL)
+            current_refmaps[i]->set_active_element(current_state->e[i]);
 
         for(unsigned int i = 0; i < this->spaces.size(); i++)
         {
+          if(current_state->e[i] == NULL)
+            continue;
           if(!this->cache_element_stored[i][current_state->e[i]->id])
 #pragma omp critical (cache_for_element_preparation)
           {
@@ -1496,7 +1504,8 @@ namespace Hermes
       }
 
       for(unsigned int i = 0; i < this->spaces.size(); i++)
-        delete [] current_alsSurface[i];
+        if(current_state->e[i] != NULL)
+          delete [] current_alsSurface[i];
       delete [] current_alsSurface;
     }
 
