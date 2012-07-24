@@ -183,6 +183,7 @@ namespace Hermes
           throw Hermes::Exceptions::Exception("Sparse matrix entry not found: [%i, %i]", m, n);
         }
 
+#pragma omp critical
         Ax[Ap[n] + pos] += v;
       }
     }
@@ -638,9 +639,17 @@ namespace Hermes
       v[idx] = y;
     }
 
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::add(unsigned int idx, Scalar y)
+    template<>
+    void UMFPackVector<double>::add(unsigned int idx, double y)
     {
+#pragma omp atomic
+      v[idx] += y;
+    }
+
+    template<>
+    void UMFPackVector<std::complex<double> >::add(unsigned int idx, std::complex<double> y)
+    {
+#pragma omp critical(UMFPackVector_add)
       v[idx] += y;
     }
 

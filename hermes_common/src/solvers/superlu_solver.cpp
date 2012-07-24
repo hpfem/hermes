@@ -195,7 +195,8 @@ namespace Hermes
           throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
         // Add offset to the n-th column.
         pos += Ap[n];
-        Ax[pos] += v;
+        #pragma omp critical (SuperLUMatrix_add)
+          Ax[pos] += v;
       }
     }
 

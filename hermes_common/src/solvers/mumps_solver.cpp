@@ -179,6 +179,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
       // Add offset to the n-th column.
       pos += Ap[n];
+#pragma omp critical (MumpsMatrix_add)
       Ax[pos] += v;
       irn[pos] = m + 1;  // MUMPS is indexing from 1
       jcn[pos] = n + 1;
@@ -478,6 +479,7 @@ namespace Hermes
     template<typename Scalar>
     void MumpsVector<Scalar>::add(unsigned int idx, Scalar y)
     {
+      #pragma omp critical (MumpsVector_add)
       v[idx] += y;
     }
 

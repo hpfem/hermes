@@ -183,7 +183,8 @@ namespace Hermes
     {
       if(v != 0.0)
       {    // ignore zero values.
-        MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
+        #pragma omp critical (PetscMatrix_add)
+          MatSetValue(matrix, (PetscInt) m, (PetscInt) n, to_petsc(v), ADD_VALUES);
       }
     }
 
@@ -417,6 +418,7 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::add(unsigned int idx, Scalar y)
     {
+#pragma omp critical (PetscVector_add)
       VecSetValue(vec, idx, to_petsc(y), ADD_VALUES);
     }
 
