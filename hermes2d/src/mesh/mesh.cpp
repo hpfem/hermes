@@ -1424,7 +1424,7 @@ namespace Hermes
           {
             if(e->cm->nurbs[n] != NULL)
             {
-              //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->cm->nurbs[n]->angle);
+              //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
             }
           }
@@ -1437,7 +1437,7 @@ namespace Hermes
             {
               if(e->parent->cm->nurbs[n] != NULL)
               {
-                //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->cm->nurbs[n]->angle);
+                //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
               }
             }
@@ -1450,7 +1450,7 @@ namespace Hermes
               {
                 if(e->parent->parent->cm->nurbs[n] != NULL)
                 {
-                  //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+                  //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
                 }
               }
@@ -1463,7 +1463,7 @@ namespace Hermes
                 {
                   if(e->parent->parent->parent->cm->nurbs[n] != NULL)
                   {
-                    //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+                    //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
                   }
                 }
@@ -1476,7 +1476,7 @@ namespace Hermes
                   {
                     if(e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
                     {
-                      //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+                      //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
                     }
                   }
@@ -2053,7 +2053,7 @@ namespace Hermes
           {
             if(e->cm->nurbs[n] != NULL)
             {
-              //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->cm->nurbs[n]->angle);
+              //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
             }
           }
@@ -2066,7 +2066,7 @@ namespace Hermes
             {
               if(e->parent->cm->nurbs[n] != NULL)
               {
-                //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->cm->nurbs[n]->angle);
+                //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
               }
             }
@@ -2079,7 +2079,7 @@ namespace Hermes
               {
                 if(e->parent->parent->cm->nurbs[n] != NULL)
                 {
-                  //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+                  //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
                 }
               }
@@ -2092,7 +2092,7 @@ namespace Hermes
                 {
                   if(e->parent->parent->parent->cm->nurbs[n] != NULL)
                   {
-                    //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+                    //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
                   }
                 }
@@ -2105,7 +2105,7 @@ namespace Hermes
                   {
                     if(e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
                     {
-                      //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+                      //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
                     }
                   }
@@ -2231,7 +2231,7 @@ namespace Hermes
           {
             if((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
             {
-              //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->cm->nurbs[n]->angle);
+              //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
             }
           }
@@ -2244,7 +2244,7 @@ namespace Hermes
             {
               if((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
               {
-                //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->cm->nurbs[n]->angle);
+                //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
               }
             }
@@ -2257,7 +2257,7 @@ namespace Hermes
               {
                 if((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                 {
-                  //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+                  //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
                 }
               }
@@ -2270,7 +2270,7 @@ namespace Hermes
                 {
                   if((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                   {
-                    //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+                    //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
                   }
                 }
@@ -2283,7 +2283,7 @@ namespace Hermes
                   {
                     if((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                     {
-                      //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+                      //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
                     }
                   }
@@ -2429,7 +2429,7 @@ namespace Hermes
           {
             if((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
             {
-              //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->cm->nurbs[n]->angle);
+              //this->info("angle = %f", e->cm->nurbs[n]->angle);
               refinement_angle[n] = e->cm->nurbs[n]->angle;
             }
           }
@@ -2442,7 +2442,7 @@ namespace Hermes
             {
               if((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
               {
-                //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->cm->nurbs[n]->angle);
+                //this->info("angle = %f", e->parent->cm->nurbs[n]->angle);
                 refinement_angle[n] = e->parent->cm->nurbs[n]->angle / 2;
               }
             }
@@ -2455,7 +2455,7 @@ namespace Hermes
               {
                 if((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                 {
-                  //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
+                  //this->info("angle = %f", e->parent->parent->cm->nurbs[n]->angle);
                   refinement_angle[n] = e->parent->parent->cm->nurbs[n]->angle / 4;
                 }
               }
@@ -2468,7 +2468,7 @@ namespace Hermes
                 {
                   if((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                   {
-                    //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
+                    //this->info("angle = %f", e->parent->parent->parent->cm->nurbs[n]->angle);
                     refinement_angle[n] = e->parent->parent->parent->cm->nurbs[n]->angle / 8;
                   }
                 }
@@ -2481,7 +2481,7 @@ namespace Hermes
                   {
                     if((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                     {
-                      //this->Hermes::Mixins::Loggable::Static::info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
+                      //this->info("angle = %f", e->parent->parent->parent->parent->cm->nurbs[n]->angle);
                       refinement_angle[n] = e->parent->parent->parent->parent->cm->nurbs[n]->angle / 16;
                     }
                   }

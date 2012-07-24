@@ -195,15 +195,15 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          this->Hermes::Mixins::Loggable::Static::info("---- Newton initial residual norm: %g", residual_norm);
+          this->info("---- Newton initial residual norm: %g", residual_norm);
         else
         {
-          this->Hermes::Mixins::Loggable::Static::info("---- Newton iteration %d, residual norm: %g", it - 1, residual_norm);
+          this->info("---- Newton iteration %d, residual norm: %g", it - 1, residual_norm);
           if(residual_norm < last_residual_norm * (1. + 1. / newton_max_iter))
           {
             this->currentDampingCofficient = std::min(1.0, 2 * this->currentDampingCofficient);
             if(residual_norm < last_residual_norm)
-              this->Hermes::Mixins::Loggable::Static::info("\t\tNewton: results improved, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
+              this->info("\t\tNewton: results improved, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
             else
               this->warn("\t\tNewton: results changed negligibly, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
           }
@@ -212,7 +212,7 @@ namespace Hermes
             if(this->currentDampingCofficient < min_allowed_damping_coeff)
             {
               this->warn("\t\tNewton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
-              this->Hermes::Mixins::Loggable::Static::info("\t\t\tIf you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
+              this->info("\t\t\tIf you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
               throw Exceptions::Exception("Newton NOT converged because of damping coefficient could not be decreased anymore to possibly handle non-converging process.");
             }
             else
@@ -348,9 +348,9 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          this->Hermes::Mixins::Loggable::Static::info("---- Newton initial residual norm: %g", residual_norm);
+          this->info("---- Newton initial residual norm: %g", residual_norm);
         else
-          this->Hermes::Mixins::Loggable::Static::info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
+          this->info("---- Newton iter %d, residual norm: %g", it - 1, residual_norm);
 
         // If maximum allowed residual norm is exceeded, fail.
         if(residual_norm > max_allowed_residual_norm)
