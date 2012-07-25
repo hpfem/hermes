@@ -102,6 +102,8 @@ namespace Hermes
       virtual void setTime(double time);
       virtual void setTimeStep(double timeStep);
 
+      void delete_cache();
+
     protected:
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the
@@ -268,7 +270,7 @@ namespace Hermes
       class CacheRecordPerElement
       {
       public:
-        void clear(Traverse::State* current_state);
+        void clear();
         int asmlistCnt;
         int* asmlistIdx;
         int order;
@@ -277,7 +279,7 @@ namespace Hermes
       class CacheRecordPerSubIdx
       {
       public:
-        void clear(CacheRecordPerElement* elementCacheInfo, Traverse::State* current_state);
+        void clear(CacheRecordPerElement* elementCacheInfo, int nvert);
         Func<double>** fns;
         Func<double>*** fnsSurface;
         Geom<double>* geometry;

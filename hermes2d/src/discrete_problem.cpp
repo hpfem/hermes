@@ -231,6 +231,27 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::delete_cache()
+    {
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
+          if(this->cache_records_sub_idx[i][j] != NULL)
+          {
+            for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
+              it->second->clear(this->cache_records_element[i][j], spaces[i]->get_mesh()->get_element(j)->nvert);
+
+            this->cache_records_sub_idx[i][j]->clear();
+            delete this->cache_records_sub_idx[i][j];
+            this->cache_records_sub_idx[i][j] = NULL;
+            this->cache_records_element[i][j]->clear();
+            delete this->cache_records_element[i][j];
+            this->cache_records_element[i][j] = NULL;
+          }
+      }
+    }
+
+    template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spacesToSet)
     {
       /// \todo TEMPORARY There is something wrong with caching vector shapesets.
@@ -252,6 +273,7 @@ namespace Hermes
           max_size = max_size_i;
       }
 
+
       if(max_size * 1.5 > this->cache_size)
       {
         max_size = 1.5 * max_size;
@@ -266,6 +288,24 @@ namespace Hermes
         }
 
         this->cache_size = max_size;
+      }
+
+      
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
+          if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active)
+            if(this->cache_records_sub_idx[i][j] != NULL)
+            {
+              for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
+                it->second->clear(this->cache_records_element[i][j], spaces[i]->get_mesh()->get_element(j)->nvert);
+
+              this->cache_records_sub_idx[i][j]->clear();
+              delete this->cache_records_sub_idx[i][j];
+              this->cache_records_sub_idx[i][j] = NULL;
+              this->cache_records_element[i][j]->clear();
+              delete this->cache_records_element[i][j];
+            }
       }
 
       this->ndof = Space<Scalar>::get_num_dofs(this->spaces);
@@ -1163,7 +1203,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear(CacheRecordPerElement* elementCacheInfo, Traverse::State* current_state)
+    void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear(CacheRecordPerElement* elementCacheInfo, int nvert)
     {
       for(unsigned int i = 0; i < elementCacheInfo->asmlistCnt; i++)
       {
@@ -1176,7 +1216,7 @@ namespace Hermes
       this->geometry->free();
       delete this->geometry;
 
-      for(unsigned int edge_i = 0; edge_i < current_state->rep->nvert; edge_i++)
+      for(unsigned int edge_i = 0; edge_i < nvert; edge_i++)
       {
         if(this->fnsSurface[edge_i] == NULL)
           continue;
@@ -1202,7 +1242,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::CacheRecordPerElement::clear(Traverse::State* current_state)
+    void DiscreteProblem<Scalar>::CacheRecordPerElement::clear()
     {
       delete [] this->asmlistIdx;
     }
@@ -1274,7 +1314,7 @@ namespace Hermes
             {
               typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i]); 
               if(it != this->cache_records_sub_idx[i][current_state->e[i]->id]->end())
-                (*it).second->clear(this->cache_records_element[i][current_state->e[i]->id], current_state);
+                (*it).second->clear(this->cache_records_element[i][current_state->e[i]->id], current_state->rep->nvert);
               else
                 this->cache_records_sub_idx[i][current_state->e[i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[i], new CacheRecordPerSubIdx));
             }
@@ -1299,7 +1339,7 @@ namespace Hermes
               if(this->cache_records_element[i][current_state->e[i]->id] == NULL)
                 this->cache_records_element[i][current_state->e[i]->id] = new CacheRecordPerElement;
               else
-                this->cache_records_element[i][current_state->e[i]->id]->clear(current_state);
+                this->cache_records_element[i][current_state->e[i]->id]->clear();
 
               int order = this->globalIntegrationOrderSet ? this->globalIntegrationOrder : 0;
               

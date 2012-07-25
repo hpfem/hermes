@@ -148,9 +148,7 @@ int main(int argc, char* args[])
 
     // Clean up.
     delete adaptivity;
-    if(done == false)
-      delete ref_space->get_mesh();
-    delete ref_space;
+   
 
     as++;
   }
