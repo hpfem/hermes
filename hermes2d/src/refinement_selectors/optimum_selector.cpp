@@ -99,6 +99,25 @@ namespace Hermes
       }
 
       template<typename Scalar>
+      OptimumSelector<Scalar>::~OptimumSelector()
+      {
+        for(int i = 0; i < 2; i++)
+        {
+          for(int j = 0; j < H2DRS_MAX_ORDER + 2; j++)
+          {
+            for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
+            {
+              delete [] num_shapes[i][j][k];
+            }
+            delete [] num_shapes[i][j];
+          }
+          delete [] num_shapes[i];
+        }
+
+        delete [] num_shapes;
+      }
+      
+      template<typename Scalar>
       void OptimumSelector<Scalar>::add_bubble_shape_index(int order_h, int order_v, std::map<int, bool>& used_shape_index, Hermes::vector<ShapeInx>& indices, ElementMode2D mode)
       {
         int quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);

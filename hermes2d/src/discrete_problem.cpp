@@ -175,6 +175,16 @@ namespace Hermes
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
       wf_seq = -1;
       if(sp_seq != NULL) delete [] sp_seq;
+
+
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        free(cache_records_sub_idx[i]);
+        free(cache_records_element[i]);
+      }
+
+      delete [] cache_records_sub_idx;
+      delete [] cache_records_element;
     }
 
     template<typename Scalar>

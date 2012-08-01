@@ -356,7 +356,7 @@ namespace Hermes
 
       public:
         /// Destructor.
-        virtual ~OptimumSelector() {};
+        virtual ~OptimumSelector();
       protected:
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
