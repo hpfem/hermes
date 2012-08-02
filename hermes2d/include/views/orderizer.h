@@ -41,6 +41,9 @@ namespace Hermes
         template<typename Scalar>
         void save_orders_vtk(const Space<Scalar>* space, const char* file_name);
 
+        template<typename Scalar>
+        void save_mesh_vtk(const Space<Scalar>* space, const char* file_name);
+
         int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
 
         void calc_vertices_aabb(double* min_x, double* max_x,

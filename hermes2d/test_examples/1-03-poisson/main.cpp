@@ -63,6 +63,13 @@ int main(int argc, char* argv[])
   // Create an H1 space with default shapeset.
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
 
+  Hermes::Hermes2D::Element* e;
+  int i = 1;
+  for_all_active_elements(e, &mesh)
+  {
+    space.set_element_order(e->id, i++ % 9 + 1);
+  }
+
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
 
@@ -90,6 +97,7 @@ int main(int argc, char* argv[])
 
       // Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
+      ord.save_mesh_vtk(&space, "mesh.vtk");
       ord.save_orders_vtk(&space, "ord.vtk");
     }
 

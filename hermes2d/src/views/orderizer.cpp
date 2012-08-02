@@ -271,6 +271,51 @@ namespace Hermes
         fclose(f);
       }
 
+      template<typename Scalar>
+      void Orderizer::save_mesh_vtk(const Space<Scalar>* space, const char* file_name)
+      {
+        process_space(space);
+
+        FILE* f = fopen(file_name, "wb");
+        if(f == NULL) throw Hermes::Exceptions::Exception("Could not open %s for writing.", file_name);
+        lock_data();
+
+        // Output header for vertices.
+        fprintf(f, "# vtk DataFile Version 2.0\n");
+        fprintf(f, "\n");
+        fprintf(f, "ASCII\n\n");
+        fprintf(f, "DATASET UNSTRUCTURED_GRID\n");
+
+        // Output vertices.
+        fprintf(f, "POINTS %d %s\n", this->vertex_count, "float");
+        for (int i = 0; i < this->vertex_count; i++)
+          fprintf(f, "%g %g %g\n", this->verts[i][0], this->verts[i][1], 0.0);
+
+        // Output elements.
+        fprintf(f, "\n");
+        fprintf(f, "CELLS %d %d\n", this->edges_count, + 3 * this->edges_count);
+        for (int i = 0; i < this->edges_count; i++)
+          fprintf(f, "2 %d %d\n", this->edges[i][0], this->edges[i][1]);
+
+        // Output cell types.
+        fprintf(f, "\n");
+        fprintf(f, "CELL_TYPES %d\n", this->edges_count);
+
+        for (int i = 0; i < this->edges_count; i++)
+          fprintf(f, "3\n");    // The "5" means triangle in VTK.
+
+        // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
+        // for how it is done for vectors.
+        fprintf(f, "\n");
+        fprintf(f, "CELL_DATA %d\n", this->edges_count);
+        fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
+        fprintf(f, "LOOKUP_TABLE %s\n", "default");
+        for (int i = 0; i < this->edges_count; i++)
+          fprintf(f, "0 \n");
+        unlock_data();
+        fclose(f);
+      }
+
       int Orderizer::get_labels(int*& lvert, char**& ltext, double2*& lbox) const
       {
         lvert = this->lvert;
@@ -297,6 +342,8 @@ namespace Hermes
 
       template HERMES_API void Orderizer::save_orders_vtk<double>(const Space<double>* space, const char* file_name);
       template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(const Space<std::complex<double> >* space, const char* file_name);
+      template HERMES_API void Orderizer::save_mesh_vtk<double>(const Space<double>* space, const char* file_name);
+      template HERMES_API void Orderizer::save_mesh_vtk<std::complex<double> >(const Space<std::complex<double> >* space, const char* file_name);
       template HERMES_API void Orderizer::process_space<double>(const Space<double>* space);
       template HERMES_API void Orderizer::process_space<std::complex<double> >(const Space<std::complex<double> >* space);
     }
