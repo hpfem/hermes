@@ -37,7 +37,6 @@ namespace Hermes
     signal(SIGABRT, CallStack::dump);
     signal(SIGFPE, CallStack::dump);
     signal(SIGILL, CallStack::dump);
-    signal(SIGINT, CallStack::dump);
     signal(SIGSEGV, CallStack::dump);
     signal(SIGTERM, CallStack::dump);
 
