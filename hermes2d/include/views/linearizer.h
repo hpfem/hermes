@@ -55,6 +55,9 @@ namespace Hermes
 
         int get_num_vertices();
         double3* get_vertices();
+
+        int3* get_contour_triangles();
+        int get_num_contour_triangles();
       protected:
         void free();
 
@@ -68,6 +71,8 @@ namespace Hermes
         MeshFunction<double> *xdisp, *ydisp;
         double dmult;
 
+        int3* trisContours;      ///< triangles: vertex index triplets
+        int triangleContours_count;
         double3* verts;  ///< vertices: (x, y, value) triplets
 
         /// What kind of information do we want to get out of the solution.

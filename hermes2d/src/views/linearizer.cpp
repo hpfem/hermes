@@ -110,6 +110,7 @@ namespace Hermes
         user_xdisp = false;
         ydisp = NULL;
         user_ydisp = false;
+        trisContours = NULL;
       }
 
       void Linearizer::process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
@@ -863,6 +864,13 @@ namespace Hermes
         delete [] trfs;
         delete [] trav;
 
+        // for contours, without regularization.
+        if(this->trisContours != NULL)
+          delete [] this->trisContours;
+        this->trisContours = new int3[this->triangle_count];
+        memcpy(this->trisContours, this->tris, this->triangle_count * sizeof(int3));
+        triangleContours_count = this->triangle_count;
+
         if(this->caughtException != NULL)
         {
           this->unlock_data();
@@ -972,6 +980,8 @@ namespace Hermes
           ::free(verts);
           verts = NULL;
         }
+        if(trisContours != NULL)
+          delete [] this->trisContours;
       }
 
       Linearizer::~Linearizer()
@@ -1047,6 +1057,16 @@ namespace Hermes
       int Linearizer::get_num_vertices()
       {
         return this->vertex_count;
+      }
+
+      int Linearizer::get_num_contour_triangles()
+      {
+        return this->triangleContours_count;
+      }
+
+      int3* Linearizer::get_contour_triangles()
+      {
+        return this->trisContours;
       }
     }
   }

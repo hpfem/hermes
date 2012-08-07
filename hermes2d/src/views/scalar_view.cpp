@@ -1072,7 +1072,7 @@ namespace Hermes
         // lock and get data
         lin->lock_data();
         double3* vert = lin->get_vertices();
-        int3* tris = lin->get_triangles();
+        int3* tris = lin->get_contour_triangles();
         int3* edges = lin->get_edges();
 
         glPolygonMode(GL_FRONT_AND_BACK, pmode ? GL_LINE : GL_FILL);
@@ -1107,7 +1107,7 @@ namespace Hermes
           {
             glColor3fv(cont_color);
             glBegin(GL_LINES);
-            for (i = 0; i < lin->get_num_triangles(); i++)
+            for (i = 0; i < lin->get_num_contour_triangles(); i++)
             {
               if(finite(vert[tris[i][0]][2]) && finite(vert[tris[i][1]][2]) && finite(vert[tris[i][2]][2]))
               {
