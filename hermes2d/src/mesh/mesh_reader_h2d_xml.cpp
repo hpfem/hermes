@@ -168,6 +168,23 @@ namespace Hermes
 
         for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
         {
+          for (int element_i = 0; element_i < parsed_xml_domain->elements().element().size(); element_i++)
+          {
+
+              XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(element_i);
+
+              // Trim whitespaces.
+              unsigned int begin = element->marker().find_first_not_of(" \t\n");
+              unsigned int end = element->marker().find_last_not_of(" \t\n");
+              element->marker().erase(end + 1, element->marker().length());
+              element->marker().erase(0, begin);
+
+              meshes[subdomains_i]->element_markers_conversion.insert_marker(meshes[subdomains_i]->element_markers_conversion.min_marker_unused, element->marker());
+          }
+        }
+
+        for(unsigned int subdomains_i = 0; subdomains_i < subdomains_count; subdomains_i++)
+        {
           unsigned int vertex_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().size() : 0;
           unsigned int element_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().size() : 0;
           unsigned int boundary_edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().size() : 0;
@@ -304,14 +321,6 @@ namespace Hermes
               }
 
               XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(element_i);
-
-              // Trim whitespaces.
-              unsigned int begin = element->marker().find_first_not_of(" \t\n");
-              unsigned int end = element->marker().find_last_not_of(" \t\n");
-              element->marker().erase(end + 1, element->marker().length());
-              element->marker().erase(0, begin);
-
-              meshes[subdomains_i]->element_markers_conversion.insert_marker(meshes[subdomains_i]->element_markers_conversion.min_marker_unused, element->marker());
 
               if(dynamic_cast<XMLSubdomains::quad_type*>(element) != NULL)
                 e = meshes[subdomains_i]->create_quad(meshes[subdomains_i]->element_markers_conversion.get_internal_marker(element->marker()).marker,
