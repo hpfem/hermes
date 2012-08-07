@@ -1294,6 +1294,8 @@ namespace Hermes
                   changedInLastAdaptation = true;
             }
           }
+          else
+            changedInLastAdaptation = true;
         }
 
         current_alsSurface[i] = new AsmList<Scalar>[current_state->rep->nvert];
