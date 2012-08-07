@@ -24,25 +24,19 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    double NewtonSolver<Scalar>::max_allowed_residual_norm = 1E9;
-
-    template<typename Scalar>
-    double NewtonSolver<Scalar>::min_allowed_damping_coeff = 1E-2;
-
-    template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0), own_dp(false)
+    NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), max_allowed_residual_norm(1E9), min_allowed_damping_coeff(1E-2), currentDampingCofficient(1.0), own_dp(false)
     {
       init_linear_solver();
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0), own_dp(true)
+    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), max_allowed_residual_norm(1E9), min_allowed_damping_coeff(1E-2), currentDampingCofficient(1.0), own_dp(true)
     {
       init_linear_solver();
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), currentDampingCofficient(1.0), own_dp(true)
+    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), kept_jacobian(NULL), newton_tol(1e-8), newton_max_iter(20), residual_as_function(false), max_allowed_residual_norm(1E9), min_allowed_damping_coeff(1E-2), currentDampingCofficient(1.0), own_dp(true)
     {
       init_linear_solver();
     }
@@ -57,6 +51,18 @@ namespace Hermes
     void NewtonSolver<Scalar>::set_newton_max_iter(int newton_max_iter)
     {
       this->newton_max_iter = newton_max_iter;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set)
+    {
+      this->max_allowed_residual_norm = max_allowed_residual_norm_to_set;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set)
+    {
+      this->min_allowed_damping_coeff = min_allowed_damping_coeff_to_set;
     }
 
     template<typename Scalar>
