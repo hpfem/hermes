@@ -92,18 +92,59 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
     {
-      if(this->stage_dp_left != NULL)
-        static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_spaces(spaces);
+      bool delete_K_vector = false;
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        if(spaces[i]->get_seq() != this->spaces[i]->get_seq())
+          delete_K_vector = true;
+      }
+
       this->spaces = spaces;
+      this->spaces_mutable.clear();
+      for(unsigned int i = 0; i < this->spaces.size(); i++)
+        this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(this->spaces.at(i)));
+
+      if(delete_K_vector)
+      {
+        delete [] K_vector;
+        K_vector = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
+        this->info("K vectors are being set to zero, as the spaces changed during computation.");
+        memset(K_vector, 0, num_stages * Space<Scalar>::get_num_dofs(this->spaces) * sizeof(Scalar));
+      }
+      delete [] u_ext_vec;
+      u_ext_vec = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
+      delete [] vector_left;
+      vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
+
+      if(this->stage_dp_left != NULL)
+        static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_spaces(this->spaces);
     }
 
     template<typename Scalar>
     void RungeKutta<Scalar>::set_space(const Space<Scalar>* space)
     {
-      if(this->stage_dp_left != NULL)
-        static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_space(space);
+      bool delete_K_vector = false;
+      if(space->get_seq() != this->spaces[0]->get_seq())
+        delete_K_vector = true;
       this->spaces.clear();
       this->spaces.push_back(space);
+      this->spaces_mutable.clear();
+      this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(space));
+
+      if(delete_K_vector)
+      {
+        delete [] K_vector;
+        K_vector = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
+        this->info("K vector is being set to zero, as the spaces changed during computation.");
+        memset(K_vector, 0, num_stages * Space<Scalar>::get_num_dofs(this->spaces) * sizeof(Scalar));
+      }
+      delete [] u_ext_vec;
+      u_ext_vec = new Scalar[num_stages * Space<Scalar>::get_num_dofs(this->spaces)];
+      delete [] vector_left;
+      vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
+
+      if(this->stage_dp_left != NULL)
+        static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_space(space);
     }
     
     template<typename Scalar>
