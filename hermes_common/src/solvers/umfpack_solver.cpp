@@ -169,8 +169,27 @@ namespace Hermes
       memset(Ax, 0, sizeof(Scalar) * nnz);
     }
 
-    template<typename Scalar>
-    void CSCMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
+    template<>
+    void CSCMatrix<double>::add(unsigned int m, unsigned int n, double v)
+    {
+      if(v != 0.0)   // ignore zero values.
+      {
+        // Find m-th row in the n-th column.
+        int pos = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+        // Make sure we are adding to an existing non-zero entry.
+        if(pos < 0)
+        {
+          this->info("CSCMatrix<Scalar>::add(): i = %d, j = %d.", m, n);
+          throw Hermes::Exceptions::Exception("Sparse matrix entry not found: [%i, %i]", m, n);
+        }
+
+#pragma omp atomic
+        Ax[Ap[n] + pos] += v;
+      }
+    }
+
+    template<>
+    void CSCMatrix<std::complex<double> >::add(unsigned int m, unsigned int n, std::complex<double> v)
     {
       if(v != 0.0)   // ignore zero values.
       {
