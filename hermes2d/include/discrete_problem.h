@@ -273,12 +273,12 @@ namespace Hermes
         void clear();
         int* asmlistIdx;
         int asmlistCnt;
-        int order;
       };
 
       class CacheRecordPerSubIdx
       {
       public:
+        int order;
         void clear(int nvert);
         int asmlistCnt;
         Func<double>** fns;
