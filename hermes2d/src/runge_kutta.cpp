@@ -29,7 +29,10 @@ namespace Hermes
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
+      {
         this->spaces.push_back(spaces.at(i));
+        this->spaces_seqs.push_back(spaces.at(i)->get_seq());
+      }
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(spaces.at(i)));
 
@@ -63,8 +66,9 @@ namespace Hermes
       stage_wf_left(1), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
-      spaces.push_back(space);
-      spaces_mutable.push_back(const_cast<Space<Scalar>*>(space));
+      this->spaces.push_back(space);
+      this->spaces_seqs.push_back(space->get_seq());
+      this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(space));
 
       if(bt==NULL) throw Exceptions::NullException(2);
 
@@ -95,11 +99,14 @@ namespace Hermes
       bool delete_K_vector = false;
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
-        if(spaces[i]->get_seq() != this->spaces[i]->get_seq())
+        if(spaces[i]->get_seq() != this->spaces_seqs[i])
           delete_K_vector = true;
       }
 
       this->spaces = spaces;
+      this->spaces_seqs.clear();
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        this->spaces_seqs.push_back(spaces.at(i)->get_seq());
       this->spaces_mutable.clear();
       for(unsigned int i = 0; i < this->spaces.size(); i++)
         this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(this->spaces.at(i)));
@@ -124,10 +131,13 @@ namespace Hermes
     void RungeKutta<Scalar>::set_space(const Space<Scalar>* space)
     {
       bool delete_K_vector = false;
-      if(space->get_seq() != this->spaces[0]->get_seq())
+      if(space->get_seq() != this->spaces_seqs[0])
         delete_K_vector = true;
+      
       this->spaces.clear();
       this->spaces.push_back(space);
+      this->spaces_seqs.clear();
+      this->spaces_seqs.push_back(space->get_seq());
       this->spaces_mutable.clear();
       this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(space));
 
@@ -404,6 +414,7 @@ namespace Hermes
           // Adding the block mass matrix M to matrix_right. This completes the
           // resulting tensor Jacobian.
           matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
+
           matrix_right->finish();
         }
         else

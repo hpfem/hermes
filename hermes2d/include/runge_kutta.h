@@ -179,6 +179,7 @@ namespace Hermes
       /// Space instances for all equations in the system.
       Hermes::vector<const Space<Scalar>*> spaces;
       Hermes::vector<Space<Scalar>*> spaces_mutable;
+      Hermes::vector<unsigned int> spaces_seqs;
 
       /// ButcherTable.
       ButcherTable* bt;
