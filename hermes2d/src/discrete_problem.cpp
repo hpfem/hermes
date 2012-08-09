@@ -249,7 +249,7 @@ namespace Hermes
           if(this->cache_records_sub_idx[i][j] != NULL)
           {
             for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-              it->second->clear(this->cache_records_element[i][j], spaces[i]->get_mesh()->get_element(j)->nvert);
+              it->second->clear(spaces[i]->get_mesh()->get_element(j)->nvert);
 
             this->cache_records_sub_idx[i][j]->clear();
             delete this->cache_records_sub_idx[i][j];
@@ -274,6 +274,14 @@ namespace Hermes
 
       this->spaces = spacesToSet;
       have_matrix = false;
+
+      unsigned int first_dof_running = 0;
+      this->spaces_first_dofs.clear();
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        this->spaces_first_dofs.push_back(first_dof_running);
+        first_dof_running += spaces.at(i)->get_num_dofs();
+      }
 
       int max_size = spacesToSet[0]->get_mesh()->get_max_element_id();
       for(unsigned int i = 1; i < spacesToSet.size(); i++)
@@ -308,7 +316,7 @@ namespace Hermes
             if(this->cache_records_sub_idx[i][j] != NULL)
             {
               for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-                it->second->clear(this->cache_records_element[i][j], spaces[i]->get_mesh()->get_element(j)->nvert);
+                it->second->clear(spaces[i]->get_mesh()->get_element(j)->nvert);
 
               this->cache_records_sub_idx[i][j]->clear();
               delete this->cache_records_sub_idx[i][j];
@@ -1213,9 +1221,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear(CacheRecordPerElement* elementCacheInfo, int nvert)
+    void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear(int nvert)
     {
-      for(unsigned int i = 0; i < elementCacheInfo->asmlistCnt; i++)
+      for(unsigned int i = 0; i < this->asmlistCnt; i++)
       {
         this->fns[i]->free_fn();
         delete this->fns[i];
@@ -1326,7 +1334,7 @@ namespace Hermes
             {
               typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i]); 
               if(it != this->cache_records_sub_idx[i][current_state->e[i]->id]->end())
-                (*it).second->clear(this->cache_records_element[i][current_state->e[i]->id], current_state->rep->nvert);
+                (*it).second->clear(current_state->rep->nvert);
               else
                 this->cache_records_sub_idx[i][current_state->e[i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[i], new CacheRecordPerSubIdx));
             }
@@ -1419,6 +1427,7 @@ namespace Hermes
           // Set active element to reference mappings.
           current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
           newRecord->fns = new Func<double>*[current_als[i]->cnt];
+          newRecord->asmlistCnt = current_als[i]->cnt;
           for (unsigned int j = 0; j < current_als[i]->cnt; j++)
           {
             current_spss[i]->set_active_shape(current_als[i]->idx[j]);

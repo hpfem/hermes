@@ -73,14 +73,14 @@ int main(int argc, char* argv[])
   H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
 
-  // Initialize the FE problem.
-  DiscreteProblem<double> dp(&wf, &space);
-
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
-  runge_kutta.set_freeze_jacobian();
-  runge_kutta.set_verbose_output(false);
+  runge_kutta.set_verbose_output(true);
+  runge_kutta.setGlobalIntegrationOrder(10);
+
+  // Iteration number.
+  int iteration = 0;
     
   // Time stepping loop:
   do
@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
     // Perform one Runge-Kutta time step according to the selected Butcher's table.
     try
     {
+      runge_kutta.set_space(&space);
       runge_kutta.setTime(current_time);
       runge_kutta.setTimeStep(time_step);
       runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);

@@ -255,6 +255,9 @@ namespace Hermes
 
         // Assemble just the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
+        FILE* file = fopen("asdf", "w+");
+        jacobian->dump(file, "a");
+        fclose(file);
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
