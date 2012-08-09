@@ -185,6 +185,7 @@ namespace Hermes
         ref_mesh->copy(coarse[i]->get_mesh());
         ref_mesh->refine_all_elements(refinement_type);
         ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
+        ref_spaces->back()->seq = g_space_seq++;
       }
 
       if(same_meshes)
@@ -203,7 +204,7 @@ namespace Hermes
       ref_mesh->refine_all_elements(refinement_type);
 
       Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
-
+      ref_space->seq = g_space_seq++;
       return ref_space;
     }
 
