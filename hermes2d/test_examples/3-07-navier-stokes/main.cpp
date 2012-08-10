@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
-  mloader.load("domain-tri.mesh", &mesh);
+  mloader.load("domain.mesh", &mesh);
 
   // Initial mesh refinements.
   mesh.refine_towards_boundary(BDY_OBSTACLE, 1, false);
