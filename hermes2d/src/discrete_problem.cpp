@@ -1776,7 +1776,7 @@ namespace Hermes
         if(current_als_i->dof[i] < 0)
           continue;
 
-        if((!tra || surface_form) && current_als_j->dof[i] < 0)
+        if((!tra || surface_form) && current_als_i->dof[i] < 0)
           continue;
         if(std::abs(current_als_i->coef[i]) < 1e-12)
           continue;
