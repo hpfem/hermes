@@ -2394,8 +2394,8 @@ namespace Hermes
           if(!form_to_be_assembled((MatrixForm<Scalar>*)current_mfsurf[current_mfsurf_i], current_state))
             continue;
 
-          int order = 24;
-          int order_base = 24;
+          int order = 20;
+          int order_base = 20;
 
           MatrixFormSurf<Scalar>* mfs = current_mfsurf[current_mfsurf_i];
           if(mfs->areas[0] != H2D_DG_INNER_EDGE)
@@ -2548,8 +2548,8 @@ namespace Hermes
       {
         for (unsigned int ww = 0; ww < wf->vfsurf.size(); ww++)
         {
-          int order = 24;
-          int order_base = 24;
+          int order = 20;
+          int order_base = 20;
 
           VectorFormSurf<Scalar>* vfs = current_vfsurf[ww];
           if(vfs->areas[0] != H2D_DG_INNER_EDGE)
