@@ -7982,14 +7982,14 @@ namespace Hermes
     static Shapeset::shape_fn_t leg_tri_fn[] =
     {
       leg_tri_l0_l0,   jacobi_f1,    jacobi_f2,    jacobi_f3,    jacobi_f4,    jacobi_f5,    jacobi_f6,    jacobi_f7_0,
-      jacobi_f7_1,  jacobi_f8_0,  jacobi_f8_1,  jacobi_f9_0,  jacobi_f9_1,  jacobi_f10,   jacobi_f11,
-      jacobi_f12,   jacobi_f13,   jacobi_f14,   jacobi_f15,   jacobi_f16_0, jacobi_f16_1, jacobi_f17_0,
-      jacobi_f17_1, jacobi_f18_0, jacobi_f18_1, jacobi_f19,   jacobi_f20,   jacobi_f21,   jacobi_f22,
+        jacobi_f8_0,    jacobi_f9_0,    jacobi_f10,   jacobi_f11,
+      jacobi_f12,   jacobi_f13,   jacobi_f14,   jacobi_f15,   jacobi_f16_0,  jacobi_f17_0,
+       jacobi_f18_0,  jacobi_f19,   jacobi_f20,   jacobi_f21,   jacobi_f22,
       jacobi_f23,   jacobi_f24,   jacobi_f25,   jacobi_f26,   jacobi_f27,   jacobi_f28,   jacobi_f29_0,
-      jacobi_f29_1, jacobi_f30_0, jacobi_f30_1, jacobi_f31_0, jacobi_f31_1, jacobi_f32,   jacobi_f33,
+       jacobi_f30_0,  jacobi_f31_0,  jacobi_f32,   jacobi_f33,
       jacobi_f34,   jacobi_f35,   jacobi_f36,   jacobi_f37,   jacobi_f38,   jacobi_f39,   jacobi_f40,
-      jacobi_f41,   jacobi_f42,   jacobi_f43,   jacobi_f44,   jacobi_f45,   jacobi_f46_0, jacobi_f46_1,
-      jacobi_f47_0, jacobi_f47_1, jacobi_f48_0, jacobi_f48_1, jacobi_f49,   jacobi_f50,   jacobi_f51,
+      jacobi_f41,   jacobi_f42,   jacobi_f43,   jacobi_f44,   jacobi_f45,   jacobi_f46_0, 
+      jacobi_f47_0,  jacobi_f48_0,  jacobi_f49,   jacobi_f50,   jacobi_f51,
       jacobi_f52,   jacobi_f53,   jacobi_f54,   jacobi_f55,   jacobi_f56,   jacobi_f57,   jacobi_f58,
       jacobi_f59,   jacobi_f60,   jacobi_f61,   jacobi_f62,   jacobi_f63,   jacobi_f64,   jacobi_f65,
       jacobi_f66
@@ -7997,14 +7997,14 @@ namespace Hermes
     static Shapeset::shape_fn_t leg_tri_fn_dx[] =
     {
       leg_tri_l0_l0x,   jacobi_f1_dx,   jacobi_f2_dx,   jacobi_f3_dx,   jacobi_f4_dx,   jacobi_f5_dx,   jacobi_f6_dx,   jacobi_f7_dx_0,
-      jacobi_f7_dx_1, jacobi_f8_dx_0, jacobi_f8_dx_1, jacobi_f9_dx_0, jacobi_f9_dx_1, jacobi_f10_dx,  jacobi_f11_dx,
-      jacobi_f12_dx,  jacobi_f13_dx,  jacobi_f14_dx,  jacobi_f15_dx,  jacobi_f16_dx_0, jacobi_f16_dx_1, jacobi_f17_dx_0,
-      jacobi_f17_dx_1, jacobi_f18_dx_0, jacobi_f18_dx_1, jacobi_f19_dx,  jacobi_f20_dx,  jacobi_f21_dx,  jacobi_f22_dx,
+       jacobi_f8_dx_0,  jacobi_f9_dx_0,  jacobi_f10_dx,  jacobi_f11_dx,
+      jacobi_f12_dx,  jacobi_f13_dx,  jacobi_f14_dx,  jacobi_f15_dx,  jacobi_f16_dx_0,  jacobi_f17_dx_0,
+       jacobi_f18_dx_0,  jacobi_f19_dx,  jacobi_f20_dx,  jacobi_f21_dx,  jacobi_f22_dx,
       jacobi_f23_dx,  jacobi_f24_dx,  jacobi_f25_dx,  jacobi_f26_dx,  jacobi_f27_dx,  jacobi_f28_dx,  jacobi_f29_dx_0,
-      jacobi_f29_dx_1, jacobi_f30_dx_0, jacobi_f30_dx_1, jacobi_f31_dx_0, jacobi_f31_dx_1, jacobi_f32_dx,  jacobi_f33_dx,
+       jacobi_f30_dx_0,  jacobi_f31_dx_0,  jacobi_f32_dx,  jacobi_f33_dx,
       jacobi_f34_dx,  jacobi_f35_dx,  jacobi_f36_dx,  jacobi_f37_dx,  jacobi_f38_dx,  jacobi_f39_dx,  jacobi_f40_dx,
-      jacobi_f41_dx,  jacobi_f42_dx,  jacobi_f43_dx,  jacobi_f44_dx,  jacobi_f45_dx,  jacobi_f46_dx_0, jacobi_f46_dx_1,
-      jacobi_f47_dx_0, jacobi_f47_dx_1, jacobi_f48_dx_0, jacobi_f48_dx_1, jacobi_f49_dx,  jacobi_f50_dx,  jacobi_f51_dx,
+      jacobi_f41_dx,  jacobi_f42_dx,  jacobi_f43_dx,  jacobi_f44_dx,  jacobi_f45_dx,  jacobi_f46_dx_0, 
+      jacobi_f47_dx_0,  jacobi_f48_dx_0,  jacobi_f49_dx,  jacobi_f50_dx,  jacobi_f51_dx,
       jacobi_f52_dx,  jacobi_f53_dx,  jacobi_f54_dx,  jacobi_f55_dx,  jacobi_f56_dx,  jacobi_f57_dx,  jacobi_f58_dx,
       jacobi_f59_dx,  jacobi_f60_dx,  jacobi_f61_dx,  jacobi_f62_dx,  jacobi_f63_dx,  jacobi_f64_dx,  jacobi_f65_dx,
       jacobi_f66_dx
@@ -8012,14 +8012,14 @@ namespace Hermes
     static Shapeset::shape_fn_t leg_tri_fn_dy[] =
     {
       leg_tri_l0_l0y,   jacobi_f1_dy,   jacobi_f2_dy,   jacobi_f3_dy,   jacobi_f4_dy,   jacobi_f5_dy,   jacobi_f6_dy,   jacobi_f7_dy_0,
-      jacobi_f7_dy_1, jacobi_f8_dy_0, jacobi_f8_dy_1, jacobi_f9_dy_0, jacobi_f9_dy_1, jacobi_f10_dy,  jacobi_f11_dy,
-      jacobi_f12_dy,  jacobi_f13_dy,  jacobi_f14_dy,  jacobi_f15_dy,  jacobi_f16_dy_0, jacobi_f16_dy_1, jacobi_f17_dy_0,
-      jacobi_f17_dy_1, jacobi_f18_dy_0, jacobi_f18_dy_1, jacobi_f19_dy,  jacobi_f20_dy,  jacobi_f21_dy,  jacobi_f22_dy,
+       jacobi_f8_dy_0,  jacobi_f9_dy_0,  jacobi_f10_dy,  jacobi_f11_dy,
+      jacobi_f12_dy,  jacobi_f13_dy,  jacobi_f14_dy,  jacobi_f15_dy,  jacobi_f16_dy_0,  jacobi_f17_dy_0,
+       jacobi_f18_dy_0,  jacobi_f19_dy,  jacobi_f20_dy,  jacobi_f21_dy,  jacobi_f22_dy,
       jacobi_f23_dy,  jacobi_f24_dy,  jacobi_f25_dy,  jacobi_f26_dy,  jacobi_f27_dy,  jacobi_f28_dy,  jacobi_f29_dy_0,
-      jacobi_f29_dy_1, jacobi_f30_dy_0, jacobi_f30_dy_1, jacobi_f31_dy_0, jacobi_f31_dy_1, jacobi_f32_dy,  jacobi_f33_dy,
+       jacobi_f30_dy_0,  jacobi_f31_dy_0,  jacobi_f32_dy,  jacobi_f33_dy,
       jacobi_f34_dy,  jacobi_f35_dy,  jacobi_f36_dy,  jacobi_f37_dy,  jacobi_f38_dy,  jacobi_f39_dy,  jacobi_f40_dy,
-      jacobi_f41_dy,  jacobi_f42_dy,  jacobi_f43_dy,  jacobi_f44_dy,  jacobi_f45_dy,  jacobi_f46_dy_0, jacobi_f46_dy_1,
-      jacobi_f47_dy_0, jacobi_f47_dy_1, jacobi_f48_dy_0, jacobi_f48_dy_1, jacobi_f49_dy,  jacobi_f50_dy,  jacobi_f51_dy,
+      jacobi_f41_dy,  jacobi_f42_dy,  jacobi_f43_dy,  jacobi_f44_dy,  jacobi_f45_dy,  jacobi_f46_dy_0, 
+      jacobi_f47_dy_0,  jacobi_f48_dy_0,  jacobi_f49_dy,  jacobi_f50_dy,  jacobi_f51_dy,
       jacobi_f52_dy,  jacobi_f53_dy,  jacobi_f54_dy,  jacobi_f55_dy,  jacobi_f56_dy,  jacobi_f57_dy,  jacobi_f58_dy,
       jacobi_f59_dy,  jacobi_f60_dy,  jacobi_f61_dy,  jacobi_f62_dy,  jacobi_f63_dy,  jacobi_f64_dy,  jacobi_f65_dy,
       jacobi_f66_dy
@@ -8082,11 +8082,11 @@ namespace Hermes
     static int qb_3[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     static int qb_4[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, };
     static int qb_5[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, };
-    static int qb_6[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 21, 22, 23, 24, 25, 26, 27, 28, 29, 38, 39, 40, 41, 42, 51, };
-    static int qb_7[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 38, 39, 40, 41, 42, 43, 44, 51, 52, 53, };
-    static int qb_8[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 46, 51, 52, 53, 54, 55, 60, };
-    static int qb_9[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 51, 52, 53, 54, 55, 56, 57, 60, 61, 62, };
-    static int qb_10[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, };
+    static int qb_6[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, };
+    static int qb_7[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36 };
+    static int qb_8[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, };
+    static int qb_9[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55 };
+    static int qb_10[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66 };
 
     int* leg_tri_bubble_indices[11] = {  qb_0,   qb_1,   qb_2,   qb_3,   qb_4,   qb_5,   qb_6,   qb_7,   qb_8,   qb_9,   qb_10 };
 
@@ -8109,8 +8109,16 @@ namespace Hermes
 
     int leg_tri_index_to_order[] =
     {
-      0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6,
-      7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+      0, 
+      1, 1, 1, 
+      2, 2, 2, 
+      3, 3, 3, 3, 
+      4, 4, 4, 4, 4,
+      5, 5, 5, 5, 5, 5, 
+      6, 6, 6, 6, 6, 6, 6, 
+      7, 7, 7, 7, 7, 7, 7, 7, 
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 
+      9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 
       10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
     };
 

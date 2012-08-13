@@ -15,12 +15,12 @@
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 2;
+const int INIT_REF = 3;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-const int P_INIT = 0;
+const int P_INIT = 1;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.2;
+const double THRESHOLD = 0.9;
 // Adaptive strategy:
 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
 //   error is processed. If more elements have similar errors, refine
@@ -29,7 +29,7 @@ const double THRESHOLD = 0.2;
 //   than THRESHOLD times maximum element error.
 // STRATEGY = 2 ... refine all elements whose error is larger
 //   than THRESHOLD.
-const int STRATEGY = 1;
+const int STRATEGY = 0;
 // Predefined list of element refinement candidates. Possible values are
 // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
 // H2D_HP_ANISO_P, H2D_HP_ANISO.
