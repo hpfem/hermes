@@ -269,14 +269,13 @@ namespace Hermes
         if(residual_norm < last_residual_norm * (1. + 1. / newton_max_iter))
         {
           memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
-          for (int i = 0; i < ndof; i++)
-            coeff_vec[i] += this->currentDampingCofficient * linear_solver->get_sln_vector()[i];
+        for (int i = 0; i < ndof; i++)
+            coeff_vec[i] += currentDampingCofficient * linear_solver->get_sln_vector()[i];
         }
         else
         {
-          memcpy(coeff_vec, coeff_vec_back, sizeof(Scalar)*ndof);
           for (int i = 0; i < ndof; i++)
-            coeff_vec[i] += this->currentDampingCofficient * linear_solver->get_sln_vector()[i];
+            coeff_vec[i] = coeff_vec_back[i] + currentDampingCofficient * (coeff_vec[i] - coeff_vec_back[i]);
         }
 
         // Increase the number of iterations and test if we are still under the limit.
