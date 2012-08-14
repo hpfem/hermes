@@ -548,5 +548,29 @@ namespace Hermes
     {
       this->timeStep = timeStep;
     }
+
+    OutputAttachable::OutputAttachable()
+    {
+    }
+
+    void OutputAttachable::onInitialization()
+    {
+
+    }
+
+    void OutputAttachable::onStepBegin()
+    {
+
+    }
+
+    void OutputAttachable::onStepEnd()
+    {
+
+    }
+
+    void OutputAttachable::onFinish()
+    {
+
+    }
   }
 }

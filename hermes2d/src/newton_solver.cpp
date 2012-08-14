@@ -156,8 +156,12 @@ namespace Hermes
       double last_residual_norm;
       int it = 1;
 
+      this->onInitialization();
+
       while (true)
       {
+        this->onStepBegin();
+
         // Assemble just the residual vector.
         this->dp->assemble(coeff_vec, residual);
         
@@ -249,12 +253,14 @@ namespace Hermes
             delete [] coeff_vec;
             coeff_vec = NULL;
           }
-
+          this->onFinish();
           return;
         }
 
         // Assemble just the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
+
+        this->onStepEnd();
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).

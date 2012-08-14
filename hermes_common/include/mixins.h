@@ -216,6 +216,16 @@ namespace Hermes
       double time;
       double timeStep;
     };
+
+    class HERMES_API OutputAttachable
+    {
+    public:
+      OutputAttachable();
+      virtual void onInitialization();
+      virtual void onStepBegin();
+      virtual void onStepEnd();
+      virtual void onFinish();
+    };
   }
 }
 #endif

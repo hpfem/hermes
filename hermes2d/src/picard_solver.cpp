@@ -259,8 +259,11 @@ namespace Hermes
 
       int it = 1;
 
+      this->onInitialization();
+
       while (true)
       {
+        this->onStepBegin();
         linear_solver.solve();
 
         this->sln_vector = linear_solver.get_sln_vector();
@@ -288,6 +291,7 @@ namespace Hermes
         {
           delete [] last_iter_vector;
           Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
+          this->onFinish();
           return true;
         }
 
@@ -296,9 +300,12 @@ namespace Hermes
         {
           this->info("Maximum allowed number of Picard iterations exceeded, returning false.");
           delete [] last_iter_vector;
+
           // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
+          this->onFinish();
           return false;
         }
+        this->onStepEnd();
 
         // Increase counter of iterations.
         it++;

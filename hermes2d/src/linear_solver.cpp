@@ -101,11 +101,15 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::solve()
     {
+      this->onInitialization();
+
       dp->assemble(this->jacobian, this->residual);
 
       this->matrix_solver->solve();
 
       this->sln_vector = matrix_solver->get_sln_vector();
+
+      this->onFinish();
     }
 
     template<typename Scalar>
