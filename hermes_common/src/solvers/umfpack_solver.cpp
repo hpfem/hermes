@@ -90,7 +90,7 @@ namespace Hermes
       {
         for (int i = Ap[j]; i < Ap[j + 1]; i++)
         {
-          vector_out[j] += vector_in[Ai[i]]*Ax[i];
+          vector_out[Ai[i]] += vector_in[j]*Ax[i];
         }
       }
     }
