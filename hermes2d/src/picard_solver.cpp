@@ -30,6 +30,7 @@ namespace Hermes
       if(dp->get_spaces().size() != 1)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
+      init();
     }
 
     template<typename Scalar>
@@ -43,6 +44,7 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
+      init();
     }
 
     template<typename Scalar>
@@ -52,6 +54,7 @@ namespace Hermes
       if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != 1)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
+      init();
     }
 
     template<typename Scalar>
@@ -65,6 +68,7 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
+      init();
     }
 
     template<typename Scalar>
@@ -74,6 +78,7 @@ namespace Hermes
       if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != 1)
         throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
       this->slns_prev_iter.push_back(sln_prev_iter);
+      init();
     }
 
     template<typename Scalar>
@@ -87,6 +92,16 @@ namespace Hermes
       {
         this->slns_prev_iter.push_back(slns_prev_iter[i]);
       }
+      init();
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::init()
+    {
+      tol = 1e-4;
+      max_iter = 50;
+      num_last_vectors_used = 3;
+      beta = 1.0;
     }
 
     template<typename Scalar>
@@ -133,12 +148,6 @@ namespace Hermes
     void PicardSolver<Scalar>::set_verbose_output_linear_solver(bool to_set)
     {
       this->verbose_output_linear_solver = to_set;
-    }
-
-    template<typename Scalar>
-    bool PicardSolver<Scalar>::solve()
-    {
-      return solve(1e-8, 100);
     }
 
     template<typename Scalar>
@@ -214,8 +223,31 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PicardSolver<Scalar>::solve(double tol, int max_iter, int num_last_vectors_used,
-        double anderson_beta)
+    void PicardSolver<Scalar>::set_picard_tol(double tol)
+    {
+      this->tol = tol;
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::set_picard_max_iter(int max_iter)
+    {
+      this->max_iter = max_iter;
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::set_num_last_vector_used(int num)
+    {
+      this->num_last_vectors_used = num;
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::set_anderson_beta(double beta)
+    {
+      this->beta = beta;
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::solve()
     {
       // Sanity check.
       if(num_last_vectors_used < 1)
@@ -290,19 +322,21 @@ namespace Hermes
         {
           delete [] last_iter_vector;
           Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
+          static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
+
           this->onFinish();
-          return true;
+          return;
         }
 
         // Stopping because maximum number of iterations reached.
         if(it >= max_iter)
         {
-          this->info("Maximum allowed number of Picard iterations exceeded, returning false.");
           delete [] last_iter_vector;
-
-          // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
+          static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
+          
           this->onFinish();
-          return false;
+          throw Hermes::Exceptions::Exception("Maximum allowed number of Picard iterations exceeded, returning false.");
+          return;
         }
         this->onStepEnd();
 

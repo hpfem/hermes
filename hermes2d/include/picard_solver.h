@@ -48,7 +48,7 @@ namespace Hermes
       void set_verbose_output_linear_solver(bool verbose_output_to_set);
 
       /// Solve with default tolerances.
-      virtual bool solve();
+      virtual void solve();
 
       /// set time information for time-dependent problems.
       virtual void setTime(double time);
@@ -58,15 +58,22 @@ namespace Hermes
       virtual void set_space(const Space<Scalar>* space);
       virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
     
-      /// Solve with user-defined tolerances.
-      /// num_last_vectors_used ... number of last vectors used for Anderson acceleration.
-      bool solve(double tol, int max_iter, int num_last_vectors_used = 3, double anderson_beta = 1.0);
+      void set_picard_tol(double tol);
+      void set_picard_max_iter(int max_iter);
+      void set_num_last_vector_used(int num);
+      void set_anderson_beta(double beta);
     private:
+      void init();
       Hermes::vector<Solution<Scalar>* > slns_prev_iter;
       bool verbose_output_linear_solver;
 
       /// This instance owns its DP.
       const bool own_dp;
+
+      double tol;
+      int max_iter;
+      int num_last_vectors_used;
+      double beta;
     };
   }
 }
