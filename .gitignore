@@ -78,3 +78,8 @@ Debug/
 *.tag
 *.sty
 *.dvi
+
+# master branch specific code
+hermes_common/tests/*
+hermes2d/tests/*
+hermes2d/test_examples/*
