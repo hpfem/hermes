@@ -87,6 +87,9 @@ namespace Hermes
       UniData** unidata;
 
       void copy_base(Filter* flt);
+      
+      virtual void setDeleteSolutions();
+      bool deleteSolutions;
     };
 
     /// @ingroup meshFunctions
@@ -111,6 +114,7 @@ namespace Hermes
     public:
 
       SimpleFilter() {};
+      ~SimpleFilter();
 
       SimpleFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions, const Hermes::vector<int>& items = Hermes::vector<int>());
 
@@ -125,6 +129,7 @@ namespace Hermes
 
       void init_components();
       virtual void precalculate(int order, int mask);
+
     };
 
     /// @ingroup meshFunctions
