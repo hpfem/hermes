@@ -265,8 +265,7 @@ namespace Hermes
       {
         this->onStepBegin();
         linear_solver.solve();
-
-        this->sln_vector = linear_solver.get_sln_vector();
+        memcpy(this->sln_vector, linear_solver.get_sln_vector(), sizeof(Scalar)*ndof);
 
         // Calculate relative error between last_iter_vector[] and this->sln_vector[].
         // FIXME: this is wrong in the complex case (complex conjugation must be used).
