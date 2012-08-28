@@ -335,7 +335,7 @@ namespace Hermes
           static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
           
           this->onFinish();
-          throw Hermes::Exceptions::Exception("Maximum allowed number of Picard iterations exceeded, returning false.");
+          throw Hermes::Exceptions::Exception("Maximum allowed number of Picard iterations exceeded.");
           return;
         }
         this->onStepEnd();
