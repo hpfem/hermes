@@ -932,7 +932,7 @@ namespace Hermes
         if(p1 > p2) std::swap(p1, p2);
         int index = this->hash(p1, p2);
         int i = this->hash_table[index];
-        while (i >= 0)
+        while (i >= 0 && i < this->vertex_count)
         {
           if(
             this->info[i][0] == p1 && this->info[i][1] == p2 &&
