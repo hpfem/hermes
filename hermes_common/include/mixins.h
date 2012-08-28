@@ -149,14 +149,12 @@ namespace Hermes
     public:
       TimeMeasurable(const char *name = NULL); ///< Constructs internal structures and starts measuring.
 
-    private:
       /// Tick type. Used by the class Hermes::TimePeriod.
       enum TimerPeriodTickType
       {
         HERMES_ACCUMULATE, ///< Accumulate a period between ticks.
         HERMES_SKIP ///< Skip period between ticks, i.e., do not accumulate it.
       };
-    public:
 
       const TimeMeasurable& reset(); ///< Resets accumulated time.
       const TimeMeasurable& tick_reset(); ///< Starts a new period and resets accumulated time.
