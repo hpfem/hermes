@@ -17,7 +17,9 @@ This document is organized as follows:
   and gives references to underlying scientific articles.
 * Section 2 describes how to install Hermes on various hardware platforms, and how to 
   install matrix solver packages and various optional packages. 
-* Section 3 explains how to use Git and Github, and how you can contribute to the project if interested.
+* Section 3 is the core documentation section, you will find developers documentation in Doxygen, 
+  as well as step-by-step user documentation in tutorials and advanced examples. 
+* Section 4 explains how to use Git and Github, and how you can contribute to the project if interested.
 
 This document is under continuous development. If you find bugs, typos, dead links 
 and such, please report them to the 
@@ -30,7 +32,6 @@ Introduction
     :maxdepth: 1
 
     src/about-hermes
-    src/documentation
     src/math-background
     src/web-access
     src/citing-hermes
@@ -42,12 +43,20 @@ Installation
     :maxdepth: 1
 
     src/installation/linux
+    src/installation/win
     src/installation/mac
-    src/installation/win-cygwin
-    src/installation/win-msvc
     src/installation/matrix_solvers
-    src/installation/cython_installation
     src/installation/exodusII_netcdf
+    
+Documentation
+------------
+
+.. toctree::
+    :maxdepth: 1
+
+    src/documentation
+    src/documentation-tutorial
+    src/documentation-examples
 
 Collaboration
 -------------
@@ -56,24 +65,20 @@ Collaboration
     :maxdepth: 1
 
     src/collaboration
-    src/editing_sphinx
 
 Tutorial and Examples
 ---------------------
 
 Tutorial and examples are in separate repositories. Before 
 using them, make sure to install the Hermes library in your 
-system::
-
-    sudo make install
-
-To get the Tutorial clone::
+system.
+To get the tutorial, clone::
 
     git clone git://github.com/hpfem/hermes-tutorial.git
 
-To get Examples, clone::
+To get examples, clone::
 
     git clone git://github.com/hpfem/hermes-examples.git
 
 Both repositores contain a folder doc/ with documentation. To build 
-the documentation, type "make html" in that directory.
+the documentation there, type "make html" in the doc/ directory.

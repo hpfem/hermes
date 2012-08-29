@@ -13,6 +13,8 @@ finite element technology that includes
  * Dozens of time-integration methods. 
  * Adaptivity with dynamical meshes for time-dependent problems.
  * Adaptive multimesh *hp*-FEM for multiphysics coupled problems.
+ * Coupled problems solved together with hp-DG and hp-FEM.
+ * Calculations with physical quantities defined in different subdomains.
 
 Some the above points are discussed in more detail below:
 

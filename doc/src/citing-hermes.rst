@@ -346,10 +346,10 @@ If you use Hermes for your work, please be so kind to include some of the refere
 
 .. only:: html
 
-   Other papers that may be still closer to what you need can be found in the `publications section  <http://hpfem.org/publications/>`_ of the hp-FEM group home page or on `Pavel Solin's home page <http://hpfem.org/~pavel>`_.
+   Other papers that may be still closer to what you need can be found in the `publications section  <http://hpfem.org/people/>`_ of the hp-FEM group home page or on `Pavel Solin's home page <http://hpfem.org/~pavel>`_.
 
 .. only:: latex 
 
       Other papers that may be still closer to what you need can be found in the `publications section  
-      <http://hpfem.org/publications/>`_ of the hp-FEM group home page or on `Pavel Solin's home page 
+      <http://hpfem.org/people/>`_ of the hp-FEM group home page or on `Pavel Solin's home page 
       <http://hpfem.org/~pavel>`_.

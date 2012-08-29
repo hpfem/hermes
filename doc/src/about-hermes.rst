@@ -11,7 +11,8 @@ from numerous places around the globe.
 
 A standard way to use Hermes is to write short C++ user programs 
 that use the functionality provided by the library, but for 
-those who prefer to use a graphical interface, there is 
+those who prefer to use a graphical interface, the group located at the 
+University of West Bohemia develops a graphical Engineering tool based on Hermes2D: 
 `Agros2D <http://hpfem.org/agros2d/>`_. 
 
 .. figure:: img/agros.png
@@ -20,12 +21,10 @@ those who prefer to use a graphical interface, there is
    :figclass: align-center
    :alt: Agros snapshot.
 
-Hermes is loaded with modern finite element technology and its user base is 
-growing fast. We hope that you will enjoy the software and that you will find 
-this documentation useful. In any case please let us know if you find mistakes 
+Hermes is loaded with modern finite element technology. We hope that you will enjoy 
+the software and that you will find this documentation useful. 
+In any case please let us know if you find mistakes 
 or if you can suggest improvements to this documentation or to Hermes itself.
-Anyone who contributes with at least one patch becomes automatically a 
-`co-author <http://git.hpfem.org/hermes.git/blob/HEAD:/AUTHORS>`_ of the code.
 
 Free use of this software is granted under the terms of the GNU Lesser General
 Public License (LGPL). For details see the files `COPYING` and `COPYING.LESSER`.

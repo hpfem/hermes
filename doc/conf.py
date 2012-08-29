@@ -273,7 +273,7 @@ html_theme_options = {
 'codebgcolor': '#F5F5F5',
 'codetextcolor': '#000000',
 
-'relbarbgcolor': '#824513',
+'relbarbgcolor': '#1553ef',
 'relbartextcolor': '#000000',
 'relbarlinkcolor': '#FFFFFF',
 'footerbgcolor': '#FFFFFF',
