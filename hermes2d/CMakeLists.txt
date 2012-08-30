@@ -22,15 +22,15 @@ set(H2D_COMPLEX             YES)
 # Optional parts of the library:
 set(WITH_EXAMPLES           YES)
 set(WITH_BENCHMARKS         YES)
-set(WITH_MODULES            YES)
+set(WITH_MODULES            NO)
 set(WITH_TUTORIAL           YES)
-set(WITH_TESTS              YES)
+set(WITH_TESTS              NO)
 
 # Optional functionality:
 set(WITH_PYTHON             NO)
 set(WITH_GLUT               YES)
 set(WITH_VIEWER_GUI         NO)
-set(WITH_UTIL               YES)
+set(WITH_UTIL               NO)
 
 #
 # Select which solvers will be available:

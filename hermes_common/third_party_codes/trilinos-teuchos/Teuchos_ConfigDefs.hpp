@@ -62,6 +62,7 @@
 
 #include <cstdio>
 #include <cstdarg>
+#include <cstddef>
 #include <cerrno>
 #include <climits>
 #include <cstdlib>

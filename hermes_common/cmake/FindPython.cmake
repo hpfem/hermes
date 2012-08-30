@@ -14,10 +14,8 @@ execute_process(
 	OUTPUT_VARIABLE PYTHON_LIB_PATH
 	)
 string(STRIP ${PYTHON_LIB_PATH} PYTHON_LIB_PATH)
-FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6
+FIND_LIBRARY(PYTHON_LIBRARY NAMES python2.6 python2.7
     PATHS ${PYTHON_LIB_PATH}
-    NO_DEFAULT_PATH
-    NO_SYSTEM_ENVIRONMENT_PATH
     )
 
 # For MSVC (on Win, the function get_config_var does not accept the parameter 'LIBDIR').
