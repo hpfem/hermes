@@ -31,8 +31,8 @@ your local copy and the master repository, and you'll become part of the Hermes
 network at Github.
 
 Once you have a local copy of the Hermes repository on your computer, change dir 
-to hermes/. There you will find a CMakeLists.txt file that contains the lines
-::
+to hermes/. There you will find a CMakeLists.txt file that contains the lines::
+
     # OpenMP
     # "-1" stands for using as many threads as is the number of available cores.
     # Please be aware that the variable OMP_NUM_THREADS, that is often used for this purpose, is ignored.

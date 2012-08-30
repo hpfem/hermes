@@ -146,7 +146,7 @@ Windows
 | Go to the Trilinos source directory.
 | 
 | In the following, replace {CLAPACK_DIR} with the full path to your clapack-3.2.1-CMAKE directory (where you installed CLAPACK as a Hermes's dependency) without any quotes.
-Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.::
+| Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any other folder where you want to install Trilinos packages.::
 
 
     mkdir build_dir
@@ -174,7 +174,7 @@ Also, replace {CMAKE_INSTALL_PREFIX} with either your dependency root, or any ot
      ..
 	
 | Build the Trilinos solution.
-Go up to the Trilinos source directory and edit the cmake_install.cmake file. Change::
+| Go up to the Trilinos source directory and edit the cmake_install.cmake file. Change::
 
 	SET(CMAKE_INSTALL_CONFIG_NAME "Release")
 	

@@ -3,7 +3,7 @@ Hermes Documentation overview
 ====================
 
 Building user documentation (this one) in HTML
---------------------------
+----------------------------------------------
 
 Before building User Documentation, install the Python Sphinx package::
 
@@ -19,7 +19,7 @@ or using another web browser.
 
 
 Building user documentation (this one) in PDF
--------------------------
+---------------------------------------------
 
 In the directory doc/ type "make latex" and you will be instructed how to build 
 the PDF::
@@ -29,7 +29,7 @@ the PDF::
 
 
 Developer Documentation (in Doxygen)
------------------------
+------------------------------------
 The documentation is accessible online.
 
      `Hermes - common code <http://hpfem.org/~hermes/hermes/hermes_common/doc/html/index.html>`_

@@ -49,12 +49,13 @@ Installation
     src/installation/exodusII_netcdf
     
 Documentation
-------------
+-------------
 
 .. toctree::
     :maxdepth: 1
 
     src/documentation
+    src/typical_example
     src/documentation-tutorial
     src/documentation-examples
 
