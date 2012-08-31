@@ -21,9 +21,13 @@ else()
 endif()
 
 # Trilinos
-if (WIN32) 
-  set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
-else() 
-  set(TRILINOS_ROOT "~/solvers/trilinos")
-endif()
-SET(WITH_TRILINOS YES)
+
+  # Uncomment to use Trilinos
+  #SET(WITH_TRILINOS YES)
+  if (WITH_TRILINOS)
+    if (WIN32) 
+      set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
+    else() 
+      set(TRILINOS_ROOT "~/solvers/trilinos")
+    endif()
+  endif (WITH_TRILINOS)
