@@ -279,7 +279,8 @@ namespace Hermes
       {
       public:
         int order;
-        void clear(int nvert);
+        int nvert;
+        void clear();
         int asmlistCnt;
         Func<double>** fns;
         Func<double>*** fnsSurface;

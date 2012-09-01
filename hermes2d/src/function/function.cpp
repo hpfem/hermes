@@ -50,6 +50,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Function<Scalar>::~Function()
+    {
+    }
+
+    template<typename Scalar>
     int Function<Scalar>::get_fn_order() const
     {
       return order;

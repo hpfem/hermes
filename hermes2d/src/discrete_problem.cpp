@@ -176,9 +176,20 @@ namespace Hermes
       wf_seq = -1;
       if(sp_seq != NULL) delete [] sp_seq;
 
-
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
+        for(unsigned int j = 0; j < this->cache_size; j++)
+          if(this->cache_records_sub_idx[i][j] != NULL)
+          {
+            for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
+              it->second->clear();
+
+            this->cache_records_sub_idx[i][j]->clear();
+            delete this->cache_records_sub_idx[i][j];
+            this->cache_records_sub_idx[i][j] = NULL;
+            this->cache_records_element[i][j]->clear();
+            delete this->cache_records_element[i][j];
+          }
         free(cache_records_sub_idx[i]);
         free(cache_records_element[i]);
       }
@@ -249,7 +260,7 @@ namespace Hermes
           if(this->cache_records_sub_idx[i][j] != NULL)
           {
             for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-              it->second->clear(spaces[i]->get_mesh()->get_element(j)->nvert);
+              it->second->clear();
 
             this->cache_records_sub_idx[i][j]->clear();
             delete this->cache_records_sub_idx[i][j];
@@ -316,7 +327,7 @@ namespace Hermes
             if(this->cache_records_sub_idx[i][j] != NULL)
             {
               for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-                it->second->clear(spaces[i]->get_mesh()->get_element(j)->nvert);
+                it->second->clear();
 
               this->cache_records_sub_idx[i][j]->clear();
               delete this->cache_records_sub_idx[i][j];
@@ -1221,7 +1232,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear(int nvert)
+    void DiscreteProblem<Scalar>::CacheRecordPerSubIdx::clear()
     {
       for(unsigned int i = 0; i < this->asmlistCnt; i++)
       {
@@ -1334,7 +1345,7 @@ namespace Hermes
             {
               typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i]); 
               if(it != this->cache_records_sub_idx[i][current_state->e[i]->id]->end())
-                (*it).second->clear(current_state->rep->nvert);
+                (*it).second->clear();
               else
                 this->cache_records_sub_idx[i][current_state->e[i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[i], new CacheRecordPerSubIdx));
             }
@@ -1418,6 +1429,7 @@ namespace Hermes
           CacheRecordPerSubIdx* newRecord;
 #pragma omp critical (cache_for_subidx_preparation)
           newRecord = (*this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i])).second;
+          newRecord->nvert = current_state->rep->nvert;
           newRecord->order = order;
           // Set active element to all test functions.
           current_spss[i]->set_active_element(current_state->e[i]);
@@ -1433,18 +1445,18 @@ namespace Hermes
             newRecord->fns[j] = init_fn(current_spss[i], current_refmaps[i], newRecord->order);
           }
 
-          newRecord->fnsSurface = new Func<double>**[current_state->rep->nvert];
-          memset(newRecord->fnsSurface, NULL, sizeof(Func<double>**) * current_state->rep->nvert);
+          newRecord->fnsSurface = new Func<double>**[newRecord->nvert];
+          memset(newRecord->fnsSurface, NULL, sizeof(Func<double>**) * newRecord->nvert);
 
-          newRecord->geometrySurface = new Geom<double>*[current_state->rep->nvert];
-          newRecord->jacobian_x_weightsSurface = new double*[current_state->rep->nvert];
+          newRecord->geometrySurface = new Geom<double>*[newRecord->nvert];
+          newRecord->jacobian_x_weightsSurface = new double*[newRecord->nvert];
           
-          newRecord->n_quadrature_pointsSurface = new int[current_state->rep->nvert];
-          newRecord->orderSurface = new int[current_state->rep->nvert];
-          newRecord->asmlistSurfaceCnt = new int[current_state->rep->nvert];
+          newRecord->n_quadrature_pointsSurface = new int[newRecord->nvert];
+          newRecord->orderSurface = new int[newRecord->nvert];
+          newRecord->asmlistSurfaceCnt = new int[newRecord->nvert];
 
           int order = newRecord->order;
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+          for (current_state->isurf = 0; current_state->isurf < newRecord->nvert; current_state->isurf++)
           {
             if(!current_state->bnd[current_state->isurf])
               continue;
@@ -1453,7 +1465,7 @@ namespace Hermes
             order = newRecord->order;
           }
 
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+          for (current_state->isurf = 0; current_state->isurf < newRecord->nvert; current_state->isurf++)
           {
             if(!current_state->bnd[current_state->isurf])
               continue;

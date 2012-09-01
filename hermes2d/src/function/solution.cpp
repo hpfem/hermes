@@ -221,6 +221,7 @@ namespace Hermes
                   ::free(it->second->get(l));
               delete it->second;
             }
+            tables[i][j]->clear();
             delete tables[i][j];
             tables[i][j] = NULL;
             elems[i][j] = NULL;
