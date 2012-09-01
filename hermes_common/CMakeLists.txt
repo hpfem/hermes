@@ -50,6 +50,7 @@ project(hermes_common)
     include/common.h
     include/matrix.h
     include/api.h
+    include/array.h
     include/tables.h
     include/qsort.h
     include/c99_functions.h
