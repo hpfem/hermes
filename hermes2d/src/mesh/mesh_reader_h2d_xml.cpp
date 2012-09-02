@@ -170,7 +170,6 @@ namespace Hermes
         {
           for (int element_i = 0; element_i < parsed_xml_domain->elements().element().size(); element_i++)
           {
-
               XMLSubdomains::domain::elements_type::element_type* element = &parsed_xml_domain->elements().element().at(element_i);
 
               // Trim whitespaces.
@@ -180,6 +179,18 @@ namespace Hermes
               element->marker().erase(0, begin);
 
               meshes[subdomains_i]->element_markers_conversion.insert_marker(meshes[subdomains_i]->element_markers_conversion.min_marker_unused, element->marker());
+          }
+          for(unsigned int edge_i = 0; edge_i < parsed_xml_domain->edges().edge().size(); edge_i++)
+          {
+              XMLSubdomains::domain::edges_type::edge_type* edge = &parsed_xml_domain->edges().edge().at(edge_i);
+
+              // Trim whitespaces.
+              unsigned int begin = edge->marker().find_first_not_of(" \t\n");
+              unsigned int end = edge->marker().find_last_not_of(" \t\n");
+              edge->marker().erase(end + 1, edge->marker().length());
+              edge->marker().erase(0, begin);
+
+              meshes[subdomains_i]->boundary_markers_conversion.insert_marker(meshes[subdomains_i]->boundary_markers_conversion.min_marker_unused, edge->marker());
           }
         }
 
@@ -368,14 +379,6 @@ namespace Hermes
               if(en == NULL)
                 throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
 
-              // Trim whitespaces.
-              unsigned int begin = edge->marker().find_first_not_of(" \t\n");
-              unsigned int end = edge->marker().find_last_not_of(" \t\n");
-              edge->marker().erase(end + 1, edge->marker().length());
-              edge->marker().erase(0, begin);
-
-              meshes[subdomains_i]->boundary_markers_conversion.insert_marker(meshes[subdomains_i]->boundary_markers_conversion.min_marker_unused, edge->marker());
-
               en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->marker()).marker;
 
               meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(edge->v1())->second].bnd = 1;
@@ -401,17 +404,8 @@ namespace Hermes
               if(en == NULL)
                 throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist)", inner_edge_number_i);
 
-              // Trim whitespaces.
-              unsigned int begin = edge->marker().find_first_not_of(" \t\n");
-              unsigned int end = edge->marker().find_last_not_of(" \t\n");
-              edge->marker().erase(end + 1, edge->marker().length());
-              edge->marker().erase(0, begin);
-
-              meshes[subdomains_i]->boundary_markers_conversion.insert_marker(meshes[subdomains_i]->boundary_markers_conversion.min_marker_unused, edge->marker());
-
-               en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->marker()).marker;
-
-               en->bnd = 0;
+              en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->marker()).marker;
+              en->bnd = 0;
             }
 
             // Curves //
