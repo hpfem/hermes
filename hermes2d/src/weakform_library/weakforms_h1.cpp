@@ -343,7 +343,6 @@ namespace Hermes
         idx_j(j), coeff1(coeff1), coeff2(coeff2), gt(gt)
       {
         this->setArea(area);
-        this->setSymFlag(sym);
         
         if(gt != HERMES_PLANAR) throw Hermes::Exceptions::Exception("Axisymmetric advection forms not implemented yet.");
 
