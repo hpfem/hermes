@@ -24,15 +24,18 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianElasticity_0_0<Scalar>::DefaultJacobianElasticity_0_0
         (unsigned int i, unsigned int j, double lambda, double mu)
-        : MatrixFormVol<Scalar>(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu)
+        : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
+        this->setSymFlag(HERMES_SYM);
       }
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_0<Scalar>::DefaultJacobianElasticity_0_0
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
-        : MatrixFormVol<Scalar>(i, j, area, HERMES_SYM), lambda(lambda), mu(mu)
+        : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
+        this->setSymFlag(HERMES_SYM);
+        this->setArea(area);
       }
 
       template<typename Scalar>
@@ -60,15 +63,18 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianElasticity_0_1<Scalar>::DefaultJacobianElasticity_0_1
         (unsigned int i, unsigned int j, double lambda, double mu)
-        : MatrixFormVol<Scalar>(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu)
+        : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
+        this->setSymFlag(HERMES_SYM);
       }
 
       template<typename Scalar>
       DefaultJacobianElasticity_0_1<Scalar>::DefaultJacobianElasticity_0_1
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
-        : MatrixFormVol<Scalar>(i, j, area, HERMES_SYM), lambda(lambda), mu(mu)
+        : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
+        this->setSymFlag(HERMES_SYM);
+        this->setArea(area);
       }
 
       template<typename Scalar>
@@ -103,8 +109,9 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualElasticity_0_0<Scalar>::DefaultResidualElasticity_0_0
         (unsigned int i, std::string area, double lambda, double mu)
-        : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
+        : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
+        this->setArea(area);
       }
 
       template<typename Scalar>
@@ -139,8 +146,9 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualElasticity_0_1<Scalar>::DefaultResidualElasticity_0_1
         (unsigned int i, std::string area, double lambda, double mu)
-        : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
+        : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
+        this->setArea(area);
       }
 
       template<typename Scalar>
@@ -175,8 +183,9 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualElasticity_1_0<Scalar>::DefaultResidualElasticity_1_0
         (unsigned int i, std::string area, double lambda, double mu)
-        : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
+        : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
+        this->setArea(area);
       }
 
       template<typename Scalar>
@@ -211,8 +220,9 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualElasticity_1_1<Scalar>::DefaultResidualElasticity_1_1
         (unsigned int i, std::string area, double lambda, double mu)
-        : VectorFormVol<Scalar>(i,  area), lambda(lambda), mu(mu)
+        : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
+        this->setArea(area);
       }
 
       template<typename Scalar>
@@ -240,15 +250,16 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianElasticity_1_1<Scalar>::DefaultJacobianElasticity_1_1
         (unsigned int i, unsigned int j, double lambda, double mu)
-        : MatrixFormVol<Scalar>(i, j, HERMES_ANY, HERMES_SYM), lambda(lambda), mu(mu)
+        : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
       }
 
       template<typename Scalar>
       DefaultJacobianElasticity_1_1<Scalar>::DefaultJacobianElasticity_1_1
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
-        : MatrixFormVol<Scalar>(i, j, area, HERMES_SYM), lambda(lambda), mu(mu)
+        : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
+        this->setArea(area);
       }
 
       template<typename Scalar>

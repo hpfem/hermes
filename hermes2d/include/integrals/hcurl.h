@@ -38,10 +38,19 @@ namespace Hermes
     public:
       // One area.
       MatrixFormVolHCurl(unsigned int i, unsigned int j, std::string area = HERMES_ANY,
-        SymFlag sym = HERMES_NONSYM) : MatrixFormVol<Scalar>(i, j, area, sym) { }
+        SymFlag sym = HERMES_NONSYM) : MatrixFormVol<Scalar>(i, j) 
+      {
+        this->setArea(area);
+        this->setSymFlag(sym);
+      }
+
       // Multiple areas.
       MatrixFormVolHCurl(unsigned int i, unsigned int j, Hermes::vector<std::string> areas,
-        SymFlag sym = HERMES_NONSYM) : MatrixFormVol<Scalar>(i, j, areas, sym) { }
+        SymFlag sym = HERMES_NONSYM) : MatrixFormVol<Scalar>(i, j) 
+      {
+        this->setAreas(areas);
+        this->setSymFlag(sym);
+      }
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const

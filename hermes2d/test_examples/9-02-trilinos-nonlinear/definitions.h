@@ -63,7 +63,10 @@ private:
   class JacobianFormVol : public MatrixFormVol<double>
   {
   public:
-    JacobianFormVol(int i, int j) : MatrixFormVol<double>(i, j, HERMES_ANY, HERMES_SYM) {};
+    JacobianFormVol(int i, int j) : MatrixFormVol<double>(i, j) 
+    {
+      this->setSymFlag(HERMES_SYM);
+    };
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
                  Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;
@@ -94,7 +97,10 @@ private:
   class PrecondFormVol : public MatrixFormVol<double>
   {
   public:
-    PrecondFormVol(int i, int j) : MatrixFormVol<double>(i, j, HERMES_ANY, HERMES_SYM) {};
+    PrecondFormVol(int i, int j) : MatrixFormVol<double>(i, j) 
+    {
+      this->setSymFlag(HERMES_SYM);
+    };
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *u,
                  Func<double> *v, Geom<double> *e, ExtData<double> *ext) const;

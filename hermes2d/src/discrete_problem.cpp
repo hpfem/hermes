@@ -2134,9 +2134,10 @@ namespace Hermes
     void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps)
     {
       // Increase due to reference map.
-      order = current_refmaps[form->i]->get_inv_ref_order();
+      int coordinate = (dynamic_cast<VectorForm<Scalar>*>(form) == NULL) ? (static_cast<MatrixForm<Scalar>*>(form)->i) : (static_cast<VectorForm<Scalar>*>(form)->i);
+      order = current_refmaps[coordinate]->get_inv_ref_order();
       order += o->get_order();
-      limit_order(order, current_refmaps[form->i]->get_active_element()->get_mode());
+      limit_order(order, current_refmaps[coordinate]->get_active_element()->get_mode());
     }
 
     template<typename Scalar>

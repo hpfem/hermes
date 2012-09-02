@@ -42,7 +42,7 @@ const CandList CAND_LIST = H2D_HP_ANISO;
 // their notoriously bad performance.
 const int MESH_REGULARITY = -1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 5.0;
+const double ERR_STOP = 10.0;
 // This parameter influences the selection of
 // candidates in hp-adaptivity. Default value is 1.0.
 const double CONV_EXP = 1.0;

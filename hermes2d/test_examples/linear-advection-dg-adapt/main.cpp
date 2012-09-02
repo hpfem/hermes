@@ -15,7 +15,7 @@
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 3;
+const int INIT_REF = 2;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
 const int P_INIT = 1;
 // This is a quantitative parameter of the adapt(...) function and
@@ -42,7 +42,7 @@ const CandList CAND_LIST = H2D_HP_ANISO;
 // their notoriously bad performance.
 const int MESH_REGULARITY = -1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 3.0;
+const double ERR_STOP = 6.0;
 // This parameter influences the selection of
 // candidates in hp-adaptivity. Default value is 1.0.
 const double CONV_EXP = 1.0;
@@ -59,7 +59,6 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
-  Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 1);
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;

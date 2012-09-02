@@ -570,14 +570,16 @@ namespace Hermes
               {
               public:
                 Jacobian(unsigned int g, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormSurf<Scalar>(g, g, HERMES_ANY),
+                  : MatrixFormSurf<Scalar>(g, g),
                   g(g), geom_type(geom_type)
                 {};
 
                 Jacobian(unsigned int g, std::string area, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormSurf<Scalar>(g, g, area),
+                  : MatrixFormSurf<Scalar>(g, g),
                   g(g), geom_type(geom_type)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 template<typename Real, typename ScalarTestFns>
                 ScalarTestFns matrix_form(int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
@@ -608,14 +610,16 @@ namespace Hermes
               {
               public:
                 Residual(unsigned int g, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormSurf<Scalar>(g, HERMES_ANY),
+                  : VectorFormSurf<Scalar>(g),
                   g(g), geom_type(geom_type)
                 {};
 
                 Residual(unsigned int g, std::string area, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormSurf<Scalar>(g, area),
+                  : VectorFormSurf<Scalar>(g),
                   g(g), geom_type(geom_type)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 template<typename Real, typename ScalarTestFns>
                 ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
@@ -650,31 +654,35 @@ namespace Hermes
               public:
                 Jacobian(unsigned int g,
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormVol<Scalar>(g, g, HERMES_ANY),
+                  : MatrixFormVol<Scalar>(g, g),
                   GenericForm(matprop, geom_type),
                   g(g)
                 {};
 
                 Jacobian(unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormVol<Scalar>(g, g, area),
+                  : MatrixFormVol<Scalar>(g, g),
                   GenericForm(matprop, geom_type),
                   g(g)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 Jacobian(unsigned int g,
                   const MaterialPropertyMaps& matprop, Mesh *mesh, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormVol<Scalar>(g, g, HERMES_ANY),
+                  : MatrixFormVol<Scalar>(g, g),
                   GenericForm(matprop, mesh, geom_type),
                   g(g)
                 {};
 
                 Jacobian(unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop, Mesh *mesh, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormVol<Scalar>(g, g, area),
+                  : MatrixFormVol<Scalar>(g, g),
                   GenericForm(matprop, mesh, geom_type),
                   g(g)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 template<typename Real, typename ScalarTestFns>
                 ScalarTestFns matrix_form( int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
@@ -707,31 +715,35 @@ namespace Hermes
 
                 Residual(unsigned int g,
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormVol<Scalar>(g, HERMES_ANY),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, geom_type),
                   g(g)
                 {};
 
                 Residual(unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormVol<Scalar>(g, area),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, geom_type),
                   g(g)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 Residual(unsigned int g,
                   const MaterialPropertyMaps& matprop, Mesh *mesh, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormVol<Scalar>(g, HERMES_ANY),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, mesh, geom_type),
                   g(g)
                 {};
 
                 Residual(unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop, Mesh *mesh, GeomType geom_type = HERMES_PLANAR)
-                  : VectorFormVol<Scalar>(g, area),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, mesh, geom_type),
                   g(g)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 template<typename Real, typename ScalarTestFns>
                 ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],
@@ -774,10 +786,12 @@ namespace Hermes
 
                 Jacobian( unsigned int gto, unsigned int gfrom, std::string area,
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR )
-                  : MatrixFormVol<Scalar>(gto, gfrom, area),
+                  : MatrixFormVol<Scalar>(gto, gfrom),
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 Jacobian( unsigned int gto, unsigned int gfrom,
                   const MaterialPropertyMaps& matprop, Mesh* mesh, GeomType geom_type = HERMES_PLANAR)
@@ -788,10 +802,12 @@ namespace Hermes
 
                 Jacobian( unsigned int gto, unsigned int gfrom, std::string area,
                   const MaterialPropertyMaps& matprop, Mesh* mesh, GeomType geom_type = HERMES_PLANAR)
-                  : MatrixFormVol<Scalar>(gto, gfrom, area),
+                  : MatrixFormVol<Scalar>(gto, gfrom),
                   GenericForm(matprop, mesh, geom_type),
                   gto(gto), gfrom(gfrom)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 template<typename Real, typename ScalarTestFns>
                 ScalarTestFns matrix_form( int n, double *wt, Func<ScalarTestFns> *u_ext[], Func<Real> *u,
@@ -827,10 +843,11 @@ namespace Hermes
                   Hermes::vector<MeshFunction<Scalar>*>& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
-                  : VectorFormVol<Scalar>(g, HERMES_ANY, iterates),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
+                  this->setExt(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -840,10 +857,12 @@ namespace Hermes
                   Hermes::vector<MeshFunction<Scalar>*>& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
-                  : VectorFormVol<Scalar>(g, area, iterates),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
+                  this->setArea(area);
+                  this->setExt(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -853,10 +872,11 @@ namespace Hermes
                   Hermes::vector<MeshFunction<Scalar>*>& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
-                  : VectorFormVol<Scalar>(g, HERMES_ANY, iterates),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
+                  this->setExt(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -866,10 +886,12 @@ namespace Hermes
                   Hermes::vector<MeshFunction<Scalar>*>& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
-                  : VectorFormVol<Scalar>(g, area, iterates),
+                  : VectorFormVol<Scalar>(g),
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
+                  this->setArea(area);
+                  this->setExt(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -914,10 +936,12 @@ namespace Hermes
 
                 Residual( unsigned int gto, unsigned int gfrom, std::string area,
                   const MaterialPropertyMaps& matprop, GeomType geom_type = HERMES_PLANAR )
-                  : VectorFormVol<Scalar>(gto, area),
+                  : VectorFormVol<Scalar>(gto),
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 Residual( unsigned int gto, unsigned int gfrom,
                   const MaterialPropertyMaps& matprop, Mesh *mesh, GeomType geom_type = HERMES_PLANAR )
@@ -928,10 +952,12 @@ namespace Hermes
 
                 Residual( unsigned int gto, unsigned int gfrom, std::string area,
                   const MaterialPropertyMaps& matprop, Mesh *mesh, GeomType geom_type = HERMES_PLANAR )
-                  : VectorFormVol<Scalar>(gto, area),
+                  : VectorFormVol<Scalar>(gto),
                   GenericForm(matprop, mesh, geom_type),
                   gto(gto), gfrom(gfrom)
-                {};
+                {
+                  this->setArea(area);
+                };
 
                 template<typename Real, typename ScalarTestFns>
                 ScalarTestFns vector_form(int n, double *wt, Func<ScalarTestFns> *u_ext[],

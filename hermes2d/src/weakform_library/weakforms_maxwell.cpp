@@ -26,10 +26,13 @@ namespace Hermes
         SymFlag sym,
         GeomType gt,
         int order_increase)
-        : MatrixFormVol<Scalar>(i, j, area, sym), idx_j(j), const_coeff(const_coeff),
+        : MatrixFormVol<Scalar>(i, j), idx_j(j), const_coeff(const_coeff),
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
+        this->setArea(area);
+        this->setSymFlag(sym);
+
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -40,10 +43,13 @@ namespace Hermes
         SymFlag sym,
         GeomType gt,
         int order_increase)
-        : MatrixFormVol<Scalar>(i, j, areas, sym), idx_j(j), const_coeff(const_coeff),
+        : MatrixFormVol<Scalar>(i, j), idx_j(j), const_coeff(const_coeff),
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
+        this->setAreas(areas);
+        this->setSymFlag(sym);
+
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -124,9 +130,10 @@ namespace Hermes
         CubicSpline* c_spline,
         GeomType gt,
         int order_increase)
-        : VectorFormVol<Scalar>(i, area), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline),
+        : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline),
         gt(gt), order_increase(order_increase)
       {
+        this->setArea(area);
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -135,9 +142,11 @@ namespace Hermes
       DefaultResidualMagnetostatics<Scalar>::DefaultResidualMagnetostatics(int i, Hermes::vector<std::string> areas, Scalar const_coeff,
         CubicSpline* c_spline,
         GeomType gt, int order_increase)
-        : VectorFormVol<Scalar>(i, areas), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
+        : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
+        this->setAreas(areas);
+
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }

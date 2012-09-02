@@ -147,67 +147,77 @@ namespace Hermes
       friend class Hermes::Preconditioners::Precond<Scalar>;
     };
 
+    /// By default, the form is initialized with the following natural attributes:
+    /// - no external functions.
+    /// - assembled over any (parameter 'HERMES_ANY') element/boundary marker.
     template<typename Scalar>
     class HERMES_API Form
     {
     public:
-      /// One area constructor.
-      Form(std::string area = HERMES_ANY, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      Form();
 
+      /// get-set methods
+      /// areas
+      void setArea(std::string area);
+      void setAreas(Hermes::vector<std::string> areas);
+      Hermes::vector<std::string> getAreas();
+      /// external functions.
+      void setExt(Hermes::vector<MeshFunction<Scalar>*> ext);
+      Hermes::vector<MeshFunction<Scalar>*> getExt();
+      
       virtual ~Form() {};
 
-      /// Multiple areas constructor.
-      Form(Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
-
+    protected:
+      /// Set pointer to a WeakForm.
       inline void set_weakform(WeakForm<Scalar>* wf) { this->wf = wf; }
 
-      /// For time-dependent right-hand side functions.
-      /// E.g. for Runge-Kutta methods. Otherwise the one time for the whole WeakForm can be used.
-      void set_current_stage_time(double time);
-
-      double get_current_stage_time() const;
-
+      /// Markers of the areas where this form will be assembled.
       Hermes::vector<std::string> areas;
 
+      /// External solutions.
       Hermes::vector<MeshFunction<Scalar>*> ext;
-
-      /// Form will be always multiplied (scaled) with this number.
-      double scaling_factor;
 
       /// External solutions for this form will start
       /// with u_ext[u_ext_offset] where u_ext[] are external
       /// solutions coming to the assembling procedure via the
       /// external coefficient vector.
       int u_ext_offset;
+      
+      /// For time-dependent right-hand side functions.
+      /// E.g. for Runge-Kutta methods. Otherwise the one time for the whole WeakForm can be used.
+      void set_current_stage_time(double time);
 
-      unsigned int i;
+      double get_current_stage_time() const;
 
-    protected:
+      /// Form will be always multiplied (scaled) with this number.
+      double scaling_factor;
+
       WeakForm<Scalar>* wf;
       double stage_time;
+      void setScalingFactor(double scalingFactor);
+      void set_uExtOffset(int u_ext_offset);
+      friend class WeakForm<Scalar>;
+      friend class RungeKutta<Scalar>;
+      friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblemLinear<Scalar>;
     };
 
+    /// By default, the matrix form is initialized with the following natural attribute:
+    /// - nonsymmetrical (if the user omits the HERMES_SYM / HERMES_ANTISYM parameters, nothing worse than a non-necessary calculations happen).
     template<typename Scalar>
     class HERMES_API MatrixForm : public Form<Scalar>
     {
     public:
-      /// One area constructor.
-      MatrixForm(unsigned int i, unsigned int j,
-        std::string area = HERMES_ANY, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
-
-      /// Multiple areas constructor..
-      MatrixForm(unsigned int i, unsigned int j,
-        Hermes::vector<std::string> areas, Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      MatrixForm(unsigned int i, unsigned int j);
 
       virtual ~MatrixForm() {};
 
+      unsigned int i;
       unsigned int j;
 
-      int sym;
+      SymFlag sym;
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
         Geom<double> *e, ExtData<Scalar> *ext) const;
@@ -220,17 +230,11 @@ namespace Hermes
     class HERMES_API MatrixFormVol : public MatrixForm<Scalar>
     {
     public:
-      /// One area constructor.
-      MatrixFormVol(unsigned int i, unsigned int j,
-        std::string area = HERMES_ANY, SymFlag sym = HERMES_NONSYM,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      MatrixFormVol(unsigned int i, unsigned int j);
 
-      /// Multiple areas constructor..
-      MatrixFormVol(unsigned int i, unsigned int j,
-        Hermes::vector<std::string> areas, SymFlag sym = HERMES_NONSYM,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      void setSymFlag(SymFlag sym);
+      SymFlag getSymFlag();
 
       virtual ~MatrixFormVol() {};
 
@@ -241,15 +245,8 @@ namespace Hermes
     class HERMES_API MatrixFormSurf : public MatrixForm<Scalar>
     {
     public:
-      /// One area constructor.
-      MatrixFormSurf(unsigned int i, unsigned int j, std::string area = HERMES_ANY,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
-
-      /// Multiple areas constructor..
-      MatrixFormSurf(unsigned int i, unsigned int j, Hermes::vector<std::string> areas,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      MatrixFormSurf(unsigned int i, unsigned int j);
 
       virtual ~MatrixFormSurf() {};
 
@@ -260,15 +257,8 @@ namespace Hermes
     class VectorForm : public Form<Scalar>
     {
     public:
-      /// One area constructor.
-      VectorForm(unsigned int i, std::string area = HERMES_ANY,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
-
-      /// Multiple areas constructor..
-      VectorForm(unsigned int i, Hermes::vector<std::string> areas,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      VectorForm(unsigned int i);
 
       virtual ~VectorForm() {};
 
@@ -277,21 +267,15 @@ namespace Hermes
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         ExtData<Hermes::Ord> *ext) const;
+      unsigned int i;
     };
 
     template<typename Scalar>
     class VectorFormVol : public VectorForm<Scalar>
     {
     public:
-      /// One area constructor.
-      VectorFormVol(unsigned int i, std::string area = HERMES_ANY,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
-
-      /// Multiple areas constructor..
-      VectorFormVol(unsigned int i, Hermes::vector<std::string> areas,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      VectorFormVol(unsigned int i);
 
       virtual ~VectorFormVol() {};
 
@@ -302,15 +286,8 @@ namespace Hermes
     class VectorFormSurf : public VectorForm<Scalar>
     {
     public:
-      /// One area constructor.
-      VectorFormSurf(unsigned int i, std::string area = HERMES_ANY,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
-
-      /// Multiple areas constructor..
-      VectorFormSurf(unsigned int i, Hermes::vector<std::string> areas,
-        Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>(),
-        double scaling_factor = 1.0, int u_ext_offset = 0);
+      /// Constructor with coordinates.
+      VectorFormSurf(unsigned int i);
 
       virtual ~VectorFormSurf() {};
 
