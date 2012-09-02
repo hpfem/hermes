@@ -85,6 +85,13 @@ namespace Hermes
     }
     
     template<typename Scalar>
+      void Form<Scalar>::setExt(MeshFunction<Scalar>* ext)
+    {
+      this->ext.clear();
+      this->ext.push_back(ext);
+    }
+
+    template<typename Scalar>
       void Form<Scalar>::setExt(Hermes::vector<MeshFunction<Scalar>*> ext)
     {
       this->ext = ext;

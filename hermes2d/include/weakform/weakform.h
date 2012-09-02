@@ -163,6 +163,7 @@ namespace Hermes
       void setAreas(Hermes::vector<std::string> areas);
       Hermes::vector<std::string> getAreas();
       /// external functions.
+      void setExt(MeshFunction<Scalar>* ext);
       void setExt(Hermes::vector<MeshFunction<Scalar>*> ext);
       Hermes::vector<MeshFunction<Scalar>*> getExt();
       
