@@ -277,18 +277,23 @@ namespace Hermes
       /// should be refined uniformly, 1 if it is a quad and should be split
       /// horizontally, 2 if it is a quad and should be split vertically,
       /// and 3 if it is a triangle and should be split into three quads.
-      void refine_by_criterion(int (*criterion)(Element* e), int depth, bool mark_as_initial = false);
+      void refine_by_criterion(int (*criterion)(Element* e), int depth = 1, bool mark_as_initial = false);
 
       /// Performs repeated refinements of elements containing the given vertex.
       /// A mesh graded towards the vertex is created.
-      void refine_towards_vertex(int vertex_id, int depth, bool mark_as_initial = false);
+      void refine_towards_vertex(int vertex_id, int depth = 1, bool mark_as_initial = false);
 
       /// Performs repeated refinements of elements touching a part of the
       /// boundary marked by 'marker'. Elements touching both by an edge or
       /// by a vertex are refined. 'aniso' allows or disables anisotropic
       /// splits of quads.
-      void refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso = true, bool mark_as_initial = false);
-      void refine_towards_boundary(std::string marker, int depth, bool aniso = true, bool mark_as_initial = false);
+      void refine_towards_boundary(Hermes::vector<std::string> markers, int depth = 1, bool aniso = true, bool mark_as_initial = false);
+      void refine_towards_boundary(std::string marker, int depth = 1, bool aniso = true, bool mark_as_initial = false);
+
+      /// Refines all element sharing the marker passed.
+      void refine_in_area(std::string marker, int depth = 1, bool mark_as_initial = false);
+      /// Refines all element sharing the markers passed.
+      void refine_in_areas(Hermes::vector<std::string> markers, int depth = 1, bool mark_as_initial = false);
 
       /// Regularizes the mesh by refining elements with hanging nodes of
       /// degree more than 'n'. As a result, n-irregular mesh is obtained.

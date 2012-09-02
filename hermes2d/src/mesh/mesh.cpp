@@ -928,6 +928,30 @@ namespace Hermes
       }
     }
 
+    void Mesh::refine_in_area(std::string marker, int depth, bool mark_as_initial)
+    {
+      Hermes::vector<std::string> markers;
+      markers.push_back(marker);
+      this->refine_in_areas(markers, depth, mark_as_initial);
+    }
+      
+    void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, bool mark_as_initial)
+    {
+      for (int i = 0; i < depth; i++)
+      {
+        Element* e;
+        for_all_active_elements(e, this)
+        {
+          for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
+            if(e->marker == this->element_markers_conversion.get_internal_marker(markers[marker_i]).marker || markers[marker_i] == HERMES_ANY)
+              this->refine_element(e, 0);
+        }
+      }
+
+      if(mark_as_initial)
+        ninitial = this->get_max_element_id();
+    }
+
     void Mesh::unrefine_element_id(int id)
     {
       Element* e = get_element(id);
