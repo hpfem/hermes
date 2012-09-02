@@ -179,6 +179,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         for(unsigned int j = 0; j < this->cache_size; j++)
+        {
           if(this->cache_records_sub_idx[i][j] != NULL)
           {
             for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
@@ -187,9 +188,14 @@ namespace Hermes
             this->cache_records_sub_idx[i][j]->clear();
             delete this->cache_records_sub_idx[i][j];
             this->cache_records_sub_idx[i][j] = NULL;
+          }
+          if(this->cache_records_element[i][j] != NULL)
+          {
             this->cache_records_element[i][j]->clear();
             delete this->cache_records_element[i][j];
+            this->cache_records_element[i][j] = NULL;
           }
+        }
         free(cache_records_sub_idx[i]);
         free(cache_records_element[i]);
       }
@@ -257,6 +263,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
+        {
           if(this->cache_records_sub_idx[i][j] != NULL)
           {
             for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
@@ -265,11 +272,19 @@ namespace Hermes
             this->cache_records_sub_idx[i][j]->clear();
             delete this->cache_records_sub_idx[i][j];
             this->cache_records_sub_idx[i][j] = NULL;
+          }
+          if(this->cache_records_element[i][j] != NULL)
+          {
             this->cache_records_element[i][j]->clear();
             delete this->cache_records_element[i][j];
             this->cache_records_element[i][j] = NULL;
           }
+          free(cache_records_sub_idx[i]);
+          free(cache_records_element[i]);
+        }
       }
+      delete [] this->cache_records_sub_idx;
+      delete [] this->cache_records_element;
     }
 
     template<typename Scalar>
@@ -302,7 +317,6 @@ namespace Hermes
           max_size = max_size_i;
       }
 
-
       if(max_size * 1.5 > this->cache_size)
       {
         max_size = 1.5 * max_size;
@@ -324,6 +338,7 @@ namespace Hermes
       {
         for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
           if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active)
+          {
             if(this->cache_records_sub_idx[i][j] != NULL)
             {
               for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
@@ -332,9 +347,14 @@ namespace Hermes
               this->cache_records_sub_idx[i][j]->clear();
               delete this->cache_records_sub_idx[i][j];
               this->cache_records_sub_idx[i][j] = NULL;
+            }
+            if(this->cache_records_element[i][j] != NULL)
+            {
               this->cache_records_element[i][j]->clear();
               delete this->cache_records_element[i][j];
+              this->cache_records_element[i][j] = NULL;
             }
+          }
       }
 
       this->ndof = Space<Scalar>::get_num_dofs(this->spaces);
