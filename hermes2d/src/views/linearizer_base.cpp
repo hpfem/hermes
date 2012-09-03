@@ -35,7 +35,7 @@ namespace Hermes
         np = lin_np;
       };
 
-      LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max)
+      LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1)
       {
         tris = NULL;
         edges = NULL;
