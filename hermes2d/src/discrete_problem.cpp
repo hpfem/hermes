@@ -17,6 +17,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "discrete_problem.h"
+#include "function/exact_solution.h"
 #include <algorithm>
 #include <map>
 #include <string>
@@ -825,7 +826,16 @@ namespace Hermes
           }
         }
         else
-          u_ext[i] = NULL;
+        {
+          u_ext[i] = new Solution<Scalar>*[wf->get_neq()];
+          for (int j = 0; j < wf->get_neq(); j++)
+          {
+            if(spaces[j]->get_shapeset()->get_num_components() == 1)
+              u_ext[i][j] = new ZeroSolution<Scalar>(spaces[j]->get_mesh());
+            else
+              u_ext[i][j] = new ZeroSolutionVector<Scalar>(spaces[j]->get_mesh());
+          }
+        }
       }
       for(unsigned int i = 0; i < Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads); i++)
       {
@@ -1083,9 +1093,8 @@ namespace Hermes
         meshes.push_back(spaces[space_i]->get_mesh());
       for (unsigned j = 0; j < ext_functions.size(); j++)
         meshes.push_back(ext_functions[j]->get_mesh());
-      if(coeff_vec != NULL)
-        for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
-          meshes.push_back(spaces[space_i]->get_mesh());
+      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        meshes.push_back(spaces[space_i]->get_mesh());
 
       Traverse trav_master(true);
       unsigned int num_states = trav_master.get_num_states(meshes);
@@ -1103,14 +1112,13 @@ namespace Hermes
           fns[i].push_back(ext[i][j]);
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
-        if(coeff_vec != NULL)
-          for (unsigned j = 0; j < wf->get_neq(); j++)
-          {
-            fns[i].push_back(u_ext[i][j]);
-            u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
-          }
-          trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
-          trav[i].stack = trav_master.stack;
+        for (unsigned j = 0; j < wf->get_neq(); j++)
+        {
+          fns[i].push_back(u_ext[i][j]);
+          u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
+        }
+        trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
+        trav[i].stack = trav_master.stack;
       }
 
       int state_i;

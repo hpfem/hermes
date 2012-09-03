@@ -301,7 +301,7 @@ namespace Hermes
 
         // Calculate relative error between last_iter_vector[] and this->sln_vector[].
         // FIXME: this is wrong in the complex case (complex conjugation must be used).
-        // FIXME: This will crash is norm of last_iter_vector[] is zero.
+        // FIXME: This will crash if norm of last_iter_vector[] is zero.
         double last_iter_vec_norm = 0;
         for (int i = 0; i < ndof; i++)
           last_iter_vec_norm += std::abs(last_iter_vector[i] * last_iter_vector[i]);

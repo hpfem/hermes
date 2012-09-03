@@ -61,17 +61,13 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
   int ndof = space.get_num_dofs();
 
-  // Initial coefficient vector for the Newton's method.
-  double* coeff_vec = new double[ndof];
-  memset(coeff_vec, 0, ndof*sizeof(double));
-
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, &space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   try{
-    newton.solve(coeff_vec);
+    newton.solve();
   }
   catch(Hermes::Exceptions::Exception e)
   {
@@ -97,9 +93,6 @@ int main(int argc, char* argv[])
     view.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
     Hermes::Hermes2D::Views::View::wait();
   }
-
-  // Clean up.
-  delete [] coeff_vec;
 
   return 0;
 }

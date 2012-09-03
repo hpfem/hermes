@@ -105,6 +105,8 @@ namespace Hermes
         meshes.push_back(this->spaces[space_i]->get_mesh());
       for (unsigned j = 0; j < ext_functions.size(); j++)
         meshes.push_back(ext_functions[j]->get_mesh());
+      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        meshes.push_back(spaces[space_i]->get_mesh());
 
       Traverse trav_master(true);
       unsigned int num_states = trav_master.get_num_states(meshes);
@@ -122,6 +124,11 @@ namespace Hermes
           fns[i].push_back(ext[i][j]);
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
+        for (unsigned j = 0; j < wf->get_neq(); j++)
+        {
+          fns[i].push_back(u_ext[i][j]);
+          u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
+        }
         trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
       }
@@ -131,6 +138,7 @@ namespace Hermes
       PrecalcShapeset** current_pss;
       PrecalcShapeset** current_spss;
       RefMap** current_refmaps;
+      Solution<Scalar>** current_u_ext;
       AsmList<Scalar>** current_als;
 
       MatrixFormVol<Scalar>** current_mfvol;
@@ -155,6 +163,7 @@ namespace Hermes
             current_pss = pss[omp_get_thread_num()];
             current_spss = spss[omp_get_thread_num()];
             current_refmaps = refmaps[omp_get_thread_num()];
+            current_u_ext = u_ext[omp_get_thread_num()];
             current_als = als[omp_get_thread_num()];
 
             current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
@@ -168,7 +177,7 @@ namespace Hermes
             // The proper sub-element mappings to all the functions of
             // this stage is supplied by the function Traverse::get_next_state()
             // called in the while loop.
-            this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+            this->assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
               this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfsurf, current_vfsurf, trav[omp_get_thread_num()].fn);
