@@ -262,7 +262,7 @@ namespace Hermes
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
-        for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
+        for(unsigned int j = 0; j < cache_size; j++)
         {
           if(this->cache_records_sub_idx[i][j] != NULL)
           {
