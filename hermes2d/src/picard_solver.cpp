@@ -18,81 +18,67 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "picard_solver.h"
 #include "linear_solver.h"
+#include "exact_solution.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter)
+    PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp)
         : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
-      if(dp->get_spaces().size() != 1)
-        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
-      this->slns_prev_iter.push_back(sln_prev_iter);
+      for(unsigned int i = 0; i < dp->get_spaces().size(); i++)
+        if(dp->get_spaces()[i]->get_shapeset()->get_num_components() == 1)
+          this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(dp->get_spaces()[i]->get_mesh()));
+        else
+          this->slns_prev_iter.push_back(new ZeroSolutionVector<Scalar>(dp->get_spaces()[i]->get_mesh()));
       init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
+    PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp)
         : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
-      int n = slns_prev_iter.size();
-      if(dp->get_spaces().size() != n)
-        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
-      for (int i = 0; i<n; i++)
-      {
-        this->slns_prev_iter.push_back(slns_prev_iter[i]);
-      }
+      for(unsigned int i = 0; i < dp->get_spaces().size(); i++)
+        if(dp->get_spaces()[i]->get_shapeset()->get_num_components() == 1)
+          this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(dp->get_spaces()[i]->get_mesh()));
+        else
+          this->slns_prev_iter.push_back(new ZeroSolutionVector<Scalar>(dp->get_spaces()[i]->get_mesh()));
       init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Solution<Scalar>* sln_prev_iter)
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
         : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
     {
-      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != 1)
-        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
-      this->slns_prev_iter.push_back(sln_prev_iter);
+      this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(space->get_mesh()));
       init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
-        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
-    {
-      int n = slns_prev_iter.size();
-      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != n)
-        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
-      for (int i = 0; i<n; i++)
-      {
-        this->slns_prev_iter.push_back(slns_prev_iter[i]);
-      }
-      init();
-    }
-
-    template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Solution<Scalar>* sln_prev_iter)
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces)
         : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
     {
-      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != 1)
-        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
-      this->slns_prev_iter.push_back(sln_prev_iter);
+      for(unsigned int i = 0; i < spaces.size(); i++)
+        if(spaces[i]->get_shapeset()->get_num_components() == 1)
+          this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(spaces[i]->get_mesh()));
+        else
+          this->slns_prev_iter.push_back(new ZeroSolutionVector<Scalar>(spaces[i]->get_mesh()));
       init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>* > slns_prev_iter)
-        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
+    void PicardSolver<Scalar>::setPreviousSolution(Solution<Scalar>* sln_prev_iter)
     {
-      int n = slns_prev_iter.size();
-      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() != n)
-        throw Hermes::Exceptions::Exception("Mismatched number of spaces and solutions in PicardSolver.");
-      for (int i = 0; i<n; i++)
-      {
-        this->slns_prev_iter.push_back(slns_prev_iter[i]);
-      }
-      init();
+      this->slns_prev_iter.clear();
+      this->slns_prev_iter.push_back(sln_prev_iter);
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::setPreviousSolutions(Hermes::vector<Solution<Scalar>* > slns_prev_iter)
+    {
+      this->slns_prev_iter = slns_prev_iter;
     }
 
     template<typename Scalar>

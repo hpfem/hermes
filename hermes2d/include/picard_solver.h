@@ -37,13 +37,18 @@ namespace Hermes
     class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable
     {
     public:
-      PicardSolver(DiscreteProblemLinear<Scalar>* dp, Solution<Scalar>* sln_prev_iter);
-      PicardSolver(DiscreteProblemLinear<Scalar>* dp, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
-      PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Solution<Scalar>* sln_prev_iter);
-      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Solution<Scalar>* sln_prev_iter);
-      PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
-      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>* > slns_prev_iter);
+      PicardSolver(DiscreteProblem<Scalar>* dp);
+      PicardSolver(DiscreteProblemLinear<Scalar>* dp);
+      PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
+      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
       ~PicardSolver();
+
+      /// Sets the previous Solution (for one Space).
+      void setPreviousSolution(Solution<Scalar>* sln_prev_iter);
+
+      /// Sets the previous Solution (for multiple Spaces).
+      void setPreviousSolutions(Hermes::vector<Solution<Scalar>* > slns_prev_iter);
+
       /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
       void set_verbose_output_linear_solver(bool verbose_output_to_set);
 
