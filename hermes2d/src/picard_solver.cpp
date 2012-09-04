@@ -235,6 +235,8 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::solve()
     {
+      this->tick();
+
       // Sanity check.
       if(num_last_vectors_used < 1)
         throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
@@ -310,6 +312,8 @@ namespace Hermes
           Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
           static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
 
+          this->tick();
+          this->info("Picard: solution duration: %f s.\n", this->last());
           this->onFinish();
           return;
         }
@@ -319,6 +323,9 @@ namespace Hermes
         {
           delete [] last_iter_vector;
           static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
+          
+          this->tick();
+          this->info("Picard: solution duration: %f s.\n", this->last());
           
           this->onFinish();
           throw Hermes::Exceptions::Exception("Picard: maximum allowed number of Picard iterations exceeded.");

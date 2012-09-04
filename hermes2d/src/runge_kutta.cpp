@@ -438,7 +438,7 @@ namespace Hermes
       if(it >= newton_max_iter)
       {
         this->tick();
-        this->info("Runge-Kutta: time step duration: %f s.", this->last());
+        this->info("Runge-Kutta: time step duration: %f s.\n", this->last());
         throw Exceptions::ValueException("Newton iterations", it, newton_max_iter);
       }
 
@@ -505,7 +505,7 @@ namespace Hermes
 
       iteration++;
       this->tick();
-      this->info("Runge-Kutta: time step duration: %f s.", this->last());
+      this->info("Runge-Kutta: time step duration: %f s.\n", this->last());
     }
 
     template<typename Scalar>

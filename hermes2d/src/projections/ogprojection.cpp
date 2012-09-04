@@ -40,6 +40,7 @@ namespace Hermes
 
       // Initialize linear solver.
       Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp);
+      linear_solver.set_verbose_output(false);
 
       // Perform Newton iteration.
       try

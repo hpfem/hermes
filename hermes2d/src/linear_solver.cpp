@@ -51,6 +51,7 @@ namespace Hermes
       this->jacobian = create_matrix<Scalar>();
       this->residual = create_vector<Scalar>();
       this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual);
+      this->set_verbose_output(true);
     }
     
     template<typename Scalar>
@@ -114,7 +115,7 @@ namespace Hermes
       this->onFinish();
       
       this->tick();
-      this->info("Linear solver solution duration: %f s.", this->last());
+      this->info("Linear solver solution duration: %f s.\n", this->last());
     }
 
     template<typename Scalar>

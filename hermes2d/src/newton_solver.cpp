@@ -298,7 +298,7 @@ namespace Hermes
         else
         {
           this->info("Newton: iteration %d, residual norm: %g", it - 1, residual_norm);
-          if(!this->manualDamping)
+          if(!this->manualDamping && !((residual_norm > max_allowed_residual_norm) || (residual_norm < newton_tol && it > 1)))
           {
             if(residual_norm < last_residual_norm * this->sufficientImprovementFactor)
             {
@@ -329,7 +329,7 @@ namespace Hermes
         if(residual_norm > max_allowed_residual_norm)
         {
           this->tick();
-          this->info("Newton: solution duration: %f s.", this->last());
+          this->info("Newton: solution duration: %f s.\n", this->last());
           this->onFinish();
           throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
         }
@@ -351,7 +351,7 @@ namespace Hermes
           this->onFinish();
 
           this->tick();
-          this->info("Newton: solution duration: %f s.", this->last());
+          this->info("Newton: solution duration: %f s.\n", this->last());
 
           return;
         }
@@ -398,7 +398,7 @@ namespace Hermes
           }
 
           this->tick();
-          this->info("Newton: solution duration: %f s.", this->last());
+          this->info("Newton: solution duration: %f s.\n", this->last());
 
           this->onFinish();
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
@@ -486,7 +486,7 @@ namespace Hermes
         else
         {
           this->info("Newton: iteration %d, residual norm: %g", it - 1, residual_norm);
-          if(!this->manualDamping)
+          if(!this->manualDamping && !((residual_norm > max_allowed_residual_norm) || (residual_norm < newton_tol && it > 1)))
           {
             if(residual_norm < last_residual_norm * this->sufficientImprovementFactor)
             {
@@ -593,7 +593,7 @@ namespace Hermes
         if(it++ >= newton_max_iter)
         {
           this->tick();
-          this->info("Newton: solution duration: %f s.", this->last());
+          this->info("Newton: solution duration: %f s.\n", this->last());
 
           this->onFinish();
 
