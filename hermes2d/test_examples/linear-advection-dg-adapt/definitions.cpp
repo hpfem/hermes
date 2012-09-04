@@ -5,7 +5,7 @@ CustomWeakForm::CustomWeakForm(std::string left_bottom_bnd_part, Mesh* mesh) : W
     add_matrix_form(new CustomMatrixFormVol(0, 0));
     add_vector_form(new CustomVectorFormVol(0));
     add_matrix_form_surf(new CustomMatrixFormSurface(0, 0));
-    add_matrix_form_surf(new CustomMatrixFormInterface(0, 0));
+    add_matrix_form_DG(new CustomMatrixFormInterface(0, 0));
     add_vector_form_surf(new CustomVectorFormSurface(0, left_bottom_bnd_part));
 }
 
@@ -126,7 +126,7 @@ Ord CustomWeakForm::CustomMatrixFormInterface::ord(int n, double *wt, Func<Ord> 
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
-MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormInterface::clone()
+MatrixFormDG<double>* CustomWeakForm::CustomMatrixFormInterface::clone()
 {
   return new CustomWeakForm::CustomMatrixFormInterface(*this);
 }

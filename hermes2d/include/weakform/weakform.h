@@ -50,6 +50,8 @@ namespace Hermes
     template<typename Scalar> class VectorFormVol;
     template<typename Scalar> class MatrixFormSurf;
     template<typename Scalar> class VectorFormSurf;
+    template<typename Scalar> class MatrixFormDG;
+    template<typename Scalar> class VectorFormDG;
 
     /// Bilinear form symmetry flag, see WeakForm::add_matrix_form
     enum SymFlag
@@ -88,11 +90,17 @@ namespace Hermes
       /// Adds surface matrix form.
       void add_matrix_form_surf(MatrixFormSurf<Scalar>* mfs);
 
+      /// Adds DG matrix form.
+      void add_matrix_form_DG(MatrixFormDG<Scalar>* mfDG);
+
       /// Adds volumetric vector form.
       void add_vector_form(VectorFormVol<Scalar>* vfv);
 
       /// Adds surface vector form.
       void add_vector_form_surf(VectorFormSurf<Scalar>* vfs);
+
+      /// Adds DG vector form.
+      void add_vector_form_DG(VectorFormDG<Scalar>* vfDG);
 
       /// Returns the number of equations.
       unsigned int get_neq() const { return neq; }
@@ -108,8 +116,11 @@ namespace Hermes
 
       Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol();
       Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf();
+      Hermes::vector<MatrixFormDG<Scalar> *> get_mfDG();
+
       Hermes::vector<VectorFormVol<Scalar> *> get_vfvol();
       Hermes::vector<VectorFormSurf<Scalar> *> get_vfsurf();
+      Hermes::vector<VectorFormDG<Scalar> *> get_vfDG();
 
       /// Deletes all volumetric and surface forms.
       void delete_all();
@@ -135,11 +146,17 @@ namespace Hermes
       /// Holds surface matrix forms.
       Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf;
 
+      /// Holds DG matrix forms.
+      Hermes::vector<MatrixFormDG<Scalar> *> mfDG;
+
       /// Holds volumetric vector forms.
       Hermes::vector<VectorFormVol<Scalar> *> vfvol;
 
       /// Holds surface vector forms.
       Hermes::vector<VectorFormSurf<Scalar> *> vfsurf;
+
+      /// Holds DG vector forms.
+      Hermes::vector<VectorFormDG<Scalar> *> vfDG;
 
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
@@ -255,6 +272,18 @@ namespace Hermes
     };
 
     template<typename Scalar>
+    class HERMES_API MatrixFormDG : public MatrixForm<Scalar>
+    {
+    public:
+      /// Constructor with coordinates.
+      MatrixFormDG(unsigned int i, unsigned int j);
+
+      virtual ~MatrixFormDG() {};
+
+      virtual MatrixFormDG* clone();
+    };
+
+    template<typename Scalar>
     class VectorForm : public Form<Scalar>
     {
     public:
@@ -293,6 +322,18 @@ namespace Hermes
       virtual ~VectorFormSurf() {};
 
       virtual VectorFormSurf* clone();
+    };
+
+    template<typename Scalar>
+    class VectorFormDG : public VectorForm<Scalar>
+    {
+    public:
+      /// Constructor with coordinates.
+      VectorFormDG(unsigned int i);
+
+      virtual ~VectorFormDG() {};
+
+      virtual VectorFormDG* clone();
     };
   }
 }

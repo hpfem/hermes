@@ -18,6 +18,13 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    static const int H2D_DG_INNER_EDGE_INT = -1234567;
+    static const std::string H2D_DG_INNER_EDGE = "-1234567";
+
+    template<typename Scalar>
+    BasicKellyAdapt<Scalar>::ErrorEstimatorFormKelly::ErrorEstimatorFormKelly(int i, double const_by_laplacian) : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE), const_by_laplacian(const_by_laplacian)
+    {}
+
     template<typename Scalar>
     KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
                                            bool ignore_visited_segments_,

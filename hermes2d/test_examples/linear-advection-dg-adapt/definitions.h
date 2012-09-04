@@ -62,12 +62,11 @@ private:
 
   };
 
-  class CustomMatrixFormInterface : public MatrixFormSurf<double>
+  class CustomMatrixFormInterface : public MatrixFormDG<double>
   {
   public:
-    CustomMatrixFormInterface(int i, int j) : MatrixFormSurf<double>(i, j) 
+    CustomMatrixFormInterface(int i, int j) : MatrixFormDG<double>(i, j) 
     {
-      this->setArea(H2D_DG_INNER_EDGE);
     };
 
     template<typename Real, typename Scalar>
@@ -77,7 +76,7 @@ private:
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const;
 
-    MatrixFormSurf<double>* clone();
+    MatrixFormDG<double>* clone();
 
   };
 

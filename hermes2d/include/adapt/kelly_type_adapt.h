@@ -315,9 +315,7 @@ namespace Hermes
       {
       public:
         /// Constructor.
-        ErrorEstimatorFormKelly(int i = 0, double const_by_laplacian = 1.0)
-          : KellyTypeAdapt<Scalar>::ErrorEstimatorForm(i, H2D_DG_INNER_EDGE), const_by_laplacian(const_by_laplacian)
-        {}
+        ErrorEstimatorFormKelly(int i = 0, double const_by_laplacian = 1.0);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
                              Func<Scalar> *u, Geom<double> *e,

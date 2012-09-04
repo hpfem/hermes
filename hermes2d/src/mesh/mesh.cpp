@@ -22,6 +22,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+  
+    static const int H2D_DG_INNER_EDGE_INT = -1234567;
+    static const std::string H2D_DG_INNER_EDGE = "-1234567";
+
     bool Node::is_constrained_vertex() const
     {
       assert(type == HERMES_TYPE_VERTEX);

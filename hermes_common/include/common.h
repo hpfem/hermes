@@ -181,13 +181,7 @@ namespace Hermes
   const std::string HERMES_ANY = "-1234";
   // For internal use.
   const int HERMES_ANY_INT = -1234;
-  /// This is to be used by weak forms specifying numerical flux through interior edges.
-  /// Forms with this identifier will receive DiscontinuousFunc representations of shape
-  /// and ext. functions, which they may query for values on either side of given interface.
-  const std::string H2D_DG_INNER_EDGE = "-1234567";
-  // For internal use.
-  const int H2D_DG_INNER_EDGE_INT = -1234567;
-
+  
   namespace Helpers
   {
     inline void fprint_num(FILE*f, double x)
