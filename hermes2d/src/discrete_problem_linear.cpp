@@ -114,8 +114,8 @@ namespace Hermes
         meshes.push_back(this->spaces[space_i]->get_mesh());
       for (unsigned j = 0; j < ext_functions.size(); j++)
         meshes.push_back(ext_functions[j]->get_mesh());
-      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
-        meshes.push_back(spaces[space_i]->get_mesh());
+      for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+        meshes.push_back(this->spaces[space_i]->get_mesh());
 
       Traverse trav_master(true);
       unsigned int num_states = trav_master.get_num_states(meshes);
@@ -133,7 +133,7 @@ namespace Hermes
           fns[i].push_back(ext[i][j]);
           ext[i][j]->set_quad_2d(&g_quad_2d_std);
         }
-        for (unsigned j = 0; j < wf->get_neq(); j++)
+        for (unsigned j = 0; j < this->wf->get_neq(); j++)
         {
           fns[i].push_back(u_ext[i][j]);
           u_ext[i][j]->set_quad_2d(&g_quad_2d_std);

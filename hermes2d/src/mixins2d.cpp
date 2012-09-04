@@ -56,7 +56,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::outputRhs(int firstIterations = -1)
+      void MatrixRhsOutput<Scalar>::outputRhs(int firstIterations)
       {
         this->outputRhsOn = true;
         this->outputRhsIterations = firstIterations;
