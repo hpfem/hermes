@@ -77,12 +77,19 @@ namespace Hermes
       for(unsigned int form_i = 0; form_i < this->wf->mfsurf.size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < this->wf->mfsurf.at(form_i)->ext.size(); ext_i++)
           ext_functions.push_back(this->wf->mfsurf.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < this->wf->mfDG.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->mfDG.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(this->wf->mfDG.at(form_i)->ext[ext_i]);
+
       for(unsigned int form_i = 0; form_i < this->wf->vfvol.size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < this->wf->vfvol.at(form_i)->ext.size(); ext_i++)
           ext_functions.push_back(this->wf->vfvol.at(form_i)->ext[ext_i]);
       for(unsigned int form_i = 0; form_i < this->wf->vfsurf.size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < this->wf->vfsurf.at(form_i)->ext.size(); ext_i++)
           ext_functions.push_back(this->wf->vfsurf.at(form_i)->ext[ext_i]);
+      for(unsigned int form_i = 0; form_i < this->wf->vfDG.size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->vfDG.at(form_i)->ext.size(); ext_i++)
+          ext_functions.push_back(this->wf->vfDG.at(form_i)->ext[ext_i]);
 
       // Structures that cloning will be done into.
       PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads)];
@@ -152,7 +159,7 @@ namespace Hermes
 
 #define CHUNKSIZE 1
       int num_threads_used = Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads);
-#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf) num_threads(num_threads_used)
+#pragma omp parallel shared(trav_master, mat, rhs) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_mfvol, current_mfsurf, current_mfDG, current_vfvol, current_vfsurf, current_vfDG) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
@@ -172,12 +179,10 @@ namespace Hermes
 
             current_mfvol = mfvol[omp_get_thread_num()].size() == 0 ? NULL : &(mfvol[omp_get_thread_num()].front());
             current_mfsurf = mfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(mfsurf[omp_get_thread_num()].front());
-            if(DG_matrix_forms_present)
-              current_mfDG = mfDG[omp_get_thread_num()].size() == 0 ? NULL : &(mfDG[omp_get_thread_num()].front());
+            current_mfDG = mfDG[omp_get_thread_num()].size() == 0 ? NULL : &(mfDG[omp_get_thread_num()].front());
             current_vfvol = vfvol[omp_get_thread_num()].size() == 0 ? NULL : &(vfvol[omp_get_thread_num()].front());
             current_vfsurf = vfsurf[omp_get_thread_num()].size() == 0 ? NULL : &(vfsurf[omp_get_thread_num()].front());
-            if(DG_vector_forms_present)
-              current_vfDG = vfDG[omp_get_thread_num()].size() == 0 ? NULL : &(vfDG[omp_get_thread_num()].front());
+            current_vfDG = vfDG[omp_get_thread_num()].size() == 0 ? NULL : &(vfDG[omp_get_thread_num()].front());
 
             // One state is a collection of (virtual) elements sharing
             // the same physical location on (possibly) different meshes.
@@ -203,7 +208,7 @@ namespace Hermes
         }
       }
 
-      deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, vfvol, vfsurf);
+      deinit_assembling(pss, spss, refmaps, u_ext, als, ext_functions, ext, mfvol, mfsurf, mfDG, vfvol, vfsurf, vfDG);
 
       trav_master.finish();
       for(unsigned int i = 0; i < Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads); i++)
