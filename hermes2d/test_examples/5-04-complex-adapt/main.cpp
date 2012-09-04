@@ -106,7 +106,6 @@ int main(int argc, char* argv[])
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
-
     
   // Adaptivity loop:
   int as = 1; bool done = false;
@@ -134,7 +133,7 @@ int main(int argc, char* argv[])
     }
     try
     {
-      newton.solve(coeff_vec);
+      newton.solve_keep_jacobian(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)
     {

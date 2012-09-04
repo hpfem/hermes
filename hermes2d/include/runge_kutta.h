@@ -74,7 +74,7 @@ namespace Hermes
 
     /// @ingroup userSolvingAPI
     template<typename Scalar>
-    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
+    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
     {
     public:
       /// Constructor.

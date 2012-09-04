@@ -101,6 +101,8 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::solve()
     {
+      this->tick();
+
       this->onInitialization();
 
       dp->assemble(this->jacobian, this->residual);
@@ -110,6 +112,9 @@ namespace Hermes
       this->sln_vector = matrix_solver->get_sln_vector();
 
       this->onFinish();
+      
+      this->tick();
+      this->info("Linear solver solution duration: %f s.", this->last());
     }
 
     template<typename Scalar>
