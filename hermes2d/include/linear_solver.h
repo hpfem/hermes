@@ -28,8 +28,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// \brief Base class for defining interface for nonlinear solvers.
-    ///
+    /// @ingroup userSolvingAPI
+    /// Class for solving linear problems.
     template <typename Scalar>
     class LinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
     {
