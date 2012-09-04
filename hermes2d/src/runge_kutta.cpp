@@ -372,6 +372,17 @@ namespace Hermes
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         vector_right->change_sign();
+        if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= it))
+        {
+          char* fileName = new char[this->RhsFilename.length() + 5];
+          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), it);
+          else
+            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
+          FILE* rhs_file = fopen(fileName, "w+");
+          vector_right->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
+          fclose(rhs_file);
+        }
 
         // Measure the residual norm.
         if(residual_as_vector)
@@ -416,6 +427,19 @@ namespace Hermes
           // Adding the block mass matrix M to matrix_right. This completes the
           // resulting tensor Jacobian.
           matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
+
+          if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= it))
+          {
+            char* fileName = new char[this->matrixFilename.length() + 5];
+            if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+              sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), it);
+            else
+              sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
+            FILE* matrix_file = fopen(fileName, "w+");
+
+            matrix_right->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
+            fclose(matrix_file);
+          }
 
           matrix_right->finish();
         }

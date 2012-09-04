@@ -33,7 +33,7 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for Newton's method.
     template<typename Scalar>
-    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable
+    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
     {
     public:
       NewtonSolver(DiscreteProblem<Scalar>* dp);

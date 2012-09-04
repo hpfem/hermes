@@ -127,6 +127,8 @@ int main(int argc, char* argv[])
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
   runge_kutta.set_verbose_output(true);
+  runge_kutta.outputMatrix(1);
+  runge_kutta.outputRhs(2);
   runge_kutta.setGlobalIntegrationOrder(10);
 
   // Iteration number.

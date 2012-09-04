@@ -107,6 +107,29 @@ namespace Hermes
       this->onInitialization();
 
       dp->assemble(this->jacobian, this->residual);
+      if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= 1))
+      {
+        char* fileName = new char[this->RhsFilename.length() + 5];
+        if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+          sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), 1);
+        else
+          sprintf(fileName, "%s%i", this->RhsFilename.c_str(), 1);
+        FILE* rhs_file = fopen(fileName, "w+");
+        residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
+        fclose(rhs_file);
+      }
+      if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= 1))
+        {
+          char* fileName = new char[this->matrixFilename.length() + 5];
+          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), 1);
+          else
+            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), 1);
+          FILE* matrix_file = fopen(fileName, "w+");
+
+          jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
+          fclose(matrix_file);
+        }
 
       this->matrix_solver->solve();
 

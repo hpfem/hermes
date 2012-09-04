@@ -34,7 +34,7 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for the Picard's method.
     template<typename Scalar>
-    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable
+    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
     {
     public:
       PicardSolver(DiscreteProblem<Scalar>* dp);

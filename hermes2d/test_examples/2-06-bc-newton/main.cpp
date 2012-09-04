@@ -63,6 +63,11 @@ int main(int argc, char* argv[])
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, &space);
+  newton.outputMatrix();
+  newton.outputRhs(1);
+  newton.setMatrixFilename("asdf");
+  newton.setRhsEMatrixDumpFormat(Hermes::Algebra::DF_HERMES_BIN);
+  newton.setMatrixVarname("aasdfgasdasdggasdgas");
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;

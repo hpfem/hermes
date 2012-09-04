@@ -253,6 +253,17 @@ namespace Hermes
 
         // Assemble just the residual vector.
         this->dp->assemble(coeff_vec, residual);
+        if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= it))
+        {
+          char* fileName = new char[this->RhsFilename.length() + 5];
+          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), it);
+          else
+            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
+          FILE* rhs_file = fopen(fileName, "w+");
+          residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
+          fclose(rhs_file);
+        }
         
         Element* e;
         for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
@@ -358,6 +369,18 @@ namespace Hermes
 
         // Assemble just the jacobian.
         this->dp->assemble(coeff_vec, jacobian);
+        if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= it))
+        {
+          char* fileName = new char[this->matrixFilename.length() + 5];
+          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), it);
+          else
+            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
+          FILE* matrix_file = fopen(fileName, "w+");
+
+          jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
+          fclose(matrix_file);
+        }
 
         this->onStepEnd();
 
@@ -442,6 +465,17 @@ namespace Hermes
 
         // Assemble the residual vector.
         this->dp->assemble(coeff_vec, residual);
+        if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= it))
+        {
+          char* fileName = new char[this->RhsFilename.length() + 5];
+          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), it);
+          else
+            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
+          FILE* rhs_file = fopen(fileName, "w+");
+          residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
+          fclose(rhs_file);
+        }
 
         Element* e;
         for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
@@ -560,6 +594,20 @@ namespace Hermes
           linear_solver = create_linear_solver<Scalar>(kept_jacobian, residual);
 
           this->dp->assemble(coeff_vec, kept_jacobian);
+
+          if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= it))
+          {
+            char* fileName = new char[this->matrixFilename.length() + 5];
+            if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+              sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), it);
+            else
+              sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
+            FILE* matrix_file = fopen(fileName, "w+");
+
+            kept_jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
+            fclose(matrix_file);
+          }
+
           linear_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         }
 

@@ -26,8 +26,61 @@ namespace Hermes
         return this->get_spaces()[n];
       }
 
+
+      template<typename Scalar>
+      MatrixRhsOutput<Scalar>::MatrixRhsOutput() : outputMatrixOn(false), outputMatrixIterations(-1), matrixFilename("Matrix_"), 
+        matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_MATLAB_SPARSE), outputRhsOn(false), outputRhsIterations(-1),
+        RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::DF_MATLAB_SPARSE)
+      {
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::outputMatrix(int firstIterations)
+      {
+        outputMatrixOn = true;
+        this->outputMatrixIterations = firstIterations;
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::setMatrixFilename(std::string name)
+      {
+        this->matrixFilename = name;
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::setMatrixVarname(std::string name)
+      {
+        this->matrixVarname = name;
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::setMatrixEMatrixDumpFormat(EMatrixDumpFormat format)
+      {
+        this->matrixFormat = format;
+      }
+
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::outputRhs(int firstIterations = -1)
+      {
+        this->outputRhsOn = true;
+        this->outputRhsIterations = firstIterations;
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::setRhsFilename(std::string name)
+      {
+        this->RhsFilename = name;
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::setRhsVarname(std::string name)
+      {
+        this->RhsVarname = name;
+      }
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::setRhsEMatrixDumpFormat(EMatrixDumpFormat format)
+      {
+        this->RhsFormat = format;
+      }
+
       template HERMES_API class SettableSpaces<double>;
       template HERMES_API class SettableSpaces<std::complex<double> >;
+      template HERMES_API class MatrixRhsOutput<double>;
+      template HERMES_API class MatrixRhsOutput<std::complex<double> >;
     }
   }
 }

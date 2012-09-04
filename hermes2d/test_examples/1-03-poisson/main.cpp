@@ -28,7 +28,7 @@
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 3;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -75,6 +75,8 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
+  linear_solver.outputMatrix();
+  linear_solver.outputRhs();
 
   // Solve the linear problem.
   try

@@ -273,7 +273,6 @@ namespace Hermes
       /// \brief Hermes binary format
       ///
       DF_HERMES_BIN,
-      DF_NATIVE,    ///< native format for the linear solver,
       DF_MATRIX_MARKET ///< Matrix Market which can be read by pysparse library
     };
 
