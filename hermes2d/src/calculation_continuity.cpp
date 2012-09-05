@@ -126,19 +126,18 @@ namespace Hermes
           switch(identification_method)
           {
           case timeAndNumber:
-            ifile >> last_time >> last_number;
+            ifile >> this->num >> last_time >> last_number;
             record_available = true;
             break;
           case onlyTime:
-            ifile >> last_time;
+            ifile >> this->num >> last_time;
             record_available = true;
             break;
           case onlyNumber:
-            ifile >> last_number;
+            ifile >> this->num >> last_number;
             record_available = true;
             break;
           }
-          num++;
         }
         ifile.close();
 
@@ -170,7 +169,7 @@ namespace Hermes
       std::ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
       if(ofile)
       {
-        ofile << time << ' ' << number << std::endl;
+        ofile << this->num << ' ' << time << ' ' << number << std::endl;
         ofile.close();
       }
       else
@@ -199,7 +198,7 @@ namespace Hermes
       std::ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
       if(ofile)
       {
-        ofile << time << ' ' << number << std::endl;
+        ofile << this->num << ' ' << time << ' ' << number << std::endl;
         ofile.close();
       }
       else
@@ -228,7 +227,7 @@ namespace Hermes
       std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
       if(ofile)
       {
-        ofile << time << std::endl;
+        ofile << this->num << ' ' << time << std::endl;
         ofile.close();
       }
       else
@@ -257,7 +256,7 @@ namespace Hermes
       std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
       if(ofile)
       {
-        ofile << time << std::endl;
+        ofile << this->num << ' ' << time << std::endl;
         ofile.close();
       }
       else
@@ -284,7 +283,7 @@ namespace Hermes
       std::ofstream ofile("onlyNumber.h2d", std::ios_base::app);
       if(ofile)
       {
-        ofile << number << std::endl;
+        ofile << this->num << ' ' << number << std::endl;
         ofile.close();
       }
       else
@@ -313,7 +312,7 @@ namespace Hermes
       std::ofstream ofile("onlyNumber.h2d", std::ios_base::app);
       if(ofile)
       {
-        ofile << number << std::endl;
+        ofile << this->num << ' ' << number << std::endl;
         ofile.close();
       }
       else
