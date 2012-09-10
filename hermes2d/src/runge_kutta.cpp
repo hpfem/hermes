@@ -58,6 +58,7 @@ namespace Hermes
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
       this->stage_dp_left = NULL;
+      this->stage_dp_right = NULL;
     }
 
     template<typename Scalar>
@@ -91,6 +92,7 @@ namespace Hermes
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(spaces)];
 
       this->stage_dp_left = NULL;
+      this->stage_dp_right = NULL;
     }
 
     template<typename Scalar>
@@ -251,8 +253,10 @@ namespace Hermes
     template<typename Scalar>
     RungeKutta<Scalar>::~RungeKutta()
     {
-      delete stage_dp_left;
-      delete stage_dp_right;
+      if(stage_dp_left != NULL)
+        delete stage_dp_left;
+      if(stage_dp_right != NULL)
+        delete stage_dp_right;
       delete solver;
       delete matrix_right;
       delete matrix_left;
