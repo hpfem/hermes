@@ -93,7 +93,8 @@ namespace Hermes
         int i; ///< Component.
         std::string area; ///< Geometric region where this estimator is applied.
         Hermes::vector<MeshFunction<Scalar>*> ext; ///< Additional functions required by the estimator.
-
+        /// Set this error form to be an interface one.
+        void setAsInterface();
         /// Constructor.
         ErrorEstimatorForm(int i, std::string area = HERMES_ANY,
                            Hermes::vector<MeshFunction<Scalar>*> ext = Hermes::vector<MeshFunction<Scalar>*>())
