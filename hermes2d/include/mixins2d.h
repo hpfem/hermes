@@ -1,10 +1,11 @@
 #ifndef __H2D_MIXINS_H
 #define __H2D_MIXINS_H
-#include "space/space.h"
+#include "global.h"
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class Space;
     namespace Mixins
     {
       template<typename Scalar>
@@ -17,6 +18,13 @@ namespace Hermes
         /// Get all spaces as a Hermes::vector.
         virtual Hermes::vector<const Space<Scalar>*> get_spaces() const = 0;
         virtual const Space<Scalar>* get_space(int n) const;
+      };
+
+      class HERMES_API StateQueryable
+      {
+      public:
+        /// Ask if the instance is fine.
+        virtual bool isOkay() const = 0;
       };
 
       template<typename Scalar>

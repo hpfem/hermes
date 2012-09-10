@@ -48,6 +48,25 @@ namespace Hermes
         delete this->overflow_nodes;
       }
     }
+    
+    template<typename Scalar>
+    bool MeshFunction<Scalar>::isOkay() const
+    {
+      bool okay = true;
+      if(this->mesh == NULL)
+        okay = false;
+      try
+      {
+        if(this->mesh->get_max_element_id() < 0)
+          throw Hermes::Exceptions::Exception("Internal exception.");
+        this->mesh->get_element(this->mesh->get_max_element_id() - 1);
+      }
+      catch(std::exception& e)
+      {
+        okay = false;
+      }
+      return okay;
+    }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::init()

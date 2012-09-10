@@ -19,6 +19,7 @@
 #include "../global.h"
 #include "curved.h"
 #include "hash.h"
+#include "../mixins2d.h"
 
 namespace Hermes
 {
@@ -32,6 +33,7 @@ namespace Hermes
 
     class Element;
     class HashTable;
+
     template<typename Scalar> class Space;
     template<typename Scalar> class KellyTypeAdapt;
     struct MItem;
@@ -215,14 +217,15 @@ namespace Hermes
 
     /// \brief Represents a finite element mesh.
     ///
-    class HERMES_API Mesh : public HashTable
+    class HERMES_API Mesh : public HashTable, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
-
       Mesh();
       ~Mesh() {
         free();
       }
+
+      virtual bool isOkay() const;
 
       /// Rescales the mesh.
       bool rescale(double x_ref, double y_ref);

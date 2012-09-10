@@ -99,12 +99,14 @@ namespace Hermes
     ///
 
     template<typename Scalar>
-    class HERMES_API Space : public Hermes::Mixins::Loggable
+    class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
       Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init);
 
       virtual ~Space();
+
+      virtual bool isOkay() const;
 
       /// Sets element polynomial order. Can be called by the user. Should not be called
       /// for many elements at once, since assign_dofs() is called at the end of this function.

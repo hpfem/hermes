@@ -36,13 +36,15 @@ namespace Hermes
     /// (This is an abstract class and cannot be instantiated.)
     ///
     template<typename Scalar>
-    class HERMES_API MeshFunction : public Function<Scalar>
+    class HERMES_API MeshFunction : public Function<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
 
       MeshFunction();
       MeshFunction(const Mesh *mesh);
       virtual ~MeshFunction();
+
+      virtual bool isOkay() const;
 
       virtual void init();
       virtual void reinit();

@@ -50,6 +50,17 @@ namespace Hermes
 
       own_shapeset = (shapeset == NULL);
     }
+    
+    template<typename Scalar>
+    bool Space<Scalar>::isOkay() const
+    {
+      bool okay = true;
+      if(ndata == NULL || edata == NULL || !nsize || !esize)
+        okay = false;
+      if(seq < 0)
+        okay = false;
+      return okay;
+    }
 
     template<typename Scalar>
     Space<Scalar>::~Space()
@@ -61,8 +72,9 @@ namespace Hermes
     void Space<Scalar>::free()
     {
       free_bc_data();
-      if(nsize) { ::free(ndata); ndata = NULL; }
-      if(esize) { ::free(edata); edata = NULL; }
+      if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
+      if(esize) { ::free(edata); edata = 0; edata = NULL; }
+      this->seq = -1;
     }
 
     template<typename Scalar>
@@ -601,7 +613,8 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::set_mesh(Mesh* mesh)
     {
-      if(this->mesh == mesh) return;
+      if(this->mesh == mesh) 
+        return;
       free();
       this->mesh = mesh;
       this->mesh_seq = mesh->get_seq();

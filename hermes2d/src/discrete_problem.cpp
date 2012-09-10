@@ -1105,6 +1105,16 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
+      // Initial check of meshes and spaces.
+      for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+      {
+        if(!this->spaces[space_i]->isOkay())
+          throw Hermes::Exceptions::Exception("Space %d is not okay in assemble().", space_i);
+
+        if(!this->spaces[space_i]->get_mesh()->isOkay())
+          throw Hermes::Exceptions::Exception("Mesh %d is not okay in assemble().", space_i);
+      }
+
       this->tick();
 
       // Important, sets the current caughtException to NULL.
@@ -1143,6 +1153,13 @@ namespace Hermes
       for(unsigned int form_i = 0; form_i < this->wf->vfDG.size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < this->wf->vfDG.at(form_i)->ext.size(); ext_i++)
           ext_functions.push_back(this->wf->vfDG.at(form_i)->ext[ext_i]);
+
+      // Initial check of meshes and spaces.
+      for(unsigned int ext_i = 0; ext_i < ext_functions.size(); ext_i++)
+      {
+        if(!ext_functions[ext_i]->isOkay())
+          throw Hermes::Exceptions::Exception("Ext function %d is not okay in assemble().", ext_i);
+      }
 
       // Structures that cloning will be done into.
       PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.getParamValue(Hermes::Hermes2D::numThreads)];

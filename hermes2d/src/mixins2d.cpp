@@ -26,7 +26,6 @@ namespace Hermes
         return this->get_spaces()[n];
       }
 
-
       template<typename Scalar>
       MatrixRhsOutput<Scalar>::MatrixRhsOutput() : outputMatrixOn(false), outputMatrixIterations(-1), matrixFilename("Matrix_"), 
         matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_MATLAB_SPARSE), outputRhsOn(false), outputRhsIterations(-1),

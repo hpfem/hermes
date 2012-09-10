@@ -157,6 +157,7 @@ namespace Hermes
   # endif
 
   /* event codes */
+  #define HERMES_EC_ERROR 'E' ///< An event code: warnings. \internal
   #define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
   #define HERMES_EC_INFO 'I' ///< An event code: info about results. \internal
 

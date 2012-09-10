@@ -210,6 +210,18 @@ namespace Hermes
       seq = g_mesh_seq++;
     }
 
+    bool Mesh::isOkay() const
+    {
+      bool okay = true;
+      if(this->elements.get_size() < 1)
+        okay = false;
+      if(this->nodes.get_size() < 1)
+        okay = false;
+      if(seq < 0)
+        okay = false;
+      return okay;
+    }
+
     void Mesh::create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
       int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers)
     {
@@ -278,28 +290,43 @@ namespace Hermes
     int Mesh::get_num_elements() const
     {
       if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_elements().");
-      return elements.get_num_items();
+      if(this->seq < 0)
+        return -1;
+      else
+        return elements.get_num_items();
     }
 
     /// Returns the number of coarse mesh elements.
     int Mesh::get_num_base_elements() const
     {
       if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
-      return nbase;
+      
+      if(this->seq < 0)
+        return -1;
+      else
+        return nbase;
     }
 
     /// Returns the current number of active elements in the mesh.
     int Mesh::get_num_active_elements() const
     {
-      if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_active_elements().");
-      return nactive;
+      if(this == NULL) 
+        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_active_elements().");
+      if(this->seq < 0)
+        return -1;
+      else
+        return nactive;
     }
 
     /// Returns the maximum node id number plus one.
     int Mesh::get_max_element_id() const
     {
-      if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_max_element_id().");
-      return elements.get_size();
+      if(this == NULL) 
+        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_max_element_id().");
+      if(this->seq < 0)
+        return -1;
+      else
+        return elements.get_size();
     }
 
     Element* Mesh::get_element(int id) const
@@ -1250,16 +1277,17 @@ namespace Hermes
     {
       Element* e;
       for_all_elements(e, this)
+      {
         if(e->cm != NULL)
         {
           delete e->cm;
           e->cm = NULL; // fixme!!!
         }
-
-        elements.free();
-        HashTable::free();
-
-        this->refinements.clear();
+      }
+      elements.free();
+      HashTable::free();
+      this->refinements.clear();
+      this->seq = -1;
     }
 
     void Mesh::copy_converted(Mesh* mesh)

@@ -43,14 +43,7 @@ namespace Hermes
       linear_solver.set_verbose_output(false);
 
       // Perform Newton iteration.
-      try
-      {
-        linear_solver.solve();
-      }
-      catch(Hermes::Exceptions::Exception e)
-      {
-        e.printMsg();
-      }
+      linear_solver.solve();
 
       if(target_vec != NULL)
         for (int i = 0; i < space->get_num_dofs(); i++)
