@@ -945,20 +945,24 @@ namespace Hermes
         // search for an existing vertex
         if(p1 > p2) std::swap(p1, p2);
         int index = this->hash(p1, p2);
-        int i = this->hash_table[index];
-        while (i >= 0 && i < this->vertex_count)
+        int i = 0;
+        if(index < this->vertex_count)
         {
-          if(
-            this->info[i][0] == p1 && this->info[i][1] == p2 &&
-            (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-8) &&
-            (fabs(x - verts[i][0]) < 1e-8) &&
-            (fabs(y - verts[i][1]) < 1e-8)
-            )
-            return i;
-          // note that we won't return a vertex with a different value than the required one;
-          // this takes care for discontinuities in the solution, where more vertices
-          // with different values will be created
-          i = info[i][2];
+          i = this->hash_table[index];
+          while (i >= 0 && i < this->vertex_count)
+          {
+            if(
+              this->info[i][0] == p1 && this->info[i][1] == p2 &&
+              (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-8) &&
+              (fabs(x - verts[i][0]) < 1e-8) &&
+              (fabs(y - verts[i][1]) < 1e-8)
+              )
+              return i;
+            // note that we won't return a vertex with a different value than the required one;
+            // this takes care for discontinuities in the solution, where more vertices
+            // with different values will be created
+            i = info[i][2];
+          }
         }
 
         // if not found, create a new one
