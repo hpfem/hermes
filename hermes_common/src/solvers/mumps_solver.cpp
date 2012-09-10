@@ -213,7 +213,6 @@ namespace Hermes
       // TODO
       switch (fmt)
       {
-      case DF_NATIVE:
       case DF_PLAIN_ASCII:
         fprintf(file, "%d\n", this->size);
         fprintf(file, "%d\n", nnz);
@@ -522,7 +521,6 @@ namespace Hermes
     {
       switch (fmt)
       {
-      case DF_NATIVE:
       case DF_PLAIN_ASCII:
         for (unsigned int i = 0; i < this->size; i++)
         {

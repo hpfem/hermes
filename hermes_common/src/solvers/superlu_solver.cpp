@@ -487,7 +487,6 @@ namespace Hermes
     {
       switch (fmt)
       {
-      case DF_NATIVE:
       case DF_PLAIN_ASCII:
         for (unsigned int i = 0; i < this->size; i++)
         {
