@@ -97,6 +97,8 @@ namespace Hermes
       delete matrix_solver;
       if(own_dp)
         delete this->dp;
+      else
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
     }
 
     template<typename Scalar>

@@ -154,6 +154,10 @@ namespace Hermes
       delete jacobian;
       delete residual;
       delete linear_solver;
+      if(own_dp)
+        delete this->dp;
+      else
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
     }
 
     template<typename Scalar>

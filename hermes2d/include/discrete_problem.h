@@ -391,6 +391,7 @@ namespace Hermes
         Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
       template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class LinearSolver;
       template<typename T> friend class NewtonSolver;
       template<typename T> friend class PicardSolver;
       template<typename T> friend class RungeKutta;
