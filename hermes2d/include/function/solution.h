@@ -164,7 +164,11 @@ namespace Hermes
       virtual void set_active_element(Element* e);
 
       virtual MeshFunction<Scalar>* clone();
+
+      static void set_static_verbose_output(bool verbose);
     protected:
+      static bool static_verbose_output;
+
       virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
 
       /// Enables or disables transformation of the solution derivatives (H1 case)

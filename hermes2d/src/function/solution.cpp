@@ -75,6 +75,16 @@ namespace Hermes
       virtual void dummy_fn() {}
     } g_quad_2d_cheb;
 
+
+    template<typename Scalar>
+    void Solution<Scalar>::set_static_verbose_output(bool verbose)
+    {
+      Solution<Scalar>::static_verbose_output = verbose;
+    }
+
+    template<typename Scalar>
+    bool Solution<Scalar>::static_verbose_output = false;
+
     template<typename Scalar>
     void Solution<Scalar>::init()
     {
@@ -341,7 +351,8 @@ namespace Hermes
         const Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       int o;
-
+      if(Solution<Scalar>::static_verbose_output)
+        Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector called.");
       // Sanity checks.
       if(space == NULL) throw Exceptions::NullException(1);
       if(space->get_mesh() == NULL) throw Exceptions::Exception("Mesh == NULL in Solution<Scalar>::set_coeff_vector().");
@@ -353,6 +364,8 @@ namespace Hermes
       if(space->shapeset != pss->shapeset)
         throw Exceptions::Exception("Provided 'space' and 'pss' must have the same shapesets.");
 
+      if(Solution<Scalar>::static_verbose_output)
+        Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - solution being freed.");
       free();
 
       this->space_type = space->get_type();
@@ -448,6 +461,8 @@ namespace Hermes
       if(this->mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL.\n");
       init_dxdy_buffer();
       this->element = NULL;
+      if(Solution<Scalar>::static_verbose_output)
+        Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - done.");
     }
 
     template<typename Scalar>
@@ -480,6 +495,19 @@ namespace Hermes
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
+        if(Solution<Scalar>::static_verbose_output)
+        {
+          if(i == 0)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-th solution", i);
+          if(i == 1)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-st solution", i);
+          if(i == 2)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-nd solution", i);
+          if(i == 3)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-rd solution", i);
+          if(i > 3)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-th solution", i);
+        }
         if(add_dir_lift == Hermes::vector<bool>())
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
@@ -530,6 +558,19 @@ namespace Hermes
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
+        if(Solution<Scalar>::static_verbose_output)
+        {
+          if(i == 0)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-th solution", i);
+          if(i == 1)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-st solution", i);
+          if(i == 2)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-nd solution", i);
+          if(i == 3)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-rd solution", i);
+          if(i > 3)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-th solution", i);
+        }
         if(add_dir_lift == Hermes::vector<bool>())
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
@@ -625,6 +666,19 @@ namespace Hermes
 
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
+        if(Solution<Scalar>::static_verbose_output)
+        {
+          if(i == 0)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-th solution", i);
+          if(i == 1)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-st solution", i);
+          if(i == 2)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-nd solution", i);
+          if(i == 3)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-rd solution", i);
+          if(i > 3)
+            Hermes::Mixins::Loggable::Static::info("Solution: %d-th solution", i);
+        }
         if(add_dir_lift == Hermes::vector<bool>())
           Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else

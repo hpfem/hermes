@@ -39,8 +39,7 @@ namespace Hermes
       void project_global(const Space<Scalar>* space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
-          Scalar* target_vec,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Scalar* target_vec);
 
       /**
        \fn  static void OGProjection::project_global(Space<Scalar>* space,
@@ -62,29 +61,24 @@ namespace Hermes
        \param newton_max_iter         (optional) the newton maximum iterator.
        */
       void project_global(const Space<Scalar>* space, MeshFunction<Scalar>* source_meshfn,
-          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper that delivers a Solution instead of coefficient vector.
       void project_global(const Space<Scalar>* space,
           Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
-          ProjNormType proj_norm = HERMES_UNSET_NORM,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper for multiple source MeshFunctions that delivers coefficient vector.
       void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
-          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(),
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       /// Wrapper for multiple source Solutions that delivers coefficient vector.
       void project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
-          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(),
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       void project_global(Hermes::vector<const Space<Scalar>*> spaces,
           Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
     protected:
       /// Underlying function for global orthogonal projection.
@@ -92,8 +86,7 @@ namespace Hermes
       /// a special projection weak form, which is different from
       /// the weak form of the PDE. If you supply a weak form of the
       /// PDE, the PDE will just be solved.
-      void project_internal(const Space<Scalar>* space, WeakForm<Scalar>* proj_wf, Scalar* target_vec,
-      double newton_tol = 1e-6, int newton_max_iter = 10);
+      void project_internal(const Space<Scalar>* space, WeakForm<Scalar>* proj_wf, Scalar* target_vec);
 
       /// Jacobian matrix (same as stiffness matrix since projections are linear).
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
