@@ -28,7 +28,7 @@ namespace Hermes
     template<typename Scalar>
     void KellyTypeAdapt<Scalar>::ErrorEstimatorForm::setAsInterface() 
     { 
-      this->setArea(H2D_DG_INNER_EDGE);
+      this->set_area(H2D_DG_INNER_EDGE);
     }
 
     template<typename Scalar>

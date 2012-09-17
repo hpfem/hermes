@@ -30,7 +30,7 @@ namespace Hermes
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-        this->setArea(area);
+        this->set_area(area);
         this->setSymFlag(sym);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
@@ -47,7 +47,7 @@ namespace Hermes
         spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
         this->setSymFlag(sym);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
@@ -133,7 +133,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline),
         gt(gt), order_increase(order_increase)
       {
-        this->setArea(area);
+        this->set_area(area);
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
       }
@@ -145,7 +145,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt),
         order_increase(order_increase)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);

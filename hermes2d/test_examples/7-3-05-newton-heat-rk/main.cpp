@@ -127,9 +127,9 @@ int main(int argc, char* argv[])
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
   runge_kutta.set_verbose_output(true);
-  runge_kutta.outputMatrix(1);
-  runge_kutta.outputRhs(2);
-  runge_kutta.setGlobalIntegrationOrder(10);
+  runge_kutta.output_matrix(1);
+  runge_kutta.output_rhs(2);
+  runge_kutta.set_global_integration_order(10);
 
   // Iteration number.
   int iteration = 0;
@@ -141,13 +141,13 @@ int main(int argc, char* argv[])
     try
     {
       runge_kutta.set_space(&space);
-      runge_kutta.setTime(current_time);
-      runge_kutta.setTimeStep(time_step);
+      runge_kutta.set_time(current_time);
+      runge_kutta.set_time_step(time_step);
       runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
     }
     catch(Exceptions::Exception& e)
     {
-      e.printMsg();
+      e.print_msg();
     }
 
     // Show the new time level solution.

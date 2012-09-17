@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
     // Update time-dependent essential BCs.
     if(current_time <= STARTUP_TIME)
-      newton.setTime(current_time);
+      newton.set_time(current_time);
 
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     }
     catch(Hermes::Exceptions::Exception& e)
     {
-      e.printMsg();
+      e.print_msg();
     }
     Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);

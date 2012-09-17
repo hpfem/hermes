@@ -35,7 +35,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
         this->setSymFlag(HERMES_SYM);
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>
@@ -74,7 +74,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
         this->setSymFlag(HERMES_SYM);
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>
@@ -111,7 +111,7 @@ namespace Hermes
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>
@@ -148,7 +148,7 @@ namespace Hermes
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>
@@ -185,7 +185,7 @@ namespace Hermes
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>
@@ -222,7 +222,7 @@ namespace Hermes
         (unsigned int i, std::string area, double lambda, double mu)
         : VectorFormVol<Scalar>(i), lambda(lambda), mu(mu)
       {
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>
@@ -259,7 +259,7 @@ namespace Hermes
         (unsigned int i, unsigned int j, std::string area, double lambda, double mu)
         : MatrixFormVol<Scalar>(i, j), lambda(lambda), mu(mu)
       {
-        this->setArea(area);
+        this->set_area(area);
       }
 
       template<typename Scalar>

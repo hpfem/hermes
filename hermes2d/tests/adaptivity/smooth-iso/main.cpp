@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     }
     catch(Hermes::Exceptions::Exception& e)
     {
-      e.printMsg();
+      e.print_msg();
     }
     // Translate the resulting coefficient vector into the instance of Solution.
     Solution<double>::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);

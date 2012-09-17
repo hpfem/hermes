@@ -83,7 +83,7 @@ namespace Hermes
       virtual ~DiscreteProblem();
 
       /// If the cache should not be used for any reason.
-      inline void setDoNotUseCache() { this->doNotUseCache = true; }
+      inline void set_do_not_use_cache() { this->do_not_use_cache = true; }
 
       // GET functions.
       /// Get the weak forms.
@@ -99,8 +99,8 @@ namespace Hermes
       bool is_matrix_free() const;
       
       /// set time information for time-dependent problems.
-      virtual void setTime(double time);
-      virtual void setTimeStep(double timeStep);
+      virtual void set_time(double time);
+      virtual void set_time_step(double time_step);
 
       void delete_cache();
 
@@ -299,7 +299,7 @@ namespace Hermes
       CacheRecordPerElement*** cache_records_element;
       bool** cache_element_stored;
       int cache_size;
-      bool doNotUseCache;
+      bool do_not_use_cache;
 
       /// Exception caught in a parallel region.
       Hermes::Exceptions::Exception* caughtException;

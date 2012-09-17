@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     }
     catch(Hermes::Exceptions::Exception& e)
     {
-      e.printMsg();
+      e.print_msg();
     }
 
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);

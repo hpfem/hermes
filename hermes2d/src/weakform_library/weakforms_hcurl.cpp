@@ -28,7 +28,7 @@ namespace Hermes
         GeomType gt)
         : MatrixFormVol<Scalar>(i, j), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
         this->setSymFlag(sym);
 
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
@@ -42,7 +42,7 @@ namespace Hermes
         Hermes2DFunction<Scalar>* f_coeff, SymFlag sym, GeomType gt)
         : MatrixFormVol<Scalar>(i, j), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
         this->setSymFlag(sym);
 
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
@@ -98,7 +98,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j),
         idx_j(j), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
         this->setSymFlag(sym);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
@@ -113,7 +113,7 @@ namespace Hermes
         : MatrixFormVol<Scalar>(i, j),
         idx_j(j), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
         this->setSymFlag(sym);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
@@ -170,7 +170,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
         function_coeff0(f_coeff0), function_coeff1(f_coeff1), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
 
         // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
@@ -187,7 +187,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i), const_coeff0(const_coeff0), const_coeff1(const_coeff1),
         function_coeff0(f_coeff0), function_coeff1(f_coeff1), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
         
         // If f_coeff0 is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff0 == HERMES_DEFAULT_FUNCTION) this->function_coeff0 = new Hermes2DFunction<Scalar>(1.0);
@@ -236,7 +236,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i),
         idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
 
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
@@ -250,7 +250,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i),
         idx_i(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
 
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
@@ -311,7 +311,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i),
         idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
@@ -325,7 +325,7 @@ namespace Hermes
         : VectorFormVol<Scalar>(i),
         idx_i(i), const_coeff(const_coeff), spline_coeff(c_spline), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
 
         // If spline is HERMES_DEFAULT_SPLINE, initialize it to be constant 1.0.
         if(c_spline == HERMES_DEFAULT_SPLINE) this->spline_coeff = new CubicSpline(1.0);
@@ -394,7 +394,7 @@ namespace Hermes
         GeomType gt)
         : MatrixFormSurf<Scalar>(i, j), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
@@ -406,7 +406,7 @@ namespace Hermes
         GeomType gt)
         : MatrixFormSurf<Scalar>(i, j), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
@@ -459,7 +459,7 @@ namespace Hermes
         GeomType gt)
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant functions in Hcurl forms not implemented yet.");
@@ -527,7 +527,7 @@ namespace Hermes
         GeomType gt)
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setArea(area);
+        this->set_area(area);
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");
@@ -539,7 +539,7 @@ namespace Hermes
         GeomType gt)
         : VectorFormSurf<Scalar>(i), const_coeff(const_coeff), function_coeff(f_coeff), gt(gt)
       {
-        this->setAreas(areas);
+        this->set_areas(areas);
         // If f_coeff is HERMES_DEFAULT_FUNCTION, initialize it to be constant 1.0.
         if(f_coeff == HERMES_DEFAULT_FUNCTION) this->function_coeff = new Hermes2DFunction<Scalar>(1.0);
         else throw Hermes::Exceptions::Exception("Nonconstant coefficients in Hcurl forms not implemented yet.");

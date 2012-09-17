@@ -36,41 +36,41 @@ namespace Hermes
         MatrixRhsOutput();
         /// Sets this instance to output the matrix in several first iterations.
         /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the matrix will be saved.
-        void outputMatrix(int firstIterations = -1);
+        void output_matrix(int firstIterations = -1);
         /// Sets filename for the matrix
         /// Default: Matrix_'iteration number' with the ".m" extension in the case of matlab format.
         /// \param[in] name sets the main part of the name, i.e. replacement for "Matrix_" in the default name.
-        void setMatrixFilename(std::string name);
+        void set_matrix_filename(std::string name);
         /// Sets varname for the matrix
         /// Default: "A".
-        void setMatrixVarname(std::string name);
+        void set_matrix_varname(std::string name);
         /// Sets varname for the matrix
         /// Default: "DF_MATLAB_SPARSE - matlab file".
-        void setMatrixEMatrixDumpFormat(EMatrixDumpFormat format);
+        void set_matrix_E_matrix_dump_format(EMatrixDumpFormat format);
         
         /// Sets this instance to output the rhs in several first iterations.
         /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the rhs will be saved.
-        void outputRhs(int firstIterations = -1);
+        void output_rhs(int firstIterations = -1);
         /// Sets filename for the rhs
         /// Default: Rhs_'iteration number' with the ".m" extension in the case of matlab format.
         /// \param[in] name sets the main part of the name, i.e. replacement for "Rhs_" in the default name.
-        void setRhsFilename(std::string name);
+        void set_rhs_filename(std::string name);
         /// Sets varname for the rhs
         /// Default: "b".
-        void setRhsVarname(std::string name);
+        void set_rhs_varname(std::string name);
         /// Sets varname for the rhs
         /// Default: "DF_MATLAB_SPARSE - matlab file".
-        void setRhsEMatrixDumpFormat(EMatrixDumpFormat format);
+        void set_rhs_E_matrix_dump_format(EMatrixDumpFormat format);
         
       protected:
-        bool outputMatrixOn;
-        int outputMatrixIterations;
+        bool output_matrixOn;
+        int output_matrixIterations;
         std::string matrixFilename;
         std::string matrixVarname;
         EMatrixDumpFormat matrixFormat;
 
-        bool outputRhsOn;
-        int outputRhsIterations;
+        bool output_rhsOn;
+        int output_rhsIterations;
         std::string RhsFilename;
         std::string RhsVarname;
         EMatrixDumpFormat RhsFormat;

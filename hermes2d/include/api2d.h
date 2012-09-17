@@ -48,11 +48,11 @@ namespace Hermes
       {
       public:
         /// Constructor.
-        /// \param[in] defaultVal Default value, if the user does not specify his own.
-        Parameter(int defaultVal);
-        bool userSet;
-        int userVal;
-        int defaultVal;
+        /// \param[in] default_val Default value, if the user does not specify his own.
+        Parameter(int default_val);
+        bool user_set;
+        int user_val;
+        int default_val;
       };
 
       /// The storage of parameters.
@@ -61,8 +61,8 @@ namespace Hermes
 
       std::map<Hermes2DApiParam, Parameter*> parameters;
     public:
-      int getParamValue(Hermes2DApiParam);
-      void setParamValue(Hermes2DApiParam, int value);
+      int get_param_value(Hermes2DApiParam);
+      void set_param_value(Hermes2DApiParam, int value);
     };
 
     /// Global instance used inside Hermes which is also accessible to users.

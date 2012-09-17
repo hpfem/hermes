@@ -25,7 +25,7 @@ private:
                                      heatcap(heatcap), current_time_ptr(current_time_ptr),
                                      temp_init(temp_init), t_final(t_final) 
     {
-      this->setArea(area);
+      this->set_area(area);
     };
 
     template<typename Real, typename Scalar>

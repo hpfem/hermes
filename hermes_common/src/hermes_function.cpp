@@ -168,71 +168,71 @@ namespace Hermes
   };
 
   template<>
-  double Hermes2DFunction<double>::derivativeX(double x, double y) const
+  double Hermes2DFunction<double>::derivative_x(double x, double y) const
   {
     if(this->is_const)
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::derivativeX");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::derivative_x");
       return 0.0;
     }
   };
   template<>
-  std::complex<double> Hermes2DFunction<std::complex<double> >::derivativeX(std::complex<double> x, std::complex<double> y) const
+  std::complex<double> Hermes2DFunction<std::complex<double> >::derivative_x(std::complex<double> x, std::complex<double> y) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::derivativeX");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::derivative_x");
       return std::complex<double>(0.0, 0.0);
     }
   };
 
   template<typename Scalar>
-  Ord Hermes2DFunction<Scalar>::derivativeX(Ord x, Ord y) const
+  Ord Hermes2DFunction<Scalar>::derivative_x(Ord x, Ord y) const
   {
     if(this->is_const)
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::derivativeX");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::derivative_x");
       return Ord(99);
     }
   };
 
   template<>
-  double Hermes2DFunction<double>::derivativeY(double x, double y) const
+  double Hermes2DFunction<double>::derivative_y(double x, double y) const
   {
     if(this->is_const)
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::derivativeY");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::derivative_y");
       return 0.0;
     }
   };
   template<>
-  std::complex<double> Hermes2DFunction<std::complex<double> >::derivativeY(std::complex<double> x, std::complex<double> y) const
+  std::complex<double> Hermes2DFunction<std::complex<double> >::derivative_y(std::complex<double> x, std::complex<double> y) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::derivativeY");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::derivative_y");
       return std::complex<double>(0.0, 0.0);
     }
   };
 
   template<typename Scalar>
-  Ord Hermes2DFunction<Scalar>::derivativeY(Ord x, Ord y) const
+  Ord Hermes2DFunction<Scalar>::derivative_y(Ord x, Ord y) const
   {
     if(this->is_const)
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::derivativeY");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::derivative_y");
       return Ord(99);
     }
   };
@@ -286,106 +286,106 @@ namespace Hermes
   };
 
   template<>
-  double Hermes3DFunction<double>::derivativeX(double x, double y, double z) const
+  double Hermes3DFunction<double>::derivative_x(double x, double y, double z) const
   {
     if(this->is_const)
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivativeX");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivative_x");
       return 0.0;
     }
   };
   template<>
-  std::complex<double> Hermes3DFunction<std::complex<double> >::derivativeX(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
+  std::complex<double> Hermes3DFunction<std::complex<double> >::derivative_x(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivativeX");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_x");
       return std::complex<double>(0.0, 0.0);
     }
   };
 
   template<typename Scalar>
-  Ord Hermes3DFunction<Scalar>::derivativeX(Ord x, Ord y, Ord z) const
+  Ord Hermes3DFunction<Scalar>::derivative_x(Ord x, Ord y, Ord z) const
   {
     if(this->is_const)
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivativeX");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivative_x");
       return Ord(99);
     }
   };
 
   template<>
-  double Hermes3DFunction<double>::derivativeY(double x, double y, double z) const
+  double Hermes3DFunction<double>::derivative_y(double x, double y, double z) const
   {
     if(this->is_const)
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivativeY");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivative_y");
       return 0.0;
     }
   };
   template<>
-  std::complex<double> Hermes3DFunction<std::complex<double> >::derivativeY(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
+  std::complex<double> Hermes3DFunction<std::complex<double> >::derivative_y(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivativeY");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_y");
       return std::complex<double>(0.0, 0.0);
     }
   };
 
   template<typename Scalar>
-  Ord Hermes3DFunction<Scalar>::derivativeY(Ord x, Ord y, Ord z) const
+  Ord Hermes3DFunction<Scalar>::derivative_y(Ord x, Ord y, Ord z) const
   {
     if(this->is_const)
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivativeY");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivative_y");
       return Ord(99);
     }
   };
 
   template<>
-  double Hermes3DFunction<double>::derivativeZ(double x, double y, double z) const
+  double Hermes3DFunction<double>::derivative_z(double x, double y, double z) const
   {
     if(this->is_const)
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivativeZ");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivative_z");
       return 0.0;
     }
   };
   template<>
-  std::complex<double> Hermes3DFunction<std::complex<double> >::derivativeZ(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
+  std::complex<double> Hermes3DFunction<std::complex<double> >::derivative_z(std::complex<double> x, std::complex<double> y, std::complex<double> z) const
   {
     if(this->is_const)
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivativeZ");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_z");
       return std::complex<double>(0.0, 0.0);
     }
   };
 
   template<typename Scalar>
-  Ord Hermes3DFunction<Scalar>::derivativeZ(Ord x, Ord y, Ord z) const
+  Ord Hermes3DFunction<Scalar>::derivative_z(Ord x, Ord y, Ord z) const
   {
     if(this->is_const)
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivativeZ");
+      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivative_z");
       return Ord(99);
     }
   };

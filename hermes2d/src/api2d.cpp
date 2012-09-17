@@ -26,10 +26,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    Api2D::Parameter::Parameter(int defaultVal)
+    Api2D::Parameter::Parameter(int default_val)
     {
-      this->defaultVal = defaultVal;
-      this->userSet = false;
+      this->default_val = default_val;
+      this->user_set = false;
     }
 
     Api2D::Api2D()
@@ -48,22 +48,22 @@ namespace Hermes
       this->parameters.clear();
     }
 
-    int Api2D::getParamValue(Hermes2DApiParam param)
+    int Api2D::get_param_value(Hermes2DApiParam param)
     {
       if(this->parameters.find(param) == parameters.end())
         throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-      if(this->parameters.find(param)->second->userSet)
-        return this->parameters.find(param)->second->userVal;
+      if(this->parameters.find(param)->second->user_set)
+        return this->parameters.find(param)->second->user_val;
       else
-        return this->parameters.find(param)->second->defaultVal;
+        return this->parameters.find(param)->second->default_val;
     }
 
-    void Api2D::setParamValue(Hermes2DApiParam param, int value)
+    void Api2D::set_param_value(Hermes2DApiParam param, int value)
     {
       if(this->parameters.find(param) == parameters.end())
         throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-      this->parameters.find(param)->second->userSet = true;
-      this->parameters.find(param)->second->userVal = value;
+      this->parameters.find(param)->second->user_set = true;
+      this->parameters.find(param)->second->user_val = value;
     }
 
     Hermes::Hermes2D::Api2D Hermes2DApi;

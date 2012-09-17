@@ -27,51 +27,51 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixRhsOutput<Scalar>::MatrixRhsOutput() : outputMatrixOn(false), outputMatrixIterations(-1), matrixFilename("Matrix_"), 
-        matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_MATLAB_SPARSE), outputRhsOn(false), outputRhsIterations(-1),
+      MatrixRhsOutput<Scalar>::MatrixRhsOutput() : output_matrixOn(false), output_matrixIterations(-1), matrixFilename("Matrix_"), 
+        matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_MATLAB_SPARSE), output_rhsOn(false), output_rhsIterations(-1),
         RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::DF_MATLAB_SPARSE)
       {
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::outputMatrix(int firstIterations)
+      void MatrixRhsOutput<Scalar>::output_matrix(int firstIterations)
       {
-        outputMatrixOn = true;
-        this->outputMatrixIterations = firstIterations;
+        output_matrixOn = true;
+        this->output_matrixIterations = firstIterations;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::setMatrixFilename(std::string name)
+      void MatrixRhsOutput<Scalar>::set_matrix_filename(std::string name)
       {
         this->matrixFilename = name;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::setMatrixVarname(std::string name)
+      void MatrixRhsOutput<Scalar>::set_matrix_varname(std::string name)
       {
         this->matrixVarname = name;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::setMatrixEMatrixDumpFormat(EMatrixDumpFormat format)
+      void MatrixRhsOutput<Scalar>::set_matrix_E_matrix_dump_format(EMatrixDumpFormat format)
       {
         this->matrixFormat = format;
       }
 
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::outputRhs(int firstIterations)
+      void MatrixRhsOutput<Scalar>::output_rhs(int firstIterations)
       {
-        this->outputRhsOn = true;
-        this->outputRhsIterations = firstIterations;
+        this->output_rhsOn = true;
+        this->output_rhsIterations = firstIterations;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::setRhsFilename(std::string name)
+      void MatrixRhsOutput<Scalar>::set_rhs_filename(std::string name)
       {
         this->RhsFilename = name;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::setRhsVarname(std::string name)
+      void MatrixRhsOutput<Scalar>::set_rhs_varname(std::string name)
       {
         this->RhsVarname = name;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::setRhsEMatrixDumpFormat(EMatrixDumpFormat format)
+      void MatrixRhsOutput<Scalar>::set_rhs_E_matrix_dump_format(EMatrixDumpFormat format)
       {
         this->RhsFormat = format;
       }

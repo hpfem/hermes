@@ -149,12 +149,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolverNOX<Scalar>::setTime(double time)
+    void NewtonSolverNOX<Scalar>::set_time(double time)
     {
     }
       
     template<typename Scalar>
-    void NewtonSolverNOX<Scalar>::setTimeStep(double timeStep)
+    void NewtonSolverNOX<Scalar>::set_time_step(double time_step)
     {
     }
 

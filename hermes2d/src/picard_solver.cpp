@@ -91,7 +91,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::setTime(double time)
+    void PicardSolver<Scalar>::set_time(double time)
     {
       Hermes::vector<Space<Scalar>*> spaces;
       for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
@@ -102,9 +102,9 @@ namespace Hermes
     }
       
     template<typename Scalar>
-    void PicardSolver<Scalar>::setTimeStep(double timeStep)
+    void PicardSolver<Scalar>::set_time_step(double time_step)
     {
-      const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time_step(timeStep);
+      const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time_step(time_step);
     }
 
     template<typename Scalar>
@@ -250,13 +250,13 @@ namespace Hermes
         add_dir_lift.push_back(false);
       LinearSolver<Scalar> linear_solver(static_cast<DiscreteProblemLinear<Scalar>*>(this->dp));
       
-      linear_solver.setRhsEMatrixDumpFormat(this->RhsFormat);
-      linear_solver.setRhsFilename(this->RhsFilename);
-      linear_solver.setRhsVarname(this->RhsVarname);
+      linear_solver.set_rhs_E_matrix_dump_format(this->RhsFormat);
+      linear_solver.set_rhs_filename(this->RhsFilename);
+      linear_solver.set_rhs_varname(this->RhsVarname);
 
-      linear_solver.setMatrixEMatrixDumpFormat(this->matrixFormat);
-      linear_solver.setMatrixFilename(this->matrixFilename);
-      linear_solver.setMatrixVarname(this->matrixVarname);
+      linear_solver.set_matrix_E_matrix_dump_format(this->matrixFormat);
+      linear_solver.set_matrix_filename(this->matrixFilename);
+      linear_solver.set_matrix_varname(this->matrixVarname);
 
       linear_solver.set_verbose_output(this->verbose_output_linear_solver);
       linear_solver.set_verbose_callback(this->get_verbose_callback());
@@ -287,20 +287,20 @@ namespace Hermes
 
       int it = 1;
 
-      this->onInitialization();
+      this->on_initialization();
 
       while (true)
       {
-        this->onStepBegin();
-        if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= it))
-          linear_solver.outputRhs(1);
+        this->on_step_begin();
+        if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= it))
+          linear_solver.output_rhs(1);
         else
-          linear_solver.outputRhs(0);
+          linear_solver.output_rhs(0);
 
-        if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= it))
-          linear_solver.outputMatrix(1);
+        if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= it))
+          linear_solver.output_matrix(1);
         else
-          linear_solver.outputMatrix(0);
+          linear_solver.output_matrix(0);
           
         linear_solver.solve();
         memcpy(this->sln_vector, linear_solver.get_sln_vector(), sizeof(Scalar)*ndof);
@@ -332,7 +332,7 @@ namespace Hermes
 
           this->tick();
           this->info("Picard: solution duration: %f s.\n", this->last());
-          this->onFinish();
+          this->on_finish();
           return;
         }
 
@@ -345,11 +345,11 @@ namespace Hermes
           this->tick();
           this->info("Picard: solution duration: %f s.\n", this->last());
           
-          this->onFinish();
+          this->on_finish();
           throw Hermes::Exceptions::Exception("Picard: maximum allowed number of Picard iterations exceeded.");
           return;
         }
-        this->onStepEnd();
+        this->on_step_end();
 
         // Increase counter of iterations.
         it++;

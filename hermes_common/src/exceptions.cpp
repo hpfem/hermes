@@ -43,13 +43,13 @@ namespace Hermes
       strcpy(message, text);
     }
 
-    void Exception::printMsg() const
+    void Exception::print_msg() const
     {
       if(message)
         printf("Exception: %s\n", message);
       else
         printf("Default exception\n");
-      if(Hermes::HermesCommonApi.getParamValue(Hermes::exceptionsPrintCallstack) == 1)
+      if(Hermes::HermesCommonApi.get_param_value(Hermes::exceptionsPrintCallstack) == 1)
         CallStack::dump(0);
     }
 
@@ -63,32 +63,32 @@ namespace Hermes
       return message;
     }
 
-    NullException::NullException(int paramIdx) : Exception()
+    NullException::NullException(int param_idx) : Exception()
     {
-      this->paramIdx = paramIdx;
-      this->itemIdx = -1;
+      this->param_idx = param_idx;
+      this->item_idx = -1;
       char * msg = new char[27];
-      sprintf(msg, "Parameter number %d is NULL", paramIdx);
+      sprintf(msg, "Parameter number %d is NULL", param_idx);
       message = msg;
     }
 
-    NullException::NullException(int paramIdx, int itemIdx) : Exception()
+    NullException::NullException(int param_idx, int item_idx) : Exception()
     {
-      this->paramIdx = paramIdx;
-      this->itemIdx = itemIdx;
+      this->param_idx = param_idx;
+      this->item_idx = item_idx;
       char * msg = new char[55];
-      sprintf(msg, "Element number %d of parameter number %d is NULL", itemIdx, paramIdx);
+      sprintf(msg, "Element number %d of parameter number %d is NULL", item_idx, param_idx);
       message = msg;
     }
 
-    int NullException::getParamIdx() const
+    int NullException::get_param_idx() const
     {
-      return paramIdx;
+      return param_idx;
     }
 
-    int NullException::getItemIdx() const
+    int NullException::get_item_idx() const
     {
-      return itemIdx;
+      return item_idx;
     }
 
     NullException::NullException(const NullException & e)
@@ -96,8 +96,8 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
-      paramIdx = e.getParamIdx();
-      itemIdx = e.getItemIdx();
+      param_idx = e.get_param_idx();
+      item_idx = e.get_item_idx();
     }
 
     Exception* NullException::clone()
@@ -105,45 +105,45 @@ namespace Hermes
       return new NullException(*this);
     }
 
-    LengthException::LengthException(int paramIdx, int wrong, int right) : Exception()
+    LengthException::LengthException(int param_idx, int wrong, int right) : Exception()
     {
-      fstParamIdx = paramIdx;
+      fst_param_idx = param_idx;
       this->wrong = wrong;
       this->right = right;
-      this->sndParamIdx = -1;
+      this->snd_param_idx = -1;
       char * msg = new char[60];
-      sprintf(msg, "Parameter number %d have length %d and should have %d", fstParamIdx, wrong, right);
+      sprintf(msg, "Parameter number %d have length %d and should have %d", fst_param_idx, wrong, right);
       message = msg;
     }
 
-    LengthException::LengthException(int fstParamIdx, int sndParamIdx, int first, int second) : Exception()
+    LengthException::LengthException(int fst_param_idx, int snd_param_idx, int first, int second) : Exception()
     {
-      this->fstParamIdx = fstParamIdx;
-      this->sndParamIdx = sndParamIdx;
+      this->fst_param_idx = fst_param_idx;
+      this->snd_param_idx = snd_param_idx;
       this->wrong = first;
       this->right = second;
       char * msg = new char[110];
       sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
-            fstParamIdx, wrong, sndParamIdx, right);
+            fst_param_idx, wrong, snd_param_idx, right);
       message = msg;
     }
 
-    int LengthException::getFirstParamIdx() const
+    int LengthException::get_first_param_idx() const
     {
-      return fstParamIdx;
+      return fst_param_idx;
     }
 
-    int LengthException::getSecondParamIdx() const
+    int LengthException::get_second_param_idx() const
     {
-      return sndParamIdx;
+      return snd_param_idx;
     }
 
-    int LengthException::getFirstLength() const
+    int LengthException::get_first_length() const
     {
       return wrong;
     }
 
-    int LengthException::getExpectedLength() const
+    int LengthException::get_expected_length() const
     {
       return right;
     }
@@ -153,10 +153,10 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
-      this->fstParamIdx = e.getFirstParamIdx();
-      this->sndParamIdx = e.getSecondParamIdx();
-      this->wrong = e.getFirstLength();
-      this->right = e.getExpectedLength();
+      this->fst_param_idx = e.get_first_param_idx();
+      this->snd_param_idx = e.get_second_param_idx();
+      this->wrong = e.get_first_length();
+      this->right = e.get_expected_length();
     }
 
     Exception* LengthException::clone()
@@ -221,12 +221,12 @@ namespace Hermes
       message = msg;
     }
 
-    double ValueException::getValue() const
+    double ValueException::get_value() const
     {
       return value;
     }
 
-    double ValueException::getAllowed() const
+    double ValueException::get_allowed() const
     {
       return allowed;
     }
@@ -236,8 +236,8 @@ namespace Hermes
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
-      this->value = e.getValue();
-      this->allowed = e.getAllowed();
+      this->value = e.get_value();
+      this->allowed = e.get_allowed();
     }
 
     Exception* ValueException::clone()

@@ -190,10 +190,10 @@ namespace Hermes
 
       this->stage_dp_right = new DiscreteProblem<Scalar>(&stage_wf_right, stage_spaces_vector);
       
-      if(this->globalIntegrationOrderSet)
+      if(this->global_integration_order_set)
       {
-        stage_dp_left->setGlobalIntegrationOrder(this->globalIntegrationOrder);
-        stage_dp_right->setGlobalIntegrationOrder(this->globalIntegrationOrder);
+        stage_dp_left->set_global_integration_order(this->global_integration_order);
+        stage_dp_right->set_global_integration_order(this->global_integration_order);
       }
 
       stage_dp_right->set_RK(spaces.size());
@@ -316,11 +316,11 @@ namespace Hermes
       if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
         throw Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
-      info("Runge-Kutta: time step, time: %f, time step: %f", this->time, this->timeStep);
+      info("Runge-Kutta: time step, time: %f, time step: %f", this->time, this->time_step);
 
       // Set the correct time to the essential boundary conditions.
       for (unsigned int stage_i = 0; stage_i < num_stages; stage_i++)
-        Space<Scalar>::update_essential_bc_values(spaces_mutable, this->time + bt->get_C(stage_i)*this->timeStep);
+        Space<Scalar>::update_essential_bc_values(spaces_mutable, this->time + bt->get_C(stage_i)*this->time_step);
 
       // All Spaces of the problem.
       Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
@@ -376,7 +376,7 @@ namespace Hermes
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
         vector_right->change_sign();
-        if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= it))
+        if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= it))
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
           if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
@@ -432,7 +432,7 @@ namespace Hermes
           // resulting tensor Jacobian.
           matrix_right->add_sparse_to_diagonal_blocks(num_stages, matrix_left);
 
-          if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= it))
+          if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= it))
           {
             char* fileName = new char[this->matrixFilename.length() + 5];
             if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
@@ -501,7 +501,7 @@ namespace Hermes
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
         for (unsigned int j = 0; j < num_stages; j++)
-          coeff_vec[i] += this->timeStep * bt->get_B(j) * K_vector[j * ndof + i];
+          coeff_vec[i] += this->time_step * bt->get_B(j) * K_vector[j * ndof + i];
 
       Solution<Scalar>::vector_to_solutions(coeff_vec, spaces, slns_time_new);
 
@@ -514,7 +514,7 @@ namespace Hermes
           coeff_vec[i] = 0.;
           for (unsigned int j = 0; j < num_stages; j++)
             coeff_vec[i] += (bt->get_B(j) - bt->get_B2(j)) * K_vector[j * ndof + i];
-          coeff_vec[i] *= this->timeStep;
+          coeff_vec[i] *= this->time_step;
         }
         Solution<Scalar>::vector_to_solutions_common_dir_lift(coeff_vec, spaces, error_fns);
       }
@@ -716,14 +716,14 @@ namespace Hermes
       for (unsigned int m = 0; m < mfvol.size(); m++)
       {
         MatrixFormVol<Scalar> *mfv_ij = mfvol[m];
-        mfv_ij->scaling_factor = -this->timeStep * bt->get_A(mfv_ij->i / spaces.size(), mfv_ij->j / spaces.size());
+        mfv_ij->scaling_factor = -this->time_step * bt->get_A(mfv_ij->i / spaces.size(), mfv_ij->j / spaces.size());
 
         mfv_ij->ext.clear();
 
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
           mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        mfv_ij->set_current_stage_time(this->time + bt->get_C(mfv_ij->i / spaces.size()) * this->timeStep);
+        mfv_ij->set_current_stage_time(this->time + bt->get_C(mfv_ij->i / spaces.size()) * this->time_step);
       }
 
       // Duplicate matrix surface forms, enhance them with
@@ -732,14 +732,14 @@ namespace Hermes
       for (unsigned int m = 0; m < mfsurf.size(); m++)
       {
         MatrixFormSurf<Scalar> *mfs_ij = mfsurf[m];
-        mfs_ij->scaling_factor = -this->timeStep * bt->get_A(mfs_ij->i / spaces.size(), mfs_ij->j / spaces.size());
+        mfs_ij->scaling_factor = -this->time_step * bt->get_A(mfs_ij->i / spaces.size(), mfs_ij->j / spaces.size());
 
         mfs_ij->ext.clear();
 
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
           mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        mfs_ij->set_current_stage_time(this->time + bt->get_C(mfs_ij->i / spaces.size()) * this->timeStep);
+        mfs_ij->set_current_stage_time(this->time + bt->get_C(mfs_ij->i / spaces.size()) * this->time_step);
       }
 
       // Duplicate vector volume forms, enhance them with
@@ -754,7 +754,7 @@ namespace Hermes
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
             vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        vfv_i->set_current_stage_time(this->time + bt->get_C(vfv_i->i / spaces.size())*this->timeStep);
+        vfv_i->set_current_stage_time(this->time + bt->get_C(vfv_i->i / spaces.size())*this->time_step);
       }
 
       // Duplicate vector surface forms, enhance them with
@@ -769,7 +769,7 @@ namespace Hermes
         for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
             vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
 
-        vfs_i->set_current_stage_time(this->time + bt->get_C(vfs_i->i / spaces.size())*this->timeStep);
+        vfs_i->set_current_stage_time(this->time + bt->get_C(vfs_i->i / spaces.size())*this->time_step);
       }
     }
 
@@ -787,7 +787,7 @@ namespace Hermes
             Scalar increment = 0;
             for (unsigned int stage_j = 0; stage_j < num_stages; stage_j++)
               increment += bt->get_A(stage_i, stage_j) * K_vector[stage_j * ndof + running_space_ndofs + idx];
-            u_ext_vec[stage_i * ndof + running_space_ndofs + idx] = this->timeStep * increment;
+            u_ext_vec[stage_i * ndof + running_space_ndofs + idx] = this->time_step * increment;
           }
           running_space_ndofs += spaces[space_i]->get_num_dofs();
         }

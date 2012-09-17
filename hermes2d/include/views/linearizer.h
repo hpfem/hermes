@@ -71,8 +71,8 @@ namespace Hermes
         MeshFunction<double> *xdisp, *ydisp;
         double dmult;
 
-        int3* trisContours;      ///< triangles: vertex index triplets
-        int triangleContours_count;
+        int3* tris_contours;      ///< triangles: vertex index triplets
+        int triangle_contours_count;
         double3* verts;  ///< vertices: (x, y, value) triplets
 
         /// What kind of information do we want to get out of the solution.

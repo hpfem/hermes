@@ -39,8 +39,8 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
-  Hermes::HermesCommonApi.setParamValue(Hermes::exceptionsPrintCallstack, 0);
-  Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 8);
+  Hermes::HermesCommonApi.set_param_value(Hermes::exceptionsPrintCallstack, 0);
+  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
 
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
@@ -75,8 +75,8 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
-  linear_solver.outputMatrix();
-  linear_solver.outputRhs();
+  linear_solver.output_matrix();
+  linear_solver.output_rhs();
 
   // Solve the linear problem.
   try

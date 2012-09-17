@@ -74,13 +74,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::setArea(std::string area)
+    void Form<Scalar>::set_area(std::string area)
     {
       areas.clear();
       areas.push_back(area);
     }
     template<typename Scalar>
-      void Form<Scalar>::setAreas(Hermes::vector<std::string> areas)
+      void Form<Scalar>::set_areas(Hermes::vector<std::string> areas)
     {
       this->areas = areas;
     }
@@ -92,14 +92,14 @@ namespace Hermes
     }
     
     template<typename Scalar>
-      void Form<Scalar>::setExt(MeshFunction<Scalar>* ext)
+      void Form<Scalar>::set_ext(MeshFunction<Scalar>* ext)
     {
       this->ext.clear();
       this->ext.push_back(ext);
     }
 
     template<typename Scalar>
-      void Form<Scalar>::setExt(Hermes::vector<MeshFunction<Scalar>*> ext)
+      void Form<Scalar>::set_ext(Hermes::vector<MeshFunction<Scalar>*> ext)
     {
       this->ext = ext;
     }
@@ -187,7 +187,7 @@ namespace Hermes
     MatrixFormDG<Scalar>::MatrixFormDG(unsigned int i, unsigned int j) :
     MatrixForm<Scalar>(i, j)
     {
-      this->setArea(H2D_DG_INNER_EDGE);
+      this->set_area(H2D_DG_INNER_EDGE);
     }
 
     template<typename Scalar>
@@ -249,7 +249,7 @@ namespace Hermes
     VectorFormDG<Scalar>::VectorFormDG(unsigned int i) :
     VectorForm<Scalar>(i)
     {
-      this->setArea(H2D_DG_INNER_EDGE);
+      this->set_area(H2D_DG_INNER_EDGE);
     }
 
     template<typename Scalar>

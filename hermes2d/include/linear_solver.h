@@ -47,8 +47,8 @@ namespace Hermes
       Scalar *get_sln_vector();
       
       /// set time information for time-dependent problems.
-      virtual void setTime(double time);
-      virtual void setTimeStep(double timeStep);
+      virtual void set_time(double time);
+      virtual void set_time_step(double time_step);
 
       virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
       virtual void set_space(const Space<Scalar>* space);

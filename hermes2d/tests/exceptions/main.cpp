@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
   }
   catch(Exceptions::NullException&e)
   {
-    if(e.getParamIdx()!=1)
+    if(e.get_param_idx()!=1)
     {
       return -1;
     }
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
   }
   catch(Exceptions::LengthException& e)
   {
-    if(e.getFirstParamIdx()!=2 || e.getSecondParamIdx()!=3 || e.getFirstLength()!=4 || e.getExpectedLength()!=3)
+    if(e.get_first_param_idx()!=2 || e.get_second_param_idx()!=3 || e.get_first_length()!=4 || e.get_expected_length()!=3)
     {
       return -1;
     }
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   }
   catch(Exceptions::MeshLoadFailureException& e)
   {
-    e.printMsg();
+    e.print_msg();
   }
 
   return 0;

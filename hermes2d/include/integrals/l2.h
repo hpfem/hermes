@@ -29,13 +29,13 @@ namespace Hermes
       // One area.
       MatrixFormVolL2(int i, int j, std::string area = HERMES_ANY,
         SymFlag sym = HERMES_NONSYM) : MatrixFormVol<Scalar>(i, j) {
-        this->setArea(area);
+        this->set_area(area);
         this->setSymFlag(sym);
       }
       // Multiple areas.
       MatrixFormVolL2(int i, int j, Hermes::vector<std::string> areas,
         SymFlag sym = HERMES_NONSYM) : MatrixFormVol<Scalar>(i, j) {
-        this->setAreas(areas);
+        this->set_areas(areas);
         this->setSymFlag(sym);
       }
 

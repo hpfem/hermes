@@ -178,21 +178,21 @@ namespace Hermes
       /// Returns the count of records.
       int get_num() const;
 
+      /// Setting of the names for the file stored.
+      static void set_mesh_file_name(std::string mesh_file_nameToSet);
+      static void set_space_file_name(std::string space_file_nameToSet);
+      static void set_solution_file_name(std::string solution_file_nameToSet);
+      static void set_time_step_file_name(std::string time_step_file_nameToSet);
+      static void set_error_file_name(std::string error_file_nameToSet);
+
     private:
       /// Names for the file stored.
-      static std::string meshFileName;
-      static std::string spaceFileName;
-      static std::string solutionFileName;
-      static std::string timeStepFileName;
-      static std::string timeStepNMinusOneFileName;
-      static std::string errorFileName;
-
-      /// Setting of the names for the file stored.
-      static void set_meshFileName(std::string meshFileNameToSet);
-      static void set_spaceFileName(std::string spaceFileNameToSet);
-      static void set_solutionFileName(std::string solutionFileNameToSet);
-      static void set_timeStepFileName(std::string timeStepFileNameToSet);
-      static void set_errorFileName(std::string errorFileNameToSet);
+      static std::string mesh_file_name;
+      static std::string space_file_name;
+      static std::string solution_file_name;
+      static std::string time_step_file_name;
+      static std::string time_stepNMinusOne_file_name;
+      static std::string error_file_name;
 
       /// For time dependent adaptive problems.
       std::map<std::pair<double, unsigned int>, Record*> records;

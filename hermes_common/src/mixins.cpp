@@ -624,49 +624,49 @@ namespace Hermes
       }
     }
 
-    IntegrableWithGlobalOrder::IntegrableWithGlobalOrder() : globalIntegrationOrderSet(false), globalIntegrationOrder(0)
+    IntegrableWithGlobalOrder::IntegrableWithGlobalOrder() : global_integration_order_set(false), global_integration_order(0)
     {}
 
-    void IntegrableWithGlobalOrder::setGlobalIntegrationOrder(unsigned int order)
+    void IntegrableWithGlobalOrder::set_global_integration_order(unsigned int order)
     {
-      this->globalIntegrationOrder = order;
-      this->globalIntegrationOrderSet = true;
+      this->global_integration_order = order;
+      this->global_integration_order_set = true;
     }
 
-    SettableComputationTime::SettableComputationTime() : time(0.0), timeStep(0.0)
+    SettableComputationTime::SettableComputationTime() : time(0.0), time_step(0.0)
     {
     }
 
-    void SettableComputationTime::setTime(double time)
+    void SettableComputationTime::set_time(double time)
     {
       this->time = time;
     }
 
-    void SettableComputationTime::setTimeStep(double timeStep)
+    void SettableComputationTime::set_time_step(double time_step)
     {
-      this->timeStep = timeStep;
+      this->time_step = time_step;
     }
 
     OutputAttachable::OutputAttachable()
     {
     }
 
-    void OutputAttachable::onInitialization()
+    void OutputAttachable::on_initialization()
     {
 
     }
 
-    void OutputAttachable::onStepBegin()
+    void OutputAttachable::on_step_begin()
     {
 
     }
 
-    void OutputAttachable::onStepEnd()
+    void OutputAttachable::on_step_end()
     {
 
     }
 
-    void OutputAttachable::onFinish()
+    void OutputAttachable::on_finish()
     {
 
     }

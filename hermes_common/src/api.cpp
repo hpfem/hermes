@@ -26,10 +26,10 @@
 
 namespace Hermes
 {
-  Api::Parameter::Parameter(int defaultVal)
+  Api::Parameter::Parameter(int default_val)
   {
-    this->defaultVal = defaultVal;
-    this->userSet = false;
+    this->default_val = default_val;
+    this->user_set = false;
   }
 
   Api::Api()
@@ -49,22 +49,22 @@ namespace Hermes
     this->parameters.clear();
   }
 
-  int Api::getParamValue(HermesCommonApiParam param)
+  int Api::get_param_value(HermesCommonApiParam param)
   {
     if(this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-    if(this->parameters.find(param)->second->userSet)
-      return this->parameters.find(param)->second->userVal;
+    if(this->parameters.find(param)->second->user_set)
+      return this->parameters.find(param)->second->user_val;
     else
-      return this->parameters.find(param)->second->defaultVal;
+      return this->parameters.find(param)->second->default_val;
   }
 
-  void Api::setParamValue(HermesCommonApiParam param, int value)
+  void Api::set_param_value(HermesCommonApiParam param, int value)
   {
     if(this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-    this->parameters.find(param)->second->userSet = true;
-    this->parameters.find(param)->second->userVal = value;
+    this->parameters.find(param)->second->user_set = true;
+    this->parameters.find(param)->second->user_val = value;
   }
 
   Hermes::Api HermesCommonApi;

@@ -578,7 +578,7 @@ namespace Hermes
                   : MatrixFormSurf<Scalar>(g, g),
                   g(g), geom_type(geom_type)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 template<typename Real, typename ScalarTestFns>
@@ -618,7 +618,7 @@ namespace Hermes
                   : VectorFormSurf<Scalar>(g),
                   g(g), geom_type(geom_type)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 template<typename Real, typename ScalarTestFns>
@@ -665,7 +665,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 Jacobian(unsigned int g,
@@ -681,7 +681,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 template<typename Real, typename ScalarTestFns>
@@ -726,7 +726,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 Residual(unsigned int g,
@@ -742,7 +742,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 template<typename Real, typename ScalarTestFns>
@@ -790,7 +790,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 Jacobian( unsigned int gto, unsigned int gfrom,
@@ -806,7 +806,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   gto(gto), gfrom(gfrom)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 template<typename Real, typename ScalarTestFns>
@@ -847,7 +847,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
-                  this->setExt(iterates);
+                  this->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -861,8 +861,8 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
-                  this->setArea(area);
-                  this->setExt(iterates);
+                  this->set_area(area);
+                  this->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -876,7 +876,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
-                  this->setExt(iterates);
+                  this->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -890,8 +890,8 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
-                  this->setArea(area);
-                  this->setExt(iterates);
+                  this->set_area(area);
+                  this->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -940,7 +940,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   gto(gto), gfrom(gfrom)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 Residual( unsigned int gto, unsigned int gfrom,
@@ -956,7 +956,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   gto(gto), gfrom(gfrom)
                 {
-                  this->setArea(area);
+                  this->set_area(area);
                 };
 
                 template<typename Real, typename ScalarTestFns>

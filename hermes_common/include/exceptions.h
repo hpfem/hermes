@@ -39,11 +39,11 @@ namespace Hermes
         /// \param[in] msg message
         Exception(const char * msg, ...);
         /// \brief print error message to stderr
-        void printMsg() const;
+        void print_msg() const;
         /// \brief get pointer to error message
         virtual const char * what() const throw();
         /// \return name of function where exception was created.
-        const char * getFuncName() const;
+        const char * get_func_name() const;
         virtual ~Exception() throw() {};
 
         virtual Exception* clone();
@@ -58,20 +58,20 @@ namespace Hermes
       public:
         /// Constructor
         /// \param[in] paramnIdx index of null parameter.
-        NullException(int paramIdx);
+        NullException(int param_idx);
         /// Null item is passed in vector or array.
         /// \param[in] paramnIdx index of parameter.
         /// \param[in] elementIdx index of null item in array parameter.
-        NullException(int paramIdx, int itemIdx);
+        NullException(int param_idx, int item_idx);
         /// \return index of null parameter.
-        int getParamIdx() const;
+        int get_param_idx() const;
         /// \return index of null item in array parameter. Returns -1 if bad parrameter is not array with null item.
-        int getItemIdx() const;
+        int get_item_idx() const;
         ~NullException() throw() {};
         NullException(const NullException & e);
         virtual Exception* clone();
       private:
-        int paramIdx, itemIdx;
+        int param_idx, item_idx;
     };
 
     /// \brief Parameter length parameter exception.
@@ -83,26 +83,26 @@ namespace Hermes
         /// \param[in] paramnIdx index wrong parameter.
         /// \param[in] wrong actual length of parameter.
         /// \param[in] right right length of parameter.
-        LengthException(int paramIdx, int wrong, int right);
+        LengthException(int param_idx, int wrong, int right);
         /// Two parameters should have same length and they dont have.
         /// \param[in] fstParamnIdx index first parameter.
         /// \param[in] sndParamnIdx index second parameter.
         /// \param[in] first actual length of first parameter.
         /// \param[in] second actual length of second parameter.
-        LengthException(int fstParamIdx, int sndParamIdx, int first, int second);
+        LengthException(int fst_param_idx, int snd_param_idx, int first, int second);
         /// \return index of first wrong parameter.
-        int getFirstParamIdx() const;
+        int get_first_param_idx() const;
         /// \return index of second wrong parameter. Returns -1 when only one parameter is wrong.
-        int getSecondParamIdx() const;
+        int get_second_param_idx() const;
         /// \return length of first parameter.
-        int getFirstLength() const;
+        int get_first_length() const;
         /// \return expected length of first parameter.
-        int getExpectedLength() const;
+        int get_expected_length() const;
         ~LengthException() throw() {};
         LengthException(const LengthException & e);
         virtual Exception* clone();
       private:
-        int fstParamIdx, sndParamIdx, wrong, right;
+        int fst_param_idx, snd_param_idx, wrong, right;
     };
 
     /// \brief Linear solver failed.
@@ -137,9 +137,9 @@ namespace Hermes
         /// String value is not supported.
         ValueException(const char * name, std::string passed);
         /// \return bad value of variable.
-        double getValue() const;
+        double get_value() const;
         /// return allowed value of variable.
-        double getAllowed() const;
+        double get_allowed() const;
         ~ValueException() throw() {};
         ValueException(const ValueException & e);
         virtual Exception* clone();

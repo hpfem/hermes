@@ -176,12 +176,12 @@ namespace Hermes
 
       /// get-set methods
       /// areas
-      void setArea(std::string area);
-      void setAreas(Hermes::vector<std::string> areas);
+      void set_area(std::string area);
+      void set_areas(Hermes::vector<std::string> areas);
       Hermes::vector<std::string> getAreas();
       /// external functions.
-      void setExt(MeshFunction<Scalar>* ext);
-      void setExt(Hermes::vector<MeshFunction<Scalar>*> ext);
+      void set_ext(MeshFunction<Scalar>* ext);
+      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
       Hermes::vector<MeshFunction<Scalar>*> getExt();
       
       virtual ~Form() {};

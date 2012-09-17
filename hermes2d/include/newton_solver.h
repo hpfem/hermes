@@ -83,8 +83,8 @@ namespace Hermes
 
       /// Set time information for time-dependent problems.
       /// See the class Hermes::Mixins::TimeMeasurable.
-      virtual void setTime(double time);
-      virtual void setTimeStep(double timeStep);
+      virtual void set_time(double time);
+      virtual void set_time_step(double time_step);
 
       /// See the class Hermes::Hermes2D::Mixins::SettableSpaces.
       virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
@@ -95,13 +95,13 @@ namespace Hermes
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.
       /// \param[in] onOff on(true)-manual damping, off(false)-automatic damping.
       /// \param[in] coeff The (perpetual) damping coefficient in the case of manual damping. Ignored in the case of automatic damping.
-      void setManualDampingCoeff(bool onOff, double coeff = 1.0);
+      void set_manual_damping_coeff(bool onOff, double coeff = 1.0);
       
       /// Make the automatic damping start with this coefficient.
       /// This will also be the top bound for the coefficient.
       /// Default: 1.0
       /// \param[in] coeff The initial damping coefficient. Must be > 0 and <= 1.0.
-      void setInitialAutoDampingCoeff(double coeff);
+      void set_initial_auto_damping_coeff(double coeff);
       
       /// Set the ratio to the automatic damping.
       /// When the damping coefficient is decided to be descreased or increased, this is the ratio
@@ -109,21 +109,21 @@ namespace Hermes
       /// I.e. when the damping coefficient is shortened 3 times if deemed too big, make the parameter not 0.333333, but 3.0.
       /// Default: 2.0
       /// \param[in] ratio The ratio (again, it must be > 1.0, and it represents the inverse of the shortening factor).
-      void setAutoDampingRatio(double ratio);
+      void set_auto_damping_ratio(double ratio);
 
       /// Set the ratio of the current residual norm and the previous residual norm necessary to deem a step 'successful'.
       /// It can be either > 1.0, meaning that even if the norm increased, the step will be 'successful', or < 1.0, meaning
       /// that even though the residual norm goes down, we will further decrease the damping coefficient.
       /// Default: 0.95
       /// param[in] ratio The ratio, must be positive.
-      void setSufficientImprovementFactor(double ratio);
+      void set_sufficient_improvement_factor(double ratio);
 
       /// Set how many successful steps are necessary for the damping coefficient to be increased, by multiplication by the parameter
-      /// set by setAutoDampingRatio().
+      /// set by set_auto_damping_ratio().
       /// The coefficient is then increased after each 'successful' step, if the sequence of such is not interrupted by an 'unsuccessful' step.
       /// Default: 1
       /// \param[in] steps Number of steps.
-      void setNecessarySuccessfulStepsToIncrease(unsigned int steps);
+      void set_necessary_successful_steps_to_increase(unsigned int steps);
 
     protected:
       /// This instance owns its DP.
@@ -157,15 +157,15 @@ namespace Hermes
       double currentDampingCofficient;
       
       /// Manual / auto.
-      bool manualDamping;
+      bool manual_damping;
       /// The ratio between two damping coeffs when changing.
-      double autoDampingRatio;
+      double auto_damping_ratio;
       /// The initial (and maximum) damping coefficient
-      double initialAutoDampingRatio;
+      double initial_auto_damping_ratio;
       /// Sufficient improvement for continuing.
-      double sufficientImprovementFactor;
+      double sufficient_improvement_factor;
       /// necessary number of steps to increase back the damping coeff.
-      unsigned int necessarySuccessfulStepsToIncrease;
+      unsigned int necessary_successful_steps_to_increase;
     };
   }
 }

@@ -91,7 +91,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::Hermes2DApi.setParamValue(Hermes::Hermes2D::numThreads, 8);
+  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
@@ -171,7 +171,7 @@ if(HERMES_VISUALIZATION)
 
     // Update time-dependent essential BCs.
     if(current_time <= STARTUP_TIME)
-      newton.setTime(current_time);
+      newton.set_time(current_time);
 
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
@@ -180,7 +180,7 @@ if(HERMES_VISUALIZATION)
     }
     catch(Hermes::Exceptions::Exception& e)
     {
-      e.printMsg();
+      e.print_msg();
     }
     Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);

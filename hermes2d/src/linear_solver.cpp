@@ -55,7 +55,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void LinearSolver<Scalar>::setTime(double time)
+    void LinearSolver<Scalar>::set_time(double time)
     {
       Hermes::vector<Space<Scalar>*> spaces;
       for(unsigned int i = 0; i < this->dp->get_spaces().size(); i++)
@@ -66,9 +66,9 @@ namespace Hermes
     }
       
     template<typename Scalar>
-    void LinearSolver<Scalar>::setTimeStep(double timeStep)
+    void LinearSolver<Scalar>::set_time_step(double time_step)
     {
-      const_cast<WeakForm<Scalar>*>(this->dp->wf)->set_current_time_step(timeStep);
+      const_cast<WeakForm<Scalar>*>(this->dp->wf)->set_current_time_step(time_step);
     }
 
     template<typename Scalar>
@@ -106,10 +106,10 @@ namespace Hermes
     {
       this->tick();
 
-      this->onInitialization();
+      this->on_initialization();
 
       dp->assemble(this->jacobian, this->residual);
-      if(this->outputRhsOn && (this->outputRhsIterations == -1 || this->outputRhsIterations >= 1))
+      if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= 1))
       {
         char* fileName = new char[this->RhsFilename.length() + 5];
         if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
@@ -120,7 +120,7 @@ namespace Hermes
         residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
         fclose(rhs_file);
       }
-      if(this->outputMatrixOn && (this->outputMatrixIterations == -1 || this->outputMatrixIterations >= 1))
+      if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= 1))
         {
           char* fileName = new char[this->matrixFilename.length() + 5];
           if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
@@ -137,7 +137,7 @@ namespace Hermes
 
       this->sln_vector = matrix_solver->get_sln_vector();
 
-      this->onFinish();
+      this->on_finish();
       
       this->tick();
       this->info("Linear solver solution duration: %f s.\n", this->last());
