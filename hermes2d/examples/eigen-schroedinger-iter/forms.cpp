@@ -7,6 +7,9 @@ double bilinear_form_S(int n, double *wt, Func<double> *u_ext[], Func<double> *u
     double y = e->y[i];
     result += wt[i] * (u->dx[i]*v->dx[i] + u->dy[i]*v->dy[i] 
                        + V(x, y) * u->val[i] * v->val[i]);
+    //result += wt[i] * ((u->dx[i]*v->dx[i] + u->dy[i]*v->dy[i])
+    //                           + (B1 * u->dx[i] * v->val[i] + B2 * u->dy[i] * v->val[i])
+    //                  );
   }
   return result;
 }

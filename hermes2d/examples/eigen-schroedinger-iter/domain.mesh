@@ -1,5 +1,6 @@
 # size of of the mesh
-a = 1.5707963267948966
+#a = 1.5707963267948966
+a = 0.5
 vertices =
 {
   { -a, -a },  # vertex 0
