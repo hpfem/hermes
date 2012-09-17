@@ -58,6 +58,8 @@ namespace Hermes
         void init();
 #ifndef _MSC_VER
         ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL);
+#else
+        ScalarView(WinGeom* wg = NULL);
 #endif
         ScalarView(char* title, WinGeom* wg = NULL);
         virtual ~ScalarView();
