@@ -880,9 +880,7 @@ namespace Hermes
         delete [] trav;
 
         // for contours, without regularization.
-        if(this->tris_contours != NULL)
-          delete [] this->tris_contours;
-        this->tris_contours = new int3[this->triangle_count];
+        this->tris_contours = (int3*) realloc(this->tris_contours, sizeof(int3) * this->triangle_count);
         memcpy(this->tris_contours, this->tris, this->triangle_count * sizeof(int3));
         triangle_contours_count = this->triangle_count;
 
@@ -1000,7 +998,10 @@ namespace Hermes
           verts = NULL;
         }
         if(tris_contours != NULL)
-          delete [] this->tris_contours;
+        {
+          ::free(tris_contours);
+          tris_contours = NULL;
+        }
 
         LinearizerBase::free();
       }

@@ -126,6 +126,10 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
 
+  Views::Linearizer lin;
+  Views::Orderizer ord;
+  Views::Vectorizer vec;
+
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
@@ -138,7 +142,6 @@ int main(int argc, char* argv[])
     // Initial coefficient vector for the Newton's method.
     std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
     memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
-
     
     try
     {
@@ -160,6 +163,9 @@ int main(int argc, char* argv[])
       RealFilter real_filter(&sln);
       v_view.show(&real_filter);
       o_view.show(&space);
+      lin.save_solution_vtk(&real_filter, "sln.vtk", "a");
+      ord.save_mesh_vtk(&space, "mesh.vtk");
+      lin.free();
     }
 
     // Calculate element errors and total error estimate.

@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   }
   catch(Hermes::Exceptions::Exception& e)
   {
-    e.printMsg();
+    e.print_msg();
   }
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space1, &sln);
 
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   }
   catch(Hermes::Exceptions::Exception& e)
   {
-    e.printMsg();
+    e.print_msg();
   }
   Solution<double>::vector_to_solution(nox_solver.get_sln_vector(), &space2, &sln2);
 
