@@ -650,9 +650,9 @@ namespace Hermes
 
         // Initialization of computation stuff.
         //    sizes.
-        this->vertex_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), 50000);
-        this->triangle_size = std::max(150 * this->sln->get_mesh()->get_num_elements(), 75000);
-        this->edges_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), 50000);
+        this->vertex_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), std::max(this->vertex_size, 50000));
+        this->triangle_size = std::max(150 * this->sln->get_mesh()->get_num_elements(), std::max(this->triangle_size, 75000));
+        this->edges_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), std::max(this->edges_size, 50000));
         //    counts.
         this->vertex_count = 0;
         this->triangle_count = 0;
@@ -662,6 +662,7 @@ namespace Hermes
         this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
         this->edges = (int3*) realloc(this->edges, sizeof(int3) * this->edges_size);
         this->info = (int4*) malloc(sizeof(int4) * this->vertex_size);
+        this->empty = false;
         //    initialize the hash table
         this->hash_table = (int*) malloc(sizeof(int) * this->vertex_size);
         memset(this->hash_table, 0xff, sizeof(int) * this->vertex_size);
@@ -1000,6 +1001,8 @@ namespace Hermes
         }
         if(tris_contours != NULL)
           delete [] this->tris_contours;
+
+        LinearizerBase::free();
       }
 
       Linearizer::~Linearizer()

@@ -35,10 +35,12 @@ namespace Hermes
         np = lin_np;
       };
 
-      LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1)
+      LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1), empty(true)
       {
         tris = NULL;
         edges = NULL;
+        hash_table = NULL;
+        info = NULL;
         max = -1e100;
 
         vertex_count = triangle_count = edges_count = 0;
@@ -49,7 +51,13 @@ namespace Hermes
         pthread_mutex_init(&data_mutex, &attr);
         pthread_mutexattr_destroy(&attr);
       }
-      LinearizerBase::~LinearizerBase()
+
+      bool LinearizerBase::is_empty()
+      {
+        return this->empty;
+      }
+
+      void LinearizerBase::free()
       {
         if(tris != NULL)
         {
@@ -61,6 +69,12 @@ namespace Hermes
           ::free(edges);
           edges = NULL;
         }
+        this->empty = true;
+      }
+
+      LinearizerBase::~LinearizerBase()
+      {
+        
         pthread_mutex_destroy(&data_mutex);
       }
 

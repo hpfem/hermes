@@ -46,8 +46,9 @@ namespace Hermes
 
         void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
+        /// Frees the instance.
+        void free();
       protected:
-        void free() {}
 
         MeshFunction<double>*xsln, *ysln;
         int xitem, component_x, value_type_x;

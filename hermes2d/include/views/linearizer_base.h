@@ -88,11 +88,20 @@ namespace Hermes
         int3* get_edges();
         int get_num_edges();
 
+        /// The instance is empty. Either process_solution has not been called so far, or
+        /// the method free() has been called.
+        virtual bool is_empty();
+
+        /// Frees the instance.
+        void free();
+
       protected:
         LinearizerBase(bool auto_max = true);
         ~LinearizerBase();
 
         void process_edge(int iv1, int iv2, int marker);
+
+        bool empty;
 
         double max;
 

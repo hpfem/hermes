@@ -58,9 +58,11 @@ namespace Hermes
 
         int3* get_contour_triangles();
         int get_num_contour_triangles();
-      protected:
+
+        /// Frees the instance.
         void free();
 
+      protected:
         MeshFunction<double>* sln;
 
         double cmax;

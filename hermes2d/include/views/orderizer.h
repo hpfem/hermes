@@ -51,6 +51,8 @@ namespace Hermes
 
         int get_num_vertices();
         double3* get_vertices();
+
+        void free();
       protected:
         char  buffer[1000];
         char* labels[11][11];

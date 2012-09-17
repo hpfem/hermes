@@ -383,9 +383,9 @@ namespace Hermes
         // about four-times finer than the original mesh).
         int nn = xsln->get_mesh()->get_num_elements() + ysln->get_mesh()->get_num_elements();
 
-        this->vertex_size = std::max(100 * nn, 50000);
-        this->triangle_size = std::max(150 * nn, 75000);
-        this->edges_size = std::max(100 * nn, 50000);
+        this->vertex_size = std::max(100 * nn, std::max(this->vertex_size, 50000));
+        this->triangle_size = std::max(150 * nn, std::max(this->triangle_size, 75000));
+        this->edges_size = std::max(100 * nn, std::max(this->edges_size, 50000));
         //dashes_size = edges_size;
 
         vertex_count = 0;
@@ -399,6 +399,7 @@ namespace Hermes
         edges = (int3*) malloc(sizeof(int3) * edges_size);
         dashes = (int2*) malloc(sizeof(int2) * dashes_size);
         info = (int4*) malloc(sizeof(int4) * vertex_size);
+        this->empty = false;
 
         // initialize the hash table
         hash_table = (int*) malloc(sizeof(int) * vertex_size);
@@ -621,7 +622,7 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
         ::free(this->info);
       }
 
-      Vectorizer::~Vectorizer()
+      void Vectorizer::free()
       {
         if(verts != NULL)
         {
@@ -633,6 +634,13 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
           ::free(dashes);
           dashes = NULL;
         }
+
+        LinearizerBase::free();
+      }
+
+      Vectorizer::~Vectorizer()
+      {
+        free();
       }
 
       void Vectorizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
