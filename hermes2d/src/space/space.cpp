@@ -951,6 +951,7 @@ namespace Hermes
       }
 
       this->assign_dofs();
+      this->seq = g_space_seq++;
       return;
     }
 

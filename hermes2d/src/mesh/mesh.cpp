@@ -801,6 +801,8 @@ namespace Hermes
 
     void Mesh::refine_element_id(int id, int refinement)
     {
+      if(refinement == -1)
+        return;
       Element* e = this->get_element(id);
       if(!e->used) throw Hermes::Exceptions::Exception("Invalid element id number.");
       if(!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
@@ -810,10 +812,19 @@ namespace Hermes
     void Mesh::refine_all_elements(int refinement, bool mark_as_initial)
     {
       Element* e;
+
+      ninitial = this->get_max_element_id();
+
+      if(refinement == -1)
+        return;
+    
       elements.set_append_only(true);
+      
       for_all_active_elements(e, this)
         refine_element_id(e->id, refinement);
+      
       elements.set_append_only(false);
+      
       if(mark_as_initial)
         ninitial = this->get_max_element_id();
     }
