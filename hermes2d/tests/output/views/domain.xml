@@ -43,6 +43,6 @@
     <arc v1="4" v2="7" angle="45" />
     <arc v1="7" v2="6" angle="45" />
 	<arc v1="2" v2="3" angle="75" />
-	<arc v1="3" v2="0" angle="75" />
+	<arc v1="3" v2="0" angle="-75" />
   </curves>
 </mesh:mesh>
