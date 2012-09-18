@@ -108,6 +108,14 @@ namespace Hermes
         wait_for_draw();
       }
 
+      void MeshView::set_b_elem_mrk(bool set)
+      {
+        if(b_ids) 
+          b_ids = false;
+        b_elem_mrk = !b_elem_mrk;
+        refresh();
+      } 
+
       void MeshView::on_display()
       {
         set_ortho_projection();

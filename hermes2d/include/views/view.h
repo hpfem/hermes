@@ -124,6 +124,8 @@ namespace Hermes
 
         static void wait(const char* text); ///< Closes all views at once.
         static void wait(ViewWaitEvent wait_event = HERMES_WAIT_CLOSE, const char* text = NULL); ///< Waits for an event.
+        void draw_help();
+        virtual void reset_view(bool force_reset); ///< Resets view based on the axis-aligned bounding box of the mesh. Assumes that the bounding box is set up. Does not reset if view_not_reset is false.
 
       protected: //FPS measurement
 #define FPS_FRAME_SIZE 5
@@ -161,7 +163,6 @@ namespace Hermes
         virtual void on_entry(int state) {}
         virtual void on_close();
 
-        virtual void reset_view(bool force_reset); ///< Resets view based on the axis-aligned bounding box of the mesh. Assumes that the bounding box is set up. Does not reset if view_not_reset is false.
         virtual void update_layout(); ///< Updates layout, i.e., centers mesh.
 
       protected:
@@ -222,7 +223,6 @@ namespace Hermes
 
         void update_tex_adjust();
 
-        void draw_help();
         virtual const char* get_help_text() const = 0;
 
         friend void on_display_stub(void);

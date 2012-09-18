@@ -50,7 +50,7 @@ namespace Hermes
 
         template<typename Scalar>
         void show(const Space<Scalar>* space);
-
+        void set_b_orders(bool set);
       protected:
 
         Orderizer ord;

@@ -45,7 +45,14 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("domain.xml", &mesh);
+  try
+  {
+    mloader.load("domain.xml", &mesh);
+  }
+  catch(std::exception& e)
+  {
+    std::cout << e.what();
+  }
 
   // Perform initial mesh refinements (optional).
   mesh.refine_in_areas(Hermes::vector<std::string>("Aluminum", "Copper"), INIT_REF_NUM);
@@ -75,8 +82,6 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
-  linear_solver.output_matrix();
-  linear_solver.output_rhs();
 
   // Solve the linear problem.
   try

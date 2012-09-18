@@ -99,6 +99,12 @@ namespace Hermes
       static int n_vert(int i) { return (i + 1) % 3; }
       static int p_vert(int i) { return (i + 2) % 3; }
 
+      void VectorView::set_mode(int mode)
+      {
+        this->mode = mode % 3;
+        refresh();
+      }
+
       void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {
         if(mode == 1)

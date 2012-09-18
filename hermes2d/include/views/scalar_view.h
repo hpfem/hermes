@@ -73,12 +73,12 @@ namespace Hermes
         inline void show_bounding_box(bool show = true) { show_aabb = show; refresh(); }
         void show_contours(double step, double orig = 0.0);
         inline void hide_contours() { contours = false; refresh(); }
-        inline void set_3d_mode(bool enable = true) { mode3d = enable; refresh(); }
+        inline void set_3d_mode(bool enable = true);
         void set_vertical_scaling(double sc);  ///< Sets the scaling on the vertical axis programmatically.
         void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
 
-      public:
         Linearizer* lin;
+        virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
 
       protected:
         /// Information about a vertex node.
@@ -211,7 +211,6 @@ namespace Hermes
         ///      biggest horizontal (x-axis) distance from the origin.
         ///  4. Take the bigger of the two distances and reverse sign (since we will translate the model, not the camera)
         double calculate_ztrans_to_fit_view(); ///< Calculates the z-coordinate (in eye coordinates) of the closest viewpoint from which we can still see the whole model. Assumes a model/view matrix to be the current matrix on the OpenGL stack.
-        virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
         virtual void update_layout(); ///< Updates layout, i.e., centers 2d and 3d mesh.
 
         void draw_tri_contours(double3* vert, int3* tri);

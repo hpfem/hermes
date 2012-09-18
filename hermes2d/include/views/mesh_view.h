@@ -46,7 +46,9 @@ namespace Hermes
         MeshView(char* title, WinGeom* wg = NULL);
         virtual ~MeshView();
 
-        void show(Mesh* mesh);
+        void show (Mesh* mesh);
+        /// Displays element markers.
+        void set_b_elem_mrk(bool set);
 
       protected:
 

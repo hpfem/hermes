@@ -753,6 +753,7 @@ namespace Hermes
 
       void View::draw_help()
       {
+        view_sync.enter();
         set_ortho_projection(true);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_LIGHTING);
@@ -782,6 +783,8 @@ namespace Hermes
         glDisable(GL_BLEND);
         glColor3f(0, 0, 0);
         draw_text(x + b, y + b+7, text);
+        view_sync.leave();
+        refresh();
       }
 
       char* View::get_screenshot_file_name()

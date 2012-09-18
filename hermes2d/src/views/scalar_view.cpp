@@ -1464,6 +1464,19 @@ namespace Hermes
         }
       }
 
+      void ScalarView::set_3d_mode(bool enable)
+      {
+        mode3d = enable; dragging = scaling = false;
+        if(mode3d)
+        {
+          lin->lock_data();
+          if(normals == NULL)
+            calculate_normals(lin->get_vertices(), lin->get_num_vertices(), lin->get_triangles(), lin->get_num_triangles());
+          lin->unlock_data();
+        } 
+        refresh(); 
+      }
+
       void ScalarView::on_key_down(unsigned char key, int x, int y)
       {
         VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));

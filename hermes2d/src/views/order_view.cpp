@@ -120,6 +120,12 @@ namespace Hermes
         order_min = min;
       }
 
+      void OrderView::set_b_orders(bool set)
+      {
+        b_orders = set;
+        refresh();
+      }
+
       void OrderView::on_display()
       {
         set_ortho_projection();

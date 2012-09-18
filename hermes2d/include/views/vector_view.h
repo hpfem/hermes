@@ -48,7 +48,7 @@ namespace Hermes
         void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem);
 
         inline void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
-
+        void set_mode(int mode);
       protected:
         Vectorizer* vec;
 
