@@ -36,7 +36,7 @@ namespace Hermes
       {
         verts = NULL;
         dashes = NULL;
-        dashes_count = 0;
+        dashes_count = dashes_size = 0;
       }
 
       int Vectorizer::create_vertex(double x, double y, double xvalue, double yvalue)

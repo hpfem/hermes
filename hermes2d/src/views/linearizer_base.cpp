@@ -43,7 +43,7 @@ namespace Hermes
         info = NULL;
         max = -1e100;
 
-        vertex_count = triangle_count = edges_count = 0;
+        vertex_count = triangle_count = edges_count = this->vertex_size = this->triangle_size = this->edges_size = 0;
 
         pthread_mutexattr_t attr;
         pthread_mutexattr_init(&attr);

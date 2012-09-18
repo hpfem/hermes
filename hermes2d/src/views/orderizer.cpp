@@ -60,6 +60,7 @@ namespace Hermes
       Orderizer::Orderizer() : LinearizerBase()
       {
         verts = NULL;
+        this->label_size = 0;
         ltext = NULL;
         lvert = NULL;
         lbox = NULL;
