@@ -168,10 +168,12 @@ namespace Hermes
 #pragma omp critical(realloc_edges)
         {
           if(edges_count >= edges_size)
-            edges = (int3*) realloc(edges, sizeof(int3) * (edges_size = edges_size * 3 / 2));
-        edges[edges_count][0] = iv1;
-        edges[edges_count][1] = iv2;
-        edges[edges_count++][2] = marker;
+          {
+            edges = (int3*) realloc(edges, sizeof(int3) * (edges_size = edges_size * 1.5));
+          }
+          edges[edges_count][0] = iv1;
+          edges[edges_count][1] = iv2;
+          edges[edges_count++][2] = marker;
         }
       }
 
