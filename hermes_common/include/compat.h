@@ -43,20 +43,6 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
   #define HERMES_API
 #endif
 
-// Windows DLL export/import definitions
-#if defined(WIN32) || defined(_WINDOWS)
-  // Visual Studio 2010.
-  #if defined(EXPORT_HERMES_MODULE)
-    // when building DLL (target project defines this macro)
-    #define HERMES_MODULE_API __declspec(dllexport)
-  #else  
-    // when using the DLL by a client project
-    #define HERMES_MODULE_API __declspec(dllimport)
-  #endif
-#else 
-  #define HERMES_MODULE_API
-#endif
-
 #ifndef HAVE_STRCASECMP
 #define strcasecmp strcmp
 #endif
