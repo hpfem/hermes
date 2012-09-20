@@ -36,7 +36,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
         this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(spaces.at(i)));
 
-      if(bt==NULL) 
+      if(bt==NULL)
         throw Exceptions::NullException(2);
 
       do_global_projections = true;
@@ -135,7 +135,7 @@ namespace Hermes
       bool delete_K_vector = false;
       if(space->get_seq() != this->spaces_seqs[0])
         delete_K_vector = true;
-      
+
       this->spaces.clear();
       this->spaces.push_back(space);
       this->spaces_seqs.clear();
@@ -158,7 +158,7 @@ namespace Hermes
       if(this->stage_dp_left != NULL)
         static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_space(space);
     }
-    
+
     template<typename Scalar>
     Hermes::vector<const Space<Scalar>*> RungeKutta<Scalar>::get_spaces() const
     {
@@ -178,7 +178,7 @@ namespace Hermes
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
       this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
-      
+
       // All Spaces of the problem.
       Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
 
@@ -189,17 +189,10 @@ namespace Hermes
           stage_spaces_vector.push_back(spaces[space_i]);
 
       this->stage_dp_right = new DiscreteProblem<Scalar>(&stage_wf_right, stage_spaces_vector);
-      
-      if(this->wf->global_integration_order_set)
-      {
-        stage_dp_left->wf->set_global_integration_order(this->wf->global_integration_order);
-        stage_dp_right->wf->set_global_integration_order(this->wf->global_integration_order);
-      }
 
       stage_dp_right->set_RK(spaces.size());
 
       // Prepare residuals of stage solutions.
-      
       if(!residual_as_vector)
         for (unsigned int i = 0; i < num_stages; i++)
           for(unsigned int sln_i = 0; sln_i < spaces.size(); sln_i++)
@@ -211,13 +204,13 @@ namespace Hermes
     {
       this->start_from_zero_K_vector = true;
     }
-    
+
     template<typename Scalar>
     void RungeKutta<Scalar>::set_residual_as_solutions()
     {
       this->residual_as_vector = false;
     }
-      
+
     template<typename Scalar>
     void RungeKutta<Scalar>::set_block_diagonal_jacobian()
     {
@@ -330,9 +323,9 @@ namespace Hermes
       for (unsigned int i = 0; i < num_stages; i++)
         for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
           stage_spaces_vector.push_back(spaces[space_i]->dup(spaces[space_i]->get_mesh()));
-      
+
       this->stage_dp_right->set_spaces(stage_spaces_vector);
-      
+
       // Zero utility vectors.
       if(start_from_zero_K_vector || !iteration)
         memset(K_vector, 0, num_stages * ndof * sizeof(Scalar));
@@ -701,6 +694,12 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<Solution<Scalar>*> slns_time_prev)
     {
+      if(this->wf->global_integration_order_set)
+      {
+        this->stage_wf_left.set_global_integration_order(this->wf->global_integration_order);
+        this->stage_wf_right.set_global_integration_order(this->wf->global_integration_order);
+      }
+
       // Extracting volume and surface matrix and vector forms from the
       // 'right' weak formulation.
       Hermes::vector<MatrixFormVol<Scalar> *> mfvol = stage_wf_right.mfvol;
