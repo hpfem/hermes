@@ -59,7 +59,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* L2Space<Scalar>::dup(Mesh* mesh, int order_increase) const
+    Space<Scalar>* L2Space<Scalar>::duplicate(Mesh* mesh, int order_increase, reference_space_p_callback_function p_callback) const
     {
       L2Space<Scalar>* space = new L2Space(mesh, 0, this->shapeset);
 
@@ -68,7 +68,7 @@ namespace Hermes
       for_all_active_elements(e, space->get_mesh())
         space->edata[e->id].changed_in_last_adaptation = false;
 
-      space->copy_orders(this, order_increase);
+      space->copy_orders(this, order_increase, p_callback);
       return space;
     }
 

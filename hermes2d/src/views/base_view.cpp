@@ -55,7 +55,7 @@ namespace Hermes
       {
         free();
         int order_increase = 0;
-        this->space = space->dup(space->get_mesh(), order_increase);
+        this->space = space->duplicate(space->get_mesh(), order_increase);
         pss = new PrecalcShapeset(this->space->shapeset);
         sln = new Solution<Scalar>();
         ndof = this->space->get_num_dofs();

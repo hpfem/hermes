@@ -185,7 +185,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase, int refinement_type) {
+    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase, reference_space_p_callback_function p_callback) 
+    {
       Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
       bool same_meshes = true;
       unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
@@ -195,8 +196,8 @@ namespace Hermes
           same_meshes = false;
         Mesh* ref_mesh = new Mesh;
         ref_mesh->copy(coarse[i]->get_mesh());
-        ref_mesh->refine_all_elements(refinement_type);
-        ref_spaces->push_back(coarse[i]->dup(ref_mesh, order_increase));
+        ref_mesh->refine_all_elements();
+        ref_spaces->push_back(coarse[i]->duplicate(ref_mesh, order_increase, p_callback));
         ref_spaces->back()->seq = g_space_seq++;
       }
 
@@ -207,15 +208,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse,
-                                                          int order_increase,
-                                                          int refinement_type)
+    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase, reference_space_p_callback_function p_callback)
     {
       Mesh* ref_mesh = new Mesh;
       ref_mesh->copy(coarse->get_mesh());
-      ref_mesh->refine_all_elements(refinement_type);
+      ref_mesh->refine_all_elements();
 
-      Space<Scalar>* ref_space = coarse->dup(ref_mesh, order_increase);
+      Space<Scalar>* ref_space = coarse->duplicate(ref_mesh, order_increase, p_callback);
       ref_space->seq = g_space_seq++;
       return ref_space;
     }
@@ -531,7 +530,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::copy_orders(const Space<Scalar>* space, int inc)
+    void Space<Scalar>::copy_orders(const Space<Scalar>* space, int order_increase, reference_space_p_callback_function p_callback)
     {
       Element* e;
       resize_tables();
@@ -543,8 +542,8 @@ namespace Hermes
 
         int mo = shapeset->get_max_order();
         int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
-        int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(o) + inc, mo));
-        int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + inc, mo));
+        int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(o) + ((p_callback == NULL) ? order_increase : (p_callback(e->id) ? order_increase : 0)), mo));
+        int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + ((p_callback == NULL) ? order_increase : (p_callback(e->id) ? order_increase : 0)), mo));
         o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
 
         copy_orders_recurrent(mesh->get_element(e->id), o);

@@ -35,6 +35,14 @@ const double BDY_A_PARAM = 0.0;
 const double BDY_B_PARAM = 0.0;
 const double BDY_C_PARAM = 20.0;
 
+bool sranda(int id)
+{
+  if(id % 2 > 0)
+    return true;
+  else
+    return false;
+}
+
 int main(int argc, char* argv[])
 {
   // Load the mesh.
@@ -68,6 +76,11 @@ int main(int argc, char* argv[])
   newton.set_matrix_filename("asdf");
   newton.set_rhs_E_matrix_dump_format(Hermes::Algebra::DF_HERMES_BIN);
   newton.set_matrix_varname("aasdfgasdasdggasdgas");
+
+  Hermes::Hermes2D::Space<double>* ref_space = Hermes::Hermes2D::Space<double>::construct_refined_space(&space, 1, *sranda);
+
+  Hermes::Hermes2D::Views::OrderView o;
+  o.show(ref_space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;

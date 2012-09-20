@@ -33,7 +33,7 @@ namespace Hermes
 
       virtual ~L2Space();
 
-      virtual Space<Scalar>* dup(Mesh* mesh, int order_increase = 0) const;
+      virtual Space<Scalar>* duplicate(Mesh* mesh, int order_increase = 0, reference_space_p_callback_function p_callback = NULL) const;
 
       /// Loads this space from a file.
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
