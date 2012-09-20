@@ -70,7 +70,7 @@ namespace Hermes
     /// of linear forms l(v). U and V are the vectors of basis and test functions.
     ///
     template<typename Scalar>
-    class HERMES_API WeakForm : public Hermes::Mixins::Loggable
+    class HERMES_API WeakForm : public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::Loggable
     {
     public:
 

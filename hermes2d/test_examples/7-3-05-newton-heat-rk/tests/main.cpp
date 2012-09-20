@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
 
   CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
                           &current_time, TEMP_INIT, T_FINAL);
+  wf.set_global_integration_order(10);
 
   // Initialize boundary conditions.
  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
@@ -77,7 +78,6 @@ int main(int argc, char* argv[])
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
   runge_kutta.set_verbose_output(true);
-  runge_kutta.set_global_integration_order(10);
 
   // Iteration number.
   int iteration = 0;

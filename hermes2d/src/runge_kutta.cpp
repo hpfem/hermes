@@ -190,10 +190,10 @@ namespace Hermes
 
       this->stage_dp_right = new DiscreteProblem<Scalar>(&stage_wf_right, stage_spaces_vector);
       
-      if(this->global_integration_order_set)
+      if(this->wf->global_integration_order_set)
       {
-        stage_dp_left->set_global_integration_order(this->global_integration_order);
-        stage_dp_right->set_global_integration_order(this->global_integration_order);
+        stage_dp_left->wf->set_global_integration_order(this->wf->global_integration_order);
+        stage_dp_right->wf->set_global_integration_order(this->wf->global_integration_order);
       }
 
       stage_dp_right->set_RK(spaces.size());

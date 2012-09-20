@@ -1481,9 +1481,9 @@ namespace Hermes
           if(current_state->e[i] != NULL)
             current_refmaps[i]->set_active_element(current_state->e[i]);
 
-        int order = this->global_integration_order_set ? this->global_integration_order : 0;
+        int order = this->wf->global_integration_order_set ? this->wf->global_integration_order : 0;
         
-        if(order == 0)
+        if(order == 0 || this->wf->global_integration_order_set)
         {
           for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
           {

@@ -33,7 +33,7 @@ namespace Hermes
   {
     /// \brief Minimalistic DiscreteProblem interface required by NoxProblemInterface.
     template<typename Scalar>
-    class DiscreteProblemInterface : public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime
+    class DiscreteProblemInterface : public Hermes::Mixins::SettableComputationTime
     {
     public:
       /// Get the number of unknowns.
