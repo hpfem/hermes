@@ -160,6 +160,7 @@ int main(int argc, char* argv[])
       }
       ConstantSolution<double> slnConstRefined(ref_space->get_mesh(), 1.234567);
       viewS.show(&slnConstRefined);
+      viewS.set_3d_mode(true);
       viewS.save_screenshot("013-constSolutionRef.bmp");
 
       viewO.show(&space);
@@ -170,10 +171,17 @@ int main(int argc, char* argv[])
       viewM.save_screenshot("200-mesh.bmp");
       viewM.set_b_elem_mrk(true);
       viewM.save_screenshot("201-meshBElemMrk.bmp");
-      viewV.show(&sln, &sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
+      viewV.show(&sln, &sln);
       viewV.save_screenshot("300-vectorizer.bmp");
-      viewV.set_mode(2);
-      viewV.save_screenshot("301-vectorizerArrowsMode.bmp");
+      viewV.show(&sln, &sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
+      viewV.save_screenshot("301-vectorizerFiner.bmp");
+      viewV.get_vectorizer()->set_curvature_epsilon(1e-5);
+      viewV.show(&sln, &sln);
+      viewV.save_screenshot("302-vectorizerFinerWithFinerCurves.bmp");
+      viewV.get_vectorizer()->set_curvature_epsilon(1e-3);
+      viewV.set_mode(1);
+      viewV.show(&sln, &sln);
+      viewV.save_screenshot("303-vectorizerArrowsMode.bmp");
     }
   }
   catch(std::exception& e)

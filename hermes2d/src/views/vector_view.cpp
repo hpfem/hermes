@@ -104,6 +104,11 @@ namespace Hermes
         this->mode = mode % 3;
         refresh();
       }
+       
+      Vectorizer* VectorView::get_vectorizer()
+      {
+        return this->vec;
+      }
 
       void VectorView::plot_arrow(double x, double y, double xval, double yval, double max, double min, double gs)
       {

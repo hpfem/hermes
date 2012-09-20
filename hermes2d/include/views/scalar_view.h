@@ -77,10 +77,15 @@ namespace Hermes
         void set_vertical_scaling(double sc);  ///< Sets the scaling on the vertical axis programmatically.
         void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
 
-        Linearizer* lin;
         virtual void reset_view(bool force_reset); ///< Resets 2d and 3d view.
 
+        /// Returns the internal linearizer for the purpose of parameter settings.
+        Linearizer* get_linearizer();
+
       protected:
+        /// Linearizer class responsible for obtaining linearized data.
+        Linearizer* lin;
+
         /// Information about a vertex node.
         struct VertexNodeInfo
         {
