@@ -46,11 +46,22 @@ namespace Hermes
 
         void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
+        /// Sets the threshold for how fine the output for curved elements.
+        /// \param[in] curvature_epsilon The 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        /// The smaller, the finer.
+        /// Default value = 1e-3.
+        void set_curvature_epsilon(double curvature_epsilon);
+
+        /// Gets the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        double get_curvature_epsilon();
+
         /// Frees the instance.
         void free();
-      protected:
 
-        MeshFunction<double>*xsln, *ysln;
+      protected:
+        /// The 'curvature' epsilon.
+        double curvature_epsilon;
+
         int xitem, component_x, value_type_x;
         int yitem, component_y, value_type_y;
 
@@ -66,13 +77,7 @@ namespace Hermes
 
         int add_vertex();
 
-        double cmax;
-
         void add_dash(int iv1, int iv2);
-
-        void push_transform(int son);
-
-        void pop_transform();
 
         void process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
           double* xval, double* yval, double* phx, double* phy, int* indices, bool curved);

@@ -103,7 +103,7 @@ namespace Hermes
       double3*  lin_tables_quad[2] = { lin_pts_0_quad, lin_pts_1_quad };
       double3** lin_tables[2]      = { lin_tables_tri, lin_tables_quad };
 
-      Linearizer::Linearizer(bool auto_max) : LinearizerBase(auto_max), dmult(1.0), component(0), value_type(0)
+      Linearizer::Linearizer(bool auto_max) : LinearizerBase(auto_max), dmult(1.0), component(0), value_type(0), curvature_epsilon(1e-3)
       {
         verts = NULL;
         xdisp = NULL;
@@ -201,7 +201,7 @@ namespace Hermes
             if(curved)
             {
               for (i = 0; i < 3; i++)
-                if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1.5e-3))
+                if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(fns[0]->get_active_element()->get_diameter()*this->get_curvature_epsilon()))
                 {
                   split = true;
                   break;
@@ -302,6 +302,16 @@ namespace Hermes
 
         // no splitting: output a linear triangle
         add_triangle(iv0, iv1, iv2);
+      }
+
+      void Linearizer::set_curvature_epsilon(double curvature_epsilon)
+      {
+        this->curvature_epsilon = curvature_epsilon;
+      }
+
+      double Linearizer::get_curvature_epsilon()
+      {
+        return this->curvature_epsilon;
       }
 
       void Linearizer::process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
@@ -415,15 +425,11 @@ namespace Hermes
             // also decide whether to split because of the curvature
             if(split != 3 && curved)
             {
-              double cm2 = sqr(this->cmax*1e-3);
+              double cm2 = sqr(fns[0]->get_active_element()->get_diameter()*this->get_curvature_epsilon());
               if(sqr(phx[idx[1]] - midval[0][1]) + sqr(phy[idx[1]] - midval[1][1]) > cm2 ||
                 sqr(phx[idx[3]] - midval[0][3]) + sqr(phy[idx[3]] - midval[1][3]) > cm2) split |= 1;
               if(sqr(phx[idx[0]] - midval[0][0]) + sqr(phy[idx[0]] - midval[1][0]) > cm2 ||
                 sqr(phx[idx[2]] - midval[0][2]) + sqr(phy[idx[2]] - midval[1][2]) > cm2) split |= 2;
-
-              /*for (i = 0; i < 5; i++)
-              if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*1e-3))
-              { split = 1; break; }*/
             }
 
             // do extra tests at level 0, so as not to miss some functions with zero error at edge midpoints
@@ -631,7 +637,6 @@ namespace Hermes
         this->tick();
 
         // Initialization of 'global' stuff.
-        this->sln = sln;
         this->item = item_;
         this->eps = eps;
         //   get the component and desired value from item.
@@ -650,9 +655,9 @@ namespace Hermes
 
         // Initialization of computation stuff.
         //    sizes.
-        this->vertex_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), std::max(this->vertex_size, 50000));
-        this->triangle_size = std::max(150 * this->sln->get_mesh()->get_num_elements(), std::max(this->triangle_size, 75000));
-        this->edges_size = std::max(100 * this->sln->get_mesh()->get_num_elements(), std::max(this->edges_size, 50000));
+        this->vertex_size = std::max(100 * sln->get_mesh()->get_num_elements(), std::max(this->vertex_size, 50000));
+        this->triangle_size = std::max(150 * sln->get_mesh()->get_num_elements(), std::max(this->triangle_size, 75000));
+        this->edges_size = std::max(100 * sln->get_mesh()->get_num_elements(), std::max(this->edges_size, 50000));
         //    counts.
         this->vertex_count = 0;
         this->triangle_count = 0;
@@ -754,11 +759,6 @@ namespace Hermes
 #pragma omp critical (max)
                 if(this->auto_max && finite(f) && fabs(f) > this->max)
                   this->max = fabs(f);
-                double c = current_state.e[0]->get_diameter();
-                if(c > this->cmax)
-#pragma omp critical(vectorizer_get_cmax)
-                  if(c > this->cmax)
-                    this->cmax = c;
               }
             }
             catch(Hermes::Exceptions::Exception& e)
@@ -1013,7 +1013,6 @@ namespace Hermes
       void Linearizer::save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char *quantity_name,
         bool mode_3D, int item, double eps)
       {
-        this->sln = sln;
         process_solution(sln, item, eps);
 
         FILE* f = fopen(filename, "wb");

@@ -32,7 +32,7 @@ namespace Hermes
 
       class Quad2DLin;
 
-      Vectorizer::Vectorizer() : LinearizerBase(), component_x(0), value_type_x(0), component_y(0), value_type_y(0)
+      Vectorizer::Vectorizer() : LinearizerBase(), component_x(0), value_type_x(0), component_y(0), value_type_y(0), curvature_epsilon(1e-3)
       {
         verts = NULL;
         dashes = NULL;
@@ -145,7 +145,7 @@ namespace Hermes
             if(curved)
             {
               for (i = 0; i < 4; i++)
-                if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(cmax*15e-3))
+                if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(fns[0]->get_active_element()->get_diameter()*this->get_curvature_epsilon()))
                 {
                   split = true;
                   break;
@@ -277,7 +277,7 @@ namespace Hermes
             // do the same for the curvature
             if(curved && !split)
             {
-              double cm2 = sqr(this->cmax*1e-3);
+              double cm2 = sqr(fns[0]->get_active_element()->get_diameter()*this->get_curvature_epsilon());
               if(sqr(phx[idx[1]] - midval[0][1]) + sqr(phy[idx[1]] - midval[1][1]) > cm2 ||
                 sqr(phx[idx[3]] - midval[0][3]) + sqr(phy[idx[3]] - midval[1][3]) > cm2) split = true;
               
@@ -362,6 +362,16 @@ namespace Hermes
         }
         this->max_val = sqrt(this->max_val);
         this->min_val = sqrt(this->min_val);
+      }
+
+      void Vectorizer::set_curvature_epsilon(double curvature_epsilon)
+      {
+        this->curvature_epsilon = curvature_epsilon;
+      }
+
+      double Vectorizer::get_curvature_epsilon()
+      {
+        return this->curvature_epsilon;
       }
 
       void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
@@ -503,11 +513,6 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
 #pragma omp critical(max)
                   if(fabs(sqrt(fx*fx + fy*fy)) > max)
                     max = fabs(sqrt(fx*fx + fy*fy));
-                double c = current_state.e[0]->get_diameter();
-                if(c > this->cmax)
-#pragma omp critical(vectorizer_get_cmax)
-                  if(c > this->cmax)
-                    this->cmax = c;
               }
             }
             catch(Hermes::Exceptions::Exception& e)
@@ -708,18 +713,6 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
         }
         dashes[dashes_count][0] = iv1;
         dashes[dashes_count++][1] = iv2;
-      }
-
-      void Vectorizer::push_transform(int son)
-      {
-        xsln->push_transform(son);
-        if(ysln != xsln) ysln->push_transform(son);
-      }
-
-      void Vectorizer::pop_transform()
-      {
-        xsln->pop_transform();
-        if(ysln != xsln) ysln->pop_transform();
       }
     }
   }

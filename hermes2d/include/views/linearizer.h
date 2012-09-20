@@ -59,13 +59,21 @@ namespace Hermes
         int3* get_contour_triangles();
         int get_num_contour_triangles();
 
+        /// Sets the threshold for how fine the output for curved elements.
+        /// \param[in] curvature_epsilon The 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        /// The smaller, the finer.
+        /// Default value = 1e-3.
+        void set_curvature_epsilon(double curvature_epsilon);
+
+        /// Gets the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        double get_curvature_epsilon();
+
         /// Frees the instance.
         void free();
 
       protected:
-        MeshFunction<double>* sln;
-
-        double cmax;
+        /// The 'curvature' epsilon.
+        double curvature_epsilon;
 
         /// Information if user-supplied displacement functions have been provided.
         bool user_xdisp, user_ydisp;
