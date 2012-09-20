@@ -28,6 +28,14 @@
 
 namespace Hermes
 {
+  /** \defgroup g_mixins Mixins
+    *  \brief Mixins are utility classes used for all kinds of other classes.
+    *
+    *  Mixin classes provide a single piece of functionality.
+    *
+    */
+
+  /// \ingroup g_mixins
   /// \brief Namespace for mixin classes.
   /// These classes always serve one particular purpose that multiple classes of the entire Hermes library
   /// could use - logging, time measurement, ...

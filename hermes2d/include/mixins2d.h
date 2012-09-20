@@ -6,6 +6,18 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar> class Space;
+
+    /** \defgroup g_mixins2d Mixins
+    *  \brief Mixins are utility classes used for all kinds of other classes.
+    *
+    *  Mixin classes provide a single piece of functionality.
+    *
+    */
+
+    /// \ingroup g_mixins2d
+    /// \brief Namespace for mixin classes.
+    /// These classes always serve one particular purpose that multiple classes of the Hermes2D library
+    /// could use - setting of spaces, output of linear algebraic structures, ...
     namespace Mixins
     {
       template<typename Scalar>
