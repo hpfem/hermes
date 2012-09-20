@@ -138,19 +138,42 @@ int main(int argc, char* argv[])
       viewS.save_screenshot("009-noMesh.bmp");
       viewS.set_scale_size(40, 1230, 14);
       viewS.save_screenshot("010-scaleSize.bmp");
-      
+
+      ZeroSolution<double> slnZero(&mesh);
+      viewS.set_3d_mode(false);
+      viewS.show_mesh(true);
+      viewS.set_scale_size(30, 120, 14);
+      viewS.show(&slnZero);
+      viewS.save_screenshot("011-zeroSolution.bmp");
+
+      Space<double>* ref_space = Space<double>::construct_refined_space(&space);
+      ZeroSolution<double> slnZeroReference(ref_space->get_mesh());
+      viewS.show(&slnZeroReference);
+      viewS.save_screenshot("012-zeroSolutionRef1.bmp");
+      for(int i = 0; i < 4; i++)
+      {
+        int number = ref_space->get_mesh()->get_max_element_id();
+        for(int j = 0; j < number; j++)
+          if((j % 5) < 3)
+            if(ref_space->get_mesh()->get_element(j)->active)
+              ref_space->get_mesh()->refine_element_id(j);
+      }
+      ConstantSolution<double> slnConstRefined(ref_space->get_mesh(), 1.234567);
+      viewS.show(&slnConstRefined);
+      viewS.save_screenshot("013-constSolutionRef.bmp");
+
       viewO.show(&space);
-      viewO.save_screenshot("011-space.bmp");
+      viewO.save_screenshot("100-space.bmp");
       viewO.set_b_orders(true);
-      viewO.save_screenshot("012-spaceBOrders.bmp");
+      viewO.save_screenshot("101-spaceBOrders.bmp");
       viewM.show(&mesh);
-      viewM.save_screenshot("013-mesh.bmp");
+      viewM.save_screenshot("200-mesh.bmp");
       viewM.set_b_elem_mrk(true);
-      viewM.save_screenshot("014-meshBElemMrk.bmp");
+      viewM.save_screenshot("201-meshBElemMrk.bmp");
       viewV.show(&sln, &sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
-      viewV.save_screenshot("015-vectorizer.bmp");
+      viewV.save_screenshot("300-vectorizer.bmp");
       viewV.set_mode(2);
-      viewV.save_screenshot("016-vectorizerArrowsMode.bmp");
+      viewV.save_screenshot("301-vectorizerArrowsMode.bmp");
     }
   }
   catch(std::exception& e)
