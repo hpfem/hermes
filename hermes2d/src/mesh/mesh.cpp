@@ -72,6 +72,8 @@ namespace Hermes
         vn[i]->ref_element();
         en[i]->ref_element(this);
       }
+      this->areaCalculated = false;
+      this->diameterCalculated = false;
     }
 
     int Element::get_edge_orientation(int ie) const
@@ -86,9 +88,13 @@ namespace Hermes
         vn[i]->unref_element(ht);
         en[i]->unref_element(ht, this);
       }
+      this->areaCalculated = false;
+      this->diameterCalculated = false;
     }
 
-    Element::Element() : visited(false) {};
+    Element::Element() : visited(false), area(0.0), diameter(0.0) 
+    {
+    };
 
     bool Element::is_triangle() const
     {
@@ -113,11 +119,6 @@ namespace Hermes
     ElementMode2D Element::get_mode() const
     {
       return (nvert == 3) ? HERMES_MODE_TRIANGLE : HERMES_MODE_QUAD;
-    }
-
-    unsigned int Element::get_num_surf()
-    {
-      return nvert;
     }
 
     int Element::next_vert(int i) const
@@ -162,44 +163,57 @@ namespace Hermes
       return NULL;
     }
 
-    double Element::get_area() const
+    double Element::get_area()
     {
-      double ax, ay, bx, by;
-      ax = vn[1]->x - vn[0]->x;
-      ay = vn[1]->y - vn[0]->y;
-      bx = vn[2]->x - vn[0]->x;
-      by = vn[2]->y - vn[0]->y;
+      if(!this->areaCalculated)
+      {
+        double ax, ay, bx, by;
+        ax = vn[1]->x - vn[0]->x;
+        ay = vn[1]->y - vn[0]->y;
+        bx = vn[2]->x - vn[0]->x;
+        by = vn[2]->y - vn[0]->y;
 
-      double area = 0.5*(ax*by - ay*bx);
-      if(is_triangle()) return area;
+        this->area = 0.5*(ax*by - ay*bx);
+        if(is_quad())
+        {
+          ax = bx; ay = by;
+          bx = vn[3]->x - vn[0]->x;
+          by = vn[3]->y - vn[0]->y;
 
-      ax = bx; ay = by;
-      bx = vn[3]->x - vn[0]->x;
-      by = vn[3]->y - vn[0]->y;
-
-      return area + 0.5*(ax*by - ay*bx);
+          this->area = area + 0.5*(ax*by - ay*bx);
+        }
+        this->areaCalculated = true;
+      }
+      return this->area;
     }
 
-    double Element::get_diameter() const
+    double Element::get_diameter()
     {
-      double max, l;
-      if(is_triangle())
+      if(!this->diameterCalculated)
       {
-        max = 0.0;
-        for (int i = 0; i < 3; i++)
+        double max, l;
+        if(is_triangle())
         {
-          int j = next_vert(i);
-          l = sqr(vn[i]->x - vn[j]->x) + sqr(vn[i]->y - vn[j]->y);
-          if(l > max) max = l;
+          max = 0.0;
+          for (int i = 0; i < 3; i++)
+          {
+            int j = next_vert(i);
+            l = sqr(vn[i]->x - vn[j]->x) + sqr(vn[i]->y - vn[j]->y);
+            if(l > max) 
+              max = l;
+          }
         }
+        else
+        {
+          max = sqr(vn[0]->x - vn[2]->x) + sqr(vn[0]->y - vn[2]->y);
+          l   = sqr(vn[1]->x - vn[3]->x) + sqr(vn[1]->y - vn[3]->y);
+          if(l > max) 
+            max = l;
+        }
+        diameter = sqrt(max);
+        this->diameterCalculated = true;
       }
-      else
-      {
-        max = sqr(vn[0]->x - vn[2]->x) + sqr(vn[0]->y - vn[2]->y);
-        l   = sqr(vn[1]->x - vn[3]->x) + sqr(vn[1]->y - vn[3]->y);
-        if(l > max) max = l;
-      }
-      return sqrt(max);
+      return this->diameter;
     }
 
     unsigned g_mesh_seq = 0;
@@ -742,7 +756,7 @@ namespace Hermes
 
       // obtain markers and bnds from son elements
       int mrk[4], bnd[4];
-      for (unsigned i = 0; i < e->get_num_surf(); i++)
+      for (unsigned i = 0; i < e->get_nvert(); i++)
       {
         get_edge_sons(e, i, s1, s2);
         assert(e->sons[s1]->active);
@@ -764,7 +778,7 @@ namespace Hermes
       }
 
       // recreate edge nodes
-      for (i = 0; i < e->get_num_surf(); i++)
+      for (i = 0; i < e->get_nvert(); i++)
         e->en[i] = this->get_edge_node(e->vn[i]->id, e->vn[e->next_vert(i)]->id);
 
       e->ref_all_nodes();
@@ -772,7 +786,7 @@ namespace Hermes
       nactive++;
 
       // restore edge node markers and bnds
-      for (i = 0; i < e->get_num_surf(); i++)
+      for (i = 0; i < e->get_nvert(); i++)
       {
         e->en[i]->marker = mrk[i];
         e->en[i]->bnd = bnd[i];
@@ -855,7 +869,7 @@ namespace Hermes
 
     static int rtv_criterion(Element* e)
     {
-      for (unsigned int i = 0; i < e->get_num_surf(); i++)
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
         if(e->vn[i]->id == rtv_id)
           return 0;
       return -1;
@@ -872,7 +886,7 @@ namespace Hermes
     int rtb_criterion(Element* e)
     {
       unsigned int i;
-      for (i = 0; i < e->get_num_surf(); i++)
+      for (i = 0; i < e->get_nvert(); i++)
       {
         if(e->en[i]->marker == rtb_marker || rtb_vert[e->vn[i]->id])
         {
@@ -880,7 +894,7 @@ namespace Hermes
         }
       }
 
-      if(i >= e->get_num_surf()) return -1;
+      if(i >= e->get_nvert()) return -1;
       // triangle should be split into 3 quads
       //  if(e->is_triangle() && rtb_tria_to_quad) return 3;
       // triangle should be split into 4 triangles or quad should
@@ -915,7 +929,7 @@ namespace Hermes
 
         Element* e;
         for_all_active_elements(e, this)
-          for (unsigned int j = 0; j < e->get_num_surf(); j++)
+          for (unsigned int j = 0; j < e->get_nvert(); j++)
           {
             bool marker_matched = false;
             for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
@@ -953,7 +967,7 @@ namespace Hermes
 
           Element* e;
           for_all_active_elements(e, this)
-            for (unsigned int j = 0; j < e->get_num_surf(); j++)
+            for (unsigned int j = 0; j < e->get_nvert(); j++)
             {
               if(e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker).marker)
               {
@@ -1179,13 +1193,13 @@ namespace Hermes
       for_all_elements(e, this)
       {
         // update vertex node pointers
-        for (i = 0; i < e->get_num_surf(); i++)
+        for (i = 0; i < e->get_nvert(); i++)
           e->vn[i] = &nodes[e->vn[i]->id];
 
         if(e->active)
         {
           // update edge node pointers
-          for (i = 0; i < e->get_num_surf(); i++)
+          for (i = 0; i < e->get_nvert(); i++)
             e->en[i] = &nodes[e->en[i]->id];
         }
         else
@@ -1265,7 +1279,7 @@ namespace Hermes
           enew = this->create_quad(e->marker, v0, v1, v2, &nodes[e->vn[3]->id], NULL);
 
         // copy edge markers
-        for (unsigned int j = 0; j < e->get_num_surf(); j++)
+        for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
           Node* en = get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd; // copy bnd data from the active el.
@@ -1370,7 +1384,7 @@ namespace Hermes
         }
 
         // copy edge markers
-        for (unsigned int j = 0; j < e->get_num_surf(); j++)
+        for (unsigned int j = 0; j < e->get_nvert(); j++)
         {
           Node* en = get_base_edge_node(e, j);
           enew->en[j]->bnd = en->bnd;
@@ -1457,7 +1471,7 @@ namespace Hermes
 
       // check if element e is a internal element.
       bool e_inter = true;
-      for (unsigned int n = 0; n < e->get_num_surf(); n++)
+      for (unsigned int n = 0; n < e->get_nvert(); n++)
       {
         if(bnd[n] == 1)
           e_inter = false;
@@ -1487,7 +1501,7 @@ namespace Hermes
         // for base element.
         if(e->cm->toplevel == true)
         {
-          for (unsigned int n = 0; n < e->get_num_surf(); n++)
+          for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
             if(e->cm->nurbs[n] != NULL)
             {
@@ -1500,7 +1514,7 @@ namespace Hermes
           // one level refinement.
           if(e->parent->cm->toplevel == true)
           {
-            for (unsigned int n = 0; n < e->get_num_surf(); n++)
+            for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
               if(e->parent->cm->nurbs[n] != NULL)
               {
@@ -1513,7 +1527,7 @@ namespace Hermes
             // two level refinements.
             if(e->parent->parent->cm->toplevel == true)
             {
-              for (unsigned int n = 0; n < e->get_num_surf(); n++)
+              for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
                 if(e->parent->parent->cm->nurbs[n] != NULL)
                 {
@@ -1526,7 +1540,7 @@ namespace Hermes
               // three level refinements.
               if(e->parent->parent->parent->cm->toplevel == true)
               {
-                for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
                   if(e->parent->parent->parent->cm->nurbs[n] != NULL)
                   {
@@ -1539,7 +1553,7 @@ namespace Hermes
                 // four level refinements.
                 if(e->parent->parent->parent->parent->cm->toplevel == true)
                 {
-                  for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                  for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
                     if(e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
                     {
@@ -2103,7 +2117,7 @@ namespace Hermes
 
       // check if element e is a internal element.
       bool e_inter = true;
-      for (unsigned int n = 0; n < e->get_num_surf(); n++)
+      for (unsigned int n = 0; n < e->get_nvert(); n++)
       {
         if(bnd[n] == 1)
           e_inter = false;
@@ -2116,7 +2130,7 @@ namespace Hermes
         // for base element.
         if(e->cm->toplevel == true)
         {
-          for (unsigned int n = 0; n < e->get_num_surf(); n++)
+          for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
             if(e->cm->nurbs[n] != NULL)
             {
@@ -2129,7 +2143,7 @@ namespace Hermes
           // one level refinement.
           if(e->parent->cm->toplevel == true)
           {
-            for (unsigned int n = 0; n < e->get_num_surf(); n++)
+            for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
               if(e->parent->cm->nurbs[n] != NULL)
               {
@@ -2142,7 +2156,7 @@ namespace Hermes
             // two level refinements.
             if(e->parent->parent->cm->toplevel == true)
             {
-              for (unsigned int n = 0; n < e->get_num_surf(); n++)
+              for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
                 if(e->parent->parent->cm->nurbs[n] != NULL)
                 {
@@ -2155,7 +2169,7 @@ namespace Hermes
               // three level refinements.
               if(e->parent->parent->parent->cm->toplevel == true)
               {
-                for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
                   if(e->parent->parent->parent->cm->nurbs[n] != NULL)
                   {
@@ -2168,7 +2182,7 @@ namespace Hermes
                 // four level refinements.
                 if(e->parent->parent->parent->parent->cm->toplevel == true)
                 {
-                  for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                  for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
                     if(e->parent->parent->parent->parent->cm->nurbs[n] != NULL)
                     {
@@ -2281,7 +2295,7 @@ namespace Hermes
 
       // check if element e is a internal element.
       bool e_inter = true;
-      for (unsigned int n = 0; n < e->get_num_surf(); n++)
+      for (unsigned int n = 0; n < e->get_nvert(); n++)
       {
         if(bnd[n] == 1)
           e_inter = false;
@@ -2294,7 +2308,7 @@ namespace Hermes
         // for base element.
         if(e->cm->toplevel == true)
         {
-          for (unsigned int n = 0; n < e->get_num_surf(); n++)
+          for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
             if((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
             {
@@ -2307,7 +2321,7 @@ namespace Hermes
           // one level refinement.
           if(e->parent->cm->toplevel == true)
           {
-            for (unsigned int n = 0; n < e->get_num_surf(); n++)
+            for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
               if((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
               {
@@ -2320,7 +2334,7 @@ namespace Hermes
             // two level refinements.
             if(e->parent->parent->cm->toplevel == true)
             {
-              for (unsigned int n = 0; n < e->get_num_surf(); n++)
+              for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
                 if((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                 {
@@ -2333,7 +2347,7 @@ namespace Hermes
               // three level refinements.
               if(e->parent->parent->parent->cm->toplevel == true)
               {
-                for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
                   if((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                   {
@@ -2346,7 +2360,7 @@ namespace Hermes
                 // four level refinements.
                 if(e->parent->parent->parent->parent->cm->toplevel == true)
                 {
-                  for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                  for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
                     if((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                     {
@@ -2359,7 +2373,7 @@ namespace Hermes
 
       // FIXME:
       if(rtb_aniso)
-        for (unsigned int i = 0; i < e->get_num_surf(); i++)
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
           refinement_angle[i] = refinement_angle[i]*2;
 
       // deactivate this element and unregister from its nodes
@@ -2375,7 +2389,7 @@ namespace Hermes
       if((e->is_curved()) && (!e_inter))
       {
         bool create_new = false;
-        for (unsigned int i = 0; i < e->get_num_surf(); i++)
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           if(fabs(refinement_angle[i] - 0.0) > 1e-4)
           {
@@ -2479,7 +2493,7 @@ namespace Hermes
 
       // check if element e is a internal element.
       bool e_inter = true;
-      for (unsigned int n = 0; n < e->get_num_surf(); n++)
+      for (unsigned int n = 0; n < e->get_nvert(); n++)
       {
         if(bnd[n] == 1)
           e_inter = false;
@@ -2492,7 +2506,7 @@ namespace Hermes
         // for base element.
         if(e->cm->toplevel == true)
         {
-          for (unsigned int n = 0; n < e->get_num_surf(); n++)
+          for (unsigned int n = 0; n < e->get_nvert(); n++)
           {
             if((e->cm->nurbs[n] != NULL) && (bnd[n] == 1))
             {
@@ -2505,7 +2519,7 @@ namespace Hermes
           // one level refinement.
           if(e->parent->cm->toplevel == true)
           {
-            for (unsigned int n = 0; n < e->get_num_surf(); n++)
+            for (unsigned int n = 0; n < e->get_nvert(); n++)
             {
               if((e->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
               {
@@ -2518,7 +2532,7 @@ namespace Hermes
             // two level refinements.
             if(e->parent->parent->cm->toplevel == true)
             {
-              for (unsigned int n = 0; n < e->get_num_surf(); n++)
+              for (unsigned int n = 0; n < e->get_nvert(); n++)
               {
                 if((e->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                 {
@@ -2531,7 +2545,7 @@ namespace Hermes
               // three level refinements.
               if(e->parent->parent->parent->cm->toplevel == true)
               {
-                for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                for (unsigned int n = 0; n < e->get_nvert(); n++)
                 {
                   if((e->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                   {
@@ -2544,7 +2558,7 @@ namespace Hermes
                 // four level refinements.
                 if(e->parent->parent->parent->parent->cm->toplevel == true)
                 {
-                  for (unsigned int n = 0; n < e->get_num_surf(); n++)
+                  for (unsigned int n = 0; n < e->get_nvert(); n++)
                   {
                     if((e->parent->parent->parent->parent->cm->nurbs[n] != NULL) && (bnd[n] == 1))
                     {
@@ -2593,7 +2607,7 @@ namespace Hermes
         if((e->is_curved()) && (!e_inter))
         {
           //bool create_new = false;
-          for (unsigned int i = 0; i < e->get_num_surf(); i++)
+          for (unsigned int i = 0; i < e->get_nvert(); i++)
           {
             if(fabs(refinement_angle[i] - 0.0) > 1e-4)
             {
@@ -3042,7 +3056,7 @@ namespace Hermes
           int iso = -1;
           if(e->is_triangle())
           {
-            for(unsigned int i = 0; i < e->get_num_surf(); i++)
+            for(unsigned int i = 0; i < e->get_nvert(); i++)
             {
               j = e->next_vert(i);
               if(get_edge_degree(e->vn[i], e->vn[j]) > n)
@@ -3059,7 +3073,7 @@ namespace Hermes
             { iso = 1; ok = false; }
             else
             {
-              for(unsigned int i = 0; i < e->get_num_surf(); i++)
+              for(unsigned int i = 0; i < e->get_nvert(); i++)
               {
                 j = e->next_vert(i);
                 if(get_edge_degree(e->vn[i], e->vn[j]) > n)

@@ -574,7 +574,7 @@ namespace Hermes
           double max_x, max_y, min_x, min_y;
           max_x = min_x = element->vn[0]->x;
           max_y = min_y = element->vn[0]->y;
-          for(unsigned int i = 0; i < element->get_num_surf(); i++)
+          for(unsigned int i = 0; i < element->get_nvert(); i++)
           {
             sum_x += element->vn[i]->x;
             sum_y += element->vn[i]->y;
@@ -589,7 +589,7 @@ namespace Hermes
               min_y = element->vn[i]->y;
           }
           element_infos.push_back(ElementInfo(element->id,
-            (float)(sum_x / element->get_num_surf()), (float)(sum_y / element->get_num_surf()),
+            (float)(sum_x / element->get_nvert()), (float)(sum_y / element->get_nvert()),
             (float)(max_x - min_x), (float)(max_y - min_y)));
         }
       }

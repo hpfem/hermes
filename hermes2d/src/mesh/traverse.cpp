@@ -818,7 +818,7 @@ namespace Hermes
         // Read base element areas from the first mesh,
         // Also get minimum element area.
         int counter = 0;
-        double min_elem_area = 1e30;
+        double min_elem_area = 1e30;  
         for_all_base_elements_incl_inactive(e, meshes[0])
         {
           if(!e->used)

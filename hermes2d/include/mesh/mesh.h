@@ -121,21 +121,19 @@ namespace Hermes
     {
     public:
       Element();
-
       int id;              ///< element id number
       bool active;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
       bool used;     ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
-      unsigned int get_num_surf();  ///< returns number of edges (same as number of vertices)
-
+      
       /// Calculates the area of the element. For curved elements, this is only
       /// an approximation: the curvature is not accounted for.
-      double get_area() const;
+      double get_area();
 
       /// Returns the length of the longest edge for triangles, and the
       /// length of the longer diagonal for quads. Ignores element curvature.
-      double get_diameter() const;
+      double get_diameter();
 
       Node* vn[4];   ///< vertex node pointers
       union
@@ -145,8 +143,7 @@ namespace Hermes
       };
 
       int marker;        ///< element marker
-      CurvMap* cm; ///< curved mapping, NULL if not curvilinear
-
+      
       // returns the edge orientation. This works for the unconstrained edges.
       int get_edge_orientation(int ie) const;
       ElementMode2D  get_mode() const;
@@ -161,9 +158,21 @@ namespace Hermes
       bool bsplit() const;
 
     protected:
-      int iro_cache;     ///< increase in integration order, see RefMap::calc_inv_ref_order()
+      CurvMap* cm; ///< curved mapping, NULL if not curvilinear
+      /// Serves for saving the once calculated area of this element.
+      bool areaCalculated;
+      /// Serves for saving the once calculated area of this element.
+      double area;
 
-      // helper functions to obtain the index of the next or previous vertex/edge
+      /// Serves for saving the once calculated diameter of this element.
+      bool diameterCalculated;
+      /// Serves for saving the once calculated diameter of this element.
+      double diameter;
+
+      /// Increase in integration order, see RefMap::calc_inv_ref_order()
+      int iro_cache;
+
+      /// Helper functions to obtain the index of the next or previous vertex/edge
       int next_vert(int i) const;
       int prev_vert(int i) const;
 
@@ -171,12 +180,15 @@ namespace Hermes
       /// NULL if it does not exist or is across an irregular edge.
       Element* get_neighbor(int ie) const;
 
+      /// Internal.
       void ref_all_nodes();
+      /// Internal.
       void unref_all_nodes(HashTable* ht);
     private:
       unsigned nvert:30; ///< number of vertices (3 or 4)
 
       friend class Mesh;
+      friend class MeshReader;
       friend class MeshReaderH2D;
       friend class MeshReaderH1DXML;
       friend class MeshReaderH2DXML;

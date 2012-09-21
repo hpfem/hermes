@@ -572,7 +572,7 @@ namespace Hermes
     int Space<Scalar>::get_edge_order(Element* e, int edge) const
     {
       Node* en = e->en[edge];
-      if(en->id >= nsize || edge >= (int)e->get_num_surf()) return 0;
+      if(en->id >= nsize || edge >= (int)e->get_nvert()) return 0;
 
       if(ndata[en->id].n == -1)
         return get_edge_order_internal(ndata[en->id].base); // constrained node
@@ -728,7 +728,7 @@ namespace Hermes
       Element* e;
       for_all_active_elements(e, mesh)
       {
-        for (unsigned int i = 0; i < e->get_num_surf(); i++)
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           if(e->en[i]->bnd)
             if(essential_bcs != NULL)
@@ -754,9 +754,9 @@ namespace Hermes
 
       // add vertex, edge and bubble functions to the assembly list
       al->cnt = 0;
-      for (unsigned int i = 0; i < e->get_num_surf(); i++)
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
         get_vertex_assembly_list(e, i, al);
-      for (unsigned int i = 0; i < e->get_num_surf(); i++)
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
         get_boundary_assembly_list_internal(e, i, al);
       get_bubble_assembly_list(e, al);
       for(unsigned int i = 0; i < al->cnt; i++)
@@ -872,7 +872,7 @@ namespace Hermes
       Element* e;
       for_all_base_elements(e, mesh)
       {
-        for (unsigned int i = 0; i < e->get_num_surf(); i++)
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
         {
           int j = e->next_vert(i);
           if(e->vn[i]->bnd && e->vn[j]->bnd)

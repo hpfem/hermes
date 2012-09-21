@@ -232,7 +232,7 @@ namespace Hermes
             if(error_estimators_surf[iest]->i != i)
               continue;
 
-            for (int isurf = 0; isurf < ee->e[i]->get_num_surf(); isurf++)
+            for (int isurf = 0; isurf < ee->e[i]->get_nvert(); isurf++)
             {
               if(bnd[isurf])   // Boundary
               {

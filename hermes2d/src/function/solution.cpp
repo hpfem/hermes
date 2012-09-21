@@ -398,7 +398,7 @@ namespace Hermes
         this->mode = e->get_mode();
         o = space->get_element_order(e->id);
         o = std::max(H2D_GET_H_ORDER(o), H2D_GET_V_ORDER(o));
-        for (unsigned int k = 0; k < e->get_num_surf(); k++)
+        for (unsigned int k = 0; k < e->get_nvert(); k++)
         {
           int eo = space->get_edge_order(e, k);
           if(eo > o) o = eo;
@@ -1326,7 +1326,7 @@ namespace Hermes
     static bool is_in_ref_domain(Element* e, double xi1, double xi2)
     {
       const double TOL = 1e-11;
-      if(e->get_num_surf() == 3)
+      if(e->get_nvert() == 3)
         return (xi1 + xi2 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 + 1.0 >= -TOL);
       else
         return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);
@@ -1436,10 +1436,10 @@ namespace Hermes
       {
         Element* elem[5];
         elem[0] = e_last;
-        for (unsigned int i = 1; i <= e_last->get_num_surf(); i++)
+        for (unsigned int i = 1; i <= e_last->get_nvert(); i++)
           elem[i] = e_last->get_neighbor(i-1);
 
-        for (unsigned int i = 0; i <= e_last->get_num_surf(); i++)
+        for (unsigned int i = 0; i <= e_last->get_nvert(); i++)
           if(elem[i] != NULL)
           {
             this->refmap->set_active_element(elem[i]);

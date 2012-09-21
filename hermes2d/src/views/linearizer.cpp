@@ -753,7 +753,7 @@ namespace Hermes
               fns[omp_get_thread_num()][0]->set_quad_order(0, this->item);
               double* val = fns[omp_get_thread_num()][0]->get_values(component, value_type);
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
               {
                 double f = val[i];
 #pragma omp critical (max)
@@ -830,7 +830,7 @@ namespace Hermes
                 dy = fns[omp_get_thread_num()][2]->get_fn_values();
 
               int iv[4];
-              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
               {
                 double f = val[i];
                 double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
@@ -849,7 +849,7 @@ namespace Hermes
               else
                 process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
                 process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
             }
             catch(Hermes::Exceptions::Exception& e)

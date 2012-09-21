@@ -506,7 +506,7 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
               double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
               double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
               {
                 double fx = xval[i];
                 double fy = yval[i];
@@ -572,7 +572,7 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
               double* y = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0);
 
               int iv[4];
-              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
               {
                 double fx = xval[i];
                 double fy = yval[i];
@@ -586,7 +586,7 @@ int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)
               else
                 process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_num_surf(); i++)
+              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
                 process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
             }
             catch(Hermes::Exceptions::Exception& e)
