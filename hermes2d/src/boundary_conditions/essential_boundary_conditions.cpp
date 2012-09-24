@@ -174,9 +174,21 @@ namespace Hermes
     template<typename Scalar>
     void EssentialBCs<Scalar>::create_marker_cache()
     {
+      bool hermes_any_set = false;
+      EssentialBoundaryCondition<Scalar>* any_set = NULL;
       for(this->iterator = begin(); iterator != end(); iterator++)
         for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); it++)
         {
+          if(hermes_any_set)
+            throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", it->c_str());
+          if((*it) == HERMES_ANY)
+          {
+            if(any_set != NULL)
+              throw Hermes::Exceptions::Exception("Attempt to define a BC on HERMES_ANY together with a BC on a specific part: '%s'.", any_set->markers.begin()->c_str());
+            hermes_any_set = true;
+          }
+          else
+            any_set = *iterator;
           if(this->markers[*it] != NULL)
             throw Hermes::Exceptions::Exception("Attempt to define more than one description of the BC on the same part of the boundary with marker '%s'.", it->c_str());
           this->markers[*it] = *iterator;
@@ -186,6 +198,8 @@ namespace Hermes
     template<typename Scalar>
     EssentialBoundaryCondition<Scalar>* EssentialBCs<Scalar>::get_boundary_condition(std::string marker)
     {
+      if(this->markers[HERMES_ANY] != NULL)
+        return this->markers[HERMES_ANY];
       if(this->markers.find(marker) == this->markers.end())
         return NULL;
       else

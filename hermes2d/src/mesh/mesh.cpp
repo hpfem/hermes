@@ -919,6 +919,7 @@ namespace Hermes
     void Mesh::refine_towards_boundary(Hermes::vector<std::string> markers, int depth, bool aniso, bool mark_as_initial)
     {
       rtb_aniso = aniso;
+      bool refined = false;
 
       // refinement: refine all elements to quad elements.
       for (int i = 0; i < depth; i++)
@@ -936,7 +937,10 @@ namespace Hermes
               if(e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(markers[marker_i]).marker)
                 marker_matched = true;
             if(marker_matched)
+            {
               rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
+              refined = true;
+            }
           }
 
           refine_by_criterion(rtb_criterion, 1);
@@ -945,6 +949,8 @@ namespace Hermes
 
       if(mark_as_initial)
         ninitial = this->get_max_element_id();
+      if(!refined)
+          throw Hermes::Exceptions::Exception("None of the markers in Mesh::refine_towards_boundary found in the Mesh.");
     }
 
     void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool mark_as_initial)
@@ -955,6 +961,7 @@ namespace Hermes
 
       else
       {
+        bool refined = false;
         rtb_marker = this->boundary_markers_conversion.get_internal_marker(marker).marker;
         rtb_aniso = aniso;
 
@@ -972,6 +979,7 @@ namespace Hermes
               if(e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker).marker)
               {
                 rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
+                refined = true;
               }
             }
 
@@ -981,6 +989,8 @@ namespace Hermes
 
         if(mark_as_initial)
           ninitial = this->get_max_element_id();
+        if(!refined)
+          throw Hermes::Exceptions::Exception("None of the markers in Mesh::refine_towards_boundary found in the Mesh.");
       }
     }
 
@@ -993,6 +1003,7 @@ namespace Hermes
       
     void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, bool mark_as_initial)
     {
+      bool refined = false;
       for (int i = 0; i < depth; i++)
       {
         Element* e;
@@ -1000,12 +1011,17 @@ namespace Hermes
         {
           for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
             if(e->marker == this->element_markers_conversion.get_internal_marker(markers[marker_i]).marker || markers[marker_i] == HERMES_ANY)
+            {
               this->refine_element(e, 0);
+              refined = true;
+            }
         }
       }
 
       if(mark_as_initial)
         ninitial = this->get_max_element_id();
+      if(!refined)
+        throw Hermes::Exceptions::Exception("None of the markers in Mesh::refine_in_areas found in the Mesh.");
     }
 
     void Mesh::unrefine_element_id(int id)

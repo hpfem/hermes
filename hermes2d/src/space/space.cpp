@@ -44,7 +44,7 @@ namespace Hermes
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
           {
-            if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end())
+            if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
               throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
           }
 

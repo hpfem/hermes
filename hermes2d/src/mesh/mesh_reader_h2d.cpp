@@ -157,7 +157,8 @@ namespace Hermes
     {
       // Check if file exists
       std::ifstream s(filename);
-      if(!s.good()) throw Hermes::Exceptions::MeshLoadFailureException("Mesh file not found.");
+      if(!s.good()) 
+        throw Hermes::Exceptions::MeshLoadFailureException("Mesh file not found.");
       s.close();
 
       int i, j, k, n;
