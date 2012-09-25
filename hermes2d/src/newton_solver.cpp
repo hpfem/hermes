@@ -644,12 +644,22 @@ namespace Hermes
         // Increase the number of iterations and test if we are still under the limit.
         if(it++ >= newton_max_iter)
         {
+          // We want to return the solution in a different structure.
+          this->sln_vector = new Scalar[ndof];
+          for (int i = 0; i < ndof; i++)
+            this->sln_vector[i] = coeff_vec[i];
+
+          if(delete_coeff_vec)
+          {
+            delete [] coeff_vec;
+            coeff_vec = NULL;
+          }
+
           this->tick();
           this->info("Newton: solution duration: %f s.\n", this->last());
 
           this->on_finish();
-
-          throw Exceptions::ValueException("newton iterations", it, newton_max_iter);
+          throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
       }
     }
