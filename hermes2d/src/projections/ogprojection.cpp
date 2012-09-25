@@ -72,14 +72,13 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
         MatrixFormVol<Scalar>* custom_projection_jacobian,
         VectorFormVol<Scalar>* custom_projection_residual,
-        Solution<Scalar>* target_sln, double newton_tol, int newton_max_iter)
+        Solution<Scalar>* target_sln)
     {
       // Calculate the coefficient vector.
       int ndof = space->get_num_dofs();
       Scalar* target_vec = new Scalar[ndof];
                
-      project_global(space, custom_projection_jacobian, custom_projection_residual, target_vec,
-                     newton_tol, newton_max_iter);
+      project_global(space, custom_projection_jacobian, custom_projection_residual, target_vec);
             
       // Translate coefficient vector into a Solution.
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
@@ -92,7 +91,7 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
-        Scalar* target_vec, double newton_tol, int newton_max_iter)
+        Scalar* target_vec)
     {
       int n = spaces.size();
 
@@ -105,8 +104,7 @@ namespace Hermes
       for (int i = 0; i < n; i++) 
       {
                 
-        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_vec + start_index,
-                       newton_tol, newton_max_iter);
+        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_vec + start_index);
         
         start_index += spaces[i]->get_num_dofs();                       
       }
@@ -116,8 +114,7 @@ namespace Hermes
     void OGProjection<Scalar>::project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
-        const Hermes::vector<Solution<Scalar>*>& target_slns,
-        double newton_tol, int newton_max_iter)
+        const Hermes::vector<Solution<Scalar>*>& target_slns)
     {
       int n = spaces.size();
 
@@ -128,8 +125,7 @@ namespace Hermes
       
       for (int i = 0; i < n; i++) 
       {
-        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i],
-                       newton_tol, newton_max_iter);
+        project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
       }
     }
     

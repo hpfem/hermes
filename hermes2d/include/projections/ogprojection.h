@@ -48,22 +48,19 @@ namespace Hermes
       void project_global(const Space<Scalar>* space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
-          Solution<Scalar>* target_sln, 
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Solution<Scalar>* target_sln);
       
       /// This method allows to specify your own multiple OG-projection forms.
       void project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
           const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
           const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
-          Scalar* target_vec,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          Scalar* target_vec);
           
       /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
       void project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
           const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
           const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
-          const Hermes::vector<Solution<Scalar>*>& target_slns,
-          double newton_tol = 1e-6, int newton_max_iter = 10);
+          const Hermes::vector<Solution<Scalar>*>& target_slns);
           
       /**
        \fn  static void OGProjection::project_global(Space<Scalar>* space,
