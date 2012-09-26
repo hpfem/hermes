@@ -26,7 +26,7 @@
 // The following parameters can be changed:
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
-const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
 const int P_INIT = 1;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 
@@ -75,8 +75,6 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
-  linear_solver.output_matrix();
-  linear_solver.output_rhs();
 
   // Solve the linear problem.
   try
@@ -105,47 +103,10 @@ int main(int argc, char* argv[])
 
     // Visualize the solution.
     Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
-    Hermes::Hermes2D::Views::OrderView viewO("Orders", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
-    Hermes::Hermes2D::Views::VectorView viewV("Vectors", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
-    Hermes::Hermes2D::Views::MeshView viewM("Mesh", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
 
     if(HERMES_VISUALIZATION)
     {
-      viewS.show(&sln);
-      viewS.save_screenshot("000-base.bmp");
-      viewS.show_contours(1.0);
-      viewS.save_screenshot("001-contours1.bmp");
-      viewS.show_contours(3.0);
-      viewS.save_screenshot("002-contours2.bmp");
-      viewS.show_contours(5.0);
-      viewS.save_screenshot("003-contours3.bmp");
-      viewS.set_3d_mode(true);
-      viewS.save_screenshot("004-3D.bmp");
-      viewS.set_3d_mode(false);
-      viewS.save_screenshot("005-backTo2D.bmp");
-      viewS.hide_contours();
-      viewS.save_screenshot("006-noContours.bmp");
-      viewS.set_palette_filter(false);
-      viewS.save_screenshot("007-paletteSmooth.bmp");
-      viewS.set_palette_filter(true);
-      viewS.save_screenshot("008-paletteBack.bmp");
-      viewS.show_mesh(false);
-      viewS.save_screenshot("009-noMesh.bmp");
-      viewS.set_scale_size(40, 1230, 14);
-      viewS.save_screenshot("010-scaleSize.bmp");
-      
-      viewO.show(&space);
-      viewO.save_screenshot("011-space.bmp");
-      viewO.set_b_orders(true);
-      viewO.save_screenshot("012-spaceBOrders.bmp");
-      viewM.show(&mesh);
-      viewM.save_screenshot("013-mesh.bmp");
-      viewM.set_b_elem_mrk(true);
-      viewM.save_screenshot("014-meshBElemMrk.bmp");
-      viewV.show(&sln, &sln, Hermes::Hermes2D::Views::HERMES_EPS_VERYHIGH);
-      viewV.save_screenshot("015-vectorizer.bmp");
-      viewV.set_mode(2);
-      viewV.save_screenshot("016-vectorizerArrowsMode.bmp");
+      viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW * 100.);
     }
   }
   catch(std::exception& e)
