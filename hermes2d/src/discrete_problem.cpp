@@ -1481,8 +1481,8 @@ namespace Hermes
           if(current_state->e[i] != NULL)
             current_refmaps[i]->set_active_element(current_state->e[i]);
 
+        // Order calculation.
         int order = this->wf->global_integration_order_set ? this->wf->global_integration_order : 0;
-        
         if(order == 0 || this->wf->global_integration_order_set)
         {
           for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
@@ -1526,6 +1526,8 @@ namespace Hermes
           }
         }
 
+        // Order is known, we know how many integration points we need and we can proceed.
+        // cache record sub idx : new precalcshapeset(spaces->shapeset, element, sub_idx, order, asmlist->idx)
         for(unsigned int i = 0; i < this->spaces.size(); i++)
         {
           if(current_state->e[i] == NULL)

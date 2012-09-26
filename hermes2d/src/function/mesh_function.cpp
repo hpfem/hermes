@@ -109,7 +109,8 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_quad_2d(Quad2D* quad_2d)
     {
-      if(quad_2d==NULL) throw Exceptions::NullException(1);
+      if(quad_2d == NULL) 
+        throw Exceptions::NullException(1);
       Function<Scalar>::set_quad_2d(quad_2d);
       refmap->set_quad_2d(quad_2d);
     }

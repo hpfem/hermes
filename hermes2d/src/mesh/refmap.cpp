@@ -32,10 +32,6 @@ namespace Hermes
 
     RefMap::~RefMap() { free(); }
 
-    /// Sets the quadrature points in which the reference map will be evaluated.
-    /// \param quad_2d[in] The quadrature points.
-    void set_quad_2d(Quad2D* quad_2d);
-
     /// Returns the current quadrature points.
     Quad2D* RefMap::get_quad_2d() const
     {
