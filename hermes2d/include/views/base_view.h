@@ -51,7 +51,7 @@ namespace Hermes
 
         void show(const Space<Scalar>* space, double eps = HERMES_EPS_LOW, int item = H2D_FN_VAL_0);
 
-        virtual ~BaseView() { free(); }
+        ~BaseView() { free(); }
 
       protected:
 

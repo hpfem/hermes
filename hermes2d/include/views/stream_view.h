@@ -42,7 +42,7 @@ namespace Hermes
 
         StreamView(const char* title = "StreamView", WinGeom* wg = NULL);
         StreamView(char* title, WinGeom* wg = NULL);
-        virtual ~StreamView();
+        ~StreamView();
 
         /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
         /// and the distance between starting points is "step"

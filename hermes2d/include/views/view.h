@@ -88,7 +88,7 @@ namespace Hermes
         void init();
         View(const char* title, WinGeom* wg = NULL);
         View(char* title, WinGeom* wg = NULL);
-        virtual ~View();
+        ~View();
 
         int  create();
         void close();
@@ -146,7 +146,7 @@ namespace Hermes
         bool dragging, scaling;
 
         virtual void on_create(int output_id);
-        virtual void on_display() = 0;
+        virtual void on_display() {};
         virtual void on_reshape(int width, int height);
         virtual void on_mouse_move(int x, int y);
         virtual void on_left_mouse_down(int x, int y);

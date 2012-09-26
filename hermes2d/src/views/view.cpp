@@ -244,7 +244,7 @@ namespace Hermes
         if(!hq_frame)
         {
           clear_background();
-          on_display();
+          this->on_display();
         }
         else
         {
@@ -545,7 +545,7 @@ namespace Hermes
         //sighandler_t old_segv, old_abrt;
         //old_segv = signal(SIGSEGV, SIG_DFL);
         //old_abrt = signal(SIGABRT, SIG_DFL);
-
+        
         view_sync.enter();
         if(output_id >= 0 && !frame_ready)
           view_sync.wait_drawing_fisnihed();

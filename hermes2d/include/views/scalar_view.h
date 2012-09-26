@@ -62,7 +62,7 @@ namespace Hermes
         ScalarView(WinGeom* wg = NULL);
 #endif
         ScalarView(char* title, WinGeom* wg = NULL);
-        virtual ~ScalarView();
+        ~ScalarView();
 
         void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
           MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0);

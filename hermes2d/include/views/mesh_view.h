@@ -44,7 +44,7 @@ namespace Hermes
 
         MeshView(const char* title = "MeshView", WinGeom* wg = NULL);
         MeshView(char* title, WinGeom* wg = NULL);
-        virtual ~MeshView();
+        ~MeshView();
 
         void show (Mesh* mesh);
         /// Displays element markers.
