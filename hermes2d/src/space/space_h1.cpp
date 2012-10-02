@@ -84,7 +84,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* H1Space<Scalar>::duplicate(Mesh* mesh, int order_increase, reference_space_p_callback_function p_callback) const
+    Space<Scalar>* H1Space<Scalar>::duplicate(Mesh* mesh, int order_increase, typename Space<Scalar>::reference_space_p_callback_function p_callback) const
     {
       H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
 
