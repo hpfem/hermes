@@ -148,6 +148,7 @@ namespace Hermes
       this->rep = other->rep;
       this->visited = other->visited;
       this->isurf = other->isurf;
+      this->isBnd = other->isBnd;
     }
 
     Traverse::State::~State()
@@ -230,6 +231,7 @@ namespace Hermes
       {
         for (int i = 0; i < 3; i++)
           (s->bnd[i] = (s->bnd[i] && e->en[i]->bnd));
+        s->isBnd = s->bnd[0] || s->bnd[1] || s->bnd[2];
       }
       else
       {
@@ -237,6 +239,7 @@ namespace Hermes
         s->bnd[1] = s->bnd[1] && (s->cr.r == ONE) && e->en[1]->bnd;
         s->bnd[2] = s->bnd[2] && (s->cr.t == ONE) && e->en[2]->bnd;
         s->bnd[3] = s->bnd[3] && (s->cr.l == 0)   && e->en[3]->bnd;
+        s->isBnd = s->bnd[0] || s->bnd[1] || s->bnd[2] || s->bnd[3];
       }
     }
 

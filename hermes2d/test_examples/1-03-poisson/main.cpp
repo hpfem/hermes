@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 
     if(HERMES_VISUALIZATION)
     {
-      viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW * 100.);
+      viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
       viewS.wait_for_close();
     }
   }

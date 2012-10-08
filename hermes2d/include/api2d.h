@@ -32,7 +32,8 @@ namespace Hermes
     /// Enumeration of potential keys in the Api2D::parameters storage.
     enum Hermes2DApiParam
     {
-      numThreads
+      numThreads,
+      secondDerivatives
     };
 
     /// API Class containing settings for the whole Hermes2D.

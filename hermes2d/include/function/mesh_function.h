@@ -77,14 +77,10 @@ namespace Hermes
       }
 
     protected:
-
       ElementMode2D mode;
       const Mesh* mesh;
       RefMap* refmap;
-
-    public:
-
-      /// For internal use only.
+    
       void force_transform(MeshFunction<Scalar>* mf);
 
       void update_refmap();

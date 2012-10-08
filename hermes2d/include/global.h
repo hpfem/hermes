@@ -63,11 +63,6 @@
     static const int H2D_TRF_NUM = (H2D_TRF_QUAD_NUM + 1);
     /// An index of identity transformation.
     static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
-    
-    /// Enabling second derivatives in weak forms. Turned on by default. Second
-    /// derivatives are employed, among others, by stabilization methods for
-    /// transport equations. For usage see the example linear-convection-diffusion.
-#define H2D_SECOND_DERIVATIVES_ENABLED
 
 #define H2DRS_ASSUMED_MAX_CANDS 512 ///< An estimated maximum number of candidates. Used for purpose of reserving space. \internal \ingroup g_selectors
 

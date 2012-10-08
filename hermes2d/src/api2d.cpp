@@ -41,6 +41,7 @@ namespace Hermes
       signal(SIGTERM, CallStack::dump);
 
       this->parameters.insert(std::pair<Hermes2DApiParam, Parameter*> (Hermes::Hermes2D::numThreads,new Parameter(NUM_THREADS)));
+      this->parameters.insert(std::pair<Hermes2DApiParam, Parameter*> (Hermes::Hermes2D::secondDerivatives,new Parameter(0)));
     }
 
     Api2D::~Api2D()

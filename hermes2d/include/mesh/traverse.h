@@ -83,6 +83,7 @@ namespace Hermes
       public:
         Element** e;
         bool bnd[4];
+        bool isBnd;
         Element* rep;
         ~State();
       private:
