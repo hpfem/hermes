@@ -183,18 +183,18 @@ namespace Hermes
       int calc_order_matrix_form(MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Matrix volumetric forms - assemble the form.
-      virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
+      virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Func<Scalar>** u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
-      virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Solution<Scalar>** current_u_ext, 
+      virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// Vector volumetric forms - calculate the integration order.
       int calc_order_vector_form(VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Vector volumetric forms - assemble the form.
-      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Func<Scalar>** u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state);
 
-      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Solution<Scalar>** current_u_ext, 
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
@@ -211,10 +211,10 @@ namespace Hermes
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates external functions.
-      void init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, Func<Scalar>** ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      void init_ext(Form<Scalar> *form, Func<Scalar>** ext, int order);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext.
-      void deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, Func<Scalar>** ext);
+      void deinit_ext(Form<Scalar> *form, Func<Scalar>** ext);
 
       /// Init function. Common code for the constructors.
       void init();
@@ -284,8 +284,8 @@ namespace Hermes
       {
       public:
         CacheRecordPerSubIdx();
-        int order;
         int nvert;
+        int order;
         void clear();
         int asmlistCnt;
         Func<double>** fns;
