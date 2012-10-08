@@ -46,10 +46,10 @@ namespace Hermes
         ~DefaultMatrixFormVol<Scalar>();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+          Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual MatrixFormVol<Scalar>* clone();
 
@@ -79,10 +79,10 @@ namespace Hermes
         ~DefaultJacobianCurlCurl();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+          Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual MatrixFormVol<Scalar>* clone();
 
@@ -117,10 +117,10 @@ namespace Hermes
         ~DefaultVectorFormVol<Scalar>();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual VectorFormVol<Scalar>* clone();
 
@@ -150,10 +150,10 @@ namespace Hermes
         ~DefaultResidualVol();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual VectorFormVol<Scalar>* clone();
 
@@ -186,10 +186,10 @@ namespace Hermes
         ~DefaultResidualCurlCurl();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual VectorFormVol<Scalar>* clone();
 
@@ -220,10 +220,10 @@ namespace Hermes
         ~DefaultMatrixFormSurf<Scalar>();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u,
-          Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual MatrixFormSurf<Scalar>* clone();
 
@@ -254,10 +254,10 @@ namespace Hermes
         ~DefaultVectorFormSurf<Scalar>();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual VectorFormSurf<Scalar>* clone();
 
@@ -287,10 +287,10 @@ namespace Hermes
         ~DefaultResidualSurf();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-          Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual VectorFormSurf<Scalar>* clone();
 

@@ -11,7 +11,7 @@ CustomWeakForm::CustomWeakForm(std::string left_bottom_bnd_part, Mesh* mesh) : W
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomMatrixFormVol::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v,
-                                                  Geom<Real> *e, ExtData<Scalar> *ext) const
+                                                  Geom<Real> *e, Func<Scalar> **ext) const
 {
   Scalar result = Scalar(0);
   for (int i = 0; i < n; i++)
@@ -20,13 +20,13 @@ Scalar CustomWeakForm::CustomMatrixFormVol::matrix_form(int n, double *wt, Func<
 }
 
 double CustomWeakForm::CustomMatrixFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v,
-                                            Geom<double> *e, ExtData<double> *ext) const
+                                            Geom<double> *e, Func<double> **ext) const
 {
   return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 }
 
 Ord CustomWeakForm::CustomMatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                       Geom<Ord> *e, ExtData<Ord> *ext) const
+                                       Geom<Ord> *e, Func<Ord> **ext) const
 {
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
@@ -38,7 +38,7 @@ MatrixFormVol<double>* CustomWeakForm::CustomMatrixFormVol::clone()
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomVectorFormVol::vector_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                                  Geom<Real> *e, ExtData<Scalar> *ext) const
+                                                  Geom<Real> *e, Func<Scalar> **ext) const
 {
   Scalar result = Scalar(0);
   for (int i = 0; i < n; i++)
@@ -47,13 +47,13 @@ Scalar CustomWeakForm::CustomVectorFormVol::vector_form(int n, double *wt, Func<
 }
 
 double CustomWeakForm::CustomVectorFormVol::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                                            Geom<double> *e, ExtData<double> *ext) const
+                                            Geom<double> *e, Func<double> **ext) const
 {
   return vector_form<double, double>(n, wt, u_ext, v, e, ext);
 }
 
 Ord CustomWeakForm::CustomVectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-                                       Geom<Ord> *e, ExtData<Ord> *ext) const
+                                       Geom<Ord> *e, Func<Ord> **ext) const
 {
   return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
 }
@@ -71,7 +71,7 @@ Real CustomWeakForm::CustomVectorFormVol::F(Real x, Real y) const
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomMatrixFormSurface::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v,
-                                                      Geom<Real> *e, ExtData<Scalar> *ext) const
+                                                      Geom<Real> *e, Func<Scalar> **ext) const
 {
   Scalar result = Scalar(0);
   for (int i = 0; i < n; i++)
@@ -84,13 +84,13 @@ Scalar CustomWeakForm::CustomMatrixFormSurface::matrix_form(int n, double *wt, F
 }
 
 double CustomWeakForm::CustomMatrixFormSurface::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v,
-                                                Geom<double> *e, ExtData<double> *ext) const
+                                                Geom<double> *e, Func<double> **ext) const
 {
   return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 }
 
 Ord CustomWeakForm::CustomMatrixFormSurface::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                           Geom<Ord> *e, ExtData<Ord> *ext) const
+                                           Geom<Ord> *e, Func<Ord> **ext) const
 {
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
@@ -102,7 +102,7 @@ MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormSurface::clone()
 
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v,
-                                                        Geom<Real> *e, ExtData<Scalar> *ext) const
+                                                        Geom<Real> *e, Func<Scalar> **ext) const
 {
   Scalar result = Scalar(0);
 
@@ -115,13 +115,13 @@ Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt,
 }
 
 double CustomWeakForm::CustomMatrixFormInterface::value(int n, double *wt, Func<double> *u_ext[], Func<double> *u, Func<double> *v,
-                                                  Geom<double> *e, ExtData<double> *ext) const
+                                                  Geom<double> *e, Func<double> **ext) const
 {
   return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 }
 
 Ord CustomWeakForm::CustomMatrixFormInterface::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                                             Geom<Ord> *e, ExtData<Ord> *ext) const
+                                             Geom<Ord> *e, Func<Ord> **ext) const
 {
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
@@ -132,7 +132,7 @@ MatrixFormDG<double>* CustomWeakForm::CustomMatrixFormInterface::clone()
 }
 
 double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<double> *u_ext[], Func<double> *v,
-                                                Geom<double> *e, ExtData<double> *ext) const
+                                                Geom<double> *e, Func<double> **ext) const
 {
   double result = 0;
   for (int i = 0; i < n; i++) {
@@ -144,7 +144,7 @@ double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<do
   return result;
 }
 
-Ord CustomWeakForm::CustomVectorFormSurface::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+Ord CustomWeakForm::CustomVectorFormSurface::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const
 {
   Ord result = Ord(0);
   for (int i = 0; i < n; i++)

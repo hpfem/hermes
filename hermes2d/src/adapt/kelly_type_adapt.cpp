@@ -537,16 +537,13 @@ namespace Hermes
         oi[i] = init_fn_ord(this->sln[i]->get_fn_order() + inc);
 
       // Polynomial order of additional external functions.
-      ExtData<Hermes::Ord>* fake_ext = new ExtData<Hermes::Ord>;
-      fake_ext->nf = err_est_form->ext.size();
-      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[fake_ext->nf];
-      for (int i = 0; i < fake_ext->nf; i++)
+      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[err_est_form->ext.size()];
+      for (int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i] = init_fn_ord(err_est_form->ext[i]->get_fn_order());
-      fake_ext->fn = fake_ext_fn;
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext);
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext_fn);
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
@@ -563,8 +560,9 @@ namespace Hermes
       }
       delete [] oi;
       delete fake_e;
-      fake_ext->free_ord();
-      delete fake_ext;
+      for(int i = 0; i < err_est_form->ext.size(); i++)
+        fake_ext_fn[i]->free_ord();
+      delete [] fake_ext_fn;
 
       // eval the form
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
@@ -584,7 +582,6 @@ namespace Hermes
       for (int i = 0; i < this->num; i++)
         ui[i] = init_fn(this->sln[i], order);
 
-      ExtData<Scalar>* ext = new ExtData<Scalar>();
       Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
@@ -593,10 +590,8 @@ namespace Hermes
         else
           ext_fn[i] = NULL;
       }
-      ext->nf = err_est_form->ext.size();
-      ext->fn = ext_fn;
 
-      Scalar res = volumetric_scaling_const * err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+      Scalar res = volumetric_scaling_const * err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext_fn);
 
       for (int i = 0; i < this->num; i++)
       {
@@ -608,11 +603,9 @@ namespace Hermes
       }
       delete [] ui;
 
-      if(ext != NULL)
-      {
-        ext->free();
-        delete ext;
-      }
+      for(int i = 0; i < err_est_form->ext.size(); i++)
+        fake_ext_fn[i]->free_fn();
+      delete [] fake_ext_fn;
 
       e->free();
       delete e;
@@ -633,16 +626,13 @@ namespace Hermes
         oi[i] = init_fn_ord(this->sln[i]->get_edge_fn_order(surf_pos->surf_num) + inc);
 
       // Polynomial order of additional external functions.
-      ExtData<Hermes::Ord>* fake_ext = new ExtData<Hermes::Ord>;
-      fake_ext->nf = err_est_form->ext.size();
-      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[fake_ext->nf];
-      for (int i = 0; i < fake_ext->nf; i++)
+      Func<Hermes::Ord>** fake_ext_fn = new Func<Hermes::Ord>*[err_est_form->ext.size()];
+      for (int i = 0; i < err_est_form->ext.size(); i++)
         fake_ext_fn[i] = init_fn_ord(err_est_form->ext[i]->get_fn_order());
-      fake_ext->fn = fake_ext_fn;
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext);
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext_fn);
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
@@ -658,8 +648,9 @@ namespace Hermes
 
       delete [] oi;
       delete fake_e;
-      fake_ext->free_ord();
-      delete fake_ext;
+      for(int i = 0; i < err_est_form->ext.size(); i++)
+        fake_ext_fn[i]->free_ord();
+      delete [] fake_ext_fn;
 
       // Evaluate the form.
       Quad2D* quad = this->sln[err_est_form->i]->get_quad_2d();
@@ -679,8 +670,6 @@ namespace Hermes
       for (int i = 0; i < this->num; i++)
         ui[i] = init_fn(this->sln[i], eo);
 
-      ExtData<Scalar>* ext = new ExtData<Scalar>;
-      // Copy external functions.
       Func<Scalar>** ext_fn = new Func<Scalar>*[err_est_form->ext.size()];
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
@@ -689,11 +678,9 @@ namespace Hermes
         else
           ext_fn[i] = NULL;
       }
-      ext->nf = err_est_form->ext.size();
-      ext->fn = ext_fn;
 
       Scalar res = boundary_scaling_const *
-        err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext);
+        err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext_fn);
 
       for (int i = 0; i < this->num; i++)
         if(ui[i] != NULL)
@@ -703,11 +690,9 @@ namespace Hermes
         }
 
       delete [] ui;
-      if(ext != NULL)
-      {
-        ext->free();
-        delete ext;
-      }
+      for(int i = 0; i < err_est_form->ext.size(); i++)
+        fake_ext_fn[i]->free_fn();
+      delete [] fake_ext_fn;
 
       e->free();
       delete e;
@@ -731,7 +716,6 @@ namespace Hermes
         slns.push_back(this->sln[i]);
 
       // Determine integration order.
-      ExtData<Hermes::Ord>* fake_ui;
       Func<Hermes::Ord>** fake_ext_fns = new Func<Hermes::Ord>*[err_est_form->ext.size()];
       for (unsigned int j = 0; j < err_est_form->ext.size(); j++)
       {
@@ -741,16 +725,10 @@ namespace Hermes
         fake_ext_fns[j] = new DiscontinuousFunc<Hermes::Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
       }
 
-      fake_ui->fn = fake_ext_fns;
-      fake_ui->nf = err_est_form->ext.size();
-
-      // Polynomial order of additional external functions.
-      // ExtData<Hermes::Ord>* fake_ext = this->dp.init_ext_fns_ord(err_est_form->ext, nbs);
-
       // Polynomial order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
       Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, Hermes::Ord(nbs->neighb_el->get_diameter()));
       double fake_wt = 1.0;
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ui->fn, fake_ui->fn[err_est_form->i], fake_e, NULL);
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ext_fns, fake_ext_fns[err_est_form->i], fake_e, NULL);
 
       int order = rm->get_inv_ref_order();
       order += o.get_order();
@@ -758,13 +736,12 @@ namespace Hermes
       limit_order(order, rm->get_active_element()->get_mode());
 
       // Clean up.
-      if(fake_ui != NULL)
+      for (int i = 0; i < this->num; i++)
       {
-        for (int i = 0; i < this->num; i++)
-          delete fake_ui->fn[i];
-        fake_ui->free_ord();
-        delete fake_ui;
+        fake_ext_fns[i]->free_ord();
+        delete fake_ext_fns[i];
       }
+      delete [] fake_ext_fns;
 
       fake_e->free_ord();
       delete fake_e;
@@ -788,18 +765,17 @@ namespace Hermes
                                                   nbs->neighb_el->get_diameter());
 
       // Function values.
-      ExtData<Scalar>* ui = this->dp.init_ext_fns(slns, neighbor_searches, order, 0);
-      //ExtData<Scalar>* ext = this->dp.init_ext_fns(err_est_form->ext, nbs);
+      Func<Scalar>** ui = this->dp.init_ext_fns(slns, neighbor_searches, order, 0);
 
       Scalar res = interface_scaling_const *
-        err_est_form->value(np, jwt, ui->fn, ui->fn[err_est_form->i], e, NULL);
+        err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, NULL);
 
       if(ui != NULL)
       {
-        ui->free();
-        delete ui;
+        for(unsigned int i = 0; i < slns.size(); i++)
+          ui[i]->free_fn();
+        delete [] ui;
       }
-      //if(ext != NULL) { ext->free(); delete ext; }
 
       e->free();
       delete e;

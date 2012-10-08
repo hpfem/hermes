@@ -81,7 +81,7 @@ namespace Hermes
       /// expected from a continuous function.
       virtual ~Func() { };
 
-      void subtract(const Func<T>& func);
+      void subtract(Func<T>* func);
       void add(T* attribute, T* other_attribute);
 
       int get_num_gip() const;
@@ -101,7 +101,7 @@ namespace Hermes
 
       /// Calculate this += func for each function expations and each integration point.
       /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
-      void add(const Func<T>& func);
+      void add(Func<T>* func);
 
       friend Func<Hermes::Ord>* init_fn_ord(const int order);
       friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
@@ -109,7 +109,6 @@ namespace Hermes
       template<typename Scalar> friend Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order);
 
       template<typename Scalar> friend class DiscontinuousFunc;
-      template<typename Scalar> friend class ExtData;
       template<typename Scalar> friend class Adapt;
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class DiscreteProblem;
@@ -295,37 +294,6 @@ namespace Hermes
     /// Init the solution for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
     HERMES_API Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order);
-
-    /// User defined data that can go to the bilinear and linear forms.
-    /// It also holds arbitraty number of functions, that user can use.
-    /// Typically, these functions are solutions from the previous time/iteration levels.
-    /// @ingroup inner
-    template<typename T>
-    class HERMES_API ExtData
-    {
-    public:
-      Func<T>** fn;     ///< Array of pointers to functions.
-      int get_nf() { return nf; };
-    private:
-      int nf;           ///< Number of functions in 'fn' array.
-
-      /// Constructor.
-      ExtData();
-
-      /// Deallocation for numerical types.
-      void free();
-
-      /// Deallocation for integration order.
-      void free_ord();
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemLinear;
-      template<typename Scalar> friend class InterfaceGeom;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class BasicKellyAdapt;
-      friend class ErrorEstimatorFormKelly;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class OGProjection;
-    };
   }
 }
 #endif

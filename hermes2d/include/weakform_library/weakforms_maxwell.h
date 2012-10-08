@@ -40,10 +40,10 @@ namespace Hermes
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-          Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const;
+          Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         // This is to make the form usable in rk_time_step_newton().
         virtual MatrixFormVol<Scalar>* clone();
@@ -69,10 +69,10 @@ namespace Hermes
           GeomType gt = HERMES_PLANAR, int order_increase = 3);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const;
+          Geom<double> *e, Func<Scalar> **ext) const;
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         // This is to make the form usable in rk_time_step_newton().
         virtual VectorFormVol<Scalar>* clone();

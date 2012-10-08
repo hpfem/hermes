@@ -453,7 +453,7 @@ namespace Hermes
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
     {
       SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
@@ -464,7 +464,7 @@ namespace Hermes
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
     {
       SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
@@ -476,7 +476,7 @@ namespace Hermes
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
     {
       SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
@@ -487,7 +487,7 @@ namespace Hermes
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
     {
       throw Hermes::Exceptions::Exception("hdiv error form not implemented yet in hdiv.h.");
 
@@ -502,7 +502,7 @@ namespace Hermes
     template<typename Scalar>
     template<typename TestFunctionDomain, typename SolFunctionDomain>
     SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
     {
       SolFunctionDomain result = SolFunctionDomain(0);
       for (int i = 0; i < n; i++)
@@ -514,7 +514,7 @@ namespace Hermes
     template<typename Scalar>
     Scalar Adapt<Scalar>::MatrixFormVolError::value(int n, double *wt, Func<Scalar> *u_ext[],
       Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e,
-      ExtData<Scalar> *ext) const
+      Func<Scalar> **ext) const
     {
       switch (projNormType)
       {
@@ -537,7 +537,7 @@ namespace Hermes
     template<typename Scalar>
     Hermes::Ord Adapt<Scalar>::MatrixFormVolError::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
       Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
-      ExtData<Hermes::Ord> *ext) const
+      Func<Ord> **ext) const
     {
       switch (projNormType)
       {
@@ -867,8 +867,8 @@ namespace Hermes
       Func<Scalar>* v1 = init_fn(rsln1, order);
       Func<Scalar>* v2 = init_fn(rsln2, order);
 
-      err1->subtract(*v1);
-      err2->subtract(*v2);
+      err1->subtract(v1);
+      err2->subtract(v2);
 
       Scalar res = form->value(np, jwt, NULL, err1, err2, e, NULL);
 

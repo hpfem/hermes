@@ -85,7 +85,6 @@ namespace Hermes
       ///   - Func\<Scalar\> *u[],   ... all solution components
       ///   - Func\<double\> *u,     ... currently processed solution component
       ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
-      ///   - ExtData\<Scalar\> *ext ... external functions (currently unused).
       ///
       class HERMES_API ErrorEstimatorForm : public Form<Scalar>
       {
@@ -103,7 +102,7 @@ namespace Hermes
         /// Value calculation.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
                              Func<Scalar> *u, Geom<double> *e,
-                             ExtData<Scalar> *ext) const
+                             Func<Scalar> **ext) const
         {
           throw Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::value()");
           return 0.0;
@@ -112,7 +111,7 @@ namespace Hermes
         /// Integration order.
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
                                 Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
-                                ExtData<Hermes::Ord> *ext) const
+                                Func<Ord> **ext) const
         {
           throw Exceptions::FunctionNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::ord().");
           return Hermes::Ord();
@@ -320,7 +319,7 @@ namespace Hermes
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
                              Func<Scalar> *u, Geom<double> *e,
-                             ExtData<Scalar> *ext) const
+                             Func<Scalar> **ext) const
         {
           Scalar result = 0.;
           for (int i = 0; i < n; i++)
@@ -331,7 +330,7 @@ namespace Hermes
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
                                 Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
-                                ExtData<Hermes::Ord> *ext) const
+                                Func<Ord> **ext) const
         {
           return Hermes::sqr( (u->get_dx_central(0) - u->get_dx_neighbor(0)) +
                               (u->get_dy_central(0) - u->get_dy_neighbor(0)) );

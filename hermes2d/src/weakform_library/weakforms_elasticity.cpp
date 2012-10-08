@@ -40,7 +40,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+        Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         return (lambda + 2*mu) * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
           mu * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
@@ -48,7 +48,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultJacobianElasticity_0_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         return (lambda + 2*mu) * int_dudx_dvdx<Ord, Ord>(n, wt, u, v) +
           mu * int_dudy_dvdy<Ord, Ord>(n, wt, u, v);
@@ -79,7 +79,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+        Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         return lambda * int_dudy_dvdx<double, Scalar>(n, wt, u, v) +
           mu * int_dudx_dvdy<double, Scalar>(n, wt, u, v);
@@ -87,7 +87,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultJacobianElasticity_0_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-        Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+        Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const
       {
         return lambda * int_dudy_dvdx<Ord, Ord>(n, wt, u, v) +
           mu * int_dudx_dvdy<Ord, Ord>(n, wt, u, v);
@@ -116,7 +116,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_0_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         return (2*mu + lambda) * int_dudx_dvdx<Scalar, double>(n, wt, u_ext[0], v) +
           mu * int_dudy_dvdy<Scalar, double>(n, wt, u_ext[0], v);
@@ -124,7 +124,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualElasticity_0_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         return (2*mu + lambda) * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[0], v) +
           mu * int_dudy_dvdy<Ord, Ord>(n, wt, u_ext[0], v);
@@ -153,7 +153,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_0_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         return lambda * int_dudy_dvdx<double, Scalar>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdy<double, Scalar>(n, wt, u_ext[1], v);
@@ -161,7 +161,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualElasticity_0_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         return lambda * int_dudy_dvdx<Ord, Ord>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdy<Ord, Ord>(n, wt, u_ext[1], v);
@@ -190,7 +190,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_1_0<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         return mu * int_dudy_dvdx<double, Scalar>(n, wt, u_ext[0], v) +
           lambda * int_dudx_dvdy<double, Scalar>(n, wt, u_ext[0], v);
@@ -198,7 +198,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualElasticity_1_0<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         return mu * int_dudy_dvdx<Ord, Ord>(n, wt, u_ext[0], v) +
           lambda * int_dudx_dvdy<Ord, Ord>(n, wt, u_ext[0], v);
@@ -227,7 +227,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         return (2*mu + lambda) * int_dudy_dvdy<double, Scalar>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdx<double, Scalar>(n, wt, u_ext[1], v);
@@ -235,7 +235,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualElasticity_1_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         return (2*mu + lambda) * int_dudy_dvdy<Ord, Ord>(n, wt, u_ext[1], v) +
           mu * int_dudx_dvdx<Ord, Ord>(n, wt, u_ext[1], v);
@@ -264,7 +264,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultJacobianElasticity_1_1<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+        Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         return  mu * int_dudx_dvdx<double, Scalar>(n, wt, u, v) +
           (lambda + 2*mu) * int_dudy_dvdy<double, Scalar>(n, wt, u, v);
@@ -272,7 +272,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultJacobianElasticity_1_1<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         return  mu * int_dudx_dvdx<Ord, Ord>(n, wt, u, v) +
           (lambda + 2*mu) * int_dudy_dvdy<Ord, Ord>(n, wt, u, v);

@@ -42,28 +42,29 @@ namespace Hermes
     }
 
     template<typename T>
-    void Func<T>::subtract(const Func<T>& func)
+    void Func<T>::subtract(Func<T>* func)
     {
-      if(num_gip != func.num_gip)
-        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
-      if(nc != func.nc)
-        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
+      if(num_gip != func->num_gip)
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of integration points (this: %d, other: %d)", num_gip, func->num_gip);
+      if(nc != func->nc)
+        throw Hermes::Exceptions::Exception("Unable to subtract a function due to a different number of components (this: %d, other: %d)", nc, func->nc);
 
-      subtract(this->val, func.val);
-      subtract(this->dx, func.dx);
-      subtract(this->dy, func.dy);
-      // The following function checks that laplace != NULL.
-      subtract(this->laplace, func.laplace);
+      subtract(this->val, func->val);
+      subtract(this->dx, func->dx);
+      subtract(this->dy, func->dy);
+      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+        subtract(this->laplace, func->laplace);
+      
       if(nc > 1)
       {
-        subtract(this->val0, func.val0);
-        subtract(this->val1, func.val1);
-        subtract(this->dx0, func.dx0);
-        subtract(this->dx1, func.dx1);
-        subtract(this->dy0, func.dy0);
-        subtract(this->dy1, func.dy1);
-        subtract(this->curl, func.curl);
-        subtract(this->div, func.div);
+        subtract(this->val0, func->val0);
+        subtract(this->val1, func->val1);
+        subtract(this->dx0, func->dx0);
+        subtract(this->dx1, func->dx1);
+        subtract(this->dy0, func->dy0);
+        subtract(this->dy1, func->dy1);
+        subtract(this->curl, func->curl);
+        subtract(this->div, func->div);
       }
     };
 
@@ -84,28 +85,30 @@ namespace Hermes
     }
 
     template<typename T>
-    void Func<T>::add(const Func<T>& func)
+    void Func<T>::add(Func<T>* func)
     {
-      if(num_gip != func.num_gip)
-        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", num_gip, func.num_gip);
-      if(nc != func.nc)
-        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of components (this: %d, other: %d)", nc, func.nc);
+      if(num_gip != func->num_gip)
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of integration points (this: %d, other: %d)", num_gip, func->num_gip);
+      if(nc != func->nc)
+        throw Hermes::Exceptions::Exception("Unable to add a function due to a different number of components (this: %d, other: %d)", nc, func->nc);
 
-      add(this->val, func.val);
-      add(this->dx, func.dx);
-      add(this->dy, func.dy);
-      // The following function checks that laplace != NULL.
-      add(this->laplace, func.laplace);
+      add(this->val, func->val);
+      add(this->dx, func->dx);
+      add(this->dy, func->dy);
+
+      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+        add(this->laplace, func->laplace);
+      
       if(nc > 1)
       {
-        add(this->val0, func.val0);
-        add(this->val1, func.val1);
-        add(this->dx0, func.dx0);
-        add(this->dx1, func.dx1);
-        add(this->dy0, func.dy0);
-        add(this->dy1, func.dy1);
-        add(this->curl, func.curl);
-        add(this->div, func.div);
+        add(this->val0, func->val0);
+        add(this->val1, func->val1);
+        add(this->dx0, func->dx0);
+        add(this->dx1, func->dx1);
+        add(this->dy0, func->dy0);
+        add(this->dy1, func->dy1);
+        add(this->curl, func->curl);
+        add(this->div, func->div);
       }
     };
 
@@ -284,30 +287,6 @@ namespace Hermes
       delete [] x;    delete [] y;
       delete [] tx;    delete [] ty;
       delete [] nx;    delete [] ny;
-    }
-
-    template<typename T>
-    ExtData<T>::ExtData()
-    {
-      nf = 0;
-      fn = NULL;
-    }
-
-    template<typename T>
-    void ExtData<T>::free()
-    {
-      for (int i = 0; i < nf; i++)
-      {
-        fn[i]->free_fn();
-        delete fn[i];
-      }
-      delete [] fn;
-    }
-
-    template<typename T>
-    void ExtData<T>::free_ord()
-    {
-      delete [] fn;
     }
 
     template<typename T>

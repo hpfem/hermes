@@ -204,17 +204,17 @@ namespace Hermes
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
-      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
-      void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext);
+      void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates external functions.
-      void init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      void init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, Func<Scalar>** ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext.
-      void deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext);
+      void deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, Func<Scalar>** ext);
 
       /// Init function. Common code for the constructors.
       void init();

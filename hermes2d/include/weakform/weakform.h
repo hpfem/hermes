@@ -43,7 +43,6 @@ namespace Hermes
     class Shapeset;
     template<typename T> class Func;
     template<typename T> class Geom;
-    template<typename T> class ExtData;
 
     template<typename Scalar> class Form;
     template<typename Scalar> class MatrixFormVol;
@@ -238,10 +237,10 @@ namespace Hermes
       SymFlag sym;
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const;
+        Geom<double> *e, Func<Scalar> **ext) const;
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const;
+        Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
     };
 
     template<typename Scalar>
@@ -293,10 +292,10 @@ namespace Hermes
       virtual ~VectorForm() {};
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const;
+        Geom<double> *e, Func<Scalar> **ext) const;
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
-        ExtData<Hermes::Ord> *ext) const;
+        Func<Ord> **ext) const;
       unsigned int i;
     };
 

@@ -131,7 +131,7 @@ public:
     }
 
     virtual std::complex<double> value(int n, double *wt, Func<std::complex<double> > *u_ext[], 
-      Func<double> *v, Geom<double> *e, ExtData<std::complex<double> > *ext) const 
+      Func<double> *v, Geom<double> *e, Func<std::complex<double> > **ext) const 
     {
       std::complex<double> result = 0;
 #pragma omp critical (jv)
@@ -154,7 +154,7 @@ public:
     }
 
     virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-      Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const 
+      Geom<Hermes::Ord> *e, Func<Ord> **ext) const 
     {
       return Hermes::Ord(10);
     }

@@ -59,7 +59,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultMatrixFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+        Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
         if(gt == HERMES_PLANAR)
@@ -73,7 +73,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultMatrixFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
         if(gt == HERMES_PLANAR)
@@ -131,7 +131,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultJacobianCurlCurl<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+        Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
         if(gt == HERMES_PLANAR)
@@ -145,7 +145,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultJacobianCurlCurl<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
         if(gt == HERMES_PLANAR)
@@ -205,7 +205,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultVectorFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar int_v0 = 0, int_v1 = 0;
         for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
@@ -215,7 +215,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultVectorFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord int_v0 = Ord(0), int_v1 = Ord(0);
         for (int i = 0; i < n; i++) int_v0 += wt[i] * v->val0[i];
@@ -265,7 +265,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
         if(gt == HERMES_PLANAR)
@@ -283,7 +283,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
         if(gt == HERMES_PLANAR)
@@ -340,7 +340,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualCurlCurl<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Func<Scalar>* u_prev = u_ext[idx_i];
         Scalar result = 0;
@@ -362,7 +362,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualCurlCurl<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Func<Ord>* u_prev = u_ext[idx_i];
         Ord result = Ord(0);
@@ -420,7 +420,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultMatrixFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
         if(gt == HERMES_PLANAR)
@@ -434,7 +434,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultMatrixFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u,
-        Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+        Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
         if(gt == HERMES_PLANAR)
@@ -484,7 +484,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
         if(gt == HERMES_PLANAR)
@@ -501,7 +501,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[],
-        Func<Ord> *v, Geom<Ord> *e, ExtData<Ord> *ext) const
+        Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
         if(gt == HERMES_PLANAR)
@@ -553,7 +553,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultVectorFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
         if(gt == HERMES_PLANAR)
@@ -570,7 +570,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultVectorFormSurf<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord result = Ord(0);
         if(gt == HERMES_PLANAR)

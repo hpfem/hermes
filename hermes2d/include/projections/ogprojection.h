@@ -98,7 +98,7 @@ namespace Hermes
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const
+          Geom<double> *e, Func<Scalar> **ext) const
         {
           switch (projNormType)
           {
@@ -119,7 +119,7 @@ namespace Hermes
         }
 
         Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const
         {
           switch (projNormType)
           {
@@ -149,7 +149,7 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
-          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
@@ -159,7 +159,7 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_semi_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
-          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
@@ -169,7 +169,7 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain l2_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
-          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
@@ -179,7 +179,7 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain hcurl_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
-          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
@@ -191,7 +191,7 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain hdiv_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
-          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext)
+          Func<TestFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
@@ -214,7 +214,7 @@ namespace Hermes
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-          Geom<double> *e, ExtData<Scalar> *ext) const
+          Geom<double> *e, Func<Scalar> **ext) const
         {
           switch (projNormType)
           {
@@ -235,7 +235,7 @@ namespace Hermes
         }
 
         Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
-          Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
+          Geom<Hermes::Ord> *e, Func<Ord> **ext) const
         {
           switch (projNormType)
           {
@@ -265,46 +265,46 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
-          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
+          Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
-            result += wt[i] * ((ext->fn[0]->val[i]) * v->val[i]
-          + (ext->fn[0]->dx[i]) * v->dx[i]
-          + (ext->fn[0]->dy[i]) * v->dy[i]);
+            result += wt[i] * ((ext[0]->val[i]) * v->val[i]
+          + (ext[0]->dx[i]) * v->dx[i]
+          + (ext[0]->dy[i]) * v->dy[i]);
           return result;
         }
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain h1_semi_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
-          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
+          Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
-            result += wt[i] * ((ext->fn[0]->dx[i]) * v->dx[i]
-          + (ext->fn[0]->dy[i]) * v->dy[i]);
+            result += wt[i] * ((ext[0]->dx[i]) * v->dx[i]
+          + (ext[0]->dy[i]) * v->dy[i]);
           return result;
         }
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain l2_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
-          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
+          Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++)
-            result += wt[i] * (ext->fn[0]->val[i]) * v->val[i];
+            result += wt[i] * (ext[0]->val[i]) * v->val[i];
           return result;
         }
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain hcurl_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
-          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
+          Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
-            result += wt[i] * (ext->fn[0]->curl[i]) * conj(v->curl[i]);
-            result += wt[i] * ((ext->fn[0]->val0[i]) * conj(v->val0[i])
-              + (ext->fn[0]->val1[i]) * conj(v->val1[i]));
+            result += wt[i] * (ext[0]->curl[i]) * conj(v->curl[i]);
+            result += wt[i] * ((ext[0]->val0[i]) * conj(v->val0[i])
+              + (ext[0]->val1[i]) * conj(v->val1[i]));
           }
 
           return result;
@@ -312,13 +312,13 @@ namespace Hermes
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain hdiv_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
-          Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext) const
+          Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext) const
         {
           SolFunctionDomain result = SolFunctionDomain(0);
           for (int i = 0; i < n; i++) {
-            result += wt[i] * (ext->fn[0]->div[i]) * conj(v->div[i]);
-            result += wt[i] * ((ext->fn[0]->val0[i]) * conj(v->val0[i])
-              + (ext->fn[0]->val1[i]) * conj(v->val1[i]));
+            result += wt[i] * (ext[0]->div[i]) * conj(v->div[i]);
+            result += wt[i] * ((ext[0]->val0[i]) * conj(v->val0[i])
+              + (ext[0]->val1[i]) * conj(v->val1[i]));
           }
 
           return result;

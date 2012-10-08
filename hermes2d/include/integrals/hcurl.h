@@ -53,13 +53,13 @@ namespace Hermes
       }
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         return int_e_f<double, Scalar>(n, wt, u, v);
       }
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
-        Geom<Hermes::Ord> *e, ExtData<Hermes::Ord> *ext) const
+        Geom<Hermes::Ord> *e, Func<Ord> **ext) const
       {
         return int_e_f<Hermes::Ord, Hermes::Ord>(n, wt, u, v);
       }

@@ -56,7 +56,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultJacobianMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-        Func<double> *v, Geom<double> *e, ExtData<Scalar> *ext) const
+        Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar planar_part = 0;
         Scalar axisym_part = 0;
@@ -100,7 +100,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultJacobianMagnetostatics<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord planar_part(0);
         for (int i = 0; i < n; i++)
@@ -153,7 +153,7 @@ namespace Hermes
 
       template<typename Scalar>
       Scalar DefaultResidualMagnetostatics<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
-        Geom<double> *e, ExtData<Scalar> *ext) const
+        Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar planar_part = 0;
         Scalar axisym_part = 0;
@@ -172,7 +172,7 @@ namespace Hermes
 
       template<typename Scalar>
       Ord DefaultResidualMagnetostatics<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
-        Geom<Ord> *e, ExtData<Ord> *ext) const
+        Geom<Ord> *e, Func<Ord> **ext) const
       {
         Ord planar_part(0);
         for (int i = 0; i < n; i++)

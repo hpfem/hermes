@@ -1743,8 +1743,8 @@ namespace Hermes
       {
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        ExtData<Hermes::Ord> ext_ord;
-        init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext, current_state);
+        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[form->ext.size()];
+        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
         int max_order_j = this->spaces[form->j]->get_element_order(current_state->e[form->j]->id);
@@ -1772,12 +1772,12 @@ namespace Hermes
         Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
 
         // Total order of the vector form.
-        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, &ext_ord);
+        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, ext_ord);
 
         adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
         // Cleanup.
-        deinit_ext_orders(form, u_ext_ord, &ext_ord);
+        deinit_ext_orders(form, u_ext_ord, ext_ord);
         delete [] u_ext_ord;
         ou->free_ord();
         delete ou;
@@ -1802,13 +1802,13 @@ namespace Hermes
 
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-      ExtData<Scalar> ext;
-      init_ext(form, u_ext, &ext, order, current_u_ext, current_state);
+      Func<Scalar>** ext = new Func<Scalar>*[form->ext.size()];
+      init_ext(form, u_ext, ext, order, current_u_ext, current_state);
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+          u_ext[ext_i]->add(ext[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // Init geometry.
       int n_quadrature_points;
@@ -1843,9 +1843,9 @@ namespace Hermes
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
             }
           }
         }
@@ -1865,7 +1865,7 @@ namespace Hermes
               Func<double>* u = base_fns[j];
               Func<double>* v = test_fns[i];
 
-              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
 
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
@@ -1888,7 +1888,7 @@ namespace Hermes
       }
 
       // Cleanup.
-      deinit_ext(form, u_ext, &ext);
+      deinit_ext(form, u_ext, ext);
       delete [] local_stiffness_matrix;
       delete [] jacobian_x_weights;
       geometry->free();
@@ -1911,13 +1911,13 @@ namespace Hermes
 
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-      ExtData<Scalar> ext;
-      init_ext(form, u_ext, &ext, order, current_u_ext, current_state);
+      Func<Scalar>** ext = new Func<Scalar>*[form->ext.size()];
+      init_ext(form, u_ext, ext, order, current_u_ext, current_state);
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+          u_ext[ext_i]->add(ext[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -1943,9 +1943,9 @@ namespace Hermes
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
             }
           }
         }
@@ -1965,7 +1965,7 @@ namespace Hermes
               Func<double>* u = base_fns[j];
               Func<double>* v = test_fns[i];
 
-              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, &ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
@@ -1988,7 +1988,7 @@ namespace Hermes
       }
 
       // Cleanup.
-      deinit_ext(form, u_ext, &ext);
+      deinit_ext(form, u_ext, ext);
       delete [] local_stiffness_matrix;
     }
 
@@ -2003,8 +2003,8 @@ namespace Hermes
       {
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        ExtData<Hermes::Ord> ext_ord;
-        init_ext_orders(form, u_ext_ord, &ext_ord, current_u_ext, current_state);
+        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[form->ext.size()];
+        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
         int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
@@ -2022,12 +2022,12 @@ namespace Hermes
         Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
 
         // Total order of the vector form.
-        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, &ext_ord);
+        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, ext_ord);
 
         adjust_order_to_refmaps(form, order, &o, current_refmaps);
 
         // Cleanup.
-        deinit_ext_orders(form, u_ext_ord, &ext_ord);
+        deinit_ext_orders(form, u_ext_ord, ext_ord);
         delete [] u_ext_ord;
         ov->free_ord();
         delete ov;
@@ -2052,13 +2052,13 @@ namespace Hermes
 
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-      ExtData<Scalar> ext;
-      init_ext(form, u_ext, &ext, order, current_u_ext, current_state);
+      Func<Scalar>** ext = new Func<Scalar>*[form->ext.size()];
+      init_ext(form, u_ext, ext, order, current_u_ext, current_state);
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+          u_ext[ext_i]->add(ext[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
@@ -2074,15 +2074,15 @@ namespace Hermes
 
         Scalar val;
         if(surface_form)
-          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
+          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, ext) * form->scaling_factor * current_als[form->i]->coef[i];
         else
-          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als[form->i]->coef[i];
+          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, ext) * form->scaling_factor * current_als[form->i]->coef[i];
 
         current_rhs->add(current_als[form->i]->dof[i], val);
       }
 
       // Cleanup.
-      deinit_ext(form, u_ext, &ext);
+      deinit_ext(form, u_ext, ext);
       delete [] jacobian_x_weights;
       geometry->free();
       delete geometry;
@@ -2096,13 +2096,13 @@ namespace Hermes
 
       // Init external functions.
       Func<Scalar>** u_ext = new Func<Scalar>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-      ExtData<Scalar> ext;
-      init_ext(form, u_ext, &ext, order, current_u_ext, current_state);
+      Func<Scalar>** ext = new Func<Scalar>*[form->ext.size()];
+      init_ext(form, u_ext, ext, order, current_u_ext, current_state);
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(*ext.fn[form->ext.size() - this->RK_original_spaces_count + ext_i]);
+          u_ext[ext_i]->add(ext[form->ext.size() - this->RK_original_spaces_count + ext_i]);
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -2118,15 +2118,15 @@ namespace Hermes
 
         Scalar val;
         if(surface_form)
-          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als_i->coef[i];
+          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, ext) * form->scaling_factor * current_als_i->coef[i];
         else
-          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, &ext) * form->scaling_factor * current_als_i->coef[i];
+          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, ext) * form->scaling_factor * current_als_i->coef[i];
 
         current_rhs->add(current_als_i->dof[i], val);
       }
 
       // Cleanup.
-      deinit_ext(form, u_ext, &ext);
+      deinit_ext(form, u_ext, ext);
     }
 
     template<typename Scalar>
@@ -2169,7 +2169,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    void DiscreteProblem<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
@@ -2187,18 +2187,15 @@ namespace Hermes
         for(int i = 0; i < prev_size; i++)
           oi[i] = init_fn_ord(0);
 
-      oext->nf = form->ext.size();
-      if(oext->nf > 0)
-        oext->fn = new Func<Hermes::Ord>*[oext->nf];
-      for (int i = 0; i < oext->nf; i++)
+      for (int i = 0; i < form->ext.size(); i++)
         if(surface_form)
-          oext->fn[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+          oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
         else
-          oext->fn[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+          oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, ExtData<Hermes::Ord>* oext)
+    void DiscreteProblem<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext)
     {
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       for(int i = 0; i < prev_size; i++)
@@ -2207,19 +2204,18 @@ namespace Hermes
         delete oi[i];
       }
 
-      oext->nf = form->ext.size();
-      for (int i = 0; i < oext->nf; i++)
+      for (int i = 0; i < form->ext.size(); i++)
       {
-        oext->fn[i]->free_ord();
-        delete oext->fn[i];
+        oext[i]->free_ord();
+        delete oext[i];
       }
 
-      if(oext->nf > 0)
-        delete [] oext->fn;
+      if(form->ext.size() > 0)
+        delete [] oext;
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    void DiscreteProblem<Scalar>::init_ext(Form<Scalar> *form, Func<Scalar>** u_ext, Func<Scalar>** ext, int order, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
 
@@ -2233,19 +2229,17 @@ namespace Hermes
         for(int i = 0; i < prev_size; i++)
           u_ext[i] = NULL;
 
-      ext->nf = form->ext.size();
-      ext->fn = new Func<Scalar>*[ext->nf];
-      for (unsigned i = 0; i < ext->nf; i++)
+      for (unsigned i = 0; i < form->ext.size(); i++)
       {
         if(form->ext[i] != NULL)
-          ext->fn[i] = init_fn(form->ext[i], order);
+          ext[i] = init_fn(form->ext[i], order);
         else
-          ext->fn[i] = NULL;
+          ext[i] = NULL;
       }
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, ExtData<Scalar>* ext)
+    void DiscreteProblem<Scalar>::deinit_ext(Form<Scalar> *form, Func<Scalar>** u_ext, Func<Scalar>** ext)
     {
       // Values of the previous Newton iteration, shape functions
       // and external functions in quadrature points.
@@ -2263,8 +2257,15 @@ namespace Hermes
 
         delete [] u_ext;
 
-        if(ext != NULL)
-          ext->free();
+        for(int i = 0; i < form->ext.size(); i++)
+        if(ext[i] != NULL)
+        {
+          ext[i]->free_fn();
+          delete ext[i];
+        }
+
+      if(form->ext.size() > 0)
+        delete [] ext;
     }
 
     template<typename Scalar>
@@ -2591,7 +2592,7 @@ namespace Hermes
             for (int i = 0; i < prev_size; i++)
               prev[i] = NULL;
 
-          ExtData<Scalar>* ext = init_ext_fns(mfs->ext, neighbor_searches, order, min_dg_mesh_seq);
+          Func<Scalar>** ext = init_ext_fns(mfs->ext, neighbor_searches, order, min_dg_mesh_seq);
 
           // Precalc shapeset and refmaps used for the evaluation.
           PrecalcShapeset* fu;
@@ -2679,8 +2680,9 @@ namespace Hermes
 
           if(ext != NULL)
           {
-            ext->free();
-            delete ext;
+            for(unsigned int i = 0; i < mfs->ext.size(); i++)
+              ext[i]->free_fn();
+            delete [] ext;
           }
 
           e->free();
@@ -2708,7 +2710,7 @@ namespace Hermes
           if(!form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
             continue;
 
-          ExtData<Scalar>* ext = init_ext_fns(vfs->ext, neighbor_searches, order, min_dg_mesh_seq);
+          Func<Scalar>** ext = init_ext_fns(vfs->ext, neighbor_searches, order, min_dg_mesh_seq);
 
           NeighborSearch<Scalar>* nbs_v = (neighbor_searches.get(spaces[m]->get_mesh()->get_seq() - min_dg_mesh_seq));
 
@@ -2768,8 +2770,9 @@ namespace Hermes
 
           if(ext != NULL)
           {
-            ext->free();
-            delete ext;
+            for(unsigned int i = 0; i < vfs->ext.size(); i++)
+              ext[i]->free_fn();
+            delete [] ext;
           }
 
           e->free();
@@ -2800,7 +2803,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ExtData<Scalar>* DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
+    Func<Scalar>** DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int order, unsigned int min_dg_mesh_seq)
     {
       Func<Scalar>** ext_fns = new Func<Scalar>*[ext.size()];
@@ -2810,11 +2813,7 @@ namespace Hermes
         ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(ext[j]);
       }
 
-      ExtData<Scalar>* ext_data = new ExtData<Scalar>;
-      ext_data->fn = ext_fns;
-      ext_data->nf = ext.size();
-
-      return ext_data;
+      return ext_fns;
     }
 
     template<typename Scalar>

@@ -75,12 +75,12 @@ namespace Hermes
         /// Error bilinear form callback function.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
           Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e,
-          ExtData<Scalar> *ext) const;
+          Func<Scalar> **ext) const;
 
         /// Error bilinear form to estimate order of a function.
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
           Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
-          ExtData<Hermes::Ord> *ext) const;
+          Func<Ord> **ext) const;
 
         virtual MatrixFormVol<Scalar>* clone();
 
@@ -91,27 +91,27 @@ namespace Hermes
         /// L2 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext);
 
         /// H1 error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext);
 
         /// H1-seminorm error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext);
 
         /// H-div error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext);
 
         /// H-curl error form.
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, ExtData<SolFunctionDomain> *ext);
+          Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext);
       };
 
       /// Sets user defined bilinear form which is used to calculate error.

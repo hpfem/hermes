@@ -62,7 +62,7 @@ int main(int argc, char* args[])
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
-  mloader.load("square-triangular.mesh", &mesh);
+  mloader.load("square.mesh", &mesh);
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++) mesh.refine_all_elements();
