@@ -53,7 +53,8 @@ namespace Hermes
     template<typename Scalar>
     WeakForm<Scalar>* WeakForm<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("WeakForm<Scalar>::clone");
+      this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
+      return new WeakForm(this->neq, this->is_matfree);
     }
 
     template<typename Scalar>
