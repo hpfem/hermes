@@ -11,6 +11,7 @@ class CustomWeakForm : public WeakForm<double>
 {
 public:
   CustomWeakForm(std::string left_bottom_bnd_part, Mesh* mesh);
+  WeakForm<double>* clone() const;
 
 private:
   class CustomMatrixFormVol : public MatrixFormVol<double>

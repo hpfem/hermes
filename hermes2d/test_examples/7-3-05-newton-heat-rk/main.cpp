@@ -58,7 +58,7 @@ MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded,
 //   Implicit_DIRK_ISMAIL_7_45_embedded.
 
-ButcherTableType butcher_table_type = Implicit_SDIRK_2_2;
+ButcherTableType butcher_table_type = Explicit_RK_1;
 
 // Problem parameters.
 const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).

@@ -61,19 +61,37 @@ namespace Hermes
     void WeakForm<Scalar>::cloneMembers(const WeakForm<Scalar>* otherWf)
     {
       for(unsigned int i = 0; i < otherWf->mfvol.size(); i++)
+      {
         this->mfvol.push_back(otherWf->mfvol[i]->clone());
+        this->mfvol.back()->wf = this;
+      }
       for(unsigned int i = 0; i < otherWf->mfsurf.size(); i++)
+      {
         this->mfsurf.push_back(otherWf->mfsurf[i]->clone());
+        this->mfsurf.back()->wf = this;
+      }
       for(unsigned int i = 0; i < otherWf->mfDG.size(); i++)
+      {
         this->mfDG.push_back(otherWf->mfDG[i]->clone());
+        this->mfDG.back()->wf = this;
+      }
       for(unsigned int i = 0; i < otherWf->vfvol.size(); i++)
+      {
         this->vfvol.push_back(otherWf->vfvol[i]->clone());
+        this->vfvol.back()->wf = this;
+      }
       for(unsigned int i = 0; i < otherWf->vfsurf.size(); i++)
+      {
         this->vfsurf.push_back(otherWf->vfsurf[i]->clone());
+        this->vfsurf.back()->wf = this;
+      }
       for(unsigned int i = 0; i < otherWf->vfDG.size(); i++)
+      {
         this->vfDG.push_back(otherWf->vfDG[i]->clone());
+        this->vfDG.back()->wf = this;
+      }
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
-      this->ext.push_back(otherWf->ext[i]->clone());
+        this->ext.push_back(otherWf->ext[i]->clone());
       this->is_matfree = otherWf->is_matfree;
       this->neq = otherWf->neq;
       this->seq = otherWf->seq;

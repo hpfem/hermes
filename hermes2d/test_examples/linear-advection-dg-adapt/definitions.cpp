@@ -9,6 +9,11 @@ CustomWeakForm::CustomWeakForm(std::string left_bottom_bnd_part, Mesh* mesh) : W
     add_vector_form_surf(new CustomVectorFormSurface(0, left_bottom_bnd_part));
 }
 
+WeakForm<double>* CustomWeakForm::clone() const
+{
+  return new CustomWeakForm(*this);
+}
+
 template<typename Real, typename Scalar>
 Scalar CustomWeakForm::CustomMatrixFormVol::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, Func<Real> *v,
                                                   Geom<Real> *e, Func<Scalar> **ext) const

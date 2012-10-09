@@ -18,7 +18,7 @@
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
-const int P_INIT = 4;                             // Uniform polynomial degree of mesh elements.
+const int P_INIT = 5;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 
 // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
@@ -71,11 +71,6 @@ int main(int argc, char* argv[])
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, &space);
-  newton.output_matrix();
-  newton.output_rhs(1);
-  newton.set_matrix_filename("asdf");
-  newton.set_rhs_E_matrix_dump_format(Hermes::Algebra::DF_HERMES_BIN);
-  newton.set_matrix_varname("aasdfgasdasdggasdgas");
 
   Hermes::Hermes2D::Space<double>* ref_space = Hermes::Hermes2D::Space<double>::construct_refined_space(&space, 1, *sranda);
 

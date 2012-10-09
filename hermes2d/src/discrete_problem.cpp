@@ -930,10 +930,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat,
-      Vector<Scalar>* rhs,
-      bool force_diagonal_blocks,
-      Table* block_weights)
+    void DiscreteProblem<Scalar>::assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, bool force_diagonal_blocks, Table* block_weights)
     {
       // Initial check of meshes and spaces.
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
@@ -1416,7 +1413,7 @@ namespace Hermes
       // - order
       int order = this->cache_records_sub_idx[rep_space_i][current_state->e[rep_space_i]->id]->find(current_state->sub_idx[rep_space_i])->second->order;
       // - u_ext
-      int prevNewtonSize = RungeKutta ? RK_original_spaces_count : this->wf->get_neq();
+      int prevNewtonSize = this->wf->get_neq();
       Func<Scalar>** u_ext = new Func<Scalar>*[prevNewtonSize];
       if(current_u_ext != NULL)
         for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
@@ -1442,6 +1439,7 @@ namespace Hermes
         {
           if(!form_to_be_assembled(current_wf->mfvol[current_mfvol_i], current_state))
             continue;
+
           int form_i = current_wf->mfvol[current_mfvol_i]->i;
           int form_j = current_wf->mfvol[current_mfvol_i]->j;
           CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
@@ -1670,108 +1668,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Func<Scalar>** ext, Func<Scalar>** u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
-    {
-      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
-
-      double block_scaling_coef = this->block_scaling_coeff(form);
-
-      bool tra = (form->i != form->j) && (form->sym != 0);
-      bool sym = (form->i == form->j) && (form->sym == 1);
-
-      // Assemble the local stiffness matrix for the form form.
-      Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als[form->i]->cnt, current_als[form->j]->cnt));
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(ext[form->wf->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // Init geometry.
-      int n_quadrature_points;
-      Geom<double>* geometry = NULL;
-      double* jacobian_x_weights = NULL;
-      if(surface_form)
-        n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state, geometry, jacobian_x_weights);
-      else
-        n_quadrature_points = init_geometry_points(current_refmaps[form->i], order, geometry, jacobian_x_weights);
-
-      // Actual form-specific calculation.
-      for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
-      {
-        if(current_als[form->i]->dof[i] < 0)
-          continue;
-
-        if((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
-          continue;
-        if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
-          continue;
-        if(!sym)
-        {
-          for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
-          {
-            if(current_als[form->j]->dof[j] >= 0)
-            {
-              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
-                continue;
-
-              Func<double>* u = base_fns[j];
-              Func<double>* v = test_fns[i];
-
-              if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
-              else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
-            }
-          }
-        }
-        // Symmetric block.
-        else
-        {
-          for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
-          {
-            if(j < i && current_als[form->j]->dof[j] >= 0)
-              continue;
-            if(current_als[form->j]->dof[j] >= 0)
-            {
-              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
-                continue;
-
-              Func<double>* u = base_fns[j];
-              Func<double>* v = test_fns[i];
-
-              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
-
-              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
-            }
-          }
-        }
-      }
-
-      // Insert the local stiffness matrix into the global one.
-
-      current_mat->add(current_als[form->i]->cnt, current_als[form->j]->cnt, local_stiffness_matrix, current_als[form->i]->dof, current_als[form->j]->dof);
-
-      // Insert also the off-diagonal (anti-)symmetric block, if required.
-      if(tra)
-      {
-        if(form->sym < 0)
-          chsgn(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
-        transpose(local_stiffness_matrix, current_als[form->i]->cnt, current_als[form->j]->cnt);
-
-        current_mat->add(current_als[form->j]->cnt, current_als[form->i]->cnt, local_stiffness_matrix, current_als[form->j]->dof, current_als[form->i]->dof);
-      }
-
-      // Cleanup.
-      delete [] local_stiffness_matrix;
-      delete [] jacobian_x_weights;
-      geometry->free();
-      delete geometry;
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
@@ -1787,8 +1683,11 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
+      {
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           u_ext[ext_i]->add(ext[form->wf->ext.size() - this->RK_original_spaces_count + ext_i]);
+        u_ext += form->u_ext_offset;
+      }
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -1858,6 +1757,9 @@ namespace Hermes
         current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
       }
 
+      if(RungeKutta)
+        u_ext -= form->u_ext_offset;
+
       // Cleanup.
       delete [] local_stiffness_matrix;
     }
@@ -1906,53 +1808,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, RefMap** current_refmaps, Func<Scalar>** ext, Func<Scalar>** u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
-    {
-      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
-
-      // Init geometry.
-      int n_quadrature_points;
-      Geom<double>* geometry = NULL;
-      double* jacobian_x_weights = NULL;
-
-      if(surface_form)
-        n_quadrature_points = init_surface_geometry_points(current_refmaps[form->i], order, current_state, geometry, jacobian_x_weights);
-      else
-        n_quadrature_points = init_geometry_points(current_refmaps[form->i], order, geometry, jacobian_x_weights);
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(ext[form->wf->ext.size() - this->RK_original_spaces_count + ext_i]);
-
-      // Actual form-specific calculation.
-      for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
-      {
-        if(current_als[form->i]->dof[i] < 0)
-          continue;
-
-        // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-        if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
-          continue;
-
-        Func<double>* v = test_fns[i];
-
-        Scalar val;
-        if(surface_form)
-          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, ext) * form->scaling_factor * current_als[form->i]->coef[i];
-        else
-          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, ext) * form->scaling_factor * current_als[form->i]->coef[i];
-
-        current_rhs->add(current_als[form->i]->dof[i], val);
-      }
-
-      // Cleanup.
-      delete [] jacobian_x_weights;
-      geometry->free();
-      delete geometry;
-    }
-
-    template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als_i, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
@@ -1960,8 +1815,11 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
+      {
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           u_ext[ext_i]->add(ext[form->wf->ext.size() - this->RK_original_spaces_count + ext_i]);
+        u_ext += form->u_ext_offset;
+      }
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -1983,6 +1841,9 @@ namespace Hermes
 
         current_rhs->add(current_als_i->dof[i], val);
       }
+
+      if(RungeKutta)
+        u_ext -= form->u_ext_offset;
     }
 
     template<typename Scalar>
