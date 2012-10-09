@@ -38,9 +38,44 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void WeakForm<Scalar>::free_ext()
+    {
+      for(unsigned int i = 0; i < this->ext.size(); i++)
+        delete this->ext[i];
+    }
+
+    template<typename Scalar>
     WeakForm<Scalar>::~WeakForm()
     {
       delete_all();
+    }
+
+    template<typename Scalar>
+    WeakForm<Scalar>* WeakForm<Scalar>::clone() const
+    {
+      throw Hermes::Exceptions::FunctionNotOverridenException("WeakForm<Scalar>::clone");
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::cloneMembers(const WeakForm<Scalar>* otherWf)
+    {
+      for(unsigned int i = 0; i < otherWf->mfvol.size(); i++)
+        this->mfvol.push_back(otherWf->mfvol[i]->clone());
+      for(unsigned int i = 0; i < otherWf->mfsurf.size(); i++)
+        this->mfsurf.push_back(otherWf->mfsurf[i]->clone());
+      for(unsigned int i = 0; i < otherWf->mfDG.size(); i++)
+        this->mfDG.push_back(otherWf->mfDG[i]->clone());
+      for(unsigned int i = 0; i < otherWf->vfvol.size(); i++)
+        this->vfvol.push_back(otherWf->vfvol[i]->clone());
+      for(unsigned int i = 0; i < otherWf->vfsurf.size(); i++)
+        this->vfsurf.push_back(otherWf->vfsurf[i]->clone());
+      for(unsigned int i = 0; i < otherWf->vfDG.size(); i++)
+        this->vfDG.push_back(otherWf->vfDG[i]->clone());
+      for(unsigned int i = 0; i < otherWf->ext.size(); i++)
+      this->ext.push_back(otherWf->ext[i]->clone());
+      this->is_matfree = otherWf->is_matfree;
+      this->neq = otherWf->neq;
+      this->seq = otherWf->seq;
     }
 
     template<typename Scalar>
@@ -54,6 +89,25 @@ namespace Hermes
       vfDG.clear();
     };
 
+    template<typename Scalar>
+      void WeakForm<Scalar>::set_ext(MeshFunction<Scalar>* ext)
+    {
+      this->ext.clear();
+      this->ext.push_back(ext);
+    }
+
+    template<typename Scalar>
+      void WeakForm<Scalar>::set_ext(Hermes::vector<MeshFunction<Scalar>*> ext)
+    {
+      this->ext = ext;
+    }
+    
+    template<typename Scalar>
+      Hermes::vector<MeshFunction<Scalar>*> WeakForm<Scalar>::get_ext() const
+    {
+      return this->ext;
+    }
+    
     template<typename Scalar>
     Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0)
     {
@@ -89,25 +143,6 @@ namespace Hermes
       Hermes::vector<std::string> Form<Scalar>::getAreas()
     {
       return this->areas;
-    }
-    
-    template<typename Scalar>
-      void Form<Scalar>::set_ext(MeshFunction<Scalar>* ext)
-    {
-      this->ext.clear();
-      this->ext.push_back(ext);
-    }
-
-    template<typename Scalar>
-      void Form<Scalar>::set_ext(Hermes::vector<MeshFunction<Scalar>*> ext)
-    {
-      this->ext = ext;
-    }
-    
-    template<typename Scalar>
-      Hermes::vector<MeshFunction<Scalar>*> Form<Scalar>::getExt()
-    {
-      return this->ext;
     }
     
     template<typename Scalar>

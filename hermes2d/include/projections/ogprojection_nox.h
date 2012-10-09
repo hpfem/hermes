@@ -222,11 +222,9 @@ namespace Hermes
       class ProjectionVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        ProjectionVectorFormVol(int i, MeshFunction<Scalar>* ext, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
+        ProjectionVectorFormVol(int i, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
         {
           this->projNormType = projNormType;
-          this->ext = Hermes::vector<MeshFunction<Scalar>*>();
-          this->ext.push_back(ext);
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,

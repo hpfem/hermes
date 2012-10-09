@@ -11,10 +11,8 @@ public:
       add_matrix_form(sym_form_1);
 
       BilinearFormUnSymVel* unsym_vel_form_0 = new BilinearFormUnSymVel(0, 0, Stokes);
-      unsym_vel_form_0->set_ext(Hermes::vector<MeshFunction<double>*>(x_vel_previous_time, y_vel_previous_time));
       add_matrix_form(unsym_vel_form_0);
       BilinearFormUnSymVel* unsym_vel_form_1 = new BilinearFormUnSymVel(1, 1, Stokes);
-      unsym_vel_form_1->set_ext(Hermes::vector<MeshFunction<double>*>(x_vel_previous_time, y_vel_previous_time));
       add_matrix_form(unsym_vel_form_1);
 
       BilinearFormUnSymXVelPressure* unsym_velx_pressure_form = new BilinearFormUnSymXVelPressure(0, 2);
@@ -28,14 +26,10 @@ public:
       Hermes::vector<MeshFunction<double> *> ext_vel_x;
       ext_vel_x.push_back(x_vel_previous_time);
 
-      vector_vel_form_x->set_ext(ext_vel_x);
-
       VectorFormVolVel* vector_vel_form_y = new VectorFormVolVel(1, Stokes, time_step);
 
       Hermes::vector<MeshFunction<double> *> ext_vel_y;
       ext_vel_y.push_back(y_vel_previous_time);
-
-      vector_vel_form_y->set_ext(ext_vel_y);
   };
 
   class BilinearFormSymVel : public MatrixFormVol<double>

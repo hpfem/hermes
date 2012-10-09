@@ -72,7 +72,6 @@ namespace Hermes
     class HERMES_API WeakForm : public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::Loggable
     {
     public:
-
       /// Constructor.
       ///
       /// \param[in]  neq   Number of equations.
@@ -124,11 +123,20 @@ namespace Hermes
       /// Deletes all volumetric and surface forms.
       void delete_all();
 
-    protected:
-      /// Internal. Used by DiscreteProblem to detect changes in the weakform.
-      int get_seq() const { return seq; }
+      /// external functions.
+      void set_ext(MeshFunction<Scalar>* ext);
+      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
+      Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
+      
+      virtual WeakForm* clone() const;
 
-      bool** get_blocks(bool force_diagonal_blocks) const;
+    protected:
+      void cloneMembers(const WeakForm<Scalar>* otherWf);
+
+      void free_ext();
+
+      /// External solutions.
+      Hermes::vector<MeshFunction<Scalar>*> ext;
 
       double current_time;
       double current_time_step;
@@ -157,6 +165,11 @@ namespace Hermes
       /// Holds DG vector forms.
       Hermes::vector<VectorFormDG<Scalar> *> vfDG;
 
+      /// Internal. Used by DiscreteProblem to detect changes in the weakform.
+      int get_seq() const { return seq; }
+
+      bool** get_blocks(bool force_diagonal_blocks) const;
+
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
       friend class RungeKutta<Scalar>;
@@ -172,18 +185,13 @@ namespace Hermes
     public:
       /// Constructor with coordinates.
       Form();
+      virtual ~Form() {};
 
       /// get-set methods
       /// areas
       void set_area(std::string area);
       void set_areas(Hermes::vector<std::string> areas);
       Hermes::vector<std::string> getAreas();
-      /// external functions.
-      void set_ext(MeshFunction<Scalar>* ext);
-      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
-      Hermes::vector<MeshFunction<Scalar>*> getExt();
-      
-      virtual ~Form() {};
 
     protected:
       /// Set pointer to a WeakForm.
@@ -191,9 +199,6 @@ namespace Hermes
 
       /// Markers of the areas where this form will be assembled.
       Hermes::vector<std::string> areas;
-
-      /// External solutions.
-      Hermes::vector<MeshFunction<Scalar>*> ext;
 
       /// External solutions for this form will start
       /// with u_ext[u_ext_offset] where u_ext[] are external

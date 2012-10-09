@@ -248,6 +248,7 @@ namespace Hermes
     FunctionNotOverridenException::FunctionNotOverridenException(const char * name, ...) : Exception()
     {
       char text[1024];
+      sprintf(text, "Method not overriden: ");
 
       // print the message
       va_list arglist;

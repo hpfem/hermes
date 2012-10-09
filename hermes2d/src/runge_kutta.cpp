@@ -707,6 +707,9 @@ namespace Hermes
       Hermes::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right.vfvol;
       Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right.vfsurf;
 
+      for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
+          stage_wf_right.ext.push_back(slns_time_prev[slns_time_prev_i]);
+
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional
       // external solutions, and anter them as blocks to the
@@ -716,12 +719,6 @@ namespace Hermes
       {
         MatrixFormVol<Scalar> *mfv_ij = mfvol[m];
         mfv_ij->scaling_factor = -this->time_step * bt->get_A(mfv_ij->i / spaces.size(), mfv_ij->j / spaces.size());
-
-        mfv_ij->ext.clear();
-
-        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-          mfv_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
         mfv_ij->set_current_stage_time(this->time + bt->get_C(mfv_ij->i / spaces.size()) * this->time_step);
       }
 
@@ -732,12 +729,6 @@ namespace Hermes
       {
         MatrixFormSurf<Scalar> *mfs_ij = mfsurf[m];
         mfs_ij->scaling_factor = -this->time_step * bt->get_A(mfs_ij->i / spaces.size(), mfs_ij->j / spaces.size());
-
-        mfs_ij->ext.clear();
-
-        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-          mfs_ij->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
         mfs_ij->set_current_stage_time(this->time + bt->get_C(mfs_ij->i / spaces.size()) * this->time_step);
       }
 
@@ -747,12 +738,6 @@ namespace Hermes
       for (unsigned int m = 0; m < vfvol.size(); m++)
       {
         VectorFormVol<Scalar>* vfv_i = vfvol[m];
-
-        vfv_i->ext.clear();
-
-        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-            vfv_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
         vfv_i->set_current_stage_time(this->time + bt->get_C(vfv_i->i / spaces.size())*this->time_step);
       }
 
@@ -762,12 +747,6 @@ namespace Hermes
       for (unsigned int m = 0; m < vfsurf.size(); m++)
       {
         VectorFormSurf<Scalar>* vfs_i = vfsurf[m];
-
-        vfs_i->ext.clear();
-
-        for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-            vfs_i->ext.push_back(slns_time_prev[slns_time_prev_i]);
-
         vfs_i->set_current_stage_time(this->time + bt->get_C(vfs_i->i / spaces.size())*this->time_step);
       }
     }

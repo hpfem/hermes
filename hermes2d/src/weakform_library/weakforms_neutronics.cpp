@@ -652,7 +652,7 @@ namespace Hermes
             template<typename ScalarClass>
             template<typename Real, typename Scalar>
             Scalar FissionYield::OuterIterationForm<ScalarClass>::vector_form( int n, double *wt, Func<Scalar> *u_ext[],
-              Func<Real> *v, Geom<Real> *e, Func<Scalar> **ext ) const
+              Func<Real> *v, Geom<Real> *e, Func<Scalar> **ext) const
             {
               if(!matprop.get_fission_multigroup_structure()[g])
                 return Scalar(0.0);
@@ -666,7 +666,7 @@ namespace Hermes
               for (int i = 0; i < n; i++)
               {
                 Scalar local_res = Scalar(0);
-                for (int gfrom = 0; gfrom < this->ext.size(); gfrom++)
+                for (int gfrom = 0; gfrom < this->wf->get_ext().size(); gfrom++)
                   local_res += nu_elem[gfrom] * Sigma_f_elem[gfrom] * ext[gfrom]->val[i];
 
                 local_res = local_res * wt[i] * v->val[i];

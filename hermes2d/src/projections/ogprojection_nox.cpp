@@ -138,10 +138,11 @@ namespace Hermes
 
       // Define temporary projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
+      proj_wf->set_ext(source_meshfn);
       // Add Jacobian.
       proj_wf->add_matrix_form(new ProjectionMatrixFormVol(0, 0, norm));
       // Add Residual.
-      proj_wf->add_vector_form(new ProjectionVectorFormVol(0, source_meshfn, norm));
+      proj_wf->add_vector_form(new ProjectionVectorFormVol(0, norm));
 
       // Call main function.
       project_internal(space, proj_wf, target_vec, newton_tol, newton_max_iter);

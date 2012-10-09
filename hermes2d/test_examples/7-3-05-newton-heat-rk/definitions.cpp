@@ -18,8 +18,7 @@ CustomWeakFormHeatRK::CustomWeakFormHeatRK(std::string bdy_air, double alpha, do
 }
 
 template<typename Real, typename Scalar>
-Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v,
-                                                                      Geom<Real> *e, Func<Scalar> **ext) const
+Scalar CustomWeakFormHeatRK::CustomFormResidualSurf::vector_form_surf(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *v, Geom<Real> *e, Func<Scalar> **ext) const
 {
   Scalar T_ext = Scalar(temp_ext(get_current_stage_time()));
   Scalar result = Scalar(0);

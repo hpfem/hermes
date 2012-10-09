@@ -847,7 +847,7 @@ namespace Hermes
                   GenericForm(matprop, geom_type),
                   g(g), keff(keff)
                 {
-                  this->set_ext(iterates);
+                  this->wf->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -862,7 +862,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   this->set_area(area);
-                  this->set_ext(iterates);
+                  this->wf->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -876,7 +876,7 @@ namespace Hermes
                   GenericForm(matprop, mesh, geom_type),
                   g(g), keff(keff)
                 {
-                  this->set_ext(iterates);
+                  this->wf->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
@@ -891,7 +891,7 @@ namespace Hermes
                   g(g), keff(keff)
                 {
                   this->set_area(area);
-                  this->set_ext(iterates);
+                  this->wf->set_ext(iterates);
                   if(g >= iterates.size())
                     throw Hermes::Exceptions::Exception(E_INVALID_GROUP_INDEX);
                 }
