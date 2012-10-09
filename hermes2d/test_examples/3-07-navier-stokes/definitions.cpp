@@ -3,8 +3,9 @@
 class WeakFormNSSimpleLinearization : public WeakForm<double>
 {
 public:
-  WeakFormNSSimpleLinearization(bool Stokes, double Reynolds, double time_step, Solution<double>* x_vel_previous_time, Solution<double>* y_vel_previous_time) : WeakForm<double>(3), Stokes(Stokes), 
-    Reynolds(Reynolds), time_step(time_step), x_vel_previous_time(x_vel_previous_time), y_vel_previous_time(y_vel_previous_time) {
+  WeakFormNSSimpleLinearization(bool Stokes, double Reynolds, double time_step) : WeakForm<double>(3), Stokes(Stokes), 
+    Reynolds(Reynolds), time_step(time_step)
+  {
       BilinearFormSymVel* sym_form_0 = new BilinearFormSymVel(0, 0, Stokes, Reynolds, time_step);
       add_matrix_form(sym_form_0);
       BilinearFormSymVel* sym_form_1 = new BilinearFormSymVel(1, 1, Stokes, Reynolds, time_step);
@@ -24,12 +25,10 @@ public:
       VectorFormVolVel* vector_vel_form_x = new VectorFormVolVel(0, Stokes, time_step);
 
       Hermes::vector<MeshFunction<double> *> ext_vel_x;
-      ext_vel_x.push_back(x_vel_previous_time);
 
       VectorFormVolVel* vector_vel_form_y = new VectorFormVolVel(1, Stokes, time_step);
 
       Hermes::vector<MeshFunction<double> *> ext_vel_y;
-      ext_vel_y.push_back(y_vel_previous_time);
   };
 
   class BilinearFormSymVel : public MatrixFormVol<double>
@@ -187,15 +186,13 @@ protected:
   bool Stokes;
   double Reynolds;
   double time_step;
-  Solution<double>* x_vel_previous_time;
-  Solution<double>* y_vel_previous_time;
 };
 
 class WeakFormNSNewton : public WeakForm<double>
 {
 public:
-  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, Solution<double>* x_vel_previous_time, Solution<double>* y_vel_previous_time) : WeakForm<double>(3), Stokes(Stokes), 
-    Reynolds(Reynolds), x_vel_previous_time(x_vel_previous_time), y_vel_previous_time(y_vel_previous_time) 
+  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step) : WeakForm<double>(3), Stokes(Stokes), 
+    Reynolds(Reynolds)
   {
     this->current_time_step = time_step;
 
@@ -220,10 +217,8 @@ public:
     add_matrix_form(unsym_vely_pressure_form);
 
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Stokes, Reynolds, time_step);
-    F_0->set_ext(Hermes::vector<MeshFunction<double>*>(x_vel_previous_time, y_vel_previous_time));
     add_vector_form(F_0);
     VectorFormNS_1* F_1 = new VectorFormNS_1(1, Stokes, Reynolds, time_step);
-    F_1->set_ext(Hermes::vector<MeshFunction<double>*>(x_vel_previous_time, y_vel_previous_time));
     add_vector_form(F_1);
     VectorFormNS_2* F_2 = new VectorFormNS_2(2);
     add_vector_form(F_2);

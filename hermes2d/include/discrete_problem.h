@@ -133,11 +133,9 @@ namespace Hermes
         Table* block_weights = NULL);
 
     protected:
-      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, MeshFunction<Scalar>*** ext,
-          WeakForm<Scalar>** weakforms);
+      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
 
-      void deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, MeshFunction<Scalar>*** ext,
-          WeakForm<Scalar>** weakforms);
+      void deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
 
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
@@ -172,7 +170,7 @@ namespace Hermes
         Traverse::State* current_state, AsmList<Scalar>** current_alsSurface, WeakForm<Scalar>* current_wf);
       
       /// Assemble one state.
-      void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, MeshFunction<Scalar>** current_ext, Solution<Scalar>** current_u_ext, 
+      void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, 
         AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf);
 
       /// Adjusts order to refmaps.
