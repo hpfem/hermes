@@ -210,7 +210,7 @@ namespace Hermes
             // The proper sub-element mappings to all the functions of
             // this stage is supplied by the function Traverse::get_next_state()
             // called in the while loop.
-            this->assemble_one_state(current_pss, current_spss, current_refmaps, current_ext, current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
+            this->assemble_one_state(current_pss, current_spss, current_refmaps, current_ext, ext_functions.size(), current_u_ext, current_als, &current_state, current_mfvol, current_mfsurf, current_vfvol, current_vfsurf);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
               this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_mfDG, current_vfDG, trav[omp_get_thread_num()].fn);
@@ -260,7 +260,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemLinear<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Func<Scalar>** u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
+    void DiscreteProblemLinear<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, RefMap** current_refmaps, Func<Scalar>** ext, Func<Scalar>** u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
 
@@ -271,10 +271,6 @@ namespace Hermes
 
       // Assemble the local stiffness matrix for the form form.
       Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als[form->i]->cnt, current_als[form->j]->cnt));
-
-      // Init external functions.
-      Func<Scalar>** ext = new Func<Scalar>*[form->ext.size()];
-      init_ext(form, ext, order);
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(this->RungeKutta)
@@ -379,7 +375,6 @@ namespace Hermes
       }
 
       // Cleanup.
-      deinit_ext(form, ext);
       delete [] local_stiffness_matrix;
       delete [] jacobian_x_weights;
       geometry->free();
@@ -387,7 +382,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemLinear<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** u_ext, 
+    void DiscreteProblemLinear<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
@@ -399,10 +394,6 @@ namespace Hermes
 
       // Assemble the local stiffness matrix for the form form.
       Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als_i->cnt, current_als_j->cnt));
-
-      // Init external functions.
-      Func<Scalar>** ext = new Func<Scalar>*[form->ext.size()];
-      init_ext(form, ext, order);
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(this->RungeKutta)
@@ -498,7 +489,6 @@ namespace Hermes
       }
 
       // Cleanup.
-      deinit_ext(form, ext);
       delete [] local_stiffness_matrix;
     }
 
