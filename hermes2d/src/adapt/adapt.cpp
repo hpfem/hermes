@@ -440,7 +440,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MatrixFormVol<Scalar>* Adapt<Scalar>::MatrixFormVolError::clone()
+    MatrixFormVol<Scalar>* Adapt<Scalar>::MatrixFormVolError::clone() const
     {
       return new MatrixFormVolError(*this);
     }

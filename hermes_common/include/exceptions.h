@@ -148,14 +148,14 @@ namespace Hermes
     };
 
     /// \brief Linear solver failed.
-    class HERMES_API FunctionNotOverridenException : public Exception
+    class HERMES_API MethodNotOverridenException : public Exception
     {
       public:
         /// Constructor
         /// \param[in] name Name of the function.
-        FunctionNotOverridenException(const char * msg, ...);
-        ~FunctionNotOverridenException() throw() {};
-        FunctionNotOverridenException(const FunctionNotOverridenException & e);
+        MethodNotOverridenException(const char * msg, ...);
+        ~MethodNotOverridenException() throw() {};
+        MethodNotOverridenException(const MethodNotOverridenException & e);
         virtual Exception* clone();
     };
 

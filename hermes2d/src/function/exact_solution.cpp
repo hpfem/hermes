@@ -27,7 +27,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunction<Scalar>* ExactSolution<Scalar>::clone()
+    MeshFunction<Scalar>* ExactSolution<Scalar>::clone() const
     {
       throw Hermes::Exceptions::Exception("Solution<Scalar>::clone() must be overridden in the case of exact solutions.");
       return NULL;
@@ -66,7 +66,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    MeshFunction<Scalar>* ConstantSolution<Scalar>::clone()
+    MeshFunction<Scalar>* ConstantSolution<Scalar>::clone() const
     {
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
@@ -94,7 +94,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    MeshFunction<Scalar>* ZeroSolution<Scalar>::clone()
+    MeshFunction<Scalar>* ZeroSolution<Scalar>::clone() const
     {
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
@@ -117,7 +117,7 @@ namespace Hermes
     ConstantSolutionVector<Scalar>::ConstantSolutionVector(const Mesh* mesh, Scalar constantX, Scalar constantY) : ExactSolutionVector<Scalar>(mesh), constantX(constantX), constantY(constantY) {};
 
     template<typename Scalar>
-    MeshFunction<Scalar>* ConstantSolutionVector<Scalar>::clone()
+    MeshFunction<Scalar>* ConstantSolutionVector<Scalar>::clone() const
     {
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
@@ -161,7 +161,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunction<Scalar>* ZeroSolutionVector<Scalar>::clone()
+    MeshFunction<Scalar>* ZeroSolutionVector<Scalar>::clone() const
     {
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();

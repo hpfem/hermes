@@ -163,7 +163,7 @@ namespace Hermes
       /// Internal.
       virtual void set_active_element(Element* e);
 
-      virtual MeshFunction<Scalar>* clone();
+      virtual MeshFunction<Scalar>* clone() const;
 
       static void set_static_verbose_output(bool verbose);
     protected:

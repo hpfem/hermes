@@ -139,7 +139,7 @@ namespace Hermes
           }
         }
 
-        MatrixFormVol<Scalar>* clone()
+        MatrixFormVol<Scalar>* clone() const
         {
           return new ProjectionMatrixFormVol(*this);
         }
@@ -253,7 +253,7 @@ namespace Hermes
           }
         }
 
-        VectorFormVol<Scalar>* clone()
+        VectorFormVol<Scalar>* clone() const
         {
           return new ProjectionVectorFormVol(*this);
         }

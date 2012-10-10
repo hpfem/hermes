@@ -36,7 +36,7 @@ private:
 
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const;
 
-    virtual VectorFormSurf<double>* clone();
+    virtual VectorFormSurf<double>* clone() const;
 
     // Time-dependent exterior temperature.
     template<typename Real>

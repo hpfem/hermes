@@ -64,7 +64,7 @@ namespace Hermes
         return int_e_f<Hermes::Ord, Hermes::Ord>(n, wt, u, v);
       }
 
-      MatrixFormVol<Scalar>* clone()
+      MatrixFormVol<Scalar>* clone() const
       {
         return new MatrixFormVolHCurl<Scalar>(*this);
       }

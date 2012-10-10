@@ -248,7 +248,7 @@ namespace Hermes
       return new ValueException(*this);
     }
 
-    FunctionNotOverridenException::FunctionNotOverridenException(const char * name, ...) : Exception()
+    MethodNotOverridenException::MethodNotOverridenException(const char * name, ...) : Exception()
     {
       char* text = new char[1024];
       sprintf(text, "Method not overriden: ");
@@ -261,16 +261,16 @@ namespace Hermes
       message = text - strlen("Method not overriden: ");
     }
 
-    FunctionNotOverridenException::FunctionNotOverridenException(const FunctionNotOverridenException&e)
+    MethodNotOverridenException::MethodNotOverridenException(const MethodNotOverridenException&e)
     {
       char * msg = new char[strlen(e.what())+1];
       strcpy(msg, e.what());
       message = msg;
     }
 
-    Exception* FunctionNotOverridenException::clone()
+    Exception* MethodNotOverridenException::clone()
     {
-      return new FunctionNotOverridenException(*this);
+      return new MethodNotOverridenException(*this);
     }
 
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()

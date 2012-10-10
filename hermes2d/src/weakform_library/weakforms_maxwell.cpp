@@ -120,7 +120,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianMagnetostatics<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianMagnetostatics<Scalar>::clone() const
       {
         return new DefaultJacobianMagnetostatics(*this);
       }
@@ -186,7 +186,7 @@ namespace Hermes
 
       // This is to make the form usable in rk_time_step_newton().
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualMagnetostatics<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualMagnetostatics<Scalar>::clone() const
       {
         return new DefaultResidualMagnetostatics(*this);
       }

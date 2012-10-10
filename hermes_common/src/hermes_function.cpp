@@ -55,7 +55,7 @@ namespace Hermes
       return const_value;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes1DFunction<double>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes1DFunction<double>::value");
       return 0.0;
     }
   };
@@ -66,7 +66,7 @@ namespace Hermes
       return const_value;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes1DFunction<std::complex<double> >::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes1DFunction<std::complex<double> >::value");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -78,7 +78,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes1DFunction<Scalar>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes1DFunction<Scalar>::value");
       return Ord(99);
     }
   };
@@ -90,7 +90,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes1DFunction<double>::derivative");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes1DFunction<double>::derivative");
       return 0.0;
     }
   };
@@ -101,7 +101,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes1DFunction<std::complex<double> >::derivative");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes1DFunction<std::complex<double> >::derivative");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -113,7 +113,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes1DFunction<Scalar>::derivative");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes1DFunction<Scalar>::derivative");
       return Ord(99);
     }
   };
@@ -138,7 +138,7 @@ namespace Hermes
       return const_value;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<double>::value");
       return 0.0;
     }
   };
@@ -150,7 +150,7 @@ namespace Hermes
       return const_value;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<std::complex<double> >::value");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -162,7 +162,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<Scalar>::value");
       return Ord(99);
     }
   };
@@ -174,7 +174,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::derivative_x");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<double>::derivative_x");
       return 0.0;
     }
   };
@@ -185,7 +185,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::derivative_x");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<std::complex<double> >::derivative_x");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -197,7 +197,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::derivative_x");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<Scalar>::derivative_x");
       return Ord(99);
     }
   };
@@ -209,7 +209,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<double>::derivative_y");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<double>::derivative_y");
       return 0.0;
     }
   };
@@ -220,7 +220,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<std::complex<double> >::derivative_y");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<std::complex<double> >::derivative_y");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -232,7 +232,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes2DFunction<Scalar>::derivative_y");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes2DFunction<Scalar>::derivative_y");
       return Ord(99);
     }
   };
@@ -257,7 +257,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<double>::value");
       return 0.0;
     }
   };
@@ -268,7 +268,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<std::complex<double> >::value");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -280,7 +280,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<Scalar>::value");
       return Ord(99);
     }
   };
@@ -292,7 +292,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivative_x");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<double>::derivative_x");
       return 0.0;
     }
   };
@@ -303,7 +303,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_x");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_x");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -315,7 +315,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivative_x");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<Scalar>::derivative_x");
       return Ord(99);
     }
   };
@@ -327,7 +327,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivative_y");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<double>::derivative_y");
       return 0.0;
     }
   };
@@ -338,7 +338,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_y");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_y");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -350,7 +350,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivative_y");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<Scalar>::derivative_y");
       return Ord(99);
     }
   };
@@ -362,7 +362,7 @@ namespace Hermes
       return 0.0;
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<double>::derivative_z");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<double>::derivative_z");
       return 0.0;
     }
   };
@@ -373,7 +373,7 @@ namespace Hermes
       return std::complex<double>(0.0, 0.0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_z");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<std::complex<double> >::derivative_z");
       return std::complex<double>(0.0, 0.0);
     }
   };
@@ -385,7 +385,7 @@ namespace Hermes
       return Ord(0);
     else
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("Hermes3DFunction<Scalar>::derivative_z");
+      throw Hermes::Exceptions::MethodNotOverridenException("Hermes3DFunction<Scalar>::derivative_z");
       return Ord(99);
     }
   };

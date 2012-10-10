@@ -42,7 +42,7 @@ Ord CustomWeakFormHeatRK::CustomFormResidualSurf::ord(int n, double *wt, Func<Or
   return vector_form_surf<Ord, Ord>(n, wt, u_ext, v, e, ext);
 }
 
-VectorFormSurf<double>* CustomWeakFormHeatRK::CustomFormResidualSurf::clone()
+VectorFormSurf<double>* CustomWeakFormHeatRK::CustomFormResidualSurf::clone() const
 {
   return new CustomFormResidualSurf(*this);
 }

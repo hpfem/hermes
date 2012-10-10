@@ -74,7 +74,7 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, Func<Ord> **ext) const;
 
-    virtual MatrixFormVol<double>* clone() { return new JacobianFormVol(i, j); }
+    virtual MatrixFormVol<double>* clone() const { return new JacobianFormVol(i, j); }
   };
 
   class ResidualFormVol : public VectorFormVol<double>
@@ -88,7 +88,7 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
                     Geom<Ord> *e, Func<Ord> **ext) const;
 
-    virtual VectorFormVol<double>* clone() { return new ResidualFormVol(i, rhs); }
+    virtual VectorFormVol<double>* clone() const { return new ResidualFormVol(i, rhs); }
   private:
     // Problem parameters.
     CustomRightHandSide* rhs;
@@ -108,7 +108,7 @@ private:
     virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
             Geom<Ord> *e, Func<Ord> **ext) const;
 
-    virtual MatrixFormVol<double>* clone() { return new PrecondFormVol(i, j); }
+    virtual MatrixFormVol<double>* clone() const { return new PrecondFormVol(i, j); }
   };
 };
 

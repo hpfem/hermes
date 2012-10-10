@@ -43,7 +43,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearSolver<Scalar>::solve(Scalar* coeff_vec)
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("NonlinearSolver<Scalar>::solve");
+      throw Hermes::Exceptions::MethodNotOverridenException("NonlinearSolver<Scalar>::solve");
       return;
     }
 

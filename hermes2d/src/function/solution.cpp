@@ -210,7 +210,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunction<Scalar>* Solution<Scalar>::clone()
+    MeshFunction<Scalar>* Solution<Scalar>::clone() const
     {
       Solution<Scalar>* sln = new Solution<Scalar>();
       sln->copy(this);

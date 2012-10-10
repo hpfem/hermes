@@ -112,13 +112,13 @@ namespace Hermes
       virtual double get_current_time() const;
       virtual double get_current_time_step() const;
 
-      Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol();
-      Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf();
-      Hermes::vector<MatrixFormDG<Scalar> *> get_mfDG();
+      Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol() const;
+      Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf() const;
+      Hermes::vector<MatrixFormDG<Scalar> *> get_mfDG() const;
 
-      Hermes::vector<VectorFormVol<Scalar> *> get_vfvol();
-      Hermes::vector<VectorFormSurf<Scalar> *> get_vfsurf();
-      Hermes::vector<VectorFormDG<Scalar> *> get_vfDG();
+      Hermes::vector<VectorFormVol<Scalar> *> get_vfvol() const;
+      Hermes::vector<VectorFormSurf<Scalar> *> get_vfsurf() const;
+      Hermes::vector<VectorFormDG<Scalar> *> get_vfDG() const;
 
       /// Deletes all volumetric and surface forms.
       void delete_all();
@@ -186,7 +186,7 @@ namespace Hermes
       /// areas
       void set_area(std::string area);
       void set_areas(Hermes::vector<std::string> areas);
-      Hermes::vector<std::string> getAreas();
+      Hermes::vector<std::string> getAreas() const;
 
     protected:
       /// Set pointer to a WeakForm.
@@ -251,11 +251,11 @@ namespace Hermes
       MatrixFormVol(unsigned int i, unsigned int j);
 
       void setSymFlag(SymFlag sym);
-      SymFlag getSymFlag();
+      SymFlag getSymFlag() const;
 
       virtual ~MatrixFormVol() {};
 
-      virtual MatrixFormVol* clone();
+      virtual MatrixFormVol* clone() const;
     };
 
     template<typename Scalar>
@@ -267,7 +267,7 @@ namespace Hermes
 
       virtual ~MatrixFormSurf() {};
 
-      virtual MatrixFormSurf* clone();
+      virtual MatrixFormSurf* clone() const;
     };
 
     template<typename Scalar>
@@ -279,7 +279,7 @@ namespace Hermes
 
       virtual ~MatrixFormDG() {};
 
-      virtual MatrixFormDG* clone();
+      virtual MatrixFormDG* clone() const;
     };
 
     template<typename Scalar>
@@ -308,7 +308,7 @@ namespace Hermes
 
       virtual ~VectorFormVol() {};
 
-      virtual VectorFormVol* clone();
+      virtual VectorFormVol* clone() const;
     };
 
     template<typename Scalar>
@@ -320,7 +320,7 @@ namespace Hermes
 
       virtual ~VectorFormSurf() {};
 
-      virtual VectorFormSurf* clone();
+      virtual VectorFormSurf* clone() const;
     };
 
     template<typename Scalar>
@@ -332,7 +332,7 @@ namespace Hermes
 
       virtual ~VectorFormDG() {};
 
-      virtual VectorFormDG* clone();
+      virtual VectorFormDG* clone() const;
     };
   }
 }

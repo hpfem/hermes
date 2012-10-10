@@ -55,7 +55,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianElasticity_0_0<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianElasticity_0_0<Scalar>::clone() const
       {
         return new DefaultJacobianElasticity_0_0<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
       }
@@ -94,7 +94,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianElasticity_0_1<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianElasticity_0_1<Scalar>::clone() const
       {
         return new DefaultJacobianElasticity_0_1<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
       }
@@ -131,7 +131,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualElasticity_0_0<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualElasticity_0_0<Scalar>::clone() const
       {
         return new DefaultResidualElasticity_0_0<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
       }
@@ -168,7 +168,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualElasticity_0_1<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualElasticity_0_1<Scalar>::clone() const
       {
         return new DefaultResidualElasticity_0_1<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
       }
@@ -205,7 +205,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualElasticity_1_0<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualElasticity_1_0<Scalar>::clone() const
       {
         return new DefaultResidualElasticity_1_0<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
       }
@@ -242,7 +242,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualElasticity_1_1<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualElasticity_1_1<Scalar>::clone() const
       {
         return new DefaultResidualElasticity_1_1<Scalar>(this->i, this->areas[0], this->lambda, this->mu);
       }
@@ -279,7 +279,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianElasticity_1_1<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianElasticity_1_1<Scalar>::clone() const
       {
         return new DefaultJacobianElasticity_1_1<Scalar>(this->i, this->j, this->areas[0], this->lambda, this->mu);
       }

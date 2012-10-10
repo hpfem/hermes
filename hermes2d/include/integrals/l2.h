@@ -57,7 +57,7 @@ namespace Hermes
         return result;
       }
 
-      MatrixFormVol<Scalar>* clone()
+      MatrixFormVol<Scalar>* clone() const
       {
         return new MatrixFormVolL2<Scalar>(*this);
       }

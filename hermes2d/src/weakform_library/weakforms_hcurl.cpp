@@ -86,7 +86,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultMatrixFormVol<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultMatrixFormVol<Scalar>::clone() const
       {
         return new DefaultMatrixFormVol<Scalar>(*this);
       }
@@ -158,7 +158,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianCurlCurl<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianCurlCurl<Scalar>::clone() const
       {
         return new DefaultJacobianCurlCurl(*this);
       }
@@ -224,7 +224,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultVectorFormVol<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultVectorFormVol<Scalar>::clone() const
       {
         return new DefaultVectorFormVol<Scalar>(*this);
       }
@@ -299,7 +299,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualVol<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualVol<Scalar>::clone() const
       {
         return new DefaultResidualVol(*this);
       }
@@ -383,7 +383,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualCurlCurl<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualCurlCurl<Scalar>::clone() const
       {
         return new DefaultResidualCurlCurl(*this);
       }
@@ -448,7 +448,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone()
+      MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone() const
       {
         return new DefaultMatrixFormSurf<Scalar>(*this);
       }
@@ -516,7 +516,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormSurf<Scalar>* DefaultResidualSurf<Scalar>::clone()
+      VectorFormSurf<Scalar>* DefaultResidualSurf<Scalar>::clone() const
       {
         return new DefaultResidualSurf(*this);
       }
@@ -586,7 +586,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormSurf<Scalar>* DefaultVectorFormSurf<Scalar>::clone()
+      VectorFormSurf<Scalar>* DefaultVectorFormSurf<Scalar>::clone() const
       {
         return new DefaultVectorFormSurf<Scalar>(*this);
       }

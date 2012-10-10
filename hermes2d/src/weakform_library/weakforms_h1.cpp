@@ -131,7 +131,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultMatrixFormVol<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultMatrixFormVol<Scalar>::clone() const
       {
         return new DefaultMatrixFormVol<Scalar>(*this);
       }
@@ -239,7 +239,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianDiffusion<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianDiffusion<Scalar>::clone() const
       {
         return new DefaultJacobianDiffusion<Scalar>(*this);
       }
@@ -329,7 +329,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultMatrixFormDiffusion<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultMatrixFormDiffusion<Scalar>::clone() const
       {
         return new DefaultMatrixFormDiffusion<Scalar>(*this);
       }
@@ -406,7 +406,7 @@ namespace Hermes
 
       // This is to make the form usable in rk_time_step_newton().
       template<typename Scalar>
-      MatrixFormVol<Scalar>* DefaultJacobianAdvection<Scalar>::clone()
+      MatrixFormVol<Scalar>* DefaultJacobianAdvection<Scalar>::clone() const
       {
         return new DefaultJacobianAdvection<Scalar>(*this);
       }
@@ -494,7 +494,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultVectorFormVol<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultVectorFormVol<Scalar>::clone() const
       {
         return new DefaultVectorFormVol<Scalar>(*this);
       }
@@ -582,7 +582,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualVol<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualVol<Scalar>::clone() const
       {
         return new DefaultResidualVol(*this);
       }
@@ -660,7 +660,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualDiffusion<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualDiffusion<Scalar>::clone() const
       {
         return new DefaultResidualDiffusion<Scalar>(*this);
       }
@@ -733,7 +733,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormVol<Scalar>* DefaultResidualAdvection<Scalar>::clone()
+      VectorFormVol<Scalar>* DefaultResidualAdvection<Scalar>::clone() const
       {
         return new DefaultResidualAdvection<Scalar>(*this);
       }
@@ -822,7 +822,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone()
+      MatrixFormSurf<Scalar>* DefaultMatrixFormSurf<Scalar>::clone() const
       {
         return new DefaultMatrixFormSurf<Scalar>(*this);
       }
@@ -886,7 +886,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      MatrixFormSurf<Scalar>* DefaultJacobianFormSurf<Scalar>::clone()
+      MatrixFormSurf<Scalar>* DefaultJacobianFormSurf<Scalar>::clone() const
       {
         return new DefaultJacobianFormSurf<Scalar>(*this);
       }
@@ -975,7 +975,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormSurf<Scalar>* DefaultVectorFormSurf<Scalar>::clone()
+      VectorFormSurf<Scalar>* DefaultVectorFormSurf<Scalar>::clone() const
       {
         return new DefaultVectorFormSurf<Scalar>(*this);
       }
@@ -1064,7 +1064,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      VectorFormSurf<Scalar>* DefaultResidualSurf<Scalar>::clone()
+      VectorFormSurf<Scalar>* DefaultResidualSurf<Scalar>::clone() const
       {
         return new DefaultResidualSurf(*this);
       }

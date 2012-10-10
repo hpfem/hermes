@@ -54,7 +54,7 @@ public:
       return result;
     }
 
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormSymVel(this->i, this->j, this->Stokes, this->Reynolds, this->time_step);
     }
@@ -93,7 +93,7 @@ public:
       return result;
     }
 
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymVel(this->i, this->j, this->Stokes);
     }
@@ -118,7 +118,7 @@ public:
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
     
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymXVelPressure(this->i, this->j);
     }
@@ -140,7 +140,7 @@ public:
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
 
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymYVelPressure(this->i, this->j);
     }
@@ -171,7 +171,7 @@ public:
       return result;
     }
     
-    VectorFormVol<double>* clone()
+    VectorFormVol<double>* clone() const
     {
       return new VectorFormVolVel(this->i, this->Stokes, this->time_step);
     }
@@ -247,7 +247,7 @@ public:
       return result;
     }
 
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormSymVel(this->i, this->j, this->Stokes, this->Reynolds, this->time_step);
     }
@@ -290,7 +290,7 @@ public:
       return result;
     }
 
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymVel_0_0(this->i, this->j, this->Stokes);
     }
@@ -327,7 +327,7 @@ public:
       return result;
     }
     
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymVel_0_1(this->i, this->j, this->Stokes);
     }
@@ -364,7 +364,7 @@ public:
       return result;
     }
     
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymVel_1_0(this->i, this->j, this->Stokes);
     }
@@ -405,7 +405,7 @@ public:
       return result;
     }
     
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymVel_1_1(this->i, this->j, this->Stokes);
     }
@@ -430,7 +430,7 @@ public:
       return - int_u_dvdx<Ord, Ord>(n, wt, u, v);
     }
     
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymXVelPressure(this->i, this->j);
     }
@@ -452,7 +452,7 @@ public:
       return - int_u_dvdy<Ord, Ord>(n, wt, u, v);
     }
     
-    MatrixFormVol<double>* clone()
+    MatrixFormVol<double>* clone() const
     {
       return new BilinearFormUnSymYVelPressure(this->i, this->j);
     }
@@ -497,7 +497,7 @@ public:
       return result;
     }
     
-    VectorFormVol<double>* clone()
+    VectorFormVol<double>* clone() const
     {
       return new VectorFormNS_0(this->i, this->Stokes, this->Reynolds, this->time_step);
     }
@@ -546,7 +546,7 @@ public:
       return result;
     }
     
-    VectorFormVol<double>* clone()
+    VectorFormVol<double>* clone() const
     {
       return new VectorFormNS_1(this->i, this->Stokes, this->Reynolds, this->time_step);
     }
@@ -583,7 +583,7 @@ public:
       return result;
     }
     
-    VectorFormVol<double>* clone()
+    VectorFormVol<double>* clone() const
     {
       return new VectorFormNS_2(this->i);
     }

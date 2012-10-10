@@ -70,7 +70,7 @@ namespace Hermes
 
       virtual void pop_transform();
 
-      virtual MeshFunction<Scalar>* clone()
+      virtual MeshFunction<Scalar>* clone() const
       {
         throw Hermes::Exceptions::Exception("You need to implement MeshFunction::clone() to be able to use paralellization");
         return NULL;

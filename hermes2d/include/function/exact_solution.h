@@ -37,7 +37,7 @@ namespace Hermes
       /// Dimension of result - either 1 or 2.
       virtual unsigned int get_dimension() const = 0;
 
-      virtual MeshFunction<Scalar>* clone();
+      virtual MeshFunction<Scalar>* clone() const;
 
     protected:
       /// For scaling of the solution.
@@ -113,7 +113,7 @@ namespace Hermes
       virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
-      virtual MeshFunction<Scalar>* clone();
+      virtual MeshFunction<Scalar>* clone() const;
     protected:
       Scalar constant;
     };
@@ -130,7 +130,7 @@ namespace Hermes
       virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
-      virtual MeshFunction<Scalar>* clone();
+      virtual MeshFunction<Scalar>* clone() const;
     };
 
     /// @ingroup meshFunctions
@@ -145,7 +145,7 @@ namespace Hermes
       virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
-      virtual MeshFunction<Scalar>* clone();
+      virtual MeshFunction<Scalar>* clone() const;
     protected:
       Scalar constantX;
       Scalar constantY;
@@ -163,7 +163,7 @@ namespace Hermes
       virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
       virtual Ord ord(Ord x, Ord y) const;
-      virtual MeshFunction<Scalar>* clone();
+      virtual MeshFunction<Scalar>* clone() const;
     };
   }
 }

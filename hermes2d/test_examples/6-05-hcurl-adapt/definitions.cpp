@@ -159,6 +159,6 @@ public:
       return Hermes::Ord(10);
     }
 
-    virtual VectorFormSurf<std::complex<double> >* clone() { return new CustomVectorFormSurf(); }
+    virtual VectorFormSurf<std::complex<double> >* clone() const { return new CustomVectorFormSurf(); }
   };
 };

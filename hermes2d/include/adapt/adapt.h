@@ -82,7 +82,7 @@ namespace Hermes
           Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
           Func<Ord> **ext) const;
 
-        virtual MatrixFormVol<Scalar>* clone();
+        virtual MatrixFormVol<Scalar>* clone() const;
 
       protected:
         /// Norm used.

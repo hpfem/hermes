@@ -163,7 +163,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-      Hermes::vector<std::string> Form<Scalar>::getAreas()
+      Hermes::vector<std::string> Form<Scalar>::getAreas() const
     {
       return this->areas;
     }
@@ -191,7 +191,7 @@ namespace Hermes
     Scalar MatrixForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
       Geom<double> *e, Func<Scalar> **ext) const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixForm<Scalar>::value");
       return 0.0;
     }
 
@@ -199,7 +199,7 @@ namespace Hermes
     Hermes::Ord MatrixForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, Func<Ord> **ext) const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixForm<Scalar>::ord");
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixForm<Scalar>::ord");
       return Hermes::Ord();
     }
 
@@ -216,15 +216,15 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    SymFlag MatrixFormVol<Scalar>::getSymFlag()
+    SymFlag MatrixFormVol<Scalar>::getSymFlag() const
     {
       return this->sym;
     }
 
     template<typename Scalar>
-    MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone()
+    MatrixFormVol<Scalar>* MatrixFormVol<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixFormVol<Scalar>::clone()");
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormVol<Scalar>::clone()");
       return NULL;
     }
 
@@ -235,9 +235,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone()
+    MatrixFormSurf<Scalar>* MatrixFormSurf<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixFormSurf<Scalar>::clone()");
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormSurf<Scalar>::clone()");
       return NULL;
     }
 
@@ -249,9 +249,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MatrixFormDG<Scalar>* MatrixFormDG<Scalar>::clone()
+    MatrixFormDG<Scalar>* MatrixFormDG<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("MatrixFormDG<Scalar>::clone()");
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormDG<Scalar>::clone()");
       return NULL;
     }
 
@@ -271,7 +271,7 @@ namespace Hermes
     Scalar VectorForm<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
       Geom<double> *e, Func<Scalar> **ext) const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::value");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorForm<Scalar>::value");
       return 0.0;
     }
 
@@ -279,14 +279,14 @@ namespace Hermes
     Hermes::Ord VectorForm<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
       Geom<Hermes::Ord> *e, Func<Ord> **ext) const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("VectorForm<Scalar>::ord");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorForm<Scalar>::ord");
       return Hermes::Ord();
     }
 
     template<typename Scalar>
-    VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone()
+    VectorFormVol<Scalar>* VectorFormVol<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("VectorFormVol<Scalar>::clone()");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormVol<Scalar>::clone()");
       return NULL;
     }
 
@@ -297,9 +297,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone()
+    VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("VectorFormSurf<Scalar>::clone()");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormSurf<Scalar>::clone()");
       return NULL;
     }
 
@@ -311,9 +311,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    VectorFormDG<Scalar>* VectorFormDG<Scalar>::clone()
+    VectorFormDG<Scalar>* VectorFormDG<Scalar>::clone() const
     {
-      throw Hermes::Exceptions::FunctionNotOverridenException("VectorFormDG<Scalar>::clone()");
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormDG<Scalar>::clone()");
       return NULL;
     }
 
@@ -385,32 +385,32 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<MatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol()
+    Hermes::vector<MatrixFormVol<Scalar> *> WeakForm<Scalar>::get_mfvol() const
     {
       return mfvol;
     }
     template<typename Scalar>
-    Hermes::vector<MatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf()
+    Hermes::vector<MatrixFormSurf<Scalar> *> WeakForm<Scalar>::get_mfsurf() const
     {
       return mfsurf;
     }
     template<typename Scalar>
-    Hermes::vector<MatrixFormDG<Scalar> *> WeakForm<Scalar>::get_mfDG()
+    Hermes::vector<MatrixFormDG<Scalar> *> WeakForm<Scalar>::get_mfDG() const
     {
       return mfDG;
     }
     template<typename Scalar>
-      Hermes::vector<VectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol()
+      Hermes::vector<VectorFormVol<Scalar> *> WeakForm<Scalar>::get_vfvol() const
     {
       return vfvol;
     }
     template<typename Scalar>
-      Hermes::vector<VectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf()
+      Hermes::vector<VectorFormSurf<Scalar> *> WeakForm<Scalar>::get_vfsurf() const
     {
       return vfsurf;
     }
     template<typename Scalar>
-    Hermes::vector<VectorFormDG<Scalar> *> WeakForm<Scalar>::get_vfDG()
+    Hermes::vector<VectorFormDG<Scalar> *> WeakForm<Scalar>::get_vfDG() const
     {
       return vfDG;
     }

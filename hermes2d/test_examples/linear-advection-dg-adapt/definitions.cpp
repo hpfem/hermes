@@ -36,7 +36,7 @@ Ord CustomWeakForm::CustomMatrixFormVol::ord(int n, double *wt, Func<Ord> *u_ext
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
-MatrixFormVol<double>* CustomWeakForm::CustomMatrixFormVol::clone()
+MatrixFormVol<double>* CustomWeakForm::CustomMatrixFormVol::clone() const
 {
   return new CustomWeakForm::CustomMatrixFormVol(*this);
 }
@@ -63,7 +63,7 @@ Ord CustomWeakForm::CustomVectorFormVol::ord(int n, double *wt, Func<Ord> *u_ext
   return vector_form<Ord, Ord>(n, wt, u_ext, v, e, ext);
 }
 
-VectorFormVol<double>* CustomWeakForm::CustomVectorFormVol::clone()
+VectorFormVol<double>* CustomWeakForm::CustomVectorFormVol::clone() const
 {
   return new CustomWeakForm::CustomVectorFormVol(*this);
 }
@@ -100,7 +100,7 @@ Ord CustomWeakForm::CustomMatrixFormSurface::ord(int n, double *wt, Func<Ord> *u
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
-MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormSurface::clone()
+MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormSurface::clone() const
 {
   return new CustomWeakForm::CustomMatrixFormSurface(*this);
 }
@@ -131,7 +131,7 @@ Ord CustomWeakForm::CustomMatrixFormInterface::ord(int n, double *wt, Func<Ord> 
   return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
-MatrixFormDG<double>* CustomWeakForm::CustomMatrixFormInterface::clone()
+MatrixFormDG<double>* CustomWeakForm::CustomMatrixFormInterface::clone() const
 {
   return new CustomWeakForm::CustomMatrixFormInterface(*this);
 }
@@ -157,7 +157,7 @@ Ord CustomWeakForm::CustomVectorFormSurface::ord(int n, double *wt, Func<Ord> *u
   return result;
 }
 
-VectorFormSurf<double>* CustomWeakForm::CustomVectorFormSurface::clone()
+VectorFormSurf<double>* CustomWeakForm::CustomVectorFormSurface::clone() const
 {
   return new CustomWeakForm::CustomVectorFormSurface(*this);
 }

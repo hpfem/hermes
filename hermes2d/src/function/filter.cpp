@@ -577,7 +577,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    MeshFunction<Scalar>* MagFilter<Scalar>::clone()
+    MeshFunction<Scalar>* MagFilter<Scalar>::clone() const
     {
       Hermes::vector<MeshFunction<Scalar>*> slns;
       Hermes::vector<int> items;
@@ -618,7 +618,7 @@ namespace Hermes
       Filter<double>::init();
     };
 
-    MeshFunction<double>* TopValFilter::clone()
+    MeshFunction<double>* TopValFilter::clone() const
     {
       Hermes::vector<MeshFunction<double>*> slns;
       Hermes::vector<int> items;
@@ -659,7 +659,7 @@ namespace Hermes
       Filter<double>::init();
     };
 
-    MeshFunction<double>* BottomValFilter::clone()
+    MeshFunction<double>* BottomValFilter::clone() const
     {
       Hermes::vector<MeshFunction<double>*> slns;
       Hermes::vector<int> items;
@@ -704,7 +704,7 @@ namespace Hermes
       Filter<double>::init();
     };
 
-    MeshFunction<double>* ValFilter::clone()
+    MeshFunction<double>* ValFilter::clone() const
     {
       Hermes::vector<MeshFunction<double>*> slns;
       Hermes::vector<int> items;
@@ -728,7 +728,7 @@ namespace Hermes
     DiffFilter<Scalar>::DiffFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
 
     template<typename Scalar>
-    MeshFunction<Scalar>* DiffFilter<Scalar>::clone()
+    MeshFunction<Scalar>* DiffFilter<Scalar>::clone() const
     {
       Hermes::vector<MeshFunction<Scalar>*> slns;
       Hermes::vector<int> items;
@@ -757,7 +757,7 @@ namespace Hermes
     SumFilter<Scalar>::SumFilter(Hermes::vector<MeshFunction<Scalar>*> solutions, Hermes::vector<int> items) : SimpleFilter<Scalar>(solutions, items) {}
 
     template<typename Scalar>
-    MeshFunction<Scalar>* SumFilter<Scalar>::clone()
+    MeshFunction<Scalar>* SumFilter<Scalar>::clone() const
     {
       Hermes::vector<MeshFunction<Scalar>*> slns;
       Hermes::vector<int> items;
@@ -794,7 +794,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    MeshFunction<Scalar>* SquareFilter<Scalar>::clone()
+    MeshFunction<Scalar>* SquareFilter<Scalar>::clone() const
     {
       Hermes::vector<MeshFunction<Scalar>*> slns;
       Hermes::vector<int> items;
@@ -833,7 +833,7 @@ namespace Hermes
       init_components();
     };
 
-    MeshFunction<double>* AbsFilter::clone()
+    MeshFunction<double>* AbsFilter::clone() const
     {
       Hermes::vector<MeshFunction<double>*> slns;
       Hermes::vector<int> items;
@@ -853,7 +853,7 @@ namespace Hermes
         result[i] = values[i].real();
     };
 
-    MeshFunction<double>* RealFilter::clone()
+    MeshFunction<double>* RealFilter::clone() const
     {
       RealFilter* filter = new RealFilter(this->sln_complex->clone(), this->item);
       filter->setDeleteSolutions();
@@ -876,7 +876,7 @@ namespace Hermes
     {
     };
 
-    MeshFunction<double>* ImagFilter::clone()
+    MeshFunction<double>* ImagFilter::clone() const
     {
       ImagFilter* filter = new ImagFilter(this->sln_complex->clone(), this->item);
       filter->setDeleteSolutions();
@@ -889,7 +889,7 @@ namespace Hermes
         result[i] = sqrt(sqr(values[i].real()) + sqr(values[i].imag()));
     };
 
-    MeshFunction<double>* ComplexAbsFilter::clone()
+    MeshFunction<double>* ComplexAbsFilter::clone() const
     {
       ComplexAbsFilter* filter = new ComplexAbsFilter(this->sln_complex->clone(), this->item);
       filter->setDeleteSolutions();
@@ -981,7 +981,7 @@ namespace Hermes
       this->item2 = item2;
     }
 
-    MeshFunction<double>* VonMisesFilter::clone()
+    MeshFunction<double>* VonMisesFilter::clone() const
     {
       MeshFunction<double>** slns = new MeshFunction<double>*[num];
       for(int i = 0; i < num; i++)
