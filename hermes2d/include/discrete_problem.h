@@ -211,9 +211,6 @@ namespace Hermes
       /// Weak formulation.
       const WeakForm<Scalar>* wf;
 
-      /// Seq number of the WeakForm.
-      int wf_seq;
-
       /// Space instances for all equations in the system.
       Hermes::vector<const Space<Scalar>*> spaces;
 

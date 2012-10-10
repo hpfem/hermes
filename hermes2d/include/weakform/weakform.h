@@ -143,8 +143,6 @@ namespace Hermes
 
       unsigned int neq;
 
-      int seq;
-
       bool is_matfree;
 
       /// Holds volumetric matrix forms.
@@ -164,9 +162,6 @@ namespace Hermes
 
       /// Holds DG vector forms.
       Hermes::vector<VectorFormDG<Scalar> *> vfDG;
-
-      /// Internal. Used by DiscreteProblem to detect changes in the weakform.
-      int get_seq() const { return seq; }
 
       bool** get_blocks(bool force_diagonal_blocks) const;
 

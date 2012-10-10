@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
   wf.set_global_integration_order(10);
 
   // Initialize boundary conditions.
- Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
- Hermes::Hermes2D::EssentialBCs<double>bcs(&bc_essential);
+  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
+  Hermes::Hermes2D::EssentialBCs<double>bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
   H1Space<double> space(&mesh, &bcs, P_INIT);
@@ -110,11 +110,11 @@ int main(int argc, char* argv[])
 
   bool success = true;
 
-  if(fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.005262) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(-3.5, 17.0) - 10.00271206) > 1E-6) success = false;
   if(fabs(sln_time_new->get_pt_value(-1.0, 2.0) - 10.0) > 1E-6) success = false;
-  if(fabs(sln_time_new->get_pt_value(0.0, 9.5) - 9.995515) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(0.0, 9.5) - 10.00005812) > 1E-6) success = false;
   if(fabs(sln_time_new->get_pt_value( 1.0, 2.0) - 10.0) > 1E-6) success = false;
-  if(fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.005262) > 1E-6) success = false;
+  if(fabs(sln_time_new->get_pt_value(3.5, 17.0) - 10.00271206) > 1E-6) success = false;
 
   if(success)
   {

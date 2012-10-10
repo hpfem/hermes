@@ -46,7 +46,7 @@ namespace Hermes
     double DiscreteProblem<Scalar>::fake_wt = 1.0;
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf), wf_seq(-1)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf)
     {
       if(spaces.empty())
         throw Exceptions::NullException(2);
@@ -62,7 +62,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
-      : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf), wf_seq(-1)
+      : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf)
     {
       spaces.push_back(space);
       this->spaces_first_dofs.push_back(0);
@@ -176,7 +176,7 @@ namespace Hermes
     {
       if(wf != NULL)
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
-      wf_seq = -1;
+
       if(sp_seq != NULL) delete [] sp_seq;
 
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -250,9 +250,6 @@ namespace Hermes
           break;
         }
       }
-
-      if(wf->get_seq() != wf_seq)
-        up_to_date = false;
 
       return up_to_date;
     }
@@ -765,8 +762,6 @@ namespace Hermes
       // save space seq numbers and weakform seq number, so we can detect their changes
       for (unsigned int i = 0; i < wf->get_neq(); i++)
         sp_seq[i] = spaces[i]->get_seq();
-
-      wf_seq = wf->get_seq();
     }
 
     template<typename Scalar>
@@ -1433,6 +1428,10 @@ namespace Hermes
         else
           ext[ext_i] = NULL;
 
+      if(RungeKutta)
+        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+          u_ext[ext_i]->add(ext[current_extCount - this->RK_original_spaces_count + ext_i]);
+
       if(current_mat != NULL)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
@@ -1533,6 +1532,10 @@ namespace Hermes
               extSurf[ext_surf_i] = current_state->e[ext_surf_i] == NULL ? NULL : init_fn(current_wf->ext[ext_surf_i], orderSurf);
             else
               extSurf[ext_surf_i] = NULL;
+
+          if(RungeKutta)
+            for(int ext_surf_i = 0; ext_surf_i < this->RK_original_spaces_count; ext_surf_i++)
+              u_extSurf[ext_surf_i]->add(extSurf[current_extCount - this->RK_original_spaces_count + ext_surf_i]);
 
           if(current_mat != NULL)
           {
@@ -1683,11 +1686,7 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
-      {
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(ext[form->wf->ext.size() - this->RK_original_spaces_count + ext_i]);
         u_ext += form->u_ext_offset;
-      }
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -1815,11 +1814,7 @@ namespace Hermes
 
       // Add the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
-      {
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(ext[form->wf->ext.size() - this->RK_original_spaces_count + ext_i]);
         u_ext += form->u_ext_offset;
-      }
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)

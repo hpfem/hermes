@@ -33,7 +33,6 @@ namespace Hermes
     WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
     {
       this->neq = neq;
-      this->seq = 0;
       this->is_matfree = mat_free;
     }
 
@@ -54,12 +53,20 @@ namespace Hermes
     WeakForm<Scalar>* WeakForm<Scalar>::clone() const
     {
       this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
-      return new WeakForm(this->neq, this->is_matfree);
+      return new WeakForm(*this);
     }
 
     template<typename Scalar>
     void WeakForm<Scalar>::cloneMembers(const WeakForm<Scalar>* otherWf)
     {
+      this->mfvol.clear();
+      this->mfsurf.clear();
+      this->mfDG.clear();
+      this->vfvol.clear();
+      this->vfsurf.clear();
+      this->vfDG.clear();
+      this->ext.clear();
+
       for(unsigned int i = 0; i < otherWf->mfvol.size(); i++)
       {
         this->mfvol.push_back(otherWf->mfvol[i]->clone());
@@ -92,9 +99,6 @@ namespace Hermes
       }
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
         this->ext.push_back(otherWf->ext[i]->clone());
-      this->is_matfree = otherWf->is_matfree;
-      this->neq = otherWf->neq;
-      this->seq = otherWf->seq;
     }
 
     template<typename Scalar>
@@ -329,7 +333,6 @@ namespace Hermes
 
       form->set_weakform(this);
       mfvol.push_back(form);
-      seq++;
     }
 
     template<typename Scalar>
@@ -340,7 +343,6 @@ namespace Hermes
 
       form->set_weakform(this);
       mfsurf.push_back(form);
-      seq++;
     }
 
     template<typename Scalar>
@@ -351,7 +353,6 @@ namespace Hermes
 
       form->set_weakform(this);
       mfDG.push_back(form);
-      seq++;
     }
 
     template<typename Scalar>
@@ -361,7 +362,6 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Invalid equation number.");
       form->set_weakform(this);
       vfvol.push_back(form);
-      seq++;
     }
 
     template<typename Scalar>
@@ -372,7 +372,6 @@ namespace Hermes
 
       form->set_weakform(this);
       vfsurf.push_back(form);
-      seq++;
     }
 
     template<typename Scalar>
@@ -383,7 +382,6 @@ namespace Hermes
 
       form->set_weakform(this);
       vfDG.push_back(form);
-      seq++;
     }
 
     template<typename Scalar>

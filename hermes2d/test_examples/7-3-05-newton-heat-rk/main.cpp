@@ -32,7 +32,7 @@
 //
 
 //  The following parameters can be changed:
-
+const bool REUSE_SOLUTION = false;
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
@@ -58,7 +58,7 @@ MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_
 //   Implicit_SDIRK_BILLINGTON_3_23_embedded, Implicit_SDIRK_CASH_5_24_embedded, Implicit_SDIRK_CASH_5_34_embedded,
 //   Implicit_DIRK_ISMAIL_7_45_embedded.
 
-ButcherTableType butcher_table_type = Explicit_RK_1;
+ButcherTableType butcher_table_type = Implicit_RK_1;
 
 // Problem parameters.
 const double TEMP_INIT = 10;       // Temperature of the ground (also initial temperature).
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   // Solution pointer.
   Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
 
-  if(continuity.have_record_available())
+  if(REUSE_SOLUTION && continuity.have_record_available())
   {
     continuity.get_last_record()->load_mesh(&mesh);
     continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
