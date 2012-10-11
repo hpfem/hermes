@@ -171,9 +171,9 @@ namespace Hermes
 
       case DF_HERMES_BIN:
         {
-          hermes_fwrite("HERMESR\001", 1, 8, file);
-          int ssize = sizeof(double);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          //hermes_fwrite("HERMESR\001", 1, 8, file);
+          //int ssize = sizeof(double);
+          //hermes_fwrite(&ssize, sizeof(int), 1, file);
           hermes_fwrite(&this->size, sizeof(int), 1, file);
           hermes_fwrite(v, sizeof(double), this->size, file);
           return true;
