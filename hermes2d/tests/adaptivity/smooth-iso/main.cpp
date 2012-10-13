@@ -91,7 +91,11 @@ int main(int argc, char* argv[])
   do
   {
     // Construct globally refined reference mesh and setup reference space.
-    Space<double>* ref_space = Space<double>::construct_refined_space(&space);
+    Mesh::ReferenceMeshCreator ref_mesh_creator(&mesh);
+    Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+    Space<double>::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh);
+    Space<double>* ref_space = ref_space_creator.create_ref_space();
+
     int ndof_ref = ref_space->get_num_dofs();
 
     dp.set_space(ref_space);

@@ -236,6 +236,18 @@ namespace Hermes
       return okay;
     }
 
+    Mesh::ReferenceMeshCreator::ReferenceMeshCreator(Mesh* coarse_mesh, int refinement) : coarse_mesh(coarse_mesh), refinement(refinement)
+    {
+    }
+
+    Mesh* Mesh::ReferenceMeshCreator::create_ref_mesh()
+    {
+      Mesh* ref_mesh = new Mesh;
+      ref_mesh->copy(this->coarse_mesh);
+      ref_mesh->refine_all_elements(refinement, false);
+      return ref_mesh;
+    }
+
     void Mesh::create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
       int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers)
     {
@@ -365,7 +377,7 @@ namespace Hermes
       return &(elements[id]);
     }
 
-    int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2)
+    int Mesh::get_edge_sons(Element* e, int edge, int& son1, int& son2) const
     {
       assert(!e->active);
 
@@ -2046,7 +2058,7 @@ namespace Hermes
     {
     }
 
-    Mesh::MarkersConversion::MarkersConversionType Mesh::ElementMarkersConversion::get_type()
+    Mesh::MarkersConversion::MarkersConversionType Mesh::ElementMarkersConversion::get_type() const
     {
       return HERMES_ELEMENT_MARKERS_CONVERSION;
     }
@@ -2055,7 +2067,7 @@ namespace Hermes
     {
     }
 
-    Mesh::MarkersConversion::MarkersConversionType Mesh::BoundaryMarkersConversion::get_type()
+    Mesh::MarkersConversion::MarkersConversionType Mesh::BoundaryMarkersConversion::get_type() const
     {
       return HERMES_BOUNDARY_MARKERS_CONVERSION;
     }
@@ -2086,7 +2098,7 @@ namespace Hermes
       return;
     }
 
-    Mesh::MarkersConversion::StringValid Mesh::MarkersConversion::get_user_marker(int internal_marker)
+    Mesh::MarkersConversion::StringValid Mesh::MarkersConversion::get_user_marker(int internal_marker) const
     {
       if(internal_marker == H2D_DG_INNER_EDGE_INT)
         return StringValid(H2D_DG_INNER_EDGE, true);
@@ -2097,7 +2109,7 @@ namespace Hermes
       return StringValid(conversion_table.find(internal_marker)->second, true);
     }
 
-    Mesh::MarkersConversion::IntValid Mesh::MarkersConversion::get_internal_marker(std::string user_marker)
+    Mesh::MarkersConversion::IntValid Mesh::MarkersConversion::get_internal_marker(std::string user_marker) const
     {
       if(user_marker == H2D_DG_INNER_EDGE)
         return IntValid(H2D_DG_INNER_EDGE_INT, true);

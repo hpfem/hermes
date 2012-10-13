@@ -57,14 +57,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>::HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    HdivSpace<Scalar>::HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>::HdivSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
+    HdivSpace<Scalar>::HdivSpace(const Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       init(shapeset, p_init);
@@ -80,17 +80,6 @@ namespace Hermes
       }
       if(this->own_shapeset)
         delete this->shapeset;
-    }
-
-    template<typename Scalar>
-    Space<Scalar>* HdivSpace<Scalar>::duplicate(Mesh* mesh, int order_increase, typename Space<Scalar>::reference_space_p_callback_function p_callback) const
-    {
-      // FIXME
-      // HdivSpace<Scalar>* space = new HdivSpace(mesh, essential_bcs, 0, this->shapeset);
-      // space->copy_callbacks(this);
-      // space->copy_orders(this, order_increase, p_callback);
-      // return space;
-      return NULL;
     }
 
     template<typename Scalar>
@@ -174,7 +163,7 @@ namespace Hermes
 
           if(en->bnd)
             if(this->essential_bcs != NULL)
-              if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(en->marker).marker) != NULL)
+              if(this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != NULL)
                 this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
               else
               {
@@ -286,7 +275,7 @@ namespace Hermes
           surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
           // If the BC on this part of the boundary is constant.
-          EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
+          EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
           if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
           {

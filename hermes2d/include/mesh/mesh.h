@@ -340,9 +340,31 @@ namespace Hermes
       /// For internal use.
       void set_seq(unsigned seq);
 
+      /// Class for creating reference mesh.
+      class HERMES_API ReferenceMeshCreator
+      {
+      public:
+        /// Constructor.
+        /// \param[in] coarse_mesh The coarse (original) mesh.
+        /// \param refinement[in] Ignored for triangles. If the element
+        /// is a quad, 0 means refine in both directions, 1 means refine
+        /// horizontally (with respect to the reference domain), 2 means
+        /// refine vertically.
+        ReferenceMeshCreator(Mesh* coarse_mesh, int refinement = 0);
+
+        /// Method that does the creation.
+        /// THIS IS THE METHOD TO OVERLOAD FOR CUSTOM CREATING OF A REFERENCE MESH.
+        virtual Mesh* create_ref_mesh();
+
+      private:
+        /// Storage.
+        Mesh* coarse_mesh;
+        int refinement;
+      };
+
     private:
       /// For internal use.
-      int get_edge_sons(Element* e, int edge, int& son1, int& son2);
+      int get_edge_sons(Element* e, int edge, int& son1, int& son2) const;
 
       /// Refines all quad elements to triangles.
       /// It refines a quadrilateral element into two triangles.
@@ -430,17 +452,17 @@ namespace Hermes
 
         /// Lookup functions.
         /// Find a user marker for this internal marker.
-        StringValid get_user_marker(int internal_marker);
+        StringValid get_user_marker(int internal_marker) const;
 
         /// Find an internal marker for this user_marker.
-        IntValid get_internal_marker(std::string user_marker);
+        IntValid get_internal_marker(std::string user_marker) const;
 
         enum MarkersConversionType {
           HERMES_ELEMENT_MARKERS_CONVERSION = 0,
           HERMES_BOUNDARY_MARKERS_CONVERSION = 1
         };
 
-        virtual MarkersConversionType get_type() = 0;
+        virtual MarkersConversionType get_type() const = 0;
 
       protected:
         /// Conversion tables between the std::string markers the user sets and
@@ -475,14 +497,14 @@ namespace Hermes
       {
       public:
         ElementMarkersConversion();
-        virtual MarkersConversionType get_type();
+        virtual MarkersConversionType get_type() const;
       };
 
       class BoundaryMarkersConversion : public MarkersConversion
       {
       public:
         BoundaryMarkersConversion();
-        virtual MarkersConversionType get_type();
+        virtual MarkersConversionType get_type() const;
       };
 
       ElementMarkersConversion element_markers_conversion;

@@ -44,7 +44,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    L2Space<Scalar>::L2Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+    L2Space<Scalar>::L2Space(const Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       init(shapeset, p_init);
@@ -56,20 +56,6 @@ namespace Hermes
       ::free(ldata);
       if(this->own_shapeset)
         delete this->shapeset;
-    }
-
-    template<typename Scalar>
-    Space<Scalar>* L2Space<Scalar>::duplicate(Mesh* mesh, int order_increase, typename Space<Scalar>::reference_space_p_callback_function p_callback) const
-    {
-      L2Space<Scalar>* space = new L2Space(mesh, 0, this->shapeset);
-
-      // Set all elements not to have changed from the adaptation.
-      Element *e;
-      for_all_active_elements(e, space->get_mesh())
-        space->edata[e->id].changed_in_last_adaptation = false;
-
-      space->copy_orders(this, order_increase, p_callback);
-      return space;
     }
 
     template<typename Scalar>

@@ -13,7 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "space.h"
+#include "space_h1.h"
+#include "space_l2.h"
+#include "space_hcurl.h"
+#include "space_hdiv.h"
 #include "space_h2d_xml.h"
 #include <iostream>
 
@@ -24,7 +27,7 @@ namespace Hermes
     unsigned g_space_seq = 0;
 
     template<typename Scalar>
-    Space<Scalar>::Space(Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init)
+    Space<Scalar>::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       if(mesh == NULL)
@@ -44,7 +47,7 @@ namespace Hermes
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
           {
-            if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
+            if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
               throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
           }
 
@@ -145,7 +148,7 @@ namespace Hermes
     template<typename Scalar>
     Mesh* Space<Scalar>::get_mesh() const
     {
-      return mesh;
+      return const_cast<Mesh*>(mesh);
     }
 
     template<typename Scalar>
@@ -182,41 +185,6 @@ namespace Hermes
 
       edata[id].order = order;
       seq = g_space_seq++;
-    }
-
-    template<typename Scalar>
-    Hermes::vector<Space<Scalar>*>* Space<Scalar>::construct_refined_spaces(Hermes::vector<Space<Scalar>*> coarse, int order_increase, reference_space_p_callback_function p_callback) 
-    {
-      Hermes::vector<Space<Scalar>*> * ref_spaces = new Hermes::vector<Space<Scalar>*>;
-      bool same_meshes = true;
-      unsigned int same_seq = coarse[0]->get_mesh()->get_seq();
-      for (unsigned int i = 0; i < coarse.size(); i++) 
-      {
-        if(coarse[i]->get_mesh()->get_seq() != same_seq)
-          same_meshes = false;
-        Mesh* ref_mesh = new Mesh;
-        ref_mesh->copy(coarse[i]->get_mesh());
-        ref_mesh->refine_all_elements();
-        ref_spaces->push_back(coarse[i]->duplicate(ref_mesh, order_increase, p_callback));
-        ref_spaces->back()->seq = g_space_seq++;
-      }
-
-      if(same_meshes)
-        for (unsigned int i = 0; i < coarse.size(); i++)
-          ref_spaces->at(i)->set_mesh_seq(same_seq);
-      return ref_spaces;
-    }
-
-    template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::construct_refined_space(Space<Scalar>* coarse, int order_increase, reference_space_p_callback_function p_callback)
-    {
-      Mesh* ref_mesh = new Mesh;
-      ref_mesh->copy(coarse->get_mesh());
-      ref_mesh->refine_all_elements();
-
-      Space<Scalar>* ref_space = coarse->duplicate(ref_mesh, order_increase, p_callback);
-      ref_space->seq = g_space_seq++;
-      return ref_space;
     }
 
     template<typename Scalar>
@@ -508,7 +476,7 @@ namespace Hermes
           edata[list[i]].order = order;
         else
           edata[list[i]].order = H2D_MAKE_QUAD_ORDER(h_order, v_order);
-        this->mesh->unrefine_element_id(list[i]);
+        const_cast<Mesh*>(this->mesh)->unrefine_element_id(list[i]);
       }
 
       // Recalculate all integrals, do not use previous adaptivity step.
@@ -519,53 +487,234 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::copy_orders_recurrent(Element* e, int order)
+    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(const Space<Scalar>* coarse_space, const Mesh* ref_mesh, unsigned int order_increase = 1) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
     {
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::ReferenceSpaceCreator::handle_orders(Space<Scalar>* ref_space)
+    {
+      Element* e;
+      for_all_active_elements(e, coarse_space->get_mesh())
+      {
+        // This is the element id on the COARSE mesh. One can use it in the logic of increasing polynomial order (selectively).
+        int coarse_element_id = e->id;
+
+        // Get the current order (may be triangular or quadrilateral - in the latter case, it is both horizontal and vertical order encoded in one number).
+        int current_order = coarse_space->get_element_order(coarse_element_id);
+        // Sanity check.
+        if(current_order < 0)
+          throw Hermes::Exceptions::Exception("Source space has an uninitialized order (element id = %d)", coarse_element_id);
+
+        // New order calculation.
+        int new_order;
+        if(e->is_triangle())
+        {
+          // The triangular order is just the current order.
+          int current_order_triangular = current_order;
+          /// This is the default setup, we ALWAYS increase by attribute of this functor class: 'order_increase'.
+          /// This is OVERRIDABLE. Plus when overriding, one does not have to care about min / max possible values (due to shapeset, Space requirements).
+          /// These are guarded internally.
+          new_order = current_order_triangular + this->order_increase;
+        }
+        else
+        {
+          // We have to get the proper parts of the encoded order.
+          // - horizontal.
+          int current_order_quadrilateral_horizontal = H2D_GET_H_ORDER(current_order);
+          // - vertical.
+          int current_order_quadrilateral_vertical = H2D_GET_V_ORDER(current_order);
+
+          // And now we have to create the new encoded order.
+          int new_order_quadrilateral_horizontal = current_order_quadrilateral_horizontal + this->order_increase;
+          int new_order_quadrilateral_vertical = current_order_quadrilateral_vertical + this->order_increase;
+          new_order = H2D_MAKE_QUAD_ORDER(new_order_quadrilateral_horizontal, new_order_quadrilateral_vertical);
+        }
+
+        // And now call this method that does the magic for us (sets the new_order to .
+        ref_space->update_orders_recurrent(ref_space->mesh->get_element(coarse_element_id), new_order);
+      }
+    }
+    
+    template<typename Scalar>
+    Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_space()
+    {
+      /// Initialization.
+      Space<Scalar>* ref_space = NULL;
+      if(dynamic_cast<const L2Space<Scalar>*>(this->coarse_space) != NULL)
+        ref_space = this->init_construction_l2();
+      if(dynamic_cast<const H1Space<Scalar>*>(this->coarse_space) != NULL)
+        ref_space = this->init_construction_h1();
+      if(dynamic_cast<const HcurlSpace<Scalar>*>(this->coarse_space) != NULL)
+        ref_space = this->init_construction_hcurl();
+      if(dynamic_cast<const HdivSpace<Scalar>*>(this->coarse_space) != NULL)
+        ref_space = this->init_construction_hdiv();
+
+      if(ref_space == NULL)
+        throw Exceptions::Exception("Something went wrong in ReferenceSpaceCreator::create_ref_space().");
+
+      /// Call to the OVERRIDABLE handling method.
+      this->handle_orders(ref_space);
+
+      /// Finish - MUST BE CALLED BEFORE RETURN.
+      this->finish_construction(ref_space);
+
+      /// Return.
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    L2Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_l2_space()
+    {
+      /// Initialization
+      L2Space<Scalar>* ref_space = this->init_construction_l2();
+
+      /// Call to the OVERRIDABLE handling method.
+      this->handle_orders(ref_space);
+
+      /// Finish - MUST BE CALLED BEFORE RETURN.
+      this->finish_construction(ref_space);
+
+      /// Return.
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    H1Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_h1_space()
+    {
+      /// Initialization
+      H1Space<Scalar>* ref_space = this->init_construction_h1();
+
+      /// Call to the OVERRIDABLE handling method.
+      this->handle_orders(ref_space);
+
+      /// Finish - MUST BE CALLED BEFORE RETURN.
+      this->finish_construction(ref_space);
+
+      /// Return.
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    HcurlSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_hcurl_space()
+    {
+      /// Initialization
+      HcurlSpace<Scalar>* ref_space = this->init_construction_hcurl();
+
+      /// Call to the OVERRIDABLE handling method.
+      this->handle_orders(ref_space);
+
+      /// Finish - MUST BE CALLED BEFORE RETURN.
+      this->finish_construction(ref_space);
+
+      /// Return.
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    HdivSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_hdiv_space()
+    {
+      /// Initialization
+      HdivSpace<Scalar>* ref_space = this->init_construction_hdiv();
+
+      /// Call to the OVERRIDABLE handling method.
+      this->handle_orders(ref_space);
+
+      /// Finish - MUST BE CALLED BEFORE RETURN.
+      this->finish_construction(ref_space);
+
+      /// Return.
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    L2Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_l2()
+    {
+      L2Space<Scalar>* ref_space = new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset());
+
+      Element *e;
+      for_all_active_elements(e, coarse_space->get_mesh())
+        coarse_space->edata[e->id].changed_in_last_adaptation = false;
+      ref_space->resize_tables();
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    H1Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_h1()
+    {
+      H1Space<Scalar>* ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset());
+
+      Element *e;
+      for_all_active_elements(e, coarse_space->get_mesh())
+        coarse_space->edata[e->id].changed_in_last_adaptation = false;
+      ref_space->resize_tables();
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    HcurlSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hcurl()
+    {
+      HcurlSpace<Scalar>* ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
+
+      Element *e;
+      for_all_active_elements(e, coarse_space->get_mesh())
+        coarse_space->edata[e->id].changed_in_last_adaptation = false;
+      ref_space->resize_tables();
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    HdivSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hdiv()
+    {
+      HdivSpace<Scalar>* ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
+
+      Element *e;
+      for_all_active_elements(e, coarse_space->get_mesh())
+        coarse_space->edata[e->id].changed_in_last_adaptation = false;
+      ref_space->resize_tables();
+      return ref_space;
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::ReferenceSpaceCreator::finish_construction(Space<Scalar>* ref_space)
+    {
+      Element *e;
+      for_all_active_elements(e, coarse_space->get_mesh())
+      {
+        if(this->coarse_space->edata[e->id].changed_in_last_adaptation)
+        {
+          if(ref_space->mesh->get_element(e->id)->active)
+            ref_space->edata[e->id].changed_in_last_adaptation = true;
+          else
+            for(unsigned int i = 0; i < 4; i++)
+              if(ref_space->mesh->get_element(e->id)->sons[i] != NULL)
+                if(ref_space->mesh->get_element(e->id)->sons[i]->active)
+                  ref_space->edata[ref_space->mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
+        }
+      }
+
+      ref_space->seq = g_space_seq++;
+
+      // since space changed, enumerate basis functions
+      ref_space->assign_dofs();
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::update_orders_recurrent(Element* e, int order)
+    {
+      // Adjust wrt. max and min possible orders.
+      int mo = shapeset->get_max_order();
+      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
+      int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(order), mo));
+      int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(order), mo));
+      order = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
+
       if(e->active)
         edata[e->id].order = order;
       else
         for (int i = 0; i < 4; i++)
           if(e->sons[i] != NULL)
-            copy_orders_recurrent(e->sons[i], order);
-    }
-
-    template<typename Scalar>
-    void Space<Scalar>::copy_orders(const Space<Scalar>* space, int order_increase, reference_space_p_callback_function p_callback)
-    {
-      Element* e;
-      resize_tables();
-      for_all_active_elements(e, space->get_mesh())
-      {
-        int o = space->get_element_order(e->id);
-        if(o < 0)
-          throw Hermes::Exceptions::Exception("Source space has an uninitialized order (element id = %d)", e->id);
-
-        int mo = shapeset->get_max_order();
-        int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
-        int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(o) + ((p_callback == NULL) ? order_increase : (p_callback(e->id) ? order_increase : 0)), mo));
-        int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(o) + ((p_callback == NULL) ? order_increase : (p_callback(e->id) ? order_increase : 0)), mo));
-        o = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
-
-        copy_orders_recurrent(mesh->get_element(e->id), o);
-        
-        if(space->edata[e->id].changed_in_last_adaptation)
-        {
-          if(mesh->get_element(e->id)->active)
-            edata[e->id].changed_in_last_adaptation = true;
-          else
-            for(unsigned int i = 0; i < 4; i++)
-              if(mesh->get_element(e->id)->sons[i] != NULL)
-                if(mesh->get_element(e->id)->sons[i]->active)
-                  edata[mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
-        }
-
-        Element * e;
-      }
-
-      seq = g_space_seq++;
-
-      // since space changed, enumerate basis functions
-      this->assign_dofs();
+            update_orders_recurrent(e->sons[i], order);
     }
 
     template<typename Scalar>
@@ -627,7 +776,7 @@ namespace Hermes
     void Space<Scalar>::set_mesh_seq(int seq)
     {
       this->mesh_seq = seq;
-      this->mesh->set_seq(seq);
+      const_cast<Mesh*>(this->mesh)->set_seq(seq);
     }
 
     template<typename Scalar>
@@ -925,7 +1074,7 @@ namespace Hermes
       if(essential_bcs != NULL)
         for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
-            if(mesh->get_boundary_markers_conversion().conversion_table_inverse.find((*it)->markers.at(i)) == mesh->get_boundary_markers_conversion().conversion_table_inverse.end())
+            if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end())
               throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
 
       this->resize_tables();

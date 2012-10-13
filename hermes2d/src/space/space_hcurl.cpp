@@ -58,14 +58,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    HcurlSpace<Scalar>::HcurlSpace(const Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
-    HcurlSpace<Scalar>::HcurlSpace(Mesh* mesh, int p_init, Shapeset* shapeset)
+    HcurlSpace<Scalar>::HcurlSpace(const Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       init(shapeset, p_init);
@@ -82,21 +82,7 @@ namespace Hermes
       if(this->own_shapeset)
         delete this->shapeset;
     }
-
-    template<typename Scalar>
-    Space<Scalar>* HcurlSpace<Scalar>::duplicate(Mesh* mesh, int order_increase, typename Space<Scalar>::reference_space_p_callback_function p_callback) const
-    {
-      HcurlSpace* space = new HcurlSpace(mesh, this->essential_bcs, 0, this->shapeset);
-
-      // Set all elements not to have changed from the adaptation.
-      Element *e;
-      for_all_active_elements(e, space->get_mesh())
-        space->edata[e->id].changed_in_last_adaptation = false;
-
-      space->copy_orders(this, order_increase, p_callback);
-      return space;
-    }
-
+    
     template<typename Scalar>
     void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
@@ -171,7 +157,7 @@ namespace Hermes
           this->ndata[en->id].n = ndofs;
           if(en->bnd)
             if(this->essential_bcs != NULL)
-              if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(en->marker).marker) != NULL)
+              if(this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != NULL)
                 this->ndata[en->id].dof = this->H2D_CONSTRAINED_DOF;
               else
               {
@@ -270,7 +256,7 @@ namespace Hermes
           surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
           // If the BC on this part of the boundary is constant.
-          EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
+          EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
           if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
           {

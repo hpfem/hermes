@@ -28,15 +28,13 @@ namespace Hermes
     class HERMES_API HcurlSpace : public Space<Scalar>
     {
     public:
-      HcurlSpace(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+      HcurlSpace(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      HcurlSpace(Mesh* mesh, int p_init = 1,
+      HcurlSpace(const Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
         virtual ~HcurlSpace();
-
-      virtual Space<Scalar>* duplicate(Mesh* mesh, int order_increase = 0, typename Space<Scalar>::reference_space_p_callback_function p_callback = NULL) const;
 
       void load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset = NULL);
 

@@ -46,14 +46,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    H1Space<Scalar>::H1Space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    H1Space<Scalar>::H1Space(const Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
     {
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
-    H1Space<Scalar>::H1Space(Mesh* mesh, int p_init, Shapeset* shapeset)
+    H1Space<Scalar>::H1Space(const Mesh* mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL, p_init)
     {
       init(shapeset, p_init);
@@ -81,20 +81,6 @@ namespace Hermes
       }
       else
         throw Hermes::Exceptions::Exception("Wrong shapeset type in H1Space<Scalar>::set_shapeset()");
-    }
-
-    template<typename Scalar>
-    Space<Scalar>* H1Space<Scalar>::duplicate(Mesh* mesh, int order_increase, typename Space<Scalar>::reference_space_p_callback_function p_callback) const
-    {
-      H1Space<Scalar>* space = new H1Space(mesh, this->essential_bcs, 1, this->shapeset);
-
-      // Set all elements not to have changed from the adaptation.
-      Element *e;
-      for_all_active_elements(e, space->get_mesh())
-        space->edata[e->id].changed_in_last_adaptation = false;
-
-      space->copy_orders(this, order_increase, p_callback);
-      return space;
     }
 
     template<typename Scalar>
@@ -192,7 +178,7 @@ namespace Hermes
 
                 if(en->bnd)
                   if(this->essential_bcs != NULL)
-                    if(this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(e->en[i]->marker).marker) != NULL)
+                    if(this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(e->en[i]->marker).marker) != NULL)
                       nd->dof = this->H2D_CONSTRAINED_DOF;
                     else
                     {
@@ -291,7 +277,7 @@ namespace Hermes
 
       // Obtain linear part of the projection.
       // If the BC on this part of the boundary is constant.
-      EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
+      EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
       if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
@@ -332,7 +318,7 @@ namespace Hermes
             surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
 
             // If the BC on this part of the boundary is constant.
-            EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->get_boundary_markers_conversion().get_user_marker(surf_pos->marker).marker);
+            EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
             if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
               rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())

@@ -72,11 +72,6 @@ int main(int argc, char* argv[])
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton(&wf, &space);
 
-  Hermes::Hermes2D::Space<double>* ref_space = Hermes::Hermes2D::Space<double>::construct_refined_space(&space, 1, *sranda);
-
-  Hermes::Hermes2D::Views::OrderView o;
-  o.show(ref_space);
-
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
   try{

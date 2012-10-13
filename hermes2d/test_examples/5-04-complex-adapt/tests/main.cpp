@@ -104,7 +104,10 @@ int main(int argc, char* argv[])
   do
   {
     // Construct globally refined reference mesh and setup reference space.
-    Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
+    Mesh::ReferenceMeshCreator ref_mesh_creator(&mesh);
+    Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh);
+    Space<std::complex<double> >* ref_space = ref_space_creator.create_ref_space();
 
     newton.set_space(ref_space);
 

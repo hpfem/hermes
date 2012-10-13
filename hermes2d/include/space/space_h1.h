@@ -29,10 +29,10 @@ namespace Hermes
     class HERMES_API H1Space : public Space<Scalar>
     {
     public:
-      H1Space(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+      H1Space(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      H1Space(Mesh* mesh, int p_init = 1,
+      H1Space(const Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
       virtual ~H1Space();
@@ -47,13 +47,12 @@ namespace Hermes
       /// boundary) is not suitable.
       void fix_vertex(int id, Scalar value = 0.0);
 
-      virtual Space<Scalar>* duplicate(Mesh* mesh, int order_increase = 0, typename Space<Scalar>::reference_space_p_callback_function p_callback = NULL) const;
-
       void load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset = NULL);
 
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+
     protected:
 
       virtual SpaceType get_type() const { return HERMES_H1_SPACE; }

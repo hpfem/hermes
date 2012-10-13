@@ -28,12 +28,10 @@ namespace Hermes
     class HERMES_API L2Space : public Space<Scalar>
     {
     public:
-      L2Space(Mesh* mesh, int p_init = 0,
+      L2Space(const Mesh* mesh, int p_init = 0,
         Shapeset* shapeset = NULL);
 
       virtual ~L2Space();
-
-      virtual Space<Scalar>* duplicate(Mesh* mesh, int order_increase = 0, typename Space<Scalar>::reference_space_p_callback_function p_callback = NULL) const;
 
       /// Loads this space from a file.
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
@@ -41,7 +39,6 @@ namespace Hermes
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
-
     protected:
       virtual int get_edge_order(Element* e, int edge) const {
         return H2D_MAKE_EDGE_ORDER(e->get_mode(), edge, this->edata[e->id].order);
@@ -72,6 +69,7 @@ namespace Hermes
       virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const;
       virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
       virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
+      template<typename T> friend class Space<T>::ReferenceSpaceCreator;
     };
   }
 }

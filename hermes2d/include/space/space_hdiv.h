@@ -29,15 +29,13 @@ namespace Hermes
     class HERMES_API HdivSpace : public Space<Scalar>
     {
     public:
-      HdivSpace(Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+      HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
         Shapeset* shapeset = NULL);
 
-      HdivSpace(Mesh* mesh, int p_init = 1,
+      HdivSpace(const Mesh* mesh, int p_init = 1,
         Shapeset* shapeset = NULL);
 
       virtual ~HdivSpace();
-
-      virtual Space<Scalar>* duplicate(Mesh* mesh, int order_increase = 0, typename Space<Scalar>::reference_space_p_callback_function p_callback = NULL) const;
 
       void load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset = NULL);
 

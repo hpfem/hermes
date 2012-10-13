@@ -107,13 +107,18 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
     
+  Views::MeshView m1, m2;
+  Views::OrderView o1, o2;
   // Adaptivity loop:
   int as = 1; bool done = false;
   do
   {
     // Construct globally refined reference mesh and setup reference space.
-    Space<std::complex<double> >* ref_space = Space<std::complex<double> >::construct_refined_space(&space);
-      
+    Mesh::ReferenceMeshCreator ref_mesh_creator(&mesh);
+    Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh);
+    Space<std::complex<double> >* ref_space = ref_space_creator.create_ref_space();
+    
     newton.set_space(ref_space);
 
     int ndof_ref = ref_space->get_num_dofs();
