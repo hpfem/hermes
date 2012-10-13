@@ -23,7 +23,8 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #ifndef WIN32
-# include <sys/time.h>
+#include <sys/time.h>
+#include <unistd.h>
 #endif
 
 #include <map>
