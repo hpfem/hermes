@@ -323,7 +323,7 @@ namespace Hermes
       for (unsigned int i = 0; i < num_stages; i++)
         for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         {
-          Space<Scalar>::ReferenceSpaceCreator ref_space_creator(spaces[space_i], spaces[space_i]->get_mesh(), 0);
+          typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(spaces[space_i], spaces[space_i]->get_mesh(), 0);
           stage_spaces_vector.push_back(ref_space_creator.create_ref_space());
         }
 

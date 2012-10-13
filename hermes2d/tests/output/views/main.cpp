@@ -124,9 +124,9 @@ int main(int argc, char* argv[])
       viewS.save_screenshot("002-contours2.bmp");
       viewS.show_contours(5.0);
       viewS.save_screenshot("003-contours3.bmp");
-      viewS.set_3d_mode(true);
+      //viewS.set_3d_mode(true);
       viewS.save_screenshot("004-3D.bmp");
-      viewS.set_3d_mode(false);
+      //viewS.set_3d_mode(false);
       viewS.save_screenshot("005-backTo2D.bmp");
       viewS.hide_contours();
       viewS.save_screenshot("006-noContours.bmp");
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
       viewS.save_screenshot("010-scaleSize.bmp");
 
       ZeroSolution<double> slnZero(&mesh);
-      viewS.set_3d_mode(false);
+      //viewS.set_3d_mode(false);
       viewS.show_mesh(true);
       viewS.set_scale_size(30, 120, 14);
       viewS.show(&slnZero);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
       }
       ConstantSolution<double> slnConstRefined(ref_space->get_mesh(), 1.234567);
       viewS.show(&slnConstRefined);
-      viewS.set_3d_mode(true);
+      //viewS.set_3d_mode(true);
       viewS.save_screenshot("013-constSolutionRef.bmp");
 
       viewO.show(&space);

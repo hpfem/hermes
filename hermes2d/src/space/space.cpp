@@ -487,7 +487,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(const Space<Scalar>* coarse_space, const Mesh* ref_mesh, unsigned int order_increase = 1) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
+    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(const Space<Scalar>* coarse_space, const Mesh* ref_mesh, unsigned int order_increase) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
     {
     }
 
