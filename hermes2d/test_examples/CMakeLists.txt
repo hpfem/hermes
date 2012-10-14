@@ -18,4 +18,6 @@ IF(WITH_TRILINOS)
   add_subdirectory("9-02-trilinos-nonlinear")
 ENDIF(WITH_TRILINOS)
 
-add_subdirectory("linear-advection-dg-adapt")
+add_subdirectory("10-linear-advection-dg-adapt")
+add_subdirectory("11-FCT")
+

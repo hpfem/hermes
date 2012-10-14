@@ -1,4 +1,4 @@
-project(linear-advection-dg-adapt)
+project(P10-linear-advection-dg-adapt)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp)
 
