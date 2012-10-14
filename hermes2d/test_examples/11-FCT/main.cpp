@@ -27,9 +27,9 @@ using namespace Hermes::Hermes2D::Views;
 
 
 
-const int INIT_REF_NUM =5;                   // Number of initial refinements.
+const int INIT_REF_NUM =3;                   // Number of initial refinements.
 const int P_INIT = 1;       						// Initial polynomial degree.
-const int P_MAX = 5; 										//Maximal polynomial degree.
+const int P_MAX = 3; 										//Maximal polynomial degree.
 
 const double time_step = 1e-3;                           // Time step.
 const double T_FINAL = 2*PI;                       // Time interval length.
@@ -69,7 +69,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
 // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 2.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 7.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
 // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
 // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -79,7 +79,7 @@ const int ADAPSTEP_MAX = 5;												// max. numbers of adaptivity steps
 
 //Visualization
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
-const bool VTK_VISUALIZATION = true;              // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
 const int VTK_FREQ = 1000;													//Every VTK_FREQth time step the solution is saved as VTK output.
 
 // Boundary markers.
