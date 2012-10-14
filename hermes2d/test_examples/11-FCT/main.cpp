@@ -143,7 +143,8 @@ int main(int argc, char* argv[])
 
 
   int ref_ndof, ndof; double err_est_rel_total;
-  Adapt<double>* adaptivity = new Adapt<double>(&space, HERMES_L2_NORM);
+  Adapt<double> adaptivity(&space, HERMES_L2_NORM);
+
   OGProjection<double> ogProjection;	
   Lumped_Projection lumpedProjection;	
   Low_Order lowOrder(theta);
@@ -151,8 +152,8 @@ int main(int argc, char* argv[])
   Flux_Correction fluxCorrection(theta);
   Regularity_Estimator regEst(EPS_smooth);
 
-  DiscreteProblem<double>* dp_mass = new DiscreteProblem<double>(&massmatrix, &space);
-  DiscreteProblem<double>* dp_convection = new DiscreteProblem<double>(&convection, &space); 
+  DiscreteProblem<double> dp_mass(&massmatrix, &space);
+  DiscreteProblem<double> dp_convection(&convection, &space); 
 
   // Time stepping loop:
   double current_time = 0.0; 
@@ -200,10 +201,10 @@ int main(int argc, char* argv[])
       Solution<double>::vector_to_solution(coeff_vec_smooth, &space, &low_sln);
       // Calculate element errors and total error estimate.
       if(ts==1)
-      err_est_rel_total = adaptivity->calc_err_est(&low_sln, &initial_condition) * 100; 
+      err_est_rel_total = adaptivity.calc_err_est(&low_sln, &initial_condition) * 100; 
       else 
-      err_est_rel_total = adaptivity->calc_err_est(&low_sln, &u_prev_time) * 100;  
-      adaptivity->unrefine(THRESHOLD_UNREF);		
+      err_est_rel_total = adaptivity.calc_err_est(&low_sln, &u_prev_time) * 100;  
+      adaptivity.unrefine(THRESHOLD_UNREF);		
       delete [] coeff_vec_smooth; 
       // Visualize the solution.
       if(HERMES_VISUALIZATION)
@@ -255,8 +256,8 @@ int main(int argc, char* argv[])
       }
 
 
-      dp_mass->set_space(ref_space);
-      dp_convection->set_space(ref_space);
+      dp_mass.set_space(ref_space);
+      dp_convection.set_space(ref_space);
       fluxCorrection.init(ref_space);	
 
       double* coeff_vec = new double[ref_ndof];
@@ -264,8 +265,8 @@ int main(int argc, char* argv[])
       double* limited_flux = new double[ref_ndof];	
 
 
-      dp_mass->assemble(mass_matrix); 										//M_c/tau
-      dp_convection->assemble(conv_matrix, NULL,true);		//K
+      dp_mass.assemble(mass_matrix); 										//M_c/tau
+      dp_convection.assemble(conv_matrix, NULL,true);		//K
 
       //----------------------MassLumping  & Artificial Diffusion --------------------------------------------------------------------	
       UMFPackMatrix<double>* lumped_matrix = fluxCorrection.massLumping(mass_matrix); // M_L/tau
@@ -298,14 +299,14 @@ int main(int argc, char* argv[])
       // Project the fine mesh solution onto the coarse mesh.
       ogProjection.project_global(&space, &ref_sln, &sln, HERMES_L2_NORM); 
       // Calculate element errors and total error estimate.
-      err_est_rel_total = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+      err_est_rel_total = adaptivity.calc_err_est(&sln, &ref_sln) * 100;
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", ndof,ref_ndof, err_est_rel_total);				
       // If err_est_rel too large, adapt the mesh.
       if((err_est_rel_total < ERR_STOP)||(as>=ADAPSTEP_MAX)) done = true;
       else
       {
-        done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
         // Increase the counter of performed adaptivity steps.
         if(done == false)  as++;
       }
@@ -366,7 +367,6 @@ int main(int argc, char* argv[])
     ord.save_orders_vtk(&space, "end_order.vtk");
   }
 
-  delete adaptivity;
   delete mass_matrix;  
   delete conv_matrix;
 

@@ -323,9 +323,9 @@ namespace Hermes
           max_size = max_size_i;
       }
 
-      if(max_size * 1.5 > this->cache_size + 1)
+      if(max_size * 1.0 > this->cache_size + 1)
       {
-        max_size = 1.5 * max_size;
+        max_size = 1.0 * max_size;
 
         for(unsigned int i = 0; i < this->spaces.size(); i++)
         {
@@ -343,7 +343,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
-          if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active)
+          if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active || spaces[i]->get_element_order(spaces[i]->get_mesh()->get_element(j)->id) < 0)
           {
             if(this->cache_records_sub_idx[i][j] != NULL)
             {

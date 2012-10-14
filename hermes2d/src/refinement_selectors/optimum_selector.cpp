@@ -105,7 +105,7 @@ namespace Hermes
         {
           for(int j = 0; j < H2DRS_MAX_ORDER + 2; j++)
           {
-            for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
+            for(int k = 0; k < 6; k++)
             {
               delete [] num_shapes[i][j][k];
             }
