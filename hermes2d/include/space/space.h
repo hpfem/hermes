@@ -181,6 +181,9 @@ namespace Hermes
       /// Loads a space from a file.
       void load(const char *filename, EssentialBCs<Scalar>* essential_bcs = NULL);
 
+      /// Obtains an assembly list for the given element.
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
+      
       /// Class for creating reference space.
       class HERMES_API ReferenceSpaceCreator
       {
@@ -219,7 +222,7 @@ namespace Hermes
         const Mesh* ref_mesh;
         unsigned int order_increase;
       };
-    protected:
+
       /// Sets element polynomial order. This version does not call assign_dofs() and is
       /// intended primarily for internal use.
       virtual void set_element_order_internal(int id, int order);
@@ -235,12 +238,10 @@ namespace Hermes
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
+    protected:
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
 
-      /// Obtains an assembly list for the given element.
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
-      
-      static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
+       static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
 
       static void update_essential_bc_values(Space<Scalar>*s, double time);
       

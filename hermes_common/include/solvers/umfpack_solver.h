@@ -53,7 +53,8 @@ namespace Hermes
       /// @param[in] ai row indices
       /// @param[in] ax values
       void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
-    protected:
+
+      /// \brief Default constructor.
       CSCMatrix();
       /// \brief Constructor with specific size
       /// Calls alloc.
@@ -136,7 +137,6 @@ namespace Hermes
       /// @param[in] size size of vector
       UMFPackVector(unsigned int size);
       virtual ~UMFPackVector();
-    protected:
       virtual void alloc(unsigned int ndofs);
       virtual void free();
       virtual Scalar get(unsigned int idx);

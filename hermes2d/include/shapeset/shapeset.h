@@ -101,7 +101,6 @@ namespace Hermes
       /// Returns 2 if this is a vector shapeset, 1 otherwise.
       int get_num_components() const;
 
-    protected:
       /// Returns the maximum poly degree for all shape functions.
       int get_max_order() const;
 
@@ -116,6 +115,7 @@ namespace Hermes
       /// shapesets with non-symmetric edge functions).
       int get_edge_index(int edge, int ori, int order, ElementMode2D mode) const;
 
+    protected:
       /// Returns a complete set of indices of bubble functions for an element of the given order.
       int* get_bubble_indices(int order, ElementMode2D mode) const;
 
