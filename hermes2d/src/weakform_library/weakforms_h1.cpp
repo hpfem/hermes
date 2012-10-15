@@ -74,8 +74,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormVol<Scalar>::~DefaultMatrixFormVol()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -146,7 +146,8 @@ namespace Hermes
         this->setSymFlag(sym);
         
         // If coeff is HERMES_ONE, initialize it to be constant 1.0.
-        if(coeff == HERMES_ONE) this->coeff = new Hermes1DFunction<Scalar>(1.0);
+        if(coeff == HERMES_ONE)
+          this->coeff = new Hermes1DFunction<Scalar>(1.0);
       };
 
       template<typename Scalar>
@@ -164,8 +165,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianDiffusion<Scalar>::~DefaultJacobianDiffusion()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        if(coeff != HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -272,8 +272,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormDiffusion<Scalar>::~DefaultMatrixFormDiffusion()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -371,7 +371,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianAdvection<Scalar>::~DefaultJacobianAdvection()
       {
-        // FIXME: Should be deleted here only if it was created here.
+        
         //if(coeff1 != HERMES_ONE) delete coeff1;
         //if(coeff2 != HERMES_ONE) delete coeff2;
       };
@@ -438,8 +438,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultVectorFormVol<Scalar>::~DefaultVectorFormVol()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -526,8 +526,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualVol<Scalar>::~DefaultResidualVol()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -612,8 +612,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualDiffusion<Scalar>::~DefaultResidualDiffusion()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -701,7 +701,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualAdvection<Scalar>::~DefaultResidualAdvection()
       {
-        // FIXME: Should be deleted here only if it was created here.
+        
         //if(coeff1 != HERMES_ONE) delete coeff1;
         //if(coeff2 != HERMES_ONE) delete coeff2;
       };
@@ -765,8 +765,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormSurf<Scalar>::~DefaultMatrixFormSurf()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -855,8 +855,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianFormSurf<Scalar>::~DefaultJacobianFormSurf()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -918,8 +918,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultVectorFormSurf<Scalar>::~DefaultVectorFormSurf()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
@@ -1007,8 +1007,8 @@ namespace Hermes
       template<typename Scalar>
       DefaultResidualSurf<Scalar>::~DefaultResidualSurf()
       {
-        // FIXME: Should be deleted here only if it was created here.
-        //if(coeff != HERMES_ONE) delete coeff;
+        
+        if(coeff == HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>

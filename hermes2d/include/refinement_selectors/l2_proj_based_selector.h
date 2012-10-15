@@ -36,7 +36,8 @@ namespace Hermes
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used, see HcurlProjBasedSelector::H2DRS_MAX_L2_ORDER.
         *  \param[in] user_shapeset A shapeset. If NULL, it will use internal instance of the class L2Shapeset. */
         L2ProjBasedSelector(CandList cand_list = H2D_HP_ANISO, double conv_exp = 1.0, int max_order = H2DRS_DEFAULT_ORDER, L2Shapeset* user_shapeset = NULL);
-
+        /// Destructor.
+        ~L2ProjBasedSelector();
         /// Cloning for paralelism.
         virtual Selector<Scalar>* clone();
 
@@ -84,6 +85,9 @@ namespace Hermes
         /// Evaluates an squared error of a projection of an element of a candidate onto subdomains.
         /**  Overriden function. For details, see ProjBasedSelector::evaluate_error_squared_subdomain(). */
         virtual double evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj);
+      
+        /// If the shapeset is not from the user, we shall delete it in the destructor.
+        bool user_shapeset;
       };
     }
   }

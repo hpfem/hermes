@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     newton.set_space(ref_space);
 
     int ndof_ref = ref_space->get_num_dofs();
-
+    std::cout << ndof_ref << std::endl;
     // Initialize reference problem.
 
     // Initial coefficient vector for the Newton's method.

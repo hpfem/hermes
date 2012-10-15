@@ -366,7 +366,7 @@ namespace Hermes
       if(this->caughtException == NULL)
         fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
 
-      for(unsigned int i = 0; i < omp_get_num_threads(); i++)
+      for(unsigned int i = 0; i < Hermes::Hermes2D::Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
           delete global_refinement_selectors[i][j];

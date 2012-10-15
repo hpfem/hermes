@@ -267,6 +267,7 @@ namespace Hermes
           FILE* rhs_file = fopen(fileName, "w+");
           residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
           fclose(rhs_file);
+          delete [] fileName;
         }
         
         Element* e;
@@ -363,6 +364,10 @@ namespace Hermes
             delete [] coeff_vec;
             coeff_vec = NULL;
           }
+
+          delete [] coeff_vec_back;
+          coeff_vec_back = NULL;
+
           this->on_finish();
 
           this->tick();
@@ -384,6 +389,7 @@ namespace Hermes
 
           jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
           fclose(matrix_file);
+          delete [] fileName;
         }
 
         this->on_step_end();
@@ -423,6 +429,9 @@ namespace Hermes
             delete [] coeff_vec;
             coeff_vec = NULL;
           }
+
+          delete [] coeff_vec_back;
+          coeff_vec_back = NULL;
 
           this->tick();
           this->info("Newton: solution duration: %f s.\n", this->last());
