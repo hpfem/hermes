@@ -30,7 +30,7 @@ namespace Hermes
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
     template<typename Scalar>
-    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free)
+    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free) : Hermes::Mixins::Loggable(true)
     {
       this->neq = neq;
       this->is_matfree = mat_free;

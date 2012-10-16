@@ -34,7 +34,9 @@ namespace Hermes
       template<typename Scalar>
       Selector<Scalar>* L2ProjBasedSelector<Scalar>::clone()
       {
-        return new L2ProjBasedSelector(this->cand_list, this->conv_exp, this->max_order, (L2Shapeset*)this->shapeset);
+        L2ProjBasedSelector<Scalar>* newSelector = new L2ProjBasedSelector(this->cand_list, this->conv_exp, this->max_order, (L2Shapeset*)this->shapeset);
+        newSelector->set_error_weights(this->error_weight_h, this->error_weight_p, this->error_weight_aniso);
+        return newSelector;
       }
 
       template<typename Scalar>

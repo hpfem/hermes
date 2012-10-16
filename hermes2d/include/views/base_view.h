@@ -55,7 +55,7 @@ namespace Hermes
 
       protected:
 
-        Space<Scalar>* space;
+        const Space<Scalar>* space;
         PrecalcShapeset* pss;
         Solution<Scalar>* sln;
 
