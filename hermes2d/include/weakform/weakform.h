@@ -169,6 +169,8 @@ namespace Hermes
       friend class DiscreteProblemLinear<Scalar>;
       friend class RungeKutta<Scalar>;
       friend class Hermes::Preconditioners::Precond<Scalar>;
+
+      bool warned_nonOverride;
     };
 
     /// By default, the form is initialized with the following natural attributes:

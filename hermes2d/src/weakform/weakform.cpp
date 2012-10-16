@@ -30,7 +30,7 @@ namespace Hermes
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
     template<typename Scalar>
-    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free) : Hermes::Mixins::Loggable(true)
+    WeakForm<Scalar>::WeakForm(unsigned int neq, bool mat_free) : Hermes::Mixins::Loggable(true), warned_nonOverride(false)
     {
       this->neq = neq;
       this->is_matfree = mat_free;
@@ -52,7 +52,9 @@ namespace Hermes
     template<typename Scalar>
     WeakForm<Scalar>* WeakForm<Scalar>::clone() const
     {
-      this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
+      if(!this->warned_nonOverride)
+        this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
+      const_cast<WeakForm<Scalar>*>(this)->warned_nonOverride = true;
       return new WeakForm(*this);
     }
 

@@ -1,4 +1,3 @@
-#define HERMES_REPORT_ALL
 #include "definitions.h"
 
 // This example shows how to use Newton (Robin) boundary conditions.
