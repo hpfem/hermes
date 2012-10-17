@@ -440,7 +440,7 @@ namespace Hermes
       int nc = fu->get_num_components();
       SpaceType space_type = fu->get_space_type();
       Quad2D* quad = fu->get_quad_2d();
-      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE)
+      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE))
           fu->set_quad_order(order, H2D_FN_ALL);
       else
         fu->set_quad_order(order);
@@ -449,8 +449,8 @@ namespace Hermes
       int np = quad->get_num_points(order, rm->get_active_element()->get_mode());
       Func<double>* u = new Func<double>(np, nc);
 
-      // H1 space.
-      if(space_type == HERMES_H1_SPACE)
+      // H1 & L2 space.
+      if(space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE)
       {
         u->val = new double[np];
         u->dx  = new double[np];
@@ -608,52 +608,6 @@ namespace Hermes
           u->val1[i] = (- fn0[i] * (*m)[0][1] + fn1[i] * (*m)[0][0]);
           u->div[i] = ((*m)[0][0] * (*m)[1][1] - (*m)[1][0] * (*m)[0][1]) * (dx0[i] + dy1[i]);
         }
-        m -= np;
-        if(rm->is_jacobian_const())
-          delete [] m;
-      }
-      // L2 Space.
-      else if(space_type == HERMES_L2_SPACE)
-      {
-        // Same as for H1, except that we currently do not have
-        // second derivatives of L2 shape functions for triangles.
-        u->val = new double[np];
-        u->dx  = new double[np];
-        u->dy  = new double[np];
-
-        double *fn = fu->get_fn_values();
-        double *dx = fu->get_dx_values();
-        double *dy = fu->get_dy_values();
-
-        double2x2 *m;
-        if(rm->is_jacobian_const())
-        {
-          m = new double2x2[np];
-          double2x2 const_inv_ref_map;
-
-          const_inv_ref_map[0][0] = rm->get_const_inv_ref_map()[0][0][0];
-          const_inv_ref_map[0][1] = rm->get_const_inv_ref_map()[0][0][1];
-          const_inv_ref_map[1][0] = rm->get_const_inv_ref_map()[0][1][0];
-          const_inv_ref_map[1][1] = rm->get_const_inv_ref_map()[0][1][1];
-
-          for(int i = 0; i < np; i++)
-          {
-            m[i][0][0] = const_inv_ref_map[0][0];
-            m[i][0][1] = const_inv_ref_map[0][1];
-            m[i][1][0] = const_inv_ref_map[1][0];
-            m[i][1][1] = const_inv_ref_map[1][1];
-          }
-        }
-        else
-          m = rm->get_inv_ref_map(order);
-
-        for (int i = 0; i < np; i++, m++)
-        {
-          u->val[i] = fn[i];
-          u->dx[i] = (dx[i] * (*m)[0][0] + dy[i] * (*m)[0][1]);
-          u->dy[i] = (dx[i] * (*m)[1][0] + dy[i] * (*m)[1][1]);
-        }
-
         m -= np;
         if(rm->is_jacobian_const())
           delete [] m;
