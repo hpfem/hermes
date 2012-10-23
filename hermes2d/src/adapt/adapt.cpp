@@ -584,7 +584,15 @@ namespace Hermes
     {
       if(num != 1)
         throw Exceptions::LengthException(1, 1, num);
+      OGProjection<Scalar> ogProjection;
+      Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
+      Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+      Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
+      Space<Scalar>* ref_space = ref_space_creator.create_ref_space();
+      ogProjection.project_global(ref_space, rsln, rsln);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
+      delete ref_space;
+      delete ref_mesh;
     }
 
     template<typename Scalar>
@@ -596,7 +604,25 @@ namespace Hermes
         throw Exceptions::LengthException(1, slns.size(), num);
       if(rslns.size() != num)
         throw Exceptions::LengthException(2, rslns.size(), num);
+      Mesh** ref_meshes = new Mesh*[num];
+      Space<Scalar>** ref_spaces = new Space<Scalar>*[num];
+      for(unsigned int i = 0; i < num; i++)
+      {
+        OGProjection<Scalar> ogProjection;
+        Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
+        ref_meshes[i] = ref_mesh_creator.create_ref_mesh();
+        Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh_creator.create_ref_mesh(), 0);
+        ref_spaces[i] = ref_space_creator.create_ref_space();
+        ogProjection.project_global(ref_space_creator.create_ref_space(), rslns[i], rslns[i]);
+      }
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
+      for(unsigned int i = 0; i < num; i++)
+      {
+        delete ref_spaces[i];
+        delete ref_meshes[i];
+      }
+      delete [] ref_meshes;
+      delete [] ref_spaces;
     }
 
     template<typename Scalar>
