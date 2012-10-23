@@ -458,7 +458,7 @@ namespace Hermes
 
     Func<double>* ComplexFilter::get_pt_value(double x, double y)
     {
-      Func<std::complex<double>>* val = this->sln_complex->get_pt_value(x, y);
+      Func<std::complex<double> >* val = this->sln_complex->get_pt_value(x, y);
 
       Func<double>* toReturn = new Func<double>(1, this->num_components);
 
