@@ -33,6 +33,9 @@ namespace Hermes
   {
     /// @ingroup userSolvingAPI
     /// Class for the Picard's method.
+    /// For details about the optionally applied Anderson acceleration, the following website
+    /// http://hpfem.org/hermes/hermes-tutorial/doc/_build/html/src/hermes2d/B-nonlinear/01-picard.html
+    /// will give an overview.
     template<typename Scalar>
     class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
     {
@@ -59,13 +62,23 @@ namespace Hermes
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
+      /// Overridden Mixins::SettableSpaces methods.
       virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
       virtual void set_space(const Space<Scalar>* space);
       virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+
+      /// Turn on / off the Anderson acceleration. By default it is off.
+      void use_Anderson_acceleration(bool to_set);
     
+      /// Set the relative tolerance, thus co-determine when to stop Picard's iterations.
       void set_picard_tol(double tol);
+      /// Set the maximum number of Picard's iterations, thus co-determine when to stop Picard's iterations.
       void set_picard_max_iter(int max_iter);
+      /// Set how many last vectors will be used for Anderson acceleration. See the details about the Anderson acceleration for 
+      /// explanation of this parameter.
       void set_num_last_vector_used(int num);
+      /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for 
+      /// explanation of this parameter.
       void set_anderson_beta(double beta);
     private:
       void init();
@@ -78,7 +91,8 @@ namespace Hermes
       double tol;
       int max_iter;
       int num_last_vectors_used;
-      double beta;
+      bool anderson_is_on;
+      double anderson_beta;
     };
   }
 }

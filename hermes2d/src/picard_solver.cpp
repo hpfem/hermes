@@ -26,7 +26,7 @@ namespace Hermes
   {
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp)
-        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
+      : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
       for(unsigned int i = 0; i < dp->get_spaces().size(); i++)
         if(dp->get_spaces()[i]->get_shapeset()->get_num_components() == 1)
@@ -38,7 +38,7 @@ namespace Hermes
 
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp)
-        : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
+      : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
       for(unsigned int i = 0; i < dp->get_spaces().size(); i++)
         if(dp->get_spaces()[i]->get_shapeset()->get_num_components() == 1)
@@ -50,7 +50,7 @@ namespace Hermes
 
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
-        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
+      : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
     {
       this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(space->get_mesh()));
       init();
@@ -58,7 +58,7 @@ namespace Hermes
 
     template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces)
-        : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
+      : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
         if(spaces[i]->get_shapeset()->get_num_components() == 1)
@@ -87,7 +87,8 @@ namespace Hermes
       tol = 1e-4;
       max_iter = 50;
       num_last_vectors_used = 3;
-      beta = 1.0;
+      anderson_beta = 1.0;
+      anderson_is_on = false;
     }
 
     template<typename Scalar>
@@ -100,7 +101,7 @@ namespace Hermes
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time(time);
     }
-      
+
     template<typename Scalar>
     void PicardSolver<Scalar>::set_time_step(double time_step)
     {
@@ -123,7 +124,7 @@ namespace Hermes
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
     }
-    
+
     template<typename Scalar>
     Hermes::vector<const Space<Scalar>*> PicardSolver<Scalar>::get_spaces() const
     {
@@ -229,7 +230,13 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::set_anderson_beta(double beta)
     {
-      this->beta = beta;
+      this->anderson_beta = beta;
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::use_Anderson_acceleration(bool to_set)
+    {
+      anderson_is_on = to_set;
     }
 
     template<typename Scalar>
@@ -249,7 +256,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
         add_dir_lift.push_back(false);
       LinearSolver<Scalar> linear_solver(static_cast<DiscreteProblemLinear<Scalar>*>(this->dp));
-      
+
       linear_solver.set_rhs_E_matrix_dump_format(this->RhsFormat);
       linear_solver.set_rhs_filename(this->RhsFilename);
       linear_solver.set_rhs_varname(this->RhsVarname);
@@ -285,7 +292,22 @@ namespace Hermes
       // Important: This makes the Solution(s) slns_prev_iter compatible with this->sln_vector.
       Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces, this->slns_prev_iter);
 
+      // If Anderson is used, allocate memory for vectors and coefficients.
+      Scalar** previous_vectors = NULL;      // To store num_last_vectors_used last coefficient vectors.
+      Scalar* anderson_coeffs = NULL;        // To store num_last_vectors_used - 1 Anderson coefficients.
+      if (anderson_is_on)
+      {
+        previous_vectors = new Scalar*[num_last_vectors_used];
+        for (int i = 0; i < num_last_vectors_used; i++) previous_vectors[i] = new Scalar[ndof];
+        anderson_coeffs = new Scalar[num_last_vectors_used-1];
+      }
+
+      // If Anderson is used, save the initial coefficient vector in the memory.
+      if (anderson_is_on)
+        for (int i = 0; i < ndof; i++) previous_vectors[0][i] = this->sln_vector[i];
+
       int it = 1;
+      int vec_in_memory = 1;   // There is already one vector in the memory.
 
       this->on_initialization();
 
@@ -301,9 +323,45 @@ namespace Hermes
           linear_solver.output_matrix(1);
         else
           linear_solver.output_matrix(0);
-          
+
         linear_solver.solve();
         memcpy(this->sln_vector, linear_solver.get_sln_vector(), sizeof(Scalar)*ndof);
+        // If Anderson is used, store the new vector in the memory.
+        if (anderson_is_on)
+        {
+          // If memory not full, just add the vector.
+          if (vec_in_memory < num_last_vectors_used)
+          {
+            for (int i = 0; i < ndof; i++) previous_vectors[vec_in_memory][i] = this->sln_vector[i];
+            vec_in_memory++;
+          }
+          else
+          {
+            // If memory full, shift all vectors back, forgetting the oldest one.
+            // Save this->sln_vector[] as the newest one.
+            Scalar* oldest_vec = previous_vectors[0];
+            for (int i = 0; i < num_last_vectors_used-1; i++) previous_vectors[i] = previous_vectors[i + 1];
+            previous_vectors[num_last_vectors_used-1] = oldest_vec;
+            for (int j = 0; j < ndof; j++) previous_vectors[num_last_vectors_used-1][j] = this->sln_vector[j];
+          }
+        }
+
+        // If there is enough vectors in the memory, calculate Anderson coeffs.
+        if (anderson_is_on && vec_in_memory >= num_last_vectors_used)
+        {
+          // Calculate Anderson coefficients.
+          calculate_anderson_coeffs(previous_vectors, anderson_coeffs, num_last_vectors_used, ndof);
+
+          // Calculate new vector and store it in this->sln_vector[].
+          for (int i = 0; i < ndof; i++)
+          {
+            this->sln_vector[i] = 0;
+            for (int j = 1; j < num_last_vectors_used; j++)
+            {
+              this->sln_vector[i] += anderson_coeffs[j-1] * previous_vectors[j][i] - (1.0 - anderson_beta) * anderson_coeffs[j-1] * (previous_vectors[j][i] - previous_vectors[j-1][i]);
+            }
+          }
+        }
 
         // Calculate relative error between last_iter_vector[] and this->sln_vector[].
         // FIXME: this is wrong in the complex case (complex conjugation must be used).
@@ -316,7 +374,7 @@ namespace Hermes
 
         double abs_error = 0;
         for (int i = 0; i < ndof; i++) abs_error += std::abs((this->sln_vector[i] - last_iter_vector[i]) * (this->sln_vector[i] - last_iter_vector[i]));
-          abs_error = sqrt(abs_error);
+        abs_error = sqrt(abs_error);
 
         double rel_error = abs_error / last_iter_vec_norm;
 
@@ -327,6 +385,13 @@ namespace Hermes
         if(rel_error < tol)
         {
           delete [] last_iter_vector;
+          // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
+          if (anderson_is_on)
+          {
+            for (int i = 0; i < num_last_vectors_used; i++) delete [] previous_vectors[i];
+            delete [] previous_vectors;
+            delete [] anderson_coeffs;
+          }
           Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
           static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
 
@@ -340,11 +405,18 @@ namespace Hermes
         if(it >= max_iter)
         {
           delete [] last_iter_vector;
+          // If Anderson acceleration was employed, release memory for the Anderson vectors and coeffs.
+          if (anderson_is_on)
+          {
+            for (int i = 0; i < num_last_vectors_used; i++) delete [] previous_vectors[i];
+            delete [] previous_vectors;
+            delete [] anderson_coeffs;
+          }
           static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
-          
+
           this->tick();
           this->info("Picard: solution duration: %f s.\n", this->last());
-          
+
           this->on_finish();
           throw Hermes::Exceptions::Exception("Picard: maximum allowed number of Picard iterations exceeded.");
           return;
