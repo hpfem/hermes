@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   bool success = true;
   for (int i = 0; i < 4; i++)
   {
-    if(Hermes::abs(value[i] - sln.get_pt_value(coor_x[i], coor_y)) > 1E-6)
+    if(Hermes::abs(value[i] - sln.get_pt_value(coor_x[i], coor_y)->val[0]) > 1E-6)
       success = false;
   }
   if(success)

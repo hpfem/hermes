@@ -1442,7 +1442,7 @@ namespace Hermes
             toReturn->dx = new Scalar[1];
             toReturn->dy = new Scalar[1];
 
-            toReturn->val[0] = get_ref_value(e, xi1, xi2, 0, 1);
+            toReturn->val[0] = get_ref_value(e, xi1, xi2, 0, 0);
 
             double2x2 m;
             double xx, yy;
