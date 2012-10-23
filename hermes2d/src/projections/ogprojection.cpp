@@ -96,6 +96,7 @@ namespace Hermes
 
       // Define temporary projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
+      proj_wf->warned_nonOverride = true;
       proj_wf->set_ext(source_meshfn);
       // Add Jacobian.
       proj_wf->add_matrix_form(new ProjectionMatrixFormVol(0, 0, norm));

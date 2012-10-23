@@ -53,8 +53,12 @@ namespace Hermes
     WeakForm<Scalar>* WeakForm<Scalar>::clone() const
     {
       if(!this->warned_nonOverride)
-        this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
-      const_cast<WeakForm<Scalar>*>(this)->warned_nonOverride = true;
+#pragma omp critical (warning_weakform_nonOverride)
+      {
+        if(!this->warned_nonOverride)
+          this->warn("Using default WeakForm<Scalar>::clone, if you have any dynamically created data in your WeakForm constructor, you need to overload this method!");
+        const_cast<WeakForm<Scalar>*>(this)->warned_nonOverride = true;
+      }
       return new WeakForm(*this);
     }
 

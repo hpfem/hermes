@@ -169,7 +169,7 @@ namespace Hermes
       update_cur_node();
 
       is_const = !element->is_curved() &&
-        (element->is_triangle() || is_parallelogram());
+        (element->is_triangle() || is_parallelogram(element));
 
       // prepare the shapes and coefficients of the reference map
       int j, k = 0;
@@ -337,10 +337,9 @@ namespace Hermes
       delete [] k;
     }
 
-    bool RefMap::is_parallelogram()
+    bool RefMap::is_parallelogram(Element* e)
     {
       const double eps = 1e-14;
-      Element* e = element;
       assert(e->is_quad());
       return fabs(e->vn[2]->x - (e->vn[1]->x + e->vn[3]->x - e->vn[0]->x)) < eps &&
         fabs(e->vn[2]->y - (e->vn[1]->y + e->vn[3]->y - e->vn[0]->y)) < eps;
@@ -589,14 +588,72 @@ namespace Hermes
     {
       const double TOL = 1e-12;
 
-      if(is_const)
+      // Newton Method
+      int local_nc;
+      double2* local_coeffs;
+      double2  local_lin_coeffs[4];
+      H1ShapesetJacobi shapeset;
+      int local_indices[70];
+        
+      // prepare the shapes and coefficients of the reference map
+      int j, k = 0;
+      for (unsigned int i = 0; i < e->get_nvert(); i++)
+        local_indices[k++] = shapeset.get_vertex_index(i, e->get_mode());
+
+      // straight-edged element
+      if(e->cm == NULL)
+      {
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
+        {
+          local_lin_coeffs[i][0] = e->vn[i]->x;
+          local_lin_coeffs[i][1] = e->vn[i]->y;
+        }
+        local_coeffs = local_lin_coeffs;
+        local_nc = e->get_nvert();
+      }
+      else // curvilinear element - edge and bubble shapes
+      {
+        int o = e->cm->order;
+        for (unsigned int i = 0; i < e->get_nvert(); i++)
+          for (j = 2; j <= o; j++)
+            local_indices[k++] = shapeset.get_edge_index(i, 0, j, e->get_mode());
+
+        if(e->is_quad()) o = H2D_MAKE_QUAD_ORDER(o, o);
+        memcpy(local_indices + k, shapeset.get_bubble_indices(o, e->get_mode()),
+          shapeset.get_num_bubbles(o, e->get_mode()) * sizeof(int));
+
+        local_coeffs = e->cm->coeffs;
+        local_nc = e->cm->nc;
+      }
+
+      // Constant reference mapping.
+      if(!e->is_curved() && (e->is_triangle() || is_parallelogram(e)))
       {
         double dx = e->vn[0]->x - x;
         double dy = e->vn[0]->y - y;
+        int k = e->is_triangle() ? 2 : 3;
+        double m[2][2] = 
+        { 
+          { e->vn[1]->x - e->vn[0]->x,  e->vn[k]->x - e->vn[0]->x },
+          { e->vn[1]->y - e->vn[0]->y,  e->vn[k]->y - e->vn[0]->y } 
+        };
+
+        double const_jacobian = 0.25 * (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
+        double2x2 const_inv_ref_map;
+        if(const_jacobian <= 0.0)
+          throw Hermes::Exceptions::Exception("Element #%d is concave or badly oriented in RefMap::untransform().", e->id);
+
+        double ij = 0.5 / const_jacobian;
+
+        const_inv_ref_map[0][0] =  m[1][1] * ij;
+        const_inv_ref_map[1][0] = -m[0][1] * ij;
+        const_inv_ref_map[0][1] = -m[1][0] * ij;
+        const_inv_ref_map[1][1] =  m[0][0] * ij;
+
         xi1 = -1.0 - (const_inv_ref_map[0][0] * dx + const_inv_ref_map[1][0] * dy);
         xi2 = -1.0 - (const_inv_ref_map[0][1] * dx + const_inv_ref_map[1][1] * dy);
       }
-      else // Newton Method
+      else
       {
         double xi1_old = 0.0, xi2_old = 0.0;
         double vx, vy;
@@ -604,17 +661,74 @@ namespace Hermes
         int it = 0; // number of Newton iterations
         while (1)
         {
-          inv_ref_map_at_point(xi1_old, xi2_old, vx, vy, m);
+          double2x2 tmp;
+          memset(tmp, 0, sizeof(double2x2));
+          vx = vy = 0;
+          for (int i = 0; i < local_nc; i++)
+          {
+            double val = shapeset.get_fn_value(local_indices[i], xi1_old, xi2_old, 0, e->get_mode());
+            vx += local_coeffs[i][0] * val;
+            vy += local_coeffs[i][1] * val;
+
+            double dx =  shapeset.get_dx_value(local_indices[i], xi1_old, xi2_old, 0, e->get_mode());
+            double dy =  shapeset.get_dy_value(local_indices[i], xi1_old, xi2_old, 0, e->get_mode());
+            tmp[0][0] += local_coeffs[i][0] * dx;
+            tmp[0][1] += local_coeffs[i][0] * dy;
+            tmp[1][0] += local_coeffs[i][1] * dx;
+            tmp[1][1] += local_coeffs[i][1] * dy;
+          }
+
+          // inverse matrix
+          double jac = tmp[0][0] * tmp[1][1] - tmp[0][1] * tmp[1][0];
+          m[0][0] =  tmp[1][1] / jac;
+          m[0][1] = -tmp[1][0] / jac;
+          m[1][0] = -tmp[0][1] / jac;
+          m[1][1] =  tmp[0][0] / jac;
+
           xi1 = xi1_old - (m[0][0] * (vx - x) + m[1][0] * (vy - y));
           xi2 = xi2_old - (m[0][1] * (vx - x) + m[1][1] * (vy - y));
           if(fabs(xi1 - xi1_old) < TOL && fabs(xi2 - xi2_old) < TOL) return;
           if(it > 1 && (xi1 > 1.5 || xi2 > 1.5 || xi1 < -1.5 || xi2 < -1.5)) return;
-          if(it > 100) { this->warn("Could not find reference coordinates - Newton method did not converge."); return; }
+          if(it > 100) 
+          {
+            Hermes::Mixins::Loggable::Static::warn("Could not find reference coordinates - Newton method did not converge.");
+            return;
+          }
           xi1_old = xi1;
           xi2_old = xi2;
           it++;
         }
       }
+    }
+
+    static bool is_in_ref_domain(Element* e, double xi1, double xi2)
+    {
+      const double TOL = 1e-11;
+      if(e->get_nvert() == 3)
+        return (xi1 + xi2 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 + 1.0 >= -TOL);
+      else
+        return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);
+    }
+
+    Element* RefMap::element_on_physical_coordinates(const Mesh* mesh, double x, double y, double* x_reference, double* y_reference)
+    {
+      // go through all elements
+      double xi1, xi2;
+      Element *e;
+      for_all_active_elements(e, mesh)
+      {
+        untransform(e, x, y, xi1, xi2);
+        if(is_in_ref_domain(e, xi1, xi2))
+        {
+          if(x_reference != NULL)
+            (*x_reference) = xi1;
+          if(y_reference != NULL)
+            (*y_reference) = xi2;
+          return e;
+        }
+      }
+      Hermes::Mixins::Loggable::Static::warn("Point (%g, %g) does not lie in any element.", x, y);
+      return NULL;
     }
 
     void RefMap::init_node(Node* pp)

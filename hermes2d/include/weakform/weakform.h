@@ -168,6 +168,7 @@ namespace Hermes
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
       friend class RungeKutta<Scalar>;
+      friend class OGProjection<Scalar>;
       friend class Hermes::Preconditioners::Precond<Scalar>;
 
       bool warned_nonOverride;

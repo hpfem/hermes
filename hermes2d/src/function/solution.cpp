@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "exact_solution.h"
+#include "forms.h"
 
 #include "solution_h2d_xml.h"
 
@@ -1323,15 +1324,6 @@ namespace Hermes
       return result;
     }
 
-    static bool is_in_ref_domain(Element* e, double xi1, double xi2)
-    {
-      const double TOL = 1e-11;
-      if(e->get_nvert() == 3)
-        return (xi1 + xi2 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 + 1.0 >= -TOL);
-      else
-        return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);
-    }
-
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
     {
@@ -1394,15 +1386,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar Solution<Scalar>::get_pt_value(double x, double y, int item)
+    Func<Scalar>* Solution<Scalar>::get_pt_value(double x, double y)
     {
       double xi1, xi2;
 
-      int a = 0, b = 0, mask = item; // a = component, b = val, dx, dy, dxx, dyy, dxy
-      if(this->num_components == 1) mask = mask & H2D_FN_COMPONENT_0;
-      if((mask & (mask - 1)) != 0) throw Hermes::Exceptions::Exception("'item' is invalid. ");
-      if(mask >= 0x40) { a = 1; mask >>= 6; }
-      while (!(mask & 1)) { mask >>= 1; b++; }
+      Func<Scalar>* toReturn = new Func<Scalar>(1, this->num_components);
 
       if(sln_type == HERMES_EXACT)
       {
@@ -1410,17 +1398,30 @@ namespace Hermes
         {
           Scalar val, dx = 0.0, dy = 0.0;
           val = (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_function(x, y, dx, dy);
-          if(b == 0) return val * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          if(b == 1) return dx * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          if(b == 2) return dy * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->val = new Scalar[1];
+          toReturn->dx = new Scalar[1];
+          toReturn->dy = new Scalar[1];
+          toReturn->val[0] = val * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->dx[0] = dx * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->dy[0] = dy * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
         }
         else
         {
           Scalar2<Scalar> dx(0.0, 0.0), dy(0.0, 0.0);
           Scalar2<Scalar> val = (static_cast<ExactSolutionVector<Scalar>*>(this))->exact_function(x, y, dx, dy);
-          if(b == 0) return val[a] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          if(b == 1) return dx[a] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
-          if(b == 2) return dy[a] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+
+          toReturn->val0 = new Scalar[1];
+          toReturn->dx0 = new Scalar[1];
+          toReturn->dy0 = new Scalar[1];
+          toReturn->val1 = new Scalar[1];
+          toReturn->dx1 = new Scalar[1];
+          toReturn->dy1 = new Scalar[1];
+          toReturn->val0[0] = val[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->val1[0] = val[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->dx0[0] = dx[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->dx1[0] = dx[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->dy0[0] = dy[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
+          toReturn->dy1[0] = dy[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
         }
         throw Hermes::Exceptions::Exception("Cannot obtain second derivatives of an exact solution.");
       }
@@ -1430,43 +1431,63 @@ namespace Hermes
           "not calculated yet or you used the assignment operator which destroys "
           "the solution on its right-hand side.");
       }
-
-      // try the last visited element and its neighbours
-      if(e_last != NULL)
+      else // HERMES_SLN
       {
-        Element* elem[5];
-        elem[0] = e_last;
-        for (unsigned int i = 1; i <= e_last->get_nvert(); i++)
-          elem[i] = e_last->get_neighbor(i-1);
-
-        for (unsigned int i = 0; i <= e_last->get_nvert(); i++)
-          if(elem[i] != NULL)
-          {
-            this->refmap->set_active_element(elem[i]);
-            this->refmap->untransform(elem[i], x, y, xi1, xi2);
-            if(is_in_ref_domain(elem[i], xi1, xi2))
-            {
-              e_last = elem[i];
-              return get_ref_value_transformed(elem[i], xi1, xi2, a, b);
-            }
-          }
-      }
-
-      // go through all elements
-      Element *e;
-      for_all_active_elements(e, this->mesh)
-      {
-        this->refmap->set_active_element(e);
-        this->refmap->untransform(e, x, y, xi1, xi2);
-        if(is_in_ref_domain(e, xi1, xi2))
+        Element* e = RefMap::element_on_physical_coordinates(this->mesh, x, y, &xi1, &xi2);
+        if(e != NULL)
         {
-          e_last = e;
-          return get_ref_value_transformed(e, xi1, xi2, a, b);
-        }
-      }
+          if(this->num_components == 1)
+          {
+            toReturn->val = new Scalar[1];
+            toReturn->dx = new Scalar[1];
+            toReturn->dy = new Scalar[1];
 
-      this->warn("Point (%g, %g) does not lie in any element.", x, y);
-      return NAN;
+            toReturn->val[0] = get_ref_value(e, xi1, xi2, 0, 1);
+
+            double2x2 m;
+            double xx, yy;
+            this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
+            Scalar dx = get_ref_value(e, xi1, xi2, 0, 1);
+            Scalar dy = get_ref_value(e, xi1, xi2, 0, 2);
+            toReturn->dx[0] = m[0][0]*dx + m[0][1]*dy;
+            toReturn->dy[0] = m[1][0]*dx + m[1][1]*dy;
+    
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+            double2x2 mat;
+            double3x2 mat2;
+            double xx, yy;
+
+            this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
+            this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
+
+            Scalar vxx = get_ref_value(e, xi1, xi2, 0, 3);
+            Scalar vyy = get_ref_value(e, xi1, xi2, 0, 4);
+            Scalar vxy = get_ref_value(e, xi1, xi2, 0, 5);
+            toReturn->dxx[0] = sqr(mat[0][0])*vxx + 2*mat[0][1]*mat[0][0]*vxy + sqr(mat[0][1])*vyy + mat2[0][0]*dx + mat2[0][1]*dy;   // dxx
+            toReturn->dyy[0] = sqr(mat[1][0])*vxx + 2*mat[1][1]*mat[1][0]*vxy + sqr(mat[1][1])*vyy + mat2[2][0]*dx + mat2[2][1]*dy;   // dyy
+            toReturn->dxy[0] = mat[0][0]*mat[1][0]*vxx + (mat[0][0]*mat[1][1] + mat[1][0]*mat[0][1])*vxy + mat[0][1]*mat[1][1]*vyy + mat2[1][0]*dx + mat2[1][1]*dy;   //dxy
+#endif
+          }
+          else // vector solution
+          {
+            toReturn->val0 = new Scalar[1];
+            toReturn->val1 = new Scalar[1];
+
+            double2x2 m;
+            double xx, yy;
+            this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, m);
+            Scalar vx = get_ref_value(e, xi1, xi2, 0, 0);
+            Scalar vy = get_ref_value(e, xi1, xi2, 1, 0);
+            toReturn->val0[0] = m[0][0]*vx + m[0][1]*vy;
+            toReturn->val1[0] = m[1][0]*vx + m[1][1]*vy;
+            Hermes::Mixins::Loggable::Static::warn("Derivatives of vector functions not implemented yet.");
+          }
+          return toReturn;
+        }
+
+        this->warn("Point (%g, %g) does not lie in any element.", x, y);
+        return NULL;
+      }
     }
 
     template class HERMES_API Solution<double>;

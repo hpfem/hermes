@@ -80,7 +80,7 @@ namespace Hermes
 
               // FIXME: Retrieving the value through get_pt_value() is slow and this
               // should be only done if we are dealing with MeshFunction (not a Solution).
-              Scalar val = meshfn->get_pt_value(x, y);
+              Scalar val = meshfn->get_pt_value(x, y)->val[0];
               //printf("Found active vertex %g %g, val = %g, dof_num = %d\n", x, y, std::abs(val), dof_num);
               target_vec[dof_num] = val;
             }

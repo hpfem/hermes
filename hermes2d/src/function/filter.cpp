@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "filter.h"
+#include "forms.h"
 #include "quad.h"
 #include "refmap.h"
 #include "traverse.h"
@@ -344,13 +345,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar SimpleFilter<Scalar>::get_pt_value(double x, double y, int it)
+    Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y)
     {
-      if(it & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        throw Hermes::Exceptions::Exception("Filter not defined for derivatives.");
       Scalar val[10];
       for (int i = 0; i < this->num; i++)
-        val[i] = this->sln[i]->get_pt_value(x, y, item[i]);
+        val[i] = this->sln[i]->get_pt_value(x, y)->val[0];
+
+      Func<Scalar>* toReturn = new Func<Scalar>(1, 1);
 
       Scalar result;
       Hermes::vector<Scalar*> values;
@@ -360,7 +361,8 @@ namespace Hermes
       // apply the filter
       filter_fn(1, values, &result);
 
-      return result;
+      toReturn->val[0] = result;
+      return toReturn;
     }
 
     ComplexFilter::ComplexFilter(MeshFunction<std::complex<double> >* solution, int item) : Filter<double>()
@@ -454,18 +456,28 @@ namespace Hermes
       this->cur_node = node;
     }
 
-    double ComplexFilter::get_pt_value(double x, double y, int it)
+    Func<double>* ComplexFilter::get_pt_value(double x, double y)
     {
-      if(it & (H2D_FN_DX | H2D_FN_DY | H2D_FN_DXX | H2D_FN_DYY | H2D_FN_DXY))
-        throw Hermes::Exceptions::Exception("Filter not defined for derivatives.");
-      std::complex<double> val = this->sln_complex->get_pt_value(x, y, it);
+      Func<std::complex<double>>* val = this->sln_complex->get_pt_value(x, y);
+
+      Func<double>* toReturn = new Func<double>(1, this->num_components);
 
       double result;
 
       // apply the filter
-      filter_fn(1, &val, &result);
+      filter_fn(1, val->val, &result);
 
-      return result;
+      if(this->num_components == 1)
+      {
+        toReturn->val[0] = result;
+        toReturn->dx[0] = 0.0;
+        toReturn->dy[0] = 0.0;
+      }
+      else
+      {
+        this->warn("ComplexFilter only implemented for scalar functions."); 
+      }
+      return toReturn;
     }
 
     template<typename Scalar>
@@ -544,7 +556,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar DXDYFilter<Scalar>::get_pt_value(double x, double y, int item)
+    Func<Scalar>* DXDYFilter<Scalar>::get_pt_value(double x, double y)
     {
       return 0;
     }
@@ -955,7 +967,7 @@ namespace Hermes
       cur_node = node;
     }
 
-    double VonMisesFilter::get_pt_value(double x, double y, int item)
+    Func<double>* VonMisesFilter::get_pt_value(double x, double y)
     {
       return 0;
     }
@@ -1038,7 +1050,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar LinearFilter<Scalar>::get_pt_value(double x, double y, int item)
+    Func<Scalar>* LinearFilter<Scalar>::get_pt_value(double x, double y)
     {
       return 0;
     }

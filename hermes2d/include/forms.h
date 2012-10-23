@@ -42,6 +42,11 @@ namespace Hermes
     class HERMES_API Func
     {
     public:
+      /// Constructor.
+      /** \param[in] num_gip A number of integration points.
+      *  \param[in] num_comps A number of components. */
+      Func(int num_gip, int num_comps);
+
       T *val;            ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
       T *dx, *dy;        ///< First-order partial derivatives.
       T *laplace;        ///< Sum of second-order partial derivatives. Enabled by defining H2D_SECOND_DERIVATIVES_ENABLED in h2d_common.h.
@@ -89,11 +94,6 @@ namespace Hermes
     protected:
       const int num_gip; ///< Number of integration points used by this intance.
       const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
-
-      /// Constructor.
-      /** \param[in] num_gip A number of integration points.
-      *  \param[in] num_comps A number of components. */
-      Func(int num_gip, int num_comps);
 
       /// Calculate this -= func for each function expations and each integration point.
       /** \param[in] func A function which is subtracted from *this. A number of integratioN points and a number of component has to match. */
