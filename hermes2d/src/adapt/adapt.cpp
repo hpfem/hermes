@@ -585,9 +585,9 @@ namespace Hermes
       if(num != 1)
         throw Exceptions::LengthException(1, 1, num);
       OGProjection<Scalar> ogProjection;
-      Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
+      typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
       Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
-      Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
+      typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
       Space<Scalar>* ref_space = ref_space_creator.create_ref_space();
       ogProjection.project_global(ref_space, rsln, rsln);
       return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
@@ -609,9 +609,9 @@ namespace Hermes
       for(unsigned int i = 0; i < num; i++)
       {
         OGProjection<Scalar> ogProjection;
-        Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
+        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
         ref_meshes[i] = ref_mesh_creator.create_ref_mesh();
-        Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh_creator.create_ref_mesh(), 0);
+        typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh_creator.create_ref_mesh(), 0);
         ref_spaces[i] = ref_space_creator.create_ref_space();
         ogProjection.project_global(ref_space_creator.create_ref_space(), rslns[i], rslns[i]);
       }
