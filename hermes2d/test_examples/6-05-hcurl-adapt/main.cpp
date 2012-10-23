@@ -200,6 +200,8 @@ int main(int argc, char* argv[])
     // Clean up.
     delete [] coeff_vec;
     delete adaptivity;
+    delete ref_mesh;
+    delete ref_space;
   }
   while (done == false);
 
