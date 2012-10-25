@@ -80,6 +80,8 @@ namespace Hermes
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
         Selector(int max_order = H2DRS_DEFAULT_ORDER) : max_order(max_order) {};
 
+        virtual ~Selector() {};
+
         /// Cloning for paralelism.
         virtual Selector<Scalar>* clone() = 0;
 
