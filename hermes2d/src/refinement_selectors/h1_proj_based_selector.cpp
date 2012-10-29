@@ -36,6 +36,7 @@ namespace Hermes
       {
         H1ProjBasedSelector<Scalar>* newSelector = new H1ProjBasedSelector(this->cand_list, this->conv_exp, this->max_order, (H1Shapeset*)this->shapeset);
         newSelector->set_error_weights(this->error_weight_h, this->error_weight_p, this->error_weight_aniso);
+        newSelector->isAClone = true;
         return newSelector;
       }
 

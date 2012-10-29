@@ -49,16 +49,21 @@ namespace Hermes
       {
         //delete matrix cache
         for(int m = 0; m < H2D_NUM_MODES; m++)
+        {
           for(int i = 0; i < H2DRS_MAX_ORDER + 1; i++)
             for(int k = 0; k < H2DRS_MAX_ORDER + 1; k++)
             {
               if(proj_matrix_cache[m][i][k] != NULL)
                 delete [] proj_matrix_cache[m][i][k];
             }
+        }
 
-        delete [] cached_shape_vals_valid;
-        delete [] cached_shape_ortho_vals;
-        delete [] cached_shape_vals;
+        if(!this->isAClone)
+        {
+          delete [] cached_shape_vals_valid;
+          delete [] cached_shape_ortho_vals;
+          delete [] cached_shape_vals;
+        }
       }
 
       template<typename Scalar>
@@ -125,11 +130,11 @@ namespace Hermes
         // find range of orders
         typename OptimumSelector<Scalar>::CandsInfo info_h, info_p, info_aniso;
         this->update_cands_info(info_h, info_p, info_aniso);
-
+        
         // calculate squared projection errors of elements of candidates
         CandElemProjError herr[4], anisoerr[4], perr;
         calc_projection_errors(e, info_h, info_p, info_aniso, rsln, herr, perr, anisoerr);
-
+        
         //evaluate errors and dofs
         double sum_err = 0.0;
         double sum_sqr_err = 0.0;
@@ -273,8 +278,8 @@ namespace Hermes
         // precalculate values of shape functions
         TrfShape empty_shape_vals;
 
-		if(!cached_shape_vals_valid[mode])
-		{
+		    if(!cached_shape_vals_valid[mode])
+		    {
 #pragma omp critical (cached_shape_vals_valid)
           if(!cached_shape_vals_valid[mode])
           {
@@ -402,74 +407,74 @@ namespace Hermes
           }
 
           //continue only if there are shapes to process
-          if(num_shapes > 0)
+          if(num_shapes == 0)
+            continue;
+
+          bool use_ortho = ortho_svals_available && order_perm.get_order_h() == order_perm.get_order_v();
+
+          //select a cache
+          Hermes::vector< ValueCacheItem<Scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
+          Hermes::vector<TrfShapeExp>** sub_svals = use_ortho ? sub_ortho_svals : sub_nonortho_svals;
+
+          //calculate projection matrix iff no ortho is used
+          if(!use_ortho)
           {
-            bool use_ortho = ortho_svals_available && order_perm.get_order_h() == order_perm.get_order_v();
+            if(proj_matrices[order_h][order_v] == NULL)
+              proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes, mode);
+            copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
+          }
 
-            //select a cache
-            Hermes::vector< ValueCacheItem<Scalar> >& rhs_cache = use_ortho ? ortho_rhs_cache : nonortho_rhs_cache;
-            Hermes::vector<TrfShapeExp>** sub_svals = use_ortho ? sub_ortho_svals : sub_nonortho_svals;
+          //build right side (fill cache values that are missing)
+          for(int inx_sub = 0; inx_sub < num_sub; inx_sub++)
+          {
+            Element* this_sub_domain = sub_domains[inx_sub];
+            ElemSubTrf this_sub_trf = { sub_trfs[inx_sub], 1 / sub_trfs[inx_sub]->m[0], 1 / sub_trfs[inx_sub]->m[1] };
+            ElemGIP this_sub_gip = { gip_points, num_gip_points, sub_rvals[inx_sub] };
+            Hermes::vector<TrfShapeExp>& this_sub_svals = *(sub_svals[inx_sub]);
 
-            //calculate projection matrix iff no ortho is used
-            if(!use_ortho)
-            {
-              if(proj_matrices[order_h][order_v] == NULL)
-                proj_matrices[order_h][order_v] = build_projection_matrix(gip_points, num_gip_points, shape_inxs, num_shapes, mode);
-              copy_matrix(proj_matrix, proj_matrices[order_h][order_v], num_shapes, num_shapes); //copy projection matrix because original matrix will be modified
-            }
-
-            //build right side (fill cache values that are missing)
-            for(int inx_sub = 0; inx_sub < num_sub; inx_sub++)
-            {
-              Element* this_sub_domain = sub_domains[inx_sub];
-              ElemSubTrf this_sub_trf = { sub_trfs[inx_sub], 1 / sub_trfs[inx_sub]->m[0], 1 / sub_trfs[inx_sub]->m[1] };
-              ElemGIP this_sub_gip = { gip_points, num_gip_points, sub_rvals[inx_sub] };
-              Hermes::vector<TrfShapeExp>& this_sub_svals = *(sub_svals[inx_sub]);
-
-              for(int k = 0; k < num_shapes; k++)
-              {
-                int shape_inx = shape_inxs[k];
-                ValueCacheItem<Scalar>& shape_rhs_cache = rhs_cache[shape_inx];
-                if(!shape_rhs_cache.is_valid())
-                {
-                  TrfShapeExp empty_sub_vals;
-                  ElemSubShapeFunc this_sub_shape = { shape_inx, this_sub_svals.empty() ? empty_sub_vals : this_sub_svals[shape_inx] };
-                  shape_rhs_cache.set(shape_rhs_cache.get() + evaluate_rhs_subdomain(this_sub_domain, this_sub_gip, this_sub_trf, this_sub_shape));
-                }
-              }
-            }
-
-            //copy values from cache and apply area correction coefficient
             for(int k = 0; k < num_shapes; k++)
             {
-              ValueCacheItem<Scalar>& rhs_cache_value = rhs_cache[shape_inxs[k]];
-              right_side[k] = sub_area_corr_coef * rhs_cache_value.get();
-              rhs_cache_value.mark();
+              int shape_inx = shape_inxs[k];
+              ValueCacheItem<Scalar>& shape_rhs_cache = rhs_cache[shape_inx];
+              if(!shape_rhs_cache.is_valid())
+              {
+                TrfShapeExp empty_sub_vals;
+                ElemSubShapeFunc this_sub_shape = { shape_inx, this_sub_svals.empty() ? empty_sub_vals : this_sub_svals[shape_inx] };
+                shape_rhs_cache.set(shape_rhs_cache.get() + evaluate_rhs_subdomain(this_sub_domain, this_sub_gip, this_sub_trf, this_sub_shape));
+              }
             }
-
-            //solve iff no ortho is used
-            if(!use_ortho)
-            {
-              ludcmp(proj_matrix, num_shapes, indx, d);
-              lubksb<Scalar>(proj_matrix, num_shapes, indx, right_side);
-            }
-
-            //calculate error
-            double error_squared = 0;
-            for(int inx_sub = 0; inx_sub < num_sub; inx_sub++)
-            {
-              Element* this_sub_domain = sub_domains[inx_sub];
-              ElemSubTrf this_sub_trf = { sub_trfs[inx_sub], 1 / sub_trfs[inx_sub]->m[0], 1 / sub_trfs[inx_sub]->m[1] };
-              ElemGIP this_sub_gip = { gip_points, num_gip_points, sub_rvals[inx_sub] };
-              ElemProj elem_proj = { shape_inxs, num_shapes, *(sub_svals[inx_sub]), right_side, quad_order };
-
-              error_squared += evaluate_error_squared_subdomain(this_sub_domain, this_sub_gip, this_sub_trf, elem_proj);
-            }
-            errors_squared[order_h][order_v] = error_squared * sub_area_corr_coef; //apply area correction coefficient
           }
-        } while (order_perm.next());
 
-        //clenaup
+          //copy values from cache and apply area correction coefficient
+          for(int k = 0; k < num_shapes; k++)
+          {
+            ValueCacheItem<Scalar>& rhs_cache_value = rhs_cache[shape_inxs[k]];
+            right_side[k] = sub_area_corr_coef * rhs_cache_value.get();
+            rhs_cache_value.mark();
+          }
+
+          //solve iff no ortho is used
+          if(!use_ortho)
+          {
+            ludcmp(proj_matrix, num_shapes, indx, d);
+            lubksb<Scalar>(proj_matrix, num_shapes, indx, right_side);
+          }
+
+          //calculate error
+          double error_squared = 0;
+          for(int inx_sub = 0; inx_sub < num_sub; inx_sub++)
+          {
+            Element* this_sub_domain = sub_domains[inx_sub];
+            ElemSubTrf this_sub_trf = { sub_trfs[inx_sub], 1 / sub_trfs[inx_sub]->m[0], 1 / sub_trfs[inx_sub]->m[1] };
+            ElemGIP this_sub_gip = { gip_points, num_gip_points, sub_rvals[inx_sub] };
+            ElemProj elem_proj = { shape_inxs, num_shapes, *(sub_svals[inx_sub]), right_side, quad_order };
+
+            error_squared += evaluate_error_squared_subdomain(this_sub_domain, this_sub_gip, this_sub_trf, elem_proj);
+          }
+          errors_squared[order_h][order_v] = error_squared * sub_area_corr_coef; //apply area correction coefficient
+        }
+        while (order_perm.next());
+
         delete [] proj_matrix;
         delete [] right_side;
         delete [] shape_inxs;

@@ -101,20 +101,23 @@ namespace Hermes
       template<typename Scalar>
       OptimumSelector<Scalar>::~OptimumSelector()
       {
-        for(int i = 0; i < 2; i++)
+        if(!this->isAClone)
         {
-          for(int j = 0; j < H2DRS_MAX_ORDER + 2; j++)
+          for(int i = 0; i < 2; i++)
           {
-            for(int k = 0; k < 6; k++)
+            for(int j = 0; j < H2DRS_MAX_ORDER + 2; j++)
             {
-              delete [] num_shapes[i][j][k];
+              for(int k = 0; k < 6; k++)
+              {
+                delete [] num_shapes[i][j][k];
+              }
+              delete [] num_shapes[i][j];
             }
-            delete [] num_shapes[i][j];
+            delete [] num_shapes[i];
           }
-          delete [] num_shapes[i];
-        }
 
-        delete [] num_shapes;
+          delete [] num_shapes;
+        }
       }
       
       template<typename Scalar>
@@ -417,7 +420,8 @@ namespace Hermes
         //generate all P-candidates (start from intention of generating all possible candidates
         //and restrict it according to the given adapt-type)
         bool iso_p = false;
-        int start_quad_order = quad_order;
+        int start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
+        int start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         int last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_p_order_h, order_h + H2DRS_MAX_ORDER_INC), std::min(max_p_order_v, order_v + H2DRS_MAX_ORDER_INC));
         switch(cand_list)
         {
@@ -431,7 +435,7 @@ namespace Hermes
 
         //generate all H-candidates
         iso_p = false;
-        int start_order_h = std::max(current_min_order, (order_h + 1) / 2), start_order_v = std::max(current_min_order, (order_v + 1) / 2);
+        start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
         start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         last_quad_order = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, std::min(start_order_h + H2DRS_MAX_ORDER_INC, order_h)), std::min(max_ha_order_v, std::min(start_order_v + H2DRS_MAX_ORDER_INC, order_v)));
         switch(cand_list)
@@ -451,9 +455,9 @@ namespace Hermes
           && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO))
         {
           iso_p = false;
-          int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v + 1) / 2));
+          int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v - 1)));
           int last_quad_order_hz = H2D_MAKE_QUAD_ORDER(std::min(max_ha_order_h, order_h + H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_quad_order) + H2DRS_MAX_ORDER_INC));
-          int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h + 1) / 2), order_v);
+          int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h - 1)), order_v);
           int last_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_quad_order) + H2DRS_MAX_ORDER_INC), std::min(max_ha_order_v, order_v + H2DRS_MAX_ORDER_INC));
           switch(cand_list)
           {
@@ -694,7 +698,7 @@ namespace Hermes
         create_candidates(element, quad_order
           , H2D_MAKE_QUAD_ORDER(current_max_order, current_max_order)
           , H2D_MAKE_QUAD_ORDER(current_max_order, current_max_order));
-
+        
         if(candidates.size() > 1) { //there are candidates to choose from
           // evaluate candidates (sum partial projection errors, calculate dofs)
           double avg_error, dev_error;

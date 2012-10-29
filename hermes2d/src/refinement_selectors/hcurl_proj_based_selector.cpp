@@ -25,7 +25,10 @@ namespace Hermes
 
       Selector<std::complex<double> >* HcurlProjBasedSelector::clone()
       {
-        return new HcurlProjBasedSelector(this->cand_list, this->conv_exp, this->max_order);
+        HcurlProjBasedSelector* newSelector = new HcurlProjBasedSelector(this->cand_list, this->conv_exp, this->max_order);
+        newSelector->set_error_weights(this->error_weight_h, this->error_weight_p, this->error_weight_aniso);
+        newSelector->isAClone = true;
+        return newSelector;
       }
 
       HcurlProjBasedSelector::~HcurlProjBasedSelector()
