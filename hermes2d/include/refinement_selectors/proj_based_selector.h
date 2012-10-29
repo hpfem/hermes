@@ -211,7 +211,7 @@ namespace Hermes
           /** By default, the item is set as invalid.
           *  \param value A starting value.
           *  \param state A state of the value. */
-          ValueCacheItem(const T& value = 0, const int state = H2DRS_VALCACHE_INVALID) : value(value), state(state) {}; ///< Default constructor. By default, it creates a item that contains invalid value.
+          ValueCacheItem(const T& value = 0, const int state = H2DRS_VALCACHE_INVALID) : value(value), state(state) {}; ///< Default constructor. By default, it creates an item that contains invalid value.
         private:
           T value; ///< A value stored in the item.
           int state; ///< A state of the image: ::H2DRS_VALCACHE_INVALID or ::H2DRS_VALCACHE_VALID or any other user-defined value. The first user defined state has to have number ::H2DRS_VALCACHE_USER.

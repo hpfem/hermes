@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
 
   ndof = space.get_num_dofs();
 
-  if(ndof == 86) // Tested value as of 12 Jul 2011.
+  if(ndof == 80) // Tested value as of October 2012.
   {
     printf("Success!\n");
     return 0;

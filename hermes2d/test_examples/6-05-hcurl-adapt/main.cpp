@@ -174,7 +174,11 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
+    adaptivity->set_verbose_output(true);
+
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+
+    Hermes::Mixins::Loggable::Static::info("\nError estimate: %f%%.\n", err_est_rel);
 
     // Calculate exact error.
     bool solutions_for_adapt = false;

@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  if(space.get_mesh()->get_num_active_elements() == 1)
+  if(space.get_num_dofs() == 169)
   {
     return 0;
   }
