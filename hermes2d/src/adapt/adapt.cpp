@@ -590,9 +590,10 @@ namespace Hermes
       typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
       Space<Scalar>* ref_space = ref_space_creator.create_ref_space();
       ogProjection.project_global(ref_space, rsln, rsln);
-      return calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
+      double result = calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
       delete ref_space;
       delete ref_mesh;
+      return result;
     }
 
     template<typename Scalar>
