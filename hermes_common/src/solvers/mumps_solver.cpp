@@ -208,7 +208,7 @@ namespace Hermes
     /// dumping matrix and right-hand side
     ///
     template<typename Scalar>
-    bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+    bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       // TODO
       switch (fmt)
@@ -517,14 +517,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+    bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
       case DF_PLAIN_ASCII:
         for (unsigned int i = 0; i < this->size; i++)
         {
-          Hermes::Helpers::fprint_num(file, v[i]);
+          Hermes::Helpers::fprint_num(file, v[i], number_format);
           fprintf(file, "\n");
         }
 
@@ -534,7 +534,7 @@ namespace Hermes
         fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
         for (unsigned int i = 0; i < this->size; i++)
         {
-          Hermes::Helpers::fprint_num(file, v[i]);
+          Hermes::Helpers::fprint_num(file, v[i], number_format);
           fprintf(file, "\n");
         }
         fprintf(file, " ];\n");

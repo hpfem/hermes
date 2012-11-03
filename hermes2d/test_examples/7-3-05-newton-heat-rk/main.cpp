@@ -128,6 +128,7 @@ int main(int argc, char* argv[])
 
   runge_kutta.set_verbose_output(true);
   runge_kutta.output_matrix(1);
+  runge_kutta.set_matrix_number_format("%a");
   runge_kutta.output_rhs(2);
   runge_kutta.set_global_integration_order(10);
 

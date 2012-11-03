@@ -380,7 +380,7 @@ namespace Hermes
           else
             sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
           FILE* rhs_file = fopen(fileName, "w+");
-          vector_right->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
+          vector_right->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
           fclose(rhs_file);
         }
 
@@ -437,7 +437,7 @@ namespace Hermes
               sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
             FILE* matrix_file = fopen(fileName, "w+");
 
-            matrix_right->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
+            matrix_right->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
             fclose(matrix_file);
           }
 

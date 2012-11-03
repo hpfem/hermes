@@ -270,7 +270,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool EpetraMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+    bool EpetraMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       return false;
     }
@@ -416,7 +416,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+    bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       return false;
     }

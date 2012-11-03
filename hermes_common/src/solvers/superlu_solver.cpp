@@ -223,7 +223,7 @@ namespace Hermes
     /// Save matrix and right-hand side to a file.
     ///
     template<typename Scalar>
-    bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+    bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       // TODO
       switch (fmt)
@@ -234,7 +234,7 @@ namespace Hermes
           for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             fprintf(file, "%d %d " , Ai[i] + 1, j + 1);
-            Hermes::Helpers::fprint_num(file, Ax[i]);
+            Hermes::Helpers::fprint_num(file, Ax[i], number_format);
             fprintf(file, "\n");
           }
           fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
@@ -483,14 +483,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt)
+    bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
       case DF_PLAIN_ASCII:
         for (unsigned int i = 0; i < this->size; i++)
         {
-          Hermes::Helpers::fprint_num(file, v[i]);
+          Hermes::Helpers::fprint_num(file, v[i], number_format);
           fprintf(file, "\n");
         }
 
@@ -500,7 +500,7 @@ namespace Hermes
         fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
         for (unsigned int i = 0; i < this->size; i++)
         {
-          Hermes::Helpers::fprint_num(file, v[i]);
+          Hermes::Helpers::fprint_num(file, v[i], number_format);
           fprintf(file, "\n");
         }
         fprintf(file, " ];\n");

@@ -185,14 +185,16 @@ namespace Hermes
   
   namespace Helpers
   {
-    inline void fprint_num(FILE*f, double x)
+    inline void fprint_num(FILE*f, double x, char* number_format)
     {
-      fprintf(f, "%lf", x);
+      fprintf(f, number_format, x);
     }
 
-    inline void fprint_num(FILE*f, std::complex<double> x)
+    inline void fprint_num(FILE*f, std::complex<double> x, char* number_format)
     {
-      fprintf(f, "(%lf, %lf)", x.real(), x.imag());
+	  char* number_formatComplex = new char[20];
+	  sprintf(number_formatComplex, "(%s, %s)", number_format, number_format); 
+      fprintf(f, number_formatComplex, x.real(), x.imag());
     }
   }
 

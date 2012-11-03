@@ -332,7 +332,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE) = 0;
+      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf") = 0;
 
       /// Get size of matrix
       /// @return size of matrix
@@ -541,7 +541,7 @@ namespace Hermes
       /// @param[in] fmt output file format
       /// @return true on succes
       virtual bool dump(FILE *file, const char *var_name,
-        EMatrixDumpFormat fmt = DF_MATLAB_SPARSE) = 0;
+        EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf") = 0;
 
     protected:
       /// size of vector

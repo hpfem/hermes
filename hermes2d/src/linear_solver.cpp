@@ -117,7 +117,7 @@ namespace Hermes
         else
           sprintf(fileName, "%s%i", this->RhsFilename.c_str(), 1);
         FILE* rhs_file = fopen(fileName, "w+");
-        residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat);
+        residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
         fclose(rhs_file);
       }
       if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= 1))
@@ -129,7 +129,7 @@ namespace Hermes
             sprintf(fileName, "%s%i", this->matrixFilename.c_str(), 1);
           FILE* matrix_file = fopen(fileName, "w+");
 
-          jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat);
+          jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
           fclose(matrix_file);
         }
 
