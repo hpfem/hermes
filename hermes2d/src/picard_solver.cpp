@@ -260,10 +260,12 @@ namespace Hermes
       linear_solver.set_rhs_E_matrix_dump_format(this->RhsFormat);
       linear_solver.set_rhs_filename(this->RhsFilename);
       linear_solver.set_rhs_varname(this->RhsVarname);
+	  linear_solver.set_rhs_number_format(this->rhs_number_format);
 
       linear_solver.set_matrix_E_matrix_dump_format(this->matrixFormat);
       linear_solver.set_matrix_filename(this->matrixFilename);
       linear_solver.set_matrix_varname(this->matrixVarname);
+	  linear_solver.set_matrix_number_format(this->matrix_number_format);
 
       linear_solver.set_verbose_output(this->verbose_output_linear_solver);
       linear_solver.set_verbose_callback(this->get_verbose_callback());
