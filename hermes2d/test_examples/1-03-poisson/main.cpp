@@ -38,43 +38,55 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
-  // Set the number of threads used in Hermes.
-  Hermes::HermesCommonApi.set_param_value(Hermes::exceptionsPrintCallstack, 0);
-  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
-
-  // Load the mesh.
-  Hermes::Hermes2D::Mesh mesh;
-  Hermes::Hermes2D::MeshReaderH2DXML mloader;
-  mloader.load("domain.xml", &mesh);
-
-  // Perform initial mesh refinements (optional).
-  mesh.refine_in_areas(Hermes::vector<std::string>("Aluminum", "Copper"), INIT_REF_NUM);
-  mesh.refine_in_area("Aluminum");
-
-  // Initialize the weak formulation.
-  CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
+  Hermes::Hermes2D::H1Space<double>* space = NULL;
+  Hermes::Hermes2D::Mesh* mesh = new Mesh();
 
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
     FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  // Create an H1 space with default shapeset.
-  Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
+  // Initialize the weak formulation.
+  CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
+  
+  // This is in a block to test that the instances mesh and space can be deleted after being copied with no harm.
+  {
+    // Set the number of threads used in Hermes.
+    Hermes::HermesCommonApi.set_param_value(Hermes::exceptionsPrintCallstack, 0);
+    Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
+
+    // Load the mesh.
+    Hermes::Hermes2D::MeshReaderH2DXML mloader;
+    mloader.load("domain.xml", mesh);
+
+    // Perform initial mesh refinements (optional).
+    mesh->refine_in_areas(Hermes::vector<std::string>("Aluminum", "Copper"), INIT_REF_NUM);
+    mesh->refine_in_area("Aluminum");
+
+    // Create an H1 space with default shapeset.
+    space = new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT);
+  }
+
+  Mesh* new_mesh = new Mesh();
+  H1Space<double>* new_space = new H1Space<double>();
+  new_space->copy(space, new_mesh);
+
+  delete space;
+  delete mesh;
 
   Hermes::Hermes2D::Element* e;
   int i = 1;
-  for_all_active_elements(e, &mesh)
+  for_all_active_elements(e, new_mesh)
   {
-    space.set_element_order(e->id, i++ % 9 + 1);
+    new_space->set_element_order(e->id, i++ % 9 + 1);
   }
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, new_space);
 
   // Solve the linear problem.
   try
@@ -85,7 +97,7 @@ int main(int argc, char* argv[])
     double* sln_vector = linear_solver.get_sln_vector();
 
     // Translate the solution vector into the previously initialized Solution.
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, new_space, &sln);
 
     // VTK output.
     if(VTK_VISUALIZATION)
@@ -97,8 +109,8 @@ int main(int argc, char* argv[])
 
       // Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
-      ord.save_mesh_vtk(&space, "mesh.vtk");
-      ord.save_orders_vtk(&space, "ord.vtk");
+      ord.save_mesh_vtk(new_space, "mesh.vtk");
+      ord.save_orders_vtk(new_space, "ord.vtk");
     }
 
     // Visualize the solution.

@@ -23,6 +23,11 @@ namespace Hermes
     template<typename Scalar> int      H1Space<Scalar>::h1_proj_ref = 0;
 
     template<typename Scalar>
+    H1Space<Scalar>::H1Space() : Space<Scalar>()
+    {
+    }
+    
+    template<typename Scalar>
     void H1Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
       if(shapeset == NULL)
@@ -47,14 +52,14 @@ namespace Hermes
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(const Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
+      : Space<Scalar>(mesh, shapeset, essential_bcs)
     {
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
     H1Space<Scalar>::H1Space(const Mesh* mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL, p_init)
+      : Space<Scalar>(mesh, shapeset, NULL)
     {
       init(shapeset, p_init);
     }
@@ -69,6 +74,18 @@ namespace Hermes
       }
       if(this->own_shapeset)
         delete this->shapeset;
+    }
+
+    template<typename Scalar>
+    void H1Space<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    {
+      Space<Scalar>::copy(space, new_mesh);
+
+      if(!h1_proj_ref++)
+        // FIXME: separate projection matrices for different shapesets
+        this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
+      this->proj_mat = h1_proj_mat;
+      this->chol_p   = h1_chol_p;
     }
 
     template<typename Scalar>

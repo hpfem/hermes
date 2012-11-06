@@ -107,7 +107,11 @@ namespace Hermes
     class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
-      Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init);
+      Space();
+      Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs);
+
+      /// Common code for constructors.
+      void init();
 
       virtual ~Space();
 
@@ -184,6 +188,9 @@ namespace Hermes
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
       
+      /// Copy from Space instance 'space'
+      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
+
       /// Class for creating reference space.
       class HERMES_API ReferenceSpaceCreator
       {
@@ -238,7 +245,6 @@ namespace Hermes
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
-    protected:
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
 
        static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);

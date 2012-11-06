@@ -29,6 +29,7 @@ namespace Hermes
     class HERMES_API HdivSpace : public Space<Scalar>
     {
     public:
+      HdivSpace();
       HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
         Shapeset* shapeset = NULL);
 
@@ -44,7 +45,9 @@ namespace Hermes
       virtual void set_shapeset(Shapeset* shapeset);
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
-
+      
+      /// Copy from Space instance 'space'
+      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
     protected:
       /// Common code for the constructors.
       void init(Shapeset* shapeset, int p_init);

@@ -31,6 +31,11 @@ namespace Hermes
     int      HdivSpace<Scalar>::hdiv_proj_ref = 0;
 
     template<typename Scalar>
+    HdivSpace<Scalar>::HdivSpace() : Space<Scalar>()
+    {
+    }
+
+    template<typename Scalar>
     void HdivSpace<Scalar>::init(Shapeset* shapeset, int p_init)
     {
       if(shapeset == NULL)
@@ -58,14 +63,14 @@ namespace Hermes
 
     template<typename Scalar>
     HdivSpace<Scalar>::HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, essential_bcs, p_init)
+      : Space<Scalar>(mesh, shapeset, essential_bcs)
     {
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
     HdivSpace<Scalar>::HdivSpace(const Mesh* mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL, p_init)
+      : Space<Scalar>(mesh, shapeset, NULL)
     {
       init(shapeset, p_init);
     }
@@ -82,6 +87,20 @@ namespace Hermes
         delete this->shapeset;
     }
 
+    template<typename Scalar>
+    void HdivSpace<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    {
+      Space<Scalar>::copy(space, new_mesh);
+
+      if(!hdiv_proj_ref++)
+      {
+        this->precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
+      }
+
+      this->proj_mat = hdiv_proj_mat;
+      this->chol_p   = hdiv_chol_p;
+    }
+    
     template<typename Scalar>
     void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {

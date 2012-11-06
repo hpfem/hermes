@@ -29,6 +29,7 @@ namespace Hermes
     class HERMES_API H1Space : public Space<Scalar>
     {
     public:
+      H1Space();
       H1Space(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
         Shapeset* shapeset = NULL);
 
@@ -52,6 +53,9 @@ namespace Hermes
       void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+
+      /// Copy from Space instance 'space'
+      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
 
     protected:
 

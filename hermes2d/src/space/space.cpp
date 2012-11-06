@@ -27,11 +27,23 @@ namespace Hermes
     unsigned g_space_seq = 0;
 
     template<typename Scalar>
-    Space<Scalar>::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs, int p_init)
+    Space<Scalar>::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
+    {
+      this->init();
+    }
+
+    template<typename Scalar>
+    Space<Scalar>::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       if(mesh == NULL)
         throw Hermes::Exceptions::NullException(0);
+      this->init();
+    }
+    
+    template<typename Scalar>
+    void Space<Scalar>::init()
+    {
       this->default_tri_order = -1;
       this->default_quad_order = -1;
       this->ndata = NULL;
@@ -53,7 +65,7 @@ namespace Hermes
 
       own_shapeset = (shapeset == NULL);
     }
-    
+
     template<typename Scalar>
     bool Space<Scalar>::isOkay() const
     {
@@ -124,6 +136,37 @@ namespace Hermes
           edata[i].order = -1;
         for (int i = oldsize; i < esize; i++)
           edata[i].changed_in_last_adaptation = true;
+      }
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    {
+      this->free();
+
+      this->essential_bcs = space->essential_bcs;
+      this->shapeset = space->shapeset->clone();
+
+      new_mesh->copy(space->get_mesh());
+      this->mesh = new_mesh;
+
+      this->resize_tables();
+
+      Element* e;
+      for_all_active_elements(e, this->mesh)
+      {
+        this->set_element_order_internal(e->id, space->get_element_order(e->id));
+      }
+
+      this->seq = g_space_seq++;
+      this->assign_dofs();
+      
+      for_all_active_elements(e, this->mesh)
+      {
+        if(space->edata[e->id].changed_in_last_adaptation)
+          this->edata[e->id].changed_in_last_adaptation = true;
+        else
+          this->edata[e->id].changed_in_last_adaptation = false;
       }
     }
 
@@ -631,9 +674,6 @@ namespace Hermes
     L2Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_l2()
     {
       L2Space<Scalar>* ref_space = new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset());
-
-      Element *e;
-      ref_space->resize_tables();
       return ref_space;
     }
 
@@ -641,9 +681,6 @@ namespace Hermes
     H1Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_h1()
     {
       H1Space<Scalar>* ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset());
-
-      Element *e;
-      ref_space->resize_tables();
       return ref_space;
     }
 
@@ -651,9 +688,6 @@ namespace Hermes
     HcurlSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hcurl()
     {
       HcurlSpace<Scalar>* ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
-
-      Element *e;
-      ref_space->resize_tables();
       return ref_space;
     }
 
@@ -661,9 +695,6 @@ namespace Hermes
     HdivSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hdiv()
     {
       HdivSpace<Scalar>* ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
-
-      Element *e;
-      ref_space->resize_tables();
       return ref_space;
     }
 

@@ -28,6 +28,7 @@ namespace Hermes
     class HERMES_API L2Space : public Space<Scalar>
     {
     public:
+      L2Space();
       L2Space(const Mesh* mesh, int p_init = 0,
         Shapeset* shapeset = NULL);
 
@@ -39,6 +40,9 @@ namespace Hermes
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
+
+      /// Copy from Space instance 'space'
+      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
     protected:
       virtual int get_edge_order(Element* e, int edge) const {
         return H2D_MAKE_EDGE_ORDER(e->get_mode(), edge, this->edata[e->id].order);

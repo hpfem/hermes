@@ -25,6 +25,11 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    L2Space<Scalar>::L2Space() : Space<Scalar>()
+    {
+    }
+
+    template<typename Scalar>
     void L2Space<Scalar>::init(Shapeset* shapeset, int p_init)
     {
       if(shapeset == NULL)
@@ -45,7 +50,7 @@ namespace Hermes
 
     template<typename Scalar>
     L2Space<Scalar>::L2Space(const Mesh* mesh, int p_init, Shapeset* shapeset)
-      : Space<Scalar>(mesh, shapeset, NULL, p_init)
+      : Space<Scalar>(mesh, shapeset, NULL)
     {
       init(shapeset, p_init);
     }
@@ -58,6 +63,15 @@ namespace Hermes
         delete this->shapeset;
     }
 
+    template<typename Scalar>
+    void L2Space<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    {
+      Space<Scalar>::copy(space, new_mesh);
+
+      ldata = NULL;
+      lsize = 0;
+    }
+    
     template<typename Scalar>
     void L2Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
     {
