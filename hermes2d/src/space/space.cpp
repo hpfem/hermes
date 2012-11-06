@@ -633,8 +633,6 @@ namespace Hermes
       L2Space<Scalar>* ref_space = new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset());
 
       Element *e;
-      for_all_active_elements(e, coarse_space->get_mesh())
-        coarse_space->edata[e->id].changed_in_last_adaptation = false;
       ref_space->resize_tables();
       return ref_space;
     }
@@ -645,8 +643,6 @@ namespace Hermes
       H1Space<Scalar>* ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset());
 
       Element *e;
-      for_all_active_elements(e, coarse_space->get_mesh())
-        coarse_space->edata[e->id].changed_in_last_adaptation = false;
       ref_space->resize_tables();
       return ref_space;
     }
@@ -657,8 +653,6 @@ namespace Hermes
       HcurlSpace<Scalar>* ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
 
       Element *e;
-      for_all_active_elements(e, coarse_space->get_mesh())
-        coarse_space->edata[e->id].changed_in_last_adaptation = false;
       ref_space->resize_tables();
       return ref_space;
     }
@@ -669,8 +663,6 @@ namespace Hermes
       HdivSpace<Scalar>* ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
 
       Element *e;
-      for_all_active_elements(e, coarse_space->get_mesh())
-        coarse_space->edata[e->id].changed_in_last_adaptation = false;
       ref_space->resize_tables();
       return ref_space;
     }
@@ -678,6 +670,11 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::ReferenceSpaceCreator::finish_construction(Space<Scalar>* ref_space)
     {
+      ref_space->seq = g_space_seq++;
+
+      // since space changed, enumerate basis functions
+      ref_space->assign_dofs();
+      
       Element *e;
       for_all_active_elements(e, coarse_space->get_mesh())
       {
@@ -692,11 +689,6 @@ namespace Hermes
                   ref_space->edata[ref_space->mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
         }
       }
-
-      ref_space->seq = g_space_seq++;
-
-      // since space changed, enumerate basis functions
-      ref_space->assign_dofs();
     }
 
     template<typename Scalar>
