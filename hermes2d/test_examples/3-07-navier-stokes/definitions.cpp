@@ -191,7 +191,7 @@ protected:
 class WeakFormNSNewton : public WeakForm<double>
 {
 public:
-  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step) : WeakForm<double>(3), Stokes(Stokes), 
+  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, MeshFunction<double>* xvel_prev_time, MeshFunction<double>* yvel_prev_time) : WeakForm<double>(3), Stokes(Stokes), 
     Reynolds(Reynolds)
   {
     this->current_time_step = time_step;
@@ -217,6 +217,10 @@ public:
     add_matrix_form(unsym_vely_pressure_form);
 
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Stokes, Reynolds, time_step);
+    
+    //F_0->set_ext(Hermes::vector<MeshFunction<double>*>(xvel_prev_time, yvel_prev_time));
+    F_0->set_ext(xvel_prev_time);
+
     add_vector_form(F_0);
     VectorFormNS_1* F_1 = new VectorFormNS_1(1, Stokes, Reynolds, time_step);
     add_vector_form(F_1);

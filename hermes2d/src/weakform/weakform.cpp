@@ -71,37 +71,74 @@ namespace Hermes
       this->vfvol.clear();
       this->vfsurf.clear();
       this->vfDG.clear();
+      this->forms.clear();
       this->ext.clear();
 
       for(unsigned int i = 0; i < otherWf->mfvol.size(); i++)
       {
-        this->mfvol.push_back(otherWf->mfvol[i]->clone());
-        this->mfvol.back()->wf = this;
+        MatrixFormVol<Scalar>* newForm = otherWf->mfvol[i]->clone();
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->mfvol[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->mfvol[i]->ext[ext_i]->clone());
+        newForm->set_ext(newExt);
+        newForm->wf = this;
+        this->mfvol.push_back(newForm);
+        this->forms.push_back(newForm);
       }
       for(unsigned int i = 0; i < otherWf->mfsurf.size(); i++)
       {
-        this->mfsurf.push_back(otherWf->mfsurf[i]->clone());
-        this->mfsurf.back()->wf = this;
+        MatrixFormSurf<Scalar>* newForm = otherWf->mfsurf[i]->clone();
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->mfsurf[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->mfsurf[i]->ext[ext_i]->clone());
+        newForm->set_ext(newExt);
+        newForm->wf = this;
+        this->mfsurf.push_back(newForm);
+        this->forms.push_back(newForm);
       }
       for(unsigned int i = 0; i < otherWf->mfDG.size(); i++)
       {
-        this->mfDG.push_back(otherWf->mfDG[i]->clone());
-        this->mfDG.back()->wf = this;
+        MatrixFormDG<Scalar>* newForm = otherWf->mfDG[i]->clone();
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->mfDG[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->mfDG[i]->ext[ext_i]->clone());
+        newForm->set_ext(newExt);
+        newForm->wf = this;
+        this->mfDG.push_back(newForm);
+        this->forms.push_back(newForm);
       }
       for(unsigned int i = 0; i < otherWf->vfvol.size(); i++)
       {
-        this->vfvol.push_back(otherWf->vfvol[i]->clone());
-        this->vfvol.back()->wf = this;
+        VectorFormVol<Scalar>* newForm = otherWf->vfvol[i]->clone();
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->vfvol[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->vfvol[i]->ext[ext_i]->clone());
+        newForm->set_ext(newExt);
+        newForm->wf = this;
+        this->vfvol.push_back(newForm);
+        this->forms.push_back(newForm);
       }
       for(unsigned int i = 0; i < otherWf->vfsurf.size(); i++)
       {
-        this->vfsurf.push_back(otherWf->vfsurf[i]->clone());
-        this->vfsurf.back()->wf = this;
+        VectorFormSurf<Scalar>* newForm = otherWf->vfsurf[i]->clone();
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->vfsurf[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->vfsurf[i]->ext[ext_i]->clone());
+        newForm->set_ext(newExt);
+        newForm->wf = this;
+        this->vfsurf.push_back(newForm);
+        this->forms.push_back(newForm);
       }
       for(unsigned int i = 0; i < otherWf->vfDG.size(); i++)
       {
-        this->vfDG.push_back(otherWf->vfDG[i]->clone());
-        this->vfDG.back()->wf = this;
+        VectorFormDG<Scalar>* newForm = otherWf->vfDG[i]->clone();
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->vfDG[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->vfDG[i]->ext[ext_i]->clone());
+        newForm->set_ext(newExt);
+        newForm->wf = this;
+        this->vfDG.push_back(newForm);
+        this->forms.push_back(newForm);
       }
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
         this->ext.push_back(otherWf->ext[i]->clone());
@@ -116,6 +153,7 @@ namespace Hermes
       vfvol.clear();
       vfsurf.clear();
       vfDG.clear();
+      forms.clear();
     };
 
     template<typename Scalar>
@@ -186,6 +224,24 @@ namespace Hermes
       this->u_ext_offset = u_ext_offset;
     }
     
+    template<typename Scalar>
+    void Form<Scalar>::set_ext(MeshFunction<Scalar>* ext)
+    {
+      this->ext.clear();
+      this->ext.push_back(ext);
+    }
+
+    template<typename Scalar>
+      void Form<Scalar>::set_ext(Hermes::vector<MeshFunction<Scalar>*> ext)
+    {
+      this->ext = ext;
+    }
+    
+    template<typename Scalar>
+      Hermes::vector<MeshFunction<Scalar>*> Form<Scalar>::get_ext() const
+    {
+      return this->ext;
+    }
 
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j) :
@@ -339,6 +395,7 @@ namespace Hermes
 
       form->set_weakform(this);
       mfvol.push_back(form);
+      forms.push_back(form);
     }
 
     template<typename Scalar>
@@ -349,6 +406,7 @@ namespace Hermes
 
       form->set_weakform(this);
       mfsurf.push_back(form);
+      forms.push_back(form);
     }
 
     template<typename Scalar>
@@ -359,6 +417,7 @@ namespace Hermes
 
       form->set_weakform(this);
       mfDG.push_back(form);
+      forms.push_back(form);
     }
 
     template<typename Scalar>
@@ -368,6 +427,7 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Invalid equation number.");
       form->set_weakform(this);
       vfvol.push_back(form);
+      forms.push_back(form);
     }
 
     template<typename Scalar>
@@ -378,6 +438,7 @@ namespace Hermes
 
       form->set_weakform(this);
       vfsurf.push_back(form);
+      forms.push_back(form);
     }
 
     template<typename Scalar>
@@ -388,6 +449,13 @@ namespace Hermes
 
       form->set_weakform(this);
       vfDG.push_back(form);
+      forms.push_back(form);
+    }
+
+    template<typename Scalar>
+    Hermes::vector<Form<Scalar> *> WeakForm<Scalar>::get_forms() const
+    {
+      return forms;
     }
 
     template<typename Scalar>
