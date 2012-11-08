@@ -1639,7 +1639,7 @@ namespace Hermes
       {
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[form->wf->ext.size()];
+        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[std::max(form->ext.size(), form->wf->ext.size())];
         init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
@@ -1800,7 +1800,7 @@ namespace Hermes
       {
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[form->wf->ext.size()];
+        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[std::max(form->ext.size(), form->wf->ext.size())];
         init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
@@ -1938,11 +1938,23 @@ namespace Hermes
         for(int i = 0; i < prev_size; i++)
           oi[i] = init_fn_ord(0);
 
-      for (int i = 0; i < form->wf->ext.size(); i++)
-        if(surface_form)
-          oext[i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
-        else
-          oext[i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+	  if(form->ext.size() > 0)
+	  {
+		  for (int i = 0; i < form->ext.size(); i++)
+			  if(surface_form)
+				  oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+			  else
+				  oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+	  }
+
+	  else
+	  {
+		  for (int i = 0; i < form->wf->ext.size(); i++)
+			  if(surface_form)
+				  oext[i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+			  else
+				  oext[i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+	  }
     }
 
     template<typename Scalar>
@@ -1955,13 +1967,20 @@ namespace Hermes
         delete oi[i];
       }
 
-      for (int i = 0; i < form->wf->ext.size(); i++)
-      {
-        oext[i]->free_ord();
-        delete oext[i];
-      }
+	  if(form->ext.size() > 0)
+		  for (int i = 0; i < form->ext.size(); i++)
+		  {
+			  oext[i]->free_ord();
+			  delete oext[i];
+		  }
+	  else
+		  for (int i = 0; i < form->wf->ext.size(); i++)
+		  {
+			  oext[i]->free_ord();
+			  delete oext[i];
+		  }
 
-      if(form->wf->ext.size() > 0)
+      if(std::max(form->ext.size(), form->wf->ext.size()) > 0)
         delete [] oext;
     }
 
