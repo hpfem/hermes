@@ -74,72 +74,44 @@ namespace Hermes
       this->forms.clear();
       this->ext.clear();
 
-      for(unsigned int i = 0; i < otherWf->mfvol.size(); i++)
+      for(unsigned int i = 0; i < otherWf->forms.size(); i++)
       {
-        MatrixFormVol<Scalar>* newForm = otherWf->mfvol[i]->clone();
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
-        for(unsigned int ext_i = 0; ext_i < otherWf->mfvol[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->mfvol[i]->ext[ext_i]->clone());
-        newForm->set_ext(newExt);
-        newForm->wf = this;
-        this->mfvol.push_back(newForm);
-        this->forms.push_back(newForm);
+          if(dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->forms.push_back((dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]))->clone());
+          if(dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->forms.push_back((dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]))->clone());
+          if(dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->forms.push_back((dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]))->clone());
+
+          if(dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->forms.push_back((dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]))->clone());
+          if(dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->forms.push_back((dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]))->clone());
+          if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->forms.push_back((dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]))->clone());
+
+
+          Hermes::vector<MeshFunction<Scalar>*> newExt;
+          for(unsigned int ext_i = 0; ext_i < otherWf->forms[i]->ext.size(); ext_i++)
+            newExt.push_back(otherWf->forms[i]->ext[ext_i]->clone());
+          this->forms.back()->set_ext(newExt);
+          this->forms.back()->wf = this;
+
+          if(dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->mfvol.push_back(dynamic_cast<MatrixFormVol<Scalar>*>(this->forms.back()));
+          if(dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->mfsurf.push_back(dynamic_cast<MatrixFormSurf<Scalar>*>(this->forms.back()));
+          if(dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->mfDG.push_back(dynamic_cast<MatrixFormDG<Scalar>*>(this->forms.back()));
+
+          if(dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->vfvol.push_back(dynamic_cast<VectorFormVol<Scalar>*>(this->forms.back()));
+          if(dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->vfsurf.push_back(dynamic_cast<VectorFormSurf<Scalar>*>(this->forms.back()));
+          if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+            this->vfDG.push_back(dynamic_cast<VectorFormDG<Scalar>*>(this->forms.back()));
       }
-      for(unsigned int i = 0; i < otherWf->mfsurf.size(); i++)
-      {
-        MatrixFormSurf<Scalar>* newForm = otherWf->mfsurf[i]->clone();
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
-        for(unsigned int ext_i = 0; ext_i < otherWf->mfsurf[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->mfsurf[i]->ext[ext_i]->clone());
-        newForm->set_ext(newExt);
-        newForm->wf = this;
-        this->mfsurf.push_back(newForm);
-        this->forms.push_back(newForm);
-      }
-      for(unsigned int i = 0; i < otherWf->mfDG.size(); i++)
-      {
-        MatrixFormDG<Scalar>* newForm = otherWf->mfDG[i]->clone();
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
-        for(unsigned int ext_i = 0; ext_i < otherWf->mfDG[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->mfDG[i]->ext[ext_i]->clone());
-        newForm->set_ext(newExt);
-        newForm->wf = this;
-        this->mfDG.push_back(newForm);
-        this->forms.push_back(newForm);
-      }
-      for(unsigned int i = 0; i < otherWf->vfvol.size(); i++)
-      {
-        VectorFormVol<Scalar>* newForm = otherWf->vfvol[i]->clone();
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
-        for(unsigned int ext_i = 0; ext_i < otherWf->vfvol[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->vfvol[i]->ext[ext_i]->clone());
-        newForm->set_ext(newExt);
-        newForm->wf = this;
-        this->vfvol.push_back(newForm);
-        this->forms.push_back(newForm);
-      }
-      for(unsigned int i = 0; i < otherWf->vfsurf.size(); i++)
-      {
-        VectorFormSurf<Scalar>* newForm = otherWf->vfsurf[i]->clone();
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
-        for(unsigned int ext_i = 0; ext_i < otherWf->vfsurf[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->vfsurf[i]->ext[ext_i]->clone());
-        newForm->set_ext(newExt);
-        newForm->wf = this;
-        this->vfsurf.push_back(newForm);
-        this->forms.push_back(newForm);
-      }
-      for(unsigned int i = 0; i < otherWf->vfDG.size(); i++)
-      {
-        VectorFormDG<Scalar>* newForm = otherWf->vfDG[i]->clone();
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
-        for(unsigned int ext_i = 0; ext_i < otherWf->vfDG[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->vfDG[i]->ext[ext_i]->clone());
-        newForm->set_ext(newExt);
-        newForm->wf = this;
-        this->vfDG.push_back(newForm);
-        this->forms.push_back(newForm);
-      }
+
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
         this->ext.push_back(otherWf->ext[i]->clone());
     }
