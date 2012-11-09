@@ -104,6 +104,10 @@ namespace Hermes
         meshes.push_back(this->spaces[space_i]->get_mesh());
       for(unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
+      for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
+        for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+          if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+            meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
         meshes.push_back(this->spaces[space_i]->get_mesh());
 
@@ -122,6 +126,15 @@ namespace Hermes
         {
           fns[i].push_back(weakforms[i]->ext[j]);
           weakforms[i]->ext[j]->set_quad_2d(&g_quad_2d_std);
+        }
+        for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
+        {
+          for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+            if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+            {
+              fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i]);
+              weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
+            }
         }
         for (unsigned j = 0; j < this->wf->get_neq(); j++)
         {
@@ -231,6 +244,19 @@ namespace Hermes
       // Assemble the local stiffness matrix for the form form.
       Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als_i->cnt, current_als_j->cnt));
 
+      Func<Scalar>** local_ext = ext;
+      // If the user supplied custom ext functions for this form.
+      if(form->ext.size() > 0)
+      {
+        int local_ext_count = form->ext.size();
+        local_ext = new Func<Scalar>*[local_ext_count];
+        for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
+          if(form->ext[ext_i] != NULL)
+            local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i], order);
+          else
+            local_ext[ext_i] = NULL;
+      }
+
       // Add the previous time level solution previously inserted at the back of ext.
       if(this->RungeKutta)
         u_ext += form->u_ext_offset;
@@ -259,18 +285,18 @@ namespace Hermes
             if(current_als_j->dof[j] >= 0)
             {
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
               else
-                local_stiffness_matrix[i][j] = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
             }
             else
             {
 
               {
                 if(surface_form)
-                  this->current_rhs->add(current_als_i->dof[i], -0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
+                  this->current_rhs->add(current_als_i->dof[i], -0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
                 else
-                  this->current_rhs->add(current_als_i->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
+                  this->current_rhs->add(current_als_i->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
               }
             }
           }
@@ -289,7 +315,7 @@ namespace Hermes
             Func<double>* u = base_fns[j];
             Func<double>* v = test_fns[i];
 
-            Scalar val = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+            Scalar val = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
             if(current_als_j->dof[j] >= 0)
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
@@ -321,6 +347,16 @@ namespace Hermes
             for (unsigned int i = 0; i < current_als_j->cnt; i++)
               if(current_als_j->dof[i] >= 0)
                 this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[i][j]);
+      }
+
+      if(form->ext.size() > 0)
+      {
+        for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
+          if(form->ext[ext_i] != NULL)
+          {
+            local_ext[ext_i]->free_fn();
+            delete local_ext[ext_i];
+          }
       }
 
       if(this->RungeKutta)

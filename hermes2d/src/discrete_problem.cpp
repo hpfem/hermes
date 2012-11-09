@@ -1003,13 +1003,13 @@ namespace Hermes
           weakforms[i]->ext[j]->set_quad_2d(&g_quad_2d_std);
         }
         for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
-       {
-         for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-           if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
-           {
-             fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i]);
-             weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
-           }
+        {
+          for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
+            if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+            {
+              fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i]);
+              weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
+            }
         }
         for (unsigned j = 0; j < wf->get_neq(); j++)
         {
@@ -1782,6 +1782,16 @@ namespace Hermes
         current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
       }
 
+      if(form->ext.size() > 0)
+      {
+        for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
+          if(form->ext[ext_i] != NULL)
+          {
+            local_ext[ext_i]->free_fn();
+            delete local_ext[ext_i];
+          }
+      }
+
       if(RungeKutta)
         u_ext -= form->u_ext_offset;
 
@@ -1827,7 +1837,7 @@ namespace Hermes
         deinit_ext_orders(form, u_ext_ord, ext_ord);
         delete [] u_ext_ord;
         ov->free_ord();
-        delete ov;
+        delete ov;  
       }
       return order;
     }
@@ -1874,6 +1884,16 @@ namespace Hermes
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
 
         current_rhs->add(current_als_i->dof[i], val);
+      }
+
+      if(form->ext.size() > 0)
+      {
+        for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
+          if(form->ext[ext_i] != NULL)
+          {
+            local_ext[ext_i]->free_fn();
+            delete local_ext[ext_i];
+          }
       }
 
       if(RungeKutta)
