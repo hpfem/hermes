@@ -54,6 +54,8 @@ namespace Hermes
       virtual void set_space(const Space<Scalar>* space);
       virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
       
+      /// Set the weak forms.
+      void set_weak_formulation(const WeakForm<Scalar>* wf);
     protected:
       DiscreteProblemLinear<Scalar>* dp; ///< FE problem being solved.
 

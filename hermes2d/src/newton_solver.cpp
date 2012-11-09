@@ -67,6 +67,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    {
+      (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);
+    }
+
+    template<typename Scalar>
     void NewtonSolver<Scalar>::set_newton_max_iter(int newton_max_iter)
     {
       if(newton_max_iter < 1)
@@ -595,7 +601,11 @@ namespace Hermes
 
         // Assemble and keep the jacobian if this has not been done before.
         // Also declare that LU-factorization in case of a direct solver will be done only once and reused afterwards.
-        if(kept_jacobian == NULL) {
+        if(kept_jacobian == NULL || !(static_cast<DiscreteProblem<Scalar>*>(this->dp))->have_matrix) 
+        {
+          if(kept_jacobian != NULL)
+            delete kept_jacobian;
+
           kept_jacobian = create_matrix<Scalar>();
 
           // Give the matrix solver the correct Jacobian. NOTE: It would be cleaner if the whole decision whether to keep

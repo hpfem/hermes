@@ -85,9 +85,11 @@ namespace Hermes
       /// If the cache should not be used for any reason.
       inline void set_do_not_use_cache() { this->do_not_use_cache = true; }
 
-      // GET functions.
       /// Get the weak forms.
       const WeakForm<Scalar>* get_weak_formulation() const;
+
+      /// Set the weak forms.
+      void set_weak_formulation(const WeakForm<Scalar>* wf);
 
       /// Get all spaces as a Hermes::vector.
       virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;

@@ -91,7 +91,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
+  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 4);
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
-  ZeroSolution<double> xvel_prev_time(&mesh), yvel_prev_time(&mesh), p_prev_time(&mesh);
+  ConstantSolution<double> xvel_prev_time(&mesh, 0.0), yvel_prev_time(&mesh, 0.0), p_prev_time(&mesh, 0.0);
 
   // Initialize weak formulation.
   WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
@@ -178,6 +178,7 @@ if(HERMES_VISUALIZATION)
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
     {
+      newton.set_weak_formulation(wf);
       newton.solve_keep_jacobian(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)

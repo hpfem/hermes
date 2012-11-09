@@ -64,7 +64,13 @@ namespace Hermes
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(this->dp->wf)->set_current_time(time);
     }
-      
+
+    template<typename Scalar>
+    void LinearSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    {
+      (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);
+    }
+
     template<typename Scalar>
     void LinearSolver<Scalar>::set_time_step(double time_step)
     {

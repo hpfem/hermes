@@ -229,6 +229,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    {
+      this->wf = wf;
+      this->have_matrix = false;
+    }
+
+    template<typename Scalar>
     bool DiscreteProblem<Scalar>::is_matrix_free() const
     {
       return wf->is_matrix_free();

@@ -80,6 +80,9 @@ namespace Hermes
       /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for 
       /// explanation of this parameter.
       void set_anderson_beta(double beta);
+
+      /// Set the weak forms.
+      void set_weak_formulation(const WeakForm<Scalar>* wf);
     private:
       void init();
       Hermes::vector<Solution<Scalar>* > slns_prev_iter;

@@ -125,6 +125,9 @@ namespace Hermes
       /// \param[in] steps Number of steps.
       void set_necessary_successful_steps_to_increase(unsigned int steps);
 
+      /// Set the weak forms.
+      void set_weak_formulation(const WeakForm<Scalar>* wf);
+
     protected:
       /// This instance owns its DP.
       const bool own_dp;

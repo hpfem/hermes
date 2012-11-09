@@ -82,6 +82,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void PicardSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    {
+      (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);
+    }
+
+    template<typename Scalar>
     void PicardSolver<Scalar>::init()
     {
       tol = 1e-4;
