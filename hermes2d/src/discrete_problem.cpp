@@ -1394,7 +1394,7 @@ namespace Hermes
       Traverse::State* current_state, WeakForm<Scalar>* current_wf)
     {
       // Integration order.
-      int rep_space_i = 0;
+      int rep_space_i = -1;
 
       // Get necessary (volumetric) assembly lists.
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
@@ -1404,6 +1404,8 @@ namespace Hermes
           spaces[space_i]->get_element_assembly_list(current_state->e[space_i], current_als[space_i], spaces_first_dofs[space_i]);
         }
 
+      if(rep_space_i == -1)
+        return;
       // Do we have to recalculate the data for this state even if the cache contains the data?
       bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
 
