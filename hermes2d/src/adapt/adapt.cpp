@@ -361,26 +361,29 @@ namespace Hermes
               elem_inx_to_proc.push_back(elem_ref);
             }
           }
-          catch(Hermes::Exceptions::Exception& e)
+          catch(Hermes::Exceptions::Exception& exception)
           {
             if(this->caughtException == NULL)
-              this->caughtException = e.clone();
+              this->caughtException = exception.clone();
           }
-          catch(std::exception& e)
+          catch(std::exception& exception)
           {
             if(this->caughtException == NULL)
-              this->caughtException = new Hermes::Exceptions::Exception(e.what());
+              this->caughtException = new Hermes::Exceptions::Exception(exception.what());
           }
         }
       }
 
-      int averageNumberOfCandidates = 0;
-      for(int i = 0; i < numberOfCandidates.size(); i++)
-        averageNumberOfCandidates += numberOfCandidates[i];
-      averageNumberOfCandidates = averageNumberOfCandidates / numberOfCandidates.size();
+      if(this->caughtException == NULL)
+      {
+        int averageNumberOfCandidates = 0;
+        for(int i = 0; i < numberOfCandidates.size(); i++)
+          averageNumberOfCandidates += numberOfCandidates[i];
+        averageNumberOfCandidates = averageNumberOfCandidates / numberOfCandidates.size();
 
-      this->info("Adaptivity: total number of refined Elements: %i.", ids.size());
-      this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
+        this->info("Adaptivity: total number of refined Elements: %i.", ids.size());
+        this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
+      }
 
       this->tick();
       this->info("Adaptivity: refinement selection duration: %f s.", this->last());
