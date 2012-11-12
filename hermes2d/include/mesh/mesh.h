@@ -233,9 +233,7 @@ namespace Hermes
     {
     public:
       Mesh();
-      ~Mesh() {
-        free();
-      }
+      ~Mesh();
 
       virtual bool isOkay() const;
 

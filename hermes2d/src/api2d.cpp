@@ -26,6 +26,43 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+
+    template<typename T>
+    PointerCalculator<T>::PointerCalculator() : count(0)
+    {
+    }
+
+    template<typename T>
+    unsigned int PointerCalculator<T>::getNumber() const
+    {
+      return this->count;
+    }
+
+    template<typename T>
+    void PointerCalculator<T>::operator+(unsigned int increaseBy)
+    {
+      this->count += increaseBy;
+    }
+
+    template<typename T>
+    void PointerCalculator<T>::operator++()
+    {
+      this->count++;
+    }
+
+    template<typename T>
+    void PointerCalculator<T>::operator-(unsigned int decreaseBy)
+    {
+      this->count -= decreaseBy;
+    }
+
+    template<typename T>
+    void PointerCalculator<T>::operator--()
+    {
+      this->count--;
+    }
+
+
     Api2D::Parameter::Parameter(int default_val)
     {
       this->default_val = default_val;
@@ -67,6 +104,47 @@ namespace Hermes
       this->parameters.find(param)->second->user_val = value;
     }
 
+    unsigned int Api2D::getNumberMeshPointers() const
+    {
+      return this->meshPointerCalculator.getNumber();
+    }
+
+    unsigned int Api2D::getNumberSpacePointers() const
+    {
+      return this->realSpacePointerCalculator.getNumber() + this->complexSpacePointerCalculator.getNumber();
+    }
+
+    unsigned int Api2D::getNumberRealSpacePointers() const
+    {
+      return this->realSpacePointerCalculator.getNumber();
+    }
+
+    unsigned int Api2D::getNumberComplexSpacePointers() const
+    {
+      return this->complexSpacePointerCalculator.getNumber();
+    }
+
+    unsigned int Api2D::getNumberSolutionPointers() const
+    {
+      return this->realSolutionPointerCalculator.getNumber() + this->complexSolutionPointerCalculator.getNumber();
+    }
+
+    unsigned int Api2D::getNumberRealSolutionPointers() const
+    {
+      return this->realSolutionPointerCalculator.getNumber();
+    }
+
+    unsigned int Api2D::getNumberComplexSolutionPointers() const
+    {
+      return this->complexSolutionPointerCalculator.getNumber();
+    }
+
+
     Hermes::Hermes2D::Api2D Hermes2DApi;
+    template class HERMES_API PointerCalculator<Mesh>;
+    template class HERMES_API PointerCalculator<Space<double> >;
+    template class HERMES_API PointerCalculator<Space<std::complex<double> > >;
+    template class HERMES_API PointerCalculator<Solution<double> >;
+    template class HERMES_API PointerCalculator<Solution<std::complex<double> > >;
   }
 }

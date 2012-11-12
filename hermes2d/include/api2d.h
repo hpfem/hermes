@@ -29,11 +29,34 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    class Mesh;
+    template<typename Scalar> class Space;
+    template<typename Scalar> class Solution;
+
     /// Enumeration of potential keys in the Api2D::parameters storage.
     enum Hermes2DApiParam
     {
       numThreads,
       secondDerivatives
+    };
+
+
+    /// Class for calculating pointers of instance T.
+    template<typename T>
+    class HERMES_API PointerCalculator
+    {
+    public:
+      PointerCalculator();
+      unsigned int getNumber() const;
+    private:
+      void operator+(unsigned int increaseBy);
+      void operator++();
+      void operator-(unsigned int decreaseBy);
+      void operator--();
+      unsigned int count;
+      friend class Mesh;
+      template<typename T1> friend class Space;
+      template<typename T1> friend class Solution;
     };
 
     /// API Class containing settings for the whole Hermes2D.
@@ -64,6 +87,24 @@ namespace Hermes
     public:
       int get_param_value(Hermes2DApiParam);
       void set_param_value(Hermes2DApiParam, int value);
+
+      unsigned int getNumberMeshPointers() const;
+      unsigned int getNumberSpacePointers() const;
+      unsigned int getNumberRealSpacePointers() const;
+      unsigned int getNumberComplexSpacePointers() const;
+      unsigned int getNumberSolutionPointers() const;
+      unsigned int getNumberRealSolutionPointers() const;
+      unsigned int getNumberComplexSolutionPointers() const;
+
+    private:
+      PointerCalculator<Mesh> meshPointerCalculator;
+      PointerCalculator<Space<double> > realSpacePointerCalculator;
+      PointerCalculator<Space<std::complex<double> > > complexSpacePointerCalculator;
+      PointerCalculator<Solution<double> > realSolutionPointerCalculator;
+      PointerCalculator<Solution<std::complex<double> > > complexSolutionPointerCalculator;
+      friend class Mesh;
+      template<typename T1> friend class Space;
+      template<typename T1> friend class Solution;
     };
 
     /// Global instance used inside Hermes which is also accessible to users.

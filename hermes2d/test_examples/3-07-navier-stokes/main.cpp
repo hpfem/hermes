@@ -175,6 +175,8 @@ if(HERMES_VISUALIZATION)
     if(current_time <= STARTUP_TIME)
       newton.set_time(current_time);
 
+    std::cout << std::endl << Hermes2DApi.getNumberMeshPointers() << std::endl;
+
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
     {

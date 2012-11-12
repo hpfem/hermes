@@ -16,6 +16,7 @@
 #include "mesh.h"
 #include <algorithm>
 #include "global.h"
+#include "api2d.h"
 #include "mesh_reader_h2d.h"
 
 namespace Hermes
@@ -222,6 +223,13 @@ namespace Hermes
     {
       nbase = nactive = ntopvert = ninitial = 0;
       seq = g_mesh_seq++;
+      Hermes::Hermes2D::Hermes2DApi.meshPointerCalculator++;
+    }
+
+    Mesh::~Mesh() 
+    {
+      free();
+      Hermes::Hermes2D::Hermes2DApi.meshPointerCalculator--;
     }
 
     bool Mesh::isOkay() const

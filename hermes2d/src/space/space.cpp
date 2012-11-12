@@ -18,6 +18,7 @@
 #include "space_hcurl.h"
 #include "space_hdiv.h"
 #include "space_h2d_xml.h"
+#include "api2d.h"
 #include <iostream>
 
 namespace Hermes
@@ -26,19 +27,38 @@ namespace Hermes
   {
     unsigned g_space_seq = 0;
 
-    template<typename Scalar>
-    Space<Scalar>::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
+    template<>
+    Space<double>::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
     {
       this->init();
+      Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator++;
     }
 
-    template<typename Scalar>
-    Space<Scalar>::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs)
+    template<>
+    Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
+    {
+      this->init();
+      Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator++;
+    }
+
+     template<>
+    Space<double>::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<double>* essential_bcs)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       if(mesh == NULL)
         throw Hermes::Exceptions::NullException(0);
       this->init();
+      Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator++;
+    }
+
+    template<>
+    Space<std::complex<double> >::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<std::complex<double> >* essential_bcs)
+      : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
+    {
+      if(mesh == NULL)
+        throw Hermes::Exceptions::NullException(0);
+      this->init();
+      Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator++;
     }
     
     template<typename Scalar>
@@ -77,10 +97,18 @@ namespace Hermes
       return okay;
     }
 
-    template<typename Scalar>
-    Space<Scalar>::~Space()
+    template<>
+    Space<double>::~Space()
     {
       free();
+      Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator--;
+    }
+
+    template<>
+    Space<std::complex<double> >::~Space()
+    {
+      free();
+      Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator--;
     }
 
     template<typename Scalar>

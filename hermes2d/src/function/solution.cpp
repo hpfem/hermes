@@ -17,6 +17,7 @@
 #include "forms.h"
 
 #include "solution_h2d_xml.h"
+#include "api2d.h"
 
 #include <iostream>
 #include <algorithm>
@@ -111,38 +112,80 @@ namespace Hermes
       this->set_quad_2d(&g_quad_2d_std);
     }
 
-    template<typename Scalar>
-    Solution<Scalar>::Solution()
-        : MeshFunction<Scalar>()
+    template<>
+    Solution<double>::Solution()
+        : MeshFunction<double>()
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();
+      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
-    template<typename Scalar>
-    Solution<Scalar>::Solution(const Mesh *mesh) : MeshFunction<Scalar>(mesh)
+    template<>
+    Solution<std::complex<double> >::Solution()
+        : MeshFunction<std::complex<double> >()
+    {
+      space_type = HERMES_INVALID_SPACE;
+      this->init();
+      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
+    }
+
+    template<>
+    Solution<double>::Solution(const Mesh *mesh) : MeshFunction<double>(mesh)
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();
       this->mesh = mesh;
+      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
-    template<typename Scalar>
-    Solution<Scalar>::Solution(Space<Scalar>* s, Vector<Scalar>* coeff_vec) : MeshFunction<Scalar>(s->get_mesh())
+    template<>
+    Solution<std::complex<double> >::Solution(const Mesh *mesh) : MeshFunction<std::complex<double> >(mesh)
+    {
+      space_type = HERMES_INVALID_SPACE;
+      this->init();
+      this->mesh = mesh;
+      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
+    }
+
+    template<>
+    Solution<double>::Solution(Space<double>* s, Vector<double>* coeff_vec) : MeshFunction<double>(s->get_mesh())
     {
       space_type = s->get_type();
       this->init();
       this->mesh = s->get_mesh();
-      Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
+      Solution<double>::vector_to_solution(coeff_vec, s, this);
+      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
-    template<typename Scalar>
-    Solution<Scalar>::Solution(Space<Scalar>* s, Scalar* coeff_vec) : MeshFunction<Scalar>(s->get_mesh())
+    template<>
+    Solution<std::complex<double> >::Solution(Space<std::complex<double> >* s, Vector<std::complex<double> >* coeff_vec) : MeshFunction<std::complex<double> >(s->get_mesh())
     {
       space_type = s->get_type();
       this->init();
       this->mesh = s->get_mesh();
-      Solution<Scalar>::vector_to_solution(coeff_vec, s, this);
+      Solution<std::complex<double> >::vector_to_solution(coeff_vec, s, this);
+      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
+    }
+
+    template<>
+    Solution<double>::Solution(Space<double>* s, double* coeff_vec) : MeshFunction<double>(s->get_mesh())
+    {
+      space_type = s->get_type();
+      this->init();
+      this->mesh = s->get_mesh();
+      Solution<double>::vector_to_solution(coeff_vec, s, this);
+      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
+    }
+
+    template<>
+    Solution<std::complex<double> >::Solution(Space<std::complex<double> >* s, std::complex<double> * coeff_vec) : MeshFunction<std::complex<double> >(s->get_mesh())
+    {
+      space_type = s->get_type();
+      this->init();
+      this->mesh = s->get_mesh();
+      Solution<std::complex<double> >::vector_to_solution(coeff_vec, s, this);
+      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
     }
 
     template<typename Scalar>
@@ -255,11 +298,20 @@ namespace Hermes
         free_tables();
     }
 
-    template<typename Scalar>
-    Solution<Scalar>::~Solution()
+    template<>
+    Solution<double>::~Solution()
     {
       free();
       space_type = HERMES_INVALID_SPACE;
+      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator--;
+    }
+
+    template<>
+    Solution<std::complex<double> >::~Solution()
+    {
+      free();
+      space_type = HERMES_INVALID_SPACE;
+      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator--;
     }
 
     static struct mono_lu_init
