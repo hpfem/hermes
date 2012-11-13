@@ -87,8 +87,8 @@ namespace Hermes
     template<typename Scalar>
     bool Solution<Scalar>::static_verbose_output = false;
 
-    template<typename Scalar>
-    void Solution<Scalar>::init()
+    template<>
+    void Solution<double>::init()
     {
       memset(tables, 0, sizeof(tables));
       memset(elems,  0, sizeof(elems));
@@ -100,7 +100,7 @@ namespace Hermes
 
       for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
-          tables[i][j] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
+          tables[i][j] = new std::map<uint64_t, LightArray<struct Function<double>::Node*>*>;
 
       mono_coeffs = NULL;
       elem_coeffs[0] = elem_coeffs[1] = NULL;
@@ -110,7 +110,34 @@ namespace Hermes
       num_dofs = -1;
 
       this->set_quad_2d(&g_quad_2d_std);
+			Hermes2DApi.realSolutionDataPointerCalculator++;
     }
+
+		template<>
+		void Solution<std::complex<double> >::init()
+		{
+			memset(tables, 0, sizeof(tables));
+			memset(elems,  0, sizeof(elems));
+			memset(oldest, 0, sizeof(oldest));
+			transform = true;
+			sln_type = HERMES_UNDEF;
+			this->num_components = 0;
+			e_last = NULL;
+
+			for(int i = 0; i < 4; i++)
+				for(int j = 0; j < 4; j++)
+					tables[i][j] = new std::map<uint64_t, LightArray<struct Function<std::complex<double> >::Node*>*>;
+
+			mono_coeffs = NULL;
+			elem_coeffs[0] = elem_coeffs[1] = NULL;
+			elem_orders = NULL;
+			dxdy_buffer = NULL;
+			num_coeffs = num_elems = 0;
+			num_dofs = -1;
+
+			this->set_quad_2d(&g_quad_2d_std);
+			Hermes2DApi.complexSolutionDataPointerCalculator++;
+		}
 
     template<>
     Solution<double>::Solution()
@@ -282,8 +309,8 @@ namespace Hermes
           }
     }
 
-    template<typename Scalar>
-    void Solution<Scalar>::free()
+    template<>
+    void Solution<double>::free()
     {
       if(mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
       if(elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
@@ -296,9 +323,27 @@ namespace Hermes
         e_last = NULL;
 
         free_tables();
+				Hermes2DApi.realSolutionDataPointerCalculator--;
     }
 
-    template<>
+		template<>
+		void Solution<std::complex<double> >::free()
+		{
+			if(mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
+			if(elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
+			if(dxdy_buffer != NULL) { delete [] dxdy_buffer;  dxdy_buffer = NULL; }
+
+			for (int i = 0; i < this->num_components; i++)
+				if(elem_coeffs[i] != NULL)
+				{ delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
+
+				e_last = NULL;
+
+				free_tables();
+				Hermes2DApi.complexSolutionDataPointerCalculator--;
+		}
+
+		template<>
     Solution<double>::~Solution()
     {
       free();

@@ -53,12 +53,16 @@ namespace Hermes
     template<typename T>
     void PointerCalculator<T>::operator-(unsigned int decreaseBy)
     {
+			if(this->count < decreaseBy)
+				throw Hermes::Exceptions::Exception("PointerCalculator: it was detected that with this decrement, the count would be < 0. Probably some increment was accidentally omitted.");
       this->count -= decreaseBy;
     }
 
     template<typename T>
     void PointerCalculator<T>::operator--()
     {
+			if(this->count < 1)
+				throw Hermes::Exceptions::Exception("PointerCalculator: it was detected that with this decrement, the count would be < 0. Probably some increment was accidentally omitted.");
       this->count--;
     }
 
@@ -139,6 +143,40 @@ namespace Hermes
       return this->complexSolutionPointerCalculator.getNumber();
     }
 
+		unsigned int Api2D::getNumberMeshData() const
+		{
+			return this->meshDataPointerCalculator.getNumber();
+		}
+
+		unsigned int Api2D::getNumberSpaceData() const
+		{
+			return this->realSpaceDataPointerCalculator.getNumber() + this->complexSpaceDataPointerCalculator.getNumber();
+		}
+
+		unsigned int Api2D::getNumberRealSpaceData() const
+		{
+			return this->realSpaceDataPointerCalculator.getNumber();
+		}
+
+		unsigned int Api2D::getNumberComplexSpaceData() const
+		{
+			return this->complexSpaceDataPointerCalculator.getNumber();
+		}
+
+		unsigned int Api2D::getNumberSolutionData() const
+		{
+			return this->realSolutionDataPointerCalculator.getNumber() + this->complexSolutionDataPointerCalculator.getNumber();
+		}
+
+		unsigned int Api2D::getNumberRealSolutionData() const
+		{
+			return this->realSolutionDataPointerCalculator.getNumber();
+		}
+
+		unsigned int Api2D::getNumberComplexSolutionData() const
+		{
+			return this->complexSolutionDataPointerCalculator.getNumber();
+		}
 
     Hermes::Hermes2D::Api2D Hermes2DApi;
     template class HERMES_API PointerCalculator<Mesh>;

@@ -90,21 +90,78 @@ namespace Hermes
       int get_param_value(Hermes2DApiParam);
       void set_param_value(Hermes2DApiParam, int value);
 
+			/// Returns the number of Mesh pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
       unsigned int getNumberMeshPointers() const;
-      unsigned int getNumberSpacePointers() const;
+      
+			/// Returns the number of Space pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
+			unsigned int getNumberSpacePointers() const;
+
+			/// Returns the number of Space<double> pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
       unsigned int getNumberRealSpacePointers() const;
+
+			/// Returns the number of Space<std::complex<double> > pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
       unsigned int getNumberComplexSpacePointers() const;
+
+			/// Returns the number of Solution pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
       unsigned int getNumberSolutionPointers() const;
+
+			/// Returns the number of Solution<double> pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
       unsigned int getNumberRealSolutionPointers() const;
+
+			/// Returns the number of Solution<std::complex<double> > pointers that exist.
+			/// Defined as the difference between constructor calls and destructor calls.
       unsigned int getNumberComplexSolutionPointers() const;
 
+			/// Returns the number of Mesh data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberMeshData() const;
+
+			/// Returns the number of Space data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberSpaceData() const;
+
+			/// Returns the number of Space<double> data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberRealSpaceData() const;
+
+			/// Returns the number of Space<std::complex<double> > data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberComplexSpaceData() const;
+
+			/// Returns the number of Solution data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberSolutionData() const;
+
+			/// Returns the number of Solution<double> data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberRealSolutionData() const;
+
+			/// Returns the number of Solution<std::complex<double> > data that exist.
+			/// Defined as the difference between init() calls and free() calls
+			unsigned int getNumberComplexSolutionData() const;
+
     private:
-      PointerCalculator<Mesh> meshPointerCalculator;
+			// Storage for handling constructor / destructor calls.
+			PointerCalculator<Mesh> meshPointerCalculator;
       PointerCalculator<Space<double> > realSpacePointerCalculator;
       PointerCalculator<Space<std::complex<double> > > complexSpacePointerCalculator;
       PointerCalculator<Solution<double> > realSolutionPointerCalculator;
       PointerCalculator<Solution<std::complex<double> > > complexSolutionPointerCalculator;
-      friend class Mesh;
+
+			// Storage for handling calls to init() / free().
+			PointerCalculator<Mesh> meshDataPointerCalculator;
+			PointerCalculator<Space<double> > realSpaceDataPointerCalculator;
+			PointerCalculator<Space<std::complex<double> > > complexSpaceDataPointerCalculator;
+			PointerCalculator<Solution<double> > realSolutionDataPointerCalculator;
+			PointerCalculator<Solution<std::complex<double> > > complexSolutionDataPointerCalculator;
+
+			friend class Mesh;
       template<typename T1> friend class Space;
       template<typename T1> friend class Solution;
     };

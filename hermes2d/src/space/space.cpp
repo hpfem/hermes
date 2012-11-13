@@ -61,8 +61,8 @@ namespace Hermes
       Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator++;
     }
     
-    template<typename Scalar>
-    void Space<Scalar>::init()
+    template<>
+    void Space<double>::init()
     {
       this->default_tri_order = -1;
       this->default_quad_order = -1;
@@ -76,7 +76,7 @@ namespace Hermes
       this->ndof = 0;
 
       if(essential_bcs != NULL)
-        for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+        for(Hermes::vector<EssentialBoundaryCondition<double>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
           for(unsigned int i = 0; i < (*it)->markers.size(); i++)
           {
             if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
@@ -84,7 +84,34 @@ namespace Hermes
           }
 
       own_shapeset = (shapeset == NULL);
+			Hermes2DApi.realSpaceDataPointerCalculator++;
     }
+
+		template<>
+		void Space<std::complex<double> >::init()
+		{
+			this->default_tri_order = -1;
+			this->default_quad_order = -1;
+			this->ndata = NULL;
+			this->edata = NULL;
+			this->nsize = esize = 0;
+			this->ndata_allocated = 0;
+			this->mesh_seq = -1;
+			this->seq = g_space_seq;
+			this->was_assigned = false;
+			this->ndof = 0;
+
+			if(essential_bcs != NULL)
+				for(Hermes::vector<EssentialBoundaryCondition<std::complex<double> >*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+					for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+					{
+						if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
+							throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
+					}
+
+					own_shapeset = (shapeset == NULL);
+			Hermes2DApi.complexSpaceDataPointerCalculator++;
+		}
 
     template<typename Scalar>
     bool Space<Scalar>::isOkay() const
@@ -111,14 +138,25 @@ namespace Hermes
       Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator--;
     }
 
-    template<typename Scalar>
-    void Space<Scalar>::free()
+    template<>
+    void Space<double>::free()
     {
       free_bc_data();
       if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
       if(esize) { ::free(edata); edata = 0; edata = NULL; }
       this->seq = -1;
+			Hermes2DApi.realSpaceDataPointerCalculator--;
     }
+
+		template<>
+		void Space<std::complex<double> >::free()
+		{
+			free_bc_data();
+			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
+			if(esize) { ::free(edata); edata = 0; edata = NULL; }
+			this->seq = -1;
+			Hermes2DApi.complexSpaceDataPointerCalculator--;
+		}
 
     template<typename Scalar>
     Node* Space<Scalar>::get_mid_edge_vertex_node(Element* e, int i, int j)
