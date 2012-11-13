@@ -54,7 +54,7 @@ namespace Hermes
     void PointerCalculator<T>::operator-(unsigned int decreaseBy)
     {
 			if(this->count < decreaseBy)
-				throw Hermes::Exceptions::Exception("PointerCalculator: it was detected that with this decrement, the count would be < 0. Probably some increment was accidentally omitted.");
+				Hermes::Mixins::Loggable::Static::warn("PointerCalculator: it was detected that with this decrement, the count would be < 0. Probably some increment was accidentally omitted.");
       this->count -= decreaseBy;
     }
 
@@ -62,7 +62,7 @@ namespace Hermes
     void PointerCalculator<T>::operator--()
     {
 			if(this->count < 1)
-				throw Hermes::Exceptions::Exception("PointerCalculator: it was detected that with this decrement, the count would be < 0. Probably some increment was accidentally omitted.");
+				Hermes::Mixins::Loggable::Static::warn("PointerCalculator: it was detected that with this decrement, the count would be < 0. Probably some increment was accidentally omitted.");
       this->count--;
     }
 

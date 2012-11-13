@@ -245,8 +245,8 @@ namespace Hermes
     {
       if(sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being copied is uninitialized.");
 
-      free();
 			this->increasePointerDataCounter();
+      free();
 
       this->mesh = sln->mesh;
 
@@ -477,9 +477,9 @@ namespace Hermes
 
       if(Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - solution being freed.");
-      free();
-
+			
 			this->increasePointerDataCounter();
+      free();
 
       this->space_type = space->get_type();
 
