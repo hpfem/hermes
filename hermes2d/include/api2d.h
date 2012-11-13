@@ -56,7 +56,8 @@ namespace Hermes
       void operator-(unsigned int decreaseBy);
       void operator--();
       unsigned int count;
-      friend class Mesh;
+			friend class Mesh;
+      friend class MeshReaderH2DXML;
       template<typename T1> friend class Space;
       template<typename T1> friend class Solution;
     };
@@ -162,6 +163,7 @@ namespace Hermes
 			PointerCalculator<Solution<std::complex<double> > > complexSolutionDataPointerCalculator;
 
 			friend class Mesh;
+			friend class MeshReaderH2DXML;
       template<typename T1> friend class Space;
       template<typename T1> friend class Solution;
     };

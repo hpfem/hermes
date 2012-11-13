@@ -166,6 +166,9 @@ namespace Hermes
       virtual MeshFunction<Scalar>* clone() const;
 
       static void set_static_verbose_output(bool verbose);
+
+			void increasePointerDataCounter();
+
     protected:
       static bool static_verbose_output;
 

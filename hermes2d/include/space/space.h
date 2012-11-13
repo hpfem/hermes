@@ -276,7 +276,7 @@ namespace Hermes
       /// call assign_dofs(). For internal use.
       void set_uniform_order_internal(int order, int marker);
 
-      virtual void free();
+      void free();
 
       /// Number of degrees of freedom (dimension of the space).
       int ndof;

@@ -77,7 +77,6 @@ namespace Hermes
       virtual void dummy_fn() {}
     } g_quad_2d_cheb;
 
-
     template<typename Scalar>
     void Solution<Scalar>::set_static_verbose_output(bool verbose)
     {
@@ -247,6 +246,7 @@ namespace Hermes
       if(sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being copied is uninitialized.");
 
       free();
+			this->increasePointerDataCounter();
 
       this->mesh = sln->mesh;
 
@@ -444,6 +444,19 @@ namespace Hermes
       delete pss;
     }
 
+
+		template<>
+		void Solution<double>::increasePointerDataCounter()
+		{
+			Hermes2DApi.realSolutionDataPointerCalculator++;
+		}
+
+		template<>
+		void Solution<std::complex<double> >::increasePointerDataCounter()
+		{
+			Hermes2DApi.realSolutionDataPointerCalculator++;
+		}
+
     template<typename Scalar>
     void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss,
         const Scalar* coeff_vec, bool add_dir_lift, int start_index)
@@ -465,6 +478,8 @@ namespace Hermes
       if(Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - solution being freed.");
       free();
+
+			this->increasePointerDataCounter();
 
       this->space_type = space->get_type();
 
