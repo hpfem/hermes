@@ -251,13 +251,11 @@ namespace Hermes
       *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
       *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
       virtual double calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
-        Hermes::vector<double>* component_errors, bool solutions_for_adapt,
-        unsigned int error_flags);
+        Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags);
 
       /// One Space version.
       virtual double calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
-        Hermes::vector<double>* component_errors, bool solutions_for_adapt,
-        unsigned int error_flags);
+        Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags);
 
       /// Evaluates a square of an absolute error of an active element among a given pair of components.
       /** The method uses a bilinear forms to calculate the error. This is done by supplying a differences (f1 - v1) and (f2 - v2) at integration points to the bilinear form,

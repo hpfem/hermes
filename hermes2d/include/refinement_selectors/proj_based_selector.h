@@ -259,7 +259,7 @@ namespace Hermes
         *  \param[out] herr An error of elements of H-candidates of various permutation of orders.
         *  \param[out] perr An error of elements of P-candidates of various permutation of orders.
         *  \param[out] anisoerr An error of elements of ANISO-candidates of various permutation of orders. */
-        virtual void calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[4], CandElemProjError perr, CandElemProjError anisoerr[4]);
+        virtual void calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[H2D_MAX_ELEMENT_SONS], CandElemProjError perr, CandElemProjError anisoerr[H2D_MAX_ELEMENT_SONS]);
 
         /// Calculate projection errors of an element of an candidate considering multiple orders.
         /** An element of a candidate may span over multiple sub-domains. All integration uses the reference domain.

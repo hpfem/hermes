@@ -275,10 +275,6 @@ namespace Hermes
       template<typename Scalar>
       Scalar** L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order)
       {
-        //set element and integration order
-        rsln->set_active_element(element);
-        rsln->set_quad_order(intr_gip_order);
-
         //fill with values
         Scalar** rvals_son = precalc_rvals[inx_son];
         rvals_son[H2D_L2FE_VALUE] = rsln->get_fn_values(0);

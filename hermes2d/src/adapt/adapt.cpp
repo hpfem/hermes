@@ -1023,6 +1023,37 @@ namespace Hermes
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
       int i, j;
+      
+      bool compatible_meshes = true;
+      for (int space_i = 0; space_i < this->num; space_i++)
+      {
+        Element* e;
+        for_all_active_elements(e, slns[space_i]->get_mesh())
+        {
+          Element* e_ref = rslns[space_i]->get_mesh()->get_element(e->id);
+          if(e_ref == NULL)
+          {
+            compatible_meshes = false;
+            break;
+          }
+          if(!e_ref->active)
+          {
+            if(e->sons[0] == NULL || e->sons[2] == NULL)
+            {
+              compatible_meshes = false;
+              break;
+            }
+            if(!e->sons[0]->active || !e->sons[2]->active)
+            {
+              compatible_meshes = false;
+              break;
+            }
+          }
+        }
+      }
+
+      if(!compatible_meshes)
+        throw Exceptions::Exception("Reference space not created by an isotropic (p-, h-, or hp-) refinement from the coarse space.");
 
       if(slns.size() != this->num)
         throw Exceptions::LengthException(0, slns.size(), this->num);

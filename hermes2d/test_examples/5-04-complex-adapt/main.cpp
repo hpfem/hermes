@@ -74,6 +74,8 @@ int main(int argc, char* argv[])
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", &mesh);
 
+  Hermes2DApi.set_param_value(numThreads, 1);
+
   // Perform initial mesh refinements.
   for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
 
@@ -114,9 +116,7 @@ int main(int argc, char* argv[])
   do
   {
     // Construct globally refined reference mesh and setup reference space.
-    Mesh::ReferenceMeshCreator ref_mesh_creator(&mesh);
-    Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
-    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh);
+    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(&space, &mesh);
     Space<std::complex<double> >* ref_space = ref_space_creator.create_ref_space();
     
     newton.set_space(ref_space);
