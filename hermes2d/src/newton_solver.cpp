@@ -17,6 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "newton_solver.h"
+#include "projections/ogprojection.h"
 #include "hermes_common.h"
 
 namespace Hermes
@@ -219,6 +220,24 @@ namespace Hermes
       if(this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       this->necessary_successful_steps_to_increase = steps;
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::solve(Solution<Scalar>* initial_guess)
+    {
+      Hermes::vector<Solution<Scalar>*> vectorToPass;
+      vectorToPass.push_back(initial_guess);
+      this->solve(vectorToPass);
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::solve(Hermes::vector<Solution<Scalar>*> initial_guess)
+    {
+      int ndof = this->dp->get_num_dofs();
+      Scalar* coeff_vec = new Scalar[ndof];
+      OGProjection<Scalar> ogProjection;
+      ogProjection.project_global(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), initial_guess, coeff_vec);
+      this->solve(coeff_vec);
     }
 
     template<typename Scalar>
@@ -446,6 +465,24 @@ namespace Hermes
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
         }
       }
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Solution<Scalar>* initial_guess)
+    {
+      Hermes::vector<Solution<Scalar>*> vectorToPass;
+      vectorToPass.push_back(initial_guess);
+      this->solve_keep_jacobian(vectorToPass);
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Hermes::vector<Solution<Scalar>*> initial_guess)
+    {
+      int ndof = this->dp->get_num_dofs();
+      Scalar* coeff_vec = new Scalar[ndof];
+      OGProjection<Scalar> ogProjection;
+      ogProjection.project_global(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), initial_guess, coeff_vec);
+      this->solve_keep_jacobian(coeff_vec);
     }
 
     template<typename Scalar>

@@ -17,7 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "picard_solver.h"
-#include "linear_solver.h"
+#include "projections/ogprojection.h"
 #include "exact_solution.h"
 
 namespace Hermes
@@ -28,23 +28,6 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp)
       : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
-      for(unsigned int i = 0; i < dp->get_spaces().size(); i++)
-        if(dp->get_spaces()[i]->get_shapeset()->get_num_components() == 1)
-          this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(dp->get_spaces()[i]->get_mesh()));
-        else
-          this->slns_prev_iter.push_back(new ZeroSolutionVector<Scalar>(dp->get_spaces()[i]->get_mesh()));
-      init();
-    }
-
-    template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(DiscreteProblemLinear<Scalar>* dp)
-      : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
-    {
-      for(unsigned int i = 0; i < dp->get_spaces().size(); i++)
-        if(dp->get_spaces()[i]->get_shapeset()->get_num_components() == 1)
-          this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(dp->get_spaces()[i]->get_mesh()));
-        else
-          this->slns_prev_iter.push_back(new ZeroSolutionVector<Scalar>(dp->get_spaces()[i]->get_mesh()));
       init();
     }
 
@@ -52,7 +35,6 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
       : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
     {
-      this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(space->get_mesh()));
       init();
     }
 
@@ -60,27 +42,9 @@ namespace Hermes
     PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces)
       : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
     {
-      for(unsigned int i = 0; i < spaces.size(); i++)
-        if(spaces[i]->get_shapeset()->get_num_components() == 1)
-          this->slns_prev_iter.push_back(new ZeroSolution<Scalar>(spaces[i]->get_mesh()));
-        else
-          this->slns_prev_iter.push_back(new ZeroSolutionVector<Scalar>(spaces[i]->get_mesh()));
       init();
     }
-
-    template<typename Scalar>
-    void PicardSolver<Scalar>::setPreviousSolution(Solution<Scalar>* sln_prev_iter)
-    {
-      this->slns_prev_iter.clear();
-      this->slns_prev_iter.push_back(sln_prev_iter);
-    }
-
-    template<typename Scalar>
-    void PicardSolver<Scalar>::setPreviousSolutions(Hermes::vector<Solution<Scalar>* > slns_prev_iter)
-    {
-      this->slns_prev_iter = slns_prev_iter;
-    }
-
+    
     template<typename Scalar>
     void PicardSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
     {
@@ -95,6 +59,10 @@ namespace Hermes
       num_last_vectors_used = 3;
       anderson_beta = 1.0;
       anderson_is_on = false;
+
+      matrix = create_matrix<Scalar>();
+      rhs = create_vector<Scalar>();
+      linear_solver = create_linear_solver<Scalar>(matrix, rhs);
     }
 
     template<typename Scalar>
@@ -117,6 +85,13 @@ namespace Hermes
     template<typename Scalar>
     PicardSolver<Scalar>::~PicardSolver()
     {
+      delete matrix;
+      delete rhs;
+      delete linear_solver;
+      if(own_dp)
+        delete this->dp;
+      else
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
     }
 
     template<typename Scalar>
@@ -246,7 +221,25 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::solve()
+    void PicardSolver<Scalar>::solve(Solution<Scalar>* initial_guess)
+    {
+      Hermes::vector<Solution<Scalar>*> vectorToPass;
+      vectorToPass.push_back(initial_guess);
+      this->solve(vectorToPass);
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::solve(Hermes::vector<Solution<Scalar>*> initial_guess)
+    {
+      int ndof = this->dp->get_num_dofs();
+      Scalar* coeff_vec = new Scalar[ndof];
+      OGProjection<Scalar> ogProjection;
+      ogProjection.project_global(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), initial_guess, coeff_vec);
+      this->solve(coeff_vec);
+    }
+
+    template<typename Scalar>
+    void PicardSolver<Scalar>::solve(Scalar* coeff_vec)
     {
       this->tick();
 
@@ -255,26 +248,12 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
 
       // Preliminaries.
-      int num_spaces = this->slns_prev_iter.size();
+      int num_spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size();
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_num_dofs();
       Hermes::vector<const Space<Scalar>* > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
       Hermes::vector<bool> add_dir_lift;
       for(unsigned int i = 0; i < spaces.size(); i++)
         add_dir_lift.push_back(false);
-      LinearSolver<Scalar> linear_solver(static_cast<DiscreteProblemLinear<Scalar>*>(this->dp));
-
-      linear_solver.set_rhs_E_matrix_dump_format(this->RhsFormat);
-      linear_solver.set_rhs_filename(this->RhsFilename);
-      linear_solver.set_rhs_varname(this->RhsVarname);
-	  linear_solver.set_rhs_number_format(this->rhs_number_format);
-
-      linear_solver.set_matrix_E_matrix_dump_format(this->matrixFormat);
-      linear_solver.set_matrix_filename(this->matrixFilename);
-      linear_solver.set_matrix_varname(this->matrixVarname);
-	  linear_solver.set_matrix_number_format(this->matrix_number_format);
-
-      linear_solver.set_verbose_output(this->verbose_output_linear_solver);
-      linear_solver.set_verbose_callback(this->get_verbose_callback());
 
       // Delete solution vector if there is any.
       if(this->sln_vector != NULL)
@@ -283,22 +262,23 @@ namespace Hermes
         this->sln_vector = NULL;
       }
 
-      // Project slns_prev_iter on the FE space(s) to obtain initial
-      // coefficient vector for the Picard's method.
-      this->info("Picard: projecting to obtain initial vector for the method.");
       this->sln_vector = new Scalar[ndof];
 
-      OGProjection<Scalar> ogProjection;
-      ogProjection.project_global(spaces, this->slns_prev_iter, this->sln_vector);
+      bool delete_coeff_vec = false;
+      if(coeff_vec == NULL)
+      {
+        coeff_vec = new Scalar[ndof];
+        memset(coeff_vec, 0, ndof*sizeof(Scalar));
+        delete_coeff_vec = true;
+      }
+
+      memcpy(this->sln_vector, coeff_vec, ndof*sizeof(Scalar));
 
       // Save the coefficient vector, it will be used to calculate increment error
       // after a new coefficient vector is calculated.
       Scalar* last_iter_vector = new Scalar[ndof];
       for (int i = 0; i < ndof; i++)
         last_iter_vector[i] = this->sln_vector[i];
-
-      // Important: This makes the Solution(s) slns_prev_iter compatible with this->sln_vector.
-      Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces, this->slns_prev_iter);
 
       // If Anderson is used, allocate memory for vectors and coefficients.
       Scalar** previous_vectors = NULL;      // To store num_last_vectors_used last coefficient vectors.
@@ -322,18 +302,44 @@ namespace Hermes
       while (true)
       {
         this->on_step_begin();
-        if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= it))
-          linear_solver.output_rhs(1);
-        else
-          linear_solver.output_rhs(0);
 
+        this->dp->assemble(last_iter_vector, matrix, rhs);
         if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= it))
-          linear_solver.output_matrix(1);
-        else
-          linear_solver.output_matrix(0);
+        {
+          char* fileName = new char[this->matrixFilename.length() + 5];
+          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), it);
+          else
+            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
+          FILE* matrix_file = fopen(fileName, "w+");
 
-        linear_solver.solve();
-        memcpy(this->sln_vector, linear_solver.get_sln_vector(), sizeof(Scalar)*ndof);
+          matrix->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+          fclose(matrix_file);
+          delete [] fileName;
+        }
+        if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= it))
+        {
+          char* fileName = new char[this->RhsFilename.length() + 5];
+          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), it);
+          else
+            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
+          FILE* rhs_file = fopen(fileName, "w+");
+          rhs->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+          fclose(rhs_file);
+          delete [] fileName;
+        }
+
+        this->on_step_end();
+
+        //rhs->change_sign();
+
+        // Solve the linear system.
+        if(!linear_solver->solve())
+          throw Exceptions::LinearMatrixSolverException();
+
+        memcpy(this->sln_vector, linear_solver->get_sln_vector(), sizeof(Scalar)*ndof);
+
         // If Anderson is used, store the new vector in the memory.
         if (anderson_is_on)
         {
@@ -387,7 +393,10 @@ namespace Hermes
         double rel_error = abs_error / last_iter_vec_norm;
 
         // Output for the user.
-        this->info("Picard: iteration %d, nDOFs %d, relative error %g%%", it, ndof, rel_error);
+        if(std::abs(last_iter_vec_norm) < 1e-12)
+          this->info("Picard: iteration %d, nDOFs %d, starting from zero vector.", it, ndof);
+        else
+          this->info("Picard: iteration %d, nDOFs %d, relative error %g%%", it, ndof, rel_error);
 
         // Stopping because error is sufficiently low.
         if(rel_error < tol)
@@ -400,8 +409,8 @@ namespace Hermes
             delete [] previous_vectors;
             delete [] anderson_coeffs;
           }
-          Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
-          static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
+          
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
 
           this->tick();
           this->info("Picard: solution duration: %f s.\n", this->last());
@@ -420,7 +429,7 @@ namespace Hermes
             delete [] previous_vectors;
             delete [] anderson_coeffs;
           }
-          static_cast<DiscreteProblemLinear<Scalar>*>(this->dp)->have_matrix = false;
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
 
           this->tick();
           this->info("Picard: solution duration: %f s.\n", this->last());
@@ -437,9 +446,6 @@ namespace Hermes
         // Renew the last iteration vector.
         for (int i = 0; i < ndof; i++)
           last_iter_vector[i] = this->sln_vector[i];
-
-        // Translate the last coefficient vector into previous Solution(s).
-        Solution<Scalar>::vector_to_solutions(this->sln_vector, spaces,  slns_prev_iter);
       }
     }
     template class HERMES_API PicardSolver<double>;
