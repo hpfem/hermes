@@ -1038,12 +1038,12 @@ namespace Hermes
           }
           if(!e_ref->active)
           {
-            if(e->sons[0] == NULL || e->sons[2] == NULL)
+            if(e_ref->sons[0] == NULL || e_ref->sons[2] == NULL)
             {
               compatible_meshes = false;
               break;
             }
-            if(!e->sons[0]->active || !e->sons[2]->active)
+            if(!e_ref->sons[0]->active || !e_ref->sons[2]->active)
             {
               compatible_meshes = false;
               break;
