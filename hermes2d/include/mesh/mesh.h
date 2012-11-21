@@ -235,11 +235,13 @@ namespace Hermes
       Mesh();
       ~Mesh();
 
-			/// Initializes the mesh.
-			/// \param size[in] Hash table size; must be a power of two.
-			void init(int size = H2D_DEFAULT_HASH_SIZE);
+      /// Initializes the mesh.
+      /// \param size[in] Hash table size; must be a power of two.
+      void init(int size = H2D_DEFAULT_HASH_SIZE);
 
+      /// State querying helpers.
       virtual bool isOkay() const;
+      inline std::string getClassName() const { return "Mesh"; }
 
       /// Rescales the mesh.
       bool rescale(double x_ref, double y_ref);

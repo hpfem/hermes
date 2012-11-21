@@ -25,6 +25,13 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    PicardSolver<Scalar>::PicardSolver()
+      : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>()), verbose_output_linear_solver(false), own_dp(true)
+    {
+      init();
+    }
+
+    template<typename Scalar>
     PicardSolver<Scalar>::PicardSolver(DiscreteProblem<Scalar>* dp)
       : NonlinearSolver<Scalar>(dp), verbose_output_linear_solver(false), own_dp(false)
     {
@@ -63,6 +70,16 @@ namespace Hermes
       matrix = create_matrix<Scalar>();
       rhs = create_vector<Scalar>();
       linear_solver = create_linear_solver<Scalar>(matrix, rhs);
+    }
+
+    template<typename Scalar>
+    bool PicardSolver<Scalar>::isOkay() const
+    {
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_weak_formulation() == NULL)
+        return false;
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() == 0)
+        return false;
+      return true;
     }
 
     template<typename Scalar>
@@ -241,6 +258,7 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::solve(Scalar* coeff_vec)
     {
+      this->check();
       this->tick();
 
       // Sanity check.

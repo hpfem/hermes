@@ -37,6 +37,12 @@ namespace Hermes
       public:
         /// Ask if the instance is fine.
         virtual bool isOkay() const = 0;
+
+        /// Get class name, for the purpose of messaging.
+        virtual std::string getClassName() const = 0;
+
+        /// Method to handle the state.
+        void check() const;
       };
 
       template<typename Scalar>

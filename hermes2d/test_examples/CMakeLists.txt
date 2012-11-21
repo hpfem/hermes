@@ -1,23 +1,23 @@
-add_subdirectory("1-03-poisson")
+add_subdirectory("01-poisson")
 
-add_subdirectory("2-06-bc-newton")
+add_subdirectory("02-poisson-newton")
 
-add_subdirectory("3-07-navier-stokes")
+add_subdirectory("03-navier-stokes")
 
-add_subdirectory("5-04-complex-adapt")
+add_subdirectory("04-complex-adapt")
 
-add_subdirectory("6-05-hcurl-adapt")
+add_subdirectory("05-hcurl-adapt")
 
-add_subdirectory("7-3-05-newton-heat-rk")
+add_subdirectory("06-system-adapt")
 
-# Commented out due to eigenproblems solver being reworked.
-#add_subdirectory("8-01-eigenvalue")
+add_subdirectory("07-newton-heat-rk")
 
-# Still in the old forms.
+# add_subdirectory("08-eigenvalue")
+
 IF(WITH_TRILINOS)
-  add_subdirectory("9-02-trilinos-nonlinear")
+	add_subdirectory("09-trilinos-nonlinear")
 ENDIF(WITH_TRILINOS)
 
 add_subdirectory("10-linear-advection-dg-adapt")
-add_subdirectory("11-FCT")
 
+add_subdirectory("11-FCT")

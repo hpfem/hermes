@@ -69,7 +69,10 @@ int main(int argc, char* argv[])
   int ndof = space.get_num_dofs();
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(&wf, &space);
+  Hermes::Hermes2D::NewtonSolver<double> newton;
+
+  newton.set_weak_formulation(&wf);
+  newton.set_space(&space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;

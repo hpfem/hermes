@@ -101,8 +101,10 @@ int main(int argc, char* argv[])
 
   wf->set_ext(Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time));
 
-  // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
+	// Initialize the Newton solver.
+	Hermes::Hermes2D::NewtonSolver<double> newton;
+	newton.set_weak_formulation(wf);
+	newton.set_spaces(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
@@ -130,6 +132,8 @@ int main(int argc, char* argv[])
     try
     {
       newton.solve(coeff_vec);
+			newton.set_weak_formulation(wf);
+			newton.set_spaces(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
     }
     catch(Hermes::Exceptions::Exception& e)
     {

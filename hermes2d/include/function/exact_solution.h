@@ -39,6 +39,8 @@ namespace Hermes
 
       virtual MeshFunction<Scalar>* clone() const;
 
+      inline std::string getClassName() const { return "ExactSolution"; }
+
     protected:
       /// For scaling of the solution.
       Scalar exact_multiplicator;

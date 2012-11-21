@@ -48,6 +48,9 @@ namespace Hermes
 
       virtual void reinit();
 
+      /// State querying helpers.
+      inline std::string getClassName() const { return "Filter"; }
+
     protected:
       void init(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
 

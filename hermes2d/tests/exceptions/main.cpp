@@ -2,6 +2,7 @@
 #include "hermes2d.h"
 
 using namespace Hermes;
+using namespace Hermes::Hermes2D;
 
 // This is a test of excptions.
 
@@ -83,8 +84,40 @@ int main(int argc, char* argv[])
     Hermes::Hermes2D::Mesh mesh;
     Hermes::Hermes2D::MeshReaderH2DXML reader;
     reader.load("domain.xml", &mesh);
+    return -1;
   }
   catch(Exceptions::MeshLoadFailureException& e)
+  {
+    e.print_msg();
+  }
+
+  try
+  {
+    Hermes::Hermes2D::Mesh mesh;
+    H1Space<double> space(&mesh);
+    return -1;
+  }
+  catch(Hermes::Exceptions::Exception& e)
+  {
+    e.print_msg();
+  }
+
+  try
+  {
+    // Load the mesh.
+    Hermes::Hermes2D::Mesh mesh;
+    Hermes::Hermes2D::MeshReaderH2D mloader;
+    mloader.load("domain.mesh", &mesh);
+
+    // Create an H1 space with default shapeset.
+    Hermes::Hermes2D::L2Space<double> space(&mesh, 3);
+
+    LinearSolver<double> ls;
+    ls.set_space(&space);
+    ls.solve();
+    return -1;
+  }
+  catch(Hermes::Exceptions::Exception& e)
   {
     e.print_msg();
   }

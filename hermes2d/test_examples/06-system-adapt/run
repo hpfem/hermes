@@ -1,0 +1,3 @@
+rm *~ 
+./P04-03-system
+python plot_graph.py &

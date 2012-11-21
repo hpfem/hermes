@@ -44,7 +44,9 @@ namespace Hermes
       MeshFunction(const Mesh *mesh);
       virtual ~MeshFunction();
 
+      /// State querying helpers.
       virtual bool isOkay() const;
+      inline std::string getClassName() const { return "MeshFunction"; }
 
       virtual void init();
       virtual void reinit();

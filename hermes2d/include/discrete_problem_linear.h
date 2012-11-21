@@ -37,6 +37,9 @@ namespace Hermes
       /// Constructor for one equation.
       DiscreteProblemLinear(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
 
+      /// Empty constructor for special purposes.
+      DiscreteProblemLinear();
+
       /// Destuctor.
       virtual ~DiscreteProblemLinear();
 

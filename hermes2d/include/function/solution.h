@@ -83,6 +83,9 @@ namespace Hermes
       Solution (Space<Scalar>* s, Scalar* coeff_vec);
       virtual ~Solution();
 
+      /// State querying helpers.
+      inline std::string getClassName() const { return "Solution"; }
+
       void assign(Solution* sln);
       inline Solution& operator = (Solution& sln) { assign(&sln); return *this; }
 

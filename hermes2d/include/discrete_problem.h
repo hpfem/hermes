@@ -60,7 +60,7 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>, public Hermes::Mixins::TimeMeasurable, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>
+    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>, public Hermes::Mixins::TimeMeasurable, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
       /// Constructor for multiple components / equations.
@@ -69,6 +69,10 @@ namespace Hermes
       /// Constructor for one equation.
       DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
       
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      virtual inline std::string getClassName() const { return "DiscreteProblem"; }
+
       /// Set this problem to Finite Volume (no integration order calculation).
       void set_fvm();
 

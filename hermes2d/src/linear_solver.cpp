@@ -28,6 +28,12 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    LinearSolver<Scalar>::LinearSolver() : dp(new DiscreteProblemLinear<Scalar>()), sln_vector(NULL), own_dp(false)
+    {
+      this->init();
+    }
+
+    template<typename Scalar>
     LinearSolver<Scalar>::LinearSolver(DiscreteProblemLinear<Scalar>* dp) : dp(dp), sln_vector(NULL), own_dp(false)
     {
       this->init();
@@ -52,6 +58,16 @@ namespace Hermes
       this->residual = create_vector<Scalar>();
       this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual);
       this->set_verbose_output(true);
+    }
+
+    template<typename Scalar>
+    bool LinearSolver<Scalar>::isOkay() const
+    {
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_weak_formulation() == NULL)
+        return false;
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() == 0)
+        return false;
+      return true;
     }
     
     template<typename Scalar>
@@ -110,6 +126,8 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::solve()
     {
+      this->check();
+
       this->tick();
 
       this->on_initialization();

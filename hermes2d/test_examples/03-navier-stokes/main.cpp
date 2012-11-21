@@ -139,7 +139,9 @@ int main(int argc, char* argv[])
   wf->set_ext(Hermes::vector<MeshFunction<double>*>(&xvel_prev_time, &yvel_prev_time));
 
   // Initialize the Newton solver.
-  Hermes::Hermes2D::NewtonSolver<double> newton(wf, Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
+  Hermes::Hermes2D::NewtonSolver<double> newton;
+	newton.set_weak_formulation(wf);
+	newton.set_spaces(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
 
   // Initialize views.
   Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));

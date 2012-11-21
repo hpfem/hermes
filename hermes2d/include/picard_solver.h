@@ -37,13 +37,18 @@ namespace Hermes
     /// http://hpfem.org/hermes/hermes-tutorial/doc/_build/html/src/hermes2d/B-nonlinear/01-picard.html
     /// will give an overview.
     template<typename Scalar>
-    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
+    class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
+      PicardSolver();
       PicardSolver(DiscreteProblem<Scalar>* dp);
       PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
       PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
       ~PicardSolver();
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "PicardSolver"; }
 
       /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
       void set_verbose_output_linear_solver(bool verbose_output_to_set);

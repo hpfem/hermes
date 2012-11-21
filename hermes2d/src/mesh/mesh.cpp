@@ -223,7 +223,7 @@ namespace Hermes
     {
       nbase = nactive = ntopvert = ninitial = 0;
       seq = g_mesh_seq++;
-			Hermes::Hermes2D::Hermes2DApi.meshPointerCalculator++;
+      Hermes::Hermes2D::Hermes2DApi.meshPointerCalculator++;
       Hermes::Hermes2D::Hermes2DApi.meshDataPointerCalculator++;
     }
 
@@ -236,6 +236,7 @@ namespace Hermes
     bool Mesh::isOkay() const
     {
       bool okay = true;
+
       if(this->elements.get_size() < 1)
         okay = false;
       if(this->nodes.get_size() < 1)

@@ -113,9 +113,11 @@ namespace Hermes
       /// Common code for constructors.
       void init();
 
-      virtual ~Space();
-
+      /// State querying helpers.
       virtual bool isOkay() const;
+      inline std::string getClassName() const { return "Space"; }
+
+      virtual ~Space();
 
       /// Sets element polynomial order. Can be called by the user. Should not be called
       /// for many elements at once, since assign_dofs() is called at the end of this function.

@@ -33,15 +33,20 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for Newton's method.
     template<typename Scalar>
-    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
+    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
+      NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
       NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
       NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
       void init_linear_solver();
 
       ~NewtonSolver();
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "NewtonSolver"; }
 
       /// Solve.
       /// \param[in] coeff_vec Ceofficient vector to start from.

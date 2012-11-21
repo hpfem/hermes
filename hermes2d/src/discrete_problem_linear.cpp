@@ -44,6 +44,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear() : DiscreteProblem<Scalar>()
+    {
+    }
+
+    template<typename Scalar>
     DiscreteProblemLinear<Scalar>::~DiscreteProblemLinear()
     {
     }
@@ -54,15 +59,7 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
-      // Initial check of meshes and spaces.
-      for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
-      {
-        if(!this->spaces[space_i]->isOkay())
-          throw Hermes::Exceptions::Exception("Space %d is not okay in assemble().", space_i);
-
-        if(!this->spaces[space_i]->get_mesh()->isOkay())
-          throw Hermes::Exceptions::Exception("Mesh %d is not okay in assemble().", space_i);
-      }
+      this->check();
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;

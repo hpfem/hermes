@@ -25,6 +25,13 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    NewtonSolver<Scalar>::NewtonSolver() : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>()), own_dp(true), kept_jacobian(NULL)
+    {
+      init_attributes();
+      init_linear_solver();
+    }
+
+    template<typename Scalar>
     NewtonSolver<Scalar>::NewtonSolver(DiscreteProblem<Scalar>* dp) : NonlinearSolver<Scalar>(dp), own_dp(false), kept_jacobian(NULL)
     {
       init_attributes();
@@ -43,6 +50,16 @@ namespace Hermes
     {
       init_attributes();
       init_linear_solver();
+    }
+
+    template<typename Scalar>
+    bool NewtonSolver<Scalar>::isOkay() const
+    {
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_weak_formulation() == NULL)
+        return false;
+      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() == 0)
+        return false;
+      return true;
     }
 
     template<typename Scalar>
@@ -243,6 +260,8 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve(Scalar* coeff_vec)
     {
+      this->check();
+
       this->tick();
 
       // Obtain the number of degrees of freedom.
@@ -488,6 +507,8 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve_keep_jacobian(Scalar* coeff_vec)
     {
+      this->check();
+
       this->tick();
 
       // Obtain the number of degrees of freedom.

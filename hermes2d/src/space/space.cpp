@@ -136,12 +136,22 @@ namespace Hermes
     template<typename Scalar>
     bool Space<Scalar>::isOkay() const
     {
-      bool okay = true;
       if(ndata == NULL || edata == NULL || !nsize || !esize)
-        okay = false;
+        return false;
       if(seq < 0)
-        okay = false;
-      return okay;
+        return false;
+      if(this->mesh == NULL)
+        return false;
+
+      this->mesh->check();
+
+      if(edata == NULL)
+      {
+          throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
+          return false;
+      }
+
+      return true;
     }
 
     template<>
@@ -245,6 +255,7 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::get_num_dofs() const
     {
+      check();
       return ndof;
     }
 
@@ -269,12 +280,14 @@ namespace Hermes
     template<typename Scalar>
     EssentialBCs<Scalar>* Space<Scalar>::get_essential_bcs() const
     {
+      check();
       return essential_bcs;
     }
 
     template<typename Scalar>
     void Space<Scalar>::set_element_order(int id, int order)
     {
+      check();
       set_element_order_internal(id, order);
 
       // since space changed, enumerate basis functions
@@ -361,16 +374,12 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::get_element_order(int id) const
     {
-      // sanity checks (for internal purposes)
-      if(this->mesh == NULL)
-        throw Hermes::Exceptions::Exception("NULL Mesh pointer detected in Space<Scalar>::get_element_order().");
-      if(edata == NULL)
-        throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
       if(id >= esize)
       {
         this->warn("Element index %d in Space<Scalar>::get_element_order() while maximum is %d.", id, esize);
         throw Hermes::Exceptions::Exception("Wrong element index in Space<Scalar>::get_element_order().");
       }
+
       return edata[id].order;
     }
 
@@ -410,6 +419,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::set_element_orders(int* elem_orders_)
     {
+      check();
       resize_tables();
 
       Element* e;
@@ -457,6 +467,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order)
     {
+      check();
       Element* e;
       for_all_active_elements(e, this->get_mesh())
       {
@@ -489,6 +500,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::unrefine_all_mesh_elements(bool keep_initial_refinements)
     {
+      check();
       // find inactive elements with active sons
       Hermes::vector<int> list;
       Element* e;
@@ -905,6 +917,7 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::assign_dofs(int first_dof, int stride)
     {
+      check();
       if(first_dof < 0)
         throw Hermes::Exceptions::ValueException("first_dof", first_dof, 0);
       if(stride < 1)
@@ -1068,6 +1081,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::update_edge_bc(Element* e, SurfPos* surf_pos)
     {
+      check();
       if(e->active)
       {
         Node* en = e->en[surf_pos->surf_num];
@@ -1107,6 +1121,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::update_essential_bc_values()
     {
+      check();
       Element* e;
       for_all_base_elements(e, mesh)
       {
