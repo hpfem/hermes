@@ -141,7 +141,7 @@ namespace Hermes
       if(seq < 0)
         return false;
       if(this->mesh == NULL)
-        return false;
+        return false;	
 
       this->mesh->check();
 
@@ -1202,8 +1202,8 @@ namespace Hermes
         throw Hermes::Exceptions::SpaceLoadFailureException(e.what());
       }
 
+			this->seq = g_space_seq++;
       this->assign_dofs();
-      this->seq = g_space_seq++;
       return;
     }
 

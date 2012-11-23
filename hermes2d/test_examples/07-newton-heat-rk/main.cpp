@@ -32,7 +32,7 @@
 //
 
 //  The following parameters can be changed:
-const bool REUSE_SOLUTION = false;
+const bool REUSE_SOLUTION = true;
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
@@ -103,13 +103,21 @@ int main(int argc, char* argv[])
   Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
 
   if(REUSE_SOLUTION && continuity.have_record_available())
-  {
-    continuity.get_last_record()->load_mesh(&mesh);
-    continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
-    space.set_essential_bcs(&bcs);
-    continuity.get_last_record()->load_solution(sln_time_prev, &space);
-    current_time = continuity.get_last_record()->get_time();
-  }
+		try
+	{
+		continuity.get_last_record()->load_mesh(&mesh);
+		continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
+		space.set_essential_bcs(&bcs);
+		continuity.get_last_record()->load_solution(sln_time_prev, &space);
+		Views::ScalarView s;
+		s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_DY);
+		s.wait_for_close();
+		current_time = continuity.get_last_record()->get_time();
+	}
+	catch(Hermes2D::CalculationContinuityException& e)
+	{
+		e.print_msg();
+	}
 
   CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
                           &current_time, TEMP_INIT, T_FINAL);
