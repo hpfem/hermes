@@ -697,7 +697,7 @@ namespace Hermes
         filename << CalculationContinuity<Scalar>::solution_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
         try
         {
-          solutions[i]->load(filename.str().c_str(), spaces[i]->get_mesh());
+          solutions[i]->load(filename.str().c_str(), spaces[i]);
           solutions[i]->space_type = spaces[i]->get_type();
         }
         catch(Hermes::Exceptions::SolutionLoadFailureException& e)
@@ -717,7 +717,7 @@ namespace Hermes
       filename << CalculationContinuity<Scalar>::solution_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
       try
       {
-        solution->load(filename.str().c_str(), space->get_mesh());
+        solution->load(filename.str().c_str(), space);
         solution->space_type = space->get_type();
       }
       catch(Hermes::Exceptions::SolutionLoadFailureException& e)

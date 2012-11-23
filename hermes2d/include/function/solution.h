@@ -96,11 +96,11 @@ namespace Hermes
 
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
-      void save(const char* filename) const;
+      virtual void save(const char* filename) const;
 
       /// Loads the solution from a file previously created by Solution::save(). This completely
       /// restores the solution in the memory.
-      void load(const char* filename, Mesh* mesh);
+      void load(const char* filename, Space<Scalar>* space);
 
       /// Returns solution value or derivatives at element e, in its reference domain point (xi1, xi2).
       /// 'item' controls the returned value: 0 = value, 1 = dx, 2 = dy, 3 = dxx, 4 = dyy, 5 = dxy.

@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "solution_h2d_xml.h"
 #include "exact_solution.h"
 namespace Hermes
 {
@@ -57,6 +58,69 @@ namespace Hermes
       return 2;
     }
 
+    template<>
+    void ConstantSolution<double>::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<double>::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+
+        xmlsolution.exactConstantXReal() = this->constant;
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
+    }
+
+    template<>
+    void ConstantSolution<std::complex<double> >::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<std::complex<double> >::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+
+        xmlsolution.exactConstantXReal() = this->constant.real();
+        xmlsolution.exactConstantXComplex() = this->constant.imag();
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
+    }
+
     template<typename Scalar>
     ConstantSolution<Scalar>::ConstantSolution(const Mesh* mesh, Scalar constant) : ExactSolutionScalar<Scalar>(mesh), constant(constant) {};
 
@@ -83,6 +147,69 @@ namespace Hermes
     template<typename Scalar>
     Ord ConstantSolution<Scalar>::ord(Ord x, Ord y) const {
       return Ord(0);
+    }
+
+    template<>
+    void ZeroSolution<double>::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<double>::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+
+        xmlsolution.exactConstantXReal() = 0;
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
+    }
+
+    template<>
+    void ZeroSolution<std::complex<double> >::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<std::complex<double> >::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+
+        xmlsolution.exactConstantXReal() = 0;
+        xmlsolution.exactConstantXComplex() = 0;
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
     }
 
     template<typename Scalar>
@@ -113,6 +240,73 @@ namespace Hermes
       return Ord(0);
     }
 
+    
+    template<>
+    void ConstantSolutionVector<double>::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<double>::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+
+        xmlsolution.exactConstantXReal() = this->constantX;
+        xmlsolution.exactConstantYReal() = this->constantY;
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
+    }
+
+    template<>
+    void ConstantSolutionVector<std::complex<double> >::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<std::complex<double> >::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+
+        xmlsolution.exactConstantXReal() = this->constantX.real();
+        xmlsolution.exactConstantXComplex() = this->constantX.imag();
+        xmlsolution.exactConstantYReal() = this->constantY.real();
+        xmlsolution.exactConstantYComplex() = this->constantY.imag();
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
+    }
+
     template<typename Scalar>
     ConstantSolutionVector<Scalar>::ConstantSolutionVector(const Mesh* mesh, Scalar constantX, Scalar constantY) : ExactSolutionVector<Scalar>(mesh), constantX(constantX), constantY(constantY) {};
 
@@ -139,6 +333,72 @@ namespace Hermes
     template<typename Scalar>
     Ord ConstantSolutionVector<Scalar>::ord(Ord x, Ord y) const {
       return Ord(0);
+    }
+
+    template<>
+    void ZeroSolutionVector<double>::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<double>::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+
+        xmlsolution.exactConstantXReal() = 0;
+        xmlsolution.exactConstantYReal() = 0;
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
+    }
+
+    template<>
+    void ZeroSolutionVector<std::complex<double> >::save(const char* filename) const
+    {
+      if(this->sln_type == HERMES_SLN)
+      {
+        Solution<std::complex<double> >::save(filename);
+        return;
+      }
+      try
+      {
+        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+
+        xmlsolution.exactConstantXReal() = 0;
+        xmlsolution.exactConstantXComplex() = 0;
+        xmlsolution.exactConstantYReal() = 0;
+        xmlsolution.exactConstantYComplex() = 0;
+
+        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        solution_schema_location.append("/solution_h2d_xml.xsd");
+        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
+
+        ::xml_schema::namespace_infomap namespace_info_map;
+        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
+
+        std::ofstream out(filename);
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        out.close();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SolutionSaveFailureException(e.what());
+      }
     }
 
     template<typename Scalar>

@@ -3,20 +3,20 @@
   <element name="solution">
     <complexType>
       <sequence>
-        <element minOccurs="1" maxOccurs="unbounded" name="mono_coeffs">
+        <element minOccurs="0" maxOccurs="unbounded" name="mono_coeffs">
           <complexType>
             <attribute name="id" type="integer" use="required" />
             <attribute name="real" type="decimal" use="required" />
             <attribute name="imaginary" type="decimal" />
           </complexType>
         </element>
-        <element minOccurs="1" maxOccurs="unbounded" name="elem_orders">
+        <element minOccurs="0" maxOccurs="unbounded" name="elem_orders">
           <complexType>
             <attribute name="id" type="integer" use="required" />
             <attribute name="order" type="integer" use="required" />
           </complexType>
         </element>
-        <element minOccurs="1" maxOccurs="unbounded" name="component">
+        <element minOccurs="0" maxOccurs="unbounded" name="component">
           <complexType>
             <sequence>
               <element minOccurs="1" maxOccurs="unbounded" name="elem_coeffs">
@@ -33,6 +33,13 @@
       <attribute name="num_components" type="integer" use="required" />
       <attribute name="num_elems" type="integer" use="required" />
       <attribute name="num_coeffs" type="integer" use="required" />
+	  <attribute name="exact" type="integer" use="required" />
+	  <attribute name="exactComplex" type="integer" use="required" />
+	  <attribute name="exactConstantXReal" type="decimal"/>
+	  <attribute name="exactConstantYReal" type="decimal"/>
+	  <attribute name="exactConstantXComplex" type="decimal"/>
+	  <attribute name="exactConstantYComplex" type="decimal"/>
+	  
     </complexType>
   </element>
 </schema>

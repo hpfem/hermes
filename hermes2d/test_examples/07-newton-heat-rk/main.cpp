@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 		space.set_essential_bcs(&bcs);
 		continuity.get_last_record()->load_solution(sln_time_prev, &space);
 		Views::ScalarView s;
-		s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_DY);
+		s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
 		s.wait_for_close();
 		current_time = continuity.get_last_record()->get_time();
 	}
@@ -166,10 +166,7 @@ int main(int argc, char* argv[])
     Tview.show(sln_time_new);
 
     // Save the progress.
-    if(iteration > 0)
-    {
-      continuity.add_record(current_time, &mesh, &space, sln_time_prev);
-    }
+    continuity.add_record(current_time, &mesh, &space, sln_time_prev);
 
     // Copy solution for the new time step.
     sln_time_prev->copy(sln_time_new);

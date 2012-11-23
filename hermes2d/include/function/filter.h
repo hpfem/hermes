@@ -198,6 +198,24 @@ namespace Hermes
     /// calculates the vector magnitude, sqrt(x^2 + y^2).
     /// \brief Calculates the magnitude of a vector function.
     template<typename Scalar>
+    class HERMES_API DXFilter : public DXDYFilter<Scalar>
+    {
+    public:
+      DXFilter() {};
+
+      DXFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
+      
+      virtual MeshFunction<Scalar>* clone() const;
+
+    protected:
+      virtual void filter_fn(int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy);
+    };
+
+    /// @ingroup meshFunctions
+    /// MagFilter takes two functions representing the components of a vector function and
+    /// calculates the vector magnitude, sqrt(x^2 + y^2).
+    /// \brief Calculates the magnitude of a vector function.
+    template<typename Scalar>
     class HERMES_API MagFilter : public SimpleFilter<Scalar>
     {
     public:
