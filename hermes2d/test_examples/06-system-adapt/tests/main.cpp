@@ -73,7 +73,7 @@ const int MESH_REGULARITY = -1;
 // candidates in hp-adaptivity. Default value is 1.0. 
 const double CONV_EXP = 1;                        
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 5.0;
+const double ERR_STOP = 5.91348;
 // Adaptivity process stops when the number of degrees of freedom grows over
 // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
@@ -145,8 +145,6 @@ int main(int argc, char* argv[])
   bool done = false;
   do
   {
-    Hermes::Mixins::Loggable::Static::info("---- Adaptivity step %d:", as);
-
     // Construct globally refined reference mesh and setup reference space.
     Mesh::ReferenceMeshCreator u_ref_mesh_creator(&u_mesh);
     Mesh* u_ref_mesh = u_ref_mesh_creator.create_ref_mesh();
@@ -186,13 +184,11 @@ int main(int argc, char* argv[])
                                           Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln));
 
     // Project the fine mesh solution onto the coarse mesh.
-    Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh.");
     OGProjection<double> ogProjection; ogProjection.project_global(Hermes::vector<const Space<double> *>(&u_space, &v_space),
                                                                    Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln),
                                                                    Hermes::vector<Solution<double> *>(&u_sln, &v_sln));
 
     // Calculate element errors.
-    Hermes::Mixins::Loggable::Static::info("Calculating error estimate and exact error.");
     Adapt<double>* adaptivity = new Adapt<double>(Hermes::vector<Space<double> *>(&u_space, &v_space));
 
     // Calculate error estimate for each solution component and the total error estimate.
@@ -201,19 +197,11 @@ int main(int argc, char* argv[])
                                                         Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln),
                                                         &err_est_rel) * 100;
 
-    // Calculate exact error for each solution component and the total exact error.
-    Hermes::vector<double> err_exact_rel;
-    bool solutions_for_adapt = false;
-    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution<double> *>(&u_sln, &v_sln),
-                                                            Hermes::vector<Solution<double> *>(&exact_u, &exact_v),
-                                                            &err_exact_rel, solutions_for_adapt) * 100;
-
     // If err_est too large, adapt the mesh.
     if (err_est_rel_total < ERR_STOP)
       done = true;
     else
     {
-      Hermes::Mixins::Loggable::Static::info("Adapting coarse mesh.");
       done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector<double> *>(&selector, &selector),
                                THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
@@ -227,10 +215,69 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
+	if(std::abs(u_ref_sln.get_pt_value(-0.98, -0.98)->val[0]- 0.000986633) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(v_ref_sln.get_pt_value(-0.98, -0.98)->val[0]- 0.747675) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(u_ref_sln.get_pt_value(-0.98, 0.98)->val[0]- 0.000986633) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(v_ref_sln.get_pt_value(-0.98, 0.98)->val[0]- 0.747675) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
 
-  std::cout << u_ref_sln.get_pt_value(-0.98, -0.98) << std::endl;
-  std::cout << v_ref_sln.get_pt_value(-0.98, -0.98) << std::endl;
-  std::cout << u_ref_sln.get_pt_value(-0.98, 0.98) << std::endl;
-  std::cout << v_ref_sln.get_pt_value(-0.98, 0.98) << std::endl;
+	if(std::abs(u_ref_sln.get_pt_value(-0.98, -0.98)->dx[0]- 0.0493155) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(v_ref_sln.get_pt_value(-0.98, -0.98)->dx[0]- 11.7667) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(u_ref_sln.get_pt_value(-0.98, 0.98)->dx[0]- 0.0493155) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(v_ref_sln.get_pt_value(-0.98, 0.98)->dx[0]- 11.7667) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
 
+	if(std::abs(u_ref_sln.get_pt_value(-0.98, -0.98)->dy[0]- 0.0493155) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(v_ref_sln.get_pt_value(-0.98, -0.98)->dy[0]- 11.7667) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(u_ref_sln.get_pt_value(-0.98, 0.98)->dy[0] + 0.0493155) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+	if(std::abs(v_ref_sln.get_pt_value(-0.98, 0.98)->dy[0] + 11.7667) > 1e-4) 
+	{
+		printf("Failure!\n");
+		return -1;
+	}
+
+	printf("Success!\n");
+	return 0;
 }

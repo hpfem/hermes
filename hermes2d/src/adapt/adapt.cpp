@@ -351,8 +351,12 @@ namespace Hermes
 
             // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
             bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(meshes[components[id_to_refine]]->get_element(ids[id_to_refine]), current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref);
-            if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]) != NULL)
-              numberOfCandidates.push_back(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size());
+            
+#pragma omp critical (number_of_candidates)
+						{
+							if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]) != NULL)
+								numberOfCandidates.push_back(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size());
+						}
 
             //add to a list of elements that are going to be refined
   #pragma omp critical (elem_inx_to_proc)
