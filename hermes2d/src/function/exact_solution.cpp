@@ -68,7 +68,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+        XMLSolution::solution xmlsolution(1, 0, 0, 1, 0);
 
         xmlsolution.exactConstantXReal() = this->constant;
 
@@ -99,7 +99,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+        XMLSolution::solution xmlsolution(1, 0, 0, 1, 1);
 
         xmlsolution.exactConstantXReal() = this->constant.real();
         xmlsolution.exactConstantXComplex() = this->constant.imag();
@@ -159,7 +159,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+        XMLSolution::solution xmlsolution(1, 0, 0, 1, 0);
 
         xmlsolution.exactConstantXReal() = 0;
 
@@ -190,7 +190,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+        XMLSolution::solution xmlsolution(1, 0, 0, 1, 1);
 
         xmlsolution.exactConstantXReal() = 0;
         xmlsolution.exactConstantXComplex() = 0;
@@ -251,7 +251,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+        XMLSolution::solution xmlsolution(2, 0, 0, 1, 0);
 
         xmlsolution.exactConstantXReal() = this->constantX;
         xmlsolution.exactConstantYReal() = this->constantY;
@@ -283,7 +283,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+        XMLSolution::solution xmlsolution(2, 0, 0, 1, 1);
 
         xmlsolution.exactConstantXReal() = this->constantX.real();
         xmlsolution.exactConstantXComplex() = this->constantX.imag();
@@ -345,7 +345,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 0);
+        XMLSolution::solution xmlsolution(2, 0, 0, 1, 0);
 
         xmlsolution.exactConstantXReal() = 0;
         xmlsolution.exactConstantYReal() = 0;
@@ -377,7 +377,7 @@ namespace Hermes
       }
       try
       {
-        XMLSolution::solution xmlsolution(0, 0, 0, 1, 1);
+        XMLSolution::solution xmlsolution(2, 0, 0, 1, 1);
 
         xmlsolution.exactConstantXReal() = 0;
         xmlsolution.exactConstantXComplex() = 0;
