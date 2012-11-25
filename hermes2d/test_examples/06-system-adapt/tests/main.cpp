@@ -34,20 +34,20 @@
 // single-mesh using the MULTI parameter.
 
 // Initial polynomial degree for u.
-const int P_INIT_U = 2;
+const int P_INIT_U = 2;                           
 // Initial polynomial degree for v.
-const int P_INIT_V = 1;
+const int P_INIT_V = 1;                           
 // Number of initial boundary refinements
-const int INIT_REF_BDY = 5;
+const int INIT_REF_BDY = 5;                       
 // MULTI = true  ... use multi-mesh,
 // MULTI = false ... use single-mesh.
 // Note: In the single mesh option, the meshes are
 // forced to be geometrically the same but the
 // polynomial degrees can still vary.
-const bool MULTI = true;
+const bool MULTI = true;                          
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 1.3;
+const double THRESHOLD = 1.3;                     
 // Adaptive strategy:
 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
 //   error is processed. If more elements have similar errors, refine
@@ -57,23 +57,23 @@ const double THRESHOLD = 1.3;
 // STRATEGY = 2 ... refine all elements whose error is larger
 //   than THRESHOLD.
 // More adaptive strategies can be created in adapt_ortho_h1.cpp.
-const int STRATEGY = 0;
+const int STRATEGY = 0;                           
 // Predefined list of element refinement candidates. Possible values are
 // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
 // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-const CandList CAND_LIST = H2D_HP_ANISO;
+const CandList CAND_LIST = H2D_HP_ANISO;              
 // Maximum allowed level of hanging nodes:
 // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
 // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
 // MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
 // Note that regular meshes are not supported, this is due to
 // their notoriously bad performance.
-const int MESH_REGULARITY = -1;
+const int MESH_REGULARITY = -1;                   
 // This parameter influences the selection of
-// candidates in hp-adaptivity. Default value is 1.0.
-const double CONV_EXP = 1;
+// candidates in hp-adaptivity. Default value is 1.0. 
+const double CONV_EXP = 1;                        
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1.0;
+const double ERR_STOP = 5.0;
 // Adaptivity process stops when the number of degrees of freedom grows over
 // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
@@ -82,7 +82,7 @@ double NEWTON_TOL_FINE = 1e-0;
 int NEWTON_MAX_ITER = 10;
 // Matrix solver: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;
+MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
 
 // Problem parameters.
 const double D_u = 1;
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
   // Initialize the weak formulation.
   CustomWeakForm wf(&g1, &g2);
-
+  
   // Initialize boundary conditions
   DefaultEssentialBCConst<double> bc_u("Bdy", 0.0);
   EssentialBCs<double> bcs_u(&bc_u);
@@ -137,18 +137,6 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
-
-  // Initialize views.
-  Views::ScalarView s_view_0("Solution[0]", new Views::WinGeom(0, 0, 440, 350));
-  s_view_0.show_mesh(false);
-  Views::OrderView  o_view_0("Mesh[0]", new Views::WinGeom(450, 0, 420, 350));
-  Views::ScalarView s_view_1("Solution[1]", new Views::WinGeom(880, 0, 440, 350));
-  s_view_1.show_mesh(false);
-  Views::OrderView o_view_1("Mesh[1]", new Views::WinGeom(1330, 0, 420, 350));
-
-  // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est;
-  SimpleGraph graph_dof_exact, graph_cpu_exact;
 
   NewtonSolver<double> newton;
 
@@ -172,12 +160,6 @@ int main(int argc, char* argv[])
     Hermes::vector<const Space<double> *> ref_spaces_const(u_ref_space, v_ref_space);
 
     int ndof_ref = Space<double>::get_num_dofs(ref_spaces_const);
-
-    // Initialize reference problem.
-    Hermes::Mixins::Loggable::Static::info("Solving on reference mesh.");
-
-    // Time measurement.
-    cpu_time.tick();
 
     // Perform Newton's iteration.
     try
@@ -209,14 +191,6 @@ int main(int argc, char* argv[])
                                                                    Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln),
                                                                    Hermes::vector<Solution<double> *>(&u_sln, &v_sln));
 
-    cpu_time.tick();
-
-    // View the coarse mesh solution and polynomial orders.
-    s_view_0.show(&u_sln);
-    o_view_0.show(&u_space);
-    s_view_1.show(&v_sln);
-    o_view_1.show(&v_space);
-
     // Calculate element errors.
     Hermes::Mixins::Loggable::Static::info("Calculating error estimate and exact error.");
     Adapt<double>* adaptivity = new Adapt<double>(Hermes::vector<Space<double> *>(&u_space, &v_space));
@@ -233,34 +207,6 @@ int main(int argc, char* argv[])
     double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution<double> *>(&u_sln, &v_sln),
                                                             Hermes::vector<Solution<double> *>(&exact_u, &exact_v),
                                                             &err_exact_rel, solutions_for_adapt) * 100;
-
-    // Time measurement.
-    cpu_time.tick();
-
-    // Report results.
-    Hermes::Mixins::Loggable::Static::info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
-                                           u_space.get_num_dofs(), u_ref_space->get_num_dofs());
-    Hermes::Mixins::Loggable::Static::info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
-    Hermes::Mixins::Loggable::Static::info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
-                                           v_space.get_num_dofs(), v_ref_space->get_num_dofs());
-    Hermes::Mixins::Loggable::Static::info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
-    Hermes::Mixins::Loggable::Static::info("ndof_coarse_total: %d, ndof_fine_total: %d",
-                                           Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&u_space, &v_space)),
-                                           Space<double>::get_num_dofs(ref_spaces_const));
-    Hermes::Mixins::Loggable::Static::info("err_est_rel_total: %g%%, err_est_exact_total: %g%%", err_est_rel_total, err_exact_rel_total);
-
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&u_space, &v_space)),
-                             err_est_rel_total);
-    graph_dof_est.save("conv_dof_est.dat");
-    graph_cpu_est.add_values(cpu_time.accumulated(), err_est_rel_total);
-    graph_cpu_est.save("conv_cpu_est.dat");
-
-    graph_dof_exact.add_values(Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&u_space, &v_space)),
-                               err_exact_rel_total);
-    graph_dof_exact.save("conv_dof_exact.dat");
-    graph_cpu_exact.add_values(cpu_time.accumulated(), err_exact_rel_total);
-    graph_cpu_exact.save("conv_cpu_exact.dat");
 
     // If err_est too large, adapt the mesh.
     if (err_est_rel_total < ERR_STOP)
@@ -281,9 +227,10 @@ int main(int argc, char* argv[])
   }
   while (done == false);
 
-  Hermes::Mixins::Loggable::Static::info("Total running time: %g s", cpu_time.accumulated());
 
-  // Wait for all views to be closed.
-  Views::View::wait();
-  return 0;
+  std::cout << u_ref_sln.get_pt_value(-0.98, -0.98) << std::endl;
+  std::cout << v_ref_sln.get_pt_value(-0.98, -0.98) << std::endl;
+  std::cout << u_ref_sln.get_pt_value(-0.98, 0.98) << std::endl;
+  std::cout << v_ref_sln.get_pt_value(-0.98, 0.98) << std::endl;
+
 }
