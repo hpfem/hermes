@@ -185,7 +185,7 @@ namespace Hermes
       bool save(const char *filename) const;
 
       /// Loads a space from a file.
-      void load(const char *filename, EssentialBCs<Scalar>* essential_bcs = NULL);
+      static Space<Scalar>* load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;

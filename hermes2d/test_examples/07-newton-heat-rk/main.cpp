@@ -97,34 +97,40 @@ int main(int argc, char* argv[])
 	Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
 	// Space.
-	H1Space<double> space(&mesh, &bcs, P_INIT);
+	Space<double>* space;
 
 	// Solution pointer.
 	Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
 
 	if(REUSE_SOLUTION && continuity.have_record_available())
+	{
 		try
-	{
-		continuity.get_last_record()->load_mesh(&mesh);
-		continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
-		space.set_essential_bcs(&bcs);
-		continuity.get_last_record()->load_solution(sln_time_prev, &space);
-		Views::ScalarView s;
-		s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
-		s.wait_for_close();
-		current_time = continuity.get_last_record()->get_time();
+		{
+			continuity.get_last_record()->load_mesh(&mesh);
+			space = continuity.get_last_record()->load_space(&mesh, &bcs);
+			continuity.get_last_record()->load_solution(sln_time_prev, space);
+			Views::ScalarView s;
+			s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
+			s.wait_for_close();
+			current_time = continuity.get_last_record()->get_time();
+		}
+		catch(Hermes2D::CalculationContinuityException& e)
+		{
+			e.print_msg();
+		}
 	}
-	catch(Hermes2D::CalculationContinuityException& e)
+	else
 	{
-		e.print_msg();
+		space = new H1Space<double>(&mesh, &bcs, P_INIT);
 	}
+
 
 	CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
 		&current_time, TEMP_INIT, T_FINAL);
 
 	Solution<double>* sln_time_new = new Solution<double>(&mesh);
 
-	int ndof = space.get_num_dofs();
+	int ndof = space->get_num_dofs();
 
 	// Initialize views.
 	Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
@@ -132,7 +138,7 @@ int main(int argc, char* argv[])
 	Tview.fix_scale_width(30);
 
 	// Initialize Runge-Kutta time stepping.
-	RungeKutta<double> runge_kutta(&wf, &space, &bt);
+	RungeKutta<double> runge_kutta(&wf, space, &bt);
 
 	runge_kutta.set_verbose_output(true);
 	runge_kutta.output_matrix(1);
@@ -149,7 +155,7 @@ int main(int argc, char* argv[])
 		// Perform one Runge-Kutta time step according to the selected Butcher's table.
 		try
 		{
-			runge_kutta.set_space(&space);
+			runge_kutta.set_space(space);
 			runge_kutta.set_time(current_time);
 			runge_kutta.set_time_step(time_step);
 			runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
@@ -166,7 +172,7 @@ int main(int argc, char* argv[])
 		Tview.show(sln_time_new);
 
 		// Save the progress.
-		continuity.add_record(current_time, &mesh, &space, sln_time_prev);
+		continuity.add_record(current_time, &mesh, space, sln_time_prev);
 
 		// Copy solution for the new time step.
 		sln_time_prev->copy(sln_time_new);

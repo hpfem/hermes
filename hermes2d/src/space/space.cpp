@@ -15,6 +15,10 @@
 
 #include "space_h1.h"
 #include "space_l2.h"
+#include "shapeset_hc_all.h"
+#include "shapeset_hd_all.h"
+#include "shapeset_h1_all.h"
+#include "shapeset_l2_all.h"
 #include "space_hcurl.h"
 #include "space_hdiv.h"
 #include "space_h2d_xml.h"
@@ -1150,6 +1154,24 @@ namespace Hermes
     {
       XMLSpace::space xmlspace;
 
+			switch(this->get_type())
+			{
+			case HERMES_H1_SPACE:
+				xmlspace.spaceType().set("h1");
+				break;
+			case HERMES_HCURL_SPACE:
+				xmlspace.spaceType().set("hcurl");
+				break;
+			case HERMES_HDIV_SPACE:
+				xmlspace.spaceType().set("hdiv");
+				break;
+			case HERMES_L2_SPACE:
+				xmlspace.spaceType().set("l2");
+				break;
+			default:
+				return false;
+			}
+
       // Utility pointer.
       Element *e;
       for_all_elements(e, this->get_mesh())
@@ -1170,41 +1192,146 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::load(const char *filename, EssentialBCs<Scalar>* essential_bcs)
+    Space<Scalar>* Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
-      this->essential_bcs = essential_bcs;
-      this->mesh_seq == this->mesh->get_seq();
-
-      if(essential_bcs != NULL)
-        for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
-          for(unsigned int i = 0; i < (*it)->markers.size(); i++)
-            if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end())
-              throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
-
-      this->resize_tables();
-
       try
       {
+				Space<Scalar>* space;
         std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename));
+
+				if(!strcmp(parsed_xml_space->spaceType().get().c_str(),"h1"))
+				{
+					space = new H1Space<Scalar>();
+					space->mesh = mesh;
+
+					if(shapeset == NULL)
+					{
+						space->shapeset = new H1Shapeset;
+						space->own_shapeset = true;
+					}
+					else
+					{
+						if(shapeset->get_space_type() != HERMES_H1_SPACE)
+							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+						else
+							space->shapeset = shapeset;
+					}
+
+					if(!static_cast<H1Space<Scalar>*>(space)->h1_proj_ref++)
+						space->precalculate_projection_matrix(2, static_cast<H1Space<Scalar>*>(space)->h1_proj_mat, static_cast<H1Space<Scalar>*>(space)->h1_chol_p);
+					space->proj_mat = static_cast<H1Space<Scalar>*>(space)->h1_proj_mat;
+					space->chol_p   = static_cast<H1Space<Scalar>*>(space)->h1_chol_p;
+				}
+				else if (!strcmp(parsed_xml_space->spaceType().get().c_str(),"hcurl"))
+				{
+					space = new HcurlSpace<Scalar>();
+					space->mesh = mesh;
+
+					if(shapeset == NULL)
+					{
+						space->shapeset = new HcurlShapeset;
+						space->own_shapeset = true;
+					}
+				else
+					{
+						if(shapeset->get_num_components() < 2)
+							throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset in Space::load.");
+						if(shapeset->get_space_type() != HERMES_HCURL_SPACE)
+							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+						else
+							space->shapeset = shapeset;
+					}
+
+					if(!static_cast<HcurlSpace<Scalar>*>(space)->hcurl_proj_ref++)
+						space->precalculate_projection_matrix(0, static_cast<HcurlSpace<Scalar>*>(space)->hcurl_proj_mat, static_cast<HcurlSpace<Scalar>*>(space)->hcurl_chol_p);
+
+					static_cast<HcurlSpace<Scalar>*>(space)->proj_mat = static_cast<HcurlSpace<Scalar>*>(space)->hcurl_proj_mat;
+					static_cast<HcurlSpace<Scalar>*>(space)->chol_p   = static_cast<HcurlSpace<Scalar>*>(space)->hcurl_chol_p;
+				}
+				else if(!!strcmp(parsed_xml_space->spaceType().get().c_str(),"hdiv"))
+				{
+					space = new HdivSpace<Scalar>();
+					space->mesh = mesh;
+
+					if(shapeset == NULL)
+					{
+						space->shapeset = new HdivShapeset;
+						space->own_shapeset = true;
+					}
+					else
+					{
+						if(shapeset->get_num_components() < 2)
+							throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset in Space::load.");
+						if(shapeset->get_space_type() != HERMES_HDIV_SPACE)
+							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+						else
+							space->shapeset = shapeset;
+					}
+
+					if(!static_cast<HdivSpace<Scalar>*>(space)->hdiv_proj_ref++)
+					{
+						space->precalculate_projection_matrix(0, static_cast<HdivSpace<Scalar>*>(space)->hdiv_proj_mat, static_cast<HdivSpace<Scalar>*>(space)->hdiv_chol_p);
+					}
+
+					static_cast<HdivSpace<Scalar>*>(space)->proj_mat = static_cast<HdivSpace<Scalar>*>(space)->hdiv_proj_mat;
+					static_cast<HdivSpace<Scalar>*>(space)->chol_p   = static_cast<HdivSpace<Scalar>*>(space)->hdiv_chol_p;
+				}
+				else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2"))
+				{
+					space = new L2Space<Scalar>();
+					space->mesh = mesh;
+
+					if(shapeset == NULL)
+					{
+						space->shapeset = new L2Shapeset;
+						space->own_shapeset = true;
+					}
+					{
+						if(shapeset->get_space_type() != HERMES_L2_SPACE)
+							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+						else
+							space->shapeset = shapeset;
+					}
+
+					static_cast<L2Space<Scalar>*>(space)->ldata = NULL;
+					static_cast<L2Space<Scalar>*>(space)->lsize = 0;
+				}
+				else
+				{
+					throw Exceptions::SpaceLoadFailureException("Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+					return NULL;
+				}
+
+				space->essential_bcs = essential_bcs;
+				space->mesh_seq == space->mesh->get_seq();
+
+				// L2 space does not have any (strong) essential BCs.
+				if(essential_bcs != NULL && parsed_xml_space->spaceType().get().c_str() != "l2")
+					for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+						for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+							if(space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
+								throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
+
+				space->resize_tables();
 
         // Element data //
         unsigned int elem_data_count = parsed_xml_space->element_data().size();
         for (unsigned int elem_data_i = 0; elem_data_i < elem_data_count; elem_data_i++)
         {
-          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].order = parsed_xml_space->element_data().at(elem_data_i).order();
-          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bdof();
-          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
-          this->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].order = parsed_xml_space->element_data().at(elem_data_i).order();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bdof();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
         }
+
+				space->assign_dofs();
+				space->seq = g_space_seq++;
+				return space;
       }
       catch (const xml_schema::exception& e)
       {
         throw Hermes::Exceptions::SpaceLoadFailureException(e.what());
       }
-
-			this->seq = g_space_seq++;
-      this->assign_dofs();
-      return;
     }
 
     template class HERMES_API Space<double>;

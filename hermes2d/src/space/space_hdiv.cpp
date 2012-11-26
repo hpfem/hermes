@@ -100,60 +100,6 @@ namespace Hermes
       this->proj_mat = hdiv_proj_mat;
       this->chol_p   = hdiv_chol_p;
     }
-    
-    template<typename Scalar>
-    void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
-    {
-      this->mesh = mesh;
-
-      if(shapeset == NULL)
-      {
-        this->shapeset = new HdivShapeset;
-        this->own_shapeset = true;
-      }
-      else
-        this->shapeset = shapeset;
-
-      if(this->shapeset->get_num_components() < 2)
-        throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
-
-      if(!hdiv_proj_ref++)
-      {
-        this->precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
-      }
-
-      this->proj_mat = hdiv_proj_mat;
-      this->chol_p   = hdiv_chol_p;
-
-      Space<Scalar>::load(filename, essential_bcs);
-    }
-
-    template<typename Scalar>
-    void HdivSpace<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
-    {
-      this->mesh = mesh;
-
-      if(shapeset == NULL)
-      {
-        this->shapeset = new HdivShapeset;
-        this->own_shapeset = true;
-      }
-      else
-        this->shapeset = shapeset;
-
-      if(this->shapeset->get_num_components() < 2)
-        throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset.");
-
-      if(!hdiv_proj_ref++)
-      {
-        this->precalculate_projection_matrix(0, hdiv_proj_mat, hdiv_chol_p);
-      }
-
-      this->proj_mat = hdiv_proj_mat;
-      this->chol_p   = hdiv_chol_p;
-
-      Space<Scalar>::load(filename);
-    }
 
     template<typename Scalar>
     void HdivSpace<Scalar>::set_shapeset(Shapeset *shapeset)

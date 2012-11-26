@@ -557,35 +557,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
+    Hermes::vector<Space<Scalar>*> CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
     {
-      if(shapesets == Hermes::vector<Shapeset*>())
-        for(unsigned int i = 0; i < spaces.size(); i++)
+			Hermes::vector<Space<Scalar>*> spaces;
+
+			if(shapesets == Hermes::vector<Shapeset*>())
+        for(unsigned int i = 0; i < meshes.size(); i++)
           shapesets.push_back(NULL);
 
-      for(unsigned int i = 0; i < spaces.size(); i++)
+      for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
         filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
 
-        spaces[i]->free();
         try
         {
-          switch(space_types[i])
-          {
-          case HERMES_H1_SPACE:
-            dynamic_cast<H1Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]);
-            break;
-          case HERMES_HCURL_SPACE:
-            dynamic_cast<HcurlSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]);
-            break;
-          case HERMES_HDIV_SPACE:
-            dynamic_cast<HdivSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]);
-            break;
-          case HERMES_L2_SPACE:
-            dynamic_cast<L2Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
-            break;
-          }
+					spaces.push_back(Space<Scalar>::load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]));
         }
         catch(Hermes::Exceptions::SpaceLoadFailureException& e)
         {
@@ -599,36 +586,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapesets)
+    Hermes::vector<Space<Scalar>*> CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapesets)
     {
+			Hermes::vector<Space<Scalar>*> spaces;
+
       if(shapesets == Hermes::vector<Shapeset*>())
-        for(unsigned int i = 0; i < spaces.size(); i++)
+        for(unsigned int i = 0; i < meshes.size(); i++)
           shapesets.push_back(NULL);
 
-      for(unsigned int i = 0; i < spaces.size(); i++)
+      for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
         filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
 
-        spaces[i]->free();
-
         try
         {
-          switch(space_types[i])
-          {
-          case HERMES_H1_SPACE:
-            dynamic_cast<H1Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
-            break;
-          case HERMES_HCURL_SPACE:
-            dynamic_cast<HcurlSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
-            break;
-          case HERMES_HDIV_SPACE:
-            dynamic_cast<HdivSpace<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
-            break;
-          case HERMES_L2_SPACE:
-            dynamic_cast<L2Space<Scalar>*>(spaces[i])->load(filename.str().c_str(), meshes[i], shapesets[i]);
-            break;
-          }
+					spaces.push_back(Space<Scalar>::load(filename.str().c_str(), meshes[i], NULL, shapesets[i]));
         }
         catch(Hermes::Exceptions::SpaceLoadFailureException& e)
         {
@@ -642,39 +615,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    Space<Scalar>* CalculationContinuity<Scalar>::Record::load_space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       std::stringstream filename;
       filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
 
-      space->free();
-
       try
       {
-        switch(space_type)
-        {
-        case HERMES_H1_SPACE:
-          if(essential_bcs == NULL)
-            dynamic_cast<H1Space<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
-          else
-            dynamic_cast<H1Space<Scalar>*>(space)->load(filename.str().c_str(), mesh, essential_bcs, shapeset);
-          break;
-        case HERMES_HCURL_SPACE:
-          if(essential_bcs == NULL)
-            dynamic_cast<HcurlSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
-          else
-            dynamic_cast<HcurlSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, essential_bcs, shapeset);
-          break;
-        case HERMES_HDIV_SPACE:
-          if(essential_bcs == NULL)
-            dynamic_cast<HdivSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
-          else
-            dynamic_cast<HdivSpace<Scalar>*>(space)->load(filename.str().c_str(), mesh, essential_bcs, shapeset);
-          break;
-        case HERMES_L2_SPACE:
-          dynamic_cast<L2Space<Scalar>*>(space)->load(filename.str().c_str(), mesh, shapeset);
-          break;
-        }
+        return Space<Scalar>::load(filename.str().c_str(), mesh, essential_bcs, shapeset);
       }
       catch(Hermes::Exceptions::SpaceLoadFailureException& e)
       {

@@ -13,6 +13,7 @@
           </complexType>
         </element>
       </sequence>
+	  <attribute name="spaceType" type="string"/>
     </complexType>
   </element>
 </schema>

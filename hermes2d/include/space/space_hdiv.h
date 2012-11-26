@@ -20,63 +20,60 @@
 
 namespace Hermes
 {
-  namespace Hermes2D
-  {
-    /// @ingroup spaces
-    /// HdivSpace represents a space of vector functions with continuous normal
-    /// components over a domain (mesh).
-    template<typename Scalar>
-    class HERMES_API HdivSpace : public Space<Scalar>
-    {
-    public:
-      HdivSpace();
-      HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-        Shapeset* shapeset = NULL);
+	namespace Hermes2D
+	{
+		/// @ingroup spaces
+		/// HdivSpace represents a space of vector functions with continuous normal
+		/// components over a domain (mesh).
+		template<typename Scalar>
+		class HERMES_API HdivSpace : public Space<Scalar>
+		{
+		public:
+			HdivSpace();
+			HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+				Shapeset* shapeset = NULL);
 
-      HdivSpace(const Mesh* mesh, int p_init = 1,
-        Shapeset* shapeset = NULL);
+			HdivSpace(const Mesh* mesh, int p_init = 1,
+				Shapeset* shapeset = NULL);
 
-      virtual ~HdivSpace();
+			virtual ~HdivSpace();
 
-      void load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset = NULL);
+			virtual void set_shapeset(Shapeset* shapeset);
 
-      void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
+			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
-      virtual void set_shapeset(Shapeset* shapeset);
+			/// Copy from Space instance 'space'
+			virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
+		protected:
+			/// Common code for the constructors.
+			void init(Shapeset* shapeset, int p_init);
 
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
-      
-      /// Copy from Space instance 'space'
-      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
-    protected:
-      /// Common code for the constructors.
-      void init(Shapeset* shapeset, int p_init);
+			virtual SpaceType get_type() const { return HERMES_HDIV_SPACE; }
 
-      virtual SpaceType get_type() const { return HERMES_HDIV_SPACE; }
+			virtual void assign_vertex_dofs() {}
+			virtual void assign_edge_dofs();
+			virtual void assign_bubble_dofs();
 
-      virtual void assign_vertex_dofs() {}
-      virtual void assign_edge_dofs();
-      virtual void assign_bubble_dofs();
+			virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const {}
+			virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
+			virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
-      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const {}
-      virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
-      virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
+			static double** hdiv_proj_mat;
+			static double*  hdiv_chol_p;
+			static int      hdiv_proj_ref;
 
-      static double** hdiv_proj_mat;
-      static double*  hdiv_chol_p;
-      static int      hdiv_proj_ref;
+			struct EdgeInfo
+			{
+				Node* node;
+				int part;
+				int ori;
+				double lo, hi;
+			};
 
-      struct EdgeInfo
-      {
-        Node* node;
-        int part;
-        int ori;
-        double lo, hi;
-      };
-
-      void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
-      virtual void update_constraints();
-    };
-  }
+			void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
+			virtual void update_constraints();
+			template<typename Scalar> friend class Space;
+		};
+	}
 }
 #endif

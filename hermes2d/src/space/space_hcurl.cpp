@@ -103,56 +103,6 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
-    {
-      this->mesh = mesh;
-
-      if(shapeset == NULL)
-      {
-        this->shapeset = new HcurlShapeset;
-        this->own_shapeset = true;
-      }
-      else
-        this->shapeset = shapeset;
-
-      if(this->shapeset->get_num_components() < 2)
-        throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
-
-      if(!hcurl_proj_ref++)
-        this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
-
-      this->proj_mat = hcurl_proj_mat;
-      this->chol_p   = hcurl_chol_p;
-
-      Space<Scalar>::load(filename, essential_bcs);
-    }
-
-    template<typename Scalar>
-    void HcurlSpace<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
-    {
-      this->mesh = mesh;
-
-      if(shapeset == NULL)
-      {
-        this->shapeset = new HcurlShapeset;
-        this->own_shapeset = true;
-      }
-      else
-        this->shapeset = shapeset;
-
-      if(this->shapeset->get_num_components() < 2)
-        throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
-
-      if(!hcurl_proj_ref++)
-        this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
-
-      this->proj_mat = hcurl_proj_mat;
-      this->chol_p   = hcurl_chol_p;
-
-      Space<Scalar>::load(filename);
-    }
-
-    template<typename Scalar>
     void HcurlSpace<Scalar>::set_shapeset(Shapeset *shapeset)
     {
       if(shapeset->get_id() < 20 && shapeset->get_id() > 9)

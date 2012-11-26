@@ -101,48 +101,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void H1Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
-    {
-      this->mesh = mesh;
-
-      if(shapeset == NULL)
-      {
-        this->shapeset = new H1Shapeset;
-        this->own_shapeset = true;
-      }
-      else
-        shapeset = shapeset;
-
-      if(!h1_proj_ref++)
-        this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
-      this->proj_mat = h1_proj_mat;
-      this->chol_p   = h1_chol_p;
-
-      Space<Scalar>::load(filename, essential_bcs);
-    }
-
-    template<typename Scalar>
-    void H1Space<Scalar>::load(const char *filename, Mesh* mesh, Shapeset* shapeset)
-    {
-      this->mesh = mesh;
-
-      if(shapeset == NULL)
-      {
-        this->shapeset = new H1Shapeset;
-        this->own_shapeset = true;
-      }
-      else
-        shapeset = shapeset;
-
-      if(!h1_proj_ref++)
-        this->precalculate_projection_matrix(2, h1_proj_mat, h1_chol_p);
-      this->proj_mat = h1_proj_mat;
-      this->chol_p   = h1_chol_p;
-
-      Space<Scalar>::load(filename);
-    }
-
-    template<typename Scalar>
     void H1Space<Scalar>::assign_vertex_dofs()
     {
       // Before assigning vertex DOFs, we must know which boundary vertex nodes are part of

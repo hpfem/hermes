@@ -113,14 +113,14 @@ namespace Hermes
         void load_mesh(Mesh* mesh);
 
         /// Loads vector of spaces.
-        void load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
+        Hermes::vector<Space<Scalar>*> load_spaces(Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
 
         /// Loads vector of spaces.
         /// Version without essential BCs.
-        void load_spaces(Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<SpaceType> space_types, Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
+        Hermes::vector<Space<Scalar>*> load_spaces(Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
 
         /// Loads one space.
-        void load_space(Space<Scalar>* space, SpaceType space_type, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+        Space<Scalar>* load_space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
         /// Loads vector of solutions.
         void load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Space<Scalar>*> spaces);

@@ -21,90 +21,87 @@
 
 namespace Hermes
 {
-  namespace Hermes2D
-  {
-    /// @ingroup spaces
-    /// H1Space represents a space of continuous Scalar functions over a domain (mesh).
-    template<typename Scalar>
-    class HERMES_API H1Space : public Space<Scalar>
-    {
-    public:
-      H1Space();
-      H1Space(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
-        Shapeset* shapeset = NULL);
+	namespace Hermes2D
+	{
+		/// @ingroup spaces
+		/// H1Space represents a space of continuous Scalar functions over a domain (mesh).
+		template<typename Scalar>
+		class HERMES_API H1Space : public Space<Scalar>
+		{
+		public:
+			H1Space();
+			H1Space(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+				Shapeset* shapeset = NULL);
 
-      H1Space(const Mesh* mesh, int p_init = 1,
-        Shapeset* shapeset = NULL);
+			H1Space(const Mesh* mesh, int p_init = 1,
+				Shapeset* shapeset = NULL);
 
-      virtual ~H1Space();
+			virtual ~H1Space();
 
-      virtual void set_shapeset(Shapeset* shapeset);
+			virtual void set_shapeset(Shapeset* shapeset);
 
-      /// Removes the degree of freedom from a vertex node with the given id (i.e., its number
-      /// in the mesh file) and makes it part of the Dirichlet lift with the given value.
-      /// This is a special-purpose function which normally should not be needed.
-      /// It is intended for fixing the solution of a system which would otherwise be singular
-      /// and for some reason a standard Dirichlet condition (with non-zero measure on the
-      /// boundary) is not suitable.
-      void fix_vertex(int id, Scalar value = 0.0);
+			/// Removes the degree of freedom from a vertex node with the given id (i.e., its number
+			/// in the mesh file) and makes it part of the Dirichlet lift with the given value.
+			/// This is a special-purpose function which normally should not be needed.
+			/// It is intended for fixing the solution of a system which would otherwise be singular
+			/// and for some reason a standard Dirichlet condition (with non-zero measure on the
+			/// boundary) is not suitable.
+			void fix_vertex(int id, Scalar value = 0.0);
 
-      void load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset = NULL);
+			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
 
-      void load(const char *filename, Mesh* mesh, Shapeset* shapeset = NULL);
+			/// Copy from Space instance 'space'
+			virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
 
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+		protected:
 
-      /// Copy from Space instance 'space'
-      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
+			virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
 
-    protected:
+			/// Common code for the constructors.
+			void init(Shapeset* shapeset, int p_init);
 
-      virtual SpaceType get_type() const { return HERMES_H1_SPACE; }
+			virtual void assign_vertex_dofs();
+			virtual void assign_edge_dofs() {};
+			virtual void assign_bubble_dofs() {};
 
-      /// Common code for the constructors.
-      void init(Shapeset* shapeset, int p_init);
+			virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const;
+			virtual void get_boundary_assembly_list_internal(Element* e, int ie, AsmList<Scalar>* al) const;
 
-      virtual void assign_vertex_dofs();
-      virtual void assign_edge_dofs() {};
-      virtual void assign_bubble_dofs() {};
+			static double** h1_proj_mat;
+			static double*  h1_chol_p;
+			static int      h1_proj_ref;
 
-      virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const;
-      virtual void get_boundary_assembly_list_internal(Element* e, int ie, AsmList<Scalar>* al) const;
+			struct EdgeInfo
+			{
+				Node* node;
+				int part;
+				int ori;
+				double lo, hi;
+			};
 
-      static double** h1_proj_mat;
-      static double*  h1_chol_p;
-      static int      h1_proj_ref;
+			inline void output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
+				Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs);
 
-      struct EdgeInfo
-      {
-        Node* node;
-        int part;
-        int ori;
-        double lo, hi;
-      };
+			typename Space<Scalar>::BaseComponent* merge_baselists(typename Space<Scalar>::BaseComponent* l1, int n1, typename Space<Scalar>::BaseComponent* l2, int n2,
+				Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents);
 
-      inline void output_component(typename Space<Scalar>::BaseComponent*& current, typename Space<Scalar>::BaseComponent*& last, typename Space<Scalar>::BaseComponent* min,
-        Node*& edge, typename Space<Scalar>::BaseComponent*& edge_dofs);
+			void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
 
-      typename Space<Scalar>::BaseComponent* merge_baselists(typename Space<Scalar>::BaseComponent* l1, int n1, typename Space<Scalar>::BaseComponent* l2, int n2,
-        Node* edge, typename Space<Scalar>::BaseComponent*& edge_dofs, int& ncomponents);
+			virtual void update_constraints();
 
-      void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
+			struct FixedVertex
+			{
+				int id;
+				Scalar value;
+			};
 
-      virtual void update_constraints();
+			Hermes::vector<FixedVertex> fixed_vertices;
 
-      struct FixedVertex
-      {
-        int id;
-        Scalar value;
-      };
+			inline bool is_fixed_vertex(int id) const;
 
-      Hermes::vector<FixedVertex> fixed_vertices;
-
-      inline bool is_fixed_vertex(int id) const;
-
-      virtual void post_assign();
-    };
-  }
+			virtual void post_assign();
+			template<typename Scalar> friend class Space;
+		};
+	}
 }
 #endif
