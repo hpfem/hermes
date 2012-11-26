@@ -40,7 +40,7 @@ double time_step = 3e+2;                    // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-                                                  // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
+// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 
 // Choose one of the following time-integration methods, or define your own Butcher's table. The last number
 // in the name of each method is its order. The one before last, if present, is the number of stages.
@@ -70,104 +70,114 @@ const double T_FINAL = 86400;      // Length of time interval (24 hours) in seco
 
 int main(int argc, char* argv[])
 {
-  // Choose a Butcher's table or define your own.
-  ButcherTable bt(butcher_table_type);
+	// Choose a Butcher's table or define your own.
+	ButcherTable bt(butcher_table_type);
 
-  // Class for progressive saving of solutions and all necessary classes for the computation.
-  CalculationContinuity<double> continuity(CalculationContinuity<double>::onlyTime);
+	// Class for progressive saving of solutions and all necessary classes for the computation.
+	CalculationContinuity<double> continuity(CalculationContinuity<double>::onlyTime);
 
-  // Initialize the time.
-  double current_time = 0;
+	// Initialize the time.
+	double current_time = 0;
 
-  // Mesh.
-  Mesh mesh;
+	// Mesh.
+	Mesh mesh;
 
-  // Init mesh.
-  MeshReaderH2DXML mloader;
-  mloader.load("electrostatic_axisymmetric_capacitor_electrostatic_0_0_normal.mesh", &mesh);
+	// Init mesh.
+	MeshReaderH2D mloader;
+	mloader.load("cathedral.mesh", &mesh);
 
-  // Space.
-  H1Space<double> space(&mesh, NULL, 2);
+	// Perform initial mesh refinements.
+	for(int i = 0; i < INIT_REF_NUM; i++)
+		mesh.refine_all_elements();
+	mesh.refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
+	mesh.refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
 
-  // Solution pointer.
-  Solution<double> sln_time_prev;
+	// Initialize boundary conditions.
+	Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
+	Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  if(REUSE_SOLUTION)
+	// Space.
+	H1Space<double> space(&mesh, &bcs, P_INIT);
+
+	// Solution pointer.
+	Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
+
+	if(REUSE_SOLUTION && continuity.have_record_available())
 		try
 	{
-      space.load("electrostatic.spc", &mesh);
-			Views::OrderView o;
-			o.show(&space);
-			o.wait_for_close();
-      sln_time_prev.load("electrostatic.sln", &space);
+		continuity.get_last_record()->load_mesh(&mesh);
+		continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
+		space.set_essential_bcs(&bcs);
+		continuity.get_last_record()->load_solution(sln_time_prev, &space);
 		Views::ScalarView s;
-        s.show(&sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_DX_0);
-        s.wait_for_close();
+		s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
+		s.wait_for_close();
+		current_time = continuity.get_last_record()->get_time();
 	}
 	catch(Hermes2D::CalculationContinuityException& e)
 	{
 		e.print_msg();
 	}
 
-  CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
-                          &current_time, TEMP_INIT, T_FINAL);
+	CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
+		&current_time, TEMP_INIT, T_FINAL);
 
-  Solution<double>* sln_time_new = new Solution<double>(&mesh);
+	Solution<double>* sln_time_new = new Solution<double>(&mesh);
 
-  int ndof = space.get_num_dofs();
+	int ndof = space.get_num_dofs();
 
-  // Initialize views.
-  Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
-  Tview.set_min_max_range(0, 20);
-  Tview.fix_scale_width(30);
+	// Initialize views.
+	Hermes::Hermes2D::Views::ScalarView Tview("Temperature", new Hermes::Hermes2D::Views::WinGeom(0, 0, 450, 600));
+	Tview.set_min_max_range(0, 20);
+	Tview.fix_scale_width(30);
 
-  // Initialize Runge-Kutta time stepping.
-  RungeKutta<double> runge_kutta(&wf, &space, &bt);
+	// Initialize Runge-Kutta time stepping.
+	RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
-  runge_kutta.set_verbose_output(true);
-  runge_kutta.output_matrix(1);
-  runge_kutta.set_matrix_number_format("%a");
-  runge_kutta.output_rhs(2);
-  runge_kutta.set_global_integration_order(10);
+	runge_kutta.set_verbose_output(true);
+	runge_kutta.output_matrix(1);
+	runge_kutta.set_matrix_number_format("%a");
+	runge_kutta.output_rhs(2);
+	runge_kutta.set_global_integration_order(10);
 
-  // Iteration number.
-  int iteration = 0;
+	// Iteration number.
+	int iteration = 0;
 
-  // Time stepping loop:
-  do
-  {
-    // Perform one Runge-Kutta time step according to the selected Butcher's table.
-    try
-    {
-      runge_kutta.set_space(&space);
-      runge_kutta.set_time(current_time);
-      runge_kutta.set_time_step(time_step);
-      runge_kutta.rk_time_step_newton(&sln_time_prev, sln_time_new);
-    }
-    catch(Exceptions::Exception& e)
-    {
-      e.print_msg();
-    }
+	// Time stepping loop:
+	do
+	{
+		// Perform one Runge-Kutta time step according to the selected Butcher's table.
+		try
+		{
+			runge_kutta.set_space(&space);
+			runge_kutta.set_time(current_time);
+			runge_kutta.set_time_step(time_step);
+			runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
+		}
+		catch(Exceptions::Exception& e)
+		{
+			e.print_msg();
+		}
 
-    // Show the new time level solution.
-    char title[100];
-    sprintf(title, "Time %3.2f s", current_time);
-    Tview.set_title(title);
-    Tview.show(sln_time_new);
+		// Show the new time level solution.
+		char title[100];
+		sprintf(title, "Time %3.2f s", current_time);
+		Tview.set_title(title);
+		Tview.show(sln_time_new);
 
-    // Save the progress.
-    continuity.add_record(current_time, &mesh, &space, &sln_time_prev);
+		// Save the progress.
+		continuity.add_record(current_time, &mesh, &space, sln_time_prev);
 
-    // Copy solution for the new time step.
-    sln_time_prev.copy(sln_time_new);
+		// Copy solution for the new time step.
+		sln_time_prev->copy(sln_time_new);
 
-    // Increase current time and time step counter.
-    current_time += time_step;
-    iteration++;
-  }
-  while (current_time < T_FINAL);
+		// Increase current time and time step counter.
+		current_time += time_step;
+		iteration++;
+	}
+	while (current_time < T_FINAL);
 
-  // Wait for the view to be closed.
-  Hermes::Hermes2D::Views::View::wait();
-  return 0;
+	// Wait for the view to be closed.
+	Hermes::Hermes2D::Views::View::wait();
+	return 0;
 }
