@@ -83,21 +83,11 @@ int main(int argc, char* argv[])
   Mesh mesh;
 
   // Init mesh.
-  MeshReaderH2D mloader;
-  mloader.load("cathedral.mesh", &mesh);
-
-  // Perform initial mesh refinements.
-  for(int i = 0; i < INIT_REF_NUM; i++)
-    mesh.refine_all_elements();
-  mesh.refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
-  mesh.refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
-
-  // Initialize boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
-  Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
+  MeshReaderH2DXML mloader;
+  mloader.load("electrostatic_axisymmetric_capacitor_electrostatic_0_0_normal.mesh", &mesh);
 
   // Space.
-  H1Space<double> space(&mesh, &bcs, P_INIT);
+  H1Space<double> space(&mesh, NULL, 2);
 
   // Solution pointer.
   Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
@@ -105,14 +95,11 @@ int main(int argc, char* argv[])
   if(REUSE_SOLUTION && continuity.have_record_available())
 		try
 	{
-		continuity.get_last_record()->load_mesh(&mesh);
-		continuity.get_last_record()->load_space(&space, HERMES_H1_SPACE, &mesh);
-		space.set_essential_bcs(&bcs);
-		continuity.get_last_record()->load_solution(sln_time_prev, &space);
+      space.load("electrostatic_axisymmetric_capacitor_electrostatic_0_0_normal.spc", &mesh);
+      sln_time_prev->load("electrostatic_axisymmetric_capacitor_electrostatic_0_0_normal.sln", &space);
 		Views::ScalarView s;
-		s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
-		s.wait_for_close();
-		current_time = continuity.get_last_record()->get_time();
+        s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_DX_0);
+        s.wait_for_close();
 	}
 	catch(Hermes2D::CalculationContinuityException& e)
 	{
