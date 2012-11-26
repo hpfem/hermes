@@ -90,15 +90,18 @@ int main(int argc, char* argv[])
   H1Space<double> space(&mesh, NULL, 2);
 
   // Solution pointer.
-  Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
+  Solution<double> sln_time_prev;
 
-  if(REUSE_SOLUTION && continuity.have_record_available())
+  if(REUSE_SOLUTION)
 		try
 	{
-      space.load("electrostatic_axisymmetric_capacitor_electrostatic_0_0_normal.spc", &mesh);
-      sln_time_prev->load("electrostatic_axisymmetric_capacitor_electrostatic_0_0_normal.sln", &space);
+      space.load("electrostatic.spc", &mesh);
+			Views::OrderView o;
+			o.show(&space);
+			o.wait_for_close();
+      sln_time_prev.load("electrostatic.sln", &space);
 		Views::ScalarView s;
-        s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_DX_0);
+        s.show(&sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_DX_0);
         s.wait_for_close();
 	}
 	catch(Hermes2D::CalculationContinuityException& e)
@@ -139,7 +142,7 @@ int main(int argc, char* argv[])
       runge_kutta.set_space(&space);
       runge_kutta.set_time(current_time);
       runge_kutta.set_time_step(time_step);
-      runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
+      runge_kutta.rk_time_step_newton(&sln_time_prev, sln_time_new);
     }
     catch(Exceptions::Exception& e)
     {
@@ -153,10 +156,10 @@ int main(int argc, char* argv[])
     Tview.show(sln_time_new);
 
     // Save the progress.
-    continuity.add_record(current_time, &mesh, &space, sln_time_prev);
+    continuity.add_record(current_time, &mesh, &space, &sln_time_prev);
 
     // Copy solution for the new time step.
-    sln_time_prev->copy(sln_time_new);
+    sln_time_prev.copy(sln_time_new);
 
     // Increase current time and time step counter.
     current_time += time_step;

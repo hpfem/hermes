@@ -1334,6 +1334,7 @@ namespace Hermes
     {
       free();
       this->mesh = space->get_mesh();
+			this->space_type = space->get_type();
 
       try
       {
@@ -1412,6 +1413,7 @@ namespace Hermes
       free();
       sln_type = HERMES_SLN;
       this->mesh = space->get_mesh();
+			this->space_type = space->get_type();
 
       try
       {
