@@ -100,7 +100,7 @@ namespace Hermes
 			inline bool is_fixed_vertex(int id) const;
 
 			virtual void post_assign();
-			template<typename Scalar> friend class Space;
+			friend class Space<Scalar>;
 		};
 	}
 }

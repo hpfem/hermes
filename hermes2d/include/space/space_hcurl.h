@@ -71,7 +71,7 @@ namespace Hermes
 
 			void update_constrained_nodes(Element* e, EdgeInfo* ei0, EdgeInfo* ei1, EdgeInfo* ei2, EdgeInfo* ei3);
 			virtual void update_constraints();
-			template<typename Scalar> friend class Space;
+			friend class Space<Scalar>;
 		};
 	}
 }
