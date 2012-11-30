@@ -39,7 +39,7 @@ namespace Hermes
       }
       if(this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
-      this->precalculate_projection_matrix(0, proj_mat, chol_p);
+      this->precalculate_projection_matrix(0, this->proj_mat, this->chol_p);
 
       // set uniform poly order in elements
       if(p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
@@ -75,7 +75,7 @@ namespace Hermes
     {
       Space<Scalar>::copy(space, new_mesh);
 
-      this->precalculate_projection_matrix(0, proj_mat, chol_p);
+      this->precalculate_projection_matrix(0, this->proj_mat, this->chol_p);
     }
     
     template<typename Scalar>
