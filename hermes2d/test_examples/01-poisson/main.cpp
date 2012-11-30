@@ -27,7 +27,7 @@
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
-const int P_INIT = 1;                             // Uniform polynomial degree of mesh elements.
+const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 
 // Problem parameters.
@@ -79,8 +79,17 @@ int main(int argc, char* argv[])
   int i = 1;
   for_all_active_elements(e, new_mesh)
   {
-    new_space->set_element_order(e->id, i++ % 9 + 1);
+    new_space->set_element_order(e->id, i++ % 4 + 1);
   }
+
+  std::cout << new_space->get_num_dofs() << std::endl;
+  std::cout << new_space->get_vertex_functions_count() << std::endl;
+  std::cout << new_space->get_edge_functions_count() << std::endl;
+  std::cout << new_space->get_bubble_functions_count() << std::endl;
+
+  Hermes::Hermes2D::Views::BaseView<double> o;
+  o.show(new_space);
+  o.wait_for_close();
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;

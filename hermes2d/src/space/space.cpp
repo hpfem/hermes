@@ -44,6 +44,9 @@ namespace Hermes
 			this->seq = g_space_seq;
 			this->was_assigned = false;
 			this->ndof = 0;
+      this->proj_mat = NULL;
+      this->chol_p = NULL;
+      this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
 			if(essential_bcs != NULL)
 				for(Hermes::vector<EssentialBoundaryCondition<double>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
@@ -70,6 +73,9 @@ namespace Hermes
 			this->seq = g_space_seq;
 			this->was_assigned = false;
 			this->ndof = 0;
+      this->proj_mat = NULL;
+      this->chol_p = NULL;
+      this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
 			if(essential_bcs != NULL)
 				for(Hermes::vector<EssentialBoundaryCondition<std::complex<double> >*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
@@ -162,6 +168,12 @@ namespace Hermes
     Space<double>::~Space()
     {
       free();
+
+      if(this->proj_mat != NULL)
+        delete [] this->proj_mat;
+      if(this->chol_p != NULL)
+        delete [] this->chol_p;
+
       Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator--;
     }
 
@@ -169,6 +181,12 @@ namespace Hermes
     Space<std::complex<double> >::~Space()
     {
       free();
+
+      if(this->proj_mat != NULL)
+        delete [] this->proj_mat;
+      if(this->chol_p != NULL)
+        delete [] this->chol_p;
+
       Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator--;
     }
 
@@ -223,6 +241,8 @@ namespace Hermes
     void Space<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
     {
       this->free();
+      
+      this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
       this->essential_bcs = space->essential_bcs;
       this->shapeset = space->shapeset->clone();
@@ -239,7 +259,6 @@ namespace Hermes
       }
 
       this->seq = g_space_seq++;
-      this->assign_dofs();
       
       for_all_active_elements(e, this->mesh)
       {
@@ -998,6 +1017,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    int Space<Scalar>::get_vertex_functions_count()
+    {
+      return this->vertex_functions_count;
+    }
+
+    template<typename Scalar>
+    int Space<Scalar>::get_edge_functions_count()
+    {
+      return this->edge_functions_count;
+    }
+
+    template<typename Scalar>
+    int Space<Scalar>::get_bubble_functions_count()
+    {
+      return this->bubble_functions_count;
+    }
+
+    template<typename Scalar>
     void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
     {
       // some checks
@@ -1217,10 +1254,7 @@ namespace Hermes
 							space->shapeset = shapeset;
 					}
 
-					if(!static_cast<H1Space<Scalar>*>(space)->h1_proj_ref++)
-						space->precalculate_projection_matrix(2, static_cast<H1Space<Scalar>*>(space)->h1_proj_mat, static_cast<H1Space<Scalar>*>(space)->h1_chol_p);
-					space->proj_mat = static_cast<H1Space<Scalar>*>(space)->h1_proj_mat;
-					space->chol_p   = static_cast<H1Space<Scalar>*>(space)->h1_chol_p;
+					space->precalculate_projection_matrix(2, space->proj_mat, space->chol_p);
 				}
 				else if (!strcmp(parsed_xml_space->spaceType().get().c_str(),"hcurl"))
 				{
@@ -1242,11 +1276,7 @@ namespace Hermes
 							space->shapeset = shapeset;
 					}
 
-					if(!static_cast<HcurlSpace<Scalar>*>(space)->hcurl_proj_ref++)
-						space->precalculate_projection_matrix(0, static_cast<HcurlSpace<Scalar>*>(space)->hcurl_proj_mat, static_cast<HcurlSpace<Scalar>*>(space)->hcurl_chol_p);
-
-					static_cast<HcurlSpace<Scalar>*>(space)->proj_mat = static_cast<HcurlSpace<Scalar>*>(space)->hcurl_proj_mat;
-					static_cast<HcurlSpace<Scalar>*>(space)->chol_p   = static_cast<HcurlSpace<Scalar>*>(space)->hcurl_chol_p;
+					space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
 				}
 				else if(!!strcmp(parsed_xml_space->spaceType().get().c_str(),"hdiv"))
 				{
@@ -1268,13 +1298,7 @@ namespace Hermes
 							space->shapeset = shapeset;
 					}
 
-					if(!static_cast<HdivSpace<Scalar>*>(space)->hdiv_proj_ref++)
-					{
-						space->precalculate_projection_matrix(0, static_cast<HdivSpace<Scalar>*>(space)->hdiv_proj_mat, static_cast<HdivSpace<Scalar>*>(space)->hdiv_chol_p);
-					}
-
-					static_cast<HdivSpace<Scalar>*>(space)->proj_mat = static_cast<HdivSpace<Scalar>*>(space)->hdiv_proj_mat;
-					static_cast<HdivSpace<Scalar>*>(space)->chol_p   = static_cast<HdivSpace<Scalar>*>(space)->hdiv_chol_p;
+					space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
 				}
 				else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2"))
 				{

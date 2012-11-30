@@ -61,15 +61,11 @@ namespace Hermes
 			void init(Shapeset* shapeset, int p_init);
 
 			virtual void assign_vertex_dofs();
-			virtual void assign_edge_dofs() {};
-			virtual void assign_bubble_dofs() {};
+			virtual void assign_edge_dofs();
+			virtual void assign_bubble_dofs();
 
 			virtual void get_vertex_assembly_list(Element* e, int iv, AsmList<Scalar>* al) const;
 			virtual void get_boundary_assembly_list_internal(Element* e, int ie, AsmList<Scalar>* al) const;
-
-			static double** h1_proj_mat;
-			static double*  h1_chol_p;
-			static int      h1_proj_ref;
 
 			struct EdgeInfo
 			{

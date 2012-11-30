@@ -58,11 +58,7 @@ namespace Hermes
 			virtual void get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const;
 			virtual void get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
-			static double** hdiv_proj_mat;
-			static double*  hdiv_chol_p;
-			static int      hdiv_proj_ref;
-
-			struct EdgeInfo
+      struct EdgeInfo
 			{
 				Node* node;
 				int part;

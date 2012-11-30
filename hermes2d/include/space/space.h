@@ -117,6 +117,7 @@ namespace Hermes
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "Space"; }
 
+      /// Destructor.
       virtual ~Space();
 
       /// Sets element polynomial order. Can be called by the user. Should not be called
@@ -189,7 +190,7 @@ namespace Hermes
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
-      
+
       /// Copy from Space instance 'space'
       virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
 
@@ -249,10 +250,10 @@ namespace Hermes
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
 
-       static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
+      static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
 
       static void update_essential_bc_values(Space<Scalar>*s, double time);
-      
+
       /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
       /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
       virtual SpaceType get_type() const = 0;
@@ -280,6 +281,15 @@ namespace Hermes
 
       void free();
 
+      /// Returns the total (global) number of vertex functions.
+      /// The DOF ordering starts with vertex functions, so it it necessary to know how many of them there are.
+      int get_vertex_functions_count();
+      /// Returns the total (global) number of edge functions.
+      int get_edge_functions_count();
+      /// Returns the total (global) number of bubble functions.
+      int get_bubble_functions_count();
+
+    protected:
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
 
@@ -297,6 +307,7 @@ namespace Hermes
       const Mesh* mesh;
 
       int default_tri_order, default_quad_order;
+      int vertex_functions_count, edge_functions_count, bubble_functions_count;
       int first_dof, next_dof;
       int stride;
       int seq, mesh_seq;

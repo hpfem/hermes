@@ -25,13 +25,6 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    double** HcurlSpace<Scalar>::hcurl_proj_mat = NULL;
-    template<typename Scalar>
-    double*  HcurlSpace<Scalar>::hcurl_chol_p   = NULL;
-    template<typename Scalar>
-    int      HcurlSpace<Scalar>::hcurl_proj_ref = 0;
-
-    template<typename Scalar>
     HcurlSpace<Scalar>::HcurlSpace() : Space<Scalar>()
     {
     }
@@ -46,13 +39,7 @@ namespace Hermes
       }
       if(this->shapeset->get_num_components() < 2) throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset.");
 
-      if(!hcurl_proj_ref++)
-      {
-        this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
-      }
-
-      this->proj_mat = hcurl_proj_mat;
-      this->chol_p   = hcurl_chol_p;
+      this->precalculate_projection_matrix(0, proj_mat, chol_p);
 
       // set uniform poly order in elements
       if(p_init < 0) throw Hermes::Exceptions::Exception("P_INIT must be >= 0 in an Hcurl space.");
@@ -79,11 +66,6 @@ namespace Hermes
     template<typename Scalar>
     HcurlSpace<Scalar>::~HcurlSpace()
     {
-      if(!--hcurl_proj_ref)
-      {
-        delete [] hcurl_proj_mat;
-        delete [] hcurl_chol_p;
-      }
       if(this->own_shapeset)
         delete this->shapeset;
     }
@@ -93,13 +75,7 @@ namespace Hermes
     {
       Space<Scalar>::copy(space, new_mesh);
 
-      if(!hcurl_proj_ref++)
-      {
-        this->precalculate_projection_matrix(0, hcurl_proj_mat, hcurl_chol_p);
-      }
-
-      this->proj_mat = hcurl_proj_mat;
-      this->chol_p   = hcurl_chol_p;
+      this->precalculate_projection_matrix(0, proj_mat, chol_p);
     }
     
     template<typename Scalar>
@@ -118,6 +94,7 @@ namespace Hermes
     void HcurlSpace<Scalar>::assign_edge_dofs()
     {
       Node* en;
+      this->edge_functions_count = 0;
       for_all_edge_nodes(en, this->mesh)
       {
         if(en->ref > 1 || en->bnd || this->mesh->peek_vertex_node(en->p1, en->p2) != NULL)
@@ -132,16 +109,19 @@ namespace Hermes
               {
                 this->ndata[en->id].dof = this->next_dof;
                 this->next_dof += ndofs * this->stride;
+                      this->edge_functions_count += ndofs;
               }
             else
             {
               this->ndata[en->id].dof = this->next_dof;
               this->next_dof += ndofs * this->stride;
+                      this->edge_functions_count += ndofs;
             }
           else
           {
             this->ndata[en->id].dof = this->next_dof;
             this->next_dof += ndofs * this->stride;
+                      this->edge_functions_count += ndofs;
           }
         }
         else
@@ -153,16 +133,16 @@ namespace Hermes
     void HcurlSpace<Scalar>::assign_bubble_dofs()
     {
       Element* e;
+      this->bubble_functions_count = 0;
       for_all_active_elements(e, this->mesh)
       {
         typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
         ed->bdof = this->next_dof;
         ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
         this->next_dof += ed->n * this->stride;
+          this->bubble_functions_count += ed->n;
       }
     }
-
-    //// assembly lists ////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
     void HcurlSpace<Scalar>::get_boundary_assembly_list_internal(Element* e, int surf_num, AsmList<Scalar>* al) const
