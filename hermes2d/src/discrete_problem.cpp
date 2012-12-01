@@ -881,19 +881,19 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms)
     {
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         pss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
       }
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         spss[i] = new PrecalcShapeset*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           spss[i][j] = new PrecalcShapeset(pss[i][j]);
       }
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         refmaps[i] = new RefMap*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
@@ -904,7 +904,7 @@ namespace Hermes
       }
 
       // U_ext functions
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         if(coeff_vec != NULL)
         {
@@ -942,7 +942,7 @@ namespace Hermes
       }
 
       // Assembly lists
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         als[i] = new AsmList<Scalar>*[wf->get_neq()];
         for (unsigned int j = 0; j < wf->get_neq(); j++)
@@ -950,7 +950,7 @@ namespace Hermes
       }
 
       // Weakforms.
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         weakforms[i] = this->wf->clone();
         weakforms[i]->cloneMembers(this->wf);
@@ -968,7 +968,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms)
     {
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete pss[i][j];
@@ -976,7 +976,7 @@ namespace Hermes
       }
       delete [] pss;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete spss[i][j];
@@ -984,7 +984,7 @@ namespace Hermes
       }
       delete [] spss;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete refmaps[i][j];
@@ -992,7 +992,7 @@ namespace Hermes
       }
       delete [] refmaps;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         if(u_ext[i] != NULL)
         {
@@ -1003,7 +1003,7 @@ namespace Hermes
       }
       delete [] u_ext;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned int j = 0; j < wf->get_neq(); j++)
           delete als[i][j];
@@ -1011,7 +1011,7 @@ namespace Hermes
       }
       delete [] als;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         weakforms[i]->free_ext();
         delete weakforms[i];
@@ -1055,12 +1055,12 @@ namespace Hermes
       }
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      RefMap*** refmaps = new RefMap**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      RefMap*** refmaps = new RefMap**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
 
       // Fill these structures.
       init_assembling(coeff_vec, pss, spss, refmaps, u_ext, als, weakforms);
@@ -1083,9 +1083,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      Traverse* trav = new Traverse[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned j = 0; j < spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -1122,7 +1122,7 @@ namespace Hermes
       WeakForm<Scalar>* current_weakform;
 
 #define CHUNKSIZE 1
-      int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads);
+      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(trav_master, mat, rhs ) private(state_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_weakform) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -1168,10 +1168,10 @@ namespace Hermes
       deinit_assembling(pss, spss, refmaps, u_ext, als, weakforms);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         fns[i].clear();
       }

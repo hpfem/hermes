@@ -49,7 +49,7 @@ namespace Hermes
         printf("Exception: %s\n", message);
       else
         printf("Default exception\n");
-      if(Hermes::HermesCommonApi.get_param_value(Hermes::exceptionsPrintCallstack) == 1)
+      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::exceptionsPrintCallstack) == 1)
         CallStack::dump(0);
     }
 

@@ -1214,7 +1214,7 @@ namespace Hermes
       for_all_elements(e, this->get_mesh())
         xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n, this->edata[e->id].changed_in_last_adaptation));
 
-      std::string space_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      std::string space_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
       space_schema_location.append("/space_h2d_xml.xsd");
       ::xml_schema::namespace_info namespace_info_space("XMLSpace", space_schema_location);
 

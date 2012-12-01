@@ -59,8 +59,8 @@ namespace Hermes
     std::map<HermesCommonApiParam, Parameter*> parameters;
 
   public:
-    int get_param_value(HermesCommonApiParam);
-    void set_param_value(HermesCommonApiParam, int value);
+    int get_integral_param_value(HermesCommonApiParam);
+    void set_integral_param_value(HermesCommonApiParam, int value);
   };
 
   /// Global instance used inside Hermes which is also accessible to users.

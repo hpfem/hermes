@@ -286,9 +286,9 @@ namespace Hermes
       }
 
       // RefinementSelectors cloning.
-      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[Hermes::Hermes2D::Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
+      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[Hermes::Hermes2D::Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
@@ -311,9 +311,9 @@ namespace Hermes
       }
 
       // Solution cloning.
-      Solution<Scalar>*** rslns = new Solution<Scalar>**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
+      Solution<Scalar>*** rslns = new Solution<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         rslns[i] = new Solution<Scalar>*[this->num];
         for (int j = 0; j < this->num; j++)
@@ -335,7 +335,7 @@ namespace Hermes
       Solution<Scalar>** current_rslns;
       int id_to_refine;
 #define CHUNKSIZE 1
-      int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads);
+      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -395,7 +395,7 @@ namespace Hermes
       if(this->caughtException == NULL)
         fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
 
-      for(unsigned int i = 1; i < Hermes::Hermes2D::Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 1; i < Hermes::Hermes2D::Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
           delete global_refinement_selectors[i][j];
@@ -403,7 +403,7 @@ namespace Hermes
       }
       delete [] global_refinement_selectors;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         if(rslns[i] != NULL)
         {

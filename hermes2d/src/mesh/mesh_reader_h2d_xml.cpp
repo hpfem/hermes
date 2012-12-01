@@ -124,7 +124,7 @@ namespace Hermes
       xmlmesh.curves().set(curves);
       xmlmesh.refinements().set(refinements);
 
-      std::string mesh_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      std::string mesh_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
       mesh_schema_location.append("/mesh_h2d_xml.xsd");
       ::xml_schema::namespace_info namespace_info_mesh("XMLMesh", mesh_schema_location);
 
@@ -703,11 +703,11 @@ namespace Hermes
       XMLSubdomains::domain xmldomain(vertices, elements, edges, subdomains);
       xmldomain.curves().set(curves);
 
-      std::string mesh_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      std::string mesh_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
       mesh_schema_location.append("/mesh_h2d_xml.xsd");
       ::xml_schema::namespace_info namespace_info_mesh("XMLMesh", mesh_schema_location);
 
-      std::string domain_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+      std::string domain_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
       domain_schema_location.append("/subdomains_h2d_xml.xsd");
       ::xml_schema::namespace_info namespace_info_domain("XMLSubdomains", domain_schema_location);
 

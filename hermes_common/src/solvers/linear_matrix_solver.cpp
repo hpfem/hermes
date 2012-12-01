@@ -77,7 +77,7 @@ namespace Hermes
     LinearMatrixSolver<Scalar>* create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
     {
       Vector<Scalar>* rhs_dummy = NULL;
-      switch (Hermes::HermesCommonApi.get_param_value(Hermes::matrixSolverType))
+      switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
       case Hermes::SOLVER_AZTECOO:
         {

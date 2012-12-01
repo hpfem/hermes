@@ -85,12 +85,12 @@ namespace Hermes
       }
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      RefMap*** refmaps = new RefMap**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      RefMap*** refmaps = new RefMap**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
 
       // Fill these structures.
       this->init_assembling(NULL, pss, spss, refmaps, u_ext, als, weakforms);
@@ -113,9 +113,9 @@ namespace Hermes
 
       trav_master.begin(meshes.size(), &(meshes.front()));
 
-      Traverse* trav = new Traverse[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads)];
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      Traverse* trav = new Traverse[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         for (unsigned j = 0; j < this->spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -152,7 +152,7 @@ namespace Hermes
       WeakForm<Scalar>* current_weakform;
 
 #define CHUNKSIZE 1
-      int num_threads_used = Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads);
+      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(trav_master, mat, rhs ) private(state_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_weakform) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -199,10 +199,10 @@ namespace Hermes
       this->deinit_assembling(pss, spss, refmaps, u_ext, als, weakforms);
 
       trav_master.finish();
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         trav[i].finish();
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
         fns[i].clear();
       }

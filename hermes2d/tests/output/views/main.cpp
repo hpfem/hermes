@@ -39,8 +39,8 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   // Set the number of threads used in Hermes.
-  Hermes::HermesCommonApi.set_param_value(Hermes::exceptionsPrintCallstack, 0);
-  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
+  Hermes::HermesCommonApi.set_integral_param_value(Hermes::exceptionsPrintCallstack, 0);
+  Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads, 8);
 
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;

@@ -52,7 +52,7 @@ namespace Hermes
       subtract(this->val, func->val);
       subtract(this->dx, func->dx);
       subtract(this->dy, func->dy);
-      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+      if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
         subtract(this->laplace, func->laplace);
       
       if(nc > 1)
@@ -96,7 +96,7 @@ namespace Hermes
       add(this->dx, func->dx);
       add(this->dy, func->dy);
 
-      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+      if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
         add(this->laplace, func->laplace);
       
       if(nc > 1)
@@ -151,7 +151,7 @@ namespace Hermes
       delete [] dx; dx = NULL;
       delete [] dy; dy = NULL;
 
-      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+      if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
       {
         delete [] laplace; 
         laplace = NULL;
@@ -440,7 +440,7 @@ namespace Hermes
       int nc = fu->get_num_components();
       SpaceType space_type = fu->get_space_type();
       Quad2D* quad = fu->get_quad_2d();
-      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE))
+      if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && (space_type == HERMES_H1_SPACE || space_type == HERMES_L2_SPACE))
           fu->set_quad_order(order, H2D_FN_ALL);
       else
         fu->set_quad_order(order);
@@ -455,7 +455,7 @@ namespace Hermes
         u->val = new double[np];
         u->dx  = new double[np];
         u->dy  = new double[np];
-        if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+        if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
           u->laplace = new double[np];
     
         double *fn = fu->get_fn_values();
@@ -466,7 +466,7 @@ namespace Hermes
         double *dxy;
         double *dyy;
 
-        if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+        if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
         {
           dxx = fu->get_dxx_values();
           dxy = fu->get_dxy_values();
@@ -496,10 +496,10 @@ namespace Hermes
           m = rm->get_inv_ref_map(order);
 
         double3x2 *mm;
-        if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+        if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
           mm = rm->get_second_ref_map(order);
 
-        if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
+        if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1)
         {
           for (int i = 0; i < np; i++, m++, mm++)
           {
@@ -674,7 +674,7 @@ namespace Hermes
 
       int nc = fu->get_num_components();
       Quad2D* quad = fu->get_quad_2d();
-      if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
+      if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
         fu->set_quad_order(order, H2D_FN_ALL);
       else
         fu->set_quad_order(order);
@@ -689,14 +689,14 @@ namespace Hermes
         u->dx  = new Scalar[np];
         u->dy  = new Scalar[np];
         
-        if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
+        if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
           u->laplace = new Scalar[np];
 
         memcpy(u->val, fu->get_fn_values(), np * sizeof(Scalar));
         memcpy(u->dx, fu->get_dx_values(), np * sizeof(Scalar));
         memcpy(u->dy, fu->get_dy_values(), np * sizeof(Scalar));
 
-        if(Hermes2DApi.get_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
+        if(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::secondDerivatives) == 1 && space_type == HERMES_H1_SPACE && sln_type != HERMES_EXACT)
         {
           Scalar *dxx = fu->get_dxx_values();
           Scalar *dyy = fu->get_dyy_values();

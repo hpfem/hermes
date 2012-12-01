@@ -50,15 +50,19 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
     new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
   
+	Hermes2DApi.set_text_param_value(xmlSchemasDirPath, "asfd");
+
   // This is in a block to test that the instances mesh and space can be deleted after being copied with no harm.
   {
     // Set the number of threads used in Hermes.
-    Hermes::HermesCommonApi.set_param_value(Hermes::exceptionsPrintCallstack, 0);
-    Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 8);
+    Hermes::HermesCommonApi.set_integral_param_value(Hermes::exceptionsPrintCallstack, 0);
+    Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads, 8);
 
     // Load the mesh.
     Hermes::Hermes2D::MeshReaderH2DXML mloader;
     mloader.load("domain.xml", mesh);
+
+		mloader.save("asdf", mesh);
 
     // Perform initial mesh refinements (optional).
     mesh->refine_in_areas(Hermes::vector<std::string>("Aluminum", "Copper"), INIT_REF_NUM);

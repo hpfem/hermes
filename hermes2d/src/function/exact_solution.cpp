@@ -15,6 +15,7 @@
 
 #include "solution_h2d_xml.h"
 #include "exact_solution.h"
+#include "api2d.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -72,7 +73,7 @@ namespace Hermes
 
         xmlsolution.exactConstantXReal() = this->constant;
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -104,7 +105,7 @@ namespace Hermes
         xmlsolution.exactConstantXReal() = this->constant.real();
         xmlsolution.exactConstantXComplex() = this->constant.imag();
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -163,7 +164,7 @@ namespace Hermes
 
         xmlsolution.exactConstantXReal() = 0;
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -195,7 +196,7 @@ namespace Hermes
         xmlsolution.exactConstantXReal() = 0;
         xmlsolution.exactConstantXComplex() = 0;
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -256,7 +257,7 @@ namespace Hermes
         xmlsolution.exactConstantXReal() = this->constantX;
         xmlsolution.exactConstantYReal() = this->constantY;
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -290,7 +291,7 @@ namespace Hermes
         xmlsolution.exactConstantYReal() = this->constantY.real();
         xmlsolution.exactConstantYComplex() = this->constantY.imag();
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -350,7 +351,7 @@ namespace Hermes
         xmlsolution.exactConstantXReal() = 0;
         xmlsolution.exactConstantYReal() = 0;
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -384,7 +385,7 @@ namespace Hermes
         xmlsolution.exactConstantYReal() = 0;
         xmlsolution.exactConstantYComplex() = 0;
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 

@@ -56,7 +56,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
     {
-      if(Hermes::HermesCommonApi.get_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
+      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
       {
         this->warn("Trying to set iterative method for a different solver than AztecOO.");
         return;
@@ -70,7 +70,7 @@ namespace Hermes
     template<typename Scalar>
     void NonlinearSolver<Scalar>::set_preconditioner(const char* preconditioner_name)
     {
-      if(Hermes::HermesCommonApi.get_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
+      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
       {
         this->warn("Trying to set iterative method for a different solver than AztecOO.");
         return;

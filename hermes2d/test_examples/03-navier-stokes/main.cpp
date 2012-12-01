@@ -91,7 +91,7 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads, 4);
+  Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads, 4);
   // Load the mesh.
   Mesh mesh;
   MeshReaderH2D mloader;

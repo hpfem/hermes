@@ -26,6 +26,7 @@
 
 #include "compat.h"
 #include "hermes_common.h"
+#include "config.h"
 
 namespace Hermes
 {
@@ -39,7 +40,8 @@ namespace Hermes
     enum Hermes2DApiParam
     {
       numThreads,
-      secondDerivatives
+      secondDerivatives,
+			xmlSchemasDirPath
     };
 
 
@@ -71,25 +73,30 @@ namespace Hermes
     protected:
       /// Parameter class, representing one parameter.
       /// Its identifier is a string identifier according to which, the instance is inserted into Api2D::parameters.
+			template<typename T>
       class HERMES_API Parameter
       {
       public:
         /// Constructor.
         /// \param[in] default_val Default value, if the user does not specify his own.
-        Parameter(int default_val);
+				Parameter(T default_val);
         bool user_set;
-        int user_val;
-        int default_val;
+        T user_val;
+        T default_val;
       };
 
       /// The storage of parameters.
       /// This storage is not optimized for speed, but for comfort of users.
       /// There should not be any parameters, values of which are sought very often, because of the above reason.
 
-      std::map<Hermes2DApiParam, Parameter*> parameters;
+			std::map<Hermes2DApiParam, Parameter<int>*> integral_parameters;
+      std::map<Hermes2DApiParam, Parameter<std::string>*> text_parameters;
     public:
-      int get_param_value(Hermes2DApiParam);
-      void set_param_value(Hermes2DApiParam, int value);
+			int get_integral_param_value(Hermes2DApiParam);
+      std::string get_text_param_value(Hermes2DApiParam);
+
+			void set_integral_param_value(Hermes2DApiParam, int value);
+			void set_text_param_value(Hermes2DApiParam, std::string value);
 
 			/// Returns the number of Mesh pointers that exist.
 			/// Defined as the difference between constructor calls and destructor calls.

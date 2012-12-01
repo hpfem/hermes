@@ -1266,7 +1266,7 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 
@@ -1311,7 +1311,7 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
-        std::string solution_schema_location(H2D_XML_SCHEMAS_DIRECTORY);
+        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
 

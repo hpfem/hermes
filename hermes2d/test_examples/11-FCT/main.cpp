@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
   do
   { 
     Hermes::Mixins::Loggable::Static::info("Time step %d, time %3.5f", ts, current_time);
-    Hermes::Hermes2D::Hermes2DApi.set_param_value(Hermes::Hermes2D::numThreads,1);  
+    Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads,1);  
 
 
     // Periodic global derefinement. 

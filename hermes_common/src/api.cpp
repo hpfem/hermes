@@ -49,7 +49,7 @@ namespace Hermes
     this->parameters.clear();
   }
 
-  int Api::get_param_value(HermesCommonApiParam param)
+  int Api::get_integral_param_value(HermesCommonApiParam param)
   {
     if(this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
@@ -59,7 +59,7 @@ namespace Hermes
       return this->parameters.find(param)->second->default_val;
   }
 
-  void Api::set_param_value(HermesCommonApiParam param, int value)
+  void Api::set_integral_param_value(HermesCommonApiParam param, int value)
   {
     if(this->parameters.find(param) == parameters.end())
       throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
