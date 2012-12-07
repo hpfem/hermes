@@ -73,7 +73,7 @@ namespace Hermes
         inline void show_bounding_box(bool show = true) { show_aabb = show; refresh(); }
         void show_contours(double step, double orig = 0.0);
         inline void hide_contours() { contours = false; refresh(); }
-        inline void set_3d_mode(bool enable = true);
+        void set_3d_mode(bool enable = true);
         void set_vertical_scaling(double sc);  ///< Sets the scaling on the vertical axis programmatically.
         void set_min_max_range(double min, double max);  ///< Sets the limits on displayed values.
 
