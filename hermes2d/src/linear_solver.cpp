@@ -164,7 +164,7 @@ namespace Hermes
       this->on_finish();
       
       this->tick();
-      this->info("Linear solver solution duration: %f s.\n", this->last());
+      this->info("\tLinear solver solution duration: %f s.\n", this->last());
     }
 
     template<typename Scalar>

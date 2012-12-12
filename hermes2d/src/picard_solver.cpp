@@ -412,9 +412,9 @@ namespace Hermes
 
         // Output for the user.
         if(std::abs(last_iter_vec_norm) < 1e-12)
-          this->info("Picard: iteration %d, nDOFs %d, starting from zero vector.", it, ndof);
+          this->info("\tPicard: iteration %d, nDOFs %d, starting from zero vector.", it, ndof);
         else
-          this->info("Picard: iteration %d, nDOFs %d, relative error %g%%", it, ndof, rel_error);
+          this->info("\tPicard: iteration %d, nDOFs %d, relative error %g%%", it, ndof, rel_error);
 
         // Stopping because error is sufficiently low.
         if(rel_error < tol)
@@ -431,7 +431,7 @@ namespace Hermes
           static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
 
           this->tick();
-          this->info("Picard: solution duration: %f s.\n", this->last());
+          this->info("\tPicard: solution duration: %f s.\n", this->last());
           this->on_finish();
           return;
         }
@@ -450,10 +450,10 @@ namespace Hermes
           static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
 
           this->tick();
-          this->info("Picard: solution duration: %f s.\n", this->last());
+          this->info("\tPicard: solution duration: %f s.\n", this->last());
 
           this->on_finish();
-          throw Hermes::Exceptions::Exception("Picard: maximum allowed number of Picard iterations exceeded.");
+          throw Hermes::Exceptions::Exception("\tPicard: maximum allowed number of Picard iterations exceeded.");
           return;
         }
         this->on_step_end();

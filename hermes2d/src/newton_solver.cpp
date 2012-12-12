@@ -354,10 +354,10 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          this->info("Newton: initial residual norm: %g", residual_norm);
+          this->info("\tNewton: initial residual norm: %g", residual_norm);
         else
         {
-          this->info("Newton: iteration %d, residual norm: %g", it - 1, residual_norm);
+          this->info("\tNewton: iteration %d, residual norm: %g", it - 1, residual_norm);
           if(!this->manual_damping && !((residual_norm > max_allowed_residual_norm) || (residual_norm < newton_tol && it > 1)))
           {
             if(residual_norm < last_residual_norm * this->sufficient_improvement_factor)
@@ -365,15 +365,15 @@ namespace Hermes
               if(++successfulSteps >= this->necessary_successful_steps_to_increase)
                 this->currentDampingCofficient = std::min(this->initial_auto_damping_ratio, 2 * this->currentDampingCofficient);
               if(residual_norm < last_residual_norm)
-                this->info(" Newton: step successful, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
+                this->info("\t Newton: step successful, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
             }
             else
             {
               successfulSteps = 0;
               if(this->currentDampingCofficient < this->min_allowed_damping_coeff)
               {
-                this->warn(" Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
-                this->info("  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
+                this->warn("\t Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
+                this->info("\t  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
                 throw Exceptions::Exception("Newton NOT converged because of damping coefficient could not be decreased anymore to possibly handle non-converging process.");
               }
               else
@@ -389,7 +389,7 @@ namespace Hermes
         if(residual_norm > max_allowed_residual_norm)
         {
           this->tick();
-          this->info("Newton: solution duration: %f s.\n", this->last());
+          this->info("\tNewton: solution duration: %f s.\n", this->last());
           this->on_finish();
           throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
         }
@@ -415,7 +415,7 @@ namespace Hermes
           this->on_finish();
 
           this->tick();
-          this->info("Newton: solution duration: %f s.\n", this->last());
+          this->info("\tNewton: solution duration: %f s.\n", this->last());
 
           return;
         }
@@ -478,7 +478,7 @@ namespace Hermes
           coeff_vec_back = NULL;
 
           this->tick();
-          this->info("Newton: solution duration: %f s.\n", this->last());
+          this->info("\tNewton: solution duration: %f s.\n", this->last());
 
           this->on_finish();
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
@@ -593,10 +593,10 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
-          this->info("Newton: initial residual norm: %g", residual_norm);
+          this->info("\tNewton: initial residual norm: %g", residual_norm);
         else
         {
-          this->info("Newton: iteration %d, residual norm: %g", it - 1, residual_norm);
+          this->info("\tNewton: iteration %d, residual norm: %g", it - 1, residual_norm);
           if(!this->manual_damping && !((residual_norm > max_allowed_residual_norm) || (residual_norm < newton_tol && it > 1)))
           {
             if(residual_norm < last_residual_norm * this->sufficient_improvement_factor)
@@ -604,21 +604,21 @@ namespace Hermes
               if(++successfulSteps >= this->necessary_successful_steps_to_increase)
                 this->currentDampingCofficient = std::min(this->initial_auto_damping_ratio, 2 * this->currentDampingCofficient);
               if(residual_norm < last_residual_norm)
-                this->info(" Newton: step successful, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
+                this->info("\t Newton: step successful, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
             }
             else
             {
               successfulSteps = 0;
               if(this->currentDampingCofficient < this->min_allowed_damping_coeff)
               {
-                this->warn(" Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
-                this->info("  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
+                this->warn("\t Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
+                this->info("\t  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
                 throw Exceptions::Exception("Newton NOT converged because of damping coefficient could not be decreased anymore to possibly handle non-converging process.");
               }
               else
               {
                 this->currentDampingCofficient = (1 / this->auto_damping_ratio) * this->currentDampingCofficient;
-                this->warn(" Newton: results NOT improved, step restarted with damping coefficient: %g.", this->currentDampingCofficient);
+                this->warn("\t Newton: results NOT improved, step restarted with damping coefficient: %g.", this->currentDampingCofficient);
               }
             }
           }
@@ -628,7 +628,7 @@ namespace Hermes
         if(residual_norm > max_allowed_residual_norm)
         {
           this->tick();
-          this->info("Newton: solution duration: %f s.", this->last());
+          this->info("\tNewton: solution duration: %f s.", this->last());
 
           this->on_finish();
 
@@ -651,7 +651,7 @@ namespace Hermes
           }
 
           this->tick();
-          this->info("Newton: solution duration: %f s.", this->last());
+          this->info("\tNewton: solution duration: %f s.", this->last());
 
           this->on_finish();
           return;
@@ -733,7 +733,7 @@ namespace Hermes
           }
 
           this->tick();
-          this->info("Newton: solution duration: %f s.\n", this->last());
+          this->info("\tNewton: solution duration: %f s.\n", this->last());
 
           this->on_finish();
           throw Exceptions::ValueException("iterations", it, newton_max_iter);
