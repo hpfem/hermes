@@ -304,7 +304,7 @@ namespace Hermes
           template<typename T> friend class ProjBasedSelector;
           template<typename T> friend class H1ProjBasedSelector;
           template<typename T> friend class L2ProjBasedSelector;
-          friend class HcurlProjBasedSelector;
+          template<typename T> friend class HcurlProjBasedSelector;
         };
 
         Shapeset *shapeset; ///< A shapeset used to calculate error.

@@ -516,8 +516,8 @@ namespace Hermes
       }
 
       // Delete stage spaces.
-      for (unsigned int i = 0; i < num_stages; i++)
-        delete stage_spaces_vector[i];
+      for (unsigned int i = 0; i < num_stages * spaces.size(); i++)
+          delete stage_spaces_vector[i];
 
       // Delete all residuals.
       if(!residual_as_vector)

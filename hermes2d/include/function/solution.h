@@ -250,7 +250,7 @@ namespace Hermes
       template<typename T> friend class RefinementSelectors::ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename T> friend class RefinementSelectors::L2ProjBasedSelector;
-      friend class RefinementSelectors::HcurlProjBasedSelector;
+      template<typename T> friend class RefinementSelectors::HcurlProjBasedSelector;
     };
   }
 }

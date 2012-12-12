@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   CustomExactSolution sln_exact(&mesh);
 
   // Initialize refinement selector.
-  HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  HcurlProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
   Views::VectorView v_view("Solution (magnitude)", new Views::WinGeom(0, 0, 460, 350));

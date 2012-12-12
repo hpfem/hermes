@@ -10,10 +10,12 @@ namespace Hermes
   {
     namespace RefinementSelectors
     {
-      const int HcurlProjBasedSelector::H2DRS_MAX_HCURL_ORDER = 6;
+      template<typename Scalar>
+      const int HcurlProjBasedSelector<Scalar>::H2DRS_MAX_HCURL_ORDER = 6;
 
-      HcurlProjBasedSelector::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<std::complex<double> >(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, OptimumSelector<std::complex<double> >::Range(), OptimumSelector<std::complex<double> >::Range(0, H2DRS_MAX_HCURL_ORDER))
+      template<typename Scalar>
+      HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, OptimumSelector<Scalar>::Range(), OptimumSelector<Scalar>::Range(0, H2DRS_MAX_HCURL_ORDER))
         , precalc_rvals_curl(NULL)
       {
         if(user_shapeset != NULL)
@@ -23,7 +25,8 @@ namespace Hermes
         }
       }
 
-      Selector<std::complex<double> >* HcurlProjBasedSelector::clone()
+      template<typename Scalar>
+      Selector<Scalar>* HcurlProjBasedSelector<Scalar>::clone()
       {
         HcurlProjBasedSelector* newSelector = new HcurlProjBasedSelector(this->cand_list, this->conv_exp, this->max_order);
         newSelector->set_error_weights(this->error_weight_h, this->error_weight_p, this->error_weight_aniso);
@@ -31,12 +34,14 @@ namespace Hermes
         return newSelector;
       }
 
-      HcurlProjBasedSelector::~HcurlProjBasedSelector()
+      template<typename Scalar>
+      HcurlProjBasedSelector<Scalar>::~HcurlProjBasedSelector()
       {
         delete [] precalc_rvals_curl;
       }
 
-      void HcurlProjBasedSelector::set_current_order_range(Element* element)
+      template<typename Scalar>
+      void HcurlProjBasedSelector<Scalar>::set_current_order_range(Element* element)
       {
         current_max_order = this->max_order;
         if(current_max_order == H2DRS_DEFAULT_ORDER)
@@ -46,7 +51,8 @@ namespace Hermes
         current_min_order = 0;
       }
 
-      void HcurlProjBasedSelector::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode)
+      template<typename Scalar>
+      void HcurlProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode)
       {
         //for all transformations
         bool done = false;
@@ -98,7 +104,8 @@ namespace Hermes
               throw Exceptions::Exception("All transformation processed but identity transformation not found."); //identity transformation has to be the last transformation
       }
 
-      void HcurlProjBasedSelector::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode)
+      template<typename Scalar>
+      void HcurlProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode)
       {
         //calculate values
         precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals, mode);
@@ -195,23 +202,24 @@ namespace Hermes
         }
       }
 
-      std::complex<double>** HcurlProjBasedSelector::precalc_ref_solution(int inx_son, Solution<std::complex<double> >* rsln, Element* element, int intr_gip_order)
+      template<typename Scalar>
+      Scalar** HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order)
       {
         const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 
         //allocate space for Curl
         if(precalc_rvals_curl == NULL)
-          precalc_rvals_curl = new_matrix<std::complex<double> >(H2D_MAX_ELEMENT_SONS, num_gip);
+          precalc_rvals_curl = new_matrix<Scalar>(H2D_MAX_ELEMENT_SONS, num_gip);
 
         //prepre for curl
-        std::complex<double>* curl = precalc_rvals_curl[inx_son];
-        std::complex<double>* d1dx = rsln->get_dx_values(1);
-        std::complex<double>* d0dy = rsln->get_dy_values(0);
+        Scalar* curl = precalc_rvals_curl[inx_son];
+        Scalar* d1dx = rsln->get_dx_values(1);
+        Scalar* d0dy = rsln->get_dy_values(0);
         for(int i = 0; i < num_gip; i++)
           curl[i] = d1dx[i] - d0dy[i];
 
         //fill with values
-        std::complex<double>** rvals_son = precalc_rvals[inx_son];
+        Scalar** rvals_son = precalc_rvals[inx_son];
         rvals_son[H2D_HCFE_VALUE0] = rsln->get_fn_values(0);
         rvals_son[H2D_HCFE_VALUE1] = rsln->get_fn_values(1);
         rvals_son[H2D_HCFE_CURL] = curl;
@@ -219,7 +227,8 @@ namespace Hermes
         return rvals_son;
       }
 
-      double** HcurlProjBasedSelector::build_projection_matrix(double3* gip_points, int num_gip_points,
+      template<typename Scalar>
+      double** HcurlProjBasedSelector<Scalar>::build_projection_matrix(double3* gip_points, int num_gip_points,
         const int* shape_inx, const int num_shapes, ElementMode2D mode)
       {
         //allocate
@@ -258,19 +267,20 @@ namespace Hermes
         return matrix;
       }
 
-      std::complex<double> HcurlProjBasedSelector::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape)
+      template<typename Scalar>
+      Scalar HcurlProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape)
       {
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
-        std::complex<double> total_value = 0;
+        Scalar total_value = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           //get location and transform it
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
 
           //get value of a shape function
-          std::complex<double> shape_value0 = sub_shape.svals[H2D_HCFE_VALUE0][gip_inx];
-          std::complex<double> shape_value1 = sub_shape.svals[H2D_HCFE_VALUE1][gip_inx];
-          std::complex<double> shape_curl = sub_shape.svals[H2D_HCFE_CURL][gip_inx];
+          Scalar shape_value0 = sub_shape.svals[H2D_HCFE_VALUE0][gip_inx];
+          Scalar shape_value1 = sub_shape.svals[H2D_HCFE_VALUE1][gip_inx];
+          Scalar shape_curl = sub_shape.svals[H2D_HCFE_CURL][gip_inx];
 
           ////DEBUG-BEGIN
           //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
@@ -284,12 +294,12 @@ namespace Hermes
           ////DEBUG-END
 
           //get value of ref. solution
-          std::complex<double> ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
-          std::complex<double> ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
-          std::complex<double> ref_curl = coef_curl * sub_gip.rvals[H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
+          Scalar ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
+          Scalar ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
+          Scalar ref_curl = coef_curl * sub_gip.rvals[H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
 
           //evaluate a right-hand value
-          std::complex<double> value = (shape_value0 * ref_value0)
+          Scalar value = (shape_value0 * ref_value0)
             + (shape_value1 * ref_value1)
             + (shape_curl * ref_curl);
 
@@ -298,7 +308,8 @@ namespace Hermes
         return total_value;
       }
 
-      double HcurlProjBasedSelector::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj)
+      template<typename Scalar>
+      double HcurlProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj)
       {
         double total_error_squared = 0;
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
@@ -308,7 +319,7 @@ namespace Hermes
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
 
           //calculate value of projected solution
-          std::complex<double> proj_value0 = 0, proj_value1 = 0, proj_curl = 0;
+          Scalar proj_value0 = 0, proj_value1 = 0, proj_curl = 0;
           for(int i = 0; i < elem_proj.num_shapes; i++)
           {
             int shape_inx = elem_proj.shape_inxs[i];
@@ -334,9 +345,9 @@ namespace Hermes
             ////DEBUG-END
 
             //get value of ref. solution
-            std::complex<double> ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
-            std::complex<double> ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
-            std::complex<double> ref_curl = coef_curl * sub_gip.rvals[H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
+            Scalar ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
+            Scalar ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
+            Scalar ref_curl = coef_curl * sub_gip.rvals[H2D_HCFE_CURL][gip_inx]; //coef_curl * curl
 
             //evaluate error
             double error_squared = sqr(proj_value0 - ref_value0)
@@ -348,6 +359,8 @@ namespace Hermes
         }
         return total_error_squared;
       }
+      template class HERMES_API HcurlProjBasedSelector<double>;
+      template class HERMES_API HcurlProjBasedSelector<std::complex<double> >;
     }
   }
 }

@@ -40,7 +40,7 @@ namespace Hermes
       template<typename Scalar> class ProjBasedSelector;
       template<typename Scalar> class H1ProjBasedSelector;
       template<typename Scalar> class L2ProjBasedSelector;
-      class HcurlProjBasedSelector;
+      template<typename Scalar> class HcurlProjBasedSelector;
     };
 
     enum SpaceType {
@@ -203,7 +203,14 @@ namespace Hermes
       ///
       double get_constrained_value(int n, int index, double x, double y, int component, ElementMode2D mode);
 
-      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class Solution;
+      friend class CurvMap; friend class RefMap;
+      template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
+      friend class PrecalcShapeset;
       friend void check_leg_tri(Shapeset* shapeset);
       friend void check_gradleg_tri(Shapeset* shapeset);
       template<typename Scalar> friend class Space;

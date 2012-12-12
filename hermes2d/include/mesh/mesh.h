@@ -49,7 +49,7 @@ namespace Hermes
       template<typename Scalar> class ProjBasedSelector;
       template<typename Scalar> class H1ProjBasedSelector;
       template<typename Scalar> class L2ProjBasedSelector;
-      class HcurlProjBasedSelector;
+      template<typename Scalar> class HcurlProjBasedSelector;
     }
 
     namespace Views
@@ -213,7 +213,7 @@ namespace Hermes
       template<typename Scalar> friend class RefinementSelectors::ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
-      friend class RefinementSelectors::HcurlProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
       friend class Views::ScalarView;
       friend class Views::Linearizer;
       friend class RefMap;
@@ -541,7 +541,7 @@ namespace Hermes
       template<typename Scalar> friend class RefinementSelectors::ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
-      friend class RefinementSelectors::HcurlProjBasedSelector;
+      template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
       friend class PrecalcShapeset;
       template<typename Scalar> friend class Space;
       template<typename Scalar> friend class H1Space;

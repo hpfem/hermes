@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
   CustomExactSolution sln_exact(&mesh);
 
   // Initialize refinement selector.
-  HcurlProjBasedSelector selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  HcurlProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   DiscreteProblem<std::complex<double> > dp(&wf, &space);
   
