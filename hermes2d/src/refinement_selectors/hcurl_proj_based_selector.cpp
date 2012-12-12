@@ -15,7 +15,7 @@ namespace Hermes
 
       template<typename Scalar>
       HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, OptimumSelector<Scalar>::Range(), OptimumSelector<Scalar>::Range(0, H2DRS_MAX_HCURL_ORDER))
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, typename OptimumSelector<Scalar>::Range(), typename OptimumSelector<Scalar>::Range(0, H2DRS_MAX_HCURL_ORDER))
         , precalc_rvals_curl(NULL)
       {
         if(user_shapeset != NULL)
@@ -43,16 +43,16 @@ namespace Hermes
       template<typename Scalar>
       void HcurlProjBasedSelector<Scalar>::set_current_order_range(Element* element)
       {
-        current_max_order = this->max_order;
-        if(current_max_order == H2DRS_DEFAULT_ORDER)
-          current_max_order = std::min(H2DRS_MAX_HCURL_ORDER, (20 - element->iro_cache)/2 - 1); // default
+        this->current_max_order = this->max_order;
+        if(this->current_max_order == H2DRS_DEFAULT_ORDER)
+          this->current_max_order = std::min(H2DRS_MAX_HCURL_ORDER, (20 - element->iro_cache)/2 - 1); // default
         else
-          current_max_order = std::min(max_order, (20 - element->iro_cache)/2 - 1); // user specified
-        current_min_order = 0;
+          this->current_max_order = std::min(this->max_order, (20 - element->iro_cache)/2 - 1); // user specified
+        this->current_min_order = 0;
       }
 
       template<typename Scalar>
-      void HcurlProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode)
+      void HcurlProjBasedSelector<Scalar>::precalc_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals, ElementMode2D mode)
       {
         //for all transformations
         bool done = false;
@@ -61,7 +61,7 @@ namespace Hermes
         {
           //prepare data for processing
           const Trf& trf = trfs[inx_trf];
-          Hermes::vector<TrfShapeExp>& trf_svals = svals[inx_trf];
+          Hermes::vector<typename ProjBasedSelector<Scalar>::TrfShapeExp>& trf_svals = svals[inx_trf];
 
           //allocate
           trf_svals.resize(max_shape_inx + 1);
@@ -71,7 +71,7 @@ namespace Hermes
           for(int i = 0; i < num_shapes; i++)
           {
             int inx_shape = shapes[i].inx;
-            TrfShapeExp& shape_exp = trf_svals[inx_shape];
+            typename ProjBasedSelector<Scalar>::TrfShapeExp& shape_exp = trf_svals[inx_shape];
 
             //allocate
             shape_exp.allocate(H2D_HCFE_NUM, num_gip_points);
@@ -84,9 +84,9 @@ namespace Hermes
               double ref_y = gip_points[k][H2D_GIP2D_Y] * trf.m[1] + trf.t[1];
 
               //for all expansions: retrieve values
-              shape_exp[H2D_HCFE_VALUE0][k] = shapeset->get_fn_value(inx_shape, ref_x, ref_y, 0, mode);
-              shape_exp[H2D_HCFE_VALUE1][k] = shapeset->get_fn_value(inx_shape, ref_x, ref_y, 1, mode);
-              shape_exp[H2D_HCFE_CURL][k] = shapeset->get_dx_value(inx_shape, ref_x, ref_y, 1, mode) - shapeset->get_dy_value(inx_shape, ref_x, ref_y, 0, mode);
+              shape_exp[H2D_HCFE_VALUE0][k] = this->shapeset->get_fn_value(inx_shape, ref_x, ref_y, 0, mode);
+              shape_exp[H2D_HCFE_VALUE1][k] = this->shapeset->get_fn_value(inx_shape, ref_x, ref_y, 1, mode);
+              shape_exp[H2D_HCFE_CURL][k] = this->shapeset->get_dx_value(inx_shape, ref_x, ref_y, 1, mode) - this->shapeset->get_dy_value(inx_shape, ref_x, ref_y, 0, mode);
             }
           }
 
@@ -105,7 +105,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void HcurlProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<ShapeInx>& shapes, const int max_shape_inx, TrfShape& svals, ElementMode2D mode)
+      void HcurlProjBasedSelector<Scalar>::precalc_ortho_shapes(const double3* gip_points, const int num_gip_points, const Trf* trfs, const int num_noni_trfs, const Hermes::vector<typename OptimumSelector<Scalar>::ShapeInx>& shapes, const int max_shape_inx, typename ProjBasedSelector<Scalar>::TrfShape& svals, ElementMode2D mode)
       {
         //calculate values
         precalc_shapes(gip_points, num_gip_points, trfs, num_noni_trfs, shapes, max_shape_inx, svals, mode);
@@ -248,12 +248,12 @@ namespace Hermes
             for(int j = 0; j < num_gip_points; j++)
             {
               double gip_x = gip_points[j][H2D_GIP2D_X], gip_y = gip_points[j][H2D_GIP2D_Y];
-              double value0[2] = { shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0, mode), shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 1, mode) };
-              double value1[2] = { shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 0, mode), shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 1, mode) };
-              double d1dx0 = shapeset->get_value(H2D_FEI_DX, shape0_inx, gip_x, gip_y, 1, mode);
-              double d1dx1 = shapeset->get_value(H2D_FEI_DX, shape1_inx, gip_x, gip_y, 1, mode);
-              double d0dy0 = shapeset->get_value(H2D_FEI_DY, shape0_inx, gip_x, gip_y, 0, mode);
-              double d0dy1 = shapeset->get_value(H2D_FEI_DY, shape1_inx, gip_x, gip_y, 0, mode);
+              double value0[2] = { this->shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 0, mode), this->shapeset->get_value(H2D_FEI_VALUE, shape0_inx, gip_x, gip_y, 1, mode) };
+              double value1[2] = { this->shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 0, mode), this->shapeset->get_value(H2D_FEI_VALUE, shape1_inx, gip_x, gip_y, 1, mode) };
+              double d1dx0 = this->shapeset->get_value(H2D_FEI_DX, shape0_inx, gip_x, gip_y, 1, mode);
+              double d1dx1 = this->shapeset->get_value(H2D_FEI_DX, shape1_inx, gip_x, gip_y, 1, mode);
+              double d0dy0 = this->shapeset->get_value(H2D_FEI_DY, shape0_inx, gip_x, gip_y, 0, mode);
+              double d0dy1 = this->shapeset->get_value(H2D_FEI_DY, shape1_inx, gip_x, gip_y, 0, mode);
               double curl0 = d1dx0 - d0dy0;
               double curl1 = d1dx1 - d0dy1;
 
@@ -268,7 +268,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar HcurlProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemSubShapeFunc& sub_shape)
+      Scalar HcurlProjBasedSelector<Scalar>::evaluate_rhs_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemSubShapeFunc& sub_shape)
       {
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
         Scalar total_value = 0;
@@ -309,7 +309,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      double HcurlProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const ElemGIP& sub_gip, const ElemSubTrf& sub_trf, const ElemProj& elem_proj)
+      double HcurlProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
       {
         double total_error_squared = 0;
         double coef_curl = std::abs(sub_trf.coef_mx * sub_trf.coef_my);
