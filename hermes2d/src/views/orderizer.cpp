@@ -132,9 +132,11 @@ namespace Hermes
 
         // reuse or allocate vertex, triangle and edge arrays
         verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
-        tris = (int3*) realloc(tris, sizeof(int3) * triangle_size);
+				this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
+				this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
+				this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
+				this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
         tris_orders = (int*) realloc(tris_orders, sizeof(int) * triangle_size);
-        edges = (int3*) realloc(edges, sizeof(int3) * edges_size);
         info = NULL;
         this->empty = false;
         lvert = (int*) realloc(lvert, sizeof(int) * label_size);

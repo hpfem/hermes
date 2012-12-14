@@ -166,7 +166,7 @@ namespace Hermes
         else
           glColor3f(0.0f, 0.0f, 0.0f);
         glBegin(GL_LINES);
-        int3* edges = ord.get_edges();
+        int2* edges = ord.get_edges();
         for (i = 0; i < ord.get_num_edges(); i++)
         {
           glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);

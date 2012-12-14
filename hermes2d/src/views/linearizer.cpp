@@ -301,7 +301,7 @@ namespace Hermes
         }
 
         // no splitting: output a linear triangle
-        add_triangle(iv0, iv1, iv2);
+        add_triangle(iv0, iv1, iv2, fns[0]->get_active_element()->marker);
       }
 
       void Linearizer::set_curvature_epsilon(double curvature_epsilon)
@@ -603,13 +603,13 @@ namespace Hermes
         // output two linear triangles,
         if(!flip)
         {
-          add_triangle(iv3, iv0, iv1);
-          add_triangle(iv1, iv2, iv3);
+          add_triangle(iv3, iv0, iv1, fns[0]->get_active_element()->marker);
+          add_triangle(iv1, iv2, iv3, fns[0]->get_active_element()->marker);
         }
         else
         {
-          add_triangle(iv0, iv1, iv2);
-          add_triangle(iv2, iv3, iv0);
+          add_triangle(iv0, iv1, iv2, fns[0]->get_active_element()->marker);
+          add_triangle(iv2, iv3, iv0, fns[0]->get_active_element()->marker);
         }
       }
 
@@ -664,8 +664,10 @@ namespace Hermes
         this->edges_count = 0;
         //    reuse or allocate vertex, triangle and edge arrays.
         this->verts = (double3*) realloc(this->verts, sizeof(double3) * this->vertex_size);
-        this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
-        this->edges = (int3*) realloc(this->edges, sizeof(int3) * this->edges_size);
+				this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
+        this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
+				this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
+        this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
         this->info = (int4*) malloc(sizeof(int4) * this->vertex_size);
         this->empty = false;
         //    initialize the hash table
@@ -902,7 +904,7 @@ namespace Hermes
           if(mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
           {
             this->del_slot = i;
-            regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2);
+            regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2, tri_markers[i]);
           }
         }
 

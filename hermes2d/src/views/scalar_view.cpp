@@ -944,12 +944,14 @@ namespace Hermes
           GLenum err = glGetError();
           if(err == GL_NO_ERROR) {//render edges
             unsigned int buffer_inx = 0;
-            int3* edges = lin->get_edges();
+						int2* edges = lin->get_edges();
+            int* edge_markers = lin->get_edge_markers();
             int edge_cnt = lin->get_num_edges();
             for (int i = 0; i < edge_cnt; i++) //TODO: we could draw only left-right, top-bottom ones
             {
-              const int3 &edge = edges[i];
-              if(show_edges || edge[2] != 0) { //select internal edges to draw
+							const int2 &edge = edges[i];
+              const int &edge_marker = edge_markers[i];
+              if(show_edges || edge_marker != 0) { //select internal edges to draw
                 gl_inx_buffer[buffer_inx] = (GLuint)edge[0];
                 gl_inx_buffer[buffer_inx + 1] = (GLuint)edge[1];
                 buffer_inx += 2;
@@ -1030,12 +1032,14 @@ namespace Hermes
 
       void ScalarView::draw_edges(DrawSingleEdgeCallback draw_single_edge, void* param, bool boundary_only)
       {
-        int3* edges = lin->get_edges();
+				int2* edges = lin->get_edges();
+        int* edge_markers = lin->get_edge_markers();
         int edge_cnt = lin->get_num_edges();
         for (int i = 0; i < edge_cnt; i++) //TODO: we could draw only left-right, top-bottom ones
         {
-          const int3 &edge = edges[i];
-          if(!boundary_only || edge[2] != 0) //select internal edges to draw
+					const int2 &edge = edges[i];
+          const int &edge_marker = edge_markers[i];
+          if(!boundary_only || edge_marker != 0) //select internal edges to draw
             draw_single_edge(edge[0], edge[1], this, param);
         }
       }
@@ -1094,7 +1098,7 @@ namespace Hermes
         lin->lock_data();
         int3* tris = lin->get_triangles();
         double3* vert = lin->get_vertices();
-        int3* edges = lin->get_edges();
+        int2* edges = lin->get_edges();
 
         glPolygonMode(GL_FRONT_AND_BACK, pmode ? GL_LINE : GL_FILL);
 
@@ -1235,8 +1239,9 @@ namespace Hermes
             {
               // Outline of the domain boundary at the bottom of the plot or at the bottom user-defined limit
               double y_coord = (range_min - yctr) * yscale;
-              int3& edge = edges[i];
-              if(edge[2])
+							int2& edge = edges[i];
+              int& edge_marker = lin->get_edge_markers()[i];
+              if(edge_marker)
               {
                 glVertex3d((vert[edge[0]][0] - xctr) * xzscale, y_coord,
                   -(vert[edge[0]][1] - zctr) * xzscale);
