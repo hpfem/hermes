@@ -645,8 +645,8 @@ namespace Hermes
         vn[0]                           vn[1]       vn[0]        vn[1] vn[0]        vn[1]
       */
 
-      Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm);
-      Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm);
+      Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm, int id = -1);
+      Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, int id = -1);
       void refine_element(Element* e, int refinement);
 
       /// Vector for storing refinements in order to be able to save/load meshes with identical element IDs.

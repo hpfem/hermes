@@ -412,10 +412,13 @@ namespace Hermes
       return 2;
     }
 
-    Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm)
+    Element* Mesh::create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, int id)
     {
       // create a new element
       Element* e = elements.add();
+
+      if(id != -1)
+          e->id = id;
 
       // initialize the new element
       e->active = 1;
@@ -442,10 +445,13 @@ namespace Hermes
     }
 
     Element* Mesh::create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3,
-      CurvMap* cm)
+      CurvMap* cm, int id)
     {
       // create a new element
       Element* e = elements.add();
+
+      if(id != -1)
+          e->id = id;
 
       // initialize the new element
       e->active = 1;

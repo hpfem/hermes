@@ -1348,9 +1348,9 @@ namespace Hermes
           space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
         }
 
-				space->assign_dofs();
-				space->seq = g_space_seq++;
-				return space;
+        space->assign_dofs();
+        space->seq = g_space_seq++;
+        return space;
       }
       catch (const xml_schema::exception& e)
       {
