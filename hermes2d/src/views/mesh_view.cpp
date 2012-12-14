@@ -148,12 +148,13 @@ namespace Hermes
 
         // draw all edges
         glLineStipple(5, 0x5555);
-        int3* edges = lin->get_edges();
+				int2* edges = lin->get_edges();
+        int* edge_markers = lin->get_edge_markers();
         for (i = 0; i < lin->get_num_edges(); i++)
         {
           int mrk = b_markers ? edges[i][2] : 0;
 
-          if(!edges[i][2] &&
+          if(!edge_markers[i] &&
             ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
             tvert[edges[i][0]][0] < tvert[edges[i][1]][0]) ||
             tvert[edges[i][0]][1] < tvert[edges[i][1]][1])) continue;

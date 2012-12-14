@@ -83,9 +83,11 @@ namespace Hermes
         void lock_data() const;
         void unlock_data() const;
 
-        int3* get_triangles();
+				int3* get_triangles();
+        int* get_triangle_markers();
         int get_num_triangles();
-        int3* get_edges();
+				int2* get_edges();
+        int* get_edge_markers();
         int get_num_edges();
 
         /// The instance is empty. Either process_solution has not been called so far, or
@@ -105,12 +107,14 @@ namespace Hermes
 
         double max;
 
-        void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2);
+        void regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2, int marker);
 
         bool auto_max;
 
-        int3* tris;      ///< triangles: vertex index triplets
-        int3* edges;     ///< edges: pairs of vertex indices
+				int3* tris;      ///< triangles: vertex index triplets
+        int* tri_markers;///< triangle_markers: triangle markers, ordering equal to tris
+				int2* edges;     ///< edges: pairs of vertex indices
+        int* edge_markers;     ///< edge_markers: edge markers, ordering equal to edges
         int* hash_table; ///< hash table
         int4 * info; ///< info[0] = p1, info[1] = p2, info[2] = next vertex in hash
 
@@ -126,7 +130,7 @@ namespace Hermes
         int peek_vertex(int p1, int p2);
 
         void add_edge(int iv1, int iv2, int marker);
-        void add_triangle(int iv0, int iv1, int iv2);
+        void add_triangle(int iv0, int iv1, int iv2, int marker);
 
         int hash(int p1, int p2);
 

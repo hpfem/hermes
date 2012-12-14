@@ -37,8 +37,10 @@ namespace Hermes
 
       LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1), empty(true)
       {
-        tris = NULL;
-        edges = NULL;
+				tris = NULL;
+        tri_markers = NULL;
+				edges = NULL;
+        edge_markers = NULL;
         hash_table = NULL;
         info = NULL;
         max = -1e100;
@@ -63,11 +65,15 @@ namespace Hermes
         {
           ::free(tris);
           tris = NULL;
+					::free(tri_markers);
+					tri_markers = NULL;
         }
         if(edges != NULL)
         {
           ::free(edges);
           edges = NULL;
+					::free(edge_markers);
+					edge_markers = NULL;
         }
         this->empty = true;
       }
@@ -100,7 +106,7 @@ namespace Hermes
           add_edge(iv1, iv2, marker);
       }
 
-      void LinearizerBase::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2)
+      void LinearizerBase::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2, int marker)
       {
         // count the number of hanging mid-edge vertices
         int n = 0;
@@ -110,31 +116,31 @@ namespace Hermes
         if(n == 3)
         {
           // three hanging vertices: split into four triangles
-          regularize_triangle(iv0, mid0, mid2, peek_vertex(iv0, mid0), -1, peek_vertex(mid2, iv0));
-          regularize_triangle(mid0, iv1, mid1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1), -1);
-          regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2));
-          regularize_triangle(mid0, mid1, mid2, -1, -1, -1);
+          regularize_triangle(iv0, mid0, mid2, peek_vertex(iv0, mid0), -1, peek_vertex(mid2, iv0), marker);
+          regularize_triangle(mid0, iv1, mid1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1), -1, marker);
+          regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2), marker);
+          regularize_triangle(mid0, mid1, mid2, -1, -1, -1, marker);
         }
         else if(n == 2)
         {
           // two hanging vertices: split into three triangles
           if(mid0 < 0)
           {
-            regularize_triangle(iv0, iv1, mid1, peek_vertex(iv0, iv1), peek_vertex(iv1, mid1), -1);
-            regularize_triangle(mid2, iv0, mid1, peek_vertex(mid2, iv0), -1, -1);
-            regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2));
+            regularize_triangle(iv0, iv1, mid1, peek_vertex(iv0, iv1), peek_vertex(iv1, mid1), -1, marker);
+            regularize_triangle(mid2, iv0, mid1, peek_vertex(mid2, iv0), -1, -1, marker);
+            regularize_triangle(mid2, mid1, iv2, -1, peek_vertex(mid1, iv2), peek_vertex(iv2, mid2), marker);
           }
           else if(mid1 < 0)
           {
-            regularize_triangle(iv1, iv2, mid2, peek_vertex(iv1, iv2), peek_vertex(iv2, mid2), -1);
-            regularize_triangle(mid0, iv1, mid2, peek_vertex(mid0, iv1), -1, -1);
-            regularize_triangle(mid0, mid2, iv0, -1, peek_vertex(mid2, iv0), peek_vertex(iv0, mid0));
+            regularize_triangle(iv1, iv2, mid2, peek_vertex(iv1, iv2), peek_vertex(iv2, mid2), -1, marker);
+            regularize_triangle(mid0, iv1, mid2, peek_vertex(mid0, iv1), -1, -1, marker);
+            regularize_triangle(mid0, mid2, iv0, -1, peek_vertex(mid2, iv0), peek_vertex(iv0, mid0), marker);
           }
           else
           {
-            regularize_triangle(iv2, iv0, mid0, peek_vertex(iv2, iv0), peek_vertex(iv0, mid0), -1);
-            regularize_triangle(mid1, iv2, mid0, peek_vertex(mid1, iv2), -1, -1);
-            regularize_triangle(mid1, mid0, iv1, -1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1));
+            regularize_triangle(iv2, iv0, mid0, peek_vertex(iv2, iv0), peek_vertex(iv0, mid0), -1, marker);
+            regularize_triangle(mid1, iv2, mid0, peek_vertex(mid1, iv2), -1, -1, marker);
+            regularize_triangle(mid1, mid0, iv1, -1, peek_vertex(mid0, iv1), peek_vertex(iv1, mid1), marker);
           }
         }
         else if(n == 1)
@@ -142,24 +148,24 @@ namespace Hermes
           // one hanging vertex: split into two triangles
           if(mid0 >= 0)
           {
-            regularize_triangle(iv0, mid0, iv2, peek_vertex(iv0, mid0), -1, peek_vertex(iv2, iv0));
-            regularize_triangle(mid0, iv1, iv2, peek_vertex(mid0, iv1), peek_vertex(iv1, iv2), -1);
+            regularize_triangle(iv0, mid0, iv2, peek_vertex(iv0, mid0), -1, peek_vertex(iv2, iv0), marker);
+            regularize_triangle(mid0, iv1, iv2, peek_vertex(mid0, iv1), peek_vertex(iv1, iv2), -1, marker);
           }
           else if(mid1 >= 0)
           {
-            regularize_triangle(iv1, mid1, iv0, peek_vertex(iv1, mid1), -1, peek_vertex(iv0, iv1));
-            regularize_triangle(mid1, iv2, iv0, peek_vertex(mid1, iv2), peek_vertex(iv2, iv0), -1);
+            regularize_triangle(iv1, mid1, iv0, peek_vertex(iv1, mid1), -1, peek_vertex(iv0, iv1), marker);
+            regularize_triangle(mid1, iv2, iv0, peek_vertex(mid1, iv2), peek_vertex(iv2, iv0), -1, marker);
           }
           else
           {
-            regularize_triangle(iv2, mid2, iv1, peek_vertex(iv2, mid2), -1, peek_vertex(iv1, iv2));
-            regularize_triangle(mid2, iv0, iv1, peek_vertex(mid2, iv0), peek_vertex(iv0, iv1), -1);
+            regularize_triangle(iv2, mid2, iv1, peek_vertex(iv2, mid2), -1, peek_vertex(iv1, iv2), marker);
+            regularize_triangle(mid2, iv0, iv1, peek_vertex(mid2, iv0), peek_vertex(iv0, iv1), -1, marker);
           }
         }
         else
         {
           // no hanging vertices: produce a single triangle
-          add_triangle(iv0, iv1, iv2);
+          add_triangle(iv0, iv1, iv2, marker);
         }
       }
 
@@ -169,11 +175,12 @@ namespace Hermes
         {
           if(edges_count >= edges_size)
           {
-            edges = (int3*) realloc(edges, sizeof(int3) * (edges_size = edges_size * 1.5));
+						edges = (int2*) realloc(edges, sizeof(int2) * (edges_size * 1.5));
+            edge_markers = (int*) realloc(edge_markers, sizeof(int) * (edges_size = edges_size * 1.5));
           }
           edges[edges_count][0] = iv1;
           edges[edges_count][1] = iv2;
-          edges[edges_count++][2] = marker;
+          edge_markers[edges_count++] = marker;
         }
       }
 
@@ -191,7 +198,7 @@ namespace Hermes
         return -1;
       }
 
-      void LinearizerBase::add_triangle(int iv0, int iv1, int iv2)
+      void LinearizerBase::add_triangle(int iv0, int iv1, int iv2, int marker)
       {
         int index;
 #pragma omp critical(realloc_triangles)
@@ -203,12 +210,16 @@ namespace Hermes
           }
           {
             if(triangle_count >= triangle_size)
-              tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size = triangle_size * 2));
+						{
+							tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size * 2));
+              tri_markers = (int*) realloc(tri_markers, sizeof(int) * (triangle_size = triangle_size * 2));
+						}
             index = triangle_count++;
 
             tris[index][0] = iv0;
             tris[index][1] = iv1;
             tris[index][2] = iv2;
+						tri_markers[index] = marker;
           }
         }
       }
@@ -260,14 +271,22 @@ namespace Hermes
       {
         return this->tris;
       }
+			int* LinearizerBase::get_triangle_markers()
+			{
+				return this->tri_markers;
+			}
       int LinearizerBase::get_num_triangles()
       {
         return this->triangle_count;
       }
-      int3* LinearizerBase::get_edges()
+      int2* LinearizerBase::get_edges()
       {
         return this->edges;
       }
+			int* LinearizerBase::get_edge_markers()
+			{
+				return this->edge_markers;
+			}
       int LinearizerBase::get_num_edges()
       {
         return this->edges_count;

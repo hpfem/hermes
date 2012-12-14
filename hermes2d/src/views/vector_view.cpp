@@ -260,7 +260,7 @@ namespace Hermes
         /*if(mode == 0) glColor3f(0.3, 0.3, 0.3);
         else*/ glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        int3* edges = vec->get_edges();
+        int2* edges = vec->get_edges();
         for (i = 0; i < vec->get_num_edges(); i++)
         {
           if(lines || edges[i][2] != 0)

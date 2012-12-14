@@ -321,12 +321,13 @@ namespace Hermes
       {
         int k = 0;
         int ne = vec->get_num_edges();
-        int3* edges = vec->get_edges();
+				int2* edges = vec->get_edges();
+        int* edge_markers = vec->get_edge_markers();
         double4* vert = vec->get_vertices();
         int3* bnd_edges = new int3[ne];
         for (int i = 0; i < ne; i++)
         {
-          if(edges[i][2] == marker)
+          if(edge_markers[i] == marker)
           {
             bnd_edges[k][0] = edges[i][0];
             bnd_edges[k][1] = edges[i][1];
@@ -496,7 +497,7 @@ namespace Hermes
         // draw all edges
         glColor3f(0.5, 0.5, 0.5);
         glBegin(GL_LINES);
-        int3* edges = vec->get_edges();
+        int2* edges = vec->get_edges();
         for (i = 0; i < vec->get_num_edges(); i++)
         {
           if(lines || edges[i][2] != 0)
