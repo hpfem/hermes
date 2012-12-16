@@ -177,7 +177,7 @@ namespace Hermes
             make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
 
           for (int i = 0; i < num_elem[mode][type]; i++)
-            this->add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]], o[4]);
+            this->add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]], o[4], e->marker);
 
           for (int i = 0; i < num_edge[mode][type]; i++)
           {
@@ -185,7 +185,7 @@ namespace Hermes
               ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
               (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
             {
-              LinearizerBase::add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], 0);
+              LinearizerBase::add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], e->en[ord_edge[mode][type][i][2]]->marker);
             }
           }
 
@@ -205,7 +205,7 @@ namespace Hermes
         refmap.set_quad_2d(&g_quad_2d_std);
       }
 
-      void Orderizer::add_triangle(int iv0, int iv1, int iv2, int order)
+      void Orderizer::add_triangle(int iv0, int iv1, int iv2, int order, int marker)
       {
         int index;
 #pragma omp critical(realloc_triangles)
@@ -218,7 +218,8 @@ namespace Hermes
           {
             if(triangle_count >= triangle_size)
             {
-              tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size = triangle_size * 2));
+							tri_markers = (int*) realloc(tri_markers, sizeof(int) * (triangle_size * 2));
+              tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size * 2));
               tris_orders = (int*) realloc(tris_orders, sizeof(int) * (triangle_size = triangle_size * 2));
             }
             index = triangle_count++;
@@ -226,7 +227,8 @@ namespace Hermes
             tris[index][0] = iv0;
             tris[index][1] = iv1;
             tris[index][2] = iv2;
-            tris_orders[index] = order;
+						tris_orders[index] = order;
+            tri_markers[index] = marker;
           }
         }
       }
