@@ -33,112 +33,245 @@ const int INIT_REF_NUM = 1;                       // Number of initial uniform m
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
-const double VOLUME_HEAT_SRC = 5e2;        // Volume heat sources generated (for example) by electric current.
-const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
+const double VOLUME_HEAT_SRC = 1.0;          // Volume heat sources generated (for example) by electric current.
+const double FIXED_BDY_TEMP = 31.0;        // Fixed temperature on the boundary.
+
+// Globals.
+Hermes::Hermes2D::H1Space<double>* space;
+Hermes::Hermes2D::Mesh* mesh;
+
+void loadCache(int* i_indices_A, int* j_indices_A, int* i_indices_rhs, double** A_values, double* rhs_values);
+void loadProblemData();
+void calculateCache(CustomWeakFormPoisson& wf);
+void calculateResult(CustomWeakFormPoisson& wf, int* i_indices_A, int* j_indices_A, int* i_indices_rhs, double** A_values, double* rhs_values);
+double handleDirichlet(CustomWeakFormPoisson& wf, int shape_indexBasis, int shape_indexDirichlet, Element* e);
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::H1Space<double>* space = NULL;
-  Hermes::Hermes2D::Mesh* mesh = new Mesh();
-
-  // Initialize essential boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
-    FIXED_BDY_TEMP);
-  Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
-
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
-    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
+    new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(VOLUME_HEAT_SRC));
   
-	Hermes2DApi.set_text_param_value(xmlSchemasDirPath, "asfd");
+  calculateCache(wf);
 
-  // This is in a block to test that the instances mesh and space can be deleted after being copied with no harm.
+  loadProblemData();
+
+  int max_index = space->get_shapeset()->get_max_index(HERMES_MODE_QUAD) + 1;
+
+  int* i_indices_A = new int[max_index*max_index];
+  int* j_indices_A = new int[max_index*max_index];
+  int* i_indices_rhs = new int[max_index];
+  double** A_values = new double*[max_index];
+  for(unsigned int i = 0; i < max_index; i++)
+    A_values[i] = new double[max_index];
+  double* rhs_values = new double[max_index];
+
+  loadCache(i_indices_A, j_indices_A, i_indices_rhs, A_values, rhs_values);
+
+  calculateResult(wf, i_indices_A, j_indices_A, i_indices_rhs, A_values, rhs_values);
+}
+
+void loadCache(int* i_indices_A, int* j_indices_A, int* i_indices_rhs, double** A_values, double* rhs_values)
+{
+  int counter = 0;
+  std::ifstream matrixFormIn("matrix");
+  std::ifstream rhsFormIn("rhs");
+
+  double valueTemp;
+  while(matrixFormIn.good())
   {
-    // Set the number of threads used in Hermes.
-    Hermes::HermesCommonApi.set_integral_param_value(Hermes::exceptionsPrintCallstack, 0);
-    Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads, 8);
-
-    // Load the mesh.
-    Hermes::Hermes2D::MeshReaderH2DXML mloader;
-    mloader.load("domain.xml", mesh);
-
-		mloader.save("asdf", mesh);
-
-    // Perform initial mesh refinements (optional).
-    mesh->refine_in_areas(Hermes::vector<std::string>("Aluminum", "Copper"), INIT_REF_NUM);
-    mesh->refine_in_area("Aluminum");
-
-    // Create an H1 space with default shapeset.
-    space = new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT);
+    matrixFormIn >> (int)i_indices_A[counter] >> (int)j_indices_A[counter] >> valueTemp;
+    A_values[i_indices_A[counter]][j_indices_A[counter]] = valueTemp;
+    counter++;
   }
 
-  Mesh* new_mesh = new Mesh();
-  H1Space<double>* new_space = new H1Space<double>();
-  new_space->copy(space, new_mesh);
-
-  delete space;
-  delete mesh;
-
-  Hermes::Hermes2D::Element* e;
-  int i = 1;
-  for_all_active_elements(e, new_mesh)
+  counter = 0;
+  while(rhsFormIn.good())
   {
-    new_space->set_element_order(e->id, i++ % 4 + 1);
+    rhsFormIn >> i_indices_rhs[counter] >> valueTemp;
+    rhs_values[i_indices_rhs[counter]] = valueTemp;
+    counter++;
+  }
+}
+
+void  loadProblemData()
+{
+  // Load the mesh.
+  Hermes::Hermes2D::MeshReaderH2DXML mloader;
+  mesh = new Mesh();
+  mloader.load("domain.xml", mesh);
+
+  for(int i = 0; i < INIT_REF_NUM; i++)
+    mesh->refine_all_elements();
+
+  // Create a H1 space with default shapeset.
+  Hermes::Hermes2D::DefaultEssentialBCConst<double>* bc_essential = new Hermes::Hermes2D::DefaultEssentialBCConst<double>("Bnd", FIXED_BDY_TEMP);
+  Hermes::Hermes2D::EssentialBCs<double>* bcs = new Hermes::Hermes2D::EssentialBCs<double>(bc_essential);
+
+  // Create an H1 space with default shapeset.
+  space = new Hermes::Hermes2D::H1Space<double>(mesh, bcs, P_INIT);
+}
+
+void calculateCache(CustomWeakFormPoisson& wf)
+{
+  // Load the mesh.
+  Hermes::Hermes2D::MeshReaderH2DXML mloader;
+  mesh = new Mesh();
+  mloader.load("domainCacheComputation.xml", mesh);
+
+  // Create an H1 space with default shapeset.
+  space = new Hermes::Hermes2D::H1Space<double>(mesh, 10);
+
+  // Initialize linear solver.
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
+
+  wf.set_global_integration_order(24);
+
+  // Solve the linear problem.
+  linear_solver.solve();
+
+  int ndof = space->get_num_dofs();
+
+  std::ofstream matrixFormOut("matrix");
+  std::ofstream rhsFormOut("rhs");
+
+  AsmList<double> al;
+  space->get_element_assembly_list(mesh->get_element(0), &al);
+
+  for(int i = 0; i < al.get_cnt(); i++)
+  {
+    if(i > 0)
+      rhsFormOut << std::endl;
+    for(int j = 0; j < al.get_cnt(); j++)
+    {
+      if(i > 0 || j > 0)
+        matrixFormOut << std::endl;
+      matrixFormOut << al.get_idx()[i] << ' ' << al.get_idx()[j] << ' ' << linear_solver.get_jacobian()->get(i, j) / al.get_coef()[i] / al.get_coef()[j];
+    }
+    rhsFormOut << al.get_idx()[i] << ' ' << linear_solver.get_residual()->get(i) / al.get_coef()[i];
   }
 
-  std::cout << new_space->get_num_dofs() << std::endl;
-  std::cout << new_space->get_vertex_functions_count() << std::endl;
-  std::cout << new_space->get_edge_functions_count() << std::endl;
-  std::cout << new_space->get_bubble_functions_count() << std::endl;
+  matrixFormOut.close();
+  rhsFormOut.close();
+   
+  return;
+}
 
-  Hermes::Hermes2D::Views::BaseView<double> o;
-  o.show(new_space);
-  o.wait_for_close();
+void calculateResult(CustomWeakFormPoisson& wf, int* i_indices_A, int* j_indices_A, int* i_indices_rhs, double** A_values, double* rhs_values)
+{
+  // Utilities.
+  int ndof = space->get_num_dofs();
+  Element* e;
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
 
-  // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, new_space);
+  /// The solution vector.
+  double* sln_vector;
 
-  // Solve the linear problem.
-  try
+  /// Jacobian.
+  SparseMatrix<double>* jacobian = create_matrix<double>();
+  jacobian->prealloc(ndof);
+  for_all_active_elements(e, mesh)
   {
-    linear_solver.solve();
-
-    // Get the solution vector.
-    double* sln_vector = linear_solver.get_sln_vector();
-
-    // Translate the solution vector into the previously initialized Solution.
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, new_space, &sln);
-
-    // VTK output.
-    if(VTK_VISUALIZATION)
+    AsmList<double> al;
+    space->get_element_assembly_list(e, &al);
+    for(int i = 0; i < al.get_cnt(); i++)
     {
-      // Output solution in VTK format.
-      Hermes::Hermes2D::Views::Linearizer lin;
-      bool mode_3D = false;
-      lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
-
-      // Output mesh and element orders in VTK format.
-      Hermes::Hermes2D::Views::Orderizer ord;
-      ord.save_mesh_vtk(new_space, "mesh.vtk");
-      ord.save_orders_vtk(new_space, "ord.vtk");
-    }
-
-    // Visualize the solution.
-    Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
-
-    if(HERMES_VISUALIZATION)
-    {
-      viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
-      viewS.wait_for_close();
+      if(al.get_dof()[i] < 0)
+        continue;
+      for(int j = 0; j < al.get_cnt(); j++)
+      {
+        if(al.get_dof()[j] < 0)
+          continue;
+        jacobian->pre_add_ij(al.get_dof()[i], al.get_dof()[j]);
+        jacobian->pre_add_ij(al.get_dof()[j], al.get_dof()[i]);
+      }
     }
   }
-  catch(std::exception& e)
+  jacobian->alloc();
+
+  /// Residual.
+  Vector<double>* residual = create_vector<double>();
+  residual->alloc(ndof);
+  
+  /// Linear solver.
+  LinearMatrixSolver<double>* matrix_solver = create_linear_solver<double>(jacobian, residual);
+
+  for_all_active_elements(e, mesh)
   {
-    std::cout << e.what();
+    RefMap refmap;
+    refmap.set_active_element(e);
+    double inv_ref_map_determinant = refmap.get_const_jacobian();
+    AsmList<double> al;
+    space->get_element_assembly_list(e, &al);
+    for(int i = 0; i < al.get_cnt(); i++)
+    {
+      if(al.get_dof()[i] < 0)
+        continue;
+      for(int j = 0; j < al.get_cnt(); j++)
+      {
+        if(al.get_dof()[j] >= 0)
+        {
+          jacobian->add(al.get_dof()[i], al.get_dof()[j], A_values[al.get_idx()[i]][al.get_idx()[j]] * al.get_coef()[i] * al.get_coef()[j]);
+          jacobian->add(al.get_dof()[j], al.get_dof()[i], A_values[al.get_idx()[i]][al.get_idx()[j]] * al.get_coef()[i] * al.get_coef()[j]);
+        }
+        else
+          residual->add(al.get_dof()[i], -handleDirichlet(wf, al.get_idx()[i], al.get_idx()[j], e) * al.get_coef()[i] * al.get_coef()[j] * 2);
+
+      }
+      residual->add(al.get_dof()[i], rhs_values[al.get_idx()[i]] * al.get_coef()[i] * inv_ref_map_determinant);
+    }
   }
 
-  return 0;
+  matrix_solver->solve();
+
+  sln_vector = matrix_solver->get_sln_vector();
+
+  // Translate the solution vector into the previously initialized Solution.
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, &sln, true);
+
+  // VTK output.
+  if(VTK_VISUALIZATION)
+  {
+    // Output solution in VTK format.
+    Hermes::Hermes2D::Views::Linearizer lin;
+    bool mode_3D = false;
+    lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+
+    // Output mesh and element orders in VTK format.
+    Hermes::Hermes2D::Views::Orderizer ord;
+    ord.save_mesh_vtk(space, "mesh.vtk");
+    ord.save_orders_vtk(space, "ord.vtk");
+  }
+
+  // Visualize the solution.
+  Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
+
+  if(HERMES_VISUALIZATION)
+  {
+    viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+    viewS.wait_for_close();
+  }
+  
+  return;
+}
+
+double handleDirichlet(CustomWeakFormPoisson& wf, int shape_indexBasis, int shape_indexDirichlet, Element* e)
+{
+  RefMap refmap;
+  refmap.set_active_element(e);
+  Geom<double>* geometry;
+  double* jacobian_x_weights;
+  int n_quadrature_points = DiscreteProblem<double>::init_geometry_points(&refmap, 24, geometry, jacobian_x_weights);
+  PrecalcShapeset pssBasis(space->get_shapeset());
+  pssBasis.set_active_element(e);
+  PrecalcShapeset pssDirichlet(space->get_shapeset());
+  pssDirichlet.set_active_element(e);
+  pssBasis.set_active_shape(shape_indexBasis);
+  pssDirichlet.set_active_shape(shape_indexDirichlet);
+  Func<double>* fnBasis = init_fn(&pssBasis, &refmap, 24);
+  Func<double>* fnDirichlet = init_fn(&pssDirichlet, &refmap, 24);
+  
+  return wf.get_mfvol()[0]->value(n_quadrature_points, jacobian_x_weights, NULL, fnBasis, fnDirichlet, geometry, NULL);
 }
