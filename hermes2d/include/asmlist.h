@@ -42,6 +42,7 @@ namespace Hermes
       int* get_idx();
       int* get_dof();
       unsigned int get_cnt();
+      Scalar* get_coef();
     private:
       /// Copy constructor.
       AsmList(const AsmList<Scalar> & other);

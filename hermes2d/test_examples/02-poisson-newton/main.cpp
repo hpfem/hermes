@@ -34,14 +34,6 @@ const double BDY_A_PARAM = 0.0;
 const double BDY_B_PARAM = 0.0;
 const double BDY_C_PARAM = 20.0;
 
-bool sranda(int id)
-{
-  if(id % 2 > 0)
-    return true;
-  else
-    return false;
-}
-
 int main(int argc, char* argv[])
 {
   // Load the mesh.

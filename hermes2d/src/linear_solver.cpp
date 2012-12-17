@@ -94,6 +94,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    SparseMatrix<Scalar>* LinearSolver<Scalar>::get_jacobian()
+    {
+      return this->jacobian;
+    }
+
+    template<typename Scalar>
+    Vector<Scalar>* LinearSolver<Scalar>::get_residual()
+    {
+      return this->residual;
+    }
+
+    template<typename Scalar>
     void LinearSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);

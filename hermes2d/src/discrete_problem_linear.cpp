@@ -288,7 +288,6 @@ namespace Hermes
             }
             else
             {
-
               {
                 if(surface_form)
                   this->current_rhs->add(current_als_i->dof[i], -0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i]);
