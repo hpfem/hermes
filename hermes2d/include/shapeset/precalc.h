@@ -52,7 +52,6 @@ namespace Hermes
       /// Destructor.
       virtual ~PrecalcShapeset();
 
-    private:
       virtual void set_quad_2d(Quad2D* quad_2d);
 
       /// \brief Frees all precalculated tables.
@@ -78,6 +77,7 @@ namespace Hermes
       /// Returns a pointer to the shapeset which is being precalculated.
       Shapeset* get_shapeset() const;
 
+private:
       /// For internal use only.
       void set_master_transform();
 
