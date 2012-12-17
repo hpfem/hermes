@@ -27,14 +27,14 @@
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
-const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 1;                             // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 5;                       // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
 const double LAMBDA_CU = 386.0;            // Thermal cond. of Cu for temperatures around 20 deg Celsius.
 const double VOLUME_HEAT_SRC = 1.0;          // Volume heat sources generated (for example) by electric current.
-const double FIXED_BDY_TEMP = 31.0;        // Fixed temperature on the boundary.
+const double FIXED_BDY_TEMP = 10.0;        // Fixed temperature on the boundary.
 
 // Globals.
 Hermes::Hermes2D::H1Space<double>* space;
