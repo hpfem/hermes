@@ -1324,7 +1324,7 @@ namespace Hermes
 
       // Order calculation.
       int order = this->wf->global_integration_order_set ? this->wf->global_integration_order : 0;
-      if(order == 0 || this->wf->global_integration_order_set)
+      if(order == 0)
       {
         Hermes::vector<MatrixFormVol<Scalar>*> current_mfvol = current_wf->mfvol;
         Hermes::vector<VectorFormVol<Scalar>*> current_vfvol = current_wf->vfvol;

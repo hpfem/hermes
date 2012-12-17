@@ -138,6 +138,11 @@ namespace Hermes
       void assemble(Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
         Table* block_weights = NULL);
 
+      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
+      /// Init geometry, jacobian * weights, return the number of integration points.
+      static int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights);
+      static int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
+
     protected:
       void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
 
@@ -195,11 +200,6 @@ namespace Hermes
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
       AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
-
-      /// \ingroup Helper methods inside {calc_order_*, assemble_*}
-      /// Init geometry, jacobian * weights, return the number of integration points.
-      int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights);
-      int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.

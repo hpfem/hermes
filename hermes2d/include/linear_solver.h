@@ -31,7 +31,7 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Class for solving linear problems.
     template <typename Scalar>
-    class LinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
+    class LinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
       LinearSolver();
@@ -61,6 +61,12 @@ namespace Hermes
       
       /// Set the weak forms.
       void set_weak_formulation(const WeakForm<Scalar>* wf);
+
+      /// Get the Jacobian.
+      SparseMatrix<Scalar>* get_jacobian();
+
+      /// Get the Residual.
+      Vector<Scalar>* get_residual();
     protected:
       DiscreteProblemLinear<Scalar>* dp; ///< FE problem being solved.
 
