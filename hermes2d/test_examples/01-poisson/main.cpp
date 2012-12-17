@@ -77,10 +77,13 @@ void loadCache(int* i_indices_A, int* j_indices_A, int* i_indices_rhs, double** 
   std::ifstream matrixFormIn("matrix");
   std::ifstream rhsFormIn("rhs");
 
+  int index_i, index_j;
   double valueTemp;
   while(matrixFormIn.good())
   {
-    matrixFormIn >> (int)i_indices_A[counter] >> (int)j_indices_A[counter] >> valueTemp;
+    matrixFormIn >> index_i >> index_j >> valueTemp;
+    i_indices_A[counter] = index_i;
+    j_indices_A[counter] = index_j;
     A_values[i_indices_A[counter]][j_indices_A[counter]] = valueTemp;
     counter++;
   }
@@ -88,7 +91,8 @@ void loadCache(int* i_indices_A, int* j_indices_A, int* i_indices_rhs, double** 
   counter = 0;
   while(rhsFormIn.good())
   {
-    rhsFormIn >> i_indices_rhs[counter] >> valueTemp;
+    rhsFormIn >> index_i >> valueTemp;
+    i_indices_rhs[counter] = index_i;
     rhs_values[i_indices_rhs[counter]] = valueTemp;
     counter++;
   }
