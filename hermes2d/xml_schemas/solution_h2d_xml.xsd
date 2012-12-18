@@ -38,7 +38,8 @@
 	  <attribute name="exactConstantXReal" type="decimal"/>
 	  <attribute name="exactConstantYReal" type="decimal"/>
 	  <attribute name="exactConstantXComplex" type="decimal"/>
-	  <attribute name="exactConstantYComplex" type="decimal"/>	  
+	  <attribute name="exactConstantYComplex" type="decimal"/>
+	  <attribute name="spaceType" type="string"/>
     </complexType>
   </element>
 </schema>

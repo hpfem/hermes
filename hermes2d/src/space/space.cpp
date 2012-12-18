@@ -1191,23 +1191,23 @@ namespace Hermes
     {
       XMLSpace::space xmlspace;
 
-			switch(this->get_type())
-			{
-			case HERMES_H1_SPACE:
-				xmlspace.spaceType().set("h1");
-				break;
-			case HERMES_HCURL_SPACE:
-				xmlspace.spaceType().set("hcurl");
-				break;
-			case HERMES_HDIV_SPACE:
-				xmlspace.spaceType().set("hdiv");
-				break;
-			case HERMES_L2_SPACE:
-				xmlspace.spaceType().set("l2");
-				break;
-			default:
-				return false;
-			}
+      switch(this->get_type())
+      {
+        case HERMES_H1_SPACE:
+            xmlspace.spaceType().set("h1");
+            break;
+        case HERMES_HCURL_SPACE:
+            xmlspace.spaceType().set("hcurl");
+            break;
+        case HERMES_HDIV_SPACE:
+            xmlspace.spaceType().set("hdiv");
+            break;
+        case HERMES_L2_SPACE:
+            xmlspace.spaceType().set("l2");
+            break;
+        default:
+            return false;
+      }
 
       // Utility pointer.
       Element *e;
