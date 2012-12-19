@@ -1265,8 +1265,6 @@ namespace Hermes
           case HERMES_L2_SPACE:
             xmlsolution.spaceType().set("l2");
             break;
-          default:
-            return false;
         }
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
@@ -1325,8 +1323,6 @@ namespace Hermes
           case HERMES_L2_SPACE:
             xmlsolution.spaceType().set("l2");
             break;
-          default:
-            return false;
         }
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
