@@ -4,12 +4,7 @@
   {
 		add_matrix_form(new CustomMatrixFormVolMassmatrix(0, 0, time_step));
   }
- CustomWeakFormMassmatrix::~CustomWeakFormMassmatrix()
- {
-		delete get_mfvol()[0];
-		WeakForm<double>::delete_all();
 
-	};
 
     template<typename Real, typename Scalar>
     Scalar CustomMatrixFormVolMassmatrix::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 
@@ -45,11 +40,7 @@ MatrixFormVol<double>* CustomMatrixFormVolMassmatrix::clone() const
   {
     add_matrix_form(new CustomMatrixFormVolConvection(0, 0));
   };
-	CustomWeakFormConvection::~CustomWeakFormConvection()
-	{
-		delete get_mfvol()[0];
-		WeakForm<double>::delete_all();
-	};
+
 
   template<typename Real, typename Scalar>
   Scalar CustomMatrixFormVolConvection::matrix_form(int n, double *wt, Func<Scalar> *u_ext[], Func<Real> *u, 

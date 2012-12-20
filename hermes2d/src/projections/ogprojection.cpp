@@ -107,8 +107,6 @@ namespace Hermes
       project_internal(space, proj_wf, target_vec);
 
       // Clean up.
-      delete proj_wf->get_mfvol()[0];
-      delete proj_wf->get_vfvol()[0];
       delete proj_wf;
     }
 

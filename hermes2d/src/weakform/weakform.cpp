@@ -46,6 +46,8 @@ namespace Hermes
     template<typename Scalar>
     WeakForm<Scalar>::~WeakForm()
     {
+    	for(unsigned int i = 0; i < this->forms.size(); i++)
+	     delete get_forms()[i];
       delete_all();
     }
 
