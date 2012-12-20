@@ -54,7 +54,7 @@ class GradientReconstruction_1 : public WeakForm<double>
 {
 public:
   GradientReconstruction_1(Solution<double>* sln);
-  ~GradientReconstruction_1();
+
 };
 
 
@@ -97,7 +97,7 @@ class GradientReconstruction_2 : public WeakForm<double>
 {
 public:
   GradientReconstruction_2(Solution<double>* sln);
-  ~GradientReconstruction_2();
+
 };
 
 

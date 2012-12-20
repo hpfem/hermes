@@ -165,7 +165,7 @@ namespace Hermes
       template<typename Scalar>
       DefaultJacobianDiffusion<Scalar>::~DefaultJacobianDiffusion()
       {
-        if(coeff != HERMES_ONE) delete coeff;
+        if(coeff==HERMES_ONE) delete coeff;
       };
 
       template<typename Scalar>
