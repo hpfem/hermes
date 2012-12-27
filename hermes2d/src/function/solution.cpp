@@ -1365,20 +1365,13 @@ namespace Hermes
     {
       free();
       this->mesh = space->get_mesh();
+      this->space_type = space->get_type();
 
 			try
       {
         std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
         sln_type = parsed_xml_solution->exact() == 0 ? HERMES_SLN : HERMES_EXACT;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"h1"))
-          this->space_type = HERMES_H1_SPACE;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"l2"))
-          this->space_type = HERMES_L2_SPACE;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hcurl"))
-          this->space_type = HERMES_HCURL_SPACE;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hdiv"))
-          this->space_type = HERMES_HDIV_SPACE;
-
+  
         if(sln_type == HERMES_EXACT)
         {
           switch(parsed_xml_solution->num_components())
@@ -1413,6 +1406,22 @@ namespace Hermes
         }
         else
         {
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"h1"))
+            if(this->space_type != HERMES_H1_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"l2"))
+            if(this->space_type != HERMES_L2_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hcurl"))
+            if(this->space_type != HERMES_HCURL_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hdiv"))
+            if(this->space_type != HERMES_HDIV_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
           this->num_coeffs = parsed_xml_solution->num_coeffs();
           this->num_elems = parsed_xml_solution->num_elems();
           this->num_components = parsed_xml_solution->num_components();
@@ -1451,20 +1460,13 @@ namespace Hermes
       free();
       sln_type = HERMES_SLN;
       this->mesh = space->get_mesh();
-
+      this->space_type = space->get_type();
+      
       try
       {
         std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
         sln_type = parsed_xml_solution->exact() == 0 ? HERMES_SLN : HERMES_EXACT;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"h1"))
-          this->space_type = HERMES_H1_SPACE;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"l2"))
-          this->space_type = HERMES_L2_SPACE;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hcurl"))
-          this->space_type = HERMES_HCURL_SPACE;
-        if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hdiv"))
-          this->space_type = HERMES_HDIV_SPACE;
-
+        
         if(sln_type == HERMES_EXACT)
         {
           switch(parsed_xml_solution->num_components())
@@ -1499,6 +1501,22 @@ namespace Hermes
         }
         else
         {
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"h1"))
+            if(this->space_type != HERMES_H1_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"l2"))
+            if(this->space_type != HERMES_L2_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hcurl"))
+            if(this->space_type != HERMES_HCURL_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hdiv"))
+            if(this->space_type != HERMES_HDIV_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
           std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
 
           this->num_coeffs = parsed_xml_solution->num_coeffs();
