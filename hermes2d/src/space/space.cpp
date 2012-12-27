@@ -774,28 +774,44 @@ namespace Hermes
     template<typename Scalar>
     L2Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_l2()
     {
-      L2Space<Scalar>* ref_space = new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset());
+      L2Space<Scalar>* ref_space;
+      if(this->coarse_space->own_shapeset)
+        ref_space = new L2Space<Scalar>(this->ref_mesh, 0);
+      else
+        ref_space = new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset());
       return ref_space;
     }
 
     template<typename Scalar>
     H1Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_h1()
     {
-      H1Space<Scalar>* ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset());
+      H1Space<Scalar>* ref_space;
+      if(this->coarse_space->own_shapeset)
+        ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1);
+      else
+        ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset());
       return ref_space;
     }
 
     template<typename Scalar>
     HcurlSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hcurl()
     {
-      HcurlSpace<Scalar>* ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
+      HcurlSpace<Scalar>* ref_space;
+      if(this->coarse_space->own_shapeset)
+        ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1);
+      else
+        ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
       return ref_space;
     }
 
     template<typename Scalar>
     HdivSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hdiv()
     {
-      HdivSpace<Scalar>* ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
+      HdivSpace<Scalar>* ref_space;
+      if(this->coarse_space->own_shapeset)
+        ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1);
+      else
+        ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
       return ref_space;
     }
 
