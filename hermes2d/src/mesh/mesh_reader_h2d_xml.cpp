@@ -221,7 +221,7 @@ namespace Hermes
 
             std::map<std::string, double> variables;
             for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
-              variables.insert(std::make_pair<std::string, double>(parsed_xml_domain->variables()->variable().at(variables_i).name(), parsed_xml_domain->variables()->variable().at(variables_i).value()));
+              variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->variable().at(variables_i).name(), (double&&)parsed_xml_domain->variables()->variable().at(variables_i).value()));
 
             // Vertex numbers //
             // create a mapping order-in-the-whole-domain <-> order-in-this-subdomain.
@@ -741,7 +741,7 @@ namespace Hermes
         unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->variable().size() : 0;
         std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
-          variables.insert(std::make_pair<std::string, double>(parsed_xml_mesh->variables()->variable().at(variables_i).name(), parsed_xml_mesh->variables()->variable().at(variables_i).value()));
+          variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->variable().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->variable().at(variables_i).value()));
 
         // Vertices //
         int vertices_count = parsed_xml_mesh->vertices().vertex().size();
@@ -985,7 +985,7 @@ namespace Hermes
         unsigned int variables_count = parsed_xml_domain->variables().present() ? parsed_xml_domain->variables()->variable().size() : 0;
         std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
-          variables.insert(std::make_pair<std::string, double>(parsed_xml_domain->variables()->variable().at(variables_i).name(), parsed_xml_domain->variables()->variable().at(variables_i).value()));
+			variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->variable().at(variables_i).name(), (double&&)parsed_xml_domain->variables()->variable().at(variables_i).value()));
 
         // Vertices //
         int vertices_count = parsed_xml_domain->vertices().vertex().size();
