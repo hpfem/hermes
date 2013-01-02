@@ -132,6 +132,13 @@ This list works for 32-bit version of Hermes.
       - Download glew Win32 precompiled binaries ver.1.5.4 (http://glew.sourceforge.net/) and unpack it.
       - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
  	
+  - XSD & XERCES
+
+    - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
+    - Build using your favorite compiler.
+    - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio.
+    - Copy the include files, libraries and binaries to the appropriate directories
+
   - AntTweakBar (optional)
 
     - If a directive ENABLE_VIEWER_GUI is *not* used, this step can be skipped.
