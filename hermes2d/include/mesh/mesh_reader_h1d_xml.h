@@ -32,7 +32,7 @@ namespace Hermes
     /// Mesh reader from Hermes2D format
     ///
     /// @ingroup mesh_readers
-    class HERMES_API MeshReaderH1DXML : public MeshReader
+    class HERMES_API MeshReaderH1DXML : public MeshReader, public Hermes::Hermes2D::Mixins::XMLParsing
     {
     public:
       MeshReaderH1DXML();

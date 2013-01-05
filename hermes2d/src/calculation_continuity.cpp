@@ -572,7 +572,7 @@ namespace Hermes
 
         try
         {
-					spaces.push_back(Space<Scalar>::load(filename.str().c_str(), meshes[i], essential_bcs[i], shapesets[i]));
+          spaces.push_back(Space<Scalar>::load(filename.str().c_str(), meshes[i], false, essential_bcs[i], shapesets[i]));
         }
         catch(Hermes::Exceptions::SpaceLoadFailureException& e)
         {
@@ -601,7 +601,7 @@ namespace Hermes
 
         try
         {
-					spaces.push_back(Space<Scalar>::load(filename.str().c_str(), meshes[i], NULL, shapesets[i]));
+          spaces.push_back(Space<Scalar>::load(filename.str().c_str(), meshes[i], false, NULL, shapesets[i]));
         }
         catch(Hermes::Exceptions::SpaceLoadFailureException& e)
         {
@@ -622,7 +622,7 @@ namespace Hermes
 
       try
       {
-        return Space<Scalar>::load(filename.str().c_str(), mesh, essential_bcs, shapeset);
+        return Space<Scalar>::load(filename.str().c_str(), mesh, false, essential_bcs, shapeset);
       }
       catch(Hermes::Exceptions::SpaceLoadFailureException& e)
       {

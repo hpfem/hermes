@@ -38,7 +38,11 @@ namespace Hermes
 
       try
       {
-        std::auto_ptr<XMLMesh1D::mesh> parsed_xml_mesh(XMLMesh1D::mesh_(filename));
+        ::xml_schema::flags parsing_flags = 0;
+        if(!this->validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLMesh1D::mesh> parsed_xml_mesh(XMLMesh1D::mesh_(filename, parsing_flags));
 
         // Variables //
         unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->variable().size() : 0;

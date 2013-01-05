@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
   // Load the mesh.
   Hermes::Hermes2D::Mesh mesh;
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
+  mloader.set_validation(false);
   mloader.load("../domain.xml", &mesh);
 
   // Perform initial mesh refinements (optional).

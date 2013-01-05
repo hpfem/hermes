@@ -42,7 +42,11 @@ namespace Hermes
 
       try
       {
-        std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh(XMLMesh::mesh_(filename));
+        ::xml_schema::flags parsing_flags = 0;
+        if(!this->validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh(XMLMesh::mesh_(filename, parsing_flags));
 
         if(!load(parsed_xml_mesh, mesh, vertex_is))
           return false;
@@ -151,7 +155,11 @@ namespace Hermes
 
       try
       {
-        std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename));
+        ::xml_schema::flags parsing_flags = 0;
+        if(!this->validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLSubdomains::domain> parsed_xml_domain (XMLSubdomains::domain_(filename, parsing_flags));
 
         int* vertex_is = new int[H2D_MAX_NODE_ID];
         for(int i = 0; i < H2D_MAX_NODE_ID; i++)

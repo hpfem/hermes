@@ -1369,7 +1369,11 @@ namespace Hermes
 
 			try
       {
-        std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
+        ::xml_schema::flags parsing_flags = 0;
+        if(!this->validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename, parsing_flags));
         sln_type = parsed_xml_solution->exact() == 0 ? HERMES_SLN : HERMES_EXACT;
   
         if(sln_type == HERMES_EXACT)
@@ -1464,7 +1468,11 @@ namespace Hermes
       
       try
       {
-        std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
+        ::xml_schema::flags parsing_flags = 0;
+        if(!this->validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename, parsing_flags));
         sln_type = parsed_xml_solution->exact() == 0 ? HERMES_SLN : HERMES_EXACT;
         
         if(sln_type == HERMES_EXACT)
@@ -1517,7 +1525,11 @@ namespace Hermes
             if(this->space_type != HERMES_HDIV_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename));
+          ::xml_schema::flags parsing_flags = 0;
+          if(!this->validate)
+            parsing_flags = xml_schema::flags::dont_validate;
+
+          std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename, parsing_flags));
 
           this->num_coeffs = parsed_xml_solution->num_coeffs();
           this->num_elems = parsed_xml_solution->num_elems();

@@ -104,7 +104,7 @@ namespace Hermes
     ///
 
     template<typename Scalar>
-    class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Hermes2D::Mixins::StateQueryable
+    class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::XMLParsing
     {
     public:
       Space();
@@ -186,7 +186,7 @@ namespace Hermes
       bool save(const char *filename) const;
 
       /// Loads a space from a file.
-      static Space<Scalar>* load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      static Space<Scalar>* load(const char *filename, Mesh* mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;

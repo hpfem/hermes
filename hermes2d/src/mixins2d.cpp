@@ -36,6 +36,15 @@ namespace Hermes
           }
       }
 
+      XMLParsing::XMLParsing() : validate(true)
+      {
+      }
+
+      void XMLParsing::set_validation(bool to_set)
+      {
+        this->validate = to_set;
+      }
+
       template<typename Scalar>
       MatrixRhsOutput<Scalar>::MatrixRhsOutput() : output_matrixOn(false), output_matrixIterations(-1), matrixFilename("Matrix_"),
         matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_MATLAB_SPARSE), matrix_number_format("%lf"), output_rhsOn(false), output_rhsIterations(-1),

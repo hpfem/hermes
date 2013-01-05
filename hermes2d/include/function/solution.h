@@ -74,7 +74,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class HERMES_API Solution : public MeshFunction<Scalar>
+    class HERMES_API Solution : public MeshFunction<Scalar>, public Hermes::Hermes2D::Mixins::XMLParsing
     {
     public:
       Solution();

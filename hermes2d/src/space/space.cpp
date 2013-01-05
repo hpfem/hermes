@@ -1245,12 +1245,17 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::load(const char *filename, Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    Space<Scalar>* Space<Scalar>::load(const char *filename, Mesh* mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       try
       {
 				Space<Scalar>* space;
-        std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename));
+
+        ::xml_schema::flags parsing_flags = 0;
+        if(!validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename, parsing_flags));
 
 				if(!strcmp(parsed_xml_space->spaceType().get().c_str(),"h1"))
 				{

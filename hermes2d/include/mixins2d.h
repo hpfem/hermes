@@ -20,6 +20,8 @@ namespace Hermes
     /// could use - setting of spaces, output of linear algebraic structures, ...
     namespace Mixins
     {
+      /// \ingroup g_mixins2d
+      /// Mixin for classes where Spaces can be (re-)set during their existence.
       template<typename Scalar>
       class HERMES_API SettableSpaces
       {
@@ -32,6 +34,9 @@ namespace Hermes
         virtual const Space<Scalar>* get_space(int n) const;
       };
 
+
+      /// \ingroup g_mixins2d
+      /// Mixin that allows for asking about the instance state (ok / not ok).
       class HERMES_API StateQueryable
       {
       public:
@@ -45,6 +50,26 @@ namespace Hermes
         void check() const;
       };
 
+      /// \ingroup g_mixins2d
+      /// Any XML parsing class should inherit from this mixin.
+      /// It serves various purposes, first of which is disabling / re-enabling of validation
+      /// against the schema referenced in a file being loaded.
+      class HERMES_API XMLParsing
+      {
+      public:
+        /// Constructor.
+        XMLParsing();
+
+        /// Set to validate / not to validate.
+        void set_validation(bool to_set);
+
+      protected:
+        /// Internal.
+        bool validate;
+      };
+
+      /// \ingroup g_mixins2d
+      /// Mixin that interfaces linear algebra structures output.
       template<typename Scalar>
       class HERMES_API MatrixRhsOutput
       {
