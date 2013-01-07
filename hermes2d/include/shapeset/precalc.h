@@ -52,25 +52,26 @@ namespace Hermes
       /// Destructor.
       virtual ~PrecalcShapeset();
 
-    private:
-      virtual void set_quad_2d(Quad2D* quad_2d);
-
-      /// \brief Frees all precalculated tables.
-      virtual void free();
-
       /// Ensures subsequent calls to get_active_element() will be returning 'e'.
       /// Switches the class to the appropriate mode (triangle, quad).
       virtual void set_active_element(Element* e);
-
-      /// Virtual function handling overflows. Has to be virtual, because
-      /// the necessary iterators in the templated class do not work with GCC.
-      virtual void handle_overflow_idx();
 
       /// Activates a shape function given by its index. The values of the shape function
       /// can then be obtained by setting the required integration rule order by calling
       /// set_quad_order() and after that calling get_values(), get_dx_values(), etc.
       /// \param index[in] Shape index.
       void set_active_shape(int index);
+
+    private:
+      virtual void set_quad_2d(Quad2D* quad_2d);
+
+      /// \brief Frees all precalculated tables.
+      virtual void free();
+
+      /// Virtual function handling overflows. Has to be virtual, because
+      /// the necessary iterators in the templated class do not work with GCC.
+      virtual void handle_overflow_idx();
+
 
       /// Returns the index of the active shape (can be negative if the shape is constrained).
       int get_active_shape() const;

@@ -198,6 +198,9 @@ namespace Hermes
     class HERMES_API Geom
     {
     public:
+      /// Constructor.
+      Geom();
+
       T diam;           ///< Element diameter (for edge, diameter of the parent element).
       T area;           ///< Element area (for edge, area of the parent element).
       T *x, *y;         ///< Coordinates[in physical domain].
@@ -228,9 +231,6 @@ namespace Hermes
       int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
       ///< otherwise 1 (each edge has a unique global normal).
       ///< Only for edge.
-
-      /// Constructor.
-      Geom();
 
       friend Geom<Hermes::Ord>* init_geom_ord();
       friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
