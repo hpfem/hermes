@@ -6,12 +6,6 @@ These installation instructions have been tested with Microsoft Visual Studio 20
 - Probably with small modifications, they should also work for NMake
 - If you would like to use NMake and you run in troubles, drop us a line to `Hermes2D mailing list <http://groups.google.com/group/hermes2d/>`_.
 
-Known limitations and issues
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
- - No eigensolver capabilities are so far possible to be used under windows.
-
-
 Building Hermes
 ~~~~~~~~~~~~~~~
 
@@ -57,11 +51,19 @@ In order to use Hermes in your project, you need to do the following steps. Step
   - Add directories 'dependencies\\lib' to additional library directories (<right click on your project>\\Properties\\Configuration Properties\\Linker\\Additional Library Directories).
   - Add also the directory where you copied Hermes libraries to as an additional library directory. This would probably be the variable TARGET_ROOT in your CMake.vars file.
   - Add 'include "hermes2d.h"', make sure that your TARGET_ROOT is among Include Directories settings in your compiler.
+  - Add the dependencies\\include directory (and possibly other directories where you copied dependency headers) using  
+    - Project -> Properties -> Configuration Properties -> VC++ Directories -> Include Directories:
+			
   - Deny (Ignore) warnings that are not indicating anything dangerous:
 
     - Ignore warnings about STL in DLL by denying a warning 4251 (<right click on your project>\\Properties\\Configuration Properties\\C/C++\\Advanced\\Disable Specific Warnings, enter 4251).
     - Ignore warnings about standard functions that are not safe (<right click on your project>\\Properties\\Configuration Properties\\C/C++\\Preprocessor\\Preprocessor Definitions, add _CRT_SECURE_NO_WARNINGS).
     - Also ignore any template instantiation warnings
+  - Resolve LIBCMTD.lib LNK2005 errors when building hermes2D (This only happened once)
+    - http://support.microsoft.com/kb/148652 (Solution # 1)
+  - Resolve unresolved linker error in Xerces
+    - http://stackoverflow.com/questions/10506582/xerces-c-unresolved-linker-error
+		
     
 Dependency check-list
 ~~~~~~~~~~~~~~~~~~~~~
@@ -82,6 +84,30 @@ This list works for 32-bit version of Hermes.
     - Copy 'lib\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
 
   - UMFPACK
+  
+    - notes from Graham Sortino:
+	  - MinGW used for compiling AMD and UMFPACK
+	  
+	  - when running make files on windows I needed to replace windows style syntax with it's windows equivalents. For example:
+	    
+		- Replace all ';' symbols in the makefile command syntax with the windows equivalent '&'
+	    - Remove all './' references in the makefile command syntax when the purposes is to execute a script or process. Windows does not use these.
+
+	  - UFconfig.mk
+	  
+	    -	CC = gcc
+	    -	# CFLAGS = -O
+	    - C++ compiler (also uses CFLAGS)
+		
+	      - CPLUSPLUS = g++
+	    - Change your rm and mv commands to their windows equivalent:
+		
+	      - RM = del
+	      - MV = move
+
+	  - AMD
+	  
+	    - When building demo remove the diff commands from the demo Makefile
 
     - UFConfig(ver-3.4.0):
 
@@ -92,9 +118,7 @@ This list works for 32-bit version of Hermes.
 
       - Download AMD source file package (http://www.cise.ufl.edu/research/sparse/amd/).
       - Unpack source files into a directory that has the same parent as a directory where you unpacked UFconfig.
-      - Copy the file 'my_hermes_root\\CMakeVars\\MSVC\\AMD.nmake' to a directory 'my_amd_directory\\Lib'.
-      - Run MSVC command prompt and switch to 'my_amd_directory\\Lib'.
-      - Compile AMD using 'nmake -f AMD.nmake'.
+	  - Build AMD
       - Copy 'Include\\amd.h', 'Include\\amd_internal.h', and 'Lib\\libamd.lib' to 'include', and 'lib' dependecy directories respectively.
 
     - UMFPACK(ver-5.4.0)
@@ -102,15 +126,15 @@ This list works for 32-bit version of Hermes.
       - Download UMFPACK source file package (http://www.cise.ufl.edu/research/sparse/umfpack/).
       - Unpack source file into a directory that has the same parent as a directory where you unpacked UFconfig.
       - Copy the file 'my_hermes_root\\CMakeVars\\MSVC\\UMFPACK.nmake' to the 'my_umfpack_root\\Lib' directory.
-      - Run MSVC command prompt and switch to 'my_umfpack_root\\Lib'.
-      - Compile UMFPACK using 'nmake -f UMFPACK.nmake'. Linking might take some time, please, be patient.
-      - Copy 'libumfpack.dll', all include files, and 'libumfpack.lib' to 'bin', 'include', and 'lib' dependecy directories, respectively.
+      - Build AMD
+	  - Copy 'libumfpack.dll', all include files, and 'libumfpack.lib' to 'bin', 'include', and 'lib' dependecy directories, respectively.
 
   - CMAKE
 
     - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
   - CLAPACK
+
     - First, you need to install CLAPACK/CBLAS:
     - Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
     - Use cmake to configure and build the debug version of clapack.
