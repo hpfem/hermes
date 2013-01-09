@@ -104,7 +104,7 @@ namespace Hermes
 
       /// Default destructor.
       /// Added to delete Function::sub_tables.
-      ~Function();
+      virtual ~Function();
 
       /// \brief Returns the number of components of the function being represented by the class.
       int get_num_components() const;

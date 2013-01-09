@@ -420,10 +420,8 @@ namespace Hermes
 					sp_seq[i] = spacesToSet[i]->get_seq();
 				}
 
-				if(max_size * 1.0 > this->cache_size + 1)
+				if(max_size > this->cache_size + 1)
 				{
-					max_size = 1.0 * max_size;
-
 					for(unsigned int i = 0; i < this->spaces.size(); i++)
 					{
 						this->cache_records_sub_idx[i] = (std::map<uint64_t, CacheRecordPerSubIdx*>**)realloc(this->cache_records_sub_idx[i], max_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
@@ -438,9 +436,30 @@ namespace Hermes
 
 				for(unsigned int i = 0; i < spaces.size(); i++)
 				{
-					for(unsigned int j = 0; j < spaces[i]->get_mesh()->get_max_element_id(); j++)
+					for(unsigned int j = 0; j < cache_size; j++)
 					{
-						if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active || spaces[i]->get_element_order(spaces[i]->get_mesh()->get_element(j)->id) < 0)
+						if(j < spaces[i]->get_mesh()->get_max_element_id())
+						{
+							if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active || spaces[i]->get_element_order(spaces[i]->get_mesh()->get_element(j)->id) < 0)
+							{
+								if(this->cache_records_sub_idx[i][j] != NULL)
+								{
+									for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
+										it->second->clear();
+
+									this->cache_records_sub_idx[i][j]->clear();
+									delete this->cache_records_sub_idx[i][j];
+									this->cache_records_sub_idx[i][j] = NULL;
+								}
+								if(this->cache_records_element[i][j] != NULL)
+								{
+									this->cache_records_element[i][j]->clear();
+									delete this->cache_records_element[i][j];
+									this->cache_records_element[i][j] = NULL;
+								}
+							}
+						}
+						else
 						{
 							if(this->cache_records_sub_idx[i][j] != NULL)
 							{

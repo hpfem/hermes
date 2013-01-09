@@ -794,11 +794,6 @@ namespace Hermes
           trav[i].stack = trav_master.stack;
         }
 
-        trav_master.begin(meshes.size(), &(meshes.front()));
-
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-          trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
-
 #pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)

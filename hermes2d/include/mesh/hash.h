@@ -52,7 +52,7 @@ namespace Hermes
 
     protected:
       HashTable();
-      ~HashTable();
+      virtual ~HashTable();
 
       /// Returns a vertex node with parent id's p1 and p2 if it exists, NULL otherwise.
       Node* peek_vertex_node(int p1, int p2) const;

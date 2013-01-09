@@ -233,7 +233,7 @@ namespace Hermes
     {
     public:
       Mesh();
-      ~Mesh();
+      virtual ~Mesh();
 
       /// Initializes the mesh.
       /// \param size[in] Hash table size; must be a power of two.

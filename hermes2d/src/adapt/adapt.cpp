@@ -395,10 +395,11 @@ namespace Hermes
       if(this->caughtException == NULL)
         fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
 
-      for(unsigned int i = 1; i < Hermes::Hermes2D::Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < Hermes::Hermes2D::Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
-        for (unsigned int j = 0; j < refinement_selectors.size(); j++)
-          delete global_refinement_selectors[i][j];
+        if(i > 0)
+          for (unsigned int j = 0; j < refinement_selectors.size(); j++)
+            delete global_refinement_selectors[i][j];
         delete [] global_refinement_selectors[i];
       }
       delete [] global_refinement_selectors;
