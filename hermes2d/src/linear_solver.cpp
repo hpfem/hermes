@@ -28,7 +28,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver() : dp(new DiscreteProblemLinear<Scalar>()), sln_vector(NULL), own_dp(false)
+    LinearSolver<Scalar>::LinearSolver() : dp(new DiscreteProblemLinear<Scalar>()), sln_vector(NULL), own_dp(true)
     {
       this->init();
     }
