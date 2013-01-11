@@ -223,14 +223,11 @@ namespace Hermes
     {
       nbase = nactive = ntopvert = ninitial = 0;
       seq = g_mesh_seq++;
-      Hermes::Hermes2D::Hermes2DApi.meshPointerCalculator++;
-      Hermes::Hermes2D::Hermes2DApi.meshDataPointerCalculator++;
     }
 
     Mesh::~Mesh() 
     {
       free();
-      Hermes::Hermes2D::Hermes2DApi.meshPointerCalculator--;
     }
 
     bool Mesh::isOkay() const
@@ -1228,7 +1225,6 @@ namespace Hermes
 
       free();
 			// Serves as a Mesh::init() for purposes of pointer calculation.
-			Hermes2DApi.meshDataPointerCalculator++;
 
       // copy nodes and elements
       HashTable::copy(mesh);
@@ -1300,7 +1296,6 @@ namespace Hermes
 		void Mesh::init(int size)
 		{
 			HashTable::init(size);
-			Hermes2DApi.meshDataPointerCalculator++;
 		}
 
     void Mesh::copy_base(Mesh* mesh)
@@ -1370,7 +1365,6 @@ namespace Hermes
       this->element_markers_conversion.conversion_table_inverse.clear();
       this->refinements.clear();
       this->seq = -1;
-			Hermes2DApi.meshDataPointerCalculator--;
     }
 
     void Mesh::copy_converted(Mesh* mesh)

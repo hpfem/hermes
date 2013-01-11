@@ -110,7 +110,6 @@ namespace Hermes
       num_dofs = -1;
 
       this->set_quad_2d(&g_quad_2d_std);
-			Hermes2DApi.realSolutionDataPointerCalculator++;
     }
 
 		template<>
@@ -136,7 +135,6 @@ namespace Hermes
 			num_dofs = -1;
 
 			this->set_quad_2d(&g_quad_2d_std);
-			Hermes2DApi.complexSolutionDataPointerCalculator++;
 		}
 
     template<>
@@ -145,7 +143,6 @@ namespace Hermes
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();
-      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
     template<>
@@ -154,7 +151,6 @@ namespace Hermes
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();
-      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
     }
 
     template<>
@@ -163,7 +159,6 @@ namespace Hermes
       space_type = HERMES_INVALID_SPACE;
       this->init();
       this->mesh = mesh;
-      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
     template<>
@@ -172,7 +167,6 @@ namespace Hermes
       space_type = HERMES_INVALID_SPACE;
       this->init();
       this->mesh = mesh;
-      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
     }
 
     template<>
@@ -182,7 +176,6 @@ namespace Hermes
       this->init();
       this->mesh = s->get_mesh();
       Solution<double>::vector_to_solution(coeff_vec, s, this);
-      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
     template<>
@@ -192,7 +185,6 @@ namespace Hermes
       this->init();
       this->mesh = s->get_mesh();
       Solution<std::complex<double> >::vector_to_solution(coeff_vec, s, this);
-      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
     }
 
     template<>
@@ -202,7 +194,6 @@ namespace Hermes
       this->init();
       this->mesh = s->get_mesh();
       Solution<double>::vector_to_solution(coeff_vec, s, this);
-      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator++;
     }
 
     template<>
@@ -212,7 +203,6 @@ namespace Hermes
       this->init();
       this->mesh = s->get_mesh();
       Solution<std::complex<double> >::vector_to_solution(coeff_vec, s, this);
-      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator++;
     }
 
     template<typename Scalar>
@@ -245,8 +235,6 @@ namespace Hermes
     void Solution<Scalar>::copy(const Solution<Scalar>* sln)
     {
       if(sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being copied is uninitialized.");
-
-			this->increasePointerDataCounter();
       free();
 
       this->mesh = sln->mesh;
@@ -324,7 +312,6 @@ namespace Hermes
         e_last = NULL;
 
         free_tables();
-				Hermes2DApi.realSolutionDataPointerCalculator--;
     }
 
 		template<>
@@ -341,7 +328,6 @@ namespace Hermes
 				e_last = NULL;
 
 				free_tables();
-				Hermes2DApi.complexSolutionDataPointerCalculator--;
 		}
 
 		template<>
@@ -349,7 +335,6 @@ namespace Hermes
     {
       free();
       space_type = HERMES_INVALID_SPACE;
-      Hermes::Hermes2D::Hermes2DApi.realSolutionPointerCalculator--;
     }
 
     template<>
@@ -357,7 +342,6 @@ namespace Hermes
     {
       free();
       space_type = HERMES_INVALID_SPACE;
-      Hermes::Hermes2D::Hermes2DApi.complexSolutionPointerCalculator--;
     }
 
     static struct mono_lu_init
@@ -445,19 +429,6 @@ namespace Hermes
       delete pss;
     }
 
-
-		template<>
-		void Solution<double>::increasePointerDataCounter()
-		{
-			Hermes2DApi.realSolutionDataPointerCalculator++;
-		}
-
-		template<>
-		void Solution<std::complex<double> >::increasePointerDataCounter()
-		{
-			Hermes2DApi.realSolutionDataPointerCalculator++;
-		}
-
     template<typename Scalar>
     void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss,
         const Scalar* coeff_vec, bool add_dir_lift, int start_index)
@@ -478,8 +449,7 @@ namespace Hermes
 
       if(Solution<Scalar>::static_verbose_output)
         Hermes::Mixins::Loggable::Static::info("Solution: set_coeff_vector - solution being freed.");
-			
-			this->increasePointerDataCounter();
+
       free();
 
       this->space_type = space->get_type();

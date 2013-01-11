@@ -34,8 +34,6 @@ namespace Hermes
 
     bool MeshReaderH2DXML::load(const char *filename, Mesh *mesh)
     {
-			if(mesh->nactive == 0)
-				Hermes2DApi.meshDataPointerCalculator++;
       mesh->free();
 
       std::map<unsigned int, unsigned int> vertex_is;
@@ -146,9 +144,7 @@ namespace Hermes
     {
       for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
 			{
-				if(meshes.at(meshes_i)->nactive == 0)
-					Hermes2DApi.meshDataPointerCalculator++;
-        meshes.at(meshes_i)->free();
+				meshes.at(meshes_i)->free();
 			}
 
       Mesh global_mesh;

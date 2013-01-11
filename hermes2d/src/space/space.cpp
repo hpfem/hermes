@@ -57,7 +57,6 @@ namespace Hermes
 					}
 
 					own_shapeset = (shapeset == NULL);
-					Hermes2DApi.realSpaceDataPointerCalculator++;
 		}
 
 		template<>
@@ -86,7 +85,6 @@ namespace Hermes
 					}
 
 					own_shapeset = (shapeset == NULL);
-					Hermes2DApi.complexSpaceDataPointerCalculator++;
 		}
 
 		template<>
@@ -96,7 +94,6 @@ namespace Hermes
 			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
 			if(esize) { ::free(edata); edata = 0; edata = NULL; }
 			this->seq = -1;
-			Hermes2DApi.realSpaceDataPointerCalculator--;
 		}
 
 		template<>
@@ -106,21 +103,18 @@ namespace Hermes
 			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
 			if(esize) { ::free(edata); edata = 0; edata = NULL; }
 			this->seq = -1;
-			Hermes2DApi.complexSpaceDataPointerCalculator--;
 		}
 
     template<>
     Space<double>::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
     {
       this->init();
-      Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator++;
     }
 
     template<>
     Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
     {
       this->init();
-      Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator++;
     }
 
      template<>
@@ -130,7 +124,6 @@ namespace Hermes
       if(mesh == NULL)
         throw Hermes::Exceptions::NullException(0);
       this->init();
-      Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator++;
     }
 
     template<>
@@ -140,7 +133,6 @@ namespace Hermes
       if(mesh == NULL)
         throw Hermes::Exceptions::NullException(0);
       this->init();
-      Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator++;
     }
     
     template<typename Scalar>
@@ -174,7 +166,6 @@ namespace Hermes
       if(this->chol_p != NULL)
         delete [] this->chol_p;
 
-      Hermes::Hermes2D::Hermes2DApi.realSpacePointerCalculator--;
     }
 
     template<>
@@ -187,7 +178,6 @@ namespace Hermes
       if(this->chol_p != NULL)
         delete [] this->chol_p;
 
-      Hermes::Hermes2D::Hermes2DApi.complexSpacePointerCalculator--;
     }
 
 		template<typename Scalar>
