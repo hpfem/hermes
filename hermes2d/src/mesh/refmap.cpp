@@ -771,7 +771,7 @@ namespace Hermes
       nodes.clear();
       if(overflow != NULL)
       {
-        free_node(overflow); overflow = NULL;
+        free_node(overflow); delete overflow; overflow = NULL;
       }
     }
 

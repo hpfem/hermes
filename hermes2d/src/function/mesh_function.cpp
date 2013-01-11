@@ -103,6 +103,7 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::set_refmap(RefMap* refmap_to_set)
     {
+      delete refmap;
       this->refmap = refmap_to_set;
     }
 
