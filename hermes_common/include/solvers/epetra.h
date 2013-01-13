@@ -23,6 +23,7 @@
 #define __HERMES_COMMON_SOLVER_EPETRA_H_
 #include "config.h"
 #ifdef HAVE_EPETRA
+#define EPETRA_NO_64BIT_GLOBAL_INDICES
 #include "matrix.h"
 #include <Epetra_SerialComm.h>
 #include <Epetra_Map.h>
