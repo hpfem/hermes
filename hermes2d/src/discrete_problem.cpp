@@ -219,35 +219,7 @@ namespace Hermes
 
       if(sp_seq != NULL) delete [] sp_seq;
 
-      for(unsigned int i = 0; i < spaces.size(); i++)
-      {
-        for(unsigned int j = 0; j < this->cache_size; j++)
-        {
-          if(this->cache_records_sub_idx[i][j] != NULL)
-          {
-            for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-            {
-              it->second->clear();
-              delete it->second;
-            }
-
-            this->cache_records_sub_idx[i][j]->clear();
-            delete this->cache_records_sub_idx[i][j];
-            this->cache_records_sub_idx[i][j] = NULL;
-          }
-          if(this->cache_records_element[i][j] != NULL)
-          {
-            this->cache_records_element[i][j]->clear();
-            delete this->cache_records_element[i][j];
-            this->cache_records_element[i][j] = NULL;
-          }
-        }
-        free(cache_records_sub_idx[i]);
-        free(cache_records_element[i]);
-      }
-
-      delete [] cache_records_sub_idx;
-      delete [] cache_records_element;
+      this->delete_cache();
     }
 
     template<typename Scalar>
@@ -341,9 +313,9 @@ namespace Hermes
             delete this->cache_records_element[i][j];
             this->cache_records_element[i][j] = NULL;
           }
-          free(cache_records_sub_idx[i]);
-          free(cache_records_element[i]);
         }
+        free(cache_records_sub_idx[i]);
+        free(cache_records_element[i]);
       }
       delete [] this->cache_records_sub_idx;
       delete [] this->cache_records_element;
