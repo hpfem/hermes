@@ -7,9 +7,6 @@ Download and compilation
 **Known issues**: Hermes has built-in OpenGL visualization based on FreeGlut, but this package 
 comes with certain installation difficulties. If you encounter Glut-related problems, set 
 H2D_WITH_GLUT to NO in Cmake.vars, build Hermes without Glut, and use VTK output for visualization. 
-For some reason tutorial example 34-remote-computing, the corresponding test, and the test 
-views/zoom-to-fit do not compile (as of November 24, 2010). We work on these problems as time 
-permits. 
 
 **Step 1**: Make sure you have XCode installed. This should be on the installation 
 disks which came with your Mac. XCode contains the GNU compilers, make 
@@ -55,19 +52,6 @@ flag to cmake (i.e. to install in /usr/local, replace the cmake
 command above with 'cmake -DCMAKE_INSTALL_PREFIX=/usr/local .').
 
 **Step 6**: Install Hermes by doing 'make install'.
-
-Tests
-~~~~~
-
-To execute all tests, do::
- 
-    make test
-
-Note that some of the tests take a long time to finish. To just execute the
-short running tests, do::
-
-    make test-quick
-
 
 More options
 ~~~~~~~~~~~~

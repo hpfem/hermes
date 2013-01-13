@@ -38,9 +38,6 @@ to hermes/. There you will find a CMakeLists.txt file that contains the lines::
     # Please be aware that the variable OMP_NUM_THREADS, that is often used for this purpose, is ignored.
     set(NUM_THREADS -1)
     
-    # Testing.
-    set(WITH_TESTS                YES)
-    
     # HermesCommon
       set(HERMES_COMMON_DEBUG     YES)
 		  set(HERMES_COMMON_RELEASE   YES)
@@ -69,18 +66,6 @@ After that, type::
 
 If you have more than one CPU, you can use "make -jN" where N is
 the number of CPUs of your computer.
-
-Tests
-~~~~~
-
-To execute all tests, do::
-
-    ctest -jN
-
-where N is the number of your cores. Note that some tests (especially for adaptivity 
-algorithms) take a longer time to finish. To just execute the short running tests, type::
-
-    make test-quick
 
 More options
 ~~~~~~~~~~~~
