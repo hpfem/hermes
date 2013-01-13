@@ -76,13 +76,6 @@ project(hermes_common)
   #
   # Subdirectories with CMakeLists.txt
 
-IF(EXISTS tests)
-  if(HERMES_COMMON_WITH_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-  endif(HERMES_COMMON_WITH_TESTS)
-ENDIF(EXISTS tests)
-
   # Create file with preprocessor definitions exposing the build settings to the source code.
   configure_file(
     config.h.cmake

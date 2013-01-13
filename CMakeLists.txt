@@ -18,8 +18,6 @@ project(hermes)
   # HermesCommon
     set(HERMES_COMMON_DEBUG     YES)
     set(HERMES_COMMON_RELEASE   YES)
-    # Tests settings.
-    set(HERMES_COMMON_WITH_TESTS YES)
 
   # Hermes2D:
   set(WITH_H2D                        YES)
@@ -30,9 +28,8 @@ project(hermes)
     set(H2D_WITH_GLUT           YES)
     set(H2D_WITH_VIEWER_GUI     NO)
     
-    # Tests settings.
+    # Test examples settings.
     set(H2D_WITH_TEST_EXAMPLES  YES)
-    set(H2D_WITH_TESTS          YES)
 
   # Installation path:
     set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
