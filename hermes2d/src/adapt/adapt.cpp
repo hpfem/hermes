@@ -469,7 +469,6 @@ namespace Hermes
           this->spaces[i]->edata[ids[id_to_refine]].changed_in_last_adaptation = false;
       }
 
-      std::cout << std::endl;
       return false;
     }
 
