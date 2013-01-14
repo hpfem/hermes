@@ -248,7 +248,7 @@ namespace Hermes
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
       static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
 
-      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order) = 0;
+      virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc) = 0;
 
       static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
 

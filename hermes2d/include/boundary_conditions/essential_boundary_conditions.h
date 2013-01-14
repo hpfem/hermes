@@ -165,8 +165,13 @@ namespace Hermes
       /// All boundary conditions together.
       Hermes::vector<EssentialBoundaryCondition<Scalar> *> all;
 
-      /// Boundary markers cache
-      std::map<std::string, EssentialBoundaryCondition<Scalar> *> markers;
+      /// Boundary markers.
+      Hermes::vector<std::string> markers;
+      /// Boundary conditions with the same order.
+      Hermes::vector<EssentialBoundaryCondition<Scalar> *> BCs;
+
+      /// Special boundary condition when it is defined on all boundary markers.
+      EssentialBoundaryCondition<Scalar> * HermesAnyBC;
 
       /// Create boundary markers cache for assembling
       void create_marker_cache();

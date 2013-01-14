@@ -1137,17 +1137,20 @@ namespace Hermes
 
         if(nd->dof != H2D_UNASSIGNED_DOF && en->bnd)
           if(essential_bcs != NULL)
-            if(essential_bcs->get_boundary_condition(mesh->boundary_markers_conversion.get_user_marker(en->marker).marker) != NULL)
+          {
+            EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(en->marker).marker);
+            if(bc != NULL)
             {
               int order = get_edge_order_internal(en);
               surf_pos->marker = en->marker;
-              nd->edge_bc_proj = get_bc_projection(surf_pos, order);
+              nd->edge_bc_proj = get_bc_projection(surf_pos, order, bc);
               bc_data.push_back(nd->edge_bc_proj);
 
               int i = surf_pos->surf_num, j = e->next_vert(i);
               ndata[e->vn[i]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
               ndata[e->vn[j]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
             }
+          }
       }
       else
       {
@@ -1169,6 +1172,16 @@ namespace Hermes
     void Space<Scalar>::update_essential_bc_values()
     {
       check();
+
+      // Check.
+      // If we use just constant BC, no need to recalculate.
+      bool allConstant = true;
+      for(typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
+        if((*it)->get_value_type() != EssentialBoundaryCondition<Scalar>::BC_CONST)
+          allConstant = false;
+      if(allConstant)
+        return;
+
       Element* e;
       for_all_base_elements(e, mesh)
       {

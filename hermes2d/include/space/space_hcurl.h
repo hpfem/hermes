@@ -39,7 +39,7 @@ namespace Hermes
 
 			virtual void set_shapeset(Shapeset* shapeset);
 
-			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order);
+			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
 			/// Copy from Space instance 'space'
 			virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);

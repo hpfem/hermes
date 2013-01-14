@@ -154,7 +154,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
+    Scalar* L2Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       throw Hermes::Exceptions::Exception("Method get_bc_projection() called from an L2Space.");
       return NULL;

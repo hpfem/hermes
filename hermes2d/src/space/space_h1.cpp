@@ -265,14 +265,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
+    Scalar* H1Space<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       assert(order >= 1);
       Scalar* proj = new Scalar[order + 1];
-
-      // Obtain linear part of the projection.
-      // If the BC on this part of the boundary is constant.
-      EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
       if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
       {
@@ -311,9 +307,6 @@ namespace Hermes
             double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
             Scalar l = proj[0] * s + proj[1] * t;
             surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
-
-            // If the BC on this part of the boundary is constant.
-            EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
             if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
               rhs[i] += pt[j][1] * this->shapeset->get_fn_value(ii, pt[j][0], -1.0, 0, surf_pos->base->get_mode())

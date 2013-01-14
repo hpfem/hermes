@@ -179,7 +179,7 @@ namespace Hermes
     //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
-    Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
+    Scalar* HcurlSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       assert(order >= 0);
       Scalar* proj = new Scalar[order + 1];
@@ -203,9 +203,6 @@ namespace Hermes
         {
           double t = (pt[j][0] + 1) * 0.5, s = 1.0 - t;
           surf_pos->t = surf_pos->lo * s + surf_pos->hi * t;
-
-          // If the BC on this part of the boundary is constant.
-          EssentialBoundaryCondition<Scalar> *bc = this->essential_bcs->get_boundary_condition(this->mesh->boundary_markers_conversion.get_user_marker(surf_pos->marker).marker);
 
           if(bc->get_value_type() == EssentialBoundaryCondition<Scalar>::BC_CONST)
           {

@@ -192,7 +192,7 @@ namespace Hermes
     //// BC stuff //////////////////////////////////////////////////////////////////////////////////////
 
     template<typename Scalar>
-    Scalar* HdivSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order)
+    Scalar* HdivSpace<Scalar>::get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc)
     {
       assert(order >= 0);
       Scalar* proj = new Scalar[order + 1];
