@@ -209,13 +209,7 @@ namespace Hermes
         virtual void handle_orders(Space<Scalar>* ref_space);
 
         /// Methods that user calls to get the reference space pointer (has to be properly casted if necessary).
-        virtual Space<Scalar>* create_ref_space();
-
-        /// Methods that user calls to get the reference space with designed type.
-        virtual L2Space<Scalar>* create_ref_l2_space();
-        virtual H1Space<Scalar>* create_ref_h1_space();
-        virtual HcurlSpace<Scalar>* create_ref_hcurl_space();
-        virtual HdivSpace<Scalar>* create_ref_hdiv_space();
+        virtual Space<Scalar>* create_ref_space(bool assign_dofs = true);
 
         /// Construction initialization.
       private:

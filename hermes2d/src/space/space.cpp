@@ -302,9 +302,6 @@ namespace Hermes
     {
       check();
       set_element_order_internal(id, order);
-
-      // since space changed, enumerate basis functions
-      this->assign_dofs();
     }
 
     template<typename Scalar>
@@ -403,9 +400,6 @@ namespace Hermes
         set_uniform_order_internal(order, -1234);
       else
         set_uniform_order_internal(order, mesh->element_markers_conversion.get_internal_marker(marker).marker);
-
-      // since space changed, enumerate basis functions
-      this->assign_dofs();
     }
 
     template<typename Scalar>
@@ -474,7 +468,6 @@ namespace Hermes
           set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(h_order, v_order));
         }
       }
-      assign_dofs();
     }
 
     template<typename Scalar>
@@ -495,7 +488,6 @@ namespace Hermes
           else
             set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(std::max<int>(H2D_GET_H_ORDER(get_element_order(e->id)) + horizontal_order_change, horizontal_min_order), std::max<int>(H2D_GET_V_ORDER(get_element_order(e->id)) + vertical_order_change, vertical_min_order)));
       }
-      assign_dofs();
     }
 
     template<typename Scalar>
@@ -507,7 +499,6 @@ namespace Hermes
         if(this->get_element_order(e->id) < 0)
           this->set_element_order_internal(e->id, this->get_element_order(e->parent->id));
       }
-      assign_dofs();
     }
 
     template<typename Scalar>
@@ -617,7 +608,6 @@ namespace Hermes
       for_all_active_elements(e, this->mesh)
         this->edata[e->id].changed_in_last_adaptation = true;
 
-      this->assign_dofs();
     }
 
     template<typename Scalar>
@@ -671,7 +661,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_space()
+    Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_space(bool assign_dofs)
     {
       /// Initialization.
       Space<Scalar>* ref_space = NULL;
@@ -693,69 +683,9 @@ namespace Hermes
       /// Finish - MUST BE CALLED BEFORE RETURN.
       this->finish_construction(ref_space);
 
-      /// Return.
-      return ref_space;
-    }
-
-    template<typename Scalar>
-    L2Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_l2_space()
-    {
-      /// Initialization
-      L2Space<Scalar>* ref_space = this->init_construction_l2();
-
-      /// Call to the OVERRIDABLE handling method.
-      this->handle_orders(ref_space);
-
-      /// Finish - MUST BE CALLED BEFORE RETURN.
-      this->finish_construction(ref_space);
-
-      /// Return.
-      return ref_space;
-    }
-
-    template<typename Scalar>
-    H1Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_h1_space()
-    {
-      /// Initialization
-      H1Space<Scalar>* ref_space = this->init_construction_h1();
-
-      /// Call to the OVERRIDABLE handling method.
-      this->handle_orders(ref_space);
-
-      /// Finish - MUST BE CALLED BEFORE RETURN.
-      this->finish_construction(ref_space);
-
-      /// Return.
-      return ref_space;
-    }
-
-    template<typename Scalar>
-    HcurlSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_hcurl_space()
-    {
-      /// Initialization
-      HcurlSpace<Scalar>* ref_space = this->init_construction_hcurl();
-
-      /// Call to the OVERRIDABLE handling method.
-      this->handle_orders(ref_space);
-
-      /// Finish - MUST BE CALLED BEFORE RETURN.
-      this->finish_construction(ref_space);
-
-      /// Return.
-      return ref_space;
-    }
-
-    template<typename Scalar>
-    HdivSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_hdiv_space()
-    {
-      /// Initialization
-      HdivSpace<Scalar>* ref_space = this->init_construction_hdiv();
-
-      /// Call to the OVERRIDABLE handling method.
-      this->handle_orders(ref_space);
-
-      /// Finish - MUST BE CALLED BEFORE RETURN.
-      this->finish_construction(ref_space);
+      // Assign dofs?
+      if(assign_dofs)
+        ref_space->assign_dofs();
 
       /// Return.
       return ref_space;
@@ -810,9 +740,6 @@ namespace Hermes
     {
       ref_space->seq = g_space_seq++;
 
-      // since space changed, enumerate basis functions
-      ref_space->assign_dofs();
-      
       Element *e;
       for_all_active_elements(e, coarse_space->get_mesh())
       {
@@ -897,9 +824,6 @@ namespace Hermes
       this->mesh = mesh;
       this->mesh_seq = mesh->get_seq();
       seq = g_space_seq++;
-
-      // since space changed, enumerate basis functions
-      this->assign_dofs();
     }
 
     template<typename Scalar>
@@ -1090,9 +1014,6 @@ namespace Hermes
     void Space<Scalar>::set_essential_bcs(EssentialBCs<Scalar>* essential_bcs)
     {
       this->essential_bcs = essential_bcs;
-
-      // since space changed, enumerate basis functions
-      this->assign_dofs();
     }
 
     template<typename Scalar>
@@ -1172,15 +1093,6 @@ namespace Hermes
     void Space<Scalar>::update_essential_bc_values()
     {
       check();
-
-      // Check.
-      // If we use just constant BC, no need to recalculate.
-      bool allConstant = true;
-      for(typename Hermes::vector<EssentialBoundaryCondition<Scalar> *>::iterator it = boundary_conditions.begin(); it != boundary_conditions.end(); it++)
-        if((*it)->get_value_type() != EssentialBoundaryCondition<Scalar>::BC_CONST)
-          allConstant = false;
-      if(allConstant)
-        return;
 
       Element* e;
       for_all_base_elements(e, mesh)
@@ -1372,7 +1284,6 @@ namespace Hermes
           space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
         }
 
-        space->assign_dofs();
         space->seq = g_space_seq++;
         return space;
       }
