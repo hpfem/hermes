@@ -305,7 +305,7 @@ namespace Hermes
       int first_dof, next_dof;
       int stride;
       int seq, mesh_seq;
-      bool was_assigned;
+      int was_assigned;
 
       struct BaseComponent
       {

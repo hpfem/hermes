@@ -121,6 +121,10 @@ namespace Hermes
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
         this->spaces[space_i]->check();
 
+      for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+        if(!this->spaces[space_i]->is_up_to_date())
+          throw Exceptions::Exception("Space is out of date, if you manually refine it, you have to call assign_dofs().");
+
       return true;
     }
 

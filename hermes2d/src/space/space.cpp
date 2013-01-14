@@ -42,7 +42,7 @@ namespace Hermes
 			this->ndata_allocated = 0;
 			this->mesh_seq = -1;
 			this->seq = g_space_seq;
-			this->was_assigned = false;
+			this->was_assigned = -1;
 			this->ndof = 0;
       this->proj_mat = NULL;
       this->chol_p = NULL;
@@ -70,7 +70,7 @@ namespace Hermes
 			this->ndata_allocated = 0;
 			this->mesh_seq = -1;
 			this->seq = g_space_seq;
-			this->was_assigned = false;
+			this->was_assigned = -1;
 			this->ndof = 0;
       this->proj_mat = NULL;
       this->chol_p = NULL;
@@ -287,7 +287,7 @@ namespace Hermes
     template<typename Scalar>
     bool Space<Scalar>::is_up_to_date() const
     {
-      return was_assigned && mesh_seq == (int) mesh->get_seq();
+      return was_assigned == this->seq && mesh_seq == (int) mesh->get_seq();
     }
 
     template<typename Scalar>
@@ -908,7 +908,7 @@ namespace Hermes
       post_assign();
 
       mesh_seq = mesh->get_seq();
-      was_assigned = true;
+      was_assigned = this->seq;
       this->ndof = (next_dof - first_dof) / stride;
 
       return this->ndof;
