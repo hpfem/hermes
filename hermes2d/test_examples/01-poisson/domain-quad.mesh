@@ -1,0 +1,120 @@
+
+L = 15            # domain length (should be a multiple of 3)
+H = 5             # domain height
+S1 = 5/2          # x-center of circle
+S2 = 5/2          # y-center of circle
+R = 1             # circle radius
+A = 1/(2*sqrt(2)) # helper length
+EPS = 0.10        # vertical shift of the circle
+
+S1minusA = 2.1464466094
+S1plusA = 2.8535533906
+S2minusA = 2.1464466094
+S2plusA = 2.8535533906
+S2minusAplusEPS = 2.2464466094
+S2plusAplusEPS = 2.9535533906
+Ldiv3 = 5
+TwiceLdiv3 = 10
+
+vertices = [
+  [ 0, 0 ],                 # 0
+  [ S1minusA, 0 ],            # 1
+  [ S1plusA, 0 ],            # 2
+  [ Ldiv3, 0 ],               # 3
+  [ TwiceLdiv3, 0 ],             # 4
+  [ L, 0 ],                 # 5
+  [ 0, S2minusA ],            # 6
+  [ S1minusA, S2minusAplusEPS],  # 7
+  [ S1plusA, S2minusAplusEPS ], # 8
+  [ Ldiv3, S2minusA ],          # 9
+  [ TwiceLdiv3, S2minusA ],        # 10
+  [ L, S2minusA ],            # 11
+  [ 0, S2plusA ],            # 12
+  [ S1minusA, S2plusAplusEPS ], # 13
+  [ S1plusA, S2plusAplusEPS ], # 14
+  [ Ldiv3, S2plusA],           # 15
+  [ TwiceLdiv3, S2plusA ],        # 16
+  [ L, S2plusA ],            # 17
+  [ 0, H ],                 # 18
+  [ S1minusA, H ],            # 19
+  [ S1plusA, H ],            # 20
+  [ Ldiv3, H ],               # 21
+  [ TwiceLdiv3, H ],             # 22
+  [ L, H ]                  # 23
+]
+
+elements = [
+  [ 0, 1, 7, 6, 0 ],
+  [ 1, 2, 8, 7, 0 ],
+  [ 2, 3, 9, 8, 0 ],
+  [ 3, 4, 10, 9, 0 ],
+  [ 4, 5, 11, 10, 0 ],
+  [ 6, 7, 13, 12, 0 ],
+  [ 8, 9, 15, 14, 0 ],
+  [ 9, 10, 16, 15, 0 ],
+  [ 10, 11, 17, 16, 0 ],
+  [ 12, 13, 19, 18, 0 ],
+  [ 13, 14, 20, 19, 0 ],
+  [ 14, 15, 21, 20, 0 ],
+  [ 15, 16, 22, 21, 0 ],
+  [ 16, 17, 23, 22, 0 ]
+]
+
+boundaries = [
+  [ 0, 1, 1 ],
+  [ 1, 2, 1 ],
+  [ 2, 3, 1 ],
+  [ 3, 4, 1 ],
+  [ 4, 5, 1 ],
+  [ 5, 11, 2 ],
+  [ 11, 17, 2 ],
+  [ 17, 23, 2 ],
+  [ 23, 22, 3 ],
+  [ 22, 21, 3 ],
+  [ 21, 20, 3 ],
+  [ 20, 19, 3 ],
+  [ 19, 18, 3],
+  [ 18, 12, 4],
+  [ 12, 6, 4 ],
+  [ 6, 0, 4 ],
+  [ 7, 13, 5 ],
+  [ 13, 14, 5],
+  [ 14, 8, 5 ],
+  [ 8, 7, 5]
+]
+
+curves = [
+  [ 7, 8, 90 ],   # 45 degrees circular arc
+  [ 8, 14, 90 ],  # 45 degrees circular arc
+  [ 14, 13, 90 ], # 45 degrees circular arc
+  [ 13, 7, 90 ]   # 45 degrees circular arc
+]
+
+refinements = [
+  [ 3, 2],
+  [ 0, 0],
+  [ 1, 1],
+  [ 2, 0],
+  [ 4, 2],
+  [ 5, 2],
+  [ 6, 2],
+  [ 7, 2],
+  [ 8, 2],
+  [ 9, 0],
+  [ 10, 1],
+  [ 11, 0],
+  [ 12, 2],
+  [ 13, 2],
+  [ 14, 0],
+  [ 15, 0],
+  [ 26, 0],
+  [ 27, 0],
+  [ 32, 2],
+  [ 33, 2],
+  [ 34, 2],
+  [ 35, 2],
+  [ 46, 0],
+  [ 47, 0],
+  [ 48, 0],
+  [ 49, 0]
+]
