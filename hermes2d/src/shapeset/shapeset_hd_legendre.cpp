@@ -8686,6 +8686,8 @@ namespace Hermes
       hdiv_leg_quad_index_to_order
     };
 
+    int HdivShapesetLegendre::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+
     HdivShapesetLegendre::HdivShapesetLegendre()
     {
       shape_table[0] = hdiv_leg_shape_fn_table;
@@ -8720,12 +8722,11 @@ namespace Hermes
       max_order = 10;
       num_components = 2;
 
-      max_index[0] = 149;
-      max_index[1] = 307;
-
       ebias = 0;  // TODO
 
       comb_table = NULL;
     }
+
+    const int HdivShapesetLegendre::max_index[2] = { 149, 307 };
   }
 }

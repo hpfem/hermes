@@ -98,6 +98,8 @@
 #include "projections/ogprojection.h"
 #include "projections/ogprojection_nox.h"
 
+#include "precalculated_forms/weakforms_h1_const.h"
+
 #include "runge_kutta.h"
 #include "spline.h"
 

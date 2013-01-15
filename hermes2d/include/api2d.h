@@ -41,7 +41,8 @@ namespace Hermes
     {
       numThreads,
       secondDerivatives,
-			xmlSchemasDirPath
+			xmlSchemasDirPath,
+			precalculatedFormsDirPath
     };
 
     /// API Class containing settings for the whole Hermes2D.

@@ -106,6 +106,8 @@ namespace Hermes
 			cache_element_stored = NULL;
 
 			this->do_not_use_cache = false;
+
+      this->is_linear = false;
     }
 
     template<typename Scalar>
@@ -169,6 +171,8 @@ namespace Hermes
       Geom<Hermes::Ord> *tmp = init_geom_ord();
       geom_ord = *tmp;
       delete tmp;
+
+      this->is_linear = false;
 
       current_mat = NULL;
       current_rhs = NULL;
@@ -899,42 +903,43 @@ namespace Hermes
       }
 
       // U_ext functions
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-      {
-        if(coeff_vec != NULL)
+      if(!is_linear)
+        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-          u_ext[i] = new Solution<Scalar>*[wf->get_neq()];
-          if(i == 0)
+          if(coeff_vec != NULL)
           {
-            int first_dof = 0;
-            for (int j = 0; j < wf->get_neq(); j++)
+            u_ext[i] = new Solution<Scalar>*[wf->get_neq()];
+            if(i == 0)
             {
-              u_ext[i][j] = new Solution<Scalar>(spaces[j]->get_mesh());
-              Solution<Scalar>::vector_to_solution(coeff_vec, spaces[j], u_ext[i][j], !RungeKutta, first_dof);
-              first_dof += spaces[j]->get_num_dofs();
+              int first_dof = 0;
+              for (int j = 0; j < wf->get_neq(); j++)
+              {
+                u_ext[i][j] = new Solution<Scalar>(spaces[j]->get_mesh());
+                Solution<Scalar>::vector_to_solution(coeff_vec, spaces[j], u_ext[i][j], !RungeKutta, first_dof);
+                first_dof += spaces[j]->get_num_dofs();
+              }
+            }
+            else
+            {
+              for (int j = 0; j < wf->get_neq(); j++)
+              {
+                u_ext[i][j] = new Solution<Scalar>(spaces[j]->get_mesh());
+                u_ext[i][j]->copy(u_ext[0][j]);
+              }
             }
           }
           else
           {
+            u_ext[i] = new Solution<Scalar>*[wf->get_neq()];
             for (int j = 0; j < wf->get_neq(); j++)
             {
-              u_ext[i][j] = new Solution<Scalar>(spaces[j]->get_mesh());
-              u_ext[i][j]->copy(u_ext[0][j]);
+              if(spaces[j]->get_shapeset()->get_num_components() == 1)
+                u_ext[i][j] = new ZeroSolution<Scalar>(spaces[j]->get_mesh());
+              else
+                u_ext[i][j] = new ZeroSolutionVector<Scalar>(spaces[j]->get_mesh());
             }
           }
         }
-        else
-        {
-          u_ext[i] = new Solution<Scalar>*[wf->get_neq()];
-          for (int j = 0; j < wf->get_neq(); j++)
-          {
-            if(spaces[j]->get_shapeset()->get_num_components() == 1)
-              u_ext[i][j] = new ZeroSolution<Scalar>(spaces[j]->get_mesh());
-            else
-              u_ext[i][j] = new ZeroSolutionVector<Scalar>(spaces[j]->get_mesh());
-          }
-        }
-      }
 
       // Assembly lists
       for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
@@ -987,16 +992,19 @@ namespace Hermes
       }
       delete [] refmaps;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      if(u_ext != NULL)
       {
-        if(u_ext[i] != NULL)
+        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-          for (unsigned int j = 0; j < wf->get_neq(); j++)
-            delete u_ext[i][j];
-          delete [] u_ext[i];
+          if(u_ext[i] != NULL)
+          {
+            for (unsigned int j = 0; j < wf->get_neq(); j++)
+              delete u_ext[i][j];
+            delete [] u_ext[i];
+          }
         }
+        delete [] u_ext;
       }
-      delete [] u_ext;
 
       for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
       {
@@ -1024,8 +1032,6 @@ namespace Hermes
     {
       // Check.
       this->check();
-
-      this->tick();
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
@@ -1318,10 +1324,6 @@ namespace Hermes
 #pragma omp critical (cache_for_subidx_preparation)
 if(new_cache==true)
         this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[space_i], new CacheRecordPerSubIdx));
-        
-        // Set active element to reference mappings.
-        // Done because we need all the refmaps to be set for the order calculation
-        current_refmaps[space_i]->set_active_element(current_state->e[space_i]);
       }
 
       // Order calculation.
@@ -1340,6 +1342,7 @@ if(new_cache==true)
           if(order < orderTemp)
             order = orderTemp;
         }
+
         for(int current_vfvol_i = 0; current_vfvol_i < current_vfvol.size(); current_vfvol_i++)
         {
           if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
@@ -1350,8 +1353,30 @@ if(new_cache==true)
             order = orderTemp;
         }
 
-        // Surface forms.
         if(current_state->isBnd)
+        {
+          for(int current_mfvol_i = 0; current_mfvol_i < current_mfvol.size(); current_mfvol_i++)
+          {
+            if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
+              continue;
+            current_mfvol[current_mfvol_i]->wf = current_wf;
+            int orderTemp = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
+            if(order < orderTemp)
+              order = orderTemp;
+          }
+           for(int current_vfvol_i = 0; current_vfvol_i < current_vfvol.size(); current_vfvol_i++)
+          {
+            if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
+              continue;
+            current_vfvol[current_vfvol_i]->wf = current_wf;
+            int orderTemp = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
+            if(order < orderTemp)
+              order = orderTemp;
+          }
+        }
+
+        // Surface forms.
+        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
         {
           Hermes::vector<MatrixFormSurf<Scalar>*> current_mfsurf = current_wf->mfsurf;
           Hermes::vector<VectorFormSurf<Scalar>*> current_vfsurf = current_wf->vfsurf;
@@ -1437,7 +1462,7 @@ if(new_cache==true)
 
         newRecord->n_quadrature_points = init_geometry_points(current_refmaps[i], newRecord->order, newRecord->geometry, newRecord->jacobian_x_weights);
 
-        if(current_state->isBnd)
+        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
         {
           newRecord->fnsSurface = new Func<double>**[newRecord->nvert];
           memset(newRecord->fnsSurface, NULL, sizeof(Func<double>**) * newRecord->nvert);
@@ -1480,7 +1505,7 @@ if(new_cache==true)
     void DiscreteProblem<Scalar>::assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
       Traverse::State* current_state, WeakForm<Scalar>* current_wf)
     {
-      // Integration order.
+      // Representing space.
       int rep_space_i = -1;
 
       // Get necessary (volumetric) assembly lists.
@@ -1488,17 +1513,22 @@ if(new_cache==true)
         if(current_state->e[space_i] != NULL)
         {
           rep_space_i = space_i;
+          current_refmaps[space_i]->set_active_element(current_state->e[space_i]);
           spaces[space_i]->get_element_assembly_list(current_state->e[space_i], current_als[space_i], spaces_first_dofs[space_i]);
         }
 
       if(rep_space_i == -1)
         return;
+
+      bool constantElement = current_refmaps[rep_space_i]->is_jacobian_const();
+      bool onlyConstantForms = current_wf->only_constant_forms();
+
       // Do we have to recalculate the data for this state even if the cache contains the data?
       bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
 
       // Assembly lists for surface forms.
       AsmList<Scalar>** current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
-      if(current_state->isBnd)
+      if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
       {
         for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
         {
@@ -1509,111 +1539,164 @@ if(new_cache==true)
         }
       }
 
+      // The constant forms.
+      if(constantElement)
+        this->assemble_constant_forms(current_refmaps[rep_space_i], current_als, current_state, current_wf);
+      
       // Calculate the cache entries.
-      if(changedInLastAdaptation)
+      if(changedInLastAdaptation && ((!onlyConstantForms || !constantElement) || current_state->isBnd))
         this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
 
-      // Ext functions.
-      // - order
-      int order = this->cache_records_sub_idx[rep_space_i][current_state->e[rep_space_i]->id]->find(current_state->sub_idx[rep_space_i])->second->order;
-      // - u_ext
-      int prevNewtonSize = this->wf->get_neq();
-      Func<Scalar>** u_ext = new Func<Scalar>*[prevNewtonSize];
-      if(current_u_ext != NULL)
-        for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-          if(current_u_ext[u_ext_i] != NULL)
-            u_ext[u_ext_i] = current_state->e[u_ext_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_i], order);
-          else
-            u_ext[u_ext_i] = NULL;
-      else
-        for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-          u_ext[u_ext_i] = NULL;
-      // - ext
-      int current_extCount = this->wf->ext.size();
-      Func<Scalar>** ext = new Func<Scalar>*[current_extCount];
-      for(int ext_i = 0; ext_i < current_extCount; ext_i++)
-        if(current_wf->ext[ext_i] != NULL)
-          ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(current_wf->ext[ext_i], order);
-        else
-          ext[ext_i] = NULL;
-
-      if(RungeKutta)
-        for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-          u_ext[ext_i]->add(ext[current_extCount - this->RK_original_spaces_count + ext_i]);
-
-      if(current_mat != NULL)
+      /// Dirichlet handling for constant elements.
+      if(constantElement && current_state->isBnd)
       {
-        for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
+        if(current_rhs != NULL)
         {
-          if(!form_to_be_assembled(current_wf->mfvol[current_mfvol_i], current_state))
-            continue;
-
-          int form_i = current_wf->mfvol[current_mfvol_i]->i;
-          int form_j = current_wf->mfvol[current_mfvol_i]->j;
-          CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-          CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
-          CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
-          CacheRecordPerSubIdxJ = this->cache_records_sub_idx[form_j][current_state->e[form_j]->id]->find(current_state->sub_idx[form_j])->second;
-
-          assemble_matrix_form(current_wf->mfvol[current_mfvol_i], 
-            CacheRecordPerSubIdxI->order, 
-            CacheRecordPerSubIdxJ->fns, 
-            CacheRecordPerSubIdxI->fns, 
-            ext,
-            u_ext,
-            current_als[form_i], 
-            current_als[form_j], 
-            current_state, 
-            CacheRecordPerSubIdxI->n_quadrature_points, 
-            CacheRecordPerSubIdxI->geometry, 
-            CacheRecordPerSubIdxI->jacobian_x_weights);
-        }
-      }
-      if(current_rhs != NULL)
-      {
-        for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
-        {
-          if(!form_to_be_assembled(current_wf->vfvol[current_vfvol_i], current_state))
-            continue;
-
-          int form_i = current_wf->vfvol[current_vfvol_i]->i;
-          CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-          CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
-
-          assemble_vector_form(current_wf->vfvol[current_vfvol_i], 
-            CacheRecordPerSubIdxI->order, 
-            CacheRecordPerSubIdxI->fns, 
-            ext,
-            u_ext, 
-            current_als[form_i], 
-            current_state, 
-            CacheRecordPerSubIdxI->n_quadrature_points,
-            CacheRecordPerSubIdxI->geometry, 
-            CacheRecordPerSubIdxI->jacobian_x_weights);
-        }
-      }
-
-      // Cleanup - u_ext
-      if(current_u_ext != NULL)
-        for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-          if(current_u_ext[u_ext_i] != NULL)
+          for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
           {
-            u_ext[u_ext_i]->free_fn();
-            delete u_ext[u_ext_i];
+            MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
+            if(!mfv->is_const)
+              continue;
+
+            if(form_to_be_assembled(mfv, current_state))
+            {
+              int form_i = current_wf->mfvol[current_mfvol_i]->i;
+              int form_j = current_wf->mfvol[current_mfvol_i]->j;
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
+              CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
+              CacheRecordPerSubIdxJ = this->cache_records_sub_idx[form_j][current_state->e[form_j]->id]->find(current_state->sub_idx[form_j])->second;
+              assemble_constant_forms_Dirichlet(current_state, CacheRecordPerSubIdxI->n_quadrature_points, CacheRecordPerSubIdxI->geometry, CacheRecordPerSubIdxI->jacobian_x_weights, CacheRecordPerSubIdxJ->fns, CacheRecordPerSubIdxI->fns, current_als, current_wf->mfvol[current_mfvol_i]);
+            }
           }
-          delete [] u_ext;
-
-      // Cleanup - ext
-      for(int ext_i = 0; ext_i < current_extCount; ext_i++)
-        if(current_wf->ext[ext_i] != NULL)
-        {
-          ext[ext_i]->free_fn();
-          delete ext[ext_i];
         }
-        delete [] ext;
+      }
 
+      if(!onlyConstantForms || !constantElement)
+      {
+        // Ext functions.
+        // - order
+        int order = this->cache_records_sub_idx[rep_space_i][current_state->e[rep_space_i]->id]->find(current_state->sub_idx[rep_space_i])->second->order;
+    
+        // - u_ext
+        Func<Scalar>** u_ext = NULL;
+        int prevNewtonSize = this->wf->get_neq();
+   
+        if(!this->is_linear)
+        {
+          u_ext = new Func<Scalar>*[prevNewtonSize];
+          if(current_u_ext != NULL)
+            for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
+              if(current_u_ext[u_ext_i] != NULL)
+                u_ext[u_ext_i] = current_state->e[u_ext_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_i], order);
+              else
+                u_ext[u_ext_i] = NULL;
+          else
+            for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
+              u_ext[u_ext_i] = NULL;
+        }
+      
+        // - ext
+        int current_extCount = this->wf->ext.size();
+        Func<Scalar>** ext = NULL;
+        if(current_extCount > 0)
+        {
+          ext = new Func<Scalar>*[current_extCount];
+          for(int ext_i = 0; ext_i < current_extCount; ext_i++)
+            if(current_wf->ext[ext_i] != NULL)
+              ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(current_wf->ext[ext_i], order);
+            else
+              ext[ext_i] = NULL;
+        }
+
+        if(RungeKutta)
+          for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+            u_ext[ext_i]->add(ext[current_extCount - this->RK_original_spaces_count + ext_i]);
+
+        if(current_mat != NULL)
+        {
+          for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
+          {
+            MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
+            if(mfv->is_const && constantElement)
+              continue;
+
+            if(!form_to_be_assembled(mfv, current_state))
+              continue;
+
+            int form_i = mfv->i;
+            int form_j = mfv->j;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
+            CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
+            CacheRecordPerSubIdxJ = this->cache_records_sub_idx[form_j][current_state->e[form_j]->id]->find(current_state->sub_idx[form_j])->second;
+
+            assemble_matrix_form(mfv, 
+              CacheRecordPerSubIdxI->order, 
+              CacheRecordPerSubIdxJ->fns, 
+              CacheRecordPerSubIdxI->fns, 
+              ext,
+              u_ext,
+              current_als[form_i], 
+              current_als[form_j], 
+              current_state, 
+              CacheRecordPerSubIdxI->n_quadrature_points, 
+              CacheRecordPerSubIdxI->geometry, 
+              CacheRecordPerSubIdxI->jacobian_x_weights);
+          }
+        }
+        if(current_rhs != NULL)
+        {
+          for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
+          {
+            VectorFormVol<Scalar>* vfv = current_wf->vfvol[current_vfvol_i];
+            if(vfv->is_const && constantElement)
+              continue;
+
+            if(!form_to_be_assembled(vfv, current_state))
+              continue;
+
+            int form_i = vfv->i;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
+            CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
+
+            assemble_vector_form(vfv, 
+              CacheRecordPerSubIdxI->order, 
+              CacheRecordPerSubIdxI->fns, 
+              ext,
+              u_ext, 
+              current_als[form_i], 
+              current_state, 
+              CacheRecordPerSubIdxI->n_quadrature_points,
+              CacheRecordPerSubIdxI->geometry, 
+              CacheRecordPerSubIdxI->jacobian_x_weights);
+          }
+        }
+
+        // Cleanup - u_ext
+        if(current_u_ext != NULL)
+        {
+          for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
+            if(current_u_ext[u_ext_i] != NULL)
+            {
+              u_ext[u_ext_i]->free_fn();
+              delete u_ext[u_ext_i];
+            }
+            delete [] u_ext;
+        }
+
+        // Cleanup - ext
+        for(int ext_i = 0; ext_i < current_extCount; ext_i++)
+          if(current_wf->ext[ext_i] != NULL)
+          {
+            ext[ext_i]->free_fn();
+            delete ext[ext_i];
+          }
+          delete [] ext;
+      }
+          
       // Assemble surface integrals now: loop through surfaces of the element.
-      if(current_state->isBnd)
+      if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
       {
         for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
@@ -1624,17 +1707,23 @@ if(new_cache==true)
           // - order
           int orderSurf = this->cache_records_sub_idx[rep_space_i][current_state->e[rep_space_i]->id]->find(current_state->sub_idx[rep_space_i])->second->orderSurface[current_state->isurf];
           // - u_ext
-          Func<Scalar>** u_extSurf = new Func<Scalar>*[prevNewtonSize];
-          if(current_u_ext != NULL)
-            for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-              if(current_u_ext[u_ext_surf_i] != NULL)
-                u_extSurf[u_ext_surf_i] = current_state->e[u_ext_surf_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_surf_i], orderSurf);
-              else
+          int prevNewtonSize = this->wf->get_neq();
+          Func<Scalar>** u_extSurf = NULL;
+          if(!this->is_linear)
+          {
+            u_extSurf = new Func<Scalar>*[prevNewtonSize];
+            if(current_u_ext != NULL)
+              for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
+                if(current_u_ext[u_ext_surf_i] != NULL)
+                  u_extSurf[u_ext_surf_i] = current_state->e[u_ext_surf_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_surf_i], orderSurf);
+                else
+                  u_extSurf[u_ext_surf_i] = NULL;
+            else
+              for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
                 u_extSurf[u_ext_surf_i] = NULL;
-          else
-            for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-              u_extSurf[u_ext_surf_i] = NULL;
+          }
           // - ext
+          int current_extCount = this->wf->ext.size();
           Func<Scalar>** extSurf = new Func<Scalar>*[current_extCount];
           for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
             if(current_wf->ext[ext_surf_i] != NULL)
@@ -1700,13 +1789,15 @@ if(new_cache==true)
           }
 
           if(current_u_ext != NULL)
+          {
             for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
               if(current_u_ext[u_ext_surf_i] != NULL)
               {
                 u_extSurf[u_ext_surf_i]->free_fn();
                 delete u_extSurf[u_ext_surf_i];
               }
-          delete [] u_extSurf;
+            delete [] u_extSurf;
+          }
 
           for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
             if(current_wf->ext[ext_surf_i] != NULL)
@@ -1722,6 +1813,276 @@ if(new_cache==true)
             delete [] current_alsSurface[i];
       }
       delete [] current_alsSurface;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble_constant_forms(RefMap* current_refmap, AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf)
+    {
+      double const_jacobian = current_refmap->get_const_jacobian();
+      double const_inv_ref_map_0_0 = current_refmap->get_const_inv_ref_map()[0][0][0];
+      double const_inv_ref_map_0_1 = current_refmap->get_const_inv_ref_map()[0][0][1];
+      double const_inv_ref_map_1_0 = current_refmap->get_const_inv_ref_map()[0][1][0];
+      double const_inv_ref_map_1_1 = current_refmap->get_const_inv_ref_map()[0][1][1];
+      if(current_mat != NULL)
+      {
+        // Matrix forms.
+        for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
+        {
+          MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
+          if(!mfv->is_const)
+            continue;
+
+          if(!form_to_be_assembled(mfv, current_state))
+            continue;
+
+          int form_i = mfv->i;
+          int form_j = mfv->j;
+
+          AsmList<Scalar>* asmlist_i = current_als[form_i];
+          AsmList<Scalar>* asmlist_j = current_als[form_j];
+
+          // Local matrix.
+          Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(asmlist_i->cnt, asmlist_j->cnt));
+
+          // Select the right precalculated table.
+          Scalar**** matrix_values;
+          if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+          {
+            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+              matrix_values = mfv->matrix_values_h1_h1;
+            else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
+              matrix_values = mfv->matrix_values_h1_l2;
+            else
+              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+          }
+          else
+          {
+            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+              matrix_values = mfv->matrix_values_l2_h1;
+            else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
+              matrix_values = mfv->matrix_values_l2_l2;
+            else
+              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+          }
+
+          for(int i = 0; i < asmlist_i->cnt; i++)
+          {
+            if(asmlist_i->dof[i] < 0)
+              continue;
+            for(int j = 0; j < asmlist_j->cnt; j++)
+            {
+              if(asmlist_j->dof[j] >= 0)
+              {
+                local_stiffness_matrix[i][j] = 0.0;
+                for(int calc_i = 0; calc_i < 21; calc_i++)
+                {
+                  if(matrix_values[current_state->rep->get_mode()][calc_i] != NULL)
+                  {
+                    Scalar val = matrix_values[current_state->rep->get_mode()][calc_i][asmlist_i->idx[i]][asmlist_j->idx[j]] * asmlist_i->coef[i] * asmlist_j->coef[j];
+                    switch(calc_i)
+                    {
+                    case 0:
+                      val *= const_jacobian;
+                      break;
+                    case 1:
+                      val *= const_jacobian * const_inv_ref_map_0_0;
+                      break;
+                    case 2:
+                      val *= const_jacobian * const_inv_ref_map_0_1;
+                      break;
+                    case 3:
+                      val *= const_jacobian * const_inv_ref_map_1_0;
+                      break;
+                    case 4:
+                      val *= const_jacobian * const_inv_ref_map_1_1;
+                      break;
+                      case 5:
+                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_0_0;
+                      break;
+                      case 6:
+                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_0_1;
+                      break;
+                      case 7:
+                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_1_0;
+                      break;
+                      case 8:
+                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_1_1;
+                      break;
+                      case 9:
+                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_0_0;
+                      break;
+                      case 10:
+                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_0_1;
+                      break;
+                      case 11:
+                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_1_0;
+                      break;
+                      case 12:
+                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_1_1;
+                      break;
+                      case 13:
+                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_0_0;
+                      break;
+                      case 14:
+                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_0_1;
+                      break;
+                      case 15:
+                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_1_0;
+                      break;
+                      case 16:
+                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_1_1;
+                      break;
+                      case 17:
+                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_0_0;
+                      break;
+                      case 18:
+                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_0_1;
+                      break;
+                      case 19:
+                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_0;
+                      break;
+                      case 20:
+                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_1;
+                      break;
+                    }
+                    local_stiffness_matrix[i][j] += val * mfv->const_coefficient;
+                  }
+                }
+              }
+            }
+          }
+
+          // Local -> Global.
+          current_mat->add(asmlist_i->cnt, asmlist_j->cnt, local_stiffness_matrix, asmlist_i->dof, asmlist_j->dof);
+        }
+      }
+      if(current_rhs != NULL)
+      {
+        // Vector forms.
+        for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
+        {
+          VectorFormVol<Scalar>* vfv = current_wf->vfvol[current_vfvol_i];
+          if(!vfv->is_const)
+            continue;
+
+          if(!form_to_be_assembled(vfv, current_state))
+            continue;
+
+          int form_i = vfv->i;
+
+          AsmList<Scalar>* asmlist_i = current_als[form_i];
+          
+          Scalar*** rhs_values;
+          if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+            rhs_values = vfv->rhs_values_h1;
+          else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
+            rhs_values = vfv->rhs_values_l2;
+          else
+              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+            
+          // Calculate the power of the inverse map jacobian.
+
+			    for(int i = 0; i < asmlist_i->cnt; i++)
+			    {
+				    if(asmlist_i->dof[i] < 0)
+					    continue;
+            for(int calc_i = 0; calc_i < 5; calc_i++)
+            {
+              if(rhs_values[current_state->rep->get_mode()][calc_i] != NULL)
+              {
+                Scalar val = rhs_values[current_state->rep->get_mode()][calc_i][asmlist_i->idx[i]] * asmlist_i->coef[i];
+                switch(calc_i)
+                {
+                case 0:
+                  val *= const_jacobian;
+                  break;
+                case 1:
+                  val *= const_jacobian * const_inv_ref_map_0_0;
+                  break;
+                case 2:
+                  val *= const_jacobian * const_inv_ref_map_0_1;
+                  break;
+                case 3:
+                  val *= const_jacobian * const_inv_ref_map_1_0;
+                  break;
+                case 4:
+                  val *= const_jacobian * const_inv_ref_map_1_1;
+                  break;
+                }
+                this->current_rhs->add(asmlist_i->dof[i], val * vfv->const_coefficient);
+              }
+            }
+			    }
+        }
+      }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::assemble_constant_forms_Dirichlet(Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights, Func<double>** base_fns, Func<double>** test_fns, AsmList<Scalar>** current_als, MatrixForm<Scalar>* form)
+    {
+      if(!form->is_const)
+        return;
+
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
+
+      double block_scaling_coef = this->block_scaling_coeff(form);
+
+      bool tra = (form->i != form->j) && (form->sym != 0);
+      bool sym = (form->i == form->j) && (form->sym == 1);
+
+      // Actual form-specific calculation.
+      for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
+      {
+        if(current_als[form->i]->dof[i] < 0)
+          continue;
+
+        if((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
+          continue;
+        if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
+          continue;
+        if(!sym)
+        {
+          for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
+          {
+            // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+            if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
+              continue;
+
+            Func<double>* u = base_fns[j];
+            Func<double>* v = test_fns[i];
+
+            if(current_als[form->j]->dof[j] < 0)
+            {
+              if(surface_form)
+                this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i]);
+              else
+                this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i]);
+            }
+          }
+        }
+        // Symmetric block.
+        else
+        {
+          for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
+          {
+            if(j < i && current_als[form->j]->dof[j] >= 0)
+              continue;
+            // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+            if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
+              continue;
+
+            Func<double>* u = base_fns[j];
+            Func<double>* v = test_fns[i];
+
+            Scalar val = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
+
+            if(current_als[form->j]->dof[j] < 0)
+            {
+              this->current_rhs->add(current_als[form->i]->dof[i], -val);
+            }
+          }
+        }
+      }
     }
 
     template<typename Scalar>

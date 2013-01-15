@@ -14,10 +14,14 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "global.h"
+#include "api2d.h"
 #include "weakform.h"
 #include "matrix.h"
 #include "forms.h"
-#include "space.h"
+#include "shapeset_l2_all.h"
+#include "shapeset_hc_all.h"
+#include "shapeset_hd_all.h"
+#include "shapeset_h1_all.h"
 using namespace Hermes::Algebra::DenseMatrixOperations;
 namespace Hermes
 {
@@ -65,6 +69,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    bool WeakForm<Scalar>::only_constant_forms() const
+    {
+      for(int i = 0; i < this->forms.size(); i++)
+        if(!this->forms[i]->is_const)
+          return false;
+      return true;
+    }
+
+    template<typename Scalar>
     void WeakForm<Scalar>::cloneMembers(const WeakForm<Scalar>* otherWf)
     {
       this->mfvol.clear();
@@ -78,42 +91,40 @@ namespace Hermes
 
       for(unsigned int i = 0; i < otherWf->forms.size(); i++)
       {
-          if(dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->forms.push_back((dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]))->clone());
-          if(dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->forms.push_back((dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]))->clone());
-          if(dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->forms.push_back((dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]))->clone());
+        if(dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->forms.push_back((dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]))->clone());
+        if(dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->forms.push_back((dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]))->clone());
+        if(dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->forms.push_back((dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]))->clone());
 
-          if(dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->forms.push_back((dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]))->clone());
-          if(dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->forms.push_back((dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]))->clone());
-          if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->forms.push_back((dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]))->clone());
+        if(dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->forms.push_back((dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]))->clone());
+        if(dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->forms.push_back((dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]))->clone());
+        if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->forms.push_back((dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]))->clone());
 
+        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        for(unsigned int ext_i = 0; ext_i < otherWf->forms[i]->ext.size(); ext_i++)
+          newExt.push_back(otherWf->forms[i]->ext[ext_i]->clone());
+        this->forms.back()->set_ext(newExt);
+        this->forms.back()->wf = this;
 
-          Hermes::vector<MeshFunction<Scalar>*> newExt;
-          for(unsigned int ext_i = 0; ext_i < otherWf->forms[i]->ext.size(); ext_i++)
-            newExt.push_back(otherWf->forms[i]->ext[ext_i]->clone());
-          this->forms.back()->set_ext(newExt);
-          this->forms.back()->wf = this;
+        if(dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->mfvol.push_back(dynamic_cast<MatrixFormVol<Scalar>*>(this->forms.back()));
+        if(dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->mfsurf.push_back(dynamic_cast<MatrixFormSurf<Scalar>*>(this->forms.back()));
+        if(dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->mfDG.push_back(dynamic_cast<MatrixFormDG<Scalar>*>(this->forms.back()));
 
-          if(dynamic_cast<MatrixFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->mfvol.push_back(dynamic_cast<MatrixFormVol<Scalar>*>(this->forms.back()));
-          if(dynamic_cast<MatrixFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->mfsurf.push_back(dynamic_cast<MatrixFormSurf<Scalar>*>(this->forms.back()));
-          if(dynamic_cast<MatrixFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->mfDG.push_back(dynamic_cast<MatrixFormDG<Scalar>*>(this->forms.back()));
-
-          if(dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->vfvol.push_back(dynamic_cast<VectorFormVol<Scalar>*>(this->forms.back()));
-          if(dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->vfsurf.push_back(dynamic_cast<VectorFormSurf<Scalar>*>(this->forms.back()));
-          if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
-            this->vfDG.push_back(dynamic_cast<VectorFormDG<Scalar>*>(this->forms.back()));
+        if(dynamic_cast<VectorFormVol<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->vfvol.push_back(dynamic_cast<VectorFormVol<Scalar>*>(this->forms.back()));
+        if(dynamic_cast<VectorFormSurf<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->vfsurf.push_back(dynamic_cast<VectorFormSurf<Scalar>*>(this->forms.back()));
+        if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
+          this->vfDG.push_back(dynamic_cast<VectorFormDG<Scalar>*>(this->forms.back()));
       }
-
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
         this->ext.push_back(otherWf->ext[i]->clone());
     }
@@ -150,10 +161,15 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0)
+    Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0), is_const(false), has_precalculated_tables(false), wf(NULL)
     {
       areas.push_back(HERMES_ANY);
       stage_time = 0.0;
+    }
+
+    template<typename Scalar>
+    Form<Scalar>::~Form()
+    {
     }
 
     template<typename Scalar>
@@ -221,6 +237,147 @@ namespace Hermes
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j) :
     Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j)
     {
+      this->matrix_values_h1_h1 = NULL;
+      this->matrix_values_h1_l2 = NULL;
+      this->matrix_values_l2_h1 = NULL;
+      this->matrix_values_l2_l2 = NULL;
+    }
+
+    template<typename Scalar>
+    static inline void delete_one_matrix_table(Scalar ****& table, const int dimensions_test[2], const int dimensions_basis[2])
+    {
+      if(table == NULL)
+        return;
+
+      if(table[0] != NULL)
+      {
+        for(unsigned int j = 0; j < 21; j++)
+          if(table[0][j] != NULL)
+          {
+            for(unsigned int i = 0; i < dimensions_test[0]; i++)
+              delete [] table[0][j][i];
+            delete table[0][j];
+          }
+        delete [] table[0];
+        table[0] = NULL;
+      }
+      if(table[1] != NULL)
+      {
+        for(unsigned int j = 0; j < 21; j++)
+          if(table[1][j] != NULL)
+          {
+            for(unsigned int i = 0; i < dimensions_test[0]; i++)
+              delete [] table[1][j][i];
+            delete table[1][j];
+          }
+        delete [] table[1];
+        table[1] = NULL;
+      }
+      if(table != NULL)
+      {
+        delete [] table;
+      }
+      table = NULL;
+    }
+
+    template<typename Scalar>
+    MatrixForm<Scalar>::~MatrixForm()
+    {
+      if(!this->has_precalculated_tables)
+        return;
+      
+      delete_one_matrix_table(this->matrix_values_h1_h1, H1Shapeset::max_index, H1Shapeset::max_index);
+      delete_one_matrix_table(this->matrix_values_h1_l2, H1Shapeset::max_index, L2Shapeset::max_index);
+      delete_one_matrix_table(this->matrix_values_l2_h1, L2Shapeset::max_index, H1Shapeset::max_index);
+      delete_one_matrix_table(this->matrix_values_l2_l2, L2Shapeset::max_index, L2Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_h1_h1_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->matrix_values_h1_h1, H1Shapeset::max_index, H1Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_h1_l2_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->matrix_values_h1_l2, H1Shapeset::max_index, L2Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_l2_h1_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->matrix_values_l2_h1, L2Shapeset::max_index, H1Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_l2_l2_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->matrix_values_l2_l2, L2Shapeset::max_index, L2Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_const_tables(ElementMode2D mode, const char* filename, Scalar****& matrix_values, const int dimensions_test[2], const int dimensions_basis[2])
+    {
+      if(!this->is_const)
+        if(this->wf != NULL)
+          throw Hermes::Exceptions::Exception("It is not allowed to change constantness of Forms already added to a WeakForm.");
+      this->is_const = true;
+      this->has_precalculated_tables = true;
+
+      std::stringstream ss;
+      ss << Hermes2D::Hermes2DApi.get_text_param_value(precalculatedFormsDirPath);
+      ss << filename;
+      std::ifstream matrixFormIn;
+      matrixFormIn.open(ss.str().c_str());
+      if(!matrixFormIn.is_open())
+        throw Exceptions::Exception("Failed to load file with precalculated form in MatrixForm::set_const_tables().");
+      if(!matrixFormIn.good())
+        throw Exceptions::Exception("Failed to load file with precalculated form in MatrixForm::set_const_tables().");
+      
+      char* calculatedColumns = new char[21];
+      for(int calc_i = 0; calc_i < 21; calc_i++)
+      {
+        matrixFormIn >> calculatedColumns[calc_i];
+      }
+
+      if(matrix_values == NULL)
+      {
+        matrix_values = new Scalar***[2];
+        memset(matrix_values, 0, sizeof(Scalar***)*2);
+      }
+      if(matrix_values[mode] == NULL)
+      {
+        matrix_values[mode] = new Scalar**[21];
+        for(int calc_i = 0; calc_i < 21; calc_i++)
+        {
+          if(calculatedColumns[calc_i] == 'a')
+          {
+            matrix_values[mode][calc_i] = new Scalar*[dimensions_test[mode] + 1];
+            for(unsigned int i = 0; i < dimensions_test[mode] + 1; i++)
+              matrix_values[mode][calc_i][i] = new Scalar[dimensions_test[mode] + 1];
+          }
+          else
+            matrix_values[mode][calc_i] = NULL;
+        }
+      }
+
+	    int index_i, index_j;
+	    int counter = 0;
+      Scalar valueTemp;
+      while(matrixFormIn.good())
+      {
+        matrixFormIn >> index_i >> index_j;
+        for(int calc_i = 0; calc_i < 21; calc_i++)
+        {
+          matrixFormIn >> valueTemp;
+          if(calculatedColumns[calc_i] == 'a')
+            matrix_values[mode][calc_i][index_i][index_j] = valueTemp;
+        }
+        counter++;
+      }
+
+      matrixFormIn.close();
     }
 
     template<typename Scalar>
@@ -245,6 +402,11 @@ namespace Hermes
     {
     }
     
+    template<typename Scalar>
+    MatrixFormVol<Scalar>::~MatrixFormVol()
+    {
+    }
+
     template<typename Scalar>
     void MatrixFormVol<Scalar>::setSymFlag(SymFlag sym)
     {
@@ -278,10 +440,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    MatrixFormSurf<Scalar>::~MatrixFormSurf()
+    {
+    }
+
+    template<typename Scalar>
     MatrixFormDG<Scalar>::MatrixFormDG(unsigned int i, unsigned int j) :
     MatrixForm<Scalar>(i, j)
     {
       this->set_area(H2D_DG_INNER_EDGE);
+    }
+
+    template<typename Scalar>
+    MatrixFormDG<Scalar>::~MatrixFormDG()
+    {
     }
 
     template<typename Scalar>
@@ -295,12 +467,127 @@ namespace Hermes
     VectorForm<Scalar>::VectorForm(unsigned int i) :
     Form<Scalar>(), i(i)
     {
+      this->rhs_values_h1 = NULL;
+      this->rhs_values_l2 = NULL;
+      this->rhs_values_hcurl = NULL;
+      this->rhs_values_hdiv = NULL;
+    }
+
+    template<typename Scalar>
+    VectorForm<Scalar>::~VectorForm()
+    {
+      if(!this->has_precalculated_tables)
+        return;
+      if(this->rhs_values_h1 != NULL)
+        delete [] rhs_values_h1;
+      if(this->rhs_values_l2 != NULL)
+        delete [] rhs_values_l2;
+      if(this->rhs_values_hcurl != NULL)
+        delete [] rhs_values_hcurl;
+      if(this->rhs_values_hdiv != NULL)
+        delete [] rhs_values_hdiv;
+      this->rhs_values_h1 = NULL;
+      this->rhs_values_l2 = NULL;
+      this->rhs_values_hcurl = NULL;
+      this->rhs_values_hdiv = NULL;
     }
 
     template<typename Scalar>
     VectorFormVol<Scalar>::VectorFormVol(unsigned int i) :
     VectorForm<Scalar>(i)
     {
+    }
+
+    template<typename Scalar>
+    VectorFormVol<Scalar>::~VectorFormVol()
+    {
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_h1_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->rhs_values_h1, H1Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_l2_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->rhs_values_l2, L2Shapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_hcurl_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->rhs_values_hcurl, HcurlShapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_hdiv_const_tables(ElementMode2D mode, const char* filename)
+    {
+      this->set_const_tables(mode, filename, this->rhs_values_hdiv, HdivShapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_const_tables(ElementMode2D mode, const char* filename, Scalar***& rhs_values, const int dimensions_test[2])
+    {
+      if(!this->is_const)
+        if(this->wf != NULL)
+          throw Hermes::Exceptions::Exception("It is not allowed to change constantness of Forms already added to a WeakForm.");
+      this->is_const = true;
+      this->has_precalculated_tables = true;
+
+      std::stringstream ss;
+      ss << Hermes2D::Hermes2DApi.get_text_param_value(precalculatedFormsDirPath);
+      ss << filename;
+      std::ifstream rhsFormIn;
+      rhsFormIn.open(ss.str().c_str());
+
+      if(!rhsFormIn.is_open())
+        throw Exceptions::Exception("Failed to load file with precalculated form in VectorForm::set_const_tables().");
+      if(!rhsFormIn.good())
+        throw Exceptions::Exception("Failed to load file with precalculated form in VectorForm::set_const_tables().");
+
+      char* calculatedColumns = new char[5];
+      for(int calc_i = 0; calc_i < 5; calc_i++)
+      {
+        rhsFormIn >> calculatedColumns[calc_i];
+      }
+
+      if(rhs_values == NULL)
+      {
+        rhs_values = new Scalar**[2];
+        memset(rhs_values, 0, sizeof(Scalar**)*2);
+      }
+      if(rhs_values[mode] == NULL)
+      {
+        rhs_values[mode] = new Scalar*[5];
+        for(int calc_i = 0; calc_i < 5; calc_i++)
+        {
+          if(calculatedColumns[calc_i] == 'a')
+          {
+            rhs_values[mode][calc_i] = new Scalar[dimensions_test[mode] + 1];
+          }
+          else
+            rhs_values[mode][calc_i] = NULL;
+        }
+      }
+
+      int index_i;
+	    int counter = 0;
+      double valueTemp;
+      while(rhsFormIn.good())
+      {
+        rhsFormIn >> index_i;
+        for(int calc_i = 0; calc_i < 5; calc_i++)
+        {
+          rhsFormIn >> valueTemp;
+          if(calculatedColumns[calc_i] == 'a')
+            rhs_values[mode][calc_i][index_i] = valueTemp;
+        }
+        counter++;
+      }
+
+      rhsFormIn.close();
     }
 
     template<typename Scalar>
@@ -333,6 +620,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    VectorFormSurf<Scalar>::~VectorFormSurf()
+    {
+    }
+
+    template<typename Scalar>
     VectorFormSurf<Scalar>* VectorFormSurf<Scalar>::clone() const
     {
       throw Hermes::Exceptions::MethodNotOverridenException("VectorFormSurf<Scalar>::clone()");
@@ -344,6 +636,11 @@ namespace Hermes
     VectorForm<Scalar>(i)
     {
       this->set_area(H2D_DG_INNER_EDGE);
+    }
+
+    template<typename Scalar>
+    VectorFormDG<Scalar>::~VectorFormDG()
+    {
     }
 
     template<typename Scalar>
@@ -519,12 +816,16 @@ namespace Hermes
     template class HERMES_API WeakForm<std::complex<double> >;
     template class HERMES_API Form<double>;
     template class HERMES_API Form<std::complex<double> >;
+    template class HERMES_API MatrixForm<double>;
+    template class HERMES_API MatrixForm<std::complex<double> >;
     template class HERMES_API MatrixFormVol<double>;
     template class HERMES_API MatrixFormVol<std::complex<double> >;
     template class HERMES_API MatrixFormSurf<double>;
     template class HERMES_API MatrixFormSurf<std::complex<double> >;
     template class HERMES_API MatrixFormDG<double>;
     template class HERMES_API MatrixFormDG<std::complex<double> >;
+    template class HERMES_API VectorForm<double>;
+    template class HERMES_API VectorForm<std::complex<double> >;
     template class HERMES_API VectorFormVol<double>;
     template class HERMES_API VectorFormVol<std::complex<double> >;
     template class HERMES_API VectorFormSurf<double>;

@@ -36,16 +36,19 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : DiscreteProblem<Scalar>(wf, spaces)
     {
+      this->is_linear = true;
     }
 
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : DiscreteProblem<Scalar>(wf, space)
     {
+      this->is_linear = true;
     }
 
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::DiscreteProblemLinear() : DiscreteProblem<Scalar>()
     {
+      this->is_linear = true;
     }
 
     template<typename Scalar>
@@ -88,12 +91,11 @@ namespace Hermes
       PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
       PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
       RefMap*** refmaps = new RefMap**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      Solution<Scalar>*** u_ext = new Solution<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
       AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
       WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
 
       // Fill these structures.
-      this->init_assembling(NULL, pss, spss, refmaps, u_ext, als, weakforms);
+      this->init_assembling(NULL, pss, spss, refmaps, NULL, als, weakforms);
 
       // Vector of meshes.
       Hermes::vector<const Mesh*> meshes;
@@ -105,8 +107,6 @@ namespace Hermes
         for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
           if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
             meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
-      for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
-        meshes.push_back(this->spaces[space_i]->get_mesh());
 
       Traverse trav_master(true);
       unsigned int num_states = trav_master.get_num_states(meshes);
@@ -133,11 +133,6 @@ namespace Hermes
               weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
             }
         }
-        for (unsigned j = 0; j < this->wf->get_neq(); j++)
-        {
-          fns[i].push_back(u_ext[i][j]);
-          u_ext[i][j]->set_quad_2d(&g_quad_2d_std);
-        }
         trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
         trav[i].stack = trav_master.stack;
       }
@@ -147,13 +142,12 @@ namespace Hermes
       PrecalcShapeset** current_pss;
       PrecalcShapeset** current_spss;
       RefMap** current_refmaps;
-      Solution<Scalar>** current_u_ext;
       AsmList<Scalar>** current_als;
       WeakForm<Scalar>* current_weakform;
 
 #define CHUNKSIZE 1
       int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-#pragma omp parallel shared(trav_master, mat, rhs ) private(state_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_weakform) num_threads(num_threads_used)
+#pragma omp parallel shared(trav_master, mat, rhs ) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_weakform) num_threads(num_threads_used)
       {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
@@ -168,7 +162,6 @@ namespace Hermes
             current_pss = pss[omp_get_thread_num()];
             current_spss = spss[omp_get_thread_num()];
             current_refmaps = refmaps[omp_get_thread_num()];
-            current_u_ext = u_ext[omp_get_thread_num()];
             current_als = als[omp_get_thread_num()];
             current_weakform = weakforms[omp_get_thread_num()];
 
@@ -178,10 +171,10 @@ namespace Hermes
             // The proper sub-element mappings to all the functions of
             // this stage is supplied by the function Traverse::get_next_state()
             // called in the while loop.
-            this->assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform);
+            this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn);
+              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn);
           }
           catch(Hermes::Exceptions::Exception& e)
           {
@@ -196,7 +189,7 @@ namespace Hermes
         }
       }
 
-      this->deinit_assembling(pss, spss, refmaps, u_ext, als, weakforms);
+      this->deinit_assembling(pss, spss, refmaps, NULL, als, weakforms);
 
       trav_master.finish();
       for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
@@ -253,10 +246,6 @@ namespace Hermes
           else
             local_ext[ext_i] = NULL;
       }
-
-      // Add the previous time level solution previously inserted at the back of ext.
-      if(this->RungeKutta)
-        u_ext += form->u_ext_offset;
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -317,7 +306,6 @@ namespace Hermes
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             else
             {
-
               this->current_rhs->add(current_als_i->dof[i], -val);
             }
           }
@@ -325,7 +313,6 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-
       this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
@@ -354,9 +341,6 @@ namespace Hermes
             delete local_ext[ext_i];
           }
       }
-
-      if(this->RungeKutta)
-        u_ext -= form->u_ext_offset;
 
       // Cleanup.
       delete [] local_stiffness_matrix;

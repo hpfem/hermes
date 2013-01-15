@@ -29,16 +29,20 @@ namespace Hermes
     public:
       HdivShapesetLegendre();
       virtual Shapeset* clone() { return new HdivShapesetLegendre(*this); };
+      virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
+      virtual int get_max_index(ElementMode2D mode);
     protected:
       virtual int get_id() const { return 20; }
-      virtual SpaceType get_space_type() const { return HERMES_HDIV_SPACE; }
       template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       template<typename Scalar> friend class Solution;
       friend class CurvMap; friend class RefMap;
       template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
 
     /// This is the default Hdiv shapeset typedef.

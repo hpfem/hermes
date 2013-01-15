@@ -3980,7 +3980,7 @@ namespace Hermes
       8,  16,  24,  32,  40,  48,  56,  64,  72,  80,  88,  0,  0,  0,  0,  0, zero16,
       9,  18,  27,  36,  45,  54,  63,  72,  81,  90,  99,  0,  0,  0,  0,  0, zero16,
       10,  20,  30,  40,  50,  60,  70,  80,  90,  100,  110,  0,  0,  0,  0,  0, zero16,
-      11,  22,  33,  44,  55,  66,  77,  88,  99,  110,  121,  0,  0,  0,  0,  0, zero16,
+      11,  22,  33,  44,  55,  66,  77,  88,  99,  110,  120,  0,  0,  0,  0,  0, zero16,
     };
 
     int leg_quad_vertex_indices[4] = { -1, -1, -1, -1 };
@@ -8190,6 +8190,8 @@ namespace Hermes
       leg_quad_index_to_order
     };
 
+    int L2ShapesetLegendre::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+
     L2ShapesetLegendre::L2ShapesetLegendre()
     {
       shape_table[0] = leg_shape_fn_table;
@@ -8224,12 +8226,12 @@ namespace Hermes
       max_order = 10;
       num_components = 1;
 
-      max_index[0] = 66;
-      max_index[1] = 121;
-
+      
       ebias = 2;
 
       comb_table = NULL;
     }
+    
+    const int L2ShapesetLegendre::max_index[2] = { 66, 120 };
   }
 }

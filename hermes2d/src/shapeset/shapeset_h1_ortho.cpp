@@ -16970,6 +16970,8 @@ namespace Hermes
       simple_quad_index_to_order
     };
 
+    int H1ShapesetOrtho::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+
     H1ShapesetOrtho::H1ShapesetOrtho()
     {
       shape_table[0] = ortho2_shape_fn_table;
@@ -17004,12 +17006,11 @@ namespace Hermes
       max_order = 10;
       num_components = 1;
 
-      max_index[0] = 77;
-      max_index[1] = 136;
-
       ebias = 2;
 
       comb_table = NULL;
     }
+
+    const int H1ShapesetOrtho::max_index[2] = { 77, 136 };
   }
 }

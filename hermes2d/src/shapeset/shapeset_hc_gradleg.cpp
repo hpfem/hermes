@@ -15802,6 +15802,8 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Bad index of last bubble");
     }
 
+    int HcurlShapesetGradLeg::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+
     HcurlShapesetGradLeg::HcurlShapesetGradLeg()
     {
       shape_table[0] = gradleg_shape_fn_table;
@@ -15836,14 +15838,13 @@ namespace Hermes
       max_order = 10;
       num_components = 2;
 
-      max_index[0] = 164;
-      max_index[1] = 307;
-
       ebias = 0;
 
       comb_table = NULL;
 
       check_gradleg_tri(this);
     }
+
+    const int HcurlShapesetGradLeg::max_index[2] = { 164, 307 };
   }
 }

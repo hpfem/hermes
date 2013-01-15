@@ -80,6 +80,8 @@ namespace Hermes
         /// Sets this instance to output the matrix in several first iterations.
         /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the matrix will be saved.
         void output_matrix(int firstIterations = -1);
+        /// Sets this instance to output matrix entries even though they are zero or not.
+        void set_print_zero_matrix_entries(bool to_set);
         /// Sets filename for the matrix
         /// Default: Matrix_'iteration number' with the ".m" extension in the case of matlab format.
         /// \param[in] name sets the main part of the name, i.e. replacement for "Matrix_" in the default name.
@@ -112,6 +114,7 @@ namespace Hermes
         void set_rhs_number_format(char* number_format);
         
       protected:
+        bool print_matrix_zero_values;
         bool output_matrixOn;
         int output_matrixIterations;
         std::string matrixFilename;

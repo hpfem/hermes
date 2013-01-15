@@ -31,16 +31,20 @@ namespace Hermes
     public:
       L2ShapesetLegendre();
       virtual Shapeset* clone() { return new L2ShapesetLegendre(*this); };
+      virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
+      virtual int get_max_index(ElementMode2D mode);
     protected:
       virtual int get_id() const { return 30; }
-      virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
       template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       template<typename Scalar> friend class Solution;
       friend class CurvMap; friend class RefMap;
       template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
 
     /// This is the default shapeset typedef

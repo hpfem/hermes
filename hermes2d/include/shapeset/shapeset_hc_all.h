@@ -29,12 +29,17 @@ namespace Hermes
     public:
       HcurlShapesetLegendre();
       virtual Shapeset* clone() { return new HcurlShapesetLegendre(*this); };
-    protected:
-      virtual int get_id() const { return 10; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
+      virtual int get_max_index(ElementMode2D mode);
+    protected:
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
+      virtual int get_id() const { return 10; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
 
+    /*
     // Experimental.
     /// @ingroup spaces
     class HERMES_API HcurlShapesetEigen2 : public Shapeset
@@ -42,12 +47,18 @@ namespace Hermes
     public:
       HcurlShapesetEigen2();
       virtual Shapeset* clone() { return new HcurlShapesetEigen2(*this); };
+      virtual int get_max_index(ElementMode2D mode);
     protected:
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       virtual int get_id() const { return 11; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
+    */
 
+    /*
     /// Experimental.
     /// @ingroup spaces
     class HERMES_API HcurlShapesetGradEigen : public Shapeset
@@ -55,11 +66,16 @@ namespace Hermes
     public:
       HcurlShapesetGradEigen();
       virtual Shapeset* clone() { return new HcurlShapesetGradEigen(*this); };
+      virtual int get_max_index(ElementMode2D mode);
     protected:
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       virtual int get_id() const { return 12; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
+    */
 
     /// H(curl) shapeset with Legendre bubbles and gradients of H1 functions as edges
     /// @ingroup spaces
@@ -68,10 +84,14 @@ namespace Hermes
     public:
       HcurlShapesetGradLeg();
       virtual Shapeset* clone() { return new HcurlShapesetGradLeg(*this); };
+      virtual int get_max_index(ElementMode2D mode);
     protected:
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       virtual int get_id() const { return 13; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
 
     /// This is the default Hcurl shapeset typedef.

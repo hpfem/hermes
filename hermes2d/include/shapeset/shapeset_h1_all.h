@@ -30,10 +30,14 @@ namespace Hermes
     public:
       H1ShapesetOrtho();
       virtual Shapeset* clone() { return new H1ShapesetOrtho(*this); };
+      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
+      virtual int get_max_index(ElementMode2D mode);
     private:
       virtual int get_id() const { return 0; }
-      virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
+      static const int max_index[2];
     };
 
     /// @ingroup spaces
@@ -43,24 +47,34 @@ namespace Hermes
     public:
       H1ShapesetJacobi();
       virtual Shapeset* clone() { return new H1ShapesetJacobi(*this); };
+      virtual int get_max_index(ElementMode2D mode);
     private:
       virtual int get_id() const { return 1; }
+      static const int max_index[2];
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
     };
 
     /// @ingroup spaces
     /// Experimental.
+    /*
     class HERMES_API H1ShapesetEigen : public Shapeset
     {
     public:
       H1ShapesetEigen();
       virtual Shapeset* clone() { return new H1ShapesetEigen(*this); };
+      virtual int get_max_index(ElementMode2D mode) {};
     private:
       virtual int get_id() const { return 2; }
+      template<typename Scalar> friend class VectorForm;
+      template<typename Scalar> friend class MatrixForm;
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      static const int max_index[2];
     };
+    */
 
     /// This is the default shapeset typedef
     typedef H1ShapesetJacobi H1Shapeset;

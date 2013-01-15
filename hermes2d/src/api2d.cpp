@@ -45,6 +45,15 @@ namespace Hermes
       this->integral_parameters.insert(std::pair<Hermes2DApiParam, Parameter<int>*> (Hermes::Hermes2D::numThreads,new Parameter<int>(NUM_THREADS)));
 			this->integral_parameters.insert(std::pair<Hermes2DApiParam, Parameter<int>*> (Hermes::Hermes2D::secondDerivatives,new Parameter<int>(0)));
       this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*> (Hermes::Hermes2D::xmlSchemasDirPath,new Parameter<std::string>(*(new std::string(H2D_XML_SCHEMAS_DIRECTORY)))));
+      std::stringstream ss;
+      ss << H2D_PRECALCULATED_FORMS_DIRECTORY;
+      if(ss.str().at(ss.str().length() - 1) == '\\' || ss.str().at(ss.str().length() - 1) == '/')
+        this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*> (Hermes::Hermes2D::precalculatedFormsDirPath,new Parameter<std::string>(*(new std::string(H2D_PRECALCULATED_FORMS_DIRECTORY)))));
+      else
+      {
+        ss << '/';
+        this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*> (Hermes::Hermes2D::precalculatedFormsDirPath,new Parameter<std::string>(*(new std::string(ss.str())))));
+      }
     }
 
     Api2D::~Api2D()
@@ -71,23 +80,23 @@ namespace Hermes
       this->integral_parameters.find(param)->second->user_val = value;
     }
 
-		std::string Api2D::get_text_param_value(Hermes2DApiParam param)
-		{
-			if(this->text_parameters.find(param) == text_parameters.end())
-				throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-			if(this->text_parameters.find(param)->second->user_set)
-				return this->text_parameters.find(param)->second->user_val;
-			else
-				return this->text_parameters.find(param)->second->default_val;
-		}
+	std::string Api2D::get_text_param_value(Hermes2DApiParam param)
+	{
+		if(this->text_parameters.find(param) == text_parameters.end())
+			throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
+		if(this->text_parameters.find(param)->second->user_set)
+			return this->text_parameters.find(param)->second->user_val;
+		else
+			return this->text_parameters.find(param)->second->default_val;
+	}
 
-		void Api2D::set_text_param_value(Hermes2DApiParam param, std::string value)
-		{
-			if(this->text_parameters.find(param) == text_parameters.end())
-				throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
-			this->text_parameters.find(param)->second->user_set = true;
-			this->text_parameters.find(param)->second->user_val = value;
-		}
+	void Api2D::set_text_param_value(Hermes2DApiParam param, std::string value)
+	{
+		if(this->text_parameters.find(param) == text_parameters.end())
+			throw Hermes::Exceptions::Exception("Wrong Hermes::Api parameter name:%i", param);
+		this->text_parameters.find(param)->second->user_set = true;
+		this->text_parameters.find(param)->second->user_val = value;
+	}
 
     Hermes::Hermes2D::Api2D HERMES_API Hermes2DApi;
   }

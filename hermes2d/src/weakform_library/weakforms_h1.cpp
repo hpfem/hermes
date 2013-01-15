@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "weakforms_h1.h"
+#include "api2d.h"
 namespace Hermes
 {
   namespace Hermes2D
@@ -272,7 +273,6 @@ namespace Hermes
       template<typename Scalar>
       DefaultMatrixFormDiffusion<Scalar>::~DefaultMatrixFormDiffusion()
       {
-        
         if(coeff == HERMES_ONE) delete coeff;
       };
 

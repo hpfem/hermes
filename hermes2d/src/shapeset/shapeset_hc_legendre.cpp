@@ -16575,6 +16575,8 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Bad index of last bubble");
     }
 
+    int HcurlShapesetLegendre::get_max_index(ElementMode2D mode) { return max_index[mode]; }
+
     HcurlShapesetLegendre::HcurlShapesetLegendre()
     {
       shape_table[0] = leg_shape_fn_table;
@@ -16609,14 +16611,12 @@ namespace Hermes
       max_order = 10;
       num_components = 2;
 
-      max_index[0] = 149;
-      max_index[1] = 307;
-
       ebias = 0;
 
       comb_table = NULL;
 
       check_leg_tri(this);
     }
+    const int HcurlShapesetLegendre::max_index[2] = { 149, 307 };
   }
 }

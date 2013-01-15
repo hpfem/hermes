@@ -105,7 +105,7 @@ namespace Hermes
       int get_max_order() const;
 
       /// Returns the highest shape function index.
-      int get_max_index(ElementMode2D mode) const;
+      virtual int get_max_index(ElementMode2D mode) = 0;
 
       /// Returns the index of a vertex shape function associated with the specified vertex.
       int get_vertex_index(int vertex, ElementMode2D mode) const;
@@ -114,6 +114,9 @@ namespace Hermes
       /// requested order. 'ori' can be 0 or 1 and determines edge orientation (this is for
       /// shapesets with non-symmetric edge functions).
       int get_edge_index(int edge, int ori, int order, ElementMode2D mode) const;
+
+      /// Returns space type.
+      virtual SpaceType get_space_type() const = 0;
 
     protected:
       /// Returns a complete set of indices of bubble functions for an element of the given order.
@@ -143,9 +146,6 @@ namespace Hermes
       /// Returns shapeset identifier. Internal.
       virtual int get_id() const = 0;
 
-      /// Returns space type.
-      virtual SpaceType get_space_type() const = 0;
-
       shape_fn_t*** shape_table[6];
 
       int**  vertex_indices;
@@ -156,7 +156,6 @@ namespace Hermes
 
       double2 ref_vert[2][4];
       int max_order;
-      int max_index[2];
       int num_components;
 
       int ebias; ///< 2 for H1 shapesets, 0 for H(curl) shapesets. It is the order of the
@@ -213,6 +212,9 @@ namespace Hermes
       friend class PrecalcShapeset;
       friend void check_leg_tri(Shapeset* shapeset);
       friend void check_gradleg_tri(Shapeset* shapeset);
+      template<typename Scalar> friend class Form;
+      template<typename Scalar> friend class MatrixForm;
+      template<typename Scalar> friend class VectorForm;
       template<typename Scalar> friend class Space;
       template<typename Scalar> friend class H1Space;
       template<typename Scalar> friend class L2Space;
