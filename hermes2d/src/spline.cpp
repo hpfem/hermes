@@ -37,6 +37,13 @@ namespace Hermes
     {
     }
 
+    CubicSpline::~CubicSpline() 
+    {
+      coeffs.clear();  
+      points.clear();
+      values.clear();
+    };
+
     double CubicSpline::value(double x) const
     {
       // For simple constant case.
@@ -51,7 +58,8 @@ namespace Hermes
         {
           // Spline should be extrapolated by constant function
           // matching the value at the end.
-          if(extrapolate_der_left == false) return value_left;
+          if(extrapolate_der_left == false)
+            return value_left;
           // Spline should be extrapolated as a linear function
           // matching the derivative at the end.
           else return extrapolate_value(point_left, value_left, derivative_left, x);
@@ -61,7 +69,8 @@ namespace Hermes
         {
           // Spline should be extrapolated by constant function
           // matching the value at the end.
-          if(extrapolate_der_right == false) return value_right;
+          if(extrapolate_der_right == false)
+            return value_right;
           // Spline should be extrapolated as a linear function
           // matching the derivative at the end.
           else return extrapolate_value(point_right, value_right, derivative_right, x);
@@ -243,9 +252,6 @@ namespace Hermes
 
       /* START COMPUTATION */
 
-      // Initializing coefficient array.
-      coeffs = new SplineCoeff[nelem];
-
       // Allocate matrix and rhs.
       const int n = 4 * nelem;
       double** matrix = new_matrix<double>(n, n);
@@ -358,12 +364,15 @@ namespace Hermes
       lubksb<double>(matrix, n, perm, rhs);
 
       // Copy the solution into the coeffs array.
+      coeffs.clear();
       for (int i = 0; i < nelem; i++)
       {
-        coeffs[i].a = rhs[4*i + 0];
-        coeffs[i].b = rhs[4*i + 1];
-        coeffs[i].c = rhs[4*i + 2];
-        coeffs[i].d = rhs[4*i + 3];
+        SplineCoeff coeff;
+        coeff.a = rhs[4*i + 0];
+        coeff.b = rhs[4*i + 1];
+        coeff.c = rhs[4*i + 2];
+        coeff.d = rhs[4*i + 3];
+        coeffs.push_back(coeff);
       }
 
       // Define end point values and derivatives so that
