@@ -99,6 +99,8 @@ namespace Hermes
 
       /// Gets value at a point that lies in interval 'm'.
       double get_value_from_interval(double x_in, int m) const;
+
+      friend class ElemwiseParameterSpline;
     };
   }
 }

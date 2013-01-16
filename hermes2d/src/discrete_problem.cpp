@@ -1302,32 +1302,25 @@ namespace Hermes
           continue;
 
         // No sub_idx map for this element.
-        if(this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] == NULL)
-        {
 #pragma omp critical (cache_records_sub_idx_map)
+        {
           if(this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] == NULL)
           {
             this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
-           	new_cache = true;
+            new_cache = true;
           }
-        }
-        else
-        {
-          // If the sub_idx map exists AND contains a record for this sub_idx, we need to delete the record.
-#pragma omp critical (cache_records_sub_idx_map)
+          else
           {
+            // If the sub_idx map exists AND contains a record for this sub_idx, we need to delete the record.
             typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->find(current_state->sub_idx[space_i]);
             if(it != this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->end())
               (*it).second->clear();
             else new_cache = true;
           }
-        }
 
-        // Insert the new record.
-#pragma omp critical (cache_records_sub_idx_map)
-        {
-if(new_cache)
-        this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[space_i], new CacheRecordPerSubIdx));
+          // Insert the new record.
+          if(new_cache)
+            this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[space_i], new CacheRecordPerSubIdx));
         }
       }
 
@@ -1881,16 +1874,13 @@ if(new_cache)
           }
 
           // Get the element-wise constant form multiplier.
-          Scalar parameter_elemwise = 1.0;
-          if(mfv->parameter_elemwise != NULL)
+          Scalar elemwise_parameter = 1.0;
+          if(mfv->elemwise_parameter != NULL)
           {
-            double x = 0., y = 0.;
-            for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
-            {
-              x += current_state->rep->vn[temp_i]->x;
-              y += current_state->rep->vn[temp_i]->y;
-            }
-            parameter_elemwise = mfv->parameter_elemwise->get_value(x, y);
+            if(mfv->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+              elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(mfv->elemwise_parameter))->get_value(current_state->rep);
+            if(mfv->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+              throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
           }
 
           for(int i = 0; i < asmlist_i->cnt; i++)
@@ -1973,7 +1963,7 @@ if(new_cache)
                       val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_1;
                       break;
                     }
-                    local_stiffness_matrix[i][j] += val * parameter_elemwise;
+                    local_stiffness_matrix[i][j] += val * elemwise_parameter;
                   }
                 }
               }
@@ -2009,16 +1999,13 @@ if(new_cache)
               throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
             
           // Get the element-wise constant form multiplier.
-          Scalar parameter_elemwise = 1.0;
-          if(vfv->parameter_elemwise != NULL)
+          Scalar elemwise_parameter = 1.0;
+          if(vfv->elemwise_parameter != NULL)
           {
-            double x = 0., y = 0.;
-            for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
-            {
-              x += current_state->rep->vn[temp_i]->x;
-              y += current_state->rep->vn[temp_i]->y;
-            }
-            parameter_elemwise = vfv->parameter_elemwise->get_value(x, y);
+            if(vfv->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+              elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(vfv->elemwise_parameter))->get_value(current_state->rep);
+            if(vfv->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+              throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
           }
 
 			    for(int i = 0; i < asmlist_i->cnt; i++)
@@ -2048,7 +2035,7 @@ if(new_cache)
                   val *= const_jacobian * const_inv_ref_map_1_1;
                   break;
                 }
-                this->current_rhs->add(asmlist_i->dof[i], val * parameter_elemwise);
+                this->current_rhs->add(asmlist_i->dof[i], val * elemwise_parameter);
               }
             }
 			    }
@@ -2070,16 +2057,13 @@ if(new_cache)
       bool sym = (form->i == form->j) && (form->sym == 1);
 
       // Get the element-wise constant form multiplier.
-      Scalar parameter_elemwise = 1.0;
-      if(form->parameter_elemwise != NULL)
+      Scalar elemwise_parameter = 1.0;
+      if(form->elemwise_parameter != NULL)
       {
-        double x = 0., y = 0.;
-        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
-        {
-          x += current_state->rep->vn[temp_i]->x;
-          y += current_state->rep->vn[temp_i]->y;
-        }
-        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+          throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
       }
 
       // Actual form-specific calculation.
@@ -2106,9 +2090,9 @@ if(new_cache)
             if(current_als[form->j]->dof[j] < 0)
             {
               if(surface_form)
-                this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * parameter_elemwise);
+                this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
               else
-                this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * parameter_elemwise);
+                this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
             }
           }
         }
@@ -2130,7 +2114,7 @@ if(new_cache)
 
             if(current_als[form->j]->dof[j] < 0)
             {
-              this->current_rhs->add(current_als[form->i]->dof[i], -val * parameter_elemwise);
+              this->current_rhs->add(current_als[form->i]->dof[i], -val * elemwise_parameter);
             }
           }
         }
@@ -2224,16 +2208,13 @@ if(new_cache)
         u_ext += form->u_ext_offset;
 
       // Get the element-wise constant form multiplier.
-      Scalar parameter_elemwise = 1.0;
-      if(form->parameter_elemwise != NULL)
+      Scalar elemwise_parameter = 1.0;
+      if(form->elemwise_parameter != NULL)
       {
-        double x = 0., y = 0.;
-        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
-        {
-          x += current_state->rep->vn[temp_i]->x;
-          y += current_state->rep->vn[temp_i]->y;
-        }
-        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+          elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(u_ext[form->previous_iteration_space_index]->val[0]);
       }
 
       // Actual form-specific calculation.
@@ -2260,9 +2241,9 @@ if(new_cache)
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise;
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter;
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise;
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter;
             }
           }
         }
@@ -2284,7 +2265,7 @@ if(new_cache)
 
               Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
-              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val * parameter_elemwise;
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val * elemwise_parameter;
             }
           }
         }
@@ -2389,16 +2370,13 @@ if(new_cache)
         u_ext += form->u_ext_offset;
 
       // Get the element-wise constant form multiplier.
-      Scalar parameter_elemwise = 1.0;
-      if(form->parameter_elemwise != NULL)
+      Scalar elemwise_parameter = 1.0;
+      if(form->elemwise_parameter != NULL)
       {
-        double x = 0., y = 0.;
-        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
-        {
-          x += current_state->rep->vn[temp_i]->x;
-          y += current_state->rep->vn[temp_i]->y;
-        }
-        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+          throw Hermes::Exceptions::Exception("Wrong parameter type, vector forms cannot have nonlinear parameters.");
       }
 
       // Actual form-specific calculation.
@@ -2419,7 +2397,7 @@ if(new_cache)
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
 
-        current_rhs->add(current_als_i->dof[i], val * parameter_elemwise);
+        current_rhs->add(current_als_i->dof[i], val * elemwise_parameter);
       }
 
       if(form->ext.size() > 0)

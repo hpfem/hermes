@@ -161,7 +161,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-      Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0), is_const(false), has_precalculated_tables(false), wf(NULL), parameter_elemwise(NULL)
+      Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0), is_const(false), has_precalculated_tables(false), wf(NULL), elemwise_parameter(NULL)
     {
       areas.push_back(HERMES_ANY);
       stage_time = 0.0;
@@ -173,9 +173,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_parameter_elemwise(ParameterElemwise<Scalar>* parameter_elemwise)
+    void Form<Scalar>::set_elemwise_parameter(ElemwiseParameter<Scalar>* elemwise_parameter)
     {
-      this->parameter_elemwise = parameter_elemwise;
+      if(this->is_const)
+        throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
+      else
+        this->elemwise_parameter = elemwise_parameter;
     }
 
     template<typename Scalar>
@@ -507,6 +510,12 @@ namespace Hermes
     template<typename Scalar>
     VectorFormVol<Scalar>::~VectorFormVol()
     {
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_elemwise_parameter(ElemwiseParameter<Scalar>* elemwise_parameter)
+    {
+      throw Hermes::Exceptions::Exception("Wrong parameter type, vector forms cannot have nonlinear parameters.");
     }
 
     template<typename Scalar>

@@ -42,8 +42,6 @@ namespace Hermes
           Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual MatrixFormVol<Scalar>* clone() const;
-      private:
-        int idx_j;
       };
 
       template<typename Scalar>
@@ -65,8 +63,6 @@ namespace Hermes
           Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
         virtual MatrixFormVol<Scalar>* clone() const;
-      private:
-        int idx_j;
       };
     }
   }

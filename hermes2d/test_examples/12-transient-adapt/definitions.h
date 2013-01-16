@@ -50,3 +50,10 @@ public:
 
   MeshFunction<double>* clone() const;
 };
+
+template<typename Scalar>
+class HERMES_API CustomWeakFormPoisson : public WeakForm<Scalar>
+{
+public:
+  CustomWeakFormPoisson();
+};

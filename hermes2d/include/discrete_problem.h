@@ -26,6 +26,8 @@
 #include "refinement_selectors/selector.h"
 #include "exceptions.h"
 #include "mixins2d.h"
+#include "elemwise_parameter/elemwise_parameter_mesh_func.h"
+#include "elemwise_parameter/elemwise_parameter_nonlinear.h"
 
 namespace Hermes
 {

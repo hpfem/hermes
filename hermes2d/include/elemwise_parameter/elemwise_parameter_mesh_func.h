@@ -13,32 +13,43 @@
 // You should have received a copy of the GNU General Public Licenserix
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_PARAMETER_H
-#define __H2D_PARAMETER_H
+#ifndef __H2D_ELEMWISE_PARAMETER_MESH_FUNC_H
+#define __H2D_ELEMWISE_PARAMETER_MESH_FUNC_H
 
-#include "config.h"
-#include "compat.h"
+#include "elemwise_parameter_func.h"
+#include "../function/mesh_function.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    /// General parameter.
+    template<typename Scalar> class MeshFunction;
+
+    /// Mesh function - based parameter.
     template<typename Scalar>
-    class HERMES_API Parameter
+    class HERMES_API ElemwiseParameterMeshFunc : public ElemwiseParameterFunc<Scalar>, public Hermes2D::Mixins::StateQueryable
     {
     public:
       /// Constructor.
-      Parameter();
+      ElemwiseParameterMeshFunc(MeshFunction<Scalar>* mesh_function);
+      ElemwiseParameterMeshFunc();
 
       /// Destructor.
-      virtual ~Parameter();
+      virtual ~ElemwiseParameterMeshFunc();
+
+      /// Ask if the instance is fine.
+      virtual bool isOkay() const;
+
+        /// Get class name, for the purpose of messaging.
+      virtual std::string getClassName() const;
 
     protected:
-      virtual Scalar get_value(double x, double y) = 0;
+      virtual Scalar get_value(Element* e);
 
-      template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;
+
+    private:
+      MeshFunction<Scalar>* mesh_function;
     };
   }
 }

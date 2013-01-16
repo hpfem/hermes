@@ -146,10 +146,10 @@ project(hermes2d)
     src/mesh/traverse.cpp
     src/mesh/mesh_data.cpp
 
-    src/parameter/parameter.cpp
-    src/parameter/parameter_elemwise.cpp
-    src/parameter/parameter_elemwise_func.cpp
-    src/parameter/parameter_elemwise_mesh_func.cpp
+    src/elemwise_parameter/elemwise_parameter.cpp
+    src/elemwise_parameter/elemwise_parameter_func.cpp
+    src/elemwise_parameter/elemwise_parameter_mesh_func.cpp
+	src/elemwise_parameter/elemwise_parameter_nonlinear.cpp
     
     src/quadrature/limit_order.cpp
     src/quadrature/quad_std.cpp
@@ -264,10 +264,10 @@ project(hermes2d)
     include/mesh/traverse.h
     include/mesh/mesh_data.h
 
-    include/parameter/parameter.h
-    include/parameter/parameter_elemwise.h
-    include/parameter/parameter_elemwise_func.h
-    include/parameter/parameter_elemwise_mesh_func.h
+    include/elemwise_parameter/elemwise_parameter.h
+    include/elemwise_parameter/elemwise_parameter_func.h
+    include/elemwise_parameter/elemwise_parameter_mesh_func.h
+	include/elemwise_parameter/elemwise_parameter_nonlinear.h
     
     include/quadrature/limit_order.h
     include/quadrature/quad.h
@@ -400,7 +400,7 @@ project(hermes2d)
   file(GLOB INC_INTEGRALS  "include/integrals/*.h")
   file(GLOB INC_LINEARIZER "include/linearizer/*.h")
   file(GLOB INC_ADAPT      "include/adapt/*.h")
-  file(GLOB INC_PARAMETER "include/parameter/*.h")
+  file(GLOB INC_elemwise_parameter "include/elemwise_parameter/*.h")
   file(GLOB INC_PROJECTIONS "include/projections/*.h")
   file(GLOB INC_PRECALC     "include/precalculated_forms/*.h")
   file(GLOB INC_QUAD       "include/quadrature/*.h")
@@ -419,7 +419,7 @@ project(hermes2d)
   install(FILES ${INC_INTEGRALS} DESTINATION ${TARGET_ROOT}/include/hermes2d/integrals)
   install(FILES ${INC_LINEARIZER}DESTINATION ${TARGET_ROOT}/include/hermes2d/linearizer)
   install(FILES ${INC_ADAPT}     DESTINATION ${TARGET_ROOT}/include/hermes2d/adapt)
-  install(FILES ${INC_PARAMETER}  DESTINATION ${TARGET_ROOT}/include/hermes2d/parameter)
+  install(FILES ${INC_elemwise_parameter}  DESTINATION ${TARGET_ROOT}/include/hermes2d/elemwise_parameter)
   install(FILES ${INC_PROJECTIONS}  DESTINATION ${TARGET_ROOT}/include/hermes2d/projections)
   install(FILES ${INC_PRECALC}  DESTINATION ${TARGET_ROOT}/include/hermes2d/precalculated_forms)
   install(FILES ${INC_QUAD}      DESTINATION ${TARGET_ROOT}/include/hermes2d/quadrature)

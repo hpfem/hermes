@@ -248,16 +248,13 @@ namespace Hermes
       }
 
       // Get the element-wise constant form multiplier.
-      Scalar parameter_elemwise = 1.0;
-      if(form->parameter_elemwise != NULL)
+      Scalar elemwise_parameter = 1.0;
+      if(form->elemwise_parameter != NULL)
       {
-        double x = 0., y = 0.;
-        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
-        {
-          x += current_state->rep->vn[temp_i]->x;
-          y += current_state->rep->vn[temp_i]->y;
-        }
-        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+          throw Hermes::Exceptions::Exception("Wrong parameter type, linear forms cannot have nonlinear parameters.");
       }
 
       // Actual form-specific calculation.
@@ -284,17 +281,17 @@ namespace Hermes
             if(current_als_j->dof[j] >= 0)
             {
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise;
+                local_stiffness_matrix[i][j] = 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter;
               else
-                local_stiffness_matrix[i][j] = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise;
+                local_stiffness_matrix[i][j] = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter;
             }
             else
             {
               {
                 if(surface_form)
-                  this->current_rhs->add(current_als_i->dof[i], -0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise);
+                  this->current_rhs->add(current_als_i->dof[i], -0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter);
                 else
-                  this->current_rhs->add(current_als_i->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise);
+                  this->current_rhs->add(current_als_i->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter);
               }
             }
           }
@@ -319,7 +316,7 @@ namespace Hermes
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             else
             {
-              this->current_rhs->add(current_als_i->dof[i], -val * parameter_elemwise);
+              this->current_rhs->add(current_als_i->dof[i], -val * elemwise_parameter);
             }
           }
         }

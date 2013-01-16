@@ -17,8 +17,8 @@
 #define __H2D_WEAKFORM_H
 
 #include "../function/solution.h"
-#include "../parameter/parameter_elemwise_func.h"
-#include "../parameter/parameter_elemwise_mesh_func.h"
+#include "../elemwise_parameter/elemwise_parameter_func.h"
+#include "../elemwise_parameter/elemwise_parameter_mesh_func.h"
 #include <string>
 
 namespace Hermes
@@ -209,7 +209,7 @@ namespace Hermes
       void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
       Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
 
-      void set_parameter_elemwise(ParameterElemwise<Scalar>* parameter_elemwise);
+      virtual void set_elemwise_parameter(ElemwiseParameter<Scalar>* elemwise_parameter);
       
     protected:
       /// Set pointer to a WeakForm.
@@ -228,7 +228,7 @@ namespace Hermes
       bool is_const;
 
       /// Element-wise constant parameter that is multiplying the form.
-      ParameterElemwise<Scalar>* parameter_elemwise;
+      ElemwiseParameter<Scalar>* elemwise_parameter;
 
       /// This form holds the memory for the precalculated tables.
       /// Used in cloning (only the original form's memory has to be released, other forms only point to the data).
@@ -269,6 +269,7 @@ namespace Hermes
 
       unsigned int i;
       unsigned int j;
+      unsigned int previous_iteration_space_index;
 
       SymFlag sym;
 
@@ -350,6 +351,8 @@ namespace Hermes
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         Func<Ord> **ext) const;
       unsigned int i;
+
+      virtual void set_elemwise_parameter(ElemwiseParameter<Scalar>* elemwise_parameter);
       
     protected:
       /// Set this form to constant and provide the tables.

@@ -13,29 +13,31 @@
 // You should have received a copy of the GNU General Public Licenserix
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_PARAMETER_ELEMWISE_FUNC_H
-#define __H2D_PARAMETER_ELEMWISE_FUNC_H
+#ifndef __H2D_ELEMWISE_PARAMETER_FUNC_H
+#define __H2D_ELEMWISE_PARAMETER_FUNC_H
 
-#include "parameter_elemwise.h"
+#include "elemwise_parameter.h"
+#include "../mesh/mesh.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    /// General parameter.
+    /// General function parameter.
     template<typename Scalar>
-    class HERMES_API ParameterElemwiseFunc : public ParameterElemwise<Scalar>
+    class HERMES_API ElemwiseParameterFunc : public ElemwiseParameter<Scalar>
     {
     public:
       /// Constructor.
-      ParameterElemwiseFunc();
+      ElemwiseParameterFunc();
 
       /// Destructor.
-      virtual ~ParameterElemwiseFunc();
+      virtual ~ElemwiseParameterFunc();
 
+      /// Get the type of this instance.
+      virtual ElemwiseParameterType get_type();
     protected:
-      virtual Scalar get_value(double x, double y) = 0;
-      virtual ParameterElemwiseValueType get_type();
+      virtual Scalar get_value(Element* e) = 0;
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;
