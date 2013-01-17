@@ -21,3 +21,5 @@ ENDIF(WITH_TRILINOS)
 add_subdirectory("10-linear-advection-dg-adapt")
 
 add_subdirectory("11-FCT")
+
+add_subdirectory("12-transient-adapt")
