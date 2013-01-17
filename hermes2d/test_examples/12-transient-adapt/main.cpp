@@ -18,7 +18,7 @@ using namespace Views;
 //  Nonlinearity: lambda(u) = 1 + pow(u, alpha).
 //
 //  Domain: square (-10, 10)^2.
-//
+//  
 //  BC: Nonconstant Dirichlet.
 //
 //  IC: Custom initial condition matching the BC.
@@ -26,9 +26,9 @@ using namespace Views;
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 2;                       
+const int INIT_REF_NUM = 5;                       
 // Initial polynomial degree of all mesh elements.
-const int P_INIT = 2;                             
+const int P_INIT = 1;                             
 // Time step. 
 double time_step = 0.05;                           
 // Time interval length.
@@ -107,6 +107,8 @@ const double heat_src = 1.0;
 
 int main(int argc, char* argv[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
+
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
   if (bt.is_explicit()) Hermes::Mixins::Loggable::Static::info("Using a %d-stage explicit R-K method.", bt.get_size());
@@ -136,7 +138,7 @@ int main(int argc, char* argv[])
   // Initialize the weak formulation
   CustomNonlinearity lambda(alpha);
   Hermes2DFunction<double> f(heat_src);
-  WeakFormsH1::DefaultWeakFormPoisson<double> wf(HERMES_ANY, &lambda, &f);
+  CustomWeakFormPoisson wf(&lambda, &f);
 
   // Next time level solution.
   Solution<double> sln_time_new(&mesh);

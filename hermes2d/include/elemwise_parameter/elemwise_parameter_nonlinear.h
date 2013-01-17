@@ -18,19 +18,28 @@
 
 #include "elemwise_parameter.h"
 #include "../spline.h"
+#include "../function/solution.h"
 #include "../mixins2d.h"
+#include "../mesh/mesh.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    /// Nonlinear parameter value type.
+    enum ElemwiseParameterNonlinearValueType
+    {
+      ElemwiseParameterNonlinearValue,
+      ElemwiseParameterNonlinearDerivative
+    };
+
     /// Nonlinear element-wise parameter.
     template<typename Scalar>
     class HERMES_API ElemwiseParameterNonlinear : public ElemwiseParameter<Scalar>
     {
     public:
       /// Constructor.
-      ElemwiseParameterNonlinear();
+      ElemwiseParameterNonlinear(ElemwiseParameterNonlinearValueType value_type = ElemwiseParameterNonlinearValue);
 
       /// Destructor.
       virtual ~ElemwiseParameterNonlinear();
@@ -38,33 +47,52 @@ namespace Hermes
       /// Get the type of this instance.
       virtual ElemwiseParameterType get_type();
     protected:
-      virtual Scalar get_value(Scalar u_ext_value) = 0;
+      virtual Scalar get_value(Solution<Scalar>* u_ext, Element* e) = 0;
+
+      ElemwiseParameterNonlinearValueType value_type;
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;
     };
 
-    /// Spline-represented nonlinear parameter.
-    class HERMES_API ElemwiseParameterSpline : public ElemwiseParameterNonlinear<double>, public Hermes2D::Mixins::StateQueryable
+    /// Nonlinear element-wise parameter.
+    template<typename Scalar>
+    class HERMES_API ElemwiseParameterNonlinearHermesFunc : public ElemwiseParameterNonlinear<Scalar>
     {
     public:
       /// Constructor.
-      ElemwiseParameterSpline(CubicSpline* spline);
-      ElemwiseParameterSpline();
+      ElemwiseParameterNonlinearHermesFunc(Hermes1DFunction<Scalar>* function, ElemwiseParameterNonlinearValueType value_type = ElemwiseParameterNonlinearValue);
+      ElemwiseParameterNonlinearHermesFunc(ElemwiseParameterNonlinearValueType value_type = ElemwiseParameterNonlinearValue);
 
       /// Destructor.
-      virtual ~ElemwiseParameterSpline();
+      virtual ~ElemwiseParameterNonlinearHermesFunc();
 
       /// Ask if the instance is fine.
       virtual bool isOkay() const;
 
         /// Get class name, for the purpose of messaging.
       virtual std::string getClassName() const;
+
+    protected:
+      virtual Scalar get_value(Solution<Scalar>* u_ext, Element* e);
+
+      Hermes1DFunction<Scalar>* function;
+
+      template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemLinear;
+    };
+
+    /// Spline-represented nonlinear parameter.
+    class HERMES_API ElemwiseParameterSpline : public ElemwiseParameterNonlinearHermesFunc<double>, public Hermes2D::Mixins::StateQueryable
+    {
+    public:
+      /// Constructor.
+      ElemwiseParameterSpline(CubicSpline* spline, ElemwiseParameterNonlinearValueType value_type = ElemwiseParameterNonlinearValue);
+      ElemwiseParameterSpline(ElemwiseParameterNonlinearValueType value_type = ElemwiseParameterNonlinearValue);
+
+      /// Destructor.
+      virtual ~ElemwiseParameterSpline();
     private:
-      virtual double get_value(double u_ext_value);
-
-      CubicSpline* spline;
-
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;
     };

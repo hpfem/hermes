@@ -23,16 +23,8 @@ namespace Hermes
     template<typename Scalar>
     Scalar ElemwiseParameterMeshFunc<Scalar>::get_value(Element* e)
     {
-      // x - coordinate
-      double x = e->vn[0]->x + e->vn[1]->x + e->vn[2]->x;
-      if(e->is_quad())
-        x += e->vn[3]->x;
-
-      // y - coordinate
-      double y = e->vn[0]->y + e->vn[1]->y + e->vn[2]->y;
-      if(e->is_quad())
-        y += e->vn[3]->y;
-
+      double x, y;
+      e->get_center(x, y);
       return this->mesh_function->get_pt_value(x, y)->val[0];
     }
 

@@ -2,6 +2,8 @@
 
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
+using namespace Hermes::Hermes2D::WeakFormsH1;
+using namespace Hermes::Hermes2D::NonlinearElemwiseWeakFormsH1;
 
 /* Nonlinearity lambda(u) = pow(u, alpha) */
 
@@ -51,9 +53,8 @@ public:
   MeshFunction<double>* clone() const;
 };
 
-template<typename Scalar>
-class HERMES_API CustomWeakFormPoisson : public WeakForm<Scalar>
+class CustomWeakFormPoisson : public WeakForm<double>
 {
 public:
-  CustomWeakFormPoisson();
+  CustomWeakFormPoisson(Hermes1DFunction<double>* coeff, Hermes2DFunction<double>* f);
 };

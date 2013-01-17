@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef __H2D_CONST_H1_WEAK_FORMS_H
-#define __H2D_CONST_H1_WEAK_FORMS_H
+#ifndef __H2D_NONLINEAR_H1_WEAK_FORMS_H
+#define __H2D_NONLINEAR_H1_WEAK_FORMS_H
 
 #include "../integrals/h1.h"
 #include "../weakform/weakform.h"

@@ -244,7 +244,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j) :
-    Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j)
+    Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j), previous_iteration_space_index(-1)
     {
       this->matrix_values_h1_h1 = NULL;
       this->matrix_values_h1_l2 = NULL;

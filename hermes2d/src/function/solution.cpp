@@ -1536,7 +1536,8 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)
     {
-      if(e==NULL) throw Exceptions::NullException(1);
+      if(e==NULL) 
+        throw Exceptions::NullException(1);
       set_active_element(e);
 
       int o = elem_orders[e->id];

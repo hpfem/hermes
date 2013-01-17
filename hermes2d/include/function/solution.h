@@ -234,6 +234,8 @@ namespace Hermes
       Element* e_last; ///< last visited element when getting solution values at specific points
 
       friend class RefMap;
+      template<typename T> friend class ElemwiseParameterNonlinear;
+      template<typename T> friend class ElemwiseParameterNonlinearHermesFunc;      
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class CalculationContinuity;
       template<typename T> friend class OGProjection;
