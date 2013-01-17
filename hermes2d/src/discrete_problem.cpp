@@ -2293,6 +2293,7 @@ namespace Hermes
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
           }
+          delete [] local_ext;
       }
 
       if(RungeKutta)
@@ -2408,6 +2409,7 @@ namespace Hermes
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
           }
+          delete [] local_ext;
       }
 
       if(RungeKutta)
