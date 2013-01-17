@@ -153,7 +153,13 @@ namespace Hermes
           return false;
       }
 
-      return true;
+      if(!this->is_up_to_date())
+      {
+        throw Hermes::Exceptions::Exception("Space is not up to date.");
+        return false;
+      }
+      else
+        return true;
     }
 
     template<>
@@ -275,6 +281,7 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::get_max_dof() const
     {
+      check();
       return next_dof - stride;
     }
 
@@ -300,7 +307,6 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::set_element_order(int id, int order)
     {
-      check();
       set_element_order_internal(id, order);
     }
 
@@ -426,7 +432,6 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::set_element_orders(int* elem_orders_)
     {
-      check();
       resize_tables();
 
       Element* e;
@@ -473,7 +478,6 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::adjust_element_order(int horizontal_order_change, int vertical_order_change, unsigned int horizontal_min_order, unsigned int vertical_min_order)
     {
-      check();
       Element* e;
       for_all_active_elements(e, this->get_mesh())
       {
@@ -870,7 +874,21 @@ namespace Hermes
     template<typename Scalar>
     int Space<Scalar>::assign_dofs(int first_dof, int stride)
     {
-      check();
+      if(ndata == NULL || edata == NULL || !nsize || !esize)
+        return false;
+      if(seq < 0)
+        return false;
+      if(this->mesh == NULL)
+        return false;
+
+      this->mesh->check();
+
+      if(edata == NULL)
+      {
+          throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
+          return false;
+      }
+
       if(first_dof < 0)
         throw Hermes::Exceptions::ValueException("first_dof", first_dof, 0);
       if(stride < 1)
@@ -912,6 +930,7 @@ namespace Hermes
       this->ndof = (next_dof - first_dof) / stride;
 
       return this->ndof;
+      check();
     }
 
     template<typename Scalar>
@@ -967,6 +986,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
     {
+      this->check();
       // some checks
       if(e->id >= esize || edata[e->id].order < 0)
         throw Hermes::Exceptions::Exception("Uninitialized element order in get_element_assembly_list(id = #%d).", e->id);
@@ -989,6 +1009,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al, unsigned int first_dof) const
     {
+      this->check();
       al->cnt = 0;
       get_vertex_assembly_list(e, surf_num, al);
       get_vertex_assembly_list(e, e->next_vert(surf_num), al);
@@ -1001,6 +1022,7 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::get_bubble_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
+      this->check();
       ElementData* ed = &edata[e->id];
 
       if(!ed->n) return;
@@ -1049,7 +1071,6 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::update_edge_bc(Element* e, SurfPos* surf_pos)
     {
-      check();
       if(e->active)
       {
         Node* en = e->en[surf_pos->surf_num];
@@ -1092,8 +1113,6 @@ namespace Hermes
     template<typename Scalar>
     void Space<Scalar>::update_essential_bc_values()
     {
-      check();
-
       Element* e;
       for_all_base_elements(e, mesh)
       {
@@ -1120,6 +1139,7 @@ namespace Hermes
     template<typename Scalar>
     bool Space<Scalar>::save(const char *filename) const
     {
+      this->check();
       XMLSpace::space xmlspace;
 
       switch(this->get_type())
