@@ -37,7 +37,7 @@ namespace Hermes
       ~CubicSpline();
 
       /// Calculates coefficients.
-      bool calculate_coeffs();
+      void calculate_coeffs();
 
       /// One-dimensional function value.
       double value(double x) const;

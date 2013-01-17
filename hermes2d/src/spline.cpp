@@ -29,8 +29,6 @@ namespace Hermes
       extrapolate_der_right(extrapolate_der_right)
     {
       this->is_const = false;
-      bool success = this->calculate_coeffs();
-      if(!success) throw Hermes::Exceptions::Exception("There was a problem constructing a cubic spline.");
     }
 
     CubicSpline::CubicSpline(double const_value) : Hermes::Hermes1DFunction<double>(const_value)
@@ -218,25 +216,25 @@ namespace Hermes
       fclose(f);
     }
 
-    bool CubicSpline::calculate_coeffs()
+    void CubicSpline::calculate_coeffs()
     {
       int nelem = points.size() - 1;
 
       // Basic sanity checks.
       if(points.empty() || values.empty())
       {
-        this->warn("Empty points or values vector in CubicSpline, returning false.");
-        return false;
+        this->warn("Empty points or values vector in CubicSpline, cancelling coefficients calculation.");
+        return;
       }
       if(points.size() < 2 || values.size() < 2)
       {
-        this->warn("At least two points and values required in CubicSpline, returning false.");
-        return false;
+        this->warn("At least two points and values required in CubicSpline, cancelling coefficients calculation.");
+        return;
       }
       if(points.size() != values.size())
       {
-        this->warn("Mismatched number fo points and values in CubicSpline, returning false.");
-        return false;
+        this->warn("Mismatched number of points and values in CubicSpline, cancelling coefficients calculation.");
+        return;
       }
 
       // Check for improperly ordered or duplicated points.
@@ -245,8 +243,8 @@ namespace Hermes
       {
         if(points[i + 1] < points[i] + eps)
         {
-          this->warn("Duplicated or improperly ordered points in CubicSpline detected, returning false.");
-          return false;
+          this->warn("Duplicated or improperly ordered points in CubicSpline detected, cancelling coefficients calculation.");
+          return;
         }
       }
 
@@ -389,7 +387,7 @@ namespace Hermes
       delete [] matrix;
       delete [] rhs;
 
-      return true;
+      return;
     }
   }
 }
