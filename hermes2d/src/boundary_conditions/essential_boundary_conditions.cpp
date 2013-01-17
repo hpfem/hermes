@@ -177,6 +177,8 @@ namespace Hermes
     void EssentialBCs<Scalar>::create_marker_cache()
     {
       bool hermes_any_set = false;
+      this->markers.clear();
+      this->BCs.clear();
       EssentialBoundaryCondition<Scalar>* any_set = NULL;
       for(this->iterator = begin(); iterator != end(); iterator++)
         for(Hermes::vector<std::string>::const_iterator it = (*iterator)->markers.begin(); it != (*iterator)->markers.end(); it++)
