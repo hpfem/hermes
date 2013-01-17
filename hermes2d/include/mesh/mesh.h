@@ -135,6 +135,9 @@ namespace Hermes
       /// length of the longer diagonal for quads. Ignores element curvature.
       double get_diameter();
 
+      /// Returns the center of gravity.
+      void get_center(double& x, double& y);
+
       Node* vn[4];   ///< vertex node pointers
       union
       {

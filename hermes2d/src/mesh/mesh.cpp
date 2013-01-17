@@ -188,6 +188,29 @@ namespace Hermes
       return this->area;
     }
 
+    void Element::get_center(double& x, double& y)
+    {
+      // x - coordinate
+      x = this->vn[0]->x + this->vn[1]->x + this->vn[2]->x;
+      if(this->is_quad())
+      {
+        x += this->vn[3]->x;
+        x = x / 4.0;
+      }
+      else
+        x = x / 3.0;
+
+      // y - coordinate
+      y = this->vn[0]->y + this->vn[1]->y + this->vn[2]->y;
+      if(this->is_quad())
+      {
+        y += this->vn[3]->y;
+        y = y / 4.0;
+      }
+      else
+        y = y / 3.0;
+    }
+
     double Element::get_diameter()
     {
       if(!this->diameterCalculated)
