@@ -561,7 +561,7 @@ namespace Hermes
       {
         Scalar result = 0;
         for (int i = 0; i < n; i++)
-          result += wt[i] * v->val[i];
+          result += wt[i] * v->dx[i];
         return result;
       }
 
@@ -571,7 +571,7 @@ namespace Hermes
       {
         Ord result = Ord(0);
         for (int i = 0; i < n; i++)
-          result += wt[i] * v->val[i];
+          result += wt[i] * v->dx[i];
         return result;
       }
 
@@ -622,7 +622,7 @@ namespace Hermes
       {
         Scalar result = 0;
         for (int i = 0; i < n; i++)
-          result += wt[i] * v->val[i];
+          result += wt[i] * v->dy[i];
         return result;
       }
 
@@ -632,7 +632,7 @@ namespace Hermes
       {
         Ord result = Ord(0);
         for (int i = 0; i < n; i++)
-          result += wt[i] * v->val[i];
+          result += wt[i] * v->dy[i];
         return result;
       }
 
