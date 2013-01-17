@@ -209,6 +209,7 @@ project(hermes2d)
     src/projections/localprojection.cpp
 
     src/precalculated_forms/weakforms_h1_const.cpp
+    src/precalculated_forms/weakforms_h1_nonlinear.cpp
     
     src/weakform_library/weakforms_elasticity.cpp
     src/weakform_library/weakforms_h1.cpp
@@ -324,6 +325,7 @@ project(hermes2d)
     include/projections/localprojection.h
 
     include/precalculated_forms/weakforms_h1_const.h
+    include/precalculated_forms/weakforms_h1_nonlinear.h
     
     include/weakform_library/weakforms_elasticity.h
     include/weakform_library/weakforms_h1.h
