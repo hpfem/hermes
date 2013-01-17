@@ -128,6 +128,7 @@ namespace Hermes
     void Func<T>::free_ord()
     {
       delete val;
+      delete dx;
       val = NULL;
       dx = NULL;
       dy = NULL;
@@ -420,18 +421,20 @@ namespace Hermes
     Func<Hermes::Ord>* init_fn_ord(const int order)
     {
       Hermes::Ord *d = new Hermes::Ord(order);
+      Hermes::Ord *d1 = new Hermes::Ord(order > 1 ? order - 1 : order);
 
       Func<Hermes::Ord>* f = new Func<Hermes::Ord>(1, 2);
       f->val = d;
-      f->dx = f->dy = d;
+      f->dx = d1;
+      f->dy = d1;
 #ifdef H2D_SECOND_DERIVATIVES_ENABLED
       f->laplace = d;
 #endif
       f->val0 = f->val1 = d;
-      f->dx0 = f->dx1 = d;
-      f->dy0 = f->dy1 = d;
-      f->curl = d;
-      f->div = d;
+      f->dx0 = f->dx1 = d1;
+      f->dy0 = f->dy1 = d1;
+      f->curl = d1;
+      f->div = d1;
       return f;
     }
 
