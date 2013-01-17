@@ -30,9 +30,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormVol : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormVol(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormVol(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormVol(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormVol(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -51,9 +51,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormDx : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormDx(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormDx(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormDx(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormDx(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -72,9 +72,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormDy : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormDy(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormDy(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormDy(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormDy(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -93,9 +93,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormDuDxValV : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormDuDxValV(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormDuDxValV(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormDuDxValV(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormDuDxValV(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -114,9 +114,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormDuDyValV : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormDuDyValV(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormDuDyValV(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormDuDyValV(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormDuDyValV(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -135,9 +135,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormValUDvDx : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormValUDvDx(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormValUDvDx(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormValUDvDx(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormValUDvDx(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -156,9 +156,9 @@ namespace Hermes
       class HERMES_API ConstantMatrixFormValUDvDy : public MatrixFormVol<Scalar>
       {
       public:
-        ConstantMatrixFormValUDvDy(int i, int j, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantMatrixFormValUDvDy(int i, int j, std::string area = HERMES_ANY);
 
-        ConstantMatrixFormValUDvDy(int i, int j, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantMatrixFormValUDvDy(int i, int j, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -182,9 +182,9 @@ namespace Hermes
       class HERMES_API ConstantVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        ConstantVectorFormVol(int i, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantVectorFormVol(int i, std::string area = HERMES_ANY);
 
-        ConstantVectorFormVol(int i, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantVectorFormVol(int i, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -203,9 +203,9 @@ namespace Hermes
       class HERMES_API ConstantVectorFormDx : public VectorFormVol<Scalar>
       {
       public:
-        ConstantVectorFormDx(int i, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantVectorFormDx(int i, std::string area = HERMES_ANY);
 
-        ConstantVectorFormDx(int i, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantVectorFormDx(int i, Hermes::vector<std::string> areas);
 
         void init_tables();
 
@@ -224,9 +224,9 @@ namespace Hermes
       class HERMES_API ConstantVectorFormDy : public VectorFormVol<Scalar>
       {
       public:
-        ConstantVectorFormDy(int i, std::string area = HERMES_ANY, Scalar coefficient = 1.0);
+        ConstantVectorFormDy(int i, std::string area = HERMES_ANY);
 
-        ConstantVectorFormDy(int i, Hermes::vector<std::string> areas, Scalar coefficient = 1.0);
+        ConstantVectorFormDy(int i, Hermes::vector<std::string> areas);
 
         void init_tables();
 

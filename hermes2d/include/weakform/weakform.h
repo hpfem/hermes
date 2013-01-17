@@ -17,6 +17,8 @@
 #define __H2D_WEAKFORM_H
 
 #include "../function/solution.h"
+#include "../parameter/parameter_elemwise_func.h"
+#include "../parameter/parameter_elemwise_mesh_func.h"
 #include <string>
 
 namespace Hermes
@@ -206,6 +208,8 @@ namespace Hermes
       void set_ext(MeshFunction<Scalar>* ext);
       void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
       Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
+
+      void set_parameter_elemwise(ParameterElemwise<Scalar>* parameter_elemwise);
       
     protected:
       /// Set pointer to a WeakForm.
@@ -223,8 +227,8 @@ namespace Hermes
       /// Constant form that can be precalculated.
       bool is_const;
 
-      /// Coefficient (factor) for the constant form.
-      Scalar const_coefficient;
+      /// Element-wise constant parameter that is multiplying the form.
+      ParameterElemwise<Scalar>* parameter_elemwise;
 
       /// This form holds the memory for the precalculated tables.
       /// Used in cloning (only the original form's memory has to be released, other forms only point to the data).

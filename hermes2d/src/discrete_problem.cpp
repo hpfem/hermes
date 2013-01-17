@@ -1865,6 +1865,19 @@ if(new_cache==true)
               throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
           }
 
+          // Get the element-wise constant form multiplier.
+          Scalar parameter_elemwise = 1.0;
+          if(mfv->parameter_elemwise != NULL)
+          {
+            double x = 0., y = 0.;
+            for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
+            {
+              x += current_state->rep->vn[temp_i]->x;
+              y += current_state->rep->vn[temp_i]->y;
+            }
+            parameter_elemwise = mfv->parameter_elemwise->get_value(x, y);
+          }
+
           for(int i = 0; i < asmlist_i->cnt; i++)
           {
             if(asmlist_i->dof[i] < 0)
@@ -1945,7 +1958,7 @@ if(new_cache==true)
                       val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_1;
                       break;
                     }
-                    local_stiffness_matrix[i][j] += val * mfv->const_coefficient;
+                    local_stiffness_matrix[i][j] += val * parameter_elemwise;
                   }
                 }
               }
@@ -1980,7 +1993,18 @@ if(new_cache==true)
           else
               throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
             
-          // Calculate the power of the inverse map jacobian.
+          // Get the element-wise constant form multiplier.
+          Scalar parameter_elemwise = 1.0;
+          if(vfv->parameter_elemwise != NULL)
+          {
+            double x = 0., y = 0.;
+            for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
+            {
+              x += current_state->rep->vn[temp_i]->x;
+              y += current_state->rep->vn[temp_i]->y;
+            }
+            parameter_elemwise = vfv->parameter_elemwise->get_value(x, y);
+          }
 
 			    for(int i = 0; i < asmlist_i->cnt; i++)
 			    {
@@ -2009,7 +2033,7 @@ if(new_cache==true)
                   val *= const_jacobian * const_inv_ref_map_1_1;
                   break;
                 }
-                this->current_rhs->add(asmlist_i->dof[i], val * vfv->const_coefficient);
+                this->current_rhs->add(asmlist_i->dof[i], val * parameter_elemwise);
               }
             }
 			    }
@@ -2029,6 +2053,19 @@ if(new_cache==true)
 
       bool tra = (form->i != form->j) && (form->sym != 0);
       bool sym = (form->i == form->j) && (form->sym == 1);
+
+      // Get the element-wise constant form multiplier.
+      Scalar parameter_elemwise = 1.0;
+      if(form->parameter_elemwise != NULL)
+      {
+        double x = 0., y = 0.;
+        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
+        {
+          x += current_state->rep->vn[temp_i]->x;
+          y += current_state->rep->vn[temp_i]->y;
+        }
+        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+      }
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
@@ -2054,9 +2091,9 @@ if(new_cache==true)
             if(current_als[form->j]->dof[j] < 0)
             {
               if(surface_form)
-                this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i]);
+                this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * parameter_elemwise);
               else
-                this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i]);
+                this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * parameter_elemwise);
             }
           }
         }
@@ -2078,7 +2115,7 @@ if(new_cache==true)
 
             if(current_als[form->j]->dof[j] < 0)
             {
-              this->current_rhs->add(current_als[form->i]->dof[i], -val);
+              this->current_rhs->add(current_als[form->i]->dof[i], -val * parameter_elemwise);
             }
           }
         }
@@ -2171,6 +2208,19 @@ if(new_cache==true)
       if(RungeKutta)
         u_ext += form->u_ext_offset;
 
+      // Get the element-wise constant form multiplier.
+      Scalar parameter_elemwise = 1.0;
+      if(form->parameter_elemwise != NULL)
+      {
+        double x = 0., y = 0.;
+        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
+        {
+          x += current_state->rep->vn[temp_i]->x;
+          y += current_state->rep->vn[temp_i]->y;
+        }
+        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+      }
+
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
       {
@@ -2195,9 +2245,9 @@ if(new_cache==true)
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise;
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * parameter_elemwise;
             }
           }
         }
@@ -2219,7 +2269,7 @@ if(new_cache==true)
 
               Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
-              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val * parameter_elemwise;
             }
           }
         }
@@ -2306,6 +2356,7 @@ if(new_cache==true)
       bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
 
       Func<Scalar>** local_ext = ext;
+
       // If the user supplied custom ext functions for this form.
       if(form->ext.size() > 0)
       {
@@ -2321,6 +2372,19 @@ if(new_cache==true)
       // Account for the previous time level solution previously inserted at the back of ext.
       if(RungeKutta)
         u_ext += form->u_ext_offset;
+
+      // Get the element-wise constant form multiplier.
+      Scalar parameter_elemwise = 1.0;
+      if(form->parameter_elemwise != NULL)
+      {
+        double x = 0., y = 0.;
+        for(int temp_i = 0; temp_i < (current_state->rep->get_mode() == HERMES_MODE_TRIANGLE ? 3 : 4); temp_i++)
+        {
+          x += current_state->rep->vn[temp_i]->x;
+          y += current_state->rep->vn[temp_i]->y;
+        }
+        parameter_elemwise = form->parameter_elemwise->get_value(x, y);
+      }
 
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
@@ -2340,7 +2404,7 @@ if(new_cache==true)
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
 
-        current_rhs->add(current_als_i->dof[i], val);
+        current_rhs->add(current_als_i->dof[i], val * parameter_elemwise);
       }
 
       if(form->ext.size() > 0)

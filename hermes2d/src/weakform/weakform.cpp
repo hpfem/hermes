@@ -161,7 +161,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0), is_const(false), has_precalculated_tables(false), wf(NULL)
+      Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0), is_const(false), has_precalculated_tables(false), wf(NULL), parameter_elemwise(NULL)
     {
       areas.push_back(HERMES_ANY);
       stage_time = 0.0;
@@ -170,6 +170,12 @@ namespace Hermes
     template<typename Scalar>
     Form<Scalar>::~Form()
     {
+    }
+
+    template<typename Scalar>
+    void Form<Scalar>::set_parameter_elemwise(ParameterElemwise<Scalar>* parameter_elemwise)
+    {
+      this->parameter_elemwise = parameter_elemwise;
     }
 
     template<typename Scalar>
