@@ -1297,33 +1297,38 @@ namespace Hermes
     {
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
       {
-      bool new_cache = false;
+        bool new_cache = false;
         if(current_state->e[space_i] == NULL)
           continue;
 
         // No sub_idx map for this element.
         if(this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] == NULL)
         {
-#pragma omp critical (cache_for_subidx_preparation)
+#pragma omp critical (cache_records_sub_idx_map)
           if(this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] == NULL)
           {
             this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
            	new_cache = true;
-           }
+          }
         }
         else
         {
           // If the sub_idx map exists AND contains a record for this sub_idx, we need to delete the record.
-          typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->find(current_state->sub_idx[space_i]);
-          if(it != this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->end())
-            (*it).second->clear();
-          else new_cache = true;
+#pragma omp critical (cache_records_sub_idx_map)
+          {
+            typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->find(current_state->sub_idx[space_i]);
+            if(it != this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->end())
+              (*it).second->clear();
+            else new_cache = true;
+          }
         }
 
         // Insert the new record.
-#pragma omp critical (cache_for_subidx_preparation)
-if(new_cache==true)
+#pragma omp critical (cache_records_sub_idx_map)
+        {
+if(new_cache)
         this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[space_i], new CacheRecordPerSubIdx));
+        }
       }
 
       // Order calculation.
@@ -1441,6 +1446,8 @@ if(new_cache==true)
         }
 
         CacheRecordPerSubIdx* newRecord;
+
+#pragma omp critical (cache_records_sub_idx_map)
         newRecord = (*this->cache_records_sub_idx[i][current_state->e[i]->id]->find(current_state->sub_idx[i])).second;
 
         newRecord->nvert = current_state->rep->nvert;
@@ -1547,6 +1554,20 @@ if(new_cache==true)
       if(changedInLastAdaptation && ((!onlyConstantForms || !constantElement) || current_state->isBnd))
         this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
 
+      // Store the cache entries.
+      CacheRecordPerSubIdx** cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
+      for(int temp_i = 0; temp_i < this->spaces.size(); temp_i++)
+      {
+        if(current_state->e[temp_i] == NULL)
+          continue;
+#pragma omp critical (cache_records_sub_idx_map)
+        {
+          typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[temp_i][current_state->e[temp_i]->id]->find(current_state->sub_idx[temp_i]);
+          if(it != this->cache_records_sub_idx[temp_i][current_state->e[temp_i]->id]->end())
+            cacheRecordPerSubIdx[temp_i] = it->second;
+        }
+      }
+
       /// Dirichlet handling for constant elements.
       if(constantElement && current_state->isBnd)
       {
@@ -1562,10 +1583,8 @@ if(new_cache==true)
             {
               int form_i = current_wf->mfvol[current_mfvol_i]->i;
               int form_j = current_wf->mfvol[current_mfvol_i]->j;
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
-              CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
-              CacheRecordPerSubIdxJ = this->cache_records_sub_idx[form_j][current_state->e[form_j]->id]->find(current_state->sub_idx[form_j])->second;
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
               assemble_constant_forms_Dirichlet(current_state, CacheRecordPerSubIdxI->n_quadrature_points, CacheRecordPerSubIdxI->geometry, CacheRecordPerSubIdxI->jacobian_x_weights, CacheRecordPerSubIdxJ->fns, CacheRecordPerSubIdxI->fns, current_als, current_wf->mfvol[current_mfvol_i]);
             }
           }
@@ -1576,7 +1595,7 @@ if(new_cache==true)
       {
         // Ext functions.
         // - order
-        int order = this->cache_records_sub_idx[rep_space_i][current_state->e[rep_space_i]->id]->find(current_state->sub_idx[rep_space_i])->second->order;
+        int order = cacheRecordPerSubIdx[rep_space_i]->order;
     
         // - u_ext
         Func<Scalar>** u_ext = NULL;
@@ -1626,10 +1645,8 @@ if(new_cache==true)
 
             int form_i = mfv->i;
             int form_j = mfv->j;
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
-            CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
-            CacheRecordPerSubIdxJ = this->cache_records_sub_idx[form_j][current_state->e[form_j]->id]->find(current_state->sub_idx[form_j])->second;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
 
             assemble_matrix_form(mfv, 
               CacheRecordPerSubIdxI->order, 
@@ -1657,8 +1674,7 @@ if(new_cache==true)
               continue;
 
             int form_i = vfv->i;
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-            CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
+            CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
 
             assemble_vector_form(vfv, 
               CacheRecordPerSubIdxI->order, 
@@ -1705,7 +1721,7 @@ if(new_cache==true)
 
           // Ext functions.
           // - order
-          int orderSurf = this->cache_records_sub_idx[rep_space_i][current_state->e[rep_space_i]->id]->find(current_state->sub_idx[rep_space_i])->second->orderSurface[current_state->isurf];
+          int orderSurf = cacheRecordPerSubIdx[rep_space_i]->orderSurface[current_state->isurf];
           // - u_ext
           int prevNewtonSize = this->wf->get_neq();
           Func<Scalar>** u_extSurf = NULL;
@@ -1744,10 +1760,8 @@ if(new_cache==true)
 
               int form_i = current_wf->mfsurf[current_mfsurf_i]->i;
               int form_j = current_wf->mfsurf[current_mfsurf_i]->j;
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxJ;
-              CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
-              CacheRecordPerSubIdxJ = this->cache_records_sub_idx[form_j][current_state->e[form_j]->id]->find(current_state->sub_idx[form_j])->second;
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
 
               assemble_matrix_form(current_wf->mfsurf[current_mfsurf_i], 
                 CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
@@ -1772,8 +1786,7 @@ if(new_cache==true)
                 continue;
 
               int form_i = current_wf->vfsurf[current_vfsurf_i]->i;
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxI;
-              CacheRecordPerSubIdxI = this->cache_records_sub_idx[form_i][current_state->e[form_i]->id]->find(current_state->sub_idx[form_i])->second;
+              CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
 
               assemble_vector_form(current_wf->vfsurf[current_vfsurf_i], 
                 CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
@@ -1812,6 +1825,8 @@ if(new_cache==true)
           if(current_state->e[i] != NULL)
             delete [] current_alsSurface[i];
       }
+
+      delete [] cacheRecordPerSubIdx;
       delete [] current_alsSurface;
     }
 
