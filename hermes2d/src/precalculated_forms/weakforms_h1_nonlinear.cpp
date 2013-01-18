@@ -23,16 +23,14 @@ namespace Hermes
     namespace NonlinearElemwiseWeakFormsH1
     {
       template<typename Scalar>
-      NonlinearElemwiseDiffusionDerivativeForm<Scalar>::NonlinearElemwiseDiffusionDerivativeForm
-        (int i, int j, std::string area) : MatrixFormVol<Scalar>(i, j)
+      NonlinearElemwiseDiffusionDerivativeForm<Scalar>::NonlinearElemwiseDiffusionDerivativeForm(int i, int j, std::string area) : MatrixFormVol<Scalar>(i, j)
       {
         this->set_area(area);
         this->previous_iteration_space_index = j;
       }
 
       template<typename Scalar>
-      NonlinearElemwiseDiffusionDerivativeForm<Scalar>::NonlinearElemwiseDiffusionDerivativeForm
-        (int i, int j, Hermes::vector<std::string> areas) : MatrixFormVol<Scalar>(i, j)
+      NonlinearElemwiseDiffusionDerivativeForm<Scalar>::NonlinearElemwiseDiffusionDerivativeForm(int i, int j, Hermes::vector<std::string> areas) : MatrixFormVol<Scalar>(i, j)
       {
         this->set_areas(areas);
         this->previous_iteration_space_index = j;
@@ -49,7 +47,7 @@ namespace Hermes
       {
         Scalar result = 0;
         for (int i = 0; i < n; i++)
-          result += wt[i] * u->val[i] * (u_ext[previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[previous_iteration_space_index]->dy[i] * v->dy[i]);
+          result += wt[i] * u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
         return result;
       }
 
@@ -59,7 +57,7 @@ namespace Hermes
       {
         Ord result = Ord(0);
         for (int i = 0; i < n; i++)
-          result += wt[i] * u->val[i] * (u_ext[previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[previous_iteration_space_index]->dy[i] * v->dy[i]);
+          result += wt[i] * u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
         return result;
       }
 
