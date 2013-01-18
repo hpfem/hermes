@@ -26,7 +26,6 @@ namespace Hermes
     template<typename Scalar>
     Filter<Scalar>::Filter()
     {
-      this->init();
     }
 
     template<typename Scalar>
