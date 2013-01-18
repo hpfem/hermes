@@ -36,7 +36,7 @@ namespace Hermes
         Vectorizer();
         ~Vectorizer();
 
-        void process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem, int yitem, double eps);
+        void process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
         int get_num_vertices();
         double4* get_vertices();
