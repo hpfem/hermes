@@ -433,7 +433,11 @@ namespace Hermes
     {
       for (int i = 0; i < 4; i++)
       {
+#ifdef _MSC_VER // For Visual Studio compiler the latter does not compile.
+        for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
+#else
         for(typename std::map<uint64_t, LightArray<struct Function<double>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
+#endif
         {
           for(unsigned int l = 0; l < it->second->get_size(); l++)
             if(it->second->present(l))
