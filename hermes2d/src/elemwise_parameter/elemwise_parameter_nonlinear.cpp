@@ -93,5 +93,7 @@ namespace Hermes
 
     template class HERMES_API ElemwiseParameterNonlinear<double>;
     template class HERMES_API ElemwiseParameterNonlinear<std::complex<double> >;
+    template class HERMES_API ElemwiseParameterNonlinearHermesFunc<double>;
+    template class HERMES_API ElemwiseParameterNonlinearHermesFunc<std::complex<double> >;
   }
 }
