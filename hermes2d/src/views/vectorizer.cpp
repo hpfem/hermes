@@ -412,7 +412,7 @@ namespace Hermes
 				this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
 				this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
 				this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
-				dashes = (int2*) malloc(sizeof(int2) * dashes_size);
+				this->dashes = (int2*) realloc(this->dashes, sizeof(int2) * dashes_size);
         info = (int4*) malloc(sizeof(int4) * vertex_size);
         this->empty = false;
 

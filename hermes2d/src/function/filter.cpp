@@ -125,7 +125,7 @@ namespace Hermes
     template<typename Scalar>
     Filter<Scalar>::~Filter()
     {
-      free();
+      this->free();
       if(this->deleteSolutions)
       {
         for(int i = 0; i < this->num; i++)
@@ -431,14 +431,18 @@ namespace Hermes
 
     void ComplexFilter::free()
     {
-      for(std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
+      for (int i = 0; i < num; i++)
       {
-        for(unsigned int l = 0; l < it->second->get_size(); l++)
-          if(it->second->present(l))
-            ::free(it->second->get(l));
-        delete it->second;
+        for(typename std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
+        {
+          for(unsigned int l = 0; l < it->second->get_size(); l++)
+            if(it->second->present(l))
+              ::free(it->second->get(l));
+          delete it->second;
+        }
+        tables[i].clear();
       }
-      tables[this->cur_quad].clear();
+
       if(this->deleteSolutions)
         delete this->sln_complex;
     }
