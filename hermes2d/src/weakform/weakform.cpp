@@ -45,6 +45,9 @@ namespace Hermes
     {
       for(unsigned int i = 0; i < this->ext.size(); i++)
         delete this->ext[i];
+      for(unsigned int i = 0; i < this->forms.size(); i++)
+	      for(unsigned int j = 0; j < get_forms()[i]->ext.size(); j++)
+          delete get_forms()[i]->ext[j];
     }
 
     template<typename Scalar>
