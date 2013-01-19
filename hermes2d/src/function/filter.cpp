@@ -179,7 +179,7 @@ namespace Hermes
     template<typename Scalar>
     void Filter<Scalar>::free()
     {
-      for (int i = 0; i < num; i++)
+      for (int i = 0; i < 4; i++)
       {
         for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
         {
@@ -431,9 +431,9 @@ namespace Hermes
 
     void ComplexFilter::free()
     {
-      for (int i = 0; i < num; i++)
+      for (int i = 0; i < 4; i++)
       {
-        for(typename std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
+        for(typename std::map<uint64_t, LightArray<struct Function<double>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
         {
           for(unsigned int l = 0; l < it->second->get_size(); l++)
             if(it->second->present(l))
@@ -461,7 +461,7 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
 
-      for(std::map<uint64_t, LightArray<struct Filter<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
+      for(std::map<uint64_t, LightArray<struct Function<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
       {
         for(unsigned int l = 0; l < it->second->get_size(); l++)
           if(it->second->present(l))
