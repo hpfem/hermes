@@ -2163,19 +2163,19 @@ namespace Hermes
       if(oext != NULL)
       {
         if(form->ext.size() > 0)
-          for (int i = 0; i < form->ext.size(); i++)
-          {
-            oext[i]->free_ord();
-            delete oext[i];
-          }
-        else
-          for (int i = 0; i < form->wf->ext.size(); i++)
-          {
-            oext[i]->free_ord();
-            delete oext[i];
-          }
+		      for (int i = 0; i < form->ext.size(); i++)
+		      {
+			      oext[i]->free_ord();
+			      delete oext[i];
+		      }
+	      else
+		      for (int i = 0; i < form->wf->ext.size(); i++)
+		      {
+			      oext[i]->free_ord();
+			      delete oext[i];
+		      }
 
-          delete [] oext;
+        delete [] oext;
       }
     }
 
