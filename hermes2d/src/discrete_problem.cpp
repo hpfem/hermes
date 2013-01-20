@@ -2134,7 +2134,10 @@ namespace Hermes
       {
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[std::max(form->ext.size(), form->wf->ext.size())];
+        Func<Hermes::Ord>** ext_ord = NULL;
+        int ext_size = std::max(form->ext.size(), form->wf->ext.size());
+        if(ext_size > 0)
+          ext_ord = new Func<Hermes::Ord>*[ext_size];
         init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
@@ -2318,7 +2321,10 @@ namespace Hermes
       {
         // order of solutions from the previous Newton iteration etc..
         Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        Func<Hermes::Ord>** ext_ord = new Func<Hermes::Ord>*[std::max(form->ext.size(), form->wf->ext.size())];
+        Func<Hermes::Ord>** ext_ord = NULL;
+        int ext_size = std::max(form->ext.size(), form->wf->ext.size());
+        if(ext_size > 0)
+          ext_ord = new Func<Hermes::Ord>*[ext_size];
         init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
         // Order of shape functions.
@@ -2507,21 +2513,23 @@ namespace Hermes
         delete oi[i];
       }
 
-	  if(form->ext.size() > 0)
-		  for (int i = 0; i < form->ext.size(); i++)
-		  {
-			  oext[i]->free_ord();
-			  delete oext[i];
-		  }
-	  else
-		  for (int i = 0; i < form->wf->ext.size(); i++)
-		  {
-			  oext[i]->free_ord();
-			  delete oext[i];
-		  }
+      if(oext != NULL)
+      {
+	      if(form->ext.size() > 0)
+		      for (int i = 0; i < form->ext.size(); i++)
+		      {
+			      oext[i]->free_ord();
+			      delete oext[i];
+		      }
+	      else
+		      for (int i = 0; i < form->wf->ext.size(); i++)
+		      {
+			      oext[i]->free_ord();
+			      delete oext[i];
+		      }
 
-      if(std::max(form->ext.size(), form->wf->ext.size()) > 0)
         delete [] oext;
+      }
     }
 
     template<typename Scalar>

@@ -65,9 +65,9 @@ namespace Hermes
 
       int num;
 
-      MeshFunction<Scalar>* sln[10];
+      MeshFunction<Scalar>* sln[H2D_MAX_COMPONENTS];
 
-      uint64_t sln_sub[10];
+      uint64_t sln_sub[H2D_MAX_COMPONENTS];
 
       /// There is a 2-layer structure of the precalculated tables.
       /// The first (the lowest) one is the layer where mapping of integral orders to
@@ -122,7 +122,7 @@ namespace Hermes
       virtual Func<Scalar>* get_pt_value(double x, double y);
 
     protected:
-      int item[10];
+      int item[H2D_MAX_COMPONENTS];
 
       virtual void filter_fn(int n, Hermes::vector<Scalar*> values, Scalar* result) = 0;
 
