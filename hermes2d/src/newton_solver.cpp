@@ -374,6 +374,14 @@ namespace Hermes
               {
                 this->warn("\t Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
                 this->info("\t  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
+                if(delete_coeff_vec)
+                {
+                  delete [] coeff_vec;
+                  coeff_vec = NULL;
+                }
+
+                delete [] coeff_vec_back;
+
                 throw Exceptions::Exception("Newton NOT converged because of damping coefficient could not be decreased anymore to possibly handle non-converging process.");
               }
               else
@@ -391,6 +399,15 @@ namespace Hermes
           this->tick();
           this->info("\tNewton: solution duration: %f s.\n", this->last());
           this->on_finish();
+          
+          if(delete_coeff_vec)
+          {
+            delete [] coeff_vec;
+            coeff_vec = NULL;
+          }
+
+          delete [] coeff_vec_back;
+          
           throw Exceptions::ValueException("residual norm", residual_norm, max_allowed_residual_norm);
         }
 
@@ -410,7 +427,6 @@ namespace Hermes
           }
 
           delete [] coeff_vec_back;
-          coeff_vec_back = NULL;
 
           this->on_finish();
 
@@ -613,6 +629,15 @@ namespace Hermes
               {
                 this->warn("\t Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
                 this->info("\t  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
+                
+                if(delete_coeff_vec)
+                {
+                  delete [] coeff_vec;
+                  coeff_vec = NULL;
+                }
+
+                delete [] coeff_vec_back;
+          
                 throw Exceptions::Exception("Newton NOT converged because of damping coefficient could not be decreased anymore to possibly handle non-converging process.");
               }
               else
@@ -629,6 +654,14 @@ namespace Hermes
         {
           this->tick();
           this->info("\tNewton: solution duration: %f s.", this->last());
+
+          if(delete_coeff_vec)
+          {
+            delete [] coeff_vec;
+            coeff_vec = NULL;
+          }
+
+          delete [] coeff_vec_back;
 
           this->on_finish();
 
@@ -649,6 +682,8 @@ namespace Hermes
             delete [] coeff_vec;
             coeff_vec = NULL;
           }
+
+          delete [] coeff_vec_back;
 
           this->tick();
           this->info("\tNewton: solution duration: %f s.", this->last());
@@ -731,6 +766,8 @@ namespace Hermes
             delete [] coeff_vec;
             coeff_vec = NULL;
           }
+
+          delete [] coeff_vec_back;
 
           this->tick();
           this->info("\tNewton: solution duration: %f s.\n", this->last());

@@ -82,7 +82,7 @@ namespace Hermes
     void Filter<Scalar>::init()
     {
       // construct the union mesh, if necessary
-      const Mesh* meshes[10];
+      const Mesh* meshes[H2D_MAX_COMPONENTS];
       for(int i = 0; i < this->num; i++)
         meshes[i] = this->sln[i]->get_mesh();
       this->mesh = meshes[0];
@@ -327,7 +327,7 @@ namespace Hermes
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain corresponding tables
-        Scalar* tab[10];
+        Scalar* tab[H2D_MAX_COMPONENTS];
         for (int i = 0; i < this->num; i++)
         {
           int a = 0, b = 0, mask = item[i];
@@ -357,7 +357,7 @@ namespace Hermes
     template<typename Scalar>
     Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y)
     {
-      Scalar val[10];
+      Scalar val[H2D_MAX_COMPONENTS];
       for (int i = 0; i < this->num; i++)
         val[i] = this->sln[i]->get_pt_value(x, y)->val[0];
 
@@ -594,7 +594,7 @@ namespace Hermes
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain solution tables
-        Scalar *val[10], *dx[10], *dy[10];
+        Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
         for (int i = 0; i < this->num; i++)
         {
           val[i] = this->sln[i]->get_fn_values(j);

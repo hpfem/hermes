@@ -142,7 +142,6 @@ namespace Hermes
       for (int i = 0; i < this->num; i++)
         delete [] errors[i];
 
-      // free error_form
       for (int i = 0; i < this->num; i++)
         for (int j = 0; j < this->num; j++)
           if(error_form[i][j] != NULL && own_forms[i][j])
@@ -150,6 +149,9 @@ namespace Hermes
             delete error_form[i][j];
             own_forms[i][j] = false;
           }
+
+      for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
+        delete [] own_forms[i];
     }
 
     template<typename Scalar>
