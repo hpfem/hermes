@@ -540,7 +540,7 @@ namespace Hermes
       x1 = get_vertex_node(e->vn[1]->id, e->vn[2]->id);
       x2 = get_vertex_node(e->vn[2]->id, e->vn[0]->id);
 
-      CurvMap* cm[4];
+      CurvMap* cm[H2D_MAX_NUMBER_EDGES];
       memset(cm, 0, sizeof(cm));
 
       // adjust mid-edge coordinates if this is a curved element
@@ -558,7 +558,7 @@ namespace Hermes
       }
 
       // create the four sons
-      Element* sons[4];
+      Element* sons[H2D_MAX_ELEMENT_SONS];
       sons[0] = create_triangle(e->marker, e->vn[0], x0, x2, cm[0]);
       sons[1] = create_triangle(e->marker, x0, e->vn[1], x1, cm[1]);
       sons[2] = create_triangle(e->marker, x2, x1, e->vn[2], cm[2]);
@@ -635,11 +635,11 @@ namespace Hermes
     void Mesh::refine_quad(Element* e, int refinement, Element** sons_out)
     {
       int i, j;
-      Element* sons[4] = {NULL, NULL, NULL, NULL};
+      Element* sons[H2D_MAX_ELEMENT_SONS] = {NULL, NULL, NULL, NULL};
 
       // remember the markers of the edge nodes
-      int bnd[4] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
-      int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
+      int bnd[H2D_MAX_NUMBER_EDGES] = { e->en[0]->bnd, e->en[1]->bnd, e->en[2]->bnd, e->en[3]->bnd };
+      int mrk[H2D_MAX_NUMBER_EDGES] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
 
       // deactivate this element and unregister from its nodes
       e->active = false;
@@ -647,7 +647,7 @@ namespace Hermes
       e->unref_all_nodes(this);
 
       // now the original edge nodes may no longer exist...
-      CurvMap* cm[4];
+      CurvMap* cm[H2D_MAX_NUMBER_EDGES];
       memset(cm, 0, sizeof(cm));
 
       // default refinement: one quad to four quads
@@ -673,7 +673,7 @@ namespace Hermes
           mid->x = pt[4][0]; mid->y = pt[4][1];
 
           // create CurvMaps for sons (pointer to parent element, part)
-          for (i = 0; i < 4; i++)
+          for (i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
             cm[i] = create_son_curv_map(e, i);
         }
 
@@ -684,10 +684,10 @@ namespace Hermes
         sons[3] = create_quad(e->marker, x3, mid, x2, e->vn[3], cm[3]);
 
         // Increase the number of active elements by 4.
-        this->nactive += 4;
+        this->nactive += H2D_MAX_ELEMENT_SONS;
 
         // set correct boundary markers for the new edge nodes
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < H2D_MAX_NUMBER_EDGES; i++)
         {
           j = (i > 0) ? i-1 : 3;
           sons[i]->en[j]->bnd = bnd[j];  sons[i]->en[j]->marker = mrk[j];
@@ -802,7 +802,7 @@ namespace Hermes
       int s1, s2;
 
       // obtain markers and bnds from son elements
-      int mrk[4], bnd[4];
+      int mrk[H2D_MAX_NUMBER_EDGES], bnd[H2D_MAX_NUMBER_EDGES];
       for (unsigned i = 0; i < e->get_nvert(); i++)
       {
         get_edge_sons(e, i, s1, s2);
@@ -812,7 +812,7 @@ namespace Hermes
       }
 
       // remove all sons
-      for (i = 0; i < 4; i++)
+      for (i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
       {
         Element* son = e->sons[i];
         if(son != NULL)
@@ -1869,8 +1869,8 @@ namespace Hermes
     void Mesh::refine_quad_to_triangles(Element* e)
     {
       // remember the markers of the edge nodes
-      int bnd[4] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd };
-      int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
+      int bnd[H2D_MAX_NUMBER_EDGES] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd };
+      int mrk[H2D_MAX_NUMBER_EDGES] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
 
       // deactivate this element and unregister from its nodes
       e->active = false;
@@ -1993,7 +1993,7 @@ namespace Hermes
       }
 
       // create the four sons
-      Element* sons[4];
+      Element* sons[H2D_MAX_ELEMENT_SONS];
       if(bcheck == true)
       {
         sons[0] = this->create_triangle(e->marker, e->vn[0], e->vn[1], e->vn[2], cm[0]);
@@ -2042,12 +2042,12 @@ namespace Hermes
       }
 
       //set pointers to parent element for sons
-      for(int i = 0; i < 4; i++)
+      for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
         if(sons[i] != NULL)
           sons[i]->parent = e;
 
       // copy son pointers (could not have been done earlier because of the union)
-      memcpy(e->sons, sons, 4 * sizeof(Element*));
+      memcpy(e->sons, sons, H2D_MAX_ELEMENT_SONS * sizeof(Element*));
     }
 
     void Mesh::refine_element_to_triangles_id(int id)
@@ -2365,8 +2365,8 @@ namespace Hermes
     void Mesh::convert_quads_to_base(Element *e)
     {
       // remember the markers of the edge nodes
-      int bnd[4] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd    };
-      int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
+      int bnd[H2D_MAX_NUMBER_EDGES] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd    };
+      int mrk[H2D_MAX_NUMBER_EDGES] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
 
       // check if element e is a internal element.
       bool e_inter = true;
@@ -2377,7 +2377,7 @@ namespace Hermes
       }
 
       // get the boundary edge angle.
-      double refinement_angle[4] = {0.0, 0.0, 0.0, 0.0};
+      double refinement_angle[H2D_MAX_NUMBER_EDGES] = {0.0, 0.0, 0.0, 0.0};
       if(e->is_curved() && (!e_inter))
       {
         // for base element.
@@ -2563,8 +2563,8 @@ namespace Hermes
     void Mesh::refine_quad_to_quads(Element* e, int refinement)
     {
       // remember the markers of the edge nodes
-      int bnd[4] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd    };
-      int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
+      int bnd[H2D_MAX_NUMBER_EDGES] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd,    e->en[3]->bnd    };
+      int mrk[H2D_MAX_NUMBER_EDGES] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
 
       // check if element e is a internal element.
       bool e_inter = true;
@@ -2575,7 +2575,7 @@ namespace Hermes
       }
 
       // get the boundary edge angle.
-      double refinement_angle[4] = {0.0, 0.0, 0.0, 0.0};
+      double refinement_angle[H2D_MAX_NUMBER_EDGES] = {0.0, 0.0, 0.0, 0.0};
       if(e->is_curved() && (!e_inter))
       {
         // for base element.
@@ -2652,8 +2652,8 @@ namespace Hermes
       double angle2 = 0.0;
       int i, j;
       int idx = 0;
-      Element* sons[4] = {NULL, NULL, NULL, NULL};
-      CurvMap* cm[4];
+      Element* sons[H2D_MAX_ELEMENT_SONS] = {NULL, NULL, NULL, NULL};
+      CurvMap* cm[H2D_MAX_ELEMENT_SONS];
       memset(cm, 0, sizeof(cm));
 
       // default refinement: one quad to four quads
@@ -2961,8 +2961,8 @@ namespace Hermes
       else if(sum > 0)
       {
         // remember the markers of the edge nodes
-        int bnd[4] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd  ,  e->en[3]->bnd  };
-        int mrk[4] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
+        int bnd[H2D_MAX_NUMBER_EDGES] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd  ,  e->en[3]->bnd  };
+        int mrk[H2D_MAX_NUMBER_EDGES] = { e->en[0]->marker, e->en[1]->marker, e->en[2]->marker, e->en[3]->marker };
 
         if(sum == 1)
         {

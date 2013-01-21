@@ -826,7 +826,7 @@ namespace Hermes
               if(ydisp != NULL)
                 dy = fns[omp_get_thread_num()][2]->get_fn_values();
 
-              int iv[4];
+              int iv[H2D_MAX_NUMBER_VERTICES];
               for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
               {
                 double f = val[i];

@@ -205,13 +205,13 @@ namespace Hermes
       /// a table from the lowest layer.
       /// The highest layer (in contrast to the PrecalcShapeset class) is represented
       /// here only by this array.
-      std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>* tables[4][4];
+      std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>* tables[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
 
-      Element* elems[4][4];
-      int cur_elem, oldest[4];
+      Element* elems[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
+      int cur_elem, oldest[H2D_SOLUTION_ELEMENT_CACHE_SIZE];
 
       Scalar* mono_coeffs;  ///< monomial coefficient array
-      int* elem_coeffs[2];  ///< array of pointers into mono_coeffs
+      int* elem_coeffs[H2D_MAX_SOLUTION_COMPONENTS];  ///< array of pointers into mono_coeffs
       /// Stored element orders in the mathematical sense. The polynomial degree of the highest basis function + increments due to the element shape, etc.  .
       int* elem_orders;
       int num_coeffs, num_elems;
@@ -221,7 +221,7 @@ namespace Hermes
 
       virtual void precalculate(int order, int mask);
 
-      Scalar* dxdy_coeffs[2][6];
+      Scalar* dxdy_coeffs[H2D_MAX_SOLUTION_COMPONENTS][6];
 
       Scalar* dxdy_buffer;
 

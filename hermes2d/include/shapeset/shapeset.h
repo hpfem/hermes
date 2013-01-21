@@ -154,7 +154,7 @@ namespace Hermes
       int**  bubble_count;
       int**  index_to_order;
 
-      double2 ref_vert[2][4];
+      double2 ref_vert[H2D_MAX_SOLUTION_COMPONENTS][H2D_MAX_NUMBER_VERTICES];
       int max_order;
       int num_components;
 

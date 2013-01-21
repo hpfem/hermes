@@ -54,8 +54,8 @@ namespace Hermes
 
 			struct L2Data
 			{
-				int vdof[4];
-				int edof[4];
+				int vdof[H2D_MAX_NUMBER_VERTICES];
+				int edof[H2D_MAX_NUMBER_EDGES];
 			};
 
 			L2Data* ldata;

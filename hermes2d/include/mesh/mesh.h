@@ -138,11 +138,11 @@ namespace Hermes
       /// Returns the center of gravity.
       void get_center(double& x, double& y);
 
-      Node* vn[4];   ///< vertex node pointers
+      Node* vn[H2D_MAX_NUMBER_VERTICES];   ///< vertex node pointers
       union
       {
-        Node* en[4];      ///< edge node pointers
-        Element* sons[4]; ///< son elements (up to four)
+        Node* en[H2D_MAX_NUMBER_EDGES];      ///< edge node pointers
+        Element* sons[H2D_MAX_ELEMENT_SONS]; ///< son elements (up to four)
       };
 
       int marker;        ///< element marker

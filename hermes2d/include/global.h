@@ -28,16 +28,18 @@
 
 /// Macros.
 #define H2D_MAX_ELEMENT_SONS 4 ///< A maximum number of sons of an element.
+#define H2D_MAX_NUMBER_EDGES 4 ///< A maximum number of edges of an element.
+#define H2D_MAX_NUMBER_VERTICES 4 ///< A maximum number of vertices of an element.
 
+/// Internal.
 #define H2D_NUM_MODES 2 ///< A number of modes, see enum ElementMode2D.
-
+#define H2D_SOLUTION_ELEMENT_CACHE_SIZE 2 ///< A maximum number of vertices of an element.
 #define H2D_MAX_NODE_ID 10000000
+#define H2D_MAX_SOLUTION_COMPONENTS 2
 
 #define HERMES_ONE NULL
 #define HERMES_DEFAULT_FUNCTION NULL
 #define HERMES_DEFAULT_SPLINE NULL
-
-#define H2D_MAX_COMPONENTS 10 ///< The maximum number of components in Hermes2D.
 
     /// Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt

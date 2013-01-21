@@ -43,7 +43,6 @@ namespace Hermes
       signal(SIGTERM, CallStack::dump);
 
       this->integral_parameters.insert(std::pair<Hermes2DApiParam, Parameter<int>*> (Hermes::Hermes2D::numThreads,new Parameter<int>(NUM_THREADS)));
-      this->integral_parameters.insert(std::pair<Hermes2DApiParam, Parameter<int>*> (Hermes::Hermes2D::secondDerivatives,new Parameter<int>(0)));
       this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*> (Hermes::Hermes2D::xmlSchemasDirPath,new Parameter<std::string>(*(new std::string(H2D_XML_SCHEMAS_DIRECTORY)))));
       std::stringstream ss;
       ss << H2D_PRECALCULATED_FORMS_DIRECTORY;

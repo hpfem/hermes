@@ -1,6 +1,6 @@
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_HOME_DIRECTORY}/cmake/cxx_flag_overrides.cmake)
 project(hermes)
-  cmake_minimum_required(VERSION 2.6)
+  cmake_minimum_required(VERSION 2.8)
 
   #------------------------------------------------------------------------------
   # Main configuration options.
@@ -20,16 +20,26 @@ project(hermes)
     set(HERMES_COMMON_RELEASE   YES)
 
   # Hermes2D:
-  set(WITH_H2D                        YES)
+  set(WITH_H2D                  YES)
     # Release and debug versions.
     set(H2D_DEBUG               YES)
     set(H2D_RELEASE             YES)
+	
     # Optional parts of the library.
     set(H2D_WITH_GLUT           YES)
-    set(H2D_WITH_VIEWER_GUI     NO)
-    
-    # Test examples settings.
     set(H2D_WITH_TEST_EXAMPLES  YES)
+	
+	# Advanced settings.
+	# Number of solution / filter components.
+	# Minimum is 1, maximum 999.
+	set(H2D_MAX_COMPONENTS 10)
+	# Number of quadratures, recommended is 4.
+	# Minimum is 2, maximum 999.
+	set(H2D_MAX_QUADRATURES 4)
+	#  This number has to be smaller than 21.
+	set(H2D_MAX_HANGING_NODES_LEVEL 15)
+	#  Use second derivatives (that are turned off by default).
+	set(H2D_USE_SECOND_DERIVATIVES YES)
 
   # Installation path:
     set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
@@ -97,14 +107,31 @@ project(hermes)
     # set(MPI_LIBRARIES         -lmpi)
     # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
+	
+	# Allow to override the default values in CMake.vars:
+	include(CMake.vars OPTIONAL)
+  
   ### END DEFAULT CONFIGURATION ###
     
   set(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
   set(HERMES_COMMON_DIR ${PROJECT_SOURCE_DIR})
   set(HERMES_COMMON_LIB  hermes_common)
-    
-  ### end DEFAULT CONFIGURATION ###
-
+  
+  if(${H2D_MAX_HANGING_NODES_LEVEL} MATCHES "[1-20]")
+  else(${H2D_MAX_HANGING_NODES_LEVEL} MATCHES "[1-20]")
+	message(FATAL_ERROR "H2D_MAX_HANGING_NODES_LEVEL has to be a number smaller than 21.")
+  endif(${H2D_MAX_HANGING_NODES_LEVEL} MATCHES "[1-20]")
+  
+  if(${H2D_MAX_COMPONENTS} MATCHES "[1-999]")
+  else(${H2D_MAX_COMPONENTS} MATCHES "[1-999]")
+	message(FATAL_ERROR "H2D_MAX_COMPONENTS has to be a number between 1 and 999.")
+  endif(${H2D_MAX_COMPONENTS} MATCHES "[1-999]")
+  
+  if(${H2D_MAX_QUADRATURES} MATCHES "[1-999]")
+  else(${H2D_MAX_QUADRATURES} MATCHES "[1-999]")
+	message(FATAL_ERROR "H2D_MAX_QUADRATURES has to be a number between 1 and 999.")
+  endif(${H2D_MAX_QUADRATURES} MATCHES "[1-999]")
+  
   #ADDED BY COLMAN
   IF (APPLE)
     IF (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
@@ -145,9 +172,6 @@ project(hermes)
   ENDIF (APPLE)
   # end ADDED BY COLMAN
 
-  # Allow to override the default values in CMake.vars:
-  include(CMake.vars OPTIONAL)
-  
   # Determine the number of cores.
   if(WIN32)
     set(NUM_THREADS "$ENV{NUMBER_OF_PROCESSORS}")

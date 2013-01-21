@@ -51,7 +51,7 @@ namespace Hermes
       double2** tables;
       int* np;
 
-      double ref_vert[2];
+      double ref_vert[H2D_NUM_MODES];
       int max_order;
 
       virtual void dummy_fn() = 0; // to prevent this class from being instantiated
@@ -80,7 +80,7 @@ namespace Hermes
       int max_order[2], safe_max_order[2];
       int max_edge_order;
 
-      double2 ref_vert[2][4];
+      double2 ref_vert[2][H2D_MAX_NUMBER_VERTICES];
     };
   }
 }

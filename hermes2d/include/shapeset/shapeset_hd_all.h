@@ -42,7 +42,7 @@ namespace Hermes
       template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
       template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
-      static const int max_index[2];
+      static const int max_index[H2D_NUM_MODES];
     };
 
     /// This is the default Hdiv shapeset typedef.

@@ -2576,8 +2576,8 @@ namespace Hermes
       (5);
       unsigned int* num_neighbors = new unsigned int[current_state->rep->nvert];
 
-      bool intra_edge_passed_DG[4];
-      for(int a = 0; a < 4; a++)
+      bool intra_edge_passed_DG[H2D_MAX_NUMBER_VERTICES];
+      for(int a = 0; a < H2D_MAX_NUMBER_VERTICES; a++)
         intra_edge_passed_DG[a] = false;
 
 #pragma omp critical (DG)
@@ -3393,9 +3393,9 @@ namespace Hermes
             (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
             (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
             (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
-            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
           else
-            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
 
         // Make the new_neighbor_neighbor_transformations the current running neighbor transformation.
         running_neighbor_transformations.push_back(new_neighbor_neighbor_transformations);
@@ -3422,9 +3422,9 @@ namespace Hermes
             (active_edge == 1 && (node->get_transformation() == 1 || node->get_transformation() == 4)) ||
             (active_edge == 2 && (node->get_transformation() == 2 || node->get_transformation() == 7)) ||
             (active_edge == 3 && (node->get_transformation() == 3 || node->get_transformation() == 5)))
-            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+            running_neighbor_transformations.back()->push_back((!edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
           else
-            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % 4));
+            running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
 
         // Move down.
         if(node->get_left_son() != NULL)

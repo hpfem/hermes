@@ -161,8 +161,8 @@ namespace Hermes
       this->errors_squared_sum = 0.0;
       double total_error = 0.0;
 
-      bool bnd[4];
-      SurfPos surf_pos[4];
+      bool bnd[H2D_MAX_NUMBER_EDGES];
+      SurfPos surf_pos[H2D_MAX_NUMBER_EDGES];
       Traverse::State *ee;
       Traverse trav(true);
 

@@ -82,7 +82,7 @@ namespace Hermes
       {
       public:
         Element** e;
-        bool bnd[4];
+        bool bnd[H2D_MAX_NUMBER_EDGES];
         bool isBnd;
         Element* rep;
         ~State();

@@ -37,7 +37,7 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
       template<typename Scalar> friend class VectorForm;
       template<typename Scalar> friend class MatrixForm;
-      static const int max_index[2];
+      static const int max_index[H2D_NUM_MODES];
     };
 
     /// @ingroup spaces
@@ -50,7 +50,7 @@ namespace Hermes
       virtual int get_max_index(ElementMode2D mode);
     private:
       virtual int get_id() const { return 1; }
-      static const int max_index[2];
+      static const int max_index[H2D_NUM_MODES];
       template<typename Scalar> friend class VectorForm;
       template<typename Scalar> friend class MatrixForm;
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
@@ -72,7 +72,7 @@ namespace Hermes
       template<typename Scalar> friend class MatrixForm;
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
-      static const int max_index[2];
+      static const int max_index[H2D_NUM_MODES];
     };
     */
 

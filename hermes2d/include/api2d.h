@@ -40,7 +40,6 @@ namespace Hermes
     enum Hermes2DApiParam
     {
       numThreads,
-      secondDerivatives,
 			xmlSchemasDirPath,
 			precalculatedFormsDirPath
     };

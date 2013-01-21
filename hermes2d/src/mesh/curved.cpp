@@ -278,7 +278,7 @@ namespace Hermes
     }
 
     //// non-polynomial reference map //////////////////////////////////////////////////////////////////////////////////
-    const double2 CurvMap::ref_vert[2][4] =
+    const double2 CurvMap::ref_vert[2][H2D_MAX_NUMBER_VERTICES] =
     {
       { { -1.0, -1.0 }, { 1.0, -1.0 }, { -1.0, 1.0 }, {  0.0, 0.0 } },
       { { -1.0, -1.0 }, { 1.0, -1.0 }, {  1.0, 1.0 }, { -1.0, 1.0 } }
@@ -357,7 +357,7 @@ namespace Hermes
     void CurvMap::calc_ref_map_quad(Element* e, Nurbs** nurbs, double xi_1, double xi_2,
       double& x, double& y)
     {
-      double ex[4], ey[4];
+      double ex[H2D_MAX_NUMBER_EDGES], ey[H2D_MAX_NUMBER_EDGES];
 
       double n_x, n_y, t_x, t_y;
       nurbs_edge(e, nurbs[0], 0,  xi_1, ex[0], ey[0], n_x, n_y, t_x, t_y);

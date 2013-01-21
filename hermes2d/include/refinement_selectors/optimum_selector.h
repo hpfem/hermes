@@ -81,13 +81,13 @@ namespace Hermes
           double error; ///< An error of this candidate.
           int dofs;  ///< An estimated number of DOFs.
           int split; ///< A refinement, see the enum RefinementType.
-          int p[4]; ///< Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.
+          int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.
           double score; ///< A score of a candidate: the higher the better. If zero, the score is not valid and a candidate should be ignored. Evaluated in OptimumSelector::select_best_candidate.
 
           /// Constructor.
           /** \param[in] split A refinement, see the enum RefinementTypes.
           *  \param[in] order_elems Encoded orders for all element of candidate. If triangle, a vertical order has to be equal to the horizontal one. Unused elements of the array can be ignored. */
-          Cand(const int split, const int order_elems[4])
+          Cand(const int split, const int order_elems[H2D_MAX_ELEMENT_SONS])
             : dofs(-1), split(split), score(0) {
               p[0] = order_elems[0];
               p[1] = order_elems[1];

@@ -607,7 +607,6 @@ namespace Hermes
         Hermes::vector<Scalar *> dy_vector;
 
         for(int i = 0; i < this->num; i++)
-
         {
           values_vector.push_back(val[i]);
           dx_vector.push_back(dx[i]);
@@ -1145,7 +1144,7 @@ namespace Hermes
       for (int j = 0; j < this->num_components; j++)
       {
         // obtain solution tables
-        Scalar *val[4], *dx[4], *dy[4];
+        Scalar *val[H2D_MAX_COMPONENTS], *dx[H2D_MAX_COMPONENTS], *dy[H2D_MAX_COMPONENTS];
         for (int i = 0; i < this->num; i++)
         {
           val[i] = this->sln[i]->get_fn_values(j);

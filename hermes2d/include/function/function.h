@@ -179,7 +179,7 @@ namespace Hermes
 
         int size;           ///< size in bytes of this struct (for maintaining total_mem)
 
-        Scalar* values[2][6]; ///< pointers to 'data'
+        Scalar* values[H2D_MAX_SOLUTION_COMPONENTS][6]; ///< pointers to 'data'
 
         Scalar data[1];       ///< value tables. The length may vary.
 

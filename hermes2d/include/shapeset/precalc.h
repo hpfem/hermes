@@ -105,7 +105,7 @@ namespace Hermes
 
       int index;
 
-      int max_index[2];
+      int max_index[H2D_NUM_MODES];
 
       PrecalcShapeset* master_pss;
 

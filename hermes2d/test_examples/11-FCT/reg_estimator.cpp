@@ -176,8 +176,9 @@ void Regularity_Estimator::smoothness_indicator(UMFPackMatrix<double> * mass_mat
   double x_c_ref = 0.;
   double y_c_ref = 0.; 
   Element* e =NULL; 
-  int* index = new int[4];
-  for(int i =0;i<4;i++)  index[i] =  space->get_shapeset()->get_vertex_index(i,HERMES_MODE_QUAD);
+  int* index = new int[H2D_MAX_NUMBER_VERTICES];
+  for(int i =0;i<H2D_MAX_NUMBER_VERTICES;i++)
+    index[i] =  space->get_shapeset()->get_vertex_index(i,HERMES_MODE_QUAD);
 
   //determine value of the solution/gradient at the center of each element
   // for each dof determine list of elements
@@ -203,7 +204,7 @@ void Regularity_Estimator::smoothness_indicator(UMFPackMatrix<double> * mass_mat
 
   Node* vn=NULL;
   double x_c =0.; double y_c =0.; double u_h_x_c =0.;
-  double* x = new double[4]; double* y = new double[4];
+  double* x = new double[H2D_MAX_NUMBER_VERTICES]; double* y = new double[H2D_MAX_NUMBER_VERTICES];
   double u_i; double u_dx ,u_dy;
   double u_min, u_max, u_min_dx, u_min_dy, u_max_dx, u_max_dy;
   std::list<int>::iterator elem_id; 

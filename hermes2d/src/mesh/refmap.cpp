@@ -591,7 +591,7 @@ namespace Hermes
       // Newton Method
       int local_nc;
       double2* local_coeffs;
-      double2  local_lin_coeffs[4];
+      double2  local_lin_coeffs[H2D_MAX_NUMBER_VERTICES];
       H1ShapesetJacobi shapeset;
       int local_indices[70];
         

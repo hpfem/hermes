@@ -78,7 +78,7 @@ namespace Hermes
       {
         // if toplevel=true, this structure belongs to a base mesh element
         // and the array 'nurbs' points to (up to four) NURBS curved edges
-        Nurbs* nurbs[4];
+        Nurbs* nurbs[H2D_MAX_NUMBER_EDGES];
         struct
         {
           // if toplevel=false, this structure belongs to a refined element
@@ -127,7 +127,7 @@ namespace Hermes
       static void nurbs_edge(Element* e, Nurbs* nurbs, int edge, double t, double& x,
         double& y, double& n_x, double& n_y, double& t_x, double& t_y);
 
-      static const double2 ref_vert[2][4];
+      static const double2 ref_vert[2][H2D_MAX_NUMBER_VERTICES];
 
       /// Subtraction of straight edge and nurbs curve.
       static void nurbs_edge_0(Element* e, Nurbs* nurbs, int edge, double t, double& x, double& y, double& n_x, double& n_y, double& t_x, double& t_y);

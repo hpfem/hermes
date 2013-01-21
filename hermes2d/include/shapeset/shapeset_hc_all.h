@@ -36,7 +36,7 @@ namespace Hermes
       template<typename Scalar> friend class MatrixForm;
       virtual int get_id() const { return 10; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
-      static const int max_index[2];
+      static const int max_index[H2D_NUM_MODES];
     };
 
     /*
@@ -91,7 +91,7 @@ namespace Hermes
       virtual int get_id() const { return 13; }
       virtual SpaceType get_space_type() const { return HERMES_HCURL_SPACE; }
       template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
-      static const int max_index[2];
+      static const int max_index[H2D_NUM_MODES];
     };
 
     /// This is the default Hcurl shapeset typedef.

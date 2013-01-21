@@ -169,7 +169,7 @@ namespace Hermes
         double3x2* second_ref_map[H2D_MAX_TABLES];
         double* phys_x[H2D_MAX_TABLES];
         double* phys_y[H2D_MAX_TABLES];
-        double3* tan[4];
+        double3* tan[H2D_MAX_NUMBER_EDGES];
       };
 
       /// Table of RefMap::Nodes, indexed by a sub-element mapping.
@@ -232,7 +232,7 @@ namespace Hermes
 
       double2* coeffs;
 
-      double2  lin_coeffs[4];
+      double2  lin_coeffs[H2D_MAX_NUMBER_EDGES];
       template<typename T> friend class MeshFunction;
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;
