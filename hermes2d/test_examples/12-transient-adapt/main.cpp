@@ -25,14 +25,17 @@ using namespace Views;
 //
 //  The following parameters can be changed:
 
+// Hermes visualization.
+const bool HERMES_VISUALIZATION = false;
+
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 5;                       
+const int INIT_REF_NUM = 4;                       
 // Initial polynomial degree of all mesh elements.
 const int P_INIT = 1;                             
 // Time step. 
 double time_step = 0.05;                           
 // Time interval length.
-const double T_FINAL = 2.0;                       
+const double T_FINAL = 1.0;                       
 
 // Adaptivity
 // Every UNREF_FREQth time step the mesh is derefined.
@@ -121,7 +124,7 @@ int main(int argc, char* argv[])
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements(0, true);
   mesh.copy(&basemesh);
-  
+
   // Initialize boundary conditions.
   EssentialBCNonConst bc_essential("Bdy");
   EssentialBCs<double> bcs(&bc_essential);
@@ -148,9 +151,12 @@ int main(int argc, char* argv[])
   char title[100];
   ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
   OrderView ordview("Initial mesh", new WinGeom(445, 0, 410, 350));
-  view.show(&sln_time_prev);
-  ordview.show(&space);
-  
+  if(HERMES_VISUALIZATION)
+  {
+    view.show(&sln_time_prev);
+    ordview.show(&space);
+  }
+
   // Initialize Runge-Kutta time stepping.
   RungeKutta<double> runge_kutta(&wf, &space, &bt);
 
@@ -163,15 +169,15 @@ int main(int argc, char* argv[])
     {
       Hermes::Mixins::Loggable::Static::info("Global mesh derefinement.");
       switch (UNREF_METHOD) {
-        case 1: mesh.copy(&basemesh);
-          space.set_uniform_order(P_INIT);
-          break;
-        case 2: mesh.unrefine_all_elements();
-          space.set_uniform_order(P_INIT);
-          break;
-        case 3: mesh.unrefine_all_elements();
-          space.adjust_element_order(-1, -1, P_INIT, P_INIT);
-          break;
+      case 1: mesh.copy(&basemesh);
+        space.set_uniform_order(P_INIT);
+        break;
+      case 2: mesh.unrefine_all_elements();
+        space.set_uniform_order(P_INIT);
+        break;
+      case 3: mesh.unrefine_all_elements();
+        space.adjust_element_order(-1, -1, P_INIT, P_INIT);
+        break;
       }
 
       space.assign_dofs();
@@ -218,7 +224,7 @@ int main(int argc, char* argv[])
 
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_ref: %d, err_est_rel: %g%%",
-                                             Space<double>::get_num_dofs(&space), Space<double>::get_num_dofs(ref_space), err_est_rel_total);
+        Space<double>::get_num_dofs(&space), Space<double>::get_num_dofs(ref_space), err_est_rel_total);
 
       // If err_est too large, adapt the mesh.
       if (err_est_rel_total < ERR_STOP) done = true;
@@ -233,16 +239,19 @@ int main(int argc, char* argv[])
           // Increase the counter of performed adaptivity steps.
           as++;
       }
-      
-      // Visualize the solution and mesh.
-      char title[100];
-      sprintf(title, "Solution<double>, time %g", current_time);
-      view.set_title(title);
-      view.show_mesh(false);
-      view.show(&sln_time_new);
-      sprintf(title, "Mesh, time %g", current_time);
-      ordview.set_title(title);
-      ordview.show(&space);
+
+      if(HERMES_VISUALIZATION)
+      {
+        // Visualize the solution and mesh.
+        char title[100];
+        sprintf(title, "Solution<double>, time %g", current_time);
+        view.set_title(title);
+        view.show_mesh(false);
+        view.show(&sln_time_new);
+        sprintf(title, "Mesh, time %g", current_time);
+        ordview.set_title(title);
+        ordview.show(&space);
+      }
 
       // Clean up.
       delete adaptivity;
@@ -262,6 +271,7 @@ int main(int argc, char* argv[])
   while (current_time < T_FINAL);
 
   // Wait for all views to be closed.
-  View::wait();
+  if(HERMES_VISUALIZATION)
+    View::wait();
   return 0;
 }
