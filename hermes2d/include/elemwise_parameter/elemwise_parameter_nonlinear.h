@@ -47,7 +47,7 @@ namespace Hermes
       /// Get the type of this instance.
       virtual ElemwiseParameterType get_type();
     protected:
-      virtual Scalar get_value(Solution<Scalar>* u_ext, Element* e) = 0;
+      virtual Scalar get_value(int np, Func<Scalar>* u_ext, Geom<double>* geometry) = 0;
 
       ElemwiseParameterNonlinearValueType value_type;
 
@@ -74,7 +74,7 @@ namespace Hermes
       virtual std::string getClassName() const;
 
     protected:
-      virtual Scalar get_value(Solution<Scalar>* u_ext, Element* e);
+      virtual Scalar get_value(int np, Func<Scalar>* u_ext, Geom<double>* geometry);
 
       Hermes1DFunction<Scalar>* function;
 

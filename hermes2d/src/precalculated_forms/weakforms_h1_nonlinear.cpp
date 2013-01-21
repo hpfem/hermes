@@ -48,6 +48,7 @@ namespace Hermes
         Scalar result = 0;
         for (int i = 0; i < n; i++)
           result += wt[i] * u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
+        
         return result;
       }
 

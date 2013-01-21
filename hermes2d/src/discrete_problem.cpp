@@ -1647,7 +1647,6 @@ namespace Hermes
               CacheRecordPerSubIdxI->fns, 
               ext,
               u_ext,
-              current_u_ext,
               current_als[form_i], 
               current_als[form_j], 
               current_state, 
@@ -1763,7 +1762,6 @@ namespace Hermes
                 CacheRecordPerSubIdxI->fnsSurface[current_state->isurf], 
                 extSurf, 
                 u_extSurf,
-                current_u_ext,
                 &current_alsSurface[form_i][current_state->isurf], 
                 &current_alsSurface[form_j][current_state->isurf], 
                 current_state, 
@@ -2182,7 +2180,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, Solution<Scalar>** u_ext_solutions, 
+    void DiscreteProblem<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
@@ -2219,7 +2217,7 @@ namespace Hermes
         if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
           elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
         if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-          elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(u_ext_solutions[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index], current_state->rep);
+          elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(n_quadrature_points, u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index], geometry);
         if(std::abs(elemwise_parameter) < 1e-12)
           return;
       }

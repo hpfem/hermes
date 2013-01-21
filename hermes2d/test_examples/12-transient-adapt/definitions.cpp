@@ -84,8 +84,7 @@ CustomWeakFormPoisson::CustomWeakFormPoisson(Hermes1DFunction<double>* coeff, He
     this->add_matrix_form(form_derivative);
     this->add_matrix_form(form_value);
   }
-
-  if(0)
+  else
   {
     this->add_matrix_form(new DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, coeff));
   }
