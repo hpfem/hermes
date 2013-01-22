@@ -29,17 +29,17 @@ using namespace Views;
 const bool HERMES_VISUALIZATION = false;
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF_NUM = 4;                       
+const int INIT_REF_NUM = 3;                       
 // Initial polynomial degree of all mesh elements.
 const int P_INIT = 1;                             
 // Time step. 
 double time_step = 0.05;                           
 // Time interval length.
-const double T_FINAL = 1.0;                       
+const double T_FINAL = 0.51;                       
 
 // Adaptivity
 // Every UNREF_FREQth time step the mesh is derefined.
-const int UNREF_FREQ = 1;                         
+const int UNREF_FREQ = 2;                         
 // 1... mesh reset to basemesh and poly degrees to P_INIT.   
 // 2... one ref. layer shaved off, poly degrees reset to P_INIT.
 // 3... one ref. layer shaved off, poly degrees decreased by one. 
@@ -205,6 +205,7 @@ int main(int argc, char* argv[])
         runge_kutta.set_verbose_output(true);
         runge_kutta.set_time(current_time);
         runge_kutta.set_time_step(time_step);
+        runge_kutta.set_newton_tol(NEWTON_TOL);
         runge_kutta.rk_time_step_newton(&sln_time_prev, &sln_time_new);
       }
       catch(Exceptions::Exception& e)
