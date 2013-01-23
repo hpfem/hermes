@@ -2214,12 +2214,45 @@ namespace Hermes
       Scalar elemwise_parameter = 1.0;
       if(form->elemwise_parameter != NULL)
       {
+        // By default, use the parameter.
+        form->forget_elemwise_parameter = false;
+
         if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
+        {
           elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-          elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(n_quadrature_points, u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index], geometry);
-        if(std::abs(elemwise_parameter) < 1e-12)
+          if(std::abs(elemwise_parameter) < 1e-12)
           return;
+        }
+        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
+        {
+          // Calculation of standard deviation of u_ext->val[{quadrature points}].
+          Scalar mean_value = 0.0;
+          for(int i = 0; i < n_quadrature_points; i++)
+            mean_value += u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index]->val[i];
+          mean_value /= n_quadrature_points;
+
+          elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(mean_value);
+
+          if(std::abs(elemwise_parameter) < 1e-12)
+          return;
+
+          double deviation = 0.0;
+          double mean_value_abs = std::abs(mean_value);
+          for(int i = 0; i < n_quadrature_points; i++)
+          {
+            double val_i_abs = std::abs(u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index]->val[i]);
+              deviation += std::pow(val_i_abs - mean_value_abs, 2.0);
+          }
+
+          double ratio = deviation / (mean_value_abs * n_quadrature_points);
+
+          // 1 percent.
+          if(ratio > 0.0001)
+          {
+            elemwise_parameter = 1.0;
+            form->forget_elemwise_parameter = true;
+          }
+        }
       }
 
       // Actual form-specific calculation.

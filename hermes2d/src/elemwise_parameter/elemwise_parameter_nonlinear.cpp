@@ -37,18 +37,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar ElemwiseParameterNonlinearHermesFunc<Scalar>::get_value(int np, Func<Scalar>* u_ext, Geom<double>* geometry)
+    Scalar ElemwiseParameterNonlinearHermesFunc<Scalar>::get_value(Scalar value) const
     {
-      Scalar result = 0.0;
-      for(int i = 0; i < np; i++)
-        result += u_ext->val[i];
-      result /= np;
-      
       // Pass the value.
       if(this->value_type == ElemwiseParameterNonlinearValue)
-        return this->function->value(result);
+        return this->function->value(value);
       else
-        return this->function->derivative(result);
+        return this->function->derivative(value);
     }
 
     template<typename Scalar>

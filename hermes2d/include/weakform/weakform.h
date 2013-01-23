@@ -231,6 +231,9 @@ namespace Hermes
       /// Element-wise constant parameter that is multiplying the form.
       ElemwiseParameter<Scalar>* elemwise_parameter;
 
+      /// For heuristics reason, if assembling decides that this form needs to be assembled properly.
+      bool forget_elemwise_parameter;
+
       /// This form holds the memory for the precalculated tables.
       /// Used in cloning (only the original form's memory has to be released, other forms only point to the data).
       bool has_precalculated_tables;
@@ -273,6 +276,9 @@ namespace Hermes
       unsigned int previous_iteration_space_index;
 
       SymFlag sym;
+
+      typedef Scalar valueFunction(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+        Geom<double> *e, Func<Scalar> **ext) const;
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
         Geom<double> *e, Func<Scalar> **ext) const;

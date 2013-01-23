@@ -46,9 +46,10 @@ namespace Hermes
 
       /// Get the type of this instance.
       virtual ElemwiseParameterType get_type();
-    protected:
-      virtual Scalar get_value(int np, Func<Scalar>* u_ext, Geom<double>* geometry) = 0;
 
+      virtual Scalar get_value(Scalar value) const = 0;
+
+    protected:
       ElemwiseParameterNonlinearValueType value_type;
 
       template<typename T> friend class DiscreteProblem;
@@ -73,9 +74,9 @@ namespace Hermes
         /// Get class name, for the purpose of messaging.
       virtual std::string getClassName() const;
 
-    protected:
-      virtual Scalar get_value(int np, Func<Scalar>* u_ext, Geom<double>* geometry);
+      virtual Scalar get_value(Scalar value) const;
 
+    protected:
       Hermes1DFunction<Scalar>* function;
 
       template<typename T> friend class DiscreteProblem;

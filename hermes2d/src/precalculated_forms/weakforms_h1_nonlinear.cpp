@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "weakforms_h1_nonlinear.h"
+#include "../elemwise_parameter/elemwise_parameter_nonlinear.h"
 #include "api2d.h"
 
 namespace Hermes
@@ -46,8 +47,17 @@ namespace Hermes
         Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
-        for (int i = 0; i < n; i++)
-          result += wt[i] * u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
+        if(forget_elemwise_parameter)
+        {
+          // Assert that there is a parameter here.
+          for (int i = 0; i < n; i++)
+            result += wt[i] * (static_cast<const ElemwiseParameterNonlinear<Scalar>*>(this->elemwise_parameter))->get_value(u_ext[this->previous_iteration_space_index]->val[i]) * u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
+        }
+        else
+        {
+          for (int i = 0; i < n; i++)
+            result += wt[i] * u->val[i] * (u_ext[this->previous_iteration_space_index]->dx[i] * v->dx[i] + u_ext[this->previous_iteration_space_index]->dy[i] * v->dy[i]);
+        }
         
         return result;
       }
@@ -73,6 +83,7 @@ namespace Hermes
         (int i, int j, std::string area) : MatrixFormVol<Scalar>(i, j)
       {
         this->set_area(area);
+        this->previous_iteration_space_index = j;
       }
 
       template<typename Scalar>
@@ -80,6 +91,7 @@ namespace Hermes
         (int i, int j, Hermes::vector<std::string> areas) : MatrixFormVol<Scalar>(i, j)
       {
         this->set_areas(areas);
+        this->previous_iteration_space_index = j;
       }
 
       template<typename Scalar>
@@ -92,8 +104,17 @@ namespace Hermes
         Geom<double> *e, Func<Scalar> **ext) const
       {
         Scalar result = 0;
-        for (int i = 0; i < n; i++)
+        if(forget_elemwise_parameter)
+        {
+          // Assert that there is a parameter here.
+          for (int i = 0; i < n; i++)
+            result += wt[i] * (static_cast<const ElemwiseParameterNonlinear<Scalar>*>(this->elemwise_parameter))->get_value(u_ext[this->previous_iteration_space_index]->val[i]) * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+        }
+        else
+        {
+          for (int i = 0; i < n; i++)
             result += wt[i] * (u->dx[i] * v->dx[i] + u->dy[i] * v->dy[i]);
+        }
         return result;
       }
 
