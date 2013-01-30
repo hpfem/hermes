@@ -285,6 +285,12 @@ namespace Hermes
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
+
+      void set_h1_h1_const_tables_filename(ElementMode2D mode, const char* filename);
+      void set_h1_l2_const_tables_filename(ElementMode2D mode, const char* filename);
+      void set_l2_h1_const_tables_filename(ElementMode2D mode, const char* filename);
+      void set_l2_l2_const_tables_filename(ElementMode2D mode, const char* filename);
+
     protected:
       /// Set this form to constant and provide the tables.
       /// For various spaces and shapesets.
@@ -293,6 +299,7 @@ namespace Hermes
       void set_h1_l2_const_tables(ElementMode2D mode, const char* filename);
       void set_l2_h1_const_tables(ElementMode2D mode, const char* filename);
       void set_l2_l2_const_tables(ElementMode2D mode, const char* filename);
+
       void set_const_tables(ElementMode2D mode, const char* filename, Scalar****& matrix_values, const int dimensions_test[2], const int dimensions_basis[2]);
 
       /// The storage for precalculated values.
@@ -301,6 +308,11 @@ namespace Hermes
       Scalar**** matrix_values_h1_l2;
       Scalar**** matrix_values_l2_h1;
       Scalar**** matrix_values_l2_l2;
+
+      std::string matrix_values_h1_h1_filename[2];
+      std::string matrix_values_h1_l2_filename[2];
+      std::string matrix_values_l2_h1_filename[2];
+      std::string matrix_values_l2_l2_filename[2];
       friend class DiscreteProblem<Scalar>;
     };
 
@@ -361,6 +373,11 @@ namespace Hermes
 
       virtual void set_elemwise_parameter(ElemwiseParameter<Scalar>* elemwise_parameter);
       
+      void set_h1_const_tables_filename(ElementMode2D mode, const char* filename);
+      void set_l2_const_tables_filename(ElementMode2D mode, const char* filename);
+      void set_hcurl_const_tables_filename(ElementMode2D mode, const char* filename);
+      void set_hdiv_const_tables_filename(ElementMode2D mode, const char* filename);
+
     protected:
       /// Set this form to constant and provide the tables.
       /// For various spaces and shapesets.
@@ -369,6 +386,7 @@ namespace Hermes
       void set_l2_const_tables(ElementMode2D mode, const char* filename);
       void set_hcurl_const_tables(ElementMode2D mode, const char* filename);
       void set_hdiv_const_tables(ElementMode2D mode, const char* filename);
+
       void set_const_tables(ElementMode2D mode, const char* filename, Scalar***& rhs_values, const int dimensions_test[2]);
 
       /// The storage for precalculated values.
@@ -377,6 +395,11 @@ namespace Hermes
       Scalar*** rhs_values_l2;
       Scalar*** rhs_values_hcurl;
       Scalar*** rhs_values_hdiv;
+
+      std::string rhs_values_h1_filename[2];
+      std::string rhs_values_l2_filename[2];
+      std::string rhs_values_hcurl_filename[2];
+      std::string rhs_values_hdiv_filename[2];
       friend class DiscreteProblem<Scalar>;
     };
 

@@ -329,6 +329,30 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void MatrixForm<Scalar>::set_h1_h1_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->matrix_values_h1_h1_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_h1_l2_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->matrix_values_h1_l2_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_l2_h1_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->matrix_values_l2_h1_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
+    void MatrixForm<Scalar>::set_l2_l2_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->matrix_values_l2_l2_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
     void MatrixForm<Scalar>::set_const_tables(ElementMode2D mode, const char* filename, Scalar****& matrix_values, const int dimensions_test[2], const int dimensions_basis[2])
     {
       if(!this->is_const)
@@ -543,6 +567,30 @@ namespace Hermes
     void VectorForm<Scalar>::set_hdiv_const_tables(ElementMode2D mode, const char* filename)
     {
       this->set_const_tables(mode, filename, this->rhs_values_hdiv, HdivShapeset::max_index);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_h1_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->rhs_values_h1_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_l2_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->rhs_values_l2_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_hcurl_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->rhs_values_hcurl_filename[mode] = std::string(filename);
+    }
+
+    template<typename Scalar>
+    void VectorForm<Scalar>::set_hdiv_const_tables_filename(ElementMode2D mode, const char* filename)
+    {
+      this->rhs_values_hdiv_filename[mode] = std::string(filename);
     }
 
     template<typename Scalar>

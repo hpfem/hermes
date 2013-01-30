@@ -27,6 +27,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -35,16 +36,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormVol<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormVolTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormVolQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormVolTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormVolQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormVolTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormVolQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormVolTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormVolQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -90,6 +92,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -98,16 +101,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormDx<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDxTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormDxQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDxTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormDxQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDxTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDxQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDxTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDxQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -153,6 +157,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -161,16 +166,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormDy<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDyTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormDyQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDyTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormDyQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDyTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDyQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDyTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDyQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -216,6 +222,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -224,16 +231,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormDuDxValV<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDuDxValVTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormDuDxValVQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDuDxValVTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormDuDxValVQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDuDxValVTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDuDxValVQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDuDxValVTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDuDxValVQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -279,6 +287,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -287,16 +296,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormDuDyValV<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDuDyValVTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormDuDyValVQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormDuDyValVTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormDuDyValVQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDuDyValVTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDuDyValVQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormDuDyValVTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormDuDyValVQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -342,6 +352,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -350,16 +361,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormValUDvDx<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDxTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormValUDvDxQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDxTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormValUDvDxQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDxTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormValUDvDxQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDxTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormValUDvDxQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -405,6 +417,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -413,16 +426,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantMatrixFormValUDvDy<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDyTriangle.h1h1");
-        this->set_h1_h1_const_tables(HERMES_MODE_QUAD, "MatrixFormValUDvDyQuad.h1h1");
-        this->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDyTriangle.l2l2");
-        this->set_l2_l2_const_tables(HERMES_MODE_QUAD, "MatrixFormValUDvDyQuad.l2l2");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDyTriangle.h1h1");
+        this->set_h1_h1_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormValUDvDyQuad.h1h1");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "MatrixFormValUDvDyTriangle.l2l2");
+        this->set_l2_l2_const_tables_filename(HERMES_MODE_QUAD, "MatrixFormValUDvDyQuad.l2l2");
 
         /// \todo Cross-tables (h1 <-> l2)
         /// \todo Hcurl, Hdiv
@@ -468,6 +482,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -476,16 +491,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
-        
+
       template<typename Scalar>
       void ConstantVectorFormVol<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_const_tables(HERMES_MODE_TRIANGLE, "VectorFormVolTriangle.h1");
-        this->set_h1_const_tables(HERMES_MODE_QUAD, "VectorFormVolQuad.h1");
-        this->set_l2_const_tables(HERMES_MODE_TRIANGLE, "VectorFormVolTriangle.l2");
-        this->set_l2_const_tables(HERMES_MODE_QUAD, "VectorFormVolQuad.l2");
+        this->set_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "VectorFormVolTriangle.h1");
+        this->set_h1_const_tables_filename(HERMES_MODE_QUAD, "VectorFormVolQuad.h1");
+        this->set_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "VectorFormVolTriangle.l2");
+        this->set_l2_const_tables_filename(HERMES_MODE_QUAD, "VectorFormVolQuad.l2");
         /// \todo Hcurl, Hdiv
       }
 
@@ -529,6 +545,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -537,16 +554,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantVectorFormDx<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_const_tables(HERMES_MODE_TRIANGLE, "VectorFormDxTriangle.h1");
-        this->set_h1_const_tables(HERMES_MODE_QUAD, "VectorFormDxQuad.h1");
-        this->set_l2_const_tables(HERMES_MODE_TRIANGLE, "VectorFormDxTriangle.l2");
-        this->set_l2_const_tables(HERMES_MODE_QUAD, "VectorFormDxQuad.l2");
+        this->set_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "VectorFormDxTriangle.h1");
+        this->set_h1_const_tables_filename(HERMES_MODE_QUAD, "VectorFormDxQuad.h1");
+        this->set_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "VectorFormDxTriangle.l2");
+        this->set_l2_const_tables_filename(HERMES_MODE_QUAD, "VectorFormDxQuad.l2");
         /// \todo Hcurl, Hdiv
       }
 
@@ -590,6 +608,7 @@ namespace Hermes
       {
         this->set_area(area);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
@@ -598,16 +617,17 @@ namespace Hermes
       {
         this->set_areas(areas);
         this->init_tables();
+        this->is_const = true;
       }
 
       template<typename Scalar>
       void ConstantVectorFormDy<Scalar>::init_tables()
       {
         // Settings of precalculated values.
-        this->set_h1_const_tables(HERMES_MODE_TRIANGLE, "VectorFormDyTriangle.h1");
-        this->set_h1_const_tables(HERMES_MODE_QUAD, "VectorFormDyQuad.h1");
-        this->set_l2_const_tables(HERMES_MODE_TRIANGLE, "VectorFormDyTriangle.l2");
-        this->set_l2_const_tables(HERMES_MODE_QUAD, "VectorFormDyQuad.l2");
+        this->set_h1_const_tables_filename(HERMES_MODE_TRIANGLE, "VectorFormDyTriangle.h1");
+        this->set_h1_const_tables_filename(HERMES_MODE_QUAD, "VectorFormDyQuad.h1");
+        this->set_l2_const_tables_filename(HERMES_MODE_TRIANGLE, "VectorFormDyTriangle.l2");
+        this->set_l2_const_tables_filename(HERMES_MODE_QUAD, "VectorFormDyQuad.l2");
         /// \todo Hcurl, Hdiv
       }
 
