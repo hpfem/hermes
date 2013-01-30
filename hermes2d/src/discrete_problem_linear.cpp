@@ -62,7 +62,10 @@ namespace Hermes
       bool force_diagonal_blocks,
       Table* block_weights)
     {
+      // Check.
       this->check();
+      if(this->ndof == 0)
+        throw Exceptions::Exception("Zero DOFs detected in DiscreteProblemLinear::assemble().");
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;

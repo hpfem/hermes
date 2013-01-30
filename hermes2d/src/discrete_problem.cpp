@@ -1115,6 +1115,8 @@ namespace Hermes
     {
       // Check.
       this->check();
+      if(this->ndof == 0)
+        throw Exceptions::Exception("Zero DOFs detected in DiscreteProblem::assemble().");
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;

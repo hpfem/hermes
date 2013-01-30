@@ -28,8 +28,8 @@
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
 const bool BASE_VISUALIZATION = true;              // Set to "true" to enable base functions output.
-const int P_INIT = 6;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 6;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 1;                             // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double VOLUME_HEAT_SRC = 1.0;          // Volume heat sources generated (for example) by electric current.
