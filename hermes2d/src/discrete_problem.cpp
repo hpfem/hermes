@@ -75,37 +75,37 @@ namespace Hermes
     {
       // Set all attributes for which we don't need to acces wf or spaces.
       // This is important for the destructor to properly detect what needs to be deallocated.
-			// Initialize special variable for Runge-Kutta time integration.
-			RungeKutta = false;
-			RK_original_spaces_count = 0;
+      // Initialize special variable for Runge-Kutta time integration.
+      RungeKutta = false;
+      RK_original_spaces_count = 0;
 
-			this->ndof = 0;
+      this->ndof = 0;
 
-			// Internal variables settings.
-			sp_seq = NULL;
+      // Internal variables settings.
+      sp_seq = NULL;
 
-			// Matrix<Scalar> related settings.
-			have_matrix = false;
+      // Matrix<Scalar> related settings.
+      have_matrix = false;
 
-			// There is a special function that sets a DiscreteProblem to be FVM.
-			// Purpose is that this constructor looks cleaner and is simpler.
-			this->is_fvm = false;
+      // There is a special function that sets a DiscreteProblem to be FVM.
+      // Purpose is that this constructor looks cleaner and is simpler.
+      this->is_fvm = false;
 
-			this->DG_matrix_forms_present = false;
-			this->DG_vector_forms_present = false;
+      this->DG_matrix_forms_present = false;
+      this->DG_vector_forms_present = false;
 
-			Geom<Hermes::Ord> *tmp = init_geom_ord();
-			geom_ord = *tmp;
-			delete tmp;
+      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      geom_ord = *tmp;
+      delete tmp;
 
-			current_mat = NULL;
-			current_rhs = NULL;
-			current_block_weights = NULL;
+      current_mat = NULL;
+      current_rhs = NULL;
+      current_block_weights = NULL;
 
-			
-			cache_element_stored = NULL;
 
-			this->do_not_use_cache = false;
+      cache_element_stored = NULL;
+
+      this->do_not_use_cache = false;
 
       this->is_linear = false;
     }
@@ -212,7 +212,7 @@ namespace Hermes
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(this->wf)->set_current_time(time);
     }
-      
+
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_time_step(double time_step)
     {
@@ -251,17 +251,17 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
     {
-			if(wf == NULL)
-				throw Hermes::Exceptions::NullException(0);
+      if(wf == NULL)
+        throw Hermes::Exceptions::NullException(0);
 
       this->wf = wf;
       this->have_matrix = false;
 
-			if(!this->wf->mfDG.empty())
-				this->DG_matrix_forms_present = true;
+      if(!this->wf->mfDG.empty())
+        this->DG_matrix_forms_present = true;
 
-			if(!this->wf->vfDG.empty())
-				this->DG_vector_forms_present = true;
+      if(!this->wf->vfDG.empty())
+        this->DG_vector_forms_present = true;
     }
 
     template<typename Scalar>
@@ -332,17 +332,17 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spacesToSet)
     {
-			for(unsigned int i = 0; i < spacesToSet.size(); i++)
-				spacesToSet[i]->check();
+      for(unsigned int i = 0; i < spacesToSet.size(); i++)
+        spacesToSet[i]->check();
 
-			if(this->spaces.size() != spacesToSet.size() && this->spaces.size() > 0)
-				throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces.size());
+      if(this->spaces.size() != spacesToSet.size() && this->spaces.size() > 0)
+        throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces.size());
 
-			int originalSize = this->spaces.size();
+      int originalSize = this->spaces.size();
 
-			this->spaces = spacesToSet;
+      this->spaces = spacesToSet;
 
-			this->ndof = Space<Scalar>::get_num_dofs(spaces);
+      this->ndof = Space<Scalar>::get_num_dofs(spaces);
 
       /// \todo TEMPORARY There is something wrong with caching vector shapesets.
       for(unsigned int i = 0; i < spacesToSet.size(); i++)
@@ -359,111 +359,111 @@ namespace Hermes
         first_dof_running += spaces.at(i)->get_num_dofs();
       }
 
-			if(originalSize == 0)
-			{
-				// Internal variables settings.
-				sp_seq = new int[spaces.size()];
-				memset(sp_seq, -1, sizeof(int) * spaces.size());
+      if(originalSize == 0)
+      {
+        // Internal variables settings.
+        sp_seq = new int[spaces.size()];
+        memset(sp_seq, -1, sizeof(int) * spaces.size());
 
-				// Matrix<Scalar> related settings.
-				have_matrix = false;
+        // Matrix<Scalar> related settings.
+        have_matrix = false;
 
-				cache_records_sub_idx = new std::map<uint64_t, CacheRecordPerSubIdx*>**[spaces.size()];
-				cache_records_element = new CacheRecordPerElement**[spaces.size()];
+        cache_records_sub_idx = new std::map<uint64_t, CacheRecordPerSubIdx*>**[spaces.size()];
+        cache_records_element = new CacheRecordPerElement**[spaces.size()];
 
-				this->cache_size = spaces[0]->get_mesh()->get_max_element_id() + 1;
-				for(unsigned int i = 1; i < spaces.size(); i++)
-				{
-					int cache_size_i = spaces[i]->get_mesh()->get_max_element_id() + 1;
-					if(cache_size_i > cache_size)
-						this->cache_size = cache_size_i;
-				}
+        this->cache_size = spaces[0]->get_mesh()->get_max_element_id() + 1;
+        for(unsigned int i = 1; i < spaces.size(); i++)
+        {
+          int cache_size_i = spaces[i]->get_mesh()->get_max_element_id() + 1;
+          if(cache_size_i > cache_size)
+            this->cache_size = cache_size_i;
+        }
 
-				for(unsigned int i = 0; i < spaces.size(); i++)
-				{
-					cache_records_sub_idx[i] = (std::map<uint64_t, CacheRecordPerSubIdx*>**)malloc(this->cache_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
-					memset(cache_records_sub_idx[i], NULL, this->cache_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
+        for(unsigned int i = 0; i < spaces.size(); i++)
+        {
+          cache_records_sub_idx[i] = (std::map<uint64_t, CacheRecordPerSubIdx*>**)malloc(this->cache_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
+          memset(cache_records_sub_idx[i], NULL, this->cache_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
 
-					cache_records_element[i] = (CacheRecordPerElement**)malloc(this->cache_size * sizeof(CacheRecordPerElement*));
-					memset(cache_records_element[i], NULL, this->cache_size * sizeof(CacheRecordPerElement*));
-				}
-				cache_element_stored = NULL;
-			}
-			else
-			{
-				int max_size = spacesToSet[0]->get_mesh()->get_max_element_id();
-				for(unsigned int i = 1; i < spacesToSet.size(); i++)
-				{
-					int max_size_i = spacesToSet[i]->get_mesh()->get_max_element_id();
-					if(max_size_i > max_size)
-						max_size = max_size_i;
-					sp_seq[i] = spacesToSet[i]->get_seq();
-				}
+          cache_records_element[i] = (CacheRecordPerElement**)malloc(this->cache_size * sizeof(CacheRecordPerElement*));
+          memset(cache_records_element[i], NULL, this->cache_size * sizeof(CacheRecordPerElement*));
+        }
+        cache_element_stored = NULL;
+      }
+      else
+      {
+        int max_size = spacesToSet[0]->get_mesh()->get_max_element_id();
+        for(unsigned int i = 1; i < spacesToSet.size(); i++)
+        {
+          int max_size_i = spacesToSet[i]->get_mesh()->get_max_element_id();
+          if(max_size_i > max_size)
+            max_size = max_size_i;
+          sp_seq[i] = spacesToSet[i]->get_seq();
+        }
 
-				if(max_size > this->cache_size + 1)
-				{
-					for(unsigned int i = 0; i < this->spaces.size(); i++)
-					{
-						this->cache_records_sub_idx[i] = (std::map<uint64_t, CacheRecordPerSubIdx*>**)realloc(this->cache_records_sub_idx[i], max_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
-						memset(this->cache_records_sub_idx[i] + this->cache_size, NULL, (max_size - this->cache_size) * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
+        if(max_size > this->cache_size + 1)
+        {
+          for(unsigned int i = 0; i < this->spaces.size(); i++)
+          {
+            this->cache_records_sub_idx[i] = (std::map<uint64_t, CacheRecordPerSubIdx*>**)realloc(this->cache_records_sub_idx[i], max_size * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
+            memset(this->cache_records_sub_idx[i] + this->cache_size, NULL, (max_size - this->cache_size) * sizeof(std::map<uint64_t, CacheRecordPerSubIdx*>*));
 
-						this->cache_records_element[i] = (CacheRecordPerElement**)realloc(this->cache_records_element[i], max_size * sizeof(CacheRecordPerElement*));
-						memset(this->cache_records_element[i] + this->cache_size, NULL, (max_size - this->cache_size) * sizeof(CacheRecordPerElement*));
-					}
+            this->cache_records_element[i] = (CacheRecordPerElement**)realloc(this->cache_records_element[i], max_size * sizeof(CacheRecordPerElement*));
+            memset(this->cache_records_element[i] + this->cache_size, NULL, (max_size - this->cache_size) * sizeof(CacheRecordPerElement*));
+          }
 
-					this->cache_size = max_size;
-				}
+          this->cache_size = max_size;
+        }
 
-				for(unsigned int i = 0; i < spaces.size(); i++)
-				{
-					for(unsigned int j = 0; j < cache_size; j++)
-					{
-						if(j < spaces[i]->get_mesh()->get_max_element_id())
-						{
-							if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active || spaces[i]->get_element_order(spaces[i]->get_mesh()->get_element(j)->id) < 0)
-							{
-								if(this->cache_records_sub_idx[i][j] != NULL)
-								{
-									for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-										it->second->clear();
+        for(unsigned int i = 0; i < spaces.size(); i++)
+        {
+          for(unsigned int j = 0; j < cache_size; j++)
+          {
+            if(j < spaces[i]->get_mesh()->get_max_element_id())
+            {
+              if(spaces[i]->get_mesh()->get_element(j) == NULL || !spaces[i]->get_mesh()->get_element(j)->active || spaces[i]->get_element_order(spaces[i]->get_mesh()->get_element(j)->id) < 0)
+              {
+                if(this->cache_records_sub_idx[i][j] != NULL)
+                {
+                  for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
+                    it->second->clear();
 
-									this->cache_records_sub_idx[i][j]->clear();
-									delete this->cache_records_sub_idx[i][j];
-									this->cache_records_sub_idx[i][j] = NULL;
-								}
-								if(this->cache_records_element[i][j] != NULL)
-								{
-									this->cache_records_element[i][j]->clear();
-									delete this->cache_records_element[i][j];
-									this->cache_records_element[i][j] = NULL;
-								}
-							}
-						}
-						else
-						{
-							if(this->cache_records_sub_idx[i][j] != NULL)
-							{
-								for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
-									it->second->clear();
+                  this->cache_records_sub_idx[i][j]->clear();
+                  delete this->cache_records_sub_idx[i][j];
+                  this->cache_records_sub_idx[i][j] = NULL;
+                }
+                if(this->cache_records_element[i][j] != NULL)
+                {
+                  this->cache_records_element[i][j]->clear();
+                  delete this->cache_records_element[i][j];
+                  this->cache_records_element[i][j] = NULL;
+                }
+              }
+            }
+            else
+            {
+              if(this->cache_records_sub_idx[i][j] != NULL)
+              {
+                for(typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[i][j]->begin(); it != this->cache_records_sub_idx[i][j]->end(); it++)
+                  it->second->clear();
 
-								this->cache_records_sub_idx[i][j]->clear();
-								delete this->cache_records_sub_idx[i][j];
-								this->cache_records_sub_idx[i][j] = NULL;
-							}
-							if(this->cache_records_element[i][j] != NULL)
-							{
-								this->cache_records_element[i][j]->clear();
-								delete this->cache_records_element[i][j];
-								this->cache_records_element[i][j] = NULL;
-							}
-						}
-					}
-				}
-			}
+                this->cache_records_sub_idx[i][j]->clear();
+                delete this->cache_records_sub_idx[i][j];
+                this->cache_records_sub_idx[i][j] = NULL;
+              }
+              if(this->cache_records_element[i][j] != NULL)
+              {
+                this->cache_records_element[i][j]->clear();
+                delete this->cache_records_element[i][j];
+                this->cache_records_element[i][j] = NULL;
+              }
+            }
+          }
+        }
+      }
 
       this->ndof = Space<Scalar>::get_num_dofs(this->spaces);
     }
-    
+
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_space(const Space<Scalar>* space)
     {
@@ -706,6 +706,9 @@ namespace Hermes
         }
       }
 
+      bool have_triangles = false;
+      bool have_quads = false;
+
       if(current_mat != NULL)
       {
         // Spaces have changed: create the matrix from scratch.
@@ -739,6 +742,11 @@ namespace Hermes
         // Loop through all elements.
         while ((current_state = trav.get_next_state()) != NULL)
         {
+          if(current_state->rep->is_triangle())
+            have_triangles = true;
+          else
+            have_quads = true;
+
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
@@ -851,6 +859,81 @@ namespace Hermes
 
         current_mat->alloc();
       }
+      
+      for(int i = 0; i < this->wf->get_forms().size(); i++)
+      {
+        MatrixForm<Scalar>* matrix_form = dynamic_cast<MatrixForm<Scalar>*>(this->wf->get_forms()[i]);
+        VectorForm<Scalar>* vector_form = dynamic_cast<VectorForm<Scalar>*>(this->wf->get_forms()[i]);
+        if(matrix_form != NULL)
+        {
+          if(matrix_form->is_const)
+          {
+            int form_i = matrix_form->i;
+            int form_j = matrix_form->j;
+            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+            {
+              if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+              {
+                if(have_triangles)
+                  matrix_form->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE);
+                if(have_quads)
+                  matrix_form->set_h1_h1_const_tables(HERMES_MODE_QUAD);
+              }
+              else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
+                {
+                if(have_triangles)
+                matrix_form->set_h1_l2_const_tables(HERMES_MODE_TRIANGLE);
+                if(have_quads)
+                matrix_form->set_h1_l2_const_tables(HERMES_MODE_QUAD);
+              }
+              else
+                throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+            }
+            else
+            {
+              if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+              {
+                if(have_triangles)
+                  matrix_form->set_l2_h1_const_tables(HERMES_MODE_TRIANGLE);
+                if(have_quads)
+                  matrix_form->set_l2_h1_const_tables(HERMES_MODE_QUAD);
+              }
+              else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
+              {
+                if(have_triangles)
+                  matrix_form->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE);
+                if(have_quads)
+                  matrix_form->set_l2_l2_const_tables(HERMES_MODE_QUAD);
+              }
+              else
+                throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+            }
+          }
+        }
+        if(vector_form != NULL)
+        {
+          if(vector_form->is_const)
+          {
+            int form_i = vector_form->i;
+            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
+            {
+              if(have_triangles)
+                vector_form->set_h1_const_tables(HERMES_MODE_TRIANGLE);
+              if(have_quads)
+                vector_form->set_h1_const_tables(HERMES_MODE_QUAD);
+            }
+            else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
+            {
+              if(have_triangles)
+                vector_form->set_l2_const_tables(HERMES_MODE_TRIANGLE);
+              if(have_quads)
+                vector_form->set_l2_const_tables(HERMES_MODE_QUAD);
+            }
+            else
+              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+          }
+        }
+      }
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
@@ -941,28 +1024,28 @@ namespace Hermes
           }
         }
 
-      // Assembly lists
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-      {
-        als[i] = new AsmList<Scalar>*[wf->get_neq()];
-        for (unsigned int j = 0; j < wf->get_neq(); j++)
-          als[i][j] = new AsmList<Scalar>();
-      }
+        // Assembly lists
+        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+        {
+          als[i] = new AsmList<Scalar>*[wf->get_neq()];
+          for (unsigned int j = 0; j < wf->get_neq(); j++)
+            als[i][j] = new AsmList<Scalar>();
+        }
 
-      // Weakforms.
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-      {
-        weakforms[i] = this->wf->clone();
-        weakforms[i]->cloneMembers(this->wf);
-      }
+        // Weakforms.
+        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+        {
+          weakforms[i] = this->wf->clone();
+          weakforms[i]->cloneMembers(this->wf);
+        }
 
-      assert(cache_element_stored == NULL);
-      cache_element_stored = new bool*[this->spaces.size()];
-      for(unsigned int i = 0; i < this->spaces.size(); i++)
-      {
-        cache_element_stored[i] = new bool[this->spaces[i]->get_mesh()->get_max_element_id()];
-        memset(cache_element_stored[i], 0, sizeof(bool) * this->spaces[i]->get_mesh()->get_max_element_id());
-      }
+        assert(cache_element_stored == NULL);
+        cache_element_stored = new bool*[this->spaces.size()];
+        for(unsigned int i = 0; i < this->spaces.size(); i++)
+        {
+          cache_element_stored[i] = new bool[this->spaces[i]->get_mesh()->get_max_element_id()];
+          memset(cache_element_stored[i], 0, sizeof(bool) * this->spaces[i]->get_mesh()->get_max_element_id());
+        }
     }
 
     template<typename Scalar>
@@ -1133,7 +1216,7 @@ namespace Hermes
           try
           {
             Traverse::State current_state;
-  #pragma omp critical (get_next_state)
+#pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
             current_pss = pss[omp_get_thread_num()];
@@ -1219,7 +1302,7 @@ namespace Hermes
         delete this->fns[i];
       }
       delete [] this->fns;
-      
+
       delete [] this->jacobian_x_weights;
       this->geometry->free();
       delete this->geometry;
@@ -1245,7 +1328,7 @@ namespace Hermes
         delete [] this->fnsSurface;
         delete [] this->geometrySurface;
         delete [] this->jacobian_x_weightsSurface;
-      
+
         delete [] this->n_quadrature_pointsSurface;
         delete [] this->orderSurface;
         delete [] this->asmlistSurfaceCnt;
@@ -1269,7 +1352,7 @@ namespace Hermes
           continue;
         if(this->spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
           return true;
-        
+
         // Check of potential new constraints.
         if(!this->do_not_use_cache)
         {
@@ -1362,7 +1445,7 @@ namespace Hermes
             if(order < orderTemp)
               order = orderTemp;
           }
-           for(int current_vfvol_i = 0; current_vfvol_i < current_vfvol.size(); current_vfvol_i++)
+          for(int current_vfvol_i = 0; current_vfvol_i < current_vfvol.size(); current_vfvol_i++)
           {
             if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
               continue;
@@ -1469,7 +1552,7 @@ namespace Hermes
 
           newRecord->geometrySurface = new Geom<double>*[newRecord->nvert];
           newRecord->jacobian_x_weightsSurface = new double*[newRecord->nvert];
-          
+
           newRecord->n_quadrature_pointsSurface = new int[newRecord->nvert];
           newRecord->orderSurface = new int[newRecord->nvert];
           newRecord->asmlistSurfaceCnt = new int[newRecord->nvert];
@@ -1517,310 +1600,312 @@ namespace Hermes
           spaces[space_i]->get_element_assembly_list(current_state->e[space_i], current_als[space_i], spaces_first_dofs[space_i]);
         }
 
-      if(rep_space_i == -1)
-        return;
+        if(rep_space_i == -1)
+          return;
 
-      bool constantElement = current_refmaps[rep_space_i]->is_jacobian_const();
-      bool onlyConstantForms = current_wf->only_constant_forms();
+        bool constantElement = current_refmaps[rep_space_i]->is_jacobian_const();
+        bool onlyConstantForms = current_wf->only_constant_forms();
 
-      // Do we have to recalculate the data for this state even if the cache contains the data?
-      bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
+        // Do we have to recalculate the data for this state even if the cache contains the data?
+        bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
 
-      // Assembly lists for surface forms.
-      AsmList<Scalar>** current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
-      if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
-      {
-        for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+        // Assembly lists for surface forms.
+        AsmList<Scalar>** current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
+        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
         {
-          current_alsSurface[space_i] = new AsmList<Scalar>[current_state->rep->nvert];
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
-            if(current_state->bnd[current_state->isurf])
-              spaces[space_i]->get_boundary_assembly_list(current_state->e[space_i], current_state->isurf, &current_alsSurface[space_i][current_state->isurf], spaces_first_dofs[space_i]);
+          for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+          {
+            current_alsSurface[space_i] = new AsmList<Scalar>[current_state->rep->nvert];
+            for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+              if(current_state->bnd[current_state->isurf])
+                spaces[space_i]->get_boundary_assembly_list(current_state->e[space_i], current_state->isurf, &current_alsSurface[space_i][current_state->isurf], spaces_first_dofs[space_i]);
+          }
         }
-      }
 
-      // The constant forms.
-      if(constantElement)
-        this->assemble_constant_forms(current_refmaps[rep_space_i], current_als, current_state, current_wf);
-      
-      // Calculate the cache entries.
-      if(changedInLastAdaptation && ((!onlyConstantForms || !constantElement) || current_state->isBnd))
-        this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
+        // The constant forms.
+        if(constantElement)
+          this->assemble_constant_forms(current_refmaps[rep_space_i], current_als, current_state, current_wf);
 
-      // Store the cache entries.
-      CacheRecordPerSubIdx** cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
-      for(int temp_i = 0; temp_i < this->spaces.size(); temp_i++)
-      {
-        if(current_state->e[temp_i] == NULL)
-          continue;
+        // Calculate the cache entries.
+        CacheRecordPerSubIdx** cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
+        if(changedInLastAdaptation && ((!onlyConstantForms || !constantElement) || current_state->isBnd))
+        {
+          this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
+
+          // Store the cache entries.
+          for(int temp_i = 0; temp_i < this->spaces.size(); temp_i++)
+          {
+            if(current_state->e[temp_i] == NULL)
+              continue;
 #pragma omp critical (cache_records_sub_idx_map)
-        {
-          typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[temp_i][current_state->e[temp_i]->id]->find(current_state->sub_idx[temp_i]);
-          if(it != this->cache_records_sub_idx[temp_i][current_state->e[temp_i]->id]->end())
-            cacheRecordPerSubIdx[temp_i] = it->second;
-        }
-      }
-
-      /// Dirichlet handling for constant elements.
-      if(constantElement && current_state->isBnd)
-      {
-        if(current_rhs != NULL)
-        {
-          for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
-          {
-            MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
-            if(!mfv->is_const)
-              continue;
-
-            if(form_to_be_assembled(mfv, current_state))
             {
-              int form_i = current_wf->mfvol[current_mfvol_i]->i;
-              int form_j = current_wf->mfvol[current_mfvol_i]->j;
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
-              CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
-              assemble_constant_forms_Dirichlet(current_state, CacheRecordPerSubIdxI->n_quadrature_points, CacheRecordPerSubIdxI->geometry, CacheRecordPerSubIdxI->jacobian_x_weights, CacheRecordPerSubIdxJ->fns, CacheRecordPerSubIdxI->fns, current_als, current_wf->mfvol[current_mfvol_i]);
+              typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[temp_i][current_state->e[temp_i]->id]->find(current_state->sub_idx[temp_i]);
+              if(it != this->cache_records_sub_idx[temp_i][current_state->e[temp_i]->id]->end())
+                cacheRecordPerSubIdx[temp_i] = it->second;
             }
           }
         }
-      }
 
-      if(!onlyConstantForms || !constantElement)
-      {
-        // Ext functions.
-        // - order
-        int order = cacheRecordPerSubIdx[rep_space_i]->order;
-    
-        // - u_ext
-        Func<Scalar>** u_ext = NULL;
-        int prevNewtonSize = this->wf->get_neq();
-   
-        if(!this->is_linear)
+        /// Dirichlet handling for constant elements.
+        if(constantElement && current_state->isBnd)
         {
-          u_ext = new Func<Scalar>*[prevNewtonSize];
-          if(current_u_ext != NULL)
-            for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-              if(current_u_ext[u_ext_i] != NULL)
-                u_ext[u_ext_i] = current_state->e[u_ext_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_i], order);
-              else
-                u_ext[u_ext_i] = NULL;
-          else
-            for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-              u_ext[u_ext_i] = NULL;
-        }
-      
-        // - ext
-        int current_extCount = this->wf->ext.size();
-        Func<Scalar>** ext = NULL;
-        if(current_extCount > 0)
-        {
-          ext = new Func<Scalar>*[current_extCount];
-          for(int ext_i = 0; ext_i < current_extCount; ext_i++)
-            if(current_wf->ext[ext_i] != NULL)
-              ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(current_wf->ext[ext_i], order);
-            else
-              ext[ext_i] = NULL;
-        }
-
-        if(RungeKutta)
-          for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
-            u_ext[ext_i]->add(ext[current_extCount - this->RK_original_spaces_count + ext_i]);
-
-        if(current_mat != NULL)
-        {
-          for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
+          if(current_rhs != NULL)
           {
-            MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
-            if(mfv->is_const && constantElement)
-              continue;
-
-            if(!form_to_be_assembled(mfv, current_state))
-              continue;
-
-            int form_i = mfv->i;
-            int form_j = mfv->j;
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
-
-            assemble_matrix_form(mfv, 
-              CacheRecordPerSubIdxI->order, 
-              CacheRecordPerSubIdxJ->fns, 
-              CacheRecordPerSubIdxI->fns, 
-              ext,
-              u_ext,
-              current_als[form_i], 
-              current_als[form_j], 
-              current_state, 
-              CacheRecordPerSubIdxI->n_quadrature_points, 
-              CacheRecordPerSubIdxI->geometry, 
-              CacheRecordPerSubIdxI->jacobian_x_weights);
-          }
-        }
-        if(current_rhs != NULL)
-        {
-          for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
-          {
-            VectorFormVol<Scalar>* vfv = current_wf->vfvol[current_vfvol_i];
-            if(vfv->is_const && constantElement)
-              continue;
-
-            if(!form_to_be_assembled(vfv, current_state))
-              continue;
-
-            int form_i = vfv->i;
-            CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
-
-            assemble_vector_form(vfv, 
-              CacheRecordPerSubIdxI->order, 
-              CacheRecordPerSubIdxI->fns, 
-              ext,
-              u_ext, 
-              current_als[form_i], 
-              current_state, 
-              CacheRecordPerSubIdxI->n_quadrature_points,
-              CacheRecordPerSubIdxI->geometry, 
-              CacheRecordPerSubIdxI->jacobian_x_weights);
-          }
-        }
-
-        // Cleanup - u_ext
-        if(current_u_ext != NULL)
-        {
-          for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-            if(current_u_ext[u_ext_i] != NULL)
+            for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
             {
-              u_ext[u_ext_i]->free_fn();
-              delete u_ext[u_ext_i];
+              MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
+              if(!mfv->is_const)
+                continue;
+
+              if(form_to_be_assembled(mfv, current_state))
+              {
+                int form_i = current_wf->mfvol[current_mfvol_i]->i;
+                int form_j = current_wf->mfvol[current_mfvol_i]->j;
+                CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
+                CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
+                assemble_constant_forms_Dirichlet(current_state, CacheRecordPerSubIdxI->n_quadrature_points, CacheRecordPerSubIdxI->geometry, CacheRecordPerSubIdxI->jacobian_x_weights, CacheRecordPerSubIdxJ->fns, CacheRecordPerSubIdxI->fns, current_als, current_wf->mfvol[current_mfvol_i]);
+              }
             }
-            delete [] u_ext;
+          }
         }
 
-        // Cleanup - ext
-        for(int ext_i = 0; ext_i < current_extCount; ext_i++)
-          if(current_wf->ext[ext_i] != NULL)
-          {
-            ext[ext_i]->free_fn();
-            delete ext[ext_i];
-          }
-          delete [] ext;
-      }
-          
-      // Assemble surface integrals now: loop through surfaces of the element.
-      if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
-      {
-        for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+        if(!onlyConstantForms || !constantElement)
         {
-          if(!current_state->bnd[current_state->isurf])
-            continue;
-
           // Ext functions.
           // - order
-          int orderSurf = cacheRecordPerSubIdx[rep_space_i]->orderSurface[current_state->isurf];
+          int order = cacheRecordPerSubIdx[rep_space_i]->order;
+
           // - u_ext
+          Func<Scalar>** u_ext = NULL;
           int prevNewtonSize = this->wf->get_neq();
-          Func<Scalar>** u_extSurf = NULL;
+
           if(!this->is_linear)
           {
-            u_extSurf = new Func<Scalar>*[prevNewtonSize];
+            u_ext = new Func<Scalar>*[prevNewtonSize];
             if(current_u_ext != NULL)
-              for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-                if(current_u_ext[u_ext_surf_i] != NULL)
-                  u_extSurf[u_ext_surf_i] = current_state->e[u_ext_surf_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_surf_i], orderSurf);
+              for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
+                if(current_u_ext[u_ext_i] != NULL)
+                  u_ext[u_ext_i] = current_state->e[u_ext_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_i], order);
                 else
-                  u_extSurf[u_ext_surf_i] = NULL;
+                  u_ext[u_ext_i] = NULL;
             else
-              for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-                u_extSurf[u_ext_surf_i] = NULL;
+              for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
+                u_ext[u_ext_i] = NULL;
           }
+
           // - ext
           int current_extCount = this->wf->ext.size();
-          Func<Scalar>** extSurf = new Func<Scalar>*[current_extCount];
-          for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
-            if(current_wf->ext[ext_surf_i] != NULL)
-              extSurf[ext_surf_i] = current_state->e[ext_surf_i] == NULL ? NULL : init_fn(current_wf->ext[ext_surf_i], orderSurf);
-            else
-              extSurf[ext_surf_i] = NULL;
+          Func<Scalar>** ext = NULL;
+          if(current_extCount > 0)
+          {
+            ext = new Func<Scalar>*[current_extCount];
+            for(int ext_i = 0; ext_i < current_extCount; ext_i++)
+              if(current_wf->ext[ext_i] != NULL)
+                ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(current_wf->ext[ext_i], order);
+              else
+                ext[ext_i] = NULL;
+          }
 
           if(RungeKutta)
-            for(int ext_surf_i = 0; ext_surf_i < this->RK_original_spaces_count; ext_surf_i++)
-              u_extSurf[ext_surf_i]->add(extSurf[current_extCount - this->RK_original_spaces_count + ext_surf_i]);
+            for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
+              u_ext[ext_i]->add(ext[current_extCount - this->RK_original_spaces_count + ext_i]);
 
           if(current_mat != NULL)
           {
-            for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
+            for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
             {
-              if(!form_to_be_assembled(current_wf->mfsurf[current_mfsurf_i], current_state))
+              MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
+              if(mfv->is_const && constantElement)
                 continue;
 
-              int form_i = current_wf->mfsurf[current_mfsurf_i]->i;
-              int form_j = current_wf->mfsurf[current_mfsurf_i]->j;
+              if(!form_to_be_assembled(mfv, current_state))
+                continue;
+
+              int form_i = mfv->i;
+              int form_j = mfv->j;
               CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
               CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
 
-              assemble_matrix_form(current_wf->mfsurf[current_mfsurf_i], 
-                CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
-                CacheRecordPerSubIdxJ->fnsSurface[current_state->isurf], 
-                CacheRecordPerSubIdxI->fnsSurface[current_state->isurf], 
-                extSurf, 
-                u_extSurf,
-                &current_alsSurface[form_i][current_state->isurf], 
-                &current_alsSurface[form_j][current_state->isurf], 
+              assemble_matrix_form(mfv, 
+                CacheRecordPerSubIdxI->order, 
+                CacheRecordPerSubIdxJ->fns, 
+                CacheRecordPerSubIdxI->fns, 
+                ext,
+                u_ext,
+                current_als[form_i], 
+                current_als[form_j], 
                 current_state, 
-                CacheRecordPerSubIdxI->n_quadrature_pointsSurface[current_state->isurf], 
-                CacheRecordPerSubIdxI->geometrySurface[current_state->isurf], 
-                CacheRecordPerSubIdxI->jacobian_x_weightsSurface[current_state->isurf]);
+                CacheRecordPerSubIdxI->n_quadrature_points, 
+                CacheRecordPerSubIdxI->geometry, 
+                CacheRecordPerSubIdxI->jacobian_x_weights);
             }
           }
-
           if(current_rhs != NULL)
           {
-            for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
+            for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
             {
-              if(!form_to_be_assembled(current_wf->vfsurf[current_vfsurf_i], current_state))
+              VectorFormVol<Scalar>* vfv = current_wf->vfvol[current_vfvol_i];
+              if(vfv->is_const && constantElement)
                 continue;
 
-              int form_i = current_wf->vfsurf[current_vfsurf_i]->i;
+              if(!form_to_be_assembled(vfv, current_state))
+                continue;
+
+              int form_i = vfv->i;
               CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
 
-              assemble_vector_form(current_wf->vfsurf[current_vfsurf_i], 
-                CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
-                CacheRecordPerSubIdxI->fnsSurface[current_state->isurf], 
-                extSurf, 
-                u_extSurf, 
-                &current_alsSurface[form_i][current_state->isurf], 
+              assemble_vector_form(vfv, 
+                CacheRecordPerSubIdxI->order, 
+                CacheRecordPerSubIdxI->fns, 
+                ext,
+                u_ext, 
+                current_als[form_i], 
                 current_state, 
-                CacheRecordPerSubIdxI->n_quadrature_pointsSurface[current_state->isurf], 
-                CacheRecordPerSubIdxI->geometrySurface[current_state->isurf], 
-                CacheRecordPerSubIdxI->jacobian_x_weightsSurface[current_state->isurf]);
+                CacheRecordPerSubIdxI->n_quadrature_points,
+                CacheRecordPerSubIdxI->geometry, 
+                CacheRecordPerSubIdxI->jacobian_x_weights);
             }
           }
 
+          // Cleanup - u_ext
           if(current_u_ext != NULL)
           {
-            for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-              if(current_u_ext[u_ext_surf_i] != NULL)
+            for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
+              if(current_u_ext[u_ext_i] != NULL)
               {
-                u_extSurf[u_ext_surf_i]->free_fn();
-                delete u_extSurf[u_ext_surf_i];
+                u_ext[u_ext_i]->free_fn();
+                delete u_ext[u_ext_i];
               }
-            delete [] u_extSurf;
+              delete [] u_ext;
           }
 
-          for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
-            if(current_wf->ext[ext_surf_i] != NULL)
+          // Cleanup - ext
+          for(int ext_i = 0; ext_i < current_extCount; ext_i++)
+            if(current_wf->ext[ext_i] != NULL)
             {
-              extSurf[ext_surf_i]->free_fn();
-              delete extSurf[ext_surf_i];
+              ext[ext_i]->free_fn();
+              delete ext[ext_i];
             }
-          delete [] extSurf;
+            delete [] ext;
         }
 
-        for(unsigned int i = 0; i < this->spaces.size(); i++)
-          if(current_state->e[i] != NULL)
-            delete [] current_alsSurface[i];
-      }
+        // Assemble surface integrals now: loop through surfaces of the element.
+        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
+        {
+          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+          {
+            if(!current_state->bnd[current_state->isurf])
+              continue;
 
-      delete [] cacheRecordPerSubIdx;
-      delete [] current_alsSurface;
+            // Ext functions.
+            // - order
+            int orderSurf = cacheRecordPerSubIdx[rep_space_i]->orderSurface[current_state->isurf];
+            // - u_ext
+            int prevNewtonSize = this->wf->get_neq();
+            Func<Scalar>** u_extSurf = NULL;
+            if(!this->is_linear)
+            {
+              u_extSurf = new Func<Scalar>*[prevNewtonSize];
+              if(current_u_ext != NULL)
+                for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
+                  if(current_u_ext[u_ext_surf_i] != NULL)
+                    u_extSurf[u_ext_surf_i] = current_state->e[u_ext_surf_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_surf_i], orderSurf);
+                  else
+                    u_extSurf[u_ext_surf_i] = NULL;
+              else
+                for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
+                  u_extSurf[u_ext_surf_i] = NULL;
+            }
+            // - ext
+            int current_extCount = this->wf->ext.size();
+            Func<Scalar>** extSurf = new Func<Scalar>*[current_extCount];
+            for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
+              if(current_wf->ext[ext_surf_i] != NULL)
+                extSurf[ext_surf_i] = current_state->e[ext_surf_i] == NULL ? NULL : init_fn(current_wf->ext[ext_surf_i], orderSurf);
+              else
+                extSurf[ext_surf_i] = NULL;
+
+            if(RungeKutta)
+              for(int ext_surf_i = 0; ext_surf_i < this->RK_original_spaces_count; ext_surf_i++)
+                u_extSurf[ext_surf_i]->add(extSurf[current_extCount - this->RK_original_spaces_count + ext_surf_i]);
+
+            if(current_mat != NULL)
+            {
+              for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
+              {
+                if(!form_to_be_assembled(current_wf->mfsurf[current_mfsurf_i], current_state))
+                  continue;
+
+                int form_i = current_wf->mfsurf[current_mfsurf_i]->i;
+                int form_j = current_wf->mfsurf[current_mfsurf_i]->j;
+                CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
+                CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
+
+                assemble_matrix_form(current_wf->mfsurf[current_mfsurf_i], 
+                  CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
+                  CacheRecordPerSubIdxJ->fnsSurface[current_state->isurf], 
+                  CacheRecordPerSubIdxI->fnsSurface[current_state->isurf], 
+                  extSurf, 
+                  u_extSurf,
+                  &current_alsSurface[form_i][current_state->isurf], 
+                  &current_alsSurface[form_j][current_state->isurf], 
+                  current_state, 
+                  CacheRecordPerSubIdxI->n_quadrature_pointsSurface[current_state->isurf], 
+                  CacheRecordPerSubIdxI->geometrySurface[current_state->isurf], 
+                  CacheRecordPerSubIdxI->jacobian_x_weightsSurface[current_state->isurf]);
+              }
+            }
+
+            if(current_rhs != NULL)
+            {
+              for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
+              {
+                if(!form_to_be_assembled(current_wf->vfsurf[current_vfsurf_i], current_state))
+                  continue;
+
+                int form_i = current_wf->vfsurf[current_vfsurf_i]->i;
+                CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
+
+                assemble_vector_form(current_wf->vfsurf[current_vfsurf_i], 
+                  CacheRecordPerSubIdxI->orderSurface[current_state->isurf], 
+                  CacheRecordPerSubIdxI->fnsSurface[current_state->isurf], 
+                  extSurf, 
+                  u_extSurf, 
+                  &current_alsSurface[form_i][current_state->isurf], 
+                  current_state, 
+                  CacheRecordPerSubIdxI->n_quadrature_pointsSurface[current_state->isurf], 
+                  CacheRecordPerSubIdxI->geometrySurface[current_state->isurf], 
+                  CacheRecordPerSubIdxI->jacobian_x_weightsSurface[current_state->isurf]);
+              }
+            }
+
+            if(current_u_ext != NULL)
+            {
+              for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
+                if(current_u_ext[u_ext_surf_i] != NULL)
+                {
+                  u_extSurf[u_ext_surf_i]->free_fn();
+                  delete u_extSurf[u_ext_surf_i];
+                }
+                delete [] u_extSurf;
+            }
+
+            for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
+              if(current_wf->ext[ext_surf_i] != NULL)
+              {
+                extSurf[ext_surf_i]->free_fn();
+                delete extSurf[ext_surf_i];
+              }
+              delete [] extSurf;
+          }
+
+          for(unsigned int i = 0; i < this->spaces.size(); i++)
+            if(current_state->e[i] != NULL)
+              delete [] current_alsSurface[i];
+        }
+
+        delete [] cacheRecordPerSubIdx;
+        delete [] current_alsSurface;
     }
 
     template<typename Scalar>
@@ -1849,26 +1934,33 @@ namespace Hermes
           AsmList<Scalar>* asmlist_i = current_als[form_i];
           AsmList<Scalar>* asmlist_j = current_als[form_j];
 
+          bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(mfv) == NULL);
+
+          double block_scaling_coef = this->block_scaling_coeff(mfv);
+
+          bool tra = (mfv->i != mfv->j) && (mfv->sym != 0);
+          bool sym = (mfv->i == mfv->j) && (mfv->sym == 1);
+
           // Local matrix.
           Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(asmlist_i->cnt, asmlist_j->cnt));
 
           // Select the right precalculated table.
-          Scalar**** matrix_values;
+          Scalar*** matrix_values;
           if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
           {
             if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-              matrix_values = mfv->matrix_values_h1_h1;
+              matrix_values = mfv->matrix_values_h1_h1[current_state->rep->get_mode()];
             else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-              matrix_values = mfv->matrix_values_h1_l2;
+              matrix_values = mfv->matrix_values_h1_l2[current_state->rep->get_mode()];
             else
               throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
           }
           else
           {
             if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-              matrix_values = mfv->matrix_values_l2_h1;
+              matrix_values = mfv->matrix_values_l2_h1[current_state->rep->get_mode()];
             else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-              matrix_values = mfv->matrix_values_l2_l2;
+              matrix_values = mfv->matrix_values_l2_l2[current_state->rep->get_mode()];
             else
               throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
           }
@@ -1887,16 +1979,20 @@ namespace Hermes
           {
             if(asmlist_i->dof[i] < 0)
               continue;
-            for(int j = 0; j < asmlist_j->cnt; j++)
+            if((!tra || surface_form) && asmlist_i->dof[i] < 0)
+              continue;
+            if(std::abs(asmlist_i->coef[i]) < 1e-12)
+              continue;
+            for(int j = sym ? i : 0; j < asmlist_j->cnt; j++)
             {
               if(asmlist_j->dof[j] >= 0)
               {
                 local_stiffness_matrix[i][j] = 0.0;
                 for(int calc_i = 0; calc_i < 21; calc_i++)
                 {
-                  if(matrix_values[current_state->rep->get_mode()][calc_i] != NULL)
+                  if(matrix_values[calc_i] != NULL)
                   {
-                    Scalar val = matrix_values[current_state->rep->get_mode()][calc_i][asmlist_i->idx[i]][asmlist_j->idx[j]] * asmlist_i->coef[i] * asmlist_j->coef[j];
+                    Scalar val = matrix_values[calc_i][asmlist_i->idx[i]][asmlist_j->idx[j]] * asmlist_i->coef[i] * asmlist_j->coef[j];
                     switch(calc_i)
                     {
                     case 0:
@@ -1914,56 +2010,58 @@ namespace Hermes
                     case 4:
                       val *= const_jacobian * const_inv_ref_map_1_1;
                       break;
-                      case 5:
+                    case 5:
                       val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_0_0;
                       break;
-                      case 6:
+                    case 6:
                       val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_0_1;
                       break;
-                      case 7:
+                    case 7:
                       val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_1_0;
                       break;
-                      case 8:
+                    case 8:
                       val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_1_1;
                       break;
-                      case 9:
+                    case 9:
                       val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_0_0;
                       break;
-                      case 10:
+                    case 10:
                       val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_0_1;
                       break;
-                      case 11:
+                    case 11:
                       val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_1_0;
                       break;
-                      case 12:
+                    case 12:
                       val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_1_1;
                       break;
-                      case 13:
+                    case 13:
                       val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_0_0;
                       break;
-                      case 14:
+                    case 14:
                       val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_0_1;
                       break;
-                      case 15:
+                    case 15:
                       val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_1_0;
                       break;
-                      case 16:
+                    case 16:
                       val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_1_1;
                       break;
-                      case 17:
+                    case 17:
                       val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_0_0;
                       break;
-                      case 18:
+                    case 18:
                       val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_0_1;
                       break;
-                      case 19:
+                    case 19:
                       val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_0;
                       break;
-                      case 20:
+                    case 20:
                       val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_1;
                       break;
                     }
                     local_stiffness_matrix[i][j] += val * elemwise_parameter;
+                    if(sym)
+                      local_stiffness_matrix[j][i] = local_stiffness_matrix[i][j];
                   }
                 }
               }
@@ -1972,6 +2070,14 @@ namespace Hermes
 
           // Local -> Global.
           current_mat->add(asmlist_i->cnt, asmlist_j->cnt, local_stiffness_matrix, asmlist_i->dof, asmlist_j->dof);
+          if(tra)
+          {
+            if(mfv->sym < 0)
+              chsgn(local_stiffness_matrix, asmlist_i->cnt, asmlist_j->cnt);
+            transpose(local_stiffness_matrix, asmlist_i->cnt, asmlist_j->cnt);
+
+            current_mat->add(asmlist_j->cnt, asmlist_i->cnt, local_stiffness_matrix, asmlist_j->dof, asmlist_i->dof);
+          }
         }
       }
       if(current_rhs != NULL)
@@ -1989,15 +2095,15 @@ namespace Hermes
           int form_i = vfv->i;
 
           AsmList<Scalar>* asmlist_i = current_als[form_i];
-          
-          Scalar*** rhs_values;
+
+          Scalar** rhs_values;
           if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-            rhs_values = vfv->rhs_values_h1;
+            rhs_values = vfv->rhs_values_h1[current_state->rep->get_mode()];
           else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-            rhs_values = vfv->rhs_values_l2;
+            rhs_values = vfv->rhs_values_l2[current_state->rep->get_mode()];
           else
-              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-            
+            throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
+
           // Get the element-wise constant form multiplier.
           Scalar elemwise_parameter = 1.0;
           if(vfv->elemwise_parameter != NULL)
@@ -2008,15 +2114,15 @@ namespace Hermes
               throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
           }
 
-			    for(int i = 0; i < asmlist_i->cnt; i++)
-			    {
-				    if(asmlist_i->dof[i] < 0)
-					    continue;
+          for(int i = 0; i < asmlist_i->cnt; i++)
+          {
+            if(asmlist_i->dof[i] < 0)
+              continue;
             for(int calc_i = 0; calc_i < 5; calc_i++)
             {
-              if(rhs_values[current_state->rep->get_mode()][calc_i] != NULL)
+              if(rhs_values[calc_i] != NULL)
               {
-                Scalar val = rhs_values[current_state->rep->get_mode()][calc_i][asmlist_i->idx[i]] * asmlist_i->coef[i];
+                Scalar val = rhs_values[calc_i][asmlist_i->idx[i]] * asmlist_i->coef[i];
                 switch(calc_i)
                 {
                 case 0:
@@ -2038,7 +2144,7 @@ namespace Hermes
                 this->current_rhs->add(asmlist_i->dof[i], val * elemwise_parameter);
               }
             }
-			    }
+          }
         }
       }
     }
@@ -2054,7 +2160,6 @@ namespace Hermes
       double block_scaling_coef = this->block_scaling_coeff(form);
 
       bool tra = (form->i != form->j) && (form->sym != 0);
-      bool sym = (form->i == form->j) && (form->sym == 1);
 
       // Get the element-wise constant form multiplier.
       Scalar elemwise_parameter = 1.0;
@@ -2072,51 +2177,25 @@ namespace Hermes
         if(current_als[form->i]->dof[i] < 0)
           continue;
 
-        if((!tra || surface_form) && current_als[form->i]->dof[i] < 0)
-          continue;
         if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
           continue;
-        if(!sym)
+
+        for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
         {
-          for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
-          {
-            // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-            if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
-              continue;
+          if(current_als[form->j]->dof[j] >= 0)
+            continue;
 
-            Func<double>* u = base_fns[j];
-            Func<double>* v = test_fns[i];
+          // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+          if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
+            continue;
 
-            if(current_als[form->j]->dof[j] < 0)
-            {
-              if(surface_form)
-                this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
-              else
-                this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
-            }
-          }
-        }
-        // Symmetric block.
-        else
-        {
-          for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
-          {
-            if(j < i && current_als[form->j]->dof[j] >= 0)
-              continue;
-            // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-            if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
-              continue;
+          Func<double>* u = base_fns[j];
+          Func<double>* v = test_fns[i];
 
-            Func<double>* u = base_fns[j];
-            Func<double>* v = test_fns[i];
-
-            Scalar val = this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i];
-
-            if(current_als[form->j]->dof[j] < 0)
-            {
-              this->current_rhs->add(current_als[form->i]->dof[i], -val * elemwise_parameter);
-            }
-          }
+          if(surface_form)
+            this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
+          else
+            this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
         }
       }
     }
@@ -2221,7 +2300,7 @@ namespace Hermes
         {
           elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
           if(std::abs(elemwise_parameter) < 1e-12)
-          return;
+            return;
         }
         if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
         {
@@ -2234,14 +2313,14 @@ namespace Hermes
           elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(mean_value);
 
           if(std::abs(elemwise_parameter) < 1e-12)
-          return;
+            return;
 
           double deviation = 0.0;
           double mean_value_abs = std::abs(mean_value);
           for(int i = 0; i < n_quadrature_points; i++)
           {
             double val_i_abs = std::abs(u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index]->val[i]);
-              deviation += std::pow(val_i_abs - mean_value_abs, 2.0);
+            deviation += std::pow(val_i_abs - mean_value_abs, 2.0);
           }
 
           double ratio = deviation / (mean_value_abs * n_quadrature_points);
@@ -2515,23 +2594,23 @@ namespace Hermes
         for(int i = 0; i < prev_size; i++)
           oi[i] = init_fn_ord(0);
 
-	  if(form->ext.size() > 0)
-	  {
-		  for (int i = 0; i < form->ext.size(); i++)
-			  if(surface_form)
-				  oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
-			  else
-				  oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
-	  }
+      if(form->ext.size() > 0)
+      {
+        for (int i = 0; i < form->ext.size(); i++)
+          if(surface_form)
+            oext[i] = init_fn_ord(form->ext[i]->get_edge_fn_order(current_state->isurf) + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+          else
+            oext[i] = init_fn_ord(form->ext[i]->get_fn_order() + (form->ext[i]->get_num_components() > 1 ? 1 : 0));
+      }
 
-	  else
-	  {
-		  for (int i = 0; i < form->wf->ext.size(); i++)
-			  if(surface_form)
-				  oext[i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
-			  else
-				  oext[i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
-	  }
+      else
+      {
+        for (int i = 0; i < form->wf->ext.size(); i++)
+          if(surface_form)
+            oext[i] = init_fn_ord(form->wf->ext[i]->get_edge_fn_order(current_state->isurf) + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+          else
+            oext[i] = init_fn_ord(form->wf->ext[i]->get_fn_order() + (form->wf->ext[i]->get_num_components() > 1 ? 1 : 0));
+      }
     }
 
     template<typename Scalar>
@@ -2546,20 +2625,20 @@ namespace Hermes
 
       if(oext != NULL)
       {
-	      if(form->ext.size() > 0)
-		      for (int i = 0; i < form->ext.size(); i++)
-		      {
-			      oext[i]->free_ord();
-			      delete oext[i];
-		      }
-	      else
-		      for (int i = 0; i < form->wf->ext.size(); i++)
-		      {
-			      oext[i]->free_ord();
-			      delete oext[i];
-		      }
+        if(form->ext.size() > 0)
+          for (int i = 0; i < form->ext.size(); i++)
+          {
+            oext[i]->free_ord();
+            delete oext[i];
+          }
+        else
+          for (int i = 0; i < form->wf->ext.size(); i++)
+          {
+            oext[i]->free_ord();
+            delete oext[i];
+          }
 
-        delete [] oext;
+          delete [] oext;
       }
     }
 
@@ -2629,7 +2708,7 @@ namespace Hermes
               intra_edge_passed_DG[current_state->isurf] = true;
               continue;
             }
-           // Create a multimesh tree;
+            // Create a multimesh tree;
             NeighborNode* root = new NeighborNode(NULL, 0);
             build_multimesh_tree(root, (*neighbor_searches[current_state->isurf]));
 
@@ -2844,7 +2923,7 @@ namespace Hermes
           int order_base = 20;
 
           MatrixFormDG<Scalar>* mfs = current_mfDG[current_mfsurf_i];
-          
+
           int m = mfs->i;
           int n = mfs->j;
 
@@ -2979,7 +3058,7 @@ namespace Hermes
             {
               ext[i]->free_fn();
               delete ext[i];
-             }
+            }
             delete [] ext;
           }
 

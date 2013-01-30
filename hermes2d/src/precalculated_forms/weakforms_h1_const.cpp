@@ -25,18 +25,22 @@ namespace Hermes
       ConstantMatrixFormVol<Scalar>::ConstantMatrixFormVol
         (int i, int j, std::string area) : MatrixFormVol<Scalar>(i, j)
       {
+        this->sym = HERMES_SYM;
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
       ConstantMatrixFormVol<Scalar>::ConstantMatrixFormVol
         (int i, int j, Hermes::vector<std::string> areas) : MatrixFormVol<Scalar>(i, j)
       {
+        this->sym = HERMES_SYM;
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -90,18 +94,22 @@ namespace Hermes
       ConstantMatrixFormDx<Scalar>::ConstantMatrixFormDx
         (int i, int j, std::string area) : MatrixFormVol<Scalar>(i, j)
       {
+        this->sym = HERMES_SYM;
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
       ConstantMatrixFormDx<Scalar>::ConstantMatrixFormDx
         (int i, int j, Hermes::vector<std::string> areas) : MatrixFormVol<Scalar>(i, j)
       {
+        this->sym = HERMES_SYM;
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -155,18 +163,22 @@ namespace Hermes
       ConstantMatrixFormDy<Scalar>::ConstantMatrixFormDy
         (int i, int j, std::string area) : MatrixFormVol<Scalar>(i, j)
       {
+        this->sym = HERMES_SYM;
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
       ConstantMatrixFormDy<Scalar>::ConstantMatrixFormDy
         (int i, int j, Hermes::vector<std::string> areas) : MatrixFormVol<Scalar>(i, j)
       {
+        this->sym = HERMES_SYM;
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -223,6 +235,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -232,6 +245,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -288,6 +302,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -297,6 +312,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -353,6 +369,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -362,6 +379,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -418,6 +436,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -427,6 +446,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -483,6 +503,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -492,6 +513,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -546,6 +568,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -555,6 +578,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -609,6 +633,7 @@ namespace Hermes
         this->set_area(area);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
@@ -618,6 +643,7 @@ namespace Hermes
         this->set_areas(areas);
         this->init_tables();
         this->is_const = true;
+        this->has_precalculated_tables = true;
       }
 
       template<typename Scalar>
