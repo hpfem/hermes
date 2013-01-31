@@ -384,6 +384,42 @@ namespace Hermes
         return elements.get_size();
     }
 
+    int Mesh::get_num_vertex_nodes() const
+    {
+      if(this == NULL) 
+        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_vertex_nodes().");
+      if(this->seq < 0)
+        return -1;
+      else
+      {
+        int to_return = 0;
+        for (int i = 0; i < this->get_num_nodes(); i++)
+        {
+          if(get_node(i)->used && !get_node(i)->type)
+            to_return++;
+        }
+        return to_return;
+      }
+    }
+
+    int Mesh::get_num_edge_nodes() const
+    {
+      if(this == NULL) 
+        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_vertex_nodes().");
+      if(this->seq < 0)
+        return -1;
+      else
+      {
+        int to_return = 0;
+        for (int i = 0; i < this->get_num_nodes(); i++)
+        {
+          if(get_node(i)->used && get_node(i)->type)
+            to_return++;
+        }
+        return to_return;
+      }
+    }
+
     Element* Mesh::get_element(int id) const
     {
       if(id < 0 || id >= elements.get_size())

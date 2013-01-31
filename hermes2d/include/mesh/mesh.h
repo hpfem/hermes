@@ -280,6 +280,12 @@ namespace Hermes
       /// Returns the maximum node id number plus one.
       int get_max_element_id() const;
 
+      /// Returns the number of vertex nodes.
+      int get_num_vertex_nodes() const;
+
+      /// Returns the number of edge nodes.
+      int get_num_edge_nodes() const;
+
       /// Refines an element.
       /// \param id[in] Element id number.
       /// \param refinement[in] Ignored for triangles. If the element
