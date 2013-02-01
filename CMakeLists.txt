@@ -150,7 +150,7 @@ project(hermes)
            necessary symbol '_glutSetOption' was only available
            in /usr/lib/libglut.dylib, which happened to be a pure
            i386 library. Maybe fixed later." FORCE)
-        IF (${CMAKE_VERBOSE_MAKEFILE} MATCHES "TRUE")
+        IF (CMAKE_VERBOSE_MAKEFILE)
           MESSAGE(STATUS)
           MESSAGE(STATUS "*******************************************************************************")
           MESSAGE(STATUS "*        SUMMARY OF USED VARIABLES -> Details in AllVariables.txt             *")
