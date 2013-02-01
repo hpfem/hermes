@@ -34,4 +34,7 @@
 // no logo
 #cmakedefine HERMES_NO_LOGO
 
+// GLUT
+#cmakedefine NOGLUT
+
 #endif

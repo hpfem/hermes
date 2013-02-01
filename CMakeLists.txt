@@ -382,6 +382,10 @@ project(hermes)
 
   # Match debug or release version of all other libraries.
   DETERMINE_HERMES_COMMON_RELEASE_DEBUG(H2D)
+  
+  if(NOT H2D_WITH_GLUT)
+    set(NOGLUT  YES)
+  endif(NOT H2D_WITH_GLUT)
 
   # Main CMakeLists.txt for each library are in the following directories.
   add_subdirectory(hermes_common)
