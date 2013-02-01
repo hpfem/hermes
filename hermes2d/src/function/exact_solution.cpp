@@ -71,7 +71,7 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(1, 0, 0, 1, 0);
 
-        xmlsolution.exactConstantXReal() = this->constant;
+        xmlsolution.exactCXR() = this->constant;
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -102,8 +102,8 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(1, 0, 0, 1, 1);
 
-        xmlsolution.exactConstantXReal() = this->constant.real();
-        xmlsolution.exactConstantXComplex() = this->constant.imag();
+        xmlsolution.exactCXR() = this->constant.real();
+        xmlsolution.exactCXC() = this->constant.imag();
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -162,7 +162,7 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(1, 0, 0, 1, 0);
 
-        xmlsolution.exactConstantXReal() = 0;
+        xmlsolution.exactCXR() = 0;
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -193,8 +193,8 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(1, 0, 0, 1, 1);
 
-        xmlsolution.exactConstantXReal() = 0;
-        xmlsolution.exactConstantXComplex() = 0;
+        xmlsolution.exactCXR() = 0;
+        xmlsolution.exactCXC() = 0;
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -254,8 +254,8 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(2, 0, 0, 1, 0);
 
-        xmlsolution.exactConstantXReal() = this->constantX;
-        xmlsolution.exactConstantYReal() = this->constantY;
+        xmlsolution.exactCXR() = this->constantX;
+        xmlsolution.exactCYR() = this->constantY;
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -286,10 +286,10 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(2, 0, 0, 1, 1);
 
-        xmlsolution.exactConstantXReal() = this->constantX.real();
-        xmlsolution.exactConstantXComplex() = this->constantX.imag();
-        xmlsolution.exactConstantYReal() = this->constantY.real();
-        xmlsolution.exactConstantYComplex() = this->constantY.imag();
+        xmlsolution.exactCXR() = this->constantX.real();
+        xmlsolution.exactCXC() = this->constantX.imag();
+        xmlsolution.exactCYR() = this->constantY.real();
+        xmlsolution.exactCYC() = this->constantY.imag();
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -348,8 +348,8 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(2, 0, 0, 1, 0);
 
-        xmlsolution.exactConstantXReal() = 0;
-        xmlsolution.exactConstantYReal() = 0;
+        xmlsolution.exactCXR() = 0;
+        xmlsolution.exactCYR() = 0;
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
@@ -380,10 +380,10 @@ namespace Hermes
       {
         XMLSolution::solution xmlsolution(2, 0, 0, 1, 1);
 
-        xmlsolution.exactConstantXReal() = 0;
-        xmlsolution.exactConstantXComplex() = 0;
-        xmlsolution.exactConstantYReal() = 0;
-        xmlsolution.exactConstantYComplex() = 0;
+        xmlsolution.exactCXR() = 0;
+        xmlsolution.exactCXC() = 0;
+        xmlsolution.exactCYR() = 0;
+        xmlsolution.exactCYC() = 0;
 
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");

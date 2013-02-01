@@ -1224,16 +1224,16 @@ namespace Hermes
         switch(this->get_space_type())
         {
           case HERMES_H1_SPACE:
-            xmlsolution.spaceType().set("h1");
+            xmlsolution.space().set("h1");
             break;
           case HERMES_HCURL_SPACE:
-            xmlsolution.spaceType().set("hcurl");
+            xmlsolution.space().set("hcurl");
             break;
           case HERMES_HDIV_SPACE:
-            xmlsolution.spaceType().set("hdiv");
+            xmlsolution.space().set("hdiv");
             break;
           case HERMES_L2_SPACE:
-            xmlsolution.spaceType().set("l2");
+            xmlsolution.space().set("l2");
             break;
         }
 
@@ -1282,23 +1282,23 @@ namespace Hermes
         switch(this->get_space_type())
         {
           case HERMES_H1_SPACE:
-            xmlsolution.spaceType().set("h1");
+            xmlsolution.space().set("h1");
             break;
           case HERMES_HCURL_SPACE:
-            xmlsolution.spaceType().set("hcurl");
+            xmlsolution.space().set("hcurl");
             break;
           case HERMES_HDIV_SPACE:
-            xmlsolution.spaceType().set("hdiv");
+            xmlsolution.space().set("hdiv");
             break;
           case HERMES_L2_SPACE:
-            xmlsolution.spaceType().set("l2");
+            xmlsolution.space().set("l2");
             break;
         }
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
         {
           xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i].real()));
-          xmlsolution.mono_coeffs().back().imaginary() = mono_coeffs[coeffs_i].imag();
+          xmlsolution.mono_coeffs().back().im() = mono_coeffs[coeffs_i].imag();
         }
 
         for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
@@ -1348,13 +1348,13 @@ namespace Hermes
   
         if(sln_type == HERMES_EXACT)
         {
-          switch(parsed_xml_solution->num_components())
+          switch(parsed_xml_solution->ncmp())
           {
           case 1:
-            if(parsed_xml_solution->exactComplex() == 0)
+            if(parsed_xml_solution->exactC() == 0)
             {
               double* coeff_vec = new double[space->get_num_dofs()];
-              ConstantSolution<double> sln(mesh, parsed_xml_solution->exactConstantXReal().get());
+              ConstantSolution<double> sln(mesh, parsed_xml_solution->exactCXR().get());
               OGProjection<double> ogProj;
               ogProj.project_global(space, &sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1364,10 +1364,10 @@ namespace Hermes
               throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
             break;
           case 2:
-            if(parsed_xml_solution->exactComplex() == 0)
+            if(parsed_xml_solution->exactC() == 0)
             {
               double* coeff_vec = new double[space->get_num_dofs()];
-              ConstantSolutionVector<double> sln(mesh, parsed_xml_solution->exactConstantXReal().get(), parsed_xml_solution->exactConstantYReal().get());
+              ConstantSolutionVector<double> sln(mesh, parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCYR().get());
               OGProjection<double> ogProj;
               ogProj.project_global(space, &sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1380,25 +1380,25 @@ namespace Hermes
         }
         else
         {
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"h1"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"h1"))
             if(this->space_type != HERMES_H1_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"l2"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"l2"))
             if(this->space_type != HERMES_L2_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hcurl"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hcurl"))
             if(this->space_type != HERMES_HCURL_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hdiv"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hdiv"))
             if(this->space_type != HERMES_HDIV_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          this->num_coeffs = parsed_xml_solution->num_coeffs();
-          this->num_elems = parsed_xml_solution->num_elems();
-          this->num_components = parsed_xml_solution->num_components();
+          this->num_coeffs = parsed_xml_solution->nc();
+          this->num_elems = parsed_xml_solution->nel();
+          this->num_components = parsed_xml_solution->ncmp();
 
           this->mono_coeffs = new double[num_coeffs];
           memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(double));
@@ -1409,14 +1409,14 @@ namespace Hermes
           this->elem_orders = new int[num_elems];
 
           for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
-            this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).real();
+            this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = parsed_xml_solution->mono_coeffs().at(coeffs_i).re();
 
           for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
-            this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).order();
+            this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).ord();
 
           for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
             for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
-              this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).coeff();
+              this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
         
         }
           init_dxdy_buffer();
@@ -1447,13 +1447,13 @@ namespace Hermes
         
         if(sln_type == HERMES_EXACT)
         {
-          switch(parsed_xml_solution->num_components())
+          switch(parsed_xml_solution->ncmp())
           {
           case 1:
-            if(parsed_xml_solution->exactComplex() == 1)
+            if(parsed_xml_solution->exactC() == 1)
             {
               std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
-              ConstantSolution<std::complex<double> > sln(mesh, std::complex<double>(parsed_xml_solution->exactConstantXReal().get(), parsed_xml_solution->exactConstantXComplex().get()));
+              ConstantSolution<std::complex<double> > sln(mesh, std::complex<double>(parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCXC().get()));
               OGProjection<std::complex<double> > ogProj;
               ogProj.project_global(space, &sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1463,10 +1463,10 @@ namespace Hermes
               throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
             break;
           case 2:
-            if(parsed_xml_solution->exactComplex() == 1)
+            if(parsed_xml_solution->exactC() == 1)
             {
               std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
-              ConstantSolutionVector<std::complex<double> > sln(mesh, std::complex<double>(parsed_xml_solution->exactConstantXReal().get(), parsed_xml_solution->exactConstantXComplex().get()), std::complex<double>(parsed_xml_solution->exactConstantYReal().get(), parsed_xml_solution->exactConstantYComplex().get()));
+              ConstantSolutionVector<std::complex<double> > sln(mesh, std::complex<double>(parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCXC().get()), std::complex<double>(parsed_xml_solution->exactCYR().get(), parsed_xml_solution->exactCYC().get()));
               OGProjection<std::complex<double> > ogProj;
               ogProj.project_global(space, &sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
@@ -1479,19 +1479,19 @@ namespace Hermes
         }
         else
         {
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"h1"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"h1"))
             if(this->space_type != HERMES_H1_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"l2"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"l2"))
             if(this->space_type != HERMES_L2_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hcurl"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hcurl"))
             if(this->space_type != HERMES_HCURL_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
-          if(!strcmp(parsed_xml_solution->spaceType().get().c_str(),"hdiv"))
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hdiv"))
             if(this->space_type != HERMES_HDIV_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
@@ -1501,9 +1501,9 @@ namespace Hermes
 
           std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename, parsing_flags));
 
-          this->num_coeffs = parsed_xml_solution->num_coeffs();
-          this->num_elems = parsed_xml_solution->num_elems();
-          this->num_components = parsed_xml_solution->num_components();
+          this->num_coeffs = parsed_xml_solution->nc();
+          this->num_elems = parsed_xml_solution->nel();
+          this->num_components = parsed_xml_solution->ncmp();
 
           this->mono_coeffs = new std::complex<double>[num_coeffs];
           memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(std::complex<double>));
@@ -1514,14 +1514,14 @@ namespace Hermes
           this->elem_orders = new int[num_elems];
 
           for (unsigned int coeffs_i = 0; coeffs_i < num_coeffs; coeffs_i++)
-            this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = std::complex<double>(parsed_xml_solution->mono_coeffs().at(coeffs_i).real(), parsed_xml_solution->mono_coeffs().at(coeffs_i).imaginary().get());
+            this->mono_coeffs[parsed_xml_solution->mono_coeffs().at(coeffs_i).id()] = std::complex<double>(parsed_xml_solution->mono_coeffs().at(coeffs_i).re(), parsed_xml_solution->mono_coeffs().at(coeffs_i).im().get());
 
           for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
-            this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).order();
+            this->elem_orders[parsed_xml_solution->elem_orders().at(elems_i).id()] = parsed_xml_solution->elem_orders().at(elems_i).ord();
 
           for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
             for (unsigned int elems_i = 0; elems_i < num_elems; elems_i++)
-              this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).coeff();
+              this->elem_coeffs[component_i][parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).id()] = parsed_xml_solution->component().at(component_i).elem_coeffs().at(elems_i).c();
         }
 
           init_dxdy_buffer();

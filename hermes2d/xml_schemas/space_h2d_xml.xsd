@@ -5,11 +5,11 @@
       <sequence>
         <element minOccurs="1" maxOccurs="unbounded" name="element_data">
           <complexType>
-            <attribute name="element_id" type="integer" use="required" />
-            <attribute name="order" type="integer" use="required" />
-            <attribute name="bdof" type="integer" use="required" />
+            <attribute name="e_id" type="integer" use="required" />
+            <attribute name="ord" type="integer" use="required" />
+            <attribute name="bd" type="integer" use="required" />
             <attribute name="n" type="integer" use="required" />
-            <attribute name="changed_in_last_adaptation" type="boolean" use="required" />
+            <attribute name="chgd" type="boolean" use="required" />
           </complexType>
         </element>
       </sequence>

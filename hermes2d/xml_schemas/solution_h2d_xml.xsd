@@ -6,14 +6,14 @@
         <element minOccurs="0" maxOccurs="unbounded" name="mono_coeffs">
           <complexType>
             <attribute name="id" type="integer" use="required" />
-            <attribute name="real" type="decimal" use="required" />
-            <attribute name="imaginary" type="decimal" />
+            <attribute name="re" type="decimal" use="required" />
+            <attribute name="im" type="decimal" />
           </complexType>
         </element>
         <element minOccurs="0" maxOccurs="unbounded" name="elem_orders">
           <complexType>
             <attribute name="id" type="integer" use="required" />
-            <attribute name="order" type="integer" use="required" />
+            <attribute name="ord" type="integer" use="required" />
           </complexType>
         </element>
         <element minOccurs="0" maxOccurs="unbounded" name="component">
@@ -22,7 +22,7 @@
               <element minOccurs="1" maxOccurs="unbounded" name="elem_coeffs">
                 <complexType>
                   <attribute name="id" type="integer" use="required" />
-                  <attribute name="coeff" type="integer" use="required" />
+                  <attribute name="c" type="integer" use="required" />
                 </complexType>
               </element>
             </sequence>
@@ -30,16 +30,16 @@
           </complexType>
         </element>
       </sequence>
-      <attribute name="num_components" type="integer" use="required" />
-      <attribute name="num_elems" type="integer" use="required" />
-      <attribute name="num_coeffs" type="integer" use="required" />
+      <attribute name="ncmp" type="integer" use="required" />
+      <attribute name="nel" type="integer" use="required" />
+      <attribute name="nc" type="integer" use="required" />
 	  <attribute name="exact" type="integer" use="required" />
-	  <attribute name="exactComplex" type="integer" use="required" />
-	  <attribute name="exactConstantXReal" type="decimal"/>
-	  <attribute name="exactConstantYReal" type="decimal"/>
-	  <attribute name="exactConstantXComplex" type="decimal"/>
-	  <attribute name="exactConstantYComplex" type="decimal"/>
-	  <attribute name="spaceType" type="string"/>
+	  <attribute name="exactC" type="integer" use="required" />
+	  <attribute name="exactCXR" type="decimal"/>
+	  <attribute name="exactCYR" type="decimal"/>
+	  <attribute name="exactCXC" type="decimal"/>
+	  <attribute name="exactCYC" type="decimal"/>
+	  <attribute name="space" type="string"/>
     </complexType>
   </element>
 </schema>

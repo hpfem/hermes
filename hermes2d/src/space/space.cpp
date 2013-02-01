@@ -1187,6 +1187,7 @@ namespace Hermes
 				Space<Scalar>* space;
 
         ::xml_schema::flags parsing_flags = 0;
+
         if(!validate)
           parsing_flags = xml_schema::flags::dont_validate;
 
@@ -1298,10 +1299,10 @@ namespace Hermes
         unsigned int elem_data_count = parsed_xml_space->element_data().size();
         for (unsigned int elem_data_i = 0; elem_data_i < elem_data_count; elem_data_i++)
         {
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].order = parsed_xml_space->element_data().at(elem_data_i).order();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bdof();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
-          space->edata[parsed_xml_space->element_data().at(elem_data_i).element_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).changed_in_last_adaptation();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].order = parsed_xml_space->element_data().at(elem_data_i).ord();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bd();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
+          space->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).chgd();
         }
 
         space->seq = g_space_seq++;
