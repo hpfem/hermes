@@ -181,13 +181,17 @@ project(hermes)
   # Determine the number of cores.
   if(WIN32)
     set(NUM_THREADS "$ENV{NUMBER_OF_PROCESSORS}")
-  else(WIN32)
+  elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    execute_process(COMMAND sysctl -a COMMAND grep "machdep.cpu.thread_count" COMMAND grep -o "[0-9]" OUTPUT_VARIABLE NUM_THREADS)
+  else()
     set(cpuinfo_file "/proc/cpuinfo")
     if(EXISTS "${cpuinfo_file}")
-    file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
-    list(LENGTH procs NUM_THREADS)
+      file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
+      list(LENGTH procs NUM_THREADS)
+    else()
+      set(NUM_THREADS 1)
     endif()
-  endif(WIN32)
+  endif()
   
   MESSAGE(STATUS "Hermes will by default be using ${NUM_THREADS} threads for calculation.")
 
@@ -217,10 +221,10 @@ project(hermes)
   # Enable debugging symbols for all files all the time:
   # set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Disable all warnings and turn on only important ones:
     set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare -fopenmp ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
 
     set(RELEASE_FLAGS "-DNDEBUG -O3")
     set(FLAGS ${RELEASE_FLAGS})
@@ -228,7 +232,7 @@ project(hermes)
     if(H2D_DEBUG)
       set(FLAGS ${DEBUG_FLAGS})
     endif(H2D_DEBUG)
-  endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  endif()
 
   # Enabling multiprocessor build on MSVC
   if(MSVC)
@@ -347,8 +351,8 @@ project(hermes)
     # SMP.
     if(WITH_OPENMP)
       find_package(OpenMP REQUIRED)
-      set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-      set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     endif(WITH_OPENMP)
 
     if(WITH_EXODUSII)
