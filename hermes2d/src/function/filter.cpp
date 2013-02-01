@@ -422,6 +422,9 @@ namespace Hermes
       this->num_components = solution->get_num_components();
       this->mesh = solution->get_mesh();
       set_quad_2d(&g_quad_2d_std);
+
+      // Set NOT to delete solution, as it is probably taken care of by the user.
+      this->deleteSolutions = false;
     }
 
     ComplexFilter::~ComplexFilter()
