@@ -22,6 +22,9 @@
 #include "common.h"
 #include "exceptions.h"
 #include "api2d.h"
+#include <xercesc/util/PlatformUtils.hpp>
+
+using namespace xercesc;
 
 namespace Hermes
 {
@@ -41,6 +44,9 @@ namespace Hermes
       signal(SIGILL, CallStack::dump);
       signal(SIGSEGV, CallStack::dump);
       signal(SIGTERM, CallStack::dump);
+      
+      // Xerces initialization - for better performance.
+      XMLPlatformUtils::Initialize();   
 
       this->integral_parameters.insert(std::pair<Hermes2DApiParam, Parameter<int>*> (Hermes::Hermes2D::numThreads,new Parameter<int>(NUM_THREADS)));
       this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*> (Hermes::Hermes2D::xmlSchemasDirPath,new Parameter<std::string>(*(new std::string(H2D_XML_SCHEMAS_DIRECTORY)))));
@@ -53,6 +59,8 @@ namespace Hermes
         ss << '/';
         this->text_parameters.insert(std::pair<Hermes2DApiParam, Parameter<std::string>*> (Hermes::Hermes2D::precalculatedFormsDirPath,new Parameter<std::string>(*(new std::string(ss.str())))));
       }
+
+      XMLPlatformUtils::Terminate();
     }
 
     Api2D::~Api2D()

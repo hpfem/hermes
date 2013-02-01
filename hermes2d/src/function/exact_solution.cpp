@@ -81,7 +81,9 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
+        
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -113,7 +115,8 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -172,7 +175,8 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -204,7 +208,8 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -265,7 +270,8 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -299,7 +305,11 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
+        
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -359,7 +369,10 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
+        
         out.close();
       }
       catch (const xml_schema::exception& e)
@@ -393,7 +406,9 @@ namespace Hermes
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
         std::ofstream out(filename);
-        XMLSolution::solution_(out, xmlsolution, namespace_info_map);
+        ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+        XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
+        
         out.close();
       }
       catch (const xml_schema::exception& e)

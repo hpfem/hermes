@@ -1173,7 +1173,10 @@ namespace Hermes
       namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("space", namespace_info_space));
 
       std::ofstream out(filename);
-      XMLSpace::space_(out, xmlspace, namespace_info_map);
+
+      ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+
+      XMLSpace::space_(out, xmlspace, namespace_info_map, "UTF-8", parsing_flags);
       out.close();
 
       return true;
