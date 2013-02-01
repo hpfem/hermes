@@ -84,9 +84,11 @@ int main(int argc, char* argv[])
   std::cout << space.get_edge_functions_count() << std::endl;
   std::cout << space.get_bubble_functions_count() << std::endl;
 
-  // OrderView.
-  Hermes::Hermes2D::Views::BaseView<double> o;
-  o.show(&space);
+ if (HERMES_VISUALIZATION)
+ {
+   Hermes::Hermes2D::Views::BaseView<double> o;
+   o.show(&space);
+ }
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
