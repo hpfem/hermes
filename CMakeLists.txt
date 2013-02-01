@@ -145,17 +145,18 @@ project(hermes)
 
         SET (CMAKE_BUILD_TYPE "Release" CACHE STRING "Release is default." FORCE)
 
-        SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING
-          "compiling for OSX only in i386 format. Library with the
-           necessary symbol '_glutSetOption' was only available
-           in /usr/lib/libglut.dylib, which happened to be a pure
-           i386 library. Maybe fixed later." FORCE)
-        IF (CMAKE_VERBOSE_MAKEFILE)
+        #SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING
+        #  "compiling for OSX only in i386 format. Library with the
+        #   necessary symbol '_glutSetOption' was only available
+        #   in /usr/lib/libglut.dylib, which happened to be a pure
+        #   i386 library. Maybe fixed later." FORCE)
+        
+		IF (CMAKE_VERBOSE_MAKEFILE)
           MESSAGE(STATUS)
           MESSAGE(STATUS "*******************************************************************************")
           MESSAGE(STATUS "*        SUMMARY OF USED VARIABLES -> Details in AllVariables.txt             *")
           MESSAGE(STATUS "*******************************************************************************")
-          MESSAGE(STATUS "COMPILING FOR OSX, i386 platform")
+          MESSAGE(STATUS "COMPILING FOR OSX, platforms: ${CMAKE_OSX_ARCHITECTURES}")
           MESSAGE(STATUS "CMAKE_ROOT ........................... = ${CMAKE_ROOT}")
           MESSAGE(STATUS "CMAKE_HOME_DIRECTORY ................. = ${CMAKE_HOME_DIRECTORY}")
           MESSAGE(STATUS "CMAKE_VERSION ........................ = ${CMAKE_VERSION}")
