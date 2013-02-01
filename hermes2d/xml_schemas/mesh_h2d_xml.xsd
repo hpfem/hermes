@@ -22,7 +22,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
   
   <complexType name="variables_type">
     <sequence>
-      <element minOccurs="0" maxOccurs="unbounded" name="variable">
+      <element minOccurs="0" maxOccurs="unbounded" name="var">
         <complexType>
           <attribute name="name" type="string" use="required" />
           <attribute name="value" type="decimal" use="required" />
@@ -33,7 +33,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
   
   <complexType name="vertices_type">
     <sequence>
-      <element minOccurs="3" maxOccurs="unbounded" name="vertex">
+      <element minOccurs="3" maxOccurs="unbounded" name="v">
         <complexType>
           <attribute name="x" type="string" use="required" />
           <attribute name="y" type="string" use="required" />
@@ -43,30 +43,30 @@ xmlns="http://www.w3.org/2001/XMLSchema">
     </sequence>
   </complexType>
 	  
-	<element name="element" abstract="true" type="mesh:element_type" />
-  <element name="triangle" substitutionGroup="mesh:element" type="mesh:triangle_type" />
-  <element name="quad" substitutionGroup="mesh:element" type="mesh:quad_type" />
+  <element name="el" abstract="true" type="mesh:el_t" />
+  <element name="t" substitutionGroup="mesh:el" type="mesh:t_t" />
+  <element name="q" substitutionGroup="mesh:el" type="mesh:q_t" />
 	
   <complexType name="elements_type">
     <sequence>
-      <element ref="mesh:element" maxOccurs="unbounded" />
+      <element ref="mesh:el" maxOccurs="unbounded" />
     </sequence>
   </complexType>
 		
-    <complexType name="element_type" abstract="true">
+    <complexType name="el_t" abstract="true">
       <attribute name="v1" type="integer" use="required" />
       <attribute name="v2" type="integer" use="required" />
       <attribute name="v3" type="integer" use="required" />
-      <attribute name="marker" type="string" use="required" />
+      <attribute name="m" type="string" use="required" />
     </complexType>
-    <complexType name="triangle_type">
+    <complexType name="t_t">
       <complexContent>
-        <extension base="mesh:element_type" />
+        <extension base="mesh:el_t" />
       </complexContent>
     </complexType>
-    <complexType name="quad_type">
+    <complexType name="q_t">
       <complexContent>
-        <extension base="mesh:element_type">
+        <extension base="mesh:el_t">
           <attribute name="v4" type="integer" use="required" />
         </extension>
       </complexContent>
@@ -75,11 +75,11 @@ xmlns="http://www.w3.org/2001/XMLSchema">
   <complexType name="edges_type">
     <sequence>
       <element minOccurs="0" maxOccurs="unbounded"
-      name="edge">
+      name="ed">
         <complexType>
           <attribute name="v1" type="integer" use="required" />
           <attribute name="v2" type="integer" use="required" />
-          <attribute name="marker" type="string" use="required" />
+          <attribute name="m" type="string" use="required" />
         </complexType>
       </element>
     </sequence>
@@ -120,7 +120,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
             </sequence>
             <attribute name="v1" type="integer" use="required" />
             <attribute name="v2" type="integer" use="required" />
-            <attribute name="degree" type="integer"
+            <attribute name="deg" type="integer"
             use="required" />
           </complexType>
         </element>
@@ -130,7 +130,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
   
   <complexType name="refinements_type">
     <sequence>
-      <element minOccurs="0" maxOccurs="unbounded" name="refinement">
+      <element minOccurs="0" maxOccurs="unbounded" name="ref">
         <complexType>
           <attribute name="element_id" type="integer" use="required" />
           <attribute name="refinement_type" type="integer" use="required" />

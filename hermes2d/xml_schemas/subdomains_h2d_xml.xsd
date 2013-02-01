@@ -64,31 +64,31 @@
     </complexType>
   </element>
     
-  <element name="element" abstract="true" type="subdomains:element_type" />
-  <element name="triangle" substitutionGroup="subdomains:element" type="subdomains:triangle_type" />
-  <element name="quad" substitutionGroup="subdomains:element" type="subdomains:quad_type" />
+  <element name="el" abstract="true" type="subdomains:el_t" />
+  <element name="t" substitutionGroup="subdomains:el" type="subdomains:t_t" />
+  <element name="q" substitutionGroup="subdomains:el" type="subdomains:q_t" />
   
   <complexType name="elements_type">
     <sequence>
-      <element ref="subdomains:element" maxOccurs="unbounded" />
+      <element ref="subdomains:el" maxOccurs="unbounded" />
     </sequence>
   </complexType>
     
-    <complexType name="element_type" abstract="true">
+    <complexType name="el_t" abstract="true">
       <attribute name="v1" type="integer" use="required" />
       <attribute name="v2" type="integer" use="required" />
       <attribute name="v3" type="integer" use="required" />
-      <attribute name="marker" type="string" use="required" />
+      <attribute name="m" type="string" use="required" />
       <attribute name="i" type="integer" use="required" />
     </complexType>
-    <complexType name="triangle_type">
+    <complexType name="t_t">
       <complexContent>
-        <extension base="subdomains:element_type" />
+        <extension base="subdomains:el_t" />
       </complexContent>
     </complexType>
-    <complexType name="quad_type">
+    <complexType name="q_t">
       <complexContent>
-        <extension base="subdomains:element_type">
+        <extension base="subdomains:el_t">
           <attribute name="v4" type="integer" use="required" />
         </extension>
       </complexContent>
@@ -96,12 +96,11 @@
     
   <complexType name="edges_type">
     <sequence>
-      <element minOccurs="0" maxOccurs="unbounded"
-      name="edge">
+      <element minOccurs="0" maxOccurs="unbounded" name="ed">
         <complexType>
           <attribute name="v1" type="integer" use="required" />
           <attribute name="v2" type="integer" use="required" />
-          <attribute name="marker" type="string" use="required" />
+          <attribute name="m" type="string" use="required" />
           <attribute name="i" type="integer" use="required" />
         </complexType>
       </element>
