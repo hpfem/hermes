@@ -1612,9 +1612,10 @@ namespace Hermes
         bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
 
         // Assembly lists for surface forms.
-        AsmList<Scalar>** current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
-        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
+        AsmList<Scalar>** current_alsSurface = NULL;
+        if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0 || current_wf->mfDG.size() > 0 || current_wf->vfDG.size() > 0))
         {
+          current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
           for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
           {
             current_alsSurface[space_i] = new AsmList<Scalar>[current_state->rep->nvert];
@@ -1629,10 +1630,13 @@ namespace Hermes
           this->assemble_constant_forms(current_refmaps[rep_space_i], current_als, current_state, current_wf);
 
         // Calculate the cache entries.
-        CacheRecordPerSubIdx** cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
-        if(changedInLastAdaptation && ((!onlyConstantForms || !constantElement) || current_state->isBnd))
+        CacheRecordPerSubIdx** cacheRecordPerSubIdx = NULL;
+        if(!onlyConstantForms || !constantElement || current_state->isBnd)
         {
-          this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
+          cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
+          
+          if(changedInLastAdaptation)
+            this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
 
           // Store the cache entries.
           for(int temp_i = 0; temp_i < this->spaces.size(); temp_i++)
@@ -1906,8 +1910,10 @@ namespace Hermes
               delete [] current_alsSurface[i];
         }
 
-        delete [] cacheRecordPerSubIdx;
-        delete [] current_alsSurface;
+        if(cacheRecordPerSubIdx != NULL)
+          delete [] cacheRecordPerSubIdx;
+        if(current_alsSurface != NULL)
+          delete [] current_alsSurface;
     }
 
     template<typename Scalar>
