@@ -3,6 +3,7 @@
 
 // OpenMP
 #cmakedefine NUM_THREADS ${NUM_THREADS}
+#cmakedefine WITH_OPENMP
 
 #cmakedefine HAVE_FMEMOPEN
 #cmakedefine HAVE_LOG2

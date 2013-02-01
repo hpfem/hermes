@@ -51,10 +51,13 @@
 #include <fstream>
 #include <cstring>
 #include <iostream>
-#include <omp.h>
 #include <signal.h>
 
 #include "config.h"
+
+#ifdef WITH_OPENMP
+  #include <omp.h>
+#endif
 
 typedef int int2[2];
 typedef int int3[3];
