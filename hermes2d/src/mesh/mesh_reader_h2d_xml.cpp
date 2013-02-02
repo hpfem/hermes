@@ -213,8 +213,8 @@ namespace Hermes
           unsigned int boundary_edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().size() : 0;
           unsigned int inner_edge_number_count = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges().present() ? parsed_xml_domain->subdomains().subdomain().at(subdomains_i).inner_edges()->i().size() : 0;
 
-          // copy nodes and elements
-          if(vertex_number_count == 0 && element_number_count == 0 && boundary_edge_number_count == 0)
+          // copy the whole mesh if the subdomain is the whole mesh.
+          if(element_number_count == 0 || element_number_count == parsed_xml_domain->elements().el().size())
           {
             meshes[subdomains_i]->copy(&global_mesh);
             continue;
@@ -307,10 +307,10 @@ namespace Hermes
                     int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
                     for(int i = 0; i < dot_position; i++)
                       if(strncmp(y.c_str() + i, "0", 1) != 0)
-                        throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_number + 1);
+                        throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the y coordinate of vertex no. %i.", vertex_number + 1);
                     for(int i = dot_position + 1; i < y.length(); i++)
                       if(strncmp(y.c_str() + i, "0", 1) != 0)
-                        throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_number + 1);
+                        throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the y coordinate of vertex no. %i.", vertex_number + 1);
                     y_value = std::strtod(y.c_str(), NULL);
                   }
 
@@ -359,18 +359,20 @@ namespace Hermes
               if(element == NULL)
                   throw Exceptions::Exception("Element number wrong in the mesh file.");
 
-              if(dynamic_cast<XMLSubdomains::q_t*>(element) != NULL)
+              XMLSubdomains::q_t* el_q = dynamic_cast<XMLSubdomains::q_t*>(element);
+              XMLSubdomains::t_t* el_t = dynamic_cast<XMLSubdomains::t_t*>(element);
+              if(el_q != NULL)
                 e = meshes[subdomains_i]->create_quad(meshes[subdomains_i]->element_markers_conversion.get_internal_marker(element->m()).marker,
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::q_t*>(element)->v1())->second],
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::q_t*>(element)->v2())->second],
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::q_t*>(element)->v3())->second],
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::q_t*>(element)->v4())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v1())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v2())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v3())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v4())->second],
                 NULL, elements_existing[element_i]);
-              else
+              if(el_t != NULL)
                 e = meshes[subdomains_i]->create_triangle(meshes[subdomains_i]->element_markers_conversion.get_internal_marker(element->m()).marker,
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::t_t*>(element)->v1())->second],
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::t_t*>(element)->v2())->second],
-                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(dynamic_cast<XMLSubdomains::t_t*>(element)->v3())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_t->v1())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_t->v2())->second],
+                &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_t->v3())->second],
                 NULL, elements_existing[element_i]);
             }
 
@@ -595,8 +597,9 @@ namespace Hermes
           // Look for the coordinates of this vertex.
           // If found, then insert the pair <this vertex number, the found vertex number> into vertices_to_vertices dictionary.
           // If not, insert.
-          if(points_to_vertices.find(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y)) != points_to_vertices.end())
-            vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, points_to_vertices.find(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y))->second));
+          std::map<std::pair<double, double>, unsigned int>::iterator it = points_to_vertices.find(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y));
+          if(it != points_to_vertices.end())
+            vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, it->second));
           else
           {
             vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, points_to_vertices.size()));
@@ -616,42 +619,17 @@ namespace Hermes
         subdomain.elements().set(XMLSubdomains::subdomain::elements_type());
         for (int i = 0; i < meshes[meshes_i]->get_num_base_elements(); i++)
         {
-          e = meshes[meshes_i]->get_element_fast(i);
+          e = &(meshes[meshes_i]->elements[i]);
           if(e->used)
           {
-            if(e->is_triangle())
+            if(e->nvert == 3)
             {
-              bool present = false;
-              for(unsigned int elements_i = 0; elements_i < elements.el().size(); elements_i++)
-                if(dynamic_cast<XMLSubdomains::t_t*>(&elements.el().at(elements_i)) != NULL)
-                  if(dynamic_cast<XMLSubdomains::t_t*>(&elements.el().at(elements_i))->v1() == vertices_to_vertices.find(e->vn[0]->id)->second &&
-                    dynamic_cast<XMLSubdomains::t_t*>(&elements.el().at(elements_i))->v2() == vertices_to_vertices.find(e->vn[1]->id)->second &&
-                    dynamic_cast<XMLSubdomains::t_t*>(&elements.el().at(elements_i))->v3() == vertices_to_vertices.find(e->vn[2]->id)->second)
-                    {
-                      present = true;
-                      break;
-                    }
-
-              if(!present)
-                elements.el().push_back(XMLSubdomains::t_t(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id));
+              elements.el().push_back(XMLSubdomains::t_t(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id));
             }
             else
             {
-              bool present = false;
-              for(unsigned int elements_i = 0; elements_i < elements.el().size(); elements_i++)
-                if(dynamic_cast<XMLSubdomains::q_t*>(&elements.el().at(elements_i)) != NULL)
-                  if(dynamic_cast<XMLSubdomains::q_t*>(&elements.el().at(elements_i))->v1() == vertices_to_vertices.find(e->vn[0]->id)->second &&
-                    dynamic_cast<XMLSubdomains::q_t*>(&elements.el().at(elements_i))->v2() == vertices_to_vertices.find(e->vn[1]->id)->second &&
-                    dynamic_cast<XMLSubdomains::q_t*>(&elements.el().at(elements_i))->v3() == vertices_to_vertices.find(e->vn[2]->id)->second &&
-                    dynamic_cast<XMLSubdomains::q_t*>(&elements.el().at(elements_i))->v4() == vertices_to_vertices.find(e->vn[3]->id)->second)
-                    {
-                      present = true;
-                      break;
-                    }
-
-                if(!present)
-                  elements.el().push_back(XMLSubdomains::q_t(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id, vertices_to_vertices.find(e->vn[3]->id)->second));
-              }
+              elements.el().push_back(XMLSubdomains::q_t(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id, vertices_to_vertices.find(e->vn[3]->id)->second));
+            }
             subdomain.elements()->i().push_back(e->id);
           }
         }
@@ -826,10 +804,10 @@ namespace Hermes
                 int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
                 for(int i = 0; i < dot_position; i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
                 for(int i = dot_position + 1; i < y.length(); i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
                 y_value = std::strtod(y.c_str(), NULL);
               }
 
@@ -856,18 +834,20 @@ namespace Hermes
 
           mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, element->m());
 
-          if(dynamic_cast<XMLMesh::q_t*>(element) != NULL)
+          XMLSubdomains::q_t* el_q = dynamic_cast<XMLSubdomains::q_t*>(element);
+          XMLSubdomains::t_t* el_t = dynamic_cast<XMLSubdomains::t_t*>(element);
+          if(el_q != NULL)
             e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker(element->m()).marker,
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::q_t*>(element)->v1())->second],
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::q_t*>(element)->v2())->second],
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::q_t*>(element)->v3())->second],
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::q_t*>(element)->v4())->second],
+            &mesh->nodes[vertex_is.find(el_q->v1())->second],
+            &mesh->nodes[vertex_is.find(el_q->v2())->second],
+            &mesh->nodes[vertex_is.find(el_q->v3())->second],
+            &mesh->nodes[vertex_is.find(el_q->v4())->second],
             NULL);
-          else
+          if(el_t != NULL)
             e = mesh->create_triangle(mesh->element_markers_conversion.get_internal_marker(element->m()).marker,
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::t_t*>(element)->v1())->second],
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::t_t*>(element)->v2())->second],
-            &mesh->nodes[vertex_is.find(dynamic_cast<XMLMesh::t_t*>(element)->v3())->second],
+            &mesh->nodes[vertex_is.find(el_t->v1())->second],
+            &mesh->nodes[vertex_is.find(el_t->v2())->second],
+            &mesh->nodes[vertex_is.find(el_t->v3())->second],
             NULL);
         }
 
@@ -1078,10 +1058,10 @@ namespace Hermes
                 int dot_position = strchr(y.c_str(), '.') == NULL ? -1 : strchr(y.c_str(), '.') - y.c_str();
                 for(int i = 0; i < dot_position; i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
                 for(int i = dot_position + 1; i < y.length(); i++)
                   if(strncmp(y.c_str() + i, "0", 1) != 0)
-                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntay in the y coordinate of vertey no. %i.", vertex_i + 1);
+                    throw Hermes::Exceptions::MeshLoadFailureException("Wrong syntax in the y coordinate of vertex no. %i.", vertex_i + 1);
                 y_value = std::strtod(y.c_str(), NULL);
               }
 
@@ -1114,18 +1094,20 @@ namespace Hermes
 
           mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, element->m());
 
-          if(dynamic_cast<XMLSubdomains::q_t*>(element) != NULL)
+          XMLSubdomains::q_t* el_q = dynamic_cast<XMLSubdomains::q_t*>(element);
+          XMLSubdomains::t_t* el_t = dynamic_cast<XMLSubdomains::t_t*>(element);
+          if(el_q != NULL)
             e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker(element->m()).marker,
-            &mesh->nodes[dynamic_cast<XMLSubdomains::q_t*>(element)->v1()],
-            &mesh->nodes[dynamic_cast<XMLSubdomains::q_t*>(element)->v2()],
-            &mesh->nodes[dynamic_cast<XMLSubdomains::q_t*>(element)->v3()],
-            &mesh->nodes[dynamic_cast<XMLSubdomains::q_t*>(element)->v4()],
+            &mesh->nodes[el_q->v1()],
+            &mesh->nodes[el_q->v2()],
+            &mesh->nodes[el_q->v3()],
+            &mesh->nodes[el_q->v4()],
             NULL);
-          else
+          if(el_t != NULL)
             e = mesh->create_triangle(mesh->element_markers_conversion.get_internal_marker(element->m()).marker,
-            &mesh->nodes[dynamic_cast<XMLSubdomains::t_t*>(element)->v1()],
-            &mesh->nodes[dynamic_cast<XMLSubdomains::t_t*>(element)->v2()],
-            &mesh->nodes[dynamic_cast<XMLSubdomains::t_t*>(element)->v3()],
+            &mesh->nodes[el_t->v1()],
+            &mesh->nodes[el_t->v2()],
+            &mesh->nodes[el_t->v3()],
             NULL);
         }
 
