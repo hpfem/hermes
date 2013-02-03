@@ -377,6 +377,10 @@ namespace Hermes
 
     private:
       /// For internal use.
+      void initial_single_check();
+      static void initial_multimesh_check(Hermes::vector<Mesh*> meshes);
+
+      /// For internal use.
       int get_edge_sons(Element* e, int edge, int& son1, int& son2) const;
 
       /// Refines all quad elements to triangles.

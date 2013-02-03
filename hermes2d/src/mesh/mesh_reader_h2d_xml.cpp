@@ -63,6 +63,7 @@ namespace Hermes
               mesh->refine_element_id(element_id, refinement_type);
           }
         }
+        mesh->initial_single_check();
       }
       catch (const xml_schema::exception& e)
       {
@@ -144,9 +145,9 @@ namespace Hermes
     bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<Mesh *> meshes)
     {
       for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
-			{
-				meshes.at(meshes_i)->free();
-			}
+      {
+        meshes.at(meshes_i)->free();
+      }
 
       Mesh global_mesh;
 
@@ -227,11 +228,11 @@ namespace Hermes
             std::map<std::string, double> variables;
             for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
 #ifdef _MSC_VER
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), (double&&)parsed_xml_domain->variables()->var().at(variables_i).value()));
+        variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), (double&&)parsed_xml_domain->variables()->var().at(variables_i).value()));
 #else
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), parsed_xml_domain->variables()->var().at(variables_i).value()));
+        variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), parsed_xml_domain->variables()->var().at(variables_i).value()));
 #endif
-			// Vertex numbers //
+      // Vertex numbers //
             // create a mapping order-in-the-whole-domain <-> order-in-this-subdomain.
             std::map<unsigned int, unsigned int> vertex_vertex_numbers;
 
@@ -537,6 +538,7 @@ namespace Hermes
             }
 
             meshes[subdomains_i]->seq = g_mesh_seq++;
+            meshes[subdomains_i]->initial_single_check();
             delete [] elements_existing;
           }
         }
@@ -729,9 +731,9 @@ namespace Hermes
         std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
 #ifdef _MSC_VER
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->var().at(variables_i).value()));
+        variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->var().at(variables_i).value()));
 #else
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), parsed_xml_mesh->variables()->var().at(variables_i).value()));
+        variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), parsed_xml_mesh->variables()->var().at(variables_i).value()));
 #endif
 
         // Vertices //
@@ -979,9 +981,9 @@ namespace Hermes
         std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
 #ifdef _MSC_VER
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), (double&&)parsed_xml_domain->variables()->var().at(variables_i).value()));
+        variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), (double&&)parsed_xml_domain->variables()->var().at(variables_i).value()));
 #else
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), parsed_xml_domain->variables()->var().at(variables_i).value()));
+        variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_domain->variables()->var().at(variables_i).name(), parsed_xml_domain->variables()->var().at(variables_i).value()));
 #endif
 
 

@@ -106,18 +106,18 @@ namespace Hermes
       /// Returns the increase in the integration order due to the reference map.
       int get_inv_ref_order() const;
 
-      H1ShapesetJacobi ref_map_shapeset;
-      PrecalcShapeset ref_map_pss;
-    private:
-      /// If the reference map is constant, this is the fast way to obtain
-      /// its inverse matrix.
-      double2x2* get_const_inv_ref_map();
-
-      /// Returns the inverse matrices of the reference map precalculated at the
+			/// Returns the inverse matrices of the reference map precalculated at the
       /// integration points of the specified order. Intended for non-constant
       /// jacobian elements.
       double2x2* get_inv_ref_map(int order);
 
+      /// If the reference map is constant, this is the fast way to obtain
+      /// its inverse matrix.
+      double2x2* get_const_inv_ref_map();
+
+      H1ShapesetJacobi ref_map_shapeset;
+      PrecalcShapeset ref_map_pss;
+    private:
       /// Returns coefficients for weak forms with second derivatives.
       double3x2* get_second_ref_map(int order);
 

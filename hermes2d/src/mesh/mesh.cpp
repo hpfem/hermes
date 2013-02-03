@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "mesh.h"
+#include "refmap.h"
 #include <algorithm>
 #include "global.h"
 #include "api2d.h"
@@ -276,6 +277,31 @@ namespace Hermes
       ref_mesh->copy(this->coarse_mesh);
       ref_mesh->refine_all_elements(refinement, false);
       return ref_mesh;
+    }
+
+    void Mesh::initial_single_check()
+    {
+      RefMap r;
+      Element* e;
+      Quad2D* quad = &g_quad_2d_std;
+      for_all_active_elements(e, this)
+      {
+        r.set_active_element(e);
+
+        int i, o, mo = quad->get_max_order(e->get_mode());
+
+        // check first the positivity of the jacobian
+        double3* pt = quad->get_points(mo, e->get_mode());
+        double2x2* m = r.get_inv_ref_map(mo);
+        double* jac = r.get_jacobian(mo);
+        for (i = 0; i < quad->get_num_points(mo, e->get_mode()); i++)
+          if(jac[i] <= 0.0)
+            throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented.", e->id);
+      }
+    }
+      
+    void Mesh::initial_multimesh_check(Hermes::vector<Mesh*> meshes)
+    {
     }
 
     void Mesh::create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,

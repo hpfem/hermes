@@ -383,7 +383,7 @@ namespace Hermes
       mesh->ninitial = mesh->elements.get_num_items();
 
       mesh->seq = g_mesh_seq++;
-
+      mesh->initial_single_check();
       return true;
     }
 
