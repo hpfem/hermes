@@ -806,7 +806,6 @@ namespace Hermes
         id = 0;
         top = 0;
 
-#ifndef H2D_DISABLE_MULTIMESH_TESTS
         // Test whether all master meshes have the same number of elements.
         int base_elem_num = meshes[0]->get_num_base_elements();
         for (int i = 1; i < n; i++)
@@ -856,7 +855,6 @@ namespace Hermes
           }
         }
         delete [] areas;
-#endif
       }
     }
 
