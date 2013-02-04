@@ -24,7 +24,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-  
+
     static const int H2D_DG_INNER_EDGE_INT = -1234567;
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
@@ -299,7 +299,7 @@ namespace Hermes
             throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented.", e->id);
       }
     }
-      
+
     void Mesh::initial_multimesh_check(Hermes::vector<Mesh*> meshes)
     {
     }
@@ -381,11 +381,29 @@ namespace Hermes
     int Mesh::get_num_base_elements() const
     {
       if(this == NULL) throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
-      
+
       if(this->seq < 0)
         return -1;
       else
         return nbase;
+    }
+
+    /// Returns the number of coarse mesh elements.
+    int Mesh::get_num_used_base_elements() const
+    {
+      int toReturn = 0;
+      if(this == NULL)
+        throw Hermes::Exceptions::Exception("this == NULL in Mesh::get_num_base_elements().");
+
+      if(this->seq < 0)
+        return -1;
+      else
+      {
+        Element* e;
+        for_all_base_elements(e, this)
+          toReturn++;
+      }
+      return toReturn;
     }
 
     /// Returns the current number of active elements in the mesh.
@@ -500,7 +518,7 @@ namespace Hermes
       Element* e = elements.add();
 
       if(id != -1)
-          e->id = id;
+        e->id = id;
 
       // initialize the new element
       e->active = 1;
@@ -533,7 +551,7 @@ namespace Hermes
       Element* e = elements.add();
 
       if(id != -1)
-          e->id = id;
+        e->id = id;
 
       // initialize the new element
       e->active = 1;
@@ -940,14 +958,14 @@ namespace Hermes
 
       if(refinement == -1)
         return;
-    
+
       elements.set_append_only(true);
-      
+
       for_all_active_elements(e, this)
         refine_element_id(e->id, refinement);
-      
+
       elements.set_append_only(false);
-      
+
       if(mark_as_initial)
         ninitial = this->get_max_element_id();
     }
@@ -1060,7 +1078,7 @@ namespace Hermes
       if(mark_as_initial)
         ninitial = this->get_max_element_id();
       if(!refined)
-          throw Hermes::Exceptions::Exception("None of the markers in Mesh::refine_towards_boundary found in the Mesh.");
+        throw Hermes::Exceptions::Exception("None of the markers in Mesh::refine_towards_boundary found in the Mesh.");
     }
 
     void Mesh::refine_towards_boundary(std::string marker, int depth, bool aniso, bool mark_as_initial)
@@ -1111,7 +1129,7 @@ namespace Hermes
       markers.push_back(marker);
       this->refine_in_areas(markers, depth, mark_as_initial);
     }
-      
+
     void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, bool mark_as_initial)
     {
       bool refined = true;
@@ -1301,7 +1319,7 @@ namespace Hermes
           throw CurvedException(e->id);
           return false;
         }
-      return true;
+        return true;
     }
 
     void Mesh::copy(const Mesh* mesh)
@@ -1309,7 +1327,7 @@ namespace Hermes
       unsigned int i;
 
       free();
-			// Serves as a Mesh::init() for purposes of pointer calculation.
+      // Serves as a Mesh::init() for purposes of pointer calculation.
 
       // copy nodes and elements
       HashTable::copy(mesh);
@@ -1378,10 +1396,10 @@ namespace Hermes
       return base->en[edge];
     }
 
-		void Mesh::init(int size)
-		{
-			HashTable::init(size);
-		}
+    void Mesh::init(int size)
+    {
+      HashTable::init(size);
+    }
 
     void Mesh::copy_base(Mesh* mesh)
     {

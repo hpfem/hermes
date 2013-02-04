@@ -159,7 +159,7 @@ namespace Hermes
           {
             Traverse::State current_state;
 
-  #pragma omp critical (get_next_state)
+#pragma omp critical (get_next_state)
             current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
 
             current_pss = pss[omp_get_thread_num()];

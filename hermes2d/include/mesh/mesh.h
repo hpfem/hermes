@@ -271,8 +271,11 @@ namespace Hermes
       /// Returns the total number of elements stored.
       int get_num_elements() const;
 
-      /// Returns the number of coarse mesh elements.
+      /// Returns the number of base mesh elements.
       int get_num_base_elements() const;
+
+      /// Returns the number of used base mesh elements.
+      int get_num_used_base_elements() const;
 
       /// Returns the current number of active elements in the mesh.
       int get_num_active_elements() const;
