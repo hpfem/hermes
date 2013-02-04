@@ -53,6 +53,12 @@ namespace Hermes
 
       /// Represents a function prescribed on the boundary. Gets the boundary point coordinate as well as the
       /// normal and tangential vectors.
+      /// \param[in] x x-coordinate of the point where the value is evaluated.
+      /// \param[in] y y-coordinate of the point where the value is evaluated.
+      /// \param[in] n_x the x-component of the unit outer normal.
+      /// \param[in] n_y the y-component of the unit outer normal.
+      /// \param[in] t_x the x-component of the tangent(perpendicular to normal).
+      /// \param[in] t_y the y-component of the tangent(perpendicular to normal).
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
 
       /// Sets the current time for time-dependent boundary conditions.
