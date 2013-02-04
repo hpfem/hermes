@@ -49,6 +49,9 @@ project(hermes)
     # UMFPACK is chosen by default.
     set(WITH_UMFPACK YES)
     
+  ################################## CURRENTLY NOT SUPPORTED ###################################
+  #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
+  
   # SuperLU
     # First option enables sequential SuperLU, which should reside in SUPERLU_ROOT/lib
     # and SUPERLU_ROOT/include. If SUPERLU_ROOT is not provided, the library will be searched
@@ -107,7 +110,9 @@ project(hermes)
     # set(MPI_LIBRARIES         -lmpi)
     # set(MPI_INCLUDE_PATH      /usr/include/openmpi
 
-	
+  #  /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\   /\
+	################################## CURRENTLY NOT SUPPORTED ###################################
+  
 	# Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
   

@@ -43,10 +43,6 @@ project(hermes2d)
       # set(CMAKE_BUILD_TYPE Release)
     endif(H2D_RELEASE)
   endif(MSVC)
-  
-  # Linker settings.
-  include(ConfigureRPATH)
-  ConfigureRPATH()
 
   #
   # Optional libraries and settings for H2D.

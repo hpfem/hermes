@@ -1,7 +1,4 @@
 project(hermes_common)
-  # Linker settings.
-  include(ConfigureRPATH)
-    ConfigureRPATH()
     
   # Check for stacktrace and math library.
   include(CMakeCommon.txt)
