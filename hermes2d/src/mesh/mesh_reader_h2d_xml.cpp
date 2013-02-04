@@ -218,7 +218,20 @@ namespace Hermes
           if(element_number_count == 0 || element_number_count == parsed_xml_domain->elements().el().size())
           {
             meshes[subdomains_i]->copy(&global_mesh);
-            continue;
+            // refinements.
+            if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().size() > 0)
+            {
+              // perform initial refinements
+              for (unsigned int i = 0; i < parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().size(); i++)
+              {
+                int element_id = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().at(i).element_id();
+                int refinement_type = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().at(i).refinement_type();
+                if(refinement_type == -1)
+                  meshes[subdomains_i]->unrefine_element_id(element_id);
+                else
+                  meshes[subdomains_i]->refine_element_id(element_id, refinement_type);
+              }
+            }
           }
           else
           {
@@ -622,7 +635,7 @@ namespace Hermes
         for (int i = 0; i < meshes[meshes_i]->get_num_base_elements(); i++)
         {
           e = &(meshes[meshes_i]->elements[i]);
-          if(e->used)
+          if(meshes_i == 0)
           {
             if(e->nvert == 3)
             {
@@ -632,6 +645,9 @@ namespace Hermes
             {
               elements.el().push_back(XMLSubdomains::q_t(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id, vertices_to_vertices.find(e->vn[3]->id)->second));
             }
+          }
+          if(e->used)
+          {
             subdomain.elements()->i().push_back(e->id);
           }
         }
@@ -836,8 +852,8 @@ namespace Hermes
 
           mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, element->m());
 
-          XMLSubdomains::q_t* el_q = dynamic_cast<XMLSubdomains::q_t*>(element);
-          XMLSubdomains::t_t* el_t = dynamic_cast<XMLSubdomains::t_t*>(element);
+          XMLMesh::q_t* el_q = dynamic_cast<XMLMesh::q_t*>(element);
+          XMLMesh::t_t* el_t = dynamic_cast<XMLMesh::t_t*>(element);
           if(el_q != NULL)
             e = mesh->create_quad(mesh->element_markers_conversion.get_internal_marker(element->m()).marker,
             &mesh->nodes[vertex_is.find(el_q->v1())->second],

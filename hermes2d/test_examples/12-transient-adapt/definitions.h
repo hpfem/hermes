@@ -3,7 +3,6 @@
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
 using namespace Hermes::Hermes2D::WeakFormsH1;
-using namespace Hermes::Hermes2D::NonlinearElemwiseWeakFormsH1;
 
 /* Nonlinearity lambda(u) = pow(u, alpha) */
 

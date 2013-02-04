@@ -1572,7 +1572,7 @@ namespace Hermes
             if(current_u_ext != NULL)
               for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
                 if(current_u_ext[u_ext_i] != NULL)
-                  u_ext[u_ext_i] = current_state->e[u_ext_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_i], order);
+                  u_ext[u_ext_i] = init_fn(current_u_ext[u_ext_i], order);
                 else
                   u_ext[u_ext_i] = NULL;
             else
@@ -1588,7 +1588,7 @@ namespace Hermes
             ext = new Func<Scalar>*[current_extCount];
             for(int ext_i = 0; ext_i < current_extCount; ext_i++)
               if(current_wf->ext[ext_i] != NULL)
-                ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(current_wf->ext[ext_i], order);
+                ext[ext_i] = init_fn(current_wf->ext[ext_i], order);
               else
                 ext[ext_i] = NULL;
           }
