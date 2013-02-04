@@ -72,22 +72,7 @@ CustomInitialCondition::~CustomInitialCondition()
 
 CustomWeakFormPoisson::CustomWeakFormPoisson(Hermes1DFunction<double>* coeff, Hermes2DFunction<double>* f)
 {
-  if(1)
-  {
-    // Jacobian.
-    NonlinearElemwiseDiffusionDerivativeForm<double>* form_derivative = new NonlinearElemwiseDiffusionDerivativeForm<double>(0, 0);
-    NonlinearElemwiseDiffusionValueForm<double>* form_value = new NonlinearElemwiseDiffusionValueForm<double>(0, 0);
-
-    form_derivative->set_elemwise_parameter(new ElemwiseParameterNonlinearHermesFunc<double>(coeff, ElemwiseParameterNonlinearDerivative));
-    form_value->set_elemwise_parameter(new ElemwiseParameterNonlinearHermesFunc<double>(coeff, ElemwiseParameterNonlinearValue));
-
-    this->add_matrix_form(form_derivative);
-    this->add_matrix_form(form_value);
-  }
-  else
-  {
-    this->add_matrix_form(new DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, coeff));
-  }
+  this->add_matrix_form(new DefaultJacobianDiffusion<double>(0, 0, HERMES_ANY, coeff));
 
   // Residual.
   this->add_vector_form(new DefaultResidualDiffusion<double>(0, HERMES_ANY, coeff));

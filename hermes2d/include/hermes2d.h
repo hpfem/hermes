@@ -39,11 +39,6 @@
 #include "mesh/mesh_reader_h1d_xml.h"
 #include "mesh/mesh_reader_exodusii.h"
 
-#include "elemwise_parameter/elemwise_parameter.h"
-#include "elemwise_parameter/elemwise_parameter_func.h"
-#include "elemwise_parameter/elemwise_parameter_mesh_func.h"
-#include "elemwise_parameter/elemwise_parameter_nonlinear.h"
-
 #include "quadrature/quad.h"
 #include "quadrature/quad_all.h"
 
@@ -102,9 +97,6 @@
 #include "projections/localprojection.h"
 #include "projections/ogprojection.h"
 #include "projections/ogprojection_nox.h"
-
-#include "precalculated_forms/weakforms_h1_const.h"
-#include "precalculated_forms/weakforms_h1_nonlinear.h"
 
 #include "runge_kutta.h"
 #include "spline.h"

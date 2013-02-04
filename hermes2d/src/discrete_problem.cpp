@@ -706,9 +706,6 @@ namespace Hermes
         }
       }
 
-      bool have_triangles = false;
-      bool have_quads = false;
-
       if(current_mat != NULL)
       {
         // Spaces have changed: create the matrix from scratch.
@@ -742,11 +739,6 @@ namespace Hermes
         // Loop through all elements.
         while ((current_state = trav.get_next_state()) != NULL)
         {
-          if(current_state->rep->is_triangle())
-            have_triangles = true;
-          else
-            have_quads = true;
-
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
@@ -860,81 +852,6 @@ namespace Hermes
         current_mat->alloc();
       }
       
-      for(int i = 0; i < this->wf->get_forms().size(); i++)
-      {
-        MatrixForm<Scalar>* matrix_form = dynamic_cast<MatrixForm<Scalar>*>(this->wf->get_forms()[i]);
-        VectorForm<Scalar>* vector_form = dynamic_cast<VectorForm<Scalar>*>(this->wf->get_forms()[i]);
-        if(matrix_form != NULL)
-        {
-          if(matrix_form->is_const)
-          {
-            int form_i = matrix_form->i;
-            int form_j = matrix_form->j;
-            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-            {
-              if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-              {
-                if(have_triangles)
-                  matrix_form->set_h1_h1_const_tables(HERMES_MODE_TRIANGLE);
-                if(have_quads)
-                  matrix_form->set_h1_h1_const_tables(HERMES_MODE_QUAD);
-              }
-              else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-                {
-                if(have_triangles)
-                matrix_form->set_h1_l2_const_tables(HERMES_MODE_TRIANGLE);
-                if(have_quads)
-                matrix_form->set_h1_l2_const_tables(HERMES_MODE_QUAD);
-              }
-              else
-                throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-            }
-            else
-            {
-              if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-              {
-                if(have_triangles)
-                  matrix_form->set_l2_h1_const_tables(HERMES_MODE_TRIANGLE);
-                if(have_quads)
-                  matrix_form->set_l2_h1_const_tables(HERMES_MODE_QUAD);
-              }
-              else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-              {
-                if(have_triangles)
-                  matrix_form->set_l2_l2_const_tables(HERMES_MODE_TRIANGLE);
-                if(have_quads)
-                  matrix_form->set_l2_l2_const_tables(HERMES_MODE_QUAD);
-              }
-              else
-                throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-            }
-          }
-        }
-        if(vector_form != NULL)
-        {
-          if(vector_form->is_const)
-          {
-            int form_i = vector_form->i;
-            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-            {
-              if(have_triangles)
-                vector_form->set_h1_const_tables(HERMES_MODE_TRIANGLE);
-              if(have_quads)
-                vector_form->set_h1_const_tables(HERMES_MODE_QUAD);
-            }
-            else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-            {
-              if(have_triangles)
-                vector_form->set_l2_const_tables(HERMES_MODE_TRIANGLE);
-              if(have_quads)
-                vector_form->set_l2_const_tables(HERMES_MODE_QUAD);
-            }
-            else
-              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-          }
-        }
-      }
-
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
       if(current_rhs != NULL)
@@ -1605,9 +1522,6 @@ namespace Hermes
         if(rep_space_i == -1)
           return;
 
-        bool constantElement = current_refmaps[rep_space_i]->is_jacobian_const();
-        bool onlyConstantForms = current_wf->only_constant_forms();
-
         // Do we have to recalculate the data for this state even if the cache contains the data?
         bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
 
@@ -1625,15 +1539,8 @@ namespace Hermes
           }
         }
 
-        // The constant forms.
-        if(constantElement)
-          this->assemble_constant_forms(current_refmaps[rep_space_i], current_als, current_state, current_wf);
-
         // Calculate the cache entries.
-        CacheRecordPerSubIdx** cacheRecordPerSubIdx = NULL;
-        if(!onlyConstantForms || !constantElement || current_state->isBnd)
-        {
-          cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
+        CacheRecordPerSubIdx** cacheRecordPerSubIdx = new CacheRecordPerSubIdx*[this->spaces.size()];
           
           if(changedInLastAdaptation)
             this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
@@ -1650,33 +1557,7 @@ namespace Hermes
                 cacheRecordPerSubIdx[temp_i] = it->second;
             }
           }
-        }
 
-        /// Dirichlet handling for constant elements.
-        if(constantElement && current_state->isBnd)
-        {
-          if(current_rhs != NULL)
-          {
-            for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
-            {
-              MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
-              if(!mfv->is_const)
-                continue;
-
-              if(form_to_be_assembled(mfv, current_state))
-              {
-                int form_i = current_wf->mfvol[current_mfvol_i]->i;
-                int form_j = current_wf->mfvol[current_mfvol_i]->j;
-                CacheRecordPerSubIdx* CacheRecordPerSubIdxI = cacheRecordPerSubIdx[form_i];
-                CacheRecordPerSubIdx* CacheRecordPerSubIdxJ = cacheRecordPerSubIdx[form_j];
-                assemble_constant_forms_Dirichlet(current_state, CacheRecordPerSubIdxI->n_quadrature_points, CacheRecordPerSubIdxI->geometry, CacheRecordPerSubIdxI->jacobian_x_weights, CacheRecordPerSubIdxJ->fns, CacheRecordPerSubIdxI->fns, current_als, current_wf->mfvol[current_mfvol_i]);
-              }
-            }
-          }
-        }
-
-        if(!onlyConstantForms || !constantElement)
-        {
           // Ext functions.
           // - order
           int order = cacheRecordPerSubIdx[rep_space_i]->order;
@@ -1721,8 +1602,6 @@ namespace Hermes
             for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
             {
               MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
-              if(mfv->is_const && constantElement)
-                continue;
 
               if(!form_to_be_assembled(mfv, current_state))
                 continue;
@@ -1751,8 +1630,6 @@ namespace Hermes
             for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
             {
               VectorFormVol<Scalar>* vfv = current_wf->vfvol[current_vfvol_i];
-              if(vfv->is_const && constantElement)
-                continue;
 
               if(!form_to_be_assembled(vfv, current_state))
                 continue;
@@ -1767,7 +1644,7 @@ namespace Hermes
                 u_ext, 
                 current_als[form_i], 
                 current_state, 
-                CacheRecordPerSubIdxI->n_quadrature_points,
+								CacheRecordPerSubIdxI->n_quadrature_points,
                 CacheRecordPerSubIdxI->geometry, 
                 CacheRecordPerSubIdxI->jacobian_x_weights);
             }
@@ -1793,7 +1670,6 @@ namespace Hermes
               delete ext[ext_i];
             }
             delete [] ext;
-        }
 
         // Assemble surface integrals now: loop through surfaces of the element.
         if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
@@ -1917,298 +1793,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_constant_forms(RefMap* current_refmap, AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf)
-    {
-      double const_jacobian = current_refmap->get_const_jacobian();
-      double const_inv_ref_map_0_0 = current_refmap->get_const_inv_ref_map()[0][0][0];
-      double const_inv_ref_map_0_1 = current_refmap->get_const_inv_ref_map()[0][0][1];
-      double const_inv_ref_map_1_0 = current_refmap->get_const_inv_ref_map()[0][1][0];
-      double const_inv_ref_map_1_1 = current_refmap->get_const_inv_ref_map()[0][1][1];
-      if(current_mat != NULL)
-      {
-        // Matrix forms.
-        for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
-        {
-          MatrixFormVol<Scalar>* mfv = current_wf->mfvol[current_mfvol_i];
-          if(!mfv->is_const)
-            continue;
-
-          if(!form_to_be_assembled(mfv, current_state))
-            continue;
-
-          int form_i = mfv->i;
-          int form_j = mfv->j;
-
-          AsmList<Scalar>* asmlist_i = current_als[form_i];
-          AsmList<Scalar>* asmlist_j = current_als[form_j];
-
-          bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(mfv) == NULL);
-
-          double block_scaling_coef = this->block_scaling_coeff(mfv);
-
-          bool tra = (mfv->i != mfv->j) && (mfv->sym != 0);
-          bool sym = (mfv->i == mfv->j) && (mfv->sym == 1);
-
-          // Local matrix.
-          Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(asmlist_i->cnt, asmlist_j->cnt));
-
-          // Select the right precalculated table.
-          Scalar*** matrix_values;
-          if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-          {
-            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-              matrix_values = mfv->matrix_values_h1_h1[current_state->rep->get_mode()];
-            else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-              matrix_values = mfv->matrix_values_h1_l2[current_state->rep->get_mode()];
-            else
-              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-          }
-          else
-          {
-            if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-              matrix_values = mfv->matrix_values_l2_h1[current_state->rep->get_mode()];
-            else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-              matrix_values = mfv->matrix_values_l2_l2[current_state->rep->get_mode()];
-            else
-              throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-          }
-
-          // Get the element-wise constant form multiplier.
-          Scalar elemwise_parameter = 1.0;
-          if(mfv->elemwise_parameter != NULL)
-          {
-            if(mfv->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
-              elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(mfv->elemwise_parameter))->get_value(current_state->rep);
-            if(mfv->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-              throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
-          }
-
-          for(int i = 0; i < asmlist_i->cnt; i++)
-          {
-            if(asmlist_i->dof[i] < 0)
-              continue;
-            if((!tra || surface_form) && asmlist_i->dof[i] < 0)
-              continue;
-            if(std::abs(asmlist_i->coef[i]) < 1e-12)
-              continue;
-            for(int j = sym ? i : 0; j < asmlist_j->cnt; j++)
-            {
-              if(asmlist_j->dof[j] >= 0)
-              {
-                local_stiffness_matrix[i][j] = 0.0;
-                for(int calc_i = 0; calc_i < 21; calc_i++)
-                {
-                  if(matrix_values[calc_i] != NULL)
-                  {
-                    Scalar val = matrix_values[calc_i][asmlist_i->idx[i]][asmlist_j->idx[j]] * asmlist_i->coef[i] * asmlist_j->coef[j];
-                    switch(calc_i)
-                    {
-                    case 0:
-                      val *= const_jacobian;
-                      break;
-                    case 1:
-                      val *= const_jacobian * const_inv_ref_map_0_0;
-                      break;
-                    case 2:
-                      val *= const_jacobian * const_inv_ref_map_0_1;
-                      break;
-                    case 3:
-                      val *= const_jacobian * const_inv_ref_map_1_0;
-                      break;
-                    case 4:
-                      val *= const_jacobian * const_inv_ref_map_1_1;
-                      break;
-                    case 5:
-                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_0_0;
-                      break;
-                    case 6:
-                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_0_1;
-                      break;
-                    case 7:
-                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_1_0;
-                      break;
-                    case 8:
-                      val *= const_jacobian * const_inv_ref_map_0_0 * const_inv_ref_map_1_1;
-                      break;
-                    case 9:
-                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_0_0;
-                      break;
-                    case 10:
-                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_0_1;
-                      break;
-                    case 11:
-                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_1_0;
-                      break;
-                    case 12:
-                      val *= const_jacobian * const_inv_ref_map_0_1 * const_inv_ref_map_1_1;
-                      break;
-                    case 13:
-                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_0_0;
-                      break;
-                    case 14:
-                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_0_1;
-                      break;
-                    case 15:
-                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_1_0;
-                      break;
-                    case 16:
-                      val *= const_jacobian * const_inv_ref_map_1_0 * const_inv_ref_map_1_1;
-                      break;
-                    case 17:
-                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_0_0;
-                      break;
-                    case 18:
-                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_0_1;
-                      break;
-                    case 19:
-                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_0;
-                      break;
-                    case 20:
-                      val *= const_jacobian * const_inv_ref_map_1_1 * const_inv_ref_map_1_1;
-                      break;
-                    }
-                    local_stiffness_matrix[i][j] += val * elemwise_parameter;
-                    if(sym)
-                      local_stiffness_matrix[j][i] = local_stiffness_matrix[i][j];
-                  }
-                }
-              }
-            }
-          }
-
-          // Local -> Global.
-          current_mat->add(asmlist_i->cnt, asmlist_j->cnt, local_stiffness_matrix, asmlist_i->dof, asmlist_j->dof);
-          if(tra)
-          {
-            if(mfv->sym < 0)
-              chsgn(local_stiffness_matrix, asmlist_i->cnt, asmlist_j->cnt);
-            transpose(local_stiffness_matrix, asmlist_i->cnt, asmlist_j->cnt);
-
-            current_mat->add(asmlist_j->cnt, asmlist_i->cnt, local_stiffness_matrix, asmlist_j->dof, asmlist_i->dof);
-          }
-        }
-      }
-      if(current_rhs != NULL)
-      {
-        // Vector forms.
-        for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
-        {
-          VectorFormVol<Scalar>* vfv = current_wf->vfvol[current_vfvol_i];
-          if(!vfv->is_const)
-            continue;
-
-          if(!form_to_be_assembled(vfv, current_state))
-            continue;
-
-          int form_i = vfv->i;
-
-          AsmList<Scalar>* asmlist_i = current_als[form_i];
-
-          Scalar** rhs_values;
-          if(this->spaces[form_i]->get_type() == HERMES_H1_SPACE)
-            rhs_values = vfv->rhs_values_h1[current_state->rep->get_mode()];
-          else if(this->spaces[form_i]->get_type() == HERMES_L2_SPACE)
-            rhs_values = vfv->rhs_values_l2[current_state->rep->get_mode()];
-          else
-            throw Exceptions::Exception("Precalculating of vector shapesets not implemented.");
-
-          // Get the element-wise constant form multiplier.
-          Scalar elemwise_parameter = 1.0;
-          if(vfv->elemwise_parameter != NULL)
-          {
-            if(vfv->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
-              elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(vfv->elemwise_parameter))->get_value(current_state->rep);
-            if(vfv->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-              throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
-          }
-
-          for(int i = 0; i < asmlist_i->cnt; i++)
-          {
-            if(asmlist_i->dof[i] < 0)
-              continue;
-            for(int calc_i = 0; calc_i < 5; calc_i++)
-            {
-              if(rhs_values[calc_i] != NULL)
-              {
-                Scalar val = rhs_values[calc_i][asmlist_i->idx[i]] * asmlist_i->coef[i];
-                switch(calc_i)
-                {
-                case 0:
-                  val *= const_jacobian;
-                  break;
-                case 1:
-                  val *= const_jacobian * const_inv_ref_map_0_0;
-                  break;
-                case 2:
-                  val *= const_jacobian * const_inv_ref_map_0_1;
-                  break;
-                case 3:
-                  val *= const_jacobian * const_inv_ref_map_1_0;
-                  break;
-                case 4:
-                  val *= const_jacobian * const_inv_ref_map_1_1;
-                  break;
-                }
-                this->current_rhs->add(asmlist_i->dof[i], val * elemwise_parameter);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_constant_forms_Dirichlet(Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights, Func<double>** base_fns, Func<double>** test_fns, AsmList<Scalar>** current_als, MatrixForm<Scalar>* form)
-    {
-      if(!form->is_const)
-        return;
-
-      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
-
-      double block_scaling_coef = this->block_scaling_coeff(form);
-
-      bool tra = (form->i != form->j) && (form->sym != 0);
-
-      // Get the element-wise constant form multiplier.
-      Scalar elemwise_parameter = 1.0;
-      if(form->elemwise_parameter != NULL)
-      {
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
-          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-          throw Hermes::Exceptions::Exception("Wrong parameter type, constant forms cannot have nonlinear parameters.");
-      }
-
-      // Actual form-specific calculation.
-      for (unsigned int i = 0; i < current_als[form->i]->cnt; i++)
-      {
-        if(current_als[form->i]->dof[i] < 0)
-          continue;
-
-        if(std::abs(current_als[form->i]->coef[i]) < 1e-12)
-          continue;
-
-        for (unsigned int j = 0; j < current_als[form->j]->cnt; j++)
-        {
-          if(current_als[form->j]->dof[j] >= 0)
-            continue;
-
-          // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-          if(std::abs(current_als[form->j]->coef[j]) < 1e-12)
-            continue;
-
-          Func<double>* u = base_fns[j];
-          Func<double>* v = test_fns[i];
-
-          if(surface_form)
-            this->current_rhs->add(current_als[form->i]->dof[i], - 0.5 * this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
-          else
-            this->current_rhs->add(current_als[form->i]->dof[i], -this->block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, NULL, u, v, geometry, NULL) * form->scaling_factor * current_als[form->j]->coef[j] * current_als[form->i]->coef[i] * elemwise_parameter);
-        }
-      }
-    }
-
-    template<typename Scalar>
     int DiscreteProblem<Scalar>::calc_order_matrix_form(MatrixForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
       int order;
@@ -2297,51 +1881,6 @@ namespace Hermes
       if(RungeKutta)
         u_ext += form->u_ext_offset;
 
-      // Get the element-wise constant form multiplier.
-      Scalar elemwise_parameter = 1.0;
-      if(form->elemwise_parameter != NULL)
-      {
-        // By default, use the parameter.
-        form->forget_elemwise_parameter = false;
-
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
-        {
-          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
-          if(std::abs(elemwise_parameter) < 1e-12)
-            return;
-        }
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-        {
-          // Calculation of standard deviation of u_ext->val[{quadrature points}].
-          Scalar mean_value = 0.0;
-          for(int i = 0; i < n_quadrature_points; i++)
-            mean_value += u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index]->val[i];
-          mean_value /= n_quadrature_points;
-
-          elemwise_parameter = (static_cast<ElemwiseParameterNonlinear<Scalar>*>(form->elemwise_parameter))->get_value(mean_value);
-
-          if(std::abs(elemwise_parameter) < 1e-12)
-            return;
-
-          double deviation = 0.0;
-          double mean_value_abs = std::abs(mean_value);
-          for(int i = 0; i < n_quadrature_points; i++)
-          {
-            double val_i_abs = std::abs(u_ext[form->previous_iteration_space_index == -1 ? form->j : form->previous_iteration_space_index]->val[i]);
-            deviation += std::pow(val_i_abs - mean_value_abs, 2.0);
-          }
-
-          double ratio = deviation / (mean_value_abs * n_quadrature_points);
-
-          // 1 percent.
-          if(ratio > 0.0001)
-          {
-            elemwise_parameter = 1.0;
-            form->forget_elemwise_parameter = true;
-          }
-        }
-      }
-
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
       {
@@ -2366,9 +1905,9 @@ namespace Hermes
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter;
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i] * elemwise_parameter;
+                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
             }
           }
         }
@@ -2390,7 +1929,7 @@ namespace Hermes
 
               Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
-              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val * elemwise_parameter;
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
           }
         }
@@ -2498,16 +2037,6 @@ namespace Hermes
       if(RungeKutta)
         u_ext += form->u_ext_offset;
 
-      // Get the element-wise constant form multiplier.
-      Scalar elemwise_parameter = 1.0;
-      if(form->elemwise_parameter != NULL)
-      {
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeFunc)
-          elemwise_parameter = (static_cast<ElemwiseParameterFunc<Scalar>*>(form->elemwise_parameter))->get_value(current_state->rep);
-        if(form->elemwise_parameter->get_type() == ElemwiseParameterTypeNonlinear)
-          throw Hermes::Exceptions::Exception("Wrong parameter type, vector forms cannot have nonlinear parameters.");
-      }
-
       // Actual form-specific calculation.
       for (unsigned int i = 0; i < current_als_i->cnt; i++)
       {
@@ -2526,7 +2055,7 @@ namespace Hermes
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
 
-        current_rhs->add(current_als_i->dof[i], val * elemwise_parameter);
+        current_rhs->add(current_als_i->dof[i], val);
       }
 
       if(form->ext.size() > 0)
