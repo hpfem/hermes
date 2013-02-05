@@ -26,12 +26,18 @@ FIND_PATH(UMFPACK_INCLUDE_DIR umfpack.h /usr/include /usr/include/umfpack /usr/l
 FIND_PATH(AMD_INCLUDE_DIR     amd.h     /usr/include /usr/local/include/AMD /usr/include/suitesparse /opt/local/include/ufsparse)
 
 FIND_LIBRARY(UMFPACK_LIBRARY  NAMES libumfpack umfpack  PATHS ${MY_UMFPACK_LIB_DIRS}  NO_DEFAULT_PATH) 
+FIND_LIBRARY(SSC_LIBRARY  NAMES libsuitesparseconfig suitesparseconfig  PATHS ${MY_UMFPACK_LIB_DIRS}  NO_DEFAULT_PATH) 
 FIND_LIBRARY(AMD_LIBRARY      NAMES libamd amd          PATHS ${MY_UMFPACK_LIB_DIRS}  NO_DEFAULT_PATH)
 FIND_LIBRARY(UMFPACK_LIBRARY  NAMES libumfpack umfpack  PATHS /usr/lib /usr/local/lib/UMFPACK) 
+FIND_LIBRARY(SSC_LIBRARY  NAMES libsuitesparseconfig suitesparseconfig  PATHS /usr/lib /usr/local/lib/UMFPACK)
 FIND_LIBRARY(AMD_LIBRARY      NAMES libamd amd          PATHS /usr/lib /usr/local/lib/AMD)
 
+if(${SSC_LIBRARY} STREQUAL "SSC_LIBRARY-NOTFOUND")
+  set(SSC_LIBRARY " ")
+endif(${SSC_LIBRARY} STREQUAL "SSC_LIBRARY-NOTFOUND")
+
 SET(UMFPACK_INCLUDE_DIRS  ${UMFPACK_INCLUDE_DIR} ${AMD_INCLUDE_DIR})
-SET(UMFPACK_LIBRARIES     ${UMFPACK_LIBRARY} ${AMD_LIBRARY})
+SET(UMFPACK_LIBRARIES     ${UMFPACK_LIBRARY} ${SSC_LIBRARY} ${AMD_LIBRARY})
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(  UMFPACK
@@ -41,4 +47,3 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(  UMFPACK
    in the CMake.vars file." 
    UMFPACK_LIBRARIES UMFPACK_INCLUDE_DIRS
 )
-
