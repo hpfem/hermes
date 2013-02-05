@@ -25,10 +25,6 @@
 
 #define GL_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-#ifdef ENABLE_VIEWER_GUI
-# include <AntTweakBar.h>
-#endif
-
 /* constants */
 #define MIN_CONT_STEP 1.0E-2 ///< A minimal step of a contour.
 #define CONT_CHANGE 1.0E-2 ///< A change of a contour in GUI
@@ -118,9 +114,6 @@ namespace Hermes
         node_widget_vert_cnt(32),
         element_id_widget(0),
         show_element_info(false)
-#ifdef ENABLE_VIEWER_GUI
-        , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
-#endif
       {
         init();
       }
@@ -130,50 +123,10 @@ namespace Hermes
         delete [] normals;
         vertex_nodes.clear();
         delete lin;
-
-# ifdef ENABLE_VIEWER_GUI
-        if(tw_wnd_id != TW_WND_ID_NONE)
-        {
-          TwSetCurrentWndID(tw_wnd_id);
-          TwTerminate();
-          tw_wnd_id = TW_WND_ID_NONE;
-        }
-# endif
-      }
-
-      void ScalarView::on_create(int output_id)
-      {
-        View::on_create(output_id);
-
-# ifdef ENABLE_VIEWER_GUI
-        if(tw_wnd_id == TW_WND_ID_NONE) //GUI has to be initialized before any displaying occurs (on_create calls post_redisplay by default)
-        {
-          TwSetCurrentWndID(TW_WND_ID_NONE);
-          if(TwInit(TW_OPENGL, NULL))
-          {
-            tw_wnd_id = TwGetCurrentWndID();
-            create_setup_bar();
-          }
-          else
-          {
-            error("TW init failed: %s", TwGetLastError());
-          }
-        }
-# endif
       }
 
       void ScalarView::on_close()
       {
-        //GUI cleanup
-# ifdef ENABLE_VIEWER_GUI
-        if(tw_wnd_id != TW_WND_ID_NONE)
-        {
-          TwSetCurrentWndID(tw_wnd_id);
-          TwTerminate();
-          tw_wnd_id = TW_WND_ID_NONE;
-        }
-# endif
-
         //OpenGL clenaup
         if(pointed_node_widget != 0)
         {
@@ -203,38 +156,6 @@ namespace Hermes
 
         //call of parent implementation
         View::on_close();
-      }
-
-      void ScalarView::create_setup_bar()
-      {
-#ifdef ENABLE_VIEWER_GUI
-        char buffer[1024];
-
-        TwBar* tw_bar = TwNewBar("View setup");
-
-        // Contours.
-        TwAddVarRW(tw_bar, "contours", TW_TYPE_BOOLCPP, &contours, " group = Contour2D label = 'Show contours'");
-        sprintf(buffer, " group = Contour2D label = 'Begin' step = %g", CONT_CHANGE);
-        TwAddVarRW(tw_bar, "cont_orig", TW_TYPE_DOUBLE, &cont_orig, buffer);
-        sprintf(buffer, " group = Contour2D label = 'Step' min = %g step = %g", MIN_CONT_STEP, CONT_CHANGE);
-        TwAddVarRW(tw_bar, "cont_step", TW_TYPE_DOUBLE, &cont_step, buffer);
-        TwAddVarRW(tw_bar, "cont_color", TW_TYPE_COLOR3F, &cont_color, " group = Contour2D label = 'Color'");
-
-        // Mesh.
-        TwAddVarRW(tw_bar, "show_values", TW_TYPE_BOOLCPP, &show_values, " group = Elements2D label = 'Show Value'");
-        TwAddVarRW(tw_bar, "show_edges", TW_TYPE_BOOLCPP, &show_edges, " group = Elements2D label = 'Show Edges'");
-        TwAddVarRW(tw_bar, "show_aabb", TW_TYPE_BOOLCPP, &show_aabb, " group = Elements2D label = 'Show Bounding box'");
-        TwAddVarRW(tw_bar, "show_element_info", TW_TYPE_BOOLCPP, &show_element_info, " group = Elements2D label = 'Show ID'");
-        TwAddVarRW(tw_bar, "allow_node_selection", TW_TYPE_BOOLCPP, &allow_node_selection, " group = Elements2D label = 'Allow Node Sel.'");
-        TwAddVarRW(tw_bar, "edges_color", TW_TYPE_COLOR3F, &edges_color, " group = Elements2D label = 'Edge color'");
-
-        // Help.
-        const char* help_text = get_help_text();
-        TwSetParam(tw_bar, NULL, "help", TW_PARAM_CSTRING, 1, help_text);
-
-        tw_setup_bar = tw_bar;
-
-#endif
       }
 
       void ScalarView::show(MeshFunction<double>* sln, double eps, int item,
@@ -354,19 +275,6 @@ namespace Hermes
       {
         //clear all selections
         pointed_vertex_node = NULL;
-#ifdef ENABLE_VIEWER_GUI
-        if(tw_wnd_id != TW_WND_ID_NONE)
-        {
-          TwSetCurrentWndID(tw_wnd_id);
-          vector<VertexNodeInfo>::iterator iter = vertex_nodes.begin();
-          while (iter != vertex_nodes.end())
-          {
-            if(iter->tw_bar != NULL)
-              TwDeleteBar((TwBar*)iter->tw_bar);
-            ++iter;
-          }
-        }
-#endif
         vertex_nodes.clear();
 
         //count a number of active nodes
@@ -1254,15 +1162,6 @@ namespace Hermes
         }
 
         lin->unlock_data();
-
-        // Draw TW.
-#ifdef ENABLE_VIEWER_GUI
-        if(tw_wnd_id != TW_WND_ID_NONE)
-        {
-          TwSetCurrentWndID(tw_wnd_id);
-          TwDraw();
-        }
-#endif
       }
 
       static inline void normalize(double& x, double& y, double& z)
@@ -1487,9 +1386,6 @@ namespace Hermes
 
       void ScalarView::on_key_down(unsigned char key, int x, int y)
       {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventKeyboardGLUT(key, x, y))
-        {
           switch (key)
           {
           case 'm':
@@ -1569,21 +1465,11 @@ namespace Hermes
             View::on_key_down(key, x, y);
             break;
           }
-        }
       }
 
-      void ScalarView::on_special_key(int key, int x, int y)
-      {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventSpecialGLUT(key, x, y))
-        {
-          View::on_special_key(key, x, y);
-        }
-      }
 
       void ScalarView::on_mouse_move(int x, int y)
       {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
         if(mode3d && (dragging || scaling || panning))
         {
           if(dragging)
@@ -1613,8 +1499,6 @@ namespace Hermes
         }
         else
         {
-          VIEWER_GUI_CALLBACK(TwEventMouseMotionGLUT(x, y))
-          {
             if(!mode3d && show_edges && !dragging && !scaling && !panning)
             {
               if(allow_node_selection)
@@ -1632,32 +1516,10 @@ namespace Hermes
               View::on_mouse_move(x, y);
             }
           }
-        }
-      }
-
-      void ScalarView::on_left_mouse_down(int x, int y)
-      {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_LEFT_BUTTON, GLUT_DOWN, x, y))
-        {
-          View::on_left_mouse_down(x, y);
-        }
-      }
-
-      void ScalarView::on_left_mouse_up(int x, int y)
-      {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_LEFT_BUTTON, GLUT_UP, x, y))
-        {
-          View::on_left_mouse_up(x, y);
-        }
       }
 
       void ScalarView::on_right_mouse_down(int x, int y)
       {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_RIGHT_BUTTON, GLUT_DOWN, x, y))
-        {
           //handle node selection
           if(allow_node_selection && pointed_vertex_node != NULL)
           {
@@ -1690,44 +1552,19 @@ namespace Hermes
             View::on_right_mouse_down(x, y);
           }
         }
-      }
-
-      void ScalarView::on_right_mouse_up(int x, int y)
-      {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_RIGHT_BUTTON, GLUT_UP, x, y))
-        {
-          View::on_right_mouse_up(x, y);
-        }
-      }
 
       void ScalarView::on_middle_mouse_down(int x, int y)
       {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_MIDDLE_BUTTON, GLUT_DOWN, x, y))
-        {
           if(!mode3d) return;
           dragging = scaling = false;
           panning = true;
-        }
       }
 
       void ScalarView::on_middle_mouse_up(int x, int y)
       {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI_CALLBACK(TwEventMouseButtonGLUT(GLUT_MIDDLE_BUTTON, GLUT_UP, x, y))
-        {
           panning = false;
-        }
       }
 
-      void ScalarView::on_reshape(int width, int height)
-      {
-        VIEWER_GUI(TwSetCurrentWndID(tw_wnd_id));
-        VIEWER_GUI(TwWindowSize(width, height));
-
-        View::on_reshape(width, height);
-      }
 
       const char* ScalarView::get_help_text() const
       {

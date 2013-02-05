@@ -34,19 +34,6 @@ namespace Hermes
       // you can define NOGLUT to turn off all OpenGL stuff in Hermes2D
 #ifndef NOGLUT
 
-      /// GUI inside views (the current GUI uses AntTweakBar and it is still experimental)
-      /// to enable view define: ENABLE_VIEWER_GUI
-# ifdef ENABLE_VIEWER_GUI
-#   include <AntTweakBar.h>
-#   define VIEWER_GUI(__def) __def
-#   define VIEWER_GUI_CALLBACK(__clbk) if(__clbk) { refresh(); } else
-# else
-#   define TW_WND_ID_NONE -1
-#   define VIEWER_GUI(__def)
-#   define VIEWER_GUI_CALLBACK(__cblk)
-#   define TwBar void /* avoid necessity to define ENABLE_VIEWER_GUI in underlaying applications */
-# endif
-
       /// \brief Visualizes a Scalar PDE solution.
       ///
       /// ScalarView is a visualization window for all Scalar-valued PDE solutions.
@@ -92,9 +79,8 @@ namespace Hermes
           float x, y; ///< location of the node in coordinates of the mesh
           int id; ///< id of the node
           bool selected; ///< true if the node is selected
-          TwBar* tw_bar; ///< a pointer to a gui window (CTwBar*) (GUI only).
           VertexNodeInfo() {}; ///< An empty default constructor to limit time
-          VertexNodeInfo(int id, float x, float y) : x(x), y(y), id(id), selected(false), tw_bar(NULL) {};
+          VertexNodeInfo(int id, float x, float y) : x(x), y(y), id(id), selected(false) {};
         };
         Hermes::vector<VertexNodeInfo> vertex_nodes; ///< Vertex nodes. Sorted accordin to the X-axis.
         VertexNodeInfo* pointed_vertex_node; ///< A vertex node that is under the mouse cursor. NULL if none.
@@ -131,12 +117,6 @@ namespace Hermes
         void init_element_info(const Mesh* mesh); ///< Creates element info from mesh.
         void create_element_info_widgets(); ///< Creates element ID widgets if not created already.
         void draw_element_infos_2d(); ///< Draws elements infos in 2D mode.
-
-      protected: //GUI
-        int tw_wnd_id; ///< tw window ID
-        TwBar* tw_setup_bar; ///< setup bar
-
-        virtual void create_setup_bar(); ///< create setup bar. Assumes that current window is set
 
       protected: //values
 #define H2DV_GL_MAX_EDGE_BUFFER 128 ///< A maximum number of pairs per a buffer.
@@ -225,25 +205,18 @@ namespace Hermes
 
         virtual void on_display();
         virtual void on_key_down(unsigned char key, int x, int y);
-        virtual void on_special_key(int key, int x, int y);
         virtual void on_mouse_move(int x, int y);
         virtual void on_right_mouse_down(int x, int y); ///< Handles selecting/deselecting of nodes.
         virtual void on_middle_mouse_down(int x, int y);
         virtual void on_middle_mouse_up(int x, int y);
         virtual const char* get_help_text() const;
         virtual void on_close();
-        virtual void on_create(int output_id);
-
-        virtual void on_left_mouse_down(int x, int y);
-        virtual void on_left_mouse_up(int x, int y);
-        virtual void on_right_mouse_up(int x, int y);
-        virtual void on_reshape(int width, int height);
       };
 #else
 class HERMES_API ScalarView : public View
       {
       public:
-        void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 #ifndef _MSC_VER
         ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 #endif

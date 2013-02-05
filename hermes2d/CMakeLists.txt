@@ -326,10 +326,6 @@ project(hermes2d)
 
     set(_FLAGS ${BUILD_FLAGS})
 
-    if(WITH_VIEWER_GUI)
-      set(_FLAGS "${_FLAGS} -DENABLE_VIEWER_GUI")
-    endif(WITH_VIEWER_GUI)
-
     set_target_properties(${HERMES_LIB} PROPERTIES COMPILE_FLAGS ${_FLAGS})
 
     target_link_libraries(  ${HERMES_LIB}
