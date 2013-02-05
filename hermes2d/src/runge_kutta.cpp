@@ -170,6 +170,17 @@ namespace Hermes
     {
       this->create_stage_wf(spaces.size(), block_diagonal_jacobian);
 
+      if(this->get_verbose_output())
+      {
+        this->stage_wf_left.set_verbose_output(true);
+        this->stage_wf_right.set_verbose_output(true);
+      }
+      else
+      {
+        this->stage_wf_left.set_verbose_output(false);
+        this->stage_wf_right.set_verbose_output(false);
+      }
+
       // The tensor discrete problem is created in two parts. First, matrix_left is the Jacobian
       // matrix of the term coming from the left-hand side of the RK formula k_i = f(...). This is
       // a block-diagonal mass matrix. The corresponding part of the residual is obtained by multiplying
@@ -178,7 +189,7 @@ namespace Hermes
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
       this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
-
+      
       // All Spaces of the problem.
       Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
 
