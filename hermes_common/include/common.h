@@ -250,32 +250,29 @@ The Hermes Common library encompasses the functionality shared by the code for a
 <a href="classHermes_1_1Api.html"><h1>Api</a></h1>
 
 Hermes Common provides utility features, like
-<center>
-
-<h1><a href="namespaceHermes_1_1Mixins.html" style="color:lime">Mixin classes</a></h1>
-General representation of a 1,2,3-dimensional functions: <a href="classHermes_1_1Hermes1DFunction.html" style="color:lime">Hermes 1D function</a>, <a href="classHermes_1_1Hermes2DFunction.html" style="color:lime">Hermes 2D function</a>, <a href="classHermes_1_1Hermes3DFunction.html" style="color:lime">Hermes 3D function</a><br />
-<h1><a href="classHermes_1_1vector.html" style="color:lime">Own std::vector-based vector class</a></h1>
-<h1><a href="classHermes_1_1ButcherTable.html" style="color:lime">Butcher's tables</a></h1>
-<h1><a href="classCallStack.html" style="color:lime">Call stack printing</a></h1>
-<h1><a href="classHermes_1_1Exceptions_1_1Exception.html" style="color:lime">Exceptions</a></h1>
-<h2><a href="classHermes_1_1Exceptions_1_1Exception.html" style="color:lime">- base class & general exceptions</a>.</h2>
-</center>
+<ul>
+<li><a href="namespaceHermes_1_1Mixins.html">Mixin classes</a>
+<li>General representation of a 1,2,3-dimensional functions: <a href="classHermes_1_1Hermes1DFunction.html">Hermes 1D function</a>, <a href="classHermes_1_1Hermes2DFunction.html">Hermes 2D function</a>, <a href="classHermes_1_1Hermes3DFunction.html">Hermes 3D function</a>
+<li><a href="classHermes_1_1vector.html">Own std::vector-based vector class</a>
+<li><a href="classHermes_1_1ButcherTable.html">Butcher's tables</a>
+<li><a href="classCallStack.html">Call stack printing</a>
+<li><a href="classHermes_1_1Exceptions_1_1Exception.html">Exceptions - base class & general exceptions</a>.
+</ul>
 
 The library provides also stand-alone functionality, needed to solve problems shared by codes for all dimensions. The first big part is
 
-<h1><a href="namespaceHermes_1_1Algebra.html">Linear algebra</a></h1>
-<h2>Matrix structures</h2>
+<h3><a href="namespaceHermes_1_1Algebra.html">Linear algebra</a></h3>
+<h4>Matrix structures</h4>
 These structures correspond to the most widely used storage type for matrices - sparse matrices.
 <img src="classHermes_1_1Algebra_1_1Matrix.png">
 <center>
 <a href="classHermes_1_1Algebra_1_1Matrix.html">Matrix structures</a>
 </center>
 
-<h2><a href="namespaceHermes_1_1Algebra_1_1DenseMatrixOperations.html">Dense matrix structures</a></h2>
+<h4><a href="namespaceHermes_1_1Algebra_1_1DenseMatrixOperations.html">Dense matrix structures</a></h4>
 These routines are here to support occasional needs to handle dense matrices, that are so small that storing them using sparse structures would be ineffective.
-
-
-<h2>Vector structures</h2>
+<br />
+Vector structures
 <img src="classHermes_1_1Algebra_1_1Vector.png">
 <center>
 <a href="classHermes_1_1Algebra_1_1Vector.html">Vector structures</a>
@@ -283,14 +280,15 @@ These routines are here to support occasional needs to handle dense matrices, th
 
 after one is able to store / load, and do other operations with linear algebraic structures, one would like to solve Ax = b:
 
-<a href="namespaceHermes_1_1Solvers.html"><h1>Linear matrix solvers</a></h1>
+<a href="namespaceHermes_1_1Solvers.html">
+<h4>Linear matrix solvers</h4></a>
 <img src="classHermes_1_1Solvers_1_1LinearMatrixSolver.png">
 <center>
 <a href="classHermes_1_1Solvers_1_1LinearMatrixSolver.html">Linear matrix solvers</a>
 </center>
 ... possibly with
 
-<a href="namespaceHermes_1_1Preconditioners.html"><h1>Preconditioners</a></h1>
+<a href="namespaceHermes_1_1Preconditioners.html"><h4>Preconditioners</a></h4>
 <img src="classHermes_1_1Preconditioners_1_1Precond.png">
 <center>
 <a href="classHermes_1_1Preconditioners_1_1Precond.html">Preconditioners</a>

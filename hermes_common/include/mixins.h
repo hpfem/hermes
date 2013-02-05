@@ -41,7 +41,7 @@ namespace Hermes
   /// could use - logging, time measurement, ...
   namespace Mixins
   {
-    /// Class the output of which is loggable, i.e. that uses functionality of info(), warn()
+    /// \brief Class the output of which is loggable, i.e. that uses functionality of info(), warn()
     /// Contains the class Static with the following usage:
     /// Anywhere in your program you can write Hermes::Mixins::Loggable::Static::info("whatever you want to output").
     class HERMES_API Loggable
@@ -106,7 +106,7 @@ namespace Hermes
 
       HermesLogEventInfo* hermes_build_log_info(char event) const;
 
-      /// Logging output monitor. \internal \ingroup g_logging
+      /// \brief Logging output monitor. \internal \ingroup g_logging
       /** This class protects a logging function __hermes_log_message_if() in multithreded environment. */
       class LoggerMonitor
       {
@@ -139,7 +139,7 @@ namespace Hermes
 
       static std::map<std::string, bool> logger_written;
 
-      /// Logs an event if the condition is true. \internal
+      /// \brief Logs an event if the condition is true. \internal
       /** Used by all even logging macros. Since this function returns a copy of the parameter cond,
       *  it can be used to call a function hermes2d_exit_if() or a function(). Thanks to that, the macro
       *  behaves as a function rather than a block of code. Also, this allows a debugger to a particular
@@ -156,7 +156,7 @@ namespace Hermes
       callbackFn verbose_callback;
     };
 
-    /// Class using time measurement
+    /// \brief Class using time measurement
     /// Can be used directly (is not abstract), so one can use e.g. this in a program:
     /// Mixins::TimeMeasurable time;
     /// time.tick();
@@ -211,7 +211,7 @@ namespace Hermes
       std::string to_string(const double time) const; ///< Converts time from seconds to human readable form.
     };
   
-    /// Class that allows overriding integration order in its discrete problems
+    /// \brief Class that allows overriding integration order in its discrete problems
     /// Internal
     class HERMES_API IntegrableWithGlobalOrder
     {
@@ -222,7 +222,7 @@ namespace Hermes
       unsigned int global_integration_order;
     };
 
-    /// Class that allows overriding integration order in its discrete problems
+    /// \brief Class that allows overriding integration order in its discrete problems
     /// Internal
     class HERMES_API SettableComputationTime
     {
@@ -235,7 +235,7 @@ namespace Hermes
       double time_step;
     };
 
-    /// Class that allows for attaching any method to particular parts of its functionality.
+    /// \brief Class that allows for attaching any method to particular parts of its functionality.
     /// Internal
     class HERMES_API OutputAttachable
     {
