@@ -29,8 +29,6 @@ namespace Hermes
       class Vectorizer;
     }
 
-    /// @defgroup meshFunctions Mesh functions
-
     /// 2D transformation.
     struct Trf
     {

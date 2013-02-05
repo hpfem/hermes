@@ -45,7 +45,9 @@ namespace Hermes
     template<typename Scalar> class HcurlSpace;
     template<typename Scalar> class HdivSpace;
 
-    /// @defgroup spaces FEM Spaces handling
+    /** @defgroup spaces FEM Spaces
+      * \brief Collection of classes that represent and specify FE spaces.
+    */
 
     /// @ingroup spaces
     /// \brief Represents a finite element space over a domain.
@@ -56,53 +58,49 @@ namespace Hermes
     ///
     /// There are four main functions the Space class provides:
     /// <ol>
-    ///    <li> It handles the Dirichlet (essential) boundary conditions. The user provides a pointer
-    ///         to an instance of the EssentialBCs class that determines
-    ///         which markers represent the Dirichlet part of the boundary, and which markers represent
-    ///         the Neumann and Newton parts. It is also possible to use the value BC_NONE
-    ///         which supresses all BC processing on such part of the boundary.
+    ///&nbsp; <li> It handles the Dirichlet (essential) boundary conditions. The user provides a pointer
+    ///&nbsp;      to an instance of the EssentialBCs class that determines
+    ///&nbsp;      which markers represent the Dirichlet part of the boundary, and which markers represent
+    ///&nbsp;      the Neumann and Newton parts (all other than those with an Essential BC specified on them).
+    ///&nbsp;      Handling of these conditions is done naturally - through weak formulation.
     ///
-    ///         The default BC type is BC_NATURAL for the whole boundary. The default BC value is zero for all
-    ///         markers.
+    ///&nbsp; <li> It stores element polynomial degrees, or 'orders'. All active elements need to have
+    ///&nbsp;      an order set for the Space to be valid. Individual orders can be set by calling
+    ///&nbsp;      set_element_order(). You can also set the same order for all elements using
+    ///&nbsp;      set_uniform_order(). Quadrilateral elements can have different orders in the vertical
+    ///&nbsp;      and horizontal directions. It is therefore necessary to form the order using the macro
+    ///&nbsp;      H2D_MAKE_QUAD_ORDER() when calling the aforementioned functions.
     ///
-    ///    <li> It stores element polynomial degrees, or 'orders'. All active elements need to have
-    ///         an order set for the Space to be valid. Individual orders can be set by calling
-    ///         set_element_order(). You can also set the same order for all elements using
-    ///         set_uniform_order(). Quadrilateral elements can have different orders in the vertical
-    ///         and horizontal directions. It is therefore necessary to form the order using the macro
-    ///         H2D_MAKE_QUAD_ORDER() when calling the aforementioned functions.
+    ///&nbsp; <li> It builds and enumerates the basis functions. After all element orders have been set,
+    ///&nbsp;      you must call the function assign_dofs(). This function assigns the DOF (degree-of-
+    ///&nbsp;      freedom) numbers to basis functions, starting with 'first_dof' (optional parameter).
+    ///&nbsp;      It also determines constraining relationships in the mesh due to hanging nodes and
+    ///&nbsp;      builds constrained basis functions. The total number of basis functions can then
+    ///&nbsp;      be obtained by calling  (). Standard basis functions are assigned positive
+    ///&nbsp;      numbers from 'first_dof' to ('first_dof' + (get_num_dofs() - 1) * 'stride'). All
+    ///&nbsp;      shape functions belonging to the Dirichlet lift are assigned DOF number of -1. This
+    ///&nbsp;      way the Dirichlet lift becomes a (virtual) basis function. This simplifies assembling.
     ///
-    ///    <li> It builds and enumerates the basis functions. After all element orders have been set,
-    ///         you must call the function assign_dofs(). This function assigns the DOF (degree-of-
-    ///         freedom) numbers to basis functions, starting with 'first_dof' (optional parameter).
-    ///         It also determines constraining relationships in the mesh due to hanging nodes and
-    ///         builds constrained basis functions. The total number of basis functions can then
-    ///         be obtained by calling  (). Standard basis functions are assigned positive
-    ///         numbers from 'first_dof' to ('first_dof' + (get_num_dofs() - 1) * 'stride'). All
-    ///         shape functions belonging to the Dirichlet lift are assigned DOF number of -1. This
-    ///         way the Dirichlet lift becomes a (virtual) basis function. This simplifies assembling.
-    ///
-    ///    <li> Finally, and most importantly, the Space is able to deliver a list of shape functions
-    ///         existing on each element. Such a list is called an "assembly list" and is represented
-    ///         by the class AsmList<Scalar>. The assembly list contains the triplets (idx, dof, coef).
-    ///         'idx' is the shape function index, as understood by the Shapeset. 'dof' is the number
-    ///         of the basis function, whose part the shape function forms. 'coef' is a Real constant,
-    ///         with which the shape function must be multiplied in order to fit into the basis
-    ///         function. This is typically 1, but can be less than that for constrained functions.
-    ///         Constrained vertex functions can belong to more than one basis functions. This
-    ///         results in more triplets with the same 'idx'. However, the assembling procedure or
-    ///         the Solution class do not have to worry about that. For instance, the Solution class
-    ///         simply obtains the values of all shape functions contained in the list, multiplies them
-    ///         by 'coef', and forms a linear combination of them by taking the solution vector values
-    ///         at the 'dof' positions. This way the solution to the PDE is obtained.
+    ///&nbsp; <li> Finally, and most importantly, the Space is able to deliver a list of shape functions
+    ///&nbsp;      existing on each element. Such a list is called an "assembly list" and is represented
+    ///&nbsp;      by the class AsmList<Scalar>. The assembly list contains the triplets (idx, dof, coef).
+    ///&nbsp;      'idx' is the shape function index, as understood by the Shapeset. 'dof' is the number
+    ///&nbsp;      of the basis function, whose part the shape function forms. 'coef' is a Real constant,
+    ///&nbsp;      with which the shape function must be multiplied in order to fit into the basis
+    ///&nbsp;      function. This is typically 1, but can be less than that for constrained functions.
+    ///&nbsp;      Constrained vertex functions can belong to more than one basis functions. This
+    ///&nbsp;      results in more triplets with the same 'idx'. However, the assembling procedure or
+    ///&nbsp;      the Solution class do not have to worry about that. For instance, the Solution class
+    ///&nbsp;      simply obtains the values of all shape functions contained in the list, multiplies them
+    ///&nbsp;      by 'coef', and forms a linear combination of them by taking the solution vector values
+    ///&nbsp;      at the 'dof' positions. This way the solution to the PDE is obtained.
     /// </ol>
     ///
     /// Space is an abstract class and cannot be instatiated. Use one of the specializations H1Space,
     /// HcurlSpace or L2Space instead.
+    /// <br>
+    /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.<br>
     ///
-    /// The handling of irregular meshes is desribed in H1Space and HcurlSpace.
-    ///
-
     template<typename Scalar>
     class HERMES_API Space : public Hermes::Mixins::Loggable, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::XMLParsing
     {

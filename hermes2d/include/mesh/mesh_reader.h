@@ -22,8 +22,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// @defgroup mesh_readers Mesh readers
-
+    /** @defgroup mesh_readers Mesh readers
+     * Collection of classes with the purpose of saving and loading Mesh class instances.
+     */
+    
     /// Abstract class for mesh readers
     ///
     /// @ingroup mesh_readers

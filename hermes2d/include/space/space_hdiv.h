@@ -23,8 +23,15 @@ namespace Hermes
 	namespace Hermes2D
 	{
 		/// @ingroup spaces
-		/// HdivSpace represents a space of vector functions with continuous normal
-		/// components over a domain (mesh).
+		/// HdivSpace represents a space of vector functions with continuous normal<br>
+		/// components over a domain (mesh).<br>
+    /// Typical usage:<br>
+    /// ...<br>
+    /// Hermes::Hermes2D::EssentialBCs<std::complex<double> > bcs(&bc_essential1, &bc_essential2, ...);<br>
+    /// <br>
+    /// // Initialize space.<br>
+    /// int globalPolynomialOrder = 4;<br>
+    /// Hermes::Hermes2D::HdivSpace<std::complex<double> > space(&mesh, &bcs, globalPolynomialOrder);<br>
 		template<typename Scalar>
 		class HERMES_API HdivSpace : public Space<Scalar>
 		{

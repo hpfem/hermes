@@ -42,6 +42,8 @@ namespace Hermes
   namespace Mixins
   {
     /// Class the output of which is loggable, i.e. that uses functionality of info(), warn()
+    /// Contains the class Static with the following usage:
+    /// Anywhere in your program you can write Hermes::Mixins::Loggable::Static::info("whatever you want to output").
     class HERMES_API Loggable
     {
     private:
@@ -155,6 +157,11 @@ namespace Hermes
     };
 
     /// Class using time measurement
+    /// Can be used directly (is not abstract), so one can use e.g. this in a program:
+    /// Mixins::TimeMeasurable time;
+    /// time.tick();
+    /// <-- do whatever you want to measure execution time of -->
+    /// std::cout << "Whatever took " << time.last() << "seconds to execute.";
     class HERMES_API TimeMeasurable
     {
     public:
@@ -205,6 +212,7 @@ namespace Hermes
     };
   
     /// Class that allows overriding integration order in its discrete problems
+    /// Internal
     class HERMES_API IntegrableWithGlobalOrder
     {
     public:
@@ -215,6 +223,7 @@ namespace Hermes
     };
 
     /// Class that allows overriding integration order in its discrete problems
+    /// Internal
     class HERMES_API SettableComputationTime
     {
     public:
@@ -226,6 +235,8 @@ namespace Hermes
       double time_step;
     };
 
+    /// Class that allows for attaching any method to particular parts of its functionality.
+    /// Internal
     class HERMES_API OutputAttachable
     {
     public:

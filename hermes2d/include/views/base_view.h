@@ -38,7 +38,7 @@ namespace Hermes
 
       /// \brief Visualizes the basis functions of a space.
       ///
-      /// BaseView is a debugging tool for the visualization of the basis functions
+      /// BaseView is a debugging tool for the visualization of the basis functions<br>
       /// of a given space.
       ///
       template<typename Scalar>

@@ -28,7 +28,9 @@ namespace Hermes
       class Vectorizer;
     };
 
-    /// @defgroup inner Hermes hp-FEM/hp-DG assembling core
+    /** @defgroup inner Hermes hp-FEM/hp-DG assembling core
+    * Inner functionality classes that are not for the user to modify.
+    */
 
     /// @ingroup inner
     /// \brief Determines the position on an element surface (edge in 2D and Face in 3D).

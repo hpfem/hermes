@@ -29,9 +29,10 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// Mesh reader from Hermes2D format
+    /// Mesh reader from Hermes1D XML format
     ///
     /// @ingroup mesh_readers
+    /// The format specification is in hermes2d/xml_schemas/mesh_h1d_xml.xsd
     class HERMES_API MeshReaderH1DXML : public MeshReader, public Hermes::Hermes2D::Mixins::XMLParsing
     {
     public:

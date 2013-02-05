@@ -23,7 +23,13 @@ namespace Hermes
 	{
 		/// @ingroup spaces
 		/// L2Space represents a space of Scalar functions with discontinuities along
-		/// mesh edges.
+		/// mesh edges.<br>
+    /// Typical usage:<br>
+    /// ...<br>
+    /// <br>
+    /// // Initialize space.<br>
+    /// int globalPolynomialOrder = 4;<br>
+    /// Hermes::Hermes2D::L2Space<double> space(&mesh, &bcs, globalPolynomialOrder);<br>
 		template<typename Scalar>
 		class HERMES_API L2Space : public Space<Scalar>
 		{

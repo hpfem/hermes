@@ -25,6 +25,11 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /** \defgroup meshFunctions Mesh functions
+     * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
+     * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
+    */
+
     /// @ingroup meshFunctions
     /// \brief Represents a function defined on a mesh.
     ///

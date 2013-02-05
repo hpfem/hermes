@@ -30,6 +30,17 @@ namespace Hermes
   namespace Exceptions
   {
     /// \brief Exception interface
+    /// Basically a std::exception, but with a constructor with string and with print_msg method.
+    /// Usage:
+    /// try
+    /// {
+    ///&nbsp;...
+    ///&nbsp;throw Hermes::Exceptions::Exception("this is an exception message");
+    /// }  
+    /// catch(Hermes::Exceptions::Exception& e)
+    /// {
+    ///&nbsp;e.print_msg();
+    /// }
     class HERMES_API Exception : public std::exception
     {
       public:
@@ -52,6 +63,7 @@ namespace Hermes
     };
 
     /// \brief Null parameter exception.
+    /// Internal.
     /// Exception occurs when some parameter is Null or empty and it shouldn't be.
     class HERMES_API NullException : public Exception
     {
@@ -75,6 +87,7 @@ namespace Hermes
     };
 
     /// \brief Parameter length parameter exception.
+    /// Internal.
     /// Exception occurs when some parameter has wrong length.
     class HERMES_API LengthException : public Exception
     {
@@ -147,7 +160,7 @@ namespace Hermes
         double value, allowed;
     };
 
-    /// \brief Linear solver failed.
+    /// \brief Method is not overriden and should be.
     class HERMES_API MethodNotOverridenException : public Exception
     {
       public:
@@ -159,7 +172,8 @@ namespace Hermes
         virtual Exception* clone();
     };
 
-    /// \brief Linear solver failed.
+    /// \brief Mesh failed to load.
+    /// Thrown by Hermes2D::MeshReaderH2DXML, MeshReaderH2D
     class HERMES_API MeshLoadFailureException : public Exception
     {
       public:
@@ -171,7 +185,7 @@ namespace Hermes
         virtual Exception* clone();
     };
 
-    /// \brief Linear solver failed.
+    /// \brief Space failed to load.
     class HERMES_API SpaceLoadFailureException : public Exception
     {
       public:
@@ -183,7 +197,7 @@ namespace Hermes
         virtual Exception* clone();
     };
 
-    /// \brief Linear solver failed.
+    /// \brief Solution failed to save.
     class HERMES_API SolutionSaveFailureException : public Exception
     {
       public:
@@ -195,7 +209,7 @@ namespace Hermes
         virtual Exception* clone();
     };
 
-    /// \brief Linear solver failed.
+    /// \brief Solution failed to load.
     class HERMES_API SolutionLoadFailureException : public Exception
     {
       public:

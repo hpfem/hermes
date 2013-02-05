@@ -31,7 +31,42 @@ namespace Hermes
   namespace Hermes2D
   {
     /// @ingroup userSolvingAPI
-    /// Class for Newton's method.
+    /// Class for Newton's method.<br>
+    /// Typical usage:<br>
+    /// // Initialize Newton's solver.<br>
+    /// // Here wf is Hermes2D::WeakForm<double>, space is Hermes2D::Space<double><br>
+    /// Hermes::Hermes2D::NewtonSolver<double> newton_solver(&wf, &space);<br>
+    /// Set a whole bunch of parameters according to your liking.<br>
+    /// See the class documentation for all possible parameters.<br>
+    /// newton_solver.set_newton_tol(1e-6);<br>
+    /// newton_solver.set_newton_max_iter(15);<br>
+    /// newton_solver.set_max_allowed_residual_norm(1e6);<br>
+    /// newton_solver.set_min_allowed_damping_coeff(1e-3);<br>
+    /// <br>
+    /// // Solve the linear problem.<br>
+    /// try<br>
+    /// {<br>
+    ///&nbsp;// Just call solve().<br>
+    ///&nbsp;newton_solver.solve();<br>
+    /// <br>
+    ///&nbsp;// Get the solution vector from the solver.<br>
+    ///&nbsp;double* sln_vector = newton_solver.get_sln_vector();<br>
+    /// <br>
+    ///&nbsp;// Translate the solution vector into the previously initialized Solution<double> using the static method vector_to_solution.<br>
+    ///&nbsp;Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);<br>
+    /// }<br>
+    /// // All kinds of Exceptions may happen (Linear algebraic solver, some bad parameters, some data not initialized...)<br>
+    /// catch(Hermes::Exceptions::Exception& e)<br>
+    /// {<br>
+    ///&nbsp;e.print_msg();<br>
+    ///&nbsp;return -1;<br>
+    /// }<br>
+    /// // For illustrative purposes, otherwise one can just catch std::exception directly, as Hermes::Exceptions::Exception derive from it.<br>
+    /// catch(std::exception& e)<br>
+    /// {<br>
+    ///&nbsp;std::cout << e.what(); <br>
+    ///&nbsp;return -1;<br>
+    /// }<br>
     template<typename Scalar>
     class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {

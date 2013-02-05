@@ -29,7 +29,8 @@ namespace Hermes
     template<typename Scalar> class ExactSolutionVector;
     template<typename Scalar> class EssentialBCs;
 
-    /// Abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
+    /// Base, abstract class representing Essential boundary condition of the form u|_{\Gamma_Essential} = u_Essential.
+    /// Internal.
     /// @ingroup inner
     template<typename Scalar>
     class HERMES_API EssentialBoundaryCondition : public Hermes::Mixins::Loggable
@@ -61,8 +62,10 @@ namespace Hermes
       /// \param[in] t_y the y-component of the tangent(perpendicular to normal).
       virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const = 0;
 
-      /// Sets the current time for time-dependent boundary conditions.
+      /// Set the current time for time-dependent boundary conditions.
       void set_current_time(double time);
+
+      /// Get the current time for time-dependent boundary conditions.
       double get_current_time() const;
 
     protected:
@@ -91,13 +94,39 @@ namespace Hermes
       DefaultEssentialBCConst(Hermes::vector<std::string> markers, Scalar value_const);
       DefaultEssentialBCConst(std::string marker, Scalar value_const);
 
-      virtual Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
+      Scalar value(double x, double y, double n_x, double n_y, double t_x, double t_y) const;
 
       /// Function giving info that u_Essential is a constant.
       inline typename EssentialBoundaryCondition<Scalar>::EssentialBCValueType get_value_type() const { return EssentialBoundaryCondition<Scalar>::BC_CONST; }
     };
 
     /// Class representing non-constant essential boundary condition for Scalar approximation.
+    /// Typical usage - this example is a non-const Dirichlet boundary condition for the incompressible Navier-Stokes equations.
+    /// class MyEssentialBCNonConst : public DefaultEssentialBCNonConst<double>
+    /// {
+    /// public:
+    ///&nbsp;// Constructor with multiple markers, setting velocity at inlet(vel_inlet), domain height(H) and startup time(startup_time) - all parameters are of this example - DERIVED - class.
+    ///&nbsp;MyEssentialBCNonConst(Hermes::vector<std::string> markers, double vel_inlet, double H, double startup_time) : 
+    ///&nbsp;  EssentialBoundaryCondition<double>(markers), vel_inlet(vel_inlet), H(H), startup_time(startup_time) {};
+    ///
+    ///  // VERY IMPORTANT - overriding the method of the base class (DefaultEssentialBCNonConst::value) with a custom implementation.
+    ///  // NOTE - one can use the top-level base class (EssentialBoundaryCondition)'s methods for handling the time variable for time-dependent problems: get_current_time().
+    ///  // NOTE - the 'virtual' keyword is not here anymore - because we will not need to further derive from this class and override this method.
+    ///  double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const {
+    ///&nbsp; double val_y = vel_inlet * y*(H-y) / (H/2.)/(H/2.);
+    ///&nbsp; if (get_current_time() <= startup_time) 
+    ///&nbsp;   return val_y * get_current_time()/startup_time;
+    ///&nbsp; else 
+    ///&nbsp;   return val_y;
+    ///  };
+    ///
+    /// protected:
+    ///&nbsp;// Members of MyEssentialBCNonConst.
+    ///&nbsp;double vel_inlet;
+    ///&nbsp;double H;
+    ///&nbsp;double startup_time;
+    ///}; 
+
     template<typename Scalar>
     class HERMES_API DefaultEssentialBCNonConst : public EssentialBoundaryCondition<Scalar>
     {
@@ -140,6 +169,7 @@ namespace Hermes
 
     /// Class encapsulating all boundary conditions of one problem.
     /// Using the class EssentialBCs and its descendants.
+    /// Usage: for passing to Hermes2D::Space in the constructor or set_essential_bcs() method.
     template<typename Scalar>
     class HERMES_API EssentialBCs {
     public:

@@ -52,14 +52,14 @@ namespace Hermes
     ///
     /// References:
     ///  [1] Kelly D. W., Gago O. C., Zienkiewicz O. C., Babuska I.:
-    ///       A posteriori error analysis and adaptive processes in the finite element method: Part I—error analysis.
-    ///       Int. J. Numer. Methods Engng. 1983;19:1593–619.
+    ///&nbsp;    A posteriori error analysis and adaptive processes in the finite element method: Part I—error analysis.
+    ///&nbsp;    Int. J. Numer. Methods Engng. 1983;19:1593–619.
     ///  [2] Gratsch T., Bathe K. J.:
-    ///       A posteriori error estimation techniques in practical finite element analysis.
-    ///       Computers and Structures 83 (2005) 235–265.
+    ///&nbsp;    A posteriori error estimation techniques in practical finite element analysis.
+    ///&nbsp;    Computers and Structures 83 (2005) 235–265.
     ///  [3] Zienkiewicz O. C., Taylor R. L., Zhu J. Z.:
-    ///       The finite element method: its basis and fundamentals (Section 13.7.1).
-    ///       6th ed. (2005), Elsevier.
+    ///&nbsp;    The finite element method: its basis and fundamentals (Section 13.7.1).
+    ///&nbsp;    6th ed. (2005), Elsevier.
     ///
     template<typename Scalar>
     class HERMES_API KellyTypeAdapt : public Adapt<Scalar>
@@ -70,21 +70,21 @@ namespace Hermes
       /// A user must derive his own representation of the estimator from this class (an example is provided by the class
       /// \c BasicKellyAdapt below). The three attributes have the following meaning:
       ///
-      ///   - i     ... with a multi-component solution, this defines for which component this estimate applies,
-      ///   - area  ... defines in which geometric parts of the domain should the estimate be used - e.g. by defining
-      ///               area = H2D_DG_INNER_EDGE, errors at element interfaces will be tracked by the estimator,
-      ///   - ext   ... vector with external functions possibly used within the estimator (e.g. previous time-level
-      ///               solutions appearing in the residual) - currently not used.
+      ///&nbsp;- i     ... with a multi-component solution, this defines for which component this estimate applies,
+      ///&nbsp;- area  ... defines in which geometric parts of the domain should the estimate be used - e.g. by defining
+      ///&nbsp;            area = H2D_DG_INNER_EDGE, errors at element interfaces will be tracked by the estimator,
+      ///&nbsp;- ext   ... vector with external functions possibly used within the estimator (e.g. previous time-level
+      ///&nbsp;            solutions appearing in the residual) - currently not used.
       ///
       /// Every estimator form must also implement the two methods \c ord and \c value, which are used for determining
       /// the integration order and for the actual evaluation of the form, respectively. During the evaluation, their
       /// parameters will be interpreted as follows:
       ///
-      ///   - int n,                 ... number of integration points in the currently processed element
-      ///   - double *wt,            ... corresponding integration weights
-      ///   - Func\<Scalar\> *u[],   ... all solution components
-      ///   - Func\<double\> *u,     ... currently processed solution component
-      ///   - Geom\<double\> *e,     ... geometric data of the currently processed element
+      ///&nbsp;- int n,                 ... number of integration points in the currently processed element
+      ///&nbsp;- double *wt,            ... corresponding integration weights
+      ///&nbsp;- Func\<Scalar\> *u[],   ... all solution components
+      ///&nbsp;- Func\<double\> *u,     ... currently processed solution component
+      ///&nbsp;- Geom\<double\> *e,     ... geometric data of the currently processed element
       ///
       class HERMES_API ErrorEstimatorForm : public Form<Scalar>
       {
@@ -183,29 +183,29 @@ namespace Hermes
       ///
       /// \param[in]  spaces_   Approximation space of each solution component.
       /// \param[in]  ignore_visited_segments_ If true, error estimator for each inner edge will be evaluated only
-      ///                                      once. It will be added to the total error estimate for both the active
-      ///                                      element and its neighbors across that edge, after possibly being scaled by
-      ///                                      \c interface_scaling_fns_ for the current component (with the diameter of
-      ///                                      the appropriate element). This saves duplicate evaluations with same
-      ///                                      results when the estimator is given e.g. by the jumps of the solution.
+      ///&nbsp;                                   once. It will be added to the total error estimate for both the active
+      ///&nbsp;                                   element and its neighbors across that edge, after possibly being scaled by
+      ///&nbsp;                                   \c interface_scaling_fns_ for the current component (with the diameter of
+      ///&nbsp;                                   the appropriate element). This saves duplicate evaluations with same
+      ///&nbsp;                                   results when the estimator is given e.g. by the jumps of the solution.
       ///
-      ///                                      If false, error estimator for each surface of each element will be
-      ///                                      evaluated, regardless of whether the neighbor side of the interface
-      ///                                      has already been processed.
+      ///&nbsp;                                   If false, error estimator for each surface of each element will be
+      ///&nbsp;                                   evaluated, regardless of whether the neighbor side of the interface
+      ///&nbsp;                                   has already been processed.
       ///
-      ///                                      Note that if \c interface_scaling_fns_ is empty (or unspecified) then the
-      ///                                      default scaling by element diameter will be always performed unless it is
-      ///                                      switched off by a call to \c disable_aposteriori_interface_scaling.
+      ///&nbsp;                                   Note that if \c interface_scaling_fns_ is empty (or unspecified) then the
+      ///&nbsp;                                   default scaling by element diameter will be always performed unless it is
+      ///&nbsp;                                   switched off by a call to \c disable_aposteriori_interface_scaling.
       /// \param[in]  interface_scaling_fns_  Specifies functions used for scaling the interface error estimator for
-      ///                                     each component. The scale is defined as a real function of the element
-      ///                                     diameter (and possibly equation coefficients associated to the element)
-      ///                                     and multiplies the result of the interface estimators. It may thus be already
-      ///                                     present in the interface estimator forms themselves, in which case call
-      ///                                     \c disable_aposteriori_interface_scaling. In this case, it may also be required
-      ///                                     that \c ignore_visited_segments be false in order to always ensure that the
-      ///                                     diameter belongs to the element whose error is being calculated.
+      ///&nbsp;                                  each component. The scale is defined as a real function of the element
+      ///&nbsp;                                  diameter (and possibly equation coefficients associated to the element)
+      ///&nbsp;                                  and multiplies the result of the interface estimators. It may thus be already
+      ///&nbsp;                                  present in the interface estimator forms themselves, in which case call
+      ///&nbsp;                                  \c disable_aposteriori_interface_scaling. In this case, it may also be required
+      ///&nbsp;                                  that \c ignore_visited_segments be false in order to always ensure that the
+      ///&nbsp;                                  diameter belongs to the element whose error is being calculated.
       /// \param[in]  norms_    Norms used for making relative error estimates.
-      ///                       If not specified, they are defined according to the spaces.
+      ///&nbsp;                    If not specified, they are defined according to the spaces.
       ///
       ///
       KellyTypeAdapt(Hermes::vector<Space<Scalar>*> spaces,
@@ -249,7 +249,7 @@ namespace Hermes
       /// For example, element residual norms may be represented by such a form.
       ///
       /// \param[in]  form ... object representing the form. A class derived from \c KellyTypeAdapt::ErrorEstimatorForm
-      ///                      defines its datatype.
+      ///&nbsp;                   defines its datatype.
       ///
       void add_error_estimator_vol(ErrorEstimatorForm* form);
 
@@ -304,8 +304,8 @@ namespace Hermes
     /// used also for other problems than that for which it had been originally derived.
     ///
     ///\todo Add handling of boundary conditions.
-    ///       Currently, the forms for the Neumann and Newton boundary conditions must be specified by
-    ///       the user, see the example \c poisson-kelly-adapt.
+    ///&nbsp;    Currently, the forms for the Neumann and Newton boundary conditions must be specified by
+    ///&nbsp;    the user, see the example \c poisson-kelly-adapt.
     ///
     template<typename Scalar>
     class HERMES_API BasicKellyAdapt : public KellyTypeAdapt<Scalar>

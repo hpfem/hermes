@@ -32,10 +32,44 @@ namespace Hermes
   namespace Hermes2D
   {
     /// @ingroup userSolvingAPI
-    /// Class for the Picard's method.
-    /// For details about the optionally applied Anderson acceleration, the following website
+    /// Class for the Picard's method.<br>
+    /// For details about the optionally applied Anderson acceleration, the following website<br>
     /// http://hpfem.org/hermes/hermes-tutorial/doc/_build/html/src/hermes2d/B-nonlinear/01-picard.html
-    /// will give an overview.
+    /// will give an overview.<br>
+    /// Typical usage:<br>
+    /// // Initialize Picard's solver.<br>
+    /// // Here wf is Hermes2D::WeakForm<std::complex<double> >, space is Hermes2D::Space<std::complex<double> ><br>
+    /// Hermes::Hermes2D::PicardSolver<std::complex<double> > picard_solver(&wf, &space);<br>
+    /// <br>
+    /// // Here we have an initial guess for the Picard's method - let us say that we already have a previous time level solution<br>
+    /// Solution<std::complex<double> > prevTimeLevelSolution;<br>
+    /// <br>
+    /// ..... // Here we fill prevTimeLevelSolution.<br>
+    /// <br>
+    /// // Solve the linear problem.<br>
+    /// try<br>
+    /// {<br>
+    ///&nbsp;// Call solve with the initial guess.<br>
+    ///&nbsp;picard_solver.solve(&prevTimeLevelSolution);<br>
+    /// <br>
+    ///&nbsp;// Get the solution vector from the solver.<br>
+    ///&nbsp;std::complex<double> * sln_vector = picard_solver.get_sln_vector();<br>
+    /// <br>
+    ///&nbsp;// Translate the solution vector into the previously initialized Solution<std::complex<double> > using the static method vector_to_solution.<br>
+    ///&nbsp;Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(sln_vector, &space, &sln);<br>
+    /// }<br>
+    /// // All kinds of Exceptions may happen (Linear algebraic solver, some bad parameters, some data not initialized...)<br>
+    /// catch(Hermes::Exceptions::Exception& e)<br>
+    /// {<br>
+    ///&nbsp;e.print_msg();<br>
+    ///&nbsp;return -1;<br>
+    /// }<br>
+    /// // For illustrative purposes, otherwise one can just catch std::exception directly, as Hermes::Exceptions::Exception derive from it.<br>
+    /// catch(std::exception& e)<br>
+    /// {<br>
+    ///&nbsp;std::cout << e.what();<br>
+    ///&nbsp;return -1;<br>
+    /// }<br>
     template<typename Scalar>
     class HERMES_API PicardSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {

@@ -26,6 +26,18 @@ namespace Hermes
     /// Mesh reader from Hermes2D format
     ///
     /// @ingroup mesh_readers
+    /// Typical usage:
+    /// Hermes::Hermes2D::Mesh mesh;
+    /// Hermes::Hermes2D::MeshReaderH2D mloader;
+    /// try
+    /// {
+    ///&nbsp;mloader.load("compressor.mesh", &mesh);
+    /// }
+    /// catch(Exceptions::MeshLoadFailureException& e)
+    /// {
+    ///&nbsp;e.print_msg();
+    ///&nbsp;return -1;
+    /// }
     class HERMES_API MeshReaderH2D : public MeshReader
     {
     public:

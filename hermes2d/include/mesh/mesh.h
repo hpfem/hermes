@@ -62,7 +62,7 @@ namespace Hermes
     /// There are are two variants of this structure, depending on the value of
     /// the member 'type':
     /// <ol> <li> HERMES_TYPE_VERTEX -- vertex node. Has physical coordinates x, y.
-    ///      <li> HERMES_TYPE_EDGE   -- edge node. Only stores edge marker and two element pointers.
+    ///&nbsp;   <li> HERMES_TYPE_EDGE   -- edge node. Only stores edge marker and two element pointers.
     /// </ol>
     ///
     struct HERMES_API Node
@@ -101,13 +101,13 @@ namespace Hermes
     /// The element can be a triangle or a quad (nvert == 3 or nvert = 4), active or inactive.
     ///
     /// Vertex/node index number
-    ///       [2]
-    ///   (3)-------(2)
-    ///    |         |
+    ///&nbsp;    [2]
+    ///&nbsp;(3)-------(2)
+    ///&nbsp; |         |
     ///[3]|  quad.  |[1]
-    ///    |         |
-    ///   (0)-------(1)
-    ///       [0]
+    ///&nbsp; |         |
+    ///&nbsp;(0)-------(1)
+    ///&nbsp;    [0]
     /// Active elements are actual existing elements in the mesh, which take part in the
     /// computation. Inactive elements are those which have once been active, but were refined,
     /// ie., replaced by several other (smaller) son elements. The purpose of the union is the
@@ -231,7 +231,18 @@ namespace Hermes
     };
 
     /// \brief Represents a finite element mesh.
-    ///
+    /// Typical usage:
+    /// Hermes::Hermes2D::Mesh mesh;
+    /// Hermes::Hermes2D::MeshReaderH2DXML mloader;
+    /// try
+    /// {
+    ///&nbsp;mloader.load("mesh.xml", &mesh);
+    /// }
+    /// catch(Exceptions::MeshLoadFailureException& e)
+    /// {
+    ///&nbsp;e.print_msg();
+    ///&nbsp;return -1;
+    /// }
     class HERMES_API Mesh : public HashTable, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:

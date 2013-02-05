@@ -22,8 +22,15 @@ namespace Hermes
 	namespace Hermes2D
 	{
 		/// @ingroup spaces
-		/// HcurlSpace represents a space of vector functions with continuous tangent
-		/// components over a domain (mesh).
+		/// HcurlSpace represents a space of vector functions with continuous tangent<br>
+		/// components over a domain (mesh).<br>
+    /// Typical usage:<br>
+    /// ...<br>
+    /// Hermes::Hermes2D::EssentialBCs<std::complex<double> > bcs(&bc_essential1, &bc_essential2, ...);<br>
+    /// <br>
+    /// // Initialize space.<br>
+    /// int globalPolynomialOrder = 4;<br>
+    /// Hermes::Hermes2D::HcurlSpace<std::complex<double> > space(&mesh, &bcs, globalPolynomialOrder);<br>
 		template<typename Scalar>
 		class HERMES_API HcurlSpace : public Space<Scalar>
 		{

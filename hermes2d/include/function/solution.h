@@ -31,19 +31,25 @@ namespace Hermes
     ///
     class Quad2DCheb;
 
+    enum SolutionType {
+      HERMES_UNDEF = -1,
+      HERMES_SLN = 0,
+      HERMES_EXACT = 1
+    };
+
     /// @ingroup meshFunctions
-    /// \brief Represents the solution of a PDE.
+    /// \brief Represents the solution of a PDE.<br>
     ///
     /// The Solution class represents the solution of a PDE. Given a space and a solution vector,
     /// it calculates the appropriate linear combination of basis functions at the specified
-    /// element and integration points.
+    /// element and integration points.<br>
     ///
     /// The higher-order solution on elements is best calculated not as a linear combination
     /// of shape functions (the usual approach), but as a linear combination of monomials.
     /// This has the advantage that no shape function table calculation and look-ups are
     /// necessary (except for the conversion of the solution coefficients), which means that
     /// visualization and multi-mesh calculations are much faster (all the push_transforms
-    /// and table searches take the most time when evaluating the solution).
+    /// and table searches take the most time when evaluating the solution).<br>
     ///
     /// The linear combination of monomials can be calculated using the Horner's scheme, which
     /// requires the same number of multiplications as the calculation of the linear combination
@@ -53,7 +59,7 @@ namespace Hermes
     /// as a self-contained unit, internally containing just a copy of the mesh and a table of
     /// monomial coefficients. It is also very straight-forward to obtain all derivatives of
     /// a solution defined in this way. Finally, it is possible to store the solution on the
-    /// disk easily (no need to store the Space, which is difficult).
+    /// disk easily (no need to store the Space, which is difficult).<br>
     ///
     /// The following is an example of the set of monomials for a cubic quad and a cubic triangle.
     /// (Note that these are actually the definitions of the polynomial spaces on these elements.)
@@ -66,13 +72,6 @@ namespace Hermes
     /// The number of monomials is (p + 1)^2 for quads and (p + 1)*(p + 2)/2 for triangles, where
     /// 'p' is the polynomial degree.
     ///
-
-    enum SolutionType {
-      HERMES_UNDEF = -1,
-      HERMES_SLN = 0,
-      HERMES_EXACT = 1
-    };
-
     template<typename Scalar>
     class HERMES_API Solution : public MeshFunction<Scalar>, public Hermes2D::Mixins::XMLParsing
     {

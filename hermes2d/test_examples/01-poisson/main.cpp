@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
     return -1;
   }
 
+  // Refine all elements, do it INIT_REF_NUM-times.
   for(unsigned int i = 0; i < INIT_REF_NUM; i++)
     mesh.refine_all_elements();
   

@@ -28,8 +28,41 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    /** \defgroup userSolvingAPI User solving API
+     * \brief Collection of classes that provide the top-level solving capabilities.
+    */
+
     /// @ingroup userSolvingAPI
-    /// Class for solving linear problems.
+    /// Class for solving linear problems.<br>
+    /// Typical usage:<br>
+    /// // Initialize linear solver.<br>
+    /// // Here wf is Hermes2D::WeakForm<double>, space is Hermes2D::Space<double><br>
+    /// Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);<br>
+    /// <br>
+    /// // Solve the linear problem.<br>
+    /// try<br>
+    /// {<br>
+    ///&nbsp;// Just call solve().<br>
+    ///&nbsp;linear_solver.solve();<br>
+    /// <br>
+    ///&nbsp;// Get the solution vector from the solver.<br>
+    ///&nbsp;double* sln_vector = linear_solver.get_sln_vector();<br>
+    /// <br>
+    ///&nbsp;// Translate the solution vector into the previously initialized Solution<double> using the static method vector_to_solution.<br>
+    ///&nbsp;Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);<br>
+    /// }<br>
+    /// // All kinds of Exceptions may happen (Linear algebraic solver, some bad parameters, some data not initialized...)<br>
+    /// catch(Hermes::Exceptions::Exception& e)<br>
+    /// {<br>
+    ///&nbsp;e.print_msg();<br>
+    ///&nbsp;return -1;<br>
+    /// }<br>
+    /// // For illustrative purposes, otherwise one can just catch std::exception directly, as Hermes::Exceptions::Exception derive from it.<br>
+    /// catch(std::exception& e)<br>
+    /// {<br>
+    ///&nbsp;std::cout << e.what();<br>
+    ///&nbsp;return -1;<br>
+    /// }<br>
     template <typename Scalar>
     class LinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
