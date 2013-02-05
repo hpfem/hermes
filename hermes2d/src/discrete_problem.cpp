@@ -1856,7 +1856,7 @@ namespace Hermes
     {
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
 
-      double block_scaling_coef = this->block_scaling_coeff(form);
+      double block_scaling_coefficient = this->block_scaling_coeff(form);
 
       bool tra = (form->i != form->j) && (form->sym != 0);
       bool sym = (form->i == form->j) && (form->sym == 1);
@@ -1905,9 +1905,9 @@ namespace Hermes
               Func<double>* v = test_fns[i];
 
               if(surface_form)
-                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
               else
-                local_stiffness_matrix[i][j] = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+                local_stiffness_matrix[i][j] = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
             }
           }
         }
@@ -1927,7 +1927,7 @@ namespace Hermes
               Func<double>* u = base_fns[j];
               Func<double>* v = test_fns[i];
 
-              Scalar val = block_scaling_coeff(form) * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+              Scalar val = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
 
               local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
             }
