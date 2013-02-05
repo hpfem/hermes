@@ -588,6 +588,9 @@ namespace Hermes
       // Global curves list.
       XMLMesh::curves_type curves;
 
+      bool* baseElementsSaved = new bool[meshes[0]->get_num_base_elements()];
+      memset(baseElementsSaved, 0, sizeof(bool) * meshes[0]->get_num_base_elements());
+
       // Subdomains.
       XMLSubdomains::subdomains subdomains;
 
@@ -619,15 +622,16 @@ namespace Hermes
             vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, it->second));
           else
           {
-            vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, points_to_vertices.size()));
+            int new_i = points_to_vertices.size();
+            vertices_to_vertices.insert(std::pair<unsigned int, unsigned int>(i, new_i));
             points_to_vertices.insert(std::pair<std::pair<double, double>, unsigned int>(std::pair<double, double>(meshes[meshes_i]->nodes[i].x, meshes[meshes_i]->nodes[i].y), points_to_vertices.size()));
             std::ostringstream x_stream;
-            x_stream << meshes[meshes_i]->nodes[vertices_to_vertices.find(i)->second].x;
+            x_stream << meshes[meshes_i]->nodes[i].x;
 
             std::ostringstream y_stream;
-            y_stream << meshes[meshes_i]->nodes[vertices_to_vertices.find(i)->second].y;
+            y_stream << meshes[meshes_i]->nodes[i].y;
 
-            vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(x_stream.str(), y_stream.str(), i)));
+            vertices.v().push_back(std::auto_ptr<XMLMesh::v>(new XMLMesh::v(x_stream.str(), y_stream.str(), new_i)));
           }
           if(!hasAllElements)
             subdomain.vertices()->i().push_back(vertices_to_vertices.find(i)->second);
@@ -638,7 +642,9 @@ namespace Hermes
         for (int i = 0; i < meshes[meshes_i]->get_num_base_elements(); i++)
         {
           e = &(meshes[meshes_i]->elements[i]);
-          if(meshes_i == 0)
+          if(!e->used)
+            continue;
+          if(!baseElementsSaved[e->id])
           {
             if(e->nvert == 3)
             {
@@ -648,10 +654,11 @@ namespace Hermes
             {
               elements.el().push_back(XMLSubdomains::q_t(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id, vertices_to_vertices.find(e->vn[3]->id)->second));
             }
+            baseElementsSaved[e->id] = true;
           }
-          if(e->used)
-            if(!hasAllElements)
-              subdomain.elements()->i().push_back(e->id);
+
+          if(!hasAllElements)
+            subdomain.elements()->i().push_back(e->id);
         }
 
         // save boundary edge markers
@@ -719,6 +726,8 @@ namespace Hermes
         subdomains.subdomain().push_back(subdomain);
       }
 
+      delete [] baseElementsSaved;
+
       XMLSubdomains::domain xmldomain(vertices, elements, edges, subdomains);
       xmldomain.curves().set(curves);
 
@@ -735,7 +744,7 @@ namespace Hermes
       namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("domain", namespace_info_domain));
 
       std::ofstream out(filename);
-      ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+      ::xml_schema::flags parsing_flags = ::xml_schema::flags::base;
       XMLSubdomains::domain_(out, xmldomain, namespace_info_map, "UTF-8", parsing_flags);
       out.close();
 
