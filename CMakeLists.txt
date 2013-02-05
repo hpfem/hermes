@@ -143,7 +143,8 @@ project(hermes)
       IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         ## It's Mac OS X.
 
-        SET (CMAKE_BUILD_TYPE "Release" CACHE STRING "Release is default." FORCE)
+        #This is causing problems when building the debug version.
+        #SET (CMAKE_BUILD_TYPE "Release" CACHE STRING "Release is default." FORCE)
 
         #SET(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING
         #  "compiling for OSX only in i386 format. Library with the
