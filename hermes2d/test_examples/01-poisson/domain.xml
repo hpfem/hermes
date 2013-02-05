@@ -4,39 +4,39 @@
   xmlns:element="XMLMesh"
   xsi:schemaLocation="XMLMesh ../../xml_schemas/mesh_h2d_xml.xsd">
   <variables>
-    <variable name="a" value="1.0" />
-    <variable name="m_a" value="-1.0" />
-    <variable name="b" value="0.70710678118654757" />    
+    <var name="a" value="1.0" />
+    <var name="m_a" value="-1.0" />
+    <var name="b" value="0.70710678118654757" />    
   </variables>
 
   <vertices>
   <!-- Contains all examples how it is possible to write a zero. -->
-    <vertex x="0.00000000000000000000" y="m_a" i="0"/>
-    <vertex x="a" y="m_a" i="1"/>
-    <vertex x="m_a" y="0" i="2"/>
-    <vertex x="." y=".00" i="3"/>
-    <vertex x="a" y=".00000000" i="4"/>
-    <vertex x="m_a" y="a" i="5"/>
-    <vertex x="0.000" y="a" i="6"/>
-    <vertex x="b" y="b" i="7"/>
+    <v x="0.00000000000000000000" y="m_a" i="0"/>
+    <v x="a" y="m_a" i="1"/>
+    <v x="m_a" y="0" i="2"/>
+    <v x="." y=".00" i="3"/>
+    <v x="a" y=".00000000" i="4"/>
+    <v x="m_a" y="a" i="5"/>
+    <v x="0.000" y="a" i="6"/>
+    <v x="b" y="b" i="7"/>
   </vertices>
 
   <elements>
-    <element:triangle v1="3" v2="4" v3="7" marker="Copper" />
-    <element:triangle v1="3" v2="7" v3="6" marker="Aluminum" />
-    <element:quad v1="0" v2="1" v3="4" v4="3" marker="Copper" />
-    <element:quad v1="2" v2="3" v3="6" v4="5" marker="Aluminum" />
+    <mesh:t v1="3" v2="4" v3="7" m="Copper" />
+    <mesh:t v1="3" v2="7" v3="6" m="Aluminum" />
+    <mesh:q v1="0" v2="1" v3="4" v4="3" m="Copper" />
+    <mesh:q v1="2" v2="3" v3="6" v4="5" m="Aluminum" />
   </elements>
 
   <edges>
-    <edge v1="0" v2="1" marker="Bottom" />
-    <edge v1="1" v2="4" marker="Outer" />
-    <edge v1="3" v2="0" marker="Inner" />
-    <edge v1="4" v2="7" marker="Outer" />
-    <edge v1="7" v2="6" marker="Outer" />
-    <edge v1="2" v2="3" marker="Inner" />
-    <edge v1="6" v2="5" marker="Outer" />
-    <edge v1="5" v2="2" marker="Left" />
+    <ed v1="0" v2="1" m="Bottom" />
+    <ed v1="1" v2="4" m="Outer" />
+    <ed v1="3" v2="0" m="Inner" />
+    <ed v1="4" v2="7" m="Outer" />
+    <ed v1="7" v2="6" m="Outer" />
+    <ed v1="2" v2="3" m="Inner" />
+    <ed v1="6" v2="5" m="Outer" />
+    <ed v1="5" v2="2" m="Left" />
   </edges>
 
   <curves>

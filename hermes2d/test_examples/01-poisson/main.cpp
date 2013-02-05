@@ -26,9 +26,9 @@
 // The following parameters can be changed:
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
-const bool VTK_VISUALIZATION = false;              // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = false;             // Set to "true" to enable VTK output.
 const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
+const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -38,68 +38,60 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::H1Space<double>* space = NULL;
-  Hermes::Hermes2D::Mesh* mesh = new Mesh();
+  // Load the mesh.
+  Hermes::Hermes2D::Mesh mesh;
+  Hermes::Hermes2D::MeshReaderH2DXML mloader;
+  try
+  {
+    mloader.load("domain.xml", &mesh);
+  }
+  catch(Exceptions::MeshLoadFailureException& e)
+  {
+    e.print_msg();
+    return -1;
+  }
 
+  for(unsigned int i = 0; i < INIT_REF_NUM; i++)
+    mesh.refine_all_elements();
+  
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
     FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
+  // Initialize space.
+  Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
+  
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
     new Hermes::Hermes1DFunction<double>(LAMBDA_CU), new Hermes::Hermes2DFunction<double>(-VOLUME_HEAT_SRC));
   
-	Hermes2DApi.set_text_param_value(xmlSchemasDirPath, "asfd");
-
-  // This is in a block to test that the instances mesh and space can be deleted after being copied with no harm.
-  {
-    // Set the number of threads used in Hermes.
-    Hermes::HermesCommonApi.set_integral_param_value(Hermes::exceptionsPrintCallstack, 0);
-    Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads, 8);
-
-    // Load the mesh.
-    Hermes::Hermes2D::MeshReaderH2DXML mloader;
-    mloader.load("domain.xml", mesh);
-
-		mloader.save("asdf", mesh);
-
-    // Perform initial mesh refinements (optional).
-    mesh->refine_in_areas(Hermes::vector<std::string>("Aluminum", "Copper"), INIT_REF_NUM);
-    mesh->refine_in_area("Aluminum");
-
-    // Create an H1 space with default shapeset.
-    space = new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT);
-  }
-
-  Mesh* new_mesh = new Mesh();
-  H1Space<double>* new_space = new H1Space<double>();
-  new_space->copy(space, new_mesh);
-
-  delete space;
-  delete mesh;
-
+  // Illustration of setting element orders.
   Hermes::Hermes2D::Element* e;
   int i = 1;
-  for_all_active_elements(e, new_mesh)
+  for_all_active_elements(e, &mesh)
   {
-    new_space->set_element_order(e->id, i++ % 4 + 1);
+    space.set_element_order(e->id, i++ % 4 + 2);
   }
 
-  std::cout << new_space->get_num_dofs() << std::endl;
-  std::cout << new_space->get_vertex_functions_count() << std::endl;
-  std::cout << new_space->get_edge_functions_count() << std::endl;
-  std::cout << new_space->get_bubble_functions_count() << std::endl;
+  // One has to call this method after any changes to DOFs.
+  space.assign_dofs();
 
+  // Output of numbers of DOFs, vertex DOFs, edge DOFs, and bubble DOFs respectively.
+  std::cout << space.get_num_dofs() << std::endl;
+  std::cout << space.get_vertex_functions_count() << std::endl;
+  std::cout << space.get_edge_functions_count() << std::endl;
+  std::cout << space.get_bubble_functions_count() << std::endl;
+
+  // OrderView.
   Hermes::Hermes2D::Views::BaseView<double> o;
-  o.show(new_space);
-  o.wait_for_close();
+  o.show(&space);
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, new_space);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
 
   // Solve the linear problem.
   try
@@ -110,7 +102,7 @@ int main(int argc, char* argv[])
     double* sln_vector = linear_solver.get_sln_vector();
 
     // Translate the solution vector into the previously initialized Solution.
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, new_space, &sln);
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
 
     // VTK output.
     if(VTK_VISUALIZATION)
@@ -122,15 +114,15 @@ int main(int argc, char* argv[])
 
       // Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
-      ord.save_mesh_vtk(new_space, "mesh.vtk");
-      ord.save_orders_vtk(new_space, "ord.vtk");
+      ord.save_mesh_vtk(&space, "mesh.vtk");
+      ord.save_orders_vtk(&space, "ord.vtk");
     }
-
-    // Visualize the solution.
-    Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
 
     if(HERMES_VISUALIZATION)
     {
+      // Visualize the solution.
+      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
+
       viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
       viewS.wait_for_close();
     }

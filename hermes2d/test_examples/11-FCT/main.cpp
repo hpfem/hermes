@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
         ogProjection.project_global(&space,&initial_condition, coeff_vec_smooth, HERMES_L2_NORM);		
       else
         ogProjection.project_global(&space,&u_prev_time, coeff_vec_smooth, HERMES_L2_NORM);			
-      
+
       Hermes::Mixins::Loggable::Static::info("Calling get_smooth_elems()...");
       smooth_elem_ref = regEst.get_smooth_elems(&space,coeff_vec_smooth);
       // Construct reference mesh and setup reference space.
@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
       Space<double>* ref_space = ref_space_creator.create_ref_space();
 
       HPAdapt * adapting = new HPAdapt(ref_space, HERMES_L2_NORM);	
-      
+
       // increase p in smooth regions, h refine in non-smooth regions 
       Hermes::Mixins::Loggable::Static::info("Calling adapt_smooth()...");
       if(adapting->adapt_smooth(smooth_elem_ref, P_MAX)==false) 
