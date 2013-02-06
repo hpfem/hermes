@@ -550,10 +550,10 @@ namespace Hermes
               }
             }
 
-            meshes[subdomains_i]->seq = g_mesh_seq++;
-            meshes[subdomains_i]->initial_single_check();
             delete [] elements_existing;
           }
+          meshes[subdomains_i]->seq = g_mesh_seq++;
+          meshes[subdomains_i]->initial_single_check();
         }
 
         delete [] vertex_is;
