@@ -1,5 +1,5 @@
 Mac OS
-======
+------
 
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,23 +59,10 @@ More options
 You can turn on and off various components to build, just create the CMake.vars
 file and add the following::
 
-    set(WITH_EXAMPLES NO)
+    set(H2D_WITH_GLUT NO)
     
 (and any other option that you would like to change, see CMakeLists.txt for the
 whole list).
-
-You can also easily generate it from a script (e.g. a debian/rules file) by:
-
-.. sourcecode::
-    .
-
-    python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)"' > CMake.vars
-
-.. latexcode::
-    .
-
-    python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)
-    \nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)"' > CMake.vars
 
 
 For development, it is good to say (in global CMake.vars)::

@@ -28,65 +28,6 @@ and execute::
   
 Find more about :ref:`ref-usage-umfpack`.
 
-Using the special Hermes/Femhub package
-```````````````````````````````````````
-
-.. popup:: '#umfpack-matrix-solver'
-   ../../../_static/clapper.png
-
-Download the software package from the `solvers repository`_ and unpack 
-it in some temporary directory:
-
-.. sourcecode::
-   .
-
-   wget https://github.com/downloads/hpfem/solvers/umfpack-5.5.1.spkg --no-check-certificate
-   tar -jxvf umfpack-5.5.1.spkg
-   rm umfpack-5.5.1.spkg
-   cd umfpack-5.5.1
-
-.. latexcode::
-   .
-
-   wget https://github.com/downloads/hpfem/solvers/umfpack-5.5.1.spkg 
-   --no-check-certificate
-   tar -jxvf umfpack-5.5.1.spkg
-   rm umfpack-5.5.1.spkg
-   cd umfpack-5.5.1
-
-In order to install the library into say ``~/solvers/umfpack`` (you may choose any
-path you like, provided that you have write access to it; the target directory 
-will be created if it doesn't exist), type now into the terminal::
-
-  ./standalone-install ~/solvers/umfpack
-
-For advanced configuration possibilities, please read the `manual`_ or visit the 
-`UMFPack home page`_.
-
-Once the library has been built and installed, you may delete the temporary 
-directory with the unpacked package to save some disk space or 
-just remove the object files by executing the following commands
-
-::
-
-  cd UFconfig; make clean
-  cd AMD     ; make clean
-  cd UMFPACK ; make clean
-
-Now go to the directory with Hermes. Create the file CMake.vars with the
-following lines (or append to the existing one)::
-
-  set(WITH_UMFPACK YES)
-  set(UMFPACK_ROOT ~/solvers/umfpack) #(or your own installation destination)
-
-Finally execute::
-  
-  rm CMakeCache.txt
-  cmake .
-  make
-
-Find more about :ref:`ref-usage-umfpack`.
-
 Windows (Cygwin, MinGW, MSVC)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

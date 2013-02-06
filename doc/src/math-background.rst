@@ -1,8 +1,11 @@
 Mathematical Background
------------------------
+----------------------------------
 
 The main strength of Hermes is a modern adaptive higher-order 
-finite element technology that includes
+finite element technology.
+
+Features
+~~~~~~~~
 
  * Curvilinear elements.
  * Reduced mesh generation needs.
@@ -35,8 +38,6 @@ Some the above points are discussed in more detail below:
    :alt: Illustration of coarse initial meshes.
 
 .. raw:: latex
-
-   \newpage
 
 * **Arbitrary-level hanging nodes**: Hermes can handle irregular meshes with arbitrary-level hanging nodes. This makes adaptive algorithms much faster compared to algorithms that use regular meshes (without hanging nodes).
 
@@ -90,8 +91,6 @@ Same graphs as above but now in terms of CPU time:
    <hr style="clear: both; visibility: hidden;">
 
 .. raw:: latex
-
-   \newpage
 
 * **Dynamical meshes for time-dependent problems**: In time-dependent problems, different physical fields or solution components can be approximated on individual meshes that evolve in time independently of each other.
 

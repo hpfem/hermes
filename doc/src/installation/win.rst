@@ -1,5 +1,5 @@
 Windows
-=======
+----------
 
 These installation instructions have been tested with Microsoft Visual Studio 2005, 2008, 2010, 2012, and with MinGW
 

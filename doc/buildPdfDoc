@@ -1,0 +1,4 @@
+rm -r _build
+make latex
+cp MakeFileLatex _build/latex/MakeFile
+make -C _build/latex

@@ -1,5 +1,5 @@
 Citing Hermes
--------------
+-----------------
 
 If you use Hermes for your work, please be so kind to include some of the references below as appropriate.
 

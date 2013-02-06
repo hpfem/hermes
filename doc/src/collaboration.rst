@@ -1,6 +1,8 @@
-=====================================
-How to Submit Your First Pull Request
-=====================================
+Collaboration
+=============
+
+Collaboration via Github
+------------------------
 
 The following is a very simple primer on Github and Git whose objective is 
 to show you how to effortlessly download Hermes and eventually contribute 
@@ -13,7 +15,7 @@ a pull request. Some good references for further reading are given after
 that.
 
 Create a Free Github Account
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Go to the `Github home page <http://github.com>`_. Click on "Plans, Pricing and Signup"
 and then on "Create a free account". You'll be asked to enter your username, email,
@@ -21,7 +23,7 @@ and a password. That's it, it does not take much time, and it is free for open s
 projects. 
 
 Fork the Hermes Git Repository
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Enter your account using the "Login" link in the upper right corner. Type 
 "hpfem" into the search line in the upper right corner and hit enter. You 
@@ -32,7 +34,7 @@ of the Hermes repository in your Github account, establish important links to
 the master Hermes repository, and add you to the Hermes network. 
 
 Generate and Register Your Public SSH Key
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Start by generating the public ssh key typing (on Linux):
 
@@ -46,7 +48,7 @@ This is where you need to paste the public key that you just generated
 on your computer. 
 
 Download Hermes to Your Local Computer
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once your public SSH key is registered at Github, you can 
 clone the Hermes repository from your Github account to
@@ -61,7 +63,7 @@ In the next paragraphs we describe how to work inside
 the Hermes Git repository on your local computer.
 
 Create the .gitconfig File
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The .gitconfig file can be used to define your identity
 for git as well as useful abbreviations. Change dir to your 
@@ -105,7 +107,7 @@ home directory. Then adjust and save the following as
 	    lg = log -p
 
 Create a Local Branch
----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Change dir back to hermes/hermes2d/ or hermes/hermes3d/
 where you were before. Whenever you want to do any changes, such as modify 
@@ -142,7 +144,7 @@ conflicts, you may not be able to update your local repository,
 you may not be able to switch branches at all, etc.
 
 Commit Your Changes
--------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Say that you modified an existing or added a new 
 file "file.cpp". In order to register the new changes,
@@ -169,7 +171,7 @@ describing your changes. Without this line,
 your commit will not be accepted. 
 
 Push the Changes to Your Github Account
----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You cannot push to the master repository 
 of Hermes directly. The way to get your changes there
@@ -184,7 +186,7 @@ same name at Github. Now you can go back to your Github account,
 click on "Commits" and you should see your changes there. 
 
 Send a Pull Request
--------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to submit your changes to the Hermes network,
 click on the button "Pull request" in the upper right 
@@ -201,7 +203,7 @@ click on "Send pull request".
 For more details on pull requests visit `this page <http://help.github.com/pull-requests/>`_.
 
 Switching Branches
-------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before changing to a different branch in your 
 local repository, type::
@@ -242,7 +244,7 @@ by typing::
     git co branch-name
 
 Further Reading
----------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Git and Github are very powerful tools and we covered just a tiny part 
 of the story. After you familiarize yourself with the contents of

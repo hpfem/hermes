@@ -1,5 +1,5 @@
 Linux
-=====
+-----
 
 Download and compilation
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,7 +49,6 @@ to hermes/. There you will find a CMakeLists.txt file that contains the lines::
 		  set(H2D_RELEASE             YES)
 		  # Optional parts of the library.
 		  set(H2D_WITH_GLUT 					YES)
-		  set(H2D_WITH_VIEWER_GUI 		NO)
       ...
       
     set(WITH_SUPERLU            NO)
@@ -66,37 +65,6 @@ After that, type::
 
 If you have more than one CPU, you can use "make -jN" where N is
 the number of CPUs of your computer.
-
-More options
-~~~~~~~~~~~~
-
-You can turn on and off various components to build, just create the CMake.vars
-file and add the following::
-
-    set(WITH_EXAMPLES NO)
-
-(and any other option that you would like to change, see CMakeLists.txt for the
-whole list).
-
-You can also easily generate it from a script (e.g. a debian/rules file) by:
-
-.. sourcecode::
-    .
-
-    python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)\nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)\nset(WITH_UTIL no)"' > CMake.vars
-
-.. latexcode::
-    .
-
-    python -c 'print "set(H2D_COMPLEX no)\nset(WITH_EXAMPLES no)
-    \nset(WITH_TUTORIAL no)\nset(WITH_PYTHON yes)\nset(WITH_GLUT no)
-    \nset(WITH_UTIL no)"' > CMake.vars
-
-If you are on OS X, you have to disable GLUT as the glut library is not easily
-installable on OS X. To do so, just put the following line into your
-CMake.vars::
-
-    set(WITH_GLUT NO)
 
 Debugging with Eclipse
 ~~~~~~~~~~~~~~~~~~~~~~
