@@ -87,11 +87,8 @@ latex:
 	      "run these through (pdf)latex."
 
 latexpdf: latex
-	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
-	@echo "Running LaTeX files through pdflatex..."
 	make -C _build/latex all-pdf
-	@echo "pdflatex finished; the PDF files are in _build/latex."
-
+	
 changes:
 	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) $(BUILDDIR)/changes
 	@echo
