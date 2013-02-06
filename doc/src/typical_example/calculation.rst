@@ -13,20 +13,22 @@ Right here we focus on the calculation::
     {
       Adaptive-loop // not necessarily on each time step.
       {
-        // create reference space(s), see the adaptivity section of hermes-tutorial documentation for this.
-        // e.g.
+        // create reference space(s), see the adaptivity section of hermes-tutorial
+        // documentation for this. e.g.
         Space<double>* ref_space = construct_refined_space(&space);
       
         // WE ARE NOW HERE.
         The calculation
         // WE ARE NOW HERE
         
-        // do the adaptivity thing, see the adaptivity section of hermes-tutorial documentation for this.
+        // do the adaptivity thing, see the adaptivity section of hermes-tutorial
+        // documentation for this.
         // This would change the 'coarse' Space instance: 'Space<double> space'.
         
         // Do some cleaning.
       }
-      // adjust time, and time step any way you want (stability conditions, time-adaptivity, ...).
+      // adjust time, and time step any way you want
+      // (stability conditions, time-adaptivity, ...).
     }
 
 In the following, some parameters are supposed to be passed as 'const', and everywhere, where one can pass an instance of Space<Scalar>*, one can pass 
@@ -51,18 +53,27 @@ Then the following code inside the loops would do the trick::
     // Set the new Space.
     solver.set_space(ref_space);
     
-    // This is usually the place where something can go wrong, so we use the try-catch block. Note that the exceptions we use in Hermes are std::exception descendants (so only one catch block is enough).
+    // This is usually the place where something can go wrong,
+    // so we use the try-catch block. Note that the exceptions 
+    // we use in Hermes are std::exception descendants (so only one catch block is enough),
+    // but you can choose to act differently upon a different exception type as shown.
     try
     {
       // Do the magic (assemble the matrix, right-hand side, solve).
       solver.solve();
+    }
+    catch(Hermes::Exception::Exception& e)
+    {
+      e.print_msg();
     }
     catch(std::exception& e)
     {
       std::cout << e.what();
     }
     
-    // Get the solution (The Solution class is described in the developers documentation, The method vector_to_solution(s) too)
+    // Get the solution.
+    // The Solution class is described in the developers (doxygen) documentation.
+    // The method vector_to_solution(s) too.
     Solution<double> ref_sln;
     Solution<double>::vector_to_solution(solver.get_sln_vector(), ref_sln, &ref_sln);
     
@@ -85,11 +96,13 @@ There is one more thing, if you want your NewtonSolver not to start from a zero 
     // Also do not forget to 'delete []' this after you do not need it.
     double* coeff_vec = new double[Space<double>::get_num_dofs(&ref_space)];
     
-    // For example let us project the previous time level solution and use it as initial guess.
+    // For example let us project the previous time level solution and
+    // use it as an initial guess.
     OGProjection<double> ogProjection;
     ogProjection.project_global(ref_space, &previous_time_level_sln, coeff_vec);
     
-    // And now use it in the NewtonSolver<Scalar>::solve (solver is now NewtonSolver<double>) method.
+    // And now use it in the NewtonSolver<Scalar>::solve.
+    // (solver is now NewtonSolver<double>) method.
     solver.solve(coeff_vec);
     
 One can also use the NOX solver from the Trilinos package (with analogic, but not exactly same methods). One needs Trilinos for that. And documentation for that is coming.
@@ -99,7 +112,8 @@ One can also use the NOX solver from the Trilinos package (with analogic, but no
 
 Again, pretty much the same as in the LinearSolver case, but the solve() method will now take the previous time level Solution(s) and return the new Solution(s), so there is no need for using the vector_to_solution(s) method::
 
-    // Initialize the solution(it can be outside of the loops, the solution would always be rewritten when it is natural)
+    // Initialize the solution(it can be outside of the loops,
+    // the solution would always be rewritten when it is natural)
     Solution<double> ref_sln;
     
     // "solver" is now an instance of RungeKutta<double>.
@@ -110,7 +124,9 @@ Again, pretty much the same as in the LinearSolver case, but the solve() method 
     // Set the new Space.
     solver.set_space(ref_space);
     
-    // This is usually the place where something can go wrong, so we use the try-catch block. Note that the exceptions we use in Hermes are std::exception descendants (so only one catch block is enough).
+    // This is usually the place where something can go wrong,
+    // so we use the try-catch block. Note that the exceptions
+    // we use in Hermes are std::exception descendants (so only one catch block is enough).
     try
     {
       // Do the usual magic, plus put the result in the ref_sln instance.
@@ -130,7 +146,8 @@ It shares some methods with the above 'calculation' classes, but of course does 
 
     // We assume we have an instance DiscreteProblem<double> dp(&wf, &space);
     
-    // These can be outside the loop, the memory would get properly freed / reallocated every time without worrying about it.
+    // These can be outside the loop, the memory would get properly freed / reallocated
+    // every time without worrying about it.
     SparseMatrix<double>* matrix = create_matrix<double>();
     Vector<double>* rhs = create_vector<double>();
     LinearMatrixSolver<double>* linear_matrix_solver = create_linear_solver<double>(matrix, rhs);
@@ -141,7 +158,9 @@ It shares some methods with the above 'calculation' classes, but of course does 
     // Set the new Space.
     dp.set_space(ref_space);
     
-    // This is usually the place where something can go wrong, so we use the try-catch block. Note that the exceptions we use in Hermes are std::exception descendants (so only one catch block is enough).
+    // This is usually the place where something can go wrong,
+    // so we use the try-catch block. Note that the exceptions 
+    // we use in Hermes are std::exception descendants (so only one catch block is enough).
     try
     {
       dp.assemble(matrix, rhs);
@@ -154,7 +173,9 @@ It shares some methods with the above 'calculation' classes, but of course does 
       std::cout << e.what();
     }
     
-    // Get the solution (The Solution class is described in the developers documentation, The method vector_to_solution(s) too)
+    // Get the solution.
+    // The Solution class is described in the developers documentation.
+    // The method vector_to_solution(s) too.
     Solution<double> ref_sln;
     Solution<double>::vector_to_solution(linear_matrix_solver.get_sln_vector(), ref_sln, &ref_sln);
     
