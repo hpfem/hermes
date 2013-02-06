@@ -290,13 +290,26 @@ namespace Hermes
 
         int i, o, mo = quad->get_max_order(e->get_mode());
 
+        int k = e->is_triangle() ? 2 : 3;
+
+        double const_m[2][2] = 
+        { 
+          { e->vn[1]->x - e->vn[0]->x,  e->vn[k]->x - e->vn[0]->x },
+          { e->vn[1]->y - e->vn[0]->y,  e->vn[k]->y - e->vn[0]->y } 
+        };
+
+        double const_jacobian = 0.25 * (const_m[0][0] * const_m[1][1] - const_m[0][1] * const_m[1][0]);
+        double2x2 const_inv_ref_map;
+        if(const_jacobian <= 0.0)
+          throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented in initial_single_check().", e->id);
+
         // check first the positivity of the jacobian
         double3* pt = quad->get_points(mo, e->get_mode());
         double2x2* m = r.get_inv_ref_map(mo);
         double* jac = r.get_jacobian(mo);
         for (i = 0; i < quad->get_num_points(mo, e->get_mode()); i++)
           if(jac[i] <= 0.0)
-            throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented.", e->id);
+            throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented in initial_single_check().", e->id);
       }
     }
 
@@ -530,6 +543,8 @@ namespace Hermes
       e->visited = false;
 
       // set vertex and edge node pointers
+      if(v0 == v1 || v1 == v2 || v2 == v0)
+        throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices of element #%d are identical which is impossible.", e->id);
       e->vn[0] = v0;
       e->vn[1] = v1;
       e->vn[2] = v2;
@@ -563,6 +578,8 @@ namespace Hermes
       e->visited = false;
 
       // set vertex and edge node pointers
+      if(v0 == v1 || v1 == v2 || v2 == v3 || v3 == v0 || v2 == v0 || v3 == v1)
+        throw Hermes::Exceptions::MeshLoadFailureException("Some of the vertices of element #%d are identical which is impossible.", e->id);
       e->vn[0] = v0;
       e->vn[1] = v1;
       e->vn[2] = v2;

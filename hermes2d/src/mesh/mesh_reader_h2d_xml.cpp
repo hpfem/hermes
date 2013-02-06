@@ -174,6 +174,19 @@ namespace Hermes
         if(!load(parsed_xml_domain, &global_mesh, vertex_is, element_is, edge_is))
           return false;
 
+        int max_vertex_i = -1;
+        for(int i = 0; i < H2D_MAX_NODE_ID; i++)
+          if(vertex_is[i] > max_vertex_i)
+            max_vertex_i = vertex_is[i];
+        int max_element_i = -1;
+        for(int i = 0; i < H2D_MAX_NODE_ID; i++)
+          if(element_is[i] > max_element_i)
+            max_element_i = element_is[i];
+        int max_edge_i = -1;
+        for(int i = 0; i < H2D_MAX_NODE_ID; i++)
+          if(edge_is[i] > max_edge_i)
+            max_edge_i = edge_is[i];
+
         // Subdomains //
         unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
         if(subdomains_count != meshes.size())
@@ -264,7 +277,11 @@ namespace Hermes
               if(vertex_number_count == parsed_xml_domain->vertices().v().size())
                 vertex_number = vertex_is[vertex_numbers_i];
               else
+              {
                 vertex_number =  parsed_xml_domain->subdomains().subdomain().at(subdomains_i).vertices()->i().at(vertex_numbers_i);
+                if(vertex_number > max_vertex_i)
+                  throw Exceptions::MeshLoadFailureException("Wrong vertex number:%u in subdomain %u.", vertex_number, subdomains_i);
+              }
 
               vertex_vertex_numbers.insert(std::pair<unsigned int, unsigned int>(vertex_number, vertex_numbers_i));
               Node* node = meshes[subdomains_i]->nodes.add();
@@ -344,9 +361,13 @@ namespace Hermes
             for(int i = 0; i < element_count; i++)
               elements_existing[i] = -1;
             for (int element_number_i = 0; element_number_i < element_number_count; element_number_i++)
-              elements_existing[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i)] =
-              parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i);
+            {
+              int elementI = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i);
+              if(elementI > max_element_i)
+                  throw Exceptions::MeshLoadFailureException("Wrong element number:%i in subdomain %u.", elementI, subdomains_i);
 
+              elements_existing[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i)] = elementI;
+            }
             for (int element_i = 0; element_i < element_count; element_i++)
             {
               bool found = false;
@@ -371,7 +392,7 @@ namespace Hermes
                   element = NULL;
               }
               if(element == NULL)
-                throw Exceptions::Exception("Element number wrong in the mesh file.");
+                throw Exceptions::MeshLoadFailureException("Element number wrong in the mesh file.");
 
               XMLSubdomains::q_t* el_q = dynamic_cast<XMLSubdomains::q_t*>(element);
               XMLSubdomains::t_t* el_t = dynamic_cast<XMLSubdomains::t_t*>(element);
@@ -396,7 +417,7 @@ namespace Hermes
 
             for (int boundary_edge_number_i = 0; boundary_edge_number_i < boundary_edge_number_count; boundary_edge_number_i++)
             {
-              XMLSubdomains::domain::edges_type::ed_type* edge;
+              XMLSubdomains::domain::edges_type::ed_type* edge = NULL;
               for(unsigned int to_find_i = 0; to_find_i < parsed_xml_domain->edges().ed().size(); to_find_i++)
               {
                 if(boundary_edge_number_count != parsed_xml_domain->edges().ed().size())
@@ -417,9 +438,12 @@ namespace Hermes
                 }
               }
 
+              if(edge == NULL)
+                  throw Exceptions::MeshLoadFailureException("Wrong boundary-edge number:%i in subdomain %u.", parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i), subdomains_i);
+
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if(en == NULL)
-                throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist)", boundary_edge_number_i);
+                throw Hermes::Exceptions::MeshLoadFailureException("Boundary data error (edge %i does not exist).", boundary_edge_number_i);
 
               en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->m()).marker;
 
@@ -431,7 +455,7 @@ namespace Hermes
             // Inner Edge numbers //
             for (int inner_edge_number_i = 0; inner_edge_number_i < inner_edge_number_count; inner_edge_number_i++)
             {
-              XMLSubdomains::domain::edges_type::ed_type* edge;
+              XMLSubdomains::domain::edges_type::ed_type* edge = NULL;
 
               for(unsigned int to_find_i = 0; to_find_i < parsed_xml_domain->edges().ed().size(); to_find_i++)
               {
@@ -442,9 +466,12 @@ namespace Hermes
                 }
               }
 
+              if(edge == NULL)
+                  throw Exceptions::MeshLoadFailureException("Wrong inner-edge number:%i in subdomain %u.", parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(inner_edge_number_i), subdomains_i);
+
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if(en == NULL)
-                throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist)", inner_edge_number_i);
+                throw Hermes::Exceptions::MeshLoadFailureException("Inner data error (edge %i does not exist).", inner_edge_number_i);
 
               en->marker = meshes[subdomains_i]->boundary_markers_conversion.get_internal_marker(edge->m()).marker;
               en->bnd = 0;
@@ -893,7 +920,7 @@ namespace Hermes
 
           en = mesh->peek_edge_node(v1, v2);
           if(en == NULL)
-            throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
+            throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist.", edge_i, v1, v2);
 
           std::string edge_marker = parsed_xml_mesh->edges().ed().at(edge_i).m();
 
@@ -923,7 +950,7 @@ namespace Hermes
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
           if(en->ref < 2 && en->marker == 0)
-            this->warn("Boundary edge node does not have a boundary marker");
+            this->warn("Boundary edge node does not have a boundary marker.");
 
         // Curves //
         // Arcs & NURBSs //
@@ -1159,7 +1186,7 @@ namespace Hermes
 
           en = mesh->peek_edge_node(v1, v2);
           if(en == NULL)
-            throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist", edge_i, v1, v2);
+            throw Hermes::Exceptions::MeshLoadFailureException("Boundary data #%d: edge %d-%d does not exist.", edge_i, v1, v2);
 
           std::string edge_marker = parsed_xml_domain->edges().ed().at(edge_i).m();
 
@@ -1189,7 +1216,7 @@ namespace Hermes
         // check that all boundary edges have a marker assigned
         for_all_edge_nodes(en, mesh)
           if(en->ref < 2 && en->marker == 0)
-            this->warn("Boundary edge node does not have a boundary marker");
+            this->warn("Boundary edge node does not have a boundary marker.");
 
         // Curves //
         // Arcs & NURBSs //
