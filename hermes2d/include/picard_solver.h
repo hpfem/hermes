@@ -89,7 +89,7 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] coeff_vec Ceofficient vector to start from.
-      void solve(Scalar* coeff_vec = NULL);
+      virtual void solve(Scalar* coeff_vec = NULL);
 
       /// Solve.
       /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
