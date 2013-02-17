@@ -713,8 +713,13 @@ namespace Hermes
       // go through all elements
       double xi1, xi2;
       Element *e;
+      // vector for curved elements that do not have the point in them when considering straight edges.
+      Hermes::vector<Element*> improbable_curved_elements;
       for_all_active_elements(e, mesh)
       {
+        // For curved elements.
+        bool is_near_straightened_element = false;
+
         // edge vectors.
         double2 vector[4];
         vector[0][0] = e->vn[1]->x - e->vn[0]->x;
@@ -744,12 +749,27 @@ namespace Hermes
         {
           if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0))
           {
-            untransform(e, x, y, xi1, xi2);
-            if(x_reference != NULL)
-              (*x_reference) = xi1;
-            if(y_reference != NULL)
-              (*y_reference) = xi2;
-            return e;
+            if(!e->is_curved())
+            {
+              untransform(e, x, y, xi1, xi2);
+              if(x_reference != NULL)
+                (*x_reference) = xi1;
+              if(y_reference != NULL)
+                (*y_reference) = xi2;
+              return e;
+            }
+            else
+              is_near_straightened_element = true;
+          }
+          if(e->is_curved() && !is_near_straightened_element)
+          {
+            double gravity_center_x = (e->vn[0]->x + e->vn[1]->x + e->vn[2]->x) / 3.;
+            double gravity_center_y = (e->vn[0]->y + e->vn[1]->y + e->vn[2]->y) / 3.;
+            double distance_x = std::abs(x - gravity_center_x);
+            double distance_y = std::abs(y - gravity_center_y);
+            if(distance_x < std::abs(e->vn[0]->x - gravity_center_x) && distance_x < std::abs(e->vn[1]->x - gravity_center_x) && distance_x < std::abs(e->vn[2]->x - gravity_center_x) &&
+              distance_y < std::abs(e->vn[0]->y - gravity_center_y) && distance_y < std::abs(e->vn[1]->y - gravity_center_y) && distance_y < std::abs(e->vn[2]->y - gravity_center_y))
+                is_near_straightened_element = true;
           }
         }
         else
@@ -757,15 +777,63 @@ namespace Hermes
           double cross_product_3 = (x - e->vn[3]->x) * vector[3][1] - (y - e->vn[3]->y) * vector[3][0];
           if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && (cross_product_0 * cross_product_3 >= 0))
           {
-            untransform(e, x, y, xi1, xi2);
-            if(x_reference != NULL)
-              (*x_reference) = xi1;
-            if(y_reference != NULL)
-              (*y_reference) = xi2;
-            return e;
+            if(!e->is_curved())
+            {
+              untransform(e, x, y, xi1, xi2);
+              if(x_reference != NULL)
+                (*x_reference) = xi1;
+              if(y_reference != NULL)
+                (*y_reference) = xi2;
+              return e;
+            }
+            else
+              is_near_straightened_element = true;
+          }
+          if(e->is_curved() && !is_near_straightened_element)
+          {
+            double gravity_center_x = (e->vn[0]->x + e->vn[1]->x + e->vn[2]->x + e->vn[3]->x) / 4.;
+            double gravity_center_y = (e->vn[0]->y + e->vn[1]->y + e->vn[2]->y + e->vn[3]->y) / 4.;
+            double distance_x = std::abs(x - gravity_center_x);
+            double distance_y = std::abs(y - gravity_center_y);
+            if(distance_x <= std::abs(e->vn[0]->x - gravity_center_x) && distance_x <= std::abs(e->vn[1]->x - gravity_center_x) && distance_x <= std::abs(e->vn[2]->x - gravity_center_x) && distance_x <= std::abs(e->vn[3]->x - gravity_center_x) &&
+              distance_y <= std::abs(e->vn[0]->y - gravity_center_y) && distance_y <= std::abs(e->vn[1]->y - gravity_center_y) && distance_y <= std::abs(e->vn[2]->y - gravity_center_y) && distance_y <= std::abs(e->vn[3]->y - gravity_center_y))
+                is_near_straightened_element = true;
           }
         }
+
+        if(e->is_curved())
+        {
+          if(is_near_straightened_element)
+          {
+            untransform(e, x, y, xi1, xi2);
+            if(is_in_ref_domain(e, xi1, xi2))
+            {
+              if(x_reference != NULL)
+                (*x_reference) = xi1;
+              if(y_reference != NULL)
+                (*y_reference) = xi2;
+              return e;
+            }
+          }
+          else
+            improbable_curved_elements.push_back(e);
+        }
       }
+
+      // loop through the improbable curved elements.
+      for(int i = 0; i < improbable_curved_elements.size(); i++)
+      {
+        untransform(improbable_curved_elements[i], x, y, xi1, xi2);
+        if(is_in_ref_domain(improbable_curved_elements[i], xi1, xi2))
+        {
+          if(x_reference != NULL)
+            (*x_reference) = xi1;
+          if(y_reference != NULL)
+            (*y_reference) = xi2;
+          return improbable_curved_elements[i];
+        }
+      }
+
       Hermes::Mixins::Loggable::Static::warn("Point (%g, %g) does not lie in any element.", x, y);
       return NULL;
     }
