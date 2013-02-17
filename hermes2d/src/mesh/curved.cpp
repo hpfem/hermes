@@ -512,11 +512,11 @@ namespace Hermes
           o = std::max(H2D_GET_V_ORDER(o), H2D_GET_H_ORDER(o));
 
           ref_map_pss->set_active_shape(ii);
-          ref_map_pss->set_quad_order(o);
+          ref_map_pss->set_quad_order(o, H2D_FN_VAL);
           double* fni = ref_map_pss->get_fn_values();
 
           ref_map_pss->set_active_shape(ij);
-          ref_map_pss->set_quad_order(o);
+          ref_map_pss->set_quad_order(o, H2D_FN_VAL);
           double* fnj = ref_map_pss->get_fn_values();
 
           double3* pt = quad2d.get_points(o, mode);

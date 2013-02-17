@@ -964,7 +964,7 @@ namespace Hermes
       // H1 space
       if(space_type == HERMES_H1_SPACE)
       {
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+#ifdef H2D_USE_SECOND_DERIVATIVES
         if(((newmask & H2D_SECOND) == H2D_SECOND && (oldmask & H2D_SECOND) != H2D_SECOND))
         {
           this->update_refmap();
@@ -1581,7 +1581,7 @@ namespace Hermes
         }
         else
         {
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+#ifdef H2D_USE_SECOND_DERIVATIVES
           double2x2 mat;
           double3x2 mat2;
           double xx, yy;
@@ -1660,7 +1660,7 @@ namespace Hermes
           toReturn->dy0[0] = dy[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
           toReturn->dy1[0] = dy[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
         }
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+#ifdef H2D_USE_SECOND_DERIVATIVES
         this->warn("Cannot obtain second derivatives of an exact solution.");
 #endif
       }
@@ -1691,7 +1691,7 @@ namespace Hermes
             toReturn->dx[0] = m[0][0]*dx + m[0][1]*dy;
             toReturn->dy[0] = m[1][0]*dx + m[1][1]*dy;
     
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+#ifdef H2D_USE_SECOND_DERIVATIVES
             double2x2 mat;
             double3x2 mat2;
             double xx, yy;

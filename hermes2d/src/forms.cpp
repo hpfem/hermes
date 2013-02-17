@@ -429,7 +429,7 @@ namespace Hermes
       f->val = d;
       f->dx = d1;
       f->dy = d1;
-#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+#ifdef H2D_USE_SECOND_DERIVATIVES
       f->laplace = d;
 #endif
       f->val0 = f->val1 = d;
