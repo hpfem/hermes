@@ -715,14 +715,55 @@ namespace Hermes
       Element *e;
       for_all_active_elements(e, mesh)
       {
-        untransform(e, x, y, xi1, xi2);
-        if(is_in_ref_domain(e, xi1, xi2))
+        // edge vectors.
+        double2 vector[4];
+        vector[0][0] = e->vn[1]->x - e->vn[0]->x;
+        vector[0][1] = e->vn[1]->y - e->vn[0]->y;
+        vector[1][0] = e->vn[2]->x - e->vn[1]->x;
+        vector[1][1] = e->vn[2]->y - e->vn[1]->y;
+        if(e->is_triangle())
         {
-          if(x_reference != NULL)
-            (*x_reference) = xi1;
-          if(y_reference != NULL)
-            (*y_reference) = xi2;
-          return e;
+          vector[2][0] = e->vn[0]->x - e->vn[2]->x;
+          vector[2][1] = e->vn[0]->y - e->vn[2]->y;
+        }
+        else
+        {
+          vector[2][0] = e->vn[3]->x - e->vn[2]->x;
+          vector[2][1] = e->vn[3]->y - e->vn[2]->y;
+          vector[3][0] = e->vn[0]->x - e->vn[3]->x;
+          vector[3][1] = e->vn[0]->y - e->vn[3]->y;
+        }
+ 
+        // calculate cross products
+        // -> if all cross products of edge vectors (vector[*]) x vector (thePoint - aVertex) are positive (negative),
+        // the point is inside of the element.
+        double cross_product_0 = (x - vector[0][0]) * vector[0][1] - (y - vector[0][1]) * vector[0][0];
+        double cross_product_1 = (x - vector[1][0]) * vector[1][1] - (y - vector[1][1]) * vector[1][0];
+        double cross_product_2 = (x - vector[2][0]) * vector[2][1] - (y - vector[2][1]) * vector[2][0];
+        if(e->is_triangle())
+        {
+          if ((cross_product_0 * cross_product_1 > 0) && (cross_product_0 * cross_product_2 > 0))
+          {
+            untransform(e, x, y, xi1, xi2);
+            if(x_reference != NULL)
+              (*x_reference) = xi1;
+            if(y_reference != NULL)
+              (*y_reference) = xi2;
+            return e;
+          }
+        }
+        else
+        {
+          double cross_product_3 = (x - vector[3][0]) * vector[3][1] - (y - vector[3][1]) * vector[3][0];
+          if ((cross_product_0 * cross_product_1 > 0) && (cross_product_0 * cross_product_2 > 0) && (cross_product_0 * cross_product_3 > 0))
+          {
+            untransform(e, x, y, xi1, xi2);
+            if(x_reference != NULL)
+              (*x_reference) = xi1;
+            if(y_reference != NULL)
+              (*y_reference) = xi2;
+            return e;
+          }
         }
       }
       Hermes::Mixins::Loggable::Static::warn("Point (%g, %g) does not lie in any element.", x, y);
