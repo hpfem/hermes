@@ -865,7 +865,7 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::set_active_element(Element* e)
     {
-      // if(e == element) return; // FIXME
+      if(e == element) return; // FIXME
       if(!e->active) throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
       MeshFunction<Scalar>::set_active_element(e);
 
@@ -1544,6 +1544,7 @@ namespace Hermes
     {
       if(e==NULL) 
         throw Exceptions::NullException(1);
+
       set_active_element(e);
 
       int o = elem_orders[e->id];
@@ -1659,7 +1660,9 @@ namespace Hermes
           toReturn->dy0[0] = dy[0] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
           toReturn->dy1[0] = dy[1] * (static_cast<ExactSolutionScalar<Scalar>*>(this))->exact_multiplicator;
         }
-        throw Hermes::Exceptions::Exception("Cannot obtain second derivatives of an exact solution.");
+#ifdef H2D_SECOND_DERIVATIVES_ENABLED
+        this->warn("Cannot obtain second derivatives of an exact solution.");
+#endif
       }
       else if(sln_type == HERMES_UNDEF)
       {

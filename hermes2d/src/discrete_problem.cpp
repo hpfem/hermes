@@ -1529,6 +1529,7 @@ namespace Hermes
         AsmList<Scalar>** current_alsSurface = NULL;
         if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0 || current_wf->mfDG.size() > 0 || current_wf->vfDG.size() > 0))
         {
+          current_alsSurface = new AsmList<Scalar>*[this->spaces.size()];
           for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
           {
             if(current_state->e[space_i] == NULL)
