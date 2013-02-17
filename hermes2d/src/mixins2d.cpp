@@ -36,7 +36,7 @@ namespace Hermes
           }
       }
 
-      XMLParsing::XMLParsing() : validate(true)
+      XMLParsing::XMLParsing() : validate(false)
       {
       }
 
