@@ -1694,7 +1694,6 @@ namespace Hermes
 #ifdef H2D_USE_SECOND_DERIVATIVES
             double2x2 mat;
             double3x2 mat2;
-            double xx, yy;
 
             this->refmap->inv_ref_map_at_point(xi1, xi2, xx, yy, mat);
             this->refmap->second_ref_map_at_point(xi1, xi2, xx, yy, mat2);
