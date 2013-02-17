@@ -1693,6 +1693,7 @@ namespace Hermes
             toReturn->dy[0] = m[1][0]*dx + m[1][1]*dy;
     
 #ifdef H2D_USE_SECOND_DERIVATIVES
+            toReturn->laplace = new Scalar[1];
             double2x2 mat;
             double3x2 mat2;
 
@@ -1702,9 +1703,9 @@ namespace Hermes
             Scalar vxx = get_ref_value(e, xi1, xi2, 0, 3);
             Scalar vyy = get_ref_value(e, xi1, xi2, 0, 4);
             Scalar vxy = get_ref_value(e, xi1, xi2, 0, 5);
-            toReturn->dxx[0] = sqr(mat[0][0])*vxx + 2*mat[0][1]*mat[0][0]*vxy + sqr(mat[0][1])*vyy + mat2[0][0]*dx + mat2[0][1]*dy;   // dxx
-            toReturn->dyy[0] = sqr(mat[1][0])*vxx + 2*mat[1][1]*mat[1][0]*vxy + sqr(mat[1][1])*vyy + mat2[2][0]*dx + mat2[2][1]*dy;   // dyy
-            toReturn->dxy[0] = mat[0][0]*mat[1][0]*vxx + (mat[0][0]*mat[1][1] + mat[1][0]*mat[0][1])*vxy + mat[0][1]*mat[1][1]*vyy + mat2[1][0]*dx + mat2[1][1]*dy;   //dxy
+            Scalar dxx = sqr(mat[0][0])*vxx + 2*mat[0][1]*mat[0][0]*vxy + sqr(mat[0][1])*vyy + mat2[0][0]*dx + mat2[0][1]*dy;   // dxx
+            Scalar dyy = sqr(mat[1][0])*vxx + 2*mat[1][1]*mat[1][0]*vxy + sqr(mat[1][1])*vyy + mat2[2][0]*dx + mat2[2][1]*dy;   // dyy
+            toReturn->laplace[0] = dxx + dyy;
 #endif
           }
           else // vector solution
