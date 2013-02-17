@@ -6,10 +6,10 @@ xmlns="http://www.w3.org/2001/XMLSchema">
       <sequence>
         <element minOccurs="0" maxOccurs="1" name="variables"
           type="mesh:variables_type" />
-        <element minOccurs="2" maxOccurs="unbounded" name="vertex" >
+        <element minOccurs="2" maxOccurs="unbounded" name="v" >
           <complexType>
             <attribute name="x" type="string" use="required"/>
-            <attribute name="marker" type="string"/>
+            <attribute name="m" type="string"/>
           </complexType>
         </element>
       </sequence>
@@ -17,7 +17,7 @@ xmlns="http://www.w3.org/2001/XMLSchema">
   </element>
   <complexType name="variables_type">
     <sequence>
-      <element minOccurs="0" maxOccurs="unbounded" name="variable">
+      <element minOccurs="0" maxOccurs="unbounded" name="var">
         <complexType>
           <attribute name="name" type="string" use="required" />
           <attribute name="value" type="decimal" use="required" />

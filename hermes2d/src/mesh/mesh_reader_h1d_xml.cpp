@@ -45,17 +45,17 @@ namespace Hermes
         std::auto_ptr<XMLMesh1D::mesh> parsed_xml_mesh(XMLMesh1D::mesh_(filename, parsing_flags));
 
         // Variables //
-        unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->variable().size() : 0;
+        unsigned int variables_count = parsed_xml_mesh->variables().present() ? parsed_xml_mesh->variables()->var().size() : 0;
         std::map<std::string, double> variables;
         for (unsigned int variables_i = 0; variables_i < variables_count; variables_i++)
 #ifdef _MSC_VER
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->variable().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->variable().at(variables_i).value()));
+				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), (double&&)parsed_xml_mesh->variables()->var().at(variables_i).value()));
 #else
-				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->variable().at(variables_i).name(), parsed_xml_mesh->variables()->variable().at(variables_i).value()));
+				variables.insert(std::make_pair<std::string, double>((std::string)parsed_xml_mesh->variables()->var().at(variables_i).name(), parsed_xml_mesh->variables()->var().at(variables_i).value()));
 #endif
 
         // Vertices //
-        int vertices_count = parsed_xml_mesh->vertex().size();
+        int vertices_count = parsed_xml_mesh->v().size();
 
         // Initialize mesh.
         int size = HashTable::H2D_DEFAULT_HASH_SIZE;
@@ -78,7 +78,7 @@ namespace Hermes
           node->next_hash = NULL;
 
           // variables matching.
-          std::string x = parsed_xml_mesh->vertex().at(vertices_i % vertices_count).x();
+          std::string x = parsed_xml_mesh->v().at(vertices_i % vertices_count).x();
           double x_value;
 
           // variables lookup.
@@ -136,10 +136,10 @@ namespace Hermes
           mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, "H1DMarker");
 
           int element_marker;
-          if(parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().present())
+          if(parsed_xml_mesh->v().at(element_i % vertices_count).m().present())
           {
-            mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().get());
-            element_marker = mesh->element_markers_conversion.get_internal_marker(parsed_xml_mesh->vertex().at(element_i % vertices_count).marker().get()).marker;
+            mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, parsed_xml_mesh->v().at(element_i % vertices_count).m().get());
+            element_marker = mesh->element_markers_conversion.get_internal_marker(parsed_xml_mesh->v().at(element_i % vertices_count).m().get()).marker;
           }
           else
             element_marker = mesh->element_markers_conversion.get_internal_marker("H1DMarker").marker;
