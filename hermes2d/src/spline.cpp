@@ -158,7 +158,11 @@ namespace Hermes
     void CubicSpline::plot(const char* filename, double extension, bool plot_derivative, int subdiv) const
     {
       FILE *f = fopen(filename, "wb");
-      if(f == NULL) throw Hermes::Exceptions::Exception("Could not open a spline file for writing.");
+      if(f == NULL) 
+        throw Hermes::Exceptions::Exception("Could not open a spline file for writing.");
+
+      if(coeffs.size() == 0)
+        throw Hermes::Exceptions::Exception("The cubic spline has no coefficients. Calculate using calculate_coeffs.");
 
       // Plotting on the left of the area of definition.
       double x_left = point_left - extension;
