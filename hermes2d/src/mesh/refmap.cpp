@@ -737,12 +737,12 @@ namespace Hermes
         // calculate cross products
         // -> if all cross products of edge vectors (vector[*]) x vector (thePoint - aVertex) are positive (negative),
         // the point is inside of the element.
-        double cross_product_0 = (x - vector[0][0]) * vector[0][1] - (y - vector[0][1]) * vector[0][0];
-        double cross_product_1 = (x - vector[1][0]) * vector[1][1] - (y - vector[1][1]) * vector[1][0];
-        double cross_product_2 = (x - vector[2][0]) * vector[2][1] - (y - vector[2][1]) * vector[2][0];
+        double cross_product_0 = (x - e->vn[0]->x) * vector[0][1] - (y - e->vn[0]->y) * vector[0][0];
+        double cross_product_1 = (x - e->vn[1]->x) * vector[1][1] - (y - e->vn[1]->y) * vector[1][0];
+        double cross_product_2 = (x - e->vn[2]->x) * vector[2][1] - (y - e->vn[2]->y) * vector[2][0];
         if(e->is_triangle())
         {
-          if ((cross_product_0 * cross_product_1 > 0) && (cross_product_0 * cross_product_2 > 0))
+          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0))
           {
             untransform(e, x, y, xi1, xi2);
             if(x_reference != NULL)
@@ -754,8 +754,8 @@ namespace Hermes
         }
         else
         {
-          double cross_product_3 = (x - vector[3][0]) * vector[3][1] - (y - vector[3][1]) * vector[3][0];
-          if ((cross_product_0 * cross_product_1 > 0) && (cross_product_0 * cross_product_2 > 0) && (cross_product_0 * cross_product_3 > 0))
+          double cross_product_3 = (x - e->vn[3]->x) * vector[3][1] - (y - e->vn[3]->y) * vector[3][0];
+          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && (cross_product_0 * cross_product_3 >= 0))
           {
             untransform(e, x, y, xi1, xi2);
             if(x_reference != NULL)
