@@ -198,7 +198,7 @@ namespace Hermes
             }
 
             // do the same for the curvature
-            if(curved)
+            if(!split && curved)
             {
               for (i = 0; i < 3; i++)
                 if(sqr(phx[idx[i]] - midval[0][i]) + sqr(phy[idx[i]] - midval[1][i]) > sqr(fns[0]->get_active_element()->get_diameter()*this->get_curvature_epsilon()))

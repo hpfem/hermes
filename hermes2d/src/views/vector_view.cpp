@@ -26,8 +26,9 @@ namespace Hermes
     namespace Views
     {
       VectorView::VectorView(const char* title, WinGeom* wg)
-        : View(title, wg), vec(NULL)
+        : View(title, wg)
       {
+        vec = new Vectorizer;
         gx = gy = 0.0;
         gs = 20.0;
         hexa = true;
@@ -38,8 +39,9 @@ namespace Hermes
       }
 
       VectorView::VectorView(char* title, WinGeom* wg)
-        : View(title, wg), vec(NULL)
+        : View(title, wg)
       {
+        vec = new Vectorizer;
         gx = gy = 0.0;
         gs = 20.0;
         hexa = true;
