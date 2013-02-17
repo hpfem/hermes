@@ -77,9 +77,6 @@ namespace Hermes
         node_widget_vert_cnt(32),
         element_id_widget(0),
         show_element_info(false)
-#ifdef ENABLE_VIEWER_GUI
-        , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
-#endif
       {
         init();
       }
@@ -95,9 +92,6 @@ namespace Hermes
         node_widget_vert_cnt(32),
         element_id_widget(0),
         show_element_info(false)
-#ifdef ENABLE_VIEWER_GUI
-        , tw_wnd_id(TW_WND_ID_NONE), tw_setup_bar(NULL)
-#endif
       {
         init();
       }
@@ -1525,26 +1519,10 @@ namespace Hermes
           {
             if(pointed_vertex_node->selected) //deselct node
             {
-# ifdef ENABLE_VIEWER_GUI
-              if(pointed_vertex_node->tw_bar != NULL)
-              {
-                TwDeleteBar((TwBar*)pointed_vertex_node->tw_bar);
-                pointed_vertex_node->tw_bar = NULL;
-              }
-# endif
               pointed_vertex_node->selected = false;
             }
             else { //select node
-# ifdef ENABLE_VIEWER_GUI
-              stringstream str;
-              str << "Vertex node: " << pointed_vertex_node->id;
-              TwBar* bar = TwNewBar(str.str().c_str());
-              TwAddVarRO(bar, "X", TW_TYPE_FLOAT, &pointed_vertex_node->x, NULL);
-              TwAddVarRO(bar, "Y", TW_TYPE_FLOAT, &pointed_vertex_node->y, NULL);
-              int intTmp = 0; TwSetParam(bar, NULL, "iconifiable", TW_PARAM_INT32, 1, &intTmp);
-              pointed_vertex_node->tw_bar = bar;
-# endif
-              pointed_vertex_node->selected = true;
+             pointed_vertex_node->selected = true;
             }
             refresh();
           }

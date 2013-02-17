@@ -1529,12 +1529,15 @@ namespace Hermes
         AsmList<Scalar>** current_alsSurface = NULL;
         if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0 || current_wf->mfDG.size() > 0 || current_wf->vfDG.size() > 0))
         {
-          if(current_state->e[space_i] == NULL)
-            return;
-          current_alsSurface[space_i] = new AsmList<Scalar>[current_state->rep->nvert];
-          for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
-            if(current_state->bnd[current_state->isurf])
-              spaces[space_i]->get_boundary_assembly_list(current_state->e[space_i], current_state->isurf, &current_alsSurface[space_i][current_state->isurf], spaces_first_dofs[space_i]);
+          for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+          {
+            if(current_state->e[space_i] == NULL)
+              return;
+            current_alsSurface[space_i] = new AsmList<Scalar>[current_state->rep->nvert];
+            for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+              if(current_state->bnd[current_state->isurf])
+                spaces[space_i]->get_boundary_assembly_list(current_state->e[space_i], current_state->isurf, &current_alsSurface[space_i][current_state->isurf], spaces_first_dofs[space_i]);
+          }
         }
 
         // Calculate the cache entries.
