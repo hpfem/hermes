@@ -717,6 +717,9 @@ namespace Hermes
       Hermes::vector<Element*> improbable_curved_elements;
       for_all_active_elements(e, mesh)
       {
+        bool is_triangle = e->is_triangle();
+        bool is_curved = e->is_curved();
+
         // For curved elements.
         bool is_near_straightened_element = false;
 
@@ -726,7 +729,7 @@ namespace Hermes
         vector[0][1] = e->vn[1]->y - e->vn[0]->y;
         vector[1][0] = e->vn[2]->x - e->vn[1]->x;
         vector[1][1] = e->vn[2]->y - e->vn[1]->y;
-        if(e->is_triangle())
+        if(is_triangle)
         {
           vector[2][0] = e->vn[0]->x - e->vn[2]->x;
           vector[2][1] = e->vn[0]->y - e->vn[2]->y;
@@ -745,11 +748,11 @@ namespace Hermes
         double cross_product_0 = (x - e->vn[0]->x) * vector[0][1] - (y - e->vn[0]->y) * vector[0][0];
         double cross_product_1 = (x - e->vn[1]->x) * vector[1][1] - (y - e->vn[1]->y) * vector[1][0];
         double cross_product_2 = (x - e->vn[2]->x) * vector[2][1] - (y - e->vn[2]->y) * vector[2][0];
-        if(e->is_triangle())
+        if(is_triangle)
         {
           if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0))
           {
-            if(!e->is_curved())
+            if(!is_curved)
             {
               untransform(e, x, y, xi1, xi2);
               if(x_reference != NULL)
@@ -761,7 +764,7 @@ namespace Hermes
             else
               is_near_straightened_element = true;
           }
-          if(e->is_curved() && !is_near_straightened_element)
+          if(is_curved && !is_near_straightened_element)
           {
             double gravity_center_x = (e->vn[0]->x + e->vn[1]->x + e->vn[2]->x) / 3.;
             double gravity_center_y = (e->vn[0]->y + e->vn[1]->y + e->vn[2]->y) / 3.;
@@ -777,7 +780,7 @@ namespace Hermes
           double cross_product_3 = (x - e->vn[3]->x) * vector[3][1] - (y - e->vn[3]->y) * vector[3][0];
           if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && (cross_product_0 * cross_product_3 >= 0))
           {
-            if(!e->is_curved())
+            if(!is_curved)
             {
               untransform(e, x, y, xi1, xi2);
               if(x_reference != NULL)
@@ -789,7 +792,7 @@ namespace Hermes
             else
               is_near_straightened_element = true;
           }
-          if(e->is_curved() && !is_near_straightened_element)
+          if(is_curved && !is_near_straightened_element)
           {
             double gravity_center_x = (e->vn[0]->x + e->vn[1]->x + e->vn[2]->x + e->vn[3]->x) / 4.;
             double gravity_center_y = (e->vn[0]->y + e->vn[1]->y + e->vn[2]->y + e->vn[3]->y) / 4.;
@@ -801,7 +804,7 @@ namespace Hermes
           }
         }
 
-        if(e->is_curved())
+        if(is_curved)
         {
           if(is_near_straightened_element)
           {
