@@ -31,7 +31,7 @@ PROJECT_NAME           = HermesCommon
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = 1.0
+PROJECT_NUMBER         = 2.0
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 
@@ -431,7 +431,7 @@ WARNINGS               = YES
 # for undocumented members. If EXTRACT_ALL is set to YES then this flag will 
 # automatically be disabled.
 
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 
 # If WARN_IF_DOC_ERROR is set to YES, doxygen will generate warnings for 
 # potential errors in the documentation, such as not documenting some 
@@ -687,7 +687,9 @@ HTML_OUTPUT            = html
 # each generated HTML page (for example: .htm,.php,.asp). If it is left blank 
 # doxygen will generate files with .html extension.
 
-HTML_FILE_EXTENSION    = .html
+HTML_FILE_EXTENSION    = .php
+
+HTML_DYNAMIC_SECTIONS = YES
 
 # The HTML_HEADER tag can be used to specify a personal HTML header for 
 # each generated HTML page. If it is left blank doxygen will generate a 
@@ -708,7 +710,7 @@ HTML_FOOTER            =
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
 
-HTML_STYLESHEET        = 
+HTML_COLORSTYLE_SAT        = 255
 
 # If the HTML_ALIGN_MEMBERS tag is set to YES, the members of classes, 
 # files or namespaces will be aligned in HTML using tables. If set to 
@@ -772,13 +774,13 @@ ENUM_VALUES_PER_LINE   = 4
 # Netscape 6.0+, Internet explorer 5.0+, or Konqueror). Windows users are 
 # probably better off using the HTML help feature.
 
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 
 # If the treeview is enabled (see GENERATE_TREEVIEW) then this tag can be 
 # used to set the initial width (in pixels) of the frame in which the tree 
 # is shown.
 
-TREEVIEW_WIDTH         = 250
+TREEVIEW_WIDTH         = 300
 
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
