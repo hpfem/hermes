@@ -106,34 +106,51 @@ namespace Hermes
       /// Returns the number of equations.
       unsigned int get_neq() const { return neq; }
 
+      /// This weakform is matrix-free.
       bool is_matrix_free() const { return is_matfree; }
 
       /// For time-dependent right-hand side functions.
+      /// Sets current time.
       void set_current_time(double time);
+      
+      /// For time-dependent right-hand side functions.
+      /// Sets current time step.
       void set_current_time_step(double time_step);
 
+      /// For time-dependent right-hand side functions.
+      /// Gets current time.
       virtual double get_current_time() const;
+      
+      /// For time-dependent right-hand side functions.
+      /// Gets current time step.
       virtual double get_current_time_step() const;
 
-      Hermes::vector<Form<Scalar> *> get_forms() const;
+      /// External functions.
+      /// Set one external function.
+      void set_ext(MeshFunction<Scalar>* ext);
+      
+      /// External functions.
+      /// Set more external functions.
+      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
+      
+      /// External functions.
+      /// Get external functions.
+      Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
 
+      /// Cloning.
+      virtual WeakForm* clone() const;
+
+      /// Internal.
+      Hermes::vector<Form<Scalar> *> get_forms() const;
       Hermes::vector<MatrixFormVol<Scalar> *> get_mfvol() const;
       Hermes::vector<MatrixFormSurf<Scalar> *> get_mfsurf() const;
       Hermes::vector<MatrixFormDG<Scalar> *> get_mfDG() const;
-
       Hermes::vector<VectorFormVol<Scalar> *> get_vfvol() const;
       Hermes::vector<VectorFormSurf<Scalar> *> get_vfsurf() const;
       Hermes::vector<VectorFormDG<Scalar> *> get_vfDG() const;
 
       /// Deletes all volumetric and surface forms.
       void delete_all();
-
-      /// external functions.
-      void set_ext(MeshFunction<Scalar>* ext);
-      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
-      Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
-
-      virtual WeakForm* clone() const;
 
     protected:
       /// External solutions.
