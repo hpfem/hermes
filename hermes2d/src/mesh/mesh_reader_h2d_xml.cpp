@@ -366,7 +366,7 @@ namespace Hermes
               if(elementI > max_element_i)
                   throw Exceptions::MeshLoadFailureException("Wrong element number:%i in subdomain %u.", elementI, subdomains_i);
 
-              elements_existing[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i)] = elementI;
+              elements_existing[element_is[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i)]] = elementI;
             }
             for (int element_i = 0; element_i < element_count; element_i++)
             {
@@ -402,13 +402,13 @@ namespace Hermes
                 &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v2())->second],
                 &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v3())->second],
                 &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_q->v4())->second],
-                NULL, elements_existing[element_i]);
+                NULL, element_i);
               if(el_t != NULL)
                 e = meshes[subdomains_i]->create_triangle(meshes[subdomains_i]->element_markers_conversion.get_internal_marker(element->m()).marker,
                 &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_t->v1())->second],
                 &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_t->v2())->second],
                 &meshes[subdomains_i]->nodes[vertex_vertex_numbers.find(el_t->v3())->second],
-                NULL, elements_existing[element_i]);
+                NULL, element_i);
             }
 
             // Boundary Edge numbers //
