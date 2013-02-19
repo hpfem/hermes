@@ -15,6 +15,7 @@
 
 #include "mesh_function.h"
 #include "../views/linearizer_base.h"
+#include <limits>
 
 namespace Hermes
 {
