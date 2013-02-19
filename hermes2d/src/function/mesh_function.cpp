@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "mesh_function.h"
+#include "../views/linearizer_base.h"
 
 namespace Hermes
 {
@@ -78,6 +79,112 @@ namespace Hermes
     {
       this->free();
       init();
+    }
+
+    template<>
+    double MeshFunction<double>::get_approx_max_value(int item_)
+    {
+      this->check();
+
+      Quad2D *old_quad = this->get_quad_2d();
+      this->set_quad_2d(&Views::g_quad_lin);
+      
+      double max = std::numeric_limits<double>::min();
+
+      int component = 0;
+      int value_type = 0;
+      int item = item_;
+
+      if(item >= 0x40)
+      {
+        component = 1;
+        item >>= 6;
+      }
+      while (!(item & 1))
+      {
+        item >>= 1;
+        value_type++;
+      }
+
+      item = item_;
+
+      Element* e;
+      for_all_active_elements(e, this->mesh)
+      {
+        this->set_active_element(e);
+        this->set_quad_order(1, item);
+        double* val = this->get_values(component, value_type);
+        for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
+        {
+          double v = val[i];
+          if(v > max)
+            max = v;
+        }
+      }
+
+      this->set_quad_2d(old_quad);
+      return max;
+    }
+
+    template<>
+    std::complex<double> MeshFunction<std::complex<double> >::get_approx_max_value(int item_)
+    {
+      this->check();
+      return std::numeric_limits<std::complex<double> >::min();
+      this->warn("Asked for a max value of a complex function.");
+    }
+
+    template<>
+    double MeshFunction<double>::get_approx_min_value(int item_)
+    {
+      this->check();
+
+      Quad2D *old_quad = this->get_quad_2d();
+      this->set_quad_2d(&Views::g_quad_lin);
+      
+      double min = std::numeric_limits<double>::max();
+
+      int component = 0;
+      int value_type = 0;
+      int item = item_;
+
+      if(item >= 0x40)
+      {
+        component = 1;
+        item >>= 6;
+      }
+      while (!(item & 1))
+      {
+        item >>= 1;
+        value_type++;
+      }
+
+      item = item_;
+
+      Element* e;
+      for_all_active_elements(e, this->mesh)
+      {
+        this->set_active_element(e);
+        this->set_quad_order(1, item);
+        double* val = this->get_values(component, value_type);
+        for (int i = 0; i < (e->is_triangle() ? 3 : 4); i++)
+        {
+          double v = val[i];
+          if(v < min)
+            min = v;
+        }
+      }
+
+      this->set_quad_2d(old_quad);
+      return min;
+    }
+
+    template<>
+    std::complex<double> MeshFunction<std::complex<double> >::get_approx_min_value(int item_)
+    {
+      this->check();
+      return std::numeric_limits<std::complex<double> >::max();
+      this->warn("Asked for a min value of a complex function.");
     }
 
     template<typename Scalar>

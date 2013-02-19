@@ -44,45 +44,77 @@ namespace Hermes
     class HERMES_API MeshFunction : public Function<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
-
+      /// Empty constructor.
       MeshFunction();
+
+      /// Constructor.
       MeshFunction(const Mesh *mesh);
+      
+      /// Destructor.
       virtual ~MeshFunction();
 
-      /// State querying helpers.
-      virtual bool isOkay() const;
-      inline std::string getClassName() const { return "MeshFunction"; }
-
-      virtual void init();
-      virtual void reinit();
-
-      virtual void set_quad_2d(Quad2D* quad_2d);
-
-      virtual void set_active_element(Element* e);
-
+      /// Return the mesh.
       const Mesh* get_mesh() const;
+
+      /// Return the reference mapping.
       RefMap* get_refmap(bool update = true);
-      void set_refmap(RefMap* refmap_to_set);
 
-      virtual int get_edge_fn_order(int edge);
-
-      /// Returns the value at the coordinates x,y.
+      /// Return the value at the coordinates x,y.
       virtual Func<Scalar>* get_pt_value(double x, double y) = 0;
 
-      /// Virtual function handling overflows. Has to be virtual, because
-      /// the necessary iterators in the templated class do not work with GCC.
-      virtual void handle_overflow_idx();
-
-      /// See Transformable::push_transform.
-      virtual void push_transform(int son);
-
-      virtual void pop_transform();
-
+      /// Cloning function - for parallel OpenMP blocks.
+      /// Designed to return an identical clone of this instance.
       virtual MeshFunction<Scalar>* clone() const
       {
         throw Hermes::Exceptions::Exception("You need to implement MeshFunction::clone() to be able to use paralellization");
         return NULL;
       }
+
+      /// Return the approximate maximum value of this instance.
+      virtual Scalar get_approx_max_value(int item = H2D_FN_VAL_0);
+
+      /// Return the approximate minimum value of this instance.
+      virtual Scalar get_approx_min_value(int item = H2D_FN_VAL_0);
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+
+      /// Internal.
+      inline std::string getClassName() const { return "MeshFunction"; }
+
+      /// Internal.
+      virtual void init();
+
+      /// Internal.
+      virtual void reinit();
+
+      /// Set the quadrature rule.
+      /// Internal.
+      virtual void set_quad_2d(Quad2D* quad_2d);
+
+      /// Set the active element.
+      /// Internal.
+      virtual void set_active_element(Element* e);
+
+      /// Virtual function handling overflows. Has to be virtual, because
+      /// the necessary iterators in the templated class do not work with GCC.
+      /// Internal.
+      virtual void handle_overflow_idx();
+
+      /// See Transformable::push_transform.
+      /// Internal.
+      virtual void push_transform(int son);
+
+      /// See Transformable::pop_transform.
+      /// Internal.
+      virtual void pop_transform();
+
+      /// Set the reference mapping.
+      /// Internal.
+      void set_refmap(RefMap* refmap_to_set);
+
+      /// Returns the order of the edge number edge of the current active element.
+      virtual int get_edge_fn_order(int edge);
 
     protected:
       ElementMode2D mode;
