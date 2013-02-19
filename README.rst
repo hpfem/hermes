@@ -1,4 +1,4 @@
-Hermes 2D hp-FEM library, version 1.1
+Hermes 2D hp-FEM library, version 2.0
 =============================
 
 This is a basic README file with generic information relevant for both Hermes Common and Hermes2D.
@@ -6,7 +6,7 @@ This is a basic README file with generic information relevant for both Hermes Co
 Copyright
 =========
 
-Copyright (c) 2008-2012 hp-FEM group at the University of Nevada, Reno (UNR) and University of West Bohemia, Pilsen.
+Copyright (c) 2008-2013 hp-FEM group at the University of Nevada, Reno (UNR) and University of West Bohemia, Pilsen.
 Email: hermes2d@googlegroups.com, home page: http://hpfem.org/.
 
 License
