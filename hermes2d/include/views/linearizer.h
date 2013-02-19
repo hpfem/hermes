@@ -41,34 +41,45 @@ namespace Hermes
         Linearizer(bool auto_max = true);
         ~Linearizer();
 
+        /// Main method - processes the solution and stores the data obtained by the process.
+        /// \param[in] sln the solution
+        /// \param[in] item what item (function value, derivative wrt. x, ..) to use in the solution.
+        /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
         void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
-        /// Saves a MeshFunction (Solution, Filter) in VTK format.
+        /// Save a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char* quantity_name,
           bool mode_3D = true, int item = H2D_FN_VAL_0,
           double eps = HERMES_EPS_NORMAL);
 
+        /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
         void set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult = 1.0);
 
         void calc_vertices_aabb(double* min_x, double* max_x,
           double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
 
+        /// Get the number of vertices of this instance.
         int get_num_vertices();
+
+        /// Get the vertices of this instance.
         double3* get_vertices();
 
+        /// Get the contours (the isolines) of this instance.
         int3* get_contour_triangles();
+
+        /// Get the number of contours (the isolines) of this instance.
         int get_num_contour_triangles();
 
-        /// Sets the threshold for how fine the output for curved elements.
+        /// Set the threshold for how fine the output for curved elements.
         /// \param[in] curvature_epsilon The 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
         /// The smaller, the finer.
         /// Default value = 1e-3.
         void set_curvature_epsilon(double curvature_epsilon);
 
-        /// Gets the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
+        /// Get the 'curvature' epsilon determining the tolerance of catching the shape of curved elements.
         double get_curvature_epsilon();
 
-        /// Frees the instance.
+        /// Free the instance.
         void free();
 
       protected:
@@ -77,6 +88,7 @@ namespace Hermes
 
         /// Information if user-supplied displacement functions have been provided.
         bool user_xdisp, user_ydisp;
+
         /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
         MeshFunction<double> *xdisp, *ydisp;
         double dmult;
@@ -98,6 +110,12 @@ namespace Hermes
           double* val, double* phx, double* phy, int* indices, bool curved);
 
         void find_min_max();
+
+        /// Internal.
+        void push_transforms(MeshFunction<double>** fns, int transform);
+
+        /// Internal.
+        void pop_transforms(MeshFunction<double>** fns);
       };
     }
   }

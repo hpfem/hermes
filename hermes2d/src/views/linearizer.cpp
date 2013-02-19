@@ -152,8 +152,8 @@ namespace Hermes
               }
               if(this->ydisp != NULL)
               {
-                fns[2]->set_quad_order(1, H2D_FN_VAL);
-                dy = fns[2]->get_fn_values();
+                fns[this->xdisp == NULL ? 1 : 2]->set_quad_order(1, H2D_FN_VAL);
+                dy = fns[this->xdisp == NULL ? 1 : 2]->get_fn_values();
               }
               for (i = 0; i < lin_np_tri[1]; i++)
               {
@@ -162,7 +162,6 @@ namespace Hermes
                 if(this->ydisp != NULL)
                   phy[i] += dmult*dy[i];
               }
-
             }
           }
 
@@ -233,69 +232,21 @@ namespace Hermes
             int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], val[idx[2]]);
 
             // recur to sub-elements
-            fns[0]->push_transform(0);
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(0);
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(0);
+            this->push_transforms(fns, 0);
             process_triangle(fns, iv0, mid0, mid2,  level + 1, val, phx, phy, tri_indices[1], curved);
-            fns[0]->pop_transform();
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+            this->pop_transforms(fns);
 
-            fns[0]->push_transform(1);
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(1);
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(1);
+            this->push_transforms(fns, 1);
             process_triangle(fns, mid0, iv1, mid1,  level + 1, val, phx, phy, tri_indices[2], curved);
-            fns[0]->pop_transform();
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+            this->pop_transforms(fns);
 
-            fns[0]->push_transform(2);
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(2);
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(2);
+            this->push_transforms(fns, 2);
             process_triangle(fns, mid2, mid1, iv2,  level + 1, val, phx, phy, tri_indices[3], curved);
-            fns[0]->pop_transform();
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+            this->pop_transforms(fns);
 
-            fns[0]->push_transform(3);
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->push_transform(3);
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->push_transform(3);
+            this->push_transforms(fns, 3);
             process_triangle(fns, mid1, mid2, mid0, level + 1, val, phx, phy, tri_indices[4], curved);
-            fns[0]->pop_transform();
-            if(this->xdisp != NULL)
-              if(fns[1] != fns[0])
-                fns[1]->pop_transform();
-            if(this->ydisp != NULL)
-              if(fns[2] != fns[1])
-                fns[2]->pop_transform();
+            this->pop_transforms(fns);
             return;
           }
         }
@@ -312,6 +263,42 @@ namespace Hermes
       double Linearizer::get_curvature_epsilon()
       {
         return this->curvature_epsilon;
+      }
+
+      void Linearizer::push_transforms(MeshFunction<double>** fns, int transform)
+      {
+        fns[0]->push_transform(transform);
+        
+        if(this->xdisp != NULL)
+          if(fns[1] != fns[0]) 
+            fns[1]->push_transform(transform);
+        if(this->ydisp != NULL)
+        {
+          if(fns[this->xdisp == NULL ? 1 : 2] != fns[0])
+          {
+            if(this->xdisp != NULL && fns[2] == fns[1])
+              return;
+            fns[this->xdisp == NULL ? 1 : 2]->push_transform(transform);
+          }
+        }
+      }
+
+      void Linearizer::pop_transforms(MeshFunction<double>** fns)
+      {
+        fns[0]->pop_transform(); 
+
+        if(this->xdisp != NULL)
+          if(fns[1] != fns[0]) 
+            fns[1]->pop_transform();
+        if(this->ydisp != NULL)
+        {
+          if(fns[this->xdisp == NULL ? 1 : 2] != fns[0])
+          {
+            if(this->xdisp != NULL && fns[2] == fns[1])
+              return;
+            fns[this->xdisp == NULL ? 1 : 2]->pop_transform();
+          }
+        }
       }
 
       void Linearizer::process_quad(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int iv3, int level,
@@ -361,11 +348,11 @@ namespace Hermes
               if(this->xdisp != NULL)
                 fns[1]->set_quad_order(1, H2D_FN_VAL);
               if(this->ydisp != NULL)
-                fns[2]->set_quad_order(1, H2D_FN_VAL);
+                fns[this->xdisp == NULL ? 1 : 2]->set_quad_order(1, H2D_FN_VAL);
               if(this->xdisp != NULL)
                 dx = fns[1]->get_fn_values();
               if(this->ydisp != NULL)
-                dy = fns[2]->get_fn_values();
+                dy = fns[this->xdisp == NULL ? 1 : 2]->get_fn_values();
               for (i = 0; i < lin_np_quad[1]; i++)
               {
                 if(this->xdisp != NULL)
@@ -463,138 +450,42 @@ namespace Hermes
             // recur to sub-elements
             if(split == 3)
             {
-              fns[0]->push_transform(0);
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(0);
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(0);
+              this->push_transforms(fns, 0);
               process_quad(fns, iv0, mid0, mid4, mid3, level + 1, val, phx, phy, quad_indices[1], curved);
-              fns[0]->pop_transform();
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+              this->pop_transforms(fns);
 
-              fns[0]->push_transform(1);
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(1);
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(1);
+              this->push_transforms(fns, 1);
               process_quad(fns, mid0, iv1, mid1, mid4, level + 1, val, phx, phy, quad_indices[2], curved);
-              fns[0]->pop_transform();
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+              this->pop_transforms(fns);
 
-              fns[0]->push_transform(2);
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(2);
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(2);
+              this->push_transforms(fns, 2);
               process_quad(fns, mid4, mid1, iv2, mid2, level + 1, val, phx, phy, quad_indices[3], curved);
-              fns[0]->pop_transform();
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+              this->pop_transforms(fns);
 
-              fns[0]->push_transform(3);
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->push_transform(3);
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->push_transform(3);
+              this->push_transforms(fns, 3);
               process_quad(fns, mid3, mid4, mid2, iv3, level + 1, val, phx, phy, quad_indices[4], curved);
-              fns[0]->pop_transform();
-              if(this->xdisp != NULL)
-                if(fns[1] != fns[0])
-                  fns[1]->pop_transform();
-              if(this->ydisp != NULL)
-                if(fns[2] != fns[1])
-                  fns[2]->pop_transform();
+              this->pop_transforms(fns);
             }
             else
               if(split == 1) // h-split
               {
-                fns[0]->push_transform(4);
-                if(this->ydisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->push_transform(4);
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->push_transform(4);
+                this->push_transforms(fns, 4);
                 process_quad(fns, iv0, iv1, mid1, mid3, level + 1, val, phx, phy, quad_indices[5], curved);
-                fns[0]->pop_transform();
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->pop_transform();
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->pop_transform();
+                this->pop_transforms(fns);
 
-                fns[0]->push_transform(5);
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->push_transform(5);
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->push_transform(5);
+                this->push_transforms(fns, 5);
                 process_quad(fns, mid3, mid1, iv2, iv3, level + 1, val, phx, phy, quad_indices[6], curved);
-                fns[0]->pop_transform();
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->pop_transform();
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->pop_transform();
+                this->pop_transforms(fns);
               }
               else // v-split
               {
-                fns[0]->push_transform(6);
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->push_transform(6);
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->push_transform(6);
+                this->push_transforms(fns, 6);
                 process_quad(fns, iv0, mid0, mid2, iv3, level + 1, val, phx, phy, quad_indices[7], curved);
-                fns[0]->pop_transform();
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->pop_transform();
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->pop_transform();
+                this->pop_transforms(fns);
 
-                fns[0]->push_transform(7);
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->push_transform(7);
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->push_transform(7);
+                this->push_transforms(fns, 7);
                 process_quad(fns, mid0, iv1, iv2, mid2, level + 1, val, phx, phy, quad_indices[8], curved);
-                fns[0]->pop_transform();
-                if(this->xdisp != NULL)
-                  if(fns[1] != fns[0])
-                    fns[1]->pop_transform();
-                if(this->ydisp != NULL)
-                  if(fns[2] != fns[1])
-                    fns[2]->pop_transform();
+                this->pop_transforms(fns);
               }
               return;
           }
@@ -702,14 +593,12 @@ namespace Hermes
           if(xdisp != NULL)
           {
             fns[i][1] = xdisp->clone();
-            //fns[i][1]->set_refmap(new RefMap);
             fns[i][1]->set_quad_2d(&g_quad_lin);
           }
           if(ydisp != NULL)
           {
-            fns[i][2] = ydisp->clone();
-            //fns[i][2]->set_refmap(new RefMap);
-            fns[i][2]->set_quad_2d(&g_quad_lin);
+            fns[i][xdisp == NULL ? 1 : 2] = ydisp->clone();
+            fns[i][xdisp == NULL ? 1 : 2]->set_quad_2d(&g_quad_lin);
           }
         }
 
@@ -721,7 +610,7 @@ namespace Hermes
           if(xdisp != NULL)
             trfs[i][1] = fns[i][1];
           if(ydisp != NULL)
-            trfs[i][2] = fns[i][2];
+            trfs[i][xdisp == NULL ? 1 : 2] = fns[i][xdisp == NULL ? 1 : 2];
         }
 
         Traverse trav_masterMax(true);
@@ -811,20 +700,20 @@ namespace Hermes
               if(val == NULL)
               {
                 delete [] trav;
-                throw Hermes::Exceptions::Exception("Item not defined in the solution.");
+                throw Hermes::Exceptions::Exception("Item not defined in the solution in Linearizer::process_solution.");
               }
 
               if(xdisp != NULL)
                 fns[omp_get_thread_num()][1]->set_quad_order(0, H2D_FN_VAL);
               if(ydisp != NULL)
-                fns[omp_get_thread_num()][2]->set_quad_order(0, H2D_FN_VAL);
+                fns[omp_get_thread_num()][xdisp == NULL ? 1 : 2]->set_quad_order(0, H2D_FN_VAL);
 
               double *dx = NULL;
               double *dy = NULL;
               if(xdisp != NULL)
                 dx = fns[omp_get_thread_num()][1]->get_fn_values();
               if(ydisp != NULL)
-                dy = fns[omp_get_thread_num()][2]->get_fn_values();
+                dy = fns[omp_get_thread_num()][xdisp == NULL ? 1 : 2]->get_fn_values();
 
               int iv[H2D_MAX_NUMBER_VERTICES];
               for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)

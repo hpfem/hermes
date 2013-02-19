@@ -37,6 +37,8 @@ namespace Hermes
         verts = NULL;
         dashes = NULL;
         dashes_count = dashes_size = 0;
+        xdisp = NULL;
+        ydisp = NULL;
       }
 
       int Vectorizer::create_vertex(double x, double y, double xvalue, double yvalue)
@@ -85,6 +87,60 @@ namespace Hermes
         return i;
       }
 
+      void Vectorizer::set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
+      {
+        if(xdisp != NULL)
+        {
+          user_xdisp = true;
+          this->xdisp = xdisp;
+        }
+        if(ydisp != NULL)
+        {
+          user_ydisp = true;
+          this->ydisp = ydisp;
+        }
+        this->dmult = dmult;
+      }
+
+      void Vectorizer::push_transforms(MeshFunction<double>** fns, int transform)
+      {
+        fns[0]->push_transform(transform);
+        if(fns[1] != fns[0]) 
+          fns[1]->push_transform(transform);
+        if(this->xdisp != NULL)
+          if(fns[2] != fns[0])
+            fns[2]->push_transform(transform);
+
+        if(this->ydisp != NULL)
+        {
+          if(fns[this->xdisp == NULL ? 2 : 3] != fns[0] && fns[this->xdisp == NULL ? 2 : 3] != fns[1])
+          {
+            if(this->xdisp != NULL && fns[3] == fns[2])
+              return;
+            fns[this->xdisp == NULL ? 2 : 3]->push_transform(transform);
+          }
+        }
+      }
+
+      void Vectorizer::pop_transforms(MeshFunction<double>** fns)
+      {
+        fns[0]->pop_transform(); 
+        if(fns[1] != fns[0]) 
+          fns[1]->pop_transform();
+        if(this->xdisp != NULL)
+          if(fns[2] != fns[0])
+            fns[2]->pop_transform();
+        if(this->ydisp != NULL)
+        {
+          if(fns[this->xdisp == NULL ? 2 : 3] != fns[0] && fns[this->xdisp == NULL ? 2 : 3] != fns[1])
+          {
+            if(this->xdisp != NULL && fns[3] == fns[2])
+              return;
+            fns[this->xdisp == NULL ? 2 : 3]->pop_transform();
+          }
+        }
+      }
+
       void Vectorizer::process_triangle(MeshFunction<double>** fns, int iv0, int iv1, int iv2, int level,
         double* xval, double* yval, double* phx, double* phy, int* idx, bool curved)
       {
@@ -104,8 +160,8 @@ namespace Hermes
             {
               double m = (sqrt(sqr(xval[i]) + sqr(yval[i])));
 #pragma omp critical(max)
-                if(finite(m) && fabs(m) > max)
-                  max = fabs(m);
+              if(finite(m) && fabs(m) > max)
+                max = fabs(m);
             }
 
             idx = tri_indices[0];
@@ -115,6 +171,26 @@ namespace Hermes
               RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
               phy = refmap->get_phys_y(1);
+
+              double* dx = NULL;
+              double* dy = NULL;
+              if(this->xdisp != NULL)
+              {
+                fns[2]->set_quad_order(1, H2D_FN_VAL);
+                dx = fns[2]->get_fn_values();
+              }
+              if(this->ydisp != NULL)
+              {
+                fns[this->xdisp == NULL ? 2 : 3]->set_quad_order(1, H2D_FN_VAL);
+                dy = fns[this->xdisp == NULL ? 2 : 3]->get_fn_values();
+              }
+              for (i = 0; i < lin_np_tri[1]; i++)
+              {
+                if(this->xdisp != NULL)
+                  phx[i] += dmult*dx[i];
+                if(this->ydisp != NULL)
+                  phy[i] += dmult*dy[i];
+              }
             }
           }
 
@@ -178,21 +254,22 @@ namespace Hermes
               int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], xval[idx[2]], yval[idx[2]]);
 
               // recur to sub-elements
-              fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0);
+              this->push_transforms(fns, 0);
               process_triangle(fns, iv0, mid0, mid2,  level + 1, xval, yval, phx, phy, tri_indices[1], curved);
-              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+              this->pop_transforms(fns);
 
-              fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1);
+              this->push_transforms(fns, 1);
               process_triangle(fns, mid0, iv1, mid1,  level + 1, xval, yval, phx, phy, tri_indices[2], curved);
-              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+              this->pop_transforms(fns);
 
-              fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2);
+              this->push_transforms(fns, 2);
               process_triangle(fns, mid2, mid1, iv2,  level + 1, xval, yval, phx, phy, tri_indices[3], curved);
-              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+              this->pop_transforms(fns);
 
-              fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3);
+              this->push_transforms(fns, 3);
               process_triangle(fns, mid1, mid2, mid0, level + 1, xval, yval, phx, phy, tri_indices[4], curved);
-              fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+              this->pop_transforms(fns);
+
               return;
           }
         }
@@ -236,12 +313,31 @@ namespace Hermes
               max = 1E-10;
 
             idx = quad_indices[0];
-        
+
             if(curved)
             {
               RefMap* refmap = fns[0]->get_refmap();
               phx = refmap->get_phys_x(1);
               phy = refmap->get_phys_y(1);
+
+              double* dx = NULL;
+              double* dy = NULL;
+
+              if(this->xdisp != NULL)
+                fns[2]->set_quad_order(1, H2D_FN_VAL);
+              if(this->ydisp != NULL)
+                fns[this->xdisp == NULL ? 2 : 3]->set_quad_order(1, H2D_FN_VAL);
+              if(this->xdisp != NULL)
+                dx = fns[2]->get_fn_values();
+              if(this->ydisp != NULL)
+                dy = fns[this->xdisp == NULL ? 2 : 3]->get_fn_values();
+              for (i = 0; i < lin_np_quad[1]; i++)
+              {
+                if(this->xdisp != NULL)
+                  phx[i] += dmult*dx[i];
+                if(this->ydisp != NULL)
+                  phy[i] += dmult*dy[i];
+              }
             }
           }
 
@@ -281,7 +377,7 @@ namespace Hermes
               double cm2 = sqr(fns[0]->get_active_element()->get_diameter()*this->get_curvature_epsilon());
               if(sqr(phx[idx[1]] - midval[0][1]) + sqr(phy[idx[1]] - midval[1][1]) > cm2 ||
                 sqr(phx[idx[3]] - midval[0][3]) + sqr(phy[idx[3]] - midval[1][3]) > cm2) split = true;
-              
+
               if(sqr(phx[idx[0]] - midval[0][0]) + sqr(phy[idx[0]] - midval[1][0]) > cm2 ||
                 sqr(phx[idx[2]] - midval[0][2]) + sqr(phy[idx[2]] - midval[1][2]) > cm2) split = true;
             }
@@ -317,10 +413,21 @@ namespace Hermes
             int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
 
             // recur to sub-elements
-            fns[0]->push_transform(0); if(fns[1] != fns[0]) fns[1]->push_transform(0); process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1], curved);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
-            fns[0]->push_transform(1); if(fns[1] != fns[0]) fns[1]->push_transform(1); process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2], curved);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
-            fns[0]->push_transform(2); if(fns[1] != fns[0]) fns[1]->push_transform(2); process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3], curved);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
-            fns[0]->push_transform(3); if(fns[1] != fns[0]) fns[1]->push_transform(3); process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4], curved);  fns[0]->pop_transform(); if(fns[1] != fns[0]) fns[1]->pop_transform();
+            this->push_transforms(fns, 0);
+            process_quad(fns, iv0, mid0, mid4, mid3, level + 1, xval, yval, phx, phy, quad_indices[1], curved); 
+            this->pop_transforms(fns);
+
+            this->push_transforms(fns, 1);
+            process_quad(fns, mid0, iv1, mid1, mid4, level + 1, xval, yval, phx, phy, quad_indices[2], curved); 
+            this->pop_transforms(fns);
+
+            this->push_transforms(fns, 2);
+            process_quad(fns, mid4, mid1, iv2, mid2, level + 1, xval, yval, phx, phy, quad_indices[3], curved); 
+            this->pop_transforms(fns);
+
+            this->push_transforms(fns, 3);
+            process_quad(fns, mid3, mid4, mid2, iv3, level + 1, xval, yval, phx, phy, quad_indices[4], curved);
+            this->pop_transforms(fns);
             return;
           }
         }
@@ -409,11 +516,11 @@ namespace Hermes
 
         // reuse or allocate vertex, triangle and edge arrays
         verts = (double4*) malloc(sizeof(double4) * vertex_size);
-				this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
-				this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
-				this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
-				this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
-				this->dashes = (int2*) realloc(this->dashes, sizeof(int2) * dashes_size);
+        this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
+        this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
+        this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
+        this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
+        this->dashes = (int2*) realloc(this->dashes, sizeof(int2) * dashes_size);
         info = (int4*) malloc(sizeof(int4) * vertex_size);
         this->empty = false;
 
@@ -423,32 +530,55 @@ namespace Hermes
 
         // select the linearization quadrature
         Quad2D *old_quad_x, *old_quad_y;
+        Quad2D *old_quad_x_disp, *old_quad_y_disp;
         old_quad_x = xsln->get_quad_2d();
         old_quad_y = ysln->get_quad_2d();
+        if(xdisp != NULL)
+          old_quad_x_disp = xdisp->get_quad_2d();
+        if(ydisp != NULL)
+          old_quad_y_disp = ydisp->get_quad_2d();
 
         Hermes::vector<const Mesh*> meshes;
         meshes.push_back(xsln->get_mesh());
         meshes.push_back(ysln->get_mesh());
+        if(xdisp != NULL)
+          meshes.push_back(xdisp->get_mesh());
+        if(ydisp != NULL)
+          meshes.push_back(ydisp->get_mesh());
 
         // Parallelization
         MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-          fns[i] = new MeshFunction<double>*[2];
+          fns[i] = new MeshFunction<double>*[4];
           fns[i][0] = xsln->clone();
           fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
           fns[i][1] = ysln->clone();
           fns[i][1]->set_refmap(new RefMap);
           fns[i][1]->set_quad_2d(&g_quad_lin);
+          if(xdisp != NULL)
+          {
+            fns[i][2] = xdisp->clone();
+            fns[i][2]->set_quad_2d(&g_quad_lin);
+          }
+          if(ydisp != NULL)
+          {
+            fns[i][xdisp == NULL ? 2 : 3] = ydisp->clone();
+            fns[i][xdisp == NULL ? 2 : 3]->set_quad_2d(&g_quad_lin);
+          }
         }
 
         Transformable*** trfs = new Transformable**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-          trfs[i] = new Transformable*[2];
+          trfs[i] = new Transformable*[4];
           trfs[i][0] = fns[i][0];
           trfs[i][1] = fns[i][1];
+          if(xdisp != NULL)
+            trfs[i][2] = fns[i][2];
+          if(ydisp != NULL)
+            trfs[i][xdisp == NULL ? 2 : 3] = fns[i][xdisp == NULL ? 2 : 3];
         }
 
         // get the component and desired value from item.
@@ -492,7 +622,7 @@ namespace Hermes
         int state_i;
 
 #define CHUNKSIZE 1
-int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
+        int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(trav_masterMax) private(state_i) num_threads(num_threads_used)
         {
 #pragma omp for schedule(dynamic, CHUNKSIZE)
@@ -514,8 +644,8 @@ int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::nu
                 double fx = xval[i];
                 double fy = yval[i];
 #pragma omp critical(max)
-                  if(fabs(sqrt(fx*fx + fy*fy)) > max)
-                    max = fabs(sqrt(fx*fx + fy*fy));
+                if(fabs(sqrt(fx*fx + fy*fy)) > max)
+                  max = fabs(sqrt(fx*fx + fy*fy));
               }
             }
             catch(Hermes::Exceptions::Exception& e)
@@ -565,17 +695,38 @@ int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::nu
               fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
               double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
               double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
+              if(xval == NULL || yval == NULL)
+              {
+                delete [] trav;
+                throw Hermes::Exceptions::Exception("Item not defined in the solution in Linearizer::process_solution.");
+              }
 
-              double* x = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0);
-              double* y = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0);
+              if(xdisp != NULL)
+                fns[omp_get_thread_num()][2]->set_quad_order(0, H2D_FN_VAL);
+              if(ydisp != NULL)
+                fns[omp_get_thread_num()][xdisp == NULL ? 2 : 3]->set_quad_order(0, H2D_FN_VAL);
 
-              int iv[4];
+              double *dx = NULL;
+              double *dy = NULL;
+              if(xdisp != NULL)
+                dx = fns[omp_get_thread_num()][2]->get_fn_values();
+              if(ydisp != NULL)
+                dy = fns[omp_get_thread_num()][xdisp == NULL ? 2 : 3]->get_fn_values();
+
+              int iv[H2D_MAX_NUMBER_VERTICES];
               for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
               {
                 double fx = xval[i];
                 double fy = yval[i];
 
-                iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x[i], y[i], fx, fy);
+                double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
+                double y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
+                if(this->xdisp != NULL)
+                  x_disp += dmult * dx[i];
+                if(this->ydisp != NULL)
+                  y_disp += dmult * dy[i];
+
+                iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x_disp, y_disp, fx, fy);
               }
 
               // recur to sub-elements
@@ -604,7 +755,7 @@ int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::nu
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
           trav[i].finish();
-          for(unsigned int j = 0; j < 2; j++)
+          for(unsigned int j = 0; j < (2 + (xdisp != NULL? 1 : 0) + (ydisp != NULL ? 1 : 0)); j++)
             delete fns[i][j];
           delete [] fns[i];
           delete [] trfs[i];
@@ -636,6 +787,10 @@ int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::nu
         // select old quadratrues
         xsln->set_quad_2d(old_quad_x);
         ysln->set_quad_2d(old_quad_y);
+        if(xdisp != NULL)
+          xdisp->set_quad_2d(old_quad_x_disp);
+        if(ydisp != NULL)
+          ydisp->set_quad_2d(old_quad_y_disp);
 
         // clean up
         ::free(this->hash_table);

@@ -36,12 +36,27 @@ namespace Hermes
         Vectorizer();
         ~Vectorizer();
 
+        /// Main method - processes the solution and stores the data obtained by the process.
+        /// \param[in] xsln the first solution (in the x-direction)
+        /// \param[in] ysln the second solution (in the y-direction)
+        /// \param[in] xitem what item (function value, derivative wrt. x, ..) to use in the first solution.
+        /// \param[in] yitem what item (function value, derivative wrt. x, ..) to use in the second solution.
+        /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
         void process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
+        /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
+        void set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult = 1.0);
+
+        /// Get the number of vertices of this instance.
         int get_num_vertices();
+
+        /// Get the vertices of this instance.
         double4* get_vertices();
 
+        /// Get the dashes (the little arrows) of this instance.
         int2* get_dashes();
+
+        /// Get the number of dashes (the little arrows) of this instance.
         int get_num_dashes();
 
         void calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
@@ -61,6 +76,13 @@ namespace Hermes
       protected:
         /// The 'curvature' epsilon.
         double curvature_epsilon;
+
+        /// Information if user-supplied displacement functions have been provided.
+        bool user_xdisp, user_ydisp;
+        
+        /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
+        MeshFunction<double> *xdisp, *ydisp;
+        double dmult;
 
         int xitem, component_x, value_type_x;
         int yitem, component_y, value_type_y;
@@ -86,6 +108,12 @@ namespace Hermes
           double* xval, double* yval, double* phx, double* phy, int* indices, bool curved);
 
         void find_min_max();
+
+        /// Internal.
+        void push_transforms(MeshFunction<double>** fns, int transform);
+
+        /// Internal.
+        void pop_transforms(MeshFunction<double>** fns);
       };
     }
   }

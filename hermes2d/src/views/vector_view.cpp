@@ -65,22 +65,19 @@ namespace Hermes
         show(vsln, vsln, eps, H2D_FN_VAL_0, H2D_FN_VAL_1);
       }
 
-      void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps)
+      void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem, MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
       {
         if(vec == NULL)
           vec = new Vectorizer;
-        if(xsln == ysln)
-          this->warn("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
-        show(xsln, ysln, eps, H2D_FN_VAL_0, H2D_FN_VAL_0);
-      }
 
-      void VectorView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem)
-      {
-        if(vec == NULL)
-          vec = new Vectorizer;
+        if(xsln != NULL && ysln != NULL && xsln == ysln)
+          this->warn("Identical solutions passed to the two-argument version of show(). Most likely this is a mistake.");
+        
+        vec->set_displacement(xdisp, ydisp, dmult);
 
         vec->lock_data();
         vec->process_solution(xsln, ysln, xitem, yitem, eps);
+        
         if(range_auto) 
         { 
           range_min = vec->get_min_value();
