@@ -119,7 +119,7 @@ namespace Hermes
       /// NOTE: This function should be used for postprocessing only, it is not effective
       /// enough for calculations. Since it searches for an element sequentinally, it is extremelly
       /// slow. Prefer Solution::get_ref_value if possible.
-      virtual Func<Scalar>* get_pt_value(double x, double y);
+      virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL);
 
       /// Multiplies the function represented by this class by the given coefficient.
       void multiply(Scalar coef);

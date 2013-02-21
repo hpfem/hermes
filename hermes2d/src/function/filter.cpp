@@ -355,11 +355,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y)
+    Func<Scalar>* SimpleFilter<Scalar>::get_pt_value(double x, double y, Element* e)
     {
       Scalar val[H2D_MAX_COMPONENTS];
       for (int i = 0; i < this->num; i++)
-        val[i] = this->sln[i]->get_pt_value(x, y)->val[0];
+        val[i] = this->sln[i]->get_pt_value(x, y, e)->val[0];
 
       Func<Scalar>* toReturn = new Func<Scalar>(1, 1);
 
@@ -521,9 +521,9 @@ namespace Hermes
       this->cur_node = node;
     }
 
-    Func<double>* ComplexFilter::get_pt_value(double x, double y)
+    Func<double>* ComplexFilter::get_pt_value(double x, double y, Element* e)
     {
-      Func<std::complex<double> >* val = this->sln_complex->get_pt_value(x, y);
+      Func<std::complex<double> >* val = this->sln_complex->get_pt_value(x, y, e);
 
       Func<double>* toReturn = new Func<double>(1, this->num_components);
 
@@ -630,8 +630,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* DXDYFilter<Scalar>::get_pt_value(double x, double y)
+    Func<Scalar>* DXDYFilter<Scalar>::get_pt_value(double x, double y, Element* e)
     {
+      this->warn("DXDYFilter<Scalar>::get_pt_value not implemented.");
       return 0;
     }
 
@@ -1093,8 +1094,9 @@ namespace Hermes
       cur_node = node;
     }
 
-    Func<double>* VonMisesFilter::get_pt_value(double x, double y)
+    Func<double>* VonMisesFilter::get_pt_value(double x, double y, Element* e)
     {
+      this->warn("VonMisesFilter<Scalar>::get_pt_value not implemented.");
       return 0;
     }
 
@@ -1180,8 +1182,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* LinearFilter<Scalar>::get_pt_value(double x, double y)
+    Func<Scalar>* LinearFilter<Scalar>::get_pt_value(double x, double y, Element* e)
     {
+      this->warn("LinearFilter<Scalar>::get_pt_value not implemented.");
       return 0;
     }
 

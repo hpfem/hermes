@@ -119,7 +119,7 @@ namespace Hermes
 
       SimpleFilter(const Hermes::vector<Solution<Scalar>*>& solutions, const Hermes::vector<int>& items = Hermes::vector<int>());
 
-      virtual Func<Scalar>* get_pt_value(double x, double y);
+      virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL);
 
     protected:
       int item[H2D_MAX_COMPONENTS];
@@ -141,7 +141,7 @@ namespace Hermes
 
       virtual ~ComplexFilter();
     protected:
-      virtual Func<double>* get_pt_value(double x, double y);
+      virtual Func<double>* get_pt_value(double x, double y, Element* e = NULL);
 
       virtual void set_quad_2d(Quad2D* quad_2d);
 
@@ -182,7 +182,7 @@ namespace Hermes
     protected:
       void init(const Hermes::vector<MeshFunction<Scalar>*>& solutions);
 
-      virtual Func<Scalar>* get_pt_value(double x, double y);
+      virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL);
 
       virtual void filter_fn (int n, Hermes::vector<Scalar *> values, Hermes::vector<Scalar *> dx, Hermes::vector<Scalar *> dy, Scalar* rslt, Scalar* rslt_dx, Scalar* rslt_dy) = 0;
 
@@ -399,7 +399,7 @@ namespace Hermes
       VonMisesFilter(MeshFunction<double>** solutions, int num, double lambda, double mu,
         int cyl = 0, int item1 = H2D_FN_VAL, int item2 = H2D_FN_VAL);
 
-      virtual Func<double>* get_pt_value(double x, double y);
+      virtual Func<double>* get_pt_value(double x, double y, Element* e = NULL);
 
       virtual MeshFunction<double>* clone() const;
       virtual ~VonMisesFilter();
@@ -424,7 +424,7 @@ namespace Hermes
 
       LinearFilter(MeshFunction<Scalar>* older, MeshFunction<Scalar>* old, double tau_frac = 1);
 
-      virtual Func<Scalar>* get_pt_value(double x, double y);
+      virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL);
       virtual MeshFunction<Scalar>* clone() const;
       virtual ~LinearFilter();
 

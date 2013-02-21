@@ -1624,7 +1624,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* Solution<Scalar>::get_pt_value(double x, double y)
+    Func<Scalar>* Solution<Scalar>::get_pt_value(double x, double y, Element* e)
     {
       double xi1, xi2;
 
@@ -1673,7 +1673,11 @@ namespace Hermes
       }
       else // HERMES_SLN
       {
-        Element* e = RefMap::element_on_physical_coordinates(this->mesh, x, y, &xi1, &xi2);
+        if(e == NULL)
+          e = RefMap::element_on_physical_coordinates(this->mesh, x, y, &xi1, &xi2);
+        else
+          RefMap::untransform(e, x, y, xi1, xi2);
+
         if(e != NULL)
         {
           if(this->num_components == 1)
