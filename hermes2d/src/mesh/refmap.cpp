@@ -750,7 +750,7 @@ namespace Hermes
         double cross_product_2 = (x - e->vn[2]->x) * vector[2][1] - (y - e->vn[2]->y) * vector[2][0];
         if(is_triangle)
         {
-          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0))
+          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && (cross_product_1 * cross_product_2 >= 0))
           {
             if(!is_curved)
             {
@@ -778,7 +778,9 @@ namespace Hermes
         else
         {
           double cross_product_3 = (x - e->vn[3]->x) * vector[3][1] - (y - e->vn[3]->y) * vector[3][0];
-          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && (cross_product_0 * cross_product_3 >= 0))
+          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && 
+              (cross_product_1 * cross_product_2 >= 0) && (cross_product_1 * cross_product_3 >= 0) &&
+              (cross_product_2 * cross_product_3 >= 0) && (cross_product_0 * cross_product_3 >= 0))
           {
             if(!is_curved)
             {
