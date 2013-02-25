@@ -1171,7 +1171,7 @@ namespace Hermes
             assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform);
 
             if(DG_matrix_forms_present || DG_vector_forms_present)
-              assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn);
+              assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
           }
           catch(Hermes::Exceptions::Exception& e)
           {
@@ -1544,15 +1544,20 @@ namespace Hermes
 
       // Get necessary (volumetric) assembly lists.
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+      {
         if(current_state->e[space_i] != NULL)
         {
           rep_space_i = space_i;
           current_refmaps[space_i]->set_active_element(current_state->e[space_i]);
           spaces[space_i]->get_element_assembly_list(current_state->e[space_i], current_als[space_i], spaces_first_dofs[space_i]);
         }
+      }
 
         if(rep_space_i == -1)
           return;
+
+        // Element-wise parameters for WeakForm.
+        (const_cast<WeakForm<Scalar>*>(current_wf))->set_active_state(current_state->e);
 
         // Do we have to recalculate the data for this state even if the cache contains the data?
         bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
@@ -1701,11 +1706,13 @@ namespace Hermes
 
         // Cleanup - ext
         for(int ext_i = 0; ext_i < current_extCount; ext_i++)
+        {
           if(current_wf->ext[ext_i] != NULL)
           {
             ext[ext_i]->free_fn();
             delete ext[ext_i];
           }
+        }
           delete [] ext;
 
           // Assemble surface integrals now: loop through surfaces of the element.
@@ -1715,6 +1722,9 @@ namespace Hermes
             {
               if(!current_state->bnd[current_state->isurf])
                 continue;
+
+              // Edge-wise parameters for WeakForm.
+              (const_cast<WeakForm<Scalar>*>(current_wf))->set_active_edge_state(current_state->e, current_state->isurf);
 
               // Ext functions.
               // - order
@@ -2228,7 +2238,7 @@ namespace Hermes
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
-      Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn)
+      Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn, WeakForm<Scalar>* current_wf)
     {
       // Determine the minimum mesh seq.
       unsigned int min_dg_mesh_seq = 0;
@@ -2393,6 +2403,9 @@ namespace Hermes
         {
           if(!DG_vector_forms_present && processed[current_state->isurf][neighbor_i])
             continue;
+
+          // DG-inner-edge-wise parameters for WeakForm.
+          (const_cast<WeakForm<Scalar>*>(current_wf))->set_active_DG_state(current_state->e, current_state->isurf);
 
           assemble_DG_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als,
             current_state, current_mfDG, current_vfDG, fn,
