@@ -72,6 +72,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void WeakForm<Scalar>::set_active_state(Element** e)
+    {
+      // Nothing here, supposed to be overriden if necessary.
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::set_active_edge_state(Element** e, int isurf)
+    {
+      // Nothing here, supposed to be overriden if necessary.
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::set_active_DG_state(Element** e, int isurf)
+    {
+      // Nothing here, supposed to be overriden if necessary.
+    }
+
+    template<typename Scalar>
     void WeakForm<Scalar>::cloneMembers(const WeakForm<Scalar>* otherWf)
     {
       this->mfvol.clear();
@@ -229,7 +247,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j) :
-      Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j), previous_iteration_space_index(-1)
+    Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j), previous_iteration_space_index(-1)
     {
     }
 
@@ -256,7 +274,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormVol<Scalar>::MatrixFormVol(unsigned int i, unsigned int j) :
-      MatrixForm<Scalar>(i, j)
+    MatrixForm<Scalar>(i, j)
     {
     }
 
@@ -286,7 +304,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormSurf<Scalar>::MatrixFormSurf(unsigned int i, unsigned int j) :
-      MatrixForm<Scalar>(i, j)
+    MatrixForm<Scalar>(i, j)
     {
     }
 
@@ -304,7 +322,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormDG<Scalar>::MatrixFormDG(unsigned int i, unsigned int j) :
-      MatrixForm<Scalar>(i, j)
+    MatrixForm<Scalar>(i, j)
     {
       this->set_area(H2D_DG_INNER_EDGE);
     }
@@ -323,7 +341,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorForm<Scalar>::VectorForm(unsigned int i) :
-      Form<Scalar>(), i(i)
+    Form<Scalar>(), i(i)
     {
     }
 
@@ -334,7 +352,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorFormVol<Scalar>::VectorFormVol(unsigned int i) :
-      VectorForm<Scalar>(i)
+    VectorForm<Scalar>(i)
     {
     }
 
@@ -368,7 +386,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorFormSurf<Scalar>::VectorFormSurf(unsigned int i) :
-      VectorForm<Scalar>(i)
+    VectorForm<Scalar>(i)
     {
     }
 
@@ -386,7 +404,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorFormDG<Scalar>::VectorFormDG(unsigned int i) :
-      VectorForm<Scalar>(i)
+    VectorForm<Scalar>(i)
     {
       this->set_area(H2D_DG_INNER_EDGE);
     }

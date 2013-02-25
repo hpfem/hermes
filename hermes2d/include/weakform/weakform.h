@@ -83,7 +83,7 @@ namespace Hermes
       WeakForm(unsigned int neq = 1, bool mat_free = false);
 
       /// Destructor.
-      ~WeakForm();
+      virtual ~WeakForm();
 
       /// Adds volumetric matrix form.
       void add_matrix_form(MatrixFormVol<Scalar>* mfv);
@@ -103,6 +103,24 @@ namespace Hermes
       /// Adds DG vector form.
       void add_vector_form_DG(VectorFormDG<Scalar>* vfDG);
 
+      /// Provides possibility of setup element-wise parameters.
+      /// For parameters that only depend on element and that do
+      /// not have to be calculated for every form.
+      /// This is rarely used and typically only for multi-physical tasks where there is a multitude of forms.
+      virtual void set_active_state(Element** e);
+
+      /// Provides possibility of setup edge-wise parameters.
+      /// For parameters that only depend on element and edge and that do
+      /// not have to be calculated for every form.
+      /// This is rarely used and typically only for multi-physical tasks where there is a multitude of forms.
+      virtual void set_active_edge_state(Element** e, int isurf);
+
+      /// Provides possibility of setup edge-wise parameters.
+      /// For parameters that only depend on element and inner edge and that do
+      /// not have to be calculated for every form.
+      /// This is rarely used and typically only for multi-physical tasks where there is a multitude of forms.
+      virtual void set_active_DG_state(Element** e, int isurf);
+
       /// Returns the number of equations.
       unsigned int get_neq() const { return neq; }
 
@@ -112,7 +130,7 @@ namespace Hermes
       /// For time-dependent right-hand side functions.
       /// Sets current time.
       void set_current_time(double time);
-      
+
       /// For time-dependent right-hand side functions.
       /// Sets current time step.
       void set_current_time_step(double time_step);
@@ -120,7 +138,7 @@ namespace Hermes
       /// For time-dependent right-hand side functions.
       /// Gets current time.
       virtual double get_current_time() const;
-      
+
       /// For time-dependent right-hand side functions.
       /// Gets current time step.
       virtual double get_current_time_step() const;
@@ -128,11 +146,11 @@ namespace Hermes
       /// External functions.
       /// Set one external function.
       void set_ext(MeshFunction<Scalar>* ext);
-      
+
       /// External functions.
       /// Set more external functions.
       void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
-      
+
       /// External functions.
       /// Get external functions.
       Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
@@ -195,9 +213,10 @@ namespace Hermes
       bool warned_nonOverride;
 
       // internal.
+      virtual void cloneMembers(const WeakForm<Scalar>* otherWf);
+
     private:
       void free_ext();
-      void cloneMembers(const WeakForm<Scalar>* otherWf);
     };
 
     /// \brief Abstract, base class for any form - i.e. integral in the weak formulation of (a system of) PDE<br>
@@ -287,7 +306,7 @@ namespace Hermes
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
-    
+
     protected:
       friend class DiscreteProblem<Scalar>;
     };
