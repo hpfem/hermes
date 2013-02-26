@@ -340,7 +340,7 @@ namespace Hermes
       if(this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces_size);
 
-      int originalSize = this->spaces_size;
+      int originalSize = this->spaces.size();
 
       this->spaces = spacesToSet;
 
@@ -2531,15 +2531,15 @@ namespace Hermes
           // Choose the correct shapeset for the test function.
           if(!ext_asmlist[i]->has_support_on_neighbor(func_i))
           {
-            current_spss[i]->set_active_shape(ext_asmlist[i]->central_al->idx[func_i]);
-            PrecalcShapeset* func = current_spss[i];
+            current_pss[i]->set_active_shape(ext_asmlist[i]->central_al->idx[func_i]);
+            PrecalcShapeset* func = current_pss[i];
             RefMap* refmap = current_refmaps[i];
             testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, nbs[i]->get_quad_eo(false)), false, nbs[i]->neighbor_edge.orientation);
           }
           else
           {
-            nspss[i]->set_active_shape(ext_asmlist[i]->neighbor_al->idx[func_i - ext_asmlist[i]->central_al->cnt]);
-            PrecalcShapeset* func = nspss[i];
+            npss[i]->set_active_shape(ext_asmlist[i]->neighbor_al->idx[func_i - ext_asmlist[i]->central_al->cnt]);
+            PrecalcShapeset* func = npss[i];
             RefMap* refmap = nrefmap[i];
             testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, nbs[i]->get_quad_eo(true)), true, nbs[i]->neighbor_edge.orientation);
           }
@@ -2582,8 +2582,8 @@ namespace Hermes
 
           // Precalc shapeset and refmaps used for the evaluation.
           bool support_neigh_u, support_neigh_v;
-          typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = ext_asmlist[m];
-          typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = ext_asmlist[n];
+          typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_u = ext_asmlist[n];
+          typename NeighborSearch<Scalar>::ExtendedShapeset* ext_asmlist_v = ext_asmlist[m];
 
           Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(ext_asmlist_u->cnt, ext_asmlist_v->cnt));
           for (int i = 0; i < ext_asmlist_v->cnt; i++)
