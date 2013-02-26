@@ -32,7 +32,7 @@ namespace Hermes
     Filter<Scalar>::Filter(MeshFunction<Scalar>** solutions, int num) : MeshFunction<Scalar>()
     {
       this->num = num;
-      if(num > 10)
+      if(num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions[i];
@@ -43,7 +43,7 @@ namespace Hermes
     Filter<Scalar>::Filter(const Hermes::vector<MeshFunction<Scalar>*>& solutions) : MeshFunction<Scalar>()
     {
       this->num = solutions.size();
-      if(num > 10)
+      if(num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions.at(i);
@@ -54,7 +54,7 @@ namespace Hermes
     Filter<Scalar>::Filter(const Hermes::vector<Solution<Scalar>*>& solutions) : MeshFunction<Scalar>()
     {
       this->num = solutions.size();
-      if(num > 10)
+      if(num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions.at(i);
@@ -65,7 +65,7 @@ namespace Hermes
     void Filter<Scalar>::init(const Hermes::vector<MeshFunction<Scalar>*>& solutions)
     {
       this->num = solutions.size();
-      if(num > 10)
+      if(num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       for(int i = 0; i < this->num; i++)
         this->sln[i] = solutions.at(i);
@@ -179,7 +179,7 @@ namespace Hermes
     template<typename Scalar>
     void Filter<Scalar>::free()
     {
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
       {
         for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
         {
@@ -249,7 +249,7 @@ namespace Hermes
     SimpleFilter<Scalar>::SimpleFilter(const Hermes::vector<MeshFunction<Scalar>*>& solutions, const Hermes::vector<int>& items)
     {
       this->num = solutions.size();
-      if(this->num > 10)
+      if(this->num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       if(items.size() != (unsigned) this->num)
         if(items.size() > 0)
@@ -273,7 +273,7 @@ namespace Hermes
     SimpleFilter<Scalar>::SimpleFilter(const Hermes::vector<Solution<Scalar>*>& solutions, const Hermes::vector<int>& items)
     {
       this->num = solutions.size();
-      if(this->num > 10)
+      if(this->num > H2D_MAX_COMPONENTS)
         throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
       if(items.size() != (unsigned) this->num)
         if(items.size() > 0)
@@ -434,7 +434,7 @@ namespace Hermes
 
     void ComplexFilter::free()
     {
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
       {
 #ifdef _MSC_VER // For Visual Studio compiler the latter does not compile.
         for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
