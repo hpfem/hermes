@@ -32,8 +32,8 @@ namespace Hermes
 
         //clear matrix cache
         for(int m = 0; m < H2D_NUM_MODES; m++)
-          for(int i = 0; i < H2DRS_MAX_ORDER + 1; i++)
-            for(int k = 0; k < H2DRS_MAX_ORDER + 1; k++)
+          for(int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
+            for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
               proj_matrix_cache[m][i][k] = NULL;
 
         //allocate caches
@@ -50,8 +50,8 @@ namespace Hermes
         //delete matrix cache
         for(int m = 0; m < H2D_NUM_MODES; m++)
         {
-          for(int i = 0; i < H2DRS_MAX_ORDER + 1; i++)
-            for(int k = 0; k < H2DRS_MAX_ORDER + 1; k++)
+          for(int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
+            for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
             {
               if(proj_matrix_cache[m][i][k] != NULL)
                 delete [] proj_matrix_cache[m][i][k];

@@ -62,7 +62,8 @@ namespace Hermes
   namespace Hermes2D
   {
 #define H2DRS_DEFAULT_ORDER -1 ///< A default order. Used to indicate an unkonwn order or a maximum support order.  \ingroup g_selectors
-#define H2DRS_MAX_ORDER 9 ///< A maximum order suported by refinement selectors. \ingroup g_selectors
+#define H2DRS_MAX_ORDER 10 ///< A maximum order suported by refinement selectors. \ingroup g_selectors
+#define H2D_NUM_SHAPES_SIZE 12 ///< A maximum order suported by refinement selectors. \ingroup g_selectors
 
     /// Namespace which encapsulates all refinement selectors. \ingroup g_selectors
     namespace RefinementSelectors {
