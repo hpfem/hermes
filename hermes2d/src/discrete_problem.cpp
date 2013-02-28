@@ -1132,11 +1132,28 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
         {
+          if(this->caughtException != NULL)
+            continue;
           try
           {
             Traverse::State current_state;
 #pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+            {
+              try
+              {
+                current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+              }
+              catch(Hermes::Exceptions::Exception& e)
+              {
+                if(this->caughtException == NULL)
+                  this->caughtException = e.clone();
+              }
+              catch(std::exception& e)
+              {
+                if(this->caughtException == NULL)
+                  this->caughtException = new Hermes::Exceptions::Exception(e.what());
+              }
+            }
 
             current_pss = pss[omp_get_thread_num()];
             current_spss = spss[omp_get_thread_num()];
@@ -1306,24 +1323,39 @@ namespace Hermes
         // No sub_idx map for this element.
 #pragma omp critical (cache_records_sub_idx_map)
         {
-          if(this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] == NULL)
+          try
           {
-            this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
-            new_cache = true;
-          }
-          else
-          {
-            // If the sub_idx map exists AND contains a record for this sub_idx, we need to delete the record.
-            typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->find(current_state->sub_idx[space_i]);
-            if(it != this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->end())
-              (*it).second->clear();
-            else new_cache = true;
-          }
+            if(this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] == NULL)
+            {
+              this->cache_records_sub_idx[space_i][current_state->e[space_i]->id] = new std::map<uint64_t, CacheRecordPerSubIdx*>;
+              new_cache = true;
+            }
+            else
+            {
+              // If the sub_idx map exists AND contains a record for this sub_idx, we need to delete the record.
+              typename std::map<uint64_t, CacheRecordPerSubIdx*>::iterator it = this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->find(current_state->sub_idx[space_i]);
+              if(it != this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->end())
+                (*it).second->clear();
+              else new_cache = true;
+            }
 
-          // Insert the new record.
-          if(new_cache)
-            this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[space_i], new CacheRecordPerSubIdx));
+            // Insert the new record.
+            if(new_cache)
+              this->cache_records_sub_idx[space_i][current_state->e[space_i]->id]->insert(std::pair<uint64_t, CacheRecordPerSubIdx*>(current_state->sub_idx[space_i], new CacheRecordPerSubIdx));
+          }
+          catch(Hermes::Exceptions::Exception& e)
+          {
+            if(this->caughtException == NULL)
+              this->caughtException = e.clone();
+          }
+          catch(std::exception& e)
+          {
+            if(this->caughtException == NULL)
+              this->caughtException = new Hermes::Exceptions::Exception(e.what());
+          }
         }
+        if(this->caughtException != NULL)
+          return;
       }
 
       // Order calculation.
@@ -1546,6 +1578,9 @@ namespace Hermes
 
         if(changedInLastAdaptation)
           this->calculate_cache_records(current_pss, current_spss, current_refmaps, current_u_ext, current_als, current_state, current_alsSurface, current_wf);
+
+        if(this->caughtException != NULL)
+          return;
 
         // Store the cache entries.
         for(int temp_i = 0; temp_i < this->spaces.size(); temp_i++)
@@ -2165,19 +2200,19 @@ namespace Hermes
       if(oext != NULL)
       {
         if(form->ext.size() > 0)
-		      for (int i = 0; i < form->ext.size(); i++)
-		      {
-			      oext[i]->free_ord();
-			      delete oext[i];
-		      }
-	      else
-		      for (int i = 0; i < form->wf->ext.size(); i++)
-		      {
-			      oext[i]->free_ord();
-			      delete oext[i];
-		      }
+          for (int i = 0; i < form->ext.size(); i++)
+          {
+            oext[i]->free_ord();
+            delete oext[i];
+          }
+        else
+          for (int i = 0; i < form->wf->ext.size(); i++)
+          {
+            oext[i]->free_ord();
+            delete oext[i];
+          }
 
-        delete [] oext;
+          delete [] oext;
       }
     }
 

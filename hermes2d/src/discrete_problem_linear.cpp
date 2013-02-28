@@ -155,12 +155,30 @@ namespace Hermes
 #pragma omp for schedule(dynamic, CHUNKSIZE)
         for(state_i = 0; state_i < num_states; state_i++)
         {
+          if(this->caughtException != NULL)
+            continue;
+
           try
           {
             Traverse::State current_state;
 
 #pragma omp critical (get_next_state)
-            current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+            {
+              try
+              {
+                current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+              }
+              catch(Hermes::Exceptions::Exception& e)
+              {
+                if(this->caughtException == NULL)
+                  this->caughtException = e.clone();
+              }
+              catch(std::exception& e)
+              {
+                if(this->caughtException == NULL)
+                  this->caughtException = new Hermes::Exceptions::Exception(e.what());
+              }
+            }
 
             current_pss = pss[omp_get_thread_num()];
             current_spss = spss[omp_get_thread_num()];
@@ -173,7 +191,7 @@ namespace Hermes
             // This is then the same element of the virtual union mesh.
             // The proper sub-element mappings to all the functions of
             // this stage is supplied by the function Traverse::get_next_state()
-            // called in the while loop.
+            // called in the while loop. 
             this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
