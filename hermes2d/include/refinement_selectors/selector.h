@@ -77,31 +77,30 @@ namespace Hermes
       {
       public:
         virtual ~Selector() {};
+        /// Cloning for paralelism.
+        virtual Selector<Scalar>* clone() = 0;
+          /// Selects a refinement.
+          /** This methods has to be implemented.
+          *  \param[in] element An element which is being refined.
+          *  \param[in] quad_order An encoded order of the element.
+          *  \param[in] rsln A reference solution which is used to select a refinement.
+          *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
+          *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
+          virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) = 0;
+          /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
+          /** \param[in] element An element which is about the be refined.
+          *  \param[in] orig_quad_order An encoded order of the element.
+          *  \param[in] refinement A refinement of the element in the mesh. Possible values are defined by the enum RefinementType.
+          *  \param[out] tgt_quad_orders Generated encoded orders.
+          *  \param[in] suggested_quad_orders Suggested encoded orders. If not NULL, the method should copy them to the output. If NULL, the method have to calculate orders. */
+          virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) = 0;
+
       protected:
         const int max_order; ///< A maximum allowed order.
         /// Constructor
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
         Selector(int max_order = H2DRS_DEFAULT_ORDER) : max_order(max_order), isAClone(false) {};
 
-        /// Cloning for paralelism.
-        virtual Selector<Scalar>* clone() = 0;
-
-        /// Selects a refinement.
-        /** This methods has to be implemented.
-        *  \param[in] element An element which is being refined.
-        *  \param[in] quad_order An encoded order of the element.
-        *  \param[in] rsln A reference solution which is used to select a refinement.
-        *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
-        *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
-        virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) = 0;
-
-        /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
-        /** \param[in] element An element which is about the be refined.
-        *  \param[in] orig_quad_order An encoded order of the element.
-        *  \param[in] refinement A refinement of the element in the mesh. Possible values are defined by the enum RefinementType.
-        *  \param[out] tgt_quad_orders Generated encoded orders.
-        *  \param[in] suggested_quad_orders Suggested encoded orders. If not NULL, the method should copy them to the output. If NULL, the method have to calculate orders. */
-        virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) = 0;
 
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;

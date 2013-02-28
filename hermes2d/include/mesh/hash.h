@@ -47,6 +47,9 @@ namespace Hermes
       /// Returns the maximum node id number plus one.
       int get_max_node_id() const;
 
+      static const int H2D_DEFAULT_HASH_SIZE = 0x8000; // 32K entries
+
+
     protected:
       HashTable();
       virtual ~HashTable();
@@ -69,8 +72,6 @@ namespace Hermes
       /// numbers of its parents. If the edge node does not exist, it is
       /// created first.
       Node* get_edge_node(int p1, int p2);
-
-      static const int H2D_DEFAULT_HASH_SIZE = 0x8000; // 32K entries
 
       Array<Node> nodes; ///< Array storing all nodes
 
