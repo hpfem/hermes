@@ -89,16 +89,10 @@ namespace Hermes
 
       void Vectorizer::set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
       {
-        if(xdisp != NULL)
-        {
-          user_xdisp = true;
-          this->xdisp = xdisp;
-        }
-        if(ydisp != NULL)
-        {
-          user_ydisp = true;
-          this->ydisp = ydisp;
-        }
+        this->xdisp = xdisp;
+        user_xdisp = (xdisp != NULL);
+        this->ydisp = ydisp;
+        user_ydisp = (ydisp != NULL);
         this->dmult = dmult;
       }
 
