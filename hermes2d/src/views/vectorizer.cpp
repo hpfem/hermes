@@ -41,18 +41,6 @@ namespace Hermes
         ydisp = NULL;
       }
 
-      int Vectorizer::create_vertex(double x, double y, double xvalue, double yvalue)
-      {
-        int i;
-#pragma omp critical(realloc_vertices)
-        i = add_vertex();
-        verts[i][0] = x;
-        verts[i][1] = y;
-        verts[i][2] = xvalue;
-        verts[i][3] = yvalue;
-        return i;
-      }
-
       int Vectorizer::get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue)
       {
         // search for an existing vertex

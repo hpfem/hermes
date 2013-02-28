@@ -83,10 +83,10 @@ namespace Hermes
         void lock_data() const;
         void unlock_data() const;
 
-				int3* get_triangles();
+        int3* get_triangles();
         int* get_triangle_markers();
         int get_num_triangles();
-				int2* get_edges();
+        int2* get_edges();
         int* get_edge_markers();
         int get_num_edges();
 
@@ -111,9 +111,9 @@ namespace Hermes
 
         bool auto_max;
 
-				int3* tris;      ///< triangles: vertex index triplets
+        int3* tris;      ///< triangles: vertex index triplets
         int* tri_markers;///< triangle_markers: triangle markers, ordering equal to tris
-				int2* edges;     ///< edges: pairs of vertex indices
+        int2* edges;     ///< edges: pairs of vertex indices
         int* edge_markers;     ///< edge_markers: edge markers, ordering equal to edges
         int* hash_table; ///< hash table
         int4 * info; ///< info[0] = p1, info[1] = p2, info[2] = next vertex in hash

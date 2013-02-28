@@ -94,7 +94,6 @@ namespace Hermes
         int dashes_size; ///< Size of arrays of vertices, triangles and edges, dashes
 
         int get_vertex(int p1, int p2, double x, double y, double xvalue, double yvalue);
-        int create_vertex(double x, double y, double xvalue, double yvalue);
         void process_dash(int iv1, int iv2);
 
         int add_vertex();
