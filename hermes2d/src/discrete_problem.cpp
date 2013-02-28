@@ -2513,7 +2513,7 @@ namespace Hermes
       // Create the extended shapeset on the union of the central element and its current neighbor.
       int order = 20;
       int order_base = 20;
-      for (unsigned int i = 0; i < spaces.size(); i++)
+      for (unsigned int i = 0; i < this->spaces_size; i++)
       {
         nbs[i] = neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq);
         ext_asmlist[i] = nbs[i]->create_extended_asmlist(spaces[i], current_als[i]);
