@@ -2525,7 +2525,7 @@ namespace Hermes
         testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
         for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
         {
-          if(ext_asmlist[i]->dof[i] < 0)
+          if(ext_asmlist[i]->dof[func_i] < 0)
             continue;
 
           // Choose the correct shapeset for the test function.
