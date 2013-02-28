@@ -176,4 +176,18 @@ namespace Hermes
     }
   }
 }
+#else
+#include "base_view.h"
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    namespace Views
+    {
+      template class HERMES_API BaseView<double>;
+      template class HERMES_API BaseView<std::complex<double> >;
+    }
+  }
+}
 #endif // NOGLUT
+

@@ -161,4 +161,19 @@ namespace Hermes
     }
   }
 }
+#else
+
+#include "vector_base_view.h"
+
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    namespace Views
+    {
+      template class HERMES_API VectorBaseView<double>;
+      template class HERMES_API VectorBaseView<std::complex<double> >;
+    }
+  }
+}
 #endif

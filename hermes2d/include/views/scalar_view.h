@@ -217,9 +217,7 @@ class HERMES_API ScalarView : public View
       {
       public:
 				void init() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-#ifndef _MSC_VER
         ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-#endif
         ScalarView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
