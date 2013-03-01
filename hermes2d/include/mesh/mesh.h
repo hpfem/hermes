@@ -167,6 +167,9 @@ namespace Hermes
       /// Serves for saving the once calculated area of this element.
       double area;
 
+      bool center_set;
+      double x_center, y_center;
+
       /// Serves for saving the once calculated diameter of this element.
       bool diameterCalculated;
       /// Serves for saving the once calculated diameter of this element.

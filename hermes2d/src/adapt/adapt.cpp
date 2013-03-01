@@ -340,7 +340,7 @@ namespace Hermes
       int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 #pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine) num_threads(num_threads_used)
       {
-#pragma omp for schedule(dynamic, CHUNKSIZE)
+#pragma omp for schedule(static, CHUNKSIZE)
         for(id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
         {
           try

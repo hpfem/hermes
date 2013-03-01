@@ -94,7 +94,7 @@ namespace Hermes
       this->diameterCalculated = false;
     }
 
-    Element::Element() : visited(false), area(0.0), diameter(0.0) 
+    Element::Element() : visited(false), area(0.0), diameter(0.0), center_set(false)
     {
     };
 
@@ -191,25 +191,30 @@ namespace Hermes
 
     void Element::get_center(double& x, double& y)
     {
-      // x - coordinate
-      x = this->vn[0]->x + this->vn[1]->x + this->vn[2]->x;
-      if(this->is_quad())
+      if(center_set)
       {
-        x += this->vn[3]->x;
-        x = x / 4.0;
+        x = this->x_center;
+        y = this->y_center;
+        return;
       }
-      else
-        x = x / 3.0;
 
-      // y - coordinate
-      y = this->vn[0]->y + this->vn[1]->y + this->vn[2]->y;
+      // x - coordinate
+      this->x_center = this->vn[0]->x + this->vn[1]->x + this->vn[2]->x;
+      this->y_center = this->vn[0]->y + this->vn[1]->y + this->vn[2]->y;
       if(this->is_quad())
       {
-        y += this->vn[3]->y;
-        y = y / 4.0;
+        this->x_center += this->vn[3]->x;
+        this->x_center = this->x_center / 4.0;
+        this->y_center += this->vn[3]->y;
+        this->y_center = this->y_center / 4.0;
       }
       else
-        y = y / 3.0;
+      {
+        this->x_center = this->x_center / 3.0;
+        this->y_center = this->y_center / 3.0;
+      }
+      x = this->x_center;
+      y = this->y_center;
     }
 
     double Element::get_diameter()
