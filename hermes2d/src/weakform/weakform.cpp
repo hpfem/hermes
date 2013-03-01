@@ -322,7 +322,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormDG<Scalar>::MatrixFormDG(unsigned int i, unsigned int j) :
-    MatrixForm<Scalar>(i, j)
+    Form<Scalar>(), i(i), j(j)
     {
       this->set_area(H2D_DG_INNER_EDGE);
     }
@@ -330,6 +330,22 @@ namespace Hermes
     template<typename Scalar>
     MatrixFormDG<Scalar>::~MatrixFormDG()
     {
+    }
+
+    template<typename Scalar>
+    Scalar MatrixFormDG<Scalar>::value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
+      Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormDG<Scalar>::value");
+      return 0.0;
+    }
+
+    template<typename Scalar>
+    Hermes::Ord MatrixFormDG<Scalar>::ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> *u, DiscontinuousFunc<Hermes::Ord> *v,
+      Geom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("MatrixFormDG<Scalar>::ord");
+      return Hermes::Ord();
     }
 
     template<typename Scalar>
@@ -404,7 +420,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorFormDG<Scalar>::VectorFormDG(unsigned int i) :
-    VectorForm<Scalar>(i)
+    Form<Scalar>(), i(i)
     {
       this->set_area(H2D_DG_INNER_EDGE);
     }
@@ -412,6 +428,22 @@ namespace Hermes
     template<typename Scalar>
     VectorFormDG<Scalar>::~VectorFormDG()
     {
+    }
+
+    template<typename Scalar>
+    Scalar VectorFormDG<Scalar>::value(int n, double *wt, Func<double> *v,
+      Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormDG<Scalar>::value");
+      return 0.0;
+    }
+
+    template<typename Scalar>
+    Hermes::Ord VectorFormDG<Scalar>::ord(int n, double *wt, Func<Hermes::Ord> *v,
+      Geom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("VectorFormDG<Scalar>::ord");
+      return Hermes::Ord();
     }
 
     template<typename Scalar>

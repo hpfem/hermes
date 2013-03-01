@@ -543,7 +543,10 @@ namespace Hermes
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext_fn);
+
+      DiscontinuousFunc<Hermes::Ord> oi_i(oi[err_est_form->i], false, false);
+
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, &oi_i, fake_e, fake_ext_fn);
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
@@ -591,7 +594,9 @@ namespace Hermes
           ext_fn[i] = NULL;
       }
 
-      Scalar res = volumetric_scaling_const * err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext_fn);
+      DiscontinuousFunc<Scalar> ui_i(ui[err_est_form->i], false, false);
+
+      Scalar res = volumetric_scaling_const * err_est_form->value(np, jwt, ui, &ui_i, e, ext_fn);
 
       for (int i = 0; i < this->num; i++)
       {
@@ -632,7 +637,8 @@ namespace Hermes
 
       double fake_wt = 1.0;
       Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, oi[err_est_form->i], fake_e, fake_ext_fn);
+      DiscontinuousFunc<Hermes::Ord> oi_i(oi[err_est_form->i], false, false);
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, oi, &oi_i, fake_e, fake_ext_fn);
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
@@ -679,8 +685,10 @@ namespace Hermes
           ext_fn[i] = NULL;
       }
 
+      DiscontinuousFunc<Scalar> ui_i(ui[err_est_form->i], false, false);
+
       Scalar res = boundary_scaling_const *
-        err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, ext_fn);
+        err_est_form->value(np, jwt, ui, &ui_i, e, ext_fn);
 
       for (int i = 0; i < this->num; i++)
         if(ui[i] != NULL)
@@ -728,7 +736,9 @@ namespace Hermes
       // Polynomial order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
       Geom<Hermes::Ord>* fake_e = new InterfaceGeom<Hermes::Ord>(init_geom_ord(), nbs->neighb_el->marker, nbs->neighb_el->id, Hermes::Ord(nbs->neighb_el->get_diameter()));
       double fake_wt = 1.0;
-      Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ext_fns, fake_ext_fns[err_est_form->i], fake_e, NULL);
+      DiscontinuousFunc<Hermes::Ord> fake_ext_fns_i(fake_ext_fns[err_est_form->i], false, false);
+      
+      Hermes::Ord o = err_est_form->ord(1, &fake_wt, fake_ext_fns, &fake_ext_fns_i, fake_e, NULL);
 
       int order = rm->get_inv_ref_order();
       order += o.get_order();
@@ -765,10 +775,10 @@ namespace Hermes
                                                   nbs->neighb_el->get_diameter());
 
       // Function values.
-      Func<Scalar>** ui = this->dp.init_ext_fns(slns, neighbor_searches, order, 0);
+      DiscontinuousFunc<Scalar>** ui = this->dp.init_ext_fns(slns, neighbor_searches, order, 0);
 
       Scalar res = interface_scaling_const *
-        err_est_form->value(np, jwt, ui, ui[err_est_form->i], e, NULL);
+        err_est_form->value(np, jwt, NULL, ui[err_est_form->i], e, NULL);
 
       if(ui != NULL)
       {

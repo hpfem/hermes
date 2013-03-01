@@ -101,7 +101,7 @@ namespace Hermes
 
         /// Value calculation.
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
-                             Func<Scalar> *u, Geom<double> *e,
+                             DiscontinuousFunc<Scalar> *u, Geom<double> *e,
                              Func<Scalar> **ext) const
         {
           throw Exceptions::MethodNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::value()");
@@ -110,7 +110,7 @@ namespace Hermes
 
         /// Integration order.
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-                                Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
+                                DiscontinuousFunc<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
                                 Func<Ord> **ext) const
         {
           throw Exceptions::MethodNotOverridenException("KellyTypeAdapt::ErrorEstimatorForm::ord().");
@@ -318,22 +318,28 @@ namespace Hermes
         ErrorEstimatorFormKelly(int i = 0, double const_by_laplacian = 1.0);
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[],
-                             Func<Scalar> *u, Geom<double> *e,
+                             DiscontinuousFunc<Scalar> *u, Geom<double> *e,
                              Func<Scalar> **ext) const
         {
           Scalar result = 0.;
-          for (int i = 0; i < n; i++)
-            result += wt[i] * Hermes::sqr( const_by_laplacian * ( e->nx[i] * (u->get_dx_central(i) - u->get_dx_neighbor(i)) +
-                                                                  e->ny[i] * (u->get_dy_central(i) - u->get_dy_neighbor(i)) ) );
+          if(u->fn_central != NULL)
+            for (int i = 0; i < n; i++)
+              result += wt[i] * Hermes::sqr( const_by_laplacian * ( e->nx[i] * u->dx[i] + e->ny[i] * u->dy[i]));
+          else
+            for (int i = 0; i < n; i++)
+              result += wt[i] * Hermes::sqr( const_by_laplacian * ( e->nx[i] * u->dx_neighbor[i] + e->ny[i] * u->dy_neighbor[i]));
+
           return result;
         }
 
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-                                Func<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
+                                DiscontinuousFunc<Hermes::Ord> *u, Geom<Hermes::Ord> *e,
                                 Func<Ord> **ext) const
         {
-          return Hermes::sqr( (u->get_dx_central(0) - u->get_dx_neighbor(0)) +
-                              (u->get_dy_central(0) - u->get_dy_neighbor(0)) );
+          if(u->fn_central != NULL)
+            return Hermes::sqr(u->dx[0] + u->dy[0]);
+          else
+            return Hermes::sqr(u->dx_neighbor[0] + u->dy_neighbor[0]);
         }
 
       private:

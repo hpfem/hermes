@@ -298,9 +298,6 @@ namespace Hermes
 
       SymFlag sym;
 
-      typedef Scalar valueFunction(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
-        Geom<double> *e, Func<Scalar> **ext) const;
-
       virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
         Geom<double> *e, Func<Scalar> **ext) const;
 
@@ -340,9 +337,9 @@ namespace Hermes
       virtual MatrixFormSurf* clone() const;
     };
 
-    /// \brief Abstract, base class for matrix DG form - i.e. MatrixForm, where the integration is with respect to 1D-Lebesgue measure (element inner-domain edges).
+    /// \brief Abstract, base class for matrix DG form - i.e. bilinear form, where the integration is with respect to 1D-Lebesgue measure (element inner-domain edges).
     template<typename Scalar>
-    class HERMES_API MatrixFormDG : public MatrixForm<Scalar>
+    class HERMES_API MatrixFormDG : public Form<Scalar>
     {
     public:
       /// Constructor with coordinates.
@@ -350,8 +347,20 @@ namespace Hermes
 
       virtual ~MatrixFormDG();
 
+      unsigned int i;
+      unsigned int j;
+
+      virtual Scalar value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
+        Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const;
+
+      virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> *u, DiscontinuousFunc<Hermes::Ord> *v,
+        Geom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const;
+
       virtual MatrixFormDG* clone() const;
+    protected:
+      friend class DiscreteProblem<Scalar>;
     };
+
 
     /// \brief Abstract, base class for vector form - i.e. a single integral in the linear form on the right hand side of the variational formulation of a (system of) PDE.
     template<typename Scalar>
@@ -400,9 +409,9 @@ namespace Hermes
       virtual VectorFormSurf* clone() const;
     };
 
-    /// \brief Abstract, base class for vector DG form - i.e. VectorForm, where the integration is with respect to 1D-Lebesgue measure (element inner-domain edges).
+    /// \brief Abstract, base class for vector DG form - i.e. linear Form, where the integration is with respect to 1D-Lebesgue measure (element inner-domain edges).
     template<typename Scalar>
-    class VectorFormDG : public VectorForm<Scalar>
+    class VectorFormDG : public Form<Scalar>
     {
     public:
       /// Constructor with coordinates.
@@ -410,7 +419,16 @@ namespace Hermes
 
       virtual ~VectorFormDG();
 
+      virtual Scalar value(int n, double *wt, Func<double> *v,
+        Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const;
+
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
+        DiscontinuousFunc<Ord> **ext) const;
+      unsigned int i;
+
       virtual VectorFormDG* clone() const;
+    protected:
+      friend class DiscreteProblem<Scalar>;
     };
   }
 }

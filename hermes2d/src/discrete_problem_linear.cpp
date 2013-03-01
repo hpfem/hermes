@@ -195,7 +195,7 @@ namespace Hermes
             this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
+              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
           }
           catch(Hermes::Exceptions::Exception& e)
           {

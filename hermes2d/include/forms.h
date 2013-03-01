@@ -56,23 +56,6 @@ namespace Hermes
       T *curl;           ///< Components of the curl of a vector field.
       T *div;            ///< Components of the div of a vector field.
 
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_val_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_val_neighbor(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dx_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dx_neighbor(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dy_central(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS);  return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_dy_neighbor(int k) const { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_laplace_central(int k) { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-      /// Methods designed for discontinuous functions, return errors here.
-      virtual T& get_laplace_neighbor(int k) { throw Hermes::Exceptions::Exception(ERR_UNDEFINED_NEIGHBORING_ELEMENTS); return * new T; }
-
       /// Dellocates an instance of Func<Ord>
       virtual void free_ord();
 
@@ -139,22 +122,8 @@ namespace Hermes
       Func<T> *fn_central;        ///< Central element's component.
       Func<T> *fn_neighbor;       ///< Neighbor element's component.
 
-      /// Get values on the central element.
-      virtual T& get_val_central(int k) const;
-      /// Get values on the neighboring element.
-      virtual T& get_val_neighbor(int k) const;
-      /// Get derivatives wrt. x on the central element.
-      virtual T& get_dx_central(int k) const;
-      /// Get derivatives wrt. x on the neighboring element.
-      virtual T& get_dx_neighbor(int k) const;
-      /// Get derivatives wrt. y on the central element.
-      virtual T& get_dy_central(int k) const;
-      /// Get derivatives wrt. y on the neighboring element.
-      virtual T& get_dy_neighbor(int k) const;
-      /// Get second derivatives (laplacian) on the central element.
-      virtual T& get_laplace_central(int k);
-      /// Get second derivatives (laplacian) on the neighboring element.
-      virtual T& get_laplace_neighbor(int k);
+      T *val_neighbor;              ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
+      T *dx_neighbor, *dy_neighbor; ///< First-order partial derivatives.
 
       /// One-component constructor.
       ///

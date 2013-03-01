@@ -114,6 +114,12 @@ namespace Hermes
       /// enough for calculations.
       Scalar get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b);
 
+      /// Returns solution value and derivatives (correctly transformed) at element e, in its REAL COORDINATES
+      /// domain point (xi1, xi2). The values are returned.
+      /// NOTE: This function should be used for postprocessing only, it is not effective
+      /// enough for calculations.
+      Scalar** get_ref_values_transformed(Element* e, double x, double y);
+
       /// Returns solution value or derivatives at the physical domain point (x, y).
       /// 'item' controls the returned value: H2D_FN_VAL_0, H2D_FN_VAL_1, H2D_FN_DX_0, H2D_FN_DX_1, H2D_FN_DY_0, ....
       /// NOTE: This function should be used for postprocessing only, it is not effective

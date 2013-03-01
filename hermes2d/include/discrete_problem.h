@@ -158,6 +158,7 @@ namespace Hermes
 
       // Return scaling coefficient.
       double block_scaling_coeff(MatrixForm<Scalar>* form) const;
+      double block_scaling_coeff(MatrixFormDG<Scalar>* form) const;
 
       /// Preassembling.
       /// Precalculate matrix sparse structure.
@@ -306,55 +307,43 @@ namespace Hermes
       ///* DG *///
 
       /// Assemble DG forms.
-      void assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
+      void assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
         Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn, WeakForm<Scalar>* current_wf);
 
       /// Assemble one DG neighbor.
       void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i,
-        PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
+        PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
         Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn,
         std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches, unsigned int min_dg_mesh_seq, WeakForm<Scalar>* current_wf);
 
       /// Assemble DG matrix forms.
-      void assemble_DG_matrix_forms(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
+      void assemble_DG_matrix_forms(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
         Traverse::State* current_state, MatrixFormDG<Scalar>** current_mfDG, std::map<unsigned int, PrecalcShapeset*> npss,
         std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
 
       /// Assemble DG vector forms.
-      void assemble_DG_vector_forms(PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
+      void assemble_DG_vector_forms(PrecalcShapeset** current_spss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
         Traverse::State* current_state, VectorFormDG<Scalar>** current_vfDG, std::map<unsigned int, PrecalcShapeset*> nspss,
         std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
 
       DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
 
       /// Calculates integration order for DG matrix forms.
-      int calc_order_dg_matrix_form(MatrixFormDG<Scalar>* mfDG, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
+      int calc_order_dg_matrix_form(MatrixFormDG<Scalar>* mfDG, PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
         bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
-
-      /// Evaluates DG matrix forms on an edge between elements identified by ru_actual, rv.
-      Scalar eval_dg_form(MatrixFormDG<Scalar>* mfDG, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru_central, RefMap* ru_actual, RefMap* rv,
-        bool neighbor_supp_u, bool neighbor_supp_v,
-        SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u, int neighbor_index_v);
 
       /// Calculates integration order for DG vector forms.
       int calc_order_dg_vector_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<Solution<Scalar>*> u_ext,
         PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
 
-      /// Evaluates DG vector forms on an edge between elements identified by ru_actual, rv.
-      Scalar eval_dg_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<Solution<Scalar>*> u_ext,
-        PrecalcShapeset* fv, RefMap* rv,
-        SurfPos* surf_pos, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
-
       /// Initialize orders of external functions for DG forms.
       Func<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
 
       /// Initialize external functions for DG forms.
-      Func<Scalar>** init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
+      DiscontinuousFunc<Scalar>** init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
         int order, unsigned int min_dg_mesh_seq);
 

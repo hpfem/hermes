@@ -484,6 +484,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    double DiscreteProblem<Scalar>::block_scaling_coeff(MatrixFormDG<Scalar>* form) const
+    {
+      if(current_block_weights != NULL)
+        return current_block_weights->get_A(form->i, form->j);
+      return 1.0;
+    }
+
+    template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state)
     {
       if(current_state->e[form->i] == NULL || current_state->e[form->j] == NULL)
@@ -1174,7 +1182,7 @@ namespace Hermes
             assemble_one_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform);
 
             if(DG_matrix_forms_present || DG_vector_forms_present)
-              assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
+              assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
           }
           catch(Hermes::Exceptions::Exception& e)
           {
@@ -2240,7 +2248,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
+    void DiscreteProblem<Scalar>::assemble_one_DG_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
       Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn, WeakForm<Scalar>* current_wf)
     {
       // Determine the minimum mesh seq.
@@ -2410,7 +2418,7 @@ namespace Hermes
           // DG-inner-edge-wise parameters for WeakForm.
           (const_cast<WeakForm<Scalar>*>(current_wf))->set_active_DG_state(current_state->e, current_state->isurf);
 
-          assemble_DG_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, current_pss, current_spss, current_refmaps, current_u_ext, current_als,
+          assemble_DG_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, current_pss, current_spss, current_refmaps, current_als,
             current_state, current_mfDG, current_vfDG, fn,
             npss, nspss, nrefmap, (*neighbor_searches[current_state->isurf]), min_dg_mesh_seq, current_wf);
         }
@@ -2441,7 +2449,7 @@ namespace Hermes
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i,
-      PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
+      PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
       Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn,
       std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap,
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches, unsigned int min_dg_mesh_seq, WeakForm<Scalar>* current_wf)
@@ -2546,7 +2554,7 @@ namespace Hermes
         }
       }
 
-      Func<Scalar>** ext = init_ext_fns(current_wf->ext, neighbor_searches, order, min_dg_mesh_seq);
+      DiscontinuousFunc<Scalar>** ext = init_ext_fns(current_wf->ext, neighbor_searches, order, min_dg_mesh_seq);
 
       if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
       {
@@ -2557,28 +2565,10 @@ namespace Hermes
 
           MatrixFormDG<Scalar>* mfs = current_mfDG[current_mfsurf_i];
 
+          double block_scaling_coefficient = block_scaling_coeff(mfs);
+
           int m = mfs->i;
           int n = mfs->j;
-
-          // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-          int prev_size = wf->get_neq() - mfs->u_ext_offset;
-          Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-          if(current_u_ext != NULL)
-          {
-            for (int i = 0; i < prev_size; i++)
-            {
-              if(current_u_ext[i + mfs->u_ext_offset] != NULL)
-              {
-                neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
-                prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
-              }
-              else
-                prev[i] = NULL;
-            }
-          }
-          else
-            for (int i = 0; i < prev_size; i++)
-              prev[i] = NULL;
 
           // Precalc shapeset and refmaps used for the evaluation.
           bool support_neigh_u, support_neigh_v;
@@ -2601,11 +2591,11 @@ namespace Hermes
                 DiscontinuousFunc<double>* u = testFunctions[n][j];
                 DiscontinuousFunc<double>* v = testFunctions[m][i];
 
-                Scalar res = mfs->value(n_quadrature_points, jacobian_x_weights[n], prev, u, v, e[n], ext) * mfs->scaling_factor;
+                Scalar res = mfs->value(n_quadrature_points, jacobian_x_weights[n], u, v, e[n], ext) * mfs->scaling_factor;
 
                 support_neigh_u = ext_asmlist_u->has_support_on_neighbor(j);
 
-               Scalar val = block_scaling_coeff(mfs) * 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
+               Scalar val = block_scaling_coefficient * 0.5 * res * (support_neigh_u ? ext_asmlist_u->neighbor_al->coef[j - ext_asmlist_u->central_al->cnt]: ext_asmlist_u->central_al->coef[j])
                   * (support_neigh_v ? ext_asmlist_v->neighbor_al->coef[i - ext_asmlist_v->central_al->cnt]: ext_asmlist_v->central_al->coef[i]);
                 
                local_stiffness_matrix[i][j] = val;
@@ -2616,18 +2606,6 @@ namespace Hermes
           current_mat->add(ext_asmlist_v->cnt, ext_asmlist_u->cnt, local_stiffness_matrix, ext_asmlist_v->dof, ext_asmlist_u->dof);
 
           delete [] local_stiffness_matrix;
-
-          // Clean up.
-          for (int i = 0; i < prev_size; i++)
-          {
-            if(prev[i] != NULL)
-            {
-              prev[i]->free_fn();
-              delete prev[i];
-            }
-          }
-
-          delete [] prev;
         }
       }
 
@@ -2659,22 +2637,6 @@ namespace Hermes
 
           NeighborSearch<Scalar>* nbs_v = nbs[n];
 
-          // Values of the previous Newton iteration, shape functions and external functions in quadrature points.
-          int prev_size = wf->get_neq() - vfs->u_ext_offset;
-          Func<Scalar>** prev = new Func<Scalar>*[prev_size];
-          if(current_u_ext != NULL)
-            for (int i = 0; i < prev_size; i++)
-              if(current_u_ext[i + vfs->u_ext_offset] != NULL)
-              {
-                neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
-                prev[i]  = neighbor_searches.get(current_u_ext[i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[i]);
-              }
-              else
-                prev[i] = NULL;
-          else
-            for (int i = 0; i < prev_size; i++)
-              prev[i] = NULL;
-
           // Here we use the standard pss, possibly just transformed by NeighborSearch.
           for (unsigned int dof_i = 0; dof_i < current_als[n]->cnt; dof_i++)
           {
@@ -2684,24 +2646,11 @@ namespace Hermes
 
             Func<double>* v = init_fn(current_spss[n], current_refmaps[n], nbs_v->get_quad_eo());
 
-
-            current_rhs->add(current_als[n]->dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights[n], prev, v, e[n], ext) * vfs->scaling_factor * current_als[n]->coef[dof_i]);
+            current_rhs->add(current_als[n]->dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights[n], v, e[n], ext) * vfs->scaling_factor * current_als[n]->coef[dof_i]);
 
             v->free_fn();
             delete v;
           }
-
-          // Clean up.
-          for (int i = 0; i < prev_size; i++)
-          {
-            if(prev[i] != NULL)
-            {
-              prev[i]->free_fn();
-              delete prev[i];
-            }
-          }
-
-          delete [] prev;
         }
       }
 
@@ -2749,10 +2698,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>** DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
+    DiscontinuousFunc<Scalar>** DiscreteProblem<Scalar>::init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
       LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int order, unsigned int min_dg_mesh_seq)
     {
-      Func<Scalar>** ext_fns = new Func<Scalar>*[ext.size()];
+      DiscontinuousFunc<Scalar>** ext_fns = new DiscontinuousFunc<Scalar>*[ext.size()];
       for(unsigned int j = 0; j < ext.size(); j++)
       {
         neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);

@@ -866,8 +866,11 @@ namespace Hermes
     void Solution<Scalar>::set_active_element(Element* e)
     {
       if(e == this->element)
-        return; // FIXME
-      if(!e->active) throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
+        return;
+
+      if(!e->active) 
+        throw Hermes::Exceptions::Exception("Cannot select inactive element. Wrong mesh?");
+      
       MeshFunction<Scalar>::set_active_element(e);
 
       // try finding an existing table for e
@@ -1565,7 +1568,9 @@ namespace Hermes
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value_transformed(Element* e, double xi1, double xi2, int a, int b)
     {
-      if(e==NULL) throw Exceptions::NullException(1);
+      if(e == NULL) 
+        throw Exceptions::NullException(1);
+
       if(this->num_components == 1)
       {
         if(b == 0)
@@ -1621,6 +1626,69 @@ namespace Hermes
       }
       throw Hermes::Exceptions::Exception("internal error: reached end of non-void function");
       return 0;
+    }
+
+    template<typename Scalar>
+    Scalar** Solution<Scalar>::get_ref_values_transformed(Element* e, double x, double y)
+    {
+      set_active_element(e);
+
+      double x_ref, y_ref;
+      double x_dummy, y_dummy;
+
+      this->get_refmap()->untransform(e, x, y, x_ref, y_ref);
+
+      Scalar** toReturn = new Scalar*[2];
+      double2x2 mat;
+      double3x2 mat2;
+      this->refmap->inv_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat);
+      this->refmap->second_ref_map_at_point(x_ref, y_ref, x_dummy, y_dummy, mat2);
+
+      if(this->num_components == 1)
+      {
+        toReturn[0] = new Scalar[6];
+
+        int o = elem_orders[e->id];
+
+        Scalar result[6];
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        for(int item = 0; item < 6; item++)
+#else
+        for(int item = 0; item < 3; item++)
+#endif
+        {
+          Scalar* mono = dxdy_coeffs[0][item];
+          Scalar result_local = 0.0;
+          int k = 0;
+          for (int i = 0; i <= o; i++)
+          {
+            Scalar row = mono[k++];
+            for (int j = 0; j < (this->mode ? o : i); j++)
+              row = row * x_ref + mono[k++];
+            result[item] = result_local * y_ref + row;
+          }
+        }
+
+        toReturn[0][0] = result[0];
+        toReturn[0][1] = mat[0][0]*result[1] + mat[0][1]*result[2];
+        toReturn[0][2] = mat[1][0]*result[1] + mat[1][1]*result[2];
+#ifdef H2D_USE_SECOND_DERIVATIVES
+        toReturn[0][3] = sqr(mat[0][0])*result[3] + 2*mat[0][1]*mat[0][0]*result[5] + sqr(mat[0][1])*result[4] + mat2[0][0]*result[1] + mat2[0][1]*result[2];
+        toReturn[0][4] = sqr(mat[1][0])*result[3] + 2*mat[1][1]*mat[1][0]*result[5] + sqr(mat[1][1])*result[4] + mat2[2][0]*result[1] + mat2[2][1]*result[2];
+        toReturn[0][5] = mat[0][0]*mat[1][0]*result[3] + (mat[0][0]*mat[1][1] + mat[1][0]*mat[0][1])*result[5] + mat[0][1]*mat[1][1]*result[4] + mat2[1][0]*result[1] + mat2[1][1]*result[2];
+#endif
+      }
+      else // vector solution
+      {
+        toReturn[0] = new Scalar[1];
+        
+        Scalar vx = get_ref_value(e, x_ref, y_ref, 0, 0);
+        Scalar vy = get_ref_value(e, x_ref, y_ref, 1, 0);
+        toReturn[0][0] = mat[0][0]*vx + mat[0][1]*vy;
+        toReturn[1][0] = mat[1][0]*vx + mat[1][1]*vy;
+      }
+
+      return toReturn;
     }
 
     template<typename Scalar>
