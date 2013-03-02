@@ -81,6 +81,9 @@ namespace Hermes
       /// \param[in] y_reference Optional parameter, in which the y-coordinate of y in the reference domain will be returned.
       static Element* element_on_physical_coordinates(const Mesh* mesh, double x, double y, double* x_reference = NULL, double* y_reference = NULL);
 
+      /// Find out if the coordinatex [x,y] lie in the element e.
+      static bool is_element_on_physical_coordinates(Element* e, double x, double y, double* x_reference, double* y_reference);
+
       /// Returns the x-coordinates of the integration points transformed to the
       /// physical domain of the element. Intended for integrals containing spatial
       /// variables.

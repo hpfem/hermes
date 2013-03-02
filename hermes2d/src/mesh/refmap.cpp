@@ -708,6 +708,80 @@ namespace Hermes
         return (xi1 - 1.0 <= TOL) && (xi1 + 1.0 >= -TOL) && (xi2 - 1.0 <= TOL) && (xi2 + 1.0 >= -TOL);
     }
 
+    bool RefMap::is_element_on_physical_coordinates(Element* e, double x, double y, double* x_reference, double* y_reference)
+    {
+      bool is_triangle = e->is_triangle();
+      bool is_curved = e->is_curved();
+
+      if(is_curved)
+      {
+        untransform(e, x, y, *x_reference, *y_reference);
+        if(is_in_ref_domain(e, *x_reference, *y_reference))
+          return true;
+        else
+          return false;
+      }
+
+      // edge vectors.
+      double2 vector[4];
+      vector[0][0] = e->vn[1]->x - e->vn[0]->x;
+      vector[0][1] = e->vn[1]->y - e->vn[0]->y;
+      vector[1][0] = e->vn[2]->x - e->vn[1]->x;
+      vector[1][1] = e->vn[2]->y - e->vn[1]->y;
+      if(is_triangle)
+      {
+        vector[2][0] = e->vn[0]->x - e->vn[2]->x;
+        vector[2][1] = e->vn[0]->y - e->vn[2]->y;
+      }
+      else
+      {
+        vector[2][0] = e->vn[3]->x - e->vn[2]->x;
+        vector[2][1] = e->vn[3]->y - e->vn[2]->y;
+        vector[3][0] = e->vn[0]->x - e->vn[3]->x;
+        vector[3][1] = e->vn[0]->y - e->vn[3]->y;
+      }
+ 
+      // calculate cross products
+      // -> if all cross products of edge vectors (vector[*]) x vector (thePoint - aVertex) are positive (negative),
+      // the point is inside of the element.
+      double cross_product_0 = (x - e->vn[0]->x) * vector[0][1] - (y - e->vn[0]->y) * vector[0][0];
+      double cross_product_1 = (x - e->vn[1]->x) * vector[1][1] - (y - e->vn[1]->y) * vector[1][0];
+      double cross_product_2 = (x - e->vn[2]->x) * vector[2][1] - (y - e->vn[2]->y) * vector[2][0];
+      if(is_triangle)
+      {
+        if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && (cross_product_1 * cross_product_2 >= 0))
+        {
+          untransform(e, x, y, *x_reference, *y_reference);
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+      else
+      {
+        double cross_product_3 = (x - e->vn[3]->x) * vector[3][1] - (y - e->vn[3]->y) * vector[3][0];
+        if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && 
+            (cross_product_1 * cross_product_2 >= 0) && (cross_product_1 * cross_product_3 >= 0) &&
+            (cross_product_2 * cross_product_3 >= 0) && (cross_product_0 * cross_product_3 >= 0))
+        {
+          if ((cross_product_0 * cross_product_1 >= 0) && (cross_product_0 * cross_product_2 >= 0) && 
+            (cross_product_1 * cross_product_2 >= 0) && (cross_product_1 * cross_product_3 >= 0) &&
+            (cross_product_2 * cross_product_3 >= 0) && (cross_product_0 * cross_product_3 >= 0))
+          {
+            untransform(e, x, y, *x_reference, *y_reference);
+            return true;
+          }
+          else
+            return false;
+        }
+      }
+
+      return false;
+    }
+
+
     Element* RefMap::element_on_physical_coordinates(const Mesh* mesh, double x, double y, double* x_reference, double* y_reference)
     {
       // go through all elements
