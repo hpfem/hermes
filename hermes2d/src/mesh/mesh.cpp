@@ -2212,6 +2212,16 @@ namespace Hermes
       return HERMES_BOUNDARY_MARKERS_CONVERSION;
     }
 
+    const Mesh::ElementMarkersConversion &Mesh::get_element_markers_conversion() const
+    {
+      return element_markers_conversion;
+    }
+
+    const Mesh::BoundaryMarkersConversion &Mesh::get_boundary_markers_conversion() const
+    {
+      return boundary_markers_conversion;
+    }
+    
     Mesh::ElementMarkersConversion &Mesh::get_element_markers_conversion()
     {
       return element_markers_conversion;
