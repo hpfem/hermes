@@ -3186,6 +3186,8 @@ namespace Hermes
         if(node->elem[0] != NULL) node->elem[0] = &(elements[idx[((int) (long) node->elem[0]) - 1]]);
         if(node->elem[1] != NULL) node->elem[1] = &(elements[idx[((int) (long) node->elem[1]) - 1]]);
       }
+
+      delete [] idx;
     }
 
     void Mesh::assign_parent(Element* e, int i)

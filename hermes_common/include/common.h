@@ -51,10 +51,16 @@
 #include <fstream>
 #include <cstring>
 #include <iostream>
-#include <omp.h>
 #include <signal.h>
 
 #include "config.h"
+
+#ifdef WITH_OPENMP
+  #include <omp.h>
+#else
+  inline int omp_get_num_threads( ) { return 1; }
+  inline int omp_get_thread_num( ) { return 0; }
+#endif
 
 typedef int int2[2];
 typedef int int3[3];
