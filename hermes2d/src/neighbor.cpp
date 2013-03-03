@@ -157,7 +157,7 @@ namespace Hermes
       reset_neighb_info();
       active_edge = edge;
 
-      //debug_log("central element: %d", central_el->id);
+      //std::cout << std::endl << "central element: " << central_el->id << std::endl;
       if(central_el->en[active_edge]->bnd == 0)
       {
         neighb_el = central_el->get_neighbor(active_edge);
@@ -165,7 +165,7 @@ namespace Hermes
         // First case : The neighboring element is of the same size as the central one.
         if(neighb_el != NULL)
         {
-          //debug_log("active neighbor el: %d", neighb_el->id);
+          //std::cout << "\t active neighbor el: " << neighb_el->id << std::endl;
 
           // Get local number of the edge used by the neighbor.
           for (unsigned int j = 0; j < neighb_el->get_nvert(); j++)
