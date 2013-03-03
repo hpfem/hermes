@@ -100,7 +100,7 @@ project(hermes)
     #
     # Enable OpenMP for shared memory processing.
     #
-    set(WITH_OPENMP             NO)
+    set(WITH_OPENMP             YES)
 
     # If MPI is enabled, the MPI library installed on the system should be found by
     # CMake automatically. If the found library doesn't match the one used to compile the
@@ -193,6 +193,11 @@ project(hermes)
       set(NUM_THREADS 1)
     endif()
   endif()
+  
+  if(NOT(WITH_OPENMP))
+	set(NUM_THREADS 1)
+  endif(NOT(WITH_OPENMP))
+  
   
   MESSAGE(STATUS "Hermes will by default be using ${NUM_THREADS} threads for calculation.")
 
