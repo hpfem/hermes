@@ -89,7 +89,7 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] coeff_vec Ceofficient vector to start from.
-      void solve(Scalar* coeff_vec = NULL);
+      virtual void solve(Scalar* coeff_vec = NULL);
 
       /// Solve.
       /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
@@ -124,8 +124,11 @@ namespace Hermes
 
       /// Set the weak forms.
       void set_weak_formulation(const WeakForm<Scalar>* wf);
-    private:
+    protected:
       void init();
+      
+      static void calculate_anderson_coeffs(Scalar** previous_vectors, Scalar* anderson_coeffs, int num_last_vectors_used, int ndof);
+      
       bool verbose_output_linear_solver;
 
       /// Matrix.

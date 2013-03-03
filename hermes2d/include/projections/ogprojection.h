@@ -37,12 +37,31 @@ namespace Hermes
       OGProjection();
 
       /// Main functionality is in the protected method project_internal().
-      /// This is a wrapper that delivers a Solution instead of a coefficient vector.
+      
+      /// This method allows to specify your own OG-projection form.
       void project_global(const Space<Scalar>* space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
           Scalar* target_vec);
 
+      /// Wrapper that delivers a Solution instead of a coefficient vector.   
+      void project_global(const Space<Scalar>* space,
+          MatrixFormVol<Scalar>* custom_projection_jacobian,
+          VectorFormVol<Scalar>* custom_projection_residual,
+          Solution<Scalar>* target_sln);
+      
+      /// This method allows to specify your own multiple OG-projection forms.
+      void project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
+          const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+          const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+          Scalar* target_vec);
+          
+      /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
+      void project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
+          const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+          const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+          const Hermes::vector<Solution<Scalar>*>& target_slns);
+          
       /**
        \fn  static void OGProjection::project_global(Space<Scalar>* space,
         MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
