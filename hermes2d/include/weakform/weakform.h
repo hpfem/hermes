@@ -42,6 +42,7 @@ namespace Hermes
     class Element;
     class Shapeset;
     template<typename T> class Func;
+    template<typename T> class DiscontinuousFunc;
     template<typename T> class Geom;
 
     template<typename Scalar> class Form;
