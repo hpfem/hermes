@@ -31,7 +31,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<Space<Scalar>*> spaces,
+    Adapt<Scalar>::Adapt(const Hermes::vector<Space<Scalar>*>& spaces,
       Hermes::vector<ProjNormType> proj_norms) :
     spaces(spaces),
       num_act_elems(-1),

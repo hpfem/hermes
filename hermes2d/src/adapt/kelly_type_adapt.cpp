@@ -32,7 +32,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< Space<Scalar>* > spaces_,
+    KellyTypeAdapt<Scalar>::KellyTypeAdapt(const Hermes::vector< Space<Scalar>* >& spaces_,
                                            bool ignore_visited_segments_,
                                            Hermes::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns_,
                                            Hermes::vector<ProjNormType > norms_)

@@ -178,7 +178,7 @@ namespace Hermes
           if(eps >= 1.0)
           {
             // if eps > 1, the user wants a fixed number of refinements (no adaptivity)
-            split = (level + 5 < eps);
+            split = ((level + 5) < eps);
           }
           else
           {
