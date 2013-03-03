@@ -583,6 +583,8 @@ namespace Hermes
           throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
         }
       }
+
+      return spaces;
     }
 
     template<typename Scalar>
@@ -612,6 +614,8 @@ namespace Hermes
           throw IOCalculationContinuityException(CalculationContinuityException::spaces, IOCalculationContinuityException::input, filename.str().c_str(), e.what());
         }
       }
+
+      return spaces;
     }
 
     template<typename Scalar>
