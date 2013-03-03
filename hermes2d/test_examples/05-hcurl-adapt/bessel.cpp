@@ -2369,6 +2369,11 @@ double exp(), log(), sin(), cos(), acos(), pow(), gamma(), lgam();
 static double recur(), jvs(), hankel(), jnx(), jnt();
 #endif
 
+#ifndef _MSC_VER
+  #define _j0(x) j0(x)
+  #define _j1(x) j1(x)
+#endif
+
 extern double MAXNUM, MACHEP, MINLOG, MAXLOG;
 #define BIG  1.44115188075855872E+17
 
