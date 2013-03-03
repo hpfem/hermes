@@ -148,7 +148,6 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Visualize initial condition.
-  char title[100];
   ScalarView view("Initial condition", new WinGeom(0, 0, 440, 350));
   OrderView ordview("Initial mesh", new WinGeom(445, 0, 410, 350));
   if(HERMES_VISUALIZATION)
@@ -187,7 +186,6 @@ int main(int argc, char* argv[])
     // Spatial adaptivity loop. Note: sln_time_prev must not be changed
     // during spatial adaptivity.
     bool done = false; int as = 1;
-    double err_est;
     do {
       Hermes::Mixins::Loggable::Static::info("Time step %d, adaptivity step %d:", ts, as);
 

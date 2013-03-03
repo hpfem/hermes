@@ -69,6 +69,7 @@ namespace Hermes
       {
         throw Hermes::Exceptions::MeshLoadFailureException(e.what());
       }
+      return true;
     }
 
     bool MeshReaderH2DXML::save(const char *filename, Mesh *mesh)

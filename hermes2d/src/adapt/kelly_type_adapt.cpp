@@ -765,14 +765,14 @@ namespace Hermes
 
       // Initialize geometry and jacobian*weights (do not use the NeighborSearch caching mechanism).
       double3* tan;
-      double* jwt = new double[np];
-      for(int i = 0; i < np; i++)
-        jwt[i] = pt[i][2] * tan[i][2];
-
       Geom<double>* e = new InterfaceGeom<double>(init_geom_surf(rm, surf_pos->surf_num, surf_pos->marker, eo, tan),
                                                   nbs->neighb_el->marker,
                                                   nbs->neighb_el->id,
                                                   nbs->neighb_el->get_diameter());
+
+      double* jwt = new double[np];
+      for(int i = 0; i < np; i++)
+        jwt[i] = pt[i][2] * tan[i][2];
 
       // Function values.
       DiscontinuousFunc<Scalar>** ui = this->dp.init_ext_fns(slns, neighbor_searches, order, 0);

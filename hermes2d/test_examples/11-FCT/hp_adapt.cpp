@@ -28,7 +28,7 @@ bool HPAdapt::adapt_smooth(int* smooth_elem, int max_p)
     throw Hermes::Exceptions::Exception("adapt_smooth: Only for one space .");
   bool changed = false;
   Space<double>* space = this->spaces[0];
-  int order, v_ord, h_ord,ref;
+  int order, v_ord, h_ord;
   int n_dof = space->get_num_dofs();
   Element* e;
   // Just set the verbose output to true so that the next calls to this->info() produce output.

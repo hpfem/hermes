@@ -181,7 +181,7 @@ namespace Hermes
             // Query the orientation of the neighbor edge relative to the central el.
             int p1 = central_el->vn[active_edge]->id;
             int p2 = central_el->vn[(active_edge + 1) % central_el->get_nvert()]->id;
-            local_edge_info.orientation = neighbor_edge_orientation(p1, p2, 0);
+            local_edge_info.orientation = neighbor_edge_orientation(p1, p2, false);
 
             neighbor_edges.push_back(local_edge_info);
 
@@ -698,7 +698,7 @@ namespace Hermes
               local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
 
               // Query the orientation of the neighbor edge relative to the central el.
-              local_edge_info.orientation = neighbor_edge_orientation(id_of_par_orient_1, id_of_par_orient_2, 0);
+              local_edge_info.orientation = neighbor_edge_orientation(id_of_par_orient_1, id_of_par_orient_2, false);
 
               neighbor_edges.push_back(local_edge_info);
 
@@ -796,21 +796,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const
+    bool NeighborSearch<Scalar>::neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const
     {
       if(segment == 0)
       {
         // neighbor edge goes from parent1 to middle vertex
         if(neighb_el->vn[neighbor_edge.local_num_of_edge]->id != bounding_vert1)
-          return 1; // orientation reversed
+          return true; // orientation reversed
       }
       else
       {
         // neighbor edge goes from middle vertex to parent2
         if(neighb_el->vn[neighbor_edge.local_num_of_edge]->id == bounding_vert2)
-          return 1; // orientation reversed
+          return true; // orientation reversed
       }
-      return 0;
+      return false;
     }
 
     template<typename Scalar>

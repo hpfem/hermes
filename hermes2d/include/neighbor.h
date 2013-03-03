@@ -237,10 +237,10 @@ namespace Hermes
       class NeighborEdgeInfo
       {
       public:
-        NeighborEdgeInfo() : local_num_of_edge(-1), orientation(-1) {};
+        NeighborEdgeInfo() : local_num_of_edge(-1), orientation(false) {};
 
         int local_num_of_edge;  ///< Local number of the edge on neighbor element.
-        int orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
+        bool orientation;        ///< Relative orientation of the neighbor edge with respect to the active edge
                                 ///< (0 - same orientation, 1 - reverse orientation).
       };
 
@@ -403,7 +403,7 @@ namespace Hermes
       /// \return 1 if the orientation of the neighbor's edge is reversed w.r.t. the central el.'s edge,
       ///         0 otherwise.
       ///
-      int neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const;
+      bool neighbor_edge_orientation(int bounding_vert1, int bounding_vert2, int segment) const;
 
       /// Cleaning of internal structures before a new edge is set as active.
       void reset_neighb_info();

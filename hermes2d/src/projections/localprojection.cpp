@@ -101,7 +101,7 @@ namespace Hermes
       int ndof = space->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];
       project_local(space, source_sln, coeff_vec, proj_norm);
-      Solution<Scalar>::vector_to_solution(coeff_vec, space, target_sln, proj_norm);
+      Solution<Scalar>::vector_to_solution(coeff_vec, space, target_sln);
       delete [] coeff_vec;
     }
 
