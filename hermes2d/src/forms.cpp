@@ -184,32 +184,32 @@ namespace Hermes
         fn_neighbor = fn;
         if(reverse_neighbor_side)
         {
-          val_neighbor = new T[num_gip];
-          dx_neighbor = new T[fn->num_gip];
-          dy_neighbor = new T[num_gip];
-          for(int i = 0; i < num_gip; i++)
+          this->val_neighbor = new T[this->num_gip];
+          this->dx_neighbor = new T[this->num_gip];
+          this->dy_neighbor = new T[this->num_gip];
+          for(int i = 0; i < this->num_gip; i++)
           {
-            val_neighbor[i] = fn->val[num_gip-i-1];
-            dx_neighbor[i] = fn->dx[num_gip-i-1];
-            dy_neighbor[i] = fn->dy[num_gip-i-1];
+            this->val_neighbor[i] = fn->val[this->num_gip-i-1];
+            this->dx_neighbor[i] = fn->dx[this->num_gip-i-1];
+            this->dy_neighbor[i] = fn->dy[this->num_gip-i-1];
           }
         }
         else
         {
-          val_neighbor = fn->val;
-          dx_neighbor = fn->dx;
-          dy_neighbor = fn->dy;
+          this->val_neighbor = fn->val;
+          this->dx_neighbor = fn->dx;
+          this->dy_neighbor = fn->dy;
         }
 
-        val = dx = dy = NULL;
+        this->val = this->dx = this->dy = NULL;
       }
       else
       {
-        fn_central = fn;
-        val = fn->val;
-        dx = fn->dx;
-        dy = fn->dy;
-        val_neighbor = dx_neighbor = dy_neighbor = NULL;
+        this->fn_central = fn;
+        this->val = fn->val;
+        this->dx = fn->dx;
+        this->dy = fn->dy;
+        this->val_neighbor = this->dx_neighbor = this->dy_neighbor = NULL;
       }
     }
 
@@ -222,25 +222,25 @@ namespace Hermes
     {
       if(reverse_neighbor_side)
       {
-        val_neighbor = new T[num_gip];
-        dx_neighbor = new T[num_gip];
-        dy_neighbor = new T[num_gip];
-        for(int i = 0; i < num_gip; i++)
+        this->val_neighbor = new T[this->num_gip];
+        this->dx_neighbor = new T[this->num_gip];
+        this->dy_neighbor = new T[this->num_gip];
+        for(int i = 0; i < this->num_gip; i++)
         {
-          val_neighbor[i] = fn_neighbor->val[num_gip-i-1];
-          dx_neighbor[i] = fn_neighbor->dx[num_gip-i-1];
-          dy_neighbor[i] = fn_neighbor->dy[num_gip-i-1];
+          this->val_neighbor[i] = fn_neighbor->val[this->num_gip-i-1];
+          this->dx_neighbor[i] = fn_neighbor->dx[this->num_gip-i-1];
+          this->dy_neighbor[i] = fn_neighbor->dy[this->num_gip-i-1];
         }
       }
       else
       {
-        val_neighbor = fn_neighbor->val;
-        dx_neighbor = fn_neighbor->dx;
-        dy_neighbor = fn_neighbor->dy;
+        this->val_neighbor = fn_neighbor->val;
+        this->dx_neighbor = fn_neighbor->dx;
+        this->dy_neighbor = fn_neighbor->dy;
       }
-      val = fn_central->val;
-      dx = fn_central->dx;
-      dy = fn_central->dy;
+      this->val = fn_central->val;
+      this->dx = fn_central->dx;
+      this->dy = fn_central->dy;
     }
 
     template<typename T>
