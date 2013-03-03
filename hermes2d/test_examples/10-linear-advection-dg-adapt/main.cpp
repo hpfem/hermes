@@ -42,7 +42,7 @@ const CandList CAND_LIST = H2D_HP_ANISO;
 // their notoriously bad performance.
 const int MESH_REGULARITY = -1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 6.0;
+const double ERR_STOP = 1.0;
 // This parameter influences the selection of
 // candidates in hp-adaptivity. Default value is 1.0.
 const double CONV_EXP = 1.0;
@@ -82,8 +82,6 @@ int main(int argc, char* args[])
   // Display the mesh.
   OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
   oview.show(&space);
-  BaseView<double> bview("Distribution of polynomial orders", new WinGeom(450, 0, 440, 350));
-  bview.show(&space);
 
   Solution<double> sln;
   Solution<double> ref_sln;
@@ -123,14 +121,17 @@ int main(int argc, char* args[])
     OGProjection<double> ogProjection;
     ogProjection.project_global(&space, &ref_sln, &sln, HERMES_L2_NORM);
 
+    ValFilter val_filter(&ref_sln, 0.0, 1.0);
+
     // View the coarse mesh solution.
-    view1.show(&sln);
+    view1.show(&val_filter);
     oview.show(&space);
-    bview.show(&space);
 
     // Calculate element errors and total error estimate.
     Adapt<double>* adaptivity = new Adapt<double>(&space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+
+    std::cout << "Error: " << err_est_rel << "%." << std::endl;
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(Space<double>::get_num_dofs(&space), err_est_rel);
