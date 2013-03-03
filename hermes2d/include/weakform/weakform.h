@@ -246,6 +246,9 @@ namespace Hermes
       void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
       Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
 
+      /// scaling factor
+      void setScalingFactor(double scalingFactor);
+
     protected:
       /// Set pointer to a WeakForm.
       inline void set_weakform(WeakForm<Scalar>* wf) { this->wf = wf; }
@@ -273,7 +276,6 @@ namespace Hermes
 
       WeakForm<Scalar>* wf;
       double stage_time;
-      void setScalingFactor(double scalingFactor);
       void set_uExtOffset(int u_ext_offset);
       friend class WeakForm<Scalar>;
       friend class RungeKutta<Scalar>;
