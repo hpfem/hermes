@@ -288,7 +288,7 @@ namespace Hermes
       {
         r.set_active_element(e);
 
-        int i, o, mo = quad->get_max_order(e->get_mode());
+        int i, mo = quad->get_max_order(e->get_mode());
 
         int k = e->is_triangle() ? 2 : 3;
 
@@ -299,7 +299,6 @@ namespace Hermes
         };
 
         double const_jacobian = 0.25 * (const_m[0][0] * const_m[1][1] - const_m[0][1] * const_m[1][0]);
-        double2x2 const_inv_ref_map;
         if(const_jacobian <= 0.0)
           throw Hermes::Exceptions::MeshLoadFailureException("Element #%d is concave or badly oriented in initial_single_check().", e->id);
 

@@ -1664,12 +1664,14 @@ namespace Hermes
 #ifdef H2D_USE_SECOND_DERIVATIVES
         this->warn("Cannot obtain second derivatives of an exact solution.");
 #endif
+        return toReturn;
       }
       else if(sln_type == HERMES_UNDEF)
       {
         throw Hermes::Exceptions::Exception("Cannot obtain values -- uninitialized solution. The solution was either "
           "not calculated yet or you used the assignment operator which destroys "
           "the solution on its right-hand side.");
+        return NULL;
       }
       else // HERMES_SLN
       {

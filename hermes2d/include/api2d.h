@@ -21,8 +21,6 @@
 */
 #ifndef __HERMES_API_2D_H_
 #define __HERMES_API_2D_H_
-// This is here because of an operator-related error in gcc
-#pragma GCC diagnostic warning "-fpermissive"
 
 #include "compat.h"
 #include "hermes_common.h"
