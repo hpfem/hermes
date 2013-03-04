@@ -175,6 +175,8 @@ namespace Hermes
 
       static void set_static_verbose_output(bool verbose);
 
+      void set_type(SolutionType type) { sln_type = type; };
+
     protected:
       static bool static_verbose_output;
 
