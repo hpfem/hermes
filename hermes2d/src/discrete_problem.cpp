@@ -2523,6 +2523,8 @@ namespace Hermes
       int order_base = 20;
       for (unsigned int i = 0; i < this->spaces_size; i++)
       {
+        if(this->spaces[i]->get_type() != HERMES_L2_SPACE)
+          continue;
         nbs[i] = neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq);
         ext_asmlist[i] = nbs[i]->create_extended_asmlist(spaces[i], current_als[i]);
         nbs[i]->set_quad_order(order);
@@ -2611,16 +2613,20 @@ namespace Hermes
 
       for(int i = 0; i < this->spaces_size; i++)
       {
+        if(this->spaces[i]->get_type() != HERMES_L2_SPACE)
+          continue;
         for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
         {
-          if(ext_asmlist[i]->dof[i] < 0)
+          if(ext_asmlist[i]->dof[func_i] < 0)
             continue;
           testFunctions[i][func_i]->free_fn();
           delete testFunctions[i][func_i];
         }        
         delete ext_asmlist[i];
+        delete [] testFunctions[i];
       }
 
+      delete [] testFunctions;
       delete [] ext_asmlist;
       
       if(current_rhs != NULL && DG_vector_forms_present)
@@ -2666,12 +2672,14 @@ namespace Hermes
 
       for(int i = 0; i < this->spaces_size; i++)
       {
+        if(this->spaces[i]->get_type() != HERMES_L2_SPACE)
+          continue;
         delete [] jacobian_x_weights[i];
         e[i]->free();
         delete e[i];
       }
 
-       delete [] nbs;
+      delete [] nbs;
       delete [] geometry;
       delete [] jacobian_x_weights;
       delete [] e;
