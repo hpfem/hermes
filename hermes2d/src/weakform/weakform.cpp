@@ -138,7 +138,13 @@ namespace Hermes
           this->vfDG.push_back(dynamic_cast<VectorFormDG<Scalar>*>(this->forms.back()));
       }
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
+      {
         this->ext.push_back(otherWf->ext[i]->clone());
+        if(dynamic_cast<Solution<Scalar>*>(otherWf->ext[i]) != NULL)
+        {
+          dynamic_cast<Solution<Scalar>*>(this->ext.back())->set_type(dynamic_cast<Solution<Scalar>*>(otherWf->ext[i])->get_type());
+        }
+      }
     }
 
     template<typename Scalar>
