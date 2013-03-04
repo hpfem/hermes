@@ -515,7 +515,7 @@ namespace Hermes
         dashes_count = 0;
 
         // reuse or allocate vertex, triangle and edge arrays
-        verts = (double4*) malloc(sizeof(double4) * vertex_size);
+        this->verts = (double4*) realloc(this->verts, sizeof(double4) * vertex_size);
         this->tris = (int3*) realloc(this->tris, sizeof(int3) * this->triangle_size);
         this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
         this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
