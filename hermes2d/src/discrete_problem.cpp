@@ -1855,56 +1855,52 @@ namespace Hermes
     {
       int order;
 
-      if(is_fvm)
-        order = current_refmaps[form->i]->get_inv_ref_order();
+      // order of solutions from the previous Newton iteration etc..
+      Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** ext_ord = NULL;
+      int ext_size = std::max(form->ext.size(), form->wf->ext.size());
+      if(ext_size > 0)
+        ext_ord = new Func<Hermes::Ord>*[ext_size];
+      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+
+      // Order of shape functions.
+      int max_order_j = this->spaces[form->j]->get_element_order(current_state->e[form->j]->id);
+      int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
+      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+        max_order_i = H2D_GET_V_ORDER(max_order_i);
       else
+        max_order_i = H2D_GET_H_ORDER(max_order_i);
+      if(H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
+        max_order_j = H2D_GET_V_ORDER(max_order_j);
+      else
+        max_order_j = H2D_GET_H_ORDER(max_order_j);
+
+      for (unsigned int k = 0; k < current_state->rep->nvert; k++)
       {
-        // order of solutions from the previous Newton iteration etc..
-        Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        Func<Hermes::Ord>** ext_ord = NULL;
-        int ext_size = std::max(form->ext.size(), form->wf->ext.size());
-        if(ext_size > 0)
-          ext_ord = new Func<Hermes::Ord>*[ext_size];
-        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
-
-        // Order of shape functions.
-        int max_order_j = this->spaces[form->j]->get_element_order(current_state->e[form->j]->id);
-        int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
-        if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
-          max_order_i = H2D_GET_V_ORDER(max_order_i);
-        else
-          max_order_i = H2D_GET_H_ORDER(max_order_i);
-        if(H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
-          max_order_j = H2D_GET_V_ORDER(max_order_j);
-        else
-          max_order_j = H2D_GET_H_ORDER(max_order_j);
-
-        for (unsigned int k = 0; k < current_state->rep->nvert; k++)
-        {
-          int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-          if(eo > max_order_i)
-            max_order_i = eo;
-          eo = this->spaces[form->j]->get_edge_order(current_state->e[form->j], k);
-          if(eo > max_order_j)
-            max_order_j = eo;
-        }
-
-        Func<Hermes::Ord>* ou = init_fn_ord(max_order_j + (spaces[form->j]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
-        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
-
-        // Total order of the vector form.
-        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, ext_ord);
-
-        adjust_order_to_refmaps(form, order, &o, current_refmaps);
-
-        // Cleanup.
-        deinit_ext_orders(form, u_ext_ord, ext_ord);
-        delete [] u_ext_ord;
-        ou->free_ord();
-        delete ou;
-        ov->free_ord();
-        delete ov;
+        int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
+        if(eo > max_order_i)
+          max_order_i = eo;
+        eo = this->spaces[form->j]->get_edge_order(current_state->e[form->j], k);
+        if(eo > max_order_j)
+          max_order_j = eo;
       }
+
+      Func<Hermes::Ord>* ou = init_fn_ord(max_order_j + (spaces[form->j]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
+      Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
+
+      // Total order of the vector form.
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ou, ov, &geom_ord, ext_ord);
+
+      adjust_order_to_refmaps(form, order, &o, current_refmaps);
+
+      // Cleanup.
+      deinit_ext_orders(form, u_ext_ord, ext_ord);
+      delete [] u_ext_ord;
+      ou->free_ord();
+      delete ou;
+      ov->free_ord();
+      delete ov;
+
       return order;
     }
 
@@ -2030,44 +2026,40 @@ namespace Hermes
     {
       int order;
 
-      if(is_fvm)
-        order = current_refmaps[form->i]->get_inv_ref_order();
+      // order of solutions from the previous Newton iteration etc..
+      Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** ext_ord = NULL;
+      int ext_size = std::max(form->ext.size(), form->wf->ext.size());
+      if(ext_size > 0)
+        ext_ord = new Func<Hermes::Ord>*[ext_size];
+      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+
+      // Order of shape functions.
+      int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
+      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+        max_order_i = H2D_GET_V_ORDER(max_order_i);
       else
+        max_order_i = H2D_GET_H_ORDER(max_order_i);
+
+      for (unsigned int k = 0; k < current_state->rep->nvert; k++)
       {
-        // order of solutions from the previous Newton iteration etc..
-        Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
-        Func<Hermes::Ord>** ext_ord = NULL;
-        int ext_size = std::max(form->ext.size(), form->wf->ext.size());
-        if(ext_size > 0)
-          ext_ord = new Func<Hermes::Ord>*[ext_size];
-        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
-
-        // Order of shape functions.
-        int max_order_i = this->spaces[form->i]->get_element_order(current_state->e[form->i]->id);
-        if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
-          max_order_i = H2D_GET_V_ORDER(max_order_i);
-        else
-          max_order_i = H2D_GET_H_ORDER(max_order_i);
-
-        for (unsigned int k = 0; k < current_state->rep->nvert; k++)
-        {
-          int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
-          if(eo > max_order_i)
-            max_order_i = eo;
-        }
-        Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
-
-        // Total order of the vector form.
-        Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, ext_ord);
-
-        adjust_order_to_refmaps(form, order, &o, current_refmaps);
-
-        // Cleanup.
-        deinit_ext_orders(form, u_ext_ord, ext_ord);
-        delete [] u_ext_ord;
-        ov->free_ord();
-        delete ov;  
+        int eo = this->spaces[form->i]->get_edge_order(current_state->e[form->i], k);
+        if(eo > max_order_i)
+          max_order_i = eo;
       }
+      Func<Hermes::Ord>* ov = init_fn_ord(max_order_i + (spaces[form->i]->get_shapeset()->get_num_components() > 1 ? 1 : 0));
+
+      // Total order of the vector form.
+      Hermes::Ord o = form->ord(1, &fake_wt, u_ext_ord, ov, &geom_ord, ext_ord);
+
+      adjust_order_to_refmaps(form, order, &o, current_refmaps);
+
+      // Cleanup.
+      deinit_ext_orders(form, u_ext_ord, ext_ord);
+      delete [] u_ext_ord;
+      ov->free_ord();
+      delete ov;
+
       return order;
     }
 
@@ -2294,7 +2286,11 @@ namespace Hermes
 
         for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
-          if(current_state->rep->en[current_state->isurf]->marker == 0)
+          bool inner_edge_for_dg = false;
+          for(int i = 0; i < this->spaces_size; i++)
+            if(current_state->e[i]->en[current_state->isurf]->marker == 0)
+              inner_edge_for_dg = true;
+          if(inner_edge_for_dg)
           {
             neighbor_searches[current_state->isurf] = new LightArray<NeighborSearch<Scalar>*>(5);
 
@@ -2407,7 +2403,12 @@ namespace Hermes
       {
         if(intra_edge_passed_DG[current_state->isurf])
           continue;
-        if(current_state->rep->en[current_state->isurf]->marker != 0)
+        
+        bool inner_edge_for_dg = false;
+          for(int i = 0; i < this->spaces_size; i++)
+            if(current_state->e[i]->en[current_state->isurf]->marker == 0)
+              inner_edge_for_dg = true;
+        if(!inner_edge_for_dg)
           continue;
 
         for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
@@ -2525,6 +2526,12 @@ namespace Hermes
       {
         if(this->spaces[i]->get_type() != HERMES_L2_SPACE)
           continue;
+
+        if(this->spaces[i]->get_element_order(current_state->e[i]->id) == 0)
+        {
+          order = order_base = 0;
+        }
+
         nbs[i] = neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq);
         ext_asmlist[i] = nbs[i]->create_extended_asmlist(spaces[i], current_als[i]);
         nbs[i]->set_quad_order(order);
