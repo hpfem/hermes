@@ -725,7 +725,7 @@ namespace Hermes
         current_mat->prealloc(this->ndof);
 
         AsmList<Scalar>* al = new AsmList<Scalar>[wf->get_neq()];
-        const Mesh** meshes = new const Mesh*[wf->get_neq()];
+        MeshSharedPtr* meshes = new MeshSharedPtr[wf->get_neq()];
         bool **blocks = wf->get_blocks(current_force_diagonal_blocks);
 
         // Init multi-mesh traversal.
@@ -1081,7 +1081,7 @@ namespace Hermes
       init_assembling(coeff_vec, pss, spss, refmaps, u_ext, als, weakforms);
 
       // Vector of meshes.
-      Hermes::vector<const Mesh*> meshes;
+      Hermes::vector<MeshSharedPtr > meshes;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         meshes.push_back(spaces[space_i]->get_mesh());
       for(unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
@@ -2471,7 +2471,7 @@ namespace Hermes
       // The important thing is that the transformations to the current subelement are already there.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        const Mesh * mesh_i;
+        MeshSharedPtr mesh_i;
         if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
           mesh_i = spaces[fns_i]->get_mesh();
         else
@@ -2690,7 +2690,7 @@ namespace Hermes
       // Clear the transformations from the RefMaps and all functions.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        const Mesh * mesh_i;
+        MeshSharedPtr mesh_i;
         if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
           mesh_i = spaces[fns_i]->get_mesh();
         else

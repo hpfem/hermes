@@ -77,7 +77,7 @@ namespace Hermes
     {
     public:
       Solution();
-      Solution(const Mesh *mesh);
+      Solution(MeshSharedPtr mesh);
       Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
       Solution (Space<Scalar>* s, Scalar* coeff_vec);
       virtual ~Solution();

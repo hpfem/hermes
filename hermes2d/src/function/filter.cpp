@@ -82,7 +82,7 @@ namespace Hermes
     void Filter<Scalar>::init()
     {
       // construct the union mesh, if necessary
-      const Mesh* meshes[H2D_MAX_COMPONENTS];
+      MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
       for(int i = 0; i < this->num; i++)
         meshes[i] = this->sln[i]->get_mesh();
       this->mesh = meshes[0];
@@ -107,8 +107,8 @@ namespace Hermes
       {
         Traverse trav;
         trav.begin(num, meshes);
-        this->mesh = new Mesh;
-        unidata = trav.construct_union_mesh(const_cast<Hermes2D::Mesh*>(this->mesh));
+        this->mesh = MeshSharedPtr(new Mesh);
+        unidata = trav.construct_union_mesh(this->mesh);
         trav.finish();
       }
 
@@ -193,7 +193,6 @@ namespace Hermes
 
       if(unimesh)
       {
-        delete this->mesh;
         for (int i = 0; i < num; i++)
           ::free(unidata[i]);
         delete [] unidata;

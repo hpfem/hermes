@@ -272,16 +272,16 @@ namespace Hermes
       return okay;
     }
 
-    Mesh::ReferenceMeshCreator::ReferenceMeshCreator(Mesh* coarse_mesh, int refinement) : coarse_mesh(coarse_mesh), refinement(refinement)
+    Mesh::ReferenceMeshCreator::ReferenceMeshCreator(MeshSharedPtr coarse_mesh, int refinement) : coarse_mesh(coarse_mesh), refinement(refinement)
     {
     }
 
-    Mesh* Mesh::ReferenceMeshCreator::create_ref_mesh()
+    MeshSharedPtr Mesh::ReferenceMeshCreator::create_ref_mesh()
     {
       Mesh* ref_mesh = new Mesh;
       ref_mesh->copy(this->coarse_mesh);
       ref_mesh->refine_all_elements(refinement, false);
-      return ref_mesh;
+      return MeshSharedPtr(ref_mesh);
     }
 
     void Mesh::initial_single_check()
@@ -317,7 +317,7 @@ namespace Hermes
       }
     }
 
-    void Mesh::initial_multimesh_check(Hermes::vector<Mesh*> meshes)
+    void Mesh::initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes)
     {
     }
 
@@ -949,7 +949,7 @@ namespace Hermes
       {
         if(refinement == 3)
         {
-          refine_triangle_to_quads(this, e);
+          refine_triangle_to_quads(e);
         }
         else
         {
@@ -1343,7 +1343,7 @@ namespace Hermes
         return true;
     }
 
-    void Mesh::copy(const Mesh* mesh)
+    void Mesh::copy(MeshSharedPtr mesh)
     {
       unsigned int i;
 
@@ -1351,7 +1351,7 @@ namespace Hermes
       // Serves as a Mesh::init() for purposes of pointer calculation.
 
       // copy nodes and elements
-      HashTable::copy(mesh);
+      HashTable::copy(mesh.get());
       elements.copy(mesh->elements);
 
       this->refinements = mesh->refinements;
@@ -1422,7 +1422,7 @@ namespace Hermes
       HashTable::init(size);
     }
 
-    void Mesh::copy_base(Mesh* mesh)
+    void Mesh::copy_base(MeshSharedPtr mesh)
     {
       //printf("Calling Mesh::free() in Mesh::copy_base().\n");
       free();
@@ -1491,10 +1491,10 @@ namespace Hermes
       this->seq = -1;
     }
 
-    void Mesh::copy_converted(Mesh* mesh)
+    void Mesh::copy_converted(MeshSharedPtr mesh)
     {
       free();
-      HashTable::copy(mesh);
+      HashTable::copy(mesh.get());
       this->boundary_markers_conversion = mesh->boundary_markers_conversion;
       this->element_markers_conversion = mesh->element_markers_conversion;
 
@@ -1586,7 +1586,8 @@ namespace Hermes
       elements.set_append_only(false);
 
       Mesh mesh_tmp_for_convert;
-      mesh_tmp_for_convert.copy_converted(this);
+      mesh_tmp_for_convert.copy_converted(MeshSharedPtr(this));
+
       for (int i = 0; i < mesh_tmp_for_convert.ntopvert; i++)
       {
         if(mesh_tmp_for_convert.nodes[i].type == 1)
@@ -1597,10 +1598,10 @@ namespace Hermes
       MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
-      loader_mesh_tmp_for_convert.save(mesh_file_tmp, &mesh_tmp_for_convert);
-      loader_mesh_tmp_for_convert.load(mesh_file_tmp, &mesh_tmp_for_convert);
+      loader_mesh_tmp_for_convert.save(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
+      loader_mesh_tmp_for_convert.load(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
       remove(mesh_file_tmp);
-      copy(&mesh_tmp_for_convert);
+      copy(MeshSharedPtr(&mesh_tmp_for_convert));
     }
 
     void Mesh::convert_to_base()
@@ -1613,7 +1614,7 @@ namespace Hermes
       elements.set_append_only(false);
 
       Mesh mesh_tmp_for_convert;
-      mesh_tmp_for_convert.copy_converted(this);
+      mesh_tmp_for_convert.copy_converted(MeshSharedPtr(this));
       for (int i = 0; i < mesh_tmp_for_convert.ntopvert; i++)
       {
         if(mesh_tmp_for_convert.nodes[i].type == 1)
@@ -1624,13 +1625,13 @@ namespace Hermes
       MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
-      loader_mesh_tmp_for_convert.save(mesh_file_tmp, &mesh_tmp_for_convert);
-      loader_mesh_tmp_for_convert.load(mesh_file_tmp, &mesh_tmp_for_convert);
+      loader_mesh_tmp_for_convert.save(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
+      loader_mesh_tmp_for_convert.load(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
       remove(mesh_file_tmp);
-      copy(&mesh_tmp_for_convert);
+      copy(MeshSharedPtr(&mesh_tmp_for_convert));
     }
 
-    void Mesh::refine_triangle_to_quads(Mesh* mesh, Element* e, Element** sons_out)
+    void Mesh::refine_triangle_to_quads(Element* e, Element** sons_out)
     {
       // remember the markers of the edge nodes
       int bnd[3] = { e->en[0]->bnd,    e->en[1]->bnd,    e->en[2]->bnd    };
@@ -1911,9 +1912,9 @@ namespace Hermes
 
       // create the four sons
       Element* sons[3];
-      sons[0] = mesh->create_quad(e->marker, e->vn[0], x0, mid, x2, cm[0]);
-      sons[1] = mesh->create_quad(e->marker, x0, e->vn[1], x1, mid, cm[1]);
-      sons[2] = mesh->create_quad(e->marker, x1, e->vn[2], x2, mid, cm[2]);
+      sons[0] = this->create_quad(e->marker, e->vn[0], x0, mid, x2, cm[0]);
+      sons[1] = this->create_quad(e->marker, x0, e->vn[1], x1, mid, cm[1]);
+      sons[2] = this->create_quad(e->marker, x1, e->vn[2], x2, mid, cm[2]);
 
       // update coefficients of curved reference mapping
       for (int i = 0; i < 3; i++)
@@ -1922,10 +1923,10 @@ namespace Hermes
 
       // deactivate this element and unregister from its nodes
       e->active = 0;
-      if(mesh != NULL)
+      if(this != NULL)
       {
-        mesh->nactive += 2;
-        e->unref_all_nodes(mesh);
+        this->nactive += 2;
+        e->unref_all_nodes(this);
       }
       // now the original edge nodes may no longer exist...
 
@@ -1960,7 +1961,7 @@ namespace Hermes
       if(!e->active) throw Hermes::Exceptions::Exception("Attempt to refine element #%d which has been refined already.", e->id);
 
       if(e->is_triangle())
-        refine_triangle_to_quads(this, e);
+        refine_triangle_to_quads(e);
       else
         refine_quad_to_quads(e);
 

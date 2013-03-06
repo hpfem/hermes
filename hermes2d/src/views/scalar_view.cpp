@@ -265,7 +265,7 @@ namespace Hermes
         return a.x < b.x;
       }
 
-      void ScalarView::init_vertex_nodes(const Mesh* mesh)
+      void ScalarView::init_vertex_nodes(MeshSharedPtr mesh)
       {
         //clear all selections
         pointed_vertex_node = NULL;
@@ -461,7 +461,7 @@ namespace Hermes
         }
       }
 
-      void ScalarView::init_element_info(const Mesh* mesh)
+      void ScalarView::init_element_info(MeshSharedPtr mesh)
       {
         //cleanup
         element_infos.clear();

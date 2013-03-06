@@ -1,9 +1,4 @@
 // This file is part of Hermes2D.
-//
-// Copyright 2005-2008 Jakub Cerveny <jakub.cerveny@gmail.com>
-// Copyright 2005-2008 Lenka Dubcova <dubcova@gmail.com>
-// Copyright 2005-2008 Pavel Solin <solin@unr.edu>
-//
 // Hermes2D is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 2 of the License, or
@@ -46,7 +41,7 @@ namespace Hermes
         MeshView(char* title, WinGeom* wg = NULL);
         ~MeshView();
 
-        void show (Mesh* mesh);
+        void show (MeshSharedPtr);
         /// Displays element markers.
         void set_b_elem_mrk(bool set);
 
@@ -73,7 +68,7 @@ namespace Hermes
         virtual void scale_dispatch() {}
         virtual const char* get_help_text() const;
 
-        Mesh* mesh;
+        MeshSharedPtr mesh;
       };
 #else
       class HERMES_API MeshView : public View
@@ -82,7 +77,7 @@ namespace Hermes
 
         MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         MeshView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show(Mesh* mesh) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshSharedPtr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

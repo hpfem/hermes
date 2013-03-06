@@ -106,19 +106,19 @@ namespace Hermes
       template<typename Scalar> friend class DiscreteProblemLinear;
       };
 
-      void begin(int n, const Mesh** meshes, Transformable** fn = NULL);
+      void begin(int n, MeshSharedPtr* meshes, Transformable** fn = NULL);
       void finish();
 
       State* get_next_state(int* top_by_ref = NULL, int* id_by_ref = NULL);
-      int get_num_states(Hermes::vector<const Mesh*> meshes);
+      int get_num_states(Hermes::vector<MeshSharedPtr > meshes);
       inline Element*  get_base() const { return base; }
 
       void init_transforms(State* s, int i);
 
-      UniData** construct_union_mesh(Mesh* unimesh);
+      UniData** construct_union_mesh(MeshSharedPtr unimesh);
 
       int num;
-      const Mesh** meshes;
+      MeshSharedPtr* meshes;
       Transformable** fn;
 
       State* stack;
@@ -142,7 +142,7 @@ namespace Hermes
 
       bool master;
 
-      Mesh* unimesh;
+      MeshSharedPtr unimesh;
       template<typename T> friend class Adapt;
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class DiscreteProblem;

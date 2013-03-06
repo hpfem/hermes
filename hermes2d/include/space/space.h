@@ -106,7 +106,7 @@ namespace Hermes
     {
     public:
       Space();
-      Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs);
+      Space(MeshSharedPtr mesh, Shapeset* shapeset, EssentialBCs<Scalar>* essential_bcs);
 
       /// Common code for constructors.
       void init();
@@ -160,10 +160,10 @@ namespace Hermes
       static int get_num_dofs(const Space<Scalar>* space);
       static int get_num_dofs(Space<Scalar>* space);
 
-      Mesh* get_mesh() const;
+      MeshSharedPtr get_mesh() const;
 
       /// \brief Sets a (new) mesh and calls assign_dofs().
-      void set_mesh(Mesh* mesh);
+      void set_mesh(MeshSharedPtr);
 
       /// \brief Sets a (new) mesh seq, and mesh_seq.
       void set_mesh_seq(int seq);
@@ -184,13 +184,13 @@ namespace Hermes
       bool save(const char *filename) const;
 
       /// Loads a space from a file.
-      static Space<Scalar>* load(const char *filename, Mesh* mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      static Space<Scalar>* load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 
       /// Copy from Space instance 'space'
-      virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
+      virtual void copy(const Space<Scalar>* space, MeshSharedPtr new_mesh);
 
       /// Class for creating reference space.
       class HERMES_API ReferenceSpaceCreator
@@ -200,7 +200,7 @@ namespace Hermes
         /// \param[in] coarse_space The coarse (original) space.
         /// \param[in] ref_mesh The refined mesh.
         /// \param[in] order_increase Increase of the polynomial order.
-        ReferenceSpaceCreator(const Space<Scalar>* coarse_space, const Mesh* ref_mesh, unsigned int order_increase = 1);
+        ReferenceSpaceCreator(const Space<Scalar>* coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase = 1);
 
         /// Method that does the creation.
         /// THIS IS THE METHOD TO OVERLOAD FOR CUSTOM CREATING OF A REFERENCE SPACE.
@@ -221,7 +221,7 @@ namespace Hermes
 
         /// Storage.
         const Space<Scalar>* coarse_space;
-        const Mesh* ref_mesh;
+        MeshSharedPtr ref_mesh;
         unsigned int order_increase;
       };
 
@@ -253,7 +253,7 @@ namespace Hermes
       static Node* get_mid_edge_vertex_node(Element* e, int i, int j);
 
       /// Sets polynomial orders to elements created by Mesh::regularize() using "parents".
-      void distribute_orders(Mesh* mesh, int* parents);
+      void distribute_orders(MeshSharedPtr mesh, int* parents);
 
       /// Internal. Obtains the order of an edge, according to the minimum rule.
       virtual int get_edge_order(Element* e, int edge) const;
@@ -296,7 +296,7 @@ namespace Hermes
       EssentialBCs<Scalar>* essential_bcs;
 
       /// FE mesh.
-      const Mesh* mesh;
+      MeshSharedPtr mesh;
 
       int default_tri_order, default_quad_order;
       int vertex_functions_count, edge_functions_count, bubble_functions_count;

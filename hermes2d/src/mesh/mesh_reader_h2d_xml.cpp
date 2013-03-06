@@ -32,7 +32,7 @@ namespace Hermes
     {
     }
 
-    bool MeshReaderH2DXML::load(const char *filename, Mesh *mesh)
+    bool MeshReaderH2DXML::load(const char *filename, MeshSharedPtr mesh)
     {
       mesh->free();
 
@@ -72,7 +72,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::save(const char *filename, Mesh *mesh)
+    bool MeshReaderH2DXML::save(const char *filename, MeshSharedPtr mesh)
     {
       // Utility pointer.
       Element* e;
@@ -143,7 +143,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<Mesh *> meshes)
+    bool MeshReaderH2DXML::load(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
     {
       for(unsigned int meshes_i = 0; meshes_i < meshes.size(); meshes_i++)
       {
@@ -172,7 +172,7 @@ namespace Hermes
         for(int i = 0; i < H2D_MAX_NODE_ID; i++)
           edge_is[i] = -1;
 
-        if(!load(parsed_xml_domain, &global_mesh, vertex_is, element_is, edge_is))
+        if(!load(parsed_xml_domain, MeshSharedPtr(&global_mesh), vertex_is, element_is, edge_is))
           return false;
 
         int max_vertex_i = -1;
@@ -231,7 +231,7 @@ namespace Hermes
           // copy the whole mesh if the subdomain is the whole mesh.
           if(element_number_count == 0 || element_number_count == parsed_xml_domain->elements().el().size())
           {
-            meshes[subdomains_i]->copy(&global_mesh);
+            meshes[subdomains_i]->copy(MeshSharedPtr(&global_mesh));
             // refinements.
             if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().size() > 0)
             {
@@ -600,7 +600,7 @@ namespace Hermes
 
     static bool elementCompare (XMLSubdomains::el_t* el_i, XMLSubdomains::el_t* el_j) { return ( el_i->i() < el_j->i() ); }
 
-    bool MeshReaderH2DXML::save(const char *filename, Hermes::vector<Mesh *> meshes)
+    bool MeshReaderH2DXML::save(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
     {
       // For mapping of physical coordinates onto top vertices.
       std::map<std::pair<double, double>, unsigned int> points_to_vertices;
@@ -787,7 +787,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, Mesh *mesh, std::map<unsigned int, unsigned int>& vertex_is)
+    bool MeshReaderH2DXML::load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, MeshSharedPtr mesh, std::map<unsigned int, unsigned int>& vertex_is)
     {
       try
       {
@@ -1037,7 +1037,7 @@ namespace Hermes
       return true;
     }
 
-    bool MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Mesh *mesh, int* vertex_is, int* element_is, int* edge_is)
+    bool MeshReaderH2DXML::load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtr mesh, int* vertex_is, int* element_is, int* edge_is)
     {
       try
       {
@@ -1304,7 +1304,7 @@ namespace Hermes
     }
 
     template<typename T>
-    Nurbs* MeshReaderH2DXML::load_arc(Mesh *mesh, std::auto_ptr<T>& parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
+    Nurbs* MeshReaderH2DXML::load_arc(MeshSharedPtr mesh, std::auto_ptr<T>& parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
     {
       Nurbs* nurbs = new Nurbs;
       nurbs->arc = true;
@@ -1360,7 +1360,7 @@ namespace Hermes
     }
 
     template<typename T>
-    Nurbs* MeshReaderH2DXML::load_nurbs(Mesh *mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
+    Nurbs* MeshReaderH2DXML::load_nurbs(MeshSharedPtr mesh, std::auto_ptr<T> & parsed_xml_entity, int id, Node** en, int p1, int p2, bool skip_check)
     {
       Nurbs* nurbs = new Nurbs;
       nurbs->arc = false;
@@ -1425,12 +1425,12 @@ namespace Hermes
       return nurbs;
     }
 
-    void MeshReaderH2DXML::save_arc(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
+    void MeshReaderH2DXML::save_arc(MeshSharedPtr mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
     {
       curves.arc().push_back(XMLMesh::arc(p1, p2, nurbs->angle));
     }
 
-    void MeshReaderH2DXML::save_nurbs(Mesh *mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
+    void MeshReaderH2DXML::save_nurbs(MeshSharedPtr mesh, int p1, int p2, Nurbs* nurbs, XMLMesh::curves_type & curves)
     {
       XMLMesh::NURBS nurbs_xml(p1, p2, nurbs->degree);
 

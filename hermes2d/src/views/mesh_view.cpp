@@ -1,9 +1,4 @@
 // This file is part of Hermes2D.
-//
-// Copyright 2005-2008 Jakub Cerveny <jakub.cerveny@gmail.com>
-// Copyright 2005-2008 Lenka Dubcova <dubcova@gmail.com>
-// Copyright 2005-2008 Pavel Solin <solin@unr.edu>
-//
 // Hermes2D is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 2 of the License, or
@@ -59,7 +54,7 @@ namespace Hermes
           delete this->lin;
       }
 
-      void MeshView::show(Mesh* mesh)
+      void MeshView::show(MeshSharedPtr)
       {
         ZeroSolution<double> sln(mesh);
         if(mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL in MeshView::show().");

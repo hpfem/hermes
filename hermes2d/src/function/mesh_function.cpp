@@ -31,7 +31,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MeshFunction<Scalar>::MeshFunction(const Mesh *mesh) :
+    MeshFunction<Scalar>::MeshFunction(MeshSharedPtr mesh) :
     Function<Scalar>()
     {
       this->mesh = mesh;
@@ -195,7 +195,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const Mesh* MeshFunction<Scalar>::get_mesh() const
+    MeshSharedPtr MeshFunction<Scalar>::get_mesh() const
     {
       return mesh;
     }

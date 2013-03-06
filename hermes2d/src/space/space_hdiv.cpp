@@ -49,14 +49,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>::HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
+    HdivSpace<Scalar>::HdivSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, essential_bcs)
     {
       init(shapeset, p_init);
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>::HdivSpace(const Mesh* mesh, int p_init, Shapeset* shapeset)
+    HdivSpace<Scalar>::HdivSpace(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL)
     {
       init(shapeset, p_init);
@@ -70,7 +70,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void HdivSpace<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    void HdivSpace<Scalar>::copy(const Space<Scalar>* space, MeshSharedPtr new_mesh)
     {
       Space<Scalar>::copy(space, new_mesh);
 

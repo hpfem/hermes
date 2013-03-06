@@ -126,7 +126,7 @@ namespace Hermes
 
       this->have_coarse_solutions = true;
 
-      const Mesh** meshes = new const Mesh*[this->num];
+      MeshSharedPtr* meshes = new MeshSharedPtr[this->num];
       Transformable** fns = new Transformable*[this->num];
 
       this->num_act_elems = 0;

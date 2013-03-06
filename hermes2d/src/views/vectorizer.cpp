@@ -538,7 +538,7 @@ namespace Hermes
         if(ydisp != NULL)
           old_quad_y_disp = ydisp->get_quad_2d();
 
-        Hermes::vector<const Mesh*> meshes;
+        Hermes::vector<MeshSharedPtr > meshes;
         meshes.push_back(xsln->get_mesh());
         meshes.push_back(ysln->get_mesh());
         if(xdisp != NULL)

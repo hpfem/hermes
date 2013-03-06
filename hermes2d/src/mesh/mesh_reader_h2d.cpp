@@ -33,7 +33,7 @@ namespace Hermes
     {
     }
 
-    Nurbs* MeshReaderH2D::load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
+    Nurbs* MeshReaderH2D::load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2)
     {
       double dummy_dbl;
 
@@ -153,7 +153,7 @@ namespace Hermes
       return nurbs;
     }
 
-    bool MeshReaderH2D::load(const char *filename, Mesh *mesh)
+    bool MeshReaderH2D::load(const char *filename, MeshSharedPtr mesh)
     {
       // Check if file exists
       std::ifstream s(filename);
@@ -387,7 +387,7 @@ namespace Hermes
       return true;
     }
 
-    void MeshReaderH2D::save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first)
+    void MeshReaderH2D::save_refinements(MeshSharedPtr mesh, FILE* f, Element* e, int id, bool& first)
     {
       if(e->active) return;
       fprintf(f, first ? "refinements =\n{\n" : ",\n"); first = false;
@@ -414,7 +414,7 @@ namespace Hermes
       }
     }
 
-    void MeshReaderH2D::save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
+    void MeshReaderH2D::save_nurbs(MeshSharedPtr mesh, FILE* f, int p1, int p2, Nurbs* nurbs)
     {
       if(nurbs->arc)
       {
@@ -438,7 +438,7 @@ namespace Hermes
       }
     }
 
-    bool MeshReaderH2D::save(const char* filename, Mesh *mesh)
+    bool MeshReaderH2D::save(const char* filename, MeshSharedPtr mesh)
     {
       int i, mrk;
       Element* e;

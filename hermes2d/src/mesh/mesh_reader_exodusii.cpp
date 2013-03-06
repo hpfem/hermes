@@ -59,7 +59,7 @@ namespace Hermes
       }
     };
 
-    bool MeshReaderExodusII::load(const char *file_name, Mesh *mesh)
+    bool MeshReaderExodusII::load(const char *file_name, MeshSharedPtr mesh)
     {
 #ifdef WITH_EXODUSII
       int err;

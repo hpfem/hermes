@@ -32,7 +32,7 @@ namespace Hermes
     class HERMES_API ExactSolution : public Solution<Scalar>
     {
     public:
-      ExactSolution(const Mesh* mesh);
+      ExactSolution(MeshSharedPtr);
 
       /// Dimension of result - either 1 or 2.
       virtual unsigned int get_dimension() const = 0;
@@ -54,7 +54,7 @@ namespace Hermes
     class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
     {
     public:
-      ExactSolutionScalar(const Mesh* mesh);
+      ExactSolutionScalar(MeshSharedPtr);
 
       /// For Scalar-valued solutions this returns 1.
       virtual unsigned int get_dimension() const;
@@ -81,7 +81,7 @@ namespace Hermes
     class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
     {
     public:
-      ExactSolutionVector(const Mesh* mesh);
+      ExactSolutionVector(MeshSharedPtr);
 
       /// For vector-valued solutions this returns 2.
       virtual unsigned int get_dimension() const;
@@ -108,7 +108,7 @@ namespace Hermes
     class HERMES_API ConstantSolution : public ExactSolutionScalar<Scalar>
     {
     public:
-      ConstantSolution(const Mesh* mesh, Scalar constant);
+      ConstantSolution(MeshSharedPtr mesh, Scalar constant);
 
       virtual Scalar value (double x, double y) const;
 
@@ -129,7 +129,7 @@ namespace Hermes
     class HERMES_API ZeroSolution : public ExactSolutionScalar<Scalar>
     {
     public:
-      ZeroSolution(const Mesh* mesh);
+      ZeroSolution(MeshSharedPtr);
 
       virtual Scalar value (double x, double y) const;
 
@@ -147,7 +147,7 @@ namespace Hermes
     class HERMES_API ConstantSolutionVector : public ExactSolutionVector<Scalar>
     {
     public:
-      ConstantSolutionVector(const Mesh* mesh, Scalar constantX, Scalar constantY);
+      ConstantSolutionVector(MeshSharedPtr mesh, Scalar constantX, Scalar constantY);
 
       virtual Scalar2<Scalar> value (double x, double y) const;
 
@@ -168,7 +168,7 @@ namespace Hermes
     class HERMES_API ZeroSolutionVector : public ExactSolutionVector<Scalar>
     {
     public:
-      ZeroSolutionVector(const Mesh* mesh);
+      ZeroSolutionVector(MeshSharedPtr);
 
       virtual Scalar2<Scalar> value (double x, double y) const;
 

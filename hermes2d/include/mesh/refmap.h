@@ -18,6 +18,7 @@
 
 #include "../global.h"
 #include "../shapeset/precalc.h"
+#include "../mesh/mesh.h"
 #include "../quadrature/quad_all.h"
 #include "shapeset/shapeset_h1_all.h"
 
@@ -79,7 +80,7 @@ namespace Hermes
       /// \param[in] y Physical y-coordinate.
       /// \param[in] x_reference Optional parameter, in which the x-coordinate of x in the reference domain will be returned.
       /// \param[in] y_reference Optional parameter, in which the y-coordinate of y in the reference domain will be returned.
-      static Element* element_on_physical_coordinates(const Mesh* mesh, double x, double y, double* x_reference = NULL, double* y_reference = NULL);
+      static Element* element_on_physical_coordinates(MeshSharedPtr mesh, double x, double y, double* x_reference = NULL, double* y_reference = NULL);
 
       /// Find out if the coordinatex [x,y] lie in the element e.
       static bool is_element_on_physical_coordinates(Element* e, double x, double y, double* x_reference, double* y_reference);

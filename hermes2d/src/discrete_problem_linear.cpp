@@ -101,7 +101,7 @@ namespace Hermes
       this->init_assembling(NULL, pss, spss, refmaps, NULL, als, weakforms);
 
       // Vector of meshes.
-      Hermes::vector<const Mesh*> meshes;
+      Hermes::vector<MeshSharedPtr > meshes;
       for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
         meshes.push_back(this->spaces[space_i]->get_mesh());
       for(unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)

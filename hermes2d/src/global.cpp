@@ -53,7 +53,7 @@ namespace Hermes
       sln1->set_quad_2d(quad);
       sln2->set_quad_2d(quad);
 
-      const Mesh* meshes[2] = { sln1->get_mesh(), sln2->get_mesh() };
+      MeshSharedPtr meshes[2] = { sln1->get_mesh(), sln2->get_mesh() };
       Transformable* tr[2] = { sln1, sln2 };
       Traverse trav(true);
       trav.begin(2, meshes, tr);
@@ -104,7 +104,7 @@ namespace Hermes
 
       double norm = 0.0;
       Element* e;
-      const Mesh* mesh = sln->get_mesh();
+      MeshSharedPtr mesh = sln->get_mesh();
 
       for_all_active_elements(e, mesh)
       {

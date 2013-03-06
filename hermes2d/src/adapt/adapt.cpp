@@ -172,7 +172,7 @@ namespace Hermes
 
       //get meshes
       int max_id = -1;
-      Mesh* meshes[H2D_MAX_COMPONENTS];
+      MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->spaces[j]->get_mesh();
@@ -635,14 +635,13 @@ namespace Hermes
         throw Exceptions::LengthException(1, 1, num);
       OGProjection<Scalar> ogProjection;
       typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
-      Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+      MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
       typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
       Space<Scalar>* ref_space = ref_space_creator.create_ref_space();
       Solution<Scalar> ref_sln_local;
       ogProjection.project_global(ref_space, rsln, &ref_sln_local);
       double result = calc_err_internal(sln, &ref_sln_local, NULL, solutions_for_adapt, error_flags);
       delete ref_space;
-      delete ref_mesh;
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
       return result;
@@ -658,7 +657,7 @@ namespace Hermes
         throw Exceptions::LengthException(1, slns.size(), num);
       if(rslns.size() != num)
         throw Exceptions::LengthException(2, rslns.size(), num);
-      Mesh** ref_meshes = new Mesh*[num];
+      MeshSharedPtr* ref_meshes = new MeshSharedPtr[num];
       Space<Scalar>** ref_spaces = new Space<Scalar>*[num];
       Hermes::vector<Solution<Scalar>*> ref_slns_local;
       for(unsigned int i = 0; i < num; i++)
@@ -673,10 +672,7 @@ namespace Hermes
       }
       double result = calc_err_internal(slns, ref_slns_local, component_errors, solutions_for_adapt, error_flags);
       for(unsigned int i = 0; i < num; i++)
-      {
         delete ref_spaces[i];
-        delete ref_meshes[i];
-      }
       delete [] ref_meshes;
       delete [] ref_spaces;
       this->tick();
@@ -696,7 +692,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fix_shared_mesh_refinements(Mesh** meshes, std::vector<ElementToRefine>& elems_to_refine,
+    void Adapt<Scalar>::fix_shared_mesh_refinements(MeshSharedPtr* meshes, std::vector<ElementToRefine>& elems_to_refine,
       int** idx, RefinementSelectors::Selector<Scalar> *** refinement_selectors)
     {
       int num_elem_to_proc = elems_to_refine.size();
@@ -787,7 +783,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    void Adapt<Scalar>::homogenize_shared_mesh_orders(Mesh** meshes)
+    void Adapt<Scalar>::homogenize_shared_mesh_orders(MeshSharedPtr* meshes)
     {
       Element* e;
       for (int i = 0; i < this->num; i++)
@@ -828,7 +824,7 @@ namespace Hermes
     void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
       Space<Scalar>* space = this->spaces[elem_ref.comp];
-      Mesh* mesh = space->get_mesh();
+      MeshSharedPtr mesh = space->get_mesh();
 
       Element* e;
       e = mesh->get_element(elem_ref.id);
@@ -1084,7 +1080,7 @@ namespace Hermes
       have_reference_solutions = true;
 
       // Prepare multi-mesh traversal and error arrays.
-      const Mesh **meshes = new const Mesh *[2 * num];
+      MeshSharedPtr *meshes = new MeshSharedPtr [2 * num];
       Transformable **tr = new Transformable *[2 * num];
       Traverse trav(true);
       num_act_elems = 0;
@@ -1239,7 +1235,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fill_regular_queue(const Mesh** meshes)
+    void Adapt<Scalar>::fill_regular_queue(MeshSharedPtr* meshes)
     {
       //prepare space for queue (it is assumed that it will only grow since we can just split)
       regular_queue.clear();

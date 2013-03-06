@@ -30,7 +30,7 @@ namespace Hermes
       MeshReaderExodusII();
       virtual ~MeshReaderExodusII();
 
-      virtual bool load(const char *file_name, Mesh *mesh);
+      virtual bool load(const char *file_name, MeshSharedPtr mesh);
     };
   }
 }

@@ -41,7 +41,11 @@
 #include <cstdio>
 #include <stdarg.h>
 #include <sstream>
-
+#ifdef _WINDOWS
+  #include <memory>
+#else
+  #include <tr1/memory>
+#endif
 #include <algorithm>
 #include <vector>
 #include <map>

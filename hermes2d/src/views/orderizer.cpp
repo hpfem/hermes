@@ -118,11 +118,7 @@ namespace Hermes
         edges_count = 0;
 
         // estimate the required number of vertices and triangles
-        Mesh* mesh = space->get_mesh();
-        if(mesh == NULL)
-        {
-          throw Hermes::Exceptions::Exception("Mesh is NULL in Orderizer:process_space().");
-        }
+        MeshSharedPtr mesh = space->get_mesh();
         int nn = mesh->get_num_active_elements();
         this->vertex_size = std::max(this->vertex_size, 77 * nn);
         this->triangle_size = std::max(this->triangle_size, 64 * nn);

@@ -55,7 +55,7 @@ namespace Hermes
       // Dump into the first part of target_vec the values of active vertex dofs, then add values
       // of active edge dofs, and finally also values of active bubble dofs.
       // Start with active vertex dofs.
-      Mesh* mesh = space->get_mesh();
+      MeshSharedPtr mesh = space->get_mesh();
       Element* e;
       // Go through all active elements in mesh to collect active vertex DOF.
       for_all_active_elements(e, mesh)

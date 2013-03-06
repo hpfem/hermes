@@ -48,18 +48,18 @@ namespace Hermes
       MeshFunction();
 
       /// Constructor.
-      MeshFunction(const Mesh *mesh);
+      MeshFunction(MeshSharedPtr mesh);
       
       /// Destructor.
       virtual ~MeshFunction();
 
       /// Return the mesh.
-      const Mesh* get_mesh() const;
+      MeshSharedPtr get_mesh() const;
 
       /// Return the reference mapping.
       RefMap* get_refmap(bool update = true);
 
-      /// Return the value at the coordinates x,y.
+			/// Return the value at the coordinates x,y.
       virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL) = 0;
 
       /// Cloning function - for parallel OpenMP blocks.
@@ -118,7 +118,7 @@ namespace Hermes
 
     protected:
       ElementMode2D mode;
-      const Mesh* mesh;
+      MeshSharedPtr mesh;
       RefMap* refmap;
     
       void force_transform(MeshFunction<Scalar>* mf);

@@ -44,14 +44,14 @@ namespace Hermes
       MeshReaderH2D();
       virtual ~MeshReaderH2D();
 
-      virtual bool load(const char *filename, Mesh *mesh);
-      virtual bool save(const char *filename, Mesh *mesh);
+      virtual bool load(const char *filename, MeshSharedPtr mesh);
+      virtual bool save(const char *filename, MeshSharedPtr mesh);
 
     protected:
-      Nurbs* load_nurbs(Mesh *mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
+      Nurbs* load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
 
-      void save_refinements(Mesh *mesh, FILE* f, Element* e, int id, bool& first);
-      void save_nurbs(Mesh *mesh, FILE* f, int p1, int p2, Nurbs* nurbs);
+      void save_refinements(MeshSharedPtr mesh, FILE* f, Element* e, int id, bool& first);
+      void save_nurbs(MeshSharedPtr mesh, FILE* f, int p1, int p2, Nurbs* nurbs);
     };
   }
 }

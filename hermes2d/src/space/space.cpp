@@ -118,7 +118,7 @@ namespace Hermes
     }
 
      template<>
-    Space<double>::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<double>* essential_bcs)
+    Space<double>::Space(MeshSharedPtr mesh, Shapeset* shapeset, EssentialBCs<double>* essential_bcs)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       if(mesh == NULL)
@@ -127,7 +127,7 @@ namespace Hermes
     }
 
     template<>
-    Space<std::complex<double> >::Space(const Mesh* mesh, Shapeset* shapeset, EssentialBCs<std::complex<double> >* essential_bcs)
+    Space<std::complex<double> >::Space(MeshSharedPtr mesh, Shapeset* shapeset, EssentialBCs<std::complex<double> >* essential_bcs)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
       if(mesh == NULL)
@@ -234,7 +234,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    void Space<Scalar>::copy(const Space<Scalar>* space, MeshSharedPtr new_mesh)
     {
       this->free();
       
@@ -286,9 +286,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Mesh* Space<Scalar>::get_mesh() const
+    MeshSharedPtr Space<Scalar>::get_mesh() const
     {
-      return const_cast<Mesh*>(mesh);
+      return mesh;
     }
 
     template<typename Scalar>
@@ -605,7 +605,8 @@ namespace Hermes
           edata[list[i]].order = order;
         else
           edata[list[i]].order = H2D_MAKE_QUAD_ORDER(h_order, v_order);
-        const_cast<Mesh*>(this->mesh)->unrefine_element_id(list[i]);
+
+        this->mesh->unrefine_element_id(list[i]);
       }
 
       // Recalculate all integrals, do not use previous adaptivity step.
@@ -615,7 +616,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(const Space<Scalar>* coarse_space, const Mesh* ref_mesh, unsigned int order_increase) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
+    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(const Space<Scalar>* coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
     {
     }
 
@@ -820,7 +821,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::set_mesh(Mesh* mesh)
+    void Space<Scalar>::set_mesh(MeshSharedPtr)
     {
       if(this->mesh == mesh) 
         return;
@@ -834,7 +835,7 @@ namespace Hermes
     void Space<Scalar>::set_mesh_seq(int seq)
     {
       this->mesh_seq = seq;
-      const_cast<Mesh*>(this->mesh)->set_seq(seq);
+      this->mesh->set_seq(seq);
     }
 
     template<typename Scalar>
@@ -854,7 +855,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::distribute_orders(Mesh* mesh, int* parents)
+    void Space<Scalar>::distribute_orders(MeshSharedPtr mesh, int* parents)
     {
       int num = mesh->get_max_element_id();
       int* orders = new int[num + 1];
@@ -1183,7 +1184,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::load(const char *filename, Mesh* mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    Space<Scalar>* Space<Scalar>::load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       try
       {

@@ -37,10 +37,10 @@ namespace Hermes
 		{
 		public:
 			HdivSpace();
-			HdivSpace(const Mesh* mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
+			HdivSpace(MeshSharedPtr mesh, EssentialBCs<Scalar>* boundary_conditions, int p_init = 1,
 				Shapeset* shapeset = NULL);
 
-			HdivSpace(const Mesh* mesh, int p_init = 1,
+			HdivSpace(MeshSharedPtr mesh, int p_init = 1,
 				Shapeset* shapeset = NULL);
 
 			virtual ~HdivSpace();
@@ -50,7 +50,7 @@ namespace Hermes
 			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
 			/// Copy from Space instance 'space'
-			virtual void copy(const Space<Scalar>* space, Mesh* new_mesh);
+			virtual void copy(const Space<Scalar>* space, MeshSharedPtr new_mesh);
 		protected:
 			/// Common code for the constructors.
 			void init(Shapeset* shapeset, int p_init);

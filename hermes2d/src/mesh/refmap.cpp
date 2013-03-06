@@ -782,7 +782,7 @@ namespace Hermes
     }
 
 
-    Element* RefMap::element_on_physical_coordinates(const Mesh* mesh, double x, double y, double* x_reference, double* y_reference)
+    Element* RefMap::element_on_physical_coordinates(MeshSharedPtr mesh, double x, double y, double* x_reference, double* y_reference)
     {
       // go through all elements
       double xi1, xi2;

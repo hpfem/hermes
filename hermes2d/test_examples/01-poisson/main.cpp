@@ -38,12 +38,13 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
+  {
   // Load the mesh.
-  Hermes::Hermes2D::Mesh mesh;
+  MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   try
   {
-    mloader.load("domain.xml", &mesh);
+    mloader.load("domain.xml", mesh);
   }
   catch(Exceptions::MeshLoadFailureException& e)
   {
@@ -53,7 +54,7 @@ int main(int argc, char* argv[])
 
   // Refine all elements, do it INIT_REF_NUM-times.
   for(unsigned int i = 0; i < INIT_REF_NUM; i++)
-    mesh.refine_all_elements();
+    mesh->refine_all_elements();
   
   // Initialize essential boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential(Hermes::vector<std::string>("Bottom", "Inner", "Outer", "Left"),
@@ -61,7 +62,7 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Initialize space.
-  Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
+  Hermes::Hermes2D::H1Space<double> space(mesh, &bcs, P_INIT);
   
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
@@ -70,7 +71,7 @@ int main(int argc, char* argv[])
   // Illustration of setting element orders.
   Hermes::Hermes2D::Element* e;
   int i = 1;
-  for_all_active_elements(e, &mesh)
+  for_all_active_elements(e, mesh)
   {
     space.set_element_order(e->id, i++ % 4 + 2);
   }
@@ -115,7 +116,7 @@ int main(int argc, char* argv[])
       bool mode_3D = false;
       lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
 
-      // Output mesh and element orders in VTK format.
+			// Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
       ord.save_mesh_vtk(&space, "mesh.vtk");
       ord.save_orders_vtk(&space, "ord.vtk");
@@ -135,5 +136,6 @@ int main(int argc, char* argv[])
     std::cout << e.what();
   }
 
+  }
   return 0;
 }

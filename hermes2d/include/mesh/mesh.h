@@ -21,6 +21,21 @@
 #include "hash.h"
 #include "../mixins2d.h"
 
+
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    class Mesh;
+  }
+}
+
+#ifdef _WINDOWS
+  typedef std::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
+#else
+  typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
+#endif
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -264,13 +279,13 @@ namespace Hermes
       bool rescale(double x_ref, double y_ref);
 
       /// Creates a copy of another mesh.
-      void copy(const Mesh* mesh);
+      void copy(MeshSharedPtr);
 
       /// Copies the coarsest elements of another mesh.
-      void copy_base(Mesh* mesh);
+      void copy_base(MeshSharedPtr);
 
       /// Copies the active elements of a converted mesh.
-      void copy_converted(Mesh* mesh);
+      void copy_converted(MeshSharedPtr);
 
       /// Creates a mesh from given vertex, triangle, quad, and marker arrays
       void create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
@@ -380,22 +395,22 @@ namespace Hermes
         /// is a quad, 0 means refine in both directions, 1 means refine
         /// horizontally (with respect to the reference domain), 2 means
         /// refine vertically.
-        ReferenceMeshCreator(Mesh* coarse_mesh, int refinement = 0);
+        ReferenceMeshCreator(MeshSharedPtr coarse_mesh, int refinement = 0);
 
         /// Method that does the creation.
         /// THIS IS THE METHOD TO OVERLOAD FOR CUSTOM CREATING OF A REFERENCE MESH.
-        virtual Mesh* create_ref_mesh();
+        virtual MeshSharedPtr create_ref_mesh();
 
       private:
         /// Storage.
-        Mesh* coarse_mesh;
+        MeshSharedPtr coarse_mesh;
         int refinement;
       };
 
     private:
       /// For internal use.
       void initial_single_check();
-      static void initial_multimesh_check(Hermes::vector<Mesh*> meshes);
+      static void initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes);
 
       /// For internal use.
       int get_edge_sons(Element* e, int edge, int& son1, int& son2) const;
@@ -410,7 +425,7 @@ namespace Hermes
 
       void refine_element_to_quads_id(int id);
 
-      void refine_triangle_to_quads(Mesh* mesh, Element* e, Element** elems_out = NULL);
+      void refine_triangle_to_quads(Element* e, Element** elems_out = NULL);
 
       void refine_element_to_triangles_id(int id);
 

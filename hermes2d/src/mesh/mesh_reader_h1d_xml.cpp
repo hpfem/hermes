@@ -32,7 +32,7 @@ namespace Hermes
     {
     }
 
-    bool MeshReaderH1DXML::load(const char *filename, Mesh *mesh)
+    bool MeshReaderH1DXML::load(const char *filename, MeshSharedPtr mesh)
     {
       mesh->free();
 
@@ -201,7 +201,7 @@ namespace Hermes
       }
     }
 
-    bool MeshReaderH1DXML::save(const char *filename, Mesh *mesh)
+    bool MeshReaderH1DXML::save(const char *filename, MeshSharedPtr mesh)
     {
       /// \todo Is this necessary? It is a valid H2D mesh afterall.
       return true;

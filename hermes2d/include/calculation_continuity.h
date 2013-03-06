@@ -86,9 +86,9 @@ namespace Hermes
         Record(unsigned int number);
 
         /// Saves vector of meshes.
-        void save_meshes(Hermes::vector<Mesh*> meshes);
+        void save_meshes(Hermes::vector<MeshSharedPtr > meshes);
         /// Saves one mesh.
-        void save_mesh(Mesh* mesh);
+        void save_mesh(MeshSharedPtr);
 
         /// Saves vector of spaces.
         void save_spaces(Hermes::vector<Space<Scalar>*> spaces);
@@ -108,19 +108,19 @@ namespace Hermes
         void save_error(double error);
 
         /// Loads vector of meshes.
-        void load_meshes(Hermes::vector<Mesh*> meshes);
+        void load_meshes(Hermes::vector<MeshSharedPtr > meshes);
         /// Loads one mesh.
-        void load_mesh(Mesh* mesh);
+        void load_mesh(MeshSharedPtr);
 
         /// Loads vector of spaces.
-        Hermes::vector<Space<Scalar>*> load_spaces(Hermes::vector<Mesh*> meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
+        Hermes::vector<Space<Scalar>*> load_spaces(Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
 
         /// Loads vector of spaces.
         /// Version without essential BCs.
-        Hermes::vector<Space<Scalar>*> load_spaces(Hermes::vector<Mesh*> meshes, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
+        Hermes::vector<Space<Scalar>*> load_spaces(Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Shapeset*> shapeset = Hermes::vector<Shapeset*>());
 
         /// Loads one space.
-        Space<Scalar>* load_space(Mesh* mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+        Space<Scalar>* load_space(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
         /// Loads vector of solutions.
         void load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Space<Scalar>*> spaces);
@@ -155,18 +155,18 @@ namespace Hermes
 
       /// Add a record.
       /// See records.
-      void add_record(double time, unsigned int number, Mesh* mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
-      void add_record(double time, unsigned int number, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(double time, unsigned int number, MeshSharedPtr mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(double time, unsigned int number, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
 
       /// Add a record.
       /// See time_records.
-      void add_record(double time, Mesh* mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
-      void add_record(double time, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(double time, MeshSharedPtr mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(double time, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
 
       /// Add a record.
       /// See numbered_records.
-      void add_record(unsigned int number, Mesh* mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
-      void add_record(unsigned int number, Hermes::vector<Mesh*> meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(unsigned int number, MeshSharedPtr mesh, Space<Scalar>* space = NULL, Solution<Scalar>* sln = NULL, double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
+      void add_record(unsigned int number, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Space<Scalar>*> spaces = Hermes::vector<Space<Scalar>*>(), Hermes::vector<Solution<Scalar>*> slns = Hermes::vector<Solution<Scalar>*>(), double time_step = 0.0, double time_step_n_minus_one = 0.0, double error = 0.0);
 
       /// Returns the value of record_available.
       /// See record_available.

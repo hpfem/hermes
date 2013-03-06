@@ -154,7 +154,7 @@ namespace Hermes
     }
 
     template<>
-    Solution<double>::Solution(const Mesh *mesh) : MeshFunction<double>(mesh)
+    Solution<double>::Solution(MeshSharedPtr mesh) : MeshFunction<double>(mesh)
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();
@@ -162,7 +162,7 @@ namespace Hermes
     }
 
     template<>
-    Solution<std::complex<double> >::Solution(const Mesh *mesh) : MeshFunction<std::complex<double> >(mesh)
+    Solution<std::complex<double> >::Solution(MeshSharedPtr mesh) : MeshFunction<std::complex<double> >(mesh)
     {
       space_type = HERMES_INVALID_SPACE;
       this->init();

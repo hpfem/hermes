@@ -49,7 +49,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    L2Space<Scalar>::L2Space(const Mesh* mesh, int p_init, Shapeset* shapeset)
+    L2Space<Scalar>::L2Space(MeshSharedPtr mesh, int p_init, Shapeset* shapeset)
       : Space<Scalar>(mesh, shapeset, NULL)
     {
       init(shapeset, p_init);
@@ -64,7 +64,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::copy(const Space<Scalar>* space, Mesh* new_mesh)
+    void L2Space<Scalar>::copy(const Space<Scalar>* space, MeshSharedPtr new_mesh)
     {
       Space<Scalar>::copy(space, new_mesh);
 

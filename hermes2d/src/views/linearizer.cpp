@@ -575,7 +575,7 @@ namespace Hermes
 
         // obtain the solution in vertices, estimate the maximum solution value
         // meshes.
-        Hermes::vector<const Mesh*> meshes;
+        Hermes::vector<MeshSharedPtr > meshes;
         meshes.push_back(sln->get_mesh());
         if(xdisp != NULL)
           meshes.push_back(xdisp->get_mesh());

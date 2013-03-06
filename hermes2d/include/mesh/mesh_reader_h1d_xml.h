@@ -40,10 +40,10 @@ namespace Hermes
       virtual ~MeshReaderH1DXML();
 
       /// This method loads a single mesh from a file.
-      virtual bool load(const char *filename, Mesh *mesh);
+      virtual bool load(const char *filename, MeshSharedPtr mesh);
 
       /// This method saves a single mesh to a file.
-      bool save(const char *filename, Mesh *mesh);
+      bool save(const char *filename, MeshSharedPtr mesh);
     };
   }
 }
