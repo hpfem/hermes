@@ -91,16 +91,15 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
-  Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads, 4);
   // Load the mesh.
-  Mesh mesh;
+  MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("domain.mesh", mesh);
 
   // Initial mesh refinements.
-  mesh.refine_towards_boundary(BDY_OBSTACLE, 1, false);
-  mesh.refine_towards_boundary(BDY_TOP, 1, true);     // '4' is the number of levels,
-  mesh.refine_towards_boundary(BDY_BOTTOM, 1, true);  // 'true' stands for anisotropic refinements.
+  mesh->refine_towards_boundary(BDY_OBSTACLE, 1, false);
+  mesh->refine_towards_boundary(BDY_TOP, 1, true);     // '4' is the number of levels,
+  mesh->refine_towards_boundary(BDY_BOTTOM, 1, true);  // 'true' stands for anisotropic refinements.
 
   // Initialize boundary conditions.
   EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
@@ -111,16 +110,16 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::EssentialBCs<double> bcs_pressure;
 
   // Spaces for velocity components and pressure.
-  H1Space<double> xvel_space(&mesh, &bcs_vel_x, P_INIT_VEL);
-  H1Space<double> yvel_space(&mesh, &bcs_vel_y, P_INIT_VEL);
+  SpaceSharedPtr<double> xvel_space(new H1Space<double>(mesh, &bcs_vel_x, P_INIT_VEL));
+  SpaceSharedPtr<double> yvel_space(new H1Space<double>(mesh, &bcs_vel_y, P_INIT_VEL));
 #ifdef PRESSURE_IN_L2
-  L2Space<double> p_space(&mesh, P_INIT_PRESSURE);
+  SpaceSharedPtr<double> p_space(new L2Space<double> (mesh, P_INIT_PRESSURE));
 #else
-  H1Space<double> p_space(&mesh, &bcs_pressure, P_INIT_PRESSURE);
+  SpaceSharedPtr<double> p_space(new H1Space<double> (mesh, &bcs_pressure, P_INIT_PRESSURE));
 #endif
 
   // Calculate and report the number of degrees of freedom.
-  int ndof = Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
+  int ndof = Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space));
 
   // Define projection norms.
   ProjNormType vel_proj_norm = HERMES_H1_NORM;
@@ -131,7 +130,7 @@ int main(int argc, char* argv[])
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
-  ConstantSolution<double> xvel_prev_time(&mesh, 0.0), yvel_prev_time(&mesh, 0.0), p_prev_time(&mesh, 0.0);
+  ConstantSolution<double> xvel_prev_time(mesh, 0.0), yvel_prev_time(mesh, 0.0), p_prev_time(mesh, 0.0);
 
   // Initialize weak formulation.
   WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
@@ -141,7 +140,7 @@ int main(int argc, char* argv[])
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
 	newton.set_weak_formulation(wf);
-	newton.set_spaces(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space));
+	newton.set_spaces(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space));
 
   // Initialize views.
   Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));
@@ -155,10 +154,10 @@ if(HERMES_VISUALIZATION)
 
   // Project the initial condition on the FE space to obtain initial
   // coefficient vector for the Newton's method.
-  double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space))];
+  double* coeff_vec = new double[Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space))];
   OGProjection<double> ogProjection;
 
-  ogProjection.project_global(Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space),
+  ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space),
     Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
     coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
@@ -188,7 +187,8 @@ if(HERMES_VISUALIZATION)
       e.print_msg();
     }
     Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
-    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), Hermes::vector<const Space<double> *>(&xvel_space, &yvel_space, &p_space), tmp);
+    Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), 
+      Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space), tmp);
 
     // Show the solution at the end of time step.
     if(HERMES_VISUALIZATION)

@@ -31,7 +31,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<Space<Scalar>*>& spaces,
+    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
       Hermes::vector<ProjNormType> proj_norms) :
     spaces(spaces),
       num_act_elems(-1),
@@ -93,8 +93,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Space<Scalar>* space, ProjNormType proj_norm) :
-    spaces(Hermes::vector<Space<Scalar>*>()),
+    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar> space, ProjNormType proj_norm) :
+    spaces(Hermes::vector<SpaceSharedPtr<Scalar> >()),
       num_act_elems(-1),
       have_errors(false),
       have_coarse_solutions(false),
@@ -637,11 +637,10 @@ namespace Hermes
       typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
       MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
       typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
-      Space<Scalar>* ref_space = ref_space_creator.create_ref_space();
+      SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
       Solution<Scalar> ref_sln_local;
       ogProjection.project_global(ref_space, rsln, &ref_sln_local);
       double result = calc_err_internal(sln, &ref_sln_local, NULL, solutions_for_adapt, error_flags);
-      delete ref_space;
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
       return result;
@@ -658,7 +657,7 @@ namespace Hermes
       if(rslns.size() != num)
         throw Exceptions::LengthException(2, rslns.size(), num);
       MeshSharedPtr* ref_meshes = new MeshSharedPtr[num];
-      Space<Scalar>** ref_spaces = new Space<Scalar>*[num];
+      SpaceSharedPtr<Scalar>* ref_spaces = new SpaceSharedPtr<Scalar>[num];
       Hermes::vector<Solution<Scalar>*> ref_slns_local;
       for(unsigned int i = 0; i < num; i++)
       {
@@ -671,9 +670,6 @@ namespace Hermes
         ogProjection.project_global(ref_space_creator.create_ref_space(), rslns[i], ref_slns_local.back());
       }
       double result = calc_err_internal(slns, ref_slns_local, component_errors, solutions_for_adapt, error_flags);
-      for(unsigned int i = 0; i < num; i++)
-        delete ref_spaces[i];
-      delete [] ref_meshes;
       delete [] ref_spaces;
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
@@ -823,7 +819,7 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
-      Space<Scalar>* space = this->spaces[elem_ref.comp];
+      SpaceSharedPtr<Scalar> space = this->spaces[elem_ref.comp];
       MeshSharedPtr mesh = space->get_mesh();
 
       Element* e;

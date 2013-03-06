@@ -1,7 +1,7 @@
 #include "hp_adapt.h"
 
 //int ref = no. of refinement steps
-bool refine_elem(Space<double>* space, Element* e, int ref)
+bool refine_elem(SpaceSharedPtr<double> space, Element* e, int ref)
 {
   bool refined = true;
   int order = space->get_element_order(e->id);
@@ -27,7 +27,7 @@ bool HPAdapt::adapt_smooth(int* smooth_elem, int max_p)
   if (this->num >1) 
     throw Hermes::Exceptions::Exception("adapt_smooth: Only for one space .");
   bool changed = false;
-  Space<double>* space = this->spaces[0];
+  SpaceSharedPtr<double> space = this->spaces[0];
   int order, v_ord, h_ord;
   int n_dof = space->get_num_dofs();
   Element* e;

@@ -30,8 +30,6 @@
         if(elem_coeffs[i] != NULL)
         { delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
         
- 				if((own_mesh == true)&&(mesh!=NULL)) delete mesh;
- 				mesh = NULL;
  				
         e_last = NULL;
 

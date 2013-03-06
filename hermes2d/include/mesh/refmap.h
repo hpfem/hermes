@@ -147,7 +147,8 @@ namespace Hermes
         stack[top] = *ctm;
         this->ctm = stack + top;
         update_cur_node();
-        if(is_const) calc_const_inv_ref_map();
+        if(is_const)
+          calc_const_inv_ref_map();
       }
 
       Quad2D* quad_2d;

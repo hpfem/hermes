@@ -36,14 +36,14 @@ const double BDY_C_PARAM = 20.0;
 
 int main(int argc, char* argv[])
 {
-  // Load the mesh.
-  Hermes::Hermes2D::Mesh mesh;
+  // Load the mesh->
+  MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2D mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("domain.mesh", mesh);
 
   // Perform initial mesh refinements (optional).
   for (int i = 0; i < INIT_REF_NUM; i++)
-    mesh.refine_all_elements();
+    mesh->refine_all_elements();
 
   // Initialize the weak formulation.
   CustomWeakFormPoissonNewton wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL),
@@ -57,14 +57,14 @@ int main(int argc, char* argv[])
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
+  SpaceSharedPtr<double> space(new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
+  int ndof = space->get_num_dofs();
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
 
   newton.set_weak_formulation(&wf);
-  newton.set_space(&space);
+  newton.set_space(space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::Solution<double> sln;
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   {
     e.print_msg();
   }
-  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), &space, &sln);
+  Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), space, &sln);
 
   // VTK output.
   if(VTK_VISUALIZATION) {
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 
     // Output mesh and element orders in VTK format.
     Hermes::Hermes2D::Views::Orderizer ord;
-    ord.save_orders_vtk(&space, "ord.vtk");
+    ord.save_orders_vtk(space, "ord.vtk");
     }
 
   // Visualize the solution.

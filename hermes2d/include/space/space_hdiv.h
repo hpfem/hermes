@@ -50,7 +50,7 @@ namespace Hermes
 			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
 			/// Copy from Space instance 'space'
-			virtual void copy(const Space<Scalar>* space, MeshSharedPtr new_mesh);
+			virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
 		protected:
 			/// Common code for the constructors.
 			void init(Shapeset* shapeset, int p_init);

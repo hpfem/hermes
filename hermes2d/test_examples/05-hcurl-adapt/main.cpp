@@ -17,7 +17,7 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 //  Domain: L-shape domain
 //
 //  Meshes: you can use either "lshape3q.mesh" (quadrilateral mesh) or
-//          "lshape3t.mesh" (triangular mesh). See the mesh.load(...) command below.
+//          "lshape3t.mesh" (triangular mesh). See the mesh->load(...) command below.
 //
 //  BC: perfect conductor on boundary markers 1 and 6 (essential BC)
 //      impedance boundary condition on rest of boundary (natural BC)
@@ -82,14 +82,14 @@ const double LAMBDA = 1.0;
 
 int main(int argc, char* argv[])
 {
-  // Load the mesh.
-  Mesh mesh;
+  // Load the mesh->
+  MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
-  mloader.load("lshape3q.mesh", &mesh);    // quadrilaterals
-  //mloader.load("lshape3t.mesh", &mesh);  // triangles
+  mloader.load("lshape3q.mesh", mesh);    // quadrilaterals
+  //mloader.load("lshape3t.mesh", mesh);  // triangles
 
   // Perform initial mesh refinemets.
-  for (int i = 0; i < INIT_REF_NUM; i++)  mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++)  mesh->refine_all_elements();
 
   // Initialize boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential(Hermes::vector<std::string>("Corner_horizontal",
@@ -97,8 +97,8 @@ int main(int argc, char* argv[])
   EssentialBCs<std::complex<double> > bcs(&bc_essential);
 
   // Create an Hcurl space with default shapeset.
-  HcurlSpace<std::complex<double> > space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
+  SpaceSharedPtr<std::complex<double> > space(new HcurlSpace<std::complex<double> >(mesh, &bcs, P_INIT));
+  int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
   CustomWeakForm wf(MU_R, KAPPA);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   Solution<std::complex<double> > sln, ref_sln;
 
   // Initialize exact solution.
-  CustomExactSolution sln_exact(&mesh);
+  CustomExactSolution sln_exact(mesh);
 
   // Initialize refinement selector.
   HcurlProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_est, graph_cpu_est,
     graph_dof_exact, graph_cpu_exact;
 
-  DiscreteProblem<std::complex<double> > dp(&wf, &space);
+  DiscreteProblem<std::complex<double> > dp(&wf, space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
@@ -134,11 +134,11 @@ int main(int argc, char* argv[])
   int as = 1; bool done = false;
   do
   {
-    // Construct globally refined reference mesh and setup reference space.
-    Mesh::ReferenceMeshCreator ref_mesh_creator(&mesh);
+    // Construct globally refined reference mesh and setup reference space->
+    Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
     Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
-    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh);
-    Space<std::complex<double> >* ref_space = ref_space_creator.create_ref_space();
+    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
+    SpaceSharedPtr<std::complex<double> > ref_space = ref_space_creator.create_ref_space();
 
     newton.set_space(ref_space);
     int ndof_ref = ref_space->get_num_dofs();
@@ -157,23 +157,23 @@ int main(int argc, char* argv[])
     }
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
-    // Project the fine mesh solution onto the coarse mesh.
+    // Project the fine mesh solution onto the coarse mesh->
     OGProjection<std::complex<double> > ogProjection;
-    ogProjection.project_global(&space, &ref_sln, &sln);
+    ogProjection.project_global(space, &ref_sln, &sln);
 
     // View the coarse mesh solution and polynomial orders.
     if(HERMES_VISUALIZATION)
     {
       RealFilter real_filter(&sln);
       v_view.show(&real_filter);
-      o_view.show(&space);
+      o_view.show(space);
       lin.save_solution_vtk(&real_filter, "sln.vtk", "a");
-      ord.save_mesh_vtk(&space, "mesh.vtk");
+      ord.save_mesh_vtk(space, "mesh->vtk");
       lin.free();
     }
 
     // Calculate element errors and total error estimate.
-    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
+    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(space);
     adaptivity->set_verbose_output(true);
 
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
@@ -185,12 +185,12 @@ int main(int argc, char* argv[])
     double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(space.get_num_dofs(), err_est_rel);
+    graph_dof_est.add_values(space->get_num_dofs(), err_est_rel);
     graph_dof_est.save("conv_dof_est.dat");
-    graph_dof_exact.add_values(space.get_num_dofs(), err_exact_rel);
+    graph_dof_exact.add_values(space->get_num_dofs(), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
 
-    // If err_est_rel too large, adapt the mesh.
+    // If err_est_rel too large, adapt the mesh->
     if(err_est_rel < ERR_STOP) done = true;
     else
     {
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
       // Increase the counter of performed adaptivity steps.
       if(done == false)  as++;
     }
-    if(space.get_num_dofs() >= NDOF_STOP) done = true;
+    if(space->get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;

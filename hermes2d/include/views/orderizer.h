@@ -35,14 +35,14 @@ namespace Hermes
         ~Orderizer();
 
         template<typename Scalar>
-        void process_space(const Space<Scalar>* space);
+        void process_space(SpaceSharedPtr<Scalar> space);
 
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
         template<typename Scalar>
-        void save_orders_vtk(const Space<Scalar>* space, const char* file_name);
+        void save_orders_vtk(SpaceSharedPtr<Scalar> space, const char* file_name);
 
         template<typename Scalar>
-        void save_mesh_vtk(const Space<Scalar>* space, const char* file_name);
+        void save_mesh_vtk(SpaceSharedPtr<Scalar> space, const char* file_name);
 
         int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
 

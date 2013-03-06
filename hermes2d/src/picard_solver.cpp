@@ -39,14 +39,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space)
       : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
     {
       init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces)
+    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
       : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
     {
       init();
@@ -85,9 +85,9 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::set_time(double time)
     {
-      Hermes::vector<Space<Scalar>*> spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
-        spaces.push_back(const_cast<Space<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(i)));
+        spaces.push_back(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(i));
 
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time(time);
@@ -112,19 +112,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    void PicardSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_space(const Space<Scalar>* space)
+    void PicardSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
     }
 
     template<typename Scalar>
-    Hermes::vector<const Space<Scalar>*> PicardSolver<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> > PicardSolver<Scalar>::get_spaces() const
     {
       return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }
@@ -268,7 +268,7 @@ namespace Hermes
       // Preliminaries.
       int num_spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size();
       int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_num_dofs();
-      Hermes::vector<const Space<Scalar>* > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
       Hermes::vector<bool> add_dir_lift;
       for(unsigned int i = 0; i < spaces.size(); i++)
         add_dir_lift.push_back(false);

@@ -36,7 +36,7 @@ namespace Hermes
 
         VectorBaseView(char* title, WinGeom* wg = NULL);
 
-        void show(Space<Scalar>* space);
+        void show(SpaceSharedPtr<Scalar> space);
 
         virtual void set_title(const char* t);
 
@@ -44,7 +44,7 @@ namespace Hermes
 
       protected:
 
-        Space<Scalar>* space;
+        SpaceSharedPtr<Scalar> space;
         PrecalcShapeset* pss;
         Solution<Scalar>* sln;
 
@@ -69,7 +69,7 @@ namespace Hermes
 
         VectorBaseView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show(Space<Scalar>* space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(SpaceSharedPtr<Scalar> space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         virtual void set_title(const char* t) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };

@@ -41,7 +41,7 @@ namespace Hermes
         MeshView(char* title, WinGeom* wg = NULL);
         ~MeshView();
 
-        void show (MeshSharedPtr);
+        void show (MeshSharedPtr mesh);
         /// Displays element markers.
         void set_b_elem_mrk(bool set);
 
@@ -77,7 +77,7 @@ namespace Hermes
 
         MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         MeshView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show(MeshSharedPtr) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshSharedPtr mesh) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

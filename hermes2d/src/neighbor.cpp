@@ -21,7 +21,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    NeighborSearch<Scalar>::NeighborSearch(Element* el, MeshSharedPtr) :
+    NeighborSearch<Scalar>::NeighborSearch(Element* el, MeshSharedPtr mesh) :
     supported_shapes(NULL),
       mesh(mesh),
       central_transformations(LightArray<Transformations*>(4)),
@@ -824,7 +824,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(const Space<Scalar>*space, AsmList<Scalar>* al)
+    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist(SpaceSharedPtr<Scalar>space, AsmList<Scalar>* al)
     {
       ExtendedShapeset* new_supp_shapes = new ExtendedShapeset(this, al, space);
 
@@ -832,7 +832,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(const Space<Scalar> *space, AsmList<Scalar>* al)
+    typename NeighborSearch<Scalar>::ExtendedShapeset* NeighborSearch<Scalar>::create_extended_asmlist_multicomponent(SpaceSharedPtr<Scalar> space, AsmList<Scalar>* al)
     {
       if(supported_shapes != NULL)
         delete supported_shapes;
@@ -960,7 +960,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, const Space<Scalar>* space) :
+    NeighborSearch<Scalar>::ExtendedShapeset::ExtendedShapeset(NeighborSearch* neighborhood, AsmList<Scalar>* central_al, SpaceSharedPtr<Scalar> space) :
     central_al(central_al)
     {
       neighbor_al = new AsmList<Scalar>();
@@ -992,7 +992,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, const Space<Scalar>* space)
+    void NeighborSearch<Scalar>::ExtendedShapeset::update(NeighborSearch* neighborhood, SpaceSharedPtr<Scalar> space)
     {
       delete [] this->dof;
       space->get_boundary_assembly_list(neighborhood->neighb_el, neighborhood->neighbor_edge.local_num_of_edge, neighbor_al);

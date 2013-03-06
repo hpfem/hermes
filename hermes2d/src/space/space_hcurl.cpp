@@ -71,7 +71,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void HcurlSpace<Scalar>::copy(const Space<Scalar>* space, MeshSharedPtr new_mesh)
+    void HcurlSpace<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
       Space<Scalar>::copy(space, new_mesh);
 

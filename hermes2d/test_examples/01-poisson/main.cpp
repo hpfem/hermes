@@ -39,7 +39,7 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 int main(int argc, char* argv[])
 {
   {
-  // Load the mesh.
+  // Load the mesh->
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   try
@@ -61,8 +61,8 @@ int main(int argc, char* argv[])
     FIXED_BDY_TEMP);
   Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-  // Initialize space.
-  Hermes::Hermes2D::H1Space<double> space(mesh, &bcs, P_INIT);
+  // Initialize space->
+  SpaceSharedPtr<double> space( new Hermes::Hermes2D::H1Space<double>(mesh, &bcs, P_INIT));
   
   // Initialize the weak formulation.
   CustomWeakFormPoisson wf("Aluminum", new Hermes::Hermes1DFunction<double>(LAMBDA_AL), "Copper",
@@ -73,29 +73,29 @@ int main(int argc, char* argv[])
   int i = 1;
   for_all_active_elements(e, mesh)
   {
-    space.set_element_order(e->id, i++ % 4 + 2);
+    space->set_element_order(e->id, i++ % 4 + 2);
   }
 
   // One has to call this method after any changes to DOFs.
-  space.assign_dofs();
+  space->assign_dofs();
 
   // Output of numbers of DOFs, vertex DOFs, edge DOFs, and bubble DOFs respectively.
-  std::cout << space.get_num_dofs() << std::endl;
-  std::cout << space.get_vertex_functions_count() << std::endl;
-  std::cout << space.get_edge_functions_count() << std::endl;
-  std::cout << space.get_bubble_functions_count() << std::endl;
+  std::cout << space->get_num_dofs() << std::endl;
+  std::cout << space->get_vertex_functions_count() << std::endl;
+  std::cout << space->get_edge_functions_count() << std::endl;
+  std::cout << space->get_bubble_functions_count() << std::endl;
 
  if (HERMES_VISUALIZATION)
  {
    Hermes::Hermes2D::Views::BaseView<double> o;
-   o.show(&space);
+   o.show(space);
  }
 
   // Initialize the solution.
   Hermes::Hermes2D::Solution<double> sln;
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, &space);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
 
   // Solve the linear problem.
   try
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
     double* sln_vector = linear_solver.get_sln_vector();
 
     // Translate the solution vector into the previously initialized Solution.
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, &space, &sln);
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, &sln);
 
     // VTK output.
     if(VTK_VISUALIZATION)
@@ -118,8 +118,8 @@ int main(int argc, char* argv[])
 
 			// Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
-      ord.save_mesh_vtk(&space, "mesh.vtk");
-      ord.save_orders_vtk(&space, "ord.vtk");
+      ord.save_mesh_vtk(space, "mesh->vtk");
+      ord.save_orders_vtk(space, "ord.vtk");
     }
 
     if(HERMES_VISUALIZATION)

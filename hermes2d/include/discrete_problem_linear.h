@@ -32,10 +32,10 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces);
+      DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
       /// Constructor for one equation.
-      DiscreteProblemLinear(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
+      DiscreteProblemLinear(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
 
       /// Empty constructor for special purposes.
       DiscreteProblemLinear();

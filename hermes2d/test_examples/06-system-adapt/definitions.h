@@ -73,7 +73,7 @@ public:
 class ExactSolutionFitzHughNagumo1 : public ExactSolutionScalar<double>
 {
 public:
-  ExactSolutionFitzHughNagumo1(const Mesh* mesh);
+  ExactSolutionFitzHughNagumo1(MeshSharedPtr mesh);
 
   virtual double value(double x, double y) const;
 
@@ -91,7 +91,7 @@ public:
 class ExactSolutionFitzHughNagumo2 : public ExactSolutionScalar<double>
 {
 public:
-  ExactSolutionFitzHughNagumo2(const Mesh* mesh, double K);
+  ExactSolutionFitzHughNagumo2(MeshSharedPtr mesh, double K);
 
   virtual double value(double x, double y) const;
 

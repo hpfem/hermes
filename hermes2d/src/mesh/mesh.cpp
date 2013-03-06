@@ -1585,23 +1585,23 @@ namespace Hermes
         refine_element_to_triangles_id(e->id);
       elements.set_append_only(false);
 
-      Mesh mesh_tmp_for_convert;
-      mesh_tmp_for_convert.copy_converted(MeshSharedPtr(this));
+      MeshSharedPtr mesh_tmp_for_convert(new Mesh);
+      mesh_tmp_for_convert->copy_converted(MeshSharedPtr(this));
 
-      for (int i = 0; i < mesh_tmp_for_convert.ntopvert; i++)
+      for (int i = 0; i < mesh_tmp_for_convert->ntopvert; i++)
       {
-        if(mesh_tmp_for_convert.nodes[i].type == 1)
+        if(mesh_tmp_for_convert->nodes[i].type == 1)
         {
-          mesh_tmp_for_convert.nodes[i].y = 0.0;
+          mesh_tmp_for_convert->nodes[i].y = 0.0;
         }
       }
       MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
-      loader_mesh_tmp_for_convert.save(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
-      loader_mesh_tmp_for_convert.load(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
+      loader_mesh_tmp_for_convert.save(mesh_file_tmp, mesh_tmp_for_convert);
+      loader_mesh_tmp_for_convert.load(mesh_file_tmp, mesh_tmp_for_convert);
       remove(mesh_file_tmp);
-      copy(MeshSharedPtr(&mesh_tmp_for_convert));
+      copy(mesh_tmp_for_convert);
     }
 
     void Mesh::convert_to_base()
@@ -1613,22 +1613,22 @@ namespace Hermes
         convert_element_to_base_id(e->id);
       elements.set_append_only(false);
 
-      Mesh mesh_tmp_for_convert;
-      mesh_tmp_for_convert.copy_converted(MeshSharedPtr(this));
-      for (int i = 0; i < mesh_tmp_for_convert.ntopvert; i++)
+      MeshSharedPtr mesh_tmp_for_convert(new Mesh);
+      mesh_tmp_for_convert->copy_converted(MeshSharedPtr(this));
+      for (int i = 0; i < mesh_tmp_for_convert->ntopvert; i++)
       {
-        if(mesh_tmp_for_convert.nodes[i].type == 1)
+        if(mesh_tmp_for_convert->nodes[i].type == 1)
         {
-          mesh_tmp_for_convert.nodes[i].y = 0.0;
+          mesh_tmp_for_convert->nodes[i].y = 0.0;
         }
       }
       MeshReaderH2D loader_mesh_tmp_for_convert;
       char* mesh_file_tmp = NULL;
       mesh_file_tmp = tmpnam(NULL);
-      loader_mesh_tmp_for_convert.save(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
-      loader_mesh_tmp_for_convert.load(mesh_file_tmp, MeshSharedPtr(&mesh_tmp_for_convert));
+      loader_mesh_tmp_for_convert.save(mesh_file_tmp, mesh_tmp_for_convert);
+      loader_mesh_tmp_for_convert.load(mesh_file_tmp, mesh_tmp_for_convert);
       remove(mesh_file_tmp);
-      copy(MeshSharedPtr(&mesh_tmp_for_convert));
+      copy(mesh_tmp_for_convert);
     }
 
     void Mesh::refine_triangle_to_quads(Element* e, Element** sons_out)

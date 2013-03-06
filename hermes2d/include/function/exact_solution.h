@@ -32,7 +32,7 @@ namespace Hermes
     class HERMES_API ExactSolution : public Solution<Scalar>
     {
     public:
-      ExactSolution(MeshSharedPtr);
+      ExactSolution(MeshSharedPtr mesh);
 
       /// Dimension of result - either 1 or 2.
       virtual unsigned int get_dimension() const = 0;
@@ -54,7 +54,7 @@ namespace Hermes
     class HERMES_API ExactSolutionScalar : public ExactSolution<Scalar>
     {
     public:
-      ExactSolutionScalar(MeshSharedPtr);
+      ExactSolutionScalar(MeshSharedPtr mesh);
 
       /// For Scalar-valued solutions this returns 1.
       virtual unsigned int get_dimension() const;
@@ -81,7 +81,7 @@ namespace Hermes
     class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
     {
     public:
-      ExactSolutionVector(MeshSharedPtr);
+      ExactSolutionVector(MeshSharedPtr mesh);
 
       /// For vector-valued solutions this returns 2.
       virtual unsigned int get_dimension() const;
@@ -129,7 +129,7 @@ namespace Hermes
     class HERMES_API ZeroSolution : public ExactSolutionScalar<Scalar>
     {
     public:
-      ZeroSolution(MeshSharedPtr);
+      ZeroSolution(MeshSharedPtr mesh);
 
       virtual Scalar value (double x, double y) const;
 
@@ -168,7 +168,7 @@ namespace Hermes
     class HERMES_API ZeroSolutionVector : public ExactSolutionVector<Scalar>
     {
     public:
-      ZeroSolutionVector(MeshSharedPtr);
+      ZeroSolutionVector(MeshSharedPtr mesh);
 
       virtual Scalar2<Scalar> value (double x, double y) const;
 

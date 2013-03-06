@@ -69,21 +69,21 @@ int main(int argc, char* argv[])
   Hermes::Mixins::TimeMeasurable m;
   m.tick();
 
-  // Load the mesh.
-  Mesh mesh;
+  // Load the mesh->
+  MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("domain.mesh", mesh);
 
   // Perform initial mesh refinements.
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh->refine_all_elements();
 
   // Initialize boundary conditions.
   Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential("Dirichlet", std::complex<double>(0.0, 0.0));
   EssentialBCs<std::complex<double> > bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space<std::complex<double> > space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
+  SpaceSharedPtr<std::complex<double> > space(new H1Space<std::complex<double> >(mesh, &bcs, P_INIT));
+  int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
   CustomWeakForm wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
-  DiscreteProblem<std::complex<double> > dp(&wf, &space);
+  DiscreteProblem<std::complex<double> > dp(&wf, space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
@@ -113,9 +113,9 @@ int main(int argc, char* argv[])
   int as = 1; bool done = false;
   do
   {
-    // Construct globally refined reference mesh and setup reference space.
-    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(&space, &mesh);
-    Space<std::complex<double> >* ref_space = ref_space_creator.create_ref_space();
+    // Construct globally refined reference mesh and setup reference space->
+    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(space, mesh);
+    SpaceSharedPtr<std::complex<double> > ref_space = ref_space_creator.create_ref_space();
     
     newton.set_space(ref_space);
 
@@ -145,33 +145,33 @@ int main(int argc, char* argv[])
 
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
 
-    // Project the fine mesh solution onto the coarse mesh.
+    // Project the fine mesh solution onto the coarse mesh->
     OGProjection<std::complex<double> > ogProjection;
-    ogProjection.project_global(&space, &ref_sln, &sln);
+    ogProjection.project_global(space, &ref_sln, &sln);
 
     // View the coarse mesh solution and polynomial orders.
     RealFilter real_filter(&sln);
     sview.show(&real_filter, &real_filter);
 
-    oview.show(&space);
+    oview.show(space);
 
     // Calculate element errors and total error estimate.
-    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(&space);
+    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
     std::cout << (std::string)"Relative error: " << err_est_rel << std::endl;
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(space.get_num_dofs(), err_est_rel);
+    graph_dof.add_values(space->get_num_dofs(), err_est_rel);
     graph_dof.save("conv_dof_est.dat");
 
-    // If err_est too large, adapt the mesh.
+    // If err_est too large, adapt the mesh->
     if(err_est_rel < ERR_STOP) done = true;
     else
     {
       std::cout << (std::string)"Adapting..." << std::endl << std::endl;
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
     }
-    if(space.get_num_dofs() >= NDOF_STOP) done = true;
+    if(space->get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;

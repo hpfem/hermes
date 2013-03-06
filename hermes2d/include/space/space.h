@@ -25,10 +25,45 @@
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
+
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class Space;
+  }
+}
+
+template<typename Scalar>
+class SpaceSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
+{
+public:
+  SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = NULL) : std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
+  {
+  }
+};
+
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    namespace Mixins
+    {
+      /// \ingroup g_mixins2d
+      /// Mixin for classes where Spaces can be (re-)set during their existence.
+      template<typename Scalar>
+      class HERMES_API SettableSpaces
+      {
+      public:
+        /// Sets new spaces for the instance.
+        virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces) = 0;
+        virtual void set_space(SpaceSharedPtr<Scalar> space) = 0;
+        /// Get all spaces as a Hermes::vector.
+        virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const = 0;
+        virtual SpaceSharedPtr<Scalar> get_space(int n) const;
+      };
+    }
+
     template<typename Scalar> class Adapt;
     template<typename Scalar> class DiscreteProblem;
     namespace Views
@@ -153,17 +188,15 @@ namespace Hermes
       int get_num_dofs() const;
 
       /// \brief Returns the number of basis functions contained in the spaces.
-      static int get_num_dofs(Hermes::vector<const Space<Scalar>*> spaces);
-      static int get_num_dofs(Hermes::vector<Space<Scalar>*> spaces);
+      static int get_num_dofs(Hermes::vector<SpaceSharedPtr<Scalar>> spaces);
 
       /// \brief Returns the number of basis functions contained in the space.
-      static int get_num_dofs(const Space<Scalar>* space);
-      static int get_num_dofs(Space<Scalar>* space);
+      static int get_num_dofs(SpaceSharedPtr<Scalar> space);
 
       MeshSharedPtr get_mesh() const;
 
       /// \brief Sets a (new) mesh and calls assign_dofs().
-      void set_mesh(MeshSharedPtr);
+      void set_mesh(MeshSharedPtr mesh);
 
       /// \brief Sets a (new) mesh seq, and mesh_seq.
       void set_mesh_seq(int seq);
@@ -184,13 +217,13 @@ namespace Hermes
       bool save(const char *filename) const;
 
       /// Loads a space from a file.
-      static Space<Scalar>* load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
 
       /// Copy from Space instance 'space'
-      virtual void copy(const Space<Scalar>* space, MeshSharedPtr new_mesh);
+      virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
 
       /// Class for creating reference space.
       class HERMES_API ReferenceSpaceCreator
@@ -200,27 +233,27 @@ namespace Hermes
         /// \param[in] coarse_space The coarse (original) space.
         /// \param[in] ref_mesh The refined mesh.
         /// \param[in] order_increase Increase of the polynomial order.
-        ReferenceSpaceCreator(const Space<Scalar>* coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase = 1);
+        ReferenceSpaceCreator(SpaceSharedPtr<Scalar> coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase = 1);
 
         /// Method that does the creation.
         /// THIS IS THE METHOD TO OVERLOAD FOR CUSTOM CREATING OF A REFERENCE SPACE.
-        virtual void handle_orders(Space<Scalar>* ref_space);
+        virtual void handle_orders(SpaceSharedPtr<Scalar> ref_space);
 
         /// Methods that user calls to get the reference space pointer (has to be properly casted if necessary).
-        virtual Space<Scalar>* create_ref_space(bool assign_dofs = true);
-
-        /// Construction initialization.
+        virtual SpaceSharedPtr<Scalar> create_ref_space(bool assign_dofs = true);
+      
       private:
-        L2Space<Scalar>* init_construction_l2();
-        H1Space<Scalar>* init_construction_h1();
-        HcurlSpace<Scalar>* init_construction_hcurl();
-        HdivSpace<Scalar>* init_construction_hdiv();
+        /// Construction initialization.
+        SpaceSharedPtr<Scalar> init_construction_l2();
+        SpaceSharedPtr<Scalar> init_construction_h1();
+        SpaceSharedPtr<Scalar> init_construction_hcurl();
+        SpaceSharedPtr<Scalar> init_construction_hdiv();
 
         /// Construction finalization.
-        virtual void finish_construction(Space<Scalar>* ref_space);
+        virtual void finish_construction(SpaceSharedPtr<Scalar> ref_space);
 
         /// Storage.
-        const Space<Scalar>* coarse_space;
+        SpaceSharedPtr<Scalar> coarse_space;
         MeshSharedPtr ref_mesh;
         unsigned int order_increase;
       };
@@ -238,13 +271,13 @@ namespace Hermes
       virtual int assign_dofs(int first_dof = 0, int stride = 1);
 
       /// \brief Assings the degrees of freedom to all Spaces in the Hermes::vector.
-      static int assign_dofs(Hermes::vector<Space<Scalar>*> spaces);
+      static int assign_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc) = 0;
 
-      static void update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time);
+      static void update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, double time);
 
-      static void update_essential_bc_values(Space<Scalar>*s, double time);
+      static void update_essential_bc_values(SpaceSharedPtr<Scalar> space, double time);
 
       /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
       /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)

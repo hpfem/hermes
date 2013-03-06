@@ -36,7 +36,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ExactSolutionScalar<Scalar>::ExactSolutionScalar(MeshSharedPtr) : ExactSolution<Scalar>(mesh)
+    ExactSolutionScalar<Scalar>::ExactSolutionScalar(MeshSharedPtr mesh) : ExactSolution<Scalar>(mesh)
     {
       this->num_components = 1;
     }
@@ -48,7 +48,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ExactSolutionVector<Scalar>::ExactSolutionVector(MeshSharedPtr) : ExactSolution<Scalar>(mesh)
+    ExactSolutionVector<Scalar>::ExactSolutionVector(MeshSharedPtr mesh) : ExactSolution<Scalar>(mesh)
     {
       this->num_components = 2;
     }
@@ -219,7 +219,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ZeroSolution<Scalar>::ZeroSolution(MeshSharedPtr) : ExactSolutionScalar<Scalar>(mesh) {};
+    ZeroSolution<Scalar>::ZeroSolution(MeshSharedPtr mesh) : ExactSolutionScalar<Scalar>(mesh) {};
 
     template<typename Scalar>
     Scalar ZeroSolution<Scalar>::value (double x, double y) const {
@@ -418,7 +418,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ZeroSolutionVector<Scalar>::ZeroSolutionVector(MeshSharedPtr) : ExactSolutionVector<Scalar>(mesh) {};
+    ZeroSolutionVector<Scalar>::ZeroSolutionVector(MeshSharedPtr mesh) : ExactSolutionVector<Scalar>(mesh) {};
 
     template<typename Scalar>
     Scalar2<Scalar> ZeroSolutionVector<Scalar>::value (double x, double y) const {

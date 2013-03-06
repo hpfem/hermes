@@ -5,8 +5,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    template<typename Scalar> class Space;
-
     /** \defgroup g_mixins2d Mixins
     *  \brief Mixins are utility classes used for all kinds of other classes.
     *
@@ -20,22 +18,7 @@ namespace Hermes
     /// could use - setting of spaces, output of linear algebraic structures, ...
     namespace Mixins
     {
-      /// \ingroup g_mixins2d
-      /// Mixin for classes where Spaces can be (re-)set during their existence.
-      template<typename Scalar>
-      class HERMES_API SettableSpaces
-      {
-      public:
-        /// Sets new spaces for the instance.
-        virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces) = 0;
-        virtual void set_space(const Space<Scalar>* space) = 0;
-        /// Get all spaces as a Hermes::vector.
-        virtual Hermes::vector<const Space<Scalar>*> get_spaces() const = 0;
-        virtual const Space<Scalar>* get_space(int n) const;
-      };
-
-
-      /// \ingroup g_mixins2d
+       /// \ingroup g_mixins2d
       /// Mixin that allows for asking about the instance state (ok / not ok).
       class HERMES_API StateQueryable
       {

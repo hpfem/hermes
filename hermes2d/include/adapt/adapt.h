@@ -59,8 +59,8 @@ namespace Hermes
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      Adapt(Hermes::vector<Space<Scalar>*>& spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
-      Adapt(Space<Scalar>* space, ProjNormType proj_norm = HERMES_UNSET_NORM);
+      Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+      Adapt(SpaceSharedPtr<Scalar> space, ProjNormType proj_norm = HERMES_UNSET_NORM);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
       /// Matrix forms for error calculation.
@@ -225,7 +225,7 @@ namespace Hermes
       void homogenize_shared_mesh_orders(MeshSharedPtr * meshes);
 
       int num;                              ///< Number of solution components (as in wf->neq).
-      Hermes::vector<Space<Scalar>*> spaces;        ///< Spaces.
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;        ///< Spaces.
       bool **own_forms;
       int num_act_elems;                    ///< A total number of active elements across all provided meshes.
       Solution<Scalar>* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.

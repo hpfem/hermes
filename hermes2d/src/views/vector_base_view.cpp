@@ -31,7 +31,7 @@ namespace Hermes
     namespace Views
     {
       template<typename Scalar>
-      void VectorBaseView<Scalar>::show(Space<Scalar>* space)
+      void VectorBaseView<Scalar>::show(SpaceSharedPtr<Scalar> space)
       {
         free();
         pss = new PrecalcShapeset(space->shapeset);

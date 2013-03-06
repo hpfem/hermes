@@ -74,7 +74,7 @@ namespace Hermes
       /// \param[in]  el    Central element of the neighborhood (current active element in the assembling procedure).
       /// \param[in]  mesh  Mesh on which we search for the neighbors.
       ///
-      NeighborSearch(Element* el, MeshSharedPtr);
+      NeighborSearch(Element* el, MeshSharedPtr mesh);
       NeighborSearch(const NeighborSearch& ns);
 
       /// Destructor.
@@ -152,8 +152,8 @@ namespace Hermes
       /// \param[in]  al    Assembly list for the central element.
       /// \return     Number of shape functions in the extended shapeset (sum of central and neighbor elems' local counts).
       ///
-      ExtendedShapeset* create_extended_asmlist(const Space<Scalar>* space, AsmList<Scalar>* al);
-      ExtendedShapeset* create_extended_asmlist_multicomponent(const Space<Scalar>* space, AsmList<Scalar>* al);
+      ExtendedShapeset* create_extended_asmlist(SpaceSharedPtr<Scalar> space, AsmList<Scalar>* al);
+      ExtendedShapeset* create_extended_asmlist_multicomponent(SpaceSharedPtr<Scalar> space, AsmList<Scalar>* al);
 
       /*** Methods for working with quadrature on the active edge. ***/
 
@@ -201,7 +201,7 @@ namespace Hermes
         /// \param[in]  central_al    Assembly list for the currently assembled edge on the central element.
         /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
         ///
-        ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, const Space<Scalar>*space);
+        ExtendedShapeset(NeighborSearch<Scalar>* neighborhood, AsmList<Scalar>* central_al, SpaceSharedPtr<Scalar>space);
 
         ExtendedShapeset(const ExtendedShapeset & other);
 
@@ -218,7 +218,7 @@ namespace Hermes
         /// \param[in]  neighborhood  Neighborhood on which the extended shapeset is defined.
         /// \param[in]  space         Space from which the neighbor's assembly list will be obtained.
         ///
-        void update(NeighborSearch* neighborhood, const Space<Scalar>* space);
+        void update(NeighborSearch* neighborhood, SpaceSharedPtr<Scalar> space);
 
       public:
         int cnt;  ///< Number of shape functions in the extended shapeset.

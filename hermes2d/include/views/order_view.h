@@ -44,7 +44,7 @@ namespace Hermes
         OrderView(char* title, WinGeom* wg = NULL);
 
         template<typename Scalar>
-        void show(const Space<Scalar>* space);
+        void show(SpaceSharedPtr<Scalar> space);
         void set_b_orders(bool set);
       protected:
 
@@ -76,7 +76,7 @@ namespace Hermes
         OrderView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         template<typename Scalar>
-        void show(const Space<Scalar>* space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(SpaceSharedPtr<Scalar> space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

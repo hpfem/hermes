@@ -54,7 +54,7 @@ namespace Hermes
           delete this->lin;
       }
 
-      void MeshView::show(MeshSharedPtr)
+      void MeshView::show(MeshSharedPtr mesh)
       {
         ZeroSolution<double> sln(mesh);
         if(mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL in MeshView::show().");

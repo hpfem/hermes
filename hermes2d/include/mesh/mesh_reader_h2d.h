@@ -27,7 +27,7 @@ namespace Hermes
     ///
     /// @ingroup mesh_readers
     /// Typical usage:
-    /// Hermes::Hermes2D::Mesh mesh;
+    /// MeshSharedPtr mesh;
     /// Hermes::Hermes2D::MeshReaderH2D mloader;
     /// try
     /// {

@@ -34,13 +34,13 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : DiscreteProblem<Scalar>(wf, spaces)
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces)
     {
       this->is_linear = true;
     }
 
     template<typename Scalar>
-    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : DiscreteProblem<Scalar>(wf, space)
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : DiscreteProblem<Scalar>(wf, space)
     {
       this->is_linear = true;
     }

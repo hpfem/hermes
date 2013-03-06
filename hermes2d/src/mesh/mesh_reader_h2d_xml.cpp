@@ -150,7 +150,7 @@ namespace Hermes
         meshes.at(meshes_i)->free();
       }
 
-      Mesh global_mesh;
+      MeshSharedPtr global_mesh;
 
       try
       {
@@ -172,7 +172,7 @@ namespace Hermes
         for(int i = 0; i < H2D_MAX_NODE_ID; i++)
           edge_is[i] = -1;
 
-        if(!load(parsed_xml_domain, MeshSharedPtr(&global_mesh), vertex_is, element_is, edge_is))
+        if(!load(parsed_xml_domain, global_mesh, vertex_is, element_is, edge_is))
           return false;
 
         int max_vertex_i = -1;
@@ -231,7 +231,7 @@ namespace Hermes
           // copy the whole mesh if the subdomain is the whole mesh.
           if(element_number_count == 0 || element_number_count == parsed_xml_domain->elements().el().size())
           {
-            meshes[subdomains_i]->copy(MeshSharedPtr(&global_mesh));
+            meshes[subdomains_i]->copy(global_mesh);
             // refinements.
             if(parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements().present() && parsed_xml_domain->subdomains().subdomain().at(subdomains_i).refinements()->ref().size() > 0)
             {

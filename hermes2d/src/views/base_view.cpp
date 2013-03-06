@@ -51,7 +51,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void BaseView<Scalar>::show(const Space<Scalar>* space, double eps, int item)
+      void BaseView<Scalar>::show(SpaceSharedPtr<Scalar> space, double eps, int item)
       {
         this->space = space;
         free();

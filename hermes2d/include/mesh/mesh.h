@@ -250,7 +250,7 @@ namespace Hermes
 
     /// \brief Represents a finite element mesh.
     /// Typical usage:
-    /// Hermes::Hermes2D::Mesh mesh;
+    /// MeshSharedPtr mesh;
     /// Hermes::Hermes2D::MeshReaderH2DXML mloader;
     /// try
     /// {
@@ -279,13 +279,13 @@ namespace Hermes
       bool rescale(double x_ref, double y_ref);
 
       /// Creates a copy of another mesh.
-      void copy(MeshSharedPtr);
+      void copy(MeshSharedPtr mesh);
 
       /// Copies the coarsest elements of another mesh.
-      void copy_base(MeshSharedPtr);
+      void copy_base(MeshSharedPtr mesh);
 
       /// Copies the active elements of a converted mesh.
-      void copy_converted(MeshSharedPtr);
+      void copy_converted(MeshSharedPtr mesh);
 
       /// Creates a mesh from given vertex, triangle, quad, and marker arrays
       void create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,

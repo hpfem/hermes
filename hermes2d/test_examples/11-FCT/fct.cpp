@@ -29,7 +29,7 @@ void Flux_Correction::free()
 
 
 
-void Flux_Correction::init(Space<double>* new_space)
+void Flux_Correction::init(SpaceSharedPtr<double> new_space)
 {
   free();
   space = new_space;					

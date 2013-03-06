@@ -31,7 +31,7 @@ namespace Hermes
     /// <br>
     /// // Initialize space.<br>
     /// int globalPolynomialOrder = 4;<br>
-    /// Hermes::Hermes2D::H1Space<double> space(&mesh, &bcs, globalPolynomialOrder);<br>
+    /// SpaceSharedPtr<double> space(&mesh, &bcs, globalPolynomialOrder);<br>
 		template<typename Scalar>
 		class HERMES_API H1Space : public Space<Scalar>
 		{
@@ -58,7 +58,7 @@ namespace Hermes
 			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
 			/// Copy from Space instance 'space'
-			virtual void copy(const Space<Scalar>* space, MeshSharedPtr new_mesh);
+			virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
 
 		protected:
 

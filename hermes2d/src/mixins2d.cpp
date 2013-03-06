@@ -20,12 +20,6 @@ namespace Hermes
   {
     namespace Mixins
     {
-      template<typename Scalar>
-      const Space<Scalar>* SettableSpaces<Scalar>::get_space(int n) const
-      {
-        return this->get_spaces()[n];
-      }
-
       void StateQueryable::check() const
       {
         if(!this->isOkay())
@@ -112,8 +106,6 @@ namespace Hermes
         this->rhs_number_format = number_format;
       }
 
-      template HERMES_API class SettableSpaces<double>;
-      template HERMES_API class SettableSpaces<std::complex<double> >;
       template HERMES_API class MatrixRhsOutput<double>;
       template HERMES_API class MatrixRhsOutput<std::complex<double> >;
     }

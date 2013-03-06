@@ -89,8 +89,8 @@ const std::string BDY_OUT = "no_bdry";
 
 int main(int argc, char* argv[])
 {  
-  // Load the mesh.
-  Mesh mesh, basemesh;
+  // Load the mesh->
+  MeshSharedPtr mesh, basemesh;
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", &basemesh);
   /*  MeshView meshview("mesh", new WinGeom(0, 0, 500, 400));
@@ -98,8 +98,8 @@ int main(int argc, char* argv[])
   View::wait();*/
 
   // Perform initial mesh refinements (optional).
-  for (int i=0; i < INIT_REF_NUM; i++) basemesh.refine_all_elements();
-  mesh.copy(&basemesh);
+  for (int i=0; i < INIT_REF_NUM; i++) basemesh->refine_all_elements();
+  mesh->copy(&basemesh);
 
 
   // Initialize boundary conditions.
@@ -107,14 +107,14 @@ int main(int argc, char* argv[])
   EssentialBCs<double>  bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space<double> space(&mesh, &bcs, P_INIT);	
+  SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT);	
 
   // Initialize solution of lower & higher order
   Solution<double>  low_sln, ref_sln, high_sln, sln;
   PrevSolution u_prev_time;
 
   // Previous time level solution (initialized by the initial condition).
-  CustomInitialCondition initial_condition(&mesh);  
+  CustomInitialCondition initial_condition(mesh);  
 
   // Initialize the weak formulation.
   CustomWeakFormMassmatrix  massmatrix(time_step);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
 
   int ref_ndof, ndof; double err_est_rel_total;
-  Adapt<double> adaptivity(&space, HERMES_L2_NORM);
+  Adapt<double> adaptivity(space, HERMES_L2_NORM);
 
   OGProjection<double> ogProjection;	
   Lumped_Projection lumpedProjection;	
@@ -152,8 +152,8 @@ int main(int argc, char* argv[])
   Flux_Correction fluxCorrection(theta);
   Regularity_Estimator regEst(EPS_smooth);
 
-  DiscreteProblem<double> dp_mass(&massmatrix, &space);
-  DiscreteProblem<double> dp_convection(&convection, &space); 
+  DiscreteProblem<double> dp_mass(&massmatrix, space);
+  DiscreteProblem<double> dp_convection(&convection, space); 
 
   // Time stepping loop:
   double current_time = 0.0; 
@@ -166,18 +166,18 @@ int main(int argc, char* argv[])
 
 
     // Periodic global derefinement. 
-    if ((ts > 1 && ts % UNREF_FREQ == 0)||(space.get_num_dofs() >= NDOF_STOP)) 
+    if ((ts > 1 && ts % UNREF_FREQ == 0)||(space->get_num_dofs() >= NDOF_STOP)) 
     { 
       Hermes::Mixins::Loggable::Static::info("Global mesh derefinement.");
       switch (UNREF_METHOD) {
-      case 1: mesh.copy(&basemesh);
-        space.set_uniform_order(P_INIT);
+      case 1: mesh->copy(&basemesh);
+        space->set_uniform_order(P_INIT);
         break;
-      case 2: mesh.unrefine_all_elements();
-        space.set_uniform_order(P_INIT);
+      case 2: mesh->unrefine_all_elements();
+        space->set_uniform_order(P_INIT);
         break;
-      case 3: mesh.unrefine_all_elements();
-        space.adjust_element_order(-1, -1, P_INIT, P_INIT);
+      case 3: mesh->unrefine_all_elements();
+        space->adjust_element_order(-1, -1, P_INIT, P_INIT);
         break;
       default: Exceptions::Exception("Wrong global derefinement method.");
       }      
@@ -188,17 +188,17 @@ int main(int argc, char* argv[])
     do 
     {
       Hermes::Mixins::Loggable::Static::info("Time step %i, adap_step %i", ts, as);			
-      ndof = space.get_num_dofs(); 
+      ndof = space->get_num_dofs(); 
 
       //Unrefinement step
       /*	if(as==1)
       {
       double* coeff_vec_smooth = new double[ndof];	
       if(ts==1)		
-      ogProjection.project_global(&space,&initial_condition, coeff_vec_smooth,  HERMES_L2_NORM);	
+      ogProjection.project_global(space,&initial_condition, coeff_vec_smooth,  HERMES_L2_NORM);	
       else		
-      ogProjection.project_global(&space,&u_prev_time, coeff_vec_smooth,  HERMES_L2_NORM);										  
-      Solution<double>::vector_to_solution(coeff_vec_smooth, &space, &low_sln);
+      ogProjection.project_global(space,&u_prev_time, coeff_vec_smooth,  HERMES_L2_NORM);										  
+      Solution<double>::vector_to_solution(coeff_vec_smooth, space, &low_sln);
       // Calculate element errors and total error estimate.
       if(ts==1)
       err_est_rel_total = adaptivity.calc_err_est(&low_sln, &initial_condition) * 100; 
@@ -211,28 +211,28 @@ int main(int argc, char* argv[])
       {
       sprintf(title, "unrefined Mesh: Time %3.2f,timestep %i", current_time,ts);
       mview.set_title(title); 
-      mview.show(&space);
+      mview.show(space);
       }
       }	*/
 
-      ndof = space.get_num_dofs();  	    		
+      ndof = space->get_num_dofs();  	    		
       double* coeff_vec_smooth = new double[ndof];
       int* smooth_elem_ref;	
 
       //smoothness-check for projected data		
       Hermes::Mixins::Loggable::Static::info("Projecting...");
       if(ts==1)
-        ogProjection.project_global(&space,&initial_condition, coeff_vec_smooth, HERMES_L2_NORM);		
+        ogProjection.project_global(space,&initial_condition, coeff_vec_smooth, HERMES_L2_NORM);		
       else
-        ogProjection.project_global(&space,&u_prev_time, coeff_vec_smooth, HERMES_L2_NORM);			
+        ogProjection.project_global(space,&u_prev_time, coeff_vec_smooth, HERMES_L2_NORM);			
 
       Hermes::Mixins::Loggable::Static::info("Calling get_smooth_elems()...");
-      smooth_elem_ref = regEst.get_smooth_elems(&space,coeff_vec_smooth);
-      // Construct reference mesh and setup reference space.
+      smooth_elem_ref = regEst.get_smooth_elems(space,coeff_vec_smooth);
+      // Construct reference mesh and setup reference space->
       Mesh* ref_mesh = new Mesh;
-      ref_mesh->copy(space.get_mesh());
-      Space<double>::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh, 0);
-      Space<double>* ref_space = ref_space_creator.create_ref_space();
+      ref_mesh->copy(space->get_mesh());
+      Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh, 0);
+      SpaceSharedPtr<double> ref_space = ref_space_creator.create_ref_space();
 
       HPAdapt * adapting = new HPAdapt(ref_space, HERMES_L2_NORM);	
 
@@ -296,13 +296,13 @@ int main(int argc, char* argv[])
       ref_sln_double = lowOrder.explicit_Correction(limited_flux);
       Solution<double> ::vector_to_solution(ref_sln_double, ref_space, &ref_sln);	
 
-      // Project the fine mesh solution onto the coarse mesh.
-      ogProjection.project_global(&space, &ref_sln, &sln, HERMES_L2_NORM); 
+      // Project the fine mesh solution onto the coarse mesh->
+      ogProjection.project_global(space, &ref_sln, &sln, HERMES_L2_NORM); 
       // Calculate element errors and total error estimate.
       err_est_rel_total = adaptivity.calc_err_est(&sln, &ref_sln) * 100;
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", ndof,ref_ndof, err_est_rel_total);				
-      // If err_est_rel too large, adapt the mesh.
+      // If err_est_rel too large, adapt the mesh->
       if((err_est_rel_total < ERR_STOP)||(as>=ADAPSTEP_MAX)) done = true;
       else
       {
@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
         // Increase the counter of performed adaptivity steps.
         if(done == false)  as++;
       }
-      if(space.get_num_dofs() >= NDOF_STOP)
+      if(space->get_num_dofs() >= NDOF_STOP)
         done = true;
 
       if(done) 
@@ -319,7 +319,7 @@ int main(int argc, char* argv[])
         u_prev_time.set_own_mesh(ref_mesh); //ref_mesh can be deleted
       }
 
-      // Visualize the solution and mesh.
+      // Visualize the solution and mesh->
       if(HERMES_VISUALIZATION)
       {
         sprintf(title, "Ref-Loesung: Time %3.2f,timestep %i,as=%i,", current_time,ts,as);
@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
         sview.show(&ref_sln);
         sprintf(title, "Mesh: Time %3.2f,timestep %i,as=%i,", current_time,ts,as);
         mview.set_title(title);
-        mview.show(&space);
+        mview.show(space);
       }
 
       if((VTK_VISUALIZATION) &&((done==true)&&(ts  % VTK_FREQ == 0)))
@@ -363,8 +363,8 @@ int main(int argc, char* argv[])
   // Visualize the solution.
   if(VTK_VISUALIZATION) {
     lin.save_solution_vtk(&u_prev_time, "end_solution.vtk", "solution", mode_3D);
-    ord.save_mesh_vtk(&space, "end_mesh");
-    ord.save_orders_vtk(&space, "end_order.vtk");
+    ord.save_mesh_vtk(space, "end_mesh");
+    ord.save_orders_vtk(space, "end_order.vtk");
   }
 
   delete mass_matrix;  

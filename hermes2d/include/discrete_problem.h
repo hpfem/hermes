@@ -64,10 +64,10 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces);
+      DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
       /// Constructor for one equation.
-      DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
+      DiscreteProblem(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
       
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -77,8 +77,8 @@ namespace Hermes
       void set_fvm();
 
       /// Sets new spaces for the instance.
-      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-      virtual void set_space(const Space<Scalar>* space);
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar> space);
       
       /// Non-parameterized constructor.
       DiscreteProblem();
@@ -96,7 +96,7 @@ namespace Hermes
       void set_weak_formulation(const WeakForm<Scalar>* wf);
 
       /// Get all spaces as a Hermes::vector.
-      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
        /// Get the number of unknowns.
       int get_num_dofs() const;
@@ -219,7 +219,7 @@ namespace Hermes
       const WeakForm<Scalar>* wf;
 
       /// Space instances for all equations in the system.
-      Hermes::vector<const Space<Scalar>*> spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       int spaces_size;
 
       Hermes::vector<unsigned int> spaces_first_dofs;

@@ -1,5 +1,8 @@
 #include "hermes2d.h"
 
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
+
 /* Weak forms */
 
 class CustomWeakFormPoissonNewton : public Hermes::Hermes2D::WeakForm<double>

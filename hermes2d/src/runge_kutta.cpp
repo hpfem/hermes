@@ -23,7 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces, ButcherTable* bt)
+    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
       stage_wf_left(spaces.size()), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
@@ -34,7 +34,7 @@ namespace Hermes
         this->spaces_seqs.push_back(spaces.at(i)->get_seq());
       }
       for(unsigned int i = 0; i < spaces.size(); i++)
-        this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(spaces.at(i)));
+        this->spaces_mutable.push_back(spaces.at(i));
 
       if(bt==NULL)
         throw Exceptions::NullException(2);
@@ -62,14 +62,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, const Space<Scalar>* space, ButcherTable* bt)
+    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
       stage_wf_left(1), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
     {
       this->spaces.push_back(space);
       this->spaces_seqs.push_back(space->get_seq());
-      this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(space));
+      this->spaces_mutable.push_back(space);
 
       if(bt==NULL) throw Exceptions::NullException(2);
 
@@ -96,7 +96,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    void RungeKutta<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       bool delete_K_vector = false;
       for(unsigned int i = 0; i < spaces.size(); i++)
@@ -111,7 +111,7 @@ namespace Hermes
         this->spaces_seqs.push_back(spaces.at(i)->get_seq());
       this->spaces_mutable.clear();
       for(unsigned int i = 0; i < this->spaces.size(); i++)
-        this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(this->spaces.at(i)));
+        this->spaces_mutable.push_back(this->spaces.at(i));
 
       if(delete_K_vector)
       {
@@ -130,18 +130,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_space(const Space<Scalar>* space)
+    void RungeKutta<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
       bool delete_K_vector = false;
       if(space->get_seq() != this->spaces_seqs[0])
         delete_K_vector = true;
 
       this->spaces.clear();
-      this->spaces.push_back(space);
+			this->spaces.push_back(space);
       this->spaces_seqs.clear();
       this->spaces_seqs.push_back(space->get_seq());
       this->spaces_mutable.clear();
-      this->spaces_mutable.push_back(const_cast<Space<Scalar>*>(space));
+      this->spaces_mutable.push_back(space);
 
       if(delete_K_vector)
       {
@@ -160,7 +160,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<const Space<Scalar>*> RungeKutta<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> > RungeKutta<Scalar>::get_spaces() const
     {
       return this->spaces;
     }
@@ -191,7 +191,7 @@ namespace Hermes
       this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
       
       // All Spaces of the problem.
-      Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
+      Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;
 
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
@@ -327,7 +327,7 @@ namespace Hermes
         Space<Scalar>::update_essential_bc_values(spaces_mutable, this->time + bt->get_C(stage_i)*this->time_step);
 
       // All Spaces of the problem.
-      Hermes::vector<const Space<Scalar>*> stage_spaces_vector;
+      Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;
 
       // Create spaces for stage solutions K_i. This is necessary
       // to define a num_stages x num_stages block weak formulation.
@@ -525,10 +525,6 @@ namespace Hermes
         }
         Solution<Scalar>::vector_to_solutions_common_dir_lift(coeff_vec, spaces, error_fns);
       }
-
-      // Delete stage spaces.
-      for (unsigned int i = 0; i < num_stages * spaces.size(); i++)
-          delete stage_spaces_vector[i];
 
       // Delete all residuals.
       if(!residual_as_vector)

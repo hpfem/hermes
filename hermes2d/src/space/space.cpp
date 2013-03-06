@@ -106,13 +106,13 @@ namespace Hermes
 		}
 
     template<>
-    Space<double>::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
+    Space<double>::Space() : shapeset(NULL), essential_bcs(NULL)
     {
       this->init();
     }
 
     template<>
-    Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL), mesh(NULL)
+		Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL)
     {
       this->init();
     }
@@ -234,7 +234,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::copy(const Space<Scalar>* space, MeshSharedPtr new_mesh)
+    void Space<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
       this->free();
       
@@ -326,7 +326,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(Hermes::vector<Space<Scalar>*> spaces, double time)
+    void Space<Scalar>::update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, double time)
     {
       int n = spaces.size();
       for (int i = 0; i < n; i++)
@@ -338,23 +338,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(Space<Scalar>*s, double time)
+    void Space<Scalar>::update_essential_bc_values(SpaceSharedPtr<Scalar> space, double time)
     {
-      s->get_essential_bcs()->set_current_time(time);
-      s->update_essential_bc_values();
+      space->get_essential_bcs()->set_current_time(time);
+      space->update_essential_bc_values();
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Hermes::vector<const Space<Scalar>*> spaces)
-    {
-      int ndof = 0;
-      for (unsigned int i = 0; i<spaces.size(); i++)
-        ndof += spaces[i]->get_num_dofs();
-      return ndof;
-    }
-
-    template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Hermes::vector<Space<Scalar>*> spaces)
+    int Space<Scalar>::get_num_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       int ndof = 0;
       for (unsigned int i = 0; i<spaces.size(); i++)
@@ -363,19 +354,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(const Space<Scalar>* space)
+    int Space<Scalar>::get_num_dofs(SpaceSharedPtr<Scalar> space)
     {
       return space->get_num_dofs();
     }
 
     template<typename Scalar>
-    int Space<Scalar>::get_num_dofs(Space<Scalar>* space)
-    {
-      return space->get_num_dofs();
-    }
-
-    template<typename Scalar>
-    int Space<Scalar>::assign_dofs(Hermes::vector<Space<Scalar>*> spaces)
+    int Space<Scalar>::assign_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       int n = spaces.size();
 
@@ -616,12 +601,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(const Space<Scalar>* coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
+    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(SpaceSharedPtr<Scalar> coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
     {
     }
 
     template<typename Scalar>
-    void Space<Scalar>::ReferenceSpaceCreator::handle_orders(Space<Scalar>* ref_space)
+    void Space<Scalar>::ReferenceSpaceCreator::handle_orders(SpaceSharedPtr<Scalar> ref_space)
     {
       Element* e;
       for_all_active_elements(e, coarse_space->get_mesh())
@@ -666,17 +651,17 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::create_ref_space(bool assign_dofs)
+    SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::create_ref_space(bool assign_dofs)
     {
       /// Initialization.
-      Space<Scalar>* ref_space = NULL;
-      if(dynamic_cast<const L2Space<Scalar>*>(this->coarse_space) != NULL)
+      SpaceSharedPtr<Scalar> ref_space = NULL;
+      if(dynamic_cast<L2Space<Scalar>* >(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_l2();
-      if(dynamic_cast<const H1Space<Scalar>*>(this->coarse_space) != NULL)
+      if(dynamic_cast<H1Space<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_h1();
-      if(dynamic_cast<const HcurlSpace<Scalar>*>(this->coarse_space) != NULL)
+      if(dynamic_cast<HcurlSpace<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_hcurl();
-      if(dynamic_cast<const HdivSpace<Scalar>*>(this->coarse_space) != NULL)
+      if(dynamic_cast<HdivSpace<Scalar>*>(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_hdiv();
 
       if(ref_space == NULL)
@@ -685,7 +670,7 @@ namespace Hermes
       /// Call to the OVERRIDABLE handling method.
       this->handle_orders(ref_space);
 
-      /// Finish - MUST BE CALLED BEFORE RETURN.
+      /// Finish - MUST BE CALLED BEFOR E RETURN.
       this->finish_construction(ref_space);
 
       // Assign dofs?
@@ -697,51 +682,43 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    L2Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_l2()
+    SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::init_construction_l2()
     {
-      L2Space<Scalar>* ref_space;
       if(this->coarse_space->own_shapeset)
-        ref_space = new L2Space<Scalar>(this->ref_mesh, 0);
+        return SpaceSharedPtr<Scalar>(new L2Space<Scalar>(this->ref_mesh, 0));
       else
-        ref_space = new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset());
-      return ref_space;
+        return SpaceSharedPtr<Scalar>(new L2Space<Scalar>(this->ref_mesh, 0, this->coarse_space->get_shapeset()));
     }
 
     template<typename Scalar>
-    H1Space<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_h1()
+    SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::init_construction_h1()
     {
-      H1Space<Scalar>* ref_space;
       if(this->coarse_space->own_shapeset)
-        ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1);
+        return SpaceSharedPtr<Scalar>(new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1));
       else
-        ref_space = new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset());
-      return ref_space;
+        return SpaceSharedPtr<Scalar>(new H1Space<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset()));
     }
 
     template<typename Scalar>
-    HcurlSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hcurl()
+    SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::init_construction_hcurl()
     {
-      HcurlSpace<Scalar>* ref_space;
       if(this->coarse_space->own_shapeset)
-        ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1);
+        return SpaceSharedPtr<Scalar>(new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1));
       else
-        ref_space = new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
-      return ref_space;
+        return SpaceSharedPtr<Scalar>(new HcurlSpace<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset()));
     }
 
     template<typename Scalar>
-    HdivSpace<Scalar>* Space<Scalar>::ReferenceSpaceCreator::init_construction_hdiv()
+    SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::init_construction_hdiv()
     {
-      HdivSpace<Scalar>* ref_space;
       if(this->coarse_space->own_shapeset)
-        ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1);
+        return SpaceSharedPtr<Scalar>(new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1));
       else
-        ref_space = new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->essential_bcs, 1, this->coarse_space->shapeset);
-      return ref_space;
+        return SpaceSharedPtr<Scalar>(new HdivSpace<Scalar>(this->ref_mesh, this->coarse_space->get_essential_bcs(), 1, this->coarse_space->get_shapeset()));
     }
 
     template<typename Scalar>
-    void Space<Scalar>::ReferenceSpaceCreator::finish_construction(Space<Scalar>* ref_space)
+    void Space<Scalar>::ReferenceSpaceCreator::finish_construction(SpaceSharedPtr<Scalar> ref_space)
     {
       ref_space->seq = g_space_seq++;
 
@@ -821,7 +798,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::set_mesh(MeshSharedPtr)
+    void Space<Scalar>::set_mesh(MeshSharedPtr mesh)
     {
       if(this->mesh == mesh) 
         return;
@@ -1184,11 +1161,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* Space<Scalar>::load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    SpaceSharedPtr<Scalar> Space<Scalar>::load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       try
       {
-				Space<Scalar>* space;
+				SpaceSharedPtr<Scalar> space(NULL);
 
         ::xml_schema::flags parsing_flags = 0;
 
@@ -1278,8 +1255,8 @@ namespace Hermes
 							space->shapeset = shapeset;
 					}
 
-					static_cast<L2Space<Scalar>*>(space)->ldata = NULL;
-					static_cast<L2Space<Scalar>*>(space)->lsize = 0;
+					static_cast<L2Space<Scalar>* >(space.get())->ldata = NULL;
+					static_cast<L2Space<Scalar>* >(space.get())->lsize = 0;
 				}
 				else
 				{
@@ -1321,7 +1298,21 @@ namespace Hermes
       }
     }
 
+    namespace Mixins
+    {
+      template<typename Scalar>
+      SpaceSharedPtr<Scalar> SettableSpaces<Scalar>::get_space(int n) const
+      {
+        return this->get_spaces()[n];
+      }
+
+      template class HERMES_API SettableSpaces<double>;
+      template class HERMES_API SettableSpaces<std::complex<double> >;
+    }
+
     template class HERMES_API Space<double>;
     template class HERMES_API Space<std::complex<double> >;
+    template class HERMES_API SpaceSharedPtr<double>;
+    template class HERMES_API SpaceSharedPtr<std::complex<double> >;
   }
 }

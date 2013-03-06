@@ -78,8 +78,8 @@ namespace Hermes
     public:
       Solution();
       Solution(MeshSharedPtr mesh);
-      Solution (Space<Scalar>* s, Vector<Scalar>* coeff_vec);
-      Solution (Space<Scalar>* s, Scalar* coeff_vec);
+      Solution (SpaceSharedPtr<Scalar> s, Vector<Scalar>* coeff_vec);
+      Solution (SpaceSharedPtr<Scalar> s, Scalar* coeff_vec);
       virtual ~Solution();
 
       /// State querying helpers.
@@ -91,7 +91,7 @@ namespace Hermes
       virtual void copy(const Solution<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
-      void set_dirichlet_lift(const Space<Scalar>* space, PrecalcShapeset* pss = NULL);
+      void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = NULL);
 
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
@@ -99,7 +99,7 @@ namespace Hermes
 
       /// Loads the solution from a file previously created by Solution::save(). This completely
       /// restores the solution in the memory.
-      void load(const char* filename, Space<Scalar>* space);
+      void load(const char* filename, SpaceSharedPtr<Scalar> space);
 
       /// Returns solution value or derivatives at element e, in its reference domain point (xi1, xi2).
       /// 'item' controls the returned value: 0 = value, 1 = dx, 2 = dy, 3 = dxx, 4 = dyy, 5 = dxy.
@@ -136,36 +136,36 @@ namespace Hermes
       inline SpaceType get_space_type() const { return space_type; };
 
       /// Passes solution components calculated from solution vector as Solutions.
-      static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
+      static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
           Hermes::vector<Solution<Scalar>*> solutions,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
-      static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<const Space<Scalar> *> spaces,
+      static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
           Hermes::vector<Solution<Scalar>*> solutions,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, Hermes::vector<const Space<Scalar> *> spaces,
+      static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
           Hermes::vector<Solution<Scalar>*> solutions,
           bool add_dir_lift = false);
 
-      static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
+      static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
           Hermes::vector<Solution<Scalar>*> solutions,
           bool add_dir_lift = false);
 
-      static void vector_to_solution(const Vector<Scalar>* vec, const Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
-      static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar> *> spaces,
+      static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
           Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
           PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
 
       /// Internal.
@@ -193,11 +193,11 @@ namespace Hermes
       virtual void free();
 
       /// Converts a coefficient vector into a Solution.
-      virtual void set_coeff_vector(const Space<Scalar>* space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index);
+      virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, const Vector<Scalar>* vec, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss, const Scalar* coeffs, bool add_dir_lift, int start_index);
+      virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss, const Scalar* coeffs, bool add_dir_lift, int start_index);
 
-      virtual void set_coeff_vector(const Space<Scalar>* space, const Scalar* coeffs, bool add_dir_lift, int start_index);
+      virtual void set_coeff_vector(SpaceSharedPtr<Scalar> space, const Scalar* coeffs, bool add_dir_lift, int start_index);
 
       SolutionType sln_type;
       SpaceType space_type;

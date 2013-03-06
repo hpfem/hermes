@@ -40,13 +40,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : dp(new DiscreteProblemLinear<Scalar>(wf, space)), sln_vector(NULL), own_dp(true)
+    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : dp(new DiscreteProblemLinear<Scalar>(wf, space)), sln_vector(NULL), own_dp(true)
     {
       this->init();
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces) : dp(new DiscreteProblemLinear<Scalar>(wf, spaces)), sln_vector(NULL), own_dp(true)
+    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : dp(new DiscreteProblemLinear<Scalar>(wf, spaces)), sln_vector(NULL), own_dp(true)
     {
       this->init();
     }
@@ -73,9 +73,9 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::set_time(double time)
     {
-      Hermes::vector<Space<Scalar>*> spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       for(unsigned int i = 0; i < this->dp->get_spaces().size(); i++)
-        spaces.push_back(const_cast<Space<Scalar>*>(this->dp->get_space(i)));
+        spaces.push_back(this->dp->get_space(i));
 
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(this->dp->wf)->set_current_time(time);
@@ -106,19 +106,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_space(const Space<Scalar>* space)
+    void LinearSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
     }
     
     template<typename Scalar>
-    Hermes::vector<const Space<Scalar>*> LinearSolver<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> > LinearSolver<Scalar>::get_spaces() const
     {
       return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }

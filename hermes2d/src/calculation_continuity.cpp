@@ -164,7 +164,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number, MeshSharedPtr mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
+    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number, MeshSharedPtr mesh, SpaceSharedPtr<Scalar> space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
       if(ofile)
@@ -193,7 +193,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
+    void CalculationContinuity<Scalar>::add_record(double time, unsigned int number, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("timeAndNumber.h2d", std::ios_base::app);
       if(ofile)
@@ -206,7 +206,7 @@ namespace Hermes
 
       CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time, number);
       record->save_meshes(meshes);
-      if(spaces != Hermes::vector<Space<Scalar>*>())
+      if(spaces != Hermes::vector<SpaceSharedPtr<Scalar> >())
         record->save_spaces(spaces);
       if(slns != Hermes::vector<Solution<Scalar>*>())
         record->save_solutions(slns);
@@ -222,7 +222,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(double time, MeshSharedPtr mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
+    void CalculationContinuity<Scalar>::add_record(double time, MeshSharedPtr mesh, SpaceSharedPtr<Scalar> space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
       if(ofile)
@@ -251,7 +251,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(double time, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
+    void CalculationContinuity<Scalar>::add_record(double time, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("onlyTime.h2d", std::ios_base::app);
       if(ofile)
@@ -263,7 +263,7 @@ namespace Hermes
         throw IOCalculationContinuityException(CalculationContinuityException::general, IOCalculationContinuityException::output, "onlyTime.h2d");
       CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(time);
       record->save_meshes(meshes);
-      if(spaces != Hermes::vector<Space<Scalar>*>())
+      if(spaces != Hermes::vector<SpaceSharedPtr<Scalar> >())
         record->save_spaces(spaces);
       if(slns != Hermes::vector<Solution<Scalar>*>())
         record->save_solutions(slns);
@@ -278,7 +278,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(unsigned int number, MeshSharedPtr mesh, Space<Scalar>* space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
+    void CalculationContinuity<Scalar>::add_record(unsigned int number, MeshSharedPtr mesh, SpaceSharedPtr<Scalar> space, Solution<Scalar>* sln, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("onlyNumber.h2d", std::ios_base::app);
       if(ofile)
@@ -307,7 +307,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::add_record(unsigned int number, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
+    void CalculationContinuity<Scalar>::add_record(unsigned int number, Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> slns, double time_step, double time_step_n_minus_one, double error)
     {
       std::ofstream ofile("onlyNumber.h2d", std::ios_base::app);
       if(ofile)
@@ -320,7 +320,7 @@ namespace Hermes
 
       CalculationContinuity<Scalar>::Record* record = new CalculationContinuity<Scalar>::Record(number);
       record->save_meshes(meshes);
-      if(spaces != Hermes::vector<Space<Scalar>*>())
+      if(spaces != Hermes::vector<SpaceSharedPtr<Scalar> >())
         record->save_spaces(spaces);
       if(slns != Hermes::vector<Solution<Scalar>*>())
         record->save_solutions(slns);
@@ -405,7 +405,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::save_spaces(Hermes::vector<Space<Scalar>*> spaces)
+    void CalculationContinuity<Scalar>::Record::save_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
@@ -423,7 +423,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::save_space(Space<Scalar>* space)
+    void CalculationContinuity<Scalar>::Record::save_space(SpaceSharedPtr<Scalar> space)
     {
       std::stringstream filename;
       filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
@@ -557,9 +557,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Space<Scalar>*> CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
+    Hermes::vector<SpaceSharedPtr<Scalar> > CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<EssentialBCs<Scalar>*> essential_bcs, Hermes::vector<Shapeset*> shapesets)
     {
-			Hermes::vector<Space<Scalar>*> spaces;
+			Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
 
 			if(shapesets == Hermes::vector<Shapeset*>())
         for(unsigned int i = 0; i < meshes.size(); i++)
@@ -588,9 +588,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<Space<Scalar>*> CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Shapeset*> shapesets)
+    Hermes::vector<SpaceSharedPtr<Scalar> > CalculationContinuity<Scalar>::Record::load_spaces(Hermes::vector<MeshSharedPtr > meshes, Hermes::vector<Shapeset*> shapesets)
     {
-			Hermes::vector<Space<Scalar>*> spaces;
+			Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
 
       if(shapesets == Hermes::vector<Shapeset*>())
         for(unsigned int i = 0; i < meshes.size(); i++)
@@ -619,7 +619,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Space<Scalar>* CalculationContinuity<Scalar>::Record::load_space(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    SpaceSharedPtr<Scalar> CalculationContinuity<Scalar>::Record::load_space(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       std::stringstream filename;
       filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
@@ -639,7 +639,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<Space<Scalar>*> spaces)
+    void CalculationContinuity<Scalar>::Record::load_solutions(Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       if(solutions.size() != spaces.size())
         throw Exceptions::LengthException(1, 2, solutions.size(), spaces.size());
@@ -663,7 +663,7 @@ namespace Hermes
       }
     }
     template<typename Scalar>
-    void CalculationContinuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, Space<Scalar>* space)
+    void CalculationContinuity<Scalar>::Record::load_solution(Solution<Scalar>* solution, SpaceSharedPtr<Scalar> space)
     {
       std::stringstream filename;
       filename << CalculationContinuity<Scalar>::solution_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";

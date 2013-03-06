@@ -27,7 +27,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_internal(const Space<Scalar>* space, WeakForm<Scalar>* wf,
+    void OGProjection<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* wf,
   Scalar* target_vec)
     {
       // Sanity check.
@@ -51,7 +51,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
+    void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
         MatrixFormVol<Scalar>* custom_projection_jacobian,
         VectorFormVol<Scalar>* custom_projection_residual,
         Scalar* target_vec)
@@ -69,7 +69,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
+    void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
         MatrixFormVol<Scalar>* custom_projection_jacobian,
         VectorFormVol<Scalar>* custom_projection_residual,
         Solution<Scalar>* target_sln)
@@ -88,7 +88,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
+    void OGProjection<Scalar>::project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
         Scalar* target_vec)
@@ -111,7 +111,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const Hermes::vector<const Space<Scalar>*>& spaces,
+    void OGProjection<Scalar>::project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
         const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
         const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
         const Hermes::vector<Solution<Scalar>*>& target_slns)
@@ -130,7 +130,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
+    void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
         MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
         ProjNormType proj_norm)
     {
@@ -172,7 +172,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(const Space<Scalar>* space,
+    void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
         Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
         ProjNormType proj_norm)
     {
@@ -202,7 +202,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces,
+    void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
         Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
         Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms)
     {
@@ -239,7 +239,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+    void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> source_slns,
         Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms)
     {
       int n = spaces.size();
@@ -274,7 +274,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void OGProjection<Scalar>::project_global(Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+    void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> source_slns,
         Hermes::vector<Solution<Scalar>*> target_slns, Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {
       int n = spaces.size();

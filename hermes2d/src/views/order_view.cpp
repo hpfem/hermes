@@ -64,7 +64,7 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      void OrderView::show(const Space<Scalar>* space)
+      void OrderView::show(SpaceSharedPtr<Scalar> space)
       {
         if(!space->is_up_to_date())
           throw Hermes::Exceptions::Exception("The space is not up to date.");
@@ -258,8 +258,8 @@ namespace Hermes
           "  Esc, Q - quit";
       }
 
-      template HERMES_API void OrderView::show<double>(const Space<double>* space);
-      template HERMES_API void OrderView::show<std::complex<double> >(const Space<std::complex<double> >* space);
+      template HERMES_API void OrderView::show<double>(const SpaceSharedPtr<double> space);
+      template HERMES_API void OrderView::show<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space);
     }
   }
 }

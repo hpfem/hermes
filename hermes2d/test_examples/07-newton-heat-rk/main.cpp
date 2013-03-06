@@ -79,35 +79,35 @@ int main(int argc, char* argv[])
 	// Initialize the time.
 	double current_time = 0;
 
-	// Mesh.
-	Mesh mesh;
+	// mesh->
+	MeshSharedPtr mesh(new Mesh);
 
-	// Init mesh.
+	// Init mesh->
 	MeshReaderH2D mloader;
-	mloader.load("cathedral.mesh", &mesh);
+	mloader.load("cathedral.mesh", mesh);
 
 	// Perform initial mesh refinements.
 	for(int i = 0; i < INIT_REF_NUM; i++)
-		mesh.refine_all_elements();
-	mesh.refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
-	mesh.refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
+		mesh->refine_all_elements();
+	mesh->refine_towards_boundary("Boundary_air", INIT_REF_NUM_BDY);
+	mesh->refine_towards_boundary("Boundary_ground", INIT_REF_NUM_BDY);
 
 	// Initialize boundary conditions.
 	Hermes::Hermes2D::DefaultEssentialBCConst<double> bc_essential("Boundary_ground", TEMP_INIT);
 	Hermes::Hermes2D::EssentialBCs<double> bcs(&bc_essential);
 
-	// Space.
-	Space<double>* space;
+	// space->
+	SpaceSharedPtr<double> space;
 
 	// Solution pointer.
-	Solution<double>* sln_time_prev = new ConstantSolution<double>(&mesh, TEMP_INIT);
+	Solution<double>* sln_time_prev = new ConstantSolution<double>(mesh, TEMP_INIT);
 
 	if(REUSE_SOLUTION && continuity.have_record_available())
 	{
 		try
 		{
-			continuity.get_last_record()->load_mesh(&mesh);
-			space = continuity.get_last_record()->load_space(&mesh, &bcs);
+			continuity.get_last_record()->load_mesh(mesh);
+			space = continuity.get_last_record()->load_space(mesh, &bcs);
 			continuity.get_last_record()->load_solution(sln_time_prev, space);
 			Views::ScalarView s;
 			s.show(sln_time_prev, Views::HERMES_EPS_NORMAL, H2D_FN_VAL_0);
@@ -121,14 +121,14 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		space = new H1Space<double>(&mesh, &bcs, P_INIT);
+		space = new H1Space<double>(mesh, &bcs, P_INIT);
 	}
 
 
 	CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
 		&current_time, TEMP_INIT, T_FINAL);
 
-	Solution<double>* sln_time_new = new Solution<double>(&mesh);
+	Solution<double>* sln_time_new = new Solution<double>(mesh);
 
 	int ndof = space->get_num_dofs();
 
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 		Tview.show(sln_time_new);
 
 		// Save the progress.
-		continuity.add_record(current_time, &mesh, space, sln_time_prev);
+		continuity.add_record(current_time, mesh, space, sln_time_prev);
 
 		// Copy solution for the new time step.
 		sln_time_prev->copy(sln_time_new);

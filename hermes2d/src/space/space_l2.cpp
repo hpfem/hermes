@@ -64,7 +64,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void L2Space<Scalar>::copy(const Space<Scalar>* space, MeshSharedPtr new_mesh)
+    void L2Space<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
       Space<Scalar>::copy(space, new_mesh);
 

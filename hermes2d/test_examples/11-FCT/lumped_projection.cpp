@@ -1,7 +1,7 @@
 #include "lumped_projection.h"
 
 
-void Lumped_Projection::project_internal( const Space<double>* space, WeakForm<double>* wf, double* target_vec, UMFPackMatrix<double>*  mat)
+void Lumped_Projection::project_internal( const SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, UMFPackMatrix<double>*  mat)
 {
 
   if(space == NULL) printf("this->space == NULL in Lumped_Projection::project_internal().");
@@ -84,7 +84,7 @@ void Lumped_Projection::project_internal( const Space<double>* space, WeakForm<d
 
 }
 
-void Lumped_Projection::project_lumped( const  Space<double>* space, MeshFunction<double>* source_meshfn,
+void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, MeshFunction<double>* source_meshfn,
   double* target_vec, UMFPackMatrix<double>*  mat )
 {
   // Sanity checks.

@@ -46,7 +46,7 @@ namespace Hermes
     double DiscreteProblem<Scalar>::fake_wt = 1.0;
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf)
     {
       if(spaces.empty())
         throw Exceptions::NullException(2);
@@ -61,7 +61,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, const Space<Scalar>* space)
+    DiscreteProblem<Scalar>::DiscreteProblem(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space)
       : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf)
     {
       spaces.push_back(space);
@@ -207,9 +207,9 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_time(double time)
     {
-      Hermes::vector<Space<Scalar>*> spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       for(unsigned int i = 0; i < this->get_spaces().size(); i++)
-        spaces.push_back(const_cast<Space<Scalar>*>(this->get_space(i)));
+        spaces.push_back(this->get_space(i));
 
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(this->wf)->set_current_time(time);
@@ -239,7 +239,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<const Space<Scalar>*> DiscreteProblem<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> > DiscreteProblem<Scalar>::get_spaces() const
     {
       return this->spaces;
     }
@@ -332,7 +332,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spacesToSet)
+    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spacesToSet)
     {
       for(unsigned int i = 0; i < spacesToSet.size(); i++)
         spacesToSet[i]->check();
@@ -468,9 +468,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_space(const Space<Scalar>* space)
+    void DiscreteProblem<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
-      Hermes::vector<const Space<Scalar>*> spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       spaces.push_back(space);
       this->set_spaces(spaces);
     }
@@ -737,13 +737,7 @@ namespace Hermes
 
         if(is_DG)
         {
-          Hermes::vector<Space<Scalar>*> mutable_spaces;
-          for(unsigned int i = 0; i < this->spaces_size; i++)
-          {
-            mutable_spaces.push_back(const_cast<Space<Scalar>*>(spaces.at(i)));
-            spaces_first_dofs[i] = 0;
-          }
-          Space<Scalar>::assign_dofs(mutable_spaces);
+          Space<Scalar>::assign_dofs(spaces);
         }
 
         Traverse::State* current_state;

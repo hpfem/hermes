@@ -59,17 +59,17 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
-  // Load the mesh.
-  Mesh mesh;
+  // Load the mesh->
+  HermesSharedPtr mesh;
   MeshReaderH2D mloader;
-  mloader.load("../square.mesh", &mesh);
+  mloader.load("../square.mesh", mesh);
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++) 
-    mesh.refine_all_elements();
+    mesh->refine_all_elements();
 
-  // Create an L2 space.
-  L2Space<double> space(&mesh, P_INIT);
+  // Create an L2 space->
+  L2Space<double> space(mesh, P_INIT);
 
   // Initialize refinement selector.
   L2ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -81,10 +81,10 @@ int main(int argc, char* args[])
   Solution<double> ref_sln;
 
   // Initialize the weak formulation.
-  CustomWeakForm wf("Bdy_bottom_left", &mesh);
+  CustomWeakForm wf("Bdy_bottom_left", mesh);
 
   // Initialize the FE problem.
-  DiscreteProblemLinear<double> dp(&wf, &space);
+  DiscreteProblemLinear<double> dp(&wf, space);
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&dp);
@@ -93,10 +93,10 @@ int main(int argc, char* args[])
   do
   {
     // Construct globally refined reference mesh
-    // and setup reference space.
-    Mesh::ReferenceMeshCreator ref_mesh_creator(&mesh);
+    // and setup reference space->
+    Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
     Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
-    Space<double>::ReferenceSpaceCreator ref_space_creator(&space, ref_mesh);
+    Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
     Space<double>* ref_space = ref_space_creator.create_ref_space();
 
     dp.set_space(ref_space);
@@ -111,21 +111,21 @@ int main(int argc, char* args[])
     {
       std::cout << e.what();
     }
-    // Project the fine mesh solution onto the coarse mesh.
+    // Project the fine mesh solution onto the coarse mesh->
     OGProjection<double> ogProjection;
-    ogProjection.project_global(&space, &ref_sln, &sln, HERMES_L2_NORM);
+    ogProjection.project_global(space, &ref_sln, &sln, HERMES_L2_NORM);
 
     // Calculate element errors and total error estimate.
-    Adapt<double>* adaptivity = new Adapt<double>(&space);
+    Adapt<double>* adaptivity = new Adapt<double>(space);
     double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
 
-    // If err_est_rel too large, adapt the mesh.
+    // If err_est_rel too large, adapt the mesh->
     if(err_est_rel < ERR_STOP) done = true;
     else
     {
       done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
-      if(Space<double>::get_num_dofs(&space) >= NDOF_STOP)
+      if(Space<double>::get_num_dofs(space) >= NDOF_STOP)
       {
         done = true;
         break;

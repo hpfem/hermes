@@ -170,7 +170,7 @@ namespace Hermes
     }
 
     template<>
-    Solution<double>::Solution(Space<double>* s, Vector<double>* coeff_vec) : MeshFunction<double>(s->get_mesh())
+    Solution<double>::Solution(SpaceSharedPtr<double> s, Vector<double>* coeff_vec) : MeshFunction<double>(s->get_mesh())
     {
       space_type = s->get_type();
       this->init();
@@ -179,7 +179,7 @@ namespace Hermes
     }
 
     template<>
-    Solution<std::complex<double> >::Solution(Space<std::complex<double> >* s, Vector<std::complex<double> >* coeff_vec) : MeshFunction<std::complex<double> >(s->get_mesh())
+    Solution<std::complex<double> >::Solution(SpaceSharedPtr<std::complex<double> > s, Vector<std::complex<double> >* coeff_vec) : MeshFunction<std::complex<double> >(s->get_mesh())
     {
       space_type = s->get_type();
       this->init();
@@ -188,7 +188,7 @@ namespace Hermes
     }
 
     template<>
-    Solution<double>::Solution(Space<double>* s, double* coeff_vec) : MeshFunction<double>(s->get_mesh())
+    Solution<double>::Solution(SpaceSharedPtr<double> s, double* coeff_vec) : MeshFunction<double>(s->get_mesh())
     {
       space_type = s->get_type();
       this->init();
@@ -197,7 +197,7 @@ namespace Hermes
     }
 
     template<>
-    Solution<std::complex<double> >::Solution(Space<std::complex<double> >* s, std::complex<double> * coeff_vec) : MeshFunction<std::complex<double> >(s->get_mesh())
+    Solution<std::complex<double> >::Solution(SpaceSharedPtr<std::complex<double> > s, std::complex<double> * coeff_vec) : MeshFunction<std::complex<double> >(s->get_mesh())
     {
       space_type = s->get_type();
       this->init();
@@ -399,7 +399,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, const Vector<Scalar>* vec,
+    void Solution<Scalar>::set_coeff_vector(SpaceSharedPtr<Scalar> space, const Vector<Scalar>* vec,
         bool add_dir_lift, int start_index)
     {
       // Sanity check.
@@ -414,7 +414,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, const Scalar* coeffs,
+    void Solution<Scalar>::set_coeff_vector(SpaceSharedPtr<Scalar> space, const Scalar* coeffs,
         bool add_dir_lift, int start_index)
     {
       // Sanity check.
@@ -430,7 +430,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_coeff_vector(const Space<Scalar>* space, PrecalcShapeset* pss,
+    void Solution<Scalar>::set_coeff_vector(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss,
         const Scalar* coeff_vec, bool add_dir_lift, int start_index)
     {
       int o;
@@ -551,7 +551,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector,
-        Hermes::vector<const Space<Scalar>*> spaces, Hermes::vector<Solution<Scalar>*> solutions,
+        Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> solutions,
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -602,7 +602,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space,
+    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
@@ -614,7 +614,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
+    void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
       Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -665,7 +665,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
       Hermes::vector<Solution<Scalar>*> solutions, bool add_dir_lift)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -687,7 +687,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
+    void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
       Hermes::vector<Solution<Scalar>*> solutions, bool add_dir_lift)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -709,7 +709,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(const Vector<Scalar>* solution_vector, const Space<Scalar>* space,
+    void Solution<Scalar>::vector_to_solution(const Vector<Scalar>* solution_vector, SpaceSharedPtr<Scalar> space,
         Solution<Scalar>* solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
@@ -721,7 +721,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, Hermes::vector<const Space<Scalar>*> spaces,
+    void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
         Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
@@ -773,7 +773,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, const Space<Scalar>* space, Solution<Scalar>* solution,
+    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
         PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -785,7 +785,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::set_dirichlet_lift(const Space<Scalar>* space, PrecalcShapeset* pss)
+    void Solution<Scalar>::set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss)
     {
       space_type = space->get_type();
       int ndof = space->get_num_dofs();
@@ -1341,7 +1341,7 @@ namespace Hermes
     }
 
     template<>
-    void Solution<double>::load(const char* filename, Space<double>* space)
+    void Solution<double>::load(const char* filename, SpaceSharedPtr<double> space)
     {
       free();
       this->mesh = space->get_mesh();
@@ -1439,7 +1439,7 @@ namespace Hermes
     }
 
     template<>
-    void Solution<std::complex<double> >::load(const char* filename, Space<std::complex<double> >* space)
+    void Solution<std::complex<double> >::load(const char* filename, SpaceSharedPtr<std::complex<double> > space)
     {
       free();
       sln_type = HERMES_SLN;

@@ -69,8 +69,8 @@ namespace Hermes
     public:
       LinearSolver();
       LinearSolver(DiscreteProblemLinear<Scalar>* dp);
-      LinearSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
-      LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
+      LinearSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       void init();
 
       ~LinearSolver();
@@ -88,9 +88,9 @@ namespace Hermes
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
-      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-      virtual void set_space(const Space<Scalar>* space);
-      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar> space);
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
       
       /// Set the weak forms.
       void set_weak_formulation(const WeakForm<Scalar>* wf);

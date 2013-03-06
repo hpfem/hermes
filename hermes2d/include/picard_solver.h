@@ -76,8 +76,8 @@ namespace Hermes
     public:
       PicardSolver();
       PicardSolver(DiscreteProblem<Scalar>* dp);
-      PicardSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
-      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
+      PicardSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       ~PicardSolver();
 
       /// State querying helpers.
@@ -104,9 +104,9 @@ namespace Hermes
       virtual void set_time_step(double time_step);
 
       /// Overridden Mixins::SettableSpaces methods.
-      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-      virtual void set_space(const Space<Scalar>* space);
-      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar> space);
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
       /// Turn on / off the Anderson acceleration. By default it is off.
       void use_Anderson_acceleration(bool to_set);

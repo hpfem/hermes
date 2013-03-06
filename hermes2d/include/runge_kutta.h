@@ -77,10 +77,10 @@ namespace Hermes
       /// Constructor.
       /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
       /// as an initial guess for the Newton's method, instead zero vector will be used.
-      RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces, ButcherTable* bt);
+      RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt);
 
       /// Constructor for one equation.
-      RungeKutta(const WeakForm<Scalar>* wf, const Space<Scalar>* space, ButcherTable* bt);
+      RungeKutta(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt);
 
       /// Projections will be local (projection-based).
       void use_local_projections();
@@ -117,9 +117,9 @@ namespace Hermes
       void set_newton_damping_coeff(double newton_damping_coeff);
       void set_newton_max_allowed_residual_norm(double newton_max_allowed_residual_norm);
 
-      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-      virtual void set_space(const Space<Scalar>* space);
-      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar> space);
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
       /**
        \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
@@ -174,8 +174,8 @@ namespace Hermes
       const WeakForm<Scalar>* wf;
 
       /// Space instances for all equations in the system.
-      Hermes::vector<const Space<Scalar>*> spaces;
-      Hermes::vector<Space<Scalar>*> spaces_mutable;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces_mutable;
       Hermes::vector<unsigned int> spaces_seqs;
 
       /// ButcherTable.

@@ -31,21 +31,21 @@ int main(int argc, char* argv[])
 {
   info("Desired number of eigenvalues: %d.", NUMBER_OF_EIGENVALUES);
 
-  // Load the mesh.
-  Mesh mesh;
+  // Load the mesh->
+  HermesSharedPtr mesh;
   MeshReaderH2D mloader;
-  mloader.load("domain.mesh", &mesh);
+  mloader.load("domain.mesh", mesh);
 
   // Perform initial mesh refinements (optional).
-  for (int i = 0; i < INIT_REF_NUM; i++) mesh.refine_all_elements();
+  for (int i = 0; i < INIT_REF_NUM; i++) mesh->refine_all_elements();
 
   // Initialize boundary conditions. 
   DefaultEssentialBCConst<double> bc_essential("Bdy", 0.0);
   EssentialBCs<double> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  H1Space<double> space(&mesh, &bcs, P_INIT);
-  int ndof = space.get_num_dofs();
+  SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT);
+  int ndof = space->get_num_dofs();
   info("ndof: %d.", ndof);
 
   // Initialize the weak formulation.
@@ -57,9 +57,9 @@ int main(int argc, char* argv[])
   RCP<SparseMatrix<double> > matrix_right = rcp(new CSCMatrix<double>());
 
   // Assemble the matrices.
-  DiscreteProblem<double> dp_left(&wf_left, &space);
+  DiscreteProblem<double> dp_left(&wf_left, space);
   dp_left.assemble(matrix_left.get());
-  DiscreteProblem<double> dp_right(&wf_right, &space);
+  DiscreteProblem<double> dp_right(&wf_right, space);
   dp_right.assemble(matrix_right.get());
 
   EigenSolver<double> es(matrix_left, matrix_right);
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     int n;
     es.get_eigenvector(ieig, &coeff_vec, &n);
     // Convert coefficient vector into a Solution.
-    Solution<double>::vector_to_solution(coeff_vec, &space, &sln);
+    Solution<double>::vector_to_solution(coeff_vec, space, &sln);
 
     // Visualize the solution.
     char title[100];

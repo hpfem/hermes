@@ -103,7 +103,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::process_space(const Space<Scalar>* space)
+      void Orderizer::process_space(SpaceSharedPtr<Scalar> space)
       {
         // sanity check
         if(space == NULL) throw Hermes::Exceptions::Exception("Space is NULL in Orderizer:process_space().");
@@ -266,7 +266,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::save_orders_vtk(const Space<Scalar>* space, const char* file_name)
+      void Orderizer::save_orders_vtk(SpaceSharedPtr<Scalar> space, const char* file_name)
       {
         process_space(space);
 
@@ -319,7 +319,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::save_mesh_vtk(const Space<Scalar>* space, const char* file_name)
+      void Orderizer::save_mesh_vtk(SpaceSharedPtr<Scalar> space, const char* file_name)
       {
         process_space(space);
 
@@ -387,12 +387,12 @@ namespace Hermes
         return this->vertex_count;
       }
 
-      template HERMES_API void Orderizer::save_orders_vtk<double>(const Space<double>* space, const char* file_name);
-      template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(const Space<std::complex<double> >* space, const char* file_name);
-      template HERMES_API void Orderizer::save_mesh_vtk<double>(const Space<double>* space, const char* file_name);
-      template HERMES_API void Orderizer::save_mesh_vtk<std::complex<double> >(const Space<std::complex<double> >* space, const char* file_name);
-      template HERMES_API void Orderizer::process_space<double>(const Space<double>* space);
-      template HERMES_API void Orderizer::process_space<std::complex<double> >(const Space<std::complex<double> >* space);
+      template HERMES_API void Orderizer::save_orders_vtk<double>(const SpaceSharedPtr<double> space, const char* file_name);
+      template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, const char* file_name);
+      template HERMES_API void Orderizer::save_mesh_vtk<double>(const SpaceSharedPtr<double> space, const char* file_name);
+      template HERMES_API void Orderizer::save_mesh_vtk<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, const char* file_name);
+      template HERMES_API void Orderizer::process_space<double>(const SpaceSharedPtr<double> space);
+      template HERMES_API void Orderizer::process_space<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space);
     }
   }
 }

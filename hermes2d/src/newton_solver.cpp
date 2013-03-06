@@ -39,14 +39,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), own_dp(true), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), own_dp(true), kept_jacobian(NULL)
     {
       init_attributes();
       init_linear_solver();
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar> *> spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true), kept_jacobian(NULL)
     {
       init_attributes();
       init_linear_solver();
@@ -123,9 +123,9 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_time(double time)
     {
-      Hermes::vector<Space<Scalar>*> spaces;
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       for(unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
-        spaces.push_back(const_cast<Space<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(i)));
+        spaces.push_back(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_space(i));
 
       Space<Scalar>::update_essential_bc_values(spaces, time);
       const_cast<WeakForm<Scalar>*>(static_cast<DiscreteProblem<Scalar>*>(this->dp)->wf)->set_current_time(time);
@@ -138,7 +138,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_spaces(Hermes::vector<const Space<Scalar>*> spaces)
+    void NewtonSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
       if(kept_jacobian != NULL)
@@ -147,7 +147,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_space(const Space<Scalar>* space)
+    void NewtonSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
       if(kept_jacobian != NULL)
@@ -156,7 +156,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    Hermes::vector<const Space<Scalar>*> NewtonSolver<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> > NewtonSolver<Scalar>::get_spaces() const
     {
       return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }

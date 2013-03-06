@@ -36,7 +36,7 @@ void Regularity_Estimator::free()
   rhs_2=NULL;
 }
 
-void Regularity_Estimator::set_space(Space<double>* new_space)
+void Regularity_Estimator::set_space(SpaceSharedPtr<double> new_space)
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: set_space");
   free();
@@ -48,7 +48,7 @@ void Regularity_Estimator::set_space(Space<double>* new_space)
   rhs_2 = new UMFPackVector<double>(ndof);
 }
 
-int* Regularity_Estimator::get_smooth_elems(Space<double>* new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix)
+int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix)
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
   if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
@@ -58,7 +58,7 @@ int* Regularity_Estimator::get_smooth_elems(Space<double>* new_space,double* coe
   return smooth_elem_patch;
 }
 
-int* Regularity_Estimator::get_smooth_dofs(Space<double>* new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix)
+int* Regularity_Estimator::get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix)
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
   if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");

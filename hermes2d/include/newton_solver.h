@@ -73,8 +73,8 @@ namespace Hermes
     public:
       NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
-      NewtonSolver(const WeakForm<Scalar>* wf, const Space<Scalar>* space);
-      NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<const Space<Scalar>*> spaces);
+      NewtonSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       void init_linear_solver();
 
       ~NewtonSolver();
@@ -144,9 +144,9 @@ namespace Hermes
       virtual void set_time_step(double time_step);
 
       /// See the class Hermes::Hermes2D::Mixins::SettableSpaces.
-      virtual void set_spaces(Hermes::vector<const Space<Scalar>*> spaces);
-      virtual void set_space(const Space<Scalar>* space);
-      virtual Hermes::vector<const Space<Scalar>*> get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar> space);
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
       /// Turn on or off manual damping (default is the automatic) and optionally sets manual damping coefficient.
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.

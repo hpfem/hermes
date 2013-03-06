@@ -26,7 +26,6 @@ namespace Hermes
       : Function<Scalar>()
     {
       refmap = new RefMap;
-      mesh = NULL;
       this->element = NULL;
     }
 
