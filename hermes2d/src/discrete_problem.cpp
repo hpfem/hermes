@@ -2527,11 +2527,6 @@ namespace Hermes
         if(this->spaces[i]->get_type() != HERMES_L2_SPACE)
           continue;
 
-        if(this->spaces[i]->get_element_order(current_state->e[i]->id) == 0)
-        {
-          order = order_base = 0;
-        }
-
         nbs[i] = neighbor_searches.get(spaces[i]->get_mesh()->get_seq() - min_dg_mesh_seq);
         ext_asmlist[i] = nbs[i]->create_extended_asmlist(spaces[i], current_als[i]);
         nbs[i]->set_quad_order(order);
