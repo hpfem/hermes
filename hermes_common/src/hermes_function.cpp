@@ -38,7 +38,7 @@ namespace Hermes
   template<typename Scalar>
   Hermes1DFunction<Scalar>::Hermes1DFunction()
   {
-    this->is_const = true;
+    this->is_const = false;
   };
 
   template<typename Scalar>
@@ -121,7 +121,7 @@ namespace Hermes
   template<typename Scalar>
   Hermes2DFunction<Scalar>::Hermes2DFunction()
   {
-    this->is_const = true;
+    this->is_const = false;
   };
 
   template<typename Scalar>
@@ -240,7 +240,7 @@ namespace Hermes
   template<typename Scalar>
   Hermes3DFunction<Scalar>::Hermes3DFunction()
   {
-    this->is_const = true;
+    this->is_const = false;
   };
 
   template<typename Scalar>
