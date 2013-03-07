@@ -1,13 +1,16 @@
 #include "prev_solution.h"
       
       
-				void PrevSolution::set_own_mesh(const Mesh* mesh){						
-						if(this->mesh == mesh){
-							Mesh* new_mesh = new Mesh;
+				void PrevSolution::set_own_mesh(const MeshSharedPtr mesh){						
+						if(this->mesh == mesh)
+            {
+							MeshSharedPtr new_mesh(new Mesh);
 							new_mesh->copy(mesh);
 							this->mesh = new_mesh;
 							own_mesh = true;						
-						}else throw Hermes::Exceptions::Exception("Solution mesh unequal own_mesh.");
+						}
+            else
+              throw Hermes::Exceptions::Exception("Solution mesh unequal own_mesh.");
 				}
     
            MeshFunction<double>* PrevSolution::clone(){

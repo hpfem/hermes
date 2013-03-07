@@ -89,25 +89,26 @@ const std::string BDY_OUT = "no_bdry";
 
 int main(int argc, char* argv[])
 {  
-  // Load the mesh->
-  MeshSharedPtr mesh, basemesh;
+  // Load the mesh.
+  MeshSharedPtr mesh(new Mesh), basemesh(new Mesh);
   MeshReaderH2D mloader;
-  mloader.load("domain.mesh", &basemesh);
+  mloader.load("domain.mesh", basemesh);
+  
   /*  MeshView meshview("mesh", new WinGeom(0, 0, 500, 400));
-  meshview.show(&basemesh);
+  meshview.show(basemesh);
   View::wait();*/
 
   // Perform initial mesh refinements (optional).
-  for (int i=0; i < INIT_REF_NUM; i++) basemesh->refine_all_elements();
-  mesh->copy(&basemesh);
-
+  for (int i=0; i < INIT_REF_NUM; i++)
+    basemesh->refine_all_elements();
+  mesh->copy(basemesh);
 
   // Initialize boundary conditions.
   DefaultEssentialBCConst<double>  bc_essential(BDY_IN, 0.0);
   EssentialBCs<double>  bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT);	
+  SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT));	
 
   // Initialize solution of lower & higher order
   Solution<double>  low_sln, ref_sln, high_sln, sln;
@@ -164,13 +165,12 @@ int main(int argc, char* argv[])
     Hermes::Mixins::Loggable::Static::info("Time step %d, time %3.5f", ts, current_time);
     Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads,1);  
 
-
     // Periodic global derefinement. 
     if ((ts > 1 && ts % UNREF_FREQ == 0)||(space->get_num_dofs() >= NDOF_STOP)) 
     { 
       Hermes::Mixins::Loggable::Static::info("Global mesh derefinement.");
       switch (UNREF_METHOD) {
-      case 1: mesh->copy(&basemesh);
+      case 1: mesh->copy(basemesh);
         space->set_uniform_order(P_INIT);
         break;
       case 2: mesh->unrefine_all_elements();
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
       Hermes::Mixins::Loggable::Static::info("Calling get_smooth_elems()...");
       smooth_elem_ref = regEst.get_smooth_elems(space,coeff_vec_smooth);
       // Construct reference mesh and setup reference space->
-      Mesh* ref_mesh = new Mesh;
+      MeshSharedPtr ref_mesh(new Mesh);
       ref_mesh->copy(space->get_mesh());
       Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh, 0);
       SpaceSharedPtr<double> ref_space = ref_space_creator.create_ref_space();
@@ -348,8 +348,6 @@ int main(int argc, char* argv[])
       delete [] coeff_vec_2;
       delete [] coeff_vec; 
       delete [] limited_flux; 
-      delete ref_mesh; 
-      delete ref_space; 
     }
     while (done == false);
 

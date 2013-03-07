@@ -114,8 +114,8 @@ public:
   ~Regularity_Estimator();
   void free();
 
-  int* get_smooth_elems(Space<double>* new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix=NULL);
-  int* get_smooth_dofs(Space<double>* new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix=NULL);
+  int* get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix=NULL);
+  int* get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix=NULL);
 
 
 protected:
@@ -125,7 +125,7 @@ protected:
 
   void smoothness_indicator(UMFPackMatrix<double> * mass_matrix=NULL);
 
-  void set_space(Space<double>* new_space);
+  void set_space(SpaceSharedPtr<double> new_space);
 
   double epsilon;
   Solution<double>* sln;
@@ -133,7 +133,7 @@ protected:
   Solution<double>* R_h_2;
   GradientReconstruction_1* grad_1;
   GradientReconstruction_2* grad_2;
-  Space<double>* space;
+  SpaceSharedPtr<double> space;
   UMFPackVector<double> * rhs_1;
   UMFPackVector<double> * rhs_2;
 

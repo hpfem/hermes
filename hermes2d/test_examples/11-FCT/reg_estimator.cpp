@@ -38,7 +38,8 @@ void Regularity_Estimator::free()
 
 void Regularity_Estimator::set_space(SpaceSharedPtr<double> new_space)
 {
-  if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: set_space");
+  if(new_space == NULL)
+    throw Hermes::Exceptions::Exception("smoothness_indicator: set_space");
   free();
   space = new_space;
   int ndof = space->get_num_dofs(); 
@@ -52,7 +53,8 @@ int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,dou
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
   if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
-  if(space!=new_space) set_space(new_space);
+  if(space!=new_space) 
+    set_space(new_space);
   Solution<double>::vector_to_solution(coeff_vec, space, sln);
   smoothness_indicator(mass_matrix);
   return smooth_elem_patch;
@@ -62,7 +64,8 @@ int* Regularity_Estimator::get_smooth_dofs(SpaceSharedPtr<double> new_space,doub
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
   if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
-  if(space!=new_space) set_space(new_space);
+  if(space!=new_space) 
+    set_space(new_space);
   Solution<double>::vector_to_solution(coeff_vec, space, sln);		
   smoothness_indicator(mass_matrix);
   return smooth_dof;

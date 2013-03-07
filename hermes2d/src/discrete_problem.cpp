@@ -107,6 +107,8 @@ namespace Hermes
 
       this->do_not_use_cache = false;
 
+      this->spaces_size = 0;
+
       this->is_linear = false;
     }
 

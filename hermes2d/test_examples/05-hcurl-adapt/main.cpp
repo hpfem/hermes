@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   {
     // Construct globally refined reference mesh and setup reference space->
     Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
-    Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+    MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
     Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
     SpaceSharedPtr<std::complex<double> > ref_space = ref_space_creator.create_ref_space();
 
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
       v_view.show(&real_filter);
       o_view.show(space);
       lin.save_solution_vtk(&real_filter, "sln.vtk", "a");
-      ord.save_mesh_vtk(space, "mesh->vtk");
+      ord.save_mesh_vtk(space, "mesh.vtk");
       lin.free();
     }
 
@@ -204,8 +204,6 @@ int main(int argc, char* argv[])
     // Clean up.
     delete [] coeff_vec;
     delete adaptivity;
-    delete ref_mesh;
-    delete ref_space;
   }
   while (done == false);
 

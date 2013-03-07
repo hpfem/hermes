@@ -299,7 +299,8 @@ void Flux_Correction::antidiffusiveFlux(UMFPackMatrix<double>* mass_matrix,UMFPa
 //FCT for projection 
 void Flux_Correction::lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double* u_L, double* u_H, double time_step, int* smooth_dof)
 {	
-  if(fct==NULL) throw Exceptions::Exception("fct-list=NULL");
+  if(fct==NULL) 
+    throw Exceptions::Exception("fct-list=NULL");
   int ndof = mass_matrix->get_size();
   double* rhs = new double[ndof];
   lumped_matrix->multiply_with_vector(u_L, rhs); 
@@ -421,12 +422,12 @@ void Flux_Correction::project_FCT(Solution<double>* sln,double* coeff_vec, doubl
   int* smooth_dof =NULL;
   //low-order projection
   lumpedProjection->project_lumped(space, sln, coeff_vec, lumped_matrix);			
-  if(regEst!=NULL) smooth_dof = regEst->get_smooth_dofs(space,coeff_vec,mass_matrix);			//=>in smooth elements no FCT needs to be applied
+  if(regEst!=NULL)
+    smooth_dof = regEst->get_smooth_dofs(space,coeff_vec,mass_matrix);			//=>in smooth elements no FCT needs to be applied
   //high-order projection		
   ogProjection->project_global(space, sln, coeff_vec_2, HERMES_L2_NORM);	
   //calculation of fluxes, limiting & explicit correction				
   lumped_flux_limiter(mass_matrix, lumped_matrix, coeff_vec, coeff_vec_2,time_step,smooth_dof); 
-
 }
 
 

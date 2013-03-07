@@ -119,12 +119,12 @@ int main(int argc, char* argv[])
   // Load the mesh->
   MeshSharedPtr mesh, basemesh;
   MeshReaderH2D mloader;
-  mloader.load("square.mesh", &basemesh);
+  mloader.load("square.mesh", basemesh);
 
   // Perform initial mesh refinements.
   for(int i = 0; i < INIT_REF_NUM; i++) 
     basemesh->refine_all_elements(0, true);
-  mesh->copy(&basemesh);
+  mesh->copy(basemesh);
 
   // Initialize boundary conditions.
   EssentialBCNonConst bc_essential("Bdy");
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     {
       Hermes::Mixins::Loggable::Static::info("Global mesh derefinement.");
       switch (UNREF_METHOD) {
-      case 1: mesh->copy(&basemesh);
+      case 1: mesh->copy(basemesh);
         space->set_uniform_order(P_INIT);
         break;
       case 2: mesh->unrefine_all_elements();
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
 
       // Construct globally refined reference mesh and setup reference space->
       Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
-      Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+      MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
       Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
       SpaceSharedPtr<double> ref_space = ref_space_creator.create_ref_space();
       int ndof_ref = Space<double>::get_num_dofs(ref_space);
@@ -255,10 +255,6 @@ int main(int argc, char* argv[])
 
       // Clean up.
       delete adaptivity;
-      if(!done) {
-        delete ref_space;
-        delete sln_time_new.get_mesh();
-      }
     }
     while (done == false);
 

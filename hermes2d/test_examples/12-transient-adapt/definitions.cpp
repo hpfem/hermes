@@ -60,14 +60,11 @@ Ord CustomInitialCondition::ord(Ord x, Ord y) const
   
 MeshFunction<double>* CustomInitialCondition::clone() const
 {
-  Mesh* new_mesh = new Mesh();
-  new_mesh->copy(this->mesh);
-  return new CustomInitialCondition(new_mesh);
+  return new CustomInitialCondition(*this);
 }
 
 CustomInitialCondition::~CustomInitialCondition()
 {
-  delete mesh;
 }
 
 CustomWeakFormPoisson::CustomWeakFormPoisson(Hermes1DFunction<double>* coeff, Hermes2DFunction<double>* f)

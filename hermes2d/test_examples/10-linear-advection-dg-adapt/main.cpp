@@ -68,7 +68,7 @@ int main(int argc, char* args[])
   for (int i=0; i<INIT_REF; i++) mesh->refine_all_elements();
 
   // Create an L2 space->
-  L2Space<double> space(mesh, P_INIT);
+  SpaceSharedPtr<double> space(new L2Space<double>(mesh, P_INIT));
 
   // Initialize refinement selector.
   L2ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -101,7 +101,7 @@ int main(int argc, char* args[])
     // Construct globally refined reference mesh
     // and setup reference space->
     Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
-    Mesh* ref_mesh = ref_mesh_creator.create_ref_mesh();
+    MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
     Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
     SpaceSharedPtr<double> ref_space = ref_space_creator.create_ref_space();
 

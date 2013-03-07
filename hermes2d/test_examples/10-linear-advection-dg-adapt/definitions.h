@@ -10,7 +10,7 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 class CustomWeakForm : public WeakForm<double>
 {
 public:
-  CustomWeakForm(std::string left_bottom_bnd_part, Mesh* mesh);
+  CustomWeakForm(std::string left_bottom_bnd_part, MeshSharedPtr mesh);
   WeakForm<double>* clone() const;
 
 private:
@@ -110,5 +110,5 @@ private:
 
   Ord upwind_flux(Ord u_cent, Ord u_neib, Ord a_dot_n) const;
 
-  Mesh* mesh;
+  MeshSharedPtr mesh;
 };

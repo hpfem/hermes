@@ -10,7 +10,7 @@ using namespace Hermes::Hermes2D;
 class  HPAdapt : public Adapt<double>
 {
 public:
-	  HPAdapt(Space<double>* space, ProjNormType proj_norm): Adapt<double>(space, proj_norm){	
+	  HPAdapt(SpaceSharedPtr<double> space, ProjNormType proj_norm): Adapt<double>(space, proj_norm){	
 	} ; 
 	~HPAdapt(){};
  

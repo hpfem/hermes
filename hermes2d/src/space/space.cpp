@@ -1312,7 +1312,8 @@ namespace Hermes
 
     template class HERMES_API Space<double>;
     template class HERMES_API Space<std::complex<double> >;
-    template class HERMES_API SpaceSharedPtr<double>;
-    template class HERMES_API SpaceSharedPtr<std::complex<double> >;
   }
 }
+
+template class HERMES_API SpaceSharedPtr<double>;
+template class HERMES_API SpaceSharedPtr<std::complex<double> >;

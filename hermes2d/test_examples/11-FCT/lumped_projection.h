@@ -11,13 +11,13 @@ using namespace Hermes::Hermes2D;
 class Lumped_Projection
 {
 public:
-  static void project_lumped( const Space<double>* space, MeshFunction<double>* source_meshfn,
+  static void project_lumped(SpaceSharedPtr<double> space, MeshFunction<double>* source_meshfn,
                              double* target_vec,UMFPackMatrix<double>*  mat  = NULL);
 
 
 
 protected:
-  static void project_internal( const Space<double>* space, WeakForm<double>* wf, double* target_vec, UMFPackMatrix<double>*  mat = NULL);
+  static void project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, UMFPackMatrix<double>*  mat = NULL);
 
 
 

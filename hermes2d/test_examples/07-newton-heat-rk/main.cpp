@@ -32,7 +32,7 @@
 //
 
 //  The following parameters can be changed:
-const bool REUSE_SOLUTION = true;
+const bool REUSE_SOLUTION = false;
 const int P_INIT = 2;                             // Polynomial degree of all mesh elements.
 const int INIT_REF_NUM = 1;                       // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.

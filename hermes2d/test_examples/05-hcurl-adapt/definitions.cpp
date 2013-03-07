@@ -68,7 +68,7 @@ static void exact_sol_der(double x, double y, std::complex<double>& e1dx, std::c
 class CustomExactSolution : public Hermes::Hermes2D::ExactSolutionVector<std::complex<double> >
 {
 public:
-  CustomExactSolution(const Mesh* mesh) : Hermes::Hermes2D::ExactSolutionVector<std::complex<double> >(mesh) {};
+  CustomExactSolution(MeshSharedPtr mesh) : Hermes::Hermes2D::ExactSolutionVector<std::complex<double> >(mesh) {};
   ~CustomExactSolution() {};
 
   virtual Scalar2<std::complex<double> > value(double x, double y) const 

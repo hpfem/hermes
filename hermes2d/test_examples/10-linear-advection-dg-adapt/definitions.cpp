@@ -1,6 +1,6 @@
 #include "definitions.h"
 
-CustomWeakForm::CustomWeakForm(std::string left_bottom_bnd_part, Mesh* mesh) : WeakForm<double>(1), mesh(mesh)
+CustomWeakForm::CustomWeakForm(std::string left_bottom_bnd_part, MeshSharedPtr mesh) : WeakForm<double>(1), mesh(mesh)
 {
     add_matrix_form(new CustomMatrixFormVol(0, 0));
     add_vector_form(new CustomVectorFormVol(0));

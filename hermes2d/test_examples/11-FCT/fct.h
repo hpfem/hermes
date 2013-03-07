@@ -17,7 +17,7 @@ public:
 
 	void free();
 	
-	void init(Space<double>* new_space);
+	void init(SpaceSharedPtr<double> new_space);
 
 	UMFPackMatrix<double>* artificialDiffusion( UMFPackMatrix<double>* conv_matrix);
 	UMFPackMatrix<double>* massLumping( UMFPackMatrix<double>* mass_matrix);
@@ -27,14 +27,14 @@ public:
 	
 	void project_FCT(Solution<double>* sln, double* coeff_vec, double* coeff_vec_2,UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double time_step, OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst=NULL);
 	
-	Space<double>* get_space(){return space;}
+	SpaceSharedPtr<double> get_space(){return space;}
 
 protected:
 		void lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double* u_L, double* u_H,double time_step, int* smooth_dof=NULL);
 
 double theta;
 	bool* fct;
-	Space<double>* space;
+	SpaceSharedPtr<double> space;
 	AsmList<double>*  al;
 	 double* P_plus; 
 	 double* P_minus; 
