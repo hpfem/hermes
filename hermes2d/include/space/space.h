@@ -199,7 +199,7 @@ namespace Hermes
       int get_num_dofs() const;
 
       /// \brief Returns the number of basis functions contained in the spaces.
-      static int get_num_dofs(Hermes::vector<SpaceSharedPtr<Scalar>> spaces);
+      static int get_num_dofs(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
       /// \brief Returns the number of basis functions contained in the space.
       static int get_num_dofs(SpaceSharedPtr<Scalar> space);

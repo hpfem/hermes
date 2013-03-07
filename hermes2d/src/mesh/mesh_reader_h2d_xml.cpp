@@ -150,7 +150,7 @@ namespace Hermes
         meshes.at(meshes_i)->free();
       }
 
-      MeshSharedPtr global_mesh;
+      MeshSharedPtr global_mesh(new Mesh);
 
       try
       {
