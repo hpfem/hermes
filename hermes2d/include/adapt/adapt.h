@@ -59,7 +59,7 @@ namespace Hermes
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+      Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
       Adapt(SpaceSharedPtr<Scalar> space, ProjNormType proj_norm = HERMES_UNSET_NORM);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
