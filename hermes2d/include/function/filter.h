@@ -39,7 +39,6 @@ namespace Hermes
       Filter();
       Filter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
       Filter(MeshFunctionSharedPtr<Scalar>* solutions, int num);
-      Filter(Hermes::vector<SolutionSharedPtr<Scalar> > solutions);
 
       virtual ~Filter();
 
@@ -117,8 +116,6 @@ namespace Hermes
 
       SimpleFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = Hermes::vector<int>());
 
-      SimpleFilter(Hermes::vector<SolutionSharedPtr<Scalar> > solutions, Hermes::vector<int> items = Hermes::vector<int>());
-
       virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL);
 
     protected:
@@ -137,8 +134,11 @@ namespace Hermes
     class HERMES_API ComplexFilter : public Filter<double>
     {
     public:
+      ComplexFilter();
       ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item = H2D_FN_VAL_0);
-      ComplexFilter(SolutionSharedPtr<std::complex<double> > solution, int item = H2D_FN_VAL_0);
+
+      /// For cloning.
+      void set_mesh_fn(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
 
       virtual ~ComplexFilter();
     protected:
@@ -153,6 +153,7 @@ namespace Hermes
       virtual void pop_transform();
 
       virtual void free();
+
       MeshFunction<std::complex<double> >* sln_complex;
 
       int item;
@@ -176,8 +177,6 @@ namespace Hermes
       DXDYFilter();
 
       DXDYFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions);
-
-      DXDYFilter(Hermes::vector<SolutionSharedPtr<Scalar> > solutions);
 
       virtual ~DXDYFilter();
     protected:
@@ -337,8 +336,8 @@ namespace Hermes
     class HERMES_API RealFilter : public ComplexFilter
     {
     public:
+      RealFilter();
       RealFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item = H2D_FN_VAL_0);
-      RealFilter(SolutionSharedPtr<std::complex<double> > solution, int item = H2D_FN_VAL_0);
       virtual ~RealFilter();
 
       virtual MeshFunction<double>* clone() const;

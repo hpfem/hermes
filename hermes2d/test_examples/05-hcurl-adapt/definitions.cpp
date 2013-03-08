@@ -100,7 +100,7 @@ public:
     return Hermes::Ord(10);
   }
   
-  virtual MeshFunctionSharedPtr<std::complex<double> > clone() const
+  virtual MeshFunction<std::complex<double> >* clone() const
   {
     return new CustomExactSolution(this->mesh);
   }

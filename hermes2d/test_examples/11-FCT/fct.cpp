@@ -415,7 +415,7 @@ void Flux_Correction::lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMF
   delete [] rhs;
 }
 
-void Flux_Correction::project_FCT(SolutionSharedPtr<double> sln,double* coeff_vec, double* coeff_vec_2,UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double time_step,OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst)
+void Flux_Correction::project_FCT(MeshFunctionSharedPtr<double> sln,double* coeff_vec, double* coeff_vec_2,UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double time_step,OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst)
 {
   if(sln==NULL)
     throw Exceptions::Exception("project_FCT: sln=NULL");

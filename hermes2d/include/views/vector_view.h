@@ -41,9 +41,6 @@ namespace Hermes
         void show(MeshFunctionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL);
         void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
 
-        void show(SolutionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL);
-        void show(SolutionSharedPtr<double> xsln, SolutionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
-
         inline void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
         void set_mode(int mode);
       

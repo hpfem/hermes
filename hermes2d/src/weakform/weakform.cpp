@@ -168,21 +168,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_ext(SolutionSharedPtr<Scalar> ext)
-    {
-      this->set_ext(MeshFunctionSharedPtr<Scalar>(ext.get()));
-    }
-
-    template<typename Scalar>
-    void WeakForm<Scalar>::set_ext(Hermes::vector<SolutionSharedPtr<Scalar> > ext)
-    {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > mext;
-      for(unsigned int i = 0; i < ext.size(); i++)
-        mext.push_back(MeshFunctionSharedPtr<Scalar>(ext[i].get()));
-      this->set_ext(mext);
-    }
-
-    template<typename Scalar>
     Hermes::vector<MeshFunctionSharedPtr<Scalar> > WeakForm<Scalar>::get_ext() const
     {
       return this->ext;

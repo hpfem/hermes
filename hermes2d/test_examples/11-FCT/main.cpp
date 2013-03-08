@@ -111,11 +111,11 @@ int main(int argc, char* argv[])
   SpaceSharedPtr<double> space(new H1Space<double>(mesh, &bcs, P_INIT));	
 
   // Initialize solution of lower & higher order
-  Solution<double>  low_sln, ref_sln, high_sln, sln;
-  PrevSolution u_prev_time;
+  MeshFunctionSharedPtr<double>  low_sln(new Solution<double>()), ref_sln(new Solution<double>()), high_sln(new Solution<double>()), sln(new Solution<double>());
+  MeshFunctionSharedPtr<double>u_prev_time(new PrevSolution);
 
   // Previous time level solution (initialized by the initial condition).
-  CustomInitialCondition initial_condition(mesh);  
+  MeshFunctionSharedPtr<double>initial_condition(new CustomInitialCondition(mesh));
 
   // Initialize the weak formulation.
   CustomWeakFormMassmatrix  massmatrix(time_step);
@@ -222,9 +222,9 @@ int main(int argc, char* argv[])
       //smoothness-check for projected data		
       Hermes::Mixins::Loggable::Static::info("Projecting...");
       if(ts==1)
-        ogProjection.project_global(space,&initial_condition, coeff_vec_smooth, HERMES_L2_NORM);		
+        ogProjection.project_global(space, initial_condition, coeff_vec_smooth, HERMES_L2_NORM);		
       else
-        ogProjection.project_global(space,&u_prev_time, coeff_vec_smooth, HERMES_L2_NORM);			
+        ogProjection.project_global(space, u_prev_time, coeff_vec_smooth, HERMES_L2_NORM);			
 
       Hermes::Mixins::Loggable::Static::info("Calling get_smooth_elems()...");
       smooth_elem_ref = regEst.get_smooth_elems(space,coeff_vec_smooth);
@@ -283,9 +283,9 @@ int main(int argc, char* argv[])
       //--------- Project the previous timestep solution on the FE space (FCT is applied )----------------			
       // coeff_vec : FCT -Projection, coeff_vec_2: L2 Projection (ogProjection)	
       if(ts==1)
-        fluxCorrection.project_FCT(&initial_condition, coeff_vec, coeff_vec_2,mass_matrix,lumped_matrix,time_step,&ogProjection,&lumpedProjection, &regEst);	
+        fluxCorrection.project_FCT(initial_condition, coeff_vec, coeff_vec_2,mass_matrix,lumped_matrix,time_step,&ogProjection,&lumpedProjection, &regEst);	
       else		
-        fluxCorrection.project_FCT(&u_prev_time, coeff_vec, coeff_vec_2,mass_matrix,lumped_matrix,time_step,&ogProjection,&lumpedProjection, &regEst);			
+        fluxCorrection.project_FCT(u_prev_time, coeff_vec, coeff_vec_2,mass_matrix,lumped_matrix,time_step,&ogProjection,&lumpedProjection, &regEst);			
       //------------------------- lower order solution------------					
       u_L = lowOrder.solve_Low_Order(lumped_matrix, coeff_vec,time_step);								
       //-------------high order solution (standard galerkin) ------				
@@ -294,12 +294,12 @@ int main(int argc, char* argv[])
       fluxCorrection.antidiffusiveFlux(mass_matrix,lumped_matrix,conv_matrix,diffusion,u_H, u_L,coeff_vec, limited_flux,time_step,&regEst);
       //-------------Compute final solution ---------------			
       ref_sln_double = lowOrder.explicit_Correction(limited_flux);
-      Solution<double> ::vector_to_solution(ref_sln_double, ref_space, &ref_sln);	
+      Solution<double>::vector_to_solution(ref_sln_double, ref_space, ref_sln);	
 
       // Project the fine mesh solution onto the coarse mesh->
-      ogProjection.project_global(space, &ref_sln, &sln, HERMES_L2_NORM); 
+      ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM); 
       // Calculate element errors and total error estimate.
-      err_est_rel_total = adaptivity.calc_err_est(&sln, &ref_sln) * 100;
+      err_est_rel_total = adaptivity.calc_err_est(sln, ref_sln) * 100;
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", ndof,ref_ndof, err_est_rel_total);				
       // If err_est_rel too large, adapt the mesh->
@@ -315,8 +315,7 @@ int main(int argc, char* argv[])
 
       if(done) 
       {  
-        u_prev_time.copy(&ref_sln);
-        u_prev_time.set_own_mesh(ref_mesh); //ref_mesh can be deleted
+        u_prev_time->copy(ref_sln);
       }
 
       // Visualize the solution and mesh->
@@ -324,7 +323,7 @@ int main(int argc, char* argv[])
       {
         sprintf(title, "Ref-Loesung: Time %3.2f,timestep %i,as=%i,", current_time,ts,as);
         sview.set_title(title);
-        sview.show(&ref_sln);
+        sview.show(ref_sln);
         sprintf(title, "Mesh: Time %3.2f,timestep %i,as=%i,", current_time,ts,as);
         mview.set_title(title);
         mview.show(space);
@@ -335,7 +334,7 @@ int main(int argc, char* argv[])
         // Output solution in VTK format.
         char filename[40];
         sprintf(filename, "solution-%i.vtk", ts );
-        lin.save_solution_vtk(&u_prev_time, filename, "solution", mode_3D);  
+        lin.save_solution_vtk(u_prev_time, filename, "solution", mode_3D);  
         sprintf(filename, "ref_space_order-%i.vtk", ts);
         ord.save_orders_vtk(ref_space, filename);
         sprintf(filename, "ref_mesh-%i.vtk", ts );
@@ -360,7 +359,7 @@ int main(int argc, char* argv[])
 
   // Visualize the solution.
   if(VTK_VISUALIZATION) {
-    lin.save_solution_vtk(&u_prev_time, "end_solution.vtk", "solution", mode_3D);
+    lin.save_solution_vtk(u_prev_time, "end_solution.vtk", "solution", mode_3D);
     ord.save_mesh_vtk(space, "end_mesh");
     ord.save_orders_vtk(space, "end_order.vtk");
   }

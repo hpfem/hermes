@@ -67,15 +67,16 @@ int main(int argc, char* argv[])
   newton.set_space(space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-  SolutionSharedPtr<double> sln(new Hermes::Hermes2D::Solution<double>());
+  MeshFunctionSharedPtr<double> sln(new Hermes::Hermes2D::Solution<double>());
 
   try{
     newton.solve();
   }
   catch(Hermes::Exceptions::Exception e)
-  {
+	{
     e.print_msg();
   }
+
   Hermes::Hermes2D::Solution<double>::vector_to_solution(newton.get_sln_vector(), space, sln);
 
   // VTK output.

@@ -191,7 +191,7 @@ protected:
 class WeakFormNSNewton : public WeakForm<double>
 {
 public:
-  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, SolutionSharedPtr<double> xvel_prev_time, SolutionSharedPtr<double> yvel_prev_time) : WeakForm<double>(3), Stokes(Stokes), 
+  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, MeshFunctionSharedPtr<double> xvel_prev_time, MeshFunctionSharedPtr<double> yvel_prev_time) : WeakForm<double>(3), Stokes(Stokes), 
     Reynolds(Reynolds)
   {
     this->current_time_step = time_step;
@@ -597,8 +597,8 @@ protected:
   // Members.
   bool Stokes;
   double Reynolds;
-  SolutionSharedPtr<double> x_vel_previous_time;
-  SolutionSharedPtr<double> y_vel_previous_time;
+  MeshFunctionSharedPtr<double> x_vel_previous_time;
+  MeshFunctionSharedPtr<double> y_vel_previous_time;
 };
 
 class EssentialBCNonConst : public EssentialBoundaryCondition<double>

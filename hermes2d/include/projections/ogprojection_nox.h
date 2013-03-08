@@ -76,7 +76,7 @@ namespace Hermes
 
       /// Wrapper that delivers a Solution instead of coefficient vector.
       void project_global(SpaceSharedPtr<Scalar> space,
-          SolutionSharedPtr<Scalar> source_sln, SolutionSharedPtr<Scalar> target_sln,
+          MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
           ProjNormType proj_norm = HERMES_UNSET_NORM,
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
@@ -86,12 +86,12 @@ namespace Hermes
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       /// Wrapper for multiple source Solutions that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<SolutionSharedPtr<Scalar> > source_slns,
+      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
           Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
       void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > source_slns, Hermes::vector<SolutionSharedPtr<Scalar> > target_slns,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false,
           double newton_tol = 1e-6, int newton_max_iter = 10);
 

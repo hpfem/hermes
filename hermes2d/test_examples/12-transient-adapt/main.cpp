@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
   if (bt.is_fully_implicit()) Hermes::Mixins::Loggable::Static::info("Using a %d-stage fully implicit R-K method.", bt.get_size());
 
   // Load the mesh->
-  MeshSharedPtr mesh, basemesh;
+  MeshSharedPtr mesh(new Mesh), basemesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("square.mesh", basemesh);
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
   int ndof_coarse = space->get_num_dofs();
 
   // Previous time level solution (initialized by initial condition).
-  CustomInitialCondition sln_time_prev(mesh);
+  MeshFunctionSharedPtr<double> sln_time_prev(new CustomInitialCondition (mesh));
 
   // Initialize the weak formulation
   CustomNonlinearity lambda(alpha);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
   CustomWeakFormPoisson wf(&lambda, &f);
 
   // Next time level solution.
-  Solution<double> sln_time_new(mesh);
+  MeshFunctionSharedPtr<double> sln_time_new(new Solution<double>(mesh));
 
   // Create a refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
   OrderView ordview("Initial mesh", new WinGeom(445, 0, 410, 350));
   if(HERMES_VISUALIZATION)
   {
-    view.show(&sln_time_prev);
+    view.show(sln_time_prev);
     ordview.show(space);
   }
 
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
         runge_kutta.set_time(current_time);
         runge_kutta.set_time_step(time_step);
         runge_kutta.set_newton_tol(NEWTON_TOL);
-        runge_kutta.rk_time_step_newton(&sln_time_prev, &sln_time_new);
+        runge_kutta.rk_time_step_newton(sln_time_prev, sln_time_new);
       }
       catch(Exceptions::Exception& e)
       {
@@ -213,14 +213,14 @@ int main(int argc, char* argv[])
       }
 
       // Project the fine mesh solution onto the coarse mesh->
-      Solution<double> sln_coarse;
+      MeshFunctionSharedPtr<double> sln_coarse(new Solution<double>());
       Hermes::Mixins::Loggable::Static::info("Projecting fine mesh solution on coarse mesh for error estimation.");
-      OGProjection<double> ogProjection; ogProjection.project_global(space, &sln_time_new, &sln_coarse);
+      OGProjection<double> ogProjection; ogProjection.project_global(space, sln_time_new, sln_coarse);
 
       // Calculate element errors and total error estimate.
       Hermes::Mixins::Loggable::Static::info("Calculating error estimate.");
       Adapt<double>* adaptivity = new Adapt<double>(space);
-      double err_est_rel_total = adaptivity->calc_err_est(&sln_coarse, &sln_time_new) * 100;
+      double err_est_rel_total = adaptivity->calc_err_est(sln_coarse, sln_time_new) * 100;
 
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_ref: %d, err_est_rel: %g%%",
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
         sprintf(title, "Solution<double>, time %g", current_time);
         view.set_title(title);
         view.show_mesh(false);
-        view.show(&sln_time_new);
+        view.show(sln_time_new);
         sprintf(title, "Mesh, time %g", current_time);
         ordview.set_title(title);
         ordview.show(space);
@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
     }
     while (done == false);
 
-    sln_time_prev.copy(&sln_time_new);
+    sln_time_prev->copy(sln_time_new);
 
     // Increase current time and counter of time steps.
     current_time += time_step;

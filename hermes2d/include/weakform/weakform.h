@@ -146,14 +146,6 @@ namespace Hermes
 
       /// External functions.
       /// Set one external function.
-      void set_ext(SolutionSharedPtr<Scalar> ext);
-
-      /// External functions.
-      /// Set more external functions.
-      void set_ext(Hermes::vector<SolutionSharedPtr<Scalar> > ext);
-
-      /// External functions.
-      /// Set one external function.
       void set_ext(MeshFunctionSharedPtr<Scalar> ext);
 
       /// External functions.

@@ -26,7 +26,6 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar> class MeshFunction;
-    template<typename Scalar> class Solution;
   }
 }
 
@@ -39,30 +38,12 @@ public:
   {
   }
 };
-
-template<typename Scalar>
-class SolutionSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >
-{
-public:
-  SolutionSharedPtr(Hermes::Hermes2D::Solution<Scalar>* ptr = NULL) : std::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >(ptr)
-  {
-  }
-};
 #else
 template<typename Scalar>
 class MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
 {
 public:
   MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
-  {
-  }
-};
-
-template<typename Scalar>
-class SolutionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >
-{
-public:
-  SolutionSharedPtr(Hermes::Hermes2D::Solution<Scalar>* ptr = NULL) : std::tr1::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >(ptr)
   {
   }
 };
@@ -104,6 +85,10 @@ namespace Hermes
       /// Return the mesh.
       MeshSharedPtr get_mesh() const;
 
+      /// Copy from sln to this instance.
+      virtual void copy(const MeshFunction<Scalar>* sln);
+      virtual void copy(const MeshFunctionSharedPtr<Scalar> sln);
+      
       /// Return the reference mapping.
       RefMap* get_refmap(bool update = true);
 

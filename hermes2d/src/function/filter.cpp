@@ -51,17 +51,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Filter<Scalar>::Filter(Hermes::vector<SolutionSharedPtr<Scalar> > solutions) : MeshFunction<Scalar>()
-    {
-      this->num = solutions.size();
-      if(num > H2D_MAX_COMPONENTS)
-        throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-      for(int i = 0; i < this->num; i++)
-        this->sln[i] = MeshFunctionSharedPtr<Scalar>(solutions.at(i).get());
-      this->init();
-    }
-
-    template<typename Scalar>
     void Filter<Scalar>::init(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions)
     {
       this->num = solutions.size();
@@ -264,29 +253,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<SolutionSharedPtr<Scalar> > solutions, const Hermes::vector<int> items)
-    {
-      this->num = solutions.size();
-      if(this->num > H2D_MAX_COMPONENTS)
-        throw Hermes::Exceptions::Exception("Attempt to create an instance of Filter with more than 10 MeshFunctions.");
-      if(items.size() != (unsigned) this->num)
-        if(items.size() > 0)
-          throw Hermes::Exceptions::Exception("Attempt to create an instance of SimpleFilter with different supplied number of MeshFunctions than the number of types of data used from them.");
-
-      for(int i = 0; i < this->num; i++)
-      {
-        this->sln[i] = MeshFunctionSharedPtr<Scalar>(solutions.at(i).get());
-        if(items.size() > 0)
-          this->item[i] = items.at(i);
-        else
-          this->item[i] = H2D_FN_VAL;
-      }
-      this->init();
-      init_components();
-      this->deleteSolutions = false;
-    }
-
-    template<typename Scalar>
     SimpleFilter<Scalar>::~SimpleFilter()
     {
     }
@@ -409,7 +375,16 @@ namespace Hermes
       return filter;
     }
 
-     ComplexFilter::ComplexFilter(SolutionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
+    ComplexFilter::ComplexFilter() : Filter<double>()
+    {
+      this->num = 0;
+      this->unimesh = false;
+
+      // Set NOT to delete solution, as it is probably taken care of by the user.
+      this->deleteSolutions = false;
+    }
+
+     ComplexFilter::ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
     {
       this->num = 0;
       this->unimesh = false;
@@ -422,17 +397,12 @@ namespace Hermes
       this->deleteSolutions = false;
     }
 
-    ComplexFilter::ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
+    void ComplexFilter::set_mesh_fn(MeshFunction<std::complex<double> >* solution, int item)
     {
-      this->num = 0;
-      this->unimesh = false;
-      this->sln_complex = solution.get();
+      this->sln_complex = solution;
       this->num_components = solution->get_num_components();
       this->mesh = solution->get_mesh();
-      set_quad_2d(&g_quad_2d_std);
-
-      // Set NOT to delete solution, as it is probably taken care of by the user.
-      this->deleteSolutions = false;
+      this-> set_quad_2d(&g_quad_2d_std);
     }
 
     ComplexFilter::~ComplexFilter()
@@ -557,12 +527,6 @@ namespace Hermes
 
     template<typename Scalar>
     DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions) : Filter<Scalar>(solutions)
-    {
-      init_components();
-    }
-
-    template<typename Scalar>
-    DXDYFilter<Scalar>::DXDYFilter(Hermes::vector<SolutionSharedPtr<Scalar> > solutions) : Filter<Scalar>(solutions)
     {
       init_components();
     }
@@ -983,13 +947,14 @@ namespace Hermes
 
     MeshFunction<double>* RealFilter::clone() const
     {
-      RealFilter* filter = new RealFilter(this->sln_complex->clone(), this->item);
+      RealFilter* filter = new RealFilter();
+      filter->set_mesh_fn(this->sln_complex->clone(), this->item);
       filter->setDeleteSolutions();
       return filter;
     }
 
-    RealFilter::RealFilter(SolutionSharedPtr<std::complex<double> > solution, int item)
-      : ComplexFilter(solution, item)
+    RealFilter::RealFilter()
+      : ComplexFilter()
     {
     };
 

@@ -51,7 +51,8 @@ namespace Hermes
 
         SpaceSharedPtr<Scalar> space;
         PrecalcShapeset* pss;
-        SolutionSharedPtr<Scalar> sln;
+        MeshFunctionSharedPtr<Scalar> sln;
+        MeshFunctionSharedPtr<double> complex_filter;
 
         double eps;
         int ndof, item;

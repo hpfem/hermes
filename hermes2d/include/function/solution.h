@@ -85,8 +85,7 @@ namespace Hermes
       /// State querying helpers.
       inline std::string getClassName() const { return "Solution"; }
 
-      virtual void copy(const Solution<Scalar>* sln);
-      virtual void copy(const SolutionSharedPtr<Scalar> sln);
+      virtual void copy(const MeshFunction<Scalar>* sln);
 
       /// Sets solution equal to Dirichlet lift only, solution vector = 0.
       void set_dirichlet_lift(SpaceSharedPtr<Scalar> space, PrecalcShapeset* pss = NULL);
@@ -135,36 +134,36 @@ namespace Hermes
 
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > solutions,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
-      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar> solution,
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
+          bool add_dir_lift = true, int start_index = 0);
+
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
           bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > solutions,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > solutions,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
           bool add_dir_lift = false);
 
       static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > solutions,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
           bool add_dir_lift = false);
 
-      static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar> solution,
+      static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
           bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
           Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
           Hermes::vector<int> start_indices = Hermes::vector<int>());
-
-      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar> solution,
-          PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
 
       /// Internal.
       virtual void set_active_element(Element* e);
@@ -176,6 +175,9 @@ namespace Hermes
       void set_type(SolutionType type) { sln_type = type; };
 
     protected:
+      static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
+          PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
+
       static bool static_verbose_output;
 
       virtual int get_edge_fn_order(int edge) { return MeshFunction<Scalar>::get_edge_fn_order(edge); }
@@ -240,6 +242,8 @@ namespace Hermes
 
       friend class RefMap;
       template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Views::BaseView;
+      template<typename T> friend class Views::VectorBaseView;
       template<typename T> friend class CalculationContinuity;
       template<typename T> friend class OGProjection;
       template<typename T> friend class OGProjectionNOX;

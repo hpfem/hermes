@@ -56,15 +56,6 @@ namespace Hermes
         delete vec;
       }
 
-      void VectorView::show(SolutionSharedPtr<double> vsln, double eps)
-      {
-        show(MeshFunctionSharedPtr<double>(vsln.get()), eps);
-      }
-
-      void VectorView::show(SolutionSharedPtr<double> xsln, SolutionSharedPtr<double> ysln, double eps, int xitem, int yitem, MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
-      {
-        show(MeshFunctionSharedPtr<double>(xsln.get()), MeshFunctionSharedPtr<double>(xsln.get()), eps, xitem, yitem, xdisp, ydisp, dmult);
-      }
       void VectorView::show(MeshFunctionSharedPtr<double> vsln, double eps)
       {
         if(vec == NULL)

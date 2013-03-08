@@ -11,7 +11,7 @@ using namespace Hermes::Hermes2D;
 class Lumped_Projection
 {
 public:
-  static void project_lumped(SpaceSharedPtr<double> space, MeshFunction<double>* source_meshfn,
+  static void project_lumped(SpaceSharedPtr<double> space, MeshFunctionSharedPtr<double> source_meshfn,
                              double* target_vec,UMFPackMatrix<double>*  mat  = NULL);
 
 

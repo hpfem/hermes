@@ -111,8 +111,8 @@ int main(int argc, char* argv[])
   if (MULTI == true) v_mesh->refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Set exact solutions.
-  ExactSolutionFitzHughNagumo1 exact_u(u_mesh);
-  ExactSolutionFitzHughNagumo2 exact_v(v_mesh, K);
+  MeshFunctionSharedPtr<double> exact_u(new ExactSolutionFitzHughNagumo1 (u_mesh));
+  MeshFunctionSharedPtr<double> exact_v(new ExactSolutionFitzHughNagumo2 (v_mesh, K));
 
   // Define right-hand sides.
   CustomRightHandSide1 g1(K, D_u, SIGMA);
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
   SpaceSharedPtr<double> v_space(new H1Space<double>(MULTI ? v_mesh : u_mesh, &bcs_v, P_INIT_V));
 
   // Initialize coarse and reference mesh solutions.
-  Solution<double> u_sln, v_sln, u_ref_sln, v_ref_sln;
+  MeshFunctionSharedPtr<double> u_sln(new Solution<double>()), v_sln(new Solution<double>()), u_ref_sln(new Solution<double>()), v_ref_sln(new Solution<double>());
 
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -199,21 +199,20 @@ int main(int argc, char* argv[])
     }
 
     // Translate the resulting coefficient vector into the instance of Solution.
-    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const,
-                                          Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln));
+    Solution<double>::vector_to_solutions(newton.get_sln_vector(), ref_spaces_const, Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln));
 
     // Project the fine mesh solution onto the coarse mesh->
     Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh->");
     OGProjection<double> ogProjection; ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space),
-                                                                   Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln),
-                                                                   Hermes::vector<Solution<double> *>(&u_sln, &v_sln));
+                                                                   Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln),
+                                                                   Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln));
 
     cpu_time.tick();
 
     // View the coarse mesh solution and polynomial orders.
-    s_view_0.show(&u_sln);
+    s_view_0.show(u_sln);
     o_view_0.show(u_space);
-    s_view_1.show(&v_sln);
+    s_view_1.show(v_sln);
     o_view_1.show(v_space);
 
     // Calculate element errors.
@@ -222,15 +221,15 @@ int main(int argc, char* argv[])
 
     // Calculate error estimate for each solution component and the total error estimate.
     Hermes::vector<double> err_est_rel;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<Solution<double> *>(&u_sln, &v_sln),
-                                                        Hermes::vector<Solution<double> *>(&u_ref_sln, &v_ref_sln),
+    double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln),
+                                                        Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln),
                                                         &err_est_rel) * 100;
 
     // Calculate exact error for each solution component and the total exact error.
     Hermes::vector<double> err_exact_rel;
     bool solutions_for_adapt = false;
-    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<Solution<double> *>(&u_sln, &v_sln),
-                                                            Hermes::vector<Solution<double> *>(&exact_u, &exact_v),
+    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln),
+                                                            Hermes::vector<MeshFunctionSharedPtr<double> >(exact_u, exact_v),
                                                             &err_exact_rel, solutions_for_adapt) * 100;
 
     // Time measurement.

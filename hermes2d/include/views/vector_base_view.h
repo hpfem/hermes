@@ -46,7 +46,7 @@ namespace Hermes
 
         SpaceSharedPtr<Scalar> space;
         PrecalcShapeset* pss;
-        SolutionSharedPtr<Scalar> sln;
+        MeshFunctionSharedPtr<Scalar> sln;
 
         int ndof, component;
         int base_index;

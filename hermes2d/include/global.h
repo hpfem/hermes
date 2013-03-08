@@ -81,7 +81,7 @@ static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
 # define H2DRS_DEFAULT_ERR_WEIGHT_ANISO 1.414214 ///< A default multiplicative coefficient of an error of a ANISO-candidate. \ingroup g_selectors
 
 template<typename Scalar> class MeshFunctionSharedPtr;
-template<typename Scalar> class SolutionSharedPtr;
+template<typename Scalar> class MeshFunctionSharedPtr;
 
 namespace Hermes
 {
@@ -120,34 +120,30 @@ namespace Hermes
       // Note: coarse mesh sln has to be first, then
       // ref_sln (because the abs. error is divided
       // by the norm of the latter).
-      static double calc_rel_error(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, int norm_type);
-
-      static double calc_abs_error(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, int norm_type);
-      static double calc_abs_error(SolutionSharedPtr<Scalar> sln1, SolutionSharedPtr<Scalar> sln2, int norm_type);
-
-      static double calc_norm(MeshFunctionSharedPtr<Scalar> sln, int norm_type);
-      static double calc_norm(SolutionSharedPtr<Scalar> sln, int norm_type);
+      static double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
+      static double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
+      static double calc_norm(MeshFunction<Scalar>* sln, int norm_type);
 
       /// Calculate norm of a (possibly vector-valued) solution.
       /// Take norm from spaces where these solutions belong.
-      static double calc_norms(Hermes::vector<SolutionSharedPtr<Scalar> > slns);
-      static double calc_abs_errors(Hermes::vector<SolutionSharedPtr<Scalar> > slns1, Hermes::vector<SolutionSharedPtr<Scalar> > slns2);
-      static double calc_rel_errors(Hermes::vector<SolutionSharedPtr<Scalar> > slns1, Hermes::vector<SolutionSharedPtr<Scalar> > slns2);
+      static double calc_norms(Hermes::vector<MeshFunction<Scalar>* > slns);
+      static double calc_abs_errors(Hermes::vector<MeshFunction<Scalar>* > slns1, Hermes::vector<MeshFunction<Scalar>* > slns2);
+      static double calc_rel_errors(Hermes::vector<MeshFunction<Scalar>* > slns1, Hermes::vector<MeshFunction<Scalar>* > slns2);
 
-      static double error_fn_l2(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_l2(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
+      static double error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      static double error_fn_h1(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_h1(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
+      static double error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      static double error_fn_hc(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hc(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
+      static double error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      static double error_fn_hcl2(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hcl2(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
+      static double error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru);
 
-      static double error_fn_hdiv(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hdiv(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
+      static double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
 
       static double get_l2_norm(Vector<Scalar>* vec);
     };

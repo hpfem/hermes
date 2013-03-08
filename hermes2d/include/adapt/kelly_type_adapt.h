@@ -139,7 +139,7 @@ namespace Hermes
                                       int neighbor_index);
       double eval_solution_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
                                 RefMap* rm,
-                                SolutionSharedPtr<Scalar> sln);
+                                MeshFunctionSharedPtr<Scalar> sln);
 
       ///
       /// Linear forms used to calculate the error estimator value for each component.
@@ -173,7 +173,7 @@ namespace Hermes
       /// their normalizations. If called with a pair of solutions, the version from Adapt is used (this is e.g.
       /// done when comparing approximate solution to the exact one - in this case, we do not want to compute
       /// the Kelly estimator value, but rather the ordinary difference between the solutions).
-      virtual double calc_err_internal(Hermes::vector<SolutionSharedPtr<Scalar> > slns,
+      virtual double calc_err_internal(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns,
                                        Hermes::vector<double>* component_errors,
                                        unsigned int error_flags);
 
@@ -265,17 +265,17 @@ namespace Hermes
       /// The following two methods calculate the error of the given \c sln, using \code calc_err_internal \endcode.
       ///
 
-      double calc_err_est(SolutionSharedPtr<Scalar>sln,
+      double calc_err_est(MeshFunctionSharedPtr<Scalar>sln,
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {
         if(this->num != 1)
           throw Exceptions::Exception("Wrong number of solutions.");
-        Hermes::vector<SolutionSharedPtr<Scalar> > slns;
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns;
         slns.push_back(sln);
         return calc_err_est(slns, NULL, error_flags);
       }
 
-      double calc_err_est(Hermes::vector<SolutionSharedPtr<Scalar> > slns,
+      double calc_err_est(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns,
                           Hermes::vector<double>* component_errors = NULL,
                           unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL)
       {

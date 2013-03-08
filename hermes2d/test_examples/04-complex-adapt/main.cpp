@@ -67,6 +67,7 @@ const double OMEGA = 2 * M_PI * FREQ;
 int main(int argc, char* argv[])
 {
   Hermes::Mixins::TimeMeasurable m;
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
   m.tick();
 
   // Load the mesh->
@@ -90,8 +91,8 @@ int main(int argc, char* argv[])
     "Wire", MU_0, std::complex<double>(J_EXT, 0.0), OMEGA);
 
   // Initialize coarse and reference mesh solution.
-  SolutionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
-  SolutionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  MeshFunctionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  MeshFunctionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
 
   // Initialize refinement selector.
   H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);

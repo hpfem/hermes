@@ -690,12 +690,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* init_fn(MeshFunctionSharedPtr<Scalar> fu, const int order)
-    {
-      return init_fn(fu.get(), order);
-    }
-
-    template<typename Scalar>
     Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order)
     {
       // Sanity checks.
@@ -767,23 +761,11 @@ namespace Hermes
       return u;
     }
 
-    template<typename Scalar>
-    Func<Scalar>* init_fn(SolutionSharedPtr<Scalar> fu, const int order)
-    {
-      return init_fn(fu.get(), order);
-    }
-
     template HERMES_API Func<double>* init_fn(MeshFunction<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(MeshFunction<std::complex<double> >* fu, const int order);
 
     template HERMES_API Func<double>* init_fn(Solution<double>* fu, const int order);
     template HERMES_API Func<std::complex<double> >* init_fn(Solution<std::complex<double> >* fu, const int order);
-
-    template HERMES_API Func<double>* init_fn(MeshFunctionSharedPtr<double> fu, const int order);
-    template HERMES_API Func<std::complex<double> >* init_fn(MeshFunctionSharedPtr<std::complex<double> > fu, const int order);
-
-    template HERMES_API Func<double>* init_fn(SolutionSharedPtr<double> fu, const int order);
-    template HERMES_API Func<std::complex<double> >* init_fn(SolutionSharedPtr<std::complex<double> > fu, const int order);
 
     template class HERMES_API Func<Hermes::Ord>;
     template class HERMES_API Func<double>;

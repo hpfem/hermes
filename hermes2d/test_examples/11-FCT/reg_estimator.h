@@ -53,7 +53,7 @@ public:
 class GradientReconstruction_1 : public WeakForm<double>
 {
 public:
-  GradientReconstruction_1(Solution<double>* sln);
+  GradientReconstruction_1(MeshFunctionSharedPtr<double> sln);
 
 };
 
@@ -96,7 +96,7 @@ public:
 class GradientReconstruction_2 : public WeakForm<double>
 {
 public:
-  GradientReconstruction_2(Solution<double>* sln);
+  GradientReconstruction_2(MeshFunctionSharedPtr<double> sln);
 
 };
 
@@ -119,11 +119,11 @@ public:
 
 
 protected:
-  double linear_approx(Element* e, double x_i, double y_i,double x_c, double y_c,Solution<double>* sln);
-  double linear_approx_dx(Element* e, double x_i, double y_i,double x_c, double y_c,Solution<double>* sln);
-  double linear_approx_dy(Element* e, double x_i, double y_i,double x_c, double y_c,Solution<double>* sln);
+  double linear_approx(Element* e, double x_i, double y_i,double x_c, double y_c, MeshFunctionSharedPtr<double> sln);
+  double linear_approx_dx(Element* e, double x_i, double y_i,double x_c, double y_c, MeshFunctionSharedPtr<double> sln);
+  double linear_approx_dy(Element* e, double x_i, double y_i,double x_c, double y_c, MeshFunctionSharedPtr<double> sln);
 
-  void smoothness_indicator(UMFPackMatrix<double> * mass_matrix=NULL);
+  void smoothness_indicator(UMFPackMatrix<double> * mass_matrix = NULL);
 
   void set_space(SpaceSharedPtr<double> new_space);
 

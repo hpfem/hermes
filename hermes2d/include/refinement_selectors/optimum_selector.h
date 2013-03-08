@@ -186,7 +186,7 @@ namespace Hermes
         *  \param[in] rsln A reference solution which is used to calculate the error.
         *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
         *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
-        void evaluate_candidates(Element* e, SolutionSharedPtr<Scalar> rsln, double* avg_error, double* dev_error);
+        void evaluate_candidates(Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error);
 
         /// Sorts and selects the best candidate and the best H-candidate according to the score.
         /** Any two candidates with the same score are skipped since it is not possible to decide between them.
@@ -210,14 +210,14 @@ namespace Hermes
         *  \param[in] rsln A reference solution which is used to calculate the error.
         *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
         *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
-        virtual void evaluate_cands_error(Element* e, SolutionSharedPtr<Scalar> rsln, double* avg_error, double* dev_error) = 0;
+        virtual void evaluate_cands_error(Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error) = 0;
 
         /// Calculates DOF of candidates.
         /** It uses a list of shape indices (OptimumSelector::shape_indices) to
         *  count a number of DOFs. No number of DOFs cannot be zero.
         *  \param[in] e An element that is being refined.
         *  \param[in] rsln A reference solution which is used to calculate the error. */
-        virtual void evaluate_cands_dof(Element* e, SolutionSharedPtr<Scalar> rsln);
+        virtual void evaluate_cands_dof(Element* e, MeshFunction<Scalar>* rsln);
 
         /// Evalutes score of candidates.
         /** It calculates score \f$s\f$ of a candidate as \f[s = \frac{\log_{10} e_0 - \log_{10} e}{(d - d_0)^c},\f]
@@ -360,7 +360,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
-        virtual bool select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement); ///< Selects refinement.
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement); ///< Selects refinement.
 
         /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
         /** Overriden function. For details, see Selector::generate_shared_mesh_orders(). */

@@ -20,8 +20,8 @@
 template class HERMES_API MeshFunctionSharedPtr<double>;
 template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
 
-template class HERMES_API SolutionSharedPtr<double>;
-template class HERMES_API SolutionSharedPtr<std::complex<double> >;
+template class HERMES_API MeshFunctionSharedPtr<double>;
+template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
 
 namespace Hermes
 {
@@ -55,7 +55,19 @@ namespace Hermes
         delete this->overflow_nodes;
       }
     }
+
+    template<typename Scalar>
+    void MeshFunction<Scalar>::copy(const MeshFunction<Scalar>* sln)
+    {
+      throw Exceptions::Exception("This instance is in fact not a Solution instance in copy().");
+    }
     
+    template<typename Scalar>
+    void MeshFunction<Scalar>::copy(const MeshFunctionSharedPtr<Scalar> sln)
+    {
+      copy(sln.get());
+    }
+
     template<typename Scalar>
     bool MeshFunction<Scalar>::isOkay() const
     {

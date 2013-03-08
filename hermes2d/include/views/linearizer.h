@@ -46,19 +46,9 @@ namespace Hermes
         /// \param[in] item what item (function value, derivative wrt. x, ..) to use in the solution.
         /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
         void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void process_solution(SolutionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
-        void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
         void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name,
-          bool mode_3D = true, int item = H2D_FN_VAL_0,
-          double eps = HERMES_EPS_NORMAL);
-
-        void save_solution_vtk(SolutionSharedPtr<double> sln, const char* filename, const char* quantity_name,
-          bool mode_3D = true, int item = H2D_FN_VAL_0,
-          double eps = HERMES_EPS_NORMAL);
-
-        void save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char* quantity_name,
           bool mode_3D = true, int item = H2D_FN_VAL_0,
           double eps = HERMES_EPS_NORMAL);
 

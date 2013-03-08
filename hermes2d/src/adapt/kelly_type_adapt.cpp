@@ -109,7 +109,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<SolutionSharedPtr<Scalar> > slns,
+    double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns,
                                                      Hermes::vector<double>* component_errors,
                                                      unsigned int error_flags)
     {
@@ -120,7 +120,11 @@ namespace Hermes
 
       for (int i = 0; i < this->num; i++)
       {
-        this->sln[i] = slns[i].get();
+        Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(slns[i].get());
+        if(solution == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in KellyTypeAdapt::calc_err_*().");
+
+        this->sln[i] = solution;
         this->sln[i]->set_quad_2d(&g_quad_2d_std);
       }
 
@@ -481,7 +485,7 @@ namespace Hermes
 
     template<typename Scalar>
     double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
-                                                      RefMap *rm, SolutionSharedPtr<Scalar> sln)
+                                                      RefMap *rm, MeshFunctionSharedPtr<Scalar> sln)
     {
       // Determine the integration order.
       int inc = (sln->get_num_components() == 2) ? 1 : 0;
@@ -511,7 +515,7 @@ namespace Hermes
         jwt[i] = pt[i][2] * jac[i];
 
       // Function values.
-      Func<Scalar>* u = init_fn(sln, order);
+      Func<Scalar>* u = init_fn(sln.get(), order);
       Scalar res = form->value(np, jwt, NULL, u, u, e, NULL);
 
       e->free(); delete e;
@@ -585,7 +589,7 @@ namespace Hermes
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
         if(err_est_form->ext[i] != NULL)
-          ext_fn[i] = init_fn(err_est_form->ext[i], order);
+          ext_fn[i] = init_fn(err_est_form->ext[i].get(), order);
         else
           ext_fn[i] = NULL;
       }
@@ -676,7 +680,7 @@ namespace Hermes
       for (unsigned i = 0; i < err_est_form->ext.size(); i++)
       {
         if(err_est_form->ext[i] != NULL)
-          ext_fn[i] = init_fn(err_est_form->ext[i], order);
+          ext_fn[i] = init_fn(err_est_form->ext[i].get(), order);
         else
           ext_fn[i] = NULL;
       }

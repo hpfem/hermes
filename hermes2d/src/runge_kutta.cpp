@@ -288,23 +288,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(SolutionSharedPtr<Scalar>  sln_time_prev,
-                                          SolutionSharedPtr<Scalar>  sln_time_new, SolutionSharedPtr<Scalar>  error_fn)
+    void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtr<Scalar>  sln_time_prev,
+                                          MeshFunctionSharedPtr<Scalar>  sln_time_new, MeshFunctionSharedPtr<Scalar>  error_fn)
     {
-      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<SolutionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<SolutionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<SolutionSharedPtr<Scalar> > error_fns      = Hermes::vector<SolutionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns      = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
       error_fns.push_back(error_fn);
       return rk_time_step_newton(slns_time_prev, slns_time_new,
         error_fns);
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev,
-                                          Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new,
-                                          Hermes::vector<SolutionSharedPtr<Scalar> > error_fns)
+    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev,
+                                          Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new,
+                                          Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns)
     {
       this->tick();
 
@@ -317,7 +317,7 @@ namespace Hermes
       update_stage_wf(slns_time_prev);
 
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-      if(error_fns != Hermes::vector<SolutionSharedPtr<Scalar> >() && bt->is_embedded() == false)
+      if(error_fns != Hermes::vector<MeshFunctionSharedPtr<Scalar> >() && bt->is_embedded() == false)
         throw Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       info("\tRunge-Kutta: time step, time: %f, time step: %f", this->time, this->time_step);
@@ -405,9 +405,12 @@ namespace Hermes
           Hermes::vector<bool> add_dir_lift_vector;
           add_dir_lift_vector.reserve(1);
           add_dir_lift_vector.push_back(false);
-          Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right->get_spaces(),
-            residuals_vector, false);
-          residual_norm = Global<Scalar>::calc_norms(residuals_vector);
+          Solution<Scalar>::vector_to_solutions(vector_right, stage_dp_right->get_spaces(), residuals_vector, false);
+          
+          Hermes::vector<MeshFunction<Scalar>*> meshFns;
+          for(int i = 0; i < residuals_vector.size(); i++)
+            meshFns.push_back(residuals_vector[i].get());
+          residual_norm = Global<Scalar>::calc_norms(meshFns);
         }
 
         // Info for the user.
@@ -514,7 +517,7 @@ namespace Hermes
 
       // If error_fn is not NULL, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
-      if(error_fns != Hermes::vector<SolutionSharedPtr<Scalar> >())
+      if(error_fns != Hermes::vector<MeshFunctionSharedPtr<Scalar> >())
       {
         for (int i = 0; i < ndof; i++)
         {
@@ -535,21 +538,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev,
-                                          Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new)
+    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev,
+                                          Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new)
     {
       return rk_time_step_newton(slns_time_prev, slns_time_new,
-                          Hermes::vector<SolutionSharedPtr<Scalar> >());
+                          Hermes::vector<MeshFunctionSharedPtr<Scalar> >());
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(SolutionSharedPtr<Scalar>  sln_time_prev, SolutionSharedPtr<Scalar>  sln_time_new)
+    void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtr<Scalar>  sln_time_prev, MeshFunctionSharedPtr<Scalar>  sln_time_new)
     {
-      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<SolutionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<SolutionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<SolutionSharedPtr<Scalar> > error_fns      = Hermes::vector<SolutionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns      = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
       return rk_time_step_newton(slns_time_prev, slns_time_new,
                           error_fns);
     }
@@ -697,7 +700,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev)
+    void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev)
     {
       if(this->wf->global_integration_order_set)
       {

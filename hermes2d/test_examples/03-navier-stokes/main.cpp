@@ -132,14 +132,14 @@ int main(int argc, char* argv[])
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
-  SolutionSharedPtr<double> xvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
-  SolutionSharedPtr<double> yvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
-  SolutionSharedPtr<double> p_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  MeshFunctionSharedPtr<double> xvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  MeshFunctionSharedPtr<double> yvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  MeshFunctionSharedPtr<double> p_prev_time(new ConstantSolution<double> (mesh, 0.0));
 
   // Initialize weak formulation.
   WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
 
-  wf->set_ext(Hermes::vector<SolutionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
+  wf->set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
@@ -162,7 +162,7 @@ if(HERMES_VISUALIZATION)
   OGProjection<double> ogProjection;
 
   ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space),
-    Hermes::vector<SolutionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, p_prev_time),
+    Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, p_prev_time),
     coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   newton.set_newton_max_iter(NEWTON_MAX_ITER);
@@ -190,7 +190,7 @@ if(HERMES_VISUALIZATION)
     {
       e.print_msg();
     }
-    Hermes::vector<SolutionSharedPtr<double> > tmp(xvel_prev_time, yvel_prev_time, p_prev_time);
+    Hermes::vector<MeshFunctionSharedPtr<double> > tmp(xvel_prev_time, yvel_prev_time, p_prev_time);
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), 
       Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space), tmp);
 

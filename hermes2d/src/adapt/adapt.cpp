@@ -100,7 +100,6 @@ namespace Hermes
       have_coarse_solutions(false),
       have_reference_solutions(false)
     {
-      if(space == NULL) throw Exceptions::NullException(1);
       spaces.push_back(space);
 
       this->num = 1;
@@ -598,7 +597,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_est(SolutionSharedPtr<Scalar>sln, SolutionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
+    double Adapt<Scalar>::calc_err_est(MeshFunctionSharedPtr<Scalar>sln, MeshFunctionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
       this->tick();
@@ -611,7 +610,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_est(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
+    double Adapt<Scalar>::calc_err_est(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
@@ -627,7 +626,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_exact(SolutionSharedPtr<Scalar>sln, SolutionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
+    double Adapt<Scalar>::calc_err_exact(MeshFunctionSharedPtr<Scalar>sln, MeshFunctionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
       this->tick();
@@ -637,17 +636,14 @@ namespace Hermes
       typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
       MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
       typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
-      SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
-      Solution<Scalar> ref_sln_local;
-      ogProjection.project_global(ref_space, rsln, &ref_sln_local);
-      double result = calc_err_internal(sln, &ref_sln_local, NULL, solutions_for_adapt, error_flags);
+      double result = calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
       return result;
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_exact(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
+    double Adapt<Scalar>::calc_err_exact(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
@@ -656,21 +652,8 @@ namespace Hermes
         throw Exceptions::LengthException(1, slns.size(), num);
       if(rslns.size() != num)
         throw Exceptions::LengthException(2, rslns.size(), num);
-      MeshSharedPtr* ref_meshes = new MeshSharedPtr[num];
-      SpaceSharedPtr<Scalar>* ref_spaces = new SpaceSharedPtr<Scalar>[num];
-      Hermes::vector<SolutionSharedPtr<Scalar> > ref_slns_local;
-      for(unsigned int i = 0; i < num; i++)
-      {
-        OGProjection<Scalar> ogProjection;
-        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
-        ref_meshes[i] = ref_mesh_creator.create_ref_mesh();
-        typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh_creator.create_ref_mesh(), 0);
-        ref_spaces[i] = ref_space_creator.create_ref_space();
-        ref_slns_local.push_back(new Solution<Scalar>);
-        ogProjection.project_global(ref_space_creator.create_ref_space(), rslns[i], ref_slns_local.back());
-      }
-      double result = calc_err_internal(slns, ref_slns_local, component_errors, solutions_for_adapt, error_flags);
-      delete [] ref_spaces;
+
+      double result = calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
       return result;
@@ -894,8 +877,8 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::eval_error(typename Adapt<Scalar>::MatrixFormVolError* form,
-      MeshFunctionSharedPtr<Scalar>sln1, MeshFunctionSharedPtr<Scalar>sln2, MeshFunctionSharedPtr<Scalar>rsln1,
-      MeshFunctionSharedPtr<Scalar>rsln2)
+      MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, MeshFunction<Scalar>* rsln1,
+      MeshFunction<Scalar>* rsln2)
     {
       RefMap *rv1 = sln1->get_refmap();
       RefMap *rv2 = sln2->get_refmap();
@@ -954,7 +937,7 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::eval_error_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
-      MeshFunctionSharedPtr<Scalar>rsln1, MeshFunctionSharedPtr<Scalar>rsln2)
+      MeshFunction<Scalar>* rsln1, MeshFunction<Scalar>* rsln2)
     {
       RefMap *rrv1 = rsln1->get_refmap();
       RefMap *rrv2 = rsln2->get_refmap();
@@ -1003,7 +986,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_internal(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
+    double Adapt<Scalar>::calc_err_internal(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
       int i, j;
@@ -1047,14 +1030,22 @@ namespace Hermes
 
       for (i = 0; i < this->num; i++)
       {
+        Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(slns[i].get());
+        if(solution == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in Adapt::calc_err_*().");
+
         slns_original[i] = this->sln[i];
-        this->sln[i] = slns[i].get();
+        this->sln[i] = solution;
         sln[i]->set_quad_2d(&g_quad_2d_std);
       }
       for (i = 0; i < this->num; i++)
       {
+        Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(rslns[i].get());
+        if(solution == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in Adapt::calc_err_*().");
+
         rslns_original[i] = this->rsln[i];
-        this->rsln[i] = rslns[i].get();
+        this->rsln[i] = solution;
         rsln[i]->set_quad_2d(&g_quad_2d_std);
       }
 
@@ -1194,13 +1185,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_internal(SolutionSharedPtr<Scalar> sln, SolutionSharedPtr<Scalar> rsln,
+    double Adapt<Scalar>::calc_err_internal(MeshFunctionSharedPtr<Scalar> sln, MeshFunctionSharedPtr<Scalar> rsln,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      Hermes::vector<SolutionSharedPtr<Scalar> > slns;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns;
       slns.push_back(sln);
-      Hermes::vector<SolutionSharedPtr<Scalar> > rslns;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns;
       rslns.push_back(rsln);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }

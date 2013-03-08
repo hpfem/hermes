@@ -238,15 +238,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::solve(SolutionSharedPtr<Scalar> initial_guess)
+    void PicardSolver<Scalar>::solve(MeshFunctionSharedPtr<Scalar> initial_guess)
     {
-      Hermes::vector<SolutionSharedPtr<Scalar> > vectorToPass;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > vectorToPass;
       vectorToPass.push_back(initial_guess);
       this->solve(vectorToPass);
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::solve(Hermes::vector<SolutionSharedPtr<Scalar> > initial_guess)
+    void PicardSolver<Scalar>::solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess)
     {
       int ndof = this->dp->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];

@@ -76,6 +76,7 @@ namespace Hermes
         memset(coeffs, 0, sizeof(double) * (ndof + 1));
         if(base_index >= -1 && base_index < ndof)
           coeffs[base_index + 1] = 1.0;
+
         Solution<double>::vector_to_solution(coeffs, space, sln, pss);
 
         VectorView::show(MeshFunctionSharedPtr<double>(sln.get()), MeshFunctionSharedPtr<double>(sln.get()), 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);

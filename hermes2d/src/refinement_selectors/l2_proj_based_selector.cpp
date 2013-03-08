@@ -273,7 +273,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar** L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, SolutionSharedPtr<Scalar> rsln, Element* element, int intr_gip_order)
+      Scalar** L2ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
         //fill with values
         Scalar** rvals_son = precalc_rvals[inx_son];

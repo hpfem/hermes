@@ -36,24 +36,17 @@ namespace Hermes
       static void project_local(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar>  meshfn,
           Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
-      static void project_local(SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar>  meshfn,
-          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
-
       // Wrapper that delivers a Solution instead of coefficient vector.
       static void project_local(SpaceSharedPtr<Scalar> space,
-    SolutionSharedPtr<Scalar> source_sln, SolutionSharedPtr<Scalar> target_sln, ProjNormType proj_norm = HERMES_UNSET_NORM);
+    MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       // Wrapper that takes multiple MeshFunctions.
       static void project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar>  > meshfns,
           Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
-      // Wrapper that takes multiple Solutions.
-      static void project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<SolutionSharedPtr<Scalar> > slns,
-          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
-
       // Wrapper that delivers Solutions instead of a coefficient vector.
       static void project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<SolutionSharedPtr<Scalar> > source_slns, Hermes::vector<SolutionSharedPtr<Scalar> > target_slns,
+          Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
     protected:

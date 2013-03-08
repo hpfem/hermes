@@ -83,8 +83,8 @@ int main(int argc, char* args[])
   OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
   oview.show(space);
 
-  Solution<double> sln;
-  Solution<double> ref_sln;
+  MeshFunctionSharedPtr<double> sln;
+  MeshFunctionSharedPtr<double> ref_sln;
 
   // Initialize the weak formulation.
   CustomWeakForm wf("Bdy_bottom_left", mesh);
@@ -111,7 +111,7 @@ int main(int argc, char* args[])
     try
     {
       linear_solver.solve();
-      Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, &ref_sln);
+      Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, ref_sln);
     }
     catch(std::exception& e)
     {
@@ -119,9 +119,9 @@ int main(int argc, char* args[])
     }
     // Project the fine mesh solution onto the coarse mesh->
     OGProjection<double> ogProjection;
-    ogProjection.project_global(space, &ref_sln, &sln, HERMES_L2_NORM);
+    ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM);
 
-    ValFilter val_filter(&ref_sln, 0.0, 1.0);
+    ValFilter val_filter(ref_sln, 0.0, 1.0);
 
     // View the coarse mesh solution.
     view1.show(&val_filter);
@@ -129,7 +129,7 @@ int main(int argc, char* args[])
 
     // Calculate element errors and total error estimate.
     Adapt<double>* adaptivity = new Adapt<double>(space);
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    double err_est_rel = adaptivity->calc_err_est(sln, ref_sln) * 100;
 
     std::cout << "Error: " << err_est_rel << "%." << std::endl;
 

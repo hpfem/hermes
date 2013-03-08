@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
  }
 
   // Initialize the solution.
-  SolutionSharedPtr<double> sln(new Solution<double>);
+  MeshFunctionSharedPtr<double> sln(new Solution<double>);
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);

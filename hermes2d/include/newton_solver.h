@@ -89,11 +89,11 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
-      void solve(SolutionSharedPtr<Scalar> initial_guess);
+      void solve(MeshFunctionSharedPtr<Scalar> initial_guess);
 
       /// Solve.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      void solve(Hermes::vector<SolutionSharedPtr<Scalar> > initial_guess);
+      void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess);
 
       /// Solve which keeps jacobian.
       /// A solve() method where the jacobian is reused.
@@ -101,11 +101,11 @@ namespace Hermes
       
       /// Solve which keeps jacobian.
       /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
-      void solve_keep_jacobian(SolutionSharedPtr<Scalar> initial_guess);
+      void solve_keep_jacobian(MeshFunctionSharedPtr<Scalar> initial_guess);
       
       /// Solve which keeps jacobian.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      void solve_keep_jacobian(Hermes::vector<SolutionSharedPtr<Scalar> > initial_guess);
+      void solve_keep_jacobian(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       /// Default: 1E9

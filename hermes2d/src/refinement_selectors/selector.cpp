@@ -15,7 +15,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool HOnlySelector<Scalar>::select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement)
+      bool HOnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
       {
         refinement.split = H2D_REFINEMENT_H;
         refinement.p[0] = refinement.p[1] = refinement.p[2] = refinement.p[3] = quad_order;
@@ -51,7 +51,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool POnlySelector<Scalar>::select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement)
+      bool POnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
       {
         refinement.split = H2D_REFINEMENT_P;
 

@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
   CustomWeakForm wf(MU_R, KAPPA);
 
   // Initialize coarse and reference mesh solutions.
-  SolutionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
-  SolutionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  MeshFunctionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  MeshFunctionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
 
   // Initialize exact solution.
-  CustomExactSolution sln_exact(mesh);
+  MeshFunctionSharedPtr<std::complex<double> > sln_exact(new CustomExactSolution(mesh));
 
   // Initialize refinement selector.
   HcurlProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -156,19 +156,19 @@ int main(int argc, char* argv[])
     {
       e.print_msg();
     }
-    Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
+    Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh->
     OGProjection<std::complex<double> > ogProjection;
-    ogProjection.project_global(space, &ref_sln, &sln);
+    ogProjection.project_global(space, ref_sln, sln);
 
     // View the coarse mesh solution and polynomial orders.
     if(HERMES_VISUALIZATION)
     {
-      RealFilter real_filter(&sln);
-      v_view.show(&real_filter);
+      MeshFunctionSharedPtr<double> real_filter(new RealFilter(sln));
+      v_view.show(real_filter);
       o_view.show(space);
-      lin.save_solution_vtk(&real_filter, "sln.vtk", "a");
+      lin.save_solution_vtk(real_filter, "sln.vtk", "a");
       ord.save_mesh_vtk(space, "mesh.vtk");
       lin.free();
     }
@@ -177,13 +177,14 @@ int main(int argc, char* argv[])
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(space);
     adaptivity->set_verbose_output(true);
 
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    double err_est_rel = adaptivity->calc_err_est(sln, ref_sln) * 100;
 
     Hermes::Mixins::Loggable::Static::info("\nError estimate: %f%%.\n", err_est_rel);
 
     // Calculate exact error.
     bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(&sln, &sln_exact, solutions_for_adapt) * 100;
+    double err_exact_rel = adaptivity->calc_err_exact(sln, sln_exact, solutions_for_adapt) * 100;
+    Hermes::Mixins::Loggable::Static::info("\nError exact: %f%%.\n", err_exact_rel);
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(space->get_num_dofs(), err_est_rel);
@@ -212,8 +213,8 @@ int main(int argc, char* argv[])
   if(HERMES_VISUALIZATION)
   {
     v_view.set_title("Fine mesh solution (magnitude)");
-    RealFilter real_filter(&ref_sln);
-    v_view.show(&real_filter);
+    MeshFunctionSharedPtr<double> real_filter(new RealFilter(ref_sln));
+    v_view.show(real_filter);
 
     // Wait for all views to be closed.
     Views::View::wait();

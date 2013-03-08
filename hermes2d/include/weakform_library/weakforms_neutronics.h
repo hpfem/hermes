@@ -1239,14 +1239,6 @@ namespace Hermes
               nu = matprop->get_nu().at(source_area);
               Sigma_f = matprop->get_Sigma_f().at(source_area);
             }
-            SourceFilter(Hermes::vector<SolutionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
-                const std::string& source_area)
-            : SimpleFilter<double>(solutions, Hermes::vector<int>())
-            {
-              nu = matprop->get_nu().at(source_area);
-              Sigma_f = matprop->get_Sigma_f().at(source_area);
-            }
-
           private:
             rank1 nu;
             rank1 Sigma_f;

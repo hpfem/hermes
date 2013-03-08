@@ -517,17 +517,7 @@ namespace Hermes
         this->dmult = dmult;
       }
 
-      void Linearizer::process_solution(SolutionSharedPtr<double> sln, int item_, double eps)
-      {
-        process_solution(sln.get(), item_, eps);
-      }
-
       void Linearizer::process_solution(MeshFunctionSharedPtr<double> sln, int item_, double eps)
-      {
-        process_solution(sln.get(), item_, eps);
-      }
-
-      void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
       {
         // Important, sets the current caughtException to NULL.
         this->caughtException = NULL;
@@ -967,12 +957,6 @@ namespace Hermes
         fclose(f);
       }
 
-      void Linearizer::save_solution_vtk(SolutionSharedPtr<double> sln, const char* filename, const char *quantity_name,
-        bool mode_3D, int item, double eps)
-      {
-        save_solution_vtk(MeshFunctionSharedPtr<double>(sln.get()), filename, quantity_name, mode_3D, item, eps);
-      }
-
       void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const
       {
         if(verts == NULL)
@@ -984,6 +968,7 @@ namespace Hermes
       {
         return this->verts;
       }
+      
       int Linearizer::get_num_vertices()
       {
         return this->vertex_count;
