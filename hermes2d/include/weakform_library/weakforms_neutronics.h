@@ -840,7 +840,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g,
                   const MaterialPropertyMaps& matprop,
-                  Hermes::vector<MeshFunction<Scalar>*>& iterates,
+                  Hermes::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -854,7 +854,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop,
-                  Hermes::vector<MeshFunction<Scalar>*>& iterates,
+                  Hermes::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -869,7 +869,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g,
                   const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                  Hermes::vector<MeshFunction<Scalar>*>& iterates,
+                  Hermes::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -883,7 +883,7 @@ namespace Hermes
 
                 OuterIterationForm( unsigned int g, std::string area,
                   const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                  Hermes::vector<MeshFunction<Scalar>*>& iterates,
+                  Hermes::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                   double keff = 1.0,
                   GeomType geom_type = HERMES_PLANAR )
                   : VectorFormVol<Scalar>(g),
@@ -1212,7 +1212,7 @@ namespace Hermes
 
             public:
               DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-                Hermes::vector<MeshFunction<Scalar>*>& iterates,
+                Hermes::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
                 double initial_keff_guess,
                 GeomType geom_type = HERMES_PLANAR );
 
@@ -1232,14 +1232,14 @@ namespace Hermes
           class HERMES_API SourceFilter : public SimpleFilter<double>
           {
             public:
-            SourceFilter(Hermes::vector<MeshFunction<double>*> solutions, const MaterialPropertyMaps* matprop,
+            SourceFilter(Hermes::vector<MeshFunctionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
                          const std::string& source_area)
               : SimpleFilter<double>(solutions, Hermes::vector<int>())
             {
               nu = matprop->get_nu().at(source_area);
               Sigma_f = matprop->get_Sigma_f().at(source_area);
             }
-            SourceFilter(Hermes::vector<Solution<double>*> solutions, const MaterialPropertyMaps* matprop,
+            SourceFilter(Hermes::vector<SolutionSharedPtr<double> > solutions, const MaterialPropertyMaps* matprop,
                 const std::string& source_area)
             : SimpleFilter<double>(solutions, Hermes::vector<int>())
             {

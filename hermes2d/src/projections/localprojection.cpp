@@ -30,7 +30,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(SpaceSharedPtr<Scalar> space, MeshFunction<Scalar>* meshfn,
+    void LocalProjection<Scalar>::project_local(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar>  meshfn,
       Scalar* target_vec, ProjNormType proj_norm)
     {
       if(proj_norm == HERMES_UNSET_NORM)
@@ -94,20 +94,27 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void LocalProjection<Scalar>::project_local(SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar>  meshfn,
+      Scalar* target_vec, ProjNormType proj_norm)
+    {
+      project_local(space, MeshFunctionSharedPtr<Scalar>(meshfn.get()), target_vec, proj_norm);
+    }
+
+    template<typename Scalar>
     void LocalProjection<Scalar>::project_local(SpaceSharedPtr<Scalar> space,
-        Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
+        SolutionSharedPtr<Scalar> source_sln, SolutionSharedPtr<Scalar> target_sln,
         ProjNormType proj_norm)
     {
       int ndof = space->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];
-      project_local(space, source_sln, coeff_vec, proj_norm);
+			project_local(space, source_sln, coeff_vec, proj_norm);
       Solution<Scalar>::vector_to_solution(coeff_vec, space, target_sln);
       delete [] coeff_vec;
     }
 
     template<typename Scalar>
     void LocalProjection<Scalar>::project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-        Hermes::vector<MeshFunction<Scalar>*> meshfns, Scalar* target_vec,
+        Hermes::vector<MeshFunctionSharedPtr<Scalar>  > meshfns, Scalar* target_vec,
         Hermes::vector<ProjNormType> proj_norms)
     {
       int n = spaces.size();
@@ -129,7 +136,7 @@ namespace Hermes
 
     template<typename Scalar>
     void LocalProjection<Scalar>::project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-        Hermes::vector<Solution<Scalar>*> slns, Scalar* target_vec,
+        Hermes::vector<SolutionSharedPtr<Scalar> > slns, Scalar* target_vec,
         Hermes::vector<ProjNormType> proj_norms)
     {
       int n = spaces.size();
@@ -151,8 +158,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LocalProjection<Scalar>::project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> source_slns,
-      Hermes::vector<Solution<Scalar>*> target_slns, Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
+    void LocalProjection<Scalar>::project_local(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<SolutionSharedPtr<Scalar> > source_slns,
+      Hermes::vector<SolutionSharedPtr<Scalar> > target_slns, Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
     {
       int n = spaces.size();
 

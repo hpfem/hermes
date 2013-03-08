@@ -153,7 +153,7 @@ namespace Hermes
       }
 
       void ScalarView::show(MeshFunction<double>* sln, double eps, int item,
-        MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
+        MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
         // For preservation of the sln's active element. Will be set back after the visualization.
         Element* active_element = sln->get_active_element();
@@ -187,12 +187,24 @@ namespace Hermes
 
         // Now we reset the active element if it was set before the MeshFunction sln entered this method.
         // Only for Solutions. This method may fail for filters, as they may not have RefMaps correctly set.
-        if(dynamic_cast<Solution<double>*>(sln) != NULL)
+        if(dynamic_cast<Solution<double>* >(sln) != NULL)
           if(active_element != NULL)
             // Also when there has not been a call to set_active_element since assignment to this MeshFunction,
             // there is nothing to restore to.
             if(active_element->active)
               sln->set_active_element(active_element);
+      }
+
+      void ScalarView::show(MeshFunctionSharedPtr<double> sln, double eps, int item,
+        MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
+      {
+        show(sln.get(), eps, item, xdisp, ydisp, dmult);
+      }
+
+      void ScalarView::show(SolutionSharedPtr<double> sln, double eps, int item,
+        MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
+      {
+        show(sln.get(), eps, item, xdisp, ydisp, dmult);
       }
 
       void ScalarView::show_linearizer_data(double eps, int item)

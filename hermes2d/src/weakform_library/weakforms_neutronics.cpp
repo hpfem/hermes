@@ -851,7 +851,7 @@ namespace Hermes
 
             template<typename Scalar>
             DefaultWeakFormSourceIteration<Scalar>::DefaultWeakFormSourceIteration( const MaterialPropertyMaps& matprop, MeshSharedPtr mesh,
-              Hermes::vector<MeshFunction<Scalar>*>& iterates,
+              Hermes::vector<MeshFunctionSharedPtr<Scalar> >& iterates,
               double initial_keff_guess,
               GeomType geom_type ) : WeakForm<Scalar>(matprop.get_G())
             {

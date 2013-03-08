@@ -47,7 +47,13 @@ namespace Hermes
         ~ScalarView();
 
         void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-          MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0);
+          MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
+
+        void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+          MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
+
+        void show(SolutionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+          MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
 
         void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0);
 
@@ -215,8 +221,8 @@ class HERMES_API ScalarView : public View
         ScalarView(const char* title = "ScalarView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         ScalarView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show(MeshFunction<double>* sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
-          MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunctionSharedPtr<double> sln, double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0,
+          MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show_linearizer_data(double eps = HERMES_EPS_NORMAL, int item = H2D_FN_VAL_0) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 

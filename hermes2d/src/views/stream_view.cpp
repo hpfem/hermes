@@ -50,7 +50,7 @@ namespace Hermes
         root = NULL;
       }
 
-      void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps)
+      void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps)
       {
         if(this->vec == NULL)
           this->vec = new Vectorizer;
@@ -375,7 +375,7 @@ namespace Hermes
         delete [] bnd_edges;
       }
 
-      void StreamView::show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem)
+      void StreamView::show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps, int xitem, int yitem)
       {
         if(vec == NULL)
           vec = new Vectorizer;

@@ -84,7 +84,7 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<
 
 }
 
-void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, MeshFunction<double>* source_meshfn,
+void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, MeshFunctionSharedPtr<double> source_meshfn,
   double* target_vec, UMFPackMatrix<double>*  mat )
 {
   // Sanity checks.

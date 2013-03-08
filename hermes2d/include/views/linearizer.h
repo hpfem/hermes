@@ -45,15 +45,25 @@ namespace Hermes
         /// \param[in] sln the solution
         /// \param[in] item what item (function value, derivative wrt. x, ..) to use in the solution.
         /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
+        void process_solution(MeshFunctionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void process_solution(SolutionSharedPtr<double> sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
         void process_solution(MeshFunction<double>* sln, int item = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
         /// Save a MeshFunction (Solution, Filter) in VTK format.
+        void save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char* quantity_name,
+          bool mode_3D = true, int item = H2D_FN_VAL_0,
+          double eps = HERMES_EPS_NORMAL);
+
+        void save_solution_vtk(SolutionSharedPtr<double> sln, const char* filename, const char* quantity_name,
+          bool mode_3D = true, int item = H2D_FN_VAL_0,
+          double eps = HERMES_EPS_NORMAL);
+
         void save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char* quantity_name,
           bool mode_3D = true, int item = H2D_FN_VAL_0,
           double eps = HERMES_EPS_NORMAL);
 
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
-        void set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult = 1.0);
+        void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
 
         void calc_vertices_aabb(double* min_x, double* max_x,
           double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
@@ -90,7 +100,7 @@ namespace Hermes
         bool user_xdisp, user_ydisp;
 
         /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
-        MeshFunction<double> *xdisp, *ydisp;
+        MeshFunctionSharedPtr<double> xdisp, ydisp;
         double dmult;
 
         int3* tris_contours;      ///< triangles: vertex index triplets

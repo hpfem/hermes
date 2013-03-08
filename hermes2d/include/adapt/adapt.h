@@ -129,25 +129,25 @@ namespace Hermes
 
       /// Type-safe version of calc_err_est() for one solution.
       /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-      double calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
+      double calc_err_est(SolutionSharedPtr<Scalar>sln, SolutionSharedPtr<Scalar>rsln, bool solutions_for_adapt = true,
         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Calculates the error of the solution. 'n' must be the same
       /// as 'num' in the constructor. After that, n coarse solution
       /// pointers are passed, followed by n fine solution pointers.
       /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-      double calc_err_est(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+      double calc_err_est(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
         Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Type-safe version of calc_err_exact() for one solution.
       /// @param[in] solutions_for_adapt - if sln and rsln are the solutions error of which is used in the function adapt().
-      double calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt = true,
+      double calc_err_exact(SolutionSharedPtr<Scalar>sln, SolutionSharedPtr<Scalar>rsln, bool solutions_for_adapt = true,
         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
       /// Calculates the error of the solution.
       /// @param[in] solutions_for_adapt - if slns and rslns are the solutions error of which is used in the function adapt().
-      double calc_err_exact(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+      double calc_err_exact(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
         Hermes::vector<double>* component_errors = NULL, bool solutions_for_adapt = true,
         unsigned int error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL);
 
@@ -250,11 +250,11 @@ namespace Hermes
       /** If overridden, this method has to initialize errors (Array::errors), sum of errors (Array::error_sum), norms of components (Array::norm), number of active elements (Array::num_act_elems). Also, it has to fill the regular queue through the method fill_regular_queue().
       *  \param[in] error_flags Flags which calculates the error. It can be a combination of ::HERMES_TOTAL_ERROR_REL, ::HERMES_TOTAL_ERROR_ABS, ::HERMES_ELEMENT_ERROR_REL, ::HERMES_ELEMENT_ERROR_ABS.
       *  \return The total error. Interpretation of the error is specified by the parameter error_flags. */
-      virtual double calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+      virtual double calc_err_internal(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
         Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags);
 
       /// One Space version.
-      virtual double calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
+      virtual double calc_err_internal(SolutionSharedPtr<Scalar> sln, SolutionSharedPtr<Scalar> rsln,
         Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags);
 
       /// Evaluates a square of an absolute error of an active element among a given pair of components.
@@ -272,7 +272,7 @@ namespace Hermes
       *  \param[in] rrv2 A reference map of a reference solution rsln2.
       *  \return A square of an absolute error. */
       virtual double eval_error(MatrixFormVolError* form,
-        MeshFunction<Scalar>*sln1, MeshFunction<Scalar>*sln2, MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2);
+        MeshFunctionSharedPtr<Scalar>sln1, MeshFunctionSharedPtr<Scalar>sln2, MeshFunctionSharedPtr<Scalar>rsln1, MeshFunctionSharedPtr<Scalar>rsln2);
 
       /// Evaluates the square of a norm of an active element in the reference solution among a given pair of components.
       /** The method uses a bilinear forms to calculate the norm. This is done by supplying a v1 and v2 at integration points to the bilinear form,
@@ -284,7 +284,7 @@ namespace Hermes
       *  \param[in] rrv2 A reference map of a reference solution rsln2.
       *  \return A square of a norm. */
       virtual double eval_error_norm(MatrixFormVolError* form,
-        MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2);
+        MeshFunctionSharedPtr<Scalar>rsln1, MeshFunctionSharedPtr<Scalar>rsln2);
 
       /// Builds an ordered queue of elements that are be examined.
       /** The method fills Adapt::standard_queue by elements sorted accordin to their error descending.

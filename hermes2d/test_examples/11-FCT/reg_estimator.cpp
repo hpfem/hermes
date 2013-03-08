@@ -76,7 +76,7 @@ int* Regularity_Estimator::get_smooth_dofs(SpaceSharedPtr<double> new_space,doub
 //linear approximation of sln in the neighborhood of element e   (at (x_i,y_i))
 // u_h_hat = u_h (p_c) + R_h(p_c) *(p - p_c)
 // R_h = (R_h_1, R_h_2), p = (x,y)
-double Regularity_Estimator::linear_approx(Element* e, double x_i, double y_i,double x_c, double y_c,Solution<double>* sln)
+double Regularity_Estimator::linear_approx(Element* e, double x_i, double y_i,double x_c, double y_c,SolutionSharedPtr<double> sln)
 {
   //center of reference element
   double x_c_ref = 0.;
@@ -90,7 +90,7 @@ double Regularity_Estimator::linear_approx(Element* e, double x_i, double y_i,do
 
 //linear approximation of the first component of the gradient in the neighborhood of element e   (at (x_i,y_i))
 // u_h_hat_1 = u_h_dx (p_c) + grad(R_h_1)(p_c) *(p - p_c)
-double Regularity_Estimator::linear_approx_dx(Element* e, double x_i, double y_i,double x_c, double y_c,Solution<double>* sln)
+double Regularity_Estimator::linear_approx_dx(Element* e, double x_i, double y_i,double x_c, double y_c,SolutionSharedPtr<double> sln)
 {
   //center of reference element	
   double x_c_ref = 0.;
@@ -105,7 +105,7 @@ double Regularity_Estimator::linear_approx_dx(Element* e, double x_i, double y_i
 
 //linear approximation of the second component of the gradient in the neighborhood of element e   (at (x_i,y_i))
 // u_h_hat_2 = u_h_dy (p_c) + grad(R_h_2)(p_c) *(p - p_c)
-double Regularity_Estimator::linear_approx_dy(Element* e, double x_i, double y_i,double x_c, double y_c,Solution<double>* sln)
+double Regularity_Estimator::linear_approx_dy(Element* e, double x_i, double y_i,double x_c, double y_c,SolutionSharedPtr<double> sln)
 {
 
   //center of reference element	
@@ -318,7 +318,7 @@ void Regularity_Estimator::smoothness_indicator(UMFPackMatrix<double> * mass_mat
 
 //---------Gradient Reconstruction---------------
 //R_H^1 
-GradientReconstruction_1::GradientReconstruction_1( Solution<double>* sln) : WeakForm<double>(1) 
+GradientReconstruction_1::GradientReconstruction_1( SolutionSharedPtr<double> sln) : WeakForm<double>(1) 
 {  this->set_ext(sln);
 add_matrix_form(new GradientReconstructionMatForm_1(0, 0));
 GradientReconstructionVectorForm_1* vector_form = new GradientReconstructionVectorForm_1(0);
@@ -380,7 +380,7 @@ VectorFormVol<double>* GradientReconstructionVectorForm_1::clone() const
 }
 
 //R_H^2
-GradientReconstruction_2::GradientReconstruction_2( Solution<double>* sln) : WeakForm<double>(1) 
+GradientReconstruction_2::GradientReconstruction_2( SolutionSharedPtr<double> sln) : WeakForm<double>(1) 
 {
   this->set_ext(sln);
   add_matrix_form(new GradientReconstructionMatForm_2(0, 0));

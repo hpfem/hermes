@@ -41,30 +41,30 @@
 #define HERMES_DEFAULT_FUNCTION NULL
 #define HERMES_DEFAULT_SPLINE NULL
 
-    /// Constant used by Adapt::calc_eror().
+/// Constant used by Adapt::calc_eror().
 #define HERMES_TOTAL_ERROR_REL  0x00  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
-    ///  The total error is divided by the norm and therefore it should be in a range[0, 1].
-    ///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
+///  The total error is divided by the norm and therefore it should be in a range[0, 1].
+///  \note Used by Adapt::calc_errors_internal().. This flag is mutually exclusive with ::H2D_TOTAL_ERROR_ABS.
 #define HERMES_TOTAL_ERROR_ABS  0x01  ///< A flag which defines interpretation of the total error. \ingroup g_adapt
-    ///  The total error is absolute, i.e., it is an integral over squares of differencies.
-    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_TOTAL_ERROR_REL.
+///  The total error is absolute, i.e., it is an integral over squares of differencies.
+///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_TOTAL_ERROR_REL.
 #define HERMES_ELEMENT_ERROR_REL 0x00 ///< A flag which defines interpretation of an error of an element. \ingroup g_adapt
-    ///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
-    ///  When norms of 2 components are very different (e.g. microwave heating), it can help.
-    ///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
-    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
+///  An error of an element is a square of an error divided by a square of a norm of a corresponding component.
+///  When norms of 2 components are very different (e.g. microwave heating), it can help.
+///  Navier-stokes on different meshes work only when absolute error (see ::H2D_ELEMENT_ERROR_ABS) is used.
+///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::H2D_ELEMENT_ERROR_ABS.
 #define HERMES_ELEMENT_ERROR_ABS 0x10 ///< A flag which defines interpretation of of an error of an element. \ingroup g_adapt
-    ///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
-    ///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
+///  An error of an element is a square of an asolute error, i.e., it is an integral over squares of differencies.
+///  \note Used by Adapt::calc_errors_internal(). This flag is mutually exclusive with ::HERMES_ELEMENT_ERROR_REL.
 
-    /// A total number of valid transformation of a triangle to a sub-domain.
-    static const int H2D_TRF_TRI_NUM = 4;
-    /// A total number of valid transformation of a quad to a sub-domain.
-    static const int H2D_TRF_QUAD_NUM = 8;
-    /// A total number of transformations.
-    static const int H2D_TRF_NUM = (H2D_TRF_QUAD_NUM + 1);
-    /// An index of identity transformation.
-    static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
+/// A total number of valid transformation of a triangle to a sub-domain.
+static const int H2D_TRF_TRI_NUM = 4;
+/// A total number of valid transformation of a quad to a sub-domain.
+static const int H2D_TRF_QUAD_NUM = 8;
+/// A total number of transformations.
+static const int H2D_TRF_NUM = (H2D_TRF_QUAD_NUM + 1);
+/// An index of identity transformation.
+static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
 
 #define H2DRS_ASSUMED_MAX_CANDS 512 ///< An estimated maximum number of candidates. Used for purpose of reserving space. \internal \ingroup g_selectors
 
@@ -79,6 +79,9 @@
 # define H2DRS_DEFAULT_ERR_WEIGHT_H 2.0 ///< A default multiplicative coefficient of an error of a H-candidate. \ingroup g_selectors
 # define H2DRS_DEFAULT_ERR_WEIGHT_P 1.0 ///< A default multiplicative coefficient of an error of a P-candidate. \ingroup g_selectors
 # define H2DRS_DEFAULT_ERR_WEIGHT_ANISO 1.414214 ///< A default multiplicative coefficient of an error of a ANISO-candidate. \ingroup g_selectors
+
+template<typename Scalar> class MeshFunctionSharedPtr;
+template<typename Scalar> class SolutionSharedPtr;
 
 namespace Hermes
 {
@@ -100,10 +103,10 @@ namespace Hermes
     const int H2D_ORDER_MASK = (1 << H2D_ORDER_BITS) - 1;
 
     /// Macros for combining quad horizontal and vertical encoded_orders.
-    #define H2D_GET_H_ORDER(encoded_order) ((encoded_order) & H2D_ORDER_MASK)
-    #define H2D_GET_V_ORDER(encoded_order) ((encoded_order) >> H2D_ORDER_BITS)
-    #define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
-    #define H2D_MAKE_EDGE_ORDER(mode, edge, order) ((mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2) ? H2D_GET_H_ORDER(order) : H2D_GET_V_ORDER(order))
+#define H2D_GET_H_ORDER(encoded_order) ((encoded_order) & H2D_ORDER_MASK)
+#define H2D_GET_V_ORDER(encoded_order) ((encoded_order) >> H2D_ORDER_BITS)
+#define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
+#define H2D_MAKE_EDGE_ORDER(mode, edge, order) ((mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2) ? H2D_GET_H_ORDER(order) : H2D_GET_V_ORDER(order))
 
     /// Class for global functions.
     template<typename Scalar>
@@ -117,32 +120,34 @@ namespace Hermes
       // Note: coarse mesh sln has to be first, then
       // ref_sln (because the abs. error is divided
       // by the norm of the latter).
-      static double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
+      static double calc_rel_error(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, int norm_type);
 
-      static double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
+      static double calc_abs_error(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, int norm_type);
+      static double calc_abs_error(SolutionSharedPtr<Scalar> sln1, SolutionSharedPtr<Scalar> sln2, int norm_type);
 
-      static double calc_norm(MeshFunction<Scalar>* sln, int norm_type);
+      static double calc_norm(MeshFunctionSharedPtr<Scalar> sln, int norm_type);
+      static double calc_norm(SolutionSharedPtr<Scalar> sln, int norm_type);
 
       /// Calculate norm of a (possibly vector-valued) solution.
       /// Take norm from spaces where these solutions belong.
-      static double calc_norms(Hermes::vector<Solution<Scalar>*> slns);
-      static double calc_abs_errors(Hermes::vector<Solution<Scalar>*> slns1, Hermes::vector<Solution<Scalar>*> slns2);
-      static double calc_rel_errors(Hermes::vector<Solution<Scalar>*> slns1, Hermes::vector<Solution<Scalar>*> slns2);
+      static double calc_norms(Hermes::vector<SolutionSharedPtr<Scalar> > slns);
+      static double calc_abs_errors(Hermes::vector<SolutionSharedPtr<Scalar> > slns1, Hermes::vector<SolutionSharedPtr<Scalar> > slns2);
+      static double calc_rel_errors(Hermes::vector<SolutionSharedPtr<Scalar> > slns1, Hermes::vector<SolutionSharedPtr<Scalar> > slns2);
 
-      static double error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru);
+      static double error_fn_l2(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_l2(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
 
-      static double error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru);
+      static double error_fn_h1(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_h1(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
 
-      static double error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru);
+      static double error_fn_hc(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hc(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
 
-      static double error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru);
+      static double error_fn_hcl2(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hcl2(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
 
-      static double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
+      static double error_fn_hdiv(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv);
+      static double norm_fn_hdiv(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru);
 
       static double get_l2_norm(Vector<Scalar>* vec);
     };

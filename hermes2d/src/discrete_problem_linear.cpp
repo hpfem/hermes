@@ -124,7 +124,7 @@ namespace Hermes
           fns[i].push_back(pss[i][j]);
         for (unsigned j = 0; j < this->wf->ext.size(); j++)
         {
-          fns[i].push_back(weakforms[i]->ext[j]);
+          fns[i].push_back(weakforms[i]->ext[j].get());
           weakforms[i]->ext[j]->set_quad_2d(&g_quad_2d_std);
         }
         for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
@@ -132,7 +132,7 @@ namespace Hermes
           for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
             if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
             {
-              fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i]);
+              fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i].get());
               weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
             }
         }
@@ -263,7 +263,7 @@ namespace Hermes
         local_ext = new Func<Scalar>*[local_ext_count];
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
           if(form->ext[ext_i] != NULL)
-            local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i], order);
+            local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i].get(), order);
           else
             local_ext[ext_i] = NULL;
       }

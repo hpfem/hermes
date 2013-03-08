@@ -88,8 +88,11 @@ namespace Hermes
 
       friend Func<Hermes::Ord>* init_fn_ord(const int order);
       friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order);
-      template<typename Scalar> friend Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order);
+      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order);
+      template<typename Scalar> friend Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
+
+      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunctionSharedPtr<Scalar> fu, const int order);
+      template<typename Scalar> friend Func<Scalar>* init_fn(SolutionSharedPtr<Scalar> fu, const int order);
 
       template<typename Scalar> friend class DiscontinuousFunc;
       template<typename Scalar> friend class Adapt;
@@ -259,10 +262,14 @@ namespace Hermes
     HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
     /// Init the mesh-function for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
-    HERMES_API Func<Scalar>* init_fn(MeshFunction<Scalar>*fu, const int order);
+    HERMES_API Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order);
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* init_fn(MeshFunctionSharedPtr<Scalar> fu, const int order);
     /// Init the solution for the evaluation of the volumetric/surface integral.
     template<typename Scalar>
-    HERMES_API Func<Scalar>* init_fn(Solution<Scalar>*fu, const int order);
+    HERMES_API Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
+    template<typename Scalar>
+    HERMES_API Func<Scalar>* init_fn(SolutionSharedPtr<Scalar> fu, const int order);
   }
 }
 #endif

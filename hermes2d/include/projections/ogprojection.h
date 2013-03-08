@@ -48,7 +48,7 @@ namespace Hermes
       void project_global(SpaceSharedPtr<Scalar> space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
-          Solution<Scalar>* target_sln);
+          SolutionSharedPtr<Scalar> target_sln);
       
       /// This method allows to specify your own multiple OG-projection forms.
       void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
@@ -60,7 +60,7 @@ namespace Hermes
       void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
           const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
           const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
-          const Hermes::vector<Solution<Scalar>*>& target_slns);
+          const Hermes::vector<SolutionSharedPtr<Scalar> >& target_slns);
           
       /**
        \fn  static void OGProjection::project_global(SpaceSharedPtr<Scalar> space,
@@ -81,24 +81,27 @@ namespace Hermes
        \param newton_tol              (optional) the newton tolerance.
        \param newton_max_iter         (optional) the newton maximum iterator.
        */
-      void project_global(SpaceSharedPtr<Scalar> space, MeshFunction<Scalar>* source_meshfn,
+      void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
+          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
+
+      void project_global(SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar> source_meshfn,
           Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper that delivers a Solution instead of coefficient vector.
       void project_global(SpaceSharedPtr<Scalar> space,
-          Solution<Scalar>* source_sln, Solution<Scalar>* target_sln,
+          SolutionSharedPtr<Scalar> source_sln, SolutionSharedPtr<Scalar>  target_sln,
           ProjNormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper for multiple source MeshFunctions that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunction<Scalar>*> source_meshfns,
+      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
           Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       /// Wrapper for multiple source Solutions that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> source_slns,
+      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<SolutionSharedPtr<Scalar> > source_slns,
           Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
 
       void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<Solution<Scalar>*> source_slns, Hermes::vector<Solution<Scalar>*> target_slns,
+          Hermes::vector<SolutionSharedPtr<Scalar> > source_slns, Hermes::vector<SolutionSharedPtr<Scalar> > target_slns,
           Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
 
     protected:

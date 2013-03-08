@@ -25,7 +25,6 @@
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
-
 namespace Hermes
 {
   namespace Hermes2D

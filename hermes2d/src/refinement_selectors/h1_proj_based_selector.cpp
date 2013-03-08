@@ -204,7 +204,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar** H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order)
+      Scalar** H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, SolutionSharedPtr<Scalar> rsln, Element* element, int intr_gip_order)
       {
         //fill with values
         Scalar** rvals_son = precalc_rvals[inx_son];

@@ -243,7 +243,7 @@ namespace Hermes
 
         /// Calculates error of candidates.
         /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
-        virtual void evaluate_cands_error(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error);
+        virtual void evaluate_cands_error(Element* e, SolutionSharedPtr<Scalar> rsln, double* avg_error, double* dev_error);
 
         /// Calculates projection errors of an elements of candidates for all permutations of orders.
         /** Errors are not normalized and they are squared.
@@ -259,7 +259,7 @@ namespace Hermes
         *  \param[out] herr An error of elements of H-candidates of various permutation of orders.
         *  \param[out] perr An error of elements of P-candidates of various permutation of orders.
         *  \param[out] anisoerr An error of elements of ANISO-candidates of various permutation of orders. */
-        virtual void calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const typename OptimumSelector<Scalar>::CandsInfo& info_aniso, Solution<Scalar>* rsln, CandElemProjError herr[H2D_MAX_ELEMENT_SONS], CandElemProjError perr, CandElemProjError anisoerr[H2D_MAX_ELEMENT_SONS]);
+        virtual void calc_projection_errors(Element* e, const typename OptimumSelector<Scalar>::CandsInfo& info_h, const typename OptimumSelector<Scalar>::CandsInfo& info_p, const typename OptimumSelector<Scalar>::CandsInfo& info_aniso, SolutionSharedPtr<Scalar> rsln, CandElemProjError herr[H2D_MAX_ELEMENT_SONS], CandElemProjError perr, CandElemProjError anisoerr[H2D_MAX_ELEMENT_SONS]);
 
         /// Calculate projection errors of an element of an candidate considering multiple orders.
         /** An element of a candidate may span over multiple sub-domains. All integration uses the reference domain.
@@ -322,7 +322,7 @@ namespace Hermes
         *  \param[in] element An element of the coarse solution. An element of both the same geometry and the same ID have to be present in the mesh of the reference solution.
         *  \param[in] intr_gip_order An order of quadrature integration. The number of quadrature points should be retrieved through a quadrature stored in the paremeter \a rsln.
         *  \return A pointer to 2D array. The first index is an index of the function expansion (f, df/dx, ...), the second index is an index of the integration point. */
-        virtual Scalar** precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order) = 0;
+        virtual Scalar** precalc_ref_solution(int inx_son, SolutionSharedPtr<Scalar> rsln, Element* element, int intr_gip_order) = 0;
 
         /// Builds projection matrix using a given set of shapes.
         /** Override to calculate a projection matrix.

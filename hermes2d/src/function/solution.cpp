@@ -206,32 +206,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::assign(Solution<Scalar>* sln)
-    {
-      if(sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being assigned is uninitialized.");
-      if(sln->sln_type != HERMES_SLN) { copy(sln); return; }
-
-      free();
-
-      this->mesh = sln->mesh;
-      // Solution vector and space setting.
-      space_type = sln->get_space_type();
-
-      mono_coeffs = sln->mono_coeffs;        sln->mono_coeffs = NULL;
-      elem_coeffs[0] = sln->elem_coeffs[0];  sln->elem_coeffs[0] = NULL;
-      elem_coeffs[1] = sln->elem_coeffs[1];  sln->elem_coeffs[1] = NULL;
-      elem_orders = sln->elem_orders;      sln->elem_orders = NULL;
-      dxdy_buffer = sln->dxdy_buffer;      sln->dxdy_buffer = NULL;
-      num_coeffs = sln->num_coeffs;          sln->num_coeffs = 0;
-      num_elems = sln->num_elems;          sln->num_elems = 0;
-
-      sln_type = sln->sln_type;
-      this->num_components = sln->num_components;
-
-      memset(sln->tables, 0, sizeof(sln->tables));
-    }
-
-    template<typename Scalar>
     void Solution<Scalar>::copy(const Solution<Scalar>* sln)
     {
       if(sln->sln_type == HERMES_UNDEF) throw Hermes::Exceptions::Exception("Solution being copied is uninitialized.");
@@ -267,6 +241,12 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Undefined or exact solutions cannot be copied into an instance of Solution already coming from computation.");
 
       this->element = NULL;
+    }
+
+    template<typename Scalar>
+    void Solution<Scalar>::copy(const SolutionSharedPtr<Scalar> sln)
+    {
+      copy(sln.get());
     }
 
     template<typename Scalar>
@@ -551,7 +531,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector,
-        Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<Solution<Scalar>*> solutions,
+        Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<SolutionSharedPtr<Scalar> > solutions,
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -603,7 +583,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space,
-        Solution<Scalar>* solution, bool add_dir_lift, int start_index)
+        SolutionSharedPtr<Scalar> solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -615,7 +595,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
+      Hermes::vector<SolutionSharedPtr<Scalar> > solutions, Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -666,7 +646,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Vector<Scalar>* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<Solution<Scalar>*> solutions, bool add_dir_lift)
+      Hermes::vector<SolutionSharedPtr<Scalar> > solutions, bool add_dir_lift)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -688,7 +668,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<Solution<Scalar>*> solutions, bool add_dir_lift)
+      Hermes::vector<SolutionSharedPtr<Scalar> > solutions, bool add_dir_lift)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
       if(spaces.size() != solutions.size()) throw Exceptions::LengthException(2, 3, spaces.size(), solutions.size());
@@ -710,7 +690,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solution(const Vector<Scalar>* solution_vector, SpaceSharedPtr<Scalar> space,
-        Solution<Scalar>* solution, bool add_dir_lift, int start_index)
+        SolutionSharedPtr<Scalar> solution, bool add_dir_lift, int start_index)
     {
       // Sanity checks.
         if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -722,7 +702,7 @@ namespace Hermes
 
     template<typename Scalar>
     void Solution<Scalar>::vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-        Hermes::vector<Solution<Scalar>*> solutions, Hermes::vector<PrecalcShapeset *> pss,
+        Hermes::vector<SolutionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
         Hermes::vector<bool> add_dir_lift, Hermes::vector<int> start_indices)
     {
       if(solution_vector==NULL) throw Exceptions::NullException(1);
@@ -773,7 +753,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
+    void Solution<Scalar>::vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, SolutionSharedPtr<Scalar> solution,
         PrecalcShapeset* pss, bool add_dir_lift, int start_index)
     {
       if(solution_vector == NULL) throw Exceptions::NullException(1);
@@ -813,7 +793,7 @@ namespace Hermes
           mono_coeffs[i] *= coef;
       }
       else if(sln_type == HERMES_EXACT)
-        dynamic_cast<ExactSolution<Scalar>*>(this)->exact_multiplicator *= coef;
+        dynamic_cast<ExactSolution<Scalar>* >(this)->exact_multiplicator *= coef;
       else
         throw Hermes::Exceptions::Exception("Uninitialized solution.");
     }
@@ -1364,9 +1344,9 @@ namespace Hermes
             if(parsed_xml_solution->exactC() == 0)
             {
               double* coeff_vec = new double[space->get_num_dofs()];
-              ConstantSolution<double> sln(mesh, parsed_xml_solution->exactCXR().get());
+              SolutionSharedPtr<double> sln(new ConstantSolution<double>(this->mesh, parsed_xml_solution->exactCXR().get()));
               OGProjection<double> ogProj;
-              ogProj.project_global(space, &sln, coeff_vec);
+              ogProj.project_global(space, sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
               sln_type = HERMES_SLN;
             }
@@ -1377,9 +1357,9 @@ namespace Hermes
             if(parsed_xml_solution->exactC() == 0)
             {
               double* coeff_vec = new double[space->get_num_dofs()];
-              ConstantSolutionVector<double> sln(mesh, parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCYR().get());
+              SolutionSharedPtr<double> sln(new ConstantSolutionVector<double>(this->mesh, parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCYR().get()));
               OGProjection<double> ogProj;
-              ogProj.project_global(space, &sln, coeff_vec);
+              ogProj.project_global(space, sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
               sln_type = HERMES_SLN;
             }
@@ -1463,9 +1443,9 @@ namespace Hermes
             if(parsed_xml_solution->exactC() == 1)
             {
               std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
-              ConstantSolution<std::complex<double> > sln(mesh, std::complex<double>(parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCXC().get()));
+              SolutionSharedPtr<std::complex<double> > sln(new ConstantSolution<std::complex<double> >(this->mesh, parsed_xml_solution->exactCXR().get()));
               OGProjection<std::complex<double> > ogProj;
-              ogProj.project_global(space, &sln, coeff_vec);
+              ogProj.project_global(space, sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
               sln_type = HERMES_SLN;
             }
@@ -1476,9 +1456,9 @@ namespace Hermes
             if(parsed_xml_solution->exactC() == 1)
             {
               std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
-              ConstantSolutionVector<std::complex<double> > sln(mesh, std::complex<double>(parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCXC().get()), std::complex<double>(parsed_xml_solution->exactCYR().get(), parsed_xml_solution->exactCYC().get()));
+              SolutionSharedPtr<std::complex<double> > sln(new ConstantSolutionVector<std::complex<double> >(this->mesh, std::complex<double>(parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCXC().get()), std::complex<double>(parsed_xml_solution->exactCYR().get(), parsed_xml_solution->exactCYC().get())));
               OGProjection<std::complex<double> > ogProj;
-              ogProj.project_global(space, &sln, coeff_vec);
+              ogProj.project_global(space, sln, coeff_vec);
               this->set_coeff_vector(space, coeff_vec, true, 0);
               sln_type = HERMES_SLN;
             }

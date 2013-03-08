@@ -43,11 +43,6 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::free_ext()
     {
-      for(unsigned int i = 0; i < this->ext.size(); i++)
-        delete this->ext[i];
-      for(unsigned int i = 0; i < this->forms.size(); i++)
-        for(unsigned int j = 0; j < get_forms()[i]->ext.size(); j++)
-          delete get_forms()[i]->ext[j];
     }
 
     template<typename Scalar>
@@ -117,9 +112,9 @@ namespace Hermes
         if(dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]) != NULL)
           this->forms.push_back((dynamic_cast<VectorFormDG<Scalar>*>(otherWf->forms[i]))->clone());
 
-        Hermes::vector<MeshFunction<Scalar>*> newExt;
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > newExt;
         for(unsigned int ext_i = 0; ext_i < otherWf->forms[i]->ext.size(); ext_i++)
-          newExt.push_back(otherWf->forms[i]->ext[ext_i]->clone());
+          newExt.push_back(MeshFunctionSharedPtr<Scalar>(otherWf->forms[i]->ext[ext_i]->clone()));
         this->forms.back()->set_ext(newExt);
         this->forms.back()->wf = this;
 
@@ -140,9 +135,9 @@ namespace Hermes
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
       {
         this->ext.push_back(otherWf->ext[i]->clone());
-        if(dynamic_cast<Solution<Scalar>*>(otherWf->ext[i]) != NULL)
+        if(dynamic_cast<Solution<Scalar>*>(otherWf->ext[i].get()) != NULL)
         {
-          dynamic_cast<Solution<Scalar>*>(this->ext.back())->set_type(dynamic_cast<Solution<Scalar>*>(otherWf->ext[i])->get_type());
+          static_cast<Solution<Scalar>*>(this->ext.back().get())->set_type(static_cast<Solution<Scalar>*>(otherWf->ext[i].get())->get_type());
         }
       }
     }
@@ -160,20 +155,35 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_ext(MeshFunction<Scalar>* ext)
+    void WeakForm<Scalar>::set_ext(MeshFunctionSharedPtr<Scalar> ext)
     {
       this->ext.clear();
       this->ext.push_back(ext);
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::set_ext(Hermes::vector<MeshFunction<Scalar>*> ext)
+    void WeakForm<Scalar>::set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext)
     {
       this->ext = ext;
     }
 
     template<typename Scalar>
-    Hermes::vector<MeshFunction<Scalar>*> WeakForm<Scalar>::get_ext() const
+    void WeakForm<Scalar>::set_ext(SolutionSharedPtr<Scalar> ext)
+    {
+      this->set_ext(MeshFunctionSharedPtr<Scalar>(ext.get()));
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::set_ext(Hermes::vector<SolutionSharedPtr<Scalar> > ext)
+    {
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > mext;
+      for(unsigned int i = 0; i < ext.size(); i++)
+        mext.push_back(MeshFunctionSharedPtr<Scalar>(ext[i].get()));
+      this->set_ext(mext);
+    }
+
+    template<typename Scalar>
+    Hermes::vector<MeshFunctionSharedPtr<Scalar> > WeakForm<Scalar>::get_ext() const
     {
       return this->ext;
     }
@@ -233,20 +243,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_ext(MeshFunction<Scalar>* ext)
+    void Form<Scalar>::set_ext(MeshFunctionSharedPtr<Scalar> ext)
     {
       this->ext.clear();
       this->ext.push_back(ext);
     }
 
     template<typename Scalar>
-    void Form<Scalar>::set_ext(Hermes::vector<MeshFunction<Scalar>*> ext)
+    void Form<Scalar>::set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext)
     {
       this->ext = ext;
     }
 
     template<typename Scalar>
-    Hermes::vector<MeshFunction<Scalar>*> Form<Scalar>::get_ext() const
+    Hermes::vector<MeshFunctionSharedPtr<Scalar> > Form<Scalar>::get_ext() const
     {
       return this->ext;
     }

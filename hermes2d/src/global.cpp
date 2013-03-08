@@ -43,7 +43,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type)
+    double Global<Scalar>::calc_abs_error(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, int norm_type)
     {
       // sanity checks
       if(sln1 == NULL) throw Hermes::Exceptions::Exception("sln1 is NULL in calc_abs_error().");
@@ -54,7 +54,7 @@ namespace Hermes
       sln2->set_quad_2d(quad);
 
       MeshSharedPtr meshes[2] = { sln1->get_mesh(), sln2->get_mesh() };
-      Transformable* tr[2] = { sln1, sln2 };
+      Transformable* tr[2] = { sln1.get(), sln2.get() };
       Traverse trav(true);
       trav.begin(2, meshes, tr);
 
@@ -88,7 +88,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::calc_rel_error(MeshFunction<Scalar>* sln, MeshFunction<Scalar>* ref_sln, int norm_type)
+    double Global<Scalar>::calc_abs_error(SolutionSharedPtr<Scalar> sln1, SolutionSharedPtr<Scalar> sln2, int norm_type)
+    {
+      return calc_abs_error(MeshFunctionSharedPtr<Scalar>(sln1.get()), MeshFunctionSharedPtr<Scalar>(sln2.get()), norm_type);
+    }
+
+    template<typename Scalar>
+    double Global<Scalar>::calc_rel_error(MeshFunctionSharedPtr<Scalar> sln, MeshFunctionSharedPtr<Scalar> ref_sln, int norm_type)
     {
       double error = calc_abs_error(sln, ref_sln, norm_type);
       double norm = calc_norm(ref_sln, norm_type);
@@ -97,7 +103,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::calc_norm(MeshFunction<Scalar>* sln, int norm_type)
+    double Global<Scalar>::calc_norm(MeshFunctionSharedPtr<Scalar> sln, int norm_type)
     {
       Quad2D* quad = &g_quad_2d_std;
       sln->set_quad_2d(quad);
@@ -135,7 +141,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::calc_norms(Hermes::vector<Solution<Scalar>*> slns)
+    double Global<Scalar>::calc_norm(SolutionSharedPtr<Scalar> sln, int norm_type)
+    {
+      return calc_norm(MeshFunctionSharedPtr<Scalar>(sln.get()), norm_type);
+    }
+
+    template<typename Scalar>
+    double Global<Scalar>::calc_norms(Hermes::vector<SolutionSharedPtr<Scalar> > slns)
     {
       // Calculate norms for all solutions.
       Hermes::vector<double> norms;
@@ -144,11 +156,11 @@ namespace Hermes
       {
         switch (slns[i]->get_space_type())
         {
-        case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
-        case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
-        case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
-        case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
-        default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
+          case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
+          case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
+          case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
+          case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
+          default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
         }
       }
       // Calculate the resulting norm.
@@ -159,7 +171,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::calc_abs_errors(Hermes::vector<Solution<Scalar>*> slns1, Hermes::vector<Solution<Scalar>*> slns2)
+    double Global<Scalar>::calc_abs_errors(Hermes::vector<SolutionSharedPtr<Scalar> > slns1, Hermes::vector<SolutionSharedPtr<Scalar> > slns2)
     {
       // Calculate errors for all solutions.
       Hermes::vector<double> errors;
@@ -183,13 +195,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::calc_rel_errors(Hermes::vector<Solution<Scalar>*> slns1, Hermes::vector<Solution<Scalar>*> slns2)
+    double Global<Scalar>::calc_rel_errors(Hermes::vector<SolutionSharedPtr<Scalar> > slns1, Hermes::vector<SolutionSharedPtr<Scalar> > slns2)
     {
       return calc_abs_errors(slns1, slns2) / calc_norms(slns2);
     }
 
     template<typename Scalar>
-    double Global<Scalar>::error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv)
+    double Global<Scalar>::error_fn_h1(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv)
     {
       Quad2D* quad = sln1->get_quad_2d();
 
@@ -212,7 +224,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru)
+    double Global<Scalar>::norm_fn_h1(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru)
     {
       Quad2D* quad = sln->get_quad_2d();
 
@@ -231,7 +243,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv)
+    double Global<Scalar>::error_fn_l2(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv)
     {
       Quad2D* quad = sln1->get_quad_2d();
 
@@ -251,7 +263,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru)
+    double Global<Scalar>::norm_fn_l2(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru)
     {
       Quad2D* quad = sln->get_quad_2d();
 
@@ -268,7 +280,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv)
+    double Global<Scalar>::error_fn_hc(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv)
     {
       Quad2D* quad = sln1->get_quad_2d();
 
@@ -290,7 +302,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru)
+    double Global<Scalar>::norm_fn_hc(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru)
     {
       Quad2D* quad = sln->get_quad_2d();
 
@@ -308,7 +320,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv)
+    double Global<Scalar>::error_fn_hcl2(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv)
     {
       Quad2D* quad = sln1->get_quad_2d();
 
@@ -327,7 +339,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru)
+    double Global<Scalar>::norm_fn_hcl2(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru)
     {
       Quad2D* quad = sln->get_quad_2d();
 
@@ -345,7 +357,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv)
+    double Global<Scalar>::error_fn_hdiv(MeshFunctionSharedPtr<Scalar> sln1, MeshFunctionSharedPtr<Scalar> sln2, RefMap* ru, RefMap* rv)
     {
       throw Hermes::Exceptions::Exception("error_fn_hdiv() not implemented yet.");
 
@@ -370,7 +382,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Global<Scalar>::norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru)
+    double Global<Scalar>::norm_fn_hdiv(MeshFunctionSharedPtr<Scalar> sln, RefMap* ru)
     {
       throw Hermes::Exceptions::Exception("norm_fn_hdiv() not implemented yet.");
 

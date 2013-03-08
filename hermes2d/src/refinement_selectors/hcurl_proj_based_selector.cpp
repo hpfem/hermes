@@ -203,7 +203,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Scalar** HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order)
+      Scalar** HcurlProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, SolutionSharedPtr<Scalar> rsln, Element* element, int intr_gip_order)
       {
         const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 

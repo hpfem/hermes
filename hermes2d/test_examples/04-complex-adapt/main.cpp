@@ -90,13 +90,14 @@ int main(int argc, char* argv[])
     "Wire", MU_0, std::complex<double>(J_EXT, 0.0), OMEGA);
 
   // Initialize coarse and reference mesh solution.
-  Solution<std::complex<double> > sln, ref_sln;
+  SolutionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  SolutionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
 
   // Initialize refinement selector.
   H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
-  Views::VectorView sview("Solution", new Views::WinGeom(0, 0, 600, 350));
+  Views::ScalarView sview("Solution", new Views::WinGeom(0, 0, 600, 350));
   Views::OrderView oview("Polynomial orders", new Views::WinGeom(610, 0, 520, 350));
 
   // DOF and CPU convergence graphs initialization.
@@ -143,21 +144,21 @@ int main(int argc, char* argv[])
       e.print_msg();
     }
 
-    Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, &ref_sln);
+    Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh->
     OGProjection<std::complex<double> > ogProjection;
-    ogProjection.project_global(space, &ref_sln, &sln);
+    ogProjection.project_global(space, ref_sln, sln);
 
     // View the coarse mesh solution and polynomial orders.
-    RealFilter real_filter(&sln);
-    sview.show(&real_filter, &real_filter);
+    MeshFunctionSharedPtr<double> real_filter(new RealFilter(sln));
+    //sview.show(real_filter);
 
     oview.show(space);
 
     // Calculate element errors and total error estimate.
     Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(space);
-    double err_est_rel = adaptivity->calc_err_est(&sln, &ref_sln) * 100;
+    double err_est_rel = adaptivity->calc_err_est(sln, ref_sln) * 100;
     std::cout << (std::string)"Relative error: " << err_est_rel << std::endl;
 
     // Add entry to DOF and CPU convergence graphs.
@@ -185,8 +186,8 @@ int main(int argc, char* argv[])
   // Show the reference solution - the final result.
   sview.set_title("Fine mesh solution");
 
-  RealFilter real_filter(&ref_sln);
-  sview.show(&real_filter, &real_filter);
+  MeshFunctionSharedPtr<double> real_filter(new RealFilter(ref_sln));
+  sview.show(real_filter);
 
   m.tick();
   std::cout << m.accumulated();

@@ -109,7 +109,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns,
+    double KellyTypeAdapt<Scalar>::calc_err_internal(Hermes::vector<SolutionSharedPtr<Scalar> > slns,
                                                      Hermes::vector<double>* component_errors,
                                                      unsigned int error_flags)
     {
@@ -120,7 +120,7 @@ namespace Hermes
 
       for (int i = 0; i < this->num; i++)
       {
-        this->sln[i] = slns[i];
+        this->sln[i] = slns[i].get();
         this->sln[i]->set_quad_2d(&g_quad_2d_std);
       }
 
@@ -481,7 +481,7 @@ namespace Hermes
 
     template<typename Scalar>
     double KellyTypeAdapt<Scalar>::eval_solution_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
-                                                      RefMap *rm, MeshFunction<Scalar>* sln)
+                                                      RefMap *rm, SolutionSharedPtr<Scalar> sln)
     {
       // Determine the integration order.
       int inc = (sln->get_num_components() == 2) ? 1 : 0;
@@ -493,11 +493,7 @@ namespace Hermes
       int order = rm->get_inv_ref_order();
       order += o.get_order();
 
-      Solution<Scalar>*sol = static_cast<Solution<Scalar>*>(sln);
-      if(sol && sol->get_type() == HERMES_EXACT)
-        limit_order_nowarn(order, rm->get_active_element()->get_mode());
-      else
-        limit_order(order, rm->get_active_element()->get_mode());
+      limit_order(order, rm->get_active_element()->get_mode());
 
       ou->free_ord(); delete ou;
       delete fake_e;
@@ -719,7 +715,7 @@ namespace Hermes
                                                             int neighbor_index)
     {
       NeighborSearch<Scalar>* nbs = neighbor_searches.get(neighbor_index);
-      Hermes::vector<MeshFunction<Scalar>*> slns;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns;
       for (int i = 0; i < this->num; i++)
         slns.push_back(this->sln[i]);
 

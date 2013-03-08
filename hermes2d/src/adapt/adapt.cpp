@@ -321,7 +321,7 @@ namespace Hermes
         for (int j = 0; j < this->num; j++)
         {
           if(rsln[j] != NULL)
-            rslns[i][j] = dynamic_cast<Solution<Scalar>*>(rsln[j]->clone());
+            rslns[i][j] = static_cast<Solution<Scalar>* >(rsln[j]->clone());
         }
       }
 
@@ -598,7 +598,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_est(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
+    double Adapt<Scalar>::calc_err_est(SolutionSharedPtr<Scalar>sln, SolutionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
       this->tick();
@@ -611,7 +611,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_est(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+    double Adapt<Scalar>::calc_err_est(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
@@ -627,7 +627,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_exact(Solution<Scalar>*sln, Solution<Scalar>*rsln, bool solutions_for_adapt,
+    double Adapt<Scalar>::calc_err_exact(SolutionSharedPtr<Scalar>sln, SolutionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
       unsigned int error_flags)
     {
       this->tick();
@@ -647,7 +647,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_exact(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+    double Adapt<Scalar>::calc_err_exact(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
@@ -658,7 +658,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, rslns.size(), num);
       MeshSharedPtr* ref_meshes = new MeshSharedPtr[num];
       SpaceSharedPtr<Scalar>* ref_spaces = new SpaceSharedPtr<Scalar>[num];
-      Hermes::vector<Solution<Scalar>*> ref_slns_local;
+      Hermes::vector<SolutionSharedPtr<Scalar> > ref_slns_local;
       for(unsigned int i = 0; i < num; i++)
       {
         OGProjection<Scalar> ogProjection;
@@ -894,8 +894,8 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::eval_error(typename Adapt<Scalar>::MatrixFormVolError* form,
-      MeshFunction<Scalar>*sln1, MeshFunction<Scalar>*sln2, MeshFunction<Scalar>*rsln1,
-      MeshFunction<Scalar>*rsln2)
+      MeshFunctionSharedPtr<Scalar>sln1, MeshFunctionSharedPtr<Scalar>sln2, MeshFunctionSharedPtr<Scalar>rsln1,
+      MeshFunctionSharedPtr<Scalar>rsln2)
     {
       RefMap *rv1 = sln1->get_refmap();
       RefMap *rv2 = sln2->get_refmap();
@@ -912,15 +912,8 @@ namespace Hermes
       Hermes::Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
       int order = rrv1->get_inv_ref_order();
       order += o.get_order();
-      if(static_cast<Solution<Scalar>*>(rsln1) || static_cast<Solution<Scalar>*>(rsln2))
-      {
-        if(static_cast<Solution<Scalar>*>(rsln1)->get_type() == HERMES_EXACT)
-        { limit_order_nowarn(order, rv1->get_active_element()->get_mode()); }
-        else
-          limit_order(order, rv1->get_active_element()->get_mode());
-      }
-      else
-        limit_order(order, rv1->get_active_element()->get_mode());
+      
+      limit_order(order, rv1->get_active_element()->get_mode());
 
       ou->free_ord(); delete ou;
       ov->free_ord(); delete ov;
@@ -961,7 +954,7 @@ namespace Hermes
 
     template<typename Scalar>
     double Adapt<Scalar>::eval_error_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
-      MeshFunction<Scalar>*rsln1, MeshFunction<Scalar>*rsln2)
+      MeshFunctionSharedPtr<Scalar>rsln1, MeshFunctionSharedPtr<Scalar>rsln2)
     {
       RefMap *rrv1 = rsln1->get_refmap();
       RefMap *rrv2 = rsln2->get_refmap();
@@ -976,15 +969,8 @@ namespace Hermes
       Hermes::Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
       int order = rrv1->get_inv_ref_order();
       order += o.get_order();
-      if(static_cast<Solution<Scalar>*>(rsln1) || static_cast<Solution<Scalar>*>(rsln2))
-      {
-        if(static_cast<Solution<Scalar>*>(rsln1)->get_type() == HERMES_EXACT)
-        { limit_order_nowarn(order, rrv1->get_active_element()->get_mode());  }
-        else
-          limit_order(order, rrv1->get_active_element()->get_mode());
-      }
-      else
-        limit_order(order, rrv1->get_active_element()->get_mode());
+      
+      limit_order(order, rrv1->get_active_element()->get_mode());
 
       ou->free_ord(); delete ou;
       ov->free_ord(); delete ov;
@@ -1017,7 +1003,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_internal(Hermes::vector<Solution<Scalar>*> slns, Hermes::vector<Solution<Scalar>*> rslns,
+    double Adapt<Scalar>::calc_err_internal(Hermes::vector<SolutionSharedPtr<Scalar> > slns, Hermes::vector<SolutionSharedPtr<Scalar> > rslns,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
     {
       int i, j;
@@ -1062,13 +1048,13 @@ namespace Hermes
       for (i = 0; i < this->num; i++)
       {
         slns_original[i] = this->sln[i];
-        this->sln[i] = slns[i];
+        this->sln[i] = slns[i].get();
         sln[i]->set_quad_2d(&g_quad_2d_std);
       }
       for (i = 0; i < this->num; i++)
       {
         rslns_original[i] = this->rsln[i];
-        this->rsln[i] = rslns[i];
+        this->rsln[i] = rslns[i].get();
         rsln[i]->set_quad_2d(&g_quad_2d_std);
       }
 
@@ -1208,13 +1194,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::calc_err_internal(Solution<Scalar>* sln, Solution<Scalar>* rsln,
+    double Adapt<Scalar>::calc_err_internal(SolutionSharedPtr<Scalar> sln, SolutionSharedPtr<Scalar> rsln,
       Hermes::vector<double>* component_errors, bool solutions_for_adapt,
       unsigned int error_flags)
     {
-      Hermes::vector<Solution<Scalar>*> slns;
+      Hermes::vector<SolutionSharedPtr<Scalar> > slns;
       slns.push_back(sln);
-      Hermes::vector<Solution<Scalar>*> rslns;
+      Hermes::vector<SolutionSharedPtr<Scalar> > rslns;
       rslns.push_back(rsln);
       return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
     }

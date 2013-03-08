@@ -103,13 +103,13 @@ namespace Hermes
       //                    iteration of the Newton's method.
       // block_diagonal_jacobian... if true then the tensor product block Jacobian is
       //                            reduced to just the diagonal blocks.
-      void rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new, Hermes::vector<Solution<Scalar>*> error_fns);
-      void rk_time_step_newton(Solution<Scalar>* slns_time_prev, Solution<Scalar>* slns_time_new, Solution<Scalar>* error_fn);
+      void rk_time_step_newton(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev, Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new, Hermes::vector<SolutionSharedPtr<Scalar> > error_fns);
+      void rk_time_step_newton(SolutionSharedPtr<Scalar> slns_time_prev, SolutionSharedPtr<Scalar> slns_time_new, SolutionSharedPtr<Scalar> error_fn);
 
       // This is a wrapper for the previous function if error_fn is not provided
       // (adaptive time stepping is not wanted).
-      void rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev, Hermes::vector<Solution<Scalar>*> slns_time_new);
-      void rk_time_step_newton(Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new);
+      void rk_time_step_newton(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev, Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new);
+      void rk_time_step_newton(SolutionSharedPtr<Scalar> sln_time_prev, SolutionSharedPtr<Scalar> sln_time_new);
 
       void set_freeze_jacobian();
       void set_newton_tol(double newton_tol);
@@ -155,7 +155,7 @@ namespace Hermes
       void create_stage_wf(unsigned int size, bool block_diagonal_jacobian);
       
       /// Updates the augmented weak formulation.
-      void update_stage_wf(Hermes::vector<Solution<Scalar>*> slns_time_prev);
+      void update_stage_wf(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev);
 
       // Prepare u_ext_vec.
       void prepare_u_ext_vec();
@@ -208,7 +208,7 @@ namespace Hermes
       double newton_damping_coeff;
       double newton_max_allowed_residual_norm;
       
-      Hermes::vector<Solution<Scalar>*> residuals_vector;
+      Hermes::vector<SolutionSharedPtr<Scalar> > residuals_vector;
 
       /// Vector K_vector of length num_stages * ndof. will represent
       /// the 'K_i' vectors in the usual R-K notation.

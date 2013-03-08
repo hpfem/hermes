@@ -144,9 +144,9 @@ namespace Hermes
       static int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
 
     protected:
-      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
+      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, SolutionSharedPtr<Scalar>** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
 
-      void deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
+      void deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, SolutionSharedPtr<Scalar>** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
 
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
@@ -178,25 +178,25 @@ namespace Hermes
       bool state_needs_recalculation(AsmList<Scalar>** current_als, Traverse::State* current_state);
 
       /// Calculate cache records for this set of parameters.
-      void calculate_cache_records(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
+      void calculate_cache_records(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, SolutionSharedPtr<Scalar>* current_u_ext, AsmList<Scalar>** current_als, 
         Traverse::State* current_state, AsmList<Scalar>** current_alsSurface, WeakForm<Scalar>* current_wf);
       
       /// Assemble one state.
-      void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, 
+      void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, SolutionSharedPtr<Scalar>* current_u_ext, 
         AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf);
 
       /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
       /// Matrix volumetric forms - calculate the integration order.
-      int calc_order_matrix_form(MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      int calc_order_matrix_form(MatrixForm<Scalar>* mfv, RefMap** current_refmaps, SolutionSharedPtr<Scalar>* current_u_ext, Traverse::State* current_state);
 
       /// Matrix volumetric forms - assemble the form.
       virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// Vector volumetric forms - calculate the integration order.
-      int calc_order_vector_form(VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      int calc_order_vector_form(VectorForm<Scalar>* mfv, RefMap** current_refmaps, SolutionSharedPtr<Scalar>* current_u_ext, Traverse::State* current_state);
 
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
@@ -204,7 +204,7 @@ namespace Hermes
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
-      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, SolutionSharedPtr<Scalar>* current_u_ext, Traverse::State* current_state);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
       void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext);
@@ -334,16 +334,16 @@ namespace Hermes
         bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
 
       /// Calculates integration order for DG vector forms.
-      int calc_order_dg_vector_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<Solution<Scalar>*> u_ext,
+      int calc_order_dg_vector_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<SolutionSharedPtr<Scalar> > u_ext,
         PrecalcShapeset* fv, RefMap* ru, SurfPos* surf_pos,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
 
       /// Initialize orders of external functions for DG forms.
-      Func<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunction<Scalar>*> &ext,
+      Func<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
 
       /// Initialize external functions for DG forms.
-      DiscontinuousFunc<Scalar>** init_ext_fns(Hermes::vector<MeshFunction<Scalar>*> &ext,
+      DiscontinuousFunc<Scalar>** init_ext_fns(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
         int order, unsigned int min_dg_mesh_seq);
 

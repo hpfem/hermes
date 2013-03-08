@@ -928,9 +928,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscontinuousFunc<Scalar>* NeighborSearch<Scalar>::init_ext_fn(MeshFunction<Scalar>* fu)
+    DiscontinuousFunc<Scalar>* NeighborSearch<Scalar>::init_ext_fn(MeshFunctionSharedPtr<Scalar> fu)
     {
-      Func<Scalar>* fn_central = init_fn(fu, get_quad_eo(false));
+      Func<Scalar>* fn_central = init_fn(fu.get(), get_quad_eo(false));
 
       uint64_t original_transform = fu->get_transform();
 
@@ -938,9 +938,9 @@ namespace Hermes
       fu->set_active_element(neighbors[active_segment]);
 
       if(neighbor_transformations.present(active_segment))
-        neighbor_transformations.get(active_segment)->apply_on(fu);
+        neighbor_transformations.get(active_segment)->apply_on(fu.get());
 
-      Func<Scalar>* fn_neighbor = init_fn(fu, get_quad_eo(true));
+      Func<Scalar>* fn_neighbor = init_fn(fu.get(), get_quad_eo(true));
 
       // Restore the original function.
       fu->set_active_element(central_el);

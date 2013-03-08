@@ -41,8 +41,8 @@ namespace Hermes
 
         /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
         /// and the distance between starting points is "step"
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem);
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps = HERMES_EPS_NORMAL);
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps, int xitem, int yitem);
 
         /// Creates additional streamline with strarting point (x, y)
         /// Note: Can be called only after StreamView::show
@@ -122,8 +122,8 @@ namespace Hermes
 
         /// Using velocity components (xsln, ysln) it creates streamlines that begin at the boundary with "marker"
         /// and the distance between starting points is "step"
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int marker, double step, double eps, int xitem, int yitem) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps = HERMES_EPS_NORMAL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int marker, double step, double eps, int xitem, int yitem) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         /// Creates additional streamline with strarting point (x, y)
         /// Note: Can be called only after StreamView::show

@@ -34,7 +34,6 @@ namespace Hermes
       {
         pss = NULL;
         sln = NULL;
-        space = NULL;
         this->show_edges = true;
         basic_title.assign(title);
       }
@@ -45,7 +44,6 @@ namespace Hermes
       {
         pss = NULL;
         sln = NULL;
-        space = NULL;
         this->show_edges = true;
         basic_title.assign(title);
       }
@@ -68,7 +66,6 @@ namespace Hermes
       void BaseView<Scalar>::free()
       {
         if(pss != NULL) { delete pss; pss = NULL; }
-        if(sln != NULL) { delete sln; sln = NULL; }
       }
 
       template<>
@@ -86,7 +83,7 @@ namespace Hermes
           Solution<double>::vector_to_solution(coeffs, space, sln, pss, true);
         }
 
-        ScalarView::show(sln, eps, item);
+        ScalarView::show(MeshFunctionSharedPtr<double>(sln.get()), eps, item);
         update_title();
 
         delete [] coeffs;
@@ -106,7 +103,7 @@ namespace Hermes
           Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss, true);
         }
 
-        Hermes::Hermes2D::RealFilter filter(sln);
+        Hermes::Hermes2D::RealFilter filter(MeshFunctionSharedPtr<std::complex<double> >(sln.get()));
 
         ScalarView::show(&filter, eps, item);
         update_title();

@@ -510,13 +510,21 @@ namespace Hermes
         }
       }
 
-      void Linearizer::set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
+      void Linearizer::set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
-        this->xdisp = xdisp;
-        user_xdisp = (xdisp != NULL);
-        this->ydisp = ydisp;
-        user_ydisp = (ydisp != NULL);
+        this->xdisp = MeshFunctionSharedPtr<double>(xdisp);
+        this->ydisp = MeshFunctionSharedPtr<double>(ydisp);
         this->dmult = dmult;
+      }
+
+      void Linearizer::process_solution(SolutionSharedPtr<double> sln, int item_, double eps)
+      {
+        process_solution(sln.get(), item_, eps);
+      }
+
+      void Linearizer::process_solution(MeshFunctionSharedPtr<double> sln, int item_, double eps)
+      {
+        process_solution(sln.get(), item_, eps);
       }
 
       void Linearizer::process_solution(MeshFunction<double>* sln, int item_, double eps)
@@ -586,8 +594,8 @@ namespace Hermes
         MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-          fns[i] = new MeshFunction<double>*[3];
-          fns[i][0] = sln->clone();
+					fns[i] = new MeshFunction<double>*[3];
+          fns[i][0] = sln->clone(); 
           fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
           if(xdisp != NULL)
@@ -804,14 +812,6 @@ namespace Hermes
 
         // select old quadratrues
         sln->set_quad_2d(old_quad);
-        if(user_xdisp)
-          xdisp->set_quad_2d(old_quad_x);
-        else
-          delete xdisp;
-        if(user_ydisp)
-          ydisp->set_quad_2d(old_quad_y);
-        else
-          delete ydisp;
 
         // clean up
         ::free(hash_table);
@@ -914,7 +914,7 @@ namespace Hermes
         free();
       }
 
-      void Linearizer::save_solution_vtk(MeshFunction<double>* sln, const char* filename, const char *quantity_name,
+      void Linearizer::save_solution_vtk(MeshFunctionSharedPtr<double> sln, const char* filename, const char *quantity_name,
         bool mode_3D, int item, double eps)
       {
         process_solution(sln, item, eps);
@@ -965,6 +965,12 @@ namespace Hermes
 
         unlock_data();
         fclose(f);
+      }
+
+      void Linearizer::save_solution_vtk(SolutionSharedPtr<double> sln, const char* filename, const char *quantity_name,
+        bool mode_3D, int item, double eps)
+      {
+        save_solution_vtk(MeshFunctionSharedPtr<double>(sln.get()), filename, quantity_name, mode_3D, item, eps);
       }
 
       void Linearizer::calc_vertices_aabb(double* min_x, double* max_x, double* min_y, double* max_y) const

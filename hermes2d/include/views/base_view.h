@@ -51,7 +51,7 @@ namespace Hermes
 
         SpaceSharedPtr<Scalar> space;
         PrecalcShapeset* pss;
-        Solution<Scalar>* sln;
+        SolutionSharedPtr<Scalar> sln;
 
         double eps;
         int ndof, item;

@@ -191,7 +191,7 @@ protected:
 class WeakFormNSNewton : public WeakForm<double>
 {
 public:
-  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, MeshFunction<double>* xvel_prev_time, MeshFunction<double>* yvel_prev_time) : WeakForm<double>(3), Stokes(Stokes), 
+  WeakFormNSNewton(bool Stokes, double Reynolds, double time_step, SolutionSharedPtr<double> xvel_prev_time, SolutionSharedPtr<double> yvel_prev_time) : WeakForm<double>(3), Stokes(Stokes), 
     Reynolds(Reynolds)
   {
     this->current_time_step = time_step;
@@ -218,8 +218,8 @@ public:
 
     VectorFormNS_0* F_0 = new VectorFormNS_0(0, Stokes, Reynolds, time_step);
     
-    //F_0->set_ext(Hermes::vector<MeshFunction<double>*>(xvel_prev_time, yvel_prev_time));
-    F_0->set_ext(xvel_prev_time);
+    //F_0->set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
+    this->set_ext(xvel_prev_time);
 
     add_vector_form(F_0);
     VectorFormNS_1* F_1 = new VectorFormNS_1(1, Stokes, Reynolds, time_step);
@@ -597,8 +597,8 @@ protected:
   // Members.
   bool Stokes;
   double Reynolds;
-  Solution<double>* x_vel_previous_time;
-  Solution<double>* y_vel_previous_time;
+  SolutionSharedPtr<double> x_vel_previous_time;
+  SolutionSharedPtr<double> y_vel_previous_time;
 };
 
 class EssentialBCNonConst : public EssentialBoundaryCondition<double>

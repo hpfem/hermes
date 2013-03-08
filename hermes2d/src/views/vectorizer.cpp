@@ -87,12 +87,10 @@ namespace Hermes
         return i;
       }
 
-      void Vectorizer::set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult)
+      void Vectorizer::set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult)
       {
-        this->xdisp = xdisp;
-        user_xdisp = (xdisp != NULL);
-        this->ydisp = ydisp;
-        user_ydisp = (ydisp != NULL);
+        this->xdisp = MeshFunctionSharedPtr<double>(xdisp);
+        this->ydisp = MeshFunctionSharedPtr<double>(ydisp);
         this->dmult = dmult;
       }
 
@@ -482,7 +480,7 @@ namespace Hermes
         return this->curvature_epsilon;
       }
 
-      void Vectorizer::process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem_orig, int yitem_orig, double eps)
+      void Vectorizer::process_solution(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int xitem_orig, int yitem_orig, double eps)
       {
         // Important, sets the current caughtException to NULL.
         this->caughtException = NULL;

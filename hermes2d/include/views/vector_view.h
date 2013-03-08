@@ -38,8 +38,11 @@ namespace Hermes
         VectorView(char* title, WinGeom* wg = NULL);
         ~VectorView();
 
-        void show(MeshFunction<double>* vsln, double eps = HERMES_EPS_NORMAL);
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunction<double>* xdisp = NULL, MeshFunction<double>* ydisp = NULL, double dmult = 1.0);
+        void show(MeshFunctionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL);
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
+
+        void show(SolutionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL);
+        void show(SolutionSharedPtr<double> xsln, SolutionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, MeshFunctionSharedPtr<double> xdisp = NULL, MeshFunctionSharedPtr<double> ydisp = NULL, double dmult = 1.0);
 
         inline void set_grid_type(bool hexa) { this->hexa = hexa; refresh(); };
         void set_mode(int mode);
@@ -71,9 +74,9 @@ namespace Hermes
         VectorView(const char* title = "VectorView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         VectorView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void show(MeshFunction<double>* vsln, double eps = HERMES_EPS_NORMAL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps = HERMES_EPS_NORMAL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-        void show(MeshFunction<double>* xsln, MeshFunction<double>* ysln, double eps, int xitem, int yitem) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunctionSharedPtr<double> vsln, double eps = HERMES_EPS_NORMAL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps = HERMES_EPS_NORMAL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void show(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, double eps, int xitem, int yitem) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         inline void set_grid_type(bool hexa) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };

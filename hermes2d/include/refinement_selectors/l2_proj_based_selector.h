@@ -61,7 +61,7 @@ namespace Hermes
 
         /// Returns an array of values of the reference solution at integration points.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
-        virtual Scalar** precalc_ref_solution(int inx_son, Solution<Scalar>* rsln, Element* element, int intr_gip_order);
+        virtual Scalar** precalc_ref_solution(int inx_son, SolutionSharedPtr<Scalar> rsln, Element* element, int intr_gip_order);
 
         /**  Overriden function. For details, see OptimumSelector::create_candidates(). */
         void create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order);

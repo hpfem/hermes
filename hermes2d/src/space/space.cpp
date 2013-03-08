@@ -654,7 +654,7 @@ namespace Hermes
     SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::create_ref_space(bool assign_dofs)
     {
       /// Initialization.
-      SpaceSharedPtr<Scalar> ref_space = NULL;
+      SpaceSharedPtr<Scalar> ref_space;
       if(dynamic_cast<L2Space<Scalar>* >(this->coarse_space.get()) != NULL)
         ref_space = this->init_construction_l2();
       if(dynamic_cast<H1Space<Scalar>*>(this->coarse_space.get()) != NULL)

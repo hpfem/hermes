@@ -86,7 +86,7 @@ namespace Hermes
           *  \param[in] rsln A reference solution which is used to select a refinement.
           *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
           *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
-          virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement) = 0;
+          virtual bool select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement) = 0;
           /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
           /** \param[in] element An element which is about the be refined.
           *  \param[in] orig_quad_order An encoded order of the element.
@@ -123,7 +123,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
-        virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement);
+        virtual bool select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement);
 
         /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
@@ -151,7 +151,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Increases an order ising POnlySelector::order_h_inc and POnlySelector::order_v_inc. Fails if the order cannot be increased due to the maximum order. For details, see Selector::select_refinement. */
-        virtual bool select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement);
+        virtual bool select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement);
 
         /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.

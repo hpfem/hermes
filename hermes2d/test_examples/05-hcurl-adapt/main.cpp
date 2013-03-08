@@ -104,7 +104,8 @@ int main(int argc, char* argv[])
   CustomWeakForm wf(MU_R, KAPPA);
 
   // Initialize coarse and reference mesh solutions.
-  Solution<std::complex<double> > sln, ref_sln;
+  SolutionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  SolutionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
 
   // Initialize exact solution.
   CustomExactSolution sln_exact(mesh);

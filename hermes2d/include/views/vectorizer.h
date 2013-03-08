@@ -42,10 +42,10 @@ namespace Hermes
         /// \param[in] xitem what item (function value, derivative wrt. x, ..) to use in the first solution.
         /// \param[in] yitem what item (function value, derivative wrt. x, ..) to use in the second solution.
         /// \param[in] eps - tolerance parameter controlling how fine the resulting linearized approximation of the solution is.
-        void process_solution(MeshFunction<double>* xsln, MeshFunction<double>* ysln, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
+        void process_solution(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int xitem = H2D_FN_VAL_0, int yitem = H2D_FN_VAL_0, double eps = HERMES_EPS_NORMAL);
 
         /// Set the displacement, i.e. set two functions that will deform the domain for visualization, in the x-direction, and the y-direction.
-        void set_displacement(MeshFunction<double>* xdisp, MeshFunction<double>* ydisp, double dmult = 1.0);
+        void set_displacement(MeshFunctionSharedPtr<double> xdisp, MeshFunctionSharedPtr<double> ydisp, double dmult = 1.0);
 
         /// Get the number of vertices of this instance.
         int get_num_vertices();
@@ -81,7 +81,7 @@ namespace Hermes
         bool user_xdisp, user_ydisp;
         
         /// Displacement functions, default to ZeroFunctions, may be supplied by set_displacement();
-        MeshFunction<double> *xdisp, *ydisp;
+        MeshFunctionSharedPtr<double> xdisp, ydisp;
         double dmult;
 
         int xitem, component_x, value_type_x;

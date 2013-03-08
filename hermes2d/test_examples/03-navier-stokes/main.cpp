@@ -91,6 +91,8 @@ double current_time = 0;
 
 int main(int argc, char* argv[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads,1);
+
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
@@ -130,12 +132,14 @@ int main(int argc, char* argv[])
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
-  ConstantSolution<double> xvel_prev_time(mesh, 0.0), yvel_prev_time(mesh, 0.0), p_prev_time(mesh, 0.0);
+  SolutionSharedPtr<double> xvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  SolutionSharedPtr<double> yvel_prev_time(new ConstantSolution<double> (mesh, 0.0));
+  SolutionSharedPtr<double> p_prev_time(new ConstantSolution<double> (mesh, 0.0));
 
   // Initialize weak formulation.
-  WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, &xvel_prev_time, &yvel_prev_time);
+  WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
 
-  wf->set_ext(Hermes::vector<MeshFunction<double>*>(&xvel_prev_time, &yvel_prev_time));
+  wf->set_ext(Hermes::vector<SolutionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
@@ -158,7 +162,7 @@ if(HERMES_VISUALIZATION)
   OGProjection<double> ogProjection;
 
   ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space),
-    Hermes::vector<MeshFunction<double> *>(&xvel_prev_time, &yvel_prev_time, &p_prev_time),
+    Hermes::vector<SolutionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, p_prev_time),
     coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   newton.set_newton_max_iter(NEWTON_MAX_ITER);
@@ -186,7 +190,7 @@ if(HERMES_VISUALIZATION)
     {
       e.print_msg();
     }
-    Hermes::vector<Solution<double> *> tmp(&xvel_prev_time, &yvel_prev_time, &p_prev_time);
+    Hermes::vector<SolutionSharedPtr<double> > tmp(xvel_prev_time, yvel_prev_time, p_prev_time);
     Hermes::Hermes2D::Solution<double>::vector_to_solutions(newton.get_sln_vector(), 
       Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space), tmp);
 
@@ -195,10 +199,10 @@ if(HERMES_VISUALIZATION)
     {
       sprintf(title, "Velocity, time %g", current_time);
       vview.set_title(title);
-      vview.show(&xvel_prev_time, &yvel_prev_time);
+      vview.show(xvel_prev_time, yvel_prev_time);
       sprintf(title, "Pressure, time %g", current_time);
       pview.set_title(title);
-      pview.show(&p_prev_time);
+      pview.show(p_prev_time);
     }
   }
 

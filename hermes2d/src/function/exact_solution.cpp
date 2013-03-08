@@ -138,8 +138,7 @@ namespace Hermes
     {
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
-      ConstantSolution<Scalar>* sln = new ConstantSolution<Scalar>(this->mesh, this->constant);
-      return sln;
+      return new ConstantSolution<Scalar>(this->mesh, this->constant);
     }
 
     template<typename Scalar>
@@ -231,8 +230,7 @@ namespace Hermes
     {
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
-      ZeroSolution<Scalar>* sln = new ZeroSolution<Scalar>(this->mesh);
-      return sln;
+      return new ZeroSolution<Scalar>(this->mesh);
     }
 
     template<typename Scalar>

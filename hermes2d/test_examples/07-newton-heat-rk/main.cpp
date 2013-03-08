@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	SpaceSharedPtr<double> space;
 
 	// Solution pointer.
-	Solution<double>* sln_time_prev = new ConstantSolution<double>(mesh, TEMP_INIT);
+	SolutionSharedPtr<double> sln_time_prev = new ConstantSolution<double>(mesh, TEMP_INIT);
 
 	if(REUSE_SOLUTION && continuity.have_record_available())
 	{
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 	CustomWeakFormHeatRK wf("Boundary_air", ALPHA, LAMBDA, HEATCAP, RHO,
 		&current_time, TEMP_INIT, T_FINAL);
 
-	Solution<double>* sln_time_new = new Solution<double>(mesh);
+	SolutionSharedPtr<double> sln_time_new = new Solution<double>(mesh);
 
 	int ndof = space->get_num_dofs();
 

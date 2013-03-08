@@ -288,23 +288,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Solution<Scalar>* sln_time_prev,
-                                          Solution<Scalar>* sln_time_new, Solution<Scalar>* error_fn)
+    void RungeKutta<Scalar>::rk_time_step_newton(SolutionSharedPtr<Scalar>  sln_time_prev,
+                                          SolutionSharedPtr<Scalar>  sln_time_new, SolutionSharedPtr<Scalar>  error_fn)
     {
-      Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
+      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<SolutionSharedPtr<Scalar> >();
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
+      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<SolutionSharedPtr<Scalar> >();
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
+      Hermes::vector<SolutionSharedPtr<Scalar> > error_fns      = Hermes::vector<SolutionSharedPtr<Scalar> >();
       error_fns.push_back(error_fn);
       return rk_time_step_newton(slns_time_prev, slns_time_new,
         error_fns);
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev,
-                                          Hermes::vector<Solution<Scalar>*> slns_time_new,
-                                          Hermes::vector<Solution<Scalar>*> error_fns)
+    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev,
+                                          Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new,
+                                          Hermes::vector<SolutionSharedPtr<Scalar> > error_fns)
     {
       this->tick();
 
@@ -317,7 +317,7 @@ namespace Hermes
       update_stage_wf(slns_time_prev);
 
       // Check whether the user provided a nonzero B2-row if he wants temporal error estimation.
-      if(error_fns != Hermes::vector<Solution<Scalar>*>() && bt->is_embedded() == false)
+      if(error_fns != Hermes::vector<SolutionSharedPtr<Scalar> >() && bt->is_embedded() == false)
         throw Hermes::Exceptions::Exception("rk_time_step_newton(): R-K method must be embedded if temporal error estimate is requested.");
 
       info("\tRunge-Kutta: time step, time: %f, time step: %f", this->time, this->time_step);
@@ -514,7 +514,7 @@ namespace Hermes
 
       // If error_fn is not NULL, use the B2-row in the Butcher's
       // table to calculate the temporal error estimate.
-      if(error_fns != Hermes::vector<Solution<Scalar>*>())
+      if(error_fns != Hermes::vector<SolutionSharedPtr<Scalar> >())
       {
         for (int i = 0; i < ndof; i++)
         {
@@ -526,11 +526,6 @@ namespace Hermes
         Solution<Scalar>::vector_to_solutions_common_dir_lift(coeff_vec, spaces, error_fns);
       }
 
-      // Delete all residuals.
-      if(!residual_as_vector)
-        for (unsigned int i = 0; i < num_stages; i++)
-          delete residuals_vector[i];
-
       // Clean up.
       delete [] coeff_vec;
 
@@ -540,21 +535,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<Solution<Scalar>*> slns_time_prev,
-                                          Hermes::vector<Solution<Scalar>*> slns_time_new)
+    void RungeKutta<Scalar>::rk_time_step_newton(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev,
+                                          Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new)
     {
       return rk_time_step_newton(slns_time_prev, slns_time_new,
-                          Hermes::vector<Solution<Scalar>*>());
+                          Hermes::vector<SolutionSharedPtr<Scalar> >());
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::rk_time_step_newton(Solution<Scalar>* sln_time_prev, Solution<Scalar>* sln_time_new)
+    void RungeKutta<Scalar>::rk_time_step_newton(SolutionSharedPtr<Scalar>  sln_time_prev, SolutionSharedPtr<Scalar>  sln_time_new)
     {
-      Hermes::vector<Solution<Scalar>*> slns_time_prev = Hermes::vector<Solution<Scalar>*>();
+      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<SolutionSharedPtr<Scalar> >();
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<Solution<Scalar>*> slns_time_new  = Hermes::vector<Solution<Scalar>*>();
+      Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<SolutionSharedPtr<Scalar> >();
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<Solution<Scalar>*> error_fns      = Hermes::vector<Solution<Scalar>*>();
+      Hermes::vector<SolutionSharedPtr<Scalar> > error_fns      = Hermes::vector<SolutionSharedPtr<Scalar> >();
       return rk_time_step_newton(slns_time_prev, slns_time_new,
                           error_fns);
     }
@@ -702,7 +697,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<Solution<Scalar>*> slns_time_prev)
+    void RungeKutta<Scalar>::update_stage_wf(Hermes::vector<SolutionSharedPtr<Scalar> > slns_time_prev)
     {
       if(this->wf->global_integration_order_set)
       {
@@ -718,7 +713,7 @@ namespace Hermes
       Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right.vfsurf;
 
       for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-          stage_wf_right.ext.push_back(slns_time_prev[slns_time_prev_i]);
+          stage_wf_right.ext.push_back(MeshFunctionSharedPtr<Scalar>(slns_time_prev[slns_time_prev_i].get()));
 
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional

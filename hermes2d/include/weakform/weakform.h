@@ -146,15 +146,23 @@ namespace Hermes
 
       /// External functions.
       /// Set one external function.
-      void set_ext(MeshFunction<Scalar>* ext);
+      void set_ext(SolutionSharedPtr<Scalar> ext);
 
       /// External functions.
       /// Set more external functions.
-      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
+      void set_ext(Hermes::vector<SolutionSharedPtr<Scalar> > ext);
+
+      /// External functions.
+      /// Set one external function.
+      void set_ext(MeshFunctionSharedPtr<Scalar> ext);
+
+      /// External functions.
+      /// Set more external functions.
+      void set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext);
 
       /// External functions.
       /// Get external functions.
-      Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > get_ext() const;
 
       /// Cloning.
       virtual WeakForm* clone() const;
@@ -173,7 +181,7 @@ namespace Hermes
 
     protected:
       /// External solutions.
-      Hermes::vector<MeshFunction<Scalar>*> ext;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext;
 
       double current_time;
       double current_time_step;
@@ -242,9 +250,9 @@ namespace Hermes
       /// external functions - dual functionality with the overall WeakForm.
       /// For Agros, this approach is better in some way, for e.g. Euler equations,
       /// the other one (for the whole WeakForm) is faster.
-      void set_ext(MeshFunction<Scalar>* ext);
-      void set_ext(Hermes::vector<MeshFunction<Scalar>*> ext);
-      Hermes::vector<MeshFunction<Scalar>*> get_ext() const;
+      void set_ext(MeshFunctionSharedPtr<Scalar> ext);
+      void set_ext(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext);
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > get_ext() const;
 
       /// scaling factor
       void setScalingFactor(double scalingFactor);
@@ -263,7 +271,7 @@ namespace Hermes
       int u_ext_offset;
 
       /// External solutions.
-      Hermes::vector<MeshFunction<Scalar>*> ext;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext;
 
       /// For time-dependent right-hand side functions.
       /// E.g. for Runge-Kutta methods. Otherwise the one time for the whole WeakForm can be used.

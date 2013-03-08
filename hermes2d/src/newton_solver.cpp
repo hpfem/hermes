@@ -240,15 +240,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve(Solution<Scalar>* initial_guess)
+    void NewtonSolver<Scalar>::solve(SolutionSharedPtr<Scalar> initial_guess)
     {
-      Hermes::vector<Solution<Scalar>*> vectorToPass;
+      Hermes::vector<SolutionSharedPtr<Scalar> > vectorToPass;
       vectorToPass.push_back(initial_guess);
       this->solve(vectorToPass);
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve(Hermes::vector<Solution<Scalar>*> initial_guess)
+    void NewtonSolver<Scalar>::solve(Hermes::vector<SolutionSharedPtr<Scalar> > initial_guess)
     {
       int ndof = this->dp->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];
@@ -323,11 +323,11 @@ namespace Hermes
         if(residual_as_function)
         {
           // Prepare solutions for measuring residual norm.
-          Hermes::vector<Solution<Scalar>*> solutions;
+          Hermes::vector<SolutionSharedPtr<Scalar> > solutions;
           Hermes::vector<bool> dir_lift_false;
           for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++) 
           {
-            solutions.push_back(new Solution<Scalar>());
+            solutions.push_back(SolutionSharedPtr<Scalar> (new Solution<Scalar>()));
             dir_lift_false.push_back(false);
           }
 
@@ -335,10 +335,6 @@ namespace Hermes
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
-
-          // Clean up.
-          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
-            delete solutions[i];
         }
         else
         {
@@ -503,15 +499,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve_keep_jacobian(Solution<Scalar>* initial_guess)
+    void NewtonSolver<Scalar>::solve_keep_jacobian(SolutionSharedPtr<Scalar> initial_guess)
     {
-      Hermes::vector<Solution<Scalar>*> vectorToPass;
+      Hermes::vector<SolutionSharedPtr<Scalar> > vectorToPass;
       vectorToPass.push_back(initial_guess);
       this->solve_keep_jacobian(vectorToPass);
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::solve_keep_jacobian(Hermes::vector<Solution<Scalar>*> initial_guess)
+    void NewtonSolver<Scalar>::solve_keep_jacobian(Hermes::vector<SolutionSharedPtr<Scalar> > initial_guess)
     {
       int ndof = this->dp->get_num_dofs();
       Scalar* coeff_vec = new Scalar[ndof];
@@ -579,10 +575,10 @@ namespace Hermes
         if(residual_as_function)
         {
           // Prepare solutions for measuring residual norm.
-          Hermes::vector<Solution<Scalar>* > solutions;
+          Hermes::vector<SolutionSharedPtr<Scalar> > solutions;
           Hermes::vector<bool> dir_lift_false;
           for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++) {
-            solutions.push_back(new Solution<Scalar>());
+            solutions.push_back(SolutionSharedPtr<Scalar>(new Solution<Scalar>()));
             dir_lift_false.push_back(false);
           }
           Solution<Scalar>::vector_to_solutions(residual,
@@ -590,10 +586,6 @@ namespace Hermes
 
           // Calculate the norm.
           residual_norm = Global<Scalar>::calc_norms(solutions);
-
-          // Clean up.
-          for (unsigned int i = 0; i < static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size(); i++)
-            delete solutions[i];
         }
         else
         {

@@ -519,7 +519,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_cands_dof(Element* e, Solution<Scalar>* rsln)
+      void OptimumSelector<Scalar>::evaluate_cands_dof(Element* e, SolutionSharedPtr<Scalar> rsln)
       {
         bool tri = e->is_triangle();
 
@@ -597,7 +597,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_candidates(Element* e, Solution<Scalar>* rsln, double* avg_error, double* dev_error)
+      void OptimumSelector<Scalar>::evaluate_candidates(Element* e, SolutionSharedPtr<Scalar> rsln, double* avg_error, double* dev_error)
       {
         evaluate_cands_error(e, rsln, avg_error, dev_error);
 
@@ -678,7 +678,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, Solution<Scalar>* rsln, ElementToRefine& refinement)
+      bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, SolutionSharedPtr<Scalar> rsln, ElementToRefine& refinement)
       {
         //make an uniform order in a case of a triangle
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);

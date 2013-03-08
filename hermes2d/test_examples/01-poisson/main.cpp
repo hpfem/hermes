@@ -1,6 +1,9 @@
 #define HERMES_REPORT_ALL
 #include "definitions.h"
 
+using namespace Hermes;
+using namespace Hermes::Hermes2D;
+
 // This example shows how to solve a simple PDE that describes stationary
 // heat transfer in an object consisting of two materials (aluminum and
 // copper). The object is heated by constant volumetric heat sources
@@ -88,11 +91,11 @@ int main(int argc, char* argv[])
  if (HERMES_VISUALIZATION)
  {
    Hermes::Hermes2D::Views::BaseView<double> o;
-   o.show(space);
+   //o.show(space);
  }
 
   // Initialize the solution.
-  Hermes::Hermes2D::Solution<double> sln;
+  SolutionSharedPtr<double> sln(new Solution<double>);
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
@@ -106,7 +109,7 @@ int main(int argc, char* argv[])
     double* sln_vector = linear_solver.get_sln_vector();
 
     // Translate the solution vector into the previously initialized Solution.
-    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, &sln);
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
 
     // VTK output.
     if(VTK_VISUALIZATION)
@@ -114,7 +117,7 @@ int main(int argc, char* argv[])
       // Output solution in VTK format.
       Hermes::Hermes2D::Views::Linearizer lin;
       bool mode_3D = false;
-      lin.save_solution_vtk(&sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      lin.save_solution_vtk(sln, "sln.vtk", "Temperature", mode_3D, 1, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
 
 			// Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
@@ -127,7 +130,7 @@ int main(int argc, char* argv[])
       // Visualize the solution.
       Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
 
-      viewS.show(&sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
       viewS.wait_for_close();
     }
   }

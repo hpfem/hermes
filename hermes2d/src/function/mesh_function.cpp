@@ -17,6 +17,12 @@
 #include "../views/linearizer_base.h"
 #include <limits>
 
+template class HERMES_API MeshFunctionSharedPtr<double>;
+template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
+
+template class HERMES_API SolutionSharedPtr<double>;
+template class HERMES_API SolutionSharedPtr<std::complex<double> >;
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -260,9 +266,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MeshFunction<Scalar>::force_transform(MeshFunction<Scalar>* mf)
+    void MeshFunction<Scalar>::force_transform(MeshFunctionSharedPtr<Scalar> mf)
     {
-      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
+			Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
     }
 
     template<typename Scalar>

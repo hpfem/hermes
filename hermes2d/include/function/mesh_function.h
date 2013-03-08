@@ -25,6 +25,54 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class MeshFunction;
+    template<typename Scalar> class Solution;
+  }
+}
+
+#ifdef _WINDOWS
+template<typename Scalar>
+class MeshFunctionSharedPtr : public std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
+{
+public:
+  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL) : std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
+  {
+  }
+};
+
+template<typename Scalar>
+class SolutionSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >
+{
+public:
+  SolutionSharedPtr(Hermes::Hermes2D::Solution<Scalar>* ptr = NULL) : std::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >(ptr)
+  {
+  }
+};
+#else
+template<typename Scalar>
+class MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
+{
+public:
+  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
+  {
+  }
+};
+
+template<typename Scalar>
+class SolutionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >
+{
+public:
+  SolutionSharedPtr(Hermes::Hermes2D::Solution<Scalar>* ptr = NULL) : std::tr1::shared_ptr<Hermes::Hermes2D::Solution<Scalar> >(ptr)
+  {
+  }
+};
+#endif
+
+
+namespace Hermes
+{
+  namespace Hermes2D
+  {
     /** \defgroup meshFunctions Mesh functions
      * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
      * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
@@ -66,7 +114,7 @@ namespace Hermes
       /// Designed to return an identical clone of this instance.
       virtual MeshFunction<Scalar>* clone() const
       {
-        throw Hermes::Exceptions::Exception("You need to implement MeshFunction::clone() to be able to use paralellization");
+        throw Hermes::Exceptions::Exception("You need to implement MeshFunctionSharedPtr::clone() to be able to use paralellization");
         return NULL;
       }
 
@@ -121,7 +169,7 @@ namespace Hermes
       MeshSharedPtr mesh;
       RefMap* refmap;
     
-      void force_transform(MeshFunction<Scalar>* mf);
+      void force_transform(MeshFunctionSharedPtr<Scalar> mf);
 
       void update_refmap();
 
