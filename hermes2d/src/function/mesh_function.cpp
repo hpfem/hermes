@@ -63,7 +63,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    void MeshFunction<Scalar>::copy(const MeshFunctionSharedPtr<Scalar> sln)
+    void MeshFunction<Scalar>::copy(MeshFunctionSharedPtr<Scalar> sln)
     {
       copy(sln.get());
     }

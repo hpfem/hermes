@@ -128,9 +128,9 @@ protected:
   void set_space(SpaceSharedPtr<double> new_space);
 
   double epsilon;
-  Solution<double>* sln;
-  Solution<double>* R_h_1;
-  Solution<double>* R_h_2;
+  MeshFunctionSharedPtr<double> sln;
+  MeshFunctionSharedPtr<double> R_h_1;
+  MeshFunctionSharedPtr<double> R_h_2;
   GradientReconstruction_1* grad_1;
   GradientReconstruction_2* grad_2;
   SpaceSharedPtr<double> space;

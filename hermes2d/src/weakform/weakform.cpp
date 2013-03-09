@@ -134,11 +134,23 @@ namespace Hermes
       }
       for(unsigned int i = 0; i < otherWf->ext.size(); i++)
       {
-        this->ext.push_back(otherWf->ext[i]->clone());
-        if(dynamic_cast<Solution<Scalar>*>(otherWf->ext[i].get()) != NULL)
+        Solution<Scalar>* originalSln = dynamic_cast<Solution<Scalar>*>(otherWf->ext[i].get());
+        if(originalSln != NULL)
         {
-          static_cast<Solution<Scalar>*>(this->ext.back().get())->set_type(static_cast<Solution<Scalar>*>(otherWf->ext[i].get())->get_type());
+          Solution<Scalar>* newSln = NULL;
+          if(originalSln->get_type() == HERMES_SLN)
+          {
+            newSln = new Solution<Scalar>;
+            newSln->copy(otherWf->ext[i].get());
+          }
+          else
+            newSln = static_cast<Solution<Scalar>*>(originalSln->clone());
+
+          newSln->set_type(originalSln->get_type());
+          this->ext.push_back(newSln);
         }
+        else
+          this->ext.push_back(otherWf->ext[i]->clone());
       }
     }
 

@@ -87,7 +87,7 @@ namespace Hermes
 
       /// Copy from sln to this instance.
       virtual void copy(const MeshFunction<Scalar>* sln);
-      virtual void copy(const MeshFunctionSharedPtr<Scalar> sln);
+      virtual void copy(MeshFunctionSharedPtr<Scalar> sln);
       
       /// Return the reference mapping.
       RefMap* get_refmap(bool update = true);

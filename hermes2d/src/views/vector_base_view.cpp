@@ -79,7 +79,7 @@ namespace Hermes
 
         Solution<double>::vector_to_solution(coeffs, space, sln, pss);
 
-        VectorView::show(MeshFunctionSharedPtr<double>(sln.get()), MeshFunctionSharedPtr<double>(sln.get()), 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
+        VectorView::show(sln, sln, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();
 
         delete [] coeffs;
@@ -93,7 +93,7 @@ namespace Hermes
           coeffs[base_index + 1] = 1.0;
         Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss);
 
-        Hermes::Hermes2D::RealFilter filter(MeshFunctionSharedPtr<std::complex<double> >(sln.get()));
+        Hermes::Hermes2D::RealFilter filter(sln);
 
         this->VectorView::show(&filter, &filter, 0.001, H2D_FN_VAL_0, H2D_FN_VAL_1);
         update_title();

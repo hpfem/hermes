@@ -180,6 +180,7 @@ int main(int argc, char* argv[])
         space->adjust_element_order(-1, -1, P_INIT, P_INIT);
         break;
       default: Exceptions::Exception("Wrong global derefinement method.");
+        space->assign_dofs();
       }      
     }
 

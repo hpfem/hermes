@@ -230,6 +230,7 @@ namespace Hermes
       int num_act_elems;                    ///< A total number of active elements across all provided meshes.
       Solution<Scalar>* sln[H2D_MAX_COMPONENTS];    ///< Coarse solution.
       Solution<Scalar>* rsln[H2D_MAX_COMPONENTS];   ///< Reference solutions.
+      MeshFunctionSharedPtr<Scalar> exactProjectedSlns[H2D_MAX_COMPONENTS];   ///< Reference solutions.
       bool have_errors;                     ///< True if errors of elements were calculated.
       bool have_coarse_solutions;           ///< True if the coarse solutions were set.
       bool have_reference_solutions;        ///< True if the reference solutions were set.

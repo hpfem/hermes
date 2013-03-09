@@ -548,13 +548,12 @@ namespace Hermes
     template<typename Scalar>
     void RungeKutta<Scalar>::rk_time_step_newton(MeshFunctionSharedPtr<Scalar>  sln_time_prev, MeshFunctionSharedPtr<Scalar>  sln_time_new)
     {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_prev;;
       slns_time_prev.push_back(sln_time_prev);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new  = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns_time_new;
       slns_time_new.push_back(sln_time_new);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns      = Hermes::vector<MeshFunctionSharedPtr<Scalar> >();
-      return rk_time_step_newton(slns_time_prev, slns_time_new,
-                          error_fns);
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > error_fns;
+      return rk_time_step_newton(slns_time_prev, slns_time_new, error_fns);
     }
 
     template<typename Scalar>
@@ -715,8 +714,10 @@ namespace Hermes
       Hermes::vector<VectorFormVol<Scalar> *> vfvol = stage_wf_right.vfvol;
       Hermes::vector<VectorFormSurf<Scalar> *> vfsurf = stage_wf_right.vfsurf;
 
+      stage_wf_right.ext.clear();
+
       for(unsigned int slns_time_prev_i = 0; slns_time_prev_i < slns_time_prev.size(); slns_time_prev_i++)
-          stage_wf_right.ext.push_back(MeshFunctionSharedPtr<Scalar>(slns_time_prev[slns_time_prev_i].get()));
+          stage_wf_right.ext.push_back(slns_time_prev[slns_time_prev_i]);
 
       // Duplicate matrix volume forms, scale them according
       // to the Butcher's table, enhance them with additional

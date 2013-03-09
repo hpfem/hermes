@@ -636,7 +636,10 @@ namespace Hermes
       typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
       MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
       typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
-      double result = calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
+      SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
+      exactProjectedSlns[0] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
+      ogProjection.project_global(ref_space, rsln, exactProjectedSlns[0]);
+      double result = calc_err_internal(sln, exactProjectedSlns[0], NULL, solutions_for_adapt, error_flags);
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
       return result;
@@ -653,7 +656,20 @@ namespace Hermes
       if(rslns.size() != num)
         throw Exceptions::LengthException(2, rslns.size(), num);
 
-      double result = calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslnsProjected;
+      for(int i = 0; i < this->num; i++)
+      {
+        OGProjection<Scalar> ogProjection;
+        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
+        MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
+        typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh, 0);
+        SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
+        exactProjectedSlns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
+        ogProjection.project_global(ref_space, rslns[i], exactProjectedSlns[i]);
+        rslnsProjected.push_back(exactProjectedSlns[i]);
+      }
+
+      double result = calc_err_internal(slns, rslnsProjected, component_errors, solutions_for_adapt, error_flags);
       this->tick();
       this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
       return result;

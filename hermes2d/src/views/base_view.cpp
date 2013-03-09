@@ -102,7 +102,7 @@ namespace Hermes
         }
 
         
-        complex_filter = MeshFunctionSharedPtr<double>(new Hermes::Hermes2D::RealFilter(MeshFunctionSharedPtr<std::complex<double> >(sln.get())));
+        complex_filter = MeshFunctionSharedPtr<double>(new Hermes::Hermes2D::RealFilter(sln.get()));
         ScalarView::show(complex_filter, eps, item);
         update_title();
 

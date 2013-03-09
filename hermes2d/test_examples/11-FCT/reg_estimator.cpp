@@ -1,11 +1,10 @@
 #include "reg_estimator.h"
 
-Regularity_Estimator::Regularity_Estimator(double epsilon): epsilon(epsilon)
+Regularity_Estimator::Regularity_Estimator(double epsilon): epsilon(epsilon), R_h_1(MeshFunctionSharedPtr<double>(new Solution<double>)), 
+  R_h_2(MeshFunctionSharedPtr<double>(new Solution<double>)), sln(MeshFunctionSharedPtr<double>(new Solution<double>))
 {
   space =NULL;
-  R_h_1 = new Solution<double>;
-  R_h_2 = new Solution<double>;
-  sln = new Solution<double>;
+  
   smooth_elem_patch= NULL;
   smooth_dof = NULL;
   al = new 	AsmList<double>;
@@ -18,8 +17,6 @@ Regularity_Estimator::Regularity_Estimator(double epsilon): epsilon(epsilon)
 Regularity_Estimator::~Regularity_Estimator()
 {
   free();
-  delete R_h_1; delete R_h_2;
-  delete sln;
   delete al;	
   delete grad_1; delete grad_2;	
 }
@@ -83,7 +80,7 @@ double Regularity_Estimator::linear_approx(Element* e, double x_i, double y_i,do
   double y_c_ref = 0.; 
 
   double u_h_x_c = (dynamic_cast<Solution<double>*>(sln.get()))->get_ref_value(e, x_c_ref, y_c_ref, 0, 0);
-  double u_h_hat = u_h_x_c + R_h_1->get_ref_value(e, x_c_ref, y_c_ref, 0, 0)*(x_i-x_c)+R_h_2->get_ref_value(e, x_c_ref, y_c_ref, 0, 0)*(y_i-y_c);
+  double u_h_hat = u_h_x_c + (dynamic_cast<Solution<double>*>(R_h_1.get()))->get_ref_value(e, x_c_ref, y_c_ref, 0, 0)*(x_i-x_c)+(dynamic_cast<Solution<double>*>(R_h_2.get()))->get_ref_value(e, x_c_ref, y_c_ref, 0, 0)*(y_i-y_c);
 
   return u_h_hat;
 }
@@ -98,8 +95,8 @@ double Regularity_Estimator::linear_approx_dx(Element* e, double x_i, double y_i
 
   double d_u_h_x_c = (dynamic_cast<Solution<double>*>(sln.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1);
 
-  double u_h_hat = d_u_h_x_c + R_h_1->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1)*(x_i-x_c)
-    + R_h_1->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2)*(y_i-y_c);
+  double u_h_hat = d_u_h_x_c + (dynamic_cast<Solution<double>*>(R_h_1.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1)*(x_i-x_c)
+    + (dynamic_cast<Solution<double>*>(R_h_1.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2)*(y_i-y_c);
   return u_h_hat;
 }
 
@@ -114,8 +111,8 @@ double Regularity_Estimator::linear_approx_dy(Element* e, double x_i, double y_i
 
   double d_u_h_x_c = (dynamic_cast<Solution<double>*>(sln.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2);
 
-  double u_h_hat = d_u_h_x_c + R_h_2->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1)*(x_i-x_c)
-    +R_h_2->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2)*(y_i-y_c);
+  double u_h_hat = d_u_h_x_c + (dynamic_cast<Solution<double>*>(R_h_2.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1)*(x_i-x_c)
+    +(dynamic_cast<Solution<double>*>(R_h_2.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2)*(y_i-y_c);
   return u_h_hat;
 
 }
@@ -187,9 +184,9 @@ void Regularity_Estimator::smoothness_indicator(UMFPackMatrix<double> * mass_mat
   // for each dof determine list of elements
   for_all_active_elements(e, space->get_mesh())
   {
-    u_c[e->id]= sln->get_ref_value(e, x_c_ref, y_c_ref, 0, 0);
-    d_u_c_dx[e->id]= sln->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1);
-    d_u_c_dy[e->id]= sln->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2);
+    u_c[e->id]= (dynamic_cast<Solution<double>*>(sln.get()))->get_ref_value(e, x_c_ref, y_c_ref, 0, 0);
+    d_u_c_dx[e->id]= (dynamic_cast<Solution<double>*>(sln.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 1);
+    d_u_c_dy[e->id]= (dynamic_cast<Solution<double>*>(sln.get()))->get_ref_value_transformed(e, x_c_ref, y_c_ref, 0, 2);
     space->get_element_assembly_list(e, al);
     for (unsigned int iv = 0; iv < e->get_nvert(); iv++)
     { 

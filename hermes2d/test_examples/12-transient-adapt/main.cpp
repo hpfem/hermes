@@ -26,7 +26,7 @@ using namespace Views;
 //  The following parameters can be changed:
 
 // Hermes visualization.
-const bool HERMES_VISUALIZATION = false;
+const bool HERMES_VISUALIZATION = true;
 
 // Number of initial uniform mesh refinements.
 const int INIT_REF_NUM = 3;                       
@@ -110,6 +110,8 @@ const double heat_src = 1.0;
 
 int main(int argc, char* argv[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads,1);
+
   // Choose a Butcher's table or define your own.
   ButcherTable bt(butcher_table_type);
   if (bt.is_explicit()) Hermes::Mixins::Loggable::Static::info("Using a %d-stage explicit R-K method.", bt.get_size());
@@ -168,7 +170,8 @@ int main(int argc, char* argv[])
     if (ts > 1 && ts % UNREF_FREQ == 0)
     {
       Hermes::Mixins::Loggable::Static::info("Global mesh derefinement.");
-      switch (UNREF_METHOD) {
+      switch (UNREF_METHOD) 
+      {
       case 1: mesh->copy(basemesh);
         space->set_uniform_order(P_INIT);
         break;
