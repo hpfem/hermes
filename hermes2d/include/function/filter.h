@@ -379,7 +379,7 @@ namespace Hermes
     class HERMES_API AngleFilter : public SimpleFilter<std::complex<double> >
     {
     public:
-      AngleFilter(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> >> solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
+      AngleFilter(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, Hermes::vector<int> items = *(new Hermes::vector<int>));
       virtual ~AngleFilter();
 
     protected:

@@ -20,9 +20,6 @@
 template class HERMES_API MeshFunctionSharedPtr<double>;
 template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
 
-template class HERMES_API MeshFunctionSharedPtr<double>;
-template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
-
 namespace Hermes
 {
   namespace Hermes2D

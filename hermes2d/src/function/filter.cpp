@@ -1017,7 +1017,7 @@ namespace Hermes
         result[i] = atan2( v1.at(0)[i].imag(), v1.at(0)[i].real() );
     };
 
-    AngleFilter::AngleFilter(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> >> solutions, Hermes::vector<int> items)
+    AngleFilter::AngleFilter(Hermes::vector<MeshFunctionSharedPtr<std::complex<double> > > solutions, Hermes::vector<int> items)
       : SimpleFilter<std::complex<double> >(solutions, items)
     {
       if(solutions.size() > 1)
