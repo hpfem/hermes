@@ -126,6 +126,10 @@ namespace Hermes
 
       /// Calculate norm of a (possibly vector-valued) solution.
       /// Take norm from spaces where these solutions belong.
+      static double calc_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns);
+      static double calc_abs_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns1, Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns2);
+      static double calc_rel_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns1, Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns2);
+
       static double calc_norms(Hermes::vector<MeshFunction<Scalar>* > slns);
       static double calc_abs_errors(Hermes::vector<MeshFunction<Scalar>* > slns1, Hermes::vector<MeshFunction<Scalar>* > slns2);
       static double calc_rel_errors(Hermes::vector<MeshFunction<Scalar>* > slns1, Hermes::vector<MeshFunction<Scalar>* > slns2);

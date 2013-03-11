@@ -135,6 +135,72 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    double Global<Scalar>::calc_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns)
+    {
+      // Calculate norms for all solutions.
+      Hermes::vector<double> norms;
+      int n = slns.size();
+      for (int i = 0; i<n; i++)
+      {
+        Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(slns[i].get());
+        if(sln == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_norms().");
+
+        switch (sln->get_space_type())
+        {
+        case HERMES_H1_SPACE: norms.push_back(calc_norm(sln, HERMES_H1_NORM)); break;
+        case HERMES_HCURL_SPACE: norms.push_back(calc_norm(sln, HERMES_HCURL_NORM)); break;
+        case HERMES_HDIV_SPACE: norms.push_back(calc_norm(sln, HERMES_HDIV_NORM)); break;
+        case HERMES_L2_SPACE: norms.push_back(calc_norm(sln, HERMES_L2_NORM)); break;
+        default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
+        }
+      }
+      // Calculate the resulting norm.
+      double result = 0;
+      for (int i = 0; i < n; i++)
+        result += norms[i] * norms[i];
+      return sqrt(result);
+    }
+
+    template<typename Scalar>
+    double Global<Scalar>::calc_abs_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns1, Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns2)
+    {
+      // Calculate errors for all solutions.
+      Hermes::vector<double> errors;
+      int n = slns1.size();
+      for (int i = 0; i < n; i++)
+      {
+        Solution<Scalar>* sln1 = dynamic_cast<Solution<Scalar>*>(slns1[i].get());
+        if(sln1 == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_abs_errors().");
+
+        Solution<Scalar>* sln2 = dynamic_cast<Solution<Scalar>*>(slns2[i].get());
+        if(sln2 == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_abs_errors().");
+
+        switch (sln1->get_space_type())
+        {
+        case HERMES_H1_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_H1_NORM)); break;
+        case HERMES_HCURL_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_HCURL_NORM)); break;
+        case HERMES_HDIV_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_HDIV_NORM)); break;
+        case HERMES_L2_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_L2_NORM)); break;
+        default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
+        }
+      }
+      // Calculate the resulting error.
+      double result = 0;
+      for (int i = 0; i < n; i++)
+        result += errors[i] * errors[i];
+      return sqrt(result);
+    }
+
+    template<typename Scalar>
+    double Global<Scalar>::calc_rel_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns1, Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns2)
+    {
+      return calc_abs_errors(slns1, slns2) / calc_norms(slns2);
+    }
+
+    template<typename Scalar>
     double Global<Scalar>::calc_norms(Hermes::vector<MeshFunction<Scalar>* > slns)
     {
       // Calculate norms for all solutions.
@@ -148,11 +214,11 @@ namespace Hermes
 
         switch (sln->get_space_type())
         {
-          case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
-          case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
-          case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
-          case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
-          default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
+        case HERMES_H1_SPACE: norms.push_back(calc_norm(slns[i], HERMES_H1_NORM)); break;
+        case HERMES_HCURL_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HCURL_NORM)); break;
+        case HERMES_HDIV_SPACE: norms.push_back(calc_norm(slns[i], HERMES_HDIV_NORM)); break;
+        case HERMES_L2_SPACE: norms.push_back(calc_norm(slns[i], HERMES_L2_NORM)); break;
+        default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
         }
       }
       // Calculate the resulting norm.
@@ -170,11 +236,15 @@ namespace Hermes
       int n = slns1.size();
       for (int i = 0; i < n; i++)
       {
-        Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(slns1[i]);
-        if(sln == NULL)
+        Solution<Scalar>* sln1 = dynamic_cast<Solution<Scalar>*>(slns1[i]);
+        if(sln1 == NULL)
           throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_abs_errors().");
 
-        switch (sln->get_space_type())
+        Solution<Scalar>* sln2 = dynamic_cast<Solution<Scalar>*>(slns2[i]);
+        if(sln2 == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_abs_errors().");
+
+        switch (sln1->get_space_type())
         {
         case HERMES_H1_SPACE: errors.push_back(calc_abs_error(slns1[i], slns2[i], HERMES_H1_NORM)); break;
         case HERMES_HCURL_SPACE: errors.push_back(calc_abs_error(slns1[i], slns2[i], HERMES_HCURL_NORM)); break;
