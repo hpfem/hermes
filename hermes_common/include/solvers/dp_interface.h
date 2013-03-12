@@ -36,6 +36,7 @@ namespace Hermes
     class DiscreteProblemInterface : public Hermes::Mixins::SettableComputationTime
     {
     public:
+      virtual ~DiscreteProblemInterface() {};
       /// Get the number of unknowns.
       virtual int get_num_dofs() const = 0;
 

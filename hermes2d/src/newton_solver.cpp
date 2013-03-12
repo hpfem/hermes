@@ -542,7 +542,13 @@ namespace Hermes
       Scalar* coeff_vec_back = new Scalar[ndof];
       memset(coeff_vec_back, 0, ndof*sizeof(Scalar));
 
-      
+      // Delete the old solution vector, if there is any.
+      if(this->sln_vector != NULL)
+      {
+        delete [] this->sln_vector;
+        this->sln_vector = NULL;
+      }
+
       // The Newton's loop.
       double residual_norm;
       double last_residual_norm;

@@ -560,6 +560,11 @@ namespace Hermes
         bubble_proj_matrix_quad = calculate_bubble_projection_matrix(nb, indices, ref_map_shapeset, ref_map_pss, HERMES_MODE_QUAD);
 
         // cholesky factorization of the matrix
+        if(bubble_quad_p != NULL)
+        {
+          delete bubble_quad_p;
+          bubble_quad_p = NULL;
+        }
         bubble_quad_p = new double[nb];
         choldc(bubble_proj_matrix_quad, nb, bubble_quad_p);
       }

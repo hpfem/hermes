@@ -229,7 +229,8 @@ namespace Hermes
       if(wf != NULL)
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
 
-      if(sp_seq != NULL) delete [] sp_seq;
+      if(sp_seq != NULL)
+        delete [] sp_seq;
 
       this->delete_cache();
     }
@@ -1005,6 +1006,8 @@ namespace Hermes
         {
           if(u_ext[i] != NULL)
           {
+            for (unsigned int j = 0; j < wf->get_neq(); j++)
+              delete u_ext[i][j];
             delete [] u_ext[i];
           }
         }

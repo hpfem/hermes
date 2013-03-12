@@ -764,6 +764,8 @@ namespace Hermes
       for(int i = 0; i < elements.size(); i++)
         elementsToPass.el().push_back(*elements[i]);
 
+      for(int i = 0; i < elements.size(); i++)
+        delete elements[i];
       XMLSubdomains::domain xmldomain(vertices, elementsToPass, edges, subdomains);
       xmldomain.curves().set(curves);
 

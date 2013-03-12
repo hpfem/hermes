@@ -38,7 +38,7 @@ namespace Hermes
     public:
       NonlinearSolver(DiscreteProblemInterface<Scalar>* dp);
 
-      ~NonlinearSolver();
+      virtual ~NonlinearSolver();
 
       /// Basic solve method.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.

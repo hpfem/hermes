@@ -30,8 +30,8 @@ using namespace Hermes::Hermes2D;
 
 const bool HERMES_VISUALIZATION = true;           // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = false;             // Set to "true" to enable VTK output.
-const int P_INIT = 2;                             // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 2;                       // Number of initial uniform mesh refinements.
+const int P_INIT = 6;                             // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 6;                       // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.

@@ -66,7 +66,7 @@ const double VEL_INLET = 1.0;
 const double STARTUP_TIME = 1.0;
 
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 30000.0;                   // Time interval length.
+const double T_FINAL = 0.11;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
@@ -137,13 +137,13 @@ int main(int argc, char* argv[])
   MeshFunctionSharedPtr<double> p_prev_time(new ConstantSolution<double> (mesh, 0.0));
 
   // Initialize weak formulation.
-  WeakForm<double>* wf = new WeakFormNSNewton(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
+  WeakFormNSNewton wf(STOKES, RE, TAU, xvel_prev_time, yvel_prev_time);
 
-  wf->set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
+  wf.set_ext(Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time));
 
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
-	newton.set_weak_formulation(wf);
+	newton.set_weak_formulation(&wf);
 	newton.set_spaces(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space));
 
   // Initialize views.
@@ -183,7 +183,6 @@ if(HERMES_VISUALIZATION)
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
     {
-      newton.set_weak_formulation(wf);
       newton.solve_keep_jacobian(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)
@@ -208,8 +207,5 @@ if(HERMES_VISUALIZATION)
 
   delete [] coeff_vec;
 
-  // Wait for all views to be closed.
-  if(HERMES_VISUALIZATION)
-    Views::View::wait();
   return 0;
 }
