@@ -127,10 +127,6 @@ namespace Hermes
       // add bubble functions to the assembly list
       al->cnt = 0;
       get_bubble_assembly_list(e, al);
-
-      for(unsigned int i = 0; i < al->cnt; i++)
-        if(al->dof[i] >= 0 && al->dof[i] < first_dof)
-          al->dof[i] += first_dof;
     }
 
     template<typename Scalar>

@@ -673,6 +673,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::create_sparse_structure()
     {
+      Space<Scalar>::assign_dofs(spaces);
+        
       if(is_up_to_date())
       {
         if(current_mat != NULL)
@@ -726,11 +728,6 @@ namespace Hermes
 
         Traverse trav(true);
         trav.begin(wf->get_neq(), meshes);
-
-        if(is_DG)
-        {
-          Space<Scalar>::assign_dofs(spaces);
-        }
 
         Traverse::State* current_state;
         // Loop through all elements.
