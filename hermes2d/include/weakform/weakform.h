@@ -301,10 +301,10 @@ namespace Hermes
 
       SymFlag sym;
 
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
+      virtual Scalar value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *u, Func<double> *v,
         Geom<double> *e, Func<Scalar> **ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
     protected:
@@ -352,11 +352,12 @@ namespace Hermes
 
       unsigned int i;
       unsigned int j;
+      unsigned int previous_iteration_space_index;
 
-      virtual Scalar value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
+      virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
         Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> *u, DiscontinuousFunc<Hermes::Ord> *v,
+      virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, DiscontinuousFunc<Hermes::Ord> *u, DiscontinuousFunc<Hermes::Ord> *v,
         Geom<Hermes::Ord> *e, DiscontinuousFunc<Ord> **ext) const;
 
       virtual MatrixFormDG* clone() const;
@@ -375,10 +376,10 @@ namespace Hermes
 
       virtual ~VectorForm();
 
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
+      virtual Scalar value(int n, double *wt, Func<Scalar> **u_ext, Func<double> *v,
         Geom<double> *e, Func<Scalar> **ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
+      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         Func<Ord> **ext) const;
       unsigned int i;
 
@@ -422,10 +423,10 @@ namespace Hermes
 
       virtual ~VectorFormDG();
 
-      virtual Scalar value(int n, double *wt, Func<double> *v,
+      virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> **u_ext, Func<double> *v,
         Geom<double> *e, DiscontinuousFunc<Scalar> **ext) const;
 
-      virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
+      virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         DiscontinuousFunc<Ord> **ext) const;
       unsigned int i;
 

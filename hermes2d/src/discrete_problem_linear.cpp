@@ -191,13 +191,13 @@ namespace Hermes
             // This is then the same element of the virtual union mesh.
             // The proper sub-element mappings to all the functions of
             // this stage is supplied by the function Traverse::get_next_state()
-            // called in the while loop. 
+            // called in the while loop.
             this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
+              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
           }
-          catch(Hermes::Exceptions::Exception& e)
+					catch(Hermes::Exceptions::Exception& e)
           {
             if(this->caughtException == NULL)
               this->caughtException = e.clone();
