@@ -980,7 +980,7 @@ namespace Hermes
         get_boundary_assembly_list_internal(e, i, al);
       get_bubble_assembly_list(e, al);
       for(unsigned int i = 0; i < al->cnt; i++)
-        if(al->dof[i] >= 0)
+        if(al->dof[i] >= 0 && al->dof[i] < first_dof)
           al->dof[i] += first_dof;
     }
 
@@ -993,7 +993,7 @@ namespace Hermes
       get_vertex_assembly_list(e, e->next_vert(surf_num), al);
       get_boundary_assembly_list_internal(e, surf_num, al);
       for(unsigned int i = 0; i < al->cnt; i++)
-        if(al->dof[i] >= 0)
+        if(al->dof[i] >= 0 && al->dof[i] < first_dof)
           al->dof[i] += first_dof;
     }
 

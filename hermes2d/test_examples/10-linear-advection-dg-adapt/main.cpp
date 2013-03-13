@@ -83,8 +83,8 @@ int main(int argc, char* args[])
   OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
   oview.show(space);
 
-  MeshFunctionSharedPtr<double> sln;
-  MeshFunctionSharedPtr<double> ref_sln;
+  MeshFunctionSharedPtr<double> sln(new Solution<double>);
+  MeshFunctionSharedPtr<double> ref_sln(new Solution<double>);
 
   // Initialize the weak formulation.
   CustomWeakForm wf("Bdy_bottom_left", mesh);

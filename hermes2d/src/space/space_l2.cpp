@@ -129,7 +129,7 @@ namespace Hermes
       get_bubble_assembly_list(e, al);
 
       for(unsigned int i = 0; i < al->cnt; i++)
-        if(al->dof[i] >= 0)
+        if(al->dof[i] >= 0 && al->dof[i] < first_dof)
           al->dof[i] += first_dof;
     }
 

@@ -136,7 +136,7 @@ namespace Hermes
       /// \param[in] fu MeshFunction whose values are requested.
       /// \return Pointer to a discontinuous function allowing to access the values from each side of the active edge.
       ///
-      DiscontinuousFunc<Scalar>* init_ext_fn(MeshFunctionSharedPtr<Scalar> fu);
+      DiscontinuousFunc<Scalar>* init_ext_fn(MeshFunction<Scalar>* fu);
 
       class ExtendedShapeset;
       ExtendedShapeset *supported_shapes; ///< Object allowing to set/get a particular shape function from the extended

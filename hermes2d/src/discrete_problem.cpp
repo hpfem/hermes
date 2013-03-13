@@ -87,10 +87,6 @@ namespace Hermes
       // Matrix<Scalar> related settings.
       have_matrix = false;
 
-      // There is a special function that sets a DiscreteProblem to be FVM.
-      // Purpose is that this constructor looks cleaner and is simpler.
-      this->is_fvm = false;
-
       this->DG_matrix_forms_present = false;
       this->DG_vector_forms_present = false;
 
@@ -158,10 +154,6 @@ namespace Hermes
 
       // Matrix<Scalar> related settings.
       have_matrix = false;
-
-      // There is a special function that sets a DiscreteProblem to be FVM.
-      // Purpose is that this constructor looks cleaner and is simpler.
-      this->is_fvm = false;
 
       this->DG_matrix_forms_present = false;
       this->DG_vector_forms_present = false;
@@ -293,12 +285,6 @@ namespace Hermes
       }
 
       return up_to_date;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_fvm()
-    {
-      this->is_fvm = true;
     }
 
     template<typename Scalar>
@@ -2745,7 +2731,7 @@ namespace Hermes
       for(unsigned int j = 0; j < ext.size(); j++)
       {
         neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
-        ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(ext[j]);
+        ext_fns[j] = neighbor_searches.get(ext[j]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(ext[j].get());
       }
 
       return ext_fns;

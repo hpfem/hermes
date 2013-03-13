@@ -236,10 +236,6 @@ namespace Hermes
       /// Fake weight used in the calculation of integration order.
       static double fake_wt;
 
-      /// If the problem has only constant test functions, there is no need for order calculation,
-      /// which saves time.
-      bool is_fvm;
-
       /// Internal.
       bool is_linear;
 

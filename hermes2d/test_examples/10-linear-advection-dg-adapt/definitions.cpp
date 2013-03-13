@@ -106,7 +106,7 @@ MatrixFormSurf<double>* CustomWeakForm::CustomMatrixFormSurface::clone() const
 }
 
 template<typename Real, typename Scalar>
-Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt, DiscontinuousFunc<Real> *u, DiscontinuousFunc<Real> *v,
+Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt, DiscontinuousFunc<Scalar>** u_ext, DiscontinuousFunc<Real> *u, DiscontinuousFunc<Real> *v,
                                                         Geom<Real> *e, DiscontinuousFunc<Scalar> **ext) const
 {
   Scalar result = Scalar(0);
@@ -122,16 +122,16 @@ Scalar CustomWeakForm::CustomMatrixFormInterface::matrix_form(int n, double *wt,
   return result;
 }
 
-double CustomWeakForm::CustomMatrixFormInterface::value(int n, double *wt, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
+double CustomWeakForm::CustomMatrixFormInterface::value(int n, double *wt, DiscontinuousFunc<double> **u_ext, DiscontinuousFunc<double> *u, DiscontinuousFunc<double> *v,
                                                   Geom<double> *e, DiscontinuousFunc<double> **ext) const
 {
-  return matrix_form<double, double>(n, wt, u, v, e, ext);
+  return matrix_form<double, double>(n, wt, u_ext, u, v, e, ext);
 }
 
-Ord CustomWeakForm::CustomMatrixFormInterface::ord(int n, double *wt, DiscontinuousFunc<Ord> *u, DiscontinuousFunc<Ord> *v,
+Ord CustomWeakForm::CustomMatrixFormInterface::ord(int n, double *wt, DiscontinuousFunc<Ord> **u_ext, DiscontinuousFunc<Ord> *u, DiscontinuousFunc<Ord> *v,
                                              Geom<Ord> *e, DiscontinuousFunc<Ord> **ext) const
 {
-  return matrix_form<Ord, Ord>(n, wt, u, v, e, ext);
+  return matrix_form<Ord, Ord>(n, wt, u_ext, u, v, e, ext);
 }
 
 MatrixFormDG<double>* CustomWeakForm::CustomMatrixFormInterface::clone() const

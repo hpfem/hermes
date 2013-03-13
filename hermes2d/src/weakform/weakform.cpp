@@ -260,7 +260,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j) :
-    Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j), previous_iteration_space_index(-1)
+    Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j), previous_iteration_space_index(j)
     {
     }
 
