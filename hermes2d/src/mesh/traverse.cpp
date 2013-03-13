@@ -151,6 +151,26 @@ namespace Hermes
       this->isBnd = other->isBnd;
     }
 
+    Traverse::State* Traverse::State::clone(const Traverse::State * other)
+    {
+      State* state = new State();
+      
+      state->num = other->num;
+
+      state->e = new Element*[state->num];
+      state->sub_idx = new uint64_t[state->num];
+      memcpy(state->e, other->e, state->num * sizeof(Element*));
+      memcpy(state->sub_idx, other->sub_idx, state->num * sizeof(uint64_t));
+      memcpy(state->bnd, other->bnd, 4 * sizeof(bool));
+
+      state->rep = other->rep;
+      state->visited = other->visited;
+      state->isurf = other->isurf;
+      state->isBnd = other->isBnd;
+
+      return state;
+    }
+
     Traverse::State::~State()
     {
       if(e != NULL)
@@ -243,10 +263,14 @@ namespace Hermes
       }
     }
 
-    int Traverse::get_num_states(Hermes::vector<MeshSharedPtr > meshes)
+    Traverse::State** Traverse::get_states(Hermes::vector<MeshSharedPtr> meshes, int& states_count)
     {
       // This will be returned.
-      int count = 0;
+      int count = 0, predictedCount = 0;
+      for(int i = 0; i < meshes.size(); i++)
+        if(meshes[i]->get_num_active_elements() > predictedCount)
+          predictedCount = meshes[i]->get_num_active_elements();
+      State** states = (State**)malloc(sizeof(State*)*predictedCount);
 
       this->num = meshes.size();
       this->begin(num, &meshes.front());
@@ -269,7 +293,6 @@ namespace Hermes
           // Push the state of a new base element.
           // This function only allocates memory for the new state,
           // with as many Elements* as there are meshes in this stage.
-          // (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
           s = push_state();
           s->cr = H2D_UNITY;
           while (1)
@@ -279,7 +302,8 @@ namespace Hermes
             if(id >= meshes[0]->get_num_base_elements())
             {
               this->finish();
-              return count;
+              states_count = count;
+              return states;
             }
 
             int nused = 0;
@@ -338,7 +362,15 @@ namespace Hermes
         // if yes, set boundary flags and return the state
         if(leaf)
         {
-          count++;
+          if(count > predictedCount - 1)
+          {
+            predictedCount *= 1.5;
+            states = (State**)realloc(states, sizeof(State*) * predictedCount);
+          }
+
+          set_boundary_info(s);
+
+          states[count++] = State::clone(s);
           continue;
         }
 

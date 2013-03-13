@@ -59,7 +59,7 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
-  // Load the mesh->
+  // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("square.mesh", mesh);
@@ -121,10 +121,10 @@ int main(int argc, char* args[])
     OGProjection<double> ogProjection;
     ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM);
 
-    ValFilter val_filter(ref_sln, 0.0, 1.0);
+    MeshFunctionSharedPtr<double> val_filter(new ValFilter(ref_sln, 0.0, 1.0));
 
     // View the coarse mesh solution.
-    view1.show(&val_filter);
+    view1.show(val_filter);
     oview.show(space);
 
     // Calculate element errors and total error estimate.

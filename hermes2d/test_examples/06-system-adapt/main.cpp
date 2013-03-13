@@ -98,7 +98,9 @@ int main(int argc, char* argv[])
   Hermes::Mixins::TimeMeasurable cpu_time;
   cpu_time.tick();
 
-  // Load the mesh->
+  Hermes2DApi.set_integral_param_value(numThreads,1);
+
+  // Load the mesh.
   MeshSharedPtr u_mesh(new Mesh), v_mesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", u_mesh);
@@ -173,7 +175,7 @@ int main(int argc, char* argv[])
     int ndof_ref = Space<double>::get_num_dofs(ref_spaces_const);
 
     // Initialize reference problem.
-    Hermes::Mixins::Loggable::Static::info("Solving on reference mesh->");
+    Hermes::Mixins::Loggable::Static::info("Solving on reference mesh.");
 
     // Time measurement.
     cpu_time.tick();

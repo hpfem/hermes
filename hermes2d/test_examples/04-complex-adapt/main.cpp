@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
   Hermes2DApi.set_integral_param_value(numThreads, 1);
   m.tick();
 
-  // Load the mesh->
+  // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", mesh);

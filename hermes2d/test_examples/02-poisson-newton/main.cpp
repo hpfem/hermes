@@ -36,7 +36,7 @@ const double BDY_C_PARAM = 20.0;
 
 int main(int argc, char* argv[])
 {
-  // Load the mesh->
+  // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2D mloader;
   mloader.load("domain.mesh", mesh);

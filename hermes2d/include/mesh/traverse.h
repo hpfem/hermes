@@ -51,7 +51,6 @@ namespace Hermes
 
     class Mesh;
     class Transformable;
-    struct State;
     struct Rect;
 
     /// @ingroup inner
@@ -91,6 +90,7 @@ namespace Hermes
       private:
         State();
         void operator=(const State * other);
+        static State* clone(const State * other);
         void push_transform(int son, int i, bool is_triangle = false);
         uint64_t get_transform(int i);
         bool visited;
@@ -110,7 +110,7 @@ namespace Hermes
       void finish();
 
       State* get_next_state(int* top_by_ref = NULL, int* id_by_ref = NULL);
-      int get_num_states(Hermes::vector<MeshSharedPtr > meshes);
+      State** get_states(Hermes::vector<MeshSharedPtr> meshes, int& num);
       inline Element*  get_base() const { return base; }
 
       void init_transforms(State* s, int i);

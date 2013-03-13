@@ -605,7 +605,8 @@ namespace Hermes
         yitem = yitem_orig;
 
         Traverse trav_masterMax(true);
-        unsigned int num_states = trav_masterMax.get_num_states(meshes);
+        int num_states;
+        trav_masterMax.get_states(meshes, num_states);
 
         trav_masterMax.begin(meshes.size(), &(meshes.front()));
 
@@ -665,7 +666,7 @@ namespace Hermes
         delete [] trav;
 
         Traverse trav_master(true);
-        num_states = trav_master.get_num_states(meshes);
+        trav_master.get_states(meshes, num_states);
 
         trav_master.begin(meshes.size(), &(meshes.front()));
 

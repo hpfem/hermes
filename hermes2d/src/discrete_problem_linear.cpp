@@ -64,8 +64,6 @@ namespace Hermes
     {
       // Check.
       this->check();
-      if(this->ndof == 0)
-        throw Exceptions::Exception("Zero DOFs detected in DiscreteProblemLinear::assemble().");
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
@@ -74,6 +72,10 @@ namespace Hermes
       this->current_rhs = rhs;
       this->current_force_diagonal_blocks = force_diagonal_blocks;
       this->current_block_weights = block_weights;
+
+      // Local number of threads - to avoid calling it over and over again, and against faults caused by the
+      // value being changed while assembling.
+      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 
       // Check that the block scaling table have proper dimension.
       if(block_weights != NULL)
@@ -91,11 +93,11 @@ namespace Hermes
       }
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      RefMap*** refmaps = new RefMap**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      AsmList<Scalar>*** als = new AsmList<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[num_threads_used];
+      PrecalcShapeset*** spss = new PrecalcShapeset**[num_threads_used];
+      RefMap*** refmaps = new RefMap**[num_threads_used];
+      AsmList<Scalar>*** als = new AsmList<Scalar>**[num_threads_used];
+      WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[num_threads_used];
 
       // Fill these structures.
       this->init_assembling(NULL, pss, spss, refmaps, NULL, als, weakforms);
@@ -112,13 +114,11 @@ namespace Hermes
             meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
       Traverse trav_master(true);
-      unsigned int num_states = trav_master.get_num_states(meshes);
+      int num_states;
+      Traverse::State** states = trav_master.get_states(meshes, num_states);
 
-      trav_master.begin(meshes.size(), &(meshes.front()));
-
-      Traverse* trav = new Traverse[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[num_threads_used];
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         for (unsigned j = 0; j < this->spaces.size(); j++)
           fns[i].push_back(pss[i][j]);
@@ -136,55 +136,35 @@ namespace Hermes
               weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
             }
         }
-        trav[i].begin(meshes.size(), &(meshes.front()), &(fns[i].front()));
-        trav[i].stack = trav_master.stack;
       }
 
-      int state_i;
-
-      PrecalcShapeset** current_pss;
-      PrecalcShapeset** current_spss;
-      RefMap** current_refmaps;
-      AsmList<Scalar>** current_als;
-      WeakForm<Scalar>* current_weakform;
-
-#define CHUNKSIZE 1
-      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-#pragma omp parallel shared(trav_master, mat, rhs ) private(state_i, current_pss, current_spss, current_refmaps, current_als, current_weakform) num_threads(num_threads_used)
+#pragma omp parallel shared(mat, rhs) num_threads(num_threads_used)
       {
-#pragma omp for schedule(static, CHUNKSIZE)
-        for(state_i = 0; state_i < num_states; state_i++)
+        int thread_number = omp_get_thread_num();
+        int start = (num_states / num_threads_used) * thread_number;
+        int end = (num_states / num_threads_used) * (thread_number + 1);
+        if(thread_number == num_threads_used - 1)
+          end = num_states;
+        for(int state_i = start; state_i < end; state_i++)
         {
-          if(this->caughtException != NULL)
-            continue;
-
           try
           {
             Traverse::State current_state;
-
-#pragma omp critical (get_next_state)
+            current_state = states[state_i];
+            for(int j = 0; j < fns[thread_number].size(); j++)
             {
-              try
+              if(current_state.e[j] != NULL)
               {
-                current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
-              }
-              catch(Hermes::Exceptions::Exception& e)
-              {
-                if(this->caughtException == NULL)
-                  this->caughtException = e.clone();
-              }
-              catch(std::exception& e)
-              {
-                if(this->caughtException == NULL)
-                  this->caughtException = new Hermes::Exceptions::Exception(e.what());
+                fns[thread_number][j]->set_active_element(current_state.e[j]);
+                fns[thread_number][j]->set_transform(current_state.sub_idx[j]);
               }
             }
 
-            current_pss = pss[omp_get_thread_num()];
-            current_spss = spss[omp_get_thread_num()];
-            current_refmaps = refmaps[omp_get_thread_num()];
-            current_als = als[omp_get_thread_num()];
-            current_weakform = weakforms[omp_get_thread_num()];
+            PrecalcShapeset** current_pss = pss[thread_number];
+            PrecalcShapeset** current_spss = spss[thread_number];
+            RefMap** current_refmaps = refmaps[thread_number];
+            AsmList<Scalar>** current_als = als[thread_number];
+            WeakForm<Scalar>* current_weakform = weakforms[thread_number];
 
             // One state is a collection of (virtual) elements sharing
             // the same physical location on (possibly) different meshes.
@@ -195,9 +175,9 @@ namespace Hermes
             this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, trav[omp_get_thread_num()].fn, current_weakform);
+              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
           }
-					catch(Hermes::Exceptions::Exception& e)
+          catch(Hermes::Exceptions::Exception& e)
           {
             if(this->caughtException == NULL)
               this->caughtException = e.clone();
@@ -212,16 +192,15 @@ namespace Hermes
 
       this->deinit_assembling(pss, spss, refmaps, NULL, als, weakforms);
 
-      trav_master.finish();
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-        trav[i].finish();
+      for(int i = 0; i < num_states; i++)
+        delete states[i];
+      ::free(states);
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         fns[i].clear();
       }
       delete [] fns;
-      delete [] trav;
 
       /// \todo Should this be really here? Or in assemble()?
       if(this->current_mat != NULL)
