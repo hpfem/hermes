@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
         std::cout << e.what();
       }
 
-      // Project the fine mesh solution onto the coarse mesh->
+      // Project the fine mesh solution onto the coarse mesh.
       MeshFunctionSharedPtr<double> sln_coarse(new Solution<double>());
       Hermes::Mixins::Loggable::Static::info("Projecting fine mesh solution on coarse mesh for error estimation.");
       OGProjection<double> ogProjection; ogProjection.project_global(space, sln_time_new, sln_coarse);
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
       if (err_est_rel_total < ERR_STOP) done = true;
       else
       {
-        Hermes::Mixins::Loggable::Static::info("Adapting the coarse mesh->");
+        Hermes::Mixins::Loggable::Static::info("Adapting the coarse mesh.");
         done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
 
         if (Space<double>::get_num_dofs(space) >= NDOF_STOP)

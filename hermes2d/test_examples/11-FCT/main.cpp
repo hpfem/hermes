@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
       ref_sln_double = lowOrder.explicit_Correction(limited_flux);
       Solution<double>::vector_to_solution(ref_sln_double, ref_space, ref_sln);	
 
-      // Project the fine mesh solution onto the coarse mesh->
+      // Project the fine mesh solution onto the coarse mesh.
       ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM); 
       // Calculate element errors and total error estimate.
       err_est_rel_total = adaptivity.calc_err_est(sln, ref_sln) * 100;

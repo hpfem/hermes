@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     }
     Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
 
-    // Project the fine mesh solution onto the coarse mesh->
+    // Project the fine mesh solution onto the coarse mesh.
     OGProjection<std::complex<double> > ogProjection;
     ogProjection.project_global(space, ref_sln, sln);
 

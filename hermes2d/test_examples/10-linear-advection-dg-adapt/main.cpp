@@ -117,7 +117,7 @@ int main(int argc, char* args[])
     {
       std::cout << e.what();
     }
-    // Project the fine mesh solution onto the coarse mesh->
+    // Project the fine mesh solution onto the coarse mesh.
     OGProjection<double> ogProjection;
     ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM);
 
