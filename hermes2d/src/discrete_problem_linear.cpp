@@ -187,7 +187,7 @@ namespace Hermes
           catch(std::exception& e)
           {
             if(this->caughtException == NULL)
-              this->caughtException = new std::exception(e.what());
+              this->caughtException = new std::exception(e);
           }
         }
       }
