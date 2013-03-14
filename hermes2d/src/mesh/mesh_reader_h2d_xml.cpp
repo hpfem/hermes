@@ -34,6 +34,9 @@ namespace Hermes
 
     bool MeshReaderH2DXML::load(const char *filename, MeshSharedPtr mesh)
     {
+      if(!mesh)
+        throw Exceptions::NullException(1);
+
       mesh->free();
 
       std::map<unsigned int, unsigned int> vertex_is;

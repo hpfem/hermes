@@ -39,6 +39,14 @@ namespace Hermes
       have_coarse_solutions(false),
       have_reference_solutions(false)
     {
+      for(unsigned int i = 0; i < spaces.size(); i++)
+      {
+        if(!spaces[i])
+          throw Exceptions::NullException(0, i);
+
+        spaces[i]->check();
+      }
+
       // sanity check
       if(proj_norms.size() > 0 && spaces.size() != proj_norms.size())
         throw Exceptions::LengthException(1, 2, spaces.size(), proj_norms.size());

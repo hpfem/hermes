@@ -53,6 +53,11 @@ namespace Hermes
       unsigned int first_dof_running = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
+        if(!spaces[i])
+          throw Exceptions::NullException(1, i);
+
+        spaces[i]->check();
+
         this->spaces.push_back(spaces.at(i));
         this->spaces_first_dofs.push_back(first_dof_running);
         first_dof_running += spaces.at(i)->get_num_dofs();
@@ -65,6 +70,11 @@ namespace Hermes
       : Hermes::Solvers::DiscreteProblemInterface<Scalar>(), wf(wf)
     {
       spaces.push_back(space);
+      if(!space)
+        throw Exceptions::NullException(1);
+
+      space->check();
+
       this->spaces_first_dofs.push_back(0);
 
       init();
@@ -327,7 +337,12 @@ namespace Hermes
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spacesToSet)
     {
       for(unsigned int i = 0; i < spacesToSet.size(); i++)
+      {
+        if(!spacesToSet[i])
+          throw Exceptions::NullException(0, i);
+
         spacesToSet[i]->check();
+      }
 
       if(this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces_size);

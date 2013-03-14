@@ -138,6 +138,12 @@ namespace Hermes
     template<typename Scalar>
     bool Space<Scalar>::isOkay() const
     {
+      if(!mesh)
+      {
+          throw Hermes::Exceptions::Exception("Mesh not present in Space.");
+          return false;
+      }
+
       if(ndata == NULL || edata == NULL || !nsize || !esize)
         return false;
       if(seq < 0)
