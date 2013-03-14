@@ -1588,7 +1588,10 @@ namespace Hermes
         if(current_u_ext != NULL)
           for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
             if(current_u_ext[u_ext_i] != NULL)
-              u_ext[u_ext_i] = init_fn(current_u_ext[u_ext_i], order);
+              if(current_u_ext[u_ext_i]->get_active_element() != NULL)
+                u_ext[u_ext_i] = init_fn(current_u_ext[u_ext_i], order);
+              else
+              u_ext[u_ext_i] = NULL;
             else
               u_ext[u_ext_i] = NULL;
         else
@@ -1604,7 +1607,10 @@ namespace Hermes
         ext = new Func<Scalar>*[current_extCount];
         for(int ext_i = 0; ext_i < current_extCount; ext_i++)
           if(current_wf->ext[ext_i] != NULL)
-            ext[ext_i] = init_fn(current_wf->ext[ext_i].get(), order);
+            if(current_wf->ext[ext_i]->get_active_element() != NULL)
+              ext[ext_i] = init_fn(current_wf->ext[ext_i].get(), order);
+            else
+            ext[ext_i] = NULL;
           else
             ext[ext_i] = NULL;
       }
@@ -1670,7 +1676,7 @@ namespace Hermes
       if(current_u_ext != NULL)
       {
         for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-          if(current_u_ext[u_ext_i] != NULL && current_state->e[u_ext_i] != NULL)
+          if(current_u_ext[u_ext_i] != NULL && current_u_ext[u_ext_i]->get_active_element() != NULL)
           {
             u_ext[u_ext_i]->free_fn();
             delete u_ext[u_ext_i];
@@ -1681,7 +1687,7 @@ namespace Hermes
       // Cleanup - ext
       for(int ext_i = 0; ext_i < current_extCount; ext_i++)
       {
-        if(current_wf->ext[ext_i] != NULL)
+        if(current_wf->ext[ext_i] != NULL && current_wf->ext[ext_i]->get_active_element() != NULL)
         {
           ext[ext_i]->free_fn();
           delete ext[ext_i];
