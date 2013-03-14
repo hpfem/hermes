@@ -336,47 +336,45 @@ namespace Hermes
       this->info("Adaptivity: data preparation duration: %f s.", this->last());
 
       // For statistics.
-      Hermes::vector<int> numberOfCandidates;
-
-
-      // The loop
-      RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
-      Solution<Scalar>** current_rslns;
-      int id_to_refine;
-#define CHUNKSIZE 1
       int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-#pragma omp parallel shared(ids, components, elem_inx_to_proc, meshes, current_orders) private(current_refinement_selectors, current_rslns, id_to_refine) num_threads(num_threads_used)
+      int num_elements_for_refinenement = ids.size();
+      int* numberOfCandidates = new int[num_elements_for_refinenement];
+
+      // Parallel section
+#pragma omp parallel shared(elem_inx_to_proc, meshes, current_orders) num_threads(num_threads_used)
       {
-#pragma omp for schedule(static, CHUNKSIZE)
-        for(id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
+        int thread_number = omp_get_thread_num();
+        int start = (num_elements_for_refinenement / num_threads_used) * thread_number;
+        int end = (num_elements_for_refinenement / num_threads_used) * (thread_number + 1);
+        if(thread_number == num_threads_used - 1)
+          end = num_elements_for_refinenement;
+        for(int id_to_refine = start; id_to_refine < end; id_to_refine++)
         {
           try
           {
-            current_refinement_selectors = global_refinement_selectors[omp_get_thread_num()];
-            current_rslns = rslns[omp_get_thread_num()];
+            RefinementSelectors::Selector<Scalar>** current_refinement_selectors = global_refinement_selectors[thread_number];
+            Solution<Scalar>** current_rslns = rslns[thread_number];
 
             // Get refinement suggestion
             ElementToRefine elem_ref(ids[id_to_refine], components[id_to_refine]);
 
             // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-            bool refined = current_refinement_selectors[components[id_to_refine]]->select_refinement(meshes[components[id_to_refine]]->get_element(ids[id_to_refine]), current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref);
+            if(!current_refinement_selectors[components[id_to_refine]]->select_refinement(meshes[components[id_to_refine]]->get_element(ids[id_to_refine]), current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref))
+              continue;
             
-#pragma omp critical (number_of_candidates)
-						{
-							if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]) != NULL)
-								numberOfCandidates.push_back(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size());
-						}
-
             //add to a list of elements that are going to be refined
-  #pragma omp critical (elem_inx_to_proc)
-            {
-              idx[ids[id_to_refine]][components[id_to_refine]] = (int)elem_inx_to_proc.size();
-              elem_inx_to_proc.push_back(elem_ref);
-            }
+            idx[ids[id_to_refine]][components[id_to_refine]] = id_to_refine;
+#pragma omp critical (elem_ref_being_pushed_back)
+            elem_inx_to_proc.push_back(elem_ref);
+
+						if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]) != NULL)
+								numberOfCandidates[id_to_refine] = dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size();
+            else
+								numberOfCandidates[id_to_refine] = 0;
           }
           catch(Hermes::Exceptions::Exception& exception)
           {
-            if(this->caughtException == NULL)
+            if(this->caughtException == NULL)   
               this->caughtException = exception.clone();
           }
           catch(std::exception& exception)
@@ -390,11 +388,11 @@ namespace Hermes
       if(this->caughtException == NULL)
       {
         int averageNumberOfCandidates = 0;
-        for(int i = 0; i < numberOfCandidates.size(); i++)
-          averageNumberOfCandidates += numberOfCandidates[i];
-        averageNumberOfCandidates = averageNumberOfCandidates / numberOfCandidates.size();
+        for(int i = 0; i < num_elements_for_refinenement; i++)
+            averageNumberOfCandidates += numberOfCandidates[i];
+        averageNumberOfCandidates = averageNumberOfCandidates / num_elements_for_refinenement;
 
-        this->info("Adaptivity: total number of refined Elements: %i.", ids.size());
+        this->info("Adaptivity: total number of refined Elements: %i.", num_elements_for_refinenement);
         this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
       }
 
@@ -404,7 +402,7 @@ namespace Hermes
       if(this->caughtException == NULL)
         fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
 
-      for(unsigned int i = 0; i < Hermes::Hermes2D::Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         if(i > 0)
           for (unsigned int j = 0; j < refinement_selectors.size(); j++)
@@ -413,7 +411,7 @@ namespace Hermes
       }
       delete [] global_refinement_selectors;
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         if(rslns[i] != NULL)
         {
@@ -474,7 +472,7 @@ namespace Hermes
       {
         for_all_active_elements(e, this->spaces[i]->get_mesh())
           this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
-        for(id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
+        for(int id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
           this->spaces[i]->edata[ids[id_to_refine]].changed_in_last_adaptation = false;
       }
 
