@@ -2353,7 +2353,7 @@ namespace Hermes
                 if(num_neighbors[current_state->isurf] == 0)
                   num_neighbors[current_state->isurf] = ns->n_neighbors;
                 if(ns->n_neighbors != num_neighbors[current_state->isurf])
-                  throw Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in DiscreteProblem<Scalar>::assemble_surface_integrals().");
+                  throw Hermes::Exceptions::Exception("Num_neighbors of different NeighborSearches not matching in assemble_one_DG_state().");
               }
             }
 
@@ -2891,7 +2891,7 @@ namespace Hermes
       // This has to be done, because we pass ns by reference and the number of neighbors is changing.
       unsigned int num_neighbors = ns->get_num_neighbors();
 
-      for(unsigned int i = 0; i < num_neighbors; i++)
+      for(int i = 0; i < num_neighbors; i++)
       {
         // Find the node corresponding to this neighbor in the tree.
         NeighborNode* node;
@@ -2902,8 +2902,8 @@ namespace Hermes
 
         // Update the NeighborSearch.
         int added = update_ns_subtree(ns, node, i);
-        i += added;
-        num_neighbors += added;
+        i -= added;
+        num_neighbors -= added;
       }
     }
 
