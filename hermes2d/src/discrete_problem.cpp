@@ -1132,6 +1132,8 @@ namespace Hermes
           end = num_states;
         for(int state_i = start; state_i < end; state_i++)
         {
+          if(this->caughtException != NULL)
+            break;
           try
           {
             Traverse::State current_state;
