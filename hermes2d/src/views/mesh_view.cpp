@@ -147,7 +147,7 @@ namespace Hermes
         int* edge_markers = lin->get_edge_markers();
         for (i = 0; i < lin->get_num_edges(); i++)
         {
-          int mrk = b_markers ? edges[i][2] : 0;
+          int mrk = b_markers ? edge_markers[i] : 0;
 
           if(!edge_markers[i] &&
             ((tvert[edges[i][0]][1] == tvert[edges[i][1]][1] &&
