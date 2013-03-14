@@ -374,7 +374,7 @@ namespace Hermes
           catch(std::exception& exception)
           {
             if(this->caughtException == NULL)
-              this->caughtException = new Hermes::Exceptions::Exception(exception.what());
+              this->caughtException = new std::exception(exception.what());
           }
         }
       }

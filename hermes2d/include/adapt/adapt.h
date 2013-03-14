@@ -182,7 +182,7 @@ namespace Hermes
       double get_element_error_squared(int component, int id) const;
     protected:
 
-      Exceptions::Exception* caughtException;
+      std::exception* caughtException;
 
       /// A reference to an element.
       struct ElementReference {

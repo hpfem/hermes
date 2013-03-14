@@ -297,7 +297,7 @@ namespace Hermes
       bool do_not_use_cache;
 
       /// Exception caught in a parallel region.
-      Hermes::Exceptions::Exception* caughtException;
+      std::exception* caughtException;
     
       
       ///* DG *///
