@@ -20,11 +20,57 @@
 #include "api2d.h"
 #include "mesh_reader_h2d.h"
 
+unsigned int MeshSharedPtr::instance_count = 0;
+
+#ifdef _WINDOWS
+MeshSharedPtr::MeshSharedPtr(Hermes::Hermes2D::Mesh* ptr) : std::shared_ptr<Hermes::Hermes2D::Mesh>(ptr)
+{
+  instance_count++;
+}
+
+MeshSharedPtr::MeshSharedPtr(const MeshSharedPtr& other) : std::shared_ptr<Hermes::Hermes2D::Mesh>(other)
+{
+  instance_count++;
+}
+
+void MeshSharedPtr::operator=(const MeshSharedPtr& other)
+{
+  std::shared_ptr<Hermes::Hermes2D::Mesh>::operator=(other);
+  instance_count++;
+}
+#else
+MeshSharedPtr::MeshSharedPtr(Hermes::Hermes2D::Mesh* ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>(ptr)
+{
+  instance_count++;
+}
+
+MeshSharedPtr::MeshSharedPtr(const MeshSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>(other)
+{
+  instance_count++;
+}
+
+void MeshSharedPtr::operator=(const MeshSharedPtr& other)
+{
+  std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>::operator=(other);
+  instance_count++;
+}
+#endif
+
+MeshSharedPtr::~MeshSharedPtr()
+{
+  instance_count--;
+}
+
+unsigned int MeshSharedPtr::get_instance_count()
+{
+  return instance_count;
+}
+
+
 namespace Hermes
 {
   namespace Hermes2D
   {
-
     static const int H2D_DG_INNER_EDGE_INT = -1234567;
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
@@ -2227,7 +2273,7 @@ namespace Hermes
     {
       return boundary_markers_conversion;
     }
-    
+
     Mesh::ElementMarkersConversion &Mesh::get_element_markers_conversion()
     {
       return element_markers_conversion;

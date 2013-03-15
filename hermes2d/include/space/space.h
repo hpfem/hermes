@@ -33,25 +33,29 @@ namespace Hermes
   }
 }
 
+template<typename Scalar>
 #ifdef _WINDOWS
-template<typename Scalar>
-class SpaceSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
-{
-public:
-  SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = NULL) : std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
-  {
-  }
-};
+class HERMES_API SpaceSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
 #else
-template<typename Scalar>
-class SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
+class HERMES_API SpaceSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >
+#endif
 {
 public:
-  SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = NULL) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
-  {
-  }
+  SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar>* ptr = NULL);
+
+  SpaceSharedPtr(const SpaceSharedPtr<Scalar>& other);
+
+  void operator=(const SpaceSharedPtr<Scalar>& other);
+
+  virtual ~SpaceSharedPtr();
+
+  static unsigned int get_instance_count();
+private:
+  static unsigned int instance_count;
+
 };
-#endif
+
+
 
 namespace Hermes
 {

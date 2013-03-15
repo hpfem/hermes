@@ -17,6 +17,61 @@
 #include "../views/linearizer_base.h"
 #include <limits>
 
+template<typename Scalar>
+unsigned int MeshFunctionSharedPtr<Scalar>::instance_count = 0;
+
+#ifdef _WINDOWS
+template<typename Scalar>
+MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+void MeshFunctionSharedPtr<Scalar>::operator=(const MeshFunctionSharedPtr& other)
+{
+  std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >::operator=(other);
+  instance_count++;
+}
+#else
+template<typename Scalar>
+MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+void MeshFunctionSharedPtr<Scalar>::operator=(const MeshFunctionSharedPtr& other)
+{
+  std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >::operator=(other);
+  instance_count++;
+}
+#endif
+
+template<typename Scalar>
+MeshFunctionSharedPtr<Scalar>::~MeshFunctionSharedPtr()
+{
+  instance_count--;
+}
+
+template<typename Scalar>
+unsigned int MeshFunctionSharedPtr<Scalar>::get_instance_count()
+{
+  return instance_count;
+}
+
 template class HERMES_API MeshFunctionSharedPtr<double>;
 template class HERMES_API MeshFunctionSharedPtr<std::complex<double> >;
 
@@ -34,7 +89,7 @@ namespace Hermes
 
     template<typename Scalar>
     MeshFunction<Scalar>::MeshFunction(MeshSharedPtr mesh) :
-    Function<Scalar>()
+      Function<Scalar>()
     {
       this->mesh = mesh;
       this->refmap = new RefMap;
@@ -58,7 +113,7 @@ namespace Hermes
     {
       throw Exceptions::Exception("This instance is in fact not a Solution instance in copy().");
     }
-    
+
     template<typename Scalar>
     void MeshFunction<Scalar>::copy(MeshFunctionSharedPtr<Scalar> sln)
     {
@@ -103,7 +158,7 @@ namespace Hermes
 
       Quad2D *old_quad = this->get_quad_2d();
       this->set_quad_2d(&Views::g_quad_lin);
-      
+
       double max = std::numeric_limits<double>::min();
 
       int component = 0;
@@ -156,7 +211,7 @@ namespace Hermes
 
       Quad2D *old_quad = this->get_quad_2d();
       this->set_quad_2d(&Views::g_quad_lin);
-      
+
       double min = std::numeric_limits<double>::max();
 
       int component = 0;
@@ -277,7 +332,7 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::force_transform(MeshFunctionSharedPtr<Scalar> mf)
     {
-			Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
+      Function<Scalar>::force_transform(mf->get_transform(), mf->get_ctm());
     }
 
     template<typename Scalar>

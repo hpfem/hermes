@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
 {
   {
   // Load the mesh.
+  std::cout << MeshSharedPtr::get_instance_count() << std::endl;
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
   try
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
     e.print_msg();
     return -1;
   }
+    std::cout << MeshSharedPtr::get_instance_count() << std::endl;
 
   // Refine all elements, do it INIT_REF_NUM-times.
   for(unsigned int i = 0; i < INIT_REF_NUM; i++)
@@ -82,12 +84,6 @@ int main(int argc, char* argv[])
   // One has to call this method after any changes to DOFs.
   space->assign_dofs();
 
-  // Output of numbers of DOFs, vertex DOFs, edge DOFs, and bubble DOFs respectively.
-  std::cout << space->get_num_dofs() << std::endl;
-  std::cout << space->get_vertex_functions_count() << std::endl;
-  std::cout << space->get_edge_functions_count() << std::endl;
-  std::cout << space->get_bubble_functions_count() << std::endl;
-
  if (HERMES_VISUALIZATION)
  {
    Hermes::Hermes2D::Views::BaseView<double> o;
@@ -100,10 +96,16 @@ int main(int argc, char* argv[])
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
 
+  std::cout << MeshSharedPtr::get_instance_count() << std::endl;
+
   // Solve the linear problem.
   try
   {
     linear_solver.solve();
+
+
+    std::cout << MeshSharedPtr::get_instance_count() << std::endl;
+
 
     // Get the solution vector.
     double* sln_vector = linear_solver.get_sln_vector();
@@ -133,6 +135,9 @@ int main(int argc, char* argv[])
       viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
       viewS.wait_for_close();
     }
+
+    std::cout << MeshSharedPtr::get_instance_count() << std::endl;
+
   }
   catch(std::exception& e)
   {
@@ -140,5 +145,6 @@ int main(int argc, char* argv[])
   }
 
   }
+  std::cout << MeshSharedPtr::get_instance_count() << std::endl;
   return 0;
 }

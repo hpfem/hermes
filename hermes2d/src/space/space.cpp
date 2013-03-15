@@ -25,6 +25,61 @@
 #include "api2d.h"
 #include <iostream>
 
+template<typename Scalar>
+unsigned int SpaceSharedPtr<Scalar>::instance_count = 0;
+
+#ifdef _WINDOWS
+template<typename Scalar>
+SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
+{
+  std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
+  instance_count++;
+}
+#else
+template<typename Scalar>
+SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
+{
+  instance_count++;
+}
+
+template<typename Scalar>
+void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
+{
+  std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
+  instance_count++;
+}
+#endif
+
+template<typename Scalar>
+SpaceSharedPtr<Scalar>::~SpaceSharedPtr()
+{
+  instance_count--;
+}
+
+template<typename Scalar>
+unsigned int SpaceSharedPtr<Scalar>::get_instance_count()
+{
+  return instance_count;
+}
+
 namespace Hermes
 {
   namespace Hermes2D

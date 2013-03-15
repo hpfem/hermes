@@ -29,25 +29,27 @@ namespace Hermes
   }
 }
 
+template<typename Scalar>
 #ifdef _WINDOWS
-template<typename Scalar>
-class MeshFunctionSharedPtr : public std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
-{
-public:
-  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL) : std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
-  {
-  }
-};
+class HERMES_API MeshFunctionSharedPtr : public std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
 #else
-template<typename Scalar>
-class MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
+class HERMES_API MeshFunctionSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >
+#endif
 {
 public:
-  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
-  {
-  }
+  MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar>* ptr = NULL);
+
+  MeshFunctionSharedPtr(const MeshFunctionSharedPtr<Scalar>& other);
+
+  void operator=(const MeshFunctionSharedPtr<Scalar>& other);
+
+  virtual ~MeshFunctionSharedPtr();
+
+  static unsigned int get_instance_count();
+private:
+  static unsigned int instance_count;
+
 };
-#endif
 
 
 namespace Hermes
