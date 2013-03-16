@@ -2305,10 +2305,11 @@ namespace Hermes
       if(internal_marker == H2D_DG_INNER_EDGE_INT)
         return StringValid(H2D_DG_INNER_EDGE, true);
 
-      if(conversion_table.find(internal_marker) == conversion_table.end())
+      std::map<int, std::string>::const_iterator marker = conversion_table.find(internal_marker);
+      if(marker == conversion_table.end())
         return StringValid("-999", false);
-
-      return StringValid(conversion_table.find(internal_marker)->second, true);
+      else
+        return StringValid(marker->second, true);
     }
 
     Mesh::MarkersConversion::IntValid Mesh::MarkersConversion::get_internal_marker(std::string user_marker) const
@@ -2316,10 +2317,11 @@ namespace Hermes
       if(user_marker == H2D_DG_INNER_EDGE)
         return IntValid(H2D_DG_INNER_EDGE_INT, true);
 
-      if(conversion_table_inverse.find(user_marker) == conversion_table_inverse.end())
+      std::map<std::string, int>::const_iterator marker = conversion_table_inverse.find(user_marker);
+      if(marker == conversion_table_inverse.end())
         return IntValid(-999, false);
-
-      return IntValid(conversion_table_inverse.find(user_marker)->second, true);
+      else
+        return IntValid(marker->second, true);
     }
 
     Mesh::CurvedException::CurvedException(int elementId) : elementId(elementId)
