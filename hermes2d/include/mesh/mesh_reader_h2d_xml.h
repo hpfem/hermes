@@ -77,7 +77,7 @@ namespace Hermes
       bool load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, MeshSharedPtr mesh, std::map<unsigned int, unsigned int>& vertex_is);
 
       /// Internal method loading contents of parsed_xml_domain's domain into mesh.
-      bool load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtr mesh, int* vertex_is, int* element_is, int* edge_is);
+      bool load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is);
 
       /// Loads one circular arc.
       /// \param[in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.
