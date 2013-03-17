@@ -213,8 +213,13 @@ namespace Hermes
 
       bool warned_nonOverride;
 
-      // internal.
+      // Internal
       virtual void cloneMembers(const WeakForm<Scalar>* otherWf);
+
+      // Internal - processes markers, translates from strings to ints.
+      template<typename FormType>
+      void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process);
+      void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
     private:
       void free_ext();
@@ -230,7 +235,7 @@ namespace Hermes
     {
     public:
       /// Constructor with coordinates.
-      Form();
+      Form(int i = 0);
       virtual ~Form();
 
       /// get-set methods
@@ -249,12 +254,21 @@ namespace Hermes
       /// scaling factor
       void setScalingFactor(double scalingFactor);
 
+      unsigned int i;
+
     protected:
       /// Set pointer to a WeakForm.
       inline void set_weakform(WeakForm<Scalar>* wf) { this->wf = wf; }
 
       /// Markers of the areas where this form will be assembled.
       Hermes::vector<std::string> areas;
+
+      /// Internal - this structure is being filled anew with every assembling.
+      Hermes::vector<int> areas_internal;
+      
+      /// Internal - this structure is being filled anew with every assembling.
+      /// True iff areas contain HERMES_ANY - meaning that this form represents an integral over the whole domain (whole boundary in case of surface forms).
+      bool assembleEverywhere;
 
       /// External solutions for this form will start
       /// with u_ext[u_ext_offset] where u_ext[] are external
@@ -295,7 +309,6 @@ namespace Hermes
 
       virtual ~MatrixForm();
 
-      unsigned int i;
       unsigned int j;
       unsigned int previous_iteration_space_index;
 
@@ -350,7 +363,6 @@ namespace Hermes
 
       virtual ~MatrixFormDG();
 
-      unsigned int i;
       unsigned int j;
       unsigned int previous_iteration_space_index;
 
@@ -381,7 +393,6 @@ namespace Hermes
 
       virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         Func<Ord> **ext) const;
-      unsigned int i;
 
     protected:
       friend class DiscreteProblem<Scalar>;
@@ -428,7 +439,6 @@ namespace Hermes
 
       virtual Hermes::Ord ord(int n, double *wt, DiscontinuousFunc<Hermes::Ord> **u_ext, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
         DiscontinuousFunc<Ord> **ext) const;
-      unsigned int i;
 
       virtual VectorFormDG* clone() const;
     protected:

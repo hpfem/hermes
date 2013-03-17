@@ -520,36 +520,15 @@ namespace Hermes
       if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
         return false;
 
-      // Assemble this form only if one of its areas is HERMES_ANY
-      // of if the element marker coincides with one of the form's areas.
-      bool assemble_this_form = false;
-      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
-      {
-        if(form->areas[ss] == HERMES_ANY)
-        {
-          assemble_this_form = true;
-          break;
-        }
-        else
-        {
-          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).valid;
-          if(marker_on_space_m)
-            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
+      if(form->assembleEverywhere)
+        return true;
 
-          bool marker_on_space_n = this->spaces[form->j]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).valid;
-          if(marker_on_space_n)
-            marker_on_space_n = (this->spaces[form->j]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
+      int this_marker = current_state->rep->marker;
+      for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
+        if(form->areas_internal[ss] == this_marker)
+          return true;
 
-          if(marker_on_space_m && marker_on_space_n)
-          {
-            assemble_this_form = true;
-            break;
-          }
-        }
-      }
-      if(!assemble_this_form)
-        return false;
-      return true;
+      return false;
     }
 
     template<typename Scalar>
@@ -558,39 +537,15 @@ namespace Hermes
       if(current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
-      if(form->areas[0] == H2D_DG_INNER_EDGE)
-        return false;
-      if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
-        return false;
+      if(form->assembleEverywhere)
+        return true;
 
-      bool assemble_this_form = false;
-      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
-      {
-        if(form->areas[ss] == HERMES_ANY)
-        {
-          assemble_this_form = true;
-          break;
-        }
-        else
-        {
-          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).valid;
-          if(marker_on_space_m)
-            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[current_state->isurf]->marker);
+      int this_marker = current_state->rep->en[current_state->isurf]->marker;
+      for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
+        if(form->areas_internal[ss] == this_marker)
+          return true;
 
-          bool marker_on_space_n = this->spaces[form->j]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).valid;
-          if(marker_on_space_n)
-            marker_on_space_n = (this->spaces[form->j]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[current_state->isurf]->marker);
-
-          if(marker_on_space_m && marker_on_space_n)
-          {
-            assemble_this_form = true;
-            break;
-          }
-        }
-      }
-      if(assemble_this_form == false)
-        return false;
-      return true;
+      return false;
     }
 
     template<typename Scalar>
@@ -610,32 +565,15 @@ namespace Hermes
       if(!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
         return false;
 
-      // Assemble this form only if one of its areas is HERMES_ANY
-      // of if the element marker coincides with one of the form's areas.
-      bool assemble_this_form = false;
-      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
-      {
-        if(form->areas[ss] == HERMES_ANY)
-        {
-          assemble_this_form = true;
-          break;
-        }
-        else
-        {
-          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).valid;
-          if(marker_on_space_m)
-            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->marker);
+      if(form->assembleEverywhere)
+        return true;
 
-          if(marker_on_space_m)
-          {
-            assemble_this_form = true;
-            break;
-          }
-        }
-      }
-      if(!assemble_this_form)
-        return false;
-      return true;
+      int this_marker = current_state->rep->marker;
+      for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
+        if(form->areas_internal[ss] == this_marker)
+          return true;
+
+      return false;
     }
 
     template<typename Scalar>
@@ -644,36 +582,12 @@ namespace Hermes
       if(current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
-      if(form->areas[0] == H2D_DG_INNER_EDGE)
-        return false;
+      int this_marker = current_state->rep->en[current_state->isurf]->marker;
+      for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
+        if(form->areas_internal[ss] == this_marker)
+          return true;
 
-      if(!form_to_be_assembled((VectorForm<Scalar>*)form, current_state))
-        return false;
-
-      bool assemble_this_form = false;
-      for (unsigned int ss = 0; ss < form->areas.size(); ss++)
-      {
-        if(form->areas[ss] == HERMES_ANY)
-        {
-          assemble_this_form = true;
-          break;
-        }
-        else
-        {
-          bool marker_on_space_m = this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).valid;
-          if(marker_on_space_m)
-            marker_on_space_m = (this->spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[ss]).marker == current_state->rep->en[current_state->isurf]->marker);
-
-          if(marker_on_space_m)
-          {
-            assemble_this_form = true;
-            break;
-          }
-        }
-      }
-      if(assemble_this_form == false)
-        return false;
-      return true;
+      return false;
     }
 
     template<typename Scalar>
@@ -963,6 +877,7 @@ namespace Hermes
         {
           weakforms[i] = this->wf->clone();
           weakforms[i]->cloneMembers(this->wf);
+          weakforms[i]->processFormMarkers(this->spaces);
         }
 
         assert(cache_element_stored == NULL);

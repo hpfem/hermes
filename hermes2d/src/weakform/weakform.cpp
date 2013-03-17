@@ -179,6 +179,47 @@ namespace Hermes
       this->ext = ext;
     }
 
+    
+    template<typename Scalar>
+    template<typename FormType>
+    void WeakForm<Scalar>::processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process)
+    {
+      for(int form_i = 0; form_i < forms_to_process.size(); form_i++)
+      {
+        Form<Scalar>* form = forms_to_process[form_i];
+        form->areas_internal.clear();
+        for(int marker_i = 0; marker_i < form->areas.size(); marker_i++)
+        {
+          if(form->areas[marker_i] == HERMES_ANY)
+          {
+            form->assembleEverywhere = true;
+            form->areas_internal.clear();
+            break;
+          }
+            
+          Mesh::MarkersConversion::IntValid marker;
+          if(surface)
+            marker = spaces[form->i]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(form->areas[marker_i]);
+          else
+            marker = spaces[form->i]->get_mesh()->get_element_markers_conversion().get_internal_marker(form->areas[marker_i]);
+
+          if(marker.valid)
+            form->areas_internal.push_back(marker.marker);
+          else
+            throw Exceptions::Exception("Marker not valid in assembling: %s.", form->areas[marker_i]);
+        }
+      }
+    }
+
+    template<typename Scalar>
+    void WeakForm<Scalar>::processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    {
+      processFormMarkers(spaces, false, this->mfvol);
+      processFormMarkers(spaces, false, this->vfvol);
+      processFormMarkers(spaces, true, this->mfsurf);
+      processFormMarkers(spaces, true, this->vfsurf);
+    }
+
     template<typename Scalar>
     Hermes::vector<MeshFunctionSharedPtr<Scalar> > WeakForm<Scalar>::get_ext() const
     {
@@ -186,7 +227,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Form<Scalar>::Form() : scaling_factor(1.0), u_ext_offset(0), wf(NULL)
+    Form<Scalar>::Form(int i) : scaling_factor(1.0), u_ext_offset(0), wf(NULL), assembleEverywhere(false), i(i)
     {
       areas.push_back(HERMES_ANY);
       stage_time = 0.0;
@@ -260,7 +301,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixForm<Scalar>::MatrixForm(unsigned int i, unsigned int j) :
-    Form<Scalar>(), sym(HERMES_NONSYM), i(i), j(j), previous_iteration_space_index(j)
+    Form<Scalar>(i), sym(HERMES_NONSYM),j(j), previous_iteration_space_index(j)
     {
     }
 
@@ -335,7 +376,7 @@ namespace Hermes
 
     template<typename Scalar>
     MatrixFormDG<Scalar>::MatrixFormDG(unsigned int i, unsigned int j) :
-    Form<Scalar>(), i(i), j(j), previous_iteration_space_index(j)
+    Form<Scalar>(i), j(j), previous_iteration_space_index(j)
     {
       this->set_area(H2D_DG_INNER_EDGE);
     }
@@ -370,7 +411,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorForm<Scalar>::VectorForm(unsigned int i) :
-    Form<Scalar>(), i(i)
+    Form<Scalar>(i)
     {
     }
 
@@ -433,7 +474,7 @@ namespace Hermes
 
     template<typename Scalar>
     VectorFormDG<Scalar>::VectorFormDG(unsigned int i) :
-    Form<Scalar>(), i(i)
+    Form<Scalar>(i)
     {
       this->set_area(H2D_DG_INNER_EDGE);
     }
