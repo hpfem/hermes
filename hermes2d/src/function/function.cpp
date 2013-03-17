@@ -219,7 +219,7 @@ namespace Hermes
       if(sub_idx > H2D_MAX_IDX)
         handle_overflow_idx();
       else {
-        std::map<uint64_t, LightArray<Node*>*>::iterator it = sub_tables->find(sub_idx);
+        typename std::map<uint64_t, LightArray<Node*>*>::iterator it = sub_tables->find(sub_idx);
         if(it == sub_tables->end())
         {
           this->nodes = new LightArray<Node*>;

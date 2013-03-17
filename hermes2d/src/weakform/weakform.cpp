@@ -206,7 +206,7 @@ namespace Hermes
           if(marker.valid)
             form->areas_internal.push_back(marker.marker);
           else
-            throw Exceptions::Exception("Marker not valid in assembling: %s.", form->areas[marker_i]);
+            throw Exceptions::Exception("Marker not valid in assembling: %s.", form->areas[marker_i].c_str());
         }
       }
     }
