@@ -582,6 +582,9 @@ namespace Hermes
       if(current_state->rep->en[current_state->isurf]->marker == 0)
         return false;
 
+      if(form->assembleEverywhere)
+        return true;
+
       int this_marker = current_state->rep->en[current_state->isurf]->marker;
       for (unsigned int ss = 0; ss < form->areas_internal.size(); ss++)
         if(form->areas_internal[ss] == this_marker)

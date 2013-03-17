@@ -1166,7 +1166,7 @@ namespace Hermes
           for_all_active_elements(e, this)
             for (unsigned int j = 0; j < e->get_nvert(); j++)
             {
-              if(e->en[j]->marker == this->boundary_markers_conversion.get_internal_marker(marker).marker)
+              if(e->en[j]->marker == rtb_marker)
               {
                 rtb_vert[e->vn[j]->id] = rtb_vert[e->vn[e->next_vert(j)]->id] = 1;
                 refined = true;
