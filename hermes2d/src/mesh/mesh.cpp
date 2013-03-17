@@ -396,18 +396,14 @@ namespace Hermes
       Element* e;
       for (int i = 0; i < nt; i++)
       {
-        this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, tri_markers[i]);
-
-        e = create_triangle(this->element_markers_conversion.get_internal_marker(tri_markers[i]).marker, &nodes[tris[i][0]], &nodes[tris[i][1]],
+        e = create_triangle(this->element_markers_conversion.insert_marker(tri_markers[i]), &nodes[tris[i][0]], &nodes[tris[i][1]],
           &nodes[tris[i][2]], NULL);
       }
 
       // create quads
       for (int i = 0; i < nq; i++)
       {
-        this->element_markers_conversion.insert_marker(this->element_markers_conversion.min_marker_unused, quad_markers[i]);
-
-        e = create_quad(this->element_markers_conversion.get_internal_marker(quad_markers[i]).marker, &nodes[quads[i][0]], &nodes[quads[i][1]],
+        e = create_quad(this->element_markers_conversion.insert_marker(quad_markers[i]), &nodes[quads[i][0]], &nodes[quads[i][1]],
           &nodes[quads[i][2]], &nodes[quads[i][3]], NULL);
       }
 
@@ -418,9 +414,7 @@ namespace Hermes
         if(en == NULL)
           throw Hermes::Exceptions::Exception("Boundary data error (edge does not exist)");
 
-        this->boundary_markers_conversion.insert_marker(this->boundary_markers_conversion.min_marker_unused, boundary_markers[i]);
-
-        en->marker = this->boundary_markers_conversion.get_internal_marker(boundary_markers[i]).marker;
+        en->marker = this->boundary_markers_conversion.insert_marker(boundary_markers[i]);
 
         nodes[mark[i][0]].bnd = 1;
         nodes[mark[i][1]].bnd = 1;
@@ -1199,19 +1193,44 @@ namespace Hermes
 
     void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, bool mark_as_initial)
     {
+      Hermes::vector<int> internal_markers;
+      bool any_marker = false;
+      for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
+      {
+        if(markers[marker_i] == HERMES_ANY)
+        {
+          any_marker = true;
+          break;
+        }
+        int marker = this->element_markers_conversion.get_internal_marker(markers[marker_i]).marker;
+        
+        internal_markers.push_back(marker);
+      }
+          
       bool refined = true;
       for (int i = 0; i < depth; i++)
       {
         refined = false;
         Element* e;
-        for_all_active_elements(e, this)
+        if(any_marker)
         {
-          for(unsigned int marker_i = 0; marker_i < markers.size(); marker_i++)
-            if(e->marker == this->element_markers_conversion.get_internal_marker(markers[marker_i]).marker || markers[marker_i] == HERMES_ANY)
-            {
-              this->refine_element(e, 0);
+          for_all_active_elements(e, this)
+          {
+            this->refine_element(e, 0);
               refined = true;
-            }
+          }
+        }
+        else
+        {
+          for_all_active_elements(e, this)
+          {
+            for(unsigned int marker_i = 0; marker_i < internal_markers.size(); marker_i++)
+              if(e->marker == internal_markers[marker_i])
+              {
+                this->refine_element(e, 0);
+                refined = true;
+              }
+          }
         }
       }
 
@@ -2284,20 +2303,15 @@ namespace Hermes
       return boundary_markers_conversion;
     }
 
-    void Mesh::MarkersConversion::insert_marker(int internal_marker, std::string user_marker)
+    int Mesh::MarkersConversion::insert_marker(std::string user_marker)
     {
       // First a check that the string value is not already present.
-      if(user_marker != "")
-        if(conversion_table_inverse.find(user_marker) != conversion_table_inverse.end())
-          return;
-      if(conversion_table.size() == 0 || conversion_table.find(internal_marker) == conversion_table.end())
-      {
-        conversion_table.insert(std::pair<int, std::string>(internal_marker, user_marker));
-        conversion_table_inverse.insert(std::pair<std::string, int>(user_marker, internal_marker));
-        if(user_marker != "")
-          this->min_marker_unused++;
-      }
-      return;
+      std::map<std::string, int>::iterator it = conversion_table_inverse.find(user_marker);
+      if(it != conversion_table_inverse.end())
+        return it->second;
+      conversion_table.insert(std::pair<int, std::string>(this->min_marker_unused, user_marker));
+      conversion_table_inverse.insert(std::pair<std::string, int>(user_marker, this->min_marker_unused));
+      return this->min_marker_unused++;
     }
 
     Mesh::MarkersConversion::StringValid Mesh::MarkersConversion::get_user_marker(int internal_marker) const

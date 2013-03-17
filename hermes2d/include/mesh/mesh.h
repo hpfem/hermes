@@ -494,7 +494,8 @@ namespace Hermes
         /// Function inserting a marker into conversion_table_for_element_markers.
         /// This function controls if this user_marker x internal_marker is already
         /// present, and if not, it inserts the std::pair.
-        void insert_marker(int internal_marker, std::string user_marker);
+        /// \return The internal marker where user_marker was inserted.
+        int insert_marker(std::string user_marker);
 
         /// Struct for return type of get_user_marker().
         struct StringValid

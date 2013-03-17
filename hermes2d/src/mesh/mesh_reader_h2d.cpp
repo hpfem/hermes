@@ -253,7 +253,7 @@ namespace Hermes
 
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
+        mesh->element_markers_conversion.insert_marker(el_marker);
         marker = mesh->element_markers_conversion.get_internal_marker(el_marker).marker;
 
         if(nv == 4) {
@@ -293,7 +293,7 @@ namespace Hermes
 
           // This functions check if the user-supplied marker on this element has been
           // already used, and if not, inserts it in the appropriate structure.
-          mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
+          mesh->boundary_markers_conversion.insert_marker(bnd_marker);
           marker = mesh->boundary_markers_conversion.get_internal_marker(bnd_marker).marker;
 
           en->marker = marker;

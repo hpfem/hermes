@@ -169,7 +169,7 @@ namespace Hermes
 
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, el_marker);
+        mesh->element_markers_conversion.insert_marker(el_marker);
 
         int ic = 0;
         for (int j = 0; j < n_elems_in_blk; j++)
@@ -241,7 +241,7 @@ namespace Hermes
 
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, bnd_marker);
+        mesh->boundary_markers_conversion.insert_marker(bnd_marker);
 
         for (int j = 0; j < num_elem_in_set; j++)
         {

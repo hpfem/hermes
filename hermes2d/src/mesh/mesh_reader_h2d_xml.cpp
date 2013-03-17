@@ -202,7 +202,7 @@ namespace Hermes
             element->m().erase(end + 1, element->m().length());
             element->m().erase(0, begin);
 
-            meshes[subdomains_i]->element_markers_conversion.insert_marker(meshes[subdomains_i]->element_markers_conversion.min_marker_unused, element->m());
+            meshes[subdomains_i]->element_markers_conversion.insert_marker(element->m());
           }
           for(unsigned int edge_i = 0; edge_i < parsed_xml_domain->edges().ed().size(); edge_i++)
           {
@@ -214,7 +214,7 @@ namespace Hermes
             edge->m().erase(end + 1, edge->m().length());
             edge->m().erase(0, begin);
 
-            meshes[subdomains_i]->boundary_markers_conversion.insert_marker(meshes[subdomains_i]->boundary_markers_conversion.min_marker_unused, edge->m());
+            meshes[subdomains_i]->boundary_markers_conversion.insert_marker(edge->m());
           }
         }
 
@@ -416,9 +416,10 @@ namespace Hermes
             for (int boundary_edge_number_i = 0; boundary_edge_number_i < boundary_edge_number_count; boundary_edge_number_i++)
             {
               XMLSubdomains::domain::edges_type::ed_type* edge = NULL;
-              for(unsigned int to_find_i = 0; to_find_i < parsed_xml_domain->edges().ed().size(); to_find_i++)
+              int domain_edge_count = parsed_xml_domain->edges().ed().size();
+              for(unsigned int to_find_i = 0; to_find_i < domain_edge_count; to_find_i++)
               {
-                if(boundary_edge_number_count != parsed_xml_domain->edges().ed().size())
+                if(boundary_edge_number_count != domain_edge_count)
                 {
                   if(parsed_xml_domain->edges().ed().at(to_find_i).i() == parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i))
                   {
@@ -892,7 +893,7 @@ namespace Hermes
           element->m().erase(end + 1, element->m().length());
           element->m().erase(0, begin);
 
-          mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, element->m());
+          mesh->element_markers_conversion.insert_marker(element->m());
 
           XMLMesh::q_t* el_q = dynamic_cast<XMLMesh::q_t*>(element);
           XMLMesh::t_t* el_t = dynamic_cast<XMLMesh::t_t*>(element);
@@ -934,14 +935,13 @@ namespace Hermes
 
           // This functions check if the user-supplied marker on this element has been
           // already used, and if not, inserts it in the appropriate structure.
-          mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, edge_marker);
-          int marker = mesh->boundary_markers_conversion.get_internal_marker(edge_marker).marker;
+          mesh->boundary_markers_conversion.insert_marker(edge_marker);
 
-          en->marker = marker;
+          en->marker = mesh->boundary_markers_conversion.get_internal_marker(edge_marker).marker;
 
           // This is extremely important, as in DG, it is assumed that negative boundary markers are reserved
           // for the inner edges.
-          if(marker > 0)
+          if(en->marker > 0)
           {
             mesh->nodes[v1].bnd = 1;
             mesh->nodes[v2].bnd = 1;
@@ -1152,7 +1152,7 @@ namespace Hermes
           element->m().erase(end + 1, element->m().length());
           element->m().erase(0, begin);
 
-          mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, element->m());
+          mesh->element_markers_conversion.insert_marker(element->m());
 
           XMLSubdomains::q_t* el_q = dynamic_cast<XMLSubdomains::q_t*>(element);
           XMLSubdomains::t_t* el_t = dynamic_cast<XMLSubdomains::t_t*>(element);
@@ -1200,7 +1200,7 @@ namespace Hermes
 
           // This functions check if the user-supplied marker on this element has been
           // already used, and if not, inserts it in the appropriate structure.
-          mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, edge_marker);
+          mesh->boundary_markers_conversion.insert_marker(edge_marker);
           int marker = mesh->boundary_markers_conversion.get_internal_marker(edge_marker).marker;
 
           en->marker = marker;

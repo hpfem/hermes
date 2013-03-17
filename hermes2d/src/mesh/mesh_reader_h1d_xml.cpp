@@ -133,12 +133,12 @@ namespace Hermes
         Element* e;
         for (int element_i = 0; element_i < vertices_count - 1; element_i++)
         {
-          mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, "H1DMarker");
+          mesh->element_markers_conversion.insert_marker("H1DMarker");
 
           int element_marker;
           if(parsed_xml_mesh->v().at(element_i % vertices_count).m().present())
           {
-            mesh->element_markers_conversion.insert_marker(mesh->element_markers_conversion.min_marker_unused, parsed_xml_mesh->v().at(element_i % vertices_count).m().get());
+            mesh->element_markers_conversion.insert_marker(parsed_xml_mesh->v().at(element_i % vertices_count).m().get());
             element_marker = mesh->element_markers_conversion.get_internal_marker(parsed_xml_mesh->v().at(element_i % vertices_count).m().get()).marker;
           }
           else
@@ -151,7 +151,7 @@ namespace Hermes
             &mesh->nodes[element_i + vertices_count],
             NULL);
 
-          mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Unused");
+          mesh->boundary_markers_conversion.insert_marker("Unused");
 
           node = mesh->peek_edge_node(element_i, element_i + 1);
           node->bnd = 1;
@@ -176,7 +176,7 @@ namespace Hermes
         en = mesh->peek_edge_node(v1_1, v2_1);
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Left");
+        mesh->boundary_markers_conversion.insert_marker("Left");
         int marker = mesh->boundary_markers_conversion.get_internal_marker("Left").marker;
         en->marker = marker;
         en->bnd = 1;
@@ -184,7 +184,7 @@ namespace Hermes
         en = mesh->peek_edge_node(v1_2, v2_2);
         // This functions check if the user-supplied marker on this element has been
         // already used, and if not, inserts it in the appropriate structure.
-        mesh->boundary_markers_conversion.insert_marker(mesh->boundary_markers_conversion.min_marker_unused, "Right");
+        mesh->boundary_markers_conversion.insert_marker("Right");
         marker = mesh->boundary_markers_conversion.get_internal_marker("Right").marker;
         en->marker = marker;
         en->bnd = 1;
