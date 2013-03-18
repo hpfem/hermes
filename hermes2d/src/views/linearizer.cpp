@@ -663,7 +663,7 @@ namespace Hermes
           int end = (num_states / num_threads_used) * (thread_number + 1);
           if(thread_number == num_threads_used - 1)
             end = num_states;
-          for(int state_i = 0; state_i < num_states; state_i++)
+          for(int state_i = start; state_i < end; state_i++)
           {
             try
             {
