@@ -567,18 +567,6 @@ namespace Hermes
           }
         }
 
-        Transformable*** trfs = new Transformable**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-        {
-          trfs[i] = new Transformable*[4];
-          trfs[i][0] = fns[i][0];
-          trfs[i][1] = fns[i][1];
-          if(xdisp != NULL)
-            trfs[i][2] = fns[i][2];
-          if(ydisp != NULL)
-            trfs[i][xdisp == NULL ? 2 : 3] = fns[i][xdisp == NULL ? 2 : 3];
-        }
-
         // get the component and desired value from item.
         if(xitem >= 0x40)
         {
@@ -604,34 +592,29 @@ namespace Hermes
         xitem = xitem_orig;
         yitem = yitem_orig;
 
-        Traverse trav_masterMax(true);
+        Traverse trav_master(true);
         int num_states;
-        trav_masterMax.get_states(meshes, num_states);
-
-        trav_masterMax.begin(meshes.size(), &(meshes.front()));
-
-        Traverse* trav = new Traverse[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-        {
-          trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
-          trav[i].stack = trav_masterMax.stack;
-        }
-
-        int state_i;
-
-#define CHUNKSIZE 1
+        Traverse::State** states = trav_master.get_states(meshes, num_states);
         int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-#pragma omp parallel shared(trav_masterMax) private(state_i) num_threads(num_threads_used)
+
+#pragma omp parallel num_threads(num_threads_used)
         {
-#pragma omp for schedule(static, CHUNKSIZE)
-          for(state_i = 0; state_i < num_states; state_i++)
+          int thread_number = omp_get_thread_num();
+          int start = (num_states / num_threads_used) * thread_number;
+          int end = (num_states / num_threads_used) * (thread_number + 1);
+          if(thread_number == num_threads_used - 1)
+            end = num_states;
+          for(int state_i = start; state_i < end; state_i++)
           {
             try
             {
               Traverse::State current_state;
-#pragma omp critical(get_next_state)
-              current_state = trav[omp_get_thread_num()].get_next_state(&trav_masterMax.top, &trav_masterMax.id);
+              current_state = states[state_i];
+              fns[thread_number][0]->set_active_element(current_state.e[0]);
+              fns[thread_number][0]->set_transform(current_state.sub_idx[0]);
+
+              fns[thread_number][1]->set_active_element(current_state.e[1]);
+              fns[thread_number][1]->set_transform(current_state.sub_idx[1]);
 
               fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
               fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
@@ -660,38 +643,24 @@ namespace Hermes
           }
         }
 
-        trav_masterMax.finish();
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-          trav[i].finish();
-        delete [] trav;
-
-        Traverse trav_master(true);
-        trav_master.get_states(meshes, num_states);
-
-        trav_master.begin(meshes.size(), &(meshes.front()));
-
-        trav = new Traverse[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+#pragma omp parallel shared(trav_master) num_threads(num_threads_used)
         {
-          trav[i].begin(meshes.size(), &(meshes.front()), trfs[i]);
-          trav[i].stack = trav_master.stack;
-        }
-
-#pragma omp parallel shared(trav_master) private(state_i) num_threads(num_threads_used)
-        {
-#pragma omp for schedule(static, CHUNKSIZE)
-          for(state_i = 0; state_i < num_states; state_i++)
+          int thread_number = omp_get_thread_num();
+          int start = (num_states / num_threads_used) * thread_number;
+          int end = (num_states / num_threads_used) * (thread_number + 1);
+          if(thread_number == num_threads_used - 1)
+            end = num_states;
+          for(int state_i = start; state_i < end; state_i++)
           {
-            if(this->caughtException != NULL)
-              continue;
-
             try
             {
               Traverse::State current_state;
+              current_state = states[state_i];
+              fns[thread_number][0]->set_active_element(current_state.e[0]);
+              fns[thread_number][0]->set_transform(current_state.sub_idx[0]);
 
-#pragma omp critical (get_next_state)
-              current_state = trav[omp_get_thread_num()].get_next_state(&trav_master.top, &trav_master.id);
+              fns[thread_number][1]->set_active_element(current_state.e[1]);
+              fns[thread_number][1]->set_transform(current_state.sub_idx[1]);
 
               fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
               fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
@@ -699,7 +668,6 @@ namespace Hermes
               double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
               if(xval == NULL || yval == NULL)
               {
-                delete [] trav;
                 throw Hermes::Exceptions::Exception("Item not defined in the solution in Linearizer::process_solution.");
               }
 
@@ -756,18 +724,16 @@ namespace Hermes
           }
         }
 
-        trav_master.finish();
+        for(int i = 0; i < num_states; i++)
+          delete states[i];
+
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-          trav[i].finish();
           for(unsigned int j = 0; j < (2 + (xdisp != NULL? 1 : 0) + (ydisp != NULL ? 1 : 0)); j++)
             delete fns[i][j];
           delete [] fns[i];
-          delete [] trfs[i];
         }
         delete [] fns;
-        delete [] trfs;
-        delete [] trav;
 
         // regularize the linear mesh
         for (int i = 0; i < this->triangle_count; i++)
