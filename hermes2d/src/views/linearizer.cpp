@@ -584,7 +584,7 @@ namespace Hermes
         MeshFunction<double>*** fns = new MeshFunction<double>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
-					fns[i] = new MeshFunction<double>*[3];
+          fns[i] = new MeshFunction<double>*[3];
           fns[i][0] = sln->clone(); 
           fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
@@ -598,17 +598,6 @@ namespace Hermes
             fns[i][xdisp == NULL ? 1 : 2] = ydisp->clone();
             fns[i][xdisp == NULL ? 1 : 2]->set_quad_2d(&g_quad_lin);
           }
-        }
-
-        Transformable*** trfs = new Transformable**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
-        {
-          trfs[i] = new Transformable*[3];
-          trfs[i][0] = fns[i][0];
-          if(xdisp != NULL)
-            trfs[i][1] = fns[i][1];
-          if(ydisp != NULL)
-            trfs[i][xdisp == NULL ? 1 : 2] = fns[i][xdisp == NULL ? 1 : 2];
         }
 
         Traverse trav_master(true);
@@ -655,9 +644,9 @@ namespace Hermes
             }
           }
         }
-        
+
 #pragma omp parallel shared(trav_master) num_threads(num_threads_used)
-				{
+        {
           int thread_number = omp_get_thread_num();
           int start = (num_states / num_threads_used) * thread_number;
           int end = (num_states / num_threads_used) * (thread_number + 1);
@@ -669,7 +658,7 @@ namespace Hermes
             {
               Traverse::State current_state;
               current_state = states[state_i];
-              
+
               if(current_state.e[0] == NULL)
                 continue;
 
@@ -745,7 +734,7 @@ namespace Hermes
         }
 
         for(int i = 0; i < num_states; i++)
-        delete states[i];
+          delete states[i];
         ::free(states);
 
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
@@ -753,10 +742,8 @@ namespace Hermes
           for(unsigned int j = 0; j < (1 + (xdisp != NULL? 1 : 0) + (ydisp != NULL ? 1 : 0)); j++)
             delete fns[i][j];
           delete [] fns[i];
-          delete [] trfs[i];
         }
         delete [] fns;
-        delete [] trfs;
 
         // for contours, without regularization.
         this->tris_contours = (int3*) realloc(this->tris_contours, sizeof(int3) * this->triangle_count);
@@ -958,7 +945,7 @@ namespace Hermes
       {
         return this->verts;
       }
-      
+
       int Linearizer::get_num_vertices()
       {
         return this->vertex_count;
