@@ -262,18 +262,11 @@ namespace Hermes
       Table* current_block_weights;
 
       /// Caching.
-      class CacheRecordPerElement
+      class CacheRecord
       {
-      public:
-        void clear();
+        CacheRecordPerSubIdx();
         int* asmlistIdx;
         int asmlistCnt;
-      };
-
-      class CacheRecordPerSubIdx
-      {
-      public:
-        CacheRecordPerSubIdx();
         int nvert;
         int order;
         void clear();
@@ -288,12 +281,17 @@ namespace Hermes
         int* n_quadrature_pointsSurface;
         int* orderSurface;
         int* asmlistSurfaceCnt;
+
+        friend class DiscreteProblem<Scalar>;
       };
 
-      std::map<uint64_t, CacheRecordPerSubIdx*>*** cache_records_sub_idx;
-      CacheRecordPerElement*** cache_records_element;
-      bool** cache_element_stored;
-      int cache_size;
+      /// The cache.
+      CacheRecordPerSubIdx** cache;
+
+      /// Cache calculation.
+      void calculate_cache();
+
+      /// To turn on / off the cache.
       bool do_not_use_cache;
 
       /// Exception caught in a parallel region.

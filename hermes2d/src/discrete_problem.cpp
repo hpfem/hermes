@@ -1220,9 +1220,41 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::calculate_cache_records(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state,
-      AsmList<Scalar>** current_alsSurface, WeakForm<Scalar>* current_wf)
+    void DiscreteProblem<Scalar>::calculate_cache(Traverse::State** states, int num_states, int num_threads, PrecalcShapeset*** pss, RefMap*** refmaps, AsmList<Scalar>*** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>** wfs)
     {
+#pragma omp parallel num_threads(num_threads_used)
+      int thread_number = omp_get_thread_num();
+      int start = (num_states / num_threads_used) * thread_number;
+      int end = (num_states / num_threads_used) * (thread_number + 1);
+      if(thread_number == num_threads_used - 1)
+        end = num_states;
+      for(int state_i = start; state_i < end; state_i++)
+      {
+        Traverse::State current_state;
+        current_state = states[state_i];
+
+        AsmList<Scalar>** current_als = als[thread_number];
+        
+        if(!this->state_needs_recalculation(current_als, &current_state))
+          continue;
+        else
+
+
+        PrecalcShapeset** current_pss = pss[thread_number];
+        RefMap** current_refmaps = refmaps[thread_number];
+        Solution<Scalar>** current_u_ext = u_ext[thread_number];
+        WeakForm<Scalar>* current_weakform = weakforms[thread_number];
+
+        for(int j = 0; j < this->spaces_size; j++)
+        {
+          if(current_state.e[j] != NULL)
+          {
+            current_pss[j]->set_active_element(current_state.e[j]);
+            current_pss[j]->set_transform(current_state.sub_idx[j]);
+          }
+        }
+
+
       for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
         bool new_cache = false;
