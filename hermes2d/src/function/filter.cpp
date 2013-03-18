@@ -62,12 +62,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Filter<Scalar>::setDeleteSolutions()
-    {
-      this->deleteSolutions = true;
-    }
-
-    template<typename Scalar>
     void Filter<Scalar>::init()
     {
       // construct the union mesh, if necessary
@@ -107,8 +101,6 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
       set_quad_2d(&g_quad_2d_std);
-
-      this->deleteSolutions = false;
     }
 
     template<typename Scalar>
@@ -249,7 +241,6 @@ namespace Hermes
       }
       this->init();
       init_components();
-      this->deleteSolutions = false;
     }
 
     template<typename Scalar>
@@ -371,7 +362,6 @@ namespace Hermes
         slns.push_back(this->sln[i]->clone());
       }
       DXFilter<Scalar>* filter = new DXFilter<Scalar>(slns);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -379,30 +369,16 @@ namespace Hermes
     {
       this->num = 0;
       this->unimesh = false;
-
-      // Set NOT to delete solution, as it is probably taken care of by the user.
-      this->deleteSolutions = false;
     }
 
      ComplexFilter::ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
     {
       this->num = 0;
       this->unimesh = false;
-      this->sln_complex = solution.get();
-      this->num_components = solution->get_num_components();
-      this->mesh = solution->get_mesh();
-      set_quad_2d(&g_quad_2d_std);
-
-      // Set NOT to delete solution, as it is probably taken care of by the user.
-      this->deleteSolutions = false;
-    }
-
-    void ComplexFilter::set_mesh_fn(MeshFunction<std::complex<double> >* solution, int item)
-    {
       this->sln_complex = solution;
       this->num_components = solution->get_num_components();
       this->mesh = solution->get_mesh();
-      this-> set_quad_2d(&g_quad_2d_std);
+      set_quad_2d(&g_quad_2d_std);
     }
 
     ComplexFilter::~ComplexFilter()
@@ -648,7 +624,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       MagFilter<Scalar>* filter = new MagFilter<Scalar>(slns, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -693,7 +668,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       TopValFilter* filter = new TopValFilter(slns, limits, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -738,7 +712,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       BottomValFilter* filter = new BottomValFilter(slns, limits, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -787,7 +760,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       ValFilter* filter = new ValFilter(slns, low_limits, high_limits, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -816,7 +788,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       DiffFilter* filter = new DiffFilter<Scalar>(slns, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -850,7 +821,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       SumFilter<Scalar>* filter = new SumFilter<Scalar>(slns, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -892,7 +862,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       SquareFilter<Scalar>* filter = new SquareFilter<Scalar>(slns, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -935,7 +904,6 @@ namespace Hermes
         items.push_back(this->item[i]);
       }
       AbsFilter* filter = new AbsFilter(slns, items);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -947,9 +915,7 @@ namespace Hermes
 
     MeshFunction<double>* RealFilter::clone() const
     {
-      RealFilter* filter = new RealFilter();
-      filter->set_mesh_fn(this->sln_complex->clone(), this->item);
-      filter->setDeleteSolutions();
+      RealFilter* filter = new RealFilter(this->sln_complex->clone(), this->item);
       return filter;
     }
 
@@ -985,7 +951,6 @@ namespace Hermes
     MeshFunction<double>* ImagFilter::clone() const
     {
       ImagFilter* filter = new ImagFilter(this->sln_complex->clone(), this->item);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -998,7 +963,6 @@ namespace Hermes
     MeshFunction<double>* ComplexAbsFilter::clone() const
     {
       ComplexAbsFilter* filter = new ComplexAbsFilter(this->sln_complex->clone(), this->item);
-      filter->setDeleteSolutions();
       return filter;
     }
 
@@ -1106,7 +1070,6 @@ namespace Hermes
       for(int i = 0; i < num; i++)
         slns[i] = sln[i]->clone();
       VonMisesFilter* filter = new VonMisesFilter(slns, num, lambda, mu, cyl, item1, item2);
-      filter->setDeleteSolutions();
       return filter;
     }
 

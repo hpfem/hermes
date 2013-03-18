@@ -25,66 +25,60 @@
 #include "api2d.h"
 #include <iostream>
 
-template<typename Scalar>
-unsigned int SpaceSharedPtr<Scalar>::instance_count = 0;
-
 #ifdef _WINDOWS
 template<typename Scalar>
 SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
 {
-  instance_count++;
 }
 
 template<typename Scalar>
 SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
 {
-  instance_count++;
 }
 
 template<typename Scalar>
 void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
 {
   std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
-  instance_count++;
 }
 #else
 template<typename Scalar>
 SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
 {
-  instance_count++;
 }
 
 template<typename Scalar>
 SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
 {
-  instance_count++;
 }
 
 template<typename Scalar>
 void SpaceSharedPtr<Scalar>::operator=(const SpaceSharedPtr& other)
 {
   std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >::operator=(other);
-  instance_count++;
 }
 #endif
 
 template<typename Scalar>
 SpaceSharedPtr<Scalar>::~SpaceSharedPtr()
 {
-  instance_count--;
-}
-
-template<typename Scalar>
-unsigned int SpaceSharedPtr<Scalar>::get_instance_count()
-{
-  return instance_count;
 }
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    
+    template<typename Scalar>
+    unsigned int Space<Scalar>::instance_count = 0;
+
     unsigned g_space_seq = 0;
+
+    template<typename Scalar>
+    unsigned int Space<Scalar>::get_instance_count()
+    {
+      return instance_count;
+    }
 
 		template<>
 		void Space<double>::init()
@@ -112,6 +106,7 @@ namespace Hermes
 					}
 
 					own_shapeset = (shapeset == NULL);
+      instance_count++;
 		}
 
 		template<>
@@ -140,6 +135,7 @@ namespace Hermes
 					}
 
 					own_shapeset = (shapeset == NULL);
+      instance_count++;
 		}
 
 		template<>
@@ -232,7 +228,7 @@ namespace Hermes
         delete [] this->proj_mat;
       if(this->chol_p != NULL)
         delete [] this->chol_p;
-
+      this->instance_count--;
     }
 
     template<>
@@ -244,7 +240,7 @@ namespace Hermes
         delete [] this->proj_mat;
       if(this->chol_p != NULL)
         delete [] this->chol_p;
-
+      this->instance_count--;
     }
 
 		template<typename Scalar>
@@ -298,7 +294,7 @@ namespace Hermes
     void Space<Scalar>::copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh)
     {
       this->free();
-      
+      this->instance_count++;
       this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
       this->essential_bcs = space->essential_bcs;

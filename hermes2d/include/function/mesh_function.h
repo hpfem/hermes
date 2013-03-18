@@ -45,10 +45,6 @@ public:
 
   virtual ~MeshFunctionSharedPtr();
 
-  static unsigned int get_instance_count();
-private:
-  static unsigned int instance_count;
-
 };
 
 
@@ -57,8 +53,8 @@ namespace Hermes
   namespace Hermes2D
   {
     /** \defgroup meshFunctions Mesh functions
-     * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
-     * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
+    * \brief Collection of classes that represent various functions of the mesh coordinates, i.e. defined on the Mesh.
+    * These comprise solutions, exact &amp; initial solutions, filters (functions of the solutions) etc.
     */
 
     /// @ingroup meshFunctions
@@ -80,7 +76,7 @@ namespace Hermes
 
       /// Constructor.
       MeshFunction(MeshSharedPtr mesh);
-      
+
       /// Destructor.
       virtual ~MeshFunction();
 
@@ -90,11 +86,11 @@ namespace Hermes
       /// Copy from sln to this instance.
       virtual void copy(const MeshFunction<Scalar>* sln);
       virtual void copy(MeshFunctionSharedPtr<Scalar> sln);
-      
+
       /// Return the reference mapping.
       RefMap* get_refmap(bool update = true);
 
-			/// Return the value at the coordinates x,y.
+      /// Return the value at the coordinates x,y.
       virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL) = 0;
 
       /// Cloning function - for parallel OpenMP blocks.
@@ -119,6 +115,8 @@ namespace Hermes
 
       /// Internal.
       virtual void init();
+
+      virtual void free();
 
       /// Internal.
       virtual void reinit();
@@ -151,11 +149,13 @@ namespace Hermes
       /// Returns the order of the edge number edge of the current active element.
       virtual int get_edge_fn_order(int edge);
 
+      static unsigned int get_instance_count();
     protected:
+      static unsigned int instance_count;
       ElementMode2D mode;
       MeshSharedPtr mesh;
       RefMap* refmap;
-    
+
       void force_transform(MeshFunctionSharedPtr<Scalar> mf);
 
       void update_refmap();

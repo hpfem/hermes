@@ -86,9 +86,6 @@ namespace Hermes
       UniData** unidata;
 
       void copy_base(Filter* flt);
-      
-      virtual void setDeleteSolutions();
-      bool deleteSolutions;
     };
 
     /// @ingroup meshFunctions
@@ -137,9 +134,6 @@ namespace Hermes
       ComplexFilter();
       ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item = H2D_FN_VAL_0);
 
-      /// For cloning.
-      void set_mesh_fn(MeshFunction<std::complex<double> >* solution, int item = H2D_FN_VAL_0);
-
       virtual ~ComplexFilter();
     protected:
       virtual Func<double>* get_pt_value(double x, double y, Element* e = NULL);
@@ -154,7 +148,7 @@ namespace Hermes
 
       virtual void free();
 
-      MeshFunction<std::complex<double> >* sln_complex;
+      MeshFunctionSharedPtr<std::complex<double> > sln_complex;
 
       int item;
 

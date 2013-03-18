@@ -44,11 +44,6 @@ public:
   void operator=(const MeshSharedPtr& other);
 
   virtual ~MeshSharedPtr();
-
-  static unsigned int get_instance_count();
-private:
-  static unsigned int instance_count;
-
 };
 
 namespace Hermes
@@ -156,7 +151,7 @@ namespace Hermes
       bool used;     ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
-      
+
       /// Calculates the area of the element. For curved elements, this is only
       /// an approximation: the curvature is not accounted for.
       double get_area();
@@ -176,7 +171,7 @@ namespace Hermes
       };
 
       int marker;        ///< element marker
-      
+
       // returns the edge orientation. This works for the unconstrained edges.
       int get_edge_orientation(int ie) const;
       ElementMode2D  get_mode() const;
@@ -304,7 +299,7 @@ namespace Hermes
 
       /// Creates a mesh from given vertex, triangle, quad, and marker arrays
       void create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
-                  int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers);
+        int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers);
 
       /// Frees all data associated with the mesh.
       void free();
@@ -422,7 +417,10 @@ namespace Hermes
         int refinement;
       };
 
+      static unsigned int get_instance_count();
     private:
+      static unsigned int instance_count;
+
       /// For internal use.
       void initial_single_check();
       static void initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes);
@@ -619,93 +617,93 @@ namespace Hermes
 
       /*  node and son numbering on a triangle:
 
-        -Triangle to triangles refinement
+      -Triangle to triangles refinement
 
-                        vn[2]                                       vn[2]
+      vn[2]                                       vn[2]
 
-                          *                                           *
+      *                                           *
 
-                          / \                                         / \
-                        /   \                                       /   \
-                        /     \                                     /     \
-                      /       \                                   / son[2]\
-                      /         \                                 /_________\
-            en[2]   /           \   en[1]                 vn[0] *           * vn[1]
-                    *             *                       vn[1]  *-----------*  vn[0]
-                  /               \                     vn[2] *  \         /  * vn[2]
-                  /                 \                         / \  \ son[3]/  / \
-                /                   \                       /   \  \     /  /   \
-                /                     \                     /     \  \   /  /     \
-              /                       \                   / son[0]\  \ /  /son[1] \
-              /                         \                 /         \  *  /         \
-            *-------------*-------------*               *-----------*   *-----------*
-                                                    vn[0]      vn[1] vn[2] vn[0]      vn[1]
-        vn[0]           en[0]           vn[1]
+      / \                                         / \
+      /   \                                       /   \
+      /     \                                     /     \
+      /       \                                   / son[2]\
+      /         \                                 /_________\
+      en[2]   /           \   en[1]                 vn[0] *           * vn[1]
+      *             *                       vn[1]  *-----------*  vn[0]
+      /               \                     vn[2] *  \         /  * vn[2]
+      /                 \                         / \  \ son[3]/  / \
+      /                   \                       /   \  \     /  /   \
+      /                     \                     /     \  \   /  /     \
+      /                       \                   / son[0]\  \ /  /son[1] \
+      /                         \                 /         \  *  /         \
+      *-------------*-------------*               *-----------*   *-----------*
+      vn[0]      vn[1] vn[2] vn[0]      vn[1]
+      vn[0]           en[0]           vn[1]
 
-        -Triangle to quads refinement
+      -Triangle to quads refinement
 
-                        vn[2]                                     vn[2]
+      vn[2]                                     vn[2]
 
-                          *                                        *
-                          / \                                      / \
-                        /   \                                    /   \
-                        /     \                                  /     \
-                      /       \                          vn[3] * son[2]* vn[1]
-                      /         \                       vn[3] *  \     /  * vn[2]
-            en[2]   *           *   en[1]                   / \  \   /  / \
-                    /             \                         /   \ vn[0] /   \
-                  /               \                       /     \  *  /     \
-                  /                 \                     /       \   /       \
-                /         *         \                   /   vn[2] * * vn[3]   \
-                /                     \                 /          | |          \
-              /                       \               /  son[0]   | |  son[1]   \
-              /                         \             /            | |            \
-            *-------------*-------------*           *-------------* *-------------*
-                                                  vn[0]      vn[1]   vn[0]        vn[1]
-        vn[0]           en[0]           vn[1]
+      *                                        *
+      / \                                      / \
+      /   \                                    /   \
+      /     \                                  /     \
+      /       \                          vn[3] * son[2]* vn[1]
+      /         \                       vn[3] *  \     /  * vn[2]
+      en[2]   *           *   en[1]                   / \  \   /  / \
+      /             \                         /   \ vn[0] /   \
+      /               \                       /     \  *  /     \
+      /                 \                     /       \   /       \
+      /         *         \                   /   vn[2] * * vn[3]   \
+      /                     \                 /          | |          \
+      /                       \               /  son[0]   | |  son[1]   \
+      /                         \             /            | |            \
+      *-------------*-------------*           *-------------* *-------------*
+      vn[0]      vn[1]   vn[0]        vn[1]
+      vn[0]           en[0]           vn[1]
 
-        node and son numbering on a quad:          refinement '0':
+      node and son numbering on a quad:          refinement '0':
 
-        vn[3]           en[2]           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
+      vn[3]           en[2]           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
 
-            *-------------*-------------*               *------------* *------------*
-            |                           |               |            | |            |
-            |                           |               |            | |            |
-            |                           |               |   son[3]   | |   son[2]   |
-            |                           |               |            | |            |
-            |                           |               |       vn[1]| |vn[0]       |
-            |                           |         vn[0] *------------* *------------* vn[1]
+      *-------------*-------------*               *------------* *------------*
+      |                           |               |            | |            |
+      |                           |               |            | |            |
+      |                           |               |   son[3]   | |   son[2]   |
+      |                           |               |            | |            |
+      |                           |               |       vn[1]| |vn[0]       |
+      |                           |         vn[0] *------------* *------------* vn[1]
       en[3]  *                           *  en[1]  vn[3] *------------* *------------* vn[2]
-            |                           |               |       vn[2]| |vn[3]       |
-            |                           |               |            | |            |
-            |                           |               |   son[0]   | |   son[1]   |
-            |                           |               |            | |            |
-            |                           |               |            | |            |
-            |                           |               *------------* *------------*
-            *-------------*-------------*
-                                                    vn[0]        vn[1] vn[0]        vn[1]
-        vn[0]           en[0]           vn[1]
+      |                           |               |       vn[2]| |vn[3]       |
+      |                           |               |            | |            |
+      |                           |               |   son[0]   | |   son[1]   |
+      |                           |               |            | |            |
+      |                           |               |            | |            |
+      |                           |               *------------* *------------*
+      *-------------*-------------*
+      vn[0]        vn[1] vn[0]        vn[1]
+      vn[0]           en[0]           vn[1]
 
       refinement '1':                             refinement '2':
 
-        vn[3]                           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
+      vn[3]                           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
 
-            *---------------------------*               *------------* *------------*
-            |                           |               |            | |            |
-            |                           |               |            | |            |
-            |          son[1]           |               |            | |            |
-            |                           |               |            | |            |
-            |                           |               |            | |            |
+      *---------------------------*               *------------* *------------*
+      |                           |               |            | |            |
+      |                           |               |            | |            |
+      |          son[1]           |               |            | |            |
+      |                           |               |            | |            |
+      |                           |               |            | |            |
       vn[0] *---------------------------* vn[1]         |            | |            |
       vn[3] *---------------------------* vn[2]         |   son[2]   | |   son[3]   |
-            |                           |               |            | |            |
-            |                           |               |            | |            |
-            |          son[0]           |               |            | |            |
-            |                           |               |            | |            |
-            |                           |               |            | |            |
-            *---------------------------*               *------------* *------------*
+      |                           |               |            | |            |
+      |                           |               |            | |            |
+      |          son[0]           |               |            | |            |
+      |                           |               |            | |            |
+      |                           |               |            | |            |
+      *---------------------------*               *------------* *------------*
 
-        vn[0]                           vn[1]       vn[0]        vn[1] vn[0]        vn[1]
+      vn[0]                           vn[1]       vn[0]        vn[1] vn[0]        vn[1]
       */
 
       Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm, int id = -1);
@@ -740,41 +738,41 @@ namespace Hermes
     static Node* get_vertex_node(Node* v1, Node* v2);
 
     /// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
-    #define for_all_elements(e, mesh) \
-            for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-              if(((e) = (mesh)->get_element_fast(_id))->used)
+#define for_all_elements(e, mesh) \
+  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+  if(((e) = (mesh)->get_element_fast(_id))->used)
 
-    #define for_all_base_elements(e, mesh) \
-            for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-              if(((e) = (mesh)->get_element_fast(_id))->used)
+#define for_all_base_elements(e, mesh) \
+  for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
+  if(((e) = (mesh)->get_element_fast(_id))->used)
 
-    #define for_all_base_elements_incl_inactive(e, mesh) \
-            for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-              if(((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
+#define for_all_base_elements_incl_inactive(e, mesh) \
+  for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
+  if(((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
 
-    #define for_all_active_elements(e, mesh) \
-            for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-              if(((e) = (mesh)->get_element_fast(_id))->used) \
-                if((e)->active)
+#define for_all_active_elements(e, mesh) \
+  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+  if(((e) = (mesh)->get_element_fast(_id))->used) \
+  if((e)->active)
 
-    #define for_all_inactive_elements(e, mesh) \
-            for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-              if(((e) = (mesh)->get_element_fast(_id))->used) \
-                if(!(e)->active)
+#define for_all_inactive_elements(e, mesh) \
+  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
+  if(((e) = (mesh)->get_element_fast(_id))->used) \
+  if(!(e)->active)
 
-    #define for_all_nodes(n, mesh) \
-            for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-              if(((n) = (mesh)->get_node(_id))->used)
+#define for_all_nodes(n, mesh) \
+  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
+  if(((n) = (mesh)->get_node(_id))->used)
 
-    #define for_all_vertex_nodes(n, mesh) \
-            for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-              if(((n) = (mesh)->get_node(_id))->used) \
-                if(!(n)->type)
+#define for_all_vertex_nodes(n, mesh) \
+  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
+  if(((n) = (mesh)->get_node(_id))->used) \
+  if(!(n)->type)
 
-    #define for_all_edge_nodes(n, mesh) \
-            for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-              if(((n) = (mesh)->get_node(_id))->used) \
-                if((n)->type)
+#define for_all_edge_nodes(n, mesh) \
+  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
+  if(((n) = (mesh)->get_node(_id))->used) \
+  if((n)->type)
 
     const int TOP_LEVEL_REF = 123456;
   }

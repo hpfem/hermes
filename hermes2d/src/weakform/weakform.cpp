@@ -43,6 +43,7 @@ namespace Hermes
     template<typename Scalar>
     void WeakForm<Scalar>::free_ext()
     {
+      this->ext.clear();
     }
 
     template<typename Scalar>

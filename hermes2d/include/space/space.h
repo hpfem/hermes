@@ -49,10 +49,6 @@ public:
 
   virtual ~SpaceSharedPtr();
 
-  static unsigned int get_instance_count();
-private:
-  static unsigned int instance_count;
-
 };
 
 
@@ -95,7 +91,7 @@ namespace Hermes
     template<typename Scalar> class HdivSpace;
 
     /** @defgroup spaces FEM Spaces
-      * \brief Collection of classes that represent and specify FE spaces.
+    * \brief Collection of classes that represent and specify FE spaces.
     */
 
     /// @ingroup spaces
@@ -255,7 +251,7 @@ namespace Hermes
 
         /// Methods that user calls to get the reference space pointer (has to be properly casted if necessary).
         virtual SpaceSharedPtr<Scalar> create_ref_space(bool assign_dofs = true);
-      
+
       private:
         /// Construction initialization.
         SpaceSharedPtr<Scalar> init_construction_l2();
@@ -328,7 +324,11 @@ namespace Hermes
       /// Returns the total (global) number of bubble functions.
       int get_bubble_functions_count();
 
+      static unsigned int get_instance_count();
+
     protected:
+      static unsigned int instance_count;
+
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
 
