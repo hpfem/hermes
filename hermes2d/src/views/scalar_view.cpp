@@ -754,6 +754,8 @@ namespace Hermes
           }
           catch(std::exception &e)
           { //out-of-memory or any other failure
+
+            std::cout << e.what();
             if(gl_coord_buffer) { glDeleteBuffersARB(1, &gl_coord_buffer); gl_coord_buffer = 0; }
             if(gl_index_buffer) { glDeleteBuffersARB(1, &gl_index_buffer); gl_index_buffer = 0; }
             if(gl_edge_inx_buffer) { glDeleteBuffersARB(1, &gl_edge_inx_buffer); gl_edge_inx_buffer = 0; }

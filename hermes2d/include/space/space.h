@@ -230,7 +230,7 @@ namespace Hermes
       static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
 
       /// Obtains an assembly list for the given element.
-      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
+      virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
       /// Copy from Space instance 'space'
       virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
@@ -308,7 +308,7 @@ namespace Hermes
       bool is_up_to_date() const;
 
       /// Obtains an edge assembly list (contains shape functions that are nonzero on the specified edge).
-      void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
+      void get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const;
 
       /// Sets the same polynomial order for all elements in the mesh. Does not
       /// call assign_dofs(). For internal use.
@@ -459,6 +459,7 @@ namespace Hermes
       template<typename T> friend class Views::VectorBaseView;
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblemLinear<Scalar>;
       template<typename T> friend class CalculationContinuity;
     };
   }

@@ -232,6 +232,7 @@ namespace Hermes
       template<typename Scalar> friend class L2Space;
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class DiscreteProblemCache;
       template<typename Scalar> friend class Solution;
       template<typename Scalar> friend class NeighborSearch;
       template<typename Scalar> friend class Filter;

@@ -21,7 +21,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>()
+    PrecalcShapeset::PrecalcShapeset(Shapeset* shapeset) : Function<double>(), tables(6, 64)
     {
       if(shapeset == NULL)
         throw Exceptions::NullException(0);
@@ -33,7 +33,7 @@ namespace Hermes
       set_quad_2d(&g_quad_2d_std);
     }
 
-    PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss) : Function<double>()
+    PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss) : Function<double>(), tables(6, 64)
     {
       while (pss->is_slave())
         pss = pss->master_pss;

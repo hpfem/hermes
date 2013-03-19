@@ -199,6 +199,7 @@ namespace Hermes
       {
         throw Hermes::Exceptions::MeshLoadFailureException(e.what());
       }
+      return true;
     }
 
     bool MeshReaderH1DXML::save(const char *filename, MeshSharedPtr mesh)

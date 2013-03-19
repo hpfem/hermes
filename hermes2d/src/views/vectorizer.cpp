@@ -608,20 +608,19 @@ namespace Hermes
           {
             try
             {
-              Traverse::State current_state;
-              current_state = states[state_i];
-              fns[thread_number][0]->set_active_element(current_state.e[0]);
-              fns[thread_number][0]->set_transform(current_state.sub_idx[0]);
+              Traverse::State* current_state = states[state_i];
+              fns[thread_number][0]->set_active_element(current_state->e[0]);
+              fns[thread_number][0]->set_transform(current_state->sub_idx[0]);
 
-              fns[thread_number][1]->set_active_element(current_state.e[1]);
-              fns[thread_number][1]->set_transform(current_state.sub_idx[1]);
+              fns[thread_number][1]->set_active_element(current_state->e[1]);
+              fns[thread_number][1]->set_transform(current_state->sub_idx[1]);
 
               fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
               fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
               double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
               double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
+              for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
               {
                 double fx = xval[i];
                 double fy = yval[i];
@@ -654,13 +653,12 @@ namespace Hermes
           {
             try
             {
-              Traverse::State current_state;
-              current_state = states[state_i];
-              fns[thread_number][0]->set_active_element(current_state.e[0]);
-              fns[thread_number][0]->set_transform(current_state.sub_idx[0]);
+              Traverse::State* current_state = states[state_i];
+              fns[thread_number][0]->set_active_element(current_state->e[0]);
+              fns[thread_number][0]->set_transform(current_state->sub_idx[0]);
 
-              fns[thread_number][1]->set_active_element(current_state.e[1]);
-              fns[thread_number][1]->set_transform(current_state.sub_idx[1]);
+              fns[thread_number][1]->set_active_element(current_state->e[1]);
+              fns[thread_number][1]->set_transform(current_state->sub_idx[1]);
 
               fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
               fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
@@ -684,7 +682,7 @@ namespace Hermes
                 dy = fns[omp_get_thread_num()][xdisp == NULL ? 2 : 3]->get_fn_values();
 
               int iv[H2D_MAX_NUMBER_VERTICES];
-              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
+              for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
               {
                 double fx = xval[i];
                 double fy = yval[i];
@@ -703,13 +701,13 @@ namespace Hermes
               }
 
               // recur to sub-elements
-              if(current_state.e[0]->is_triangle())
-                process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+              if(current_state->e[0]->is_triangle())
+                process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
               else
-                process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+                process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
-                process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
+              for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
+                process_edge(iv[i], iv[current_state->e[0]->next_vert(i)], current_state->e[0]->en[i]->marker);
             }
             catch(Hermes::Exceptions::Exception& e)
             {

@@ -222,7 +222,7 @@ namespace Hermes
         typename std::map<uint64_t, LightArray<Node*>*>::iterator it = sub_tables->find(sub_idx);
         if(it == sub_tables->end())
         {
-          this->nodes = new LightArray<Node*>;
+          this->nodes = new LightArray<Node*>(2, 2);
           sub_tables->insert(std::pair<uint64_t, LightArray<Node*>*>(sub_idx, this->nodes));
         }
         else

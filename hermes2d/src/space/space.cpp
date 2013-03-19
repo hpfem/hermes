@@ -27,12 +27,12 @@
 
 #ifdef _WINDOWS
 template<typename Scalar>
-SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
+SpaceSharedPtr<Scalar>::SpaceSharedPtr(Hermes::Hermes2D::Space<Scalar> * ptr) : std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(ptr)
 {
 }
 
 template<typename Scalar>
-SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
+SpaceSharedPtr<Scalar>::SpaceSharedPtr(const SpaceSharedPtr& other) : std::shared_ptr<Hermes::Hermes2D::Space<Scalar> >(other)
 {
 }
 
@@ -1019,7 +1019,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
+    void Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       this->check();
       // some checks
@@ -1039,7 +1039,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al, unsigned int first_dof) const
+    void Space<Scalar>::get_boundary_assembly_list(Element* e, int surf_num, AsmList<Scalar>* al) const
     {
       this->check();
       al->cnt = 0;

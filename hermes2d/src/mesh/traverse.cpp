@@ -129,6 +129,7 @@ namespace Hermes
       isurf = -1;
     }
 
+    /*
     void Traverse::State::operator=(const State * other)
     {
       // Delete part.
@@ -150,11 +151,11 @@ namespace Hermes
       this->isurf = other->isurf;
       this->isBnd = other->isBnd;
     }
-
+    */
     Traverse::State* Traverse::State::clone(const Traverse::State * other)
     {
       State* state = new State();
-      
+
       state->num = other->num;
 
       state->e = new Element*[state->num];
@@ -164,6 +165,8 @@ namespace Hermes
       memcpy(state->bnd, other->bnd, 4 * sizeof(bool));
 
       state->rep = other->rep;
+      state->rep_subidx = other->rep_subidx;
+      state->rep_i = other->rep_i;
       state->visited = other->visited;
       state->isurf = other->isurf;
       state->isBnd = other->isBnd;
@@ -282,7 +285,6 @@ namespace Hermes
         // If the top state was visited already, we are returning through it:
         // undo all its transformations, pop it and continue with a non-visited one
         State* s;
-
         while (top > 0 && (s = stack + top-1)->visited)
           (top)--;
 
@@ -318,7 +320,11 @@ namespace Hermes
                 continue;
               }
               else
+              {
                 s->rep = s->e[i];
+                s->rep_subidx = 0;
+                s->rep_i = 0;
+              }
               s->er[i] = H2D_UNITY;
               nused++;
             }
@@ -395,6 +401,8 @@ namespace Hermes
                 ns->e[i] = s->e[i];
                 ns->sub_idx[i] = s->sub_idx[i];
                 ns->push_transform(son, i, true);
+                ns->rep_subidx = ns->sub_idx[i];
+                ns->rep_i = i;
               }
               // ..we move to the son.
               else
@@ -404,7 +412,11 @@ namespace Hermes
                 if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
+                {
                   ns->rep = ns->e[i];
+                  ns->rep_subidx = ns->sub_idx[i];
+                  ns->rep_i = i;
+                }
               }
             }
 
@@ -468,7 +480,11 @@ namespace Hermes
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
+                  {
                     ns->rep = ns->e[i];
+                    ns->rep_subidx = ns->sub_idx[i];
+                    ns->rep_i = i;
+                  }
                 }
               }
             }
@@ -507,7 +523,11 @@ namespace Hermes
                       ns->sub_idx[i] = 0;
                   }
                   if(ns->e[i] != NULL)
+                  {
                     ns->rep = ns->e[i];
+                    ns->rep_subidx = ns->sub_idx[i];
+                    ns->rep_i = i;
+                  }
                 }
               }
             }
@@ -537,7 +557,11 @@ namespace Hermes
                 if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
                 if(ns->e[i] != NULL)
+                {
                   ns->rep = ns->e[i];
+                  ns->rep_subidx = ns->sub_idx[i];
+                  ns->rep_i = i;
+                }
               }
             }
           }
@@ -883,7 +907,7 @@ namespace Hermes
                 this->info("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
                 throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
               }
-            counter++;
+              counter++;
           }
         }
         delete [] areas;

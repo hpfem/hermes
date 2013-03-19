@@ -19,12 +19,12 @@
 
 #ifdef _WINDOWS
 template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
+MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(Hermes::Hermes2D::MeshFunction<Scalar> * ptr) : std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(ptr)
 {
 }
 
 template<typename Scalar>
-MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
+MeshFunctionSharedPtr<Scalar>::MeshFunctionSharedPtr(const MeshFunctionSharedPtr& other) : std::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >(other)
 {
 }
 
@@ -131,6 +131,7 @@ namespace Hermes
       }
       catch(std::exception& e)
       {
+        std::cout << e.what();
         okay = false;
       }
       return okay;

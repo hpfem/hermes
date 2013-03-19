@@ -54,6 +54,75 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
     };
 
+    template<typename Scalar>
+    class DiscreteProblemCache
+    {
+    public:
+      DiscreteProblemCache();
+
+      ~DiscreteProblemCache();
+
+      class CacheRecord;
+
+      CacheRecord* get(int rep_id, int rep_sub_idx, int rep_i) const;
+
+      CacheRecord* put(int rep_id, int rep_sub_idx, int rep_i);
+
+    private:
+
+      static const int DEFAULT_SIZE = 1e5;
+      static const int GUESS_NUMBER_OF_SUBELEMENTS = 32;
+      static const int DEFAULT_HASH_TABLE_SIZE = DEFAULT_SIZE * GUESS_NUMBER_OF_SUBELEMENTS;
+
+      int size;
+      int hash_table_size;
+
+      class CacheRecord
+      {
+      public:
+        void init(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order);
+        void free();
+
+        int spaceCnt;
+        int** asmlistIdx;
+        int* asmlistCnt;
+        int nvert;
+        int order;
+        Func<double>*** fns;
+        Func<double>**** fnsSurface;
+        Geom<double>* geometry;
+        Geom<double>** geometrySurface;
+        double* jacobian_x_weights;
+        double** jacobian_x_weightsSurface;
+        int n_quadrature_points;
+        int* n_quadrature_pointsSurface;
+        int* orderSurface;
+        int** asmlistSurfaceCnt;
+
+        friend class DiscreteProblem<Scalar>;
+      };
+
+      CacheRecord **recordTable;
+      int recordCount;
+
+      class StateHash
+      {
+      public:
+        StateHash(int rep_id, int rep_sub_idx, int rep_i, CacheRecord* pointer);
+
+        int rep_id;
+        int rep_sub_idx;
+        int rep_i;
+        CacheRecord* pointer;
+      };
+
+      StateHash **hashTable;
+
+      int hashFunction(int rep_id, int rep_sub_idx, int rep_i) const;
+
+      friend class DiscreteProblem<Scalar>;
+    };
+
     /// @ingroup inner
     /// Discrete problem class.
     ///
@@ -68,7 +137,7 @@ namespace Hermes
 
       /// Constructor for one equation.
       DiscreteProblem(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-      
+
       /// State querying helpers.
       virtual bool isOkay() const;
       virtual inline std::string getClassName() const { return "DiscreteProblem"; }
@@ -79,7 +148,7 @@ namespace Hermes
       /// Sets new spaces for the instance.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       virtual void set_space(SpaceSharedPtr<Scalar> space);
-      
+
       /// Non-parameterized constructor.
       DiscreteProblem();
 
@@ -98,12 +167,12 @@ namespace Hermes
       /// Get all spaces as a Hermes::vector.
       virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
-       /// Get the number of unknowns.
+      /// Get the number of unknowns.
       int get_num_dofs() const;
 
       /// Get info about presence of a matrix.
       bool is_matrix_free() const;
-      
+
       /// set time information for time-dependent problems.
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
@@ -144,9 +213,9 @@ namespace Hermes
       static int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
 
     protected:
-      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
+      void init_assembling(Scalar* coeff_vec, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms);
 
-      void deinit_assembling(PrecalcShapeset*** pss , PrecalcShapeset*** spss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, WeakForm<Scalar>** weakforms);
+      void deinit_assembling(RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms);
 
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
@@ -177,13 +246,8 @@ namespace Hermes
       /// \return if one needs to recalculate, the method calculate_cache_records is called.
       bool state_needs_recalculation(AsmList<Scalar>** current_als, Traverse::State* current_state);
 
-      /// Calculate cache records for this set of parameters.
-      void calculate_cache_records(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, 
-        Traverse::State* current_state, AsmList<Scalar>** current_alsSurface, WeakForm<Scalar>* current_wf);
-      
       /// Assemble one state.
-      void assemble_one_state(PrecalcShapeset** current_pss, PrecalcShapeset** current_spss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, 
-        AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf);
+      void assemble_one_state(typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf);
 
       /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
@@ -193,14 +257,14 @@ namespace Hermes
 
       /// Matrix volumetric forms - assemble the form.
       virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
-      AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+        AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// Vector volumetric forms - calculate the integration order.
       int calc_order_vector_form(VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
-      AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+        AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
@@ -221,8 +285,6 @@ namespace Hermes
       /// Space instances for all equations in the system.
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       int spaces_size;
-
-      Hermes::vector<unsigned int> spaces_first_dofs;
 
       /// Seq numbers of Space instances in spaces.
       int* sp_seq;
@@ -261,43 +323,21 @@ namespace Hermes
       bool current_force_diagonal_blocks;
       Table* current_block_weights;
 
-      /// Caching.
-      class CacheRecord
-      {
-        CacheRecordPerSubIdx();
-        int* asmlistIdx;
-        int asmlistCnt;
-        int nvert;
-        int order;
-        void clear();
-        int asmlistCnt;
-        Func<double>** fns;
-        Func<double>*** fnsSurface;
-        Geom<double>* geometry;
-        Geom<double>** geometrySurface;
-        double* jacobian_x_weights;
-        double** jacobian_x_weightsSurface;
-        int n_quadrature_points;
-        int* n_quadrature_pointsSurface;
-        int* orderSurface;
-        int* asmlistSurfaceCnt;
-
-        friend class DiscreteProblem<Scalar>;
-      };
-
       /// The cache.
-      CacheRecordPerSubIdx** cache;
+      DiscreteProblemCache<Scalar> cache;
 
       /// Cache calculation.
-      void calculate_cache();
+      void calculate_cache(Traverse::State** states, int num_states, int num_threads, RefMap*** refmaps, Solution<Scalar>*** current_u_ext, AsmList<Scalar>*** current_als, AsmList<Scalar>**** current_alsSurface, WeakForm<Scalar>** wfs);
+      
+      /// Order calculation.
+      int calculate_order(Traverse::State* state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf);
 
       /// To turn on / off the cache.
       bool do_not_use_cache;
 
       /// Exception caught in a parallel region.
       std::exception* caughtException;
-    
-      
+
       ///* DG *///
 
       /// Assemble DG forms.

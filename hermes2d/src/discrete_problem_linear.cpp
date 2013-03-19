@@ -93,14 +93,13 @@ namespace Hermes
       }
 
       // Structures that cloning will be done into.
-      PrecalcShapeset*** pss = new PrecalcShapeset**[num_threads_used];
-      PrecalcShapeset*** spss = new PrecalcShapeset**[num_threads_used];
       RefMap*** refmaps = new RefMap**[num_threads_used];
       AsmList<Scalar>*** als = new AsmList<Scalar>**[num_threads_used];
+      AsmList<Scalar>**** alsSurface = new AsmList<Scalar>***[num_threads_used];
       WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[num_threads_used];
 
       // Fill these structures.
-      this->init_assembling(NULL, pss, spss, refmaps, NULL, als, weakforms);
+      init_assembling(NULL, refmaps, NULL, als, alsSurface, weakforms);
 
       // Vector of meshes.
       Hermes::vector<MeshSharedPtr > meshes;
@@ -117,11 +116,11 @@ namespace Hermes
       int num_states;
       Traverse::State** states = trav_master.get_states(meshes, num_states);
 
+      this->calculate_cache(states, num_states, num_threads_used, refmaps, NULL, als, alsSurface, weakforms);
+
       Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[num_threads_used];
       for(unsigned int i = 0; i < num_threads_used; i++)
       {
-        for (unsigned j = 0; j < this->spaces.size(); j++)
-          fns[i].push_back(pss[i][j]);
         for (unsigned j = 0; j < this->wf->ext.size(); j++)
         {
           fns[i].push_back(weakforms[i]->ext[j].get());
@@ -151,33 +150,26 @@ namespace Hermes
             break;
           try
           {
-            Traverse::State current_state;
-            current_state = states[state_i];
+            Traverse::State* current_state = states[state_i];
             for(int j = 0; j < fns[thread_number].size(); j++)
             {
-              if(current_state.e[j] != NULL)
+              if(current_state->e[j] != NULL)
               {
-                fns[thread_number][j]->set_active_element(current_state.e[j]);
-                fns[thread_number][j]->set_transform(current_state.sub_idx[j]);
+                fns[thread_number][j]->set_active_element(current_state->e[j + this->spaces_size]);
+                fns[thread_number][j]->set_transform(current_state->sub_idx[j + this->spaces_size]);
               }
             }
 
-            PrecalcShapeset** current_pss = pss[thread_number];
-            PrecalcShapeset** current_spss = spss[thread_number];
             RefMap** current_refmaps = refmaps[thread_number];
             AsmList<Scalar>** current_als = als[thread_number];
             WeakForm<Scalar>* current_weakform = weakforms[thread_number];
 
-            // One state is a collection of (virtual) elements sharing
-            // the same physical location on (possibly) different meshes.
-            // This is then the same element of the virtual union mesh.
-            // The proper sub-element mappings to all the functions of
-            // this stage is supplied by the function Traverse::get_next_state()
-            // called in the while loop.
-            this->assemble_one_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform);
+            DiscreteProblemCache<Scalar>::CacheRecord* cache_record = this->cache.get(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
 
-            if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
+            assemble_one_state(cache_record, current_refmaps, NULL, current_als, current_state, current_weakform);
+
+            //if(DG_matrix_forms_present || DG_vector_forms_present)
+            //assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
           }
           catch(Hermes::Exceptions::Exception& e)
           {
@@ -192,7 +184,7 @@ namespace Hermes
         }
       }
 
-      this->deinit_assembling(pss, spss, refmaps, NULL, als, weakforms);
+      deinit_assembling(refmaps, NULL, als, alsSurface, weakforms);
 
       for(int i = 0; i < num_states; i++)
         delete states[i];
@@ -217,6 +209,11 @@ namespace Hermes
           for_all_elements(element_to_set_nonvisited, meshes[mesh_i])
           element_to_set_nonvisited->visited = false;
       }
+
+      Element* e;
+      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+        for_all_active_elements(e, spaces[space_i]->get_mesh())
+          spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
 
       if(this->caughtException != NULL)
         throw *(this->caughtException);

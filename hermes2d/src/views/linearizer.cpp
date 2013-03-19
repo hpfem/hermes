@@ -616,15 +616,14 @@ namespace Hermes
           {
             try
             {
-              Traverse::State current_state;
-              current_state = states[state_i];
-              fns[thread_number][0]->set_active_element(current_state.e[0]);
-              fns[thread_number][0]->set_transform(current_state.sub_idx[0]);
+              Traverse::State* current_state = states[state_i];
+              fns[thread_number][0]->set_active_element(current_state->e[0]);
+              fns[thread_number][0]->set_transform(current_state->sub_idx[0]);
 
               fns[thread_number][0]->set_quad_order(0, this->item);
               double* val = fns[thread_number][0]->get_values(component, value_type);
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
+              for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
               {
                 double f = val[i];
 #pragma omp critical (max)
@@ -656,23 +655,22 @@ namespace Hermes
           {
             try
             {
-              Traverse::State current_state;
-              current_state = states[state_i];
+              Traverse::State* current_state = states[state_i];
 
-              if(current_state.e[0] == NULL)
+              if(current_state->e[0] == NULL)
                 continue;
 
-              fns[thread_number][0]->set_active_element(current_state.e[0]);
-              fns[thread_number][0]->set_transform(current_state.sub_idx[0]);
+              fns[thread_number][0]->set_active_element(current_state->e[0]);
+              fns[thread_number][0]->set_transform(current_state->sub_idx[0]);
               if(xdisp != NULL)
               {
-                fns[thread_number][1]->set_active_element(current_state.e[1]);
-                fns[thread_number][1]->set_transform(current_state.sub_idx[1]);
+                fns[thread_number][1]->set_active_element(current_state->e[1]);
+                fns[thread_number][1]->set_transform(current_state->sub_idx[1]);
               }
               if(ydisp != NULL)
               {
-                fns[thread_number][xdisp == NULL ? 1 : 2]->set_active_element(current_state.e[xdisp == NULL ? 1 : 2]);
-                fns[thread_number][xdisp == NULL ? 1 : 2]->set_transform(current_state.sub_idx[xdisp == NULL ? 1 : 2]);
+                fns[thread_number][xdisp == NULL ? 1 : 2]->set_active_element(current_state->e[xdisp == NULL ? 1 : 2]);
+                fns[thread_number][xdisp == NULL ? 1 : 2]->set_transform(current_state->sub_idx[xdisp == NULL ? 1 : 2]);
               }
 
               fns[thread_number][0]->set_quad_order(0, this->item);
@@ -695,7 +693,7 @@ namespace Hermes
                 dy = fns[thread_number][xdisp == NULL ? 1 : 2]->get_fn_values();
 
               int iv[H2D_MAX_NUMBER_VERTICES];
-              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
+              for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
               {
                 double f = val[i];
                 double x_disp = fns[thread_number][0]->get_refmap()->get_phys_x(0)[i];
@@ -712,13 +710,13 @@ namespace Hermes
               }
 
               // recur to sub-elements
-              if(current_state.e[0]->is_triangle())
-                process_triangle(fns[thread_number], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+              if(current_state->e[0]->is_triangle())
+                process_triangle(fns[thread_number], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
               else
-                process_quad(fns[thread_number], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, current_state.e[0]->is_curved());
+                process_quad(fns[thread_number], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
 
-              for (unsigned int i = 0; i < current_state.e[0]->get_nvert(); i++)
-                process_edge(iv[i], iv[current_state.e[0]->next_vert(i)], current_state.e[0]->en[i]->marker);
+              for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
+                process_edge(iv[i], iv[current_state->e[0]->next_vert(i)], current_state->e[0]->en[i]->marker);
             }
             catch(Hermes::Exceptions::Exception& e)
             {

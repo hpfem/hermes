@@ -193,7 +193,7 @@ namespace Hermes
           cur_node = handle_overflow();
         }
         else {
-          if(nodes.insert(std::make_pair(sub_idx, updated_node)).second == false)
+          if(nodes.insert(std::pair<uint64_t, Node*>(sub_idx, updated_node)).second == false)
             /// The value had already existed.
             delete updated_node;
           else
@@ -240,6 +240,7 @@ namespace Hermes
       double2  lin_coeffs[H2D_MAX_NUMBER_EDGES];
       template<typename T> friend class MeshFunction;
       template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemCache;
       template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class Solution;
       template<typename T> friend class ExactSolution;

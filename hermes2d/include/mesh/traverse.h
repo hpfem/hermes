@@ -17,6 +17,7 @@
 #define __H2D_TRAVERSE_H
 
 #include "hermes_common.h"
+#include <hash_set>
 
 namespace Hermes
 {
@@ -86,10 +87,12 @@ namespace Hermes
         bool bnd[H2D_MAX_NUMBER_EDGES];
         bool isBnd;
         Element* rep;
+        uint64_t rep_subidx;
+        int rep_i;
         ~State();
       private:
         State();
-        void operator=(const State * other);
+        //void operator=(const State * other);
         static State* clone(const State * other);
         void push_transform(int son, int i, bool is_triangle = false);
         uint64_t get_transform(int i);
@@ -102,6 +105,7 @@ namespace Hermes
       friend class Traverse;
       friend class Views::Linearizer;
       friend class Views::Vectorizer;
+      template<typename T> friend class DiscreteProblemCache;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class DiscreteProblemLinear;
       };
@@ -146,6 +150,7 @@ namespace Hermes
       template<typename T> friend class Adapt;
       template<typename T> friend class KellyTypeAdapt;
       template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemCache;
       template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class Filter;
       template<typename T> friend class SimpleFilter;
