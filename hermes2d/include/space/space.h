@@ -76,6 +76,7 @@ namespace Hermes
 
     template<typename Scalar> class Adapt;
     template<typename Scalar> class DiscreteProblem;
+    template<typename Scalar> class DiscreteProblemLinear;
     namespace Views
     {
       template<typename Scalar> class BaseView;

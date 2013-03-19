@@ -62,21 +62,6 @@ namespace Hermes
 
       ~DiscreteProblemCache();
 
-      class CacheRecord;
-
-      CacheRecord* get(int rep_id, int rep_sub_idx, int rep_i) const;
-
-      CacheRecord* put(int rep_id, int rep_sub_idx, int rep_i);
-
-    private:
-
-      static const int DEFAULT_SIZE = 1e5;
-      static const int GUESS_NUMBER_OF_SUBELEMENTS = 32;
-      static const int DEFAULT_HASH_TABLE_SIZE = DEFAULT_SIZE * GUESS_NUMBER_OF_SUBELEMENTS;
-
-      int size;
-      int hash_table_size;
-
       class CacheRecord
       {
       public:
@@ -101,6 +86,19 @@ namespace Hermes
 
         friend class DiscreteProblem<Scalar>;
       };
+
+      CacheRecord* get(int rep_id, int rep_sub_idx, int rep_i) const;
+
+      CacheRecord* put(int rep_id, int rep_sub_idx, int rep_i);
+
+    private:
+
+      static const int DEFAULT_SIZE = 1e5;
+      static const int GUESS_NUMBER_OF_SUBELEMENTS = 32;
+      static const int DEFAULT_HASH_TABLE_SIZE = DEFAULT_SIZE * GUESS_NUMBER_OF_SUBELEMENTS;
+
+      int size;
+      int hash_table_size;
 
       CacheRecord **recordTable;
       int recordCount;
