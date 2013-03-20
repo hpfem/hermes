@@ -66,6 +66,7 @@ namespace Hermes
     void NewtonSolver<Scalar>::init_attributes()
     {
       this->newton_tol = 1e-8;
+      this->newton_tol_relative = false;
       this->newton_max_iter = 15;
       this->residual_as_function = false;
       this->max_allowed_residual_norm = 1E9;
@@ -79,9 +80,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_newton_tol(double newton_tol)
+    void NewtonSolver<Scalar>::set_newton_tol(double newton_tol, bool relative)
     {
       this->newton_tol = newton_tol;
+      this->newton_tol_relative = relative;
     }
 
     template<typename Scalar>
@@ -295,6 +297,8 @@ namespace Hermes
 
       this->on_initialization();
 
+      double initial_residual_norm;
+
       while (true)
       {
         this->on_step_begin();
@@ -353,7 +357,11 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
+        {
           this->info("\tNewton: initial residual norm: %g", residual_norm);
+
+          initial_residual_norm = residual_norm;
+        }
         else
         {
           this->info("\tNewton: iteration %d, residual norm: %g", it - 1, residual_norm);
@@ -412,7 +420,8 @@ namespace Hermes
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
-        if(residual_norm < newton_tol && it > 1)
+        double residual_norm_for_decision = this->newton_tol_relative ? residual_norm / initial_residual_norm : residual_norm;
+        if(residual_norm_for_decision < newton_tol && it > 1)
         {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];
@@ -557,6 +566,8 @@ namespace Hermes
 
       this->on_initialization();
 
+      double initial_residual_norm;
+
       while (true)
       {
         this->on_step_begin();
@@ -613,7 +624,10 @@ namespace Hermes
 
         // Info for the user.
         if(it == 1)
+        {
           this->info("\tNewton: initial residual norm: %g", residual_norm);
+          initial_residual_norm = residual_norm;
+        }
         else
         {
           this->info("\tNewton: iteration %d, residual norm: %g", it - 1, residual_norm);
@@ -674,7 +688,8 @@ namespace Hermes
 
         // If residual norm is within tolerance, return 'true'.
         // This is the only correct way of ending.
-        if(residual_norm < newton_tol && it > 1) 
+        double residual_norm_for_decision = this->newton_tol_relative ? residual_norm / initial_residual_norm : residual_norm;
+        if(residual_norm_for_decision < newton_tol && it > 1) 
         {
           // We want to return the solution in a different structure.
           this->sln_vector = new Scalar[ndof];

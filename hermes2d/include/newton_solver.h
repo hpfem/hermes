@@ -132,7 +132,7 @@ namespace Hermes
 
       /// Set the residual norm tolerance for ending the Newton's loop.
       /// Default: 1E-8.
-      void set_newton_tol(double newton_tol);
+      void set_newton_tol(double newton_tol, bool relative = false);
 
       /// Set the maximum number of Newton's iterations.
       /// Default: 15
@@ -205,6 +205,7 @@ namespace Hermes
       LinearMatrixSolver<Scalar>* linear_solver;
 
       double newton_tol;
+      bool newton_tol_relative;
       int newton_max_iter;
       bool residual_as_function;
 
