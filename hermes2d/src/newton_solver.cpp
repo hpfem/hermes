@@ -76,7 +76,7 @@ namespace Hermes
       this->auto_damping_ratio = 2.0;
       this->initial_auto_damping_ratio = 1.0;
       this->sufficient_improvement_factor = 0.95;
-      this->necessary_successful_steps_to_increase = 1;
+      this->necessary_successful_steps_to_increase = 3;
     }
 
     template<typename Scalar>
