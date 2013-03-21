@@ -16,6 +16,7 @@
 #ifndef __H2D_FUNCTION_H
 #define __H2D_FUNCTION_H
 
+#include "sub_element_map.h"
 #include "transformable.h"
 #include "../quadrature/quad.h"
 #include "exceptions.h"
@@ -201,7 +202,7 @@ namespace Hermes
       int num_components; ///< number of vector components
 
       /// Table of Node tables, for each possible transformation there can be a different Node table.
-      std::map<uint64_t, LightArray<Node*>*>* sub_tables;
+      SubElementMap<LightArray<Node*> >* sub_tables;
 
       /// Table of nodes.
       LightArray<Node*>* nodes;

@@ -30,6 +30,7 @@
 #include "quadrature/limit_order.h"
 
 #include "api2d.h"
+#include "sub_element_map.h"
 #include "mixins2d.h"
 
 #include "mesh/mesh.h"

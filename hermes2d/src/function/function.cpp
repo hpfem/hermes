@@ -216,18 +216,10 @@ namespace Hermes
     template<typename Scalar>
     void Function<Scalar>::update_nodes_ptr()
     {
-      if(sub_idx > H2D_MAX_IDX)
-        handle_overflow_idx();
-      else {
-        typename std::map<uint64_t, LightArray<Node*>*>::iterator it = sub_tables->find(sub_idx);
-        if(it == sub_tables->end())
-        {
-          this->nodes = new LightArray<Node*>(2, 2);
-          sub_tables->insert(std::pair<uint64_t, LightArray<Node*>*>(sub_idx, this->nodes));
-        }
-        else
-          this->nodes = it->second;
-      }
+      bool to_add = true;
+      LightArray<Node*>* node_array = sub_tables->get(sub_idx, to_add);
+      if(to_add)
+        node_array = this->nodes = new LightArray<Node*>(2, 2);
     }
 
     template<typename Scalar>

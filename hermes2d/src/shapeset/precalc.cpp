@@ -76,13 +76,13 @@ namespace Hermes
       if(master_pss == NULL)
       {
         if(!tables.present(key))
-          tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
+          tables.add(new SubElementMap<LightArray<Node*> >, key);
         sub_tables = tables.get(key);
       }
       else
       {
         if(!master_pss->tables.present(key))
-          master_pss->tables.add(new std::map<uint64_t, LightArray<Node*>*>, key);
+          master_pss->tables.add(new SubElementMap<LightArray<Node*> >, key);
         sub_tables = master_pss->tables.get(key);
       }
 
@@ -142,16 +142,7 @@ namespace Hermes
 
       for(unsigned int i = 0; i < tables.get_size(); i++)
         if(tables.present(i))
-        {
-          for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables.get(i)->begin(); it != tables.get(i)->end(); it++)
-          {
-            for(unsigned int k = 0; k < it->second->get_size(); k++)
-              if(it->second->present(k))
-                ::free(it->second->get(k));
-            delete it->second;
-          }
           delete tables.get(i);
-        }
 
         if(overflow_nodes != NULL)
         {

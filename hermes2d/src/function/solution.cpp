@@ -87,8 +87,8 @@ namespace Hermes
     template<typename Scalar>
     bool Solution<Scalar>::static_verbose_output = false;
 
-    template<>
-    void Solution<double>::init()
+    template<typename Scalar>
+    void Solution<Scalar>::init()
     {
       memset(tables, 0, sizeof(tables));
       memset(elems,  0, sizeof(elems));
@@ -100,7 +100,7 @@ namespace Hermes
 
       for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
-          tables[i][j] = new std::map<uint64_t, LightArray<struct Function<double>::Node*>*>;
+          tables[i][j] = new SubElementMap<LightArray<struct Function<Scalar>::Node*> >;
 
       mono_coeffs = NULL;
       elem_coeffs[0] = elem_coeffs[1] = NULL;
@@ -111,31 +111,6 @@ namespace Hermes
 
       this->set_quad_2d(&g_quad_2d_std);
     }
-
-		template<>
-		void Solution<std::complex<double> >::init()
-		{
-			memset(tables, 0, sizeof(tables));
-			memset(elems,  0, sizeof(elems));
-			memset(oldest, 0, sizeof(oldest));
-			transform = true;
-			sln_type = HERMES_UNDEF;
-			this->num_components = 0;
-			e_last = NULL;
-
-			for(int i = 0; i < 4; i++)
-				for(int j = 0; j < 4; j++)
-					tables[i][j] = new std::map<uint64_t, LightArray<struct Function<std::complex<double> >::Node*>*>;
-
-			mono_coeffs = NULL;
-			elem_coeffs[0] = elem_coeffs[1] = NULL;
-			elem_orders = NULL;
-			dxdy_buffer = NULL;
-			num_coeffs = num_elems = 0;
-			num_dofs = -1;
-
-			this->set_quad_2d(&g_quad_2d_std);
-		}
 
     template<>
     Solution<double>::Solution()
@@ -263,13 +238,6 @@ namespace Hermes
         for (int j = 0; j < 4; j++)
           if(tables[i][j] != NULL)
           {
-            for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[i][j]->begin(); it != tables[i][j]->end(); it++)
-            {
-              for(unsigned int l = 0; l < it->second->get_size(); l++)
-                if(it->second->present(l))
-                  ::free(it->second->get(l));
-              delete it->second;
-            }
             tables[i][j]->clear();
             delete tables[i][j];
             tables[i][j] = NULL;
@@ -277,8 +245,8 @@ namespace Hermes
           }
     }
 
-    template<>
-    void Solution<double>::free()
+    template<typename Scalar>
+    void Solution<Scalar>::free()
     {
       if(mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
       if(elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
@@ -293,31 +261,8 @@ namespace Hermes
         free_tables();
     }
 
-		template<>
-		void Solution<std::complex<double> >::free()
-		{
-			if(mono_coeffs  != NULL) { delete [] mono_coeffs;   mono_coeffs = NULL;  }
-			if(elem_orders != NULL) { delete [] elem_orders;  elem_orders = NULL; }
-			if(dxdy_buffer != NULL) { delete [] dxdy_buffer;  dxdy_buffer = NULL; }
-
-			for (int i = 0; i < this->num_components; i++)
-				if(elem_coeffs[i] != NULL)
-				{ delete [] elem_coeffs[i];  elem_coeffs[i] = NULL; }
-
-				e_last = NULL;
-
-				free_tables();
-		}
-
-		template<>
-    Solution<double>::~Solution()
-    {
-      free();
-      space_type = HERMES_INVALID_SPACE;
-    }
-
-    template<>
-    Solution<std::complex<double> >::~Solution()
+    template<typename Scalar>
+    Solution<Scalar>::~Solution()
     {
       free();
       space_type = HERMES_INVALID_SPACE;
@@ -891,19 +836,10 @@ namespace Hermes
       {
         if(tables[this->cur_quad][oldest[this->cur_quad]] != NULL)
         {
-          for(typename std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>::iterator it = tables[this->cur_quad][oldest[this->cur_quad]]->begin(); it != tables[this->cur_quad][oldest[this->cur_quad]]->end(); it++)
-          {
-            for(unsigned int l = 0; l < it->second->get_size(); l++)
-              if(it->second->present(l))
-                ::free(it->second->get(l));
-            delete it->second;
-          }
-          delete tables[this->cur_quad][oldest[this->cur_quad]];
+          tables[this->cur_quad][oldest[this->cur_quad]]->clear();
           tables[this->cur_quad][oldest[this->cur_quad]] = NULL;
           elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
         }
-
-        tables[this->cur_quad][oldest[this->cur_quad]] = new std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>;
 
         cur_elem = oldest[this->cur_quad];
         if(++oldest[this->cur_quad] >= 4)

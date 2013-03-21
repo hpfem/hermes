@@ -123,6 +123,7 @@ project(hermes2d)
     src/function/solution_h2d_xml.cpp
 
     src/api2d.cpp
+    src/sub_element_map.cpp
     src/mixins2d.cpp
     
     src/mesh/refmap.cpp
@@ -233,6 +234,7 @@ project(hermes2d)
     include/integrals/hcurl.h
     
     include/api2d.h
+    include/sub_element_map.h
     include/mixins2d.h
     
     include/mesh/refmap.h

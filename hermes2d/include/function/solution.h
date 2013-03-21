@@ -212,7 +212,7 @@ namespace Hermes
       /// a table from the lowest layer.
       /// The highest layer (in contrast to the PrecalcShapeset class) is represented
       /// here only by this array.
-      std::map<uint64_t, LightArray<struct Function<Scalar>::Node*>*>* tables[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
+      SubElementMap<LightArray<struct Function<Scalar>::Node*> >* tables[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
 
       Element* elems[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
       int cur_elem, oldest[H2D_SOLUTION_ELEMENT_CACHE_SIZE];

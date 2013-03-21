@@ -137,13 +137,6 @@ namespace Hermes
         }
       }
 
-      for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
-      {
-        for(unsigned int l = 0; l < it->second->get_size(); l++)
-          if(it->second->present(l))
-            ::free(it->second->get(l));
-        delete it->second;
-      }
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];
@@ -156,16 +149,7 @@ namespace Hermes
     void Filter<Scalar>::free()
     {
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
-      {
-        for(typename std::map<uint64_t, LightArray<struct Filter<Scalar>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
-        {
-          for(unsigned int l = 0; l < it->second->get_size(); l++)
-            if(it->second->present(l))
-              ::free(it->second->get(l));
-          delete it->second;
-        }
         tables[i].clear();
-      }
 
       if(unimesh)
       {
@@ -389,20 +373,7 @@ namespace Hermes
     void ComplexFilter::free()
     {
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
-      {
-#ifdef _MSC_VER // For Visual Studio compiler the latter does not compile.
-        for(std::map<uint64_t, LightArray<Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
-#else
-        for(std::map<uint64_t, LightArray<struct Function<double>::Node*>*>::iterator it = tables[i].begin(); it != tables[i].end(); it++)
-#endif
-        {
-          for(unsigned int l = 0; l < it->second->get_size(); l++)
-            if(it->second->present(l))
-              ::free(it->second->get(l));
-          delete it->second;
-        }
         tables[i].clear();
-      }
     }
 
     void ComplexFilter::set_quad_2d(Quad2D* quad_2d)
@@ -419,13 +390,6 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
 
-      for(std::map<uint64_t, LightArray<struct Function<double>::Node*>*>::iterator it = tables[this->cur_quad].begin(); it != tables[this->cur_quad].end(); it++)
-      {
-        for(unsigned int l = 0; l < it->second->get_size(); l++)
-          if(it->second->present(l))
-            ::free(it->second->get(l));
-        delete it->second;
-      }
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];
