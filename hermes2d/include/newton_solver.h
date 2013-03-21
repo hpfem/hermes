@@ -222,7 +222,7 @@ namespace Hermes
       /// The ratio between two damping coeffs when changing.
       double auto_damping_ratio;
       /// The initial (and maximum) damping coefficient
-      double initial_auto_damping_ratio;
+      double initial_auto_damping_coefficient;
       /// Sufficient improvement for continuing.
       double sufficient_improvement_factor;
       /// necessary number of steps to increase back the damping coeff.

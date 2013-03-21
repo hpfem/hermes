@@ -74,7 +74,7 @@ namespace Hermes
       this->currentDampingCofficient = 1.0;
       this->manual_damping = false;
       this->auto_damping_ratio = 2.0;
-      this->initial_auto_damping_ratio = 1.0;
+      this->initial_auto_damping_coefficient = 1.0;
       this->sufficient_improvement_factor = 0.95;
       this->necessary_successful_steps_to_increase = 3;
     }
@@ -208,7 +208,10 @@ namespace Hermes
       if(this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       else
+      {
         this->currentDampingCofficient = coeff;
+        this->initial_auto_damping_coefficient = coeff;
+      }
     }
       
     template<typename Scalar>
@@ -370,7 +373,7 @@ namespace Hermes
             if(residual_norm < last_residual_norm * this->sufficient_improvement_factor)
             {
               if(++successfulSteps >= this->necessary_successful_steps_to_increase)
-                this->currentDampingCofficient = std::min(this->initial_auto_damping_ratio, 2 * this->currentDampingCofficient);
+                this->currentDampingCofficient = std::min(this->initial_auto_damping_coefficient, 2 * this->currentDampingCofficient);
               if(residual_norm < last_residual_norm)
                 this->info("\t Newton: step successful, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
             }
@@ -636,7 +639,7 @@ namespace Hermes
             if(residual_norm < last_residual_norm * this->sufficient_improvement_factor)
             {
               if(++successfulSteps >= this->necessary_successful_steps_to_increase)
-                this->currentDampingCofficient = std::min(this->initial_auto_damping_ratio, 2 * this->currentDampingCofficient);
+                this->currentDampingCofficient = std::min(this->initial_auto_damping_coefficient, 2 * this->currentDampingCofficient);
               if(residual_norm < last_residual_norm)
                 this->info("\t Newton: step successful, calculation continues with damping coefficient: %g.", this->currentDampingCofficient);
             }
