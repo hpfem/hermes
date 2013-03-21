@@ -23,106 +23,90 @@ namespace Hermes
   {
     /// Sub-Element maps - used for replacing std::map<uint64_t, T>.
     template<typename T>
-    class HERMES_API SubElementMap
+    class SubElementMap
     {
+      template<typename Scalar> friend class Function;
     public:
-      SubElementMap();
-      ~SubElementMap();
-      void clear();
-
-      T* get(uint64_t sub_idx, bool& to_add);
-      void add(uint64_t sub_idx, T* data);
+      SubElementMap()
+      {
+      }
+      ~SubElementMap()
+      {
+        this->clear();
+      }
+      void clear()
+      {
+        this->root.clear_subtree();
+        memset(this->root.children, 0, 8 * sizeof(Node*));
+      }
 
     private:
       class Node
       {
       public:
-        Node(T* data);
+        Node()
+        {
+          init();
+        }
+        Node(T* data) : data(data)
+        {
+          init();
+        }
         T* data;
         Node* children[8];
-        void clear_subtree();
+        void clear_subtree()
+        {
+          for(int i = 0; i < 8; i++)
+          {
+            if(this->children[i] != NULL)
+            {
+              this->children[i]->clear_subtree();
+              delete this->children[i];
+            }
+          }
+        }
+      private:
+        void init()
+        {
+          memset(this->children, 0, 8 * sizeof(Node*));
+        }
       };
 
+    public:
+      Node* get(uint64_t sub_idx, bool& to_add)
+      {
+        if(sub_idx == 0)
+          return &root;
+        Node* node = &root;
+        bool added = false;
+        int sons[Transformable::H2D_MAX_TRN_LEVEL];
+        int sons_count = 0;
+        while (sub_idx > 0)
+        {
+          sons[sons_count++] = (sub_idx - 1) & 7;
+          sub_idx = (sub_idx - 1) >> 3;
+        }
+        
+        for(int i = sons_count - 1; i >= 0 ; i--)
+        {
+          Node* child_node = node->children[sons[i]];
+          if(child_node == NULL)
+            if(to_add)
+            {
+              added = true;
+              child_node = node->children[sons[i]] = new Node(NULL);
+            }
+            else
+              return NULL;
+          node = child_node;
+        }
+        if(!added)
+          to_add = false;
+        return node;
+      }
+    
       Node root;
     };
-
-    template<typename T>
-    SubElementMap<T>::SubElementMap()
-    {
-    }
-
-    template<typename T>
-    SubElementMap<T>::~SubElementMap()
-    {
-      this->clear();
-    }
-
-    template<typename T>
-    void SubElementMap<T>::clear()
-    {
-      this->root.clear_subtree();
-      memset(this->root->children, 0, 8 * sizeof(Node*));
-    }
-
-    template<typename T>
-    T* SubElementMap<T>::get(uint64_t sub_idx, bool& to_add)
-    {
-      if(sub_idx == 0)
-        return root.data;
-      Node* node = &root;
-      while (sub_idx > 0)
-      {
-        int current_son = (sub_idx - 1) & 7;
-        Node* child_node = node->children[current_son];
-        if(child_node == NULL)
-          if(to_add)
-            node->children[current_son] = new Node(NULL);
-          else
-            return NULL;
-        sub_idx = (sub_idx - 1) >> 3;
-        node = child_node;
-      }
-      if(to_add)
-        to_add = false;
-      return node->data;
-    }
-
-    template<typename T>
-    void SubElementMap<T>::add(uint64_t sub_idx, T* data)
-    {
-      Node* node = &root;
-      while (sub_idx > 0)
-      {
-        int current_son = (sub_idx - 1) & 7;
-        Node* child_node = node->children[current_son];
-        if(child_node == NULL)
-        {
-          node->children[current_son] = new Node(NULL);
-        }
-        sub_idx = (sub_idx - 1) >> 3;
-        node = child_node;
-      }
-      node->data = data;
-    }
-
-    template<typename T>
-    SubElementMap<T>::Node::Node(T* data) : data(data)
-    {
-      memset(this->children, 0, 8 * sizeof(Node*));
-    }
-
-    template<typename T>
-    void SubElementMap<T>::Node::clear_subtree()
-    {
-      for(int i = 0; i < 8; i++)
-      {
-        if(this->children[i] != NULL)
-        {
-          this->children[i]->clear_subtree;
-          delete this->children[i];
-        }
-      }
-    }
   }
 }
 

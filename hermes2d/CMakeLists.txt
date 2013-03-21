@@ -123,7 +123,6 @@ project(hermes2d)
     src/function/solution_h2d_xml.cpp
 
     src/api2d.cpp
-    src/sub_element_map.cpp
     src/mixins2d.cpp
     
     src/mesh/refmap.cpp

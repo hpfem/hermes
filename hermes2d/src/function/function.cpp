@@ -217,9 +217,9 @@ namespace Hermes
     void Function<Scalar>::update_nodes_ptr()
     {
       bool to_add = true;
-      LightArray<Node*>* node_array = sub_tables->get(sub_idx, to_add);
+      SubElementMap<LightArray<Node*> >::Node* node_array = sub_tables->get(sub_idx, to_add);
       if(to_add)
-        node_array = this->nodes = new LightArray<Node*>(2, 2);
+        node_array->data = this->nodes = new LightArray<Node*>(2, 2);
     }
 
     template<typename Scalar>

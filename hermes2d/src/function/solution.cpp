@@ -90,17 +90,12 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::init()
     {
-      memset(tables, 0, sizeof(tables));
       memset(elems,  0, sizeof(elems));
       memset(oldest, 0, sizeof(oldest));
       transform = true;
       sln_type = HERMES_UNDEF;
       this->num_components = 0;
       e_last = NULL;
-
-      for(int i = 0; i < 4; i++)
-        for(int j = 0; j < 4; j++)
-          tables[i][j] = new SubElementMap<LightArray<struct Function<Scalar>::Node*> >;
 
       mono_coeffs = NULL;
       elem_coeffs[0] = elem_coeffs[1] = NULL;
@@ -234,15 +229,12 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::free_tables()
     {
-      for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-          if(tables[i][j] != NULL)
-          {
-            tables[i][j]->clear();
-            delete tables[i][j];
-            tables[i][j] = NULL;
-            elems[i][j] = NULL;
-          }
+      for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
+        for (int j = 0; j < H2D_SOLUTION_ELEMENT_CACHE_SIZE; j++)
+        {
+          tables[i][j].clear();
+          elems[i][j] = NULL;
+        }
     }
 
     template<typename Scalar>
@@ -753,7 +745,8 @@ namespace Hermes
     template<typename Scalar>
     void Solution<Scalar>::enable_transform(bool enable)
     {
-      if(transform != enable) free_tables();
+      if(transform != enable)
+        free_tables();
       transform = enable;
     }
 
@@ -827,22 +820,18 @@ namespace Hermes
       MeshFunction<Scalar>::set_active_element(e);
 
       // try finding an existing table for e
-      for (cur_elem = 0; cur_elem < 4; cur_elem++)
+      for (cur_elem = 0; cur_elem < H2D_SOLUTION_ELEMENT_CACHE_SIZE; cur_elem++)
         if(elems[this->cur_quad][cur_elem] == e)
           break;
 
       // if not found, free the oldest one and use its slot
-      if(cur_elem >= 4)
+      if(cur_elem >= H2D_SOLUTION_ELEMENT_CACHE_SIZE)
       {
-        if(tables[this->cur_quad][oldest[this->cur_quad]] != NULL)
-        {
-          tables[this->cur_quad][oldest[this->cur_quad]]->clear();
-          tables[this->cur_quad][oldest[this->cur_quad]] = NULL;
-          elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
-        }
+        tables[this->cur_quad][oldest[this->cur_quad]].clear();
+        elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
 
         cur_elem = oldest[this->cur_quad];
-        if(++oldest[this->cur_quad] >= 4)
+        if(++oldest[this->cur_quad] >= H2D_SOLUTION_ELEMENT_CACHE_SIZE)
           oldest[this->cur_quad] = 0;
 
         elems[this->cur_quad][cur_elem] = e;
@@ -872,7 +861,7 @@ namespace Hermes
       else
         throw Hermes::Exceptions::Exception("Uninitialized solution.");
 
-      this->sub_tables = tables[this->cur_quad][cur_elem];
+      this->sub_tables = &tables[this->cur_quad][cur_elem];
 
       this->update_nodes_ptr();
     }
