@@ -839,7 +839,7 @@ namespace Hermes
       int num_states;
       Traverse::State** states = trav_master.get_states(meshes, num_states);
 
-      this->calculate_cache(states, num_states, num_threads_used, refmaps, u_ext, als, alsSurface, weakforms);
+      // this->calculate_cache(states, num_states, num_threads_used, refmaps, u_ext, als, alsSurface, weakforms);
 
       Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[num_threads_used];
       for(unsigned int i = 0; i < num_threads_used; i++)
@@ -872,8 +872,47 @@ namespace Hermes
         int end = (num_states / num_threads_used) * (thread_number + 1);
         if(thread_number == num_threads_used - 1)
           end = num_states;
+
+        PrecalcShapeset** current_pss = new PrecalcShapeset*[spaces_size];
+        for (unsigned int j = 0; j < spaces_size; j++)
+          current_pss[j] = new PrecalcShapeset(spaces[j]->shapeset);
+
         for(int state_i = start; state_i < end; state_i++)
         {
+          Traverse::State* current_state = states[state_i];
+
+          assert(current_state->rep != NULL);
+
+          AsmList<Scalar>** current_als = als[thread_number];
+          AsmList<Scalar>*** current_als_surface = alsSurface[thread_number];
+
+          DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
+          if(!this->state_needs_recalculation(current_als, current_state))
+            continue;
+          else
+            cache_record = this->cache.put(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
+
+          RefMap** current_refmaps = refmaps[thread_number];
+          Solution<Scalar>** current_u_ext = u_ext == NULL ? NULL : u_ext[thread_number];
+          WeakForm<Scalar>* current_weakform = weakforms[thread_number];
+
+          for(int j = 0; j < this->spaces_size; j++)
+          {
+            if(current_state->e[j] != NULL)
+            {
+              current_pss[j]->set_active_element(current_state->e[j]);
+              current_pss[j]->set_transform(current_state->sub_idx[j]);
+              current_refmaps[j]->set_active_element(current_state->e[j]);
+              current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
+
+              spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
+            }
+          }
+
+          int order = this->calculate_order(current_state, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform);
+
+          cache_record->init(this->spaces, current_state, current_pss, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform, order);
+
           if(this->caughtException != NULL)
             break;
           try
@@ -893,8 +932,6 @@ namespace Hermes
             AsmList<Scalar>** current_als = als[thread_number];
             WeakForm<Scalar>* current_weakform = weakforms[thread_number];
 
-            DiscreteProblemCache<Scalar>::CacheRecord* cache_record = this->cache.get(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
-
             assemble_one_state(cache_record, current_refmaps, current_u_ext, current_als, current_state, current_weakform);
 
             //if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -911,6 +948,10 @@ namespace Hermes
               this->caughtException = new std::exception(e);
           }
         }
+
+        for (unsigned int j = 0; j < spaces_size; j++)
+          delete current_pss[j];
+        delete [] current_pss;
       }
 
       deinit_assembling(refmaps, u_ext, als, alsSurface, weakforms);
@@ -936,13 +977,13 @@ namespace Hermes
         Element* element_to_set_nonvisited;
         for(unsigned int mesh_i = 0; mesh_i < meshes.size(); mesh_i++)
           for_all_elements(element_to_set_nonvisited, meshes[mesh_i])
-            element_to_set_nonvisited->visited = false;
+          element_to_set_nonvisited->visited = false;
       }
 
       Element* e;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         for_all_active_elements(e, spaces[space_i]->get_mesh())
-          spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
+        spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
 
       if(this->caughtException != NULL)
         throw *(this->caughtException);
@@ -960,36 +1001,56 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::state_needs_recalculation(AsmList<Scalar>** current_als, Traverse::State* current_state)
     {
+      bool toReturn = false;
+      int hash = 0;
       for(unsigned int i = 0; i < this->spaces_size; i++)
       {
         if(current_state->e[i] == NULL)
           continue;
 
+        hash = this->cache.get(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
+
+        if(this->do_not_use_cache)
+        {
+          toReturn = true;
+          break;
+        }
+
         if(this->spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
-          return true;
+        {
+          toReturn = true;
+          break;
+        }
 
         // Check of potential new constraints.
-        if(this->do_not_use_cache)
-          return true;
-        else
+        if(hash != 0)
         {
-          DiscreteProblemCache<Scalar>::CacheRecord* cache_record = this->cache.get(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
-          if(cache_record != NULL)
+          DiscreteProblemCache<Scalar>::CacheRecord* record = this->cache.recordTable[this->cache.hashTable[hash]->cache_record_index];
+          if(record->asmlistCnt[i] != current_als[i]->cnt)
           {
-            if(cache_record->asmlistCnt[i] != current_als[i]->cnt)
-              return true;
-            else
-            {
-              for(unsigned int idx_i = 0; idx_i < current_als[i]->cnt; idx_i++)
-                if(current_als[i]->idx[idx_i] != cache_record->asmlistIdx[i][idx_i])
-                  return true;
-            }
+            toReturn = true;
+            break;
           }
           else
-            return true;
+          {
+            for(unsigned int idx_i = 0; idx_i < current_als[i]->cnt; idx_i++)
+              if(current_als[i]->idx[idx_i] != record->asmlistIdx[i][idx_i])
+              {
+                toReturn = true;
+                break;
+              }
+          }
+        }
+        else
+        {
+          toReturn = true;
+          break;
         }
       }
-      return false;
+
+      if(toReturn && hash != 0)
+        this->cache.remove(hash);
+      return toReturn;
     }
 
     template<typename Scalar>
@@ -1068,47 +1129,7 @@ namespace Hermes
           end = num_states;
         for(int state_i = start; state_i < end; state_i++)
         {
-          Traverse::State* current_state = states[state_i];
 
-          assert(current_state->rep != NULL);
-
-          AsmList<Scalar>** current_als = als[thread_number];
-          AsmList<Scalar>*** current_als_surface = als_surface[thread_number];
-
-          DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
-          if(!this->state_needs_recalculation(current_als, current_state))
-            continue;
-          else
-            cache_record = this->cache.put(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
-
-          PrecalcShapeset** current_pss = new PrecalcShapeset*[spaces_size];
-          for (unsigned int j = 0; j < spaces_size; j++)
-            current_pss[j] = new PrecalcShapeset(spaces[j]->shapeset);
-
-          RefMap** current_refmaps = refmaps[thread_number];
-          Solution<Scalar>** current_u_ext = u_ext == NULL ? NULL : u_ext[thread_number];
-          WeakForm<Scalar>* current_weakform = weakforms[thread_number];
-
-          for(int j = 0; j < this->spaces_size; j++)
-          {
-            if(current_state->e[j] != NULL)
-            {
-              current_pss[j]->set_active_element(current_state->e[j]);
-              current_pss[j]->set_transform(current_state->sub_idx[j]);
-              current_refmaps[j]->set_active_element(current_state->e[j]);
-              current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
-
-              spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
-            }
-          }
-
-          int order = this->calculate_order(current_state, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform);
-
-          cache_record->init(this->spaces, current_state, current_pss, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform, order);
-
-          for (unsigned int j = 0; j < spaces_size; j++)
-            delete current_pss[j];
-          delete [] current_pss;
         }
       }
     }
@@ -1136,9 +1157,6 @@ namespace Hermes
 
       // Element-wise parameters for WeakForm.
       (const_cast<WeakForm<Scalar>*>(current_wf))->set_active_state(current_state->e);
-
-      // Do we have to recalculate the data for this state even if the cache contains the data?
-      bool changedInLastAdaptation = this->do_not_use_cache ? true : this->state_needs_recalculation(current_als, current_state);
 
       // Assembly lists for surface forms.
       AsmList<Scalar>** current_alsSurface = NULL;
@@ -2752,6 +2770,7 @@ namespace Hermes
         int order = this->order;
 
         this->fnsSurface = new Func<double>***[this->nvert];
+        memset(this->fnsSurface, NULL, sizeof(Func<double>***) * this->nvert);
         this->asmlistSurfaceCnt = new int*[this->nvert];
 
         for (current_state->isurf = 0; current_state->isurf < this->nvert; current_state->isurf++)
@@ -2816,25 +2835,28 @@ namespace Hermes
 
       if(this->fnsSurface != NULL)
       {
-        for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
+        for(unsigned int edge_i = 0; edge_i < nvert; edge_i++)
         {
-          for(unsigned int edge_i = 0; edge_i < nvert; edge_i++)
-          {
-            if(this->fnsSurface[space_i][edge_i] == NULL)
-              continue;
-            delete [] this->jacobian_x_weightsSurface[edge_i];
-            this->geometrySurface[edge_i]->free();
-            delete this->geometrySurface[edge_i];
+          if(this->fnsSurface[edge_i] == NULL)
+            continue;
 
-            for(unsigned int i = 0; i < this->asmlistSurfaceCnt[space_i][edge_i]; i++)
+          this->geometrySurface[edge_i]->free();
+          delete this->geometrySurface[edge_i];
+          delete [] this->jacobian_x_weightsSurface[edge_i];
+
+          for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
+          {
+            if(this->fnsSurface[edge_i][space_i] == NULL)
+              continue;
+            for(unsigned int i = 0; i < this->asmlistSurfaceCnt[edge_i][space_i]; i++)
             {
-              this->fnsSurface[space_i][edge_i][i]->free_fn();
-              delete this->fnsSurface[space_i][edge_i][i];
+              this->fnsSurface[edge_i][space_i][i]->free_fn();
+              delete this->fnsSurface[edge_i][space_i][i];
             }
-            delete [] this->fnsSurface[space_i][edge_i];
+            delete [] this->fnsSurface[edge_i][space_i];
           }
-          delete [] this->fnsSurface[space_i];
-          delete [] this->asmlistSurfaceCnt[space_i];
+          delete [] this->fnsSurface[edge_i];
+          delete [] this->asmlistSurfaceCnt[edge_i];
         }
 
         delete [] this->fnsSurface;
@@ -2860,7 +2882,8 @@ namespace Hermes
     DiscreteProblemCache<Scalar>::~DiscreteProblemCache()
     {
       for(int i = 0; i < this->recordCount; i++)
-        delete this->recordTable[i];
+        if(this->recordTable[i] != NULL)
+          delete this->recordTable[i];
 
       delete [] recordTable;
 
@@ -2868,19 +2891,28 @@ namespace Hermes
         if (hashTable[i] != NULL)
           delete hashTable[i];
 
-      free(hashTable);
+      ::free(hashTable);
     }
 
     template<typename Scalar>
-    typename DiscreteProblemCache<Scalar>::CacheRecord* DiscreteProblemCache<Scalar>::get(int rep_id, int rep_sub_idx, int rep_i) const
+    int DiscreteProblemCache<Scalar>::get(int rep_id, int rep_sub_idx, int rep_i) const
     {
       int hash = this->hashFunction(rep_id, rep_sub_idx, rep_i);
       while (hashTable[hash] != NULL && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
         hash = (hash + 1) % hash_table_size;
       if (hashTable[hash] == NULL)
-        return NULL;
+        return 0;
       else
-        return hashTable[hash]->pointer;
+        return hash;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemCache<Scalar>::remove(int hash)
+    {
+      delete this->recordTable[hashTable[hash]->cache_record_index];
+      this->recordTable[hashTable[hash]->cache_record_index] = NULL;
+      delete hashTable[hash];
+      hashTable[hash] = NULL;
     }
 
     template<typename Scalar>
@@ -2897,17 +2929,17 @@ namespace Hermes
       int hash = this->hashFunction(rep_id, rep_sub_idx, rep_i);
       while (hashTable[hash] != NULL && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
         hash = (hash + 1) % hash_table_size;
-      if (hashTable[hash] != NULL)
-        delete hashTable[hash];
       CacheRecord* new_record = new CacheRecord();
 #pragma omp critical(record_count_increase)
-      recordTable[recordCount++] = new_record;
-      hashTable[hash] = new StateHash(rep_id, rep_sub_idx, rep_i, new_record);
+      {
+        recordTable[recordCount] = new_record;
+        hashTable[hash] = new StateHash(rep_id, rep_sub_idx, rep_i, recordCount++);
+      }
       return new_record;
     }
 
     template<typename Scalar>
-    DiscreteProblemCache<Scalar>::StateHash::StateHash(int rep_id, int rep_sub_idx, int rep_i, CacheRecord* pointer) : rep_id(rep_id), rep_sub_idx(rep_sub_idx), rep_i(rep_i), pointer(pointer) {};
+    DiscreteProblemCache<Scalar>::StateHash::StateHash(int rep_id, int rep_sub_idx, int rep_i, int cache_record_index) : rep_id(rep_id), rep_sub_idx(rep_sub_idx), rep_i(rep_i), cache_record_index(cache_record_index) {};
 
     template<typename Scalar>
     int DiscreteProblemCache<Scalar>::hashFunction(int rep_id, int rep_sub_idx, int rep_i) const

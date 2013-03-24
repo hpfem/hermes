@@ -124,7 +124,7 @@ namespace Hermes
               return NULL;
           node = child_node;
         }
-        if(!added)
+        if(!added && node->data != NULL)
           to_add = false;
         return node;
       }

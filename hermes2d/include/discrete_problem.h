@@ -89,9 +89,11 @@ namespace Hermes
         friend class DiscreteProblem<Scalar>;
       };
 
-      CacheRecord* get(int rep_id, int rep_sub_idx, int rep_i) const;
+      int get(int rep_id, int rep_sub_idx, int rep_i) const;
 
       CacheRecord* put(int rep_id, int rep_sub_idx, int rep_i);
+
+      void remove(int hash);
 
     private:
 
@@ -108,12 +110,12 @@ namespace Hermes
       class StateHash
       {
       public:
-        StateHash(int rep_id, int rep_sub_idx, int rep_i, CacheRecord* pointer);
+        StateHash(int rep_id, int rep_sub_idx, int rep_i, int cache_record_index);
 
         int rep_id;
         int rep_sub_idx;
         int rep_i;
-        CacheRecord* pointer;
+        int cache_record_index;
       };
 
       StateHash **hashTable;
