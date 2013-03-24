@@ -920,6 +920,7 @@ namespace Hermes
     void RefMap::init_node(Node* pp)
     {
       memset(pp->inv_ref_map, 0, num_tables * sizeof(double2x2*));
+      memset(pp->jacobian, 0, num_tables * sizeof(double*));
       memset(pp->second_ref_map, 0, num_tables * sizeof(double3x2*));
       memset(pp->phys_x, 0, num_tables * sizeof(double*));
       memset(pp->phys_y, 0, num_tables * sizeof(double*));
@@ -932,13 +933,19 @@ namespace Hermes
       for (int i = 0; i < num_tables; i++)
       {
         if(node->inv_ref_map[i] != NULL)
-        {
           delete [] node->inv_ref_map[i];
+
+        if(node->jacobian[i] != NULL)
           delete [] node->jacobian[i];
-        }
-        if(node->second_ref_map[i] != NULL) delete [] node->second_ref_map[i];
-        if(node->phys_x[i] != NULL) delete [] node->phys_x[i];
-        if(node->phys_y[i] != NULL) delete [] node->phys_y[i];
+
+        if(node->second_ref_map[i] != NULL)
+          delete [] node->second_ref_map[i];
+
+        if(node->phys_x[i] != NULL)
+          delete [] node->phys_x[i];
+
+        if(node->phys_y[i] != NULL)
+          delete [] node->phys_y[i];
       }
 
       for (int i = 0; i < 4; i++)
@@ -948,12 +955,33 @@ namespace Hermes
       delete node;
     }
 
+     void RefMap::update_cur_node()
+    {
+      bool to_add = true;
+      SubElementMap<Node>::Node* node_array = this->nodes.get(sub_idx, to_add);
+      if(to_add)
+      {
+        cur_node = new Node;
+        init_node(cur_node);
+        node_array->data = cur_node;
+      }
+      else
+        cur_node = node_array->data;
+    }
+
+    void RefMap::force_transform(uint64_t sub_idx, Trf* ctm)
+    {
+      this->sub_idx = sub_idx;
+      stack[top] = *ctm;
+      this->ctm = stack + top;
+      update_cur_node();
+      if(is_const)
+        calc_const_inv_ref_map();
+    }
+
     void RefMap::free()
     {
-      std::map<uint64_t, Node*>::iterator it;
-
-      for (it = nodes.begin(); it != nodes.end(); ++it)
-        free_node(it->second);
+      nodes.run_for_all(Node::DeallocationFunction);
       nodes.clear();
       if(overflow != NULL)
       {

@@ -232,6 +232,7 @@ namespace Hermes
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
         for (int j = 0; j < H2D_SOLUTION_ELEMENT_CACHE_SIZE; j++)
         {
+          tables[i][j].run_for_all(Node::DeallocationFunction);
           tables[i][j].clear();
           elems[i][j] = NULL;
         }
@@ -827,6 +828,7 @@ namespace Hermes
       // if not found, free the oldest one and use its slot
       if(cur_elem >= H2D_SOLUTION_ELEMENT_CACHE_SIZE)
       {
+        tables[this->cur_quad][oldest[this->cur_quad]].run_for_all(Node::DeallocationFunction);
         tables[this->cur_quad][oldest[this->cur_quad]].clear();
         elems[this->cur_quad][oldest[this->cur_quad]] = NULL;
 
@@ -1143,7 +1145,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        ::tc_free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;

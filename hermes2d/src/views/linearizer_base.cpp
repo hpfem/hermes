@@ -58,14 +58,14 @@ namespace Hermes
       {
         if(tris != NULL)
         {
-          ::free(tris);
+          ::tc_free(tris);
           tris = NULL;
 					::free(tri_markers);
 					tri_markers = NULL;
         }
         if(edges != NULL)
         {
-          ::free(edges);
+          ::tc_free(edges);
           edges = NULL;
 					::free(edge_markers);
 					edge_markers = NULL;

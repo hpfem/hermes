@@ -61,7 +61,7 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
           if(overflow_nodes->present(i))
-            ::free(overflow_nodes->get(i));
+            ::tc_free(overflow_nodes->get(i));
         delete overflow_nodes;
       }
       nodes = new LightArray<Node *>;
@@ -130,8 +130,9 @@ namespace Hermes
       if(nodes->present(order))
       {
         assert(nodes->get(order) == cur_node);
-        ::free(nodes->get(order));
+        ::tc_free(nodes->get(order));
       }
+
       nodes->add(node, order);
       cur_node = node;
     }
@@ -142,13 +143,16 @@ namespace Hermes
 
       for(unsigned int i = 0; i < tables.get_size(); i++)
         if(tables.present(i))
+        {
+          tables.get(i)->run_for_all(Node::DeallocationFunction);
           delete tables.get(i);
+        }
 
         if(overflow_nodes != NULL)
         {
           for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
             if(overflow_nodes->present(i))
-              ::free(overflow_nodes->get(i));
+              ::tc_free(overflow_nodes->get(i));
           delete overflow_nodes;
         }
     }

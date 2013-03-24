@@ -917,7 +917,7 @@ namespace Hermes
 
       for(int i = 0; i < num_states; i++)
         delete states[i];
-      ::free(states);
+      free(states);
 
       for(unsigned int i = 0; i < num_threads_used; i++)
       {
@@ -999,77 +999,53 @@ namespace Hermes
       int order = this->wf->global_integration_order_set ? this->wf->global_integration_order : 0;
       if(order == 0)
       {
-        Hermes::vector<MatrixFormVol<Scalar>*> current_mfvol = current_wf->mfvol;
-        Hermes::vector<VectorFormVol<Scalar>*> current_vfvol = current_wf->vfvol;
-
-        for(int current_mfvol_i = 0; current_mfvol_i < current_mfvol.size(); current_mfvol_i++)
+        for(int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
         {
-          if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
+          MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
+          if(!form_to_be_assembled(current_mfvol, current_state))
             continue;
-          current_mfvol[current_mfvol_i]->wf = current_wf;
-          int orderTemp = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
+          current_mfvol->wf = current_wf;
+          int orderTemp = calc_order_matrix_form(current_mfvol, current_refmaps, current_u_ext, current_state);
           if(order < orderTemp)
             order = orderTemp;
         }
 
-        for(int current_vfvol_i = 0; current_vfvol_i < current_vfvol.size(); current_vfvol_i++)
+        for(int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
         {
-          if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
+          VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
+          if(!form_to_be_assembled(current_vfvol, current_state))
             continue;
-          current_vfvol[current_vfvol_i]->wf = current_wf;
-          int orderTemp = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
+          current_vfvol->wf = current_wf;
+          int orderTemp = calc_order_vector_form(current_vfvol, current_refmaps, current_u_ext, current_state);
           if(order < orderTemp)
             order = orderTemp;
-        }
-
-        if(current_state->isBnd)
-        {
-          for(int current_mfvol_i = 0; current_mfvol_i < current_mfvol.size(); current_mfvol_i++)
-          {
-            if(!form_to_be_assembled(current_mfvol[current_mfvol_i], current_state))
-              continue;
-            current_mfvol[current_mfvol_i]->wf = current_wf;
-            int orderTemp = calc_order_matrix_form(current_mfvol[current_mfvol_i], current_refmaps, current_u_ext, current_state);
-            if(order < orderTemp)
-              order = orderTemp;
-          }
-          for(int current_vfvol_i = 0; current_vfvol_i < current_vfvol.size(); current_vfvol_i++)
-          {
-            if(!form_to_be_assembled(current_vfvol[current_vfvol_i], current_state))
-              continue;
-            current_vfvol[current_vfvol_i]->wf = current_wf;
-            int orderTemp = calc_order_vector_form(current_vfvol[current_vfvol_i], current_refmaps, current_u_ext, current_state);
-            if(order < orderTemp)
-              order = orderTemp;
-          }
         }
 
         // Surface forms.
         if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
         {
-          Hermes::vector<MatrixFormSurf<Scalar>*> current_mfsurf = current_wf->mfsurf;
-          Hermes::vector<VectorFormSurf<Scalar>*> current_vfsurf = current_wf->vfsurf;
-
           for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
           {
             if(!current_state->bnd[current_state->isurf])
               continue;
-            for(int current_mfsurf_i = 0; current_mfsurf_i < current_mfsurf.size(); current_mfsurf_i++)
+            for(int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
             {
-              if(!form_to_be_assembled(current_mfsurf[current_mfsurf_i], current_state))
+              MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
+              if(!form_to_be_assembled(current_mfsurf, current_state))
                 continue;
-              current_mfsurf[current_mfsurf_i]->wf = current_wf;
-              int orderTemp = calc_order_matrix_form(current_mfsurf[current_mfsurf_i], current_refmaps, current_u_ext, current_state);
+              current_mfsurf->wf = current_wf;
+              int orderTemp = calc_order_matrix_form(current_mfsurf, current_refmaps, current_u_ext, current_state);
               if(order < orderTemp)
                 order = orderTemp;
             }
 
-            for(int current_vfsurf_i = 0; current_vfsurf_i < current_vfsurf.size(); current_vfsurf_i++)
+            for(int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
             {
-              if(!form_to_be_assembled(current_vfsurf[current_vfsurf_i], current_state))
+              VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
+              if(!form_to_be_assembled(current_vfsurf, current_state))
                 continue;
-              current_vfsurf[current_vfsurf_i]->wf = current_wf;
-              int orderTemp = calc_order_vector_form(current_vfsurf[current_vfsurf_i], current_refmaps, current_u_ext, current_state);
+              current_vfsurf->wf = current_wf;
+              int orderTemp = calc_order_vector_form(current_vfsurf, current_refmaps, current_u_ext, current_state);
               if(order < orderTemp)
                 order = orderTemp;
             }
@@ -2732,7 +2708,9 @@ namespace Hermes
     void DiscreteProblemCache<Scalar>::CacheRecord::init(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order)
     {
       int spaces_size = spaces.size();
+      this->spaceCnt = spaces_size;
       this->fns = new Func<double>**[spaces_size];
+      this->fnsSurface = NULL;
       this->asmlistCnt = new int[spaces_size];
       this->asmlistIdx = new int*[spaces_size];
 
@@ -2759,9 +2737,9 @@ namespace Hermes
           current_pss[space_i]->set_active_shape(current_als[space_i]->idx[j]);
           this->fns[space_i][j] = init_fn(current_pss[space_i], current_refmaps[space_i], order);
         }
-
-        this->n_quadrature_points = DiscreteProblem<Scalar>::init_geometry_points(current_refmaps[space_i], this->order, this->geometry, this->jacobian_x_weights);
       }
+
+      this->n_quadrature_points = DiscreteProblem<Scalar>::init_geometry_points(current_refmaps[rep_space_i], this->order, this->geometry, this->jacobian_x_weights);
 
       if(current_state->isBnd && (current_wf->mfsurf.size() > 0 || current_wf->vfsurf.size() > 0))
       {
@@ -2810,6 +2788,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    DiscreteProblemCache<Scalar>::CacheRecord::~CacheRecord()
+    {
+      this->free();
+    }
+
+    template<typename Scalar>
     void DiscreteProblemCache<Scalar>::CacheRecord::free()
     {
       for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
@@ -2824,6 +2808,7 @@ namespace Hermes
       }
       delete [] this->fns;
       delete [] this->asmlistCnt;
+      delete [] this->asmlistIdx;
 
       delete [] this->jacobian_x_weights;
       this->geometry->free();
@@ -2868,18 +2853,22 @@ namespace Hermes
     DiscreteProblemCache<Scalar>::DiscreteProblemCache() : recordCount(0), size(DEFAULT_SIZE), hash_table_size(DEFAULT_HASH_TABLE_SIZE)
     {
       recordTable = new CacheRecord*[size];
-      hashTable = (StateHash**)(malloc(sizeof(StateHash*) * hash_table_size));
-      memset(this->hashTable, 0, hash_table_size*sizeof(StateHash*));
+      hashTable = (StateHash**)(calloc(hash_table_size, sizeof(StateHash*)));
     }
 
     template<typename Scalar>
     DiscreteProblemCache<Scalar>::~DiscreteProblemCache()
     {
       for(int i = 0; i < this->recordCount; i++)
-      {
         delete this->recordTable[i];
-      }
-      ::free(hashTable);
+
+      delete [] recordTable;
+
+      for(int i = 0; i < this->hash_table_size; i++)
+        if (hashTable[i] != NULL)
+          delete hashTable[i];
+
+      free(hashTable);
     }
 
     template<typename Scalar>
@@ -2911,6 +2900,7 @@ namespace Hermes
       if (hashTable[hash] != NULL)
         delete hashTable[hash];
       CacheRecord* new_record = new CacheRecord();
+#pragma omp critical(record_count_increase)
       recordTable[recordCount++] = new_record;
       hashTable[hash] = new StateHash(rep_id, rep_sub_idx, rep_i, new_record);
       return new_record;

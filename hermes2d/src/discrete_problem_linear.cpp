@@ -116,8 +116,6 @@ namespace Hermes
       int num_states;
       Traverse::State** states = trav_master.get_states(meshes, num_states);
 
-      this->calculate_cache(states, num_states, num_threads_used, refmaps, NULL, als, alsSurface, weakforms);
-
       Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[num_threads_used];
       for(unsigned int i = 0; i < num_threads_used; i++)
       {
@@ -144,8 +142,47 @@ namespace Hermes
         int end = (num_states / num_threads_used) * (thread_number + 1);
         if(thread_number == num_threads_used - 1)
           end = num_states;
+
+        PrecalcShapeset** current_pss = new PrecalcShapeset*[spaces_size];
+        for (unsigned int j = 0; j < spaces_size; j++)
+          current_pss[j] = new PrecalcShapeset(spaces[j]->shapeset);
+
         for(int state_i = start; state_i < end; state_i++)
         {
+          Traverse::State* current_state = states[state_i];
+
+          assert(current_state->rep != NULL);
+
+          AsmList<Scalar>** current_als = als[thread_number];
+          AsmList<Scalar>*** current_als_surface = alsSurface[thread_number];
+
+          DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
+          if(!this->state_needs_recalculation(current_als, current_state))
+            continue;
+          else
+            cache_record = this->cache.put(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
+
+          RefMap** current_refmaps = refmaps[thread_number];
+          Solution<Scalar>** current_u_ext = NULL;
+          WeakForm<Scalar>* current_weakform = weakforms[thread_number];
+
+          for(int j = 0; j < this->spaces_size; j++)
+          {
+            if(current_state->e[j] != NULL)
+            {
+              current_pss[j]->set_active_element(current_state->e[j]);
+              current_pss[j]->set_transform(current_state->sub_idx[j]);
+              current_refmaps[j]->set_active_element(current_state->e[j]);
+              current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
+
+              spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
+            }
+          }
+
+          int order = this->calculate_order(current_state, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform);
+
+          cache_record->init(this->spaces, current_state, current_pss, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform, order);
+
           if(this->caughtException != NULL)
             break;
           try
@@ -182,13 +219,17 @@ namespace Hermes
               this->caughtException = new std::exception(e);
           }
         }
+
+        for (unsigned int j = 0; j < spaces_size; j++)
+          delete current_pss[j];
+        delete [] current_pss;
       }
 
       deinit_assembling(refmaps, NULL, als, alsSurface, weakforms);
 
       for(int i = 0; i < num_states; i++)
         delete states[i];
-      ::free(states);
+      free(states);
 
       for(unsigned int i = 0; i < num_threads_used; i++)
       {

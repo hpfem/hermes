@@ -597,13 +597,14 @@ namespace Hermes
         Traverse::State** states = trav_master.get_states(meshes, num_states);
         int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 
-#pragma omp parallel num_threads(num_threads_used)
+#pragma omp parallel shared(trav_master) num_threads(num_threads_used)
         {
           int thread_number = omp_get_thread_num();
           int start = (num_states / num_threads_used) * thread_number;
           int end = (num_states / num_threads_used) * (thread_number + 1);
           if(thread_number == num_threads_used - 1)
             end = num_states;
+
           for(int state_i = start; state_i < end; state_i++)
           {
             try
@@ -615,10 +616,10 @@ namespace Hermes
               fns[thread_number][1]->set_active_element(current_state->e[1]);
               fns[thread_number][1]->set_transform(current_state->sub_idx[1]);
 
-              fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
-              fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
-              double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
-              double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
+              fns[thread_number][0]->set_quad_order(0, xitem);
+              fns[thread_number][1]->set_quad_order(0, yitem);
+              double* xval = fns[thread_number][0]->get_values(component_x, value_type_x);
+              double* yval = fns[thread_number][1]->get_values(component_y, value_type_y);
 
               for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
               {
@@ -640,15 +641,7 @@ namespace Hermes
                 this->caughtException = new Hermes::Exceptions::Exception(e.what());
             }
           }
-        }
 
-#pragma omp parallel shared(trav_master) num_threads(num_threads_used)
-        {
-          int thread_number = omp_get_thread_num();
-          int start = (num_states / num_threads_used) * thread_number;
-          int end = (num_states / num_threads_used) * (thread_number + 1);
-          if(thread_number == num_threads_used - 1)
-            end = num_states;
           for(int state_i = start; state_i < end; state_i++)
           {
             try
@@ -660,26 +653,26 @@ namespace Hermes
               fns[thread_number][1]->set_active_element(current_state->e[1]);
               fns[thread_number][1]->set_transform(current_state->sub_idx[1]);
 
-              fns[omp_get_thread_num()][0]->set_quad_order(0, xitem);
-              fns[omp_get_thread_num()][1]->set_quad_order(0, yitem);
-              double* xval = fns[omp_get_thread_num()][0]->get_values(component_x, value_type_x);
-              double* yval = fns[omp_get_thread_num()][1]->get_values(component_y, value_type_y);
+              fns[thread_number][0]->set_quad_order(0, xitem);
+              fns[thread_number][1]->set_quad_order(0, yitem);
+              double* xval = fns[thread_number][0]->get_values(component_x, value_type_x);
+              double* yval = fns[thread_number][1]->get_values(component_y, value_type_y);
               if(xval == NULL || yval == NULL)
               {
                 throw Hermes::Exceptions::Exception("Item not defined in the solution in Linearizer::process_solution.");
               }
 
               if(xdisp != NULL)
-                fns[omp_get_thread_num()][2]->set_quad_order(0, H2D_FN_VAL);
+                fns[thread_number][2]->set_quad_order(0, H2D_FN_VAL);
               if(ydisp != NULL)
-                fns[omp_get_thread_num()][xdisp == NULL ? 2 : 3]->set_quad_order(0, H2D_FN_VAL);
+                fns[thread_number][xdisp == NULL ? 2 : 3]->set_quad_order(0, H2D_FN_VAL);
 
               double *dx = NULL;
               double *dy = NULL;
               if(xdisp != NULL)
-                dx = fns[omp_get_thread_num()][2]->get_fn_values();
+                dx = fns[thread_number][2]->get_fn_values();
               if(ydisp != NULL)
-                dy = fns[omp_get_thread_num()][xdisp == NULL ? 2 : 3]->get_fn_values();
+                dy = fns[thread_number][xdisp == NULL ? 2 : 3]->get_fn_values();
 
               int iv[H2D_MAX_NUMBER_VERTICES];
               for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
@@ -687,14 +680,14 @@ namespace Hermes
                 double fx = xval[i];
                 double fy = yval[i];
 
-                double x_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_x(0)[i];
-                double y_disp = fns[omp_get_thread_num()][0]->get_refmap()->get_phys_y(0)[i];
+                double x_disp = fns[thread_number][0]->get_refmap()->get_phys_x(0)[i];
+                double y_disp = fns[thread_number][0]->get_refmap()->get_phys_y(0)[i];
                 if(this->xdisp != NULL)
                   x_disp += dmult * dx[i];
                 if(this->ydisp != NULL)
                   y_disp += dmult * dy[i];
 
-                iv[i] = this->get_vertex(-fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, -fns[omp_get_thread_num()][0]->get_active_element()->vn[i]->id, x_disp, y_disp, fx, fy);
+                iv[i] = this->get_vertex(-fns[thread_number][0]->get_active_element()->vn[i]->id, -fns[thread_number][0]->get_active_element()->vn[i]->id, x_disp, y_disp, fx, fy);
 
                 if(this->caughtException != NULL)
                   continue;
@@ -702,9 +695,9 @@ namespace Hermes
 
               // recur to sub-elements
               if(current_state->e[0]->is_triangle())
-                process_triangle(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
+                process_triangle(fns[thread_number], iv[0], iv[1], iv[2], 0, NULL, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
               else
-                process_quad(fns[omp_get_thread_num()], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
+                process_quad(fns[thread_number], iv[0], iv[1], iv[2], iv[3], 0, NULL, NULL, NULL, NULL, NULL, current_state->e[0]->is_curved());
 
               for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
                 process_edge(iv[i], iv[current_state->e[0]->next_vert(i)], current_state->e[0]->en[i]->marker);
@@ -724,6 +717,8 @@ namespace Hermes
 
         for(int i = 0; i < num_states; i++)
           delete states[i];
+
+        ::tc_free(states);
 
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
@@ -762,20 +757,20 @@ namespace Hermes
           ydisp->set_quad_2d(old_quad_y_disp);
 
         // clean up
-        ::free(this->hash_table);
-        ::free(this->info);
+        ::tc_free(this->hash_table);
+        ::tc_free(this->info);
       }
 
       void Vectorizer::free()
       {
         if(verts != NULL)
         {
-          ::free(verts);
+          ::tc_free(verts);
           verts = NULL;
         }
         if(dashes != NULL)
         {
-          ::free(dashes);
+          ::tc_free(dashes);
           dashes = NULL;
         }
 

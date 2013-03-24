@@ -58,7 +58,7 @@ namespace Hermes
     template<typename Scalar>
     L2Space<Scalar>::~L2Space()
     {
-      ::free(ldata);
+      ::tc_free(ldata);
       if(this->own_shapeset)
         delete this->shapeset;
     }

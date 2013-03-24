@@ -26,6 +26,8 @@ namespace Hermes
     class SubElementMap
     {
       template<typename Scalar> friend class Function;
+      friend class RefMap;
+      typedef void (*ProcessingFunction)(T* data);
     public:
       SubElementMap()
       {
@@ -38,13 +40,20 @@ namespace Hermes
       {
         this->root.clear_subtree();
         memset(this->root.children, 0, 8 * sizeof(Node*));
+        this->root.data = NULL;
+      }
+
+      void run_for_all(ProcessingFunction f)
+      {
+        run_for_node(&this->root, f);
+        this->root.data = NULL;
       }
 
     private:
       class Node
       {
       public:
-        Node()
+        Node() : data(NULL)
         {
           init();
         }
@@ -73,10 +82,25 @@ namespace Hermes
       };
 
     public:
+      void run_for_node(Node* node, ProcessingFunction f)
+      {
+        for(int i = 0; i < 8; i++)
+        {
+          if(node->children[i] != NULL)
+            run_for_node(node->children[i], f);
+        }
+        if(node->data != NULL)
+          f(node->data);
+      }
+
       Node* get(uint64_t sub_idx, bool& to_add)
       {
         if(sub_idx == 0)
+        {
+          if(root.data != NULL)
+            to_add = false;
           return &root;
+        }
         Node* node = &root;
         bool added = false;
         int sons[Transformable::H2D_MAX_TRN_LEVEL];

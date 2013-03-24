@@ -184,10 +184,14 @@ namespace Hermes
 
         Scalar data[1];       ///< value tables. The length may vary.
 
-      private:
-        Node(const Node& org) {}; ///< Copy constructor is disabled.
-
-        Node& operator=(const Node& other) { return *this; }; ///< Assignment is not allowed.
+      public:
+        static void DeallocationFunction(LightArray<Node*>* data)
+        {
+          for(unsigned int k = 0; k < data->get_size(); k++)
+            if(data->present(k))
+              ::tc_free(data->get(k));
+          delete data;
+        }
       };
 
       /// \brief Returns the polynomial degree of the function at given edge. To be overridden in derived classes.

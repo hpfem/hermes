@@ -450,7 +450,7 @@ namespace Hermes
           int* parents;
           parents = meshes[i]->regularize(regularize);
           this->spaces[i]->distribute_orders(meshes[i], parents);
-          ::free(parents);
+          ::tc_free(parents);
         }
       }
 

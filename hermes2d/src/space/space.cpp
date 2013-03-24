@@ -142,8 +142,8 @@ namespace Hermes
 		void Space<double>::free()
 		{
 			free_bc_data();
-			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
-			if(esize) { ::free(edata); edata = 0; edata = NULL; }
+			if(nsize) { ::tc_free(ndata); nsize = 0; ndata = NULL; }
+			if(esize) { ::tc_free(edata); edata = 0; edata = NULL; }
 			this->seq = -1;
 		}
 
@@ -151,8 +151,8 @@ namespace Hermes
 		void Space<std::complex<double> >::free()
 		{
 			free_bc_data();
-			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
-			if(esize) { ::free(edata); edata = 0; edata = NULL; }
+			if(nsize) { ::tc_free(ndata); nsize = 0; ndata = NULL; }
+			if(esize) { ::tc_free(edata); edata = 0; edata = NULL; }
 			this->seq = -1;
 		}
 

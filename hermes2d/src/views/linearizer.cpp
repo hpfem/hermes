@@ -605,14 +605,15 @@ namespace Hermes
         Traverse::State** states = trav_master.get_states(meshes, num_states);
         int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 
-#pragma omp parallel num_threads(num_threads_used)
+#pragma omp parallel shared(trav_master) num_threads(num_threads_used)
         {
           int thread_number = omp_get_thread_num();
           int start = (num_states / num_threads_used) * thread_number;
           int end = (num_states / num_threads_used) * (thread_number + 1);
           if(thread_number == num_threads_used - 1)
             end = num_states;
-          for(int state_i = start; state_i < end; state_i++)
+
+           for(int state_i = start; state_i < end; state_i++)
           {
             try
             {
@@ -642,15 +643,7 @@ namespace Hermes
                 this->caughtException = new std::exception(e);
             }
           }
-        }
 
-#pragma omp parallel shared(trav_master) num_threads(num_threads_used)
-        {
-          int thread_number = omp_get_thread_num();
-          int start = (num_states / num_threads_used) * thread_number;
-          int end = (num_states / num_threads_used) * (thread_number + 1);
-          if(thread_number == num_threads_used - 1)
-            end = num_states;
           for(int state_i = start; state_i < end; state_i++)
           {
             try
@@ -733,7 +726,7 @@ namespace Hermes
 
         for(int i = 0; i < num_states; i++)
           delete states[i];
-        ::free(states);
+        ::tc_free(states);
 
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
@@ -751,8 +744,8 @@ namespace Hermes
         if(this->caughtException != NULL)
         {
           this->unlock_data();
-          ::free(hash_table);
-          ::free(info);
+          ::tc_free(hash_table);
+          ::tc_free(info);
           throw *(this->caughtException);
         }
 
@@ -779,8 +772,8 @@ namespace Hermes
         sln->set_quad_2d(old_quad);
 
         // clean up
-        ::free(hash_table);
-        ::free(info);
+        ::tc_free(hash_table);
+        ::tc_free(info);
       }
 
       void Linearizer::find_min_max()
@@ -862,12 +855,12 @@ namespace Hermes
       {
         if(verts != NULL)
         {
-          ::free(verts);
+          ::tc_free(verts);
           verts = NULL;
         }
         if(tris_contours != NULL)
         {
-          ::free(tris_contours);
+          ::tc_free(tris_contours);
           tris_contours = NULL;
         }
 

@@ -1003,8 +1003,6 @@ namespace Hermes
 
     void Mesh::refine_all_elements(int refinement, bool mark_as_initial)
     {
-      Element* e;
-
       ninitial = this->get_max_element_id();
 
       if(refinement == -1)
@@ -1012,8 +1010,10 @@ namespace Hermes
 
       elements.set_append_only(true);
 
+      Element* e;
+
       for_all_active_elements(e, this)
-        refine_element_id(e->id, refinement);
+        refine_element(e, refinement);
 
       elements.set_append_only(false);
 

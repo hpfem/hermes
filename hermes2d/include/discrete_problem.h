@@ -68,6 +68,8 @@ namespace Hermes
         void init(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order);
         void free();
 
+        ~CacheRecord();
+
         int spaceCnt;
         int** asmlistIdx;
         int* asmlistCnt;

@@ -39,6 +39,7 @@ namespace Hermes
 
     Api2D::Api2D()
     {
+      int* asf = (int*)malloc(1000);
       signal(SIGABRT, CallStack::dump);
       signal(SIGFPE, CallStack::dump);
       signal(SIGILL, CallStack::dump);

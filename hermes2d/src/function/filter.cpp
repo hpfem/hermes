@@ -154,7 +154,7 @@ namespace Hermes
       if(unimesh)
       {
         for (int i = 0; i < num; i++)
-          ::free(unidata[i]);
+          ::tc_free(unidata[i]);
         delete [] unidata;
       }
     }
@@ -283,7 +283,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        ::tc_free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;
@@ -430,7 +430,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        ::tc_free(this->nodes->get(order));
       }
 
       this->cur_node = node;
@@ -532,7 +532,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        ::tc_free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;
@@ -991,7 +991,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == cur_node);
-        ::free(this->nodes->get(order));
+        ::tc_free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       cur_node = node;
@@ -1077,7 +1077,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::free(this->nodes->get(order));
+        ::tc_free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;

@@ -202,14 +202,16 @@ namespace Hermes
       Scalar* data = node->data;
       for (int j = 0; j < num_components; j++) {
         for (int i = 0; i < 6; i++)
-          if(mask & idx2mask[i][j]) {
+          if(mask & idx2mask[i][j]) 
+          {
             node->values[j][i] = data;
             data += num_points;
           }
       }
 
       total_mem += size;
-      if(max_mem < total_mem) max_mem = total_mem;
+      if(max_mem < total_mem) 
+        max_mem = total_mem;
       return node;
     }
 
@@ -220,6 +222,8 @@ namespace Hermes
       SubElementMap<LightArray<Node*> >::Node* node_array = sub_tables->get(sub_idx, to_add);
       if(to_add)
         node_array->data = this->nodes = new LightArray<Node*>(2, 2);
+      else
+        this->nodes = node_array->data;
     }
 
     template<typename Scalar>
@@ -236,7 +240,7 @@ namespace Hermes
       if(node == NULL) throw Exceptions::NullException(1);
       if(cur_node != NULL) {
         total_mem -= cur_node->size;
-        ::free(cur_node);
+        ::tc_free(cur_node);
       }
       cur_node = node;
     }

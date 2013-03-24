@@ -373,7 +373,7 @@ namespace Hermes
       /// is removed and all elements become top-level elements. Also, total
       /// regularization does not work on curved elements.
       /// Returns an array of new element parents which can be passed to
-      /// Space::distribute_orders(). The array must be deallocated with ::free().
+      /// Space::distribute_orders(). The array must be deallocated with ::tc_free().
       int* regularize(int n);
 
       /// Recursively removes all son elements of the given element and

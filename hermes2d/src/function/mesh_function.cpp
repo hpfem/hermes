@@ -99,7 +99,7 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
           if(this->overflow_nodes->present(i))
-            ::free(this->overflow_nodes->get(i));
+            ::tc_free(this->overflow_nodes->get(i));
         delete this->overflow_nodes;
       }
       free();
@@ -313,7 +313,7 @@ namespace Hermes
       if(this->overflow_nodes != NULL) {
         for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
           if(this->overflow_nodes->present(i))
-            ::free(this->overflow_nodes->get(i));
+            ::tc_free(this->overflow_nodes->get(i));
         delete this->overflow_nodes;
       }
       this->nodes = new LightArray<typename Function<Scalar>::Node *>;

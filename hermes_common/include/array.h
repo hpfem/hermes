@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <limits.h>
+#include "tcmalloc.h"
 
 #ifndef INVALID_IDX
 #define INVALID_IDX      INT_MAX
@@ -304,9 +305,8 @@ namespace Hermes
 
         for(int i = 0; i < page_count; i++)
         {
-          pages[i] = new TYPE[page_size];
-          presence[i] = new bool[page_size];
-          memset(presence[i], 0, page_size * sizeof(bool));
+          pages[i] = (TYPE*)malloc(page_size*sizeof(TYPE));
+          presence[i] = (bool*)calloc(page_size, sizeof(bool));
         }
       }
 
@@ -322,11 +322,11 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < page_count; i++)
         {
-          delete [] pages[i];
-          delete [] presence[i];
+          free(pages[i]);
+          free(presence[i]);
         }
-        ::free(pages);
-        ::free(presence);
+        free(pages);
+        free(presence);
       }
 
       /// Adds a new item to the array.
@@ -343,9 +343,8 @@ namespace Hermes
 
           for(int i = page_count; i < new_page_count; i++)
           {
-            pages[i] = new TYPE[page_size];
-            presence[i] = new bool[page_size];
-            memset(presence[i], 0, page_size * sizeof(bool));
+            pages[i] = (TYPE*)malloc(page_size*sizeof(TYPE));
+            presence[i] = (bool*)calloc(page_size, sizeof(bool));
           }
 
           page_count = new_page_count;
