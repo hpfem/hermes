@@ -2758,7 +2758,10 @@ namespace Hermes
       for(unsigned int space_i = 0; space_i < spaces_size; space_i++)
       {
         if(current_state->e[space_i] == NULL)
+        {
+          this->fns[space_i] = NULL;
           continue;
+        }
         else
           rep_space_i = space_i;
 
@@ -2794,7 +2797,10 @@ namespace Hermes
         for (current_state->isurf = 0; current_state->isurf < this->nvert; current_state->isurf++)
         {
           if(!current_state->bnd[current_state->isurf])
+          {
+            this->fnsSurface[current_state->isurf] = NULL;
             continue;
+          }
           this->n_quadrature_pointsSurface[current_state->isurf] = DiscreteProblem<Scalar>::init_surface_geometry_points(current_refmaps[rep_space_i], order, current_state, this->geometrySurface[current_state->isurf], this->jacobian_x_weightsSurface[current_state->isurf]);
           this->orderSurface[current_state->isurf] = order;
           order = this->order;
@@ -2835,6 +2841,8 @@ namespace Hermes
     {
       for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
       {
+        if(this->fns[space_i] == NULL)
+          continue;
         for(unsigned int i = 0; i < this->asmlistCnt[space_i]; i++)
         {
           this->fns[space_i][i]->free_fn();
