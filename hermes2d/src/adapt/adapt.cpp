@@ -159,6 +159,7 @@ namespace Hermes
 
       for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
         delete [] own_forms[i];
+      delete [] own_forms;
     }
 
     template<typename Scalar>
@@ -397,6 +398,8 @@ namespace Hermes
         this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
       }
 
+      delete [] numberOfCandidates;
+
       this->tick();
       this->info("Adaptivity: refinement selection duration: %f s.", this->last());
 
@@ -450,7 +453,7 @@ namespace Hermes
           int* parents;
           parents = meshes[i]->regularize(regularize);
           this->spaces[i]->distribute_orders(meshes[i], parents);
-          ::tc_free(parents);
+          ::free(parents);
         }
       }
 

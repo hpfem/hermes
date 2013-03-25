@@ -129,11 +129,6 @@ namespace Hermes
       /// Internal.
       virtual void set_active_element(Element* e);
 
-      /// Virtual function handling overflows. Has to be virtual, because
-      /// the necessary iterators in the templated class do not work with GCC.
-      /// Internal.
-      virtual void handle_overflow_idx();
-
       /// See Transformable::push_transform.
       /// Internal.
       virtual void push_transform(int son);

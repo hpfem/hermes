@@ -726,7 +726,7 @@ namespace Hermes
 
         for(int i = 0; i < num_states; i++)
           delete states[i];
-        ::tc_free(states);
+        ::free(states);
 
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
@@ -744,8 +744,8 @@ namespace Hermes
         if(this->caughtException != NULL)
         {
           this->unlock_data();
-          ::tc_free(hash_table);
-          ::tc_free(info);
+          ::free(hash_table);
+          ::free(info);
           throw *(this->caughtException);
         }
 
@@ -772,8 +772,8 @@ namespace Hermes
         sln->set_quad_2d(old_quad);
 
         // clean up
-        ::tc_free(hash_table);
-        ::tc_free(info);
+        ::free(hash_table);
+        ::free(info);
       }
 
       void Linearizer::find_min_max()
@@ -855,12 +855,12 @@ namespace Hermes
       {
         if(verts != NULL)
         {
-          ::tc_free(verts);
+          ::free(verts);
           verts = NULL;
         }
         if(tris_contours != NULL)
         {
-          ::tc_free(tris_contours);
+          ::free(tris_contours);
           tris_contours = NULL;
         }
 

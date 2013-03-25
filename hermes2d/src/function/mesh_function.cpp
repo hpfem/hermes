@@ -95,13 +95,6 @@ namespace Hermes
     MeshFunction<Scalar>::~MeshFunction()
     {
       delete refmap;
-      if(this->overflow_nodes != NULL)
-      {
-        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-          if(this->overflow_nodes->present(i))
-            ::tc_free(this->overflow_nodes->get(i));
-        delete this->overflow_nodes;
-      }
       free();
     }
 
@@ -305,19 +298,6 @@ namespace Hermes
       mode = e->get_mode();
       refmap->set_active_element(e);
       Function<Scalar>::reset_transform();
-    }
-
-    template<typename Scalar>
-    void MeshFunction<Scalar>::handle_overflow_idx()
-    {
-      if(this->overflow_nodes != NULL) {
-        for(unsigned int i = 0; i < this->overflow_nodes->get_size(); i++)
-          if(this->overflow_nodes->present(i))
-            ::tc_free(this->overflow_nodes->get(i));
-        delete this->overflow_nodes;
-      }
-      this->nodes = new LightArray<typename Function<Scalar>::Node *>;
-      this->overflow_nodes = this->nodes;
     }
 
     template<typename Scalar>

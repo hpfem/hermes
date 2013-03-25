@@ -97,9 +97,10 @@ namespace Hermes
       AsmList<Scalar>*** als = new AsmList<Scalar>**[num_threads_used];
       AsmList<Scalar>**** alsSurface = new AsmList<Scalar>***[num_threads_used];
       WeakForm<Scalar>** weakforms = new WeakForm<Scalar>*[num_threads_used];
+      PrecalcShapeset*** pss = new PrecalcShapeset**[num_threads_used];
 
       // Fill these structures.
-      init_assembling(NULL, refmaps, NULL, als, alsSurface, weakforms);
+      init_assembling(NULL, pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);
 
       // Vector of meshes.
       Hermes::vector<MeshSharedPtr > meshes;
@@ -119,6 +120,10 @@ namespace Hermes
       Hermes::vector<Transformable *>* fns = new Hermes::vector<Transformable *>[num_threads_used];
       for(unsigned int i = 0; i < num_threads_used; i++)
       {
+        for (unsigned j = 0; j < this->spaces_size; j++)
+        {
+          fns[i].push_back(pss[i][j]);
+        }
         for (unsigned j = 0; j < this->wf->ext.size(); j++)
         {
           fns[i].push_back(weakforms[i]->ext[j].get());
@@ -143,70 +148,68 @@ namespace Hermes
         if(thread_number == num_threads_used - 1)
           end = num_states;
 
-        PrecalcShapeset** current_pss = new PrecalcShapeset*[spaces_size];
-        for (unsigned int j = 0; j < spaces_size; j++)
-          current_pss[j] = new PrecalcShapeset(spaces[j]->shapeset);
+        AsmList<Scalar>** current_als = als[thread_number];
+        AsmList<Scalar>*** current_als_surface = alsSurface[thread_number];
+        RefMap** current_refmaps = refmaps[thread_number];
+        WeakForm<Scalar>* current_weakform = weakforms[thread_number];
+        PrecalcShapeset** current_pss = pss[thread_number];
+
+        PrecalcShapeset** current_spss = new PrecalcShapeset*[spaces_size];
+        if(DG_matrix_forms_present || DG_vector_forms_present)
+          for (unsigned int j = 0; j < spaces_size; j++)
+            current_spss[j] = new PrecalcShapeset(current_pss[j]);
+
+        int order;
 
         for(int state_i = start; state_i < end; state_i++)
         {
-          Traverse::State* current_state = states[state_i];
-
-          assert(current_state->rep != NULL);
-
-          AsmList<Scalar>** current_als = als[thread_number];
-          AsmList<Scalar>*** current_als_surface = alsSurface[thread_number];
-
-          DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
-          if(!this->state_needs_recalculation(current_als, current_state))
-            continue;
-          else
-            cache_record = this->cache.put(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
-
-          RefMap** current_refmaps = refmaps[thread_number];
-          Solution<Scalar>** current_u_ext = NULL;
-          WeakForm<Scalar>* current_weakform = weakforms[thread_number];
-
-          for(int j = 0; j < this->spaces_size; j++)
-          {
-            if(current_state->e[j] != NULL)
-            {
-              current_pss[j]->set_active_element(current_state->e[j]);
-              current_pss[j]->set_transform(current_state->sub_idx[j]);
-              current_refmaps[j]->set_active_element(current_state->e[j]);
-              current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
-
-              spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
-            }
-          }
-
-          int order = this->calculate_order(current_state, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform);
-
-          cache_record->init(this->spaces, current_state, current_pss, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform, order);
-
           if(this->caughtException != NULL)
             break;
           try
           {
             Traverse::State* current_state = states[state_i];
+
             for(int j = 0; j < fns[thread_number].size(); j++)
             {
               if(current_state->e[j] != NULL)
               {
-                fns[thread_number][j]->set_active_element(current_state->e[j + this->spaces_size]);
-                fns[thread_number][j]->set_transform(current_state->sub_idx[j + this->spaces_size]);
+                fns[thread_number][j]->set_active_element(current_state->e[j]);
+                fns[thread_number][j]->set_transform(current_state->sub_idx[j]);
               }
             }
 
-            RefMap** current_refmaps = refmaps[thread_number];
-            AsmList<Scalar>** current_als = als[thread_number];
-            WeakForm<Scalar>* current_weakform = weakforms[thread_number];
+            for(int j = 0; j < this->spaces_size; j++)
+            {
+              if(current_state->e[j] != NULL)
+              {
+                spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
+                if(DG_matrix_forms_present || DG_vector_forms_present)
+                {
+                  current_spss[j]->set_active_element(current_state->e[j]);
+                  current_spss[j]->set_transform(current_state->sub_idx[j]);
+                }
+                current_refmaps[j]->set_active_element(current_state->e[j]);
+                current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
+              }
+            }
 
-            DiscreteProblemCache<Scalar>::CacheRecord* cache_record = this->cache.get(current_state->rep->id, current_state->rep_subidx, current_state->rep_i);
+            DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
+            if(!this->do_not_use_cache)
+              cache_record = this->get_state_cache(current_state, current_pss, current_refmaps, NULL, current_als, current_als_surface, current_weakform, order);
+            else
+            {
+              cache_record = new DiscreteProblemCache<Scalar>::CacheRecord;
+              order = this->calculate_order(current_state, current_refmaps, NULL, current_weakform);
+              cache_record->init(this->spaces, current_state, current_pss, current_refmaps, NULL, current_als, current_als_surface, current_weakform, order);
+            }
 
             assemble_one_state(cache_record, current_refmaps, NULL, current_als, current_state, current_weakform);
 
-            //if(DG_matrix_forms_present || DG_vector_forms_present)
-            //assemble_one_DG_state(current_pss, current_spss, current_refmaps, current_u_ext, current_als, &current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
+            if(DG_matrix_forms_present || DG_vector_forms_present)
+              assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
+
+            if(this->do_not_use_cache)
+              delete cache_record;
           }
           catch(Hermes::Exceptions::Exception& e)
           {
@@ -220,12 +223,13 @@ namespace Hermes
           }
         }
 
-        for (unsigned int j = 0; j < spaces_size; j++)
-          delete current_pss[j];
-        delete [] current_pss;
+        if(DG_matrix_forms_present || DG_vector_forms_present)
+         for (unsigned int j = 0; j < spaces_size; j++)
+            delete current_spss[j];
+        delete [] current_spss;
       }
 
-      deinit_assembling(refmaps, NULL, als, alsSurface, weakforms);
+      deinit_assembling(pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);
 
       for(int i = 0; i < num_states; i++)
         delete states[i];
@@ -253,8 +257,10 @@ namespace Hermes
 
       Element* e;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+      {
         for_all_active_elements(e, spaces[space_i]->get_mesh())
           spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
+      }
 
       if(this->caughtException != NULL)
         throw *(this->caughtException);

@@ -157,7 +157,8 @@ namespace Hermes
 
     void RefMap::set_active_element(Element* e)
     {
-      if(e != element) free();
+      if(e != element)
+        free();
 
       ref_map_pss.set_active_element(e);
       num_tables = quad_2d->get_num_tables(e->get_mode());
@@ -925,12 +926,13 @@ namespace Hermes
       memset(pp->phys_x, 0, num_tables * sizeof(double*));
       memset(pp->phys_y, 0, num_tables * sizeof(double*));
       memset(pp->tan, 0, sizeof(pp->tan));
+      pp->num_tables = this->num_tables;
     }
 
     void RefMap::free_node(Node* node)
     {
       // destroy all precalculated tables
-      for (int i = 0; i < num_tables; i++)
+      for (int i = 0; i < node->num_tables; i++)
       {
         if(node->inv_ref_map[i] != NULL)
           delete [] node->inv_ref_map[i];
@@ -948,7 +950,7 @@ namespace Hermes
           delete [] node->phys_y[i];
       }
 
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < H2D_MAX_NUMBER_EDGES; i++)
         if(node->tan[i] != NULL)
           delete [] node->tan[i];
 
@@ -981,21 +983,8 @@ namespace Hermes
 
     void RefMap::free()
     {
-      nodes.run_for_all(Node::DeallocationFunction);
+      nodes.run_for_all(DeallocationFunction);
       nodes.clear();
-      if(overflow != NULL)
-      {
-        free_node(overflow); delete overflow; overflow = NULL;
-      }
-    }
-
-    RefMap::Node* RefMap::handle_overflow()
-    {
-      if(overflow != NULL)
-        free_node(overflow);
-      overflow = new Node;
-      init_node(overflow);
-      return overflow;
     }
   }
 }

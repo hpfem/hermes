@@ -189,7 +189,7 @@ namespace Hermes
         {
           for(unsigned int k = 0; k < data->get_size(); k++)
             if(data->present(k))
-              ::tc_free(data->get(k));
+              ::free(data->get(k));
           delete data;
         }
       };
@@ -214,9 +214,6 @@ namespace Hermes
       /// Current Node.
       Node* cur_node;
 
-      /// Nodes for the overflow sub-element transformation.
-      LightArray<Node*>* overflow_nodes;
-
       /// With changed sub-element mapping, there comes the need for a change of the current
       /// Node table nodes.
       void update_nodes_ptr();
@@ -228,15 +225,7 @@ namespace Hermes
 
       int cur_quad;     ///< active quadrature (index into 'quads')
 
-      int total_mem;    ///< total memory in bytes used by the tables
-
-      int max_mem;      ///< peak memory usage
-
       Node* new_node(int mask, int num_points); ///< allocates a new Node structure
-
-      virtual void  handle_overflow_idx() = 0;
-
-      void replace_cur_node(Node* node);
 
       static void check_params(int component, Node* cur_node, int num_components);
 

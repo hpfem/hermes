@@ -68,11 +68,6 @@ namespace Hermes
       /// \brief Frees all precalculated tables.
       virtual void free();
 
-      /// Virtual function handling overflows. Has to be virtual, because
-      /// the necessary iterators in the templated class do not work with GCC.
-      virtual void handle_overflow_idx();
-
-
       /// Returns the index of the active shape (can be negative if the shape is constrained).
       int get_active_shape() const;
 

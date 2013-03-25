@@ -55,19 +55,6 @@ namespace Hermes
       Function<double>::set_quad_2d(quad_2d);
     }
 
-    void PrecalcShapeset::handle_overflow_idx()
-    {
-      if(overflow_nodes != NULL)
-      {
-        for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
-          if(overflow_nodes->present(i))
-            ::tc_free(overflow_nodes->get(i));
-        delete overflow_nodes;
-      }
-      nodes = new LightArray<Node *>;
-      overflow_nodes = nodes;
-    }
-
     void PrecalcShapeset::set_active_shape(int index)
     {
       // Key creation.
@@ -130,7 +117,7 @@ namespace Hermes
       if(nodes->present(order))
       {
         assert(nodes->get(order) == cur_node);
-        ::tc_free(nodes->get(order));
+        ::free(nodes->get(order));
       }
 
       nodes->add(node, order);
@@ -148,13 +135,6 @@ namespace Hermes
           delete tables.get(i);
         }
 
-        if(overflow_nodes != NULL)
-        {
-          for(unsigned int i = 0; i < overflow_nodes->get_size(); i++)
-            if(overflow_nodes->present(i))
-              ::tc_free(overflow_nodes->get(i));
-          delete overflow_nodes;
-        }
     }
 
     extern PrecalcShapeset ref_map_pss;

@@ -137,6 +137,7 @@ namespace Hermes
         }
       }
 
+      tables[this->cur_quad].run_for_all(Node::DeallocationFunction);
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];
@@ -149,12 +150,15 @@ namespace Hermes
     void Filter<Scalar>::free()
     {
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
+      {
+        tables[i].run_for_all(Node::DeallocationFunction);
         tables[i].clear();
+      }
 
       if(unimesh)
       {
         for (int i = 0; i < num; i++)
-          ::tc_free(unidata[i]);
+          ::free(unidata[i]);
         delete [] unidata;
       }
     }
@@ -203,7 +207,7 @@ namespace Hermes
     SimpleFilter<Scalar>::SimpleFilter() : Filter<Scalar>()
     {
     }
-    
+
     template<typename Scalar>
     SimpleFilter<Scalar>::SimpleFilter(Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, const Hermes::vector<int> items)
     {
@@ -283,7 +287,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::tc_free(this->nodes->get(order));
+        ::free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;
@@ -355,7 +359,7 @@ namespace Hermes
       this->unimesh = false;
     }
 
-     ComplexFilter::ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
+    ComplexFilter::ComplexFilter(MeshFunctionSharedPtr<std::complex<double> > solution, int item) : Filter<double>()
     {
       this->num = 0;
       this->unimesh = false;
@@ -373,7 +377,10 @@ namespace Hermes
     void ComplexFilter::free()
     {
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
+      {
+        tables[i].run_for_all(Node::DeallocationFunction);
         tables[i].clear();
+      }
     }
 
     void ComplexFilter::set_quad_2d(Quad2D* quad_2d)
@@ -390,6 +397,7 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
 
+      tables[this->cur_quad].run_for_all(Node::DeallocationFunction);
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];
@@ -430,7 +438,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::tc_free(this->nodes->get(order));
+        ::free(this->nodes->get(order));
       }
 
       this->cur_node = node;
@@ -532,7 +540,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::tc_free(this->nodes->get(order));
+        ::free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;
@@ -661,7 +669,7 @@ namespace Hermes
       this->num = 1;
       Filter<double>::init();
     };
-    
+
     BottomValFilter::~BottomValFilter()
     {
     }
@@ -991,7 +999,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == cur_node);
-        ::tc_free(this->nodes->get(order));
+        ::free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       cur_node = node;
@@ -1015,7 +1023,7 @@ namespace Hermes
     }
 
     VonMisesFilter::VonMisesFilter(MeshFunctionSharedPtr<double>* solutions, int num, double lambda, double mu,
-        int cyl, int item1, int item2): Filter<double>(solutions, num)
+      int cyl, int item1, int item2): Filter<double>(solutions, num)
     {
       this->mu = mu;
       this->lambda = lambda;
@@ -1077,7 +1085,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::tc_free(this->nodes->get(order));
+        ::free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;

@@ -261,7 +261,7 @@ namespace Hermes
       space_type = HERMES_INVALID_SPACE;
     }
 
-    static struct mono_lu_init
+    static class mono_lu_init
     {
     public:
 
@@ -1145,7 +1145,7 @@ namespace Hermes
       if(this->nodes->present(order))
       {
         assert(this->nodes->get(order) == this->cur_node);
-        ::tc_free(this->nodes->get(order));
+        ::free(this->nodes->get(order));
       }
       this->nodes->add(node, order);
       this->cur_node = node;

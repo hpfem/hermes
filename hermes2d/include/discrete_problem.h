@@ -89,11 +89,7 @@ namespace Hermes
         friend class DiscreteProblem<Scalar>;
       };
 
-      int get(int rep_id, int rep_sub_idx, int rep_i) const;
-
-      CacheRecord* put(int rep_id, int rep_sub_idx, int rep_i);
-
-      void remove(int hash);
+      bool get(int rep_id, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
 
     private:
 
@@ -215,9 +211,9 @@ namespace Hermes
       static int init_surface_geometry_points(RefMap* reference_mapping, int& order, Traverse::State* current_state, Geom<double>*& geometry, double*& jacobian_x_weights);
 
     protected:
-      void init_assembling(Scalar* coeff_vec, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms);
+      void init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms, int num_threads);
 
-      void deinit_assembling(RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms);
+      void deinit_assembling(PrecalcShapeset*** pss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms, int num_threads);
 
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
@@ -246,7 +242,7 @@ namespace Hermes
 
       /// Assemble one state - needs recalculation?
       /// \return if one needs to recalculate, the method calculate_cache_records is called.
-      bool state_needs_recalculation(AsmList<Scalar>** current_als, Traverse::State* current_state);
+      typename DiscreteProblemCache<Scalar>::CacheRecord* get_state_cache(Traverse::State* state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int& order);
 
       /// Assemble one state.
       void assemble_one_state(typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, Traverse::State* current_state, WeakForm<Scalar>* current_wf);
@@ -332,7 +328,7 @@ namespace Hermes
       void calculate_cache(Traverse::State** states, int num_states, int num_threads, RefMap*** refmaps, Solution<Scalar>*** current_u_ext, AsmList<Scalar>*** current_als, AsmList<Scalar>**** current_alsSurface, WeakForm<Scalar>** wfs);
       
       /// Order calculation.
-      int calculate_order(Traverse::State* state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf);
+      int calculate_order(Traverse::State* state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf);
 
       /// To turn on / off the cache.
       bool do_not_use_cache;

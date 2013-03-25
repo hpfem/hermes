@@ -233,27 +233,27 @@ namespace Hermes
       {
         if(verts != NULL)
         {
-          ::tc_free(verts);
+          ::free(verts);
           verts = NULL;
         }
         if(lvert != NULL)
         {
-          ::tc_free(lvert);
+          ::free(lvert);
           lvert = NULL;
         }
         if(ltext != NULL)
         {
-          ::tc_free(ltext);
+          ::free(ltext);
           ltext = NULL;
         }
         if(lbox != NULL)
         {
-          ::tc_free(lbox);
+          ::free(lbox);
           lbox = NULL;
         }
         if(tris_orders != NULL)
         {
-          ::tc_free(tris_orders);
+          ::free(tris_orders);
           tris_orders = NULL;
         }
 

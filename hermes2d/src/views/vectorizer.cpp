@@ -718,7 +718,7 @@ namespace Hermes
         for(int i = 0; i < num_states; i++)
           delete states[i];
 
-        ::tc_free(states);
+        ::free(states);
 
         for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
         {
@@ -757,20 +757,20 @@ namespace Hermes
           ydisp->set_quad_2d(old_quad_y_disp);
 
         // clean up
-        ::tc_free(this->hash_table);
-        ::tc_free(this->info);
+        ::free(this->hash_table);
+        ::free(this->info);
       }
 
       void Vectorizer::free()
       {
         if(verts != NULL)
         {
-          ::tc_free(verts);
+          ::free(verts);
           verts = NULL;
         }
         if(dashes != NULL)
         {
-          ::tc_free(dashes);
+          ::free(dashes);
           dashes = NULL;
         }
 

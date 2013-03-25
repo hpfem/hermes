@@ -41,11 +41,9 @@ namespace Hermes
       : Transformable()
     {
       order = 0;
-      max_mem = total_mem = 0;
       cur_node = NULL;
       sub_tables = NULL;
       nodes = NULL;
-      overflow_nodes = NULL;
       memset(quads, 0, sizeof(quads));
     }
 
@@ -209,9 +207,6 @@ namespace Hermes
           }
       }
 
-      total_mem += size;
-      if(max_mem < total_mem) 
-        max_mem = total_mem;
       return node;
     }
 
@@ -232,17 +227,6 @@ namespace Hermes
       this->sub_idx = sub_idx;
       this->ctm = ctm;
       update_nodes_ptr();
-    }
-
-    template<typename Scalar>
-    void Function<Scalar>::replace_cur_node(Node* node)
-    {
-      if(node == NULL) throw Exceptions::NullException(1);
-      if(cur_node != NULL) {
-        total_mem -= cur_node->size;
-        ::tc_free(cur_node);
-      }
-      cur_node = node;
     }
 
     template class HERMES_API Function<double>;

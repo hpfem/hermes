@@ -167,12 +167,8 @@ namespace Hermes
         double* phys_x[H2D_MAX_TABLES];
         double* phys_y[H2D_MAX_TABLES];
         double3* tan[H2D_MAX_NUMBER_EDGES];
-
-       public:
-        static void DeallocationFunction(Node* data)
-        {
-          delete data;
-        }
+        
+        int num_tables;
       };
 
       /// Table of RefMap::Nodes, indexed by a sub-element mapping.
@@ -206,7 +202,12 @@ namespace Hermes
 
       void init_node(Node* pp);
 
-      void free_node(Node* node);
+      static void free_node(Node* node);
+
+      static void DeallocationFunction(Node* data)
+      {
+        free_node(data);
+      }
 
       Node* handle_overflow();
 

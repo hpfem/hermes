@@ -2535,14 +2535,29 @@ namespace Hermes
 
     Quad2DStd::~Quad2DStd()
     {
-      int i;
+      int i, j, k, l;
       if(!--quad_pt_ref)
       {
-        for (i = 0; i <= 3 * max_order[0] + 2; i++)
-          delete [] std_tables_2d_tri[max_order[0] + 1 + i];
+        for (i = 0; i <= max_order[0]; i++)
+        {
+          for (j = 0; j < 3; j++)
+          {
+            k = max_order[0] + 1 + 3*i + j;
+            l = j < 2 ? j + 1 : 0;
+            delete [] std_tables_2d_tri[k];
+          }
+        }
 
-        for (i = 0; i <= 5 * max_order[1] + 4; i++)
+        for (i = 0; i <= max_order[1]; i++)
+        {
           delete [] std_tables_2d_quad[i];
+          for (j = 0; j < 4; j++)
+          {
+            k = max_order[1] + 1 + 4*i + j;
+            l = j < 3 ? j + 1 : 0;
+            delete [] std_tables_2d_quad[k];
+          }
+        }
       }
     }
 
