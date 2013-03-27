@@ -284,6 +284,7 @@ namespace Hermes
 
         Transformations();
         Transformations(const Transformations* t);
+        void operator=(const Transformations* t);
         Transformations(const Hermes::vector<unsigned int>& t);
 
         void copy_from(const Hermes::vector<unsigned int>& t);
@@ -314,12 +315,15 @@ namespace Hermes
       MeshSharedPtr mesh;
 
       /*** Transformations. ***/
+      static const unsigned int H2D_MAX_NEIGHBORS = 32768;
 
-      LightArray< Transformations* > central_transformations;     ///< Array of transformations of the central element to each neighbor
-                                                                  ///< (in a go-down neighborhood; stored as on \c Transformation structure
-                                                                  ///< for each neighbor).
-      LightArray< Transformations* > neighbor_transformations;    ///< Array of transformations of the neighbor to the central element (go-up).
+      Transformations* central_transformations[H2D_MAX_NEIGHBORS];  ///< Array of transformations of the central element to each neighbor
+                                                                    ///< (in a go-down neighborhood; stored as on \c Transformation structure
+                                                                    ///< for each neighbor).
+      unsigned int central_transformations_size;
+      Transformations* neighbor_transformations[H2D_MAX_NEIGHBORS]; ///< Array of transformations of the neighbor to the central element (go-up).
 
+      unsigned int neighbor_transformations_size;
       uint64_t original_central_el_transform;                  ///< Sub-element transformation of any function that comes from the
                                                                ///< assembly, before transforms from \c transformations are pushed to it.
 

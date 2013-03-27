@@ -151,7 +151,6 @@ namespace Hermes
       bool used;     ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
-
       /// Calculates the area of the element. For curved elements, this is only
       /// an approximation: the curvature is not accounted for.
       double get_area();

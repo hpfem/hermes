@@ -116,7 +116,7 @@ namespace Hermes
     {}
 
     template<typename Scalar>
-    void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof) const
+    void L2Space<Scalar>::get_element_assembly_list(Element* e, AsmList<Scalar>* al) const
     {
       if(e->id >= this->esize || this->edata[e->id].order < 0)
         throw Hermes::Exceptions::Exception("Uninitialized element order (id = #%d).", e->id);

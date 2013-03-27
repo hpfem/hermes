@@ -50,7 +50,6 @@ namespace Hermes
     {
       if(spaces.empty())
         throw Exceptions::NullException(2);
-      unsigned int first_dof_running = 0;
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         if(!spaces[i])
@@ -59,7 +58,6 @@ namespace Hermes
         spaces[i]->check();
 
         this->spaces.push_back(spaces.at(i));
-        first_dof_running += spaces.at(i)->get_num_dofs();
       }
       init();
     }
@@ -646,16 +644,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms, int num_threads)
+    void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms, int num_threads_used)
     {
-      for(unsigned int i = 0; i < num_threads; i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {      
         pss[i] = new PrecalcShapeset*[spaces_size];
         for (unsigned int j = 0; j < spaces_size; j++)
           pss[i][j] = new PrecalcShapeset(spaces[j]->shapeset);
       }
 
-      for(unsigned int i = 0; i < num_threads; i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         refmaps[i] = new RefMap*[spaces_size];
         for (unsigned int j = 0; j < spaces_size; j++)
@@ -667,7 +665,7 @@ namespace Hermes
 
       // U_ext functions
       if(!is_linear)
-        for(unsigned int i = 0; i < num_threads; i++)
+        for(unsigned int i = 0; i < num_threads_used; i++)
         {
           if(coeff_vec != NULL)
           {
@@ -705,7 +703,7 @@ namespace Hermes
         }
 
         // Assembly lists
-        for(unsigned int i = 0; i < num_threads; i++)
+        for(unsigned int i = 0; i < num_threads_used; i++)
         {
           als[i] = new AsmList<Scalar>*[spaces_size];
           for (unsigned int j = 0; j < spaces_size; j++)
@@ -713,7 +711,7 @@ namespace Hermes
         }
 
         // Assembly lists
-        for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+        for(unsigned int i = 0; i < num_threads_used; i++)
         {
           alsSurface[i] = new AsmList<Scalar>**[spaces_size];
           for (unsigned int j = 0; j < spaces_size; j++)
@@ -725,7 +723,7 @@ namespace Hermes
         }
 
         // Weakforms.
-        for(unsigned int i = 0; i < num_threads; i++)
+        for(unsigned int i = 0; i < num_threads_used; i++)
         {
           weakforms[i] = this->wf->clone();
           weakforms[i]->cloneMembers(this->wf);
@@ -933,7 +931,7 @@ namespace Hermes
                 if(DG_matrix_forms_present || DG_vector_forms_present)
                 {
                   current_spss[j]->set_active_element(current_state->e[j]);
-                  current_spss[j]->set_transform(current_state->sub_idx[j]);
+                  current_spss[j]->set_master_transform();
                 }
                 current_refmaps[j]->set_active_element(current_state->e[j]);
                 current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
@@ -1026,7 +1024,7 @@ namespace Hermes
       assert(!this->do_not_use_cache);
 
       DiscreteProblemCache<Scalar>::CacheRecord* cache_record = NULL;
-      if(this->cache.get(current_state->rep->id, current_state->rep_subidx, current_state->rep_i, cache_record))
+      if(this->cache.get(current_state->rep, current_state->rep_subidx, current_state->rep_i, cache_record))
       {
         bool reinit = false;
         for(unsigned int i = 0; i < this->spaces_size; i++)
@@ -1866,7 +1864,7 @@ namespace Hermes
       {
         for(unsigned int i = 0; i < current_state->num; i++)
           current_state->e[i]->visited = true;
-
+        
         for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
           bool inner_edge_for_dg = false;
@@ -2059,8 +2057,8 @@ namespace Hermes
         else
           mesh_i = (dynamic_cast<MeshFunction<Scalar>* >(fn[fns_i]))->get_mesh();
         NeighborSearch<Scalar>* ns = neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq);
-        if(ns->central_transformations.present(neighbor_i))
-          ns->central_transformations.get(neighbor_i)->apply_on(fn[fns_i]);
+        if(ns->central_transformations[neighbor_i] != NULL)
+          ns->central_transformations[neighbor_i]->apply_on(fn[fns_i]);
       }
 
       // For neighbor psss.
@@ -2070,8 +2068,8 @@ namespace Hermes
         {
           NeighborSearch<Scalar>* ns = neighbor_searches.get(spaces[idx_i]->get_mesh()->get_seq() - min_dg_mesh_seq);
           npss[idx_i]->set_active_element((*ns->get_neighbors())[neighbor_i]);
-          if(ns->neighbor_transformations.present(neighbor_i))
-            ns->neighbor_transformations.get(neighbor_i)->apply_on(npss[idx_i]);
+          if(ns->neighbor_transformations[neighbor_i])
+            ns->neighbor_transformations[neighbor_i]->apply_on(npss[idx_i]);
         }
       }
 
@@ -2381,11 +2379,11 @@ namespace Hermes
         {
           NeighborSearch<Scalar>* ns = neighbor_searches.get(i);
           if(ns->n_neighbors == 1 &&
-            (ns->central_transformations.get_size() == 0 || ns->central_transformations.get(0)->num_levels == 0))
+            (ns->central_transformations_size == 0 || ns->central_transformations[0]->num_levels == 0))
             continue;
           for(unsigned int j = 0; j < ns->n_neighbors; j++)
-            if(ns->central_transformations.present(j))
-              insert_into_multimesh_tree(root, ns->central_transformations.get(j)->transf, ns->central_transformations.get(j)->num_levels);
+            if(ns->central_transformations[j] != NULL)
+              insert_into_multimesh_tree(root, ns->central_transformations[j]->transf, ns->central_transformations[j]->num_levels);
         }
     }
 
@@ -2492,8 +2490,8 @@ namespace Hermes
       {
         // Find the node corresponding to this neighbor in the tree.
         NeighborNode* node;
-        if(ns->central_transformations.present(i))
-          node = find_node(ns->central_transformations.get(i)->transf, ns->central_transformations.get(i)->num_levels, multimesh_tree);
+        if(ns->central_transformations[i] != NULL)
+          node = find_node(ns->central_transformations[i]->transf, ns->central_transformations[i]->num_levels, multimesh_tree);
         else
           node = multimesh_tree;
 
@@ -2555,15 +2553,15 @@ namespace Hermes
       Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
       running_central_transformations.push_back(new Hermes::vector<unsigned int>);
-      if(ns->central_transformations.present(ith_neighbor))
-        ns->central_transformations.get(ith_neighbor)->copy_to(running_central_transformations.back());
+      if(ns->central_transformations[ith_neighbor])
+        ns->central_transformations[ith_neighbor]->copy_to(running_central_transformations.back());
 
       // Initialize the vector for neighbor transformations->
       Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
       running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
-      if(ns->neighbor_transformations.present(ith_neighbor))
-        ns->neighbor_transformations.get(ith_neighbor)->copy_to(running_neighbor_transformations.back());
+      if(ns->neighbor_transformations[ith_neighbor])
+        ns->neighbor_transformations[ith_neighbor]->copy_to(running_neighbor_transformations.back());
 
       // Delete the current neighbor.
       ns->delete_neighbor(ith_neighbor);
@@ -2590,12 +2588,18 @@ namespace Hermes
         ns->neighbors.push_back(neighbor);
         ns->neighbor_edges.push_back(edge_info);
 
-        if(!ns->central_transformations.present(ns->n_neighbors))
-          ns->central_transformations.add(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
-        if(!ns->neighbor_transformations.present(ns->n_neighbors))
-          ns->neighbor_transformations.add(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
-        ns->central_transformations.get(ns->n_neighbors)->copy_from(*running_central_transformations[i]);
-        ns->neighbor_transformations.get(ns->n_neighbors)->copy_from(*running_neighbor_transformations[i]);
+        if(ns->central_transformations[ns->n_neighbors] == NULL)
+        {
+          ns->central_transformations[ns->n_neighbors] = new typename NeighborSearch<Scalar>::Transformations;
+          ns->central_transformations_size = std::max(ns->central_transformations_size, ns->n_neighbors + 1);
+        }
+        if(!ns->neighbor_transformations[ns->n_neighbors] == NULL)
+        {
+          ns->neighbor_transformations[ns->n_neighbors] = new typename NeighborSearch<Scalar>::Transformations;
+          ns->neighbor_transformations_size = std::max(ns->neighbor_transformations_size, ns->n_neighbors + 1);
+        }
+        ns->central_transformations[ns->n_neighbors]->copy_from(*running_central_transformations[i]);
+        ns->neighbor_transformations[ns->n_neighbors]->copy_from(*running_neighbor_transformations[i]);
 
         ns->n_neighbors++;
       }
@@ -2900,7 +2904,8 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemCache<Scalar>::DiscreteProblemCache() : recordCount(0), size(DEFAULT_SIZE), hash_table_size(DEFAULT_HASH_TABLE_SIZE)
     {
-      recordTable = new CacheRecord*[size];
+      recordTable = (CacheRecord**)(malloc(size * sizeof(CacheRecord*)));
+      hierarchyTable = (int**)(calloc(size, sizeof(int*)));
       hashTable = (StateHash**)(calloc(hash_table_size, sizeof(StateHash*)));
     }
 
@@ -2908,10 +2913,18 @@ namespace Hermes
     DiscreteProblemCache<Scalar>::~DiscreteProblemCache()
     {
       for(int i = 0; i < this->recordCount; i++)
+      {
         if(this->recordTable[i] != NULL)
           delete this->recordTable[i];
+      }
+      for(int i = 0; i < this->size; i++)
+      {
+        if(this->hierarchyTable[i] != NULL)
+          delete this->hierarchyTable[i];
+      }
 
-      delete [] recordTable;
+      ::free(recordTable);
+      ::free(hierarchyTable);
 
       for(int i = 0; i < this->hash_table_size; i++)
         if (hashTable[i] != NULL)
@@ -2921,8 +2934,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool DiscreteProblemCache<Scalar>::get(int rep_id, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
+    bool DiscreteProblemCache<Scalar>::get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
     {
+      int rep_id = rep->id;
+      if(rep->parent != NULL && hierarchyTable[rep->parent->id] != NULL)
+      {
+        for(int i = 0; i < 4; i++)
+        {
+          if(rep->parent->sons[i] == rep)
+          {
+            rep_id = hierarchyTable[rep->parent->id][i];
+            break;
+          }
+        }
+      }
       int hash = this->hashFunction(rep_id, rep_sub_idx, rep_i);
       while (hashTable[hash] != NULL && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
         hash = (hash + 1) % hash_table_size;
@@ -2932,17 +2957,25 @@ namespace Hermes
         {
 #pragma omp critical(record_size_increase)
           {
-            CacheRecord** new_record_table = new CacheRecord*[size*1.5];
-            memcpy(new_record_table, this->recordTable, this->size * sizeof(CacheRecord*));
-            delete [] this->recordTable;
-            this->recordTable = new_record_table;
+            this->hierarchyTable = (int**)realloc(this->hierarchyTable, size * 1.5 * sizeof(int*));
+            memset(this->hierarchyTable, 0, size * 0.5 * sizeof(int*));
             size *= 1.5;
+            this->recordTable = (CacheRecord**)realloc(this->recordTable, size * sizeof(CacheRecord*));
           }
         }
         cache_record = new CacheRecord();
 #pragma omp critical(record_count_increase)
         {
           recordTable[recordCount] = cache_record;
+          if(rep->parent != NULL && hierarchyTable[rep->parent->id] == NULL)
+          {
+            hierarchyTable[rep->parent->id] = new int[4];
+            for(int i = 0; i < 4; i++)
+            {
+              if(rep->parent->sons[i])
+                hierarchyTable[rep->parent->id][i] = rep->parent->sons[i]->id;
+            }
+          }
           hashTable[hash] = new StateHash(rep_id, rep_sub_idx, rep_i, recordCount++);
         }
         return false;

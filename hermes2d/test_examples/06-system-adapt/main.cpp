@@ -73,7 +73,7 @@ const int MESH_REGULARITY = -1;
 // candidates in hp-adaptivity. Default value is 1.0.
 const double CONV_EXP = 1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1.0;
+const double ERR_STOP = 15.0;
 // Adaptivity process stops when the number of degrees of freedom grows over
 // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
@@ -94,11 +94,11 @@ const double K = 100.;
 
 int main(int argc, char* argv[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
+
   // Time measurement.
   Hermes::Mixins::TimeMeasurable cpu_time;
   cpu_time.tick();
-
-  Hermes2DApi.set_integral_param_value(numThreads,1);
 
   // Load the mesh.
   MeshSharedPtr u_mesh(new Mesh), v_mesh(new Mesh);
@@ -284,6 +284,6 @@ int main(int argc, char* argv[])
   Hermes::Mixins::Loggable::Static::info("Total running time: %g s", cpu_time.accumulated());
 
   // Wait for all views to be closed.
-  Views::View::wait();
+  // Views::View::wait();
   return 0;
 }

@@ -67,7 +67,6 @@ const double OMEGA = 2 * M_PI * FREQ;
 int main(int argc, char* argv[])
 {
   Hermes::Mixins::TimeMeasurable m;
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
   m.tick();
 
   // Load the mesh.

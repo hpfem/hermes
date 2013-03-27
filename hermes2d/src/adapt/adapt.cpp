@@ -296,9 +296,10 @@ namespace Hermes
       }
 
       // RefinementSelectors cloning.
-      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[Hermes::Hermes2D::Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
+      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[num_threads_used];
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
         for (unsigned int j = 0; j < refinement_selectors.size(); j++)
@@ -308,22 +309,26 @@ namespace Hermes
           else
           {
             global_refinement_selectors[i][j] = refinement_selectors[j]->clone();
-            if(dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j]) != NULL)
+            RefinementSelectors::ProjBasedSelector<Scalar>* proj_based_selector_i_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j]);
+            RefinementSelectors::ProjBasedSelector<Scalar>* proj_based_selector_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j]);
+            RefinementSelectors::ProjBasedSelector<Scalar>* optimum_selector_i_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j]);
+            RefinementSelectors::ProjBasedSelector<Scalar>* optimum_selector_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j]);
+            if(proj_based_selector_i_j != NULL)
             {
-              dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j])->cached_shape_vals_valid = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j])->cached_shape_vals_valid;
-              dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j])->cached_shape_ortho_vals = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j])->cached_shape_ortho_vals;
-              dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j])->cached_shape_vals = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j])->cached_shape_vals;
+              proj_based_selector_i_j->cached_shape_vals_valid = proj_based_selector_j->cached_shape_vals_valid;
+              proj_based_selector_i_j->cached_shape_ortho_vals = proj_based_selector_j->cached_shape_ortho_vals;
+              proj_based_selector_i_j->cached_shape_vals = proj_based_selector_j->cached_shape_vals;
             }
-            if(dynamic_cast<RefinementSelectors::OptimumSelector<Scalar>*>(global_refinement_selectors[i][j]) != NULL)
-              dynamic_cast<RefinementSelectors::OptimumSelector<Scalar>*>(global_refinement_selectors[i][j])->num_shapes = dynamic_cast<RefinementSelectors::OptimumSelector<Scalar>*>(refinement_selectors[j])->num_shapes;
+            if(optimum_selector_i_j != NULL)
+              optimum_selector_i_j->num_shapes = optimum_selector_j->num_shapes;
           }
         }
       }
 
       // Solution cloning.
-      Solution<Scalar>*** rslns = new Solution<Scalar>**[Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads)];
+      Solution<Scalar>*** rslns = new Solution<Scalar>**[num_threads_used];
 
-      for(unsigned int i = 0; i < Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads); i++)
+      for(unsigned int i = 0; i < num_threads_used; i++)
       {
         rslns[i] = new Solution<Scalar>*[this->num];
         for (int j = 0; j < this->num; j++)
@@ -337,7 +342,6 @@ namespace Hermes
       this->info("Adaptivity: data preparation duration: %f s.", this->last());
 
       // For statistics.
-      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
       int num_elements_for_refinenement = ids.size();
       int* numberOfCandidates = new int[num_elements_for_refinenement];
 
@@ -369,10 +373,13 @@ namespace Hermes
               elem_inx_to_proc.push_back(elem_ref);
             }
 
-						if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]) != NULL)
-								numberOfCandidates[id_to_refine] = dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size();
-            else
-								numberOfCandidates[id_to_refine] = 0;
+            if(this->get_verbose_output())
+            {
+						  if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]) != NULL)
+								  numberOfCandidates[id_to_refine] = dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size();
+              else
+								  numberOfCandidates[id_to_refine] = 0;
+            }
           }
           catch(Hermes::Exceptions::Exception& exception)
           {
@@ -389,13 +396,16 @@ namespace Hermes
 
       if(this->caughtException == NULL)
       {
-        int averageNumberOfCandidates = 0;
-        for(int i = 0; i < num_elements_for_refinenement; i++)
-            averageNumberOfCandidates += numberOfCandidates[i];
-        averageNumberOfCandidates = averageNumberOfCandidates / num_elements_for_refinenement;
+        if(this->get_verbose_output())
+        {
+          int averageNumberOfCandidates = 0;
+          for(int i = 0; i < num_elements_for_refinenement; i++)
+              averageNumberOfCandidates += numberOfCandidates[i];
+          averageNumberOfCandidates = averageNumberOfCandidates / num_elements_for_refinenement;
 
-        this->info("Adaptivity: total number of refined Elements: %i.", num_elements_for_refinenement);
-        this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
+          this->info("Adaptivity: total number of refined Elements: %i.", num_elements_for_refinenement);
+          this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
+        }
       }
 
       delete [] numberOfCandidates;

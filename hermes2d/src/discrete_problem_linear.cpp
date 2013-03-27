@@ -186,7 +186,7 @@ namespace Hermes
                 if(DG_matrix_forms_present || DG_vector_forms_present)
                 {
                   current_spss[j]->set_active_element(current_state->e[j]);
-                  current_spss[j]->set_transform(current_state->sub_idx[j]);
+                  current_spss[j]->set_master_transform();
                 }
                 current_refmaps[j]->set_active_element(current_state->e[j]);
                 current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());

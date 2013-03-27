@@ -782,15 +782,15 @@ namespace Hermes
       Element *e;
       for_all_active_elements(e, coarse_space->get_mesh())
       {
-        if(this->coarse_space->edata[e->id].changed_in_last_adaptation)
+        bool to_set = this->coarse_space->edata[e->id].changed_in_last_adaptation;
         {
           if(ref_space->mesh->get_element(e->id)->active)
-            ref_space->edata[e->id].changed_in_last_adaptation = true;
+            ref_space->edata[e->id].changed_in_last_adaptation = to_set;
           else
             for(unsigned int i = 0; i < 4; i++)
               if(ref_space->mesh->get_element(e->id)->sons[i] != NULL)
                 if(ref_space->mesh->get_element(e->id)->sons[i]->active)
-                  ref_space->edata[ref_space->mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = true;
+                  ref_space->edata[ref_space->mesh->get_element(e->id)->sons[i]->id].changed_in_last_adaptation = to_set;
         }
       }
     }

@@ -67,6 +67,7 @@ namespace Hermes
       /// \param son[in] Son element number in the range[0-3] for triangles and[0-7] for quads.
       virtual void push_transform(int son);
 
+      /// If this changes, NeighborSearch::H2D_MAX_NEIGHBORS must change too.
       static const unsigned int H2D_MAX_TRN_LEVEL = 15;
 
     protected:

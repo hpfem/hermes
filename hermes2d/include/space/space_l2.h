@@ -42,7 +42,7 @@ namespace Hermes
 
 			virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc);
 
-			virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al, unsigned int first_dof = 0) const;
+			virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
 			/// Copy from Space instance 'space'
 			virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);

@@ -89,7 +89,7 @@ namespace Hermes
         friend class DiscreteProblem<Scalar>;
       };
 
-      bool get(int rep_id, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
+      bool get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
 
     private:
 
@@ -101,6 +101,7 @@ namespace Hermes
       int hash_table_size;
 
       CacheRecord **recordTable;
+      int** hierarchyTable;
       int recordCount;
 
       class StateHash

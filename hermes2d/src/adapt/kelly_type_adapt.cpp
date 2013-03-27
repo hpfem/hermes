@@ -337,8 +337,8 @@ namespace Hermes
                   for(unsigned int fns_i = 0; fns_i < this->num; fns_i++)
                   {
                     NeighborSearch<Scalar> *ns = neighbor_searches.get(meshes[fns_i]->get_seq() - min_dg_mesh_seq);
-                    if(ns->central_transformations.present(neighbor))
-                      ns->central_transformations.get(neighbor)->apply_on(fns[fns_i]);
+                    if(ns->central_transformations[neighbor])
+                      ns->central_transformations[neighbor]->apply_on(fns[fns_i]);
                   }
 
                   // END COPY FROM DISCRETE_PROBLEM.CPP

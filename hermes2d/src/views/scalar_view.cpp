@@ -522,7 +522,7 @@ namespace Hermes
           float height = (float)(iter->height * scale);
 
           //draw if AABB of element is large enough
-          if(width > 6*node_pixel_radius && height > 3*node_pixel_radius)
+          if(width > 4*node_pixel_radius && height > 2*node_pixel_radius)
           {
             //prepare environment
             glPushMatrix();

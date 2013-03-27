@@ -163,7 +163,6 @@ int main(int argc, char* argv[])
   do
   { 
     Hermes::Mixins::Loggable::Static::info("Time step %d, time %3.5f", ts, current_time);
-    Hermes::Hermes2D::Hermes2DApi.set_integral_param_value(Hermes::Hermes2D::numThreads,1);  
 
     // Periodic global derefinement. 
     if ((ts > 1 && ts % UNREF_FREQ == 0)||(space->get_num_dofs() >= NDOF_STOP)) 
