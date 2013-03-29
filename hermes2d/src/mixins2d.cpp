@@ -106,6 +106,15 @@ namespace Hermes
         this->rhs_number_format = number_format;
       }
 
+      void DiscreteProblemCacheSettings::set_do_not_use_cache()
+      {
+        this->do_not_use_cache = true;
+      }
+
+      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : do_not_use_cache(false)
+      {
+      }
+
       template HERMES_API class MatrixRhsOutput<double>;
       template HERMES_API class MatrixRhsOutput<std::complex<double> >;
     }

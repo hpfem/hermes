@@ -87,6 +87,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NewtonSolver<Scalar>::free_cache()
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->free_cache();
+    }
+
+    template<typename Scalar>
     void NewtonSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
     {
       (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);

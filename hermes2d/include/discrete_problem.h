@@ -64,7 +64,14 @@ namespace Hermes
     public:
       DiscreteProblemCache();
 
+      /// Destructor that uses the clear() method and then deallocates even the internal structures.
       ~DiscreteProblemCache();
+
+      /// Just clears all stored data, leaves the internal structures for further use.
+      void free();
+
+      /// In every call to assemble(), the unused hash table entries are stored, so that they can be deallocated (they will not be ever again used).
+      void free_unused();
 
       /// Storage unit - a record.
       class CacheRecord
@@ -115,7 +122,6 @@ namespace Hermes
       int hash_table_size;
 
       CacheRecord **recordTable;
-      int** hierarchyTable;
       int recordCount;
 
       class StateHash
@@ -137,6 +143,7 @@ namespace Hermes
       };
 
       StateHash **hashTable;
+      bool *hashTableUsed;
 
       int get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i);
 
@@ -163,9 +170,6 @@ namespace Hermes
       /// State querying helpers.
       virtual bool isOkay() const;
       virtual inline std::string getClassName() const { return "DiscreteProblem"; }
-
-      /// Set this problem to Finite Volume (no integration order calculation).
-      void set_fvm();
 
       /// Sets new spaces for the instance.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
@@ -199,7 +203,11 @@ namespace Hermes
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
-      void delete_cache();
+      /// Free data and memory stored in the cache.
+      /// This allows for its subsequent usage, so it can be used as a periodical cache cleaning.
+      /// Note that the cache ONLY STORES WHAT IT NEEDS, the no-more needed cache records are
+      /// deleted after the first assembly where they are not needed.
+      void free_cache();
 
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the

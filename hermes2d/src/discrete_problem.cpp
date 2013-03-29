@@ -270,6 +270,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::free_cache()
+    {
+      this->cache.free();
+      memset(this->cache.recordTable, 0, this->cache.size);
+      memset(this->cache.hashTable, 0, this->cache.hash_table_size);
+      memset(this->cache.hashTableUsed, 0, this->cache.hash_table_size);
+    }
+
+    template<typename Scalar>
     void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spacesToSet)
     {
       for(unsigned int i = 0; i < spacesToSet.size(); i++)
@@ -648,6 +657,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_assembling(Scalar* coeff_vec, PrecalcShapeset*** pss, RefMap*** refmaps, Solution<Scalar>*** u_ext, AsmList<Scalar>*** als, AsmList<Scalar>**** alsSurface, WeakForm<Scalar>** weakforms, int num_threads_used)
     {
+      memset(this->cache.hashTableUsed, 0, this->cache.hash_table_size);
+
       for(unsigned int i = 0; i < num_threads_used; i++)
       {      
         pss[i] = new PrecalcShapeset*[spaces_size];
@@ -974,6 +985,8 @@ namespace Hermes
          for (unsigned int j = 0; j < spaces_size; j++)
             delete current_spss[j];
         delete [] current_spss;
+
+        this->cache.free_unused();
       }
 
       deinit_assembling(pss, refmaps, u_ext, als, alsSurface, weakforms, num_threads_used);
@@ -1023,8 +1036,6 @@ namespace Hermes
     template<typename Scalar>
     typename DiscreteProblemCache<Scalar>::CacheRecord* DiscreteProblem<Scalar>::get_state_cache(Traverse::State* current_state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int& order)
     {
-      assert(!this->do_not_use_cache);
-
       DiscreteProblemCache<Scalar>::CacheRecord* cache_record = NULL;
       if(this->cache.get(current_state->rep, current_state->rep_subidx, current_state->rep_i, cache_record))
       {
@@ -2907,32 +2918,42 @@ namespace Hermes
     DiscreteProblemCache<Scalar>::DiscreteProblemCache() : recordCount(0), size(DEFAULT_SIZE), hash_table_size(DEFAULT_HASH_TABLE_SIZE)
     {
       recordTable = (CacheRecord**)(malloc(size * sizeof(CacheRecord*)));
-      hierarchyTable = (int**)(calloc(size, sizeof(int*)));
       hashTable = (StateHash**)(calloc(hash_table_size, sizeof(StateHash*)));
+      hashTableUsed = (bool*)(calloc(hash_table_size, sizeof(bool)));
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemCache<Scalar>::free()
+    {
+      for(int i = 0; i < this->hash_table_size; i++)
+        if(hashTable[i])
+        {
+          delete this->recordTable[this->hashTable[i]->cache_record_index];
+          delete hashTable[i];
+        }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemCache<Scalar>::free_unused()
+    {
+      for(int i = 0; i < this->hash_table_size; i++)
+      {
+        if(!this->hashTableUsed[i] && this->hashTable[i])
+        {
+          delete this->recordTable[this->hashTable[i]->cache_record_index];
+          delete this->hashTable[i];
+          this->hashTable[i] = NULL;
+        }
+      }
     }
 
     template<typename Scalar>
     DiscreteProblemCache<Scalar>::~DiscreteProblemCache()
     {
-      for(int i = 0; i < this->recordCount; i++)
-      {
-        if(this->recordTable[i])
-          delete this->recordTable[i];
-      }
-      for(int i = 0; i < this->size; i++)
-      {
-        if(this->hierarchyTable[i])
-          delete this->hierarchyTable[i];
-      }
-
+      this->free();
       ::free(recordTable);
-      ::free(hierarchyTable);
-
-      for(int i = 0; i < this->hash_table_size; i++)
-        if (hashTable[i])
-          delete hashTable[i];
-
       ::free(hashTable);
+      ::free(hashTableUsed);
     }
 
     template<typename Scalar>
@@ -2941,6 +2962,7 @@ namespace Hermes
       int hash = this->hashFunction(rep_id, parent_son, rep_sub_idx, rep_i);
       while (hashTable[hash] && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
         hash = (hash + 1) % hash_table_size;
+      hashTableUsed[hash] = true;
       return hash;
     }
 
@@ -2964,8 +2986,6 @@ namespace Hermes
         {
 #pragma omp critical(record_size_increase)
           {
-            this->hierarchyTable = (int**)realloc(this->hierarchyTable, size * 1.5 * sizeof(int*));
-            memset(this->hierarchyTable, 0, size * 0.5 * sizeof(int*));
             size *= 1.5;
             this->recordTable = (CacheRecord**)realloc(this->recordTable, size * sizeof(CacheRecord*));
           }
@@ -2999,8 +3019,6 @@ namespace Hermes
           {
 #pragma omp critical(record_size_increase)
             {
-              this->hierarchyTable = (int**)realloc(this->hierarchyTable, size * 1.5 * sizeof(int*));
-              memset(this->hierarchyTable, 0, size * 0.5 * sizeof(int*));
               size *= 1.5;
               this->recordTable = (CacheRecord**)realloc(this->recordTable, size * sizeof(CacheRecord*));
             }

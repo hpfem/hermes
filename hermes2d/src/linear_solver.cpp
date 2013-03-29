@@ -185,6 +185,12 @@ namespace Hermes
       return sln_vector;
     }
 
+    template<typename Scalar>
+    void LinearSolver<Scalar>::free_cache()
+    {
+      this->dp->free_cache();
+    }
+
     template class HERMES_API LinearSolver<double>;
     template class HERMES_API LinearSolver<std::complex<double> >;
   }

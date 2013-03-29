@@ -68,7 +68,7 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template<typename Scalar>
-    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
+    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
     {
     public:
       NewtonSolver();
@@ -120,6 +120,9 @@ namespace Hermes
 
       /// Call NonlinearSolver::set_preconditioner() and set the method to the linear solver (if applicable).
       virtual void set_preconditioner(const char* preconditioner_name);
+
+      /// See DiscreteProblemCacheSettings in mixins2d.h for details.
+      virtual void free_cache();
 
       /// Interpret the residual as a function.
       /// Translate the residual vector into a residual function (or multiple functions)

@@ -112,6 +112,26 @@ namespace Hermes
         EMatrixDumpFormat RhsFormat;
 		char* rhs_number_format;
       };
+
+      /// \ingroup g_mixins2d
+      /// Mixin that intermediate DiscreteProblemCache settings.
+      class HERMES_API DiscreteProblemCacheSettings
+      {
+      public:
+        DiscreteProblemCacheSettings();
+
+        /// Free data and memory stored in the cache.
+        /// This allows for its subsequent usage, so it can be used as a periodical cache cleaning.
+        /// Note that the cache ONLY STORES WHAT IT NEEDS, the no-more needed cache records are
+        /// deleted after the first assembly where they are not needed.
+        virtual void free_cache() = 0;
+
+        /// If the cache should not be used for any reason.
+        void set_do_not_use_cache();
+
+      private:
+        bool do_not_use_cache;
+      };
     }
   }
 }

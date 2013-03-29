@@ -71,7 +71,7 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template<typename Scalar>
-    class HERMES_API PicardSolver : public Solvers::NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
+    class HERMES_API PicardSolver : public Solvers::NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
     {
     public:
       PicardSolver();
@@ -121,6 +121,9 @@ namespace Hermes
       /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for 
       /// explanation of this parameter.
       void set_anderson_beta(double beta);
+      
+      /// See DiscreteProblemCacheSettings in mixins2d.h for details.
+      virtual void free_cache();
 
       /// Set the weak forms.
       void set_weak_formulation(const WeakForm<Scalar>* wf);

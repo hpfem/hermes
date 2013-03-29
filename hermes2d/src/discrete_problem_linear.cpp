@@ -227,6 +227,8 @@ namespace Hermes
          for (unsigned int j = 0; j < spaces_size; j++)
             delete current_spss[j];
         delete [] current_spss;
+
+        this->cache.free_unused();
       }
 
       deinit_assembling(pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);

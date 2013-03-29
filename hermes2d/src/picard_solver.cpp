@@ -83,6 +83,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void PicardSolver<Scalar>::free_cache()
+    {
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->free_cache();
+    }
+
+    template<typename Scalar>
     void PicardSolver<Scalar>::set_time(double time)
     {
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
