@@ -39,7 +39,7 @@ project(hermes)
 	#  This number has to be smaller than 21.
 	set(H2D_MAX_HANGING_NODES_LEVEL 15)
 	#  Use second derivatives (that are turned off by default).
-	set(H2D_USE_SECOND_DERIVATIVES YES)
+	set(H2D_USE_SECOND_DERIVATIVES NO)
 
   # Installation path:
     set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,

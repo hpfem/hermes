@@ -29,8 +29,9 @@ namespace Hermes
       val = NULL;
       dx = NULL;
       dy = NULL;
+#ifdef H2D_USE_SECOND_DERIVATIVES
       laplace = NULL;
-
+#endif
       if(this->nc > 1)
       {
         val0 = val1 = NULL;
@@ -145,7 +146,9 @@ namespace Hermes
         div = NULL;
       }
 
+#ifdef H2D_USE_SECOND_DERIVATIVES
       laplace = NULL;
+#endif
     }
 
     template<typename T>
@@ -494,14 +497,10 @@ namespace Hermes
         double *dx = fu->get_dx_values();
         double *dy = fu->get_dy_values();
 
-        double *dxx;
-        double *dxy;
-        double *dyy;
-
 #ifdef H2D_USE_SECOND_DERIVATIVES
-        dxx = fu->get_dxx_values();
-        dxy = fu->get_dxy_values();
-        dyy = fu->get_dyy_values();
+        double *dxx = fu->get_dxx_values();
+        double *dxy = fu->get_dxy_values();
+        double *dyy = fu->get_dyy_values();
 #endif
 
         double2x2 *m;

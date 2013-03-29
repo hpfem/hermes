@@ -49,7 +49,9 @@ namespace Hermes
 
       T *val;            ///< Function values. If T == Hermes::Ord and orders vary with direction, this returns max(h_order, v_order).
       T *dx, *dy;        ///< First-order partial derivatives.
+#ifdef H2D_USE_SECOND_DERIVATIVES
       T *laplace;        ///< Sum of second-order partial derivatives. Enabled by defining H2D_USE_SECOND_DERIVATIVES in h2d_common.h.
+#endif
       T *val0, *val1;    ///< Components of a vector field.
       T *dx0, *dx1;      ///< Components of the gradient of a vector field.
       T *dy0, *dy1;      ///< Components of the gradient of a vector field.
