@@ -1814,7 +1814,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps)
     {
       // Increase due to reference map.
-      int coordinate = (dynamic_cast<VectorForm<Scalar>*>(form) == NULL) ? (static_cast<MatrixForm<Scalar>*>(form)->i) : (static_cast<VectorForm<Scalar>*>(form)->i);
+      int coordinate = form->i;
       order = current_refmaps[coordinate]->get_inv_ref_order();
       order += o->get_order();
       limit_order(order, current_refmaps[coordinate]->get_active_element()->get_mode());
@@ -2052,10 +2052,10 @@ namespace Hermes
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
         MeshSharedPtr mesh_i;
-        if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
+        if(fns_i < this->spaces_size)
           mesh_i = spaces[fns_i]->get_mesh();
         else
-          mesh_i = (dynamic_cast<MeshFunction<Scalar>* >(fn[fns_i]))->get_mesh();
+          mesh_i = (static_cast<MeshFunction<Scalar>* >(fn[fns_i]))->get_mesh();
         NeighborSearch<Scalar>* ns = neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq);
         if(ns->central_transformations[neighbor_i] != NULL)
           ns->central_transformations[neighbor_i]->apply_on(fn[fns_i]);
@@ -2305,16 +2305,16 @@ namespace Hermes
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
         MeshSharedPtr mesh_i;
-        if(dynamic_cast<PrecalcShapeset*>(fn[fns_i]) != NULL)
+        if(fns_i < this->spaces_size)
           mesh_i = spaces[fns_i]->get_mesh();
         else
-          mesh_i = (dynamic_cast<MeshFunction<Scalar>* >(fn[fns_i]))->get_mesh();
+          mesh_i = (static_cast<MeshFunction<Scalar>* >(fn[fns_i]))->get_mesh();
 
         fn[fns_i]->set_transform(neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq)->original_central_el_transform);
       }
 
       // Also clear the transformations from the slave psss and refmaps.
-      for (unsigned int i = 0; i < spaces.size(); i++)
+      for (unsigned int i = 0; i < spaces_size; i++)
       {
         current_spss[i]->set_master_transform();
         current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
