@@ -951,12 +951,12 @@ namespace Hermes
               }
             }
 
-            DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
+            typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
             if(!this->do_not_use_cache)
               cache_record = this->get_state_cache(current_state, current_pss, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform, order);
             else
             {
-              cache_record = new DiscreteProblemCache<Scalar>::CacheRecord;
+              cache_record = new typename DiscreteProblemCache<Scalar>::CacheRecord;
               order = this->calculate_order(current_state, current_refmaps, current_u_ext, current_weakform);
               cache_record->init(this->spaces, current_state, current_pss, current_refmaps, current_u_ext, current_als, current_als_surface, current_weakform, order);
             }
@@ -1037,7 +1037,7 @@ namespace Hermes
     template<typename Scalar>
     typename DiscreteProblemCache<Scalar>::CacheRecord* DiscreteProblem<Scalar>::get_state_cache(Traverse::State* current_state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int& order)
     {
-      DiscreteProblemCache<Scalar>::CacheRecord* cache_record = NULL;
+      typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record = NULL;
       if(this->cache.get(current_state->rep, current_state->rep_subidx, current_state->rep_i, cache_record))
       {
         bool reinit = false;
@@ -3052,6 +3052,9 @@ namespace Hermes
       else
         return (rep_id + 1) * GUESS_NUMBER_OF_SUBELEMENTS + rep_i + (parent_son + 1);
     }
+
+    template class HERMES_API DiscreteProblemCache<double>;
+    template class HERMES_API DiscreteProblemCache<std::complex<double> >;
 
     template class HERMES_API DiscreteProblem<double>;
     template class HERMES_API DiscreteProblem<std::complex<double> >;

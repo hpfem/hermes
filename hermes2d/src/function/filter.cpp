@@ -137,7 +137,7 @@ namespace Hermes
         }
       }
 
-      tables[this->cur_quad].run_for_all(Node::DeallocationFunction);
+      tables[this->cur_quad].run_for_all(Function<Scalar>::Node::DeallocationFunction);
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];
@@ -151,7 +151,7 @@ namespace Hermes
     {
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
       {
-        tables[i].run_for_all(Node::DeallocationFunction);
+        tables[i].run_for_all(Function<Scalar>::Node::DeallocationFunction);
         tables[i].clear();
       }
 
@@ -378,7 +378,7 @@ namespace Hermes
     {
       for (int i = 0; i < H2D_MAX_QUADRATURES; i++)
       {
-        tables[i].run_for_all(Node::DeallocationFunction);
+        tables[i].run_for_all(Function<double>::Node::DeallocationFunction);
         tables[i].clear();
       }
     }
@@ -397,7 +397,7 @@ namespace Hermes
 
       memset(sln_sub, 0, sizeof(sln_sub));
 
-      tables[this->cur_quad].run_for_all(Node::DeallocationFunction);
+      tables[this->cur_quad].run_for_all(Function<double>::Node::DeallocationFunction);
       tables[this->cur_quad].clear();
 
       this->sub_tables = &tables[this->cur_quad];

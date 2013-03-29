@@ -16,6 +16,7 @@
 #define __H2D_SUB_ELEMENT_MAP_H
 
 #include "exceptions.h"
+#include "function/transformable.h"
 
 namespace Hermes
 {

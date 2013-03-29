@@ -104,7 +104,7 @@ namespace Hermes
 
       // Vector of meshes.
       Hermes::vector<MeshSharedPtr > meshes;
-      for(unsigned int space_i = 0; space_i < this->spaces.size(); space_i++)
+      for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
         meshes.push_back(this->spaces[space_i]->get_mesh());
       for(unsigned int ext_i = 0; ext_i < this->wf->ext.size(); ext_i++)
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
@@ -154,9 +154,9 @@ namespace Hermes
         WeakForm<Scalar>* current_weakform = weakforms[thread_number];
         PrecalcShapeset** current_pss = pss[thread_number];
 
-        PrecalcShapeset** current_spss = new PrecalcShapeset*[spaces_size];
-        if(DG_matrix_forms_present || DG_vector_forms_present)
-          for (unsigned int j = 0; j < spaces_size; j++)
+        PrecalcShapeset** current_spss = new PrecalcShapeset*[this->spaces_size];
+        if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+          for (unsigned int j = 0; j < this->spaces_size; j++)
             current_spss[j] = new PrecalcShapeset(current_pss[j]);
 
         int order;
@@ -182,8 +182,8 @@ namespace Hermes
             {
               if(current_state->e[j])
               {
-                spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
-                if(DG_matrix_forms_present || DG_vector_forms_present)
+                this->spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
+                if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
                 {
                   current_spss[j]->set_active_element(current_state->e[j]);
                   current_spss[j]->set_master_transform();
@@ -193,19 +193,19 @@ namespace Hermes
               }
             }
 
-            DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
+            typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
             if(!this->do_not_use_cache)
               cache_record = this->get_state_cache(current_state, current_pss, current_refmaps, NULL, current_als, current_als_surface, current_weakform, order);
             else
             {
-              cache_record = new DiscreteProblemCache<Scalar>::CacheRecord;
+              cache_record = new typename DiscreteProblemCache<Scalar>::CacheRecord();
               order = this->calculate_order(current_state, current_refmaps, NULL, current_weakform);
               cache_record->init(this->spaces, current_state, current_pss, current_refmaps, NULL, current_als, current_als_surface, current_weakform, order);
             }
 
             assemble_one_state(cache_record, current_refmaps, NULL, current_als, current_state, current_weakform);
 
-            if(DG_matrix_forms_present || DG_vector_forms_present)
+            if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
               assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
 
             if(this->do_not_use_cache)
@@ -223,8 +223,8 @@ namespace Hermes
           }
         }
 
-        if(DG_matrix_forms_present || DG_vector_forms_present)
-         for (unsigned int j = 0; j < spaces_size; j++)
+        if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+         for (unsigned int j = 0; j < this->spaces_size; j++)
             delete current_spss[j];
         delete [] current_spss;
 
@@ -259,10 +259,10 @@ namespace Hermes
       }
 
       Element* e;
-      for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
+      for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
-        for_all_active_elements(e, spaces[space_i]->get_mesh())
-          spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
+        for_all_active_elements(e, this->spaces[space_i]->get_mesh())
+          this->spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
       }
 
       if(this->caughtException)
