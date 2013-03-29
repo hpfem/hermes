@@ -270,6 +270,10 @@ project(hermes)
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     find_package(PTHREAD REQUIRED)
+    
+    find_package(TCMALLOC REQUIRED)
+    include_directories(${TCMALLOC_INCLUDE_DIR})
+
     find_package(XSD REQUIRED)
     find_package(XERCES REQUIRED)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

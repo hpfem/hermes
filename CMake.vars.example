@@ -10,6 +10,7 @@ if (WIN32)
   set(XERCES_ROOT "d:/hpfem/hermes/dependencies")
   set(XSD_ROOT "d:/hpfem/hermes/dependencies")
   set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies")
+  set(TCMALLOC_ROOT "d:/hpfem/hermes/dependencies")
   set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies")
   set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies")
   # Target (installation) path.
