@@ -78,7 +78,7 @@ namespace Hermes
       int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 
       // Check that the block scaling table have proper dimension.
-      if(block_weights != NULL)
+      if(block_weights)
         if(block_weights->get_size() != this->wf->get_neq())
           throw Exceptions::LengthException(6, block_weights->get_size(),this-> wf->get_neq());
 
@@ -110,7 +110,7 @@ namespace Hermes
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
       for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-          if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+          if(this->wf->get_forms()[form_i]->ext[ext_i])
             meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
 
       Traverse trav_master(true);
@@ -132,7 +132,7 @@ namespace Hermes
         for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
         {
           for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-            if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+            if(this->wf->get_forms()[form_i]->ext[ext_i])
             {
               fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i].get());
               weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
@@ -163,7 +163,7 @@ namespace Hermes
 
         for(int state_i = start; state_i < end; state_i++)
         {
-          if(this->caughtException != NULL)
+          if(this->caughtException)
             break;
           try
           {
@@ -171,7 +171,7 @@ namespace Hermes
 
             for(int j = 0; j < fns[thread_number].size(); j++)
             {
-              if(current_state->e[j] != NULL)
+              if(current_state->e[j])
               {
                 fns[thread_number][j]->set_active_element(current_state->e[j]);
                 fns[thread_number][j]->set_transform(current_state->sub_idx[j]);
@@ -180,7 +180,7 @@ namespace Hermes
 
             for(int j = 0; j < this->spaces_size; j++)
             {
-              if(current_state->e[j] != NULL)
+              if(current_state->e[j])
               {
                 spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
                 if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -242,9 +242,9 @@ namespace Hermes
       delete [] fns;
 
       /// \todo Should this be really here? Or in assemble()?
-      if(this->current_mat != NULL)
+      if(this->current_mat)
         this->current_mat->finish();
-      if(this->current_rhs != NULL)
+      if(this->current_rhs)
         this->current_rhs->finish();
 
       if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
@@ -262,7 +262,7 @@ namespace Hermes
           spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
       }
 
-      if(this->caughtException != NULL)
+      if(this->caughtException)
         throw *(this->caughtException);
     }
 
@@ -287,7 +287,7 @@ namespace Hermes
         int local_ext_count = form->ext.size();
         local_ext = new Func<Scalar>*[local_ext_count];
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
-          if(form->ext[ext_i] != NULL)
+          if(form->ext[ext_i])
             local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i].get(), order);
           else
             local_ext[ext_i] = NULL;
@@ -381,7 +381,7 @@ namespace Hermes
       if(form->ext.size() > 0)
       {
         for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
-          if(form->ext[ext_i] != NULL)
+          if(form->ext[ext_i])
           {
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];

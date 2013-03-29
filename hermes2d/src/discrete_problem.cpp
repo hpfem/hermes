@@ -113,7 +113,7 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::isOkay() const
     {
-      if(this->wf == NULL)
+      if(!this->wf)
         return false;
 
       if(this->spaces_size == 0)
@@ -143,7 +143,7 @@ namespace Hermes
       this->ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // Sanity checks.
-      if(wf == NULL)
+      if(!wf)
         throw Hermes::Exceptions::Exception("WeakForm<Scalar>* wf can not be NULL in DiscreteProblem<Scalar>::DiscreteProblem.");
 
       if(spaces.size() != (unsigned) wf->get_neq())
@@ -202,10 +202,10 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-      if(wf != NULL)
+      if(wf)
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
 
-      if(sp_seq != NULL)
+      if(sp_seq)
         delete [] sp_seq;
     }
 
@@ -230,7 +230,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
     {
-      if(wf == NULL)
+      if(!wf)
         throw Hermes::Exceptions::NullException(0);
 
       this->wf = wf;
@@ -328,7 +328,7 @@ namespace Hermes
     template<typename Scalar>
     double DiscreteProblem<Scalar>::block_scaling_coeff(MatrixForm<Scalar>* form) const
     {
-      if(current_block_weights != NULL)
+      if(current_block_weights)
         return current_block_weights->get_A(form->i, form->j);
       return 1.0;
     }
@@ -336,7 +336,7 @@ namespace Hermes
     template<typename Scalar>
     double DiscreteProblem<Scalar>::block_scaling_coeff(MatrixFormDG<Scalar>* form) const
     {
-      if(current_block_weights != NULL)
+      if(current_block_weights)
         return current_block_weights->get_A(form->i, form->j);
       return 1.0;
     }
@@ -344,17 +344,19 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state)
     {
-      if(current_state->e[form->i] == NULL || current_state->e[form->j] == NULL)
-        return false;
-      if(fabs(form->scaling_factor) < 1e-12)
-        return false;
-
-      // If a block scaling table is provided, and if the scaling coefficient
-      // A_mn for this block is zero, then the form does not need to be assembled.
-      if(current_block_weights != NULL)
-        if(fabs(current_block_weights->get_A(form->i, form->j)) < 1e-12)
+      if(current_state->e[form->i] && current_state->e[form->j])
+      {
+        if(fabs(form->scaling_factor) < 1e-12)
           return false;
-      return true;
+
+        // If a block scaling table is provided, and if the scaling coefficient
+        // A_mn for this block is zero, then the form does not need to be assembled.
+        if(current_block_weights)
+          if(fabs(current_block_weights->get_A(form->i, form->j)) < 1e-12)
+            return false;
+        return true;
+      }
+      return false;
     }
 
     template<typename Scalar>
@@ -394,7 +396,7 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblem<Scalar>::form_to_be_assembled(VectorForm<Scalar>* form, Traverse::State* current_state)
     {
-      if(current_state->e[form->i] == NULL)
+      if(!current_state->e[form->i])
         return false;
       if(fabs(form->scaling_factor) < 1e-12)
         return false;
@@ -440,7 +442,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       this->current_mat = mat;
-      if(rhs != NULL)
+      if(rhs)
         this->current_rhs = rhs;
       this->create_sparse_structure();
     }
@@ -452,9 +454,9 @@ namespace Hermes
 
       if(is_up_to_date())
       {
-        if(current_mat != NULL)
+        if(current_mat)
           current_mat->zero();
-        if(current_rhs != NULL)
+        if(current_rhs)
         {
           // If we use e.g. a new NewtonSolver (providing a new Vector) for this instance of DiscreteProblem that already assembled a system,
           // we end up with everything up_to_date, but unallocated Vector.
@@ -486,7 +488,7 @@ namespace Hermes
         }
       }
 
-      if(current_mat != NULL)
+      if(current_mat)
       {
         // Spaces have changed: create the matrix from scratch.
         have_matrix = true;
@@ -506,12 +508,12 @@ namespace Hermes
 
         Traverse::State* current_state;
         // Loop through all elements.
-        while ((current_state = trav.get_next_state()) != NULL)
+        while (current_state = trav.get_next_state())
         {
           // Obtain assembly lists for the element at all spaces.
           /// \todo do not get the assembly list again if the element was not changed.
           for (unsigned int i = 0; i < wf->get_neq(); i++)
-            if(current_state->e[i] != NULL)
+            if(current_state->e[i])
               spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
 
           if(is_DG)
@@ -554,7 +556,7 @@ namespace Hermes
               for(unsigned int el = 0; el < wf->get_neq(); el++)
                 for(int ed = 0; ed < num_edges; ed++)
                   for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
-                    if((blocks[m][el] || blocks[el][m]) && current_state->e[m] != NULL)
+                    if((blocks[m][el] || blocks[el][m]) && current_state->e[m])
                     {
                       AsmList<Scalar>*am = &(al[m]);
                       AsmList<Scalar>*an = new AsmList<Scalar>;
@@ -594,7 +596,7 @@ namespace Hermes
           {
             for (unsigned int n = 0; n < wf->get_neq(); n++)
             {
-              if(blocks[m][n] && current_state->e[m] != NULL && current_state->e[n] != NULL)
+              if(blocks[m][n] && current_state->e[m] && current_state->e[n])
               {
                 AsmList<Scalar>*am = &(al[m]);
                 AsmList<Scalar>*an = &(al[n]);
@@ -620,7 +622,7 @@ namespace Hermes
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
-      if(current_rhs != NULL)
+      if(current_rhs)
         current_rhs->alloc(this->ndof);
 
       // save space seq numbers and weakform seq number, so we can detect their changes
@@ -667,7 +669,7 @@ namespace Hermes
       if(!is_linear)
         for(unsigned int i = 0; i < num_threads_used; i++)
         {
-          if(coeff_vec != NULL)
+          if(coeff_vec)
           {
             u_ext[i] = new Solution<Scalar>*[spaces_size];
             if(i == 0)
@@ -750,11 +752,11 @@ namespace Hermes
       }
       delete [] refmaps;
 
-      if(u_ext != NULL)
+      if(u_ext)
       {
         for(unsigned int i = 0; i < num_threads; i++)
         {
-          if(u_ext[i] != NULL)
+          if(u_ext[i])
           {
             for (unsigned int j = 0; j < spaces_size; j++)
               delete u_ext[i][j];
@@ -811,7 +813,7 @@ namespace Hermes
       int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
 
       // Check that the block scaling table have proper dimension.
-      if(block_weights != NULL)
+      if(block_weights )
         if(block_weights->get_size() != this->wf->get_neq())
           throw Exceptions::LengthException(6, block_weights->get_size(),this-> wf->get_neq());
 
@@ -844,7 +846,7 @@ namespace Hermes
         meshes.push_back(this->wf->ext[ext_i]->get_mesh());
       for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
         for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-          if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+          if(this->wf->get_forms()[form_i]->ext[ext_i])
             meshes.push_back(this->wf->get_forms()[form_i]->ext[ext_i]->get_mesh());
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
         meshes.push_back(spaces[space_i]->get_mesh());
@@ -871,7 +873,7 @@ namespace Hermes
         for(unsigned int form_i = 0; form_i < this->wf->get_forms().size(); form_i++)
         {
           for(unsigned int ext_i = 0; ext_i < this->wf->get_forms()[form_i]->ext.size(); ext_i++)
-            if(this->wf->get_forms()[form_i]->ext[ext_i] != NULL)
+            if(this->wf->get_forms()[form_i]->ext[ext_i])
             {
               fns[i].push_back(weakforms[i]->get_forms()[form_i]->ext[ext_i].get());
               weakforms[i]->get_forms()[form_i]->ext[ext_i]->set_quad_2d(&g_quad_2d_std);
@@ -908,7 +910,7 @@ namespace Hermes
 
         for(int state_i = start; state_i < end; state_i++)
         {
-          if(this->caughtException != NULL)
+          if(this->caughtException)
             break;
           try
           {
@@ -916,7 +918,7 @@ namespace Hermes
 
             for(int j = 0; j < fns[thread_number].size(); j++)
             {
-              if(current_state->e[j] != NULL)
+              if(current_state->e[j])
               {
                 fns[thread_number][j]->set_active_element(current_state->e[j]);
                 fns[thread_number][j]->set_transform(current_state->sub_idx[j]);
@@ -925,7 +927,7 @@ namespace Hermes
 
             for(int j = 0; j < this->spaces_size; j++)
             {
-              if(current_state->e[j] != NULL)
+              if(current_state->e[j])
               {
                 spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
                 if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -958,12 +960,12 @@ namespace Hermes
           }
           catch(Hermes::Exceptions::Exception& e)
           {
-            if(this->caughtException == NULL)
+            if(!this->caughtException)
               this->caughtException = e.clone();
           }
           catch(std::exception& e)
           {
-            if(this->caughtException == NULL)
+            if(!this->caughtException)
               this->caughtException = new std::exception(e);
           }
         }
@@ -987,9 +989,9 @@ namespace Hermes
       delete [] fns;
 
       /// \todo Should this be really here? Or in assemble()?
-      if(current_mat != NULL)
+      if(current_mat)
         current_mat->finish();
-      if(current_rhs != NULL)
+      if(current_rhs)
         current_rhs->finish();
 
       if(DG_matrix_forms_present || DG_vector_forms_present)
@@ -1007,7 +1009,7 @@ namespace Hermes
         spaces[space_i]->edata[e->id].changed_in_last_adaptation = false;
       }
 
-      if(this->caughtException != NULL)
+      if(this->caughtException)
         throw *(this->caughtException);
     }
 
@@ -1029,7 +1031,7 @@ namespace Hermes
         bool reinit = false;
         for(unsigned int i = 0; i < this->spaces_size; i++)
         {
-          if(current_state->e[i] == NULL)
+          if(!current_state->e[i])
             continue;
 
           if(this->spaces[i]->edata[current_state->e[i]->id].changed_in_last_adaptation)
@@ -1161,7 +1163,7 @@ namespace Hermes
       // Get necessary (volumetric) assembly lists.
       for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
       {
-        if(current_state->e[space_i] != NULL)
+        if(current_state->e[space_i])
         {
           rep_space_i = space_i;
           current_refmaps[space_i]->set_active_element(current_state->e[space_i]);
@@ -1182,7 +1184,7 @@ namespace Hermes
         current_alsSurface = new AsmList<Scalar>*[this->spaces_size];
         for(unsigned int space_i = 0; space_i < this->spaces_size; space_i++)
         {
-          if(current_state->e[space_i] == NULL)
+          if(!current_state->e[space_i])
             return;
           current_alsSurface[space_i] = new AsmList<Scalar>[current_state->rep->nvert];
           for (current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
@@ -1191,7 +1193,7 @@ namespace Hermes
         }
       }
 
-      if(this->caughtException != NULL)
+      if(this->caughtException)
         return;
 
       // Ext functions.
@@ -1205,10 +1207,10 @@ namespace Hermes
       if(!this->is_linear)
       {
         u_ext = new Func<Scalar>*[prevNewtonSize];
-        if(current_u_ext != NULL)
+        if(current_u_ext)
           for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-            if(current_u_ext[u_ext_i] != NULL)
-              if(current_u_ext[u_ext_i]->get_active_element() != NULL)
+            if(current_u_ext[u_ext_i])
+              if(current_u_ext[u_ext_i]->get_active_element())
                 u_ext[u_ext_i] = init_fn(current_u_ext[u_ext_i], order);
               else
                 u_ext[u_ext_i] = NULL;
@@ -1226,8 +1228,8 @@ namespace Hermes
       {
         ext = new Func<Scalar>*[current_extCount];
         for(int ext_i = 0; ext_i < current_extCount; ext_i++)
-          if(current_wf->ext[ext_i] != NULL)
-            if(current_wf->ext[ext_i]->get_active_element() != NULL)
+          if(current_wf->ext[ext_i])
+            if(current_wf->ext[ext_i]->get_active_element())
               ext[ext_i] = init_fn(current_wf->ext[ext_i].get(), order);
             else
               ext[ext_i] = NULL;
@@ -1239,7 +1241,7 @@ namespace Hermes
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           u_ext[ext_i]->add(ext[current_extCount - this->RK_original_spaces_count + ext_i]);
 
-      if(current_mat != NULL)
+      if(current_mat)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
         {
@@ -1265,7 +1267,7 @@ namespace Hermes
             cache_record->jacobian_x_weights);
         }
       }
-      if(current_rhs != NULL)
+      if(current_rhs)
       {
         for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
         {
@@ -1290,10 +1292,10 @@ namespace Hermes
       }
 
       // Cleanup - u_ext
-      if(current_u_ext != NULL)
+      if(current_u_ext)
       {
         for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-          if(current_u_ext[u_ext_i] != NULL && current_u_ext[u_ext_i]->get_active_element() != NULL)
+          if(current_u_ext[u_ext_i] && current_u_ext[u_ext_i]->get_active_element())
           {
             u_ext[u_ext_i]->free_fn();
             delete u_ext[u_ext_i];
@@ -1304,7 +1306,7 @@ namespace Hermes
       // Cleanup - ext
       for(int ext_i = 0; ext_i < current_extCount; ext_i++)
       {
-        if(current_wf->ext[ext_i] != NULL && current_wf->ext[ext_i]->get_active_element() != NULL)
+        if(current_wf->ext[ext_i] && current_wf->ext[ext_i]->get_active_element())
         {
           ext[ext_i]->free_fn();
           delete ext[ext_i];
@@ -1333,9 +1335,9 @@ namespace Hermes
           if(!this->is_linear)
           {
             u_extSurf = new Func<Scalar>*[prevNewtonSize];
-            if(current_u_ext != NULL)
+            if(current_u_ext)
               for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-                if(current_u_ext[u_ext_surf_i] != NULL)
+                if(current_u_ext[u_ext_surf_i])
                   u_extSurf[u_ext_surf_i] = current_state->e[u_ext_surf_i] == NULL ? NULL : init_fn(current_u_ext[u_ext_surf_i], orderSurf);
                 else
                   u_extSurf[u_ext_surf_i] = NULL;
@@ -1347,7 +1349,7 @@ namespace Hermes
           int current_extCount = this->wf->ext.size();
           Func<Scalar>** extSurf = new Func<Scalar>*[current_extCount];
           for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
-            if(current_wf->ext[ext_surf_i] != NULL)
+            if(current_wf->ext[ext_surf_i])
               extSurf[ext_surf_i] = current_state->e[ext_surf_i] == NULL ? NULL : init_fn(current_wf->ext[ext_surf_i].get(), orderSurf);
             else
               extSurf[ext_surf_i] = NULL;
@@ -1356,7 +1358,7 @@ namespace Hermes
             for(int ext_surf_i = 0; ext_surf_i < this->RK_original_spaces_count; ext_surf_i++)
               u_extSurf[ext_surf_i]->add(extSurf[current_extCount - this->RK_original_spaces_count + ext_surf_i]);
 
-          if(current_mat != NULL)
+          if(current_mat)
           {
             for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
             {
@@ -1381,7 +1383,7 @@ namespace Hermes
             }
           }
 
-          if(current_rhs != NULL)
+          if(current_rhs)
           {
             for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
             {
@@ -1403,10 +1405,10 @@ namespace Hermes
             }
           }
 
-          if(current_u_ext != NULL)
+          if(current_u_ext)
           {
             for(int u_ext_surf_i = 0; u_ext_surf_i < prevNewtonSize; u_ext_surf_i++)
-              if(current_u_ext[u_ext_surf_i] != NULL)
+              if(current_u_ext[u_ext_surf_i])
               {
                 u_extSurf[u_ext_surf_i]->free_fn();
                 delete u_extSurf[u_ext_surf_i];
@@ -1415,7 +1417,7 @@ namespace Hermes
           }
 
           for(int ext_surf_i = 0; ext_surf_i < current_extCount; ext_surf_i++)
-            if(current_wf->ext[ext_surf_i] != NULL)
+            if(current_wf->ext[ext_surf_i])
             {
               extSurf[ext_surf_i]->free_fn();
               delete extSurf[ext_surf_i];
@@ -1424,11 +1426,11 @@ namespace Hermes
         }
 
         for(unsigned int i = 0; i < this->spaces_size; i++)
-          if(current_state->e[i] != NULL)
+          if(current_state->e[i])
             delete [] current_alsSurface[i];
       }
 
-      if(current_alsSurface != NULL)
+      if(current_alsSurface)
         delete [] current_alsSurface;
     }
 
@@ -1507,7 +1509,7 @@ namespace Hermes
         int local_ext_count = form->ext.size();
         local_ext = new Func<Scalar>*[local_ext_count];
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
-          if(form->ext[ext_i] != NULL)
+          if(form->ext[ext_i])
             local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i].get(), order);
           else
             local_ext[ext_i] = NULL;
@@ -1587,7 +1589,7 @@ namespace Hermes
       if(form->ext.size() > 0)
       {
         for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
-          if(form->ext[ext_i] != NULL)
+          if(form->ext[ext_i])
           {
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
@@ -1658,7 +1660,7 @@ namespace Hermes
         int local_ext_count = form->ext.size();
         local_ext = new Func<Scalar>*[local_ext_count];
         for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
-          if(form->ext[ext_i] != NULL)
+          if(form->ext[ext_i])
             local_ext[ext_i] = init_fn(form->ext[ext_i].get(), order);
           else
             local_ext[ext_i] = NULL;
@@ -1692,7 +1694,7 @@ namespace Hermes
       if(form->ext.size() > 0)
       {
         for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
-          if(form->ext[ext_i] != NULL)
+          if(form->ext[ext_i])
           {
             local_ext[ext_i]->free_fn();
             delete local_ext[ext_i];
@@ -1749,9 +1751,9 @@ namespace Hermes
       unsigned int prev_size = RungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
-      if(current_u_ext != NULL)
+      if(current_u_ext)
         for(int i = 0; i < prev_size; i++)
-          if(current_u_ext[i + form->u_ext_offset] != NULL)
+          if(current_u_ext[i + form->u_ext_offset])
             if(surface_form)
               oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_edge_fn_order(current_state->isurf) + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
             else
@@ -1791,7 +1793,7 @@ namespace Hermes
         delete oi[i];
       }
 
-      if(oext != NULL)
+      if(oext)
       {
         if(form->ext.size() > 0)
           for (int i = 0; i < form->ext.size(); i++)
@@ -2057,12 +2059,12 @@ namespace Hermes
         else
           mesh_i = (static_cast<MeshFunction<Scalar>* >(fn[fns_i]))->get_mesh();
         NeighborSearch<Scalar>* ns = neighbor_searches.get(mesh_i->get_seq() - min_dg_mesh_seq);
-        if(ns->central_transformations[neighbor_i] != NULL)
+        if(ns->central_transformations[neighbor_i])
           ns->central_transformations[neighbor_i]->apply_on(fn[fns_i]);
       }
 
       // For neighbor psss.
-      if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
+      if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
         for(unsigned int idx_i = 0; idx_i < spaces.size(); idx_i++)
         {
@@ -2080,7 +2082,7 @@ namespace Hermes
         current_refmaps[i]->force_transform(current_pss[i]->get_transform(), current_pss[i]->get_ctm());
 
         // Neighbor.
-        if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
+        if(current_mat && DG_matrix_forms_present && !edge_processed)
         {
           nspss[i]->set_active_element(npss[i]->get_active_element());
           nspss[i]->set_master_transform();
@@ -2144,9 +2146,9 @@ namespace Hermes
       DiscontinuousFunc<Scalar>** u_ext = new DiscontinuousFunc<Scalar>*[prevNewtonSize];
       if(!this->is_linear)
       {
-        if(current_u_ext != NULL)
+        if(current_u_ext)
           for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-            if(current_u_ext[u_ext_i] != NULL)
+            if(current_u_ext[u_ext_i])
             {
               neighbor_searches.get(current_u_ext[u_ext_i]->get_mesh()->get_seq() - min_dg_mesh_seq)->set_quad_order(order);
               u_ext[u_ext_i]  = neighbor_searches.get(current_u_ext[u_ext_i]->get_mesh()->get_seq() - min_dg_mesh_seq)->init_ext_fn(current_u_ext[u_ext_i]);
@@ -2158,7 +2160,7 @@ namespace Hermes
             u_ext[u_ext_i] = NULL;
       }
 
-      if(current_mat != NULL && DG_matrix_forms_present && !edge_processed)
+      if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
         for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
         {
@@ -2229,7 +2231,7 @@ namespace Hermes
       delete [] testFunctions;
       delete [] ext_asmlist;
 
-      if(current_rhs != NULL && DG_vector_forms_present)
+      if(current_rhs && DG_vector_forms_present)
       {
         for (unsigned int ww = 0; ww < wf->vfDG.size(); ww++)
         {
@@ -2260,7 +2262,7 @@ namespace Hermes
         }
       }
 
-      if(ext != NULL)
+      if(ext)
       {
         for(unsigned int i = 0; i < current_wf->ext.size(); i++)
         {
@@ -2272,10 +2274,10 @@ namespace Hermes
 
       if(!this->is_linear)
       {
-        if(current_u_ext != NULL)
+        if(current_u_ext)
         {
           for(int u_ext_i = 0; u_ext_i < prevNewtonSize; u_ext_i++)
-            if(current_u_ext[u_ext_i] != NULL)
+            if(current_u_ext[u_ext_i])
             {
               u_ext[u_ext_i]->free_fn();
               delete u_ext[u_ext_i];
@@ -2382,7 +2384,7 @@ namespace Hermes
             (ns->central_transformations_size == 0 || ns->central_transformations[0]->num_levels == 0))
             continue;
           for(unsigned int j = 0; j < ns->n_neighbors; j++)
-            if(ns->central_transformations[j] != NULL)
+            if(ns->central_transformations[j])
               insert_into_multimesh_tree(root, ns->central_transformations[j]->transf, ns->central_transformations[j]->num_levels);
         }
     }
@@ -2409,7 +2411,7 @@ namespace Hermes
         if(node->get_left_son()->get_transformation() == transformations[0])
           insert_into_multimesh_tree(node->get_left_son(), transformations + 1, transformation_count - 1);
         // The right one also exists, check that it is the right one, or return an error.
-        else if(node->get_right_son() != NULL)
+        else if(node->get_right_son())
         {
           if(node->get_right_son()->get_transformation() == transformations[0])
             insert_into_multimesh_tree(node->get_right_son(), transformations + 1, transformation_count - 1);
@@ -2444,9 +2446,9 @@ namespace Hermes
       // If we are in the root.
       if(node->get_transformation() == 0)
       {
-        if(node->get_left_son() != NULL)
+        if(node->get_left_son())
           traverse_multimesh_tree(node->get_left_son(), running_transformations);
-        if(node->get_right_son() != NULL)
+        if(node->get_right_son())
           traverse_multimesh_tree(node->get_right_son(), running_transformations);
         // Delete the vector prepared by the last accessed leaf.
         delete running_transformations.back();
@@ -2470,9 +2472,9 @@ namespace Hermes
       else
       {
         running_transformations.back()->push_back(node->get_transformation());
-        if(node->get_left_son() != NULL)
+        if(node->get_left_son())
           traverse_multimesh_tree(node->get_left_son(), running_transformations);
-        if(node->get_right_son() != NULL)
+        if(node->get_right_son())
           traverse_multimesh_tree(node->get_right_son(), running_transformations);
         running_transformations.back()->pop_back();
         return;
@@ -2490,7 +2492,7 @@ namespace Hermes
       {
         // Find the node corresponding to this neighbor in the tree.
         NeighborNode* node;
-        if(ns->central_transformations[i] != NULL)
+        if(ns->central_transformations[i])
           node = find_node(ns->central_transformations[i]->transf, ns->central_transformations[i]->num_levels, multimesh_tree);
         else
           node = multimesh_tree;
@@ -2512,12 +2514,12 @@ namespace Hermes
         return node;
       else
       {
-        if(node->get_left_son() != NULL)
+        if(node->get_left_son())
         {
           if(node->get_left_son()->get_transformation() == transformations[0])
             return find_node(transformations + 1, transformation_count - 1, node->get_left_son());
         }
-        if(node->get_right_son() != NULL)
+        if(node->get_right_son())
         {
           if(node->get_right_son()->get_transformation() == transformations[0])
             return find_node(transformations + 1, transformation_count - 1, node->get_right_son());
@@ -2539,7 +2541,7 @@ namespace Hermes
       // Also check the assertion that if one son is null, then the other too.
       if(node->get_left_son() == NULL)
       {
-        if(node->get_right_son() != NULL)
+        if(node->get_right_son())
           throw Hermes::Exceptions::Exception("Only one son (right) not null in DiscreteProblem<Scalar>::update_ns_subtree.");
         return 0;
       }
@@ -2567,11 +2569,11 @@ namespace Hermes
       ns->delete_neighbor(ith_neighbor);
 
       // Move down the subtree.
-      if(node->get_left_son() != NULL)
+      if(node->get_left_son())
         traverse_multimesh_subtree(node->get_left_son(), running_central_transformations,
         running_neighbor_transformations, edge_info, ns->active_edge,
         ns->central_el->get_mode());
-      if(node->get_right_son() != NULL)
+      if(node->get_right_son())
         traverse_multimesh_subtree(node->get_right_son(), running_central_transformations,
         running_neighbor_transformations, edge_info, ns->active_edge,
         ns->central_el->get_mode());
@@ -2687,10 +2689,10 @@ namespace Hermes
             running_neighbor_transformations.back()->push_back((edge_info.orientation ? edge_info.local_num_of_edge : (edge_info.local_num_of_edge + 1) % H2D_MAX_NUMBER_EDGES));
 
         // Move down.
-        if(node->get_left_son() != NULL)
+        if(node->get_left_son())
           traverse_multimesh_subtree(node->get_left_son(), running_central_transformations, running_neighbor_transformations,
           edge_info, active_edge, mode);
-        if(node->get_right_son() != NULL)
+        if(node->get_right_son())
           traverse_multimesh_subtree(node->get_right_son(), running_central_transformations, running_neighbor_transformations,
           edge_info, active_edge, mode);
 
@@ -2708,12 +2710,12 @@ namespace Hermes
     }
     NeighborNode::~NeighborNode()
     {
-      if(left_son != NULL)
+      if(left_son)
       {
         delete left_son;
         left_son = NULL;
       }
-      if(right_son != NULL)
+      if(right_son)
       {
         delete right_son;
         right_son = NULL;
@@ -2863,7 +2865,7 @@ namespace Hermes
       this->geometry->free();
       delete this->geometry;
 
-      if(this->fnsSurface != NULL)
+      if(this->fnsSurface)
       {
         for(unsigned int edge_i = 0; edge_i < nvert; edge_i++)
         {
@@ -2914,12 +2916,12 @@ namespace Hermes
     {
       for(int i = 0; i < this->recordCount; i++)
       {
-        if(this->recordTable[i] != NULL)
+        if(this->recordTable[i])
           delete this->recordTable[i];
       }
       for(int i = 0; i < this->size; i++)
       {
-        if(this->hierarchyTable[i] != NULL)
+        if(this->hierarchyTable[i])
           delete this->hierarchyTable[i];
       }
 
@@ -2927,7 +2929,7 @@ namespace Hermes
       ::free(hierarchyTable);
 
       for(int i = 0; i < this->hash_table_size; i++)
-        if (hashTable[i] != NULL)
+        if (hashTable[i])
           delete hashTable[i];
 
       ::free(hashTable);
@@ -2937,7 +2939,7 @@ namespace Hermes
     int DiscreteProblemCache<Scalar>::get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i)
     {
       int hash = this->hashFunction(rep_id, parent_son, rep_sub_idx, rep_i);
-      while (hashTable[hash] != NULL && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
+      while (hashTable[hash] && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
         hash = (hash + 1) % hash_table_size;
       return hash;
     }
@@ -2986,7 +2988,7 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemCache<Scalar>::get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
     {
-      if(rep->parent != NULL)
+      if(rep->parent)
         return get_adaptivity(rep, rep_sub_idx, rep_i, cache_record);
       else
       {
