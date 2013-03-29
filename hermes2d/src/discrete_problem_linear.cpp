@@ -140,7 +140,7 @@ namespace Hermes
         }
       }
 
-#pragma omp parallel shared(mat, rhs) num_threads(num_threads_used)
+#pragma omp parallel num_threads(num_threads_used)
       {
         int thread_number = omp_get_thread_num();
         int start = (num_states / num_threads_used) * thread_number;

@@ -346,7 +346,7 @@ namespace Hermes
       int* numberOfCandidates = new int[num_elements_for_refinenement];
 
       // Parallel section
-#pragma omp parallel shared(elem_inx_to_proc, meshes, current_orders) num_threads(num_threads_used)
+#pragma omp parallel num_threads(num_threads_used)
       {
         int thread_number = omp_get_thread_num();
         int start = (num_elements_for_refinenement / num_threads_used) * thread_number;
