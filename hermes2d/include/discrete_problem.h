@@ -35,6 +35,7 @@ namespace Hermes
 
     /// @ingroup inner
     /// Multimesh neighbors traversal class.
+    /// Internal.
     class NeighborNode
     {
     private:
@@ -54,6 +55,9 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
     };
 
+    /// @ingroup inner
+    /// Caching in DiscreteProblem.
+    /// Internal.
     template<typename Scalar>
     class DiscreteProblemCache
     {
@@ -62,6 +66,7 @@ namespace Hermes
 
       ~DiscreteProblemCache();
 
+      /// Storage unit - a record.
       class CacheRecord
       {
       public:
@@ -89,12 +94,21 @@ namespace Hermes
         friend class DiscreteProblem<Scalar>;
       };
 
+      /// Returns the cache record and information whether it is initialized (found in the cache).
+      /// \param [out] cache_record The record.
+      /// \return Found in cache.
       bool get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
+
+      /// Special handling of adaptivity situtation.
+      bool get_adaptivity(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
 
     private:
 
+      /// Starting size of the recordTable.
       static const int DEFAULT_SIZE = 1e5;
-      static const int GUESS_NUMBER_OF_SUBELEMENTS = 32;
+      /// Average number of subelements.
+      static const int GUESS_NUMBER_OF_SUBELEMENTS = 16;
+      /// Starting size of the hashTable.
       static const int DEFAULT_HASH_TABLE_SIZE = DEFAULT_SIZE * GUESS_NUMBER_OF_SUBELEMENTS;
 
       int size;
@@ -107,9 +121,16 @@ namespace Hermes
       class StateHash
       {
       public:
-        StateHash(int rep_id, int rep_sub_idx, int rep_i, int cache_record_index);
+        /// Hash is created from 4 parameters, cache_record_index is an index to the array recordTable.
+        /// \param[in] rep_id Id of the representing element of the Traverse::State at hand.
+        /// \param[in] parent_son if dealing with adaptive calculation caching, the rep_id is no longer the id of the representing element, 
+        /// but the id of its father and this is the son index that together represent the element at hand.
+        /// \param[in] rep_sub_idx The sub-element number of the representing element.
+        /// \param[in] rep_i In the case of subdomains calculations, this identifies what space is the representing element in.
+        StateHash(int rep_id, int parent_son, int rep_sub_idx, int rep_i, int cache_record_index);
 
         int rep_id;
+        int parent_son;
         int rep_sub_idx;
         int rep_i;
         int cache_record_index;
@@ -117,7 +138,9 @@ namespace Hermes
 
       StateHash **hashTable;
 
-      int hashFunction(int rep_id, int rep_sub_idx, int rep_i) const;
+      int get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i);
+
+      int hashFunction(int rep_id, int parent_son, int rep_sub_idx, int rep_i) const;
 
       friend class DiscreteProblem<Scalar>;
     };

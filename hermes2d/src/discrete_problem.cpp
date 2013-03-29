@@ -2934,24 +2934,29 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool DiscreteProblemCache<Scalar>::get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
+    int DiscreteProblemCache<Scalar>::get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i)
     {
-      int rep_id = rep->id;
-      if(rep->parent != NULL && hierarchyTable[rep->parent->id] != NULL)
+      int hash = this->hashFunction(rep_id, parent_son, rep_sub_idx, rep_i);
+      while (hashTable[hash] != NULL && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
+        hash = (hash + 1) % hash_table_size;
+      return hash;
+    }
+
+    template<typename Scalar>
+    bool DiscreteProblemCache<Scalar>::get_adaptivity(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
+    {
+      int parent_son;
+      for(int i = 0; i < 4; i++)
       {
-        for(int i = 0; i < 4; i++)
+        if(rep->parent->sons[i] == rep)
         {
-          if(rep->parent->sons[i] == rep)
-          {
-            rep_id = hierarchyTable[rep->parent->id][i];
-            break;
-          }
+          parent_son = i;
+          break;
         }
       }
-      int hash = this->hashFunction(rep_id, rep_sub_idx, rep_i);
-      while (hashTable[hash] != NULL && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
-        hash = (hash + 1) % hash_table_size;
-      if (hashTable[hash] == NULL)
+
+      int hash = this->get_hash_record(rep->parent->id, parent_son, rep_sub_idx, rep_i);
+      if (this->hashTable[hash] == NULL)
       {
         if(recordCount > 0.9 * size)
         {
@@ -2967,36 +2972,64 @@ namespace Hermes
 #pragma omp critical(record_count_increase)
         {
           recordTable[recordCount] = cache_record;
-          if(rep->parent != NULL && hierarchyTable[rep->parent->id] == NULL)
-          {
-            hierarchyTable[rep->parent->id] = new int[4];
-            for(int i = 0; i < 4; i++)
-            {
-              if(rep->parent->sons[i])
-                hierarchyTable[rep->parent->id][i] = rep->parent->sons[i]->id;
-            }
-          }
-          hashTable[hash] = new StateHash(rep_id, rep_sub_idx, rep_i, recordCount++);
+          this->hashTable[hash] = new StateHash(rep->parent->id, parent_son, rep_sub_idx, rep_i, recordCount++);
         }
         return false;
       }
       else
       {
-        cache_record = this->recordTable[hashTable[hash]->cache_record_index];
+        cache_record = this->recordTable[this->hashTable[hash]->cache_record_index];
         return true;
       }
     }
 
     template<typename Scalar>
-    DiscreteProblemCache<Scalar>::StateHash::StateHash(int rep_id, int rep_sub_idx, int rep_i, int cache_record_index) : rep_id(rep_id), rep_sub_idx(rep_sub_idx), rep_i(rep_i), cache_record_index(cache_record_index) {};
+    bool DiscreteProblemCache<Scalar>::get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
+    {
+      if(rep->parent != NULL)
+        return get_adaptivity(rep, rep_sub_idx, rep_i, cache_record);
+      else
+      {
+        int hash = this->get_hash_record(rep->id, -1, rep_sub_idx, rep_i);
+        if (this->hashTable[hash] == NULL)
+        {
+          if(recordCount > 0.9 * size)
+          {
+#pragma omp critical(record_size_increase)
+            {
+              this->hierarchyTable = (int**)realloc(this->hierarchyTable, size * 1.5 * sizeof(int*));
+              memset(this->hierarchyTable, 0, size * 0.5 * sizeof(int*));
+              size *= 1.5;
+              this->recordTable = (CacheRecord**)realloc(this->recordTable, size * sizeof(CacheRecord*));
+            }
+          }
+          cache_record = new CacheRecord();
+#pragma omp critical(record_count_increase)
+          {
+            recordTable[recordCount] = cache_record;
+            this->hashTable[hash] = new StateHash(rep->id, -1, rep_sub_idx, rep_i, recordCount++);
+          }
+          return false;
+        }
+        else
+        {
+          cache_record = this->recordTable[this->hashTable[hash]->cache_record_index];
+          return true;
+        }
+      }
+    }
 
     template<typename Scalar>
-    int DiscreteProblemCache<Scalar>::hashFunction(int rep_id, int rep_sub_idx, int rep_i) const
+    DiscreteProblemCache<Scalar>::StateHash::StateHash(int rep_id, int parent_son, int rep_sub_idx, int rep_i, int cache_record_index)
+      : rep_id(rep_id), parent_son(parent_son), rep_sub_idx(rep_sub_idx), rep_i(rep_i), cache_record_index(cache_record_index) {};
+
+    template<typename Scalar>
+    int DiscreteProblemCache<Scalar>::hashFunction(int rep_id, int parent_son, int rep_sub_idx, int rep_i) const
     {
       if(rep_sub_idx < GUESS_NUMBER_OF_SUBELEMENTS)
-        return rep_id * GUESS_NUMBER_OF_SUBELEMENTS + rep_sub_idx + rep_i;
+        return rep_id * GUESS_NUMBER_OF_SUBELEMENTS + rep_sub_idx + rep_i + (parent_son + 1);
       else
-        return (rep_id + 1) * GUESS_NUMBER_OF_SUBELEMENTS + rep_i;
+        return (rep_id + 1) * GUESS_NUMBER_OF_SUBELEMENTS + rep_i + (parent_son + 1);
     }
 
     template class HERMES_API DiscreteProblem<double>;

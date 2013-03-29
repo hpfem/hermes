@@ -63,9 +63,9 @@ namespace Hermes
     template<typename Scalar>
     bool LinearSolver<Scalar>::isOkay() const
     {
-      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_weak_formulation() == NULL)
+      if(this->dp->get_weak_formulation() == NULL)
         return false;
-      if(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size() == 0)
+      if(this->dp->get_spaces().size() == 0)
         return false;
       return true;
     }
@@ -84,7 +84,7 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
     {
-      (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);
+      this->dp->set_weak_formulation(wf);
     }
 
     template<typename Scalar>
@@ -108,19 +108,19 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
     {
-      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
+      this->dp->set_spaces(spaces);
     }
 
     template<typename Scalar>
     void LinearSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
     {
-      static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
+      this->dp->set_space(space);
     }
     
     template<typename Scalar>
     Hermes::vector<SpaceSharedPtr<Scalar> > LinearSolver<Scalar>::get_spaces() const
     {
-      return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      return this->dp->get_spaces();
     }
     
     template<typename Scalar>
@@ -132,7 +132,7 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
+        this->dp->have_matrix = false;
     }
 
     template<typename Scalar>
