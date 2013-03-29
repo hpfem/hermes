@@ -8,7 +8,7 @@ SET(MY_TCMALLOC_INC_DIRS ${TCMALLOC_ROOT}/include)
 
 FIND_PATH(TCMALLOC_INCLUDE_DIR tcmalloc.h ${MY_TCMALLOC_INC_DIRS} /usr/local/include/google /usr/include/google)
 
-FIND_LIBRARY(TCMALLOC_LIBRARY  NAMES tcmalloc_minimal tcmalloc_minimal_debug libtcmalloc_minimal libtcmalloc_minimal-debug PATHS ${MY_TCMALLOC_LIB_DIRS} /usr/lib /usr/local/lib)
+FIND_LIBRARY(TCMALLOC_LIBRARY  NAMES tcmalloc_minimal libtcmalloc_minimal PATHS ${MY_TCMALLOC_LIB_DIRS} /usr/lib /usr/local/lib)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(  TCMALLOC "TCMALLOC could not be found." 
