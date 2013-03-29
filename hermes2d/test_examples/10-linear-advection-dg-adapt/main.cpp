@@ -59,7 +59,6 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
@@ -127,7 +126,6 @@ int main(int argc, char* args[])
 
     // View the coarse mesh solution.
     view1.show(val_filter);
-    view1.wait_for_keypress();
     oview.show(space);
 
     // Calculate element errors and total error estimate.

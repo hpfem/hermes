@@ -43,7 +43,7 @@ using namespace Hermes::Hermes2D;
 // tutorial for comparisons.
 const bool STOKES = false;
 
-const bool HERMES_VISUALIZATION = true;
+const bool HERMES_VISUALIZATION = false;
 
 #define PRESSURE_IN_L2
 
@@ -66,7 +66,7 @@ const double VEL_INLET = 1.0;
 const double STARTUP_TIME = 1.0;
 
 const double TAU = 0.1;                           // Time step.
-const double T_FINAL = 3000.;                   // Time interval length.
+const double T_FINAL = 0.5;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
 const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
@@ -88,6 +88,7 @@ double current_time = 0;
 
 // Weak forms.
 #include "definitions.cpp"
+#include "tcmalloc.h"
 
 int main(int argc, char* argv[])
 {
@@ -97,9 +98,11 @@ int main(int argc, char* argv[])
   mloader.load("domain.mesh", mesh);
 
   // Initial mesh refinements.
-  mesh->refine_towards_boundary(BDY_OBSTACLE, 1, false);
-  mesh->refine_towards_boundary(BDY_TOP, 1, true);     // '4' is the number of levels,
-  mesh->refine_towards_boundary(BDY_BOTTOM, 1, true);  // 'true' stands for anisotropic refinements.
+  mesh->refine_towards_boundary(BDY_OBSTACLE, 2, false);
+  mesh->refine_towards_boundary(BDY_TOP, 2, true);     // '4' is the number of levels,
+  mesh->refine_towards_boundary(BDY_BOTTOM, 2, true);  // 'true' stands for anisotropic refinements.
+  mesh->refine_all_elements();
+  mesh->refine_all_elements();
 
   // Initialize boundary conditions.
   EssentialBCNonConst bc_left_vel_x(BDY_LEFT, VEL_INLET, H, STARTUP_TIME);
