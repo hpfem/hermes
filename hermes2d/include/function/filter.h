@@ -43,6 +43,8 @@ namespace Hermes
       virtual ~Filter();
 
       virtual void reinit();
+      
+      inline SpaceType get_space_type() const { return space_type; };
 
       /// State querying helpers.
       inline std::string getClassName() const { return "Filter"; }
@@ -83,6 +85,8 @@ namespace Hermes
 
       bool unimesh;
 
+      SpaceType space_type;
+      
       UniData** unidata;
 
       void copy_base(Filter* flt);
