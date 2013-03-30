@@ -45,7 +45,7 @@ namespace Hermes
       OGProjectionNOX();
 
       /// Main functionality is in the protected method project_internal().
-      /// This is a wrapper that delivers a Solution instead of a coefficient vector.
+      /// This is a wrapper that allows the user to specify his own projection form.
       void project_global(SpaceSharedPtr<Scalar> space,
           MatrixFormVol<Scalar>* custom_projection_jacobian,
           VectorFormVol<Scalar>* custom_projection_residual,
@@ -74,18 +74,23 @@ namespace Hermes
           Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM,
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      /// Wrapper that delivers a Solution instead of coefficient vector.
+      /// Wrapper that accepts MeshFunctionSharedPtr instead of the ordinary MeshFunction pointer.
+      void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
+          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM,
+          double newton_tol = 1e-6, int newton_max_iter = 10);
+          
+      /// Wrapper that delivers a MeshFunctionSharedPtr instead of coefficient vector.
       void project_global(SpaceSharedPtr<Scalar> space,
           MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
           ProjNormType proj_norm = HERMES_UNSET_NORM,
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      /// Wrapper for multiple source MeshFunctions that delivers coefficient vector.
+      /// Wrapper for multiple source MeshFunction pointers that delivers coefficient vector.
       void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunction<Scalar>* > source_meshfns,
           Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
 
-      /// Wrapper for multiple source Solutions that delivers coefficient vector.
+      /// Wrapper for multiple source MeshFunctionSharedPtrs that delivers coefficient vector.
       void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
           Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(),
           double newton_tol = 1e-6, int newton_max_iter = 10);
