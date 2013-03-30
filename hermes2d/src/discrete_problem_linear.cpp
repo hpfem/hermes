@@ -100,7 +100,7 @@ namespace Hermes
       PrecalcShapeset*** pss = new PrecalcShapeset**[num_threads_used];
 
       // Fill these structures.
-      init_assembling(NULL, pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);
+      this->init_assembling(NULL, pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);
 
       // Vector of meshes.
       Hermes::vector<MeshSharedPtr > meshes;
@@ -203,10 +203,10 @@ namespace Hermes
               cache_record->init(this->spaces, current_state, current_pss, current_refmaps, NULL, current_als, current_als_surface, current_weakform, order);
             }
 
-            assemble_one_state(cache_record, current_refmaps, NULL, current_als, current_state, current_weakform);
+            this->assemble_one_state(cache_record, current_refmaps, NULL, current_als, current_state, current_weakform);
 
             if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
+              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
 
             if(this->do_not_use_cache)
               delete cache_record;
@@ -232,7 +232,7 @@ namespace Hermes
 
       this->cache.free_unused();
 
-      deinit_assembling(pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);
+      this->deinit_assembling(pss, refmaps, NULL, als, alsSurface, weakforms, num_threads_used);
 
       for(int i = 0; i < num_states; i++)
         delete states[i];
