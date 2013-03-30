@@ -69,6 +69,13 @@ namespace Hermes
       for(int i = 0; i < this->num; i++)
         meshes[i] = this->sln[i]->get_mesh();
       this->mesh = meshes[0];
+      
+      Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(this->sln[0].get());
+      if (sln == NULL)
+        this->space_type = HERMES_INVALID_SPACE;
+      else
+        this->space_type = sln->get_space_type();
+      
       unimesh = false;
 
       for (int i = 1; i < num; i++)
@@ -84,6 +91,10 @@ namespace Hermes
           unimesh = true;
           break;
         }
+        
+        sln = dynamic_cast<Solution<Scalar>*>(this->sln[i].get());
+        if(sln == NULL || sln->get_space_type() != this->space_type)
+          this->space_type = HERMES_INVALID_SPACE;
       }
 
       if(unimesh)

@@ -20,6 +20,7 @@
 #include "traverse.h"
 #include "refmap.h"
 #include "function/solution.h"
+#include "function/filter.h"
 #include "quadrature/limit_order.h"
 #include "integrals/h1.h"
 #include "discrete_problem.h"
@@ -143,15 +144,29 @@ namespace Hermes
       for (int i = 0; i<n; i++)
       {
         Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(slns[i].get());
-        if(sln == NULL)
-          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_norms().");
-
-        switch (sln->get_space_type())
+        Filter<Scalar>* flt = dynamic_cast<Filter<Scalar>*>(slns[i].get());
+        SpaceType spt;
+        MeshFunction<Scalar>* mfn;
+        
+        if(sln == NULL && flt == NULL)
+          throw Exceptions::Exception("Passed solution is in fact not a Solution or Filter instance in calc_norms().");
+        else if (sln != NULL)
         {
-        case HERMES_H1_SPACE: norms.push_back(calc_norm(sln, HERMES_H1_NORM)); break;
-        case HERMES_HCURL_SPACE: norms.push_back(calc_norm(sln, HERMES_HCURL_NORM)); break;
-        case HERMES_HDIV_SPACE: norms.push_back(calc_norm(sln, HERMES_HDIV_NORM)); break;
-        case HERMES_L2_SPACE: norms.push_back(calc_norm(sln, HERMES_L2_NORM)); break;
+          spt = sln->get_space_type();
+          mfn = sln;
+        }
+        else
+        {
+          spt = flt->get_space_type();
+          mfn = flt;
+        }
+        
+        switch (spt)
+        {
+        case HERMES_H1_SPACE: norms.push_back(calc_norm(mfn, HERMES_H1_NORM)); break;
+        case HERMES_HCURL_SPACE: norms.push_back(calc_norm(mfn, HERMES_HCURL_NORM)); break;
+        case HERMES_HDIV_SPACE: norms.push_back(calc_norm(mfn, HERMES_HDIV_NORM)); break;
+        case HERMES_L2_SPACE: norms.push_back(calc_norm(mfn, HERMES_L2_NORM)); break;
         default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
         }
       }
@@ -171,19 +186,40 @@ namespace Hermes
       for (int i = 0; i < n; i++)
       {
         Solution<Scalar>* sln1 = dynamic_cast<Solution<Scalar>*>(slns1[i].get());
-        if(sln1 == NULL)
+        Filter<Scalar>* flt1 = dynamic_cast<Filter<Scalar>*>(slns1[i].get());
+        if(sln1 == NULL && flt1 == NULL)
           throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_abs_errors().");
 
         Solution<Scalar>* sln2 = dynamic_cast<Solution<Scalar>*>(slns2[i].get());
-        if(sln2 == NULL)
+        Filter<Scalar>* flt2 = dynamic_cast<Filter<Scalar>*>(slns2[i].get());
+        if(sln2 == NULL && flt2 == NULL)
           throw Exceptions::Exception("Passed solution is in fact not a Solution instance in calc_abs_errors().");
 
-        switch (sln1->get_space_type())
+        SpaceType spt;
+        MeshFunction<Scalar> *mfn1, *mfn2;
+        
+        if (sln1 != NULL)
         {
-        case HERMES_H1_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_H1_NORM)); break;
-        case HERMES_HCURL_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_HCURL_NORM)); break;
-        case HERMES_HDIV_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_HDIV_NORM)); break;
-        case HERMES_L2_SPACE: errors.push_back(calc_abs_error(sln1, sln2, HERMES_L2_NORM)); break;
+          spt = sln1->get_space_type();
+          mfn1 = sln1;
+        }
+        else
+        {
+          spt = flt1->get_space_type();
+          mfn1 = flt1;
+        }
+        
+        if (sln2 != NULL)
+          mfn2 = sln2;
+        else
+          mfn2 = flt2;
+        
+        switch (spt)
+        {
+        case HERMES_H1_SPACE: errors.push_back(calc_abs_error(mfn1, mfn2, HERMES_H1_NORM)); break;
+        case HERMES_HCURL_SPACE: errors.push_back(calc_abs_error(mfn1, mfn2, HERMES_HCURL_NORM)); break;
+        case HERMES_HDIV_SPACE: errors.push_back(calc_abs_error(mfn1, mfn2, HERMES_HDIV_NORM)); break;
+        case HERMES_L2_SPACE: errors.push_back(calc_abs_error(mfn1, mfn2, HERMES_L2_NORM)); break;
         default: throw Hermes::Exceptions::Exception("Internal in calc_norms(): unknown space type.");
         }
       }
