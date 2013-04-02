@@ -2613,7 +2613,7 @@ namespace Hermes
           ns->central_transformations[ns->n_neighbors] = new typename NeighborSearch<Scalar>::Transformations;
           ns->central_transformations_size = std::max(ns->central_transformations_size, ns->n_neighbors + 1);
         }
-        if(!ns->neighbor_transformations[ns->n_neighbors] == NULL)
+        if(ns->neighbor_transformations[ns->n_neighbors] == NULL)
         {
           ns->neighbor_transformations[ns->n_neighbors] = new typename NeighborSearch<Scalar>::Transformations;
           ns->neighbor_transformations_size = std::max(ns->neighbor_transformations_size, ns->n_neighbors + 1);
