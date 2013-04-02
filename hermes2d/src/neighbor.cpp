@@ -28,15 +28,17 @@ namespace Hermes
       neighb_el(NULL),
       quad(&g_quad_2d_std),
       central_transformations_size(0),
-      neighbor_transformations_size(0)
+      neighbor_transformations_size(0),
+      central_transformations_alloc_size(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS),
+      neighbor_transformations_alloc_size(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS)
     {
       if(central_el == NULL || central_el->active != 1)
         throw Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
-      memset(central_transformations, 0, H2D_MAX_NEIGHBORS * sizeof(Transformations*));
-      memset(neighbor_transformations, 0, H2D_MAX_NEIGHBORS * sizeof(Transformations*));
+      central_transformations = (Transformations**)calloc(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, sizeof(Transformations*));
+      neighbor_transformations = (Transformations**)calloc(H2D_INITIAL_NEIGHBOR_NUMBER_GUESS, sizeof(Transformations*));
 
       ignore_errors = false;
       n_neighbors = 0;
@@ -56,22 +58,26 @@ namespace Hermes
       neighbors.reserve(2);
       neighbor_edges.reserve(2);
 
-      for(unsigned int j = 0; j < ns.central_transformations_size; j++)
+      central_transformations = (Transformations**)calloc(ns.central_transformations_alloc_size, sizeof(Transformations*));
+      neighbor_transformations = (Transformations**)calloc(ns.neighbor_transformations_alloc_size, sizeof(Transformations*));
+
+      for(unsigned int j = 0; j < ns.central_transformations_alloc_size; j++)
       {
-        if(ns.central_transformations[j] != NULL)
+        if(ns.central_transformations[j])
           this->central_transformations[j] = new Transformations(ns.central_transformations[j]);
       }
 
       this->central_transformations_size = ns.central_transformations_size;
+      this->central_transformations_alloc_size = ns.central_transformations_alloc_size;
 
-      for(unsigned int j = 0; j < ns.neighbor_transformations_size; j++)
+      for(unsigned int j = 0; j < ns.neighbor_transformations_alloc_size; j++)
       {
-        if(ns.neighbor_transformations[j] != NULL)
+        if(ns.neighbor_transformations[j])
           this->neighbor_transformations[j] = new Transformations(ns.neighbor_transformations[j]);
       }
 
       this->neighbor_transformations_size = ns.neighbor_transformations_size;
-
+      this->neighbor_transformations_alloc_size = ns.neighbor_transformations_alloc_size;
 
       if(central_el == NULL || central_el->active != 1)
         throw Exceptions::Exception("You must pass an active element to the NeighborSearch constructor.");
@@ -96,12 +102,14 @@ namespace Hermes
       neighbors.clear();
       clear_supported_shapes();
 
-      for(unsigned int i = 0; i < central_transformations_size; i++)
-        if(this->central_transformations[i] != NULL)
+      for(unsigned int i = 0; i < central_transformations_alloc_size; i++)
+        if(this->central_transformations[i])
           delete this->central_transformations[i];
-      for(unsigned int i = 0; i < neighbor_transformations_size; i++)
-        if(this->neighbor_transformations[i] != NULL)
+      ::free(this->central_transformations);
+      for(unsigned int i = 0; i < neighbor_transformations_alloc_size; i++)
+        if(this->neighbor_transformations[i])
           delete this->neighbor_transformations[i];
+      ::free(this->neighbor_transformations);
     }
 
     template<typename Scalar>
@@ -119,7 +127,9 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::clear_supported_shapes()
     {
-      if(supported_shapes != NULL) delete supported_shapes; supported_shapes = NULL;
+      if(supported_shapes != NULL)
+        delete supported_shapes;
+      supported_shapes = NULL;
     }
 
     template<typename Scalar>
@@ -134,9 +144,9 @@ namespace Hermes
       // Reset transformations.
       for(unsigned int i = 0; i < n_neighbors; i++)
       {
-        if(this->central_transformations[i] != NULL)
+        if(this->central_transformations[i])
           this->central_transformations[i]->reset();
-        if(this->neighbor_transformations[i] != NULL)
+        if(this->neighbor_transformations[i])
           this->neighbor_transformations[i]->reset();
       }
 
@@ -258,8 +268,8 @@ namespace Hermes
       {
         neighb_el = central_el;
 
-        neighbor_transformations[0] = new Transformations(transformations);
-        neighbor_transformations_size++;
+        assert(!neighbor_transformations[0]);
+        this->add_neighbor_transformations(new Transformations(transformations), 0);
 
         neighbor_edge.local_num_of_edge = active_edge = edge;
         NeighborEdgeInfo local_edge_info;
@@ -320,14 +330,65 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NeighborSearch<Scalar>::add_central_transformations(Transformations* to_add, int position, bool replace)
+    {
+      if(position >= this->central_transformations_alloc_size)
+      {
+        int new_alloc_size = position * 1.5;
+        this->central_transformations = (Transformations**)realloc(this->central_transformations, new_alloc_size * sizeof(Transformations*));
+        memset(this->central_transformations + this->central_transformations_alloc_size, 0, sizeof(Transformations*) * (new_alloc_size - this->central_transformations_alloc_size));
+        this->central_transformations_alloc_size = new_alloc_size;
+      }
+
+      if(this->central_transformations[position])
+      {
+        if(replace)
+        {
+          delete this->central_transformations[position];
+          this->central_transformations[position] = to_add;
+        }
+      }
+      else
+      {
+        this->central_transformations[position] = to_add;
+        this->central_transformations_size++;
+      }
+    }
+
+    template<typename Scalar>
+    void NeighborSearch<Scalar>::add_neighbor_transformations(Transformations* to_add, int position, bool replace)
+    {
+      if(position >= this->neighbor_transformations_alloc_size)
+      {
+        int new_alloc_size = position * 1.5;
+        this->neighbor_transformations = (Transformations**)realloc(this->neighbor_transformations, new_alloc_size * sizeof(Transformations*));
+        memset(this->neighbor_transformations + this->neighbor_transformations_alloc_size, 0, sizeof(Transformations*) * (new_alloc_size - this->neighbor_transformations_alloc_size));
+        this->neighbor_transformations_alloc_size = new_alloc_size;
+      }
+
+      if(this->neighbor_transformations[position])
+      {
+        if(replace)
+        {
+          delete this->neighbor_transformations[position];
+          this->neighbor_transformations[position] = to_add;
+        }
+      }
+      else
+      {
+        this->neighbor_transformations[position] = to_add;
+        this->neighbor_transformations_size++;
+      }
+    }
+
+    template<typename Scalar>
     void NeighborSearch<Scalar>::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
     {
       if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP)
       {
-        if(neighbor_transformations[0] == NULL)
+        if(!neighbor_transformations[0])
         {
-          neighbor_transformations[0] = new Transformations(transformations);
-          neighbor_transformations_size++;
+          this->add_neighbor_transformations(new Transformations(transformations), 0);
         }
 
         Transformations *tr = neighbor_transformations[0];
@@ -530,11 +591,8 @@ namespace Hermes
 
         for(unsigned int level = central_transformations[i]->num_levels; level < updated_transformations.size(); level++)
         {
-          if(neighbor_transformations[i] == NULL)
-          {
-            neighbor_transformations[i] = new Transformations;
-            neighbor_transformations_size = std::max(neighbor_transformations_size, i + 1);
-          }
+          if(!neighbor_transformations[i])
+            this->add_neighbor_transformations(new Transformations, i);
 
           Transformations* neighbor_transforms = neighbor_transformations[i];
 
@@ -585,23 +643,20 @@ namespace Hermes
       for(unsigned int i = position; i < n_neighbors - 1; i++)
         central_transformations[i]->copy_from(central_transformations[i + 1]);
 
-      if(central_transformations[n_neighbors - 1] != NULL) // may not be true when position == n_neighbors - 1
+      if(central_transformations[n_neighbors - 1]) // may not be true when position == n_neighbors - 1
         central_transformations[n_neighbors - 1]->reset();
 
       for(unsigned int i = position; i < n_neighbors - 1; i++)
       {
-        if(neighbor_transformations[i + 1] != NULL)
+        if(neighbor_transformations[i + 1])
         {
-          if(neighbor_transformations[i] == NULL)
-          {
-            neighbor_transformations[i] = new Transformations;
-            neighbor_transformations_size = std::max(neighbor_transformations_size, i + 1);
-          }
+          if(!neighbor_transformations[i])
+            this->add_neighbor_transformations(new Transformations, i);
 
           neighbor_transformations[i]->copy_from(neighbor_transformations[i + 1]);
         }
       }
-      if(neighbor_transformations[n_neighbors - 1] != NULL) // may not be true when position == n_neighbors - 1
+      if(neighbor_transformations[n_neighbors - 1]) // may not be true when position == n_neighbors - 1
         neighbor_transformations[n_neighbors - 1]->reset();
 
       neighbor_edges.erase (neighbor_edges.begin() + position);
@@ -672,11 +727,8 @@ namespace Hermes
               // adjacent to the single big neighbor.
               assert(n_neighbors == 0);
 
-              if(neighbor_transformations[n_neighbors] == NULL)
-              {
-                neighbor_transformations[n_neighbors] = new Transformations;
-                neighbor_transformations_size++;
-              }
+              if(!neighbor_transformations[n_neighbors])
+                this->add_neighbor_transformations(new Transformations, n_neighbors);
               
               Transformations *neighbor_transforms = neighbor_transformations[n_neighbors];
 
@@ -788,11 +840,8 @@ namespace Hermes
 
                 if(neighbor_edge.local_num_of_edge == -1) throw Hermes::Exceptions::Exception("Neighbor edge wasn't found");
 
-                if(central_transformations[n_neighbors] == NULL)
-                {
-                  central_transformations[n_neighbors] = new Transformations;
-                  central_transformations_size++;
-                }
+                if(!central_transformations[n_neighbors])
+                  this->add_central_transformations(new Transformations, n_neighbors);
                 
                 Transformations *tr = central_transformations[n_neighbors];
 
@@ -957,7 +1006,7 @@ namespace Hermes
       // Change the active element of the function. Note that this also resets the transformations on the function.
       fu->set_active_element(neighbors[active_segment]);
 
-      if(neighbor_transformations[active_segment] != NULL)
+      if(neighbor_transformations[active_segment])
         neighbor_transformations[active_segment]->apply_on(fu);
 
       Func<Scalar>* fn_neighbor = init_fn(fu, get_quad_eo(true));
@@ -1028,7 +1077,6 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>::Transformations::Transformations() : num_levels(0)
     {
-      memset(transf, 0, max_level * sizeof(int));
     }
 
     template<typename Scalar>

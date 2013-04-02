@@ -2608,16 +2608,12 @@ namespace Hermes
         ns->neighbors.push_back(neighbor);
         ns->neighbor_edges.push_back(edge_info);
 
-        if(ns->central_transformations[ns->n_neighbors] == NULL)
-        {
-          ns->central_transformations[ns->n_neighbors] = new typename NeighborSearch<Scalar>::Transformations;
-          ns->central_transformations_size = std::max(ns->central_transformations_size, ns->n_neighbors + 1);
-        }
-        if(ns->neighbor_transformations[ns->n_neighbors] == NULL)
-        {
-          ns->neighbor_transformations[ns->n_neighbors] = new typename NeighborSearch<Scalar>::Transformations;
-          ns->neighbor_transformations_size = std::max(ns->neighbor_transformations_size, ns->n_neighbors + 1);
-        }
+        if(!ns->central_transformations[ns->n_neighbors])
+          ns->add_central_transformations(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
+
+        if(!ns->neighbor_transformations[ns->n_neighbors])
+          ns->add_neighbor_transformations(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
+        
         ns->central_transformations[ns->n_neighbors]->copy_from(*running_central_transformations[i]);
         ns->neighbor_transformations[ns->n_neighbors]->copy_from(*running_neighbor_transformations[i]);
 
