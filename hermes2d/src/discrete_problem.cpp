@@ -942,6 +942,7 @@ namespace Hermes
               }
             }
 
+            bool state_skipped = true;
             for(int j = 0; j < this->spaces_size; j++)
             {
               if(current_state->e[j])
@@ -954,8 +955,12 @@ namespace Hermes
                 }
                 current_refmaps[j]->set_active_element(current_state->e[j]);
                 current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
+                state_skipped = false;
               }
             }
+            
+            if(state_skipped)
+              continue;
 
             typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
             if(!this->do_not_use_cache)

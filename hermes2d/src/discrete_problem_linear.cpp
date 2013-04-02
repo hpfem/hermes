@@ -177,7 +177,8 @@ namespace Hermes
                 fns[thread_number][j]->set_transform(current_state->sub_idx[j]);
               }
             }
-
+            
+            bool state_skipped = true;
             for(int j = 0; j < this->spaces_size; j++)
             {
               if(current_state->e[j])
@@ -190,8 +191,12 @@ namespace Hermes
                 }
                 current_refmaps[j]->set_active_element(current_state->e[j]);
                 current_refmaps[j]->force_transform(current_pss[j]->get_transform(), current_pss[j]->get_ctm());
+                state_skipped = false;
               }
             }
+
+            if(state_skipped)
+              continue;
 
             typename DiscreteProblemCache<Scalar>::CacheRecord* cache_record;
             if(!this->do_not_use_cache)
@@ -227,7 +232,6 @@ namespace Hermes
          for (unsigned int j = 0; j < this->spaces_size; j++)
             delete current_spss[j];
         delete [] current_spss;
-
       }
 
       this->cache.free_unused();
