@@ -148,6 +148,12 @@ namespace Hermes
       this->free();
       init();
     }
+    
+    template<typename Scalar>
+    void MeshFunction<Scalar>::multiply(Scalar coef)
+    {
+      throw Exceptions::MethodNotOverridenException("MeshFunction<Scalar>::multiply");
+    }
 
     template<>
     double MeshFunction<double>::get_approx_max_value(int item_)

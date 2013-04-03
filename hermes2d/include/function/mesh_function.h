@@ -100,6 +100,9 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("You need to implement MeshFunctionSharedPtr::clone() to be able to use paralellization");
         return NULL;
       }
+      
+      /// Multiplies the function represented by this class by the given coefficient.
+      virtual void multiply(Scalar coef);
 
       /// Return the approximate maximum value of this instance.
       virtual Scalar get_approx_max_value(int item = H2D_FN_VAL_0);

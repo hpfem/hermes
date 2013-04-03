@@ -125,7 +125,7 @@ namespace Hermes
       virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL);
 
       /// Multiplies the function represented by this class by the given coefficient.
-      void multiply(Scalar coef);
+      virtual void multiply(Scalar coef);
 
       /// Returns solution type.
       inline SolutionType get_type() const { return sln_type; };
