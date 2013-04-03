@@ -95,6 +95,7 @@ namespace Hermes
         //void operator=(const State * other);
         static State* clone(const State * other);
         void push_transform(int son, int i, bool is_triangle = false);
+        bool is_triangle();
         uint64_t get_transform(int i);
         bool visited;
         uint64_t* sub_idx;

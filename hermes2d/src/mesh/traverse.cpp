@@ -250,7 +250,7 @@ namespace Hermes
       for (int i = 0; i < num; i++)
         if((e = s->e[i]) != NULL) break;
 
-      if(s->rep->is_triangle())
+      if(e->is_triangle())
       {
         for (int i = 0; i < 3; i++)
           (s->bnd[i] = (s->bnd[i] && e->en[i]->bnd));
@@ -264,6 +264,21 @@ namespace Hermes
         s->bnd[3] = s->bnd[3] && (s->cr.l == 0)   && e->en[3]->bnd;
         s->isBnd = s->bnd[0] || s->bnd[1] || s->bnd[2] || s->bnd[3] || e->vn[0]->bnd || e->vn[1]->bnd || e->vn[2]->bnd || e->vn[3]->bnd;
       }
+    }
+
+    bool Traverse::State::is_triangle()
+    {
+      bool is_triangle = false;
+      for(int j = 0; j < this->num; j++)
+      {
+        if(this->e[j] != NULL)
+        {
+          if(this->e[j]->is_triangle())
+            is_triangle = true;
+          break;
+        }
+      }
+      return is_triangle;
     }
 
     Traverse::State** Traverse::get_states(Hermes::vector<MeshSharedPtr> meshes, int& states_count)
@@ -337,7 +352,7 @@ namespace Hermes
 
           (id)++;
 
-          if(s->rep->is_triangle())
+          if(s->is_triangle())
             for (i = 0; i < 3; i++)
               s->bnd[i] = true;
         }
@@ -349,7 +364,7 @@ namespace Hermes
           // ..where the element is used ..
           if(s->e[i] != NULL)
             if(s->sub_idx[i] == 0 && s->e[i]->active)
-              if(!s->rep->is_triangle())
+              if(!s->e[i]->is_triangle())
                 init_transforms(s, i);
         }
 
@@ -375,13 +390,19 @@ namespace Hermes
           }
 
           set_boundary_info(s);
-
+          for(int j = 0; j < num; j++)
+            if(s->e[j] != NULL)
+            {
+              s->rep = s->e[j];
+              s->rep_subidx = s->sub_idx[j];
+              s->rep_i = j;
+            }
           states[count++] = State::clone(s);
           continue;
         }
 
         // Triangle: push son states
-        if(s->rep->is_triangle())
+        if(s->is_triangle())
         {
           // Triangle always has 4 sons.
           for (son = 0; son <= 3; son++)
@@ -397,12 +418,9 @@ namespace Hermes
               }
               else if(s->e[i]->active)
               {
-                ns->rep = s->e[i];
                 ns->e[i] = s->e[i];
                 ns->sub_idx[i] = s->sub_idx[i];
                 ns->push_transform(son, i, true);
-                ns->rep_subidx = ns->sub_idx[i];
-                ns->rep_i = i;
               }
               // ..we move to the son.
               else
@@ -411,12 +429,6 @@ namespace Hermes
                 // If the son's element is active.
                 if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
-                if(ns->e[i] != NULL)
-                {
-                  ns->rep = ns->e[i];
-                  ns->rep_subidx = ns->sub_idx[i];
-                  ns->rep_i = i;
-                }
               }
             }
 
@@ -479,12 +491,6 @@ namespace Hermes
                     if(ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
-                  if(ns->e[i] != NULL)
-                  {
-                    ns->rep = ns->e[i];
-                    ns->rep_subidx = ns->sub_idx[i];
-                    ns->rep_i = i;
-                  }
                 }
               }
             }
@@ -522,12 +528,6 @@ namespace Hermes
                     if(ns->e[i]->active)
                       ns->sub_idx[i] = 0;
                   }
-                  if(ns->e[i] != NULL)
-                  {
-                    ns->rep = ns->e[i];
-                    ns->rep_subidx = ns->sub_idx[i];
-                    ns->rep_i = i;
-                  }
                 }
               }
             }
@@ -556,12 +556,6 @@ namespace Hermes
                 move_to_son(ns->er + i, s->er + i, current_sons[i][0]);
                 if(ns->e[i]->active)
                   ns->sub_idx[i] = 0;
-                if(ns->e[i] != NULL)
-                {
-                  ns->rep = ns->e[i];
-                  ns->rep_subidx = ns->sub_idx[i];
-                  ns->rep_i = i;
-                }
               }
             }
           }
