@@ -12,6 +12,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+
+/*
 #include "kelly_type_adapt.h"
 
 namespace Hermes
@@ -804,3 +806,4 @@ namespace Hermes
     template HERMES_API class BasicKellyAdapt<std::complex<double> >;
   }
 }
+*/

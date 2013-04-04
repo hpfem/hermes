@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 
 
       dp_mass.assemble(mass_matrix); 										//M_c/tau
-      dp_convection.assemble(conv_matrix, NULL,true);		//K
+      dp_convection.assemble(conv_matrix, NULL);		//K
 
       //----------------------MassLumping  & Artificial Diffusion --------------------------------------------------------------------	
       UMFPackMatrix<double>* lumped_matrix = fluxCorrection.massLumping(mass_matrix); // M_L/tau

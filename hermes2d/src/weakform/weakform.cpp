@@ -190,11 +190,10 @@ namespace Hermes
     {
       this->ext = ext;
     }
-
     
     template<typename Scalar>
     template<typename FormType>
-    void WeakForm<Scalar>::processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process)
+    void WeakForm<Scalar>::processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool surface, Hermes::vector<FormType> forms_to_process)
     {
       for(int form_i = 0; form_i < forms_to_process.size(); form_i++)
       {

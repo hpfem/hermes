@@ -77,10 +77,10 @@ namespace Hermes
       /// Constructor.
       /// Parameter start_from_zero_K_vector: if set to true, the last K_vector will NOT be used
       /// as an initial guess for the Newton's method, instead zero vector will be used.
-      RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt);
+      RungeKutta(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt);
 
       /// Constructor for one equation.
-      RungeKutta(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt);
+      RungeKutta(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt);
 
       /// Projections will be local (projection-based).
       void use_local_projections();

@@ -23,7 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt)
+    RungeKutta<Scalar>::RungeKutta(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ButcherTable* bt)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * spaces.size()),
       stage_wf_left(spaces.size()), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
@@ -62,7 +62,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    RungeKutta<Scalar>::RungeKutta(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt)
+    RungeKutta<Scalar>::RungeKutta(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt)
       : wf(wf), bt(bt), num_stages(bt->get_size()), stage_wf_right(bt->get_size() * 1),
       stage_wf_left(1), start_from_zero_K_vector(false), block_diagonal_jacobian(false), residual_as_vector(true), iteration(0),
       freeze_jacobian(false), newton_tol(1e-6), newton_max_iter(20), newton_damping_coeff(1.0), newton_max_allowed_residual_norm(1e10)
@@ -200,8 +200,6 @@ namespace Hermes
           stage_spaces_vector.push_back(spaces[space_i]);
 
       this->stage_dp_right = new DiscreteProblem<Scalar>(&stage_wf_right, stage_spaces_vector);
-
-      stage_dp_right->set_RK(spaces.size());
 
       // Prepare residuals of stage solutions.
       if(!residual_as_vector)
@@ -375,7 +373,8 @@ namespace Hermes
         // Assemble the block Jacobian matrix of the stationary residual F.
         // Diagonal blocks are created even if empty, so that matrix_left can be added later.
         bool force_diagonal_blocks = true;
-        stage_dp_right->assemble(u_ext_vec, NULL, vector_right, force_diagonal_blocks);
+        stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks);
+        stage_dp_right->assemble(u_ext_vec, NULL, vector_right);
 
         // Finalizing the residual vector.
         vector_right->add_vector(vector_left);
@@ -436,7 +435,8 @@ namespace Hermes
           // Assemble the block Jacobian matrix of the stationary residual F
           // Diagonal blocks are created even if empty, so that matrix_left
           // can be added later.
-          stage_dp_right->assemble(u_ext_vec, matrix_right, NULL, force_diagonal_blocks);
+          stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks);
+          stage_dp_right->assemble(u_ext_vec, matrix_right, NULL);
 
           // Adding the block mass matrix M to matrix_right. This completes the
           // resulting tensor Jacobian.

@@ -100,6 +100,7 @@ namespace Hermes
       template<typename Scalar> friend class Adapt;
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class DiscreteProblem;
+      template<typename Scalar> friend class DiscreteProblemDGAssembler;
       template<typename Scalar> friend class DiscreteProblemLinear;
       template<typename Scalar> friend class BasicKellyAdapt;
       template<typename Scalar> friend class Hermes::Hermes2D::OGProjection;
@@ -159,6 +160,7 @@ namespace Hermes
       bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
       ///< (when retrieving values on an edge that is oriented differently in both elements).
       static T zero;              ///< Zero value used for the zero-extension.
+      template<typename Scalar> friend class DiscreteProblemDGAssembler;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class DiscreteProblemLinear;
       template<typename Scalar> friend class KellyTypeAdapt;
@@ -212,6 +214,7 @@ namespace Hermes
 
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class DiscreteProblemLinear;
+      template<typename Scalar> friend class DiscreteProblemDGAssembler;
       template<typename Scalar> friend class InterfaceGeom;
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class BasicKellyAdapt;
@@ -247,6 +250,7 @@ namespace Hermes
       int neighb_marker;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class DiscreteProblemLinear;
+      template<typename Scalar> friend class DiscreteProblemDGAssembler;
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class Adapt;
     };

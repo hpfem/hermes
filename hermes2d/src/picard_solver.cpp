@@ -39,21 +39,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space)
+    PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space)
       : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), verbose_output_linear_solver(false), own_dp(true)
     {
       init();
     }
 
     template<typename Scalar>
-    PicardSolver<Scalar>::PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    PicardSolver<Scalar>::PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
       : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), verbose_output_linear_solver(false), own_dp(true)
     {
       init();
     }
     
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    void PicardSolver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
     {
       (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);
     }
@@ -85,7 +85,7 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::free_cache()
     {
-      static_cast<DiscreteProblem<Scalar>*>(this->dp)->free_cache();
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->cache.free();
     }
 
     template<typename Scalar>
@@ -114,7 +114,7 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
     }
 
     template<typename Scalar>
@@ -254,7 +254,9 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess)
     {
-      int ndof = this->dp->get_num_dofs();
+      this->check();
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
       Scalar* coeff_vec = new Scalar[ndof];
       OGProjection<Scalar> ogProjection;
       ogProjection.project_global(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), initial_guess, coeff_vec);
@@ -272,9 +274,9 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Picard: Bad number of last iterations to be used (must be at least one).");
 
       // Preliminaries.
-      int num_spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces().size();
-      int ndof = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_num_dofs();
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      int num_spaces = spaces.size();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
       Hermes::vector<bool> add_dir_lift;
       for(unsigned int i = 0; i < spaces.size(); i++)
         add_dir_lift.push_back(false);
@@ -435,7 +437,7 @@ namespace Hermes
             delete [] anderson_coeffs;
           }
           
-          static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
 
           this->tick();
           this->info("\tPicard: solution duration: %f s.\n", this->last());
@@ -454,7 +456,7 @@ namespace Hermes
             delete [] previous_vectors;
             delete [] anderson_coeffs;
           }
-          static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
+          static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
 
           this->tick();
           this->info("\tPicard: solution duration: %f s.\n", this->last());

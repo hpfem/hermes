@@ -32,10 +32,10 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      DiscreteProblemLinear(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
       /// Constructor for one equation.
-      DiscreteProblemLinear(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      DiscreteProblemLinear(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
 
       /// Empty constructor for special purposes.
       DiscreteProblemLinear();
@@ -45,8 +45,7 @@ namespace Hermes
 
       /// Assembling.
       /// Light version, linear problems.
-      virtual void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL, bool force_diagonal_blocks = false,
-        Table* block_weights = NULL);
+      virtual void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
 
     protected:
       /// Methods different to those of the parent class.

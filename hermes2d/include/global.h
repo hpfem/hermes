@@ -36,6 +36,7 @@
 #define H2D_SOLUTION_ELEMENT_CACHE_SIZE 4 ///< An internal parameter.
 #define H2D_MAX_NODE_ID 10000000
 #define H2D_MAX_SOLUTION_COMPONENTS 2
+static const std::string H2D_DG_INNER_EDGE = "-1234567";
 
 #define HERMES_ONE NULL
 #define HERMES_DEFAULT_FUNCTION NULL

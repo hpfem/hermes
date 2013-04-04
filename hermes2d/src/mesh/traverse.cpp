@@ -390,6 +390,7 @@ namespace Hermes
           }
 
           set_boundary_info(s);
+          s->rep = NULL;
           for(int j = 0; j < num; j++)
             if(s->e[j] != NULL)
             {
@@ -397,7 +398,8 @@ namespace Hermes
               s->rep_subidx = s->sub_idx[j];
               s->rep_i = j;
             }
-          states[count++] = State::clone(s);
+          if(s->rep)
+            states[count++] = State::clone(s);
           continue;
         }
 

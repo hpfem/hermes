@@ -209,6 +209,9 @@ namespace Hermes
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemCache<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
+      friend class DiscreteProblemDGAssembler<Scalar>;
+      friend class DiscreteProblemThreadAssembler<Scalar>;
+      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
       friend class RungeKutta<Scalar>;
       friend class OGProjection<Scalar>;
       friend class Hermes::Preconditioners::Precond<Scalar>;
@@ -220,7 +223,7 @@ namespace Hermes
 
       // Internal - processes markers, translates from strings to ints.
       template<typename FormType>
-      void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process);
+      void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool surface, Hermes::vector<FormType> forms_to_process);
       void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
 
     private:
@@ -297,6 +300,9 @@ namespace Hermes
       friend class RungeKutta<Scalar>;
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemCache<Scalar>;
+      friend class DiscreteProblemDGAssembler<Scalar>;
+      friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
+      friend class DiscreteProblemThreadAssembler<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
     };
 

@@ -189,8 +189,6 @@ project(hermes2d)
     src/neighbor.cpp
     src/graph.cpp
     src/global.cpp
-    src/discrete_problem.cpp
-    src/discrete_problem_linear.cpp
     src/runge_kutta.cpp
     src/spline.cpp
 
@@ -203,7 +201,29 @@ project(hermes2d)
     src/weakform_library/weakforms_hcurl.cpp
     src/weakform_library/weakforms_maxwell.cpp
     src/weakform_library/weakforms_neutronics.cpp
+    
+    src/discrete_problem.cpp
+    src/discrete_problem_linear.cpp
+    src/discrete_problem/discrete_problem_helpers.cpp
+    src/discrete_problem/discrete_problem_cache.cpp
+    src/discrete_problem/discrete_problem_thread_assembler.cpp
+    src/discrete_problem/discrete_problem_integration_order_calculator.cpp
+    src/discrete_problem/dg/discrete_problem_dg_assembly_data.cpp
+    src/discrete_problem/dg/discrete_problem_dg_assembler.cpp
+    src/discrete_problem/dg/multimesh_dg_neighbor_tree.cpp
+    src/discrete_problem/dg/multimesh_dg_neighbor_tree_node.cpp
   )
+  
+  SOURCE_GROUP("Source Files - Discrete Problem" FILES src/discrete_problem.cpp
+    src/discrete_problem_linear.cpp
+    src/discrete_problem/discrete_problem_helpers.cpp
+    src/discrete_problem/discrete_problem_cache.cpp
+    src/discrete_problem/discrete_problem_thread_assembler.cpp
+    src/discrete_problem/discrete_problem_integration_order_calculator.cpp
+    src/discrete_problem/dg/discrete_problem_dg_assembly_data.cpp
+    src/discrete_problem/dg/discrete_problem_dg_assembler.cpp
+    src/discrete_problem/dg/multimesh_dg_neighbor_tree.cpp
+    src/discrete_problem/dg/multimesh_dg_neighbor_tree_node.cpp)
   
   set(HEADERS
     include/forms.h
@@ -298,8 +318,6 @@ project(hermes2d)
     include/neighbor.h
     include/graph.h
     include/global.h
-    include/discrete_problem.h
-    include/discrete_problem_linear.h
     include/runge_kutta.h
     include/spline.h
 
@@ -312,7 +330,29 @@ project(hermes2d)
     include/weakform_library/weakforms_hcurl.h
     include/weakform_library/weakforms_maxwell.h
     include/weakform_library/weakforms_neutronics.h
+    
+    include/discrete_problem.h
+    include/discrete_problem_linear.h
+    include/discrete_problem/discrete_problem_helpers.h
+    include/discrete_problem/discrete_problem_cache.h
+    include/discrete_problem/discrete_problem_thread_assembler.h
+    include/discrete_problem/discrete_problem_integration_order_calculator.h
+    include/discrete_problem/dg/discrete_problem_dg_assembly_data.h
+    include/discrete_problem/dg/discrete_problem_dg_assembler.h
+    include/discrete_problem/dg/multimesh_dg_neighbor_tree.h
+    include/discrete_problem/dg/multimesh_dg_neighbor_tree_node.h
   )
+    
+  SOURCE_GROUP("Header Files - Discrete Problem" FILES include/discrete_problem.h
+  include/discrete_problem_linear.h
+  include/discrete_problem/discrete_problem_helpers.h
+  include/discrete_problem/discrete_problem_cache.h
+  include/discrete_problem/discrete_problem_thread_assembler.h
+  include/discrete_problem/discrete_problem_integration_order_calculator.h
+  include/discrete_problem/dg/discrete_problem_dg_assembly_data.h
+  include/discrete_problem/dg/discrete_problem_dg_assembler.h
+  include/discrete_problem/dg/multimesh_dg_neighbor_tree.h
+  include/discrete_problem/dg/multimesh_dg_neighbor_tree_node.h)
     
   #
   # Build and install the library.
@@ -366,6 +406,8 @@ project(hermes2d)
   # Install header files.
 
   file(GLOB INC            "include/*.h")
+  file(GLOB INC_DP          "include/discrete_problem/*.h")
+  file(GLOB INC_DP_DG       "include/discrete_problem/dg/*.h")
   file(GLOB INC_FORM       "include/form/*.h")
   file(GLOB INC_SPACE      "include/space/*.h")
   file(GLOB INC_MESH       "include/mesh/*.h")
@@ -385,6 +427,8 @@ project(hermes2d)
   file(GLOB INC_WEAKFORM_LIBRARY "include/weakform_library/*.h")
   
   install(FILES ${INC}           DESTINATION ${TARGET_ROOT}/include/hermes2d)
+  install(FILES ${INC_DP}           DESTINATION ${TARGET_ROOT}/include/hermes2d/discrete_problem)
+  install(FILES ${INC_DP_DG}           DESTINATION ${TARGET_ROOT}/include/hermes2d/discrete_problem/dg)
   install(FILES ${INC_SPACE}     DESTINATION ${TARGET_ROOT}/include/hermes2d/space)
   install(FILES ${INC_MESH}      DESTINATION ${TARGET_ROOT}/include/hermes2d/mesh)
   install(FILES ${XSD}           DESTINATION ${TARGET_ROOT}/include/hermes2d/xml_schemas)

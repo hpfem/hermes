@@ -34,13 +34,13 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces)
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces)
     {
       this->is_linear = true;
     }
 
     template<typename Scalar>
-    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : DiscreteProblem<Scalar>(wf, space)
+    DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : DiscreteProblem<Scalar>(wf, space)
     {
       this->is_linear = true;
     }
@@ -57,10 +57,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemLinear<Scalar>::assemble(SparseMatrix<Scalar>* mat,
-      Vector<Scalar>* rhs,
-      bool force_diagonal_blocks,
-      Table* block_weights)
+    void DiscreteProblemLinear<Scalar>::assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
     {
       // Check.
       this->check();
@@ -68,10 +65,8 @@ namespace Hermes
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
 
-      this->current_mat = mat;
-      this->current_rhs = rhs;
-      this->current_force_diagonal_blocks = force_diagonal_blocks;
-      this->current_block_weights = block_weights;
+      this->set_matrix(mat);
+      this->set_rhs(rhs);
 
       // Local number of threads - to avoid calling it over and over again, and against faults caused by the
       // value being changed while assembling.
@@ -155,7 +150,7 @@ namespace Hermes
         PrecalcShapeset** current_pss = pss[thread_number];
 
         PrecalcShapeset** current_spss = new PrecalcShapeset*[this->spaces_size];
-        if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+        if(this->dgAssembler.DG_matrix_forms_present || this->dgAssembler.DG_vector_forms_present)
           for (unsigned int j = 0; j < this->spaces_size; j++)
             current_spss[j] = new PrecalcShapeset(current_pss[j]);
 
@@ -184,7 +179,7 @@ namespace Hermes
               if(current_state->e[j])
               {
                 this->spaces[j]->get_element_assembly_list(current_state->e[j], current_als[j]);
-                if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+                if(this->dgAssembler.DG_matrix_forms_present || this->dgAssembler.DG_vector_forms_present)
                 {
                   current_spss[j]->set_active_element(current_state->e[j]);
                   current_spss[j]->set_master_transform();
@@ -204,14 +199,14 @@ namespace Hermes
             else
             {
               cache_record = new typename DiscreteProblemCache<Scalar>::CacheRecord();
-              order = this->calculate_order(current_state, current_refmaps, NULL, current_weakform);
+              order = this->integrationOrderCalculator.calculate_order(spaces, current_state, current_refmaps, NULL, current_weakform);
               cache_record->init(this->spaces, current_state, current_pss, current_refmaps, NULL, current_als, current_als_surface, current_weakform, order);
             }
 
             this->assemble_one_state(cache_record, current_refmaps, NULL, current_als, current_state, current_weakform);
 
-            if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
-              this->assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
+            if(this->dgAssembler.DG_matrix_forms_present || this->dgAssembler.DG_vector_forms_present)
+              this->dgAssembler.assemble_one_DG_state(current_pss, current_spss, current_refmaps, NULL, current_als, current_state, current_weakform->mfDG, current_weakform->vfDG, &fns[thread_number].front(), current_weakform);
 
             if(this->do_not_use_cache)
               delete cache_record;
@@ -228,7 +223,7 @@ namespace Hermes
           }
         }
 
-        if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+        if(this->dgAssembler.DG_matrix_forms_present || this->dgAssembler.DG_vector_forms_present)
          for (unsigned int j = 0; j < this->spaces_size; j++)
             delete current_spss[j];
         delete [] current_spss;
@@ -254,7 +249,7 @@ namespace Hermes
       if(this->current_rhs)
         this->current_rhs->finish();
 
-      if(this->DG_matrix_forms_present || this->DG_vector_forms_present)
+      if(this->dgAssembler.DG_matrix_forms_present || this->dgAssembler.DG_vector_forms_present)
       {
         Element* element_to_set_nonvisited;
         for(unsigned int mesh_i = 0; mesh_i < meshes.size(); mesh_i++)

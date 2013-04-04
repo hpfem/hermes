@@ -39,14 +39,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), own_dp(true), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, space)), own_dp(true), kept_jacobian(NULL)
     {
       init_attributes();
       init_linear_solver();
     }
 
     template<typename Scalar>
-    NewtonSolver<Scalar>::NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true), kept_jacobian(NULL)
+    NewtonSolver<Scalar>::NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : NonlinearSolver<Scalar>(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true), kept_jacobian(NULL)
     {
       init_attributes();
       init_linear_solver();
@@ -89,11 +89,11 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::free_cache()
     {
-      static_cast<DiscreteProblem<Scalar>*>(this->dp)->free_cache();
+      static_cast<DiscreteProblem<Scalar>*>(this->dp)->cache.free();
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    void NewtonSolver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
     {
       (static_cast<DiscreteProblem<Scalar>*>(this->dp))->set_weak_formulation(wf);
     }
@@ -189,7 +189,7 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        static_cast<DiscreteProblem<Scalar>*>(this->dp)->have_matrix = false;
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
     }
 
     template<typename Scalar>
@@ -261,7 +261,9 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess)
     {
-      int ndof = this->dp->get_num_dofs();
+      this->check();
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
       Scalar* coeff_vec = new Scalar[ndof];
       OGProjection<Scalar> ogProjection;
       ogProjection.project_global(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), initial_guess, coeff_vec);
@@ -276,7 +278,8 @@ namespace Hermes
       this->tick();
 
       // Obtain the number of degrees of freedom.
-      int ndof = this->dp->get_num_dofs();
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // If coeff_vec == NULL then create a zero vector.
       bool delete_coeff_vec = false;
@@ -525,7 +528,9 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve_keep_jacobian(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess)
     {
-      int ndof = this->dp->get_num_dofs();
+      this->check();
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
       Scalar* coeff_vec = new Scalar[ndof];
       OGProjection<Scalar> ogProjection;
       ogProjection.project_global(static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces(), initial_guess, coeff_vec);
@@ -540,7 +545,8 @@ namespace Hermes
       this->tick();
 
       // Obtain the number of degrees of freedom.
-      int ndof = this->dp->get_num_dofs();
+      Hermes::vector<SpaceSharedPtr<Scalar> > spaces = static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
+      int ndof = Space<Scalar>::get_num_dofs(spaces);
 
       // If coeff_vec == NULL then create a zero vector.
       bool delete_coeff_vec = false;
@@ -712,7 +718,7 @@ namespace Hermes
 
         // Assemble and keep the jacobian if this has not been done before.
         // Also declare that LU-factorization in case of a direct solver will be done only once and reused afterwards.
-        if(kept_jacobian == NULL || !(static_cast<DiscreteProblem<Scalar>*>(this->dp))->have_matrix) 
+        if(kept_jacobian == NULL || !(static_cast<DiscreteProblem<Scalar>*>(this->dp))->matrix_structure_reusable) 
         {
           if(kept_jacobian != NULL)
             delete kept_jacobian;

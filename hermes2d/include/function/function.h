@@ -255,7 +255,6 @@ namespace Hermes
       friend class ComplexFilter;
       friend class VonMisesFilter;
       friend HERMES_API Geom<double>* init_geom_vol(RefMap *rm, const int order);
-      friend HERMES_API Geom<double>* init_geom_surf(RefMap *rm, SurfPos* surf_pos, const int order);
       friend HERMES_API Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
       template<typename T> friend HERMES_API Func<T>* init_fn(MeshFunction<T>*fu, const int order);
     };

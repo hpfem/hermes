@@ -16,12 +16,11 @@
 #ifndef __H2D_SPACE_H
 #define __H2D_SPACE_H
 
-#include "../mesh/mesh.h"
 #include "../shapeset/shapeset.h"
 #include "asmlist.h"
+#include "../boundary_conditions/essential_boundary_conditions.h"
 #include "../mesh/traverse.h"
 #include "../quadrature/quad_all.h"
-#include "../boundary_conditions/essential_boundary_conditions.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -51,8 +50,6 @@ public:
 
 };
 
-
-
 namespace Hermes
 {
   namespace Hermes2D
@@ -77,6 +74,7 @@ namespace Hermes
     template<typename Scalar> class Adapt;
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class DiscreteProblemLinear;
+    template<typename Scalar> class DiscreteProblemThreadAssembler;
     namespace Views
     {
       template<typename Scalar> class BaseView;
@@ -461,6 +459,8 @@ namespace Hermes
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
+      friend class DiscreteProblemDGAssembler<Scalar>;
+      friend class DiscreteProblemThreadAssembler<Scalar>;
       template<typename T> friend class CalculationContinuity;
     };
   }

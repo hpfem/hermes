@@ -40,13 +40,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : dp(new DiscreteProblemLinear<Scalar>(wf, space)), sln_vector(NULL), own_dp(true)
+    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : dp(new DiscreteProblemLinear<Scalar>(wf, space)), sln_vector(NULL), own_dp(true)
     {
       this->init();
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : dp(new DiscreteProblemLinear<Scalar>(wf, spaces)), sln_vector(NULL), own_dp(true)
+    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : dp(new DiscreteProblemLinear<Scalar>(wf, spaces)), sln_vector(NULL), own_dp(true)
     {
       this->init();
     }
@@ -82,7 +82,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_weak_formulation(const WeakForm<Scalar>* wf)
+    void LinearSolver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
     {
       this->dp->set_weak_formulation(wf);
     }
@@ -132,7 +132,7 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        this->dp->have_matrix = false;
+        this->dp->matrix_structure_reusable = false;
     }
 
     template<typename Scalar>
@@ -188,7 +188,7 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::free_cache()
     {
-      this->dp->free_cache();
+      this->dp->cache.free();
     }
 
     template class HERMES_API LinearSolver<double>;

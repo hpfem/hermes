@@ -232,6 +232,8 @@ namespace Hermes
       template<typename Scalar> friend class KellyTypeAdapt;
       template<typename Scalar> friend class DiscreteProblem;
       template<typename Scalar> friend class DiscreteProblemCache;
+      template<typename Scalar> friend class DiscreteProblemDGAssembler;
+      template<typename Scalar> friend class DiscreteProblemIntegrationOrderCalculator;
       template<typename Scalar> friend class Solution;
       template<typename Scalar> friend class NeighborSearch;
       template<typename Scalar> friend class Filter;
@@ -579,6 +581,7 @@ namespace Hermes
       friend class MeshReaderExodusII;
       friend class DiscreteProblem<double>;
       friend class DiscreteProblem<std::complex<double> >;
+      template<typename Scalar> friend class DiscreteProblemDGAssembler;
       friend class WeakForm<double>;
       friend class WeakForm<std::complex<double> >;
       template<typename Scalar> friend class Adapt;

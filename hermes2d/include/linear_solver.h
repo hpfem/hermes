@@ -69,8 +69,8 @@ namespace Hermes
     public:
       LinearSolver();
       LinearSolver(DiscreteProblemLinear<Scalar>* dp);
-      LinearSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-      LinearSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       void init();
 
       ~LinearSolver();
@@ -91,14 +91,14 @@ namespace Hermes
 
       /// SettableSpaces helpers.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar> space);
+      virtual void set_space(const SpaceSharedPtr<Scalar> space);
       virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
       /// See DiscreteProblemCacheSettings in mixins2d.h for details.
       virtual void free_cache();
 
       /// Set the weak forms.
-      void set_weak_formulation(const WeakForm<Scalar>* wf);
+      void set_weak_formulation(WeakForm<Scalar>* wf);
 
       /// Get the Jacobian.
       SparseMatrix<Scalar>* get_jacobian();

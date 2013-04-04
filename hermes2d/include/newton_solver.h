@@ -73,8 +73,8 @@ namespace Hermes
     public:
       NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
-      NewtonSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-      NewtonSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       void init_linear_solver();
 
       ~NewtonSolver();
@@ -186,7 +186,7 @@ namespace Hermes
       void set_necessary_successful_steps_to_increase(unsigned int steps);
 
       /// Set the weak forms.
-      void set_weak_formulation(const WeakForm<Scalar>* wf);
+      void set_weak_formulation(WeakForm<Scalar>* wf);
 
     protected:
       /// This instance owns its DP.

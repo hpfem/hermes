@@ -12,6 +12,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
+/*
 #ifndef KELLY_TYPE_ADAPT_H
 #define KELLY_TYPE_ADAPT_H
 
@@ -208,7 +209,7 @@ namespace Hermes
       ///&nbsp;                    If not specified, they are defined according to the spaces.
       ///
       ///
-      KellyTypeAdapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
+      KellyTypeAdapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
                      bool ignore_visited_segments = true,
                      Hermes::vector<const InterfaceEstimatorScalingFunction*>
                        interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
@@ -378,3 +379,4 @@ namespace Hermes
   }
 }
 #endif
+*/

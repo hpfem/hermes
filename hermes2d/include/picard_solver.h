@@ -76,8 +76,8 @@ namespace Hermes
     public:
       PicardSolver();
       PicardSolver(DiscreteProblem<Scalar>* dp);
-      PicardSolver(const WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-      PicardSolver(const WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      PicardSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       ~PicardSolver();
 
       /// State querying helpers.
@@ -126,7 +126,7 @@ namespace Hermes
       virtual void free_cache();
 
       /// Set the weak forms.
-      void set_weak_formulation(const WeakForm<Scalar>* wf);
+      void set_weak_formulation(WeakForm<Scalar>* wf);
     protected:
       void init();
       

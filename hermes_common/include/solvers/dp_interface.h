@@ -36,9 +36,8 @@ namespace Hermes
     class DiscreteProblemInterface : public Hermes::Mixins::SettableComputationTime
     {
     public:
+      DiscreteProblemInterface();
       virtual ~DiscreteProblemInterface() {};
-      /// Get the number of unknowns.
-      virtual int get_num_dofs() const = 0;
 
       /// Get info about presence of a matrix.
       virtual bool is_matrix_free() const = 0;
@@ -52,13 +51,11 @@ namespace Hermes
       /// weighting of matrix blocks in systems. The parameter add_dir_lift decides
       /// whether Dirichlet lift will be added while coeff_vec is converted into
       /// Solutions.
-      virtual void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
+      virtual void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL) = 0;
 
       /// Assembling.
       /// Without the matrix.
-      virtual void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL,
-        bool force_diagonal_blocks = false, Table* block_weights = NULL) = 0;
+      virtual void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL) = 0;
 
     protected:
       /// Preassembling.
@@ -70,8 +67,6 @@ namespace Hermes
       /// weighting of matrix blocks in systems.
       virtual void create_sparse_structure() = 0;
       virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL) = 0;
-
-      DiscreteProblemInterface();
 
       template<typename T> friend class DiscreteProblemNOX;
     };

@@ -42,6 +42,8 @@ namespace Hermes
 
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::exceptionsPrintCallstack,new Parameter(0)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::matrixSolverType,new Parameter(SOLVER_UMFPACK)));
+
+    ::tc_set_new_mode(1);
   }
 
   Api::~Api()

@@ -64,6 +64,8 @@ int main(int argc, char* args[])
   MeshReaderH2D mloader;
   mloader.load("square.mesh", mesh);
 
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
+
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++)
     mesh->refine_all_elements();
