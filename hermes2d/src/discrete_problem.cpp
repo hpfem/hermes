@@ -62,7 +62,7 @@ namespace Hermes
         memset(sp_seq, -1, sizeof(int) * wf->get_neq());
 
       // Matrix<Scalar> related settings.
-      matrix_structure_reusable = false;
+      matrix_structure_reusable = true;
 
       this->nonlinear = true;
 
@@ -162,20 +162,18 @@ namespace Hermes
     bool DiscreteProblem<Scalar>::is_up_to_date() const
     {
       // check if we can reuse the matrix structure
-      bool up_to_date = true;
       if(!matrix_structure_reusable)
-        up_to_date = false;
+        return false;
 
       for (unsigned int i = 0; i < wf->get_neq(); i++)
       {
         if(spaces[i]->get_seq() != sp_seq[i])
         {
-          up_to_date = false;
-          break;
+          return false;
         }
       }
 
-      return up_to_date;
+      return true;
     }
 
     template<typename Scalar>
@@ -256,26 +254,6 @@ namespace Hermes
         return;
       }
 
-      // For DG, the sparse structure is different as we have to
-      // account for over-edge calculations.
-      bool is_DG = false;
-      for(unsigned int i = 0; i < this->wf->mfsurf.size(); i++)
-      {
-        if(!this->wf->mfDG.empty())
-        {
-          is_DG = true;
-          break;
-        }
-      }
-      for(unsigned int i = 0; i < this->wf->vfsurf.size() && is_DG == false; i++)
-      {
-        if(!this->wf->vfDG.empty())
-        {
-          is_DG = true;
-          break;
-        }
-      }
-
       if(current_mat)
       {
         // Spaces have changed: create the matrix from scratch.
@@ -304,7 +282,7 @@ namespace Hermes
             if(current_state->e[i])
               spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
 
-          if(is_DG)
+          if(this->wf->is_DG())
           {
             // Number of edges ( =  number of vertices).
             int num_edges = current_state->e[0]->nvert;

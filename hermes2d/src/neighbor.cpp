@@ -182,28 +182,30 @@ namespace Hermes
 
           // Get local number of the edge used by the neighbor.
           for (unsigned int j = 0; j < neighb_el->get_nvert(); j++)
+          {
             if(central_el->en[active_edge] == neighb_el->en[j])
             {
               neighbor_edge.local_num_of_edge = j;
               break;
             }
+          }
 
-            NeighborEdgeInfo local_edge_info;
-            local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
+          NeighborEdgeInfo local_edge_info;
+          local_edge_info.local_num_of_edge = neighbor_edge.local_num_of_edge;
 
-            // Query the orientation of the neighbor edge relative to the central el.
-            int p1 = central_el->vn[active_edge]->id;
-            int p2 = central_el->vn[(active_edge + 1) % central_el->get_nvert()]->id;
-            local_edge_info.orientation = neighbor_edge_orientation(p1, p2, false);
+          // Query the orientation of the neighbor edge relative to the central el.
+          int p1 = central_el->vn[active_edge]->id;
+          int p2 = central_el->vn[(active_edge + 1) % central_el->get_nvert()]->id;
+          local_edge_info.orientation = neighbor_edge_orientation(p1, p2, false);
 
-            neighbor_edges.push_back(local_edge_info);
+          neighbor_edges.push_back(local_edge_info);
 
-            // There is only one neighbor in this case.
-            n_neighbors = 1;
-            neighbors.push_back(neighb_el);
+          // There is only one neighbor in this case.
+          n_neighbors = 1;
+          neighbors.push_back(neighb_el);
 
-            // No need for transformation, since the neighboring element is of the same size.
-            neighborhood_type = H2D_DG_NO_TRANSF;
+          // No need for transformation, since the neighboring element is of the same size.
+          neighborhood_type = H2D_DG_NO_TRANSF;
         }
         else
         {
@@ -384,6 +386,9 @@ namespace Hermes
     template<typename Scalar>
     void NeighborSearch<Scalar>::update_according_to_sub_idx(const Hermes::vector<unsigned int>& transformations)
     {
+      if(neighborhood_type == H2D_DG_NO_TRANSF && transformations.size() == 0)
+        return;
+
       if(neighborhood_type == H2D_DG_NO_TRANSF || neighborhood_type == H2D_DG_GO_UP)
       {
         if(!neighbor_transformations[0])
@@ -471,18 +476,18 @@ namespace Hermes
         // If there were more sub-element transformation from the assembling than from the neighbor search.
         if(!deleted)
         {
-          if((unsigned int)updated_transformations.size() > current_transforms->num_levels)
-          {
-            for(unsigned int level = current_transforms->num_levels; level < (unsigned int)updated_transformations.size(); level++)
-            {
-              // If the found neighbor is not a neighbor of this subelement.
-              if(!compatible_transformations(current_transforms->transf[current_transforms->num_levels - 1], updated_transformations[level], active_edge))
-              {
-                deleted = true;
-                break;
-              }
-            }
-          }
+        if((unsigned int)updated_transformations.size() > current_transforms->num_levels)
+        {
+        for(unsigned int level = current_transforms->num_levels; level < (unsigned int)updated_transformations.size(); level++)
+        {
+        // If the found neighbor is not a neighbor of this subelement.
+        if(!compatible_transformations(current_transforms->transf[current_transforms->num_levels - 1], updated_transformations[level], active_edge))
+        {
+        deleted = true;
+        break;
+        }
+        }
+        }
         }
         */
         if(deleted)
@@ -729,7 +734,7 @@ namespace Hermes
 
               if(!neighbor_transformations[n_neighbors])
                 this->add_neighbor_transformations(new Transformations, n_neighbors);
-              
+
               Transformations *neighbor_transforms = neighbor_transformations[n_neighbors];
 
               neighbor_transforms->num_levels = n_parents;
@@ -842,7 +847,7 @@ namespace Hermes
 
                 if(!central_transformations[n_neighbors])
                   this->add_central_transformations(new Transformations, n_neighbors);
-                
+
                 Transformations *tr = central_transformations[n_neighbors];
 
                 // Construct the transformation path to the current neighbor.
@@ -962,7 +967,7 @@ namespace Hermes
     unsigned int NeighborSearch<Scalar>::get_central_n_trans(unsigned int index) const
     {
       if(central_transformations[index] != NULL)
-          return this->central_transformations[index]->num_levels;
+        return this->central_transformations[index]->num_levels;
       else
         return 0;
     }
@@ -981,7 +986,7 @@ namespace Hermes
     unsigned int NeighborSearch<Scalar>::get_neighbor_n_trans(unsigned int index) const
     {
       if(neighbor_transformations[index] != NULL)
-          return this->neighbor_transformations[index]->num_levels;
+        return this->neighbor_transformations[index]->num_levels;
       else
         return 0;
     }

@@ -113,7 +113,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemDGAssembler<Scalar>::assemble_one_state()
     {
-
       bool intra_edge_passed_DG[H2D_MAX_NUMBER_VERTICES];
       for(int a = 0; a < H2D_MAX_NUMBER_VERTICES; a++)
         intra_edge_passed_DG[a] = false;
@@ -125,11 +124,7 @@ namespace Hermes
 
         for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
         {
-          bool inner_edge_for_dg = false;
-          for(int i = 0; i < this->spaces_size; i++)
-            if(current_state->e[i]->en[current_state->isurf]->marker == 0)
-              inner_edge_for_dg = true;
-          if(inner_edge_for_dg)
+          if(!current_state->bnd[current_state->isurf])
           {
             if(!init_neighbors(neighbor_searches[current_state->isurf], current_state))
             {
@@ -143,33 +138,19 @@ namespace Hermes
 #ifdef DEBUG_DG_ASSEMBLING
             debug();
 #endif
+            for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
+            {
+              if(!DG_vector_forms_present && processed[current_state->isurf][neighbor_i])
+                continue;
+
+              // DG-inner-edge-wise parameters for WeakForm.
+              wf->set_active_DG_state(current_state->e, current_state->isurf);
+
+              assemble_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, neighbor_searches[current_state->isurf]);
+            }
           }
           else
-            processed[current_state->isurf] = false;
-        }
-      }
-
-      for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
-      {
-        if(intra_edge_passed_DG[current_state->isurf])
-          continue;
-
-        bool inner_edge_for_dg = false;
-        for(int i = 0; i < this->spaces_size; i++)
-          if(current_state->e[i]->en[current_state->isurf]->marker == 0)
-            inner_edge_for_dg = true;
-        if(!inner_edge_for_dg)
-          continue;
-
-        for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
-        {
-          if(!DG_vector_forms_present && processed[current_state->isurf][neighbor_i])
-            continue;
-
-          // DG-inner-edge-wise parameters for WeakForm.
-          wf->set_active_DG_state(current_state->e, current_state->isurf);
-
-          assemble_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, neighbor_searches[current_state->isurf]);
+            processed[current_state->isurf] = NULL;
         }
       }
     }
@@ -194,7 +175,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemDGAssembler<Scalar>::assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches)
+    void DiscreteProblemDGAssembler<Scalar>::assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** current_neighbor_searches)
     {
       /// \todo
       DiscreteProblemFormAssembler<Scalar> formAssembler;
@@ -204,7 +185,7 @@ namespace Hermes
       // Set the active segment in all NeighborSearches
       for(unsigned int i = 0; i < this->current_state->num; i++)
       {
-        NeighborSearch<Scalar>* ns = neighbor_searches[i];
+        NeighborSearch<Scalar>* ns = current_neighbor_searches[i];
         ns->active_segment = neighbor_i;
         ns->neighb_el = ns->neighbors[neighbor_i];
         ns->neighbor_edge = ns->neighbor_edges[neighbor_i];
@@ -214,7 +195,7 @@ namespace Hermes
       // The important thing is that the transformations to the current subelement are already there.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        NeighborSearch<Scalar>* ns = neighbor_searches[fns_i];
+        NeighborSearch<Scalar>* ns = current_neighbor_searches[fns_i];
         if(ns->central_transformations[neighbor_i])
           ns->central_transformations[neighbor_i]->apply_on(fns[fns_i]);
       }
@@ -224,7 +205,7 @@ namespace Hermes
       {
         for(unsigned int idx_i = 0; idx_i < spaces_size; idx_i++)
         {
-          NeighborSearch<Scalar>* ns = neighbor_searches[idx_i];
+          NeighborSearch<Scalar>* ns = current_neighbor_searches[idx_i];
           npss[idx_i]->set_active_element((*ns->get_neighbors())[neighbor_i]);
           if(ns->neighbor_transformations[neighbor_i])
             ns->neighbor_transformations[neighbor_i]->apply_on(npss[idx_i]);
@@ -246,7 +227,6 @@ namespace Hermes
 
       /***/
       // The computation takes place here.
-      NeighborSearch<Scalar>** nbs = new NeighborSearch<Scalar>*[this->spaces_size];
       typename NeighborSearch<Scalar>::ExtendedShapeset** ext_asmlist = new typename NeighborSearch<Scalar>::ExtendedShapeset*[this->spaces_size];
       int n_quadrature_points;
       Geom<double>** geometry = new Geom<double>*[this->spaces_size];
@@ -259,12 +239,12 @@ namespace Hermes
       int order_base = 20;
       for (unsigned int i = 0; i < this->spaces_size; i++)
       {
-        nbs[i] = neighbor_searches[i];
-        ext_asmlist[i] = nbs[i]->create_extended_asmlist(spaces[i], als[i]);
-        nbs[i]->set_quad_order(order);
+        current_neighbor_searches[i] = current_neighbor_searches[i];
+        ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], als[i]);
+        current_neighbor_searches[i]->set_quad_order(order);
         order_base = order;
         n_quadrature_points = init_surface_geometry_points(refmaps[i], order_base, i, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
-        e[i] = new InterfaceGeom<double>(geometry[i], nbs[i]->neighb_el->marker, nbs[i]->neighb_el->id, nbs[i]->neighb_el->get_diameter());
+        e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->get_diameter());
 
         testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
         for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
@@ -278,19 +258,19 @@ namespace Hermes
             pss[i]->set_active_shape(ext_asmlist[i]->central_al->idx[func_i]);
             PrecalcShapeset* func = pss[i];
             RefMap* refmap = refmaps[i];
-            testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, nbs[i]->get_quad_eo(false)), false, nbs[i]->neighbor_edge.orientation);
+            testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, current_neighbor_searches[i]->get_quad_eo(false)), false, current_neighbor_searches[i]->neighbor_edge.orientation);
           }
           else
           {
             npss[i]->set_active_shape(ext_asmlist[i]->neighbor_al->idx[func_i - ext_asmlist[i]->central_al->cnt]);
             PrecalcShapeset* func = npss[i];
             RefMap* refmap = nrefmaps[i];
-            testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, nbs[i]->get_quad_eo(true)), true, nbs[i]->neighbor_edge.orientation);
+            testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, current_neighbor_searches[i]->get_quad_eo(true)), true, current_neighbor_searches[i]->neighbor_edge.orientation);
           }
         }
       }
 
-      DiscontinuousFunc<Scalar>** ext = init_ext_fns(wf->ext, neighbor_searches, order);
+      DiscontinuousFunc<Scalar>** ext = init_ext_fns(wf->ext, current_neighbor_searches, order);
 
       DiscontinuousFunc<Scalar>** u_ext_func = new DiscontinuousFunc<Scalar>*[this->spaces_size];
       if(this->nonlinear)
@@ -300,8 +280,8 @@ namespace Hermes
           for(int u_ext_func_i = 0; u_ext_func_i < this->spaces_size; u_ext_func_i++)
             if(u_ext[u_ext_func_i])
             {
-              neighbor_searches[u_ext_func_i]->set_quad_order(order);
-              u_ext_func[u_ext_func_i]  = neighbor_searches[u_ext_func_i]->init_ext_fn(u_ext[u_ext_func_i]);
+              current_neighbor_searches[u_ext_func_i]->set_quad_order(order);
+              u_ext_func[u_ext_func_i]  = current_neighbor_searches[u_ext_func_i]->init_ext_fn(u_ext[u_ext_func_i]);
             }
             else
               u_ext_func[u_ext_func_i] = NULL;
@@ -364,8 +344,6 @@ namespace Hermes
 
       for(int i = 0; i < this->spaces_size; i++)
       {
-        if(this->spaces[i]->get_type() != HERMES_L2_SPACE)
-          continue;
         for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
         {
           if(ext_asmlist[i]->dof[func_i] < 0)
@@ -393,7 +371,7 @@ namespace Hermes
           if(!formAssembler.form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
             continue;
 
-          NeighborSearch<Scalar>* nbs_v = nbs[n];
+          NeighborSearch<Scalar>* current_neighbor_searches_v = current_neighbor_searches[n];
 
           // Here we use the standard pss, possibly just transformed by NeighborSearch.
           for (unsigned int dof_i = 0; dof_i < als[n]->cnt; dof_i++)
@@ -402,7 +380,7 @@ namespace Hermes
               continue;
             pss[n]->set_active_shape(als[n]->idx[dof_i]);
 
-            Func<double>* v = init_fn(pss[n], refmaps[n], nbs_v->get_quad_eo());
+            Func<double>* v = init_fn(pss[n], refmaps[n], current_neighbor_searches_v->get_quad_eo());
 
             current_rhs->add(als[n]->dof[dof_i], 0.5 * vfs->value(n_quadrature_points, jacobian_x_weights[n], u_ext_func, v, e[n], ext) * vfs->scaling_factor * als[n]->coef[dof_i]);
 
@@ -447,7 +425,6 @@ namespace Hermes
         delete e[i];
       }
 
-      delete [] nbs;
       delete [] geometry;
       delete [] jacobian_x_weights;
       delete [] e;
@@ -456,7 +433,7 @@ namespace Hermes
       // Clear the transformations from the RefMaps and all functions.
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
-        fns[fns_i]->set_transform(neighbor_searches[fns_i]->original_central_el_transform);
+        fns[fns_i]->set_transform(current_neighbor_searches[fns_i]->original_central_el_transform);
       }
 
       // Also clear the transformations from the slave psss and refmaps.
@@ -471,12 +448,12 @@ namespace Hermes
 
     template<typename Scalar>
     DiscontinuousFunc<Scalar>** DiscreteProblemDGAssembler<Scalar>::init_ext_fns(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext,
-        NeighborSearch<Scalar>** neighbor_searches, int order)
+        NeighborSearch<Scalar>** current_neighbor_searches, int order)
     {
       DiscontinuousFunc<Scalar>** ext_fns = new DiscontinuousFunc<Scalar>*[ext.size()];
       for(unsigned int j = 0; j < ext.size(); j++)
       {
-        NeighborSearch<Scalar>* ns = this->get_neighbor_search_ext(neighbor_searches, j);
+        NeighborSearch<Scalar>* ns = this->get_neighbor_search_ext(current_neighbor_searches, j);
         ns->set_quad_order(order);
         ext_fns[j] = ns->init_ext_fn(ext[j].get());
       }
@@ -485,18 +462,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool DiscreteProblemDGAssembler<Scalar>::init_neighbors(NeighborSearch<Scalar>** neighbor_searches, Traverse::State* current_state)
+    bool DiscreteProblemDGAssembler<Scalar>::init_neighbors(NeighborSearch<Scalar>** current_neighbor_searches, Traverse::State* current_state)
     {
       // Initialize the NeighborSearches.
       for(unsigned int i = 0; i < current_state->num; i++)
       {
         if(i > 0 && spaces[i - 1]->get_mesh()->get_seq() == spaces[i]->get_mesh()->get_seq())
-          neighbor_searches[i] = neighbor_searches[i - 1];
+          current_neighbor_searches[i] = current_neighbor_searches[i - 1];
         else
         {
           NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(current_state->e[i], spaces[i]->get_mesh());
           ns->original_central_el_transform = current_state->sub_idx[i];
-          neighbor_searches[i] = ns;
+          current_neighbor_searches[i] = ns;
         }
       }
 
@@ -509,9 +486,9 @@ namespace Hermes
       {
         if(!(i > 0 && spaces[i]->get_mesh()->get_seq() == spaces[i-1]->get_mesh()->get_seq()))
         {
-          if(neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf) && spaces[i]->get_type() == HERMES_L2_SPACE)
+          if(current_neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf) && spaces[i]->get_type() == HERMES_L2_SPACE)
             DG_intra = true;
-          neighbor_searches[i]->clear_initial_sub_idx();
+          current_neighbor_searches[i]->clear_initial_sub_idx();
         }
       }
       return DG_intra;
