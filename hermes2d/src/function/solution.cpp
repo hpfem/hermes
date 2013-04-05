@@ -15,12 +15,9 @@
 
 #include "exact_solution.h"
 #include "forms.h"
-
 #include "solution_h2d_xml.h"
 #include "ogprojection.h"
 #include "api2d.h"
-
-#include <iostream>
 #include <algorithm>
 
 namespace Hermes

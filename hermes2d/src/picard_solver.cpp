@@ -329,7 +329,7 @@ namespace Hermes
       {
         this->on_step_begin();
 
-        (static_cast<DiscreteProblem<Scalar>*>(this->dp))->is_linear = false;
+        (static_cast<DiscreteProblem<Scalar>*>(this->dp))->nonlinear = true;
         this->dp->assemble(last_iter_vector, matrix, rhs);
         if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= it))
         {

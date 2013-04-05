@@ -23,7 +23,6 @@
 #define DPINTERFACE_H
 
 #include "../matrix.h"
-#include "../tables.h"
 
 using namespace Hermes::Algebra;
 
@@ -38,9 +37,6 @@ namespace Hermes
     public:
       DiscreteProblemInterface();
       virtual ~DiscreteProblemInterface() {};
-
-      /// Get info about presence of a matrix.
-      virtual bool is_matrix_free() const = 0;
 
       /// Assembling.
       /// General assembling procedure for nonlinear problems. coeff_vec is the

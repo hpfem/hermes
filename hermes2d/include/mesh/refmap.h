@@ -110,7 +110,7 @@ namespace Hermes
       /// Returns the increase in the integration order due to the reference map.
       int get_inv_ref_order() const;
 
-			/// Returns the inverse matrices of the reference map precalculated at the
+      /// Returns the inverse matrices of the reference map precalculated at the
       /// integration points of the specified order. Intended for non-constant
       /// jacobian elements.
       double2x2* get_inv_ref_map(int order);
@@ -121,7 +121,7 @@ namespace Hermes
 
       H1ShapesetJacobi ref_map_shapeset;
       PrecalcShapeset ref_map_pss;
-    private:
+
       /// Returns coefficients for weak forms with second derivatives.
       double3x2* get_second_ref_map(int order);
 
@@ -167,7 +167,7 @@ namespace Hermes
         double* phys_x[H2D_MAX_TABLES];
         double* phys_y[H2D_MAX_TABLES];
         double3* tan[H2D_MAX_NUMBER_EDGES];
-        
+
         int num_tables;
       };
 
@@ -220,28 +220,7 @@ namespace Hermes
       double2* coeffs;
 
       double2  lin_coeffs[H2D_MAX_NUMBER_EDGES];
-      template<typename T> friend class MeshFunction;
-      template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemCache;
-      template<typename T> friend class DiscreteProblemLinear;
-      template<typename T> friend class DiscreteProblemDGAssembler;
-      template<typename T> friend class Solution;
-      template<typename T> friend class ExactSolution;
-      template<typename T> friend class ExactSolutionScalar;
-      template<typename T> friend class ExactSolutionVector;
-      template<typename T> friend class Adapt;
-      template<typename T> friend class KellyTypeAdapt;
-      friend class Views::Orderizer;
-      friend class Views::Vectorizer;
-      friend class Views::Linearizer;
-      template<typename T> friend class Global;
-      friend class VonMisesFilter;
-      template<typename T> friend class Func;
-      template<typename T> friend class Geom;
-      friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
-      friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-      template<typename T> friend T int_g_h(Function<T>* fg, Function<T>* fh, RefMap* rg, RefMap* rh);
-	};
+    };
   }
 }
 #endif

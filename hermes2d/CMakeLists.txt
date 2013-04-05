@@ -206,9 +206,9 @@ project(hermes2d)
     src/discrete_problem_linear.cpp
     src/discrete_problem/discrete_problem_helpers.cpp
     src/discrete_problem/discrete_problem_cache.cpp
+    src/discrete_problem/discrete_problem_form_assembler.cpp
     src/discrete_problem/discrete_problem_thread_assembler.cpp
     src/discrete_problem/discrete_problem_integration_order_calculator.cpp
-    src/discrete_problem/dg/discrete_problem_dg_assembly_data.cpp
     src/discrete_problem/dg/discrete_problem_dg_assembler.cpp
     src/discrete_problem/dg/multimesh_dg_neighbor_tree.cpp
     src/discrete_problem/dg/multimesh_dg_neighbor_tree_node.cpp
@@ -218,9 +218,9 @@ project(hermes2d)
     src/discrete_problem_linear.cpp
     src/discrete_problem/discrete_problem_helpers.cpp
     src/discrete_problem/discrete_problem_cache.cpp
+    src/discrete_problem/discrete_problem_form_assembler.cpp
     src/discrete_problem/discrete_problem_thread_assembler.cpp
     src/discrete_problem/discrete_problem_integration_order_calculator.cpp
-    src/discrete_problem/dg/discrete_problem_dg_assembly_data.cpp
     src/discrete_problem/dg/discrete_problem_dg_assembler.cpp
     src/discrete_problem/dg/multimesh_dg_neighbor_tree.cpp
     src/discrete_problem/dg/multimesh_dg_neighbor_tree_node.cpp)
@@ -335,9 +335,9 @@ project(hermes2d)
     include/discrete_problem_linear.h
     include/discrete_problem/discrete_problem_helpers.h
     include/discrete_problem/discrete_problem_cache.h
+    include/discrete_problem/discrete_problem_form_assembler.h
     include/discrete_problem/discrete_problem_thread_assembler.h
     include/discrete_problem/discrete_problem_integration_order_calculator.h
-    include/discrete_problem/dg/discrete_problem_dg_assembly_data.h
     include/discrete_problem/dg/discrete_problem_dg_assembler.h
     include/discrete_problem/dg/multimesh_dg_neighbor_tree.h
     include/discrete_problem/dg/multimesh_dg_neighbor_tree_node.h
@@ -347,9 +347,9 @@ project(hermes2d)
   include/discrete_problem_linear.h
   include/discrete_problem/discrete_problem_helpers.h
   include/discrete_problem/discrete_problem_cache.h
+  include/discrete_problem/discrete_problem_form_assembler.h
   include/discrete_problem/discrete_problem_thread_assembler.h
   include/discrete_problem/discrete_problem_integration_order_calculator.h
-  include/discrete_problem/dg/discrete_problem_dg_assembly_data.h
   include/discrete_problem/dg/discrete_problem_dg_assembler.h
   include/discrete_problem/dg/multimesh_dg_neighbor_tree.h
   include/discrete_problem/dg/multimesh_dg_neighbor_tree_node.h)

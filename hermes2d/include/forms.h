@@ -74,9 +74,6 @@ namespace Hermes
       void subtract(Func<T>* func);
       void add(T* attribute, T* other_attribute);
 
-      int get_num_gip() const;
-
-    protected:
       const int num_gip; ///< Number of integration points used by this intance.
       const int nc;      ///< Number of components. Currently accepted values are 1 (H1, L2 space) and 2 (Hcurl, Hdiv space).
 
@@ -87,24 +84,6 @@ namespace Hermes
       /// Calculate this += func for each function expations and each integration point.
       /** \param[in] func A function which is added to *this. A number of integratioN points and a number of component has to match. */
       void add(Func<T>* func);
-
-      friend Func<Hermes::Ord>* init_fn_ord(const int order);
-      friend Func<double>* init_fn(PrecalcShapeset *fu, RefMap *rm, const int order);
-      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunction<Scalar>* fu, const int order);
-      template<typename Scalar> friend Func<Scalar>* init_fn(Solution<Scalar>* fu, const int order);
-
-      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunctionSharedPtr<Scalar> fu, const int order);
-      template<typename Scalar> friend Func<Scalar>* init_fn(MeshFunctionSharedPtr<Scalar> fu, const int order);
-
-      template<typename Scalar> friend class DiscontinuousFunc;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
-      template<typename Scalar> friend class DiscreteProblemLinear;
-      template<typename Scalar> friend class BasicKellyAdapt;
-      template<typename Scalar> friend class Hermes::Hermes2D::OGProjection;
-      friend class ErrorEstimatorFormKelly;
     };
 
     /// @ingroup inner
@@ -147,7 +126,6 @@ namespace Hermes
       ///
       DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false);
 
-    private:
       void subtract(const DiscontinuousFunc<T>& func);
 
       /// Default destructor may be used. Deallocation is done using the following functions.
@@ -160,12 +138,6 @@ namespace Hermes
       bool reverse_neighbor_side; ///< True if values from the neighbor have to be retrieved in reverse order
       ///< (when retrieving values on an edge that is oriented differently in both elements).
       static T zero;              ///< Zero value used for the zero-extension.
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemLinear;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class NeighborSearch;
     };
 
     /// Geometry (coordinates, normals, tangents) of either an element or an edge.
@@ -203,23 +175,9 @@ namespace Hermes
       int elem_marker;       ///< Element marker (for both volumetric and surface forms).
       int edge_marker;       ///< Edge marker (for surface forms only).
 
-    protected:
       int orientation;  ///< 0 .... if(nx, ny) is equal to the global normal,
       ///< otherwise 1 (each edge has a unique global normal).
       ///< Only for edge.
-
-      friend Geom<Hermes::Ord>* init_geom_ord();
-      friend Geom<double>* init_geom_vol(RefMap *rm, const int order);
-      friend Geom<double>* init_geom_surf(RefMap *rm, int isurf, int marker, const int order, double3*& tan);
-
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemLinear;
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
-      template<typename Scalar> friend class InterfaceGeom;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class BasicKellyAdapt;
-      friend class ErrorEstimatorFormKelly;
-      template<typename Scalar> friend class Adapt;
     };
 
     /// Small class which contains information about the element on the other side of an interface.
@@ -239,20 +197,16 @@ namespace Hermes
       int get_neighbor_id()  const;
       T get_neighbor_diam() const;
 
-    private:
       /// Constructor.
       InterfaceGeom(Geom<T>* geom, int n_marker, int n_id, T n_diam);
-      Geom<T>* wrapped_geom;
 
       virtual void free();
       virtual void free_ord();
 
+    private:
+      Geom<T>* wrapped_geom;
       int neighb_marker;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemLinear;
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
       template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class Adapt;
     };
 
     /// Init element geometry for calculating the integration order.

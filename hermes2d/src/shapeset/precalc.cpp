@@ -26,20 +26,8 @@ namespace Hermes
       if(shapeset == NULL)
         throw Exceptions::NullException(0);
       this->shapeset = shapeset;
-      master_pss = NULL;
       num_components = shapeset->get_num_components();
       assert(num_components == 1 || num_components == 2);
-      update_max_index();
-      set_quad_2d(&g_quad_2d_std);
-    }
-
-    PrecalcShapeset::PrecalcShapeset(PrecalcShapeset* pss) : Function<double>(), tables(6, 64)
-    {
-      while (pss->is_slave())
-        pss = pss->master_pss;
-      master_pss = pss;
-      shapeset = pss->shapeset;
-      num_components = pss->num_components;
       update_max_index();
       set_quad_2d(&g_quad_2d_std);
     }
@@ -60,18 +48,9 @@ namespace Hermes
       // Key creation.
       unsigned key = cur_quad | (element->get_mode() << 3) | ((unsigned) (max_index[element->get_mode()] - index) << 4);
 
-      if(master_pss == NULL)
-      {
-        if(!tables.present(key))
-          tables.add(new SubElementMap<LightArray<Node*> >, key);
-        sub_tables = tables.get(key);
-      }
-      else
-      {
-        if(!master_pss->tables.present(key))
-          master_pss->tables.add(new SubElementMap<LightArray<Node*> >, key);
-        sub_tables = master_pss->tables.get(key);
-      }
+      if(!tables.present(key))
+        tables.add(new SubElementMap<LightArray<Node*> >, key);
+      sub_tables = tables.get(key);
 
       // Update the Node table.
       update_nodes_ptr();
@@ -126,8 +105,6 @@ namespace Hermes
 
     void PrecalcShapeset::free()
     {
-      if(master_pss != NULL) return;
-
       for(unsigned int i = 0; i < tables.get_size(); i++)
         if(tables.present(i))
         {
@@ -173,23 +150,9 @@ namespace Hermes
       return shapeset->get_space_type();
     }
 
-    void PrecalcShapeset::set_master_transform()
-    {
-      assert(master_pss != NULL);
-      sub_idx = master_pss->sub_idx;
-      top = master_pss->top;
-      stack[top] = *(master_pss->ctm);
-      ctm = stack + top;
-    }
-
     int PrecalcShapeset::get_edge_fn_order(int edge)
     {
       return H2D_MAKE_EDGE_ORDER(element->get_mode(), edge, shapeset->get_order(index, element->get_mode()));
-    }
-
-    bool PrecalcShapeset::is_slave() const
-    {
-      return master_pss != NULL;
     }
 
     void PrecalcShapeset::force_transform(uint64_t sub_idx, Trf* ctm)

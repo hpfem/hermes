@@ -35,6 +35,7 @@ namespace Hermes
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class DiscreteProblemLinear;
     template<typename Scalar> class DiscreteProblemCache;
+    template<typename Scalar> class DiscreteProblemFormAssembler;
     template<typename Scalar> class RungeKutta;
     template<typename Scalar> class Space;
     template<typename Scalar> class MeshFunction;
@@ -124,7 +125,7 @@ namespace Hermes
       virtual void set_active_DG_state(Element** e, int isurf);
 
       /// Returns the number of equations.
-      unsigned int get_neq() const { return neq; }
+      inline unsigned int get_neq() const { return neq; }
 
       /// This weakform is matrix-free.
       bool is_matrix_free() const { return is_matfree; }
@@ -159,6 +160,9 @@ namespace Hermes
 
       /// Cloning.
       virtual WeakForm* clone() const;
+
+      // Checks presence of DG forms.
+      bool is_DG() const;
 
       /// Internal.
       Hermes::vector<Form<Scalar> *> get_forms() const;
@@ -211,6 +215,7 @@ namespace Hermes
       friend class DiscreteProblemLinear<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
+      friend class DiscreteProblemFormAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
       friend class RungeKutta<Scalar>;
       friend class OGProjection<Scalar>;
@@ -223,8 +228,8 @@ namespace Hermes
 
       // Internal - processes markers, translates from strings to ints.
       template<typename FormType>
-      void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool surface, Hermes::vector<FormType> forms_to_process);
-      void processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      void processFormMarkers(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process);
+      void processFormMarkers(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
 
     private:
       void free_ext();
@@ -302,6 +307,7 @@ namespace Hermes
       friend class DiscreteProblemCache<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
+      friend class DiscreteProblemFormAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
     };

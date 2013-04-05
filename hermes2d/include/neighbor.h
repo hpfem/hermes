@@ -306,8 +306,7 @@ namespace Hermes
         template<typename T> friend class Adapt;
         template<typename T> friend class Func;
         template<typename T> friend class DiscontinuousFunc;
-        template<typename T> friend class DiscreteProblem;
-        template<typename T> friend class DiscreteProblemLinear;
+        template<typename T> friend class MultimeshDGNeighborTree;
       };
 
     private:
@@ -427,8 +426,7 @@ namespace Hermes
       template<typename T> friend class Adapt;
       template<typename T> friend class Func;
       template<typename T> friend class DiscontinuousFunc;
-      template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemLinear;
+      template<typename T> friend class MultimeshDGNeighborTree;
       template<typename T> friend class DiscreteProblemDGAssembler;
     };
   }

@@ -72,12 +72,6 @@ namespace Hermes
     };
 
     template<typename T>
-    int Func<T>::get_num_gip() const
-    {
-      return num_gip;
-    }
-
-    template<typename T>
     void Func<T>::subtract(T* attribute, T* other_attribute)
     {
       if(attribute != NULL && other_attribute != NULL)

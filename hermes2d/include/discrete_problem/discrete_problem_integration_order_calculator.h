@@ -37,22 +37,20 @@ namespace Hermes
     /// DiscreteProblemIntegrationOrderCalculator class.
     template<typename Scalar>
     class HERMES_API DiscreteProblemIntegrationOrderCalculator :
-      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemSingleAssemblyData
+      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>
     {
     private:
       /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
       /// Matrix volumetric forms - calculate the integration order.
-      int calc_order_matrix_form(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      int calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Vector volumetric forms - calculate the integration order.
-      int calc_order_vector_form(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
+      int calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar>* mfv, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
 
       /// Order calculation.
-      int calculate_order(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf);
+      int calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf);
       
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Calculates orders for external functions.
@@ -77,6 +75,7 @@ namespace Hermes
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemLinear;
+      template<typename T> friend class DiscreteProblemThreadAssembler;
     };
   }
 }

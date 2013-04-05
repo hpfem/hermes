@@ -13,11 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <algorithm>
-#include <map>
-#include <string>
-#include <utility>
-#include <vector>
 #include "global.h"
 #include "mesh/traverse.h"
 #include "space/space.h"
@@ -31,21 +26,20 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    void DiscreteProblemCache<Scalar>::CacheRecord::init(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Traverse::State* current_state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order)
+    void DiscreteProblemCache<Scalar>::CacheRecord::init(Traverse::State* current_state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order)
     {
-      int spaces_size = spaces.size();
-      this->spaceCnt = spaces_size;
-      this->fns = new Func<double>**[spaces_size];
+      this->spaceCnt = current_wf->get_neq();
+      this->fns = new Func<double>**[spaceCnt];
       this->fnsSurface = NULL;
-      this->asmlistCnt = new int[spaces_size];
-      this->asmlistIdx = new int*[spaces_size];
+      this->asmlistCnt = new int[spaceCnt];
+      this->asmlistIdx = new int*[spaceCnt];
 
       this->nvert = current_state->rep->nvert;
       this->order = order;
 
       int rep_space_i = -1;
 
-      for(unsigned int space_i = 0; space_i < spaces_size; space_i++)
+      for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
       {
         if(current_state->e[space_i] == NULL)
         {
@@ -95,17 +89,19 @@ namespace Hermes
           this->orderSurface[current_state->isurf] = order;
           order = this->order;
 
-          this->fnsSurface[current_state->isurf] = new Func<double>**[spaces_size];
-          memset(this->fnsSurface[current_state->isurf], NULL, sizeof(Func<double>**) * spaces_size);
+          this->fnsSurface[current_state->isurf] = new Func<double>**[spaceCnt];
+          memset(this->fnsSurface[current_state->isurf], NULL, sizeof(Func<double>**) * spaceCnt);
 
-          this->asmlistSurfaceCnt[current_state->isurf] = new int[spaces_size];
+          this->asmlistSurfaceCnt[current_state->isurf] = new int[spaceCnt];
 
-          for(unsigned int space_i = 0; space_i < spaces_size; space_i++)
+          for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
           {
             if(current_state->e[space_i] == NULL)
               continue;
 
-            spaces[space_i]->get_boundary_assembly_list(current_state->e[space_i], current_state->isurf, current_alsSurface[space_i][current_state->isurf]);
+#ifdef _DEBUG
+            assert(current_alsSurface[space_i][current_state->isurf]);
+#endif
 
             this->asmlistSurfaceCnt[current_state->isurf][space_i] = current_alsSurface[space_i][current_state->isurf]->cnt;
 

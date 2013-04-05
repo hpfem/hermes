@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "runge_kutta.h"
-#include "discrete_problem.h"
+#include "discrete_problem_linear.h"
 #include "projections/ogprojection.h"
 #include "projections/localprojection.h"
 #include "weakform_library/weakforms_hcurl.h"
@@ -126,7 +126,7 @@ namespace Hermes
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
       if(this->stage_dp_left != NULL)
-        static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_spaces(this->spaces);
+        this->stage_dp_left->set_spaces(this->spaces);
     }
 
     template<typename Scalar>
@@ -156,7 +156,7 @@ namespace Hermes
       vector_left = new Scalar[num_stages*  Space<Scalar>::get_num_dofs(this->spaces)];
 
       if(this->stage_dp_left != NULL)
-        static_cast<DiscreteProblem<Scalar>*>(this->stage_dp_left)->set_space(space);
+        this->stage_dp_left->set_space(space);
     }
 
     template<typename Scalar>
@@ -188,7 +188,7 @@ namespace Hermes
       // matrix and residula vector coming from the function f(...). Of course the RK equation is assumed
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
-      this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
+      this->stage_dp_left = new DiscreteProblemLinear<Scalar>(&stage_wf_left, spaces);
       
       // All Spaces of the problem.
       Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;
@@ -348,7 +348,7 @@ namespace Hermes
       // The corresponding part of the global residual vector is obtained
       // just by multiplication with the stage vector K.
       // FIXME: This should not be repeated if spaces have not changed.
-      stage_dp_left->assemble(matrix_left, NULL);
+      stage_dp_left->assemble(matrix_left);
 
       // The Newton's loop.
       double residual_norm;

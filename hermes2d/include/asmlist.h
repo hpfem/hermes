@@ -43,7 +43,7 @@ namespace Hermes
       int* get_dof();
       unsigned int get_cnt();
       Scalar* get_coef();
-    private:
+
       /// Copy constructor.
       AsmList(const AsmList<Scalar> & other);
 
@@ -58,17 +58,6 @@ namespace Hermes
 
       /// Internal. Enlarges the storage capacity.
       void enlarge();
-      template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemCache;
-      template<typename T> friend class DiscreteProblemLinear;
-      template<typename T> friend class DiscreteProblemDGAssembler;
-      template<typename T> friend class NeighborSearch;
-      template<typename T> friend class Solution;
-      template<typename T> friend class Space;
-      template<typename T> friend class H1Space;
-      template<typename T> friend class L2Space;
-      template<typename T> friend class HcurlSpace;
-      template<typename T> friend class HdivSpace;
     };
   }
 }

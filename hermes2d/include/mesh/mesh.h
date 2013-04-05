@@ -184,7 +184,6 @@ namespace Hermes
       bool vsplit() const;
       bool bsplit() const;
 
-    protected:
       CurvMap* cm; ///< curved mapping, NULL if not curvilinear
       /// Serves for saving the once calculated area of this element.
       bool areaCalculated;
@@ -214,50 +213,8 @@ namespace Hermes
       void ref_all_nodes();
       /// Internal.
       void unref_all_nodes(HashTable* ht);
-    private:
+      
       unsigned nvert:30; ///< number of vertices (3 or 4)
-
-      friend class Mesh;
-      friend class MeshReader;
-      friend class MeshReaderH2D;
-      friend class MeshReaderH1DXML;
-      friend class MeshReaderH2DXML;
-      friend class PrecalcShapeset;
-      template<typename Scalar> friend class Space;
-      template<typename Scalar> friend class Adapt;
-      template<typename Scalar> friend class H1Space;
-      template<typename Scalar> friend class HcurlSpace;
-      template<typename Scalar> friend class HdivSpace;
-      template<typename Scalar> friend class L2Space;
-      template<typename Scalar> friend class KellyTypeAdapt;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemCache;
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
-      template<typename Scalar> friend class DiscreteProblemIntegrationOrderCalculator;
-      template<typename Scalar> friend class Solution;
-      template<typename Scalar> friend class NeighborSearch;
-      template<typename Scalar> friend class Filter;
-      template<typename Scalar> friend class MeshFunction;
-      template<typename Scalar> friend class Global;
-      template<typename Scalar> friend class RefinementSelectors::Selector;
-      template<typename Scalar> friend class RefinementSelectors::POnlySelector;
-      template<typename Scalar> friend class RefinementSelectors::HOnlySelector;
-      template<typename Scalar> friend class RefinementSelectors::OptimumSelector;
-      template<typename Scalar> friend class RefinementSelectors::ProjBasedSelector;
-      template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
-      template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
-      template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
-      friend class Views::ScalarView;
-      friend class Views::Linearizer;
-      friend class RefMap;
-      friend class Traverse;
-      friend class Transformable;
-      friend class CurvMap;
-      friend class Views::Orderizer;
-      friend class Views::Vectorizer;
-      friend bool is_twin_nurbs(Element* e, int i);
-      friend int rtb_criterion(Element* e);
-      friend CurvMap* create_son_curv_map(Element* e, int son);
     };
 
     /// \brief Represents a finite element mesh.

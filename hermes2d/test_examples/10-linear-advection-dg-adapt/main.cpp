@@ -15,9 +15,9 @@
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 2;
+const int INIT_REF = 0;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-const int P_INIT = 1;
+const int P_INIT = 0;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
 const double THRESHOLD = 0.9;
@@ -63,8 +63,6 @@ int main(int argc, char* args[])
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("square.mesh", mesh);
-
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
 
   // Perform initial mesh refinement.
   for (int i=0; i<INIT_REF; i++)
@@ -156,7 +154,6 @@ int main(int argc, char* args[])
     // Clean up.
     delete adaptivity;
    
-
     as++;
   }
   while (done == false);

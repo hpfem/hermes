@@ -192,7 +192,7 @@ namespace Hermes
 
       /// For the matrix M (size ndof times ndof).
       WeakForm<Scalar> stage_wf_left;
-      DiscreteProblem<Scalar>* stage_dp_left;
+      DiscreteProblemLinear<Scalar>* stage_dp_left;
 
       bool start_from_zero_K_vector;
       bool block_diagonal_jacobian;

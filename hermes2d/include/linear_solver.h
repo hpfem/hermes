@@ -91,7 +91,7 @@ namespace Hermes
 
       /// SettableSpaces helpers.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(const SpaceSharedPtr<Scalar> space);
+      virtual void set_space(SpaceSharedPtr<Scalar> space);
       virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
 
       /// See DiscreteProblemCacheSettings in mixins2d.h for details.

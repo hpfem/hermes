@@ -1,6 +1,3 @@
-//#define DEBUG_DG_ASSEMBLING
-//#define DEBUG_DG_ASSEMBLING_ELEMENT 44
-//#define DEBUG_DG_ASSEMBLING_ISURF 3
 // This file is part of Hermes2D.
 //
 // Hermes2D is free software: you can redistribute it and/or modify
@@ -18,11 +15,6 @@
 
 #include "discrete_problem.h"
 #include "function/exact_solution.h"
-#include <algorithm>
-#include <map>
-#include <string>
-#include <utility>
-#include <vector>
 #include "global.h"
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
@@ -33,6 +25,7 @@
 #include "function/solution.h"
 #include "neighbor.h"
 #include "api2d.h"
+#include <algorithm>
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 
@@ -41,19 +34,17 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf)
     {
-      this->wf = current_wf;
-
       // Order calculation.
-      int order = this->wf->global_integration_order_set ? this->wf->global_integration_order : 0;
+      int order = current_wf->global_integration_order_set ? current_wf->global_integration_order : 0;
       if(order == 0)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
         {
           MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
           //if(!form_to_be_assembled(current_mfvol, current_state))
-            //continue;
+          //continue;
           current_mfvol->wf = current_wf;
           int orderTemp = calc_order_matrix_form(spaces, current_mfvol, current_refmaps, current_u_ext, current_state);
           if(order < orderTemp)
@@ -64,7 +55,7 @@ namespace Hermes
         {
           VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
           //if(!form_to_be_assembled(current_vfvol, current_state))
-            //continue;
+          //continue;
           current_vfvol->wf = current_wf;
           int orderTemp = calc_order_vector_form(spaces, current_vfvol, current_refmaps, current_u_ext, current_state);
           if(order < orderTemp)
@@ -82,7 +73,7 @@ namespace Hermes
             {
               MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
               //if(!form_to_be_assembled(current_mfsurf, current_state))
-                //continue;
+              //continue;
               current_mfsurf->wf = current_wf;
               int orderTemp = calc_order_matrix_form(spaces, current_mfsurf, current_refmaps, current_u_ext, current_state);
               if(order < orderTemp)
@@ -93,7 +84,7 @@ namespace Hermes
             {
               VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
               //if(!form_to_be_assembled(current_vfsurf, current_state))
-                //continue;
+              //continue;
               current_vfsurf->wf = current_wf;
               int orderTemp = calc_order_vector_form(spaces, current_vfsurf, current_refmaps, current_u_ext, current_state);
               if(order < orderTemp)
@@ -107,12 +98,12 @@ namespace Hermes
     } 
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, MatrixForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
       int order;
 
       // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = NULL;
       int ext_size = std::max(form->ext.size(), form->wf->ext.size());
       if(ext_size > 0)
@@ -164,12 +155,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, VectorForm<Scalar> *form, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
       int order;
 
       // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = new Func<Hermes::Ord>*[rungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[rungeKutta ? RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = NULL;
       int ext_size = std::max(form->ext.size(), form->wf->ext.size());
       if(ext_size > 0)
@@ -211,7 +202,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
-      unsigned int prev_size = rungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
+      unsigned int prev_size = rungeKutta ? RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
       if(current_u_ext)
@@ -223,9 +214,6 @@ namespace Hermes
               oi[i] = init_fn_ord(current_u_ext[i + form->u_ext_offset]->get_fn_order() + (current_u_ext[i + form->u_ext_offset]->get_num_components() > 1 ? 1 : 0));
           else
             oi[i] = init_fn_ord(0);
-      else
-        for(int i = 0; i < prev_size; i++)
-          oi[i] = init_fn_ord(0);
 
       if(form->ext.size() > 0)
       {
@@ -249,7 +237,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext)
     {
-      unsigned int prev_size = rungeKutta ? RK_original_spaces_count : this->wf->get_neq() - form->u_ext_offset;
+      unsigned int prev_size = oi ? (rungeKutta ? RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
       for(int i = 0; i < prev_size; i++)
       {
         oi[i]->free_ord();

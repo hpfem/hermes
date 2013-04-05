@@ -1,6 +1,3 @@
-//#define DEBUG_DG_ASSEMBLING
-//#define DEBUG_DG_ASSEMBLING_ELEMENT 44
-//#define DEBUG_DG_ASSEMBLING_ISURF 3
 // This file is part of Hermes2D.
 //
 // Hermes2D is free software: you can redistribute it and/or modify

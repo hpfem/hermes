@@ -193,7 +193,7 @@ namespace Hermes
     
     template<typename Scalar>
     template<typename FormType>
-    void WeakForm<Scalar>::processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool surface, Hermes::vector<FormType> forms_to_process)
+    void WeakForm<Scalar>::processFormMarkers(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool surface, Hermes::vector<FormType> forms_to_process)
     {
       for(int form_i = 0; form_i < forms_to_process.size(); form_i++)
       {
@@ -223,12 +223,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void WeakForm<Scalar>::processFormMarkers(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    void WeakForm<Scalar>::processFormMarkers(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       processFormMarkers(spaces, false, this->mfvol);
       processFormMarkers(spaces, false, this->vfvol);
       processFormMarkers(spaces, true, this->mfsurf);
       processFormMarkers(spaces, true, this->vfsurf);
+    }
+
+    template<typename Scalar>
+    bool WeakForm<Scalar>::is_DG() const
+    {
+      if(this->mfDG.empty() && this->vfDG.empty())
+        return false;
+      return true;
     }
 
     template<typename Scalar>

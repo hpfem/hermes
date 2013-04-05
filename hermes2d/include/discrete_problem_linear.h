@@ -39,25 +39,6 @@ namespace Hermes
 
       /// Empty constructor for special purposes.
       DiscreteProblemLinear();
-
-      /// Destuctor.
-      virtual ~DiscreteProblemLinear();
-
-      /// Assembling.
-      /// Light version, linear problems.
-      virtual void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
-
-    protected:
-      /// Methods different to those of the parent class.
-      /// Matrix forms.
-      virtual void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
-      AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
-
-      template<typename T> friend class KellyTypeAdapt;
-      template<typename T> friend class NewtonSolver;
-      template<typename T> friend class PicardSolver;
-      template<typename T> friend class RungeKutta;
-      template<typename T> friend class LinearSolver;
     };
   }
 }

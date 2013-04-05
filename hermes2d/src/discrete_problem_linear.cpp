@@ -14,8 +14,6 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "discrete_problem_linear.h"
-#include <iostream>
-#include <algorithm>
 #include "global.h"
 #include "integrals/h1.h"
 #include "quadrature/limit_order.h"
@@ -36,21 +34,22 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces) : DiscreteProblem<Scalar>(wf, spaces)
     {
-      this->is_linear = true;
+      this->nonlinear = false;
     }
 
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::DiscreteProblemLinear(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space) : DiscreteProblem<Scalar>(wf, space)
     {
-      this->is_linear = true;
+      this->nonlinear = false;
     }
 
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::DiscreteProblemLinear() : DiscreteProblem<Scalar>()
     {
-      this->is_linear = true;
+      this->nonlinear = false;
     }
 
+    /*
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::~DiscreteProblemLinear()
     {
@@ -394,6 +393,7 @@ namespace Hermes
       // Cleanup.
       delete [] local_stiffness_matrix;
     }
+    */
 
     template class HERMES_API DiscreteProblemLinear<double>;
     template class HERMES_API DiscreteProblemLinear<std::complex<double> >;

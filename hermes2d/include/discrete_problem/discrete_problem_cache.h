@@ -36,7 +36,7 @@ namespace Hermes
     /// Caching in DiscreteProblem.
     /// Internal.
     template<typename Scalar>
-    class DiscreteProblemCache : public Hermes::Hermes2D::Mixins::DiscreteProblemSingleAssemblyData
+    class DiscreteProblemCache
     {
     public:
       DiscreteProblemCache();
@@ -50,17 +50,17 @@ namespace Hermes
       /// In every call to assemble(), the unused hash table entries are stored, so that they can be deallocated (they will not be ever again used).
       void free_unused();
 
+      /// Sets the usage table for each call to assemble().
       void init_assembling();
 
       /// Storage unit - a record.
       class CacheRecord
       {
       public:
-        void init(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Traverse::State* state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order);
-        void free();
-
         ~CacheRecord();
-
+        void init(Traverse::State* state, PrecalcShapeset** current_pss, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als, AsmList<Scalar>*** current_alsSurface, WeakForm<Scalar>* current_wf, int order);
+        void free();
+        
         int spaceCnt;
         int** asmlistIdx;
         int* asmlistCnt;
@@ -77,7 +77,7 @@ namespace Hermes
         int* orderSurface;
         int** asmlistSurfaceCnt;
 
-        friend class DiscreteProblem<Scalar>;
+        friend class DiscreteProblemCache<Scalar>;
       };
 
       /// Returns the cache record and information whether it is initialized (found in the cache).
@@ -85,10 +85,9 @@ namespace Hermes
       /// \return Found in cache.
       bool get(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
 
+    private:
       /// Special handling of adaptivity situtation.
       bool get_adaptivity(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
-
-    private:
 
       /// Starting size of the recordTable.
       static const int DEFAULT_SIZE = 1e5;
@@ -105,7 +104,7 @@ namespace Hermes
 
       class StateHash
       {
-      public:
+      private:
         /// Hash is created from 4 parameters, cache_record_index is an index to the array recordTable.
         /// \param[in] rep_id Id of the representing element of the Traverse::State at hand.
         /// \param[in] parent_son if dealing with adaptive calculation caching, the rep_id is no longer the id of the representing element, 
@@ -119,6 +118,7 @@ namespace Hermes
         int rep_sub_idx;
         int rep_i;
         int cache_record_index;
+        friend class DiscreteProblemCache<Scalar>;
       };
 
       StateHash **hashTable;

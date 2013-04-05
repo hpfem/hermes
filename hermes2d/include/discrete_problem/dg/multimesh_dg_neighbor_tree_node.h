@@ -38,8 +38,8 @@ namespace Hermes
       MultimeshDGNeighborTreeNode* left_son;
       MultimeshDGNeighborTreeNode* right_son;
       unsigned int transformation;
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
+
+      template<typename Scalar> friend class MultimeshDGNeighborTree;
       template<typename Scalar> friend class KellyTypeAdapt;
     };
   }

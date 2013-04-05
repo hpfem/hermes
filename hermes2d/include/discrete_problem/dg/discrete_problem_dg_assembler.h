@@ -27,9 +27,8 @@
 #include "exceptions.h"
 #include "mixins2d.h"
 #include "multimesh_dg_neighbor_tree.h"
-#include "discrete_problem_dg_assembly_data.h"
 #include "discrete_problem/discrete_problem_helpers.h"
-#include "multimesh_dg_neighbor_tree_node.h"
+#include "multimesh_dg_neighbor_tree.h"
 
 namespace Hermes
 {
@@ -43,44 +42,14 @@ namespace Hermes
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblemDGAssembler : 
-      public Hermes::Mixins::TimeMeasurable, 
-      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
-      public Hermes::Hermes2D::Mixins::StateQueryable,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemSingleAssemblyData
+      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
     public:
-      /// Constructor for multiple components / equations.
-      DiscreteProblemDGAssembler(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-
-      /// Constructor for one equation.
-      DiscreteProblemDGAssembler(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-
-      DiscreteProblemDGAssembler();
-
-      void init();
-      void init_assembling();
-      virtual std::string getClassName() const { return "DiscreteProblemDGAssembler"; }
-
-      void free();
-      bool is_linear;
-
-      /// The form will be assembled.
-      bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
-      bool form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state);
-      bool form_to_be_assembled(MatrixFormSurf<Scalar>* form, Traverse::State* current_state);
-      bool form_to_be_assembled(VectorForm<Scalar>* form, Traverse::State* current_state);
-      bool form_to_be_assembled(VectorFormVol<Scalar>* form, Traverse::State* current_state);
-      bool form_to_be_assembled(VectorFormSurf<Scalar>* form, Traverse::State* current_state);
-
-      bool isOkay() const;
-
-      Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const
-      {
-        return this->spaces;
-      }
+      /// Constructor copying data from DiscreteProblemThreadAssembler.
+      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      
+      /// Destructor.
+      ~DiscreteProblemDGAssembler();
 
       /// There is a matrix form set on DG_INNER_EDGE area or not.
       bool DG_matrix_forms_present;
@@ -88,71 +57,61 @@ namespace Hermes
       /// There is a vector form set on DG_INNER_EDGE area or not.
       bool DG_vector_forms_present;
 
-      /// Sets new spaces for the instance.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar> space);
-
+      /// Initialize assembling for a state.
+      void init_assembling_one_state(Traverse::State* current_state_);
       /// Assemble DG forms.
-      void assemble_one_DG_state(PrecalcShapeset** current_pss, RefMap** current_refmaps,  Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
-        Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn, WeakForm<Scalar>* current_wf);
+      void assemble_one_state();
+      /// Deinitialize assembling for a state.
+      void deinit_assembling_one_state();
 
+      /// Initialize assembling for a neighbor.
+      void init_assembling_one_neighbor();
       /// Assemble one DG neighbor.
-      void assemble_DG_one_neighbor(bool edge_processed, unsigned int neighbor_i,
-        PrecalcShapeset** current_pss, RefMap** current_refmaps,  Solution<Scalar>** current_u_ext, AsmList<Scalar>** current_als,
-        Traverse::State* current_state, Hermes::vector<MatrixFormDG<Scalar>*> current_mfDG, Hermes::vector<VectorFormDG<Scalar>*> current_vfDG, Transformable** fn,
-        std::map<unsigned int, PrecalcShapeset *> npss, std::map<unsigned int, PrecalcShapeset *> nspss, std::map<unsigned int, RefMap *> nrefmap,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches, unsigned int min_dg_mesh_seq, WeakForm<Scalar>* current_wf);
-
-      /// Assemble DG matrix forms.
-      void assemble_DG_matrix_forms(PrecalcShapeset** current_pss, RefMap** current_refmaps, AsmList<Scalar>** current_als,
-        Traverse::State* current_state, MatrixFormDG<Scalar>** current_mfDG, std::map<unsigned int, PrecalcShapeset*> npss,
-        std::map<unsigned int, PrecalcShapeset*> nspss, std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
-
-      /// Assemble DG vector forms.
-      void assemble_DG_vector_forms(RefMap** current_refmaps, AsmList<Scalar>** current_als,
-        Traverse::State* current_state, VectorFormDG<Scalar>** current_vfDG, std::map<unsigned int, PrecalcShapeset*> nspss,
-        std::map<unsigned int, RefMap*> nrefmap, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+      void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches);
+      /// Deinitialize assembling for a neighbor.
+      void deinit_assembling_one_neighbor();
 
       /// Initialize external functions for DG forms.
       DiscontinuousFunc<Scalar>** init_ext_fns(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches,
-        int order, unsigned int min_dg_mesh_seq);
+        NeighborSearch<Scalar>** neighbor_searches, int order);
 
       /// Initialize neighbors.
-      bool init_neighbors(LightArray<NeighborSearch<Scalar>*>& neighbor_searches, Traverse::State* current_state, unsigned int min_dg_mesh_seq);
+      bool init_neighbors(NeighborSearch<Scalar>** neighbor_searches, Traverse::State* current_state);
 
-      /// Initialize the tree for traversing multimesh neighbors.
-      void build_multimesh_tree(MultimeshDGNeighborTreeNode* root, LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+      /// Finds the correct NeighborSearch.
+      NeighborSearch<Scalar>* get_neighbor_search_ext(NeighborSearch<Scalar>** neighbor_searches, int index);
 
-      /// Recursive insertion function into the tree.
-      void insert_into_multimesh_tree(MultimeshDGNeighborTreeNode* node, unsigned int* transformations, unsigned int transformation_count);
+    private:
+      NeighborSearch<Scalar>*** neighbor_searches;
+      int* num_neighbors;
+      bool** processed;
 
-      /// Return a global (unified list of central element transformations representing the neighbors on the union mesh.
-      Hermes::vector<Hermes::vector<unsigned int>*> get_multimesh_neighbors_transformations(MultimeshDGNeighborTreeNode* multimesh_tree);
+      // Neighbor psss, refmaps.
+      PrecalcShapeset ** npss;
+      RefMap ** nrefmaps;
 
-      /// Traverse the multimesh tree. Used in the function get_multimesh_neighbors_transformations().
-      void traverse_multimesh_tree(MultimeshDGNeighborTreeNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_transformations);
-
-      /// Update the NeighborSearch according to the multimesh tree.
-      void update_neighbor_search(NeighborSearch<Scalar>* ns, MultimeshDGNeighborTreeNode* multimesh_tree);
-
-      /// Finds a node in the multimesh tree that corresponds to the array transformations, with the length of transformation_count,
-      /// starting to look for it in the MultimeshDGNeighborTreeNode node.
-      MultimeshDGNeighborTreeNode* find_node(unsigned int* transformations, unsigned int transformation_count, MultimeshDGNeighborTreeNode* node);
-
-      /// Updates the NeighborSearch ns according to the subtree of MultimeshDGNeighborTreeNode node.
-      /// Returns 0 if no neighbor was deleted, -1 otherwise.
-      int update_ns_subtree(NeighborSearch<Scalar>* ns, MultimeshDGNeighborTreeNode* node, unsigned int ith_neighbor);
-
-      /// Traverse the multimesh subtree. Used in the function update_ns_subtree().
-      void traverse_multimesh_subtree(MultimeshDGNeighborTreeNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
-        Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
-
-      /// Space instances for all equations in the system.
-      Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+      PrecalcShapeset** pss;
+      RefMap** refmaps;
+      Solution<Scalar>** u_ext;
+      AsmList<Scalar>** als;
+      Hermes::vector<Transformable *> fns;
+      WeakForm<Scalar>* wf;
       int spaces_size;
+      bool nonlinear;
+
+      SparseMatrix<Scalar>* current_mat;
+      Vector<Scalar>* current_rhs;
+
+      bool do_not_use_cache;
+      Traverse::State* current_state;
+
+      const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces;
 
       template<typename T> friend class DiscreteProblem;
+
+#ifdef DEBUG_DG_ASSEMBLING
+      void debug();
+#endif
     };
   }
 }

@@ -20,6 +20,8 @@
 #include "../shapeset/precalc.h"
 #include "../function/solution.h"
 #include "discrete_problem_helpers.h"
+#include "discrete_problem_cache.h"
+#include "discrete_problem_integration_order_calculator.h"
 
 namespace Hermes
 {
@@ -33,34 +35,61 @@ namespace Hermes
     template<typename Scalar>
     class HERMES_API DiscreteProblemThreadAssembler : 
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>
+      public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
+      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
-    private:
+    protected:
       DiscreteProblemThreadAssembler();
       ~DiscreteProblemThreadAssembler();
 
-      void init_assembling();
-      void init_assembling_one_state(Traverse::State* current_state);
-
+      /// Initialization of all structures concerning space - assembly lists, precalculated shapesets, ..
       void init_spaces(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      /// Initialization of the weak formulation.
       void set_weak_formulation(WeakForm<Scalar>* wf);
+      /// Initialization of previous iterations for non-linear solvers.
       void init_u_ext(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Solution<Scalar>** u_ext_sln);
 
+      /// Initializes the Transformable array for doing transformations.
+      void init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear);
+
+      /// Sets active elements & transformations
+      void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
+      /// Takes the global cache and according to the current_state, it
+      /// either gets or gets a record.
+      void handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache, bool do_not_use_cache);
+      /// Assemble the state.
+      void assemble_one_state();
+
+      /// Delete the cache record if do_not_use_cache etc.
+      void deinit_assembling_one_state();
+      /// Delete the cache record if do_not_use_cache etc.
+      void deinit_assembling();
+      
+      /// Free all data.
       void free();
       void free_spaces();
       void free_weak_formulation();
       void free_u_ext();
 
+    private:
       PrecalcShapeset** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
       AsmList<Scalar>** als;
       AsmList<Scalar>*** alsSurface;
-
       Hermes::vector<Transformable *> fns;  
-
       int spaces_size;
+      bool nonlinear;
+
+      bool do_not_use_cache;
+      Traverse::State* current_state;
+      typename DiscreteProblemCache<Scalar>::CacheRecord* current_cache_record;
+      
+      /// Integration order calculator.
+      DiscreteProblemIntegrationOrderCalculator<Scalar> integrationOrderCalculator;
+
       friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblemDGAssembler<Scalar>;
     };
   }
 }
