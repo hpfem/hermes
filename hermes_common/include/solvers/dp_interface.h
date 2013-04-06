@@ -23,6 +23,7 @@
 #define DPINTERFACE_H
 
 #include "../matrix.h"
+#include "../exceptions.h"
 
 using namespace Hermes::Algebra;
 
@@ -61,8 +62,8 @@ namespace Hermes
       /// forms do not exist. This is useful if the matrix is later to be merged with
       /// a matrix that has nonzeros in these blocks. The Table serves for optional
       /// weighting of matrix blocks in systems.
-      virtual void create_sparse_structure() = 0;
-      virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL) = 0;
+      virtual void create_sparse_structure() { throw Hermes::Exceptions::MethodNotOverridenException("DiscreteProblemInterface::reate_sparse_structure()"); }
+      virtual void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL) { throw Hermes::Exceptions::MethodNotOverridenException("DiscreteProblemInterface::reate_sparse_structure()"); }
 
       template<typename T> friend class DiscreteProblemNOX;
     };

@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "discrete_problem/discrete_problem_form_assembler.h"
 #include "discrete_problem/dg/discrete_problem_dg_assembler.h"
 #include "discrete_problem/discrete_problem_thread_assembler.h"
 
@@ -41,6 +40,7 @@ namespace Hermes
       current_mat(threadAssembler->current_mat),
       current_rhs(threadAssembler->current_rhs),
       current_state(NULL),
+      selectiveAssembler(threadAssembler->selectiveAssembler),
       do_not_use_cache(threadAssembler->do_not_use_cache),
       spaces(spaces)
     {
@@ -126,11 +126,9 @@ namespace Hermes
         {
           if(!current_state->bnd[current_state->isurf])
           {
+            // If this edge is an inter-element one on all meshes.
             if(!init_neighbors(neighbor_searches[current_state->isurf], current_state))
-            {
-              intra_edge_passed_DG[current_state->isurf] = true;
               continue;
-            }
 
             // Create a multimesh tree;
             MultimeshDGNeighborTree<Scalar>::process_edge(neighbor_searches[current_state->isurf], this->current_state->num, this->num_neighbors[current_state->isurf], this->processed[current_state->isurf]);
@@ -177,11 +175,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemDGAssembler<Scalar>::assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** current_neighbor_searches)
     {
-      /// \todo
-      DiscreteProblemFormAssembler<Scalar> formAssembler;
-      formAssembler.set_matrix(this->current_mat);
-      formAssembler.set_rhs(this->current_rhs);
-
       // Set the active segment in all NeighborSearches
       for(unsigned int i = 0; i < this->current_state->num; i++)
       {
@@ -239,33 +232,31 @@ namespace Hermes
       int order_base = 20;
       for (unsigned int i = 0; i < this->spaces_size; i++)
       {
-        current_neighbor_searches[i] = current_neighbor_searches[i];
-        ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], als[i]);
         current_neighbor_searches[i]->set_quad_order(order);
         order_base = order;
-        n_quadrature_points = init_surface_geometry_points(refmaps[i], order_base, i, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
+        n_quadrature_points = init_surface_geometry_points(refmaps[i], order_base, current_state->isurf, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
         e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->get_diameter());
 
-        testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
-        for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
+        if(current_mat && DG_matrix_forms_present && !edge_processed)
         {
-          if(ext_asmlist[i]->dof[func_i] < 0)
-            continue;
+          ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], als[i]);
+          testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
+          for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
+          {
+            if(ext_asmlist[i]->dof[func_i] < 0)
+              continue;
 
-          // Choose the correct shapeset for the test function.
-          if(!ext_asmlist[i]->has_support_on_neighbor(func_i))
-          {
-            pss[i]->set_active_shape(ext_asmlist[i]->central_al->idx[func_i]);
-            PrecalcShapeset* func = pss[i];
-            RefMap* refmap = refmaps[i];
-            testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, current_neighbor_searches[i]->get_quad_eo(false)), false, current_neighbor_searches[i]->neighbor_edge.orientation);
-          }
-          else
-          {
-            npss[i]->set_active_shape(ext_asmlist[i]->neighbor_al->idx[func_i - ext_asmlist[i]->central_al->cnt]);
-            PrecalcShapeset* func = npss[i];
-            RefMap* refmap = nrefmaps[i];
-            testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(func, refmap, current_neighbor_searches[i]->get_quad_eo(true)), true, current_neighbor_searches[i]->neighbor_edge.orientation);
+            // Choose the correct shapeset for the test function.
+            if(ext_asmlist[i]->has_support_on_neighbor(func_i))
+            {
+              npss[i]->set_active_shape(ext_asmlist[i]->neighbor_al->idx[func_i - ext_asmlist[i]->central_al->cnt]);
+              testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(npss[i], nrefmaps[i], current_neighbor_searches[i]->get_quad_eo(true)), true, current_neighbor_searches[i]->neighbor_edge.orientation);
+            }
+            else
+            {
+              pss[i]->set_active_shape(ext_asmlist[i]->central_al->idx[func_i]);
+              testFunctions[i][func_i] = new DiscontinuousFunc<double>(init_fn(pss[i], refmaps[i], current_neighbor_searches[i]->get_quad_eo(false)), false, current_neighbor_searches[i]->neighbor_edge.orientation);
+            }
           }
         }
       }
@@ -295,7 +286,7 @@ namespace Hermes
       {
         for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
         {
-          if(!formAssembler.form_to_be_assembled((MatrixForm<Scalar>*)wf->mfDG[current_mfsurf_i], current_state))
+          if(!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)wf->mfDG[current_mfsurf_i], current_state))
             continue;
 
           MatrixFormDG<Scalar>* mfs = wf->mfDG[current_mfsurf_i];
@@ -342,19 +333,21 @@ namespace Hermes
         }
       }
 
-      for(int i = 0; i < this->spaces_size; i++)
+      if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
-        for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
+        for(int i = 0; i < this->spaces_size; i++)
         {
-          if(ext_asmlist[i]->dof[func_i] < 0)
-            continue;
-          testFunctions[i][func_i]->free_fn();
-          delete testFunctions[i][func_i];
-        }        
-        delete ext_asmlist[i];
-        delete [] testFunctions[i];
+          for (int func_i = 0; func_i < ext_asmlist[i]->cnt; func_i++)
+          {
+            if(ext_asmlist[i]->dof[func_i] < 0)
+              continue;
+            testFunctions[i][func_i]->free_fn();
+            delete testFunctions[i][func_i];
+          }        
+          delete ext_asmlist[i];
+          delete [] testFunctions[i];
+        }
       }
-
       delete [] testFunctions;
       delete [] ext_asmlist;
 
@@ -368,7 +361,7 @@ namespace Hermes
 
           int n = vfs->i;
 
-          if(!formAssembler.form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
+          if(!this->selectiveAssembler->form_to_be_assembled((VectorForm<Scalar>*)vfs, current_state))
             continue;
 
           NeighborSearch<Scalar>* current_neighbor_searches_v = current_neighbor_searches[n];

@@ -35,7 +35,7 @@ namespace Hermes
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class DiscreteProblemLinear;
     template<typename Scalar> class DiscreteProblemCache;
-    template<typename Scalar> class DiscreteProblemFormAssembler;
+    template<typename Scalar> class DiscreteProblemSelectiveAssembler;
     template<typename Scalar> class RungeKutta;
     template<typename Scalar> class Space;
     template<typename Scalar> class MeshFunction;
@@ -215,8 +215,8 @@ namespace Hermes
       friend class DiscreteProblemLinear<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
-      friend class DiscreteProblemFormAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
+      friend class DiscreteProblemSelectiveAssembler<Scalar>;
       friend class RungeKutta<Scalar>;
       friend class OGProjection<Scalar>;
       friend class Hermes::Preconditioners::Precond<Scalar>;
@@ -307,7 +307,7 @@ namespace Hermes
       friend class DiscreteProblemCache<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemIntegrationOrderCalculator<Scalar>;
-      friend class DiscreteProblemFormAssembler<Scalar>;
+      friend class DiscreteProblemSelectiveAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
       friend class DiscreteProblemLinear<Scalar>;
     };

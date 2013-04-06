@@ -68,7 +68,13 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template<typename Scalar>
-    class HERMES_API NewtonSolver : public NonlinearSolver<Scalar>, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
+    class HERMES_API NewtonSolver : 
+      public NonlinearSolver<Scalar>,
+      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>,
+      public Hermes::Mixins::OutputAttachable,
+      public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>,
+      public Hermes::Hermes2D::Mixins::StateQueryable,
+      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
     {
     public:
       NewtonSolver();
@@ -147,9 +153,9 @@ namespace Hermes
       virtual void set_time_step(double time_step);
 
       /// See the class Hermes::Hermes2D::Mixins::SettableSpaces.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar> space);
-      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar>& space);
+      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
 
       /// Turn on or off manual damping (default is the automatic) and optionally sets manual damping coefficient.
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.

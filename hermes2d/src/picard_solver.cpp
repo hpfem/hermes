@@ -114,23 +114,26 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
+      {
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_matrix(NULL);
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_rhs(NULL);
+      }
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    void PicardSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
+    void PicardSolver<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
     }
 
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> > PicardSolver<Scalar>::get_spaces() const
+    const Hermes::vector<SpaceSharedPtr<Scalar> >& PicardSolver<Scalar>::get_spaces() const
     {
       return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }
@@ -436,8 +439,6 @@ namespace Hermes
             delete [] previous_vectors;
             delete [] anderson_coeffs;
           }
-          
-          static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
 
           this->tick();
           this->info("\tPicard: solution duration: %f s.\n", this->last());
@@ -456,7 +457,6 @@ namespace Hermes
             delete [] previous_vectors;
             delete [] anderson_coeffs;
           }
-          static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
 
           this->tick();
           this->info("\tPicard: solution duration: %f s.\n", this->last());

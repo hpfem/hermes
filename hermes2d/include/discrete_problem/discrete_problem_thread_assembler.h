@@ -22,6 +22,7 @@
 #include "discrete_problem_helpers.h"
 #include "discrete_problem_cache.h"
 #include "discrete_problem_integration_order_calculator.h"
+#include "discrete_problem_selective_assembler.h"
 
 namespace Hermes
 {
@@ -39,7 +40,7 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
     protected:
-      DiscreteProblemThreadAssembler();
+      DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler);
       ~DiscreteProblemThreadAssembler();
 
       /// Initialization of all structures concerning space - assembly lists, precalculated shapesets, ..
@@ -59,6 +60,13 @@ namespace Hermes
       void handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache, bool do_not_use_cache);
       /// Assemble the state.
       void assemble_one_state();
+      /// Matrix volumetric forms - assemble the form.
+      void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
+        AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+
+      /// Vector volumetric forms - assemble the form.
+      void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
+        AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// Delete the cache record if do_not_use_cache etc.
       void deinit_assembling_one_state();
@@ -86,6 +94,7 @@ namespace Hermes
       typename DiscreteProblemCache<Scalar>::CacheRecord* current_cache_record;
       
       /// Integration order calculator.
+      DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
       DiscreteProblemIntegrationOrderCalculator<Scalar> integrationOrderCalculator;
 
       friend class DiscreteProblem<Scalar>;

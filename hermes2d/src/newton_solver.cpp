@@ -146,7 +146,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    void NewtonSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_spaces(spaces);
       if(kept_jacobian != NULL)
@@ -155,7 +155,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void NewtonSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
+    void NewtonSolver<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
     {
       static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_space(space);
       if(kept_jacobian != NULL)
@@ -164,7 +164,7 @@ namespace Hermes
     }
     
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> > NewtonSolver<Scalar>::get_spaces() const
+    const Hermes::vector<SpaceSharedPtr<Scalar> >& NewtonSolver<Scalar>::get_spaces() const
     {
       return static_cast<DiscreteProblem<Scalar>*>(this->dp)->get_spaces();
     }
@@ -189,7 +189,10 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        static_cast<DiscreteProblem<Scalar>*>(this->dp)->matrix_structure_reusable = false;
+      {
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_matrix(NULL);
+        static_cast<DiscreteProblem<Scalar>*>(this->dp)->set_rhs(NULL);
+      }
     }
 
     template<typename Scalar>
@@ -718,7 +721,7 @@ namespace Hermes
 
         // Assemble and keep the jacobian if this has not been done before.
         // Also declare that LU-factorization in case of a direct solver will be done only once and reused afterwards.
-        if(kept_jacobian == NULL || !(static_cast<DiscreteProblem<Scalar>*>(this->dp))->matrix_structure_reusable) 
+        if(kept_jacobian == NULL) 
         {
           if(kept_jacobian != NULL)
             delete kept_jacobian;

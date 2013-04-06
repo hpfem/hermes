@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "discrete_problem/discrete_problem_thread_assembler.h"
-#include "discrete_problem/discrete_problem_form_assembler.h"
+#include "discrete_problem/discrete_problem_selective_assembler.h"
 #include "shapeset/precalc.h"
 #include "function/solution.h"
 #include "weakform/weakform.h"
@@ -32,7 +32,7 @@ namespace Hermes
 #endif
 
     template<typename Scalar>
-    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler() : pss(NULL), refmaps(NULL), u_ext(NULL), als(NULL), alsSurface(NULL)
+    DiscreteProblemThreadAssembler<Scalar>::DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : pss(NULL), refmaps(NULL), u_ext(NULL), als(NULL), alsSurface(NULL), selectiveAssembler(selectiveAssembler)
     {
     }
 
@@ -270,11 +270,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::assemble_one_state()
     {
-      /// \todo
-      DiscreteProblemFormAssembler<Scalar> formAssembler;
-      formAssembler.set_matrix(this->current_mat);
-      formAssembler.set_rhs(this->current_rhs);
-
       // - u_ext_func
       Func<Scalar>** u_ext_func = NULL;
       int prevNewtonSize = this->wf->get_neq();
@@ -322,13 +317,13 @@ namespace Hermes
         {
           MatrixFormVol<Scalar>* mfv = this->wf->mfvol[current_mfvol_i];
 
-          if(!formAssembler.form_to_be_assembled(mfv, current_state))
+          if(!selectiveAssembler->form_to_be_assembled(mfv, current_state))
             continue;
 
           int form_i = mfv->i;
           int form_j = mfv->j;
 
-          formAssembler.assemble_matrix_form(mfv, 
+          this->assemble_matrix_form(mfv, 
             this->current_cache_record->order, 
             current_cache_record->fns[form_j], 
             current_cache_record->fns[form_i], 
@@ -348,12 +343,12 @@ namespace Hermes
         {
           VectorFormVol<Scalar>* vfv = this->wf->vfvol[current_vfvol_i];
 
-          if(!formAssembler.form_to_be_assembled(vfv, current_state))
+          if(!selectiveAssembler->form_to_be_assembled(vfv, current_state))
             continue;
 
           int form_i = vfv->i;
 
-          formAssembler.assemble_vector_form(vfv, 
+          this->assemble_vector_form(vfv, 
             this->current_cache_record->order, 
             current_cache_record->fns[form_i], 
             ext,
@@ -437,13 +432,13 @@ namespace Hermes
           {
             for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
             {
-              if(!formAssembler.form_to_be_assembled(this->wf->mfsurf[current_mfsurf_i], current_state))
+              if(!selectiveAssembler->form_to_be_assembled(this->wf->mfsurf[current_mfsurf_i], current_state))
                 continue;
 
               int form_i = this->wf->mfsurf[current_mfsurf_i]->i;
               int form_j = this->wf->mfsurf[current_mfsurf_i]->j;
 
-              formAssembler.assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], 
+              this->assemble_matrix_form(this->wf->mfsurf[current_mfsurf_i], 
                 current_cache_record->orderSurface[current_state->isurf], 
                 current_cache_record->fnsSurface[current_state->isurf][form_j], 
                 current_cache_record->fnsSurface[current_state->isurf][form_i], 
@@ -462,12 +457,12 @@ namespace Hermes
           {
             for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
             {
-              if(!formAssembler.form_to_be_assembled(this->wf->vfsurf[current_vfsurf_i], current_state))
+              if(!selectiveAssembler->form_to_be_assembled(this->wf->vfsurf[current_vfsurf_i], current_state))
                 continue;
 
               int form_i = this->wf->vfsurf[current_vfsurf_i]->i;
 
-              formAssembler.assemble_vector_form(this->wf->vfsurf[current_vfsurf_i], 
+              this->assemble_vector_form(this->wf->vfsurf[current_vfsurf_i], 
                 current_cache_record->orderSurface[current_state->isurf], 
                 current_cache_record->fnsSurface[current_state->isurf][form_i], 
                 extSurf, 
@@ -502,6 +497,182 @@ namespace Hermes
       }
     }
 
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
+      AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
+    {
+      bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);
+
+      double block_scaling_coefficient = this->block_scaling_coeff(form);
+
+      bool tra = (form->i != form->j) && (form->sym != 0);
+      bool sym = (form->i == form->j) && (form->sym == 1);
+
+      // Assemble the local stiffness matrix for the form form.
+      Scalar **local_stiffness_matrix = new_matrix<Scalar>(std::max(current_als_i->cnt, current_als_j->cnt));
+
+      Func<Scalar>** local_ext = ext;
+      // If the user supplied custom ext functions for this form.
+      if(form->ext.size() > 0)
+      {
+        int local_ext_count = form->ext.size();
+        local_ext = new Func<Scalar>*[local_ext_count];
+        for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
+          if(form->ext[ext_i])
+            local_ext[ext_i] = current_state->e[ext_i] == NULL ? NULL : init_fn(form->ext[ext_i].get(), order);
+          else
+            local_ext[ext_i] = NULL;
+      }
+
+      // Account for the previous time level solution previously inserted at the back of ext.
+      if(rungeKutta)
+        u_ext += form->u_ext_offset;
+
+      // Actual form-specific calculation.
+      for (unsigned int i = 0; i < current_als_i->cnt; i++)
+      {
+        if(current_als_i->dof[i] < 0)
+          continue;
+
+        if((!tra || surface_form) && current_als_i->dof[i] < 0)
+          continue;
+        if(std::abs(current_als_i->coef[i]) < 1e-12)
+          continue;
+        if(!sym)
+        {
+          for (unsigned int j = 0; j < current_als_j->cnt; j++)
+          {
+            if(current_als_j->dof[j] >= 0)
+            {
+              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+              if(std::abs(current_als_j->coef[j]) < 1e-12)
+                continue;
+
+              Func<double>* u = base_fns[j];
+              Func<double>* v = test_fns[i];
+
+              if(surface_form)
+                local_stiffness_matrix[i][j] = 0.5 * block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+              else
+                local_stiffness_matrix[i][j] = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+            }
+          }
+        }
+        // Symmetric block.
+        else
+        {
+          for (unsigned int j = 0; j < current_als_j->cnt; j++)
+          {
+            if(j < i && current_als_j->dof[j] >= 0)
+              continue;
+            if(current_als_j->dof[j] >= 0)
+            {
+              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+              if(std::abs(current_als_j->coef[j]) < 1e-12)
+                continue;
+
+              Func<double>* u = base_fns[j];
+              Func<double>* v = test_fns[i];
+
+              Scalar val = block_scaling_coefficient * form->value(n_quadrature_points, jacobian_x_weights, u_ext, u, v, geometry, local_ext) * form->scaling_factor * current_als_j->coef[j] * current_als_i->coef[i];
+
+              local_stiffness_matrix[i][j] = local_stiffness_matrix[j][i] = val;
+            }
+          }
+        }
+      }
+
+      // Insert the local stiffness matrix into the global one.
+      current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
+
+      // Insert also the off-diagonal (anti-)symmetric block, if required.
+      if(tra)
+      {
+        if(form->sym < 0)
+          chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
+        transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
+
+        current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
+      }
+
+      if(form->ext.size() > 0)
+      {
+        for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
+          if(form->ext[ext_i])
+          {
+            local_ext[ext_i]->free_fn();
+            delete local_ext[ext_i];
+          }
+          delete [] local_ext;
+      }
+
+      if(rungeKutta)
+        u_ext -= form->u_ext_offset;
+
+      // Cleanup.
+      delete [] local_stiffness_matrix;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemThreadAssembler<Scalar>::assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
+      AsmList<Scalar>* current_als_i, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
+    {
+      bool surface_form = (dynamic_cast<VectorFormVol<Scalar>*>(form) == NULL);
+
+      Func<Scalar>** local_ext = ext;
+
+      // If the user supplied custom ext functions for this form.
+      if(form->ext.size() > 0)
+      {
+        int local_ext_count = form->ext.size();
+        local_ext = new Func<Scalar>*[local_ext_count];
+        for(int ext_i = 0; ext_i < local_ext_count; ext_i++)
+          if(form->ext[ext_i])
+            local_ext[ext_i] = init_fn(form->ext[ext_i].get(), order);
+          else
+            local_ext[ext_i] = NULL;
+      }
+
+      // Account for the previous time level solution previously inserted at the back of ext.
+      if(rungeKutta)
+        u_ext += form->u_ext_offset;
+
+      // Actual form-specific calculation.
+      for (unsigned int i = 0; i < current_als_i->cnt; i++)
+      {
+        if(current_als_i->dof[i] < 0)
+          continue;
+
+        // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
+        if(std::abs(current_als_i->coef[i]) < 1e-12)
+          continue;
+
+        Func<double>* v = test_fns[i];
+
+        Scalar val;
+        if(surface_form)
+          val = 0.5 * form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
+        else
+          val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
+
+        current_rhs->add(current_als_i->dof[i], val);
+      }
+
+      if(form->ext.size() > 0)
+      {
+        for(int ext_i = 0; ext_i < form->ext.size(); ext_i++)
+          if(form->ext[ext_i])
+          {
+            local_ext[ext_i]->free_fn();
+            delete local_ext[ext_i];
+          }
+          delete [] local_ext;
+      }
+
+      if(rungeKutta)
+        u_ext -= form->u_ext_offset;
+    }
+    
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling_one_state()
     {

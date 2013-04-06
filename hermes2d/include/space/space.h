@@ -63,11 +63,11 @@ namespace Hermes
       {
       public:
         /// Sets new spaces for the instance.
-        virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces) = 0;
-        virtual void set_space(SpaceSharedPtr<Scalar> space) = 0;
+        virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) = 0;
+        virtual void set_space(SpaceSharedPtr<Scalar>& space) = 0;
         /// Get all spaces as a Hermes::vector.
-        virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const = 0;
-        virtual SpaceSharedPtr<Scalar> get_space(int n) const;
+        virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
+        virtual const SpaceSharedPtr<Scalar>& get_space(int n) const;
       };
     }
 
@@ -324,6 +324,9 @@ namespace Hermes
       int get_bubble_functions_count();
 
       static unsigned int get_instance_count();
+      
+      /// Internal. Used by DiscreteProblem to detect changes in the space.
+      int get_seq() const;
 
     protected:
       static unsigned int instance_count;
@@ -438,8 +441,6 @@ namespace Hermes
 
       void free_bc_data();
 
-      /// Internal. Used by DiscreteProblem to detect changes in the space.
-      int get_seq() const;
       template<typename T> friend class OGProjection;
       template<typename T> friend class NewtonSolver;
       template<typename T> friend class PicardSolver;

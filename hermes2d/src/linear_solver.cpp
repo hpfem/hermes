@@ -106,19 +106,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    void LinearSolver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       this->dp->set_spaces(spaces);
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
+    void LinearSolver<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
     {
       this->dp->set_space(space);
     }
     
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> > LinearSolver<Scalar>::get_spaces() const
+    const Hermes::vector<SpaceSharedPtr<Scalar> >& LinearSolver<Scalar>::get_spaces() const
     {
       return this->dp->get_spaces();
     }
@@ -132,7 +132,10 @@ namespace Hermes
       if(own_dp)
         delete this->dp;
       else
-        this->dp->matrix_structure_reusable = false;
+      {
+        this->dp->set_matrix(NULL);
+        this->dp->set_rhs(NULL);
+      }
     }
 
     template<typename Scalar>

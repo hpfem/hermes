@@ -56,14 +56,6 @@ namespace Hermes
     {
       this->spaces_size = this->spaces.size();
 
-      // Internal variables settings.
-      sp_seq = spaces_size == 0 ? NULL : new int[wf->get_neq()];
-      if(sp_seq)
-        memset(sp_seq, -1, sizeof(int) * wf->get_neq());
-
-      // Matrix<Scalar> related settings.
-      matrix_structure_reusable = true;
-
       this->nonlinear = true;
 
       current_mat = NULL;
@@ -74,18 +66,17 @@ namespace Hermes
       // Local number of threads - to avoid calling it over and over again, and against faults caused by the
       // value being changed while assembling.
       num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>[num_threads_used];
+      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[num_threads_used];
+      for(int i = 0; i < num_threads_used; i++)
+        this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler);
     }
 
     template<typename Scalar>
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
-      if(wf)
-        memset(sp_seq, -1, sizeof(int) * wf->get_neq());
-
-      if(sp_seq)
-        delete [] sp_seq;
-
+      
+      for(int i = 0; i < num_threads_used; i++)
+        delete this->threadAssembler[i];
       delete [] this->threadAssembler;
     }
 
@@ -123,9 +114,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Hermes::vector<SpaceSharedPtr<Scalar> > DiscreteProblem<Scalar>::get_spaces() const
+    const Hermes::vector<SpaceSharedPtr<Scalar> >& DiscreteProblem<Scalar>::get_spaces() const
     {
       return this->spaces;
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::invalidate_matrix()
+    {
+      this->selectiveAssembler.matrix_structure_reusable = false;
     }
 
     template<typename Scalar>
@@ -136,10 +133,11 @@ namespace Hermes
 
       this->wf = wf_;
 
-      this->matrix_structure_reusable = false;
+      this->selectiveAssembler.set_weak_formulation(wf_);
+      this->selectiveAssembler.matrix_structure_reusable = false;
 
       for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i].set_weak_formulation(wf_);
+        this->threadAssembler[i]->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
@@ -147,7 +145,7 @@ namespace Hermes
     {
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_matrix(mat);
       for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i].set_matrix(mat);
+        this->threadAssembler[i]->set_matrix(mat);
     }
 
     template<typename Scalar>
@@ -155,33 +153,15 @@ namespace Hermes
     {
       Mixins::DiscreteProblemMatrixVector<Scalar>::set_rhs(rhs);
       for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i].set_rhs(rhs);
+        this->threadAssembler[i]->set_rhs(rhs);
     }
 
     template<typename Scalar>
-    bool DiscreteProblem<Scalar>::is_up_to_date() const
-    {
-      // check if we can reuse the matrix structure
-      if(!matrix_structure_reusable)
-        return false;
-
-      for (unsigned int i = 0; i < wf->get_neq(); i++)
-      {
-        if(spaces[i]->get_seq() != sp_seq[i])
-        {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spacesToSet)
+    void DiscreteProblem<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spacesToSet)
     {
       if(this->spaces_size != spacesToSet.size() && this->spaces_size > 0)
         throw Hermes::Exceptions::LengthException(0, spacesToSet.size(), this->spaces_size);
-      
+
       for(unsigned int i = 0; i < spacesToSet.size(); i++)
       {
         if(!spacesToSet[i])
@@ -189,211 +169,28 @@ namespace Hermes
         spacesToSet[i]->check();
       }
 
-      if(this->spaces_size == 0)
-      {
-        // Internal variables settings.
-        this->spaces_size = spacesToSet.size();
-        sp_seq = new int[spaces_size];
-        memset(sp_seq, -1, sizeof(int) * spaces_size);
-
-        // Matrix<Scalar> related settings.
-        matrix_structure_reusable = false;
-      }
-      else
-      {
-        for(unsigned int i = 0; i < spaces_size; i++)
-          sp_seq[i] = spacesToSet[i]->get_seq();
-      }
-
+      this->spaces_size = spacesToSet.size();
       this->spaces = spacesToSet;
+
+      this->selectiveAssembler.set_spaces(spacesToSet);
 
       /// \todo TEMPORARY There is something wrong with caching vector shapesets.
       for(unsigned int i = 0; i < spacesToSet.size(); i++)
         if(spacesToSet[i]->get_shapeset()->get_num_components() > 1)
           this->set_do_not_use_cache();
-      
+
       for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i].init_spaces(spaces);
+        this->threadAssembler[i]->init_spaces(spaces);
+
+      Space<Scalar>::assign_dofs(spaces);
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
+    void DiscreteProblem<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
     {
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       spaces.push_back(space);
       this->set_spaces(spaces);
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs)
-    {
-      this->current_mat = mat;
-      if(rhs)
-        this->current_rhs = rhs;
-      this->create_sparse_structure();
-    }
-
-    template<typename Scalar>
-    void DiscreteProblem<Scalar>::create_sparse_structure()
-    {
-      int ndof = Space<Scalar>::assign_dofs(spaces);
-
-      if(is_up_to_date())
-      {
-        if(current_mat)
-          current_mat->zero();
-        if(current_rhs)
-        {
-          // If we use e.g. a new NewtonSolver (providing a new Vector) for this instance of DiscreteProblem that already assembled a system,
-          // we end up with everything up_to_date, but unallocated Vector.
-          if(current_rhs->length() == 0)
-            current_rhs->alloc(ndof);
-          else
-            current_rhs->zero();
-        }
-        return;
-      }
-
-      if(current_mat)
-      {
-        // Spaces have changed: create the matrix from scratch.
-        matrix_structure_reusable = true;
-        current_mat->free();
-        current_mat->prealloc(ndof);
-
-        AsmList<Scalar>* al = new AsmList<Scalar>[wf->get_neq()];
-        MeshSharedPtr* meshes = new MeshSharedPtr[wf->get_neq()];
-        bool **blocks = wf->get_blocks(this->force_diagonal_blocks);
-
-        // Init multi-mesh traversal.
-        for (unsigned int i = 0; i < wf->get_neq(); i++)
-          meshes[i] = spaces[i]->get_mesh();
-
-        Traverse trav(true);
-        trav.begin(wf->get_neq(), meshes);
-
-        Traverse::State* current_state;
-        // Loop through all elements.
-        while (current_state = trav.get_next_state())
-        {
-          // Obtain assembly lists for the element at all spaces.
-          /// \todo do not get the assembly list again if the element was not changed.
-          for (unsigned int i = 0; i < wf->get_neq(); i++)
-            if(current_state->e[i])
-              spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
-
-          if(this->wf->is_DG())
-          {
-            // Number of edges ( =  number of vertices).
-            int num_edges = current_state->e[0]->nvert;
-
-            // Allocation an array of arrays of neighboring elements for every mesh x edge.
-            Element **** neighbor_elems_arrays = new Element ***[wf->get_neq()];
-            for(unsigned int i = 0; i < wf->get_neq(); i++)
-              neighbor_elems_arrays[i] = new Element **[num_edges];
-
-            // The same, only for number of elements
-            int ** neighbor_elems_counts = new int *[wf->get_neq()];
-            for(unsigned int i = 0; i < wf->get_neq(); i++)
-              neighbor_elems_counts[i] = new int[num_edges];
-
-            // Get the neighbors.
-            for(unsigned int el = 0; el < wf->get_neq(); el++)
-            {
-              NeighborSearch<Scalar> ns(current_state->e[el], meshes[el]);
-
-              // Ignoring errors (and doing nothing) in case the edge is a boundary one.
-              ns.set_ignore_errors(true);
-
-              for(int ed = 0; ed < num_edges; ed++)
-              {
-                ns.set_active_edge(ed);
-                const Hermes::vector<Element *> *neighbors = ns.get_neighbors();
-
-                neighbor_elems_counts[el][ed] = ns.get_num_neighbors();
-                neighbor_elems_arrays[el][ed] = new Element *[neighbor_elems_counts[el][ed]];
-                for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
-                  neighbor_elems_arrays[el][ed][neigh] = (*neighbors)[neigh];
-              }
-            }
-
-            // Pre-add into the stiffness matrix.
-            for (unsigned int m = 0; m < wf->get_neq(); m++)
-              for(unsigned int el = 0; el < wf->get_neq(); el++)
-                for(int ed = 0; ed < num_edges; ed++)
-                  for(int neigh = 0; neigh < neighbor_elems_counts[el][ed]; neigh++)
-                    if((blocks[m][el] || blocks[el][m]) && current_state->e[m])
-                    {
-                      AsmList<Scalar>*am = &(al[m]);
-                      AsmList<Scalar>*an = new AsmList<Scalar>;
-                      spaces[el]->get_element_assembly_list(neighbor_elems_arrays[el][ed][neigh], an);
-
-                      // pretend assembling of the element stiffness matrix
-                      // register nonzero elements
-                      for (unsigned int i = 0; i < am->cnt; i++)
-                        if(am->dof[i] >= 0)
-                          for (unsigned int j = 0; j < an->cnt; j++)
-                            if(an->dof[j] >= 0)
-                            {
-                              if(blocks[m][el]) current_mat->pre_add_ij(am->dof[i], an->dof[j]);
-                              if(blocks[el][m]) current_mat->pre_add_ij(an->dof[j], am->dof[i]);
-                            }
-                            delete an;
-                    }
-
-                    // Deallocation an array of arrays of neighboring elements
-                    // for every mesh x edge.
-                    for(unsigned int el = 0; el < wf->get_neq(); el++)
-                    {
-                      for(int ed = 0; ed < num_edges; ed++)
-                        delete [] neighbor_elems_arrays[el][ed];
-                      delete [] neighbor_elems_arrays[el];
-                    }
-                    delete [] neighbor_elems_arrays;
-
-                    // The same, only for number of elements.
-                    for(unsigned int el = 0; el < wf->get_neq(); el++)
-                      delete [] neighbor_elems_counts[el];
-                    delete [] neighbor_elems_counts;
-          }
-
-          // Go through all equation-blocks of the local stiffness matrix.
-          for (unsigned int m = 0; m < wf->get_neq(); m++)
-          {
-            for (unsigned int n = 0; n < wf->get_neq(); n++)
-            {
-              if(blocks[m][n] && current_state->e[m] && current_state->e[n])
-              {
-                AsmList<Scalar>*am = &(al[m]);
-                AsmList<Scalar>*an = &(al[n]);
-
-                // Pretend assembling of the element stiffness matrix.
-                for (unsigned int i = 0; i < am->cnt; i++)
-                  if(am->dof[i] >= 0)
-                    for (unsigned int j = 0; j < an->cnt; j++)
-                      if(an->dof[j] >= 0)
-                        current_mat->pre_add_ij(am->dof[i], an->dof[j]);
-              }
-            }
-          }
-        }
-
-        trav.finish();
-        delete [] al;
-        delete [] meshes;
-        delete [] blocks;
-
-        current_mat->alloc();
-      }
-
-      // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
-      // by previous vector before allocating
-      if(current_rhs)
-        current_rhs->alloc(ndof);
-
-      // save space seq numbers and weakform seq number, so we can detect their changes
-      for (unsigned int i = 0; i < wf->get_neq(); i++)
-        sp_seq[i] = spaces[i]->get_seq();
     }
 
     template<typename Scalar>
@@ -468,9 +265,6 @@ namespace Hermes
       this->set_matrix(mat);
       this->set_rhs(rhs);
 
-      // Creating matrix sparse structure.
-      create_sparse_structure();
-
       // Initialize cache.
       this->cache.init_assembling();
 
@@ -478,6 +272,9 @@ namespace Hermes
       int num_states;
       Traverse::State** states;
       this->init_assembling(states, num_states, u_ext_sln);
+
+      // Creating matrix sparse structure.
+      this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states);
 
       // Is this a DG assembling.
       bool is_DG = this->wf->is_DG();
@@ -490,20 +287,20 @@ namespace Hermes
         if(thread_number == num_threads_used - 1)
           end = num_states;
 
-        this->threadAssembler[thread_number].init_assembling(u_ext_sln, spaces, this->nonlinear);
+        this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear);
         DiscreteProblemDGAssembler<Scalar>* dgAssembler;
         if(is_DG)
-          dgAssembler = new DiscreteProblemDGAssembler<Scalar>(&this->threadAssembler[thread_number], this->spaces);
+          dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces);
 
         for(int state_i = start; state_i < end; state_i++)
         {
           Traverse::State* current_state = states[state_i];
 
-          this->threadAssembler[thread_number].init_assembling_one_state(spaces, current_state);
-          
-          this->threadAssembler[thread_number].handle_cache(spaces, &this->cache, this->do_not_use_cache);
+          this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
 
-          this->threadAssembler[thread_number].assemble_one_state();
+          this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache, this->do_not_use_cache);
+
+          this->threadAssembler[thread_number]->assemble_one_state();
 
           if(is_DG)
           {
@@ -512,7 +309,7 @@ namespace Hermes
             dgAssembler->deinit_assembling_one_state();
           }
 
-          this->threadAssembler[thread_number].deinit_assembling_one_state();
+          this->threadAssembler[thread_number]->deinit_assembling_one_state();
         }
 
         if(is_DG)
@@ -546,7 +343,7 @@ namespace Hermes
     void DiscreteProblem<Scalar>::deinit_assembling(Traverse::State** states, int num_states)
     {
       for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i].deinit_assembling();
+        this->threadAssembler[i]->deinit_assembling();
 
       for(int i = 0; i < num_states; i++)
         delete states[i];

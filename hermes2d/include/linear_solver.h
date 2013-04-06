@@ -64,7 +64,15 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template <typename Scalar>
-    class LinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Mixins::OutputAttachable, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable, public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
+    class LinearSolver : 
+      public Hermes::Mixins::Loggable, 
+      public Hermes::Mixins::TimeMeasurable, 
+      public Hermes::Mixins::SettableComputationTime, 
+      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
+      public Hermes::Mixins::OutputAttachable, 
+      public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, 
+      public Hermes::Hermes2D::Mixins::StateQueryable, 
+      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
     {
     public:
       LinearSolver();
@@ -90,9 +98,9 @@ namespace Hermes
       virtual void set_time_step(double time_step);
 
       /// SettableSpaces helpers.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar> space);
-      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar>& space);
+      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
 
       /// See DiscreteProblemCacheSettings in mixins2d.h for details.
       virtual void free_cache();

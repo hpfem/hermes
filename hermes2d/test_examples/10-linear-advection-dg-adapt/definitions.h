@@ -84,7 +84,10 @@ private:
   class CustomVectorFormSurface : public VectorFormSurf<double>
   {
   public:
-    CustomVectorFormSurface(int i, std::string left_bottom_bnd_part) : VectorFormSurf<double>(i), left_bottom_bnd_part(left_bottom_bnd_part) {};
+    CustomVectorFormSurface(int i, std::string left_bottom_bnd_part) : VectorFormSurf<double>(i) 
+    {
+      this->set_area(left_bottom_bnd_part);
+    };
 
     virtual double value(int n, double *wt, Func<double> *u_ext[], Func<double> *v, Geom<double> *e, Func<double> **ext) const;
 
@@ -94,12 +97,6 @@ private:
 
     template<typename Real>
     Real F(Real x, Real y) const;
-
-    template<typename Real, typename Scalar>
-    Scalar g(std::string ess_bdy_marker, Real x, Real y) const;
-    
-    // Member.
-    std::string left_bottom_bnd_part;
   };
   
   double calculate_a_dot_v(double x, double y, double vx, double vy) const;

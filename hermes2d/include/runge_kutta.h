@@ -71,7 +71,13 @@ namespace Hermes
     /// @ingroup userSolvingAPI
     /// Runge-Kutta methods implementation for time-dependent problems.
     template<typename Scalar>
-    class HERMES_API RungeKutta : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime, public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
+    class HERMES_API RungeKutta : 
+      public Hermes::Mixins::Loggable,
+      public Hermes::Mixins::TimeMeasurable,
+      public Hermes::Mixins::IntegrableWithGlobalOrder,
+      public Hermes::Mixins::SettableComputationTime,
+      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>,
+      public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>
     {
     public:
       /// Constructor.
@@ -117,9 +123,9 @@ namespace Hermes
       void set_newton_damping_coeff(double newton_damping_coeff);
       void set_newton_max_allowed_residual_norm(double newton_max_allowed_residual_norm);
 
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar> space);
-      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar>& space);
+      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
 
       /**
        \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);

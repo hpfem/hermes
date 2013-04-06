@@ -1351,7 +1351,13 @@ namespace Hermes
     namespace Mixins
     {
       template<typename Scalar>
-      SpaceSharedPtr<Scalar> SettableSpaces<Scalar>::get_space(int n) const
+      const Hermes::vector<SpaceSharedPtr<Scalar> >& SettableSpaces<Scalar>::get_spaces() const
+      {
+        throw Hermes::Exceptions::MethodNotOverridenException("SettableSpaces<Scalar>::get_spaces()");
+      }
+
+      template<typename Scalar>
+      const SpaceSharedPtr<Scalar>& SettableSpaces<Scalar>::get_space(int n) const
       {
         return this->get_spaces()[n];
       }

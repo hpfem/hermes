@@ -59,6 +59,8 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
+
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
@@ -111,6 +113,8 @@ int main(int argc, char* args[])
     // Solve the linear system. If successful, obtain the solution.
     try
     {
+      linear_solver.output_matrix();
+      linear_solver.output_rhs();
       linear_solver.solve();
       Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, ref_sln);
     }

@@ -27,8 +27,8 @@
 #include "exceptions.h"
 #include "mixins2d.h"
 #include "multimesh_dg_neighbor_tree.h"
-#include "discrete_problem/discrete_problem_helpers.h"
 #include "multimesh_dg_neighbor_tree.h"
+#include "discrete_problem/discrete_problem_selective_assembler.h"
 
 namespace Hermes
 {
@@ -41,8 +41,7 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblemDGAssembler : 
-      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
+    class HERMES_API DiscreteProblemDGAssembler
     {
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
@@ -98,6 +97,7 @@ namespace Hermes
       WeakForm<Scalar>* wf;
       int spaces_size;
       bool nonlinear;
+      DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
 
       SparseMatrix<Scalar>* current_mat;
       Vector<Scalar>* current_rhs;

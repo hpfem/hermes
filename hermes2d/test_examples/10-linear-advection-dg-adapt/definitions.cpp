@@ -147,7 +147,7 @@ double CustomWeakForm::CustomVectorFormSurface::value(int n, double *wt, Func<do
     double x = e->x[i], y = e->y[i];
     double a_dot_n = static_cast<CustomWeakForm*>(wf)->calculate_a_dot_v(x, y, e->nx[i], e->ny[i]);
     // Function values for Dirichlet boundary conditions.
-    result += -wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(0, g<double,double>(static_cast<CustomWeakForm*>(wf)->mesh->get_boundary_markers_conversion().get_user_marker(e->edge_marker).marker, x, y), a_dot_n) * v->val[i];
+    result += -wt[i] * static_cast<CustomWeakForm*>(wf)->upwind_flux(0, 1, a_dot_n) * v->val[i];
   }
   return result;
 }
@@ -169,12 +169,6 @@ template<typename Real>
 Real CustomWeakForm::CustomVectorFormSurface::F(Real x, Real y) const
 {
   return 0;
-}
-
-template<typename Real, typename Scalar>
-Scalar CustomWeakForm::CustomVectorFormSurface::g(std::string ess_bdy_marker, Real x, Real y) const
-{
-  if(ess_bdy_marker == left_bottom_bnd_part) return 1; else return 0;
 }
 
 double CustomWeakForm::calculate_a_dot_v(double x, double y, double vx, double vy) const

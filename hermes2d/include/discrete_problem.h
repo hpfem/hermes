@@ -81,59 +81,43 @@ namespace Hermes
       virtual void set_time_step(double time_step);
 
       /// Sets new spaces for the instance.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar> space);
+      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual void set_space(SpaceSharedPtr<Scalar>& space);
 
       /// Set the weak forms.
       void set_weak_formulation(WeakForm<Scalar>* wf);
 
       /// Get all spaces as a Hermes::vector.
-      virtual Hermes::vector<SpaceSharedPtr<Scalar> > get_spaces() const;
+      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
 
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
       virtual inline std::string getClassName() const { return "DiscreteProblem"; }
 
-      /// Preassembling.
-      /// Precalculate matrix sparse structure.
-      /// If force_diagonal_block == true, then (zero) matrix
-      /// antries are created in diagonal blocks even if corresponding matrix weak
-      /// forms do not exist. This is useful if the matrix is later to be merged with
-      /// a matrix that has nonzeros in these blocks. The Table serves for optional
-      /// weighting of matrix blocks in systems.
-      void create_sparse_structure();
-      void create_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
-      
       /// Init function. Common code for the constructors.
       void init();
-
-      /// Matrix structure as well as spaces and weak formulation is up-to-date.
-      bool is_up_to_date() const;
 
       /// Space instances for all equations in the system.
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
       int spaces_size;
-
-      /// Seq numbers of Space instances in spaces.
-      int* sp_seq;
       
       /// Internal.
       bool nonlinear;
-
-      /// Matrix structure can be reused.
-      /// If other conditions apply.
-      bool matrix_structure_reusable;
       
       /// DiscreteProblemMatrixVector methods.
       virtual void set_matrix(SparseMatrix<Scalar>* mat);
       virtual void set_rhs(Vector<Scalar>* rhs);
+      void invalidate_matrix();
 
       /// The cache.
       DiscreteProblemCache<Scalar> cache;
       
       /// Assembly data.
-      DiscreteProblemThreadAssembler<Scalar>* threadAssembler;
+      DiscreteProblemThreadAssembler<Scalar>** threadAssembler;
+
+      /// Select the right things to assemble
+      DiscreteProblemSelectiveAssembler<Scalar> selectiveAssembler;
 
       int num_threads_used;
 
