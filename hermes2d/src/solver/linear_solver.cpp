@@ -78,29 +78,8 @@ namespace Hermes
       this->on_initialization();
 
       dp->assemble(this->jacobian, this->residual);
-      if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= 1))
-      {
-        char* fileName = new char[this->RhsFilename.length() + 5];
-        if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
-          sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), 1);
-        else
-          sprintf(fileName, "%s%i", this->RhsFilename.c_str(), 1);
-        FILE* rhs_file = fopen(fileName, "w+");
-        residual->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-        fclose(rhs_file);
-      }
-      if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= 1))
-        {
-          char* fileName = new char[this->matrixFilename.length() + 5];
-          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
-            sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), 1);
-          else
-            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), 1);
-          FILE* matrix_file = fopen(fileName, "w+");
-
-          jacobian->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          fclose(matrix_file);
-        }
+      process_matrix_output(jacobian, 1); 
+      process_vector_output(residual, 1);
 
       this->matrix_solver->solve();
 
