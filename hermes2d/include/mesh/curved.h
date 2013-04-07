@@ -156,7 +156,6 @@ namespace Hermes
       template<typename T> friend class HcurlSpace;
       template<typename T> friend class HdivSpace;
       template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class Adapt;
       template<typename T> friend class KellyTypeAdapt;
       friend class RefMap;

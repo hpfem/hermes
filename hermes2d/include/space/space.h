@@ -66,14 +66,13 @@ namespace Hermes
         virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) = 0;
         virtual void set_space(SpaceSharedPtr<Scalar>& space) = 0;
         /// Get all spaces as a Hermes::vector.
-        virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
-        virtual const SpaceSharedPtr<Scalar>& get_space(int n) const;
+        virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
+        virtual SpaceSharedPtr<Scalar>& get_space(int n);
       };
     }
 
     template<typename Scalar> class Adapt;
     template<typename Scalar> class DiscreteProblem;
-    template<typename Scalar> class DiscreteProblemLinear;
     template<typename Scalar> class DiscreteProblemThreadAssembler;
     namespace Views
     {
@@ -284,9 +283,9 @@ namespace Hermes
 
       virtual Scalar* get_bc_projection(SurfPos* surf_pos, int order, EssentialBoundaryCondition<Scalar> *bc) = 0;
 
-      static void update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, double time);
+      static void update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, double time);
 
-      static void update_essential_bc_values(SpaceSharedPtr<Scalar> space, double time);
+      static void update_essential_bc_values(SpaceSharedPtr<Scalar>& space, double time);
 
       /// Internal. Return type of this space (H1 = HERMES_H1_SPACE, Hcurl = HERMES_HCURL_SPACE,
       /// Hdiv = HERMES_HDIV_SPACE, L2 = HERMES_L2_SPACE)
@@ -459,7 +458,6 @@ namespace Hermes
       template<typename T> friend class Views::VectorBaseView;
       friend class Adapt<Scalar>;
       friend class DiscreteProblem<Scalar>;
-      friend class DiscreteProblemLinear<Scalar>;
       friend class DiscreteProblemDGAssembler<Scalar>;
       friend class DiscreteProblemThreadAssembler<Scalar>;
       template<typename T> friend class CalculationContinuity;

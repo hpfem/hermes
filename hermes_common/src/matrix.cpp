@@ -29,7 +29,6 @@
 #include "solvers/amesos_solver.h"
 #include "solvers/petsc_solver.h"
 #include "solvers/mumps_solver.h"
-#include "solvers/newton_solver_nox.h"
 #include "solvers/aztecoo_solver.h"
 #include "qsort.h"
 #include "api.h"

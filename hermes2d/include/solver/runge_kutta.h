@@ -125,7 +125,7 @@ namespace Hermes
 
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual void set_space(SpaceSharedPtr<Scalar>& space);
-      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
 
       /**
        \fn  void RungeKutta::set_filters_to_reinit(Hermes::vector<Filter<Scalar>*> filters_to_reinit);
@@ -198,7 +198,7 @@ namespace Hermes
 
       /// For the matrix M (size ndof times ndof).
       WeakForm<Scalar> stage_wf_left;
-      DiscreteProblemLinear<Scalar>* stage_dp_left;
+      DiscreteProblem<Scalar>* stage_dp_left;
 
       bool start_from_zero_K_vector;
       bool block_diagonal_jacobian;

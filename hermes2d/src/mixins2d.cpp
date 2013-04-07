@@ -23,11 +23,11 @@ namespace Hermes
       void StateQueryable::check() const
       {
         if(!this->isOkay())
-          {
-            std::stringstream ss;
-            ss << "The instance of " << this->getClassName() << " is not OK.";
-            throw Hermes::Exceptions::Exception(ss.str().c_str());
-          }
+        {
+          std::stringstream ss;
+          ss << "The instance of " << this->getClassName() << " is not OK.";
+          throw Hermes::Exceptions::Exception(ss.str().c_str());
+        }
       }
 
       XMLParsing::XMLParsing() : validate(false)
@@ -45,6 +45,42 @@ namespace Hermes
         RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::DF_MATLAB_SPARSE), rhs_number_format("%lf")
       {
       }
+
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::process_matrix_output(SparseMatrix<Scalar>* matrix, int iteration)
+      {
+        if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration))
+        {
+          char* fileName = new char[this->matrixFilename.length() + 5];
+          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), iteration);
+          else
+            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
+          FILE* matrix_file = fopen(fileName, "w+");
+
+          matrix->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+          fclose(matrix_file);
+          delete [] fileName;
+        }
+      }
+
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::process_vector_output(Vector<Scalar>* rhs, int iteration)
+      {
+        if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration))
+        {
+          char* fileName = new char[this->RhsFilename.length() + 5];
+          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), iteration);
+          else
+            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+          FILE* rhs_file = fopen(fileName, "w+");
+          rhs->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+          fclose(rhs_file);
+          delete [] fileName;
+        }
+      }
+
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::output_matrix(int firstIterations)
       {

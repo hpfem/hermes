@@ -28,8 +28,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
-      : Hermes::Solvers::DiscreteProblemInterface<Scalar>()
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       init();
       this->set_spaces(spaces);
@@ -37,8 +36,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar> space)
-      : Hermes::Solvers::DiscreteProblemInterface<Scalar>()
+    DiscreteProblem<Scalar>::DiscreteProblem(WeakForm<Scalar>* wf_, SpaceSharedPtr<Scalar>& space)
     {
       init();
       this->set_space(space);
@@ -46,7 +44,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    DiscreteProblem<Scalar>::DiscreteProblem() : Hermes::Solvers::DiscreteProblemInterface<Scalar>()
+    DiscreteProblem<Scalar>::DiscreteProblem()
     {
       init();
     }
@@ -69,6 +67,12 @@ namespace Hermes
       this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[num_threads_used];
       for(int i = 0; i < num_threads_used; i++)
         this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_nonlinear(bool to_set)
+    {
+      this->nonlinear = to_set;
     }
 
     template<typename Scalar>
@@ -114,7 +118,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const Hermes::vector<SpaceSharedPtr<Scalar> >& DiscreteProblem<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> >& DiscreteProblem<Scalar>::get_spaces()
     {
       return this->spaces;
     }
@@ -128,10 +132,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
     {
-      if(!wf_)
-        throw Hermes::Exceptions::NullException(0);
-
-      this->wf = wf_;
+      Mixins::DiscreteProblemWeakForm<Scalar>::set_weak_formulation(wf_);
 
       this->selectiveAssembler.set_weak_formulation(wf_);
       this->selectiveAssembler.matrix_structure_reusable = false;
@@ -181,8 +182,6 @@ namespace Hermes
 
       for(int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->init_spaces(spaces);
-
-      Space<Scalar>::assign_dofs(spaces);
     }
 
     template<typename Scalar>
@@ -216,7 +215,7 @@ namespace Hermes
     {
       Solution<Scalar>** u_ext_sln = NULL;
 
-      if(this->nonlinear)
+      if(this->nonlinear && coeff_vec)
       {
         u_ext_sln = new Solution<Scalar>*[spaces_size];
         int first_dof = 0;
@@ -229,6 +228,13 @@ namespace Hermes
       }
 
       assemble(u_ext_sln, mat, rhs);
+
+      if(this->nonlinear && coeff_vec)
+      {
+        for(int i = 0; i < this->spaces_size; i++)
+          delete u_ext_sln[i];
+        delete [] u_ext_sln;
+      }
     }
 
     template<typename Scalar>

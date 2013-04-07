@@ -74,7 +74,6 @@ namespace Hermes
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
 
       template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class DiscreteProblemThreadAssembler;
     };
   }

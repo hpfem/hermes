@@ -22,8 +22,27 @@ namespace Hermes
   {
 
     template<typename Scalar>
-    DiscreteProblemSelectiveAssembler<Scalar>::DiscreteProblemSelectiveAssembler() : sp_seq(NULL), spaces_size(0), matrix_structure_reusable(true)
+    DiscreteProblemSelectiveAssembler<Scalar>::DiscreteProblemSelectiveAssembler()
+    : sp_seq(NULL), 
+      spaces_size(0), 
+      mfvol_forms_size(0), 
+      vfvol_forms_size(0), 
+      mfsurf_forms_size(0), 
+      vfsurf_forms_size(0), 
+      surface_markers_size(0), 
+      volume_markers_size(0), 
+      matrix_structure_reusable(false), 
+      vector_structure_reusable(false)
     {
+        this->matrix_surface_recalculation = NULL;
+        this->vector_surface_recalculation = NULL;
+        this->matrix_surface_forms_recalculation = NULL;
+        this->vector_surface_forms_recalculation = NULL;
+
+        this->matrix_vector_recalculation = NULL;
+        this->vector_vector_recalculation = NULL;
+        this->matrix_vector_forms_recalculation = NULL;
+        this->vector_vector_forms_recalculation = NULL;
     }
 
     template<typename Scalar>
@@ -37,28 +56,14 @@ namespace Hermes
     void DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states)
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
-
-      bool recreate = false;
-
-      // check if we can reuse the matrix structure
-      if(!matrix_structure_reusable)
-        recreate = true;
-
-      for (unsigned int i = 0; i < spaces_size; i++)
+      
+      if(matrix_structure_reusable && mat)
       {
-        if(spaces[i]->get_seq() != sp_seq[i])
-        {
-          recreate = true;
-          break;
-        }
+         //mat->zero();
+        num_states = 0;
       }
 
-      if(!recreate && mat)
-      {
-         mat->zero();
-      }
-
-      if(!recreate && rhs)
+      if(vector_structure_reusable && rhs)
       {
         if(rhs->length() == 0)
           rhs->alloc(ndof);
@@ -66,7 +71,7 @@ namespace Hermes
           rhs->zero();
       }
 
-      if(recreate && mat)
+      if(!matrix_structure_reusable && mat)
       {
         // Spaces have changed: create the matrix from scratch.
         matrix_structure_reusable = true;
@@ -207,12 +212,11 @@ namespace Hermes
 
       // WARNING: unlike Matrix<Scalar>::alloc(), Vector<Scalar>::alloc(ndof) frees the memory occupied
       // by previous vector before allocating
-      if(recreate && rhs)
+      if(!vector_structure_reusable && rhs)
+      {
+        vector_structure_reusable = true;
         rhs->alloc(ndof);
-
-      // save space seq numbers and weakform seq number, so we can detect their changes
-      for (unsigned int i = 0; i < spaces_size; i++)
-        sp_seq[i] = spaces[i]->get_seq();
+      }
     }
 
     template<typename Scalar>
@@ -224,14 +228,128 @@ namespace Hermes
         this->spaces_size = spacesToSet.size();
         sp_seq = new int[spaces_size];
         memset(sp_seq, -1, sizeof(int) * spaces_size);
-
-        // Matrix<Scalar> related settings.
-        matrix_structure_reusable = false;
       }
       else
       {
         for(unsigned int i = 0; i < spaces_size; i++)
-          sp_seq[i] = spacesToSet[i]->get_seq();
+        {
+          int new_sp_seq = spacesToSet[i]->get_seq();
+
+          if(new_sp_seq != sp_seq[i])
+          {
+            matrix_structure_reusable = false;
+            vector_structure_reusable = false;
+          }
+          sp_seq[i] = new_sp_seq;
+        }
+      }
+
+      if(spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused != surface_markers_size)
+      {
+        surface_markers_size = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
+        this->matrix_surface_recalculation = this->matrix_surface_recalculation ? (bool*)realloc(this->matrix_surface_recalculation, surface_markers_size * sizeof(bool)) : (bool*)malloc(surface_markers_size * sizeof(bool));
+        this->vector_surface_recalculation = (bool*)realloc(this->vector_surface_recalculation, surface_markers_size * sizeof(bool));
+        memset(this->matrix_surface_recalculation, 0, surface_markers_size * sizeof(bool));
+        memset(this->vector_surface_recalculation, 0, surface_markers_size * sizeof(bool));
+
+        this->matrix_surface_forms_recalculation = (bool**)realloc(this->matrix_surface_forms_recalculation, surface_markers_size * sizeof(bool*));
+        if(this->mfsurf_forms_size > 0)
+        {
+          for(int i = 0; i < this->surface_markers_size; i++)
+          {
+            matrix_surface_forms_recalculation[i] = (bool*)realloc(matrix_surface_forms_recalculation[i], this->mfsurf_forms_size * sizeof(bool));
+            memset(matrix_surface_forms_recalculation[i], 0, this->mfsurf_forms_size * sizeof(bool));
+          }
+        }
+        this->vector_surface_forms_recalculation = (bool**)realloc(this->vector_surface_forms_recalculation, surface_markers_size * sizeof(bool*));
+        if(this->vfsurf_forms_size > 0)
+        {
+          for(int i = 0; i < this->surface_markers_size; i++)
+          {
+            vector_surface_forms_recalculation[i] = (bool*)realloc(vector_surface_forms_recalculation[i], this->vfsurf_forms_size * sizeof(bool));
+            memset(vector_surface_forms_recalculation[i], 0, this->vfsurf_forms_size * sizeof(bool));
+          }
+        }
+      }
+
+      if(spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused != volume_markers_size)
+      {
+        volume_markers_size = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
+        this->matrix_volume_recalculation = (bool*)realloc(this->matrix_volume_recalculation, volume_markers_size * sizeof(bool));
+        this->vector_volume_recalculation = (bool*)realloc(this->vector_volume_recalculation, volume_markers_size * sizeof(bool));
+        memset(this->matrix_volume_recalculation, 0, volume_markers_size * sizeof(bool));
+        memset(this->vector_volume_recalculation, 0, volume_markers_size * sizeof(bool));
+
+        this->matrix_volume_forms_recalculation = (bool**)realloc(this->matrix_volume_forms_recalculation, volume_markers_size * sizeof(bool*));
+        if(this->mfvol_forms_size > 0)
+        {
+          for(int i = 0; i < this->volume_markers_size; i++)
+          {
+            matrix_volume_forms_recalculation[i] = (bool*)realloc(matrix_volume_forms_recalculation[i], this->mfvol_forms_size * sizeof(bool));
+            memset(matrix_volume_forms_recalculation[i], 0, this->mfvol_forms_size * sizeof(bool));
+          }
+        }
+        this->vector_volume_forms_recalculation = (bool**)realloc(this->vector_volume_forms_recalculation, volume_markers_size * sizeof(bool*));
+        if(this->vfvol_forms_size > 0)
+        {
+          for(int i = 0; i < this->volume_markers_size; i++)
+          {
+            vector_volume_forms_recalculation[i] = (bool*)realloc(vector_volume_forms_recalculation[i], this->vfvol_forms_size * sizeof(bool));
+            memset(vector_volume_forms_recalculation[i], 0, this->vfvol_forms_size * sizeof(bool));
+          }
+        }
+      }
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemSelectiveAssembler<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf_)
+    {
+      Mixins::DiscreteProblemWeakForm<Scalar>::set_weak_formulation(wf_);
+
+      this->matrix_structure_reusable = false;
+      this->vector_structure_reusable = false;
+
+      if(spaces_size == 0)
+        return;
+
+      if(this->wf->mfvol.size() != this->mfvol_forms_size)
+      {
+        this->mfvol_forms_size = this->wf->mfvol.size();
+        for(int i = 0; i < this->volume_markers_size; i++)
+        {
+          matrix_volume_forms_recalculation[i] = (bool*)realloc(matrix_volume_forms_recalculation[i], this->mfvol_forms_size * sizeof(bool));
+          memset(matrix_volume_forms_recalculation[i], 0, this->mfvol_forms_size * sizeof(bool));
+        }
+      }
+
+      if(this->wf->vfvol.size() != this->vfvol_forms_size)
+      {
+        this->vfvol_forms_size = this->wf->vfvol.size();
+        for(int i = 0; i < this->volume_markers_size; i++)
+        {
+          vector_volume_forms_recalculation[i] = (bool*)realloc(vector_volume_forms_recalculation[i], this->vfvol_forms_size * sizeof(bool));
+          memset(vector_volume_forms_recalculation[i], 0, this->vfvol_forms_size * sizeof(bool));
+        }
+      }
+
+      if(this->wf->mfsurf.size() != this->mfsurf_forms_size)
+      {
+        this->mfsurf_forms_size = this->wf->mfsurf.size();
+        for(int i = 0; i < this->surface_markers_size; i++)
+        {
+          matrix_surface_forms_recalculation[i] = (bool*)realloc(matrix_surface_forms_recalculation[i], this->mfsurf_forms_size * sizeof(bool));
+          memset(matrix_surface_forms_recalculation[i], 0, this->mfsurf_forms_size * sizeof(bool));
+        }
+      }
+
+      if(this->wf->vfsurf.size() != this->vfsurf_forms_size)
+      {
+        this->vfsurf_forms_size = this->wf->vfsurf.size();
+        for(int i = 0; i < this->surface_markers_size; i++)
+        {
+          vector_surface_forms_recalculation[i] = (bool*)realloc(vector_surface_forms_recalculation[i], this->vfsurf_forms_size * sizeof(bool));
+          memset(vector_surface_forms_recalculation[i], 0, this->vfsurf_forms_size * sizeof(bool));
+        }
       }
     }
 

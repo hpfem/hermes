@@ -19,19 +19,15 @@
 /*! \file nonlinear_solver.h
 \brief General nonlinear solver functionality.
 */
-#ifndef __HERMES_COMMON_LINEAR_SOLVER_H_
-#define __HERMES_COMMON_LINEAR_SOLVER_H_
+#ifndef __H2D_LINEAR_SOLVER_H_
+#define __H2D_LINEAR_SOLVER_H_
 
-#include "discrete_problem_linear.h"
+#include "solver.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
-    /** \defgroup userSolvingAPI User solving API
-     * \brief Collection of classes that provide the top-level solving capabilities.
-    */
-
     /// @ingroup userSolvingAPI
     /// Class for solving linear problems.<br>
     /// Typical usage:<br>
@@ -64,24 +60,14 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template <typename Scalar>
-    class LinearSolver : 
-      public Hermes::Mixins::Loggable, 
-      public Hermes::Mixins::TimeMeasurable, 
-      public Hermes::Mixins::SettableComputationTime, 
-      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
-      public Hermes::Mixins::OutputAttachable, 
-      public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, 
-      public Hermes::Hermes2D::Mixins::StateQueryable, 
-      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
+    class LinearSolver : public Solver<Scalar>
     {
     public:
       LinearSolver();
-      LinearSolver(DiscreteProblemLinear<Scalar>* dp);
-      LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-      LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      void init();
-
-      ~LinearSolver();
+      LinearSolver(DiscreteProblem<Scalar>* dp);
+      LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
+      LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual ~LinearSolver();
 
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -90,46 +76,8 @@ namespace Hermes
       /// Basic solve method.
       virtual void solve();
 
-      /// Return the solution vector.
-      Scalar *get_sln_vector();
-      
-      /// set time information for time-dependent problems.
-      virtual void set_time(double time);
-      virtual void set_time_step(double time_step);
-
-      /// SettableSpaces helpers.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar>& space);
-      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
-
-      /// See DiscreteProblemCacheSettings in mixins2d.h for details.
-      virtual void free_cache();
-
-      /// Set the weak forms.
-      void set_weak_formulation(WeakForm<Scalar>* wf);
-
-      /// Get the Jacobian.
-      SparseMatrix<Scalar>* get_jacobian();
-
-      /// Get the Residual.
-      Vector<Scalar>* get_residual();
     protected:
-      DiscreteProblemLinear<Scalar>* dp; ///< FE problem being solved.
-
-      /// The solution vector.
-      Scalar* sln_vector;
-
-      /// Jacobian.
-      SparseMatrix<Scalar>* jacobian;
-
-      /// Residual.
-      Vector<Scalar>* residual;
-
-      /// Linear solver.
-      LinearMatrixSolver<Scalar>* matrix_solver;
-      
-      /// This instance owns its DP.
-      const bool own_dp;
+      void init_linear();
     };
   }
 }

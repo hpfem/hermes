@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "runge_kutta.h"
-#include "discrete_problem_linear.h"
+#include "solver/runge_kutta.h"
+#include "discrete_problem.h"
 #include "projections/ogprojection.h"
 #include "projections/localprojection.h"
 #include "weakform_library/weakforms_hcurl.h"
@@ -160,7 +160,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    const Hermes::vector<SpaceSharedPtr<Scalar> >& RungeKutta<Scalar>::get_spaces() const
+    Hermes::vector<SpaceSharedPtr<Scalar> >& RungeKutta<Scalar>::get_spaces()
     {
       return this->spaces;
     }
@@ -188,7 +188,8 @@ namespace Hermes
       // matrix and residula vector coming from the function f(...). Of course the RK equation is assumed
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
-      this->stage_dp_left = new DiscreteProblemLinear<Scalar>(&stage_wf_left, spaces);
+      this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
+      this->stage_dp_left->nonlinear = false;
       
       // All Spaces of the problem.
       Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;

@@ -12,10 +12,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-/*! \file newton_solver_nox.cpp
+/*! \file nox_solver.cpp
 \brief NOX (nonliner) solver interface.
 */
-#include "newton_solver_nox.h"
+#include "solver/nox_solver.h"
+
 #if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
 namespace Hermes

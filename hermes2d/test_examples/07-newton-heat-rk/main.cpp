@@ -70,8 +70,6 @@ const double T_FINAL = 86400;      // Length of time interval (24 hours) in seco
 
 int main(int argc, char* argv[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
-
 	// Choose a Butcher's table or define your own.
 	ButcherTable bt(butcher_table_type);
 

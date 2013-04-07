@@ -113,7 +113,6 @@ namespace Hermes
       template<typename T> friend class DiscreteProblemAssemblyData;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemThreadAssembler;
-      template<typename Scalar> friend class DiscreteProblemLinear;
       };
 
       void begin(int n, MeshSharedPtr* meshes, Transformable** fn = NULL);
@@ -160,7 +159,6 @@ namespace Hermes
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
       template<typename T> friend class DiscreteProblemAssemblyData;
-      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class Filter;
       template<typename T> friend class SimpleFilter;
       template<typename T> friend class Global;

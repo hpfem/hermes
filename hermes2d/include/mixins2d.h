@@ -60,6 +60,13 @@ namespace Hermes
         /// Constructor.
         /// Sets defaults (see individual set methods for values of those).
         MatrixRhsOutput();
+
+        /// Processes the matrix.
+        void process_matrix_output(SparseMatrix<Scalar>* matrix, int iteration);
+        
+        /// Processes the matrix.
+        void process_vector_output(Vector<Scalar>* rhs, int iteration);
+
         /// Sets this instance to output the matrix in several first iterations.
         /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the matrix will be saved.
         void output_matrix(int firstIterations = -1);

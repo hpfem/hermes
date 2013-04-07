@@ -15,7 +15,7 @@
 
 #include "projections/ogprojection.h"
 #include "space.h"
-#include "linear_solver.h"
+#include "solver/linear_solver.h"
 
 namespace Hermes
 {
@@ -35,7 +35,8 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
 
       // Initialize DiscreteProblem.
-      DiscreteProblemLinear<Scalar> dp(wf, space);
+      DiscreteProblem<Scalar> dp(wf, space);
+      dp.set_nonlinear(false);
       dp.set_do_not_use_cache();
 
       // Initialize linear solver.

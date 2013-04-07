@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     }
     try
     {
-      newton.solve_keep_jacobian(coeff_vec);
+      newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)
     {

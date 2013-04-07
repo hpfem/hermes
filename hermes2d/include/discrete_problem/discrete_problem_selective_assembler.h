@@ -43,9 +43,6 @@ namespace Hermes
       DiscreteProblemSelectiveAssembler();
       ~DiscreteProblemSelectiveAssembler();
       
-      /// Sets new spaces for the instance.
-      void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-
       /// Preassembling.
       /// Precalculate matrix sparse structure.
       /// If force_diagonal_block == true, then (zero) matrix
@@ -55,6 +52,12 @@ namespace Hermes
       /// weighting of matrix blocks in systems.
       void prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states);
       
+      /// Sets new spaces for the instance.
+      void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      
+      /// Set the weak forms.
+      void set_weak_formulation(WeakForm<Scalar>* wf);
+
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
       bool form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state);
@@ -66,6 +69,23 @@ namespace Hermes
       bool form_to_be_assembled(VectorFormSurf<Scalar>* form, Traverse::State* current_state);
       bool form_to_be_assembled(VectorFormDG<Scalar>* form, Traverse::State* current_state);
 
+      /// Recalculation storages.
+      bool* matrix_volume_recalculation;
+      bool* matrix_surface_recalculation;
+      bool** matrix_surface_forms_recalculation;
+      bool** matrix_volume_forms_recalculation;
+      bool* vector_volume_recalculation;
+      bool* vector_surface_recalculation;
+      bool** vector_surface_forms_recalculation;
+      bool** vector_volume_forms_recalculation;
+      int mfvol_forms_size;
+      int vfvol_forms_size;
+      int mfsurf_forms_size;
+      int vfsurf_forms_size;
+      int surface_markers_size;
+      int volume_markers_size;
+
+    protected:
       /// Spaces.
       int spaces_size;
 
@@ -75,6 +95,7 @@ namespace Hermes
       /// Matrix structure can be reused.
       /// If other conditions apply.
       bool matrix_structure_reusable;
+      bool vector_structure_reusable;
 
       friend class DiscreteProblem<Scalar>;
     };

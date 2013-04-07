@@ -20,9 +20,9 @@
 
 #include "global.h"
 
-#include "newton_solver.h"
-#include "picard_solver.h"
-#include "linear_solver.h"
+#include "solver/newton_solver.h"
+#include "solver/picard_solver.h"
+#include "solver/linear_solver.h"
 #include "calculation_continuity.h"
 
 #include "boundary_conditions/essential_boundary_conditions.h"
@@ -58,7 +58,7 @@
 
 #include "weakform/weakform.h"
 #include "discrete_problem.h"
-#include "discrete_problem_linear.h"
+#include "discrete_problem.h"
 #include "forms.h"
 
 #include "integrals/h1.h"
@@ -99,7 +99,7 @@
 #include "projections/ogprojection.h"
 #include "projections/ogprojection_nox.h"
 
-#include "runge_kutta.h"
+#include "solver/runge_kutta.h"
 #include "spline.h"
 
 #if defined (AGROS)

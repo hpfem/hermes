@@ -19,43 +19,64 @@
 /*! \file nonlinear_solver.cpp
 \brief General nonlinear solver functionality.
 */
-#include "nonlinear_solver.h"
-#include "api.h"
-
-using namespace Hermes::Algebra;
+#include "solver/nonlinear_solver.h"
+#include "projections/ogprojection.h"
 
 namespace Hermes
 {
-  namespace Solvers
+  namespace Hermes2D
   {
     template<typename Scalar>
-    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblemInterface<Scalar>* dp) : Hermes::Mixins::Loggable(true, NULL), dp(dp), sln_vector(NULL)
+    NonlinearSolver<Scalar>::NonlinearSolver() : Solver<Scalar>()
+    {
+    }
+
+    template<typename Scalar>
+    NonlinearSolver<Scalar>::NonlinearSolver(DiscreteProblem<Scalar>* dp) : Solver<Scalar>(dp)
+    {
+    }
+
+    template<typename Scalar>
+    NonlinearSolver<Scalar>::NonlinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(wf, space)
+    {
+    }
+
+    template<typename Scalar>
+    NonlinearSolver<Scalar>::NonlinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(wf, spaces)
     {
     }
 
     template<typename Scalar>
     NonlinearSolver<Scalar>::~NonlinearSolver()
     {
-      if(sln_vector != NULL)
-        delete [] sln_vector;
     }
 
     template<typename Scalar>
-    void NonlinearSolver<Scalar>::solve(Scalar* coeff_vec)
+    void NonlinearSolver<Scalar>::solve(MeshFunctionSharedPtr<Scalar>& initial_guess)
     {
-      throw Hermes::Exceptions::MethodNotOverridenException("NonlinearSolver<Scalar>::solve");
-      return;
+      assert(this->dp->get_spaces().size() == 1);
+      Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
+      OGProjection<Scalar> ogProj;
+      ogProj.project_global(this->dp->get_spaces()[0], initial_guess, coeff_vec);
+      this->solve(coeff_vec);
+      delete [] coeff_vec;
+
     }
 
     template<typename Scalar>
-    Scalar *NonlinearSolver<Scalar>::get_sln_vector()
+    void NonlinearSolver<Scalar>::solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess)
     {
-      return sln_vector;
+      Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
+      OGProjection<Scalar> ogProj;
+      ogProj.project_global(this->dp->get_spaces(), initial_guess, coeff_vec);
+      this->solve(coeff_vec);
+      delete [] coeff_vec;
     }
 
     template<typename Scalar>
     void NonlinearSolver<Scalar>::set_iterative_method(const char* iterative_method_name)
     {
+#ifdef HAVE_AZTECOO
       if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
       {
         this->warn("Trying to set iterative method for a different solver than AztecOO.");
@@ -64,12 +85,17 @@ namespace Hermes
       else
       {
         this->iterative_method = (char*)iterative_method_name;
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar>*>(linear_solver)->set_solver(iterative_method_name);
       }
+#else
+      this->warn("Trying to set iterative method without AztecOO present.");
+#endif
     }
 
     template<typename Scalar>
     void NonlinearSolver<Scalar>::set_preconditioner(const char* preconditioner_name)
     {
+#ifdef HAVE_AZTECOO
       if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
       {
         this->warn("Trying to set iterative method for a different solver than AztecOO.");
@@ -77,8 +103,12 @@ namespace Hermes
       }
       else
       {
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(linear_solver)->set_precond(preconditioner_name);
         this->preconditioner = (char*)preconditioner_name;
       }
+#else
+      this->warn("Trying to set iterative method without AztecOO present.");
+#endif
     }
 
     template class HERMES_API NonlinearSolver<double>;

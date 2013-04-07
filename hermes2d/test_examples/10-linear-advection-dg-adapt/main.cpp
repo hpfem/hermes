@@ -59,8 +59,6 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
-
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;

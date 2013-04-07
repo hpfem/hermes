@@ -24,6 +24,7 @@
 
 #include "global.h"
 #include "discrete_problem.h"
+#include "nonlinear_solver.h"
 #include "exceptions.h"
 
 namespace Hermes
@@ -68,50 +69,34 @@ namespace Hermes
     ///&nbsp;return -1;<br>
     /// }<br>
     template<typename Scalar>
-    class HERMES_API NewtonSolver : 
-      public NonlinearSolver<Scalar>,
-      public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>,
-      public Hermes::Mixins::OutputAttachable,
-      public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>,
-      public Hermes::Hermes2D::Mixins::StateQueryable,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings
+    class HERMES_API NewtonSolver : public Hermes::Hermes2D::NonlinearSolver<Scalar>
     {
     public:
       NewtonSolver();
       NewtonSolver(DiscreteProblem<Scalar>* dp);
-      NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
-      NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
-      void init_linear_solver();
-
-      ~NewtonSolver();
+      NewtonSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
+      NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      virtual ~NewtonSolver();
 
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NewtonSolver"; }
 
       /// Solve.
-      /// \param[in] coeff_vec Ceofficient vector to start from.
+      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
       void solve(Scalar* coeff_vec = NULL);
 
-      /// Solve.
-      /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
-      void solve(MeshFunctionSharedPtr<Scalar> initial_guess);
+      /// Convergence measurement.
+      enum ConvergenceMeasurement
+      {
+        RelativeToInitialNorm,
+        RelativeToPreviousNorm,
+        AbsoluteNorm
+      };
 
-      /// Solve.
-      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess);
-
-      /// Solve which keeps jacobian.
-      /// A solve() method where the jacobian is reused.
-      void solve_keep_jacobian(Scalar* coeff_vec = NULL);
-      
-      /// Solve which keeps jacobian.
-      /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
-      void solve_keep_jacobian(MeshFunctionSharedPtr<Scalar> initial_guess);
-      
-      /// Solve which keeps jacobian.
-      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      void solve_keep_jacobian(Hermes::vector<MeshFunctionSharedPtr<Scalar> > initial_guess);
+      /// Sets the current convergence measurement.
+      /// Default: AbsoluteNorm
+      void set_convergence_measurement(typename ConvergenceMeasurement measurement);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       /// Default: 1E9
@@ -120,15 +105,6 @@ namespace Hermes
       /// Sets minimum damping coefficient.
       /// Default: 1E-4
       void set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set);
-
-      /// Call NonlinearSolver::set_iterative_method() and set the method to the linear solver (if applicable).
-      virtual void set_iterative_method(const char* iterative_method_name);
-
-      /// Call NonlinearSolver::set_preconditioner() and set the method to the linear solver (if applicable).
-      virtual void set_preconditioner(const char* preconditioner_name);
-
-      /// See DiscreteProblemCacheSettings in mixins2d.h for details.
-      virtual void free_cache();
 
       /// Interpret the residual as a function.
       /// Translate the residual vector into a residual function (or multiple functions)
@@ -146,16 +122,6 @@ namespace Hermes
       /// Set the maximum number of Newton's iterations.
       /// Default: 15
       void set_newton_max_iter(int newton_max_iter);
-
-      /// Set time information for time-dependent problems.
-      /// See the class Hermes::Mixins::TimeMeasurable.
-      virtual void set_time(double time);
-      virtual void set_time_step(double time_step);
-
-      /// See the class Hermes::Hermes2D::Mixins::SettableSpaces.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar>& space);
-      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
 
       /// Turn on or off manual damping (default is the automatic) and optionally sets manual damping coefficient.
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.
@@ -191,27 +157,35 @@ namespace Hermes
       /// \param[in] steps Number of steps.
       void set_necessary_successful_steps_to_increase(unsigned int steps);
 
-      /// Set the weak forms.
-      void set_weak_formulation(WeakForm<Scalar>* wf);
-
     protected:
-      /// This instance owns its DP.
-      const bool own_dp;
+      void init_solving(int ndof, Scalar*& coeff_vec, Scalar*& coeff_vec_back);
+      bool delete_coeff_vec;
+      void finalize_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
+      void deinit_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
 
-      /// Used by method solve_keep_jacobian().
-      SparseMatrix<Scalar>* kept_jacobian;
+      /// Calculates the residual norm.
+      double calculate_residual_norm();
+
+      /// Calculates the new damping coefficient.
+      double calculate_damping_coefficient(double previous_residual_norm, double residual_norm, double current_damping_coefficient, bool& damping_coefficient_drop, int& successful_steps);
+
+      typename ConvergenceMeasurement current_convergence_measurement;
+      
+      enum ConvergenceState
+      {
+        Converged,
+        NotConverged,
+        BelowMinDampingCoeff,
+        AboveMaxAllowedResidualNorm,
+        AboveMaxIterations,
+        Error
+      };
+
+      /// Find out the state.
+      typename ConvergenceState get_convergence_state(double initial_residual_norm, double previous_residual_norm, double residual_norm, int iteration);
 
       /// Internal setting of default values (see individual set methods).
-      void init_attributes();
-
-      /// Jacobian.
-      SparseMatrix<Scalar>* jacobian;
-
-      /// Residual.
-      Vector<Scalar>* residual;
-
-      /// Linear solver.
-      LinearMatrixSolver<Scalar>* linear_solver;
+      void init_newton();
 
       double newton_tol;
       bool newton_tol_relative;
@@ -222,12 +196,14 @@ namespace Hermes
       /// By default set to 1E6.
       /// Possible to change via method set_max_allowed_residual_norm().
       double max_allowed_residual_norm;
-      double min_allowed_damping_coeff;
 
-      double currentDampingCofficient;
-      
       /// Manual / auto.
       bool manual_damping;
+
+      /// Manual.
+      double manual_damping_coefficient;
+
+      /// Auto.
       /// The ratio between two damping coeffs when changing.
       double auto_damping_ratio;
       /// The initial (and maximum) damping coefficient
@@ -236,6 +212,8 @@ namespace Hermes
       double sufficient_improvement_factor;
       /// necessary number of steps to increase back the damping coeff.
       unsigned int necessary_successful_steps_to_increase;
+      /// Minimum allowed damping coeff.
+      double min_allowed_damping_coeff;
     };
   }
 }

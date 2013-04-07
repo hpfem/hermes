@@ -383,7 +383,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, double time)
+    void Space<Scalar>::update_essential_bc_values(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, double time)
     {
       int n = spaces.size();
       for (int i = 0; i < n; i++)
@@ -395,7 +395,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::update_essential_bc_values(SpaceSharedPtr<Scalar> space, double time)
+    void Space<Scalar>::update_essential_bc_values(SpaceSharedPtr<Scalar>& space, double time)
     {
       space->get_essential_bcs()->set_current_time(time);
       space->update_essential_bc_values();
@@ -1351,13 +1351,13 @@ namespace Hermes
     namespace Mixins
     {
       template<typename Scalar>
-      const Hermes::vector<SpaceSharedPtr<Scalar> >& SettableSpaces<Scalar>::get_spaces() const
+      Hermes::vector<SpaceSharedPtr<Scalar> >& SettableSpaces<Scalar>::get_spaces()
       {
         throw Hermes::Exceptions::MethodNotOverridenException("SettableSpaces<Scalar>::get_spaces()");
       }
 
       template<typename Scalar>
-      const SpaceSharedPtr<Scalar>& SettableSpaces<Scalar>::get_space(int n) const
+      SpaceSharedPtr<Scalar>& SettableSpaces<Scalar>::get_space(int n)
       {
         return this->get_spaces()[n];
       }

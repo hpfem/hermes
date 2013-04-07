@@ -36,7 +36,7 @@ namespace Hermes
     /// This class does assembling into external matrix / vector structures.
     ///
     template<typename Scalar>
-    class HERMES_API DiscreteProblem : public DiscreteProblemInterface<Scalar>,
+    class HERMES_API DiscreteProblem : 
       public Hermes::Mixins::TimeMeasurable, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
       public Hermes::Hermes2D::Mixins::StateQueryable,
@@ -48,13 +48,19 @@ namespace Hermes
     {
     public:
       /// Constructor for multiple components / equations.
-      DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      DiscreteProblem(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       /// Constructor for one equation.
-      DiscreteProblem(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space);
+      DiscreteProblem(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
       /// Non-parameterized constructor.
       DiscreteProblem();
       /// Destuctor.
       virtual ~DiscreteProblem();
+
+      /// Make this DiscreteProblem linear.
+      /// Does 2 things
+      /// 1 - turns off initialization of previous iterations for nonlinear solvers.
+      /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
+      void set_nonlinear(bool to_set);
 
       /// Assembling.
       void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
@@ -88,7 +94,7 @@ namespace Hermes
       void set_weak_formulation(WeakForm<Scalar>* wf);
 
       /// Get all spaces as a Hermes::vector.
-      virtual const Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces() const;
+      virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
 
     protected:
       /// State querying helpers.
@@ -121,11 +127,13 @@ namespace Hermes
 
       int num_threads_used;
 
-      template<typename T> friend class KellyTypeAdapt;
+      template<typename T> friend class Solver;
       template<typename T> friend class LinearSolver;
+      template<typename T> friend class NonlinearSolver;
       template<typename T> friend class NewtonSolver;
       template<typename T> friend class PicardSolver;
       template<typename T> friend class RungeKutta;
+      template<typename T> friend class KellyTypeAdapt;
     };
   }
 }

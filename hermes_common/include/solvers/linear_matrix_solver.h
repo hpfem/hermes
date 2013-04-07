@@ -23,7 +23,6 @@
 #define __HERMES_COMMON_SOLVER_H_
 
 #include "precond.h"
-#include "dp_interface.h"
 #include "exceptions.h"
 #include "mixins.h"
 

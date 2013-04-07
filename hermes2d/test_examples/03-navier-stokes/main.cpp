@@ -184,7 +184,7 @@ if(HERMES_VISUALIZATION)
     // Perform Newton's iteration and translate the resulting coefficient vector into previous time level solutions.
     try
     {
-      newton.solve_keep_jacobian(coeff_vec);
+      newton.solve(coeff_vec);
     }
     catch(Hermes::Exceptions::Exception& e)
     {

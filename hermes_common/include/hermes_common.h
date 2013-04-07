@@ -21,12 +21,10 @@
 */
 #include "common.h"
 #include "solvers/linear_matrix_solver.h"
-#include "solvers/nonlinear_solver.h"
 #include "solvers/amesos_solver.h"
 #include "solvers/aztecoo_solver.h"
 #include "solvers/epetra.h"
 #include "solvers/mumps_solver.h"
-#include "solvers/newton_solver_nox.h"
 #include "solvers/petsc_solver.h"
 #include "solvers/umfpack_solver.h"
 #include "solvers/superlu_solver.h"

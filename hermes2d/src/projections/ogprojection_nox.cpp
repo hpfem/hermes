@@ -18,7 +18,7 @@
 #include "projections/ogprojection_nox.h"
 #include "space.h"
 #include "discrete_problem.h"
-#include "newton_solver_nox.h"
+#include "solver/nox_solver.h"
 #if(defined HAVE_NOX && defined HAVE_EPETRA && defined HAVE_TEUCHOS)
 
 namespace Hermes

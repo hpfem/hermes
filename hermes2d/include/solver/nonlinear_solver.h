@@ -19,32 +19,39 @@
 /*! \file nonlinear_solver.h
 \brief General nonlinear solver functionality.
 */
-#ifndef __HERMES_COMMON_NONLINEAR_SOLVER_H_
-#define __HERMES_COMMON_NONLINEAR_SOLVER_H_
+#ifndef __H2D_NONLINEAR_SOLVER_H_
+#define __H2D_NONLINEAR_SOLVER_H_
 
-#include "precond.h"
-#include "dp_interface.h"
-#include "mixins.h"
+#include "hermes_common.h"
+#include "solver.h"
 
 namespace Hermes
 {
-  namespace Solvers
+  namespace Hermes2D
   {
     /// \brief Base class for defining interface for nonlinear solvers.
     ///
     template <typename Scalar>
-    class NonlinearSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::IntegrableWithGlobalOrder, public Hermes::Mixins::SettableComputationTime
+    class NonlinearSolver : public Solver<Scalar>
     {
     public:
-      NonlinearSolver(DiscreteProblemInterface<Scalar>* dp);
-
+      NonlinearSolver();
+      NonlinearSolver(DiscreteProblem<Scalar>* dp);
+      NonlinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
+      NonlinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~NonlinearSolver();
 
       /// Basic solve method.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
-      virtual void solve(Scalar* coeff_vec);
+      virtual void solve(Scalar* coeff_vec = NULL) = 0;
 
-      Scalar *get_sln_vector();
+      /// Solve.
+      /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
+      void solve(MeshFunctionSharedPtr<Scalar>& initial_guess);
+
+      /// Solve.
+      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
+      void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
 
       /// Set the name of the iterative method employed by AztecOO (ignored
       /// by the other solvers).
@@ -57,12 +64,6 @@ namespace Hermes
       void set_preconditioner(const char* preconditioner_name);
     
     protected:
-      DiscreteProblemInterface<Scalar>* dp; ///< FE problem being solved (not NULL in case of using
-      ///< NonlinearProblem(DiscreteProblemInterface *) ctor.
-
-      /// The solution vector.
-      Scalar* sln_vector;
-
       /// For use of error measurement.
       int error;
 

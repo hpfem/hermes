@@ -19,8 +19,8 @@
 /*! \file newton_solver_nox.h
 \brief NOX (nonliner) solver interface.
 */
-#ifndef __HERMES_COMMON_NEWTON_SOLVER_NOX_H_
-#define __HERMES_COMMON_NEWTON_SOLVER_NOX_H_
+#ifndef __H2D_NEWTON_SOLVER_NOX_H_
+#define __H2D_COMMON_NEWTON_SOLVER_NOX_H_
 
 #include "linear_matrix_solver.h"
 #include "nonlinear_solver.h"
@@ -38,18 +38,19 @@
 
 namespace Hermes
 {
-  namespace Solvers
+  namespace Hermes2D
   {
     /// \brief discrete problem used in NOX solver
     /// Implents interfaces needed by NOX Epetra
     template <typename Scalar>
     class HERMES_API DiscreteProblemNOX :
+      public Hermes::Hermes2D::DiscreteProblem<Scalar>,
       public NOX::Epetra::Interface::Required,
       public NOX::Epetra::Interface::Jacobian,
       public NOX::Epetra::Interface::Preconditioner
     {
     public:
-      DiscreteProblemNOX(DiscreteProblemInterface<Scalar> * problem);
+      DiscreteProblemNOX();
 
       /// \brief Setter for preconditioner.
       void set_precond(Teuchos::RCP<Precond<Scalar> > &pc);
@@ -71,7 +72,6 @@ namespace Hermes
         Teuchos::ParameterList *precParams = 0);
 
     private:
-      DiscreteProblemInterface<Scalar> * dp;
       /// \brief Jacobian (optional).
       EpetraMatrix<Scalar> jacobian;
       /// \brief Preconditioner (optional).
@@ -82,14 +82,13 @@ namespace Hermes
     /// \note complex numbers is not implemented yet
     /// @ingroup solvers
     template <typename Scalar>
-    class HERMES_API NewtonSolverNOX : public NonlinearSolver<Scalar>
+    class HERMES_API NewtonSolverNOX : public Hermes::Hermes2D::NonlinearSolver<Scalar>
     {
     private:
-      DiscreteProblemNOX<Scalar> ndp;
       Teuchos::RCP<Teuchos::ParameterList> nl_pars;
     public:
       /// Constructor.
-      NewtonSolverNOX(DiscreteProblemInterface<Scalar> *problem);
+      NewtonSolverNOX(DiscreteProblemNOX<Scalar> *problem);
 
       virtual ~NewtonSolverNOX();
 

@@ -124,7 +124,6 @@ namespace Hermes
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemCache;
-      template<typename T> friend class DiscreteProblemLinear;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemThreadAssembler;
       template<typename T> friend class NeighborSearch;

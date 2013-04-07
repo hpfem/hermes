@@ -104,7 +104,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_)
     {
-#ifdef _DEBUG
+#ifdef _DEBUG_DP_CACHE
     cache_searches = 0;
     cache_record_found = 0;
     cache_record_found_reinit = 0;
@@ -205,14 +205,14 @@ namespace Hermes
         return;
       }
       
-#ifdef _DEBUG
+#ifdef _DEBUG_DP_CACHE
     cache_searches++;
 #endif
 
       this->current_cache_record = NULL;
       if(cache->get(current_state->rep, current_state->rep_subidx, current_state->rep_i, this->current_cache_record))
       {
-#ifdef _DEBUG
+#ifdef _DEBUG_DP_CACHE
     cache_record_found++;
 #endif
 
@@ -249,7 +249,7 @@ namespace Hermes
         }
         if(reinit)
         {
-#ifdef _DEBUG
+#ifdef _DEBUG_DP_CACHE
     cache_record_found_reinit++;
 #endif
           this->current_cache_record->free();
@@ -259,7 +259,7 @@ namespace Hermes
       }
       else
       {
-#ifdef _DEBUG
+#ifdef _DEBUG_DP_CACHE
     cache_record_not_found++;
 #endif
         int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, wf);
@@ -593,6 +593,15 @@ namespace Hermes
         transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
 
         current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
+
+        if(this->nonlinear == false && this->current_rhs)
+        {
+          for (unsigned int j = 0; j < current_als_i->cnt; j++)
+            if(current_als_i->dof[j] < 0)
+              for (unsigned int i = 0; i < current_als_j->cnt; i++)
+                if(current_als_j->dof[i] >= 0)
+                  this->current_rhs->add(current_als_j->dof[i], -local_stiffness_matrix[i][j]);
+        }
       }
 
       if(form->ext.size() > 0)
@@ -683,7 +692,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling()
     {
-#ifdef _DEBUG
+#ifdef _DEBUG_DP_CACHE
     if(!this->do_not_use_cache)
     {
       std::cout << std::endl;
