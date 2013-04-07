@@ -39,10 +39,10 @@ namespace Hermes
         this->matrix_surface_forms_recalculation = NULL;
         this->vector_surface_forms_recalculation = NULL;
 
-        this->matrix_vector_recalculation = NULL;
-        this->vector_vector_recalculation = NULL;
-        this->matrix_vector_forms_recalculation = NULL;
-        this->vector_vector_forms_recalculation = NULL;
+        this->matrix_volume_recalculation = NULL;
+        this->vector_volume_recalculation = NULL;
+        this->matrix_volume_forms_recalculation = NULL;
+        this->vector_volume_forms_recalculation = NULL;
     }
 
     template<typename Scalar>
@@ -59,8 +59,7 @@ namespace Hermes
       
       if(matrix_structure_reusable && mat)
       {
-         //mat->zero();
-        num_states = 0;
+        mat->zero();
       }
 
       if(vector_structure_reusable && rhs)
@@ -247,27 +246,45 @@ namespace Hermes
       if(spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused != surface_markers_size)
       {
         surface_markers_size = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
-        this->matrix_surface_recalculation = this->matrix_surface_recalculation ? (bool*)realloc(this->matrix_surface_recalculation, surface_markers_size * sizeof(bool)) : (bool*)malloc(surface_markers_size * sizeof(bool));
-        this->vector_surface_recalculation = (bool*)realloc(this->vector_surface_recalculation, surface_markers_size * sizeof(bool));
-        memset(this->matrix_surface_recalculation, 0, surface_markers_size * sizeof(bool));
-        memset(this->vector_surface_recalculation, 0, surface_markers_size * sizeof(bool));
+        
+        if(this->matrix_surface_recalculation)
+          free(this->matrix_surface_recalculation);
+        
+        this->matrix_surface_recalculation = (bool*)calloc(surface_markers_size, sizeof(bool));
+        
+        if(this->vector_surface_recalculation)
+          free(this->vector_surface_recalculation);
+        
+        this->vector_surface_recalculation = (bool*)calloc(surface_markers_size, sizeof(bool));
 
-        this->matrix_surface_forms_recalculation = (bool**)realloc(this->matrix_surface_forms_recalculation, surface_markers_size * sizeof(bool*));
+
+        if(this->matrix_surface_forms_recalculation)
+          free(this->matrix_surface_forms_recalculation);
+        
+        this->matrix_surface_forms_recalculation = (bool**)calloc(surface_markers_size, sizeof(bool*));
         if(this->mfsurf_forms_size > 0)
         {
           for(int i = 0; i < this->surface_markers_size; i++)
           {
-            matrix_surface_forms_recalculation[i] = (bool*)realloc(matrix_surface_forms_recalculation[i], this->mfsurf_forms_size * sizeof(bool));
-            memset(matrix_surface_forms_recalculation[i], 0, this->mfsurf_forms_size * sizeof(bool));
+            if(matrix_surface_forms_recalculation[i])
+              free(matrix_surface_forms_recalculation[i]);
+
+            matrix_surface_forms_recalculation[i] = (bool*)calloc(this->mfsurf_forms_size, sizeof(bool));
           }
         }
-        this->vector_surface_forms_recalculation = (bool**)realloc(this->vector_surface_forms_recalculation, surface_markers_size * sizeof(bool*));
+
+        if(this->vector_surface_forms_recalculation)
+          free(this->vector_surface_forms_recalculation);
+        
+        this->vector_surface_forms_recalculation = (bool**)calloc(surface_markers_size, sizeof(bool*));
         if(this->vfsurf_forms_size > 0)
         {
           for(int i = 0; i < this->surface_markers_size; i++)
           {
-            vector_surface_forms_recalculation[i] = (bool*)realloc(vector_surface_forms_recalculation[i], this->vfsurf_forms_size * sizeof(bool));
-            memset(vector_surface_forms_recalculation[i], 0, this->vfsurf_forms_size * sizeof(bool));
+            if(vector_surface_forms_recalculation[i])
+              free(vector_surface_forms_recalculation[i]);
+
+            vector_surface_forms_recalculation[i] = (bool*)calloc(this->vfsurf_forms_size, sizeof(bool));
           }
         }
       }
@@ -275,27 +292,45 @@ namespace Hermes
       if(spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused != volume_markers_size)
       {
         volume_markers_size = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
-        this->matrix_volume_recalculation = (bool*)realloc(this->matrix_volume_recalculation, volume_markers_size * sizeof(bool));
-        this->vector_volume_recalculation = (bool*)realloc(this->vector_volume_recalculation, volume_markers_size * sizeof(bool));
-        memset(this->matrix_volume_recalculation, 0, volume_markers_size * sizeof(bool));
-        memset(this->vector_volume_recalculation, 0, volume_markers_size * sizeof(bool));
+        
+        if(this->matrix_volume_recalculation)
+          free(this->matrix_volume_recalculation);
+        
+        this->matrix_volume_recalculation = (bool*)calloc(volume_markers_size, sizeof(bool));
+        
+        if(this->vector_volume_recalculation)
+          free(this->vector_volume_recalculation);
+        
+        this->vector_volume_recalculation = (bool*)calloc(volume_markers_size, sizeof(bool));
 
-        this->matrix_volume_forms_recalculation = (bool**)realloc(this->matrix_volume_forms_recalculation, volume_markers_size * sizeof(bool*));
+
+        if(this->matrix_volume_forms_recalculation)
+          free(this->matrix_volume_forms_recalculation);
+        
+        this->matrix_volume_forms_recalculation = (bool**)calloc(volume_markers_size, sizeof(bool*));
         if(this->mfvol_forms_size > 0)
         {
           for(int i = 0; i < this->volume_markers_size; i++)
           {
-            matrix_volume_forms_recalculation[i] = (bool*)realloc(matrix_volume_forms_recalculation[i], this->mfvol_forms_size * sizeof(bool));
-            memset(matrix_volume_forms_recalculation[i], 0, this->mfvol_forms_size * sizeof(bool));
+            if(matrix_volume_forms_recalculation[i])
+              free(matrix_volume_forms_recalculation[i]);
+
+            matrix_volume_forms_recalculation[i] = (bool*)calloc(this->mfvol_forms_size, sizeof(bool));
           }
         }
-        this->vector_volume_forms_recalculation = (bool**)realloc(this->vector_volume_forms_recalculation, volume_markers_size * sizeof(bool*));
+
+        if(this->vector_volume_forms_recalculation)
+          free(this->vector_volume_forms_recalculation);
+        
+        this->vector_volume_forms_recalculation = (bool**)calloc(volume_markers_size, sizeof(bool*));
         if(this->vfvol_forms_size > 0)
         {
           for(int i = 0; i < this->volume_markers_size; i++)
           {
-            vector_volume_forms_recalculation[i] = (bool*)realloc(vector_volume_forms_recalculation[i], this->vfvol_forms_size * sizeof(bool));
-            memset(vector_volume_forms_recalculation[i], 0, this->vfvol_forms_size * sizeof(bool));
+            if(vector_volume_forms_recalculation[i])
+              free(vector_volume_forms_recalculation[i]);
+
+            vector_volume_forms_recalculation[i] = (bool*)calloc(this->vfvol_forms_size, sizeof(bool));
           }
         }
       }
@@ -317,8 +352,9 @@ namespace Hermes
         this->mfvol_forms_size = this->wf->mfvol.size();
         for(int i = 0; i < this->volume_markers_size; i++)
         {
-          matrix_volume_forms_recalculation[i] = (bool*)realloc(matrix_volume_forms_recalculation[i], this->mfvol_forms_size * sizeof(bool));
-          memset(matrix_volume_forms_recalculation[i], 0, this->mfvol_forms_size * sizeof(bool));
+          if(matrix_volume_forms_recalculation[i])
+            free(matrix_volume_forms_recalculation[i]);
+          matrix_volume_forms_recalculation[i] = (bool*)calloc(this->mfvol_forms_size, sizeof(bool));
         }
       }
 
@@ -327,8 +363,9 @@ namespace Hermes
         this->vfvol_forms_size = this->wf->vfvol.size();
         for(int i = 0; i < this->volume_markers_size; i++)
         {
-          vector_volume_forms_recalculation[i] = (bool*)realloc(vector_volume_forms_recalculation[i], this->vfvol_forms_size * sizeof(bool));
-          memset(vector_volume_forms_recalculation[i], 0, this->vfvol_forms_size * sizeof(bool));
+          if(vector_volume_forms_recalculation[i])
+            free(vector_volume_forms_recalculation[i]);
+          vector_volume_forms_recalculation[i] = (bool*)calloc(this->vfvol_forms_size, sizeof(bool));
         }
       }
 
@@ -337,8 +374,9 @@ namespace Hermes
         this->mfsurf_forms_size = this->wf->mfsurf.size();
         for(int i = 0; i < this->surface_markers_size; i++)
         {
-          matrix_surface_forms_recalculation[i] = (bool*)realloc(matrix_surface_forms_recalculation[i], this->mfsurf_forms_size * sizeof(bool));
-          memset(matrix_surface_forms_recalculation[i], 0, this->mfsurf_forms_size * sizeof(bool));
+          if(matrix_surface_forms_recalculation[i])
+            free(matrix_surface_forms_recalculation[i]);
+          matrix_surface_forms_recalculation[i] = (bool*)calloc(this->mfsurf_forms_size, sizeof(bool));
         }
       }
 
@@ -347,8 +385,9 @@ namespace Hermes
         this->vfsurf_forms_size = this->wf->vfsurf.size();
         for(int i = 0; i < this->surface_markers_size; i++)
         {
-          vector_surface_forms_recalculation[i] = (bool*)realloc(vector_surface_forms_recalculation[i], this->vfsurf_forms_size * sizeof(bool));
-          memset(vector_surface_forms_recalculation[i], 0, this->vfsurf_forms_size * sizeof(bool));
+          if(vector_surface_forms_recalculation[i])
+            free(vector_surface_forms_recalculation[i]);
+          vector_surface_forms_recalculation[i] = (bool*)calloc(this->vfsurf_forms_size, sizeof(bool));
         }
       }
     }

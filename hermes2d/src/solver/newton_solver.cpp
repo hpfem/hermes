@@ -243,13 +243,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double NewtonSolver<Scalar>::calculate_damping_coefficient(double previous_residual_norm, double residual_norm, double current_damping_coefficient, bool& damping_coefficient_drop, int& successful_steps)
+    double NewtonSolver<Scalar>::calculate_damping_coefficient(double previous_residual_norm, double residual_norm, double current_damping_coefficient, bool& residual_norm_drop, int& successful_steps)
     {
       if(this->manual_damping)
         return this->manual_damping_coefficient;
 
       if(residual_norm < previous_residual_norm * this->sufficient_improvement_factor)
       {
+        residual_norm_drop = true;
         if(++successful_steps >= this->necessary_successful_steps_to_increase)
           return std::min(this->initial_auto_damping_coefficient, 2 * current_damping_coefficient);
         if(residual_norm < previous_residual_norm)
@@ -258,7 +259,7 @@ namespace Hermes
       else
       {
         successful_steps = 0;
-        damping_coefficient_drop = true;
+        residual_norm_drop = false;
         if(current_damping_coefficient < this->min_allowed_damping_coeff)
         {
           this->warn("\t Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
@@ -336,7 +337,7 @@ namespace Hermes
       int successful_steps = 0;
       double initial_residual_norm;
       double current_damping_coefficient = this->manual_damping ? manual_damping_coefficient : initial_auto_damping_coefficient;
-      bool damping_coefficient_drop = true;
+      bool residual_norm_drop = true;
 
       while (true)
       {
@@ -362,7 +363,7 @@ namespace Hermes
         else
         {
           this->info("\tNewton: iteration %d, residual norm: %g", it - 1, residual_norm);
-          current_damping_coefficient = this->calculate_damping_coefficient(previous_residual_norm, residual_norm, current_damping_coefficient, damping_coefficient_drop, successful_steps);
+          current_damping_coefficient = this->calculate_damping_coefficient(previous_residual_norm, residual_norm, current_damping_coefficient, residual_norm_drop, successful_steps);
         }
 
         // Find out the state with respect to all residual norms.
@@ -430,7 +431,7 @@ namespace Hermes
 
         // Add \deltaY^{n + 1} to Y^n.
         // The good case - step does not have to be restarted.
-        if(damping_coefficient_drop)
+        if(residual_norm_drop)
         {
           memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
           for (int i = 0; i < ndof; i++)
