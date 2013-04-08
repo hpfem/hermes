@@ -311,6 +311,13 @@ namespace Hermes
       /// Add a number to each diagonal entry.
       virtual void add_to_diagonal(Scalar v) = 0;
 
+      /// set the stiffness matrix
+      ///
+      /// @param[in] m    - the row where to set
+      /// @param[in] n    - the column where to set
+      /// @param[in] v    - value
+      virtual void set(unsigned int m, unsigned int n, Scalar v);
+      
       /// update the stiffness matrix
       ///
       /// @param[in] m    - the row where to update

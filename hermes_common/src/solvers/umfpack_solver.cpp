@@ -151,6 +151,16 @@ namespace Hermes
       }
     }
 
+    
+    template<typename Scalar>
+    void CSCMatrix<Scalar>::set(unsigned int m, unsigned int n, Scalar v)
+    {
+      // Find m-th row in the n-th column.
+      int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
+
+      Ax[Ap[n] + mid] = v;
+    }
+
     template<typename Scalar>
     Scalar CSCMatrix<Scalar>::get(unsigned int m, unsigned int n)
     {

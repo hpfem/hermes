@@ -61,6 +61,7 @@ namespace Hermes
       num_last_vectors_used = 3;
       anderson_beta = 1.0;
       anderson_is_on = false;
+      this->dp->nonlinear = true;
     }
 
     template<typename Scalar>
@@ -244,8 +245,27 @@ namespace Hermes
       {
         this->on_step_begin();
 
-        this->dp->nonlinear = true;
-        this->dp->assemble(last_iter_vector, jacobian, residual);
+        if(this->jacobian_reusable)
+        {
+          if(this->constant_jacobian)
+          {
+            this->info("\tPicard: reusing jacobian.");
+            this->dp->assemble(last_iter_vector, residual);
+            this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+          }
+          else
+          {
+            this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+            this->dp->assemble(last_iter_vector, jacobian, residual);
+          }
+        }
+        else
+        {
+          this->dp->assemble(last_iter_vector, jacobian, residual);
+          this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+          this->jacobian_reusable = true;
+        }
+
         process_matrix_output(jacobian, it); 
         process_vector_output(residual, it);
 

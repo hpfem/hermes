@@ -254,7 +254,7 @@ namespace Hermes
         if(++successful_steps >= this->necessary_successful_steps_to_increase)
           return std::min(this->initial_auto_damping_coefficient, 2 * current_damping_coefficient);
         if(residual_norm < previous_residual_norm)
-          this->info("\t Newton: step successful, calculation continues with damping coefficient: %g.", current_damping_coefficient);
+          this->info("\tNewton: step successful, damping coefficient: %g.", current_damping_coefficient);
       }
       else
       {
@@ -262,14 +262,14 @@ namespace Hermes
         residual_norm_drop = false;
         if(current_damping_coefficient < this->min_allowed_damping_coeff)
         {
-          this->warn("\t Newton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
+          this->warn("\tNewton: results NOT improved, current damping coefficient is at the minimum possible level: %g.", min_allowed_damping_coeff);
           this->info("\t  If you want to decrease the minimum level, use the method set_min_allowed_damping_coeff()");
           return this->min_allowed_damping_coeff;
         }
         else
         {
           return (1 / this->auto_damping_ratio) * current_damping_coefficient;
-          this->warn(" Newton: results NOT improved, step restarted with damping coefficient: %g.", current_damping_coefficient);
+          this->warn("\tNewton: results NOT improved, step restarted with damping coefficient: %g.", current_damping_coefficient);
         }
       }
 
@@ -413,7 +413,27 @@ namespace Hermes
         }
 
         // Assemble just the jacobian.
-        this->dp->assemble(coeff_vec, jacobian);
+        if(this->jacobian_reusable)
+        {
+          if(this->constant_jacobian)
+          {
+            this->info("\tNewton: reusing jacobian.");
+            this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+          }
+          else
+          {
+            this->dp->assemble(coeff_vec, jacobian);
+
+
+            this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+          }
+        }
+        else
+        {
+          this->dp->assemble(coeff_vec, jacobian);
+          this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+          this->jacobian_reusable = true;
+        }
 
         // Output.
         this->process_matrix_output(jacobian, it);

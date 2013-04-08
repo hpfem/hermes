@@ -59,32 +59,23 @@ namespace Hermes
       this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual);
       this->set_verbose_output(true);
       this->sln_vector = NULL;
+
+      this->jacobian_reusable = false;
+      this->constant_jacobian = false;
     }
 
+    template<typename Scalar>
+    void Solver<Scalar>::set_jacobian_constant(bool to_set)
+    {
+      this->constant_jacobian = to_set;
+      if(!to_set)
+        this->jacobian_reusable = false;
+    }
 
     template<typename Scalar>
-    void Solver<Scalar>::keep_matrix_surface_values(int marker, MatrixFormSurf<Scalar>* form)
+    void Solver<Scalar>::keep_element_values(int marker, typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side)
     {
-      assert(this->dp->spaces.size() > 0);
-      assert(this->wf);
-      if(form)
-      {
-        assert(this->dp->selectiveAssembler.matrix_surface_forms_recalculation);
-        assert(this->dp->selectiveAssembler.matrix_surface_forms_recalculation[marker]);
-        for(int i = 0; i < this->wf->get_mfsurf().size(); i++)
-        {
-          if(this->wf->get_mfsurf()[i] == form)
-          {
-            this->dp->selectiveAssembler.matrix_surface_forms_recalculation[marker][i] = true;
-            break;
-          }
-        }
-      }
-      else
-      {
-        assert(this->dp->selectiveAssembler.matrix_surface_recalculation);
-        this->dp->selectiveAssembler.matrix_surface_recalculation[marker] = true;
-      }
+      this->dp->selectiveAssembler.state_reuse_kept[dimension][equation_side][marker] = true;
     }
 
     template<typename Scalar>
@@ -108,6 +99,7 @@ namespace Hermes
     void Solver<Scalar>::set_weak_formulation(WeakForm<Scalar>* wf)
     {
       this->dp->set_weak_formulation(wf);
+      this->jacobian_reusable = false;
     }
 
     template<typename Scalar>
@@ -132,12 +124,7 @@ namespace Hermes
     void Solver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       this->dp->set_spaces(spaces);
-    }
-
-    template<typename Scalar>
-    void Solver<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
-    {
-      this->dp->set_space(space);
+      this->jacobian_reusable = false;
     }
     
     template<typename Scalar>

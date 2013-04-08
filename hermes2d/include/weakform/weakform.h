@@ -87,6 +87,18 @@ namespace Hermes
       /// Destructor.
       virtual ~WeakForm();
 
+      enum FormIntegrationDimension
+      {
+        FormVol = 0,
+        FormSurf = 1
+      };
+
+      enum FormEquationSide
+      {
+        MatrixForm = 0,
+        VectorForm = 1
+      };
+
       /// Adds volumetric matrix form.
       void add_matrix_form(MatrixFormVol<Scalar>* mfv);
 

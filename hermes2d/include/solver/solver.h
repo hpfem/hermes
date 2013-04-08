@@ -53,10 +53,7 @@ namespace Hermes
 
       void init();
 
-      void keep_matrix_volume_values(int marker, MatrixFormVol<Scalar>* form = NULL);
-      void keep_rhs_volume_values(int marker, VectorFormVol<Scalar>* form = NULL);
-      void keep_matrix_surface_values(int marker, MatrixFormSurf<Scalar>* form = NULL);
-      void keep_rhs_surface_values(int marker, VectorFormSurf<Scalar>* form = NULL);
+      void keep_element_values(int marker, typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
 
       virtual bool isOkay() const;
       
@@ -70,19 +67,29 @@ namespace Hermes
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
-      /// SettableSpaces helpers.
+      /// SettableSpaces helper.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar>& space);
       virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
 
+      /// DiscreteProblemWeakForm helper.
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
+
+      /// Sets the jacobian to be constant, i.e. reused whenever possible.
+      void set_jacobian_constant(bool to_set);
 
       /// Get the Jacobian.
       SparseMatrix<Scalar>* get_jacobian();
 
       /// Get the Residual.
       Vector<Scalar>* get_residual();
+
     protected:
+      /// Jacobian can be reused if possible.
+      bool constant_jacobian;
+
+      /// Jacobian is ready to be reused if desirable.
+      bool jacobian_reusable;
+      
       ///< FE problem being solved.
       DiscreteProblem<Scalar>* dp;
 

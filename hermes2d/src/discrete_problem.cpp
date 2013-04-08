@@ -320,6 +320,8 @@ namespace Hermes
 
         if(is_DG)
           delete dgAssembler;
+
+        this->threadAssembler[thread_number]->deinit_assembling();
       }
 
       // Deinitialize states && previous iterations.

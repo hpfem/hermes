@@ -1362,6 +1362,14 @@ namespace Hermes
         return this->get_spaces()[n];
       }
 
+      template<typename Scalar>
+      void SettableSpaces<Scalar>::set_space(SpaceSharedPtr<Scalar>& space)
+      {
+        Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
+        spaces.push_back(space);
+        this->set_spaces(spaces);
+      }
+
       template class HERMES_API SettableSpaces<double>;
       template class HERMES_API SettableSpaces<std::complex<double> >;
     }

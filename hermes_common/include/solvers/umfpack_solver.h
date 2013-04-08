@@ -65,6 +65,7 @@ namespace Hermes
       virtual void free();
       virtual Scalar get(unsigned int m, unsigned int n);
       virtual void zero();
+      virtual void set(unsigned int m, unsigned int n, Scalar v);
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
       /// Add matrix.

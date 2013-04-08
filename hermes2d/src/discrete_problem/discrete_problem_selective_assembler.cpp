@@ -24,25 +24,18 @@ namespace Hermes
     template<typename Scalar>
     DiscreteProblemSelectiveAssembler<Scalar>::DiscreteProblemSelectiveAssembler()
     : sp_seq(NULL), 
-      spaces_size(0), 
-      mfvol_forms_size(0), 
-      vfvol_forms_size(0), 
-      mfsurf_forms_size(0), 
-      vfsurf_forms_size(0), 
-      surface_markers_size(0), 
-      volume_markers_size(0), 
+      spaces_size(0),
       matrix_structure_reusable(false), 
       vector_structure_reusable(false)
     {
-        this->matrix_surface_recalculation = NULL;
-        this->vector_surface_recalculation = NULL;
-        this->matrix_surface_forms_recalculation = NULL;
-        this->vector_surface_forms_recalculation = NULL;
-
-        this->matrix_volume_recalculation = NULL;
-        this->vector_volume_recalculation = NULL;
-        this->matrix_volume_forms_recalculation = NULL;
-        this->vector_volume_forms_recalculation = NULL;
+      for(int i = 0; i < 2; i++)
+      {
+        for(int j = 0; j < 2; j++)
+        {
+          state_reuse_kept[i][j] = NULL;
+					markers_size[i][j] = 0;
+        }
+      }
     }
 
     template<typename Scalar>
@@ -56,10 +49,56 @@ namespace Hermes
     void DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states)
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
+
+      Traverse::State** recalculated_states = new Traverse::State*[num_states];
+      int num_recalculated_states = 0;
       
       if(matrix_structure_reusable && mat)
       {
-        mat->zero();
+        AsmList<Scalar>* al = new AsmList<Scalar>[spaces_size];
+        bool **blocks = wf->get_blocks(this->force_diagonal_blocks);
+
+        for(int state_i = 0; state_i < num_states; state_i++)
+        {
+          Traverse::State* current_state = states[state_i];
+          int marker = current_state->rep->marker;
+
+          if(!this->state_reuse_kept[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm][marker])
+          {
+            recalculated_states[num_recalculated_states++] = current_state;
+
+            // Obtain assembly lists for the element at all spaces.
+            /// \todo do not get the assembly list again if the element was not changed.
+            for (unsigned int i = 0; i < spaces_size; i++)
+              if(current_state->e[i])
+                spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
+
+            for (unsigned int m = 0; m < spaces_size; m++)
+            {
+
+              for (unsigned int n = 0; n < spaces_size; n++)
+              {
+                if(blocks[m][n] && current_state->e[m] && current_state->e[n])
+                {
+                  AsmList<Scalar>*am = &(al[m]);
+                  AsmList<Scalar>*an = &(al[n]);
+
+                  // Pretend assembling of the element stiffness matrix.
+                  for (unsigned int i = 0; i < am->cnt; i++)
+                  {
+                    if(am->dof[i] >= 0)
+                      for (unsigned int j = 0; j < an->cnt; j++)
+                        if(an->dof[j] >= 0)
+                          mat->set(am->dof[i], an->dof[j], Scalar(0));
+                  }
+                }
+              }
+            } 
+          }
+        }
+        
+        states = recalculated_states;
+        num_states = num_recalculated_states;
       }
 
       if(vector_structure_reusable && rhs)
@@ -154,30 +193,30 @@ namespace Hermes
                               if(blocks[m][el]) mat->pre_add_ij(am->dof[i], an->dof[j]);
                               if(blocks[el][m]) mat->pre_add_ij(an->dof[j], am->dof[i]);
                             }
-                            delete an;
                           }
                         }
                       }
+                      delete an;
                     }
-
-                    // Deallocation an array of arrays of neighboring elements
-                    // for every mesh x edge.
-                    for(unsigned int el = 0; el < spaces_size; el++)
-                    {
-                      for(int ed = 0; ed < num_edges; ed++)
-                        delete [] neighbor_elems_arrays[el][ed];
-                      delete [] neighbor_elems_arrays[el];
-                    }
-                    delete [] neighbor_elems_arrays;
-
-                    // The same, only for number of elements.
-                    for(unsigned int el = 0; el < spaces_size; el++)
-                      delete [] neighbor_elems_counts[el];
-                    delete [] neighbor_elems_counts;
                   }
                 }
               }
             }
+
+            // Deallocation an array of arrays of neighboring elements
+            // for every mesh x edge.
+            for(unsigned int el = 0; el < spaces_size; el++)
+            {
+              for(int ed = 0; ed < num_edges; ed++)
+                delete [] neighbor_elems_arrays[el][ed];
+              delete [] neighbor_elems_arrays[el];
+            }
+            delete [] neighbor_elems_arrays;
+
+            // The same, only for number of elements.
+            for(unsigned int el = 0; el < spaces_size; el++)
+              delete [] neighbor_elems_counts[el];
+            delete [] neighbor_elems_counts;
           }
 
           // Go through all equation-blocks of the local stiffness matrix.
@@ -243,96 +282,31 @@ namespace Hermes
         }
       }
 
-      if(spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused != surface_markers_size)
+      int volume_markers_count = spacesToSet[0]->get_mesh()->get_element_markers_conversion().min_marker_unused;
+      int surface_markers_count = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
+
+      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::MatrixForm, volume_markers_count);
+      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::VectorForm, volume_markers_count);
+
+      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::MatrixForm, surface_markers_count);
+      this->alloc_recalculation_tables_spaces_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::VectorForm, surface_markers_count);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblemSelectiveAssembler<Scalar>::alloc_recalculation_tables_spaces_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side, int new_markers_count)
+    {
+      if(new_markers_count != this->markers_size[dimension][equation_side])
       {
-        surface_markers_size = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
-        
-        if(this->matrix_surface_recalculation)
-          free(this->matrix_surface_recalculation);
-        
-        this->matrix_surface_recalculation = (bool*)calloc(surface_markers_size, sizeof(bool));
-        
-        if(this->vector_surface_recalculation)
-          free(this->vector_surface_recalculation);
-        
-        this->vector_surface_recalculation = (bool*)calloc(surface_markers_size, sizeof(bool));
+        markers_size[dimension][equation_side] = new_markers_count;
 
-
-        if(this->matrix_surface_forms_recalculation)
-          free(this->matrix_surface_forms_recalculation);
+        if(this->state_reuse_kept[dimension][equation_side])
+          free(this->state_reuse_kept[dimension][equation_side]);
         
-        this->matrix_surface_forms_recalculation = (bool**)calloc(surface_markers_size, sizeof(bool*));
-        if(this->mfsurf_forms_size > 0)
-        {
-          for(int i = 0; i < this->surface_markers_size; i++)
-          {
-            if(matrix_surface_forms_recalculation[i])
-              free(matrix_surface_forms_recalculation[i]);
-
-            matrix_surface_forms_recalculation[i] = (bool*)calloc(this->mfsurf_forms_size, sizeof(bool));
-          }
-        }
-
-        if(this->vector_surface_forms_recalculation)
-          free(this->vector_surface_forms_recalculation);
-        
-        this->vector_surface_forms_recalculation = (bool**)calloc(surface_markers_size, sizeof(bool*));
-        if(this->vfsurf_forms_size > 0)
-        {
-          for(int i = 0; i < this->surface_markers_size; i++)
-          {
-            if(vector_surface_forms_recalculation[i])
-              free(vector_surface_forms_recalculation[i]);
-
-            vector_surface_forms_recalculation[i] = (bool*)calloc(this->vfsurf_forms_size, sizeof(bool));
-          }
-        }
+        this->state_reuse_kept[dimension][equation_side] = (bool*)calloc(markers_size[dimension][equation_side], sizeof(bool));
       }
-
-      if(spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused != volume_markers_size)
+      else
       {
-        volume_markers_size = spacesToSet[0]->get_mesh()->get_boundary_markers_conversion().min_marker_unused;
-        
-        if(this->matrix_volume_recalculation)
-          free(this->matrix_volume_recalculation);
-        
-        this->matrix_volume_recalculation = (bool*)calloc(volume_markers_size, sizeof(bool));
-        
-        if(this->vector_volume_recalculation)
-          free(this->vector_volume_recalculation);
-        
-        this->vector_volume_recalculation = (bool*)calloc(volume_markers_size, sizeof(bool));
-
-
-        if(this->matrix_volume_forms_recalculation)
-          free(this->matrix_volume_forms_recalculation);
-        
-        this->matrix_volume_forms_recalculation = (bool**)calloc(volume_markers_size, sizeof(bool*));
-        if(this->mfvol_forms_size > 0)
-        {
-          for(int i = 0; i < this->volume_markers_size; i++)
-          {
-            if(matrix_volume_forms_recalculation[i])
-              free(matrix_volume_forms_recalculation[i]);
-
-            matrix_volume_forms_recalculation[i] = (bool*)calloc(this->mfvol_forms_size, sizeof(bool));
-          }
-        }
-
-        if(this->vector_volume_forms_recalculation)
-          free(this->vector_volume_forms_recalculation);
-        
-        this->vector_volume_forms_recalculation = (bool**)calloc(volume_markers_size, sizeof(bool*));
-        if(this->vfvol_forms_size > 0)
-        {
-          for(int i = 0; i < this->volume_markers_size; i++)
-          {
-            if(vector_volume_forms_recalculation[i])
-              free(vector_volume_forms_recalculation[i]);
-
-            vector_volume_forms_recalculation[i] = (bool*)calloc(this->vfvol_forms_size, sizeof(bool));
-          }
-        }
+        memset(this->state_reuse_kept[dimension][equation_side], 0, markers_size[dimension][equation_side] * sizeof(bool));
       }
     }
 
@@ -347,49 +321,18 @@ namespace Hermes
       if(spaces_size == 0)
         return;
 
-      if(this->wf->mfvol.size() != this->mfvol_forms_size)
-      {
-        this->mfvol_forms_size = this->wf->mfvol.size();
-        for(int i = 0; i < this->volume_markers_size; i++)
-        {
-          if(matrix_volume_forms_recalculation[i])
-            free(matrix_volume_forms_recalculation[i]);
-          matrix_volume_forms_recalculation[i] = (bool*)calloc(this->mfvol_forms_size, sizeof(bool));
-        }
-      }
+      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::MatrixForm);
+      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormVol, WeakForm<Scalar>::VectorForm);
 
-      if(this->wf->vfvol.size() != this->vfvol_forms_size)
-      {
-        this->vfvol_forms_size = this->wf->vfvol.size();
-        for(int i = 0; i < this->volume_markers_size; i++)
-        {
-          if(vector_volume_forms_recalculation[i])
-            free(vector_volume_forms_recalculation[i]);
-          vector_volume_forms_recalculation[i] = (bool*)calloc(this->vfvol_forms_size, sizeof(bool));
-        }
-      }
+      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::MatrixForm);
+      this->alloc_recalculation_tables_weakform_settings(WeakForm<Scalar>::FormSurf, WeakForm<Scalar>::VectorForm);
+    }
 
-      if(this->wf->mfsurf.size() != this->mfsurf_forms_size)
-      {
-        this->mfsurf_forms_size = this->wf->mfsurf.size();
-        for(int i = 0; i < this->surface_markers_size; i++)
-        {
-          if(matrix_surface_forms_recalculation[i])
-            free(matrix_surface_forms_recalculation[i]);
-          matrix_surface_forms_recalculation[i] = (bool*)calloc(this->mfsurf_forms_size, sizeof(bool));
-        }
-      }
-
-      if(this->wf->vfsurf.size() != this->vfsurf_forms_size)
-      {
-        this->vfsurf_forms_size = this->wf->vfsurf.size();
-        for(int i = 0; i < this->surface_markers_size; i++)
-        {
-          if(vector_surface_forms_recalculation[i])
-            free(vector_surface_forms_recalculation[i]);
-          vector_surface_forms_recalculation[i] = (bool*)calloc(this->vfsurf_forms_size, sizeof(bool));
-        }
-      }
+    template<typename Scalar>
+    void DiscreteProblemSelectiveAssembler<Scalar>::alloc_recalculation_tables_weakform_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side)
+    {
+      if(this->state_reuse_kept[dimension][equation_side])
+        memset(this->state_reuse_kept[dimension][equation_side], 0, markers_size[dimension][equation_side] * sizeof(bool));
     }
 
     template<typename Scalar>

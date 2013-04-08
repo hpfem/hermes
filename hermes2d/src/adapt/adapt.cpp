@@ -167,6 +167,7 @@ namespace Hermes
       int regularize, double to_be_processed)
     {
       this->tick();
+
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
 
@@ -339,7 +340,7 @@ namespace Hermes
       }
 
       this->tick();
-      this->info("Adaptivity: data preparation duration: %f s.", this->last());
+      this->info("\tAdaptivity: data preparation duration: %f s.", this->last());
 
       // For statistics.
       int num_elements_for_refinenement = ids.size();
@@ -403,15 +404,15 @@ namespace Hermes
               averageNumberOfCandidates += numberOfCandidates[i];
           averageNumberOfCandidates = averageNumberOfCandidates / num_elements_for_refinenement;
 
-          this->info("Adaptivity: total number of refined Elements: %i.", num_elements_for_refinenement);
-          this->info("Adaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
+          this->info("\tAdaptivity: total number of refined Elements: %i.", num_elements_for_refinenement);
+          this->info("\tAdaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
         }
       }
 
       delete [] numberOfCandidates;
 
       this->tick();
-      this->info("Adaptivity: refinement selection duration: %f s.", this->last());
+      this->info("\tAdaptivity: refinement selection duration: %f s.", this->last());
 
       if(this->caughtException == NULL)
         fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
@@ -625,7 +626,7 @@ namespace Hermes
         throw Exceptions::LengthException(1, 1, num);
       double result = calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
       this->tick();
-      this->info("Adaptivity: error estimate calculation duration: %f s.", this->last());
+      this->info("\tAdaptivity: error estimate calculation duration: %f s.", this->last());
       return result;
     }
 
@@ -641,7 +642,7 @@ namespace Hermes
         throw Exceptions::LengthException(2, rslns.size(), num);
       double result = calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
       this->tick();
-      this->info("Adaptivity: error estimate calculation duration: %f s.", this->last());
+      this->info("\tAdaptivity: error estimate calculation duration: %f s.", this->last());
       return result;
     }
 
@@ -661,7 +662,7 @@ namespace Hermes
       ogProjection.project_global(ref_space, rsln, exactProjectedSlns[0]);
       double result = calc_err_internal(sln, exactProjectedSlns[0], NULL, solutions_for_adapt, error_flags);
       this->tick();
-      this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
+      this->info("\tAdaptivity: exact error calculation duration: %f s.", this->last());
       return result;
     }
 
@@ -691,7 +692,7 @@ namespace Hermes
 
       double result = calc_err_internal(slns, rslnsProjected, component_errors, solutions_for_adapt, error_flags);
       this->tick();
-      this->info("Adaptivity: exact error calculation duration: %f s.", this->last());
+      this->info("\tAdaptivity: exact error calculation duration: %f s.", this->last());
       return result;
     }
 

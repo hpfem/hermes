@@ -189,7 +189,6 @@ namespace Hermes
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
       this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
-      this->stage_dp_left->nonlinear = false;
       
       // All Spaces of the problem.
       Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;

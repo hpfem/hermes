@@ -187,7 +187,6 @@ namespace Hermes
 
         this->fnsSurface = NULL;
       }
-      
     }
 
     template<typename Scalar>

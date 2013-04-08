@@ -117,6 +117,12 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
 }
 
 template<typename Scalar>
+void Hermes::Algebra::Matrix<Scalar>::set(unsigned int m, unsigned int n, Scalar v)
+{
+  throw Hermes::Exceptions::MethodNotOverridenException("Matrix<Scalar>::set");
+}
+
+template<typename Scalar>
 Hermes::Algebra::SparseMatrix<Scalar>::SparseMatrix()
 {
   this->size = 0;

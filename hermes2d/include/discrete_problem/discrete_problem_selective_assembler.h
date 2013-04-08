@@ -54,9 +54,11 @@ namespace Hermes
       
       /// Sets new spaces for the instance.
       void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      void alloc_recalculation_tables_spaces_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side, int new_markers_count);
       
       /// Set the weak forms.
       void set_weak_formulation(WeakForm<Scalar>* wf);
+      void alloc_recalculation_tables_weakform_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
 
       /// The form will be assembled.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
@@ -70,20 +72,8 @@ namespace Hermes
       bool form_to_be_assembled(VectorFormDG<Scalar>* form, Traverse::State* current_state);
 
       /// Recalculation storages.
-      bool* matrix_volume_recalculation;
-      bool* matrix_surface_recalculation;
-      bool** matrix_surface_forms_recalculation;
-      bool** matrix_volume_forms_recalculation;
-      bool* vector_volume_recalculation;
-      bool* vector_surface_recalculation;
-      bool** vector_surface_forms_recalculation;
-      bool** vector_volume_forms_recalculation;
-      int mfvol_forms_size;
-      int vfvol_forms_size;
-      int mfsurf_forms_size;
-      int vfsurf_forms_size;
-      int surface_markers_size;
-      int volume_markers_size;
+      bool* state_reuse_kept[2][2];
+      int markers_size[2][2];
 
     protected:
       /// Spaces.

@@ -15,9 +15,9 @@
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 0;
+const int INIT_REF = 2;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-const int P_INIT = 0;
+const int P_INIT = 1;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
 const double THRESHOLD = 0.9;
@@ -59,6 +59,7 @@ const char* preconditioner = "jacobi";
 
 int main(int argc, char* args[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
@@ -111,8 +112,6 @@ int main(int argc, char* args[])
     // Solve the linear system. If successful, obtain the solution.
     try
     {
-      linear_solver.output_matrix();
-      linear_solver.output_rhs();
       linear_solver.solve();
       Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, ref_sln);
     }
@@ -156,6 +155,7 @@ int main(int argc, char* args[])
     // Clean up.
     delete adaptivity;
    
+
     as++;
   }
   while (done == false);

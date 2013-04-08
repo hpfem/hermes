@@ -64,7 +64,7 @@ namespace Hermes
       public:
         /// Sets new spaces for the instance.
         virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) = 0;
-        virtual void set_space(SpaceSharedPtr<Scalar>& space) = 0;
+        virtual void set_space(SpaceSharedPtr<Scalar>& space);
         /// Get all spaces as a Hermes::vector.
         virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
         virtual SpaceSharedPtr<Scalar>& get_space(int n);

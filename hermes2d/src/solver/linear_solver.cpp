@@ -77,9 +77,26 @@ namespace Hermes
 
       this->on_initialization();
 
-      dp->assemble(this->jacobian, this->residual);
-      process_matrix_output(jacobian, 1); 
-      process_vector_output(residual, 1);
+      if(this->jacobian_reusable)
+      {
+        if(this->constant_jacobian)
+        {
+          this->info("\tLinear solver: reusing jacobian.");
+          this->dp->assemble(residual);
+          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+        }
+        else
+        {
+          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+          this->dp->assemble(jacobian, residual);
+        }
+      }
+      else
+      {
+        this->dp->assemble(jacobian, residual);
+        this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+        this->jacobian_reusable = true;
+      }
 
       this->matrix_solver->solve();
 

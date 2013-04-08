@@ -168,13 +168,13 @@ if(HERMES_VISUALIZATION)
 
   newton.set_newton_max_iter(NEWTON_MAX_ITER);
   newton.set_newton_tol(NEWTON_TOL);
+  newton.keep_element_values(1, WeakForm<double>::FormVol, WeakForm<double>::MatrixForm);
 
   // Time-stepping loop:
   char title[100];
   int num_time_steps = T_FINAL / TAU;
   for (int ts = 1; ts <= num_time_steps; ts++)
   {
-    std::cout << ts << std::endl;
     current_time += TAU;
 
     // Update time-dependent essential BCs.
