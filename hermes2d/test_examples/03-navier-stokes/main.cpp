@@ -88,7 +88,6 @@ double current_time = 0;
 
 // Weak forms.
 #include "definitions.cpp"
-#include "tcmalloc.h"
 
 int main(int argc, char* argv[])
 {

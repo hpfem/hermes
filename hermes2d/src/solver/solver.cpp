@@ -50,6 +50,21 @@ namespace Hermes
     {
       this->init();
     }
+    
+    template<typename Scalar>
+    Solver<Scalar>::~Solver()
+    {
+      delete jacobian;
+      delete residual;
+      delete matrix_solver;
+      if(own_dp)
+        delete this->dp;
+      else
+      {
+        this->dp->set_matrix(NULL);
+        this->dp->set_rhs(NULL);
+      }
+    }
 
     template<typename Scalar>
     void Solver<Scalar>::init()
@@ -131,21 +146,6 @@ namespace Hermes
     Hermes::vector<SpaceSharedPtr<Scalar> >& Solver<Scalar>::get_spaces()
     {
       return this->dp->get_spaces();
-    }
-    
-    template<typename Scalar>
-    Solver<Scalar>::~Solver()
-    {
-      delete jacobian;
-      delete residual;
-      delete matrix_solver;
-      if(own_dp)
-        delete this->dp;
-      else
-      {
-        this->dp->set_matrix(NULL);
-        this->dp->set_rhs(NULL);
-      }
     }
 
     template<typename Scalar>

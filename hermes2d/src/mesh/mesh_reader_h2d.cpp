@@ -355,7 +355,8 @@ namespace Hermes
                 nurbs_rev->ref++;
               }
           }
-          if(!nurbs->ref) delete nurbs;
+          if(!nurbs->ref)
+            delete nurbs;
         }
       }
 

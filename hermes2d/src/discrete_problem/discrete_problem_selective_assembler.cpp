@@ -43,6 +43,15 @@ namespace Hermes
     {
       if(sp_seq)
         delete [] sp_seq;
+
+      for(int i = 0; i < 2; i++)
+      {
+        for(int j = 0; j < 2; j++)
+        {
+          if(state_reuse_kept[i][j])
+            ::free(state_reuse_kept[i][j]);
+        }
+      }
     }
 
     template<typename Scalar>
@@ -50,11 +59,11 @@ namespace Hermes
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
-      Traverse::State** recalculated_states = (Traverse::State**)malloc(sizeof(Traverse::State*) * num_states);
-      int num_recalculated_states = 0;
-      
       if(matrix_structure_reusable && mat)
       {
+        Traverse::State** recalculated_states = (Traverse::State**)malloc(sizeof(Traverse::State*) * num_states);
+        int num_recalculated_states = 0;
+      
         // First check if any marker is reused.
         bool markers_to_reuse = false;
         for(int i = 0; i < this->markers_size[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm]; i++)

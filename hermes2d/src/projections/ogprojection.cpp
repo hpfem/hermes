@@ -31,8 +31,10 @@ namespace Hermes
   Scalar* target_vec)
     {
       // Sanity check.
-      if(space == NULL)
-        throw Hermes::Exceptions::Exception("this->space == NULL in project_internal().");
+      if(wf == NULL)
+        throw Hermes::Exceptions::NullException(1);
+      if(target_vec == NULL)
+        throw Exceptions::NullException(2);
 
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, space);
@@ -46,9 +48,7 @@ namespace Hermes
       // Perform Newton iteration.
       linear_solver.solve();
 
-      if(target_vec != NULL)
-        for (int i = 0; i < space->get_num_dofs(); i++)
-          target_vec[i] = linear_solver.get_sln_vector()[i];
+      memcpy(target_vec, linear_solver.get_sln_vector(), space->get_num_dofs() * sizeof(Scalar));
     }
 
     template<typename Scalar>
