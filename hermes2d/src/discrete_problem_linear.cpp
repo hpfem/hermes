@@ -49,7 +49,6 @@ namespace Hermes
       this->nonlinear = false;
     }
 
-    /*
     template<typename Scalar>
     DiscreteProblemLinear<Scalar>::~DiscreteProblemLinear()
     {

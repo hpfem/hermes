@@ -75,7 +75,7 @@ namespace Hermes
       virtual void set_weak_formulation(WeakForm<Scalar>* wf);
 
       /// Sets the jacobian to be constant, i.e. reused whenever possible.
-      void set_jacobian_constant(bool to_set);
+      void set_jacobian_constant(bool to_set = true);
 
       /// Get the Jacobian.
       SparseMatrix<Scalar>* get_jacobian();

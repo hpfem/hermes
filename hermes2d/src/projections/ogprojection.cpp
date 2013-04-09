@@ -36,7 +36,7 @@ namespace Hermes
 
       // Initialize DiscreteProblem.
       DiscreteProblem<Scalar> dp(wf, space);
-      dp.set_nonlinear(false);
+      dp.set_linear();
       dp.set_do_not_use_cache();
 
       // Initialize linear solver.

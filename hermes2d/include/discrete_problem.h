@@ -60,7 +60,7 @@ namespace Hermes
       /// Does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
-      void set_nonlinear(bool to_set);
+      void set_linear(bool to_set = true);
 
       /// Assembling.
       void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
@@ -97,6 +97,10 @@ namespace Hermes
       virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
 
     protected:
+
+      /// RungeKutta helpers.
+      virtual void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
+
       /// State querying helpers.
       virtual bool isOkay() const;
       virtual inline std::string getClassName() const { return "DiscreteProblem"; }

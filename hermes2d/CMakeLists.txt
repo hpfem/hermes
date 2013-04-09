@@ -437,6 +437,7 @@ project(hermes2d)
   # Install header files.
 
   file(GLOB INC            "include/*.h")
+  file(GLOB INC_SOLVER          "include/solver/*.h")
   file(GLOB INC_DP          "include/discrete_problem/*.h")
   file(GLOB INC_DP_DG       "include/discrete_problem/dg/*.h")
   file(GLOB INC_FORM       "include/form/*.h")
@@ -458,6 +459,7 @@ project(hermes2d)
   file(GLOB INC_WEAKFORM_LIBRARY "include/weakform_library/*.h")
   
   install(FILES ${INC}           DESTINATION ${TARGET_ROOT}/include/hermes2d)
+  install(FILES ${INC_SOLVER}           DESTINATION ${TARGET_ROOT}/include/hermes2d/solver)
   install(FILES ${INC_DP}           DESTINATION ${TARGET_ROOT}/include/hermes2d/discrete_problem)
   install(FILES ${INC_DP_DG}           DESTINATION ${TARGET_ROOT}/include/hermes2d/discrete_problem/dg)
   install(FILES ${INC_SPACE}     DESTINATION ${TARGET_ROOT}/include/hermes2d/space)

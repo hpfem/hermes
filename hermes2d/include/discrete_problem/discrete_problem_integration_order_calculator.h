@@ -40,6 +40,8 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>
     {
     private:
+      DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler);
+
       /// Adjusts order to refmaps.
       void adjust_order_to_refmaps(Form<Scalar> *form, int& order, Hermes::Ord* o, RefMap** current_refmaps);
 
@@ -72,6 +74,9 @@ namespace Hermes
       /// Initialize orders of external functions for DG forms.
       Func<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
         LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+
+      /// For selective assembling.
+      DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
 
       template<typename T> friend class DiscreteProblem;
       template<typename T> friend class DiscreteProblemThreadAssembler;

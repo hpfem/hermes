@@ -245,23 +245,27 @@ namespace Hermes
       {
         this->on_step_begin();
 
+        // Assemble residual.
+        this->dp->assemble(last_iter_vector, residual);
+
         if(this->jacobian_reusable)
         {
           if(this->constant_jacobian)
           {
             this->info("\tPicard: reusing jacobian.");
-            this->dp->assemble(last_iter_vector, residual);
             this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
           }
           else
           {
             this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
-            this->dp->assemble(last_iter_vector, jacobian, residual);
+            // Assemble jacobian.
+            this->dp->assemble(last_iter_vector, jacobian);
           }
         }
         else
         {
-          this->dp->assemble(last_iter_vector, jacobian, residual);
+            // Assemble jacobian.
+          this->dp->assemble(last_iter_vector, jacobian);
           this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
           this->jacobian_reusable = true;
         }

@@ -34,6 +34,11 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    DiscreteProblemIntegrationOrderCalculator<Scalar>::DiscreteProblemIntegrationOrderCalculator(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler) : selectiveAssembler(selectiveAssembler)
+    {
+    }
+
+    template<typename Scalar>
     int DiscreteProblemIntegrationOrderCalculator<Scalar>::calculate_order(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, WeakForm<Scalar>* current_wf)
     {
       // Order calculation.
@@ -43,8 +48,8 @@ namespace Hermes
         for(int current_mfvol_i = 0; current_mfvol_i < current_wf->mfvol.size(); current_mfvol_i++)
         {
           MatrixFormVol<Scalar>* current_mfvol = current_wf->mfvol[current_mfvol_i];
-          //if(!form_to_be_assembled(current_mfvol, current_state))
-          //continue;
+          if(!selectiveAssembler->form_to_be_assembled(current_mfvol, current_state))
+            continue;
           current_mfvol->wf = current_wf;
           int orderTemp = calc_order_matrix_form(spaces, current_mfvol, current_refmaps, current_u_ext, current_state);
           if(order < orderTemp)
@@ -54,8 +59,8 @@ namespace Hermes
         for(int current_vfvol_i = 0; current_vfvol_i < current_wf->vfvol.size(); current_vfvol_i++)
         {
           VectorFormVol<Scalar>* current_vfvol = current_wf->vfvol[current_vfvol_i];
-          //if(!form_to_be_assembled(current_vfvol, current_state))
-          //continue;
+          if(!selectiveAssembler->form_to_be_assembled(current_vfvol, current_state))
+            continue;
           current_vfvol->wf = current_wf;
           int orderTemp = calc_order_vector_form(spaces, current_vfvol, current_refmaps, current_u_ext, current_state);
           if(order < orderTemp)
@@ -72,8 +77,8 @@ namespace Hermes
             for(int current_mfsurf_i = 0; current_mfsurf_i < current_wf->mfsurf.size(); current_mfsurf_i++)
             {
               MatrixFormSurf<Scalar>* current_mfsurf = current_wf->mfsurf[current_mfsurf_i];
-              //if(!form_to_be_assembled(current_mfsurf, current_state))
-              //continue;
+              if(!selectiveAssembler->form_to_be_assembled(current_mfsurf, current_state))
+                continue;
               current_mfsurf->wf = current_wf;
               int orderTemp = calc_order_matrix_form(spaces, current_mfsurf, current_refmaps, current_u_ext, current_state);
               if(order < orderTemp)
@@ -83,8 +88,9 @@ namespace Hermes
             for(int current_vfsurf_i = 0; current_vfsurf_i < current_wf->vfsurf.size(); current_vfsurf_i++)
             {
               VectorFormSurf<Scalar>* current_vfsurf = current_wf->vfsurf[current_vfsurf_i];
-              //if(!form_to_be_assembled(current_vfsurf, current_state))
-              //continue;
+              if(!selectiveAssembler->form_to_be_assembled(current_vfsurf, current_state))
+                continue;
+
               current_vfsurf->wf = current_wf;
               int orderTemp = calc_order_vector_form(spaces, current_vfsurf, current_refmaps, current_u_ext, current_state);
               if(order < orderTemp)

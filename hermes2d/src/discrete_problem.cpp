@@ -70,9 +70,9 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_nonlinear(bool to_set)
+    void DiscreteProblem<Scalar>::set_linear(bool to_set)
     {
-      this->nonlinear = to_set;
+      this->nonlinear = !to_set;
     }
 
     template<typename Scalar>
@@ -122,6 +122,17 @@ namespace Hermes
     {
       return this->spaces;
     }
+    
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_RK(int original_spaces_count, bool force_diagonal_blocks_, Table* block_weights_)
+    {
+      DiscreteProblemRungeKutta<Scalar>::set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
+
+      this->selectiveAssembler.set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
+
+      for(int i = 0; i < this->num_threads_used; i++)
+        this->threadAssembler[i]->set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
+    }
 
     template<typename Scalar>
     void DiscreteProblem<Scalar>::invalidate_matrix()
@@ -136,9 +147,6 @@ namespace Hermes
 
       this->selectiveAssembler.set_weak_formulation(wf_);
       this->selectiveAssembler.matrix_structure_reusable = false;
-
-      for(int i = 0; i < this->num_threads_used; i++)
-        this->threadAssembler[i]->set_weak_formulation(wf_);
     }
 
     template<typename Scalar>
@@ -256,6 +264,13 @@ namespace Hermes
         for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
           meshes.push_back(spaces[space_i]->get_mesh());
       }
+      
+      // Important.
+      // This must be here, because the weakforms may have changed since set_weak_formulation (where the following calls
+      // used to be in development). And since the following clones the passed WeakForm, this has to be called
+      // only after the weak forms are ready for calculation.
+      for(int i = 0; i < this->num_threads_used; i++)
+        this->threadAssembler[i]->set_weak_formulation(this->wf);
 
       Traverse trav_master(true);
       states = trav_master.get_states(meshes, num_states);
@@ -280,48 +295,51 @@ namespace Hermes
       this->init_assembling(states, num_states, u_ext_sln);
 
       // Creating matrix sparse structure.
-      this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states);
-
-      // Is this a DG assembling.
-      bool is_DG = this->wf->is_DG();
-
-#pragma omp parallel num_threads(num_threads_used)
+      // If there are no states, return.
+      if(this->selectiveAssembler.prepare_sparse_structure(this->current_mat, this->current_rhs, this->spaces, states, num_states))
       {
-        int thread_number = omp_get_thread_num();
-        int start = (num_states / num_threads_used) * thread_number;
-        int end = (num_states / num_threads_used) * (thread_number + 1);
-        if(thread_number == num_threads_used - 1)
-          end = num_states;
+        // Is this a DG assembling.
+        bool is_DG = this->wf->is_DG();
 
-        this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear);
-        DiscreteProblemDGAssembler<Scalar>* dgAssembler;
-        if(is_DG)
-          dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces);
-
-        for(int state_i = start; state_i < end; state_i++)
+  #pragma omp parallel num_threads(num_threads_used)
         {
-          Traverse::State* current_state = states[state_i];
+          int thread_number = omp_get_thread_num();
+          int start = (num_states / num_threads_used) * thread_number;
+          int end = (num_states / num_threads_used) * (thread_number + 1);
+          if(thread_number == num_threads_used - 1)
+            end = num_states;
 
-          this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
+          this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear);
 
-          this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache, this->do_not_use_cache);
-
-          this->threadAssembler[thread_number]->assemble_one_state();
-
+          DiscreteProblemDGAssembler<Scalar>* dgAssembler;
           if(is_DG)
+            dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces);
+
+          for(int state_i = start; state_i < end; state_i++)
           {
-            dgAssembler->init_assembling_one_state(current_state);
-            dgAssembler->assemble_one_state();
-            dgAssembler->deinit_assembling_one_state();
+            Traverse::State* current_state = states[state_i];
+
+            this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
+
+            this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache, this->do_not_use_cache);
+
+            this->threadAssembler[thread_number]->assemble_one_state();
+
+            if(is_DG)
+            {
+              dgAssembler->init_assembling_one_state(current_state);
+              dgAssembler->assemble_one_state();
+              dgAssembler->deinit_assembling_one_state();
+            }
+
+            this->threadAssembler[thread_number]->deinit_assembling_one_state();
           }
 
-          this->threadAssembler[thread_number]->deinit_assembling_one_state();
+          if(is_DG)
+            delete dgAssembler;
+
+          this->threadAssembler[thread_number]->deinit_assembling();
         }
-
-        if(is_DG)
-          delete dgAssembler;
-
-        this->threadAssembler[thread_number]->deinit_assembling();
       }
 
       // Deinitialize states && previous iterations.

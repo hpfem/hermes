@@ -46,59 +46,59 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states)
+    bool DiscreteProblemSelectiveAssembler<Scalar>::prepare_sparse_structure(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State**& states, int& num_states)
     {
       int ndof = Space<Scalar>::get_num_dofs(spaces);
 
-      Traverse::State** recalculated_states = new Traverse::State*[num_states];
+      Traverse::State** recalculated_states = (Traverse::State**)malloc(sizeof(Traverse::State*) * num_states);
       int num_recalculated_states = 0;
       
       if(matrix_structure_reusable && mat)
       {
-        AsmList<Scalar>* al = new AsmList<Scalar>[spaces_size];
-        bool **blocks = wf->get_blocks(this->force_diagonal_blocks);
+        // First check if any marker is reused.
+        bool markers_to_reuse = false;
+        for(int i = 0; i < this->markers_size[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm]; i++)
+          if(this->state_reuse_kept[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm][i])
+            markers_to_reuse = true;
 
-        for(int state_i = 0; state_i < num_states; state_i++)
+        // Just zero the matrix if nothing can be reused.
+        // Or if we also have to assemble the right-hand-side, we can not change the states.
+        if(!markers_to_reuse || rhs)
+          mat->zero();
+        else
         {
-          Traverse::State* current_state = states[state_i];
-          int marker = current_state->rep->marker;
-
-          if(!this->state_reuse_kept[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm][marker])
+          for(int state_i = 0; state_i < num_states; state_i++)
           {
-            recalculated_states[num_recalculated_states++] = current_state;
+            Traverse::State* current_state = states[state_i];
+            int marker = current_state->rep->marker;
 
-            // Obtain assembly lists for the element at all spaces.
-            /// \todo do not get the assembly list again if the element was not changed.
-            for (unsigned int i = 0; i < spaces_size; i++)
-              if(current_state->e[i])
-                spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
-
-            for (unsigned int m = 0; m < spaces_size; m++)
+            if(this->state_reuse_kept[WeakForm<Scalar>::FormVol][WeakForm<Scalar>::MatrixForm][marker])
+              delete current_state;
+            else
             {
+              recalculated_states[num_recalculated_states++] = current_state;
 
-              for (unsigned int n = 0; n < spaces_size; n++)
+              for (unsigned int m = 0; m < spaces_size; m++)
               {
-                if(blocks[m][n] && current_state->e[m] && current_state->e[n])
+                if(current_state->e[m])
                 {
-                  AsmList<Scalar>*am = &(al[m]);
-                  AsmList<Scalar>*an = &(al[n]);
+                  AsmList<Scalar> am;
+                  spaces[m]->get_element_assembly_list(current_state->e[m], &am);
 
                   // Pretend assembling of the element stiffness matrix.
-                  for (unsigned int i = 0; i < am->cnt; i++)
-                  {
-                    if(am->dof[i] >= 0)
-                      for (unsigned int j = 0; j < an->cnt; j++)
-                        if(an->dof[j] >= 0)
-                          mat->set(am->dof[i], an->dof[j], Scalar(0));
-                  }
+                  for (unsigned int i = 0; i < am.cnt; i++)
+                    mat->set_row_zero(am.dof[i]);
                 }
-              }
-            } 
+              } 
+            }
           }
-        }
         
-        states = recalculated_states;
-        num_states = num_recalculated_states;
+          free(states);
+          states = recalculated_states;
+          num_states = num_recalculated_states;
+          if(!num_states)
+            return false;
+        }
       }
 
       if(vector_structure_reusable && rhs)
@@ -255,6 +255,8 @@ namespace Hermes
         vector_structure_reusable = true;
         rhs->alloc(ndof);
       }
+
+      return true;
     }
 
     template<typename Scalar>

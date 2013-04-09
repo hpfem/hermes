@@ -77,6 +77,8 @@ namespace Hermes
 
       this->on_initialization();
 
+      Space<Scalar>::assign_dofs(this->dp->get_spaces());
+
       if(this->jacobian_reusable)
       {
         if(this->constant_jacobian)
@@ -97,6 +99,9 @@ namespace Hermes
         this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
         this->jacobian_reusable = true;
       }
+
+      this->process_matrix_output(jacobian, 1);
+      this->process_vector_output(residual, 1);
 
       this->matrix_solver->solve();
 

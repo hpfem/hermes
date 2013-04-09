@@ -33,7 +33,7 @@ namespace Hermes
         DiscreteProblemRungeKutta();
 
         /// Set the special handling of external functions of Runge-Kutta methods, including information how many spaces were there in the original problem.
-        void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
+        virtual void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
 
         /// Turn on Runge-Kutta specific handling of external functions.
         bool rungeKutta;

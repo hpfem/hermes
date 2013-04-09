@@ -189,7 +189,7 @@ namespace Hermes
       // in a form suitable for the Newton's method: k_i - f(...) = 0. At the end, matrix_left and vector_left
       // are added to matrix_right and vector_right, respectively.
       this->stage_dp_left = new DiscreteProblem<Scalar>(&stage_wf_left, spaces);
-      
+
       // All Spaces of the problem.
       Hermes::vector<SpaceSharedPtr<Scalar> > stage_spaces_vector;
 
@@ -336,6 +336,7 @@ namespace Hermes
           stage_spaces_vector.push_back(ref_space_creator.create_ref_space());
         }
 
+      Space<Scalar>::assign_dofs(stage_spaces_vector);
       this->stage_dp_right->set_spaces(stage_spaces_vector);
 
       // Zero utility vectors.
@@ -373,7 +374,7 @@ namespace Hermes
         // Assemble the block Jacobian matrix of the stationary residual F.
         // Diagonal blocks are created even if empty, so that matrix_left can be added later.
         bool force_diagonal_blocks = true;
-        stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks);
+        stage_dp_right->set_RK(spaces.size(), force_diagonal_blocks, this->bt);
         stage_dp_right->assemble(u_ext_vec, NULL, vector_right);
 
         // Finalizing the residual vector.

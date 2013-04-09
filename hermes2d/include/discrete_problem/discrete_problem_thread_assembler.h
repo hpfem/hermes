@@ -62,10 +62,10 @@ namespace Hermes
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.
       void assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
-        AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+        AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
       /// Vector volumetric forms - assemble the form.
       void assemble_vector_form(VectorForm<Scalar>* form, int order, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext, 
-        AsmList<Scalar>* current_als, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
+        AsmList<Scalar>* current_als, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights);
 
       /// Delete the cache record if do_not_use_cache etc.
       void deinit_assembling_one_state();
@@ -79,6 +79,12 @@ namespace Hermes
       void free_u_ext();
 
     private:
+      Func<Scalar>** init_u_ext_values(int order);
+      void deinit_u_ext_values(Func<Scalar>** u_ext_func);
+
+      Func<Scalar>** init_ext_values(int order, Func<Scalar>** u_ext_func_for_RungeKutta);
+      void deinit_ext_values(Func<Scalar>** ext_func);
+
       PrecalcShapeset** pss;
       RefMap** refmaps;
       Solution<Scalar>** u_ext;
@@ -92,8 +98,10 @@ namespace Hermes
       Traverse::State* current_state;
       typename DiscreteProblemCache<Scalar>::CacheRecord* current_cache_record;
       
-      /// Integration order calculator.
+      /// For selective reassembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;
+
+      /// Integration order calculator.
       DiscreteProblemIntegrationOrderCalculator<Scalar> integrationOrderCalculator;
 
       friend class DiscreteProblem<Scalar>;

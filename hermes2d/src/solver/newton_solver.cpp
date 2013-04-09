@@ -423,8 +423,6 @@ namespace Hermes
           else
           {
             this->dp->assemble(coeff_vec, jacobian);
-
-
             this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
           }
         }

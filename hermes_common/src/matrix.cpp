@@ -117,7 +117,7 @@ void Hermes::Algebra::DenseMatrixOperations::choldc(double **a, int n, double p[
 }
 
 template<typename Scalar>
-void Hermes::Algebra::Matrix<Scalar>::set(unsigned int m, unsigned int n, Scalar v)
+void Hermes::Algebra::Matrix<Scalar>::set_row_zero(unsigned int n)
 {
   throw Hermes::Exceptions::MethodNotOverridenException("Matrix<Scalar>::set");
 }

@@ -316,7 +316,7 @@ namespace Hermes
       /// @param[in] m    - the row where to set
       /// @param[in] n    - the column where to set
       /// @param[in] v    - value
-      virtual void set(unsigned int m, unsigned int n, Scalar v);
+      virtual void set_row_zero(unsigned int n);
       
       /// update the stiffness matrix
       ///
