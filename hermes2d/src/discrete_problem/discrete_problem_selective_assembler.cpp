@@ -126,7 +126,7 @@ namespace Hermes
         mat->prealloc(ndof);
 
         AsmList<Scalar>* al = new AsmList<Scalar>[spaces_size];
-        bool **blocks = wf->get_blocks(this->force_diagonal_blocks);
+        bool **blocks = this->wf->get_blocks(this->force_diagonal_blocks);
         
         // Loop through all elements.
         for(int state_i = 0; state_i < num_states; state_i++)

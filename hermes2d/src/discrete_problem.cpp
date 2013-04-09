@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "discrete_problem/dg/discrete_problem_dg_assembler.h"
+#include "discrete_problem/discrete_problem_helpers.h"
 #include "discrete_problem.h"
 #include "function/exact_solution.h"
 #include "mesh/traverse.h"
@@ -55,9 +56,6 @@ namespace Hermes
       this->spaces_size = this->spaces.size();
 
       this->nonlinear = true;
-
-      current_mat = NULL;
-      current_rhs = NULL;
 
       this->do_not_use_cache = false;
 
@@ -126,7 +124,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::set_RK(int original_spaces_count, bool force_diagonal_blocks_, Table* block_weights_)
     {
-      DiscreteProblemRungeKutta<Scalar>::set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
+      Mixins::DiscreteProblemRungeKutta<Scalar>::set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
 
       this->selectiveAssembler.set_RK(original_spaces_count, force_diagonal_blocks_, block_weights_);
 
@@ -230,7 +228,7 @@ namespace Hermes
         for(int i = 0; i < this->spaces_size; i++)
         {
           u_ext_sln[i] = new Solution<Scalar>(spaces[i]->get_mesh());
-          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], u_ext_sln[i], !rungeKutta, first_dof);
+          Solution<Scalar>::vector_to_solution(coeff_vec, spaces[i], u_ext_sln[i], !this->rungeKutta, first_dof);
           first_dof += spaces[i]->get_num_dofs();
         }
       }
@@ -349,10 +347,10 @@ namespace Hermes
       this->cache.free_unused();
 
       /// Finish the algebraic structures for solving.
-      if(current_mat)
-        current_mat->finish();
-      if(current_rhs)
-        current_rhs->finish();
+      if(this->current_mat)
+        this->current_mat->finish();
+      if(this->current_rhs)
+        this->current_rhs->finish();
 
       Element* e;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)

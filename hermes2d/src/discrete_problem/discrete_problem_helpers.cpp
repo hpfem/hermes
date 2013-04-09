@@ -55,7 +55,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      DiscreteProblemWeakForm<Scalar>::DiscreteProblemWeakForm(WeakForm<Scalar>* wf_ = NULL) : wf(wf_)
+      DiscreteProblemWeakForm<Scalar>::DiscreteProblemWeakForm(WeakForm<Scalar>* wf_) : wf(wf_)
       {
       }
 

@@ -230,7 +230,7 @@ namespace Hermes
           dir_lift_false.push_back(false);
         }
 
-        Solution<Scalar>::vector_to_solutions(residual, this->dp->get_spaces(), solutions, dir_lift_false);
+        Solution<Scalar>::vector_to_solutions(this->residual, this->dp->get_spaces(), solutions, dir_lift_false);
 
         // Calculate the norm.
         return Global<Scalar>::calc_norms(solutionsPtrs);
@@ -238,7 +238,7 @@ namespace Hermes
       else
       {
         // Calculate the l2-norm of residual vector, this is the traditional way.
-        return Global<Scalar>::get_l2_norm(residual);
+        return Global<Scalar>::get_l2_norm(this->residual);
       }
     }
 
@@ -345,10 +345,10 @@ namespace Hermes
         this->on_step_begin();
 
         // Assemble just the residual vector.
-        this->dp->assemble(coeff_vec, residual);
+        this->dp->assemble(coeff_vec, this->residual);
 
         // Output.
-        this->process_vector_output(residual, it);
+        this->process_vector_output(this->residual, it);
       
         // Current residual norm && current_damping_coefficient.
         double residual_norm = this->calculate_residual_norm();
@@ -367,7 +367,7 @@ namespace Hermes
         }
 
         // Find out the state with respect to all residual norms.
-        ConvergenceState state = get_convergence_state(initial_residual_norm, previous_residual_norm, residual_norm, it);
+        NewtonSolver<Scalar>::ConvergenceState state = get_convergence_state(initial_residual_norm, previous_residual_norm, residual_norm, it);
 
         // Previous residual norm.
         previous_residual_norm = residual_norm;
@@ -422,23 +422,23 @@ namespace Hermes
           }
           else
           {
-            this->dp->assemble(coeff_vec, jacobian);
+            this->dp->assemble(coeff_vec, this->jacobian);
             this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
           }
         }
         else
         {
-          this->dp->assemble(coeff_vec, jacobian);
+          this->dp->assemble(coeff_vec, this->jacobian);
           this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
           this->jacobian_reusable = true;
         }
 
         // Output.
-        this->process_matrix_output(jacobian, it);
+        this->process_matrix_output(this->jacobian, it);
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).
-        residual->change_sign();
+        this->residual->change_sign();
 
         // Solve the linear system.
         if(!this->matrix_solver->solve())

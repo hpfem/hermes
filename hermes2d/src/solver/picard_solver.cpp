@@ -222,7 +222,7 @@ namespace Hermes
       // Save the coefficient vector, it will be used to calculate increment error
       // after a new coefficient vector is calculated.
       Scalar* last_iter_vector = new Scalar[ndof];
-      memcpy(last_iter_vector, sln_vector, ndof*sizeof(Scalar));
+      memcpy(last_iter_vector, this->sln_vector, ndof*sizeof(Scalar));
 
       // If Anderson is used, allocate memory for vectors and coefficients.
       Scalar** previous_vectors = NULL;      // To store num_last_vectors_used last coefficient vectors.
@@ -236,7 +236,7 @@ namespace Hermes
 
       // If Anderson is used, save the initial coefficient vector in the memory.
       if (anderson_is_on)
-        memcpy(previous_vectors[0], sln_vector, ndof*sizeof(Scalar));
+        memcpy(previous_vectors[0], this->sln_vector, ndof*sizeof(Scalar));
 
       int it = 1;
       int vec_in_memory = 1;   // There is already one vector in the memory.
@@ -246,7 +246,7 @@ namespace Hermes
         this->on_step_begin();
 
         // Assemble residual.
-        this->dp->assemble(last_iter_vector, residual);
+        this->dp->assemble(last_iter_vector, this->residual);
 
         if(this->jacobian_reusable)
         {
@@ -259,27 +259,27 @@ namespace Hermes
           {
             this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
             // Assemble jacobian.
-            this->dp->assemble(last_iter_vector, jacobian);
+            this->dp->assemble(last_iter_vector, this->jacobian);
           }
         }
         else
         {
             // Assemble jacobian.
-          this->dp->assemble(last_iter_vector, jacobian);
+          this->dp->assemble(last_iter_vector, this->jacobian);
           this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
           this->jacobian_reusable = true;
         }
 
-        process_matrix_output(jacobian, it); 
-        process_vector_output(residual, it);
+        process_matrix_output(this->jacobian, it); 
+        process_vector_output(this->residual, it);
 
         this->on_step_end();
 
         // Solve the linear system.
-        if(!matrix_solver->solve())
+        if(!this->matrix_solver->solve())
           throw Exceptions::LinearMatrixSolverException();
 
-        memcpy(this->sln_vector, matrix_solver->get_sln_vector(), sizeof(Scalar)*ndof);
+        memcpy(this->sln_vector, this->matrix_solver->get_sln_vector(), sizeof(Scalar)*ndof);
 
         // If Anderson is used, store the new vector in the memory.
         if (anderson_is_on)
@@ -287,7 +287,7 @@ namespace Hermes
           // If memory not full, just add the vector.
           if (vec_in_memory < num_last_vectors_used)
           {
-            memcpy(previous_vectors[vec_in_memory], sln_vector, ndof*sizeof(Scalar));
+            memcpy(previous_vectors[vec_in_memory], this->sln_vector, ndof*sizeof(Scalar));
             vec_in_memory++;
           }
           else
@@ -301,7 +301,7 @@ namespace Hermes
 
             previous_vectors[num_last_vectors_used-1] = oldest_vec;
 
-            memcpy(previous_vectors[num_last_vectors_used-1], sln_vector, ndof*sizeof(Scalar));
+            memcpy(previous_vectors[num_last_vectors_used-1], this->sln_vector, ndof*sizeof(Scalar));
           }
         }
 
@@ -388,7 +388,7 @@ namespace Hermes
         it++;
 
         // Renew the last iteration vector.
-        memcpy(last_iter_vector, sln_vector, ndof*sizeof(Scalar));
+        memcpy(last_iter_vector, this->sln_vector, ndof*sizeof(Scalar));
       }
     }
 

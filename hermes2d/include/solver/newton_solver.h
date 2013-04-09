@@ -96,7 +96,7 @@ namespace Hermes
 
       /// Sets the current convergence measurement.
       /// Default: AbsoluteNorm
-      void set_convergence_measurement(typename ConvergenceMeasurement measurement);
+      void set_convergence_measurement(typename NewtonSolver<Scalar>::ConvergenceMeasurement measurement);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       /// Default: 1E9
@@ -169,7 +169,7 @@ namespace Hermes
       /// Calculates the new damping coefficient.
       double calculate_damping_coefficient(double previous_residual_norm, double residual_norm, double current_damping_coefficient, bool& damping_coefficient_drop, int& successful_steps);
 
-      typename ConvergenceMeasurement current_convergence_measurement;
+      typename NewtonSolver<Scalar>::ConvergenceMeasurement current_convergence_measurement;
       
       enum ConvergenceState
       {
@@ -182,7 +182,7 @@ namespace Hermes
       };
 
       /// Find out the state.
-      typename ConvergenceState get_convergence_state(double initial_residual_norm, double previous_residual_norm, double residual_norm, int iteration);
+      typename NewtonSolver<Scalar>::ConvergenceState get_convergence_state(double initial_residual_norm, double previous_residual_norm, double residual_norm, int iteration);
 
       /// Internal setting of default values (see individual set methods).
       void init_newton();

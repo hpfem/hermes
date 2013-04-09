@@ -144,7 +144,8 @@ int main(int argc, char* argv[])
   // Initialize the Newton solver.
   Hermes::Hermes2D::NewtonSolver<double> newton;
 	newton.set_weak_formulation(&wf);
-	newton.set_spaces(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space));
+  Hermes::vector<SpaceSharedPtr<double> > spaces(xvel_space, yvel_space, p_space);
+	newton.set_spaces(spaces);
 
   // Initialize views.
   Views::VectorView vview("velocity[m/s]", new Views::WinGeom(0, 0, 750, 240));

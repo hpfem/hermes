@@ -61,9 +61,9 @@ namespace Hermes
       static void traverse_multimesh_subtree(MultimeshDGNeighborTreeNode* node, Hermes::vector<Hermes::vector<unsigned int>*>& running_central_transformations,
         Hermes::vector<Hermes::vector<unsigned int>*>& running_neighbor_transformations, const typename NeighborSearch<Scalar>::NeighborEdgeInfo& edge_info, const int& active_edge, const int& mode);
 
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class DiscreteProblemDGAssembler;
-      template<typename Scalar> friend class KellyTypeAdapt;
+      friend class DiscreteProblem<Scalar>;
+      friend class DiscreteProblemDGAssembler<Scalar>;
+      friend class KellyTypeAdapt<Scalar>;
     };
   }
 }

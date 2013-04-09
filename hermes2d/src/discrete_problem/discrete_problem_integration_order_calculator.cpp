@@ -166,7 +166,7 @@ namespace Hermes
       int order;
 
       // order of solutions from the previous Newton iteration etc..
-      Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[rungeKutta ? RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
+      Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = NULL;
       int ext_size = std::max(form->ext.size(), form->wf->ext.size());
       if(ext_size > 0)
@@ -208,7 +208,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state)
     {
-      unsigned int prev_size = rungeKutta ? RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset;
+      unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset;
       bool surface_form = (current_state->isurf > -1);
 
       if(current_u_ext)
@@ -243,7 +243,7 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext)
     {
-      unsigned int prev_size = oi ? (rungeKutta ? RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
+      unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
       for(int i = 0; i < prev_size; i++)
       {
         oi[i]->free_ord();

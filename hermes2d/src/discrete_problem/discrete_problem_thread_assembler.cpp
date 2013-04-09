@@ -263,8 +263,8 @@ namespace Hermes
 #ifdef _DEBUG_DP_CACHE
         cache_record_not_found++;
 #endif
-        int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, wf);
-        this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, wf, order);
+        int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
+        this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
       }
     }
 
@@ -329,7 +329,7 @@ namespace Hermes
             ext_func[ext_i] = NULL;
       }
 
-      if(rungeKutta)
+      if(this->rungeKutta)
         for(int ext_i = 0; ext_i < this->RK_original_spaces_count; ext_i++)
           u_ext_func_for_RungeKutta[ext_i]->add(ext_func[current_extCount - this->RK_original_spaces_count + ext_i]);
 
@@ -360,9 +360,9 @@ namespace Hermes
       // init - ext
       Func<Scalar>** ext_func = this->init_ext_values(this->current_cache_record->order, u_ext_func);
 
-      if(current_mat)
+      if(this->current_mat)
       {
-        for(int current_mfvol_i = 0; current_mfvol_i < wf->mfvol.size(); current_mfvol_i++)
+        for(int current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
         {
           MatrixFormVol<Scalar>* mfv = this->wf->mfvol[current_mfvol_i];
 
@@ -380,9 +380,9 @@ namespace Hermes
             current_cache_record->n_quadrature_points, current_cache_record->geometry, current_cache_record->jacobian_x_weights);
         }
       }
-      if(current_rhs)
+      if(this->current_rhs)
       {
-        for(int current_vfvol_i = 0; current_vfvol_i < wf->vfvol.size(); current_vfvol_i++)
+        for(int current_vfvol_i = 0; current_vfvol_i < this->wf->vfvol.size(); current_vfvol_i++)
         {
           VectorFormVol<Scalar>* vfv = this->wf->vfvol[current_vfvol_i];
 
@@ -429,9 +429,9 @@ namespace Hermes
           // init - ext
           Func<Scalar>** ext_funcSurf = this->init_ext_values(orderSurf, u_ext_funcSurf);
 
-          if(current_mat)
+          if(this->current_mat)
           {
-            for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfsurf.size(); current_mfsurf_i++)
+            for(int current_mfsurf_i = 0; current_mfsurf_i < this->wf->mfsurf.size(); current_mfsurf_i++)
             {
               if(!selectiveAssembler->form_to_be_assembled(this->wf->mfsurf[current_mfsurf_i], current_state))
                 continue;
@@ -449,9 +449,9 @@ namespace Hermes
             }
           }
 
-          if(current_rhs)
+          if(this->current_rhs)
           {
-            for(int current_vfsurf_i = 0; current_vfsurf_i < wf->vfsurf.size(); current_vfsurf_i++)
+            for(int current_vfsurf_i = 0; current_vfsurf_i < this->wf->vfsurf.size(); current_vfsurf_i++)
             {
               if(!selectiveAssembler->form_to_be_assembled(this->wf->vfsurf[current_vfsurf_i], current_state))
                 continue;
@@ -504,7 +504,7 @@ namespace Hermes
       }
 
       // Account for the previous time level solution previously inserted at the back of ext.
-      if(rungeKutta)
+      if(this->rungeKutta)
         u_ext += form->u_ext_offset;
 
       // Actual form-specific calculation.
@@ -539,7 +539,7 @@ namespace Hermes
             if(sym)
               local_stiffness_matrix[j][i] = local_stiffness_matrix[i][j];
           }
-          else if(!nonlinear && current_rhs)
+          else if(!nonlinear && this->current_rhs)
           {
             this->current_rhs->add(current_als_i->dof[i], -val);
           }
@@ -547,7 +547,7 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-      current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
+      this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
       if(tra)
@@ -556,7 +556,7 @@ namespace Hermes
           chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
         transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
 
-        current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
+        this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
 
         if(this->nonlinear == false && this->current_rhs)
         {
@@ -579,7 +579,7 @@ namespace Hermes
           delete [] local_ext;
       }
 
-      if(rungeKutta)
+      if(this->rungeKutta)
         u_ext -= form->u_ext_offset;
 
       // Cleanup.
@@ -607,7 +607,7 @@ namespace Hermes
       }
 
       // Account for the previous time level solution previously inserted at the back of ext.
-      if(rungeKutta)
+      if(this->rungeKutta)
         u_ext += form->u_ext_offset;
 
       // Actual form-specific calculation.
@@ -628,7 +628,7 @@ namespace Hermes
         else
           val = form->value(n_quadrature_points, jacobian_x_weights, u_ext, v, geometry, local_ext) * form->scaling_factor * current_als_i->coef[i];
 
-        current_rhs->add(current_als_i->dof[i], val);
+        this->current_rhs->add(current_als_i->dof[i], val);
       }
 
       if(form->ext.size() > 0)
@@ -642,7 +642,7 @@ namespace Hermes
           delete [] local_ext;
       }
 
-      if(rungeKutta)
+      if(this->rungeKutta)
         u_ext -= form->u_ext_offset;
     }
 

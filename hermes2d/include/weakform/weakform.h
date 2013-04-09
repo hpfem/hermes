@@ -35,6 +35,7 @@ namespace Hermes
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class DiscreteProblemCache;
     template<typename Scalar> class DiscreteProblemSelectiveAssembler;
+    template<typename Scalar> class DiscreteProblemIntegrationOrderCalculator;
     template<typename Scalar> class RungeKutta;
     template<typename Scalar> class Space;
     template<typename Scalar> class MeshFunction;
