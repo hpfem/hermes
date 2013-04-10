@@ -926,8 +926,6 @@ namespace Hermes
           if(nurbs[i] != NULL)
           {
             nurbs[i]->unref();
-            if(!nurbs[i]->ref)
-              delete nurbs;
           }
     }
   }

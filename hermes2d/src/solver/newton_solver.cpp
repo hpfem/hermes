@@ -162,7 +162,7 @@ namespace Hermes
     void NewtonSolver<Scalar>::set_necessary_successful_steps_to_increase(unsigned int steps)
     {
       if(steps < 1)
-        throw Exceptions::ValueException("steps", steps, 0.0);
+        throw Exceptions::ValueException("necessary_successful_steps_to_increase", steps, 0.0);
       if(this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       this->necessary_successful_steps_to_increase = steps;
