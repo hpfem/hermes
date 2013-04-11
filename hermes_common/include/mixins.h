@@ -246,6 +246,7 @@ namespace Hermes
       virtual void on_step_end();
       virtual void on_finish();
 
+    protected:
       template<typename T>
       class Parameter
       {
@@ -255,10 +256,11 @@ namespace Hermes
       };
 
       template<typename T>
-      T get_parameter_value(Parameter<T>& parameter);
-    protected:
-      template<typename T>
       void set_parameter_value(Parameter<T>& parameter, T* value);
+
+    public:
+      template<typename T>
+      T get_parameter_value(Parameter<T>& parameter);
     };
   }
 }

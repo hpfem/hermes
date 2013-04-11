@@ -104,7 +104,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_)
+    void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
     {
 #ifdef _DEBUG_DP_CACHE
       cache_searches = 0;
@@ -114,6 +114,7 @@ namespace Hermes
 #endif
 
       this->nonlinear = nonlinear_;
+      this->add_dirichlet_lift = add_dirichlet_lift_;
 
       fns.clear();
       for (unsigned j = 0; j < this->spaces_size; j++)
@@ -360,7 +361,7 @@ namespace Hermes
       // init - ext
       Func<Scalar>** ext_func = this->init_ext_values(this->current_cache_record->order, u_ext_func);
 
-      if(this->current_mat)
+      if(this->current_mat || this->add_dirichlet_lift)
       {
         for(int current_mfvol_i = 0; current_mfvol_i < this->wf->mfvol.size(); current_mfvol_i++)
         {
@@ -429,7 +430,7 @@ namespace Hermes
           // init - ext
           Func<Scalar>** ext_funcSurf = this->init_ext_values(orderSurf, u_ext_funcSurf);
 
-          if(this->current_mat)
+          if(this->current_mat || this->add_dirichlet_lift)
           {
             for(int current_mfsurf_i = 0; current_mfsurf_i < this->wf->mfsurf.size(); current_mfsurf_i++)
             {
@@ -518,7 +519,12 @@ namespace Hermes
 
         for (unsigned int j = 0; j < current_als_j->cnt; j++)
         {
+          // Skip symmetric values that do not contribute to Dirichlet lift.
           if(sym && j < i && current_als_j->dof[j] >= 0)
+            continue;
+
+          // Skip anything that does not contribute to Dirichlet in the case of just rhs assembling.
+          if(current_als_j->dof[j] >= 0 && !this->current_mat)
             continue;
 
           if(std::abs(current_als_j->coef[j]) < 1e-12)
@@ -539,7 +545,7 @@ namespace Hermes
             if(sym)
               local_stiffness_matrix[j][i] = local_stiffness_matrix[i][j];
           }
-          else if(!nonlinear && this->current_rhs)
+          else if(this->add_dirichlet_lift && this->current_rhs)
           {
             this->current_rhs->add(current_als_i->dof[i], -val);
           }
@@ -558,7 +564,7 @@ namespace Hermes
 
         this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
 
-        if(this->nonlinear == false && this->current_rhs)
+        if(this->add_dirichlet_lift && this->current_rhs)
         {
           for (unsigned int j = 0; j < current_als_i->cnt; j++)
             if(current_als_i->dof[j] < 0)

@@ -79,7 +79,7 @@ const double ERR_STOP = 15.0;
 const int NDOF_STOP = 60000;
 // Newton's method.
 double NEWTON_TOL_FINE = 1e-0;
-int NEWTON_MAX_ITER = 10;
+int max_allowed_iterations = 10;
 // Matrix solver: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 MatrixSolverType matrix_solver = SOLVER_UMFPACK;
@@ -151,6 +151,10 @@ int main(int argc, char* argv[])
 
   NewtonSolver<double> newton;
 
+  newton.set_weak_formulation(&wf);
+
+  newton.set_tolerance(1e-1);
+
   // Adaptivity loop:
   int as = 1;
   bool done = false;
@@ -170,6 +174,8 @@ int main(int argc, char* argv[])
 
     Hermes::vector<SpaceSharedPtr<double> > ref_spaces_const(u_ref_space, v_ref_space);
 
+    newton.set_spaces(ref_spaces_const);
+
     int ndof_ref = Space<double>::get_num_dofs(ref_spaces_const);
 
     // Initialize reference problem.
@@ -181,12 +187,6 @@ int main(int argc, char* argv[])
     // Perform Newton's iteration.
     try
     {
-      newton.set_spaces(ref_spaces_const);
-
-      newton.set_weak_formulation(&wf);
-
-      newton.set_newton_tol(1e-1);
-
       newton.solve();
     }
     catch(Hermes::Exceptions::Exception& e)

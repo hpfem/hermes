@@ -50,17 +50,25 @@ namespace Hermes
     NonlinearSolver<Scalar>::~NonlinearSolver()
     {
     }
+    
+    template<typename Scalar>
+    void NonlinearSolver<Scalar>::set_max_allowed_iterations(int max_allowed_iterations_)
+    {
+      if(max_allowed_iterations_ < 1)
+        throw Exceptions::ValueException("max_allowed_iterations", max_allowed_iterations_, 1);
+      this->max_allowed_iterations = max_allowed_iterations_;
+    }
 
     template<typename Scalar>
     void NonlinearSolver<Scalar>::solve(MeshFunctionSharedPtr<Scalar>& initial_guess)
     {
-      assert(this->dp->get_spaces().size() == 1);
+      if(this->dp->get_spaces().size() != 1)
+        throw Hermes::Exceptions::ValueException("dp->get_spaces().size()", this->dp->get_spaces().size(), 1);
       Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
       OGProjection<Scalar> ogProj;
       ogProj.project_global(this->dp->get_spaces()[0], initial_guess, coeff_vec);
       this->solve(coeff_vec);
       delete [] coeff_vec;
-
     }
 
     template<typename Scalar>

@@ -38,7 +38,7 @@ const int INIT_REF_NUM = 1;                       // Number of initial uniform m
 const int INIT_REF_NUM_BDY = 1;                   // Number of initial uniform mesh refinements towards the boundary.
 double time_step = 3e+2;                    // Time step in seconds.
 const double NEWTON_TOL = 1e-5;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 100;                  // Maximum allowed number of Newton iterations.
+const int max_allowed_iterations = 100;                  // Maximum allowed number of Newton iterations.
 MatrixSolverType matrix_solver_type = SOLVER_UMFPACK;  // Possibilities: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
 // SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
 

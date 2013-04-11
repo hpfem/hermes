@@ -68,7 +68,7 @@ const double STARTUP_TIME = 1.0;
 const double TAU = 0.1;                           // Time step.
 const double T_FINAL = 0.5;                   // Time interval length.
 const double NEWTON_TOL = 1e-3;                   // Stopping criterion for the Newton's method.
-const int NEWTON_MAX_ITER = 10;                   // Maximum allowed number of Newton iterations.
+const int max_allowed_iterations = 10;                   // Maximum allowed number of Newton iterations.
 const double H = 5;                               // Domain height (necessary to define the parabolic
 // velocity profile at inlet).
 
@@ -166,8 +166,8 @@ if(HERMES_VISUALIZATION)
     Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, p_prev_time),
     coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
-  newton.set_newton_max_iter(NEWTON_MAX_ITER);
-  newton.set_newton_tol(NEWTON_TOL);
+  newton.set_max_allowed_iterations(max_allowed_iterations);
+  newton.set_tolerance(NEWTON_TOL);
   newton.keep_element_values(1, WeakForm<double>::FormVol, WeakForm<double>::MatrixForm);
 
   // Time-stepping loop:

@@ -59,7 +59,7 @@ namespace Hermes
     template<typename Scalar>
     void LinearSolver<Scalar>::init_linear()
     {
-      this->dp->nonlinear = false;
+      this->dp->set_linear();
     }
 
     template<typename Scalar>
@@ -79,26 +79,8 @@ namespace Hermes
 
       Space<Scalar>::assign_dofs(this->dp->get_spaces());
 
-      if(this->jacobian_reusable)
-      {
-        if(this->constant_jacobian)
-        {
-          this->info("\tLinear solver: reusing jacobian.");
-          this->dp->assemble(this->residual);
-          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
-        }
-        else
-        {
-          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
-          this->dp->assemble(this->jacobian, this->residual);
-        }
-      }
-      else
-      {
-        this->dp->assemble(this->jacobian, this->residual);
-        this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
-        this->jacobian_reusable = true;
-      }
+      // Assemble the residual always and the jacobian when necessary (nonconstant jacobian, not reusable, ...).
+      this->conditionally_assemble();
 
       this->process_matrix_output(this->jacobian, 1);
       this->process_vector_output(this->residual, 1);

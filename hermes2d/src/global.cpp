@@ -44,6 +44,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    double Global<Scalar>::get_l2_norm(Scalar* vec, int count)
+    {
+      Scalar val = 0;
+      for (unsigned int i = 0; i < count; i++)
+      {
+        Scalar inc = vec[i];
+        val = val + inc*conj(inc);
+      }
+      return sqrt(std::abs(val));
+    }
+
+    template<typename Scalar>
     double Global<Scalar>::calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type)
     {
       // sanity checks

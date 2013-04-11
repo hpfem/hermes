@@ -60,7 +60,7 @@ namespace Hermes
       /// Does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
-      void set_linear(bool to_set = true);
+      void set_linear(bool to_set = true, bool dirichlet_lift_accordingly = true);
 
       /// Assembling.
       void assemble(Scalar* coeff_vec, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
@@ -113,7 +113,7 @@ namespace Hermes
       int spaces_size;
       
       /// Internal.
-      bool nonlinear;
+      bool nonlinear, add_dirichlet_lift;
       
       /// DiscreteProblemMatrixVector methods.
       virtual void set_matrix(SparseMatrix<Scalar>* mat);

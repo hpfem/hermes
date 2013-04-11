@@ -56,6 +56,7 @@ namespace Hermes
       this->spaces_size = this->spaces.size();
 
       this->nonlinear = true;
+      this->add_dirichlet_lift = false;
 
       this->do_not_use_cache = false;
 
@@ -68,9 +69,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblem<Scalar>::set_linear(bool to_set)
+    void DiscreteProblem<Scalar>::set_linear(bool to_set, bool dirichlet_lift_accordingly)
     {
       this->nonlinear = !to_set;
+      if(dirichlet_lift_accordingly)
+        this->add_dirichlet_lift = !this->nonlinear;
     }
 
     template<typename Scalar>
@@ -307,7 +310,7 @@ namespace Hermes
           if(thread_number == num_threads_used - 1)
             end = num_states;
 
-          this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear);
+          this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);
 
           DiscreteProblemDGAssembler<Scalar>* dgAssembler;
           if(is_DG)

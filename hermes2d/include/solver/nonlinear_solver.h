@@ -62,10 +62,22 @@ namespace Hermes
       /// the other solvers).
       /// \param[in] preconditioner_name See the attribute preconditioner.
       void set_preconditioner(const char* preconditioner_name);
+
+      /// Set the maximum number of iterations, thus co-determine when to stop iterations.
+      void set_max_allowed_iterations(int max_allowed_iterations);
     
     protected:
-      /// For use of error measurement.
-      int error;
+      /// Maximum number of iterations allowed.
+      int max_allowed_iterations;
+
+      /// Maximum allowed residual norm. If this number is exceeded, the methods solve() return 'false'.
+      /// By default set to 1E6.
+      /// Possible to change via method set_max_allowed_residual_norm().
+      double max_allowed_residual_norm;
+
+      /// There was no initial coefficient vector passed, so this instance had to create one
+      /// and this serves as the identificator according to which it will be deleted.
+      bool delete_coeff_vec;
 
       /// Preconditioned solver.
       bool precond_yes;

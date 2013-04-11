@@ -92,30 +92,73 @@ namespace Hermes
       void use_Anderson_acceleration(bool to_set);
     
       /// Set the relative tolerance, thus co-determine when to stop Picard's iterations.
-      void set_picard_tol(double tol);
-      /// Set the maximum number of Picard's iterations, thus co-determine when to stop Picard's iterations.
-      void set_picard_max_iter(int max_iter);
+      void set_tolerance(double tol);
+      
       /// Set how many last vectors will be used for Anderson acceleration. See the details about the Anderson acceleration for 
       /// explanation of this parameter.
       void set_num_last_vector_used(int num);
+
       /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for 
       /// explanation of this parameter.
       void set_anderson_beta(double beta);
       
     protected:
+
+      /// Convergence state.
+      enum ConvergenceState
+      {
+        Converged,
+        NotConverged,
+        AboveMaxAllowedResidualNorm,
+        AboveMaxIterations,
+        Error
+      };
+
+      /// Find out the state.
+      typename PicardSolver<Scalar>::ConvergenceState get_convergence_state(double relative_error, int iteration);
+
       void init_solving(int ndof, Scalar*& coeff_vec);
+      void deinit_solving(Scalar* coeff_vec);
 
       void init_picard();
-      
-      static void calculate_anderson_coeffs(Scalar** previous_vectors, Scalar* anderson_coeffs, int num_last_vectors_used, int ndof);
+
+      double calculate_relative_error(int ndof, Scalar* coeff_vec);
       
       bool verbose_output_linear_solver;
 
-      double tol;
-      int max_iter;
+      /// Tolerance.
+      double picard_tolerance;
+
+      /// Parameters for OutputAttachable mixin.
+      Hermes::Mixins::OutputAttachable::Parameter<int> p_vec_in_memory;
+
+      // Anderson.
       int num_last_vectors_used;
       bool anderson_is_on;
       double anderson_beta;
+      /// To store num_last_vectors_used last coefficient vectors.
+      Scalar** previous_vectors;
+      /// To store num_last_vectors_used - 1 Anderson coefficients.
+      Scalar* anderson_coeffs;
+
+      /// Initialization.
+      void init_anderson(int ndof);
+      /// Deinitialization.
+      void deinit_anderson();
+
+      /// Handle the previous vectors.
+      void handle_previous_vectors(int ndof, int& vec_in_memory);
+      /// Calcualte the coefficients.
+      void calculate_anderson_coeffs(int ndof);
+
+#pragma region OutputAttachable
+      // For derived classes - read-only access.
+      const Hermes::Mixins::OutputAttachable::Parameter<int>& iteration() const { return this->p_iteration; };
+
+    private:
+      // Parameters for OutputAttachable mixin.
+      Hermes::Mixins::OutputAttachable::Parameter<int> p_iteration;
+#pragma endregion
     };
   }
 }

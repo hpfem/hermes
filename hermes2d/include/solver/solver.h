@@ -23,6 +23,7 @@
 #define __H2D_SOLVER_H_
 
 #include "discrete_problem.h"
+#include "global.h"
 
 namespace Hermes
 {
@@ -37,7 +38,7 @@ namespace Hermes
       public Hermes::Mixins::TimeMeasurable, 
       public Hermes::Mixins::SettableComputationTime, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
-      public Hermes::Mixins::OutputAttachable, 
+      public Hermes::Mixins::OutputAttachable,
       public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, 
       public Hermes::Mixins::IntegrableWithGlobalOrder, 
       public Hermes::Hermes2D::Mixins::StateQueryable, 
@@ -83,6 +84,9 @@ namespace Hermes
       /// Get the Residual.
       Vector<Scalar>* get_residual();
 
+      /// Handle the jacobian re-calculation and re-usage of a previous one.
+      void conditionally_assemble(Scalar* coeff_vec = NULL, bool force_reuse_jacobian_values = false, bool assemble_residual = true);
+
     protected:
       /// Jacobian can be reused if possible.
       bool constant_jacobian;
@@ -108,8 +112,8 @@ namespace Hermes
       /// This instance owns its DP.
       const bool own_dp;
 
-      /// Parameters for OutputAttachable mixin.
-      Hermes::Mixins::OutputAttachable::Parameter<int> p_iterations;
+      /// For deciding if the jacobian is constant at this point.
+      virtual bool reuse_jacobian_values();
     };
   }
 }

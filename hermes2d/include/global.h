@@ -151,6 +151,7 @@ namespace Hermes
       static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
 
       static double get_l2_norm(Vector<Scalar>* vec);
+      static double get_l2_norm(Scalar* vec, int count);
     };
 
     /// Projection norms.

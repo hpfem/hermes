@@ -40,7 +40,7 @@ namespace Hermes
     /// Set a whole bunch of parameters according to your liking.<br>
     /// See the class documentation for all possible parameters.<br>
     /// newton_solver.set_newton_tol(1e-6);<br>
-    /// newton_solver.set_newton_max_iter(15);<br>
+    /// newton_solver.set_max_allowed_iterations(15);<br>
     /// newton_solver.set_max_allowed_residual_norm(1e6);<br>
     /// newton_solver.set_min_allowed_damping_coeff(1e-3);<br>
     /// <br>
@@ -78,10 +78,6 @@ namespace Hermes
       NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~NewtonSolver();
 
-      /// State querying helpers.
-      virtual bool isOkay() const;
-      inline std::string getClassName() const { return "NewtonSolver"; }
-
       /// Solve.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
       void solve(Scalar* coeff_vec = NULL);
@@ -102,10 +98,6 @@ namespace Hermes
       /// Default: 1E9
       void set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set);
 
-      /// Sets minimum damping coefficient.
-      /// Default: 1E-4
-      void set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set);
-
       /// Interpret the residual as a function.
       /// Translate the residual vector into a residual function (or multiple functions)
       /// in the corresponding finite element space(s) and measure their norm(s) there.
@@ -117,11 +109,12 @@ namespace Hermes
 
       /// Set the residual norm tolerance for ending the Newton's loop.
       /// Default: 1E-8.
-      void set_newton_tol(double newton_tol, bool relative = false);
+      void set_tolerance(double newton_tol);
 
-      /// Set the maximum number of Newton's iterations.
-      /// Default: 15
-      void set_newton_max_iter(int newton_max_iter);
+#pragma region damping-public
+      /// Sets minimum damping coefficient.
+      /// Default: 1E-4
+      void set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set);
 
       /// Turn on or off manual damping (default is the automatic) and optionally sets manual damping coefficient.
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.
@@ -156,10 +149,19 @@ namespace Hermes
       /// Default: 1
       /// \param[in] steps Number of steps.
       void set_necessary_successful_steps_to_increase(unsigned int steps);
+#pragma endregion
+
+#pragma region jacobian_recalculation-public
+      void set_sufficient_improvement_factor_jacobian(double ratio);
+      void set_max_steps_with_constant_jacobian(int steps);
+#pragma endregion
+
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "NewtonSolver"; }
 
     protected:
       void init_solving(int ndof, Scalar*& coeff_vec, Scalar*& coeff_vec_back);
-      bool delete_coeff_vec;
       void finalize_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
       void deinit_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
 
@@ -171,6 +173,14 @@ namespace Hermes
 
       typename NewtonSolver<Scalar>::ConvergenceMeasurement current_convergence_measurement;
       
+      /// Internal setting of default values (see individual set methods).
+      void init_newton();
+
+      double newton_tolerance;
+      bool residual_as_function;
+      
+#pragma region ConvergenceState      
+      /// Convergence state.
       enum ConvergenceState
       {
         Converged,
@@ -183,20 +193,9 @@ namespace Hermes
 
       /// Find out the state.
       typename NewtonSolver<Scalar>::ConvergenceState get_convergence_state(double initial_residual_norm, double previous_residual_norm, double residual_norm, int iteration);
+#pragma endregion
 
-      /// Internal setting of default values (see individual set methods).
-      void init_newton();
-
-      double newton_tol;
-      bool newton_tol_relative;
-      int newton_max_iter;
-      bool residual_as_function;
-
-      /// Maximum allowed residual norm. If this number is exceeded, the methods solve() return 'false'.
-      /// By default set to 1E6.
-      /// Possible to change via method set_max_allowed_residual_norm().
-      double max_allowed_residual_norm;
-
+#pragma region damping-private
       /// Manual / auto.
       bool manual_damping;
 
@@ -213,15 +212,39 @@ namespace Hermes
       /// necessary number of steps to increase back the damping coeff.
       unsigned int necessary_successful_steps_to_increase;
       /// Minimum allowed damping coeff.
-      double min_allowed_damping_coeff;
+      double min_allowed_damping_coeff;      
+#pragma endregion
 
-      /// Parameters for OutputAttachable mixin.
+#pragma region jacobian_recalculation-private
+      /// For deciding if the jacobian is constant at this point.
+      bool force_reuse_jacobian_values(double previous_residual_norm, double residual_norm, int it, int& successful_steps_with_constant_jacobian);
+
+      double sufficient_improvement_factor_jacobian;
+      int max_steps_with_constant_jacobian;
+#pragma endregion
+
+#pragma region OutputAttachable
+      // For derived classes - read-only access.
+      const Hermes::Mixins::OutputAttachable::Parameter<double>& residual_norm() const { return this->p_residual_norm; };
+      const Hermes::Mixins::OutputAttachable::Parameter<double>& previous_residual_norm() const { return this->p_previous_residual_norm; };
+      const Hermes::Mixins::OutputAttachable::Parameter<int>& successful_steps_jacobian() const { return this->p_successful_steps_jacobian; };
+      const Hermes::Mixins::OutputAttachable::Parameter<int>& successful_steps() const { return this->p_successful_steps; };
+      const Hermes::Mixins::OutputAttachable::Parameter<double>& initial_residual_norm() const { return this->p_initial_residual_norm; };
+      const Hermes::Mixins::OutputAttachable::Parameter<double>& current_damping_coefficient() const { return this->p_current_damping_coefficient; };
+      const Hermes::Mixins::OutputAttachable::Parameter<bool>& residual_norm_drop() const { return this->p_residual_norm_drop; };
+      const Hermes::Mixins::OutputAttachable::Parameter<int>& iteration() const { return this->p_iteration; };
+
+    private:
+      // Parameters for OutputAttachable mixin.
       Hermes::Mixins::OutputAttachable::Parameter<double> p_residual_norm;
       Hermes::Mixins::OutputAttachable::Parameter<double> p_previous_residual_norm;
       Hermes::Mixins::OutputAttachable::Parameter<int> p_successful_steps;
+      Hermes::Mixins::OutputAttachable::Parameter<int> p_successful_steps_jacobian;
       Hermes::Mixins::OutputAttachable::Parameter<double> p_initial_residual_norm;
       Hermes::Mixins::OutputAttachable::Parameter<double> p_current_damping_coefficient;
       Hermes::Mixins::OutputAttachable::Parameter<bool> p_residual_norm_drop;
+      Hermes::Mixins::OutputAttachable::Parameter<int> p_iteration;
+#pragma endregion
     };
   }
 }
