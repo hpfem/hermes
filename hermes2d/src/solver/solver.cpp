@@ -176,7 +176,6 @@ namespace Hermes
       {
         if(this->reuse_jacobian_values() || force_reuse_jacobian_values)
         {
-          this->info("\tPicard: reusing jacobian.");
           if(assemble_residual)
             this->dp->assemble(coeff_vec, this->residual);
           this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
