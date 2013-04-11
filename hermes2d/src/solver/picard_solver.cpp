@@ -297,11 +297,11 @@ namespace Hermes
       else
         memcpy(this->sln_vector, coeff_vec, ndof*sizeof(Scalar));
 
-      delete_coeff_vec = false;
+      this->delete_coeff_vec = false;
       if(coeff_vec == NULL)
       {
         coeff_vec = (Scalar*)calloc(ndof, sizeof(Scalar));
-        delete_coeff_vec = true;
+        this->delete_coeff_vec = true;
       }
 
       this->on_initialization();
@@ -327,8 +327,8 @@ namespace Hermes
         // Assemble the residual and also jacobian when necessary (nonconstant jacobian, not reusable, ...).
         this->conditionally_assemble(coeff_vec);
 
-        process_matrix_output(this->jacobian, it); 
-        process_vector_output(this->residual, it);
+        this->process_matrix_output(this->jacobian, it); 
+        this->process_vector_output(this->residual, it);
 
         this->on_step_end();
 
@@ -356,7 +356,7 @@ namespace Hermes
           break;
 
         case AboveMaxIterations:
-          throw Exceptions::ValueException("iterations", it, max_allowed_iterations);
+          throw Exceptions::ValueException("iterations", it, this->max_allowed_iterations);
           this->deinit_solving(coeff_vec);
           return;
           break;
@@ -383,10 +383,10 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::deinit_solving(Scalar* coeff_vec)
     {
-      if(delete_coeff_vec)
+      if(this->delete_coeff_vec)
       {
         ::free(coeff_vec);
-        delete_coeff_vec = false;
+        this->delete_coeff_vec = false;
       }
     }
 

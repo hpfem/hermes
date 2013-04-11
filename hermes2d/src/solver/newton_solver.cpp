@@ -287,11 +287,11 @@ namespace Hermes
       this->check();
       this->tick();
 
-      delete_coeff_vec = false;
+      this->delete_coeff_vec = false;
       if(coeff_vec == NULL)
       {
         coeff_vec = (Scalar*)calloc(ndof, sizeof(Scalar));
-        delete_coeff_vec = true;
+        this->delete_coeff_vec = true;
       }
 
       coeff_vec_back = (Scalar*)calloc(ndof, sizeof(Scalar));
@@ -310,10 +310,10 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::deinit_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back)
     {
-      if(delete_coeff_vec)
+      if(this->delete_coeff_vec)
       {
         ::free(coeff_vec);
-        delete_coeff_vec = false;
+        this->delete_coeff_vec = false;
       }
 
       ::free(coeff_vec_back);
@@ -429,7 +429,7 @@ namespace Hermes
 
         case AboveMaxIterations:
           memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
-          throw Exceptions::ValueException("iterations", it, max_allowed_iterations);
+          throw Exceptions::ValueException("iterations", it, this->max_allowed_iterations);
           this->finalize_solving(coeff_vec, coeff_vec_back);
           return;
           break;

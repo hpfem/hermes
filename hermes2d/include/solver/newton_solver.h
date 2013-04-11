@@ -177,6 +177,12 @@ namespace Hermes
       void init_newton();
 
       double newton_tolerance;
+
+      /// Maximum allowed residual norm. If this number is exceeded, the methods solve() return 'false'.
+      /// By default set to 1E6.
+      /// Possible to change via method set_max_allowed_residual_norm().
+      double max_allowed_residual_norm;
+
       bool residual_as_function;
       
 #pragma region ConvergenceState      
