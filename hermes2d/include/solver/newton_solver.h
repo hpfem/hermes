@@ -153,7 +153,7 @@ namespace Hermes
 
 #pragma region jacobian_recalculation-public
       void set_sufficient_improvement_factor_jacobian(double ratio);
-      void set_max_steps_with_constant_jacobian(int steps);
+      void set_max_steps_with_reused_jacobian(unsigned int steps);
 #pragma endregion
 
       /// State querying helpers.
@@ -217,18 +217,18 @@ namespace Hermes
 
 #pragma region jacobian_recalculation-private
       /// For deciding if the jacobian is constant at this point.
-      bool force_reuse_jacobian_values(double previous_residual_norm, double residual_norm, int it, int& successful_steps_with_constant_jacobian);
+      bool force_reuse_jacobian_values(double previous_residual_norm, double residual_norm, int it, unsigned int& successful_steps_with_constant_jacobian);
 
       double sufficient_improvement_factor_jacobian;
-      int max_steps_with_constant_jacobian;
+      unsigned int max_steps_with_reused_jacobian;
 #pragma endregion
 
 #pragma region OutputAttachable
       // For derived classes - read-only access.
       const Hermes::Mixins::OutputAttachable::Parameter<double>& residual_norm() const { return this->p_residual_norm; };
       const Hermes::Mixins::OutputAttachable::Parameter<double>& previous_residual_norm() const { return this->p_previous_residual_norm; };
-      const Hermes::Mixins::OutputAttachable::Parameter<int>& successful_steps_jacobian() const { return this->p_successful_steps_jacobian; };
       const Hermes::Mixins::OutputAttachable::Parameter<int>& successful_steps() const { return this->p_successful_steps; };
+      const Hermes::Mixins::OutputAttachable::Parameter<unsigned int>& successful_steps_jacobian() const { return this->p_successful_steps_jacobian; };
       const Hermes::Mixins::OutputAttachable::Parameter<double>& initial_residual_norm() const { return this->p_initial_residual_norm; };
       const Hermes::Mixins::OutputAttachable::Parameter<double>& current_damping_coefficient() const { return this->p_current_damping_coefficient; };
       const Hermes::Mixins::OutputAttachable::Parameter<bool>& residual_norm_drop() const { return this->p_residual_norm_drop; };
@@ -239,7 +239,7 @@ namespace Hermes
       Hermes::Mixins::OutputAttachable::Parameter<double> p_residual_norm;
       Hermes::Mixins::OutputAttachable::Parameter<double> p_previous_residual_norm;
       Hermes::Mixins::OutputAttachable::Parameter<int> p_successful_steps;
-      Hermes::Mixins::OutputAttachable::Parameter<int> p_successful_steps_jacobian;
+      Hermes::Mixins::OutputAttachable::Parameter<unsigned int> p_successful_steps_jacobian;
       Hermes::Mixins::OutputAttachable::Parameter<double> p_initial_residual_norm;
       Hermes::Mixins::OutputAttachable::Parameter<double> p_current_damping_coefficient;
       Hermes::Mixins::OutputAttachable::Parameter<bool> p_residual_norm_drop;

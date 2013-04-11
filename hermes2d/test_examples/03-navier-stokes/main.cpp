@@ -168,7 +168,8 @@ if(HERMES_VISUALIZATION)
 
   newton.set_max_allowed_iterations(max_allowed_iterations);
   newton.set_tolerance(NEWTON_TOL);
-  newton.keep_element_values(1, WeakForm<double>::FormVol, WeakForm<double>::MatrixForm);
+  //newton.keep_element_values(1, WeakForm<double>::FormVol, WeakForm<double>::MatrixForm);
+  newton.set_sufficient_improvement_factor_jacobian(1e-2);
 
   // Time-stepping loop:
   char title[100];

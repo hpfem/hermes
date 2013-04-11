@@ -70,19 +70,19 @@ namespace Hermes
       this->necessary_successful_steps_to_increase = 3;
 
       this->sufficient_improvement_factor_jacobian = 1e-1;
-      this->max_steps_with_constant_jacobian = 3;
+      this->max_steps_with_reused_jacobian = 3;
     }
 
     template<typename Scalar>
-    void set_sufficient_improvement_factor_jacobian(double ratio)
+    void NewtonSolver<Scalar>::set_sufficient_improvement_factor_jacobian(double ratio)
     {
       this->sufficient_improvement_factor_jacobian = ratio;
     }
 
     template<typename Scalar>
-    void set_max_steps_with_constant_jacobian(int steps)
+    void NewtonSolver<Scalar>::set_max_steps_with_reused_jacobian(unsigned int steps)
     {
-      this->max_steps_with_constant_jacobian = steps;
+      this->max_steps_with_reused_jacobian = steps;
     }
 
     template<typename Scalar>
@@ -329,7 +329,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool NewtonSolver<Scalar>::force_reuse_jacobian_values(double previous_residual_norm, double residual_norm, int it, int& successful_steps_with_constant_jacobian)
+    bool NewtonSolver<Scalar>::force_reuse_jacobian_values(double previous_residual_norm, double residual_norm, int it, unsigned int& successful_steps_with_reused_jacobian)
     {
       if(it == 1)
         return false;
@@ -340,11 +340,17 @@ namespace Hermes
       assert(previous_residual_norm > residual_norm);
 #endif
       
-      if(successful_steps_with_constant_jacobian >= this->max_steps_with_constant_jacobian)
+      if(successful_steps_with_reused_jacobian >= this->max_steps_with_reused_jacobian)
+      {
+        successful_steps_with_reused_jacobian = 0;
         return false;
+      }
       if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
+      {
+        successful_steps_with_reused_jacobian = 0;
         return false;
-
+      }
+      successful_steps_with_reused_jacobian++;
       return true;
     }
 
@@ -359,7 +365,7 @@ namespace Hermes
       // The Newton's loop.
       int it = 1;
       int successful_steps = 0;
-      int successful_steps_jacobian = 0;
+      unsigned int successful_steps_jacobian = 0;
       double residual_norm, initial_residual_norm, previous_residual_norm;
       double current_damping_coefficient = this->manual_damping ? manual_damping_coefficient : initial_auto_damping_coefficient;
       bool residual_norm_drop = true;
