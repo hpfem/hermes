@@ -245,6 +245,20 @@ namespace Hermes
       virtual void on_step_begin();
       virtual void on_step_end();
       virtual void on_finish();
+
+      template<typename T>
+      class Parameter
+      {
+      private:
+        T* value;
+        friend class OutputAttachable;
+      };
+
+      template<typename T>
+      T get_parameter_value(Parameter<T>& parameter);
+    protected:
+      template<typename T>
+      void set_parameter_value(Parameter<T>& parameter, T* value);
     };
   }
 }

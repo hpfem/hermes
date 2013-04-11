@@ -458,32 +458,28 @@ namespace Hermes
     bool DiscreteProblemDGAssembler<Scalar>::init_neighbors(NeighborSearch<Scalar>** current_neighbor_searches, Traverse::State* current_state)
     {
       // Initialize the NeighborSearches.
+      bool DG_intra = false;
       for(unsigned int i = 0; i < current_state->num; i++)
       {
-        if(i > 0 && spaces[i - 1]->get_mesh()->get_seq() == spaces[i]->get_mesh()->get_seq())
-          current_neighbor_searches[i] = current_neighbor_searches[i - 1];
-        else
+        bool existing_ns = false;
+        for(int j = i - 1; j >= 0; j--)
+          if(current_state->e[i] == current_state->e[j])
+          {
+            current_neighbor_searches[i] = current_neighbor_searches[j];
+            existing_ns = true;
+            break;
+          }
+        if(!existing_ns)
         {
           NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(current_state->e[i], spaces[i]->get_mesh());
           ns->original_central_el_transform = current_state->sub_idx[i];
           current_neighbor_searches[i] = ns;
-        }
-      }
-
-      // Calculate respective neighbors.
-      // Also clear the initial_sub_idxs from the central element transformations
-      // of NeighborSearches with multiple neighbors.
-      // If all DG meshes have this edge as intra-edge, pass.
-      bool DG_intra = false;
-      for(unsigned int i = 0; i < current_state->num; i++)
-      {
-        if(!(i > 0 && spaces[i]->get_mesh()->get_seq() == spaces[i-1]->get_mesh()->get_seq()))
-        {
           if(current_neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf) && spaces[i]->get_type() == HERMES_L2_SPACE)
             DG_intra = true;
           current_neighbor_searches[i]->clear_initial_sub_idx();
         }
       }
+
       return DG_intra;
     }
 

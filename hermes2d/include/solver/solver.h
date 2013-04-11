@@ -107,6 +107,9 @@ namespace Hermes
       
       /// This instance owns its DP.
       const bool own_dp;
+
+      /// Parameters for OutputAttachable mixin.
+      Hermes::Mixins::OutputAttachable::Parameter<int> p_iterations;
     };
   }
 }

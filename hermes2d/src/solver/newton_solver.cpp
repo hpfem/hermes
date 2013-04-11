@@ -332,12 +332,18 @@ namespace Hermes
       this->init_solving(ndof, coeff_vec, coeff_vec_back);
 
       // The Newton's loop.
-      double previous_residual_norm;
       int it = 1;
       int successful_steps = 0;
-      double initial_residual_norm;
+      double residual_norm, initial_residual_norm, previous_residual_norm;
       double current_damping_coefficient = this->manual_damping ? manual_damping_coefficient : initial_auto_damping_coefficient;
       bool residual_norm_drop = true;
+
+      this->set_parameter_value(this->p_previous_residual_norm, &previous_residual_norm);
+      this->set_parameter_value(this->p_successful_steps, &successful_steps);
+      this->set_parameter_value(this->p_iterations, &it);
+      this->set_parameter_value(this->p_initial_residual_norm, &initial_residual_norm);
+      this->set_parameter_value(this->p_residual_norm, &residual_norm);
+      this->set_parameter_value(this->p_residual_norm_drop, &residual_norm_drop);
 
       while (true)
       {

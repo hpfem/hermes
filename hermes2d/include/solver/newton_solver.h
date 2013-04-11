@@ -214,6 +214,14 @@ namespace Hermes
       unsigned int necessary_successful_steps_to_increase;
       /// Minimum allowed damping coeff.
       double min_allowed_damping_coeff;
+
+      /// Parameters for OutputAttachable mixin.
+      Hermes::Mixins::OutputAttachable::Parameter<double> p_residual_norm;
+      Hermes::Mixins::OutputAttachable::Parameter<double> p_previous_residual_norm;
+      Hermes::Mixins::OutputAttachable::Parameter<int> p_successful_steps;
+      Hermes::Mixins::OutputAttachable::Parameter<double> p_initial_residual_norm;
+      Hermes::Mixins::OutputAttachable::Parameter<double> p_current_damping_coefficient;
+      Hermes::Mixins::OutputAttachable::Parameter<bool> p_residual_norm_drop;
     };
   }
 }

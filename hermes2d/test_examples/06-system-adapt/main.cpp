@@ -94,8 +94,6 @@ const double K = 100.;
 
 int main(int argc, char* argv[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
-
   // Time measurement.
   Hermes::Mixins::TimeMeasurable cpu_time;
   cpu_time.tick();

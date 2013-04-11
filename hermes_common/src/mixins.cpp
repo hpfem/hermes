@@ -55,7 +55,7 @@ namespace Hermes
       va_end(arglist);
 
       //Windows platform
-    #ifdef WIN32
+#ifdef WIN32
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
 
       //generate console settings
@@ -72,11 +72,11 @@ namespace Hermes
       BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, NULL);
       std::cout << std::endl;
 
-    //Linux platform
-    #else
-    # define FOREGROUND_RED 1
-    # define FOREGROUND_GREEN 2
-    # define FOREGROUND_BLUE 4
+      //Linux platform
+#else
+# define FOREGROUND_RED 1
+# define FOREGROUND_GREEN 2
+# define FOREGROUND_BLUE 4
       //console color code
       int console_attrs = 0;
       bool console_bold = true;
@@ -90,7 +90,7 @@ namespace Hermes
       //print text and reset settings
       printf("%s\033[0m\n", text_contents);
 
-    #endif
+#endif
     }
 
     void Loggable::Static::warn(const char* msg, ...)
@@ -109,7 +109,7 @@ namespace Hermes
       va_end(arglist);
 
       //Windows platform
-    #ifdef WIN32
+#ifdef WIN32
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
 
       //generate console settings
@@ -125,11 +125,11 @@ namespace Hermes
       DWORD num_written;
       BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, NULL);
       std::cout << std::endl;
-    //Linux platform
-    #else
-    # define FOREGROUND_RED 1
-    # define FOREGROUND_GREEN 2
-    # define FOREGROUND_BLUE 4
+      //Linux platform
+#else
+# define FOREGROUND_RED 1
+# define FOREGROUND_GREEN 2
+# define FOREGROUND_BLUE 4
       //console color code
       int console_attrs = 1;
       console_attrs |= FOREGROUND_RED | FOREGROUND_GREEN;
@@ -144,7 +144,7 @@ namespace Hermes
       //print text and reset settings
       printf("%s\033[0m\n", text_contents);
 
-    #endif
+#endif
     }
 
     void Loggable::Static::error(const char* msg, ...)
@@ -163,7 +163,7 @@ namespace Hermes
       va_end(arglist);
 
       //Windows platform
-    #ifdef WIN32
+#ifdef WIN32
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
 
       //generate console settings
@@ -179,11 +179,11 @@ namespace Hermes
       DWORD num_written;
       BOOL write_success = WriteConsoleA(h_console, text_contents, strlen(text_contents), &num_written, NULL);
       std::cout << std::endl;
-    //Linux platform
-    #else
-    # define FOREGROUND_RED 1
-    # define FOREGROUND_GREEN 2
-    # define FOREGROUND_BLUE 4
+      //Linux platform
+#else
+# define FOREGROUND_RED 1
+# define FOREGROUND_GREEN 2
+# define FOREGROUND_BLUE 4
       //console color code
       int console_attrs = 1;
       console_attrs |= FOREGROUND_RED;
@@ -198,7 +198,7 @@ namespace Hermes
       //print text and reset settings
       printf("%s\033[0m\n", text_contents);
 
-    #endif
+#endif
     }
 
     void Loggable::error(const char* msg, ...) const
@@ -331,7 +331,7 @@ namespace Hermes
     bool Loggable::write_console(const char code, const char* text) const
     {
       //Windows platform
-    #ifdef WIN32
+#ifdef WIN32
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
       if(h_console == INVALID_HANDLE_VALUE)
         return false;
@@ -347,10 +347,10 @@ namespace Hermes
       WORD console_attrs = 0;
       switch(code)
       {
-        case HERMES_EC_ERROR: console_attrs |= console_attr_red; break;
-        case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
-        case HERMES_EC_INFO:console_attrs |= console_attr_green;  break;
-        default: throw Hermes::Exceptions::Exception("Unknown error code: '%c'", code);
+      case HERMES_EC_ERROR: console_attrs |= console_attr_red; break;
+      case HERMES_EC_WARNING: console_attrs |= console_attr_red | console_attr_green; break;
+      case HERMES_EC_INFO:console_attrs |= console_attr_green;  break;
+      default: throw Hermes::Exceptions::Exception("Unknown error code: '%c'", code);
       }
 
       //set new console settings
@@ -367,11 +367,11 @@ namespace Hermes
         return true;
       else
         return false;
-    //Linux platform
-    #else
-    # define FOREGROUND_RED 1
-    # define FOREGROUND_GREEN 2
-    # define FOREGROUND_BLUE 4
+      //Linux platform
+#else
+# define FOREGROUND_RED 1
+# define FOREGROUND_GREEN 2
+# define FOREGROUND_BLUE 4
       //console color code
       int console_attrs = 0;
       bool console_bold = false;
@@ -392,12 +392,12 @@ namespace Hermes
       printf("%s\033[0m", text);
 
       return true;
-    #endif
+#endif
     }
 
     Loggable::HermesLogEventInfo* Loggable::hermes_build_log_info(char event) const
     {
-        return new Loggable::HermesLogEventInfo(event, HERMES_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__);
+      return new Loggable::HermesLogEventInfo(event, HERMES_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__);
     }
 
     void Loggable::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const
@@ -493,19 +493,19 @@ namespace Hermes
     TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == NULL ? "unnamed" : name)
     {
       //initialization
-  #ifdef WIN32  //Windows
+#ifdef WIN32  //Windows
       LARGE_INTEGER freq;
       if(QueryPerformanceFrequency(&freq))
         frequency = (double)freq.QuadPart;
       else
         frequency = -1;
-  #endif  //Linux
+#endif  //Linux
       tick_reset();
     }
 
     TimeMeasurable::SysTime TimeMeasurable::get_time() const
     {
-  #ifdef WIN32  //Windows
+#ifdef WIN32  //Windows
       if(frequency > 0)
       {
         LARGE_INTEGER ticks;
@@ -516,26 +516,26 @@ namespace Hermes
       {
         return clock();
       }
-  #elif defined(__APPLE__)  //Mac
+#elif defined(__APPLE__)  //Mac
       // FIXME: implement time measurement on Mac
       timespec tm;
       return tm;
-  #else  //Linux
+#else  //Linux
       timespec tm;
       clock_gettime(CLOCK_REALTIME, &tm);
       return tm;
-  #endif
+#endif
     }
 
     double TimeMeasurable::period_in_seconds(const SysTime& begin, const SysTime& end) const
     {
-  #ifdef WIN32  //Windows
+#ifdef WIN32  //Windows
       uint64_t period = end - begin;
       if(frequency > 0)
         return period / frequency;
       else
         return period / (double)CLOCKS_PER_SEC;
-  #else  //Linux
+#else  //Linux
       int sec_corr = 0;
       long period_nsec = end.tv_nsec - begin.tv_nsec;
       if(period_nsec < 0)
@@ -545,7 +545,7 @@ namespace Hermes
       }
       long period_sec = (long)(end.tv_sec - begin.tv_sec) + sec_corr;
       return period_sec + (period_nsec / 1E9);
-  #endif
+#endif
     }
 
     const TimeMeasurable& TimeMeasurable::tick(TimerPeriodTickType type)
@@ -670,5 +670,26 @@ namespace Hermes
     {
 
     }
+
+    template<typename T>
+    T OutputAttachable::get_parameter_value(Parameter<T>& parameter)
+    {
+      return *parameter.value;
+    }
+
+    template<typename T>
+    void OutputAttachable::set_parameter_value(Parameter<T>& parameter, T* value)
+    {
+      parameter.value = value;
+    }
+
+    template HERMES_API int OutputAttachable::get_parameter_value<int>(Parameter<int>& parameter);
+    template HERMES_API double OutputAttachable::get_parameter_value<double>(Parameter<double>& parameter);
+    template HERMES_API std::complex<double>  OutputAttachable::get_parameter_value<std::complex<double> >(Parameter<std::complex<double> >& parameter);
+    template HERMES_API bool OutputAttachable::get_parameter_value<bool>(Parameter<bool>& parameter);
+    template HERMES_API void OutputAttachable::set_parameter_value<int>(Parameter<int>& parameter, int* value);
+    template HERMES_API void OutputAttachable::set_parameter_value<double>(Parameter<double>& parameter, double* value);
+    template HERMES_API void OutputAttachable::set_parameter_value<std::complex<double> >(Parameter<std::complex<double> > & parameter, std::complex<double>* value);
+    template HERMES_API void OutputAttachable::set_parameter_value<bool>(Parameter<bool>& parameter, bool* value);
   }
 }
