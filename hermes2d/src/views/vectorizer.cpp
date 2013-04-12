@@ -593,7 +593,7 @@ namespace Hermes
         xitem = xitem_orig;
         yitem = yitem_orig;
 
-        Traverse trav_master(true);
+        Traverse trav_master(ydisp == NULL ? (xdisp == NULL ? 2 : 3) : (xdisp == NULL ? 3 : 4));
         int num_states;
         Traverse::State** states = trav_master.get_states(meshes, num_states);
 

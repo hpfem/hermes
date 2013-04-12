@@ -601,7 +601,7 @@ namespace Hermes
           }
         }
 
-        Traverse trav_master(true);
+        Traverse trav_master(ydisp == NULL ? (xdisp == NULL ? 1 : 2) : (xdisp == NULL ? 2 : 3));
         int num_states;
         Traverse::State** states = trav_master.get_states(meshes, num_states);
 

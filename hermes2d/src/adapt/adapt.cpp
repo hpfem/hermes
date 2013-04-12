@@ -1092,7 +1092,7 @@ namespace Hermes
       // Prepare multi-mesh traversal and error arrays.
       MeshSharedPtr *meshes = new MeshSharedPtr [2 * num];
       Transformable **tr = new Transformable *[2 * num];
-      Traverse trav(true);
+      Traverse trav(num);
       num_act_elems = 0;
       for (i = 0; i < num; i++)
       {

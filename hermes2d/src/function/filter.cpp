@@ -99,7 +99,7 @@ namespace Hermes
 
       if(unimesh)
       {
-        Traverse trav;
+        Traverse trav(this->num);
         trav.begin(num, meshes);
         this->mesh = MeshSharedPtr(new Mesh);
         unidata = trav.construct_union_mesh(this->mesh);

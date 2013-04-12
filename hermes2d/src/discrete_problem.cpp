@@ -273,8 +273,8 @@ namespace Hermes
       for(int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i]->set_weak_formulation(this->wf);
 
-      Traverse trav_master(true);
-      states = trav_master.get_states(meshes, num_states);
+      Traverse trav(this->spaces_size);
+      states = trav.get_states(meshes, num_states);
     }
 
     template<typename Scalar>

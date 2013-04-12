@@ -22,7 +22,7 @@ namespace Hermes
   namespace Hermes2D
   {
     static const Rect H2D_UNITY = { 0, 0, ONE, ONE };
-    Traverse::Traverse(bool master) : master(master)
+    Traverse::Traverse(int spaces_size) : spaces_size(spaces_size)
     {
     }
 
@@ -391,7 +391,12 @@ namespace Hermes
 
           set_boundary_info(s);
           s->rep = NULL;
-          for(int j = 0; j < num; j++)
+          // EXTREMELY IMPORTANT.
+          // The for loop here is NOT through all meshes, but only
+          // through the spaces.
+          // The reason is not to include states that only have elements
+          // on meshes that are not a part of the weak form.
+          for(int j = 0; j < this->spaces_size; j++)
             if(s->e[j] != NULL)
             {
               s->rep = s->e[j];
@@ -847,7 +852,7 @@ namespace Hermes
       this->fn = fn;
 
       size = 256;
-      if(master)
+      
       {
         stack = new State[size];
         memset(stack, 0, size * sizeof(State));
@@ -920,7 +925,6 @@ namespace Hermes
 
     void Traverse::finish()
     {
-      if(master)
       {
         delete [] subs;
         delete [] sons;

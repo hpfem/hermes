@@ -81,7 +81,7 @@ namespace Hermes
     class HERMES_API Traverse : public Hermes::Mixins::Loggable
     {
     public:
-      Traverse(bool master = false);
+      Traverse(int spaces_size);
       class State
       {
       public:
@@ -149,7 +149,7 @@ namespace Hermes
 
       void free_state(State* state);
 
-      bool master;
+      int spaces_size;
 
       MeshSharedPtr unimesh;
       template<typename T> friend class Adapt;

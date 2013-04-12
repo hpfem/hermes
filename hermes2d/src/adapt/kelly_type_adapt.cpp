@@ -170,7 +170,7 @@ namespace Hermes
       bool bnd[H2D_MAX_NUMBER_EDGES];
       SurfPos surf_pos[H2D_MAX_NUMBER_EDGES];
       Traverse::State *ee;
-      Traverse trav(true);
+      Traverse trav(this->num);
 
       // Reset the e->visited status of each element of each mesh (most likely it will be set to true from
       // the latest assembling procedure).
