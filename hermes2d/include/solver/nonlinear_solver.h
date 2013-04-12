@@ -47,11 +47,11 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
-      void solve(MeshFunctionSharedPtr<Scalar>& initial_guess);
+      virtual void solve(MeshFunctionSharedPtr<Scalar>& initial_guess);
 
       /// Solve.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
+      virtual void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
 
       /// Set the name of the iterative method employed by AztecOO (ignored
       /// by the other solvers).

@@ -192,12 +192,24 @@ namespace Hermes
         switch(this->current_convergence_measurement)
         {
         case RelativeToInitialNorm:
-          if((residual_norm / initial_residual_norm < this->newton_tolerance) && iteration > 1)
+          if(((1 - residual_norm / initial_residual_norm) < this->newton_tolerance) && iteration > 1)
             return Converged;
           else
             return NotConverged;
           break;
         case RelativeToPreviousNorm:
+          if(((1 - residual_norm / initial_residual_norm) < this->newton_tolerance) && iteration > 1)
+            return Converged;
+          else
+            return NotConverged;
+          break;
+        case RatioToInitialNorm:
+          if((residual_norm / initial_residual_norm < this->newton_tolerance) && iteration > 1)
+            return Converged;
+          else
+            return NotConverged;
+          break;
+        case RatioToPreviousNorm:
           if((residual_norm / previous_residual_norm < this->newton_tolerance) && iteration > 1)
             return Converged;
           else
@@ -257,9 +269,16 @@ namespace Hermes
       {
         residual_norm_drop = true;
         if(++successful_steps >= this->necessary_successful_steps_to_increase)
-          return std::min(this->initial_auto_damping_coefficient, 2 * current_damping_coefficient);
-        if(residual_norm < previous_residual_norm)
+        {
+          current_damping_coefficient = std::min(this->initial_auto_damping_coefficient, this->auto_damping_ratio * current_damping_coefficient);
           this->info("\tNewton: step successful, damping coefficient: %g.", current_damping_coefficient);
+          return current_damping_coefficient;
+        }
+        if(residual_norm < previous_residual_norm)
+        {
+          this->info("\tNewton: step successful, damping coefficient: %g.", current_damping_coefficient);
+          return current_damping_coefficient;
+        }
       }
       else
       {
@@ -273,11 +292,10 @@ namespace Hermes
         }
         else
         {
-          return (1 / this->auto_damping_ratio) * current_damping_coefficient;
           this->warn("\tNewton: results NOT improved, step restarted with damping coefficient: %g.", current_damping_coefficient);
+          return (1. / this->auto_damping_ratio) * current_damping_coefficient;
         }
       }
-
       return current_damping_coefficient;
     }
 

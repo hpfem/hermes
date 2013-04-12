@@ -92,13 +92,7 @@ int main(int argc, char* argv[])
   picard.set_anderson_beta(PICARD_ANDERSON_BETA);
   try
   {
-    double* coeff_vec = new double[Space<double>::get_num_dofs(dp.get_spaces())];
-    OGProjection<double> ogProj;
-    ogProj.project_global(dp.get_spaces()[0], sln_prev_iter, coeff_vec);
-
-    picard.solve(coeff_vec);
-
-    delete [] coeff_vec;
+    picard.solve(sln_prev_iter);
   }
   catch(std::exception& e)
   {

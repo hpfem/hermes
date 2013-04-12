@@ -80,13 +80,16 @@ namespace Hermes
 
       /// Solve.
       /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      void solve(Scalar* coeff_vec = NULL);
+      using NonlinearSolver<Scalar>::solve;
+      virtual void solve(Scalar* coeff_vec = NULL);
 
       /// Convergence measurement.
       enum ConvergenceMeasurement
       {
         RelativeToInitialNorm,
         RelativeToPreviousNorm,
+        RatioToInitialNorm,
+        RatioToPreviousNorm,
         AbsoluteNorm
       };
 
