@@ -292,8 +292,9 @@ namespace Hermes
         }
         else
         {
+          current_damping_coefficient = (1. / this->auto_damping_ratio) * current_damping_coefficient;
           this->warn("\tNewton: results NOT improved, step restarted with damping coefficient: %g.", current_damping_coefficient);
-          return (1. / this->auto_damping_ratio) * current_damping_coefficient;
+          return current_damping_coefficient;
         }
       }
       return current_damping_coefficient;
