@@ -260,7 +260,7 @@ namespace Hermes
 
     public:
       template<typename T>
-      T get_parameter_value(Parameter<T>& parameter);
+      T get_parameter_value(const Parameter<T>& parameter);
     };
   }
 }

@@ -31,9 +31,10 @@ namespace Hermes
     class MultimeshDGNeighborTree
     {
     public:
+      /// The main method, for the passed neighbor searches, it will process all multi-mesh neighbor consolidation.
       static void process_edge(NeighborSearch<Scalar>** neighbor_searches, int num_neighbor_searches, int& num_neighbors, bool*& processed);
+    
     private:
-
       /// Initialize the tree for traversing multimesh neighbors.
       static void build_multimesh_tree(MultimeshDGNeighborTreeNode* root, NeighborSearch<Scalar>** neighbor_searches, int number);
 

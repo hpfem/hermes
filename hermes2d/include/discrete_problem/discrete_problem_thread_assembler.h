@@ -29,9 +29,8 @@ namespace Hermes
   namespace Hermes2D
   {
     /// @ingroup inner
-    /// DiscreteProblemAssemblyData class.
-    ///
-    /// This class does assembling into external matrix / vector structures.
+    /// Discrete problem thread assembler class
+    /// \brief This class is a one-thread (non-DG) assembly worker.
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblemThreadAssembler : 
@@ -39,7 +38,7 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
-    protected:
+    private:
       DiscreteProblemThreadAssembler(DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler);
       ~DiscreteProblemThreadAssembler();
 
@@ -74,11 +73,13 @@ namespace Hermes
       
       /// Free all data.
       void free();
+      /// Free space-related data.
       void free_spaces();
+      /// Free weak formulation data.
       void free_weak_formulation();
+      /// Free nonlinearities-related data.
       void free_u_ext();
 
-    private:
       Func<Scalar>** init_u_ext_values(int order);
       void deinit_u_ext_values(Func<Scalar>** u_ext_func);
 

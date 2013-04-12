@@ -52,12 +52,14 @@ namespace Hermes
       Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~Solver();
 
-      void init();
-
+      /// Method setting that the element values on an internal marker will be kept if reusable from a previous solution.
+      /// IMPORTANT: so far this method is implemented (works) only on the matrix and volumetric markers.
+      /// It is for a discussion if anything else is needed.
+      /// \param[in] marker The INTERNAL marker specifying the elements where matrix-vector entries will be reused.
+      /// \param[in] dimension Specifying either surface (1d), or volumetric (2d) integrals, thus determining the meaning of marker.
+      /// \param[in] equation_side Specifying either matrix or right-hand side.
       void keep_element_values(int marker, typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
 
-      virtual bool isOkay() const;
-      
       /// See DiscreteProblemCacheSettings in mixins2d.h for details.
       virtual void free_cache();
 
@@ -84,10 +86,13 @@ namespace Hermes
       /// Get the Residual.
       Vector<Scalar>* get_residual();
 
+    protected:
       /// Handle the jacobian re-calculation and re-usage of a previous one.
       void conditionally_assemble(Scalar* coeff_vec = NULL, bool force_reuse_jacobian_values = false, bool assemble_residual = true);
 
-    protected:
+      /// Internal checking.
+      virtual bool isOkay() const;
+      
       /// Jacobian can be reused if possible.
       bool constant_jacobian;
 
@@ -114,6 +119,9 @@ namespace Hermes
 
       /// For deciding if the jacobian is constant at this point.
       virtual bool reuse_jacobian_values();
+
+    private:
+      void init();
     };
   }
 }

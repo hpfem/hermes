@@ -36,9 +36,9 @@ namespace Hermes
   {
     class PrecalcShapeset;
     /// @ingroup inner
-    /// Discrete problem class.
+    /// Discrete problem DG assembling class.
     ///
-    /// This class does assembling into external matrix / vector structures.
+    /// This class provides methods for assembling DG forms (forms evaluated on internal edges) into external matrix / vector structures.
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblemDGAssembler
@@ -50,18 +50,19 @@ namespace Hermes
       /// Destructor.
       ~DiscreteProblemDGAssembler();
 
-      /// There is a matrix form set on DG_INNER_EDGE area or not.
-      bool DG_matrix_forms_present;
-
-      /// There is a vector form set on DG_INNER_EDGE area or not.
-      bool DG_vector_forms_present;
-
       /// Initialize assembling for a state.
       void init_assembling_one_state(Traverse::State* current_state_);
       /// Assemble DG forms.
       void assemble_one_state();
       /// Deinitialize assembling for a state.
       void deinit_assembling_one_state();
+
+    private:
+      /// There is a matrix form set on DG_INNER_EDGE area or not.
+      bool DG_matrix_forms_present;
+
+      /// There is a vector form set on DG_INNER_EDGE area or not.
+      bool DG_vector_forms_present;
 
       /// Initialize assembling for a neighbor.
       void init_assembling_one_neighbor();
@@ -79,8 +80,7 @@ namespace Hermes
 
       /// Finds the correct NeighborSearch.
       NeighborSearch<Scalar>* get_neighbor_search_ext(NeighborSearch<Scalar>** neighbor_searches, int index);
-
-    private:
+      
       NeighborSearch<Scalar>*** neighbor_searches;
       int* num_neighbors;
       bool** processed;

@@ -77,16 +77,13 @@ namespace Hermes
       PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~PicardSolver();
 
-      /// State querying helpers.
-      virtual bool isOkay() const;
-      inline std::string getClassName() const { return "PicardSolver"; }
-
       /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
       void set_verbose_output_linear_solver(bool verbose_output_to_set);
 
-      /// Solve.
-      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
+      // See the base class for details, the following serves only for avoiding C++ name-hiding.
       using NonlinearSolver<Scalar>::solve;
+      /// Solve.
+      /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec = NULL);
 
       /// Turn on / off the Anderson acceleration. By default it is off.
@@ -104,6 +101,9 @@ namespace Hermes
       void set_anderson_beta(double beta);
       
     protected:
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "PicardSolver"; }
 
       /// Convergence state.
       enum ConvergenceState

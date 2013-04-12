@@ -60,6 +60,8 @@ namespace Hermes
       /// Does 2 things
       /// 1 - turns off initialization of previous iterations for nonlinear solvers.
       /// 2 - allows for assembling Dirichlet boundary conditions using a Dirichlet lift.
+      /// \param[in] dirichlet_lift_accordingly If true, the appropriate settings for (linear / nonlinear)
+      /// problem will be used (use Dirichlet lift iff the problem is linear). If false, the other way round.
       void set_linear(bool to_set = true, bool dirichlet_lift_accordingly = true);
 
       /// Assembling.
@@ -74,13 +76,8 @@ namespace Hermes
       /// are initialized with zeros.
       /// Without the matrix.
       void assemble(Vector<Scalar>* rhs);
-      /// The inner-most version.
+      /// Assembling.
       void assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
-
-      /// Initialize states.
-      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln);
-      void deinit_assembling(Traverse::State** states, int num_states);
-
 
       /// set time information for time-dependent problems.
       virtual void set_time(double time);
@@ -97,6 +94,9 @@ namespace Hermes
       virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
 
     protected:
+      /// Initialize states.
+      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln);
+      void deinit_assembling(Traverse::State** states, int num_states);
 
       /// RungeKutta helpers.
       virtual void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);

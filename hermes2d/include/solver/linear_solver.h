@@ -69,14 +69,14 @@ namespace Hermes
       LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~LinearSolver();
 
-      /// State querying helpers.
-      virtual bool isOkay() const;
-      inline std::string getClassName() const { return "LinearSolver"; }
-
       /// Basic solve method.
       virtual void solve();
 
     protected:
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "LinearSolver"; }
+
       void init_linear();
     };
   }

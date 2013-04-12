@@ -78,18 +78,25 @@ namespace Hermes
       NewtonSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~NewtonSolver();
 
-      /// Solve.
-      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
+      // See the base class for details, the following serves only for avoiding C++ name-hiding.
       using NonlinearSolver<Scalar>::solve;
+      /// Solve.
+      /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec = NULL);
 
-      /// Convergence measurement.
+      /// Convergence measurement strategies.
+      /// This specifies the quantity that is compared to newton_tolerance (settable by set_tolerance()).
       enum ConvergenceMeasurement
       {
+        // (norm - initial_norm) / initial_norm
         RelativeToInitialNorm,
+        // (norm - previous_norm) / previous_norm
         RelativeToPreviousNorm,
+        // norm / initial_norm
         RatioToInitialNorm,
+        // norm / previous_norm
         RatioToPreviousNorm,
+        // norm
         AbsoluteNorm
       };
 
@@ -155,15 +162,21 @@ namespace Hermes
 #pragma endregion
 
 #pragma region jacobian_recalculation-public
+      /// Set the ratio of the current residual norm and the previous residual norm necessary to deem a step 'successful'.
+      /// IMPORTANT: it is truly a FACTOR, i.e. the two successive residual norms are put in a fraction and this number is
+      /// then compared to the ratio set by this method.
       void set_sufficient_improvement_factor_jacobian(double ratio);
+
+      /// Set maximum number of steps (Newton iterations) that a jacobian can be reused if it is deemed a 'successful' reusal
+      /// with respect to the improvement factor.
       void set_max_steps_with_reused_jacobian(unsigned int steps);
 #pragma endregion
 
+    protected:
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NewtonSolver"; }
 
-    protected:
       void init_solving(int ndof, Scalar*& coeff_vec, Scalar*& coeff_vec_back);
       void finalize_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
       void deinit_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);

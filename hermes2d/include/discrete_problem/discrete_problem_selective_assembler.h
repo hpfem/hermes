@@ -29,10 +29,11 @@ namespace Hermes
   namespace Hermes2D
   {
     class PrecalcShapeset;
+    template<typename Scalar> class Solver;
     /// @ingroup inner
-    /// Discrete problem class.
-    ///
-    /// This class does assembling into external matrix / vector structures.
+    /// Discrete problem selective assembling class.
+    /// \brief Provides capabilities to (re-)assemble a matrix / vector only where necessary.
+    /// See also Solver::keep_element_values()
     ///
     template<typename Scalar>
     class HERMES_API DiscreteProblemSelectiveAssembler : 
@@ -55,33 +56,41 @@ namespace Hermes
       
       /// Sets new spaces for the instance.
       void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      void alloc_recalculation_tables_spaces_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side, int new_markers_count);
       
       /// Set the weak forms.
       void set_weak_formulation(WeakForm<Scalar>* wf);
-      void alloc_recalculation_tables_weakform_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
-
-      /// The form will be assembled.
+      
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state);
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state);
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(MatrixFormSurf<Scalar>* form, Traverse::State* current_state);
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(MatrixFormDG<Scalar>* form, Traverse::State* current_state);
 
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(VectorForm<Scalar>* form, Traverse::State* current_state);
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(VectorFormVol<Scalar>* form, Traverse::State* current_state);
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(VectorFormSurf<Scalar>* form, Traverse::State* current_state);
+      /// Decides if the form will be assembled on this State.
       bool form_to_be_assembled(VectorFormDG<Scalar>* form, Traverse::State* current_state);
 
+    protected:
       /// Recalculation storages.
       bool* state_reuse_kept[2][2];
       int markers_size[2][2];
 
-    protected:
       /// Spaces.
       int spaces_size;
 
       /// Seq numbers of Space instances in spaces.
       int* sp_seq;
+
+      void alloc_recalculation_tables_weakform_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side);
+      void alloc_recalculation_tables_spaces_settings(typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side, int new_markers_count);
 
       /// Matrix structure can be reused.
       /// If other conditions apply.
@@ -89,6 +98,7 @@ namespace Hermes
       bool vector_structure_reusable;
 
       friend class DiscreteProblem<Scalar>;
+      friend class Solver<Scalar>;
     };
   }
 }

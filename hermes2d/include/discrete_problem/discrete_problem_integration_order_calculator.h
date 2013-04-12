@@ -35,6 +35,7 @@ namespace Hermes
     class PrecalcShapeset;
     /// @ingroup inner
     /// DiscreteProblemIntegrationOrderCalculator class.
+    /// \brief Provides methods of integration order calculation.
     template<typename Scalar>
     class HERMES_API DiscreteProblemIntegrationOrderCalculator :
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>
@@ -62,10 +63,12 @@ namespace Hermes
       void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext);
 
       /// Calculates integration order for DG matrix forms.
+      /// NOT IMPLEMENTED.
       int calc_order_dg_matrix_form(MatrixFormDG<Scalar>* mfDG, PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, 
         bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
 
       /// Calculates integration order for DG vector forms.
+      /// NOT IMPLEMENTED.
       int calc_order_dg_vector_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<Solution<Scalar> > u_ext,
         PrecalcShapeset* fv, RefMap* ru, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
 
