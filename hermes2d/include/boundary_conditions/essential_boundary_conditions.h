@@ -132,9 +132,9 @@ namespace Hermes
     {
     public:
       DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_,
-        ExactSolutionScalar<Scalar>* exact_solution);
+        MeshFunctionSharedPtr<Scalar> exact_solution);
 
-      DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution);
+      DefaultEssentialBCNonConst(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution);
 
       ~DefaultEssentialBCNonConst() {};
 
@@ -154,8 +154,8 @@ namespace Hermes
     public:
       // Tangential values given by a vector-valued solution.
       DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
-        ExactSolutionVector<Scalar>* exact_solution2);
-      DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2);
+        MeshFunctionSharedPtr<Scalar> exact_solution2);
+      DefaultEssentialBCNonConstHcurl(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution2);
 
       ~DefaultEssentialBCNonConstHcurl() {};
 

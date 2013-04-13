@@ -77,16 +77,28 @@ namespace Hermes
 
     template<typename Scalar>
     DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(Hermes::vector<std::string> markers_,
-      ExactSolutionScalar<Scalar>* exact_solution)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution(exact_solution)
+      MeshFunctionSharedPtr<Scalar> exact_solution_)
+      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>())
     {
-      for (unsigned int i = 0; i < this->markers.size(); i++) this->markers.push_back(markers_[i]);
+      ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
+      if(exact)
+        this->exact_solution = exact;
+      else
+        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
+      
+      for (unsigned int i = 0; i < this->markers.size(); i++)
+        this->markers.push_back(markers_[i]);
     }
 
     template<typename Scalar>
-    DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(std::string marker, ExactSolutionScalar<Scalar>* exact_solution)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution(exact_solution)
+    DefaultEssentialBCNonConst<Scalar>::DefaultEssentialBCNonConst(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution_)
+      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>())
     {
+      ExactSolutionScalar<Scalar>* exact = dynamic_cast<ExactSolutionScalar<Scalar>*>(exact_solution_.get());
+      if(exact)
+        this->exact_solution = exact;
+      else
+        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
       this->markers.push_back(marker);
     }
 
@@ -98,17 +110,28 @@ namespace Hermes
 
     template<typename Scalar>
     DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(Hermes::vector<std::string> markers_,
-      ExactSolutionVector<Scalar>* exact_solution2)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2)
+      MeshFunctionSharedPtr<Scalar> exact_solution2_)
+      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>())
     {
+      ExactSolutionVector<Scalar>* exact = dynamic_cast<ExactSolutionVector<Scalar>*>(exact_solution2_.get());
+      if(exact)
+        this->exact_solution2 = exact;
+      else
+        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConstHcurl.");
+
       for (unsigned int i = 0; i < this->markers.size(); i++)
         this->markers.push_back(markers_[i]);
     }
 
     template<typename Scalar>
-    DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, ExactSolutionVector<Scalar>* exact_solution2)
-      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>()), exact_solution2(exact_solution2)
+    DefaultEssentialBCNonConstHcurl<Scalar>::DefaultEssentialBCNonConstHcurl(std::string marker, MeshFunctionSharedPtr<Scalar> exact_solution2_)
+      : EssentialBoundaryCondition<Scalar>(Hermes::vector<std::string>())
     {
+      ExactSolutionVector<Scalar>* exact = dynamic_cast<ExactSolutionVector<Scalar>*>(exact_solution2_.get());
+      if(exact)
+        this->exact_solution2 = exact;
+      else
+        throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConstHcurl.");
       this->markers.push_back(marker);
     }
 
