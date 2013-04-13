@@ -113,7 +113,7 @@ namespace Hermes
         else if(s->cr.b >= vmid) son = 5;
         else assert(0);
 
-        s->push_transform(son, i, s->rep->is_triangle());
+        s->push_transform(son, i, s->is_triangle());
         move_to_son(&r, &r, son);
       }
     }
