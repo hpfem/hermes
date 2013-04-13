@@ -39,7 +39,7 @@ namespace Hermes
     /// Hermes::Hermes2D::NewtonSolver<double> newton_solver(&wf, &space);<br>
     /// Set a whole bunch of parameters according to your liking.<br>
     /// See the class documentation for all possible parameters.<br>
-    /// newton_solver.set_newton_tol(1e-6);<br>
+    /// newton_solver.set_tolerance(1e-6);<br>
     /// newton_solver.set_max_allowed_iterations(15);<br>
     /// newton_solver.set_max_allowed_residual_norm(1e6);<br>
     /// newton_solver.set_min_allowed_damping_coeff(1e-3);<br>

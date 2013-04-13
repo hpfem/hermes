@@ -232,12 +232,12 @@ namespace Hermes
       this->freeze_jacobian = true;
     }
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_newton_tol(double newton_tol)
+    void RungeKutta<Scalar>::set_tolerance(double newton_tol)
     {
       this->newton_tol = newton_tol;
     }
     template<typename Scalar>
-    void RungeKutta<Scalar>::set_newton_max_iter(int newton_max_iter)
+    void RungeKutta<Scalar>::set_max_allowed_iterations(int newton_max_iter)
     {
       this->newton_max_iter = newton_max_iter;
     }

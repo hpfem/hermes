@@ -118,8 +118,8 @@ namespace Hermes
       void rk_time_step_newton(MeshFunctionSharedPtr<Scalar> sln_time_prev, MeshFunctionSharedPtr<Scalar> sln_time_new);
 
       void set_freeze_jacobian();
-      void set_newton_tol(double newton_tol);
-      void set_newton_max_iter(int newton_max_iter);
+      void set_tolerance(double newton_tol);
+      void set_max_allowed_iterations  (int newton_max_iter);
       void set_newton_damping_coeff(double newton_damping_coeff);
       void set_newton_max_allowed_residual_norm(double newton_max_allowed_residual_norm);
 
