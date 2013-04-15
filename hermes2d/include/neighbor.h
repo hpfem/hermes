@@ -8,6 +8,7 @@
 #include "mesh/refmap.h"
 #include "asmlist.h"
 #include "space/space.h"
+#include "adapt/error_calculator.h"
 namespace Hermes
 {
   namespace Hermes2D

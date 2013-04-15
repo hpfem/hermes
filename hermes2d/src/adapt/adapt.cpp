@@ -13,134 +13,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "umfpack.h"
-#include "adapt.h"
-#include "hermes2d.h"
-#include "global.h"
-#include "limit_order.h"
-#include "solution.h"
-#include "discrete_problem.h"
-#include "refmap.h"
-#include "quad_all.h"
-#include "traverse.h"
-#include "refinement_selectors/optimum_selector.h"
-#include "matrix.h"
+#include "error_calculator.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-      Hermes::vector<ProjNormType> proj_norms) :
-    spaces(spaces),
-      num_act_elems(-1),
-      have_errors(false),
-      have_coarse_solutions(false),
-      have_reference_solutions(false)
+    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces_, ErrorCalculator<Scalar>* error_calculator) : error_calculator(error_calculator)
     {
-      for(unsigned int i = 0; i < spaces.size(); i++)
-      {
-        if(!spaces[i])
-          throw Exceptions::NullException(0, i);
+      for(unsigned int i = 0; i < spaces_.size(); i++)
+        spaces.push_back(spaces_[i]);
 
-        spaces[i]->check();
-      }
-
-      // sanity check
-      if(proj_norms.size() > 0 && spaces.size() != proj_norms.size())
-        throw Exceptions::LengthException(1, 2, spaces.size(), proj_norms.size());
-
-      this->num = spaces.size();
-
-      // sanity checks
-      if((this->num <= 0) || (this->num > H2D_MAX_COMPONENTS)) throw Exceptions::ValueException("components", this->num, 0, H2D_MAX_COMPONENTS);
-
-      // reset values
-      memset(errors, 0, sizeof(errors));
-      memset(sln, 0, sizeof(sln));
-      memset(rsln, 0, sizeof(rsln));
-      own_forms = new bool*[H2D_MAX_COMPONENTS];
-      for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
-      {
-        own_forms[i] = new bool[H2D_MAX_COMPONENTS];
-        memset(own_forms[i], 0, H2D_MAX_COMPONENTS * sizeof(bool));
-      }
-
-      // if norms were not set by the user, set them to defaults
-      // according to spaces
-      if(proj_norms.size() == 0)
-      {
-        for (int i = 0; i < this->num; i++)
-        {
-          switch (spaces[i]->get_type())
-          {
-          case HERMES_H1_SPACE: proj_norms.push_back(HERMES_H1_NORM); break;
-          case HERMES_HCURL_SPACE: proj_norms.push_back(HERMES_HCURL_NORM); break;
-          case HERMES_HDIV_SPACE: proj_norms.push_back(HERMES_HDIV_NORM); break;
-          case HERMES_L2_SPACE: proj_norms.push_back(HERMES_L2_NORM); break;
-          default: throw Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
-          }
-        }
-      }
-
-      // assign norm weak forms  according to norms selection
-      for (int i = 0; i < this->num; i++)
-        for (int j = 0; j < this->num; j++)
-        {
-          error_form[i][j] = NULL;
-          norm_form[i][j] = NULL;
-        }
-
-        for (int i = 0; i < this->num; i++)
-        {
-          error_form[i][i] = new MatrixFormVolError(i, i, proj_norms[i]);
-          norm_form[i][i] = error_form[i][i];
-          own_forms[i][i] = true;
-        }
+      this->init();
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar> space, ProjNormType proj_norm) :
-    spaces(Hermes::vector<SpaceSharedPtr<Scalar> >()),
-      num_act_elems(-1),
-      have_errors(false),
-      have_coarse_solutions(false),
-      have_reference_solutions(false)
+    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar>& space) : error_calculator(error_calculator)
     {
       spaces.push_back(space);
-
-      this->num = 1;
-
-      // reset values
-      memset(errors, 0, sizeof(errors));
-      memset(sln, 0, sizeof(sln));
-      memset(rsln, 0, sizeof(rsln));
-      own_forms = new bool*[H2D_MAX_COMPONENTS];
-      for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
-      {
-        own_forms[i] = new bool[H2D_MAX_COMPONENTS];
-        memset(own_forms[i], 0, H2D_MAX_COMPONENTS * sizeof(bool));
-      }
-
-      // if norms were not set by the user, set them to defaults
-      // according to spaces
-      if(proj_norm == HERMES_UNSET_NORM)
-      {
-        switch (space->get_type())
-        {
-        case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
-        case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
-        case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
-        case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-        default: throw Hermes::Exceptions::Exception("Unknown space type in Adapt<Scalar>::Adapt().");
-        }
-      }
-
-      // assign norm weak forms  according to norms selection
-      error_form[0][0] = new MatrixFormVolError(0, 0, proj_norm);
-      norm_form[0][0] = error_form[0][0];
-      own_forms[0][0] = true;
+      this->init();
     }
 
     template<typename Scalar>
@@ -163,19 +55,77 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double thr, int strat,
-      int regularize, double to_be_processed)
+    void Adapt<Scalar>::init()
+    {
+      if(!this->error_calculator)
+        throw Exceptions::Exception("Error calculator must not be NULL in Adapt::Adapt().");
+
+      this->num = spaces.size();
+      
+      if(this->num > H2D_MAX_COMPONENTS)
+        throw Exceptions::ValueException("components", this->num, 0, H2D_MAX_COMPONENTS);
+
+      for(unsigned int i = 0; i < this->num; i++)
+      {
+        if(spaces[i].empty())
+          throw Exceptions::NullException(0, i);
+        spaces[i]->check();
+      }
+
+      regularization = -1;
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_strategy(typename Adapt<Scalar>::StoppingCriterionStrategy strategy_, double threshold_)
+    {
+      this->strategy = strategy_;
+      this->threshold = threshold_;
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_regularization_level(int regularization-)
+    {
+      this->regularization = regularization_;
+    }
+
+    template<typename Scalar>
+    bool Adapt<Scalar>::add_refinement(double processed_error_squared, double max_error, double threshold, int refinement_count, double current_error)
+    {
+      switch(this->strategy)
+      {
+      case Cumulative:
+        if(processed_error_squared > (threshold*threshold) * errors_squared_sum)
+          return false;
+        else
+          return true;
+        break;
+      case SingleElement:
+        if(current_error > threshold * max_error)
+          return true;
+        else
+          return false;
+        break;
+      default:
+        throw Exceptions::Exception("Unknown strategy in Adaptivity.");
+      }
+
+      return false;
+    }
+
+    template<typename Scalar>
+    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double threshold, int regularize)
     {
       this->tick();
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
 
-      if(!have_errors)
-        throw Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
+      if(!this->error_calculator->elements_stored)
+        throw Exceptions::Exception("element errors have to be calculated first, call ErrorCalculator::calculate_errors().");
 
       if(refinement_selectors.empty())
         throw Exceptions::NullException(1);
+
       if(spaces.size() != refinement_selectors.size())
         throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
 
@@ -204,14 +154,12 @@ namespace Hermes
         for(int l = 0; l < this->num; l++)
           idx[j][l] = -1; // element not refined
 
-      double err0_squared = 1000.0;
       double processed_error_squared = 0.0;
 
-      std::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
-      elem_inx_to_proc.reserve(num_act_elems);
+      Hermes::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
+      elem_inx_to_proc.reserve(this->error_calculator->num_act_elems);
 
-      //adaptivity loop
-      double error_squared_threshold = -1; //an error threshold that breaks the adaptivity loop in a case of strategy 1
+      double max_error;
       int num_ignored_elem = 0; //a number of ignored elements
       int num_not_changed = 0; //a number of element that were not changed
       int num_priority_elem = 0; //a number of elements that were processed using priority queue
@@ -223,71 +171,25 @@ namespace Hermes
       bool first_regular_element = true; // true if first regular element was not processed yet
       bool error_level_reached = false;
 
-      for(int inx_regular_element = 0; inx_regular_element < num_act_elems || !priority_queue.empty();)
+      for(int element_inspected_i = 0; element_inspected_i < this->error_calculator->num_act_elems; element_inspected_i++)
       {
-        int id, comp;
+        // Set the maximum error
+        if(element_inspected_i == 0)
+          max_error = thr * err_squared;
 
-        // Process the queuse(s) to see what elements to really refine.
-        if(priority_queue.empty())
+        ErrorCalculator<Scalar>::ElementReference* element_reference = this->error_calculator->element_references[element_inspected_i];
+
+        if(this->add_refinement(processed_error_squared, max_error, this->threshold, element_inspected_i, (*element_reference->error))
         {
-          id = regular_queue[inx_regular_element].id;
-          comp = regular_queue[inx_regular_element].comp;
-          inx_regular_element++;
-
-          // Get info linked with the element
-          double err_squared = errors[comp][id];
-
-          if(first_regular_element)
-          {
-            error_squared_threshold = thr * err_squared;
-            first_regular_element = false;
-          }
-
-          // first refinement strategy:
-          // refine elements until prescribed amount of error is processed
-          // if more elements have similar error refine all to keep the mesh symmetric
-          if((strat == 0) && (processed_error_squared > sqrt(thr) * errors_squared_sum)
-            && fabs((err_squared - err0_squared)/err0_squared) > 1e-3)
-            error_level_reached = true;
-
-          // second refinement strategy:
-          // refine all elements whose error is bigger than some portion of maximal error
-          if((strat == 1) && (err_squared < error_squared_threshold))
-            error_level_reached = true;
-
-          if((strat == 2) && (err_squared < thr))
-            error_level_reached = true;
-
-          if((strat == 3) && ((err_squared < error_squared_threshold) || (processed_error_squared > 1.5 * to_be_processed)))
-            error_level_reached = true;
-
-          // Insert the element only if it complies with the strategy.
-          if(!error_level_reached)
-          {
-            err0_squared = err_squared;
-            processed_error_squared += err_squared;
-            ids.push_back(id);
-            components.push_back(comp);
-            current_orders.push_back(this->spaces[comp]->get_element_order(id));
-            spaces[comp]->edata[id].changed_in_last_adaptation = true;
-          }
-          else
-            if(priority_queue.empty())
-              break;
-        }
-        // Priority - refine no matter what.
-        else
-        {
-          id = priority_queue.front().id;
-          comp = priority_queue.front().comp;
-          priority_queue.pop();
-
-          // Insert into appropripate arrays.
+          err0_squared = err_squared;
+          processed_error_squared += err_squared;
           ids.push_back(id);
           components.push_back(comp);
           current_orders.push_back(this->spaces[comp]->get_element_order(id));
           spaces[comp]->edata[id].changed_in_last_adaptation = true;
         }
+        else
+          break;
       }
 
       if(ids.empty())
@@ -495,208 +397,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(int i, int j) : MatrixFormVol<Scalar>(i, j)
-    {
-    }
-
-    template<typename Scalar>
-    MatrixFormVol<Scalar>* Adapt<Scalar>::MatrixFormVolError::clone() const
-    {
-      return new MatrixFormVolError(*this);
-    }
-
-    template<typename Scalar>
-    Adapt<Scalar>::MatrixFormVolError::MatrixFormVolError(int i, int j, ProjNormType type) : MatrixFormVol<Scalar>(i, j), projNormType(type)
-    {
-    }
-
-    template<typename Scalar>
-    template<typename TestFunctionDomain, typename SolFunctionDomain>
-    SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::l2_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
-    {
-      SolFunctionDomain result = SolFunctionDomain(0);
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * conj(v->val[i]));
-      return result;
-    }
-
-    template<typename Scalar>
-    template<typename TestFunctionDomain, typename SolFunctionDomain>
-    SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
-    {
-      SolFunctionDomain result = SolFunctionDomain(0);
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (u->val[i] * conj(v->val[i]) + u->dx[i] * conj(v->dx[i])
-        + u->dy[i] * conj(v->dy[i]));
-      return result;
-    }
-
-    template<typename Scalar>
-    template<typename TestFunctionDomain, typename SolFunctionDomain>
-    SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::h1_error_semi_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
-    {
-      SolFunctionDomain result = SolFunctionDomain(0);
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (u->dx[i] * conj(v->dx[i]) + u->dy[i] * conj(v->dy[i]));
-      return result;
-    }
-
-    template<typename Scalar>
-    template<typename TestFunctionDomain, typename SolFunctionDomain>
-    SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hdiv_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
-    {
-      throw Hermes::Exceptions::Exception("hdiv error form not implemented yet in hdiv.h.");
-
-      // this is Hcurl code:
-      SolFunctionDomain result = SolFunctionDomain(0);
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
-        u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-      return result;
-    }
-
-    template<typename Scalar>
-    template<typename TestFunctionDomain, typename SolFunctionDomain>
-    SolFunctionDomain Adapt<Scalar>::MatrixFormVolError::hcurl_error_form(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<SolFunctionDomain> *u,
-      Func<SolFunctionDomain> *v, Geom<TestFunctionDomain> *e, Func<SolFunctionDomain> **ext)
-    {
-      SolFunctionDomain result = SolFunctionDomain(0);
-      for (int i = 0; i < n; i++)
-        result += wt[i] * (u->curl[i] * conj(v->curl[i]) +
-        u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
-      return result;
-    }
-
-    template<typename Scalar>
-    Scalar Adapt<Scalar>::MatrixFormVolError::value(int n, double *wt, Func<Scalar> *u_ext[],
-      Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e,
-      Func<Scalar> **ext) const
-    {
-      switch (projNormType)
-      {
-      case HERMES_L2_NORM:
-        return l2_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_H1_NORM:
-        return h1_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_H1_SEMINORM:
-        return h1_error_semi_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_HCURL_NORM:
-        return hcurl_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_HDIV_NORM:
-        return hdiv_error_form<double, Scalar>(n, wt, u_ext, u, v, e, ext);
-      default:
-        throw Hermes::Exceptions::Exception("Unknown projection type");
-        return 0.0;
-      }
-    }
-
-    template<typename Scalar>
-    Hermes::Ord Adapt<Scalar>::MatrixFormVolError::ord(int n, double *wt, Func<Hermes::Ord> *u_ext[],
-      Func<Hermes::Ord> *u, Func<Hermes::Ord> *v, Geom<Hermes::Ord> *e,
-      Func<Ord> **ext) const
-    {
-      switch (projNormType)
-      {
-      case HERMES_L2_NORM:
-        return l2_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_H1_NORM:
-        return h1_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_H1_SEMINORM:
-        return h1_error_semi_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_HCURL_NORM:
-        return hcurl_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      case HERMES_HDIV_NORM:
-        return hdiv_error_form<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
-      default:
-        throw Hermes::Exceptions::Exception("Unknown projection type");
-        return Hermes::Ord();
-      }
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::calc_err_est(MeshFunctionSharedPtr<Scalar>sln, MeshFunctionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
-      unsigned int error_flags)
-    {
-      this->tick();
-      if(num != 1)
-        throw Exceptions::LengthException(1, 1, num);
-      double result = calc_err_internal(sln, rsln, NULL, solutions_for_adapt, error_flags);
-      this->tick();
-      this->info("\tAdaptivity: error estimate calculation duration: %f s.", this->last());
-      return result;
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::calc_err_est(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns,
-      Hermes::vector<double>* component_errors, bool solutions_for_adapt,
-      unsigned int error_flags)
-    {
-      this->tick();
-      if(slns.size() != num)
-        throw Exceptions::LengthException(1, slns.size(), num);
-      if(rslns.size() != num)
-        throw Exceptions::LengthException(2, rslns.size(), num);
-      double result = calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
-      this->tick();
-      this->info("\tAdaptivity: error estimate calculation duration: %f s.", this->last());
-      return result;
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::calc_err_exact(MeshFunctionSharedPtr<Scalar>sln, MeshFunctionSharedPtr<Scalar>rsln, bool solutions_for_adapt,
-      unsigned int error_flags)
-    {
-      this->tick();
-      if(num != 1)
-        throw Exceptions::LengthException(1, 1, num);
-      OGProjection<Scalar> ogProjection;
-      typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[0]->get_mesh());
-      MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-      typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[0], ref_mesh, 0);
-      SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
-      exactProjectedSlns[0] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
-      ogProjection.project_global(ref_space, rsln, exactProjectedSlns[0]);
-      double result = calc_err_internal(sln, exactProjectedSlns[0], NULL, solutions_for_adapt, error_flags);
-      this->tick();
-      this->info("\tAdaptivity: exact error calculation duration: %f s.", this->last());
-      return result;
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::calc_err_exact(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns,
-      Hermes::vector<double>* component_errors, bool solutions_for_adapt,
-      unsigned int error_flags)
-    {
-      this->tick();
-      if(slns.size() != num)
-        throw Exceptions::LengthException(1, slns.size(), num);
-      if(rslns.size() != num)
-        throw Exceptions::LengthException(2, rslns.size(), num);
-
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslnsProjected;
-      for(int i = 0; i < this->num; i++)
-      {
-        OGProjection<Scalar> ogProjection;
-        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
-        MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-        typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh, 0);
-        SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
-        exactProjectedSlns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
-        ogProjection.project_global(ref_space, rslns[i], exactProjectedSlns[i]);
-        rslnsProjected.push_back(exactProjectedSlns[i]);
-      }
-
-      double result = calc_err_internal(slns, rslnsProjected, component_errors, solutions_for_adapt, error_flags);
-      this->tick();
-      this->info("\tAdaptivity: exact error calculation duration: %f s.", this->last());
-      return result;
-    }
-
-    template<typename Scalar>
     bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat,
       int regularize, double to_be_processed)
     {
@@ -785,20 +485,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    double Adapt<Scalar>::get_element_error_squared(int component, int id) const
-    {
-      if(!have_errors)
-        throw Exceptions::Exception("element errors have to be calculated first, call Adapt<Scalar>::calc_err_est().");
-      return errors[component][id];
-    };
-
-    template<typename Scalar>
-    const Hermes::vector<typename Adapt<Scalar>::ElementReference>& Adapt<Scalar>::get_regular_queue() const
-    {
-      return regular_queue;
-    };
-
-    template<typename Scalar>
     void Adapt<Scalar>::homogenize_shared_mesh_orders(MeshSharedPtr* meshes)
     {
       Element* e;
@@ -820,12 +506,6 @@ namespace Hermes
             this->spaces[i]->set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(current_order_h, current_order_v));
         }
       }
-    }
-
-    template<typename Scalar>
-    const std::vector<ElementToRefine>& Adapt<Scalar>::get_last_refinements() const
-    {
-      return last_refinements;
     }
 
     template<typename Scalar>
@@ -870,405 +550,6 @@ namespace Hermes
           space->edata[e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id].changed_in_last_adaptation = true;
         }
       }
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_error_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
-    {
-      if(form->i < 0 || form->i >= this->num)
-        throw Exceptions::ValueException("component number", form->i, 0, this->num);
-      if(form->j < 0 || form->j >= this->num)
-        throw Exceptions::ValueException("component number", form->j, 0, this->num);
-
-      // FIXME: Memory leak - always for i == j (see the constructor), may happen for i != j
-      //        if user does not delete previously set error forms by himself.
-      if(own_forms[i][j] && error_form[i][j])
-        delete error_form[i][j];
-      error_form[i][j] = form;
-      norm_form[i][j] = error_form[i][j];
-      own_forms[i][j] = false;
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_error_form(typename Adapt<Scalar>::MatrixFormVolError* form)
-    {
-      set_error_form(0, 0, form);
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_norm_form(int i, int j, typename Adapt<Scalar>::MatrixFormVolError* form)
-    {
-      if(form->i < 0 || form->i >= this->num)
-        throw Exceptions::ValueException("component number", form->i, 0, this->num);
-      if(form->j < 0 || form->j >= this->num)
-        throw Exceptions::ValueException("component number", form->j, 0, this->num);
-
-      norm_form[i][j] = form;
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::set_norm_form(typename Adapt<Scalar>::MatrixFormVolError* form)
-    {
-      set_norm_form(0, 0, form);
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::eval_error(typename Adapt<Scalar>::MatrixFormVolError* form,
-      MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, MeshFunction<Scalar>* rsln1,
-      MeshFunction<Scalar>* rsln2)
-    {
-      RefMap *rv1 = sln1->get_refmap();
-      RefMap *rv2 = sln2->get_refmap();
-      RefMap *rrv1 = rsln1->get_refmap();
-      RefMap *rrv2 = rsln2->get_refmap();
-
-      // determine the integration order
-      int inc = (rsln1->get_num_components() == 2) ? 1 : 0;
-      Func<Hermes::Ord>* ou = init_fn_ord(rsln1->get_fn_order() + inc);
-      Func<Hermes::Ord>* ov = init_fn_ord(rsln2->get_fn_order() + inc);
-
-      double fake_wt = 1.0;
-      Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
-      int order = rrv1->get_inv_ref_order();
-      order += o.get_order();
-      
-      limit_order(order, rv1->get_active_element()->get_mode());
-
-      ou->free_ord(); delete ou;
-      ov->free_ord(); delete ov;
-      delete fake_e;
-
-      // eval the form
-      Quad2D* quad = sln1->get_quad_2d();
-      double3* pt = quad->get_points(order, sln1->get_active_element()->get_mode());
-      int np = quad->get_num_points(order, sln1->get_active_element()->get_mode());
-
-      // init geometry and jacobian*weights
-      Geom<double>* e = init_geom_vol(rrv1, order);
-      double* jac = rrv1->get_jacobian(order);
-      double* jwt = new double[np];
-      for(int i = 0; i < np; i++)
-        jwt[i] = pt[i][2] * jac[i];
-
-      // function values and values of external functions
-      Func<Scalar>* err1 = init_fn(sln1, order);
-      Func<Scalar>* err2 = init_fn(sln2, order);
-      Func<Scalar>* v1 = init_fn(rsln1, order);
-      Func<Scalar>* v2 = init_fn(rsln2, order);
-
-      err1->subtract(v1);
-      err2->subtract(v2);
-
-      Scalar res = form->value(np, jwt, NULL, err1, err2, e, NULL);
-
-      e->free(); delete e;
-      delete [] jwt;
-      err1->free_fn(); delete err1;
-      err2->free_fn(); delete err2;
-      v1->free_fn(); delete v1;
-      v2->free_fn(); delete v2;
-
-      return std::abs(res);
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::eval_error_norm(typename Adapt<Scalar>::MatrixFormVolError* form,
-      MeshFunction<Scalar>* rsln1, MeshFunction<Scalar>* rsln2)
-    {
-      RefMap *rrv1 = rsln1->get_refmap();
-      RefMap *rrv2 = rsln2->get_refmap();
-
-      // determine the integration order
-      int inc = (rsln1->get_num_components() == 2) ? 1 : 0;
-      Func<Hermes::Ord>* ou = init_fn_ord(rsln1->get_fn_order() + inc);
-      Func<Hermes::Ord>* ov = init_fn_ord(rsln2->get_fn_order() + inc);
-
-      double fake_wt = 1.0;
-      Geom<Hermes::Ord>* fake_e = init_geom_ord();
-      Hermes::Ord o = form->ord(1, &fake_wt, NULL, ou, ov, fake_e, NULL);
-      int order = rrv1->get_inv_ref_order();
-      order += o.get_order();
-      
-      limit_order(order, rrv1->get_active_element()->get_mode());
-
-      ou->free_ord(); delete ou;
-      ov->free_ord(); delete ov;
-      delete fake_e;
-
-      // eval the form
-      Quad2D* quad = rsln1->get_quad_2d();
-      double3* pt = quad->get_points(order, rrv1->get_active_element()->get_mode());
-      int np = quad->get_num_points(order, rrv1->get_active_element()->get_mode());
-
-      // init geometry and jacobian*weights
-      Geom<double>* e = init_geom_vol(rrv1, order);
-      double* jac = rrv1->get_jacobian(order);
-      double* jwt = new double[np];
-      for(int i = 0; i < np; i++)
-        jwt[i] = pt[i][2] * jac[i];
-
-      // function values
-      Func<Scalar>* v1 = init_fn(rsln1, order);
-      Func<Scalar>* v2 = init_fn(rsln2, order);
-
-      Scalar res = form->value(np, jwt, NULL, v1, v2, e, NULL);
-
-      e->free(); delete e;
-      delete [] jwt;
-      v1->free_fn(); delete v1;
-      v2->free_fn(); delete v2;
-
-      return std::abs(res);
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::calc_err_internal(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns,
-      Hermes::vector<double>* component_errors, bool solutions_for_adapt, unsigned int error_flags)
-    {
-      int i, j;
-      
-      bool compatible_meshes = true;
-      for (int space_i = 0; space_i < this->num; space_i++)
-      {
-        Element* e;
-        for_all_active_elements(e, slns[space_i]->get_mesh())
-        {
-          Element* e_ref = rslns[space_i]->get_mesh()->get_element(e->id);
-          if(e_ref == NULL)
-          {
-            compatible_meshes = false;
-            break;
-          }
-          if(!e_ref->active)
-          {
-            if(e_ref->sons[0] == NULL || e_ref->sons[2] == NULL)
-            {
-              compatible_meshes = false;
-              break;
-            }
-            if(!e_ref->sons[0]->active || !e_ref->sons[2]->active)
-            {
-              compatible_meshes = false;
-              break;
-            }
-          }
-        }
-      }
-
-      if(!compatible_meshes)
-        throw Exceptions::Exception("Reference space not created by an isotropic (p-, h-, or hp-) refinement from the coarse space.");
-
-      if(slns.size() != this->num)
-        throw Exceptions::LengthException(0, slns.size(), this->num);
-
-      Solution<Scalar>* rslns_original[H2D_MAX_COMPONENTS];
-      Solution<Scalar>* slns_original[H2D_MAX_COMPONENTS];
-
-      for (i = 0; i < this->num; i++)
-      {
-        Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(slns[i].get());
-        if(solution == NULL)
-          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in Adapt::calc_err_*().");
-
-        slns_original[i] = this->sln[i];
-        this->sln[i] = solution;
-        sln[i]->set_quad_2d(&g_quad_2d_std);
-      }
-      for (i = 0; i < this->num; i++)
-      {
-        Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(rslns[i].get());
-        if(solution == NULL)
-          throw Exceptions::Exception("Passed solution is in fact not a Solution instance in Adapt::calc_err_*().");
-
-        rslns_original[i] = this->rsln[i];
-        this->rsln[i] = solution;
-        rsln[i]->set_quad_2d(&g_quad_2d_std);
-      }
-
-      have_coarse_solutions = true;
-      have_reference_solutions = true;
-
-      // Prepare multi-mesh traversal and error arrays.
-      MeshSharedPtr *meshes = new MeshSharedPtr [2 * num];
-      Transformable **tr = new Transformable *[2 * num];
-      Traverse trav(num);
-      num_act_elems = 0;
-      for (i = 0; i < num; i++)
-      {
-        meshes[i] = sln[i]->get_mesh();
-        meshes[i + num] = rsln[i]->get_mesh();
-        tr[i] = sln[i];
-        tr[i + num] = rsln[i];
-
-        num_act_elems += sln[i]->get_mesh()->get_num_active_elements();
-
-        int max = meshes[i]->get_max_element_id();
-        if(solutions_for_adapt)
-        {
-          if(errors[i])
-            delete [] errors[i];
-          errors[i] = new double[max];
-          memset(errors[i], 0, sizeof(double) * max);
-        }
-      }
-
-      double total_norm = 0.0;
-      double *norms = new double[num];
-      memset(norms, 0, num * sizeof(double));
-      double *errors_components = new double[num];
-      memset(errors_components, 0, num * sizeof(double));
-      if(solutions_for_adapt) this->errors_squared_sum = 0.0;
-      double total_error = 0.0;
-
-      // Calculate error.
-      Traverse::State * ee;
-      trav.begin(2 * num, meshes, tr);
-      while (ee = trav.get_next_state())
-      {
-        for (i = 0; i < num; i++)
-        {
-          for (j = 0; j < num; j++)
-          {
-            if(error_form[i][j])
-            {
-              double err, nrm;
-              err = eval_error(error_form[i][j], sln[i], sln[j], rsln[i], rsln[j]);
-              nrm = eval_error_norm(norm_form[i][j], rsln[i], rsln[j]);
-
-              norms[i] += nrm;
-              total_norm  += nrm;
-              total_error += err;
-              errors_components[i] += err;
-              if(solutions_for_adapt)
-                this->errors[i][ee->e[i]->id] += err;
-            }
-          }
-        }
-      }
-      trav.finish();
-
-      // Store the calculation for each solution component separately.
-      if(component_errors)
-      {
-        component_errors->clear();
-        for (int i = 0; i < num; i++)
-        {
-          if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-            component_errors->push_back(sqrt(errors_components[i]));
-          else if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-            component_errors->push_back(sqrt(errors_components[i]/norms[i]));
-          else
-          {
-            throw Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
-            return -1.0;
-          }
-        }
-      }
-
-      // Make the error relative if needed.
-      if(solutions_for_adapt)
-      {
-        if((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
-        {
-          for (int i = 0; i < this->num; i++)
-          {
-            Element* e;
-            for_all_active_elements(e, meshes[i])
-            {
-              errors[i][e->id] /= norms[i];
-            }
-          }
-        }
-
-        this->errors_squared_sum = total_error;
-
-        // Element error mask is used here, because this variable is used in the adapt()
-        // function, where the processed error (sum of errors of processed element errors)
-        // is matched to this variable.
-        if((error_flags & HERMES_ELEMENT_ERROR_MASK) == HERMES_ELEMENT_ERROR_REL)
-          errors_squared_sum = errors_squared_sum / total_norm;
-      }
-
-      // Prepare an ordered list of elements according to an error.
-      if(solutions_for_adapt)
-      {
-        fill_regular_queue(meshes);
-        have_errors = true;
-      }
-      else
-      {
-        for (i = 0; i < this->num; i++)
-        {
-          this->sln[i] = slns_original[i];
-          this->rsln[i] = rslns_original[i];
-        }
-      }
-
-      delete [] meshes;
-      delete [] tr;
-      delete [] norms;
-      delete [] errors_components;
-
-      // Return error value.
-      if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_ABS)
-        return sqrt(total_error);
-      else if((error_flags & HERMES_TOTAL_ERROR_MASK) == HERMES_TOTAL_ERROR_REL)
-        return sqrt(total_error / total_norm);
-      else
-      {
-        throw Hermes::Exceptions::Exception("Unknown total error type (0x%x).", error_flags & HERMES_TOTAL_ERROR_MASK);
-        return -1.0;
-      }
-    }
-
-    template<typename Scalar>
-    double Adapt<Scalar>::calc_err_internal(MeshFunctionSharedPtr<Scalar> sln, MeshFunctionSharedPtr<Scalar> rsln,
-      Hermes::vector<double>* component_errors, bool solutions_for_adapt,
-      unsigned int error_flags)
-    {
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns;
-      slns.push_back(sln);
-      Hermes::vector<MeshFunctionSharedPtr<Scalar> > rslns;
-      rslns.push_back(rsln);
-      return calc_err_internal(slns, rslns, component_errors, solutions_for_adapt, error_flags);
-    }
-
-    template<typename Scalar>
-    Adapt<Scalar>::CompareElements::CompareElements(double** errors): errors(errors)
-    {
-    }
-
-    template<typename Scalar>
-    bool Adapt<Scalar>::CompareElements::operator()(const ElementReference& e1, const ElementReference& e2) const
-    {
-      return errors[e1.comp][e1.id] > errors[e2.comp][e2.id];
-    }
-
-    template<typename Scalar>
-    void Adapt<Scalar>::fill_regular_queue(MeshSharedPtr* meshes)
-    {
-      //prepare space for queue (it is assumed that it will only grow since we can just split)
-      regular_queue.clear();
-      if(num_act_elems < (int)regular_queue.capacity())
-      {
-        Hermes::vector<ElementReference> empty_refs;
-        regular_queue.swap(empty_refs); //deallocate
-        regular_queue.reserve(num_act_elems); //allocate
-      }
-
-      //prepare initial fill
-      Element* e;
-      typename Hermes::vector<ElementReference>::iterator elem_info = regular_queue.begin();
-      for (int i = 0; i < this->num; i++)
-      {
-        for_all_active_elements(e, meshes[i])
-        {
-          regular_queue.push_back(ElementReference(e->id, i));
-        }
-      }
-      //sort
-      std::sort(regular_queue.begin(), regular_queue.end(), CompareElements(errors));
     }
 
     template HERMES_API class Adapt<double>;

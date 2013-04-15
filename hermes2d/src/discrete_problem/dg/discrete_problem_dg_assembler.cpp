@@ -35,6 +35,8 @@ namespace Hermes
       als(threadAssembler->als),
       fns(threadAssembler->fns),
       wf(threadAssembler->wf),
+      mfDG(threadAssembler->wf->mfDG),
+      vfDG(threadAssembler->wf->vfDG),
       spaces_size(threadAssembler->spaces_size),
       nonlinear(threadAssembler->nonlinear),
       current_mat(threadAssembler->current_mat),
@@ -44,18 +46,25 @@ namespace Hermes
       do_not_use_cache(threadAssembler->do_not_use_cache),
       spaces(spaces)
     {
-      this->DG_matrix_forms_present = false;
-      this->DG_vector_forms_present = false;
-      if(this->wf)
+      if(mfDG.size() > 0)
       {
-        if(!this->wf->mfDG.empty())
-          this->DG_matrix_forms_present = true;
+        npss = new PrecalcShapeset*[spaces_size];
+        nrefmaps = new RefMap*[spaces_size];
 
-        if(!this->wf->vfDG.empty())
-          this->DG_vector_forms_present = true;
+        for (unsigned int j = 0; j < spaces_size; j++)
+        {
+          npss[j] = new PrecalcShapeset(spaces[j]->shapeset);
+          nrefmaps[j] = new RefMap();
+        }
       }
+    }
 
-      if(DG_matrix_forms_present)
+    template<typename Scalar>
+    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(Hermes::vector<MatrixFormDG<Scalar>*>& mfDG)
+      : mfDG(mfDG),
+      current_state(NULL)
+    {
+      if(mfDG.size() > 0)
       {
         npss = new PrecalcShapeset*[spaces_size];
         nrefmaps = new RefMap*[spaces_size];
@@ -71,7 +80,7 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>* DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(NeighborSearch<Scalar>** neighbor_searches, int index)
     {
-      return neighbor_searches[index + this->wf->get_neq()];
+      return neighbor_searches[index + this->spaces_size];
     }
 
     template<typename Scalar>
@@ -142,7 +151,8 @@ namespace Hermes
                 continue;
 
               // DG-inner-edge-wise parameters for WeakForm.
-              wf->set_active_DG_state(current_state->e, current_state->isurf);
+              if(wf)
+                wf->set_active_DG_state(current_state->e, current_state->isurf);
 
               assemble_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, neighbor_searches[current_state->isurf]);
             }
@@ -261,7 +271,8 @@ namespace Hermes
         }
       }
 
-      DiscontinuousFunc<Scalar>** ext = init_ext_fns(wf->ext, current_neighbor_searches, order);
+      if(wf)
+        DiscontinuousFunc<Scalar>** ext = init_ext_fns(wf->ext, current_neighbor_searches, order);
 
       DiscontinuousFunc<Scalar>** u_ext_func = new DiscontinuousFunc<Scalar>*[this->spaces_size];
       if(this->nonlinear)
@@ -284,12 +295,12 @@ namespace Hermes
 
       if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
-        for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
+        for(int current_mfsurf_i = 0; current_mfsurf_i < this->mfDG.size(); current_mfsurf_i++)
         {
-          if(!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)wf->mfDG[current_mfsurf_i], current_state))
+          if(!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)this->mfDG[current_mfsurf_i], current_state))
             continue;
 
-          MatrixFormDG<Scalar>* mfs = wf->mfDG[current_mfsurf_i];
+          MatrixFormDG<Scalar>* mfs = this->mfDG[current_mfsurf_i];
 
           int m = mfs->i;
           int n = mfs->j;
@@ -353,9 +364,9 @@ namespace Hermes
 
       if(current_rhs && DG_vector_forms_present)
       {
-        for (unsigned int ww = 0; ww < wf->vfDG.size(); ww++)
+        for (unsigned int ww = 0; ww < this->vfDG.size(); ww++)
         {
-          VectorFormDG<Scalar>* vfs = wf->vfDG[ww];
+          VectorFormDG<Scalar>* vfs = this->vfDG[ww];
           if(vfs->areas[0] != H2D_DG_INNER_EDGE)
             continue;
 
@@ -383,7 +394,7 @@ namespace Hermes
         }
       }
 
-      if(ext)
+      if(ext && wf)
       {
         for(unsigned int i = 0; i < wf->ext.size(); i++)
         {

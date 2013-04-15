@@ -109,54 +109,14 @@ namespace Hermes
 #define H2D_MAKE_QUAD_ORDER(h_encoded_order, v_encoded_order) (((v_encoded_order) << H2D_ORDER_BITS) + (h_encoded_order))
 #define H2D_MAKE_EDGE_ORDER(mode, edge, order) ((mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2) ? H2D_GET_H_ORDER(order) : H2D_GET_V_ORDER(order))
 
-    /// Class for global functions.
     template<typename Scalar>
-    class HERMES_API Global : public Hermes::Mixins::Loggable
-    {
-    public:
-      Global() : Hermes::Mixins::Loggable() {};
-      friend void warn_order();
-    public:
-      /// Error calculation in Hermes, useful for non-adaptive computations.
-      // Note: coarse mesh sln has to be first, then
-      // ref_sln (because the abs. error is divided
-      // by the norm of the latter).
-      static double calc_rel_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
-      static double calc_abs_error(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, int norm_type);
-      static double calc_norm(MeshFunction<Scalar>* sln, int norm_type);
-
-      /// Calculate norm of a (possibly vector-valued) solution.
-      /// Take norm from spaces where these solutions belong.
-      static double calc_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns);
-      static double calc_abs_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns1, Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns2);
-      static double calc_rel_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns1, Hermes::vector<MeshFunctionSharedPtr<Scalar> > slns2);
-
-      static double calc_norms(Hermes::vector<MeshFunction<Scalar>* > slns);
-      static double calc_abs_errors(Hermes::vector<MeshFunction<Scalar>* > slns1, Hermes::vector<MeshFunction<Scalar>* > slns2);
-      static double calc_rel_errors(Hermes::vector<MeshFunction<Scalar>* > slns1, Hermes::vector<MeshFunction<Scalar>* > slns2);
-
-      static double error_fn_l2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_l2(MeshFunction<Scalar>* sln, RefMap* ru);
-
-      static double error_fn_h1(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_h1(MeshFunction<Scalar>* sln, RefMap* ru);
-
-      static double error_fn_hc(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hc(MeshFunction<Scalar>* sln, RefMap* ru);
-
-      static double error_fn_hcl2(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hcl2(MeshFunction<Scalar>* sln, RefMap* ru);
-
-      static double error_fn_hdiv(MeshFunction<Scalar>* sln1, MeshFunction<Scalar>* sln2, RefMap* ru, RefMap* rv);
-      static double norm_fn_hdiv(MeshFunction<Scalar>* sln, RefMap* ru);
-
-      static double get_l2_norm(Vector<Scalar>* vec);
-      static double get_l2_norm(Scalar* vec, int count);
-    };
+    HERMES_API double get_l2_norm(Vector<Scalar>* vec);
+    template<typename Scalar>
+    HERMES_API double get_l2_norm(Scalar* vec, int count);
 
     /// Projection norms.
     /// Used in projections and adaptivity.
-    enum ProjNormType
+    enum NormType
     {
       HERMES_L2_NORM,
       HERMES_H1_NORM,
@@ -169,6 +129,30 @@ namespace Hermes
     enum ElementMode2D {
       HERMES_MODE_TRIANGLE = 0,
       HERMES_MODE_QUAD = 1
+    };
+
+    enum SpaceType {
+      HERMES_H1_SPACE = 0,
+      HERMES_HCURL_SPACE = 1,
+      HERMES_HDIV_SPACE = 2,
+      HERMES_L2_SPACE = 3,
+      HERMES_INVALID_SPACE = -9999
+    };
+
+    /// Geometrical type of weak forms.
+    enum GeomType
+    {
+      HERMES_PLANAR = 0,         // Planar problem.
+      HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
+      HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
+    };
+
+    /// Bilinear form symmetry flag, see WeakForm::add_matrix_form
+    enum SymFlag
+    {
+      HERMES_ANTISYM = -1,
+      HERMES_NONSYM = 0,
+      HERMES_SYM = 1
     };
   }
 }

@@ -34,68 +34,61 @@ namespace Hermes
     class HERMES_API OGProjection : public Hermes::Mixins::Loggable
     {
     public:
-      OGProjection();
-
-      /// Main functionality is in the protected method project_internal().
-      
       /// This method allows to specify your own OG-projection form.
-      void project_global(SpaceSharedPtr<Scalar> space,
-          MatrixFormVol<Scalar>* custom_projection_jacobian,
-          VectorFormVol<Scalar>* custom_projection_residual,
-          Scalar* target_vec);
+      static void project_global(SpaceSharedPtr<Scalar> space,
+        MatrixFormVol<Scalar>* custom_projection_jacobian,
+        VectorFormVol<Scalar>* custom_projection_residual,
+        Scalar* target_vec);
 
       /// Wrapper that delivers a Solution instead of a coefficient vector.   
-      void project_global(SpaceSharedPtr<Scalar> space,
-          MatrixFormVol<Scalar>* custom_projection_jacobian,
-          VectorFormVol<Scalar>* custom_projection_residual,
-          MeshFunctionSharedPtr<Scalar> target_sln);
-      
+      static void project_global(SpaceSharedPtr<Scalar> space,
+        MatrixFormVol<Scalar>* custom_projection_jacobian,
+        VectorFormVol<Scalar>* custom_projection_residual,
+        MeshFunctionSharedPtr<Scalar> target_sln);
+
       /// This method allows to specify your own multiple OG-projection forms.
-      void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
-          const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
-          const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
-          Scalar* target_vec);
-          
+      static void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
+        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+        Scalar* target_vec);
+
       /// Wrapper that delivers a vector of Solutions instead of a coefficient vector.   
-      void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
-          const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
-          const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
-          const Hermes::vector<MeshFunctionSharedPtr<Scalar> >& target_slns);
-          
+      static void project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
+        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobian,
+        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residual,
+        const Hermes::vector<MeshFunctionSharedPtr<Scalar> >& target_slns);
+
       /**
-       \fn  static void OGProjection::project_global(SpaceSharedPtr<Scalar> space,
-        MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
-        ProjNormType proj_norm = HERMES_UNSET_NORM, double newton_tol = 1e-6, int newton_max_iter = 10);
+      \fn  static void OGProjection::project_global(SpaceSharedPtr<Scalar> space,
+      MeshFunction<Scalar>* source_meshfn, Scalar* target_vec,
+      NormType proj_norm = HERMES_UNSET_NORM, double newton_tol = 1e-6, int newton_max_iter = 10);
 
-       \brief The method checks source_meshfn if it is an instance of Solution, if so, it checks its sln_vector, and space_seq
-              if they can be used directly.
+      \brief The method checks source_meshfn if it is an instance of Solution, if so, it checks its sln_vector, and space_seq
+      if they can be used directly.
 
-       \author  LK
-       \date  10/29/2011
-
-       \param[in]  space         If non-null, the space.
-       \param[in]  source_meshfn If non-null, source meshfn.
-       \param[out]  target_vec    If non-null, target vector.
-       \param matrix_solver           (optional) the matrix solver.
-       \param proj_norm               (optional) the project normalise.
-       \param newton_tol              (optional) the newton tolerance.
-       \param newton_max_iter         (optional) the newton maximum iterator.
-       */
-      void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
-          Scalar* target_vec, ProjNormType proj_norm = HERMES_UNSET_NORM);
+      \param[in]  space         If non-null, the space.
+      \param[in]  source_meshfn If non-null, source meshfn.
+      \param[out]  target_vec    If non-null, target vector.
+      \param matrix_solver           (optional) the matrix solver.
+      \param proj_norm               (optional) the project normalise.
+      \param newton_tol              (optional) the newton tolerance.
+      \param newton_max_iter         (optional) the newton maximum iterator.
+      */
+      static void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
+        Scalar* target_vec, NormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper that delivers a Solution instead of coefficient vector.
-      void project_global(SpaceSharedPtr<Scalar> space,
-          MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar>  target_sln,
-          ProjNormType proj_norm = HERMES_UNSET_NORM);
+      static void project_global(SpaceSharedPtr<Scalar> space,
+        MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar>  target_sln,
+        NormType proj_norm = HERMES_UNSET_NORM);
 
       /// Wrapper for multiple source MeshFunctions that delivers coefficient vector.
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
-          Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>());
+      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
+        Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
 
-      void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
-          Hermes::vector<ProjNormType> proj_norms = Hermes::vector<ProjNormType>(), bool delete_old_mesh = false);
+      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
+        Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false);
 
     protected:
       /// Underlying function for global orthogonal projection.
@@ -103,21 +96,21 @@ namespace Hermes
       /// a special projection weak form, which is different from
       /// the weak form of the PDE. If you supply a weak form of the
       /// PDE, the PDE will just be solved.
-      void project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* proj_wf, Scalar* target_vec);
+      static void project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* proj_wf, Scalar* target_vec);
 
       /// Jacobian matrix (same as stiffness matrix since projections are linear).
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
       {
       public:
-        ProjectionMatrixFormVol(int i, int j, ProjNormType projNormType) : MatrixFormVol<Scalar>(i, j)
+        ProjectionMatrixFormVol(int i, int j, NormType NormType) : MatrixFormVol<Scalar>(i, j)
         {
-          this->projNormType = projNormType;
+          this->NormType = NormType;
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
           Geom<double> *e, Func<Scalar> **ext) const
         {
-          switch (projNormType)
+          switch (NormType)
           {
           case HERMES_L2_NORM:
             return l2_projection_biform<double, Scalar>(n, wt, u_ext, u, v, e, ext);
@@ -138,7 +131,7 @@ namespace Hermes
         Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, Func<Ord> **ext) const
         {
-          switch (projNormType)
+          switch (NormType)
           {
           case HERMES_L2_NORM:
             return l2_projection_biform<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
@@ -162,7 +155,7 @@ namespace Hermes
         }
 
       private:
-        ProjNormType projNormType;
+        NormType NormType;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
@@ -223,15 +216,15 @@ namespace Hermes
       class ProjectionVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        ProjectionVectorFormVol(int i, ProjNormType projNormType) : VectorFormVol<Scalar>(i)
+        ProjectionVectorFormVol(int i, NormType NormType) : VectorFormVol<Scalar>(i)
         {
-          this->projNormType = projNormType;
+          this->NormType = NormType;
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, Func<Scalar> **ext) const
         {
-          switch (projNormType)
+          switch (NormType)
           {
           case HERMES_L2_NORM:
             return l2_projection_residual<double, Scalar>(n, wt, u_ext, v, e, ext);
@@ -252,7 +245,7 @@ namespace Hermes
         Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, Func<Ord> **ext) const
         {
-          switch (projNormType)
+          switch (NormType)
           {
           case HERMES_L2_NORM:
             return l2_projection_residual<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
@@ -276,7 +269,7 @@ namespace Hermes
         }
 
       private:
-        ProjNormType projNormType;
+        NormType NormType;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
@@ -339,8 +332,6 @@ namespace Hermes
           return result;
         }
       };
-
-      int ndof;
     };
   }
 }

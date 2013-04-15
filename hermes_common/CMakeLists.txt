@@ -18,7 +18,8 @@ project(hermes_common)
     src/callstack.cpp
     src/matrix.cpp
     src/api.cpp
-    src/tables.cpp
+    src/range.cpp
+    src/table.cpp
     src/qsort.cpp
     src/c99_functions.cpp
     src/ord.cpp
@@ -45,7 +46,8 @@ project(hermes_common)
     include/matrix.h
     include/api.h
     include/array.h
-    include/tables.h
+    include/range.h
+    include/table.h
     include/qsort.h
     include/c99_functions.h
     include/ord.h

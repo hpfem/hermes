@@ -46,6 +46,7 @@ namespace Hermes
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
       DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      DiscreteProblemDGAssembler(Hermes::vector<MatrixFormDG<Scalar>*>& mfDG);
       
       /// Destructor.
       ~DiscreteProblemDGAssembler();
@@ -57,17 +58,11 @@ namespace Hermes
       /// Deinitialize assembling for a state.
       void deinit_assembling_one_state();
 
-    private:
-      /// There is a matrix form set on DG_INNER_EDGE area or not.
-      bool DG_matrix_forms_present;
-
-      /// There is a vector form set on DG_INNER_EDGE area or not.
-      bool DG_vector_forms_present;
-
+    protected:
       /// Initialize assembling for a neighbor.
       void init_assembling_one_neighbor();
       /// Assemble one DG neighbor.
-      void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches);
+      virtual void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches);
       /// Deinitialize assembling for a neighbor.
       void deinit_assembling_one_neighbor();
 
@@ -95,6 +90,8 @@ namespace Hermes
       AsmList<Scalar>** als;
       Hermes::vector<Transformable *> fns;
       WeakForm<Scalar>* wf;
+      Hermes::vector<MatrixFormDG<Scalar> >& mfDG;
+      Hermes::vector<VectorFormDG<Scalar> >& vfDG;
       int spaces_size;
       bool nonlinear;
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;

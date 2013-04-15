@@ -124,11 +124,11 @@ int main(int argc, char* argv[])
   int ndof = Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space));
 
   // Define projection norms.
-  ProjNormType vel_proj_norm = HERMES_H1_NORM;
+  NormType vel_proj_norm = HERMES_H1_NORM;
 #ifdef PRESSURE_IN_L2
-  ProjNormType p_proj_norm = HERMES_L2_NORM;
+  NormType p_proj_norm = HERMES_L2_NORM;
 #else
-  ProjNormType p_proj_norm = HERMES_H1_NORM;
+  NormType p_proj_norm = HERMES_H1_NORM;
 #endif
 
   // Solutions for the Newton's iteration and time stepping.
@@ -164,7 +164,7 @@ if(HERMES_VISUALIZATION)
 
   ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(xvel_space, yvel_space, p_space),
     Hermes::vector<MeshFunctionSharedPtr<double> >(xvel_prev_time, yvel_prev_time, p_prev_time),
-    coeff_vec, Hermes::vector<ProjNormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
+    coeff_vec, Hermes::vector<NormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   newton.set_max_allowed_iterations(max_allowed_iterations);
   newton.set_tolerance(NEWTON_TOL);

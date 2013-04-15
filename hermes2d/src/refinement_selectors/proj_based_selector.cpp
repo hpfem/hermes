@@ -15,8 +15,8 @@ namespace Hermes
     {
       template<typename Scalar>
       ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, double conv_exp, int
-        max_order, Shapeset* shapeset, const typename OptimumSelector<Scalar>::Range& vertex_order, const
-        typename OptimumSelector<Scalar>::Range& edge_bubble_order) :
+        max_order, Shapeset* shapeset, const Range& vertex_order, const
+        Range& edge_bubble_order) :
       OptimumSelector<Scalar>(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order),
         warn_uniform_orders(false),
         error_weight_h(H2DRS_DEFAULT_ERR_WEIGHT_H),

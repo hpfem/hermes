@@ -86,6 +86,7 @@ namespace Hermes
       {
       public:
         Element** e;
+        uint64_t* sub_idx;
         bool bnd[H2D_MAX_NUMBER_EDGES];
         bool isBnd;
         Element* rep;
@@ -93,6 +94,7 @@ namespace Hermes
         int rep_i;
         ~State();
         int isurf;
+        int num;
       private:
         State();
         //void operator=(const State * other);
@@ -101,10 +103,8 @@ namespace Hermes
         bool is_triangle();
         uint64_t get_transform(int i);
         bool visited;
-        uint64_t* sub_idx;
         Rect  cr;
         Rect* er;
-        int num;
       friend class Traverse;
       friend class Views::Linearizer;
       friend class Views::Vectorizer;

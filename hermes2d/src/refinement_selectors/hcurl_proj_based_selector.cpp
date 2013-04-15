@@ -15,7 +15,7 @@ namespace Hermes
 
       template<typename Scalar>
       HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, typename OptimumSelector<Scalar>::Range(), typename OptimumSelector<Scalar>::Range(0, H2DRS_MAX_HCURL_ORDER))
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
         , precalc_rvals_curl(NULL)
       {
         if(user_shapeset != NULL)

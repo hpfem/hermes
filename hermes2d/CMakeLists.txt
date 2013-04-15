@@ -108,12 +108,9 @@ project(hermes2d)
     src/mixins2d.cpp
     src/neighbor.cpp
     src/graph.cpp
-    src/global.cpp
+    src/norm_calculator.cpp
     src/spline.cpp
     
-    src/adapt/adapt.cpp
-    src/adapt/kelly_type_adapt.cpp
-
     src/boundary_conditions/essential_boundary_conditions.cpp
 
     src/function/transformable.cpp
@@ -126,8 +123,6 @@ project(hermes2d)
 
     src/mesh/refmap.cpp
     src/mesh/curved.cpp
-    src/mesh/refinement_type.cpp
-    src/mesh/element_to_refine.cpp
     src/mesh/mesh_reader_exodusii.cpp
     src/mesh/hash.cpp
     src/mesh/mesh_reader_h2d.cpp
@@ -142,14 +137,6 @@ project(hermes2d)
 
     src/quadrature/limit_order.cpp
     src/quadrature/quad_std.cpp
-
-    src/refinement_selectors/selector.cpp
-    src/refinement_selectors/order_permutator.cpp
-    src/refinement_selectors/optimum_selector.cpp
-    src/refinement_selectors/proj_based_selector.cpp
-    src/refinement_selectors/l2_proj_based_selector.cpp
-    src/refinement_selectors/h1_proj_based_selector.cpp
-    src/refinement_selectors/hcurl_proj_based_selector.cpp
 
     src/shapeset/shapeset.cpp
     src/shapeset/shapeset_h1_ortho.cpp
@@ -214,6 +201,77 @@ project(hermes2d)
     src/solver/newton_solver_convergence_measurement.cpp
     src/solver/picard_solver.cpp
     src/solver/runge_kutta.cpp
+    
+    src/adapt/adapt.cpp
+    src/adapt/kelly_type_adapt.cpp
+    src/adapt/error_calculator.cpp
+    src/adapt/error_thread_calculator.cpp
+
+    src/refinement_selectors/selector.cpp
+    src/refinement_selectors/order_permutator.cpp
+    src/refinement_selectors/optimum_selector.cpp
+    src/refinement_selectors/proj_based_selector.cpp
+    src/refinement_selectors/l2_proj_based_selector.cpp
+    src/refinement_selectors/h1_proj_based_selector.cpp
+    src/refinement_selectors/hcurl_proj_based_selector.cpp
+
+    src/mesh/element_to_refine.cpp
+    src/mesh/refinement_type.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Mesh" FILES 
+    src/mesh/refmap.cpp
+    src/mesh/curved.cpp
+    src/mesh/mesh_reader_exodusii.cpp
+    src/mesh/hash.cpp
+    src/mesh/mesh_reader_h2d.cpp
+    src/mesh/mesh_reader_h2d_xml.cpp
+    src/mesh/mesh_reader_h1d_xml.cpp
+    src/mesh/mesh_h2d_xml.cpp
+    src/mesh/mesh_h1d_xml.cpp
+    src/mesh/subdomains_h2d_xml.cpp
+    src/mesh/mesh.cpp
+    src/mesh/traverse.cpp
+    src/mesh/mesh_data.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Views" FILES 
+    src/views/base_view.cpp
+    src/views/mesh_view.cpp
+    src/views/order_view.cpp
+    src/views/scalar_view.cpp
+    src/views/stream_view.cpp
+    src/views/vector_base_view.cpp
+    src/views/vector_view.cpp
+    src/views/view.cpp
+    src/views/view_data.cpp
+    src/views/view_support.cpp
+    src/views/linearizer.cpp
+    src/views/linearizer_base.cpp
+    src/views/orderizer.cpp
+    src/views/vectorizer.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Space" FILES 
+    src/shapeset/shapeset.cpp
+    src/shapeset/shapeset_h1_ortho.cpp
+    src/shapeset/shapeset_h1_jacobi.cpp
+    src/shapeset/shapeset_h1_quad.cpp
+    src/shapeset/shapeset_hc_legendre.cpp
+    src/shapeset/shapeset_hc_gradleg.cpp
+    src/shapeset/shapeset_hd_legendre.cpp
+    src/shapeset/shapeset_l2_legendre.cpp
+    src/shapeset/precalc.cpp
+
+    src/space/space.cpp
+    src/space/space_h1.cpp
+    src/space/space_hcurl.cpp
+    src/space/space_l2.cpp
+    src/space/space_hdiv.cpp
+    src/space/space_h2d_xml.cpp
   )
   
   SOURCE_GROUP(
@@ -242,6 +300,28 @@ project(hermes2d)
     src/discrete_problem/dg/multimesh_dg_neighbor_tree_node.cpp
   )
   
+  SOURCE_GROUP(
+    "Source Files\\Adaptivity" FILES 
+    src/adapt/adapt.cpp
+    src/adapt/kelly_type_adapt.cpp
+    src/adapt/error_calculator.cpp
+    src/adapt/error_thread_calculator.cpp
+  )
+
+  SOURCE_GROUP(
+    "Source Files\\Adaptivity\\Refinement Selectors" FILES 
+    src/refinement_selectors/selector.cpp
+    src/refinement_selectors/order_permutator.cpp
+    src/refinement_selectors/optimum_selector.cpp
+    src/refinement_selectors/proj_based_selector.cpp
+    src/refinement_selectors/l2_proj_based_selector.cpp
+    src/refinement_selectors/h1_proj_based_selector.cpp
+    src/refinement_selectors/hcurl_proj_based_selector.cpp
+
+    src/mesh/element_to_refine.cpp
+    src/mesh/refinement_type.cpp
+  )
+  
   set(HEADERS
     include/api2d.h
     include/asmlist.h
@@ -252,10 +332,8 @@ project(hermes2d)
     include/sub_element_map.h
     include/graph.h
     include/global.h
+    include/norm_calculator.h
     include/spline.h
-
-    include/adapt/adapt.h
-    include/adapt/kelly_type_adapt.h
 
     include/boundary_conditions/essential_boundary_conditions.h
 
@@ -274,8 +352,6 @@ project(hermes2d)
     
     include/mesh/refmap.h
     include/mesh/curved.h
-    include/mesh/refinement_type.h
-    include/mesh/element_to_refine.h
     include/mesh/mesh_reader_exodusii.h
     include/mesh/hash.h
     include/mesh/mesh_reader_h2d.h
@@ -291,14 +367,6 @@ project(hermes2d)
     include/quadrature/limit_order.h
     include/quadrature/quad.h
     include/quadrature/quad_all.h
-
-    include/refinement_selectors/selector.h
-    include/refinement_selectors/order_permutator.h
-    include/refinement_selectors/optimum_selector.h
-    include/refinement_selectors/proj_based_selector.h
-    include/refinement_selectors/l2_proj_based_selector.h
-    include/refinement_selectors/h1_proj_based_selector.h
-    include/refinement_selectors/hcurl_proj_based_selector.h
 
     include/shapeset/shapeset.h
     include/shapeset/shapeset_h1_all.h
@@ -330,7 +398,6 @@ project(hermes2d)
     include/views/vectorizer.h
 
     include/weakform/weakform.h
-
     
     include/projections/ogprojection.h
     include/projections/ogprojection_nox.h
@@ -361,9 +428,77 @@ project(hermes2d)
     include/solver/newton_solver.h
     include/solver/picard_solver.h
     include/solver/runge_kutta.h
+    
+    include/adapt/adapt.h
+    include/adapt/kelly_type_adapt.h
+    include/adapt/error_calculator.h
+    include/adapt/error_thread_calculator.h
+
+    include/mesh/refinement_type.h
+    include/mesh/element_to_refine.h
+    
+    include/refinement_selectors/selector.h
+    include/refinement_selectors/order_permutator.h
+    include/refinement_selectors/optimum_selector.h
+    include/refinement_selectors/proj_based_selector.h
+    include/refinement_selectors/l2_proj_based_selector.h
+    include/refinement_selectors/h1_proj_based_selector.h
+    include/refinement_selectors/hcurl_proj_based_selector.h
   )
     
-    SOURCE_GROUP(
+  SOURCE_GROUP(
+    "Header Files\\Mesh" FILES 
+    include/mesh/refmap.h
+    include/mesh/curved.h
+    include/mesh/mesh_reader_exodusii.h
+    include/mesh/hash.h
+    include/mesh/mesh_reader_h2d.h
+    include/mesh/mesh_reader_h2d_xml.h
+    include/mesh/mesh_reader_h1d_xml.h
+    include/mesh/mesh_h2d_xml.h
+    include/mesh/mesh_h1d_xml.h
+    include/mesh/subdomains_h2d_xml.h
+    include/mesh/mesh.h
+    include/mesh/traverse.h
+    include/mesh/mesh_data.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Views" FILES 
+    include/views/base_view.h
+    include/views/mesh_view.h
+    include/views/order_view.h
+    include/views/scalar_view.h
+    include/views/stream_view.h
+    include/views/vector_base_view.h
+    include/views/vector_view.h
+    include/views/view.h
+    include/views/view_support.h
+    include/views/linearizer.h
+    include/views/linearizer_base.h
+    include/views/orderizer.h
+    include/views/vectorizer.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Space" FILES 
+    include/shapeset/shapeset.h
+    include/shapeset/shapeset_h1_all.h
+    include/shapeset/shapeset_h1_quad.h
+    include/shapeset/shapeset_hc_all.h
+    include/shapeset/shapeset_hd_all.h
+    include/shapeset/shapeset_l2_all.h
+    include/shapeset/precalc.h
+
+    include/space/space.h
+    include/space/space_h1.h
+    include/space/space_hcurl.h
+    include/space/space_l2.h
+    include/space/space_hdiv.h
+    include/space/space_h2d_xml.h
+  )
+  
+  SOURCE_GROUP(
     "Header Files\\Solvers" FILES 
     include/solver/solver.h
     include/solver/linear_solver.h
@@ -387,6 +522,28 @@ project(hermes2d)
     include/discrete_problem/dg/discrete_problem_dg_assembler.h
     include/discrete_problem/dg/multimesh_dg_neighbor_tree.h
     include/discrete_problem/dg/multimesh_dg_neighbor_tree_node.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Adaptivity" FILES 
+    include/adapt/adapt.h
+    include/adapt/kelly_type_adapt.h
+    include/adapt/error_calculator.h
+    include/adapt/error_thread_calculator.h
+
+    include/mesh/refinement_type.h
+    include/mesh/element_to_refine.h
+    )
+    
+  SOURCE_GROUP(
+    "Header Files\\Adaptivity\\Refinement Selectors" FILES  
+    include/refinement_selectors/selector.h
+    include/refinement_selectors/order_permutator.h
+    include/refinement_selectors/optimum_selector.h
+    include/refinement_selectors/proj_based_selector.h
+    include/refinement_selectors/l2_proj_based_selector.h
+    include/refinement_selectors/h1_proj_based_selector.h
+    include/refinement_selectors/hcurl_proj_based_selector.h
   )
     
   #

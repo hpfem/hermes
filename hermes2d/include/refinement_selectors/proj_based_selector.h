@@ -173,7 +173,7 @@ namespace Hermes
         *  \param[in] shapeset A shapeset. It cannot be NULL.
         *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range()) to skip vertex functions.
         *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range()) to skip edge and bubble functions. */
-        ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const typename OptimumSelector<Scalar>::Range& vertex_order, const typename OptimumSelector<Scalar>::Range& edge_bubble_order);
+        ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
 
       protected: //internal logic
         /// True if the selector has already warned about possible inefficiency.

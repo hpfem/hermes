@@ -23,14 +23,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// Geometrical type of weak forms.
-    enum GeomType
-    {
-      HERMES_PLANAR = 0,         // Planar problem.
-      HERMES_AXISYM_X = 1,       // Axisymmetric problem where x-axis is the axis of symmetry.
-      HERMES_AXISYM_Y = 2        // Axisymmetric problem where y-axis is the axis of symmetry.
-    };
-
+#pragma region forward-declarations
     class RefMap;
     template<typename Scalar> class DiscreteProblem;
     template<typename Scalar> class DiscreteProblemCache;
@@ -55,14 +48,7 @@ namespace Hermes
     template<typename Scalar> class VectorFormSurf;
     template<typename Scalar> class MatrixFormDG;
     template<typename Scalar> class VectorFormDG;
-
-    /// Bilinear form symmetry flag, see WeakForm::add_matrix_form
-    enum SymFlag
-    {
-      HERMES_ANTISYM = -1,
-      HERMES_NONSYM = 0,
-      HERMES_SYM = 1
-    };
+#pragma endregion
 
     /// \brief Represents the weak formulation of a PDE problem.
     ///

@@ -282,31 +282,6 @@ namespace Hermes
           ShapeInx(int order_h, int order_v, int inx, ShapeType type) : order_h(order_h), order_v(order_v), inx(inx), type(type) {};
         };
 
-        /// Range of values.
-        class Range
-        {
-        protected:
-          int lower_bound;    ///< Lower boundary.
-          int upper_bound;    ///< Upper boundary.
-          bool empty_range; ///< intrue if range is empty.
-          Range();
-          Range(const int& lower_bound, const int& upper_bound);
-          bool empty() const;
-          const int& lower() const;
-          const int& upper() const;
-          bool is_in_closed(const Range& range) const;
-          bool is_in_closed(const int& value) const;
-          bool is_in_open(const int& value) const;
-          void enlarge_to_include(const int& value);
-
-          static Range make_envelope(const Range& a, const Range& b);
-          template<typename T> friend class OptimumSelector;
-          template<typename T> friend class ProjBasedSelector;
-          template<typename T> friend class H1ProjBasedSelector;
-          template<typename T> friend class L2ProjBasedSelector;
-          template<typename T> friend class HcurlProjBasedSelector;
-        };
-
         Shapeset *shapeset; ///< A shapeset used to calculate error.
 
         Hermes::vector<ShapeInx> shape_indices[H2D_NUM_MODES]; ///< Shape indices. The first index is a mode (ElementMode2D).

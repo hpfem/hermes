@@ -22,13 +22,8 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    OGProjection<Scalar>::OGProjection() : Hermes::Mixins::Loggable(), ndof(0)
-    {
-    }
-
-    template<typename Scalar>
     void OGProjection<Scalar>::project_internal(SpaceSharedPtr<Scalar> space, WeakForm<Scalar>* wf,
-  Scalar* target_vec)
+      Scalar* target_vec)
     {
       // Sanity check.
       if(wf == NULL)
@@ -53,9 +48,9 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
-        MatrixFormVol<Scalar>* custom_projection_jacobian,
-        VectorFormVol<Scalar>* custom_projection_residual,
-        Scalar* target_vec)
+      MatrixFormVol<Scalar>* custom_projection_jacobian,
+      VectorFormVol<Scalar>* custom_projection_residual,
+      Scalar* target_vec)
     {
       // Define projection weak form.
       WeakForm<Scalar>* proj_wf = new WeakForm<Scalar>(1);
@@ -68,31 +63,30 @@ namespace Hermes
       // Clean up.
       delete proj_wf;
     }
-    
+
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
-        MatrixFormVol<Scalar>* custom_projection_jacobian,
-        VectorFormVol<Scalar>* custom_projection_residual,
-        MeshFunctionSharedPtr<Scalar> target_sln)
+      MatrixFormVol<Scalar>* custom_projection_jacobian,
+      VectorFormVol<Scalar>* custom_projection_residual,
+      MeshFunctionSharedPtr<Scalar> target_sln)
     {
       // Calculate the coefficient vector.
-      int ndof = space->get_num_dofs();
-      Scalar* target_vec = new Scalar[ndof];
-               
+      Scalar* target_vec = new Scalar[space->get_num_dofs()];
+
       project_global(space, custom_projection_jacobian, custom_projection_residual, target_vec);
-            
+
       // Translate coefficient vector into a Solution.
       Solution<Scalar>::vector_to_solution(target_vec, space, target_sln);
 
       // Clean up.
       delete [] target_vec;
     }
-    
+
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
-        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
-        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
-        Scalar* target_vec)
+      const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
+      const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
+      Scalar* target_vec)
     {
       int n = spaces.size();
 
@@ -100,22 +94,22 @@ namespace Hermes
       if(target_vec == NULL) throw Exceptions::NullException(3);
       if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
       if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
-      
+
       int start_index = 0;
       for (int i = 0; i < n; i++) 
       {
-                
+
         project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_vec + start_index);
-        
+
         start_index += spaces[i]->get_num_dofs();                       
       }
     }
-    
+
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces,
-        const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
-        const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
-        const Hermes::vector<MeshFunctionSharedPtr<Scalar> >& target_slns)
+      const Hermes::vector<MatrixFormVol<Scalar>*>& custom_projection_jacobians,
+      const Hermes::vector<VectorFormVol<Scalar>*>& custom_projection_residuals,
+      const Hermes::vector<MeshFunctionSharedPtr<Scalar> >& target_slns)
     {
       int n = spaces.size();
 
@@ -123,17 +117,17 @@ namespace Hermes
       if (n != target_slns.size()) throw Exceptions::LengthException(1, 2, n, target_slns.size());
       if (n != custom_projection_jacobians.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
       if (n != custom_projection_residuals.size()) throw Exceptions::LengthException(1, 2, n, custom_projection_residuals.size());
-      
+
       for (int i = 0; i < n; i++) 
       {
         project_global(spaces[i], custom_projection_jacobians[i], custom_projection_residuals[i], target_slns[i]);
       }
     }
-    
+
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
-        MeshFunctionSharedPtr<Scalar> source_meshfn, Scalar* target_vec,
-        ProjNormType proj_norm)
+      MeshFunctionSharedPtr<Scalar> source_meshfn, Scalar* target_vec,
+      NormType proj_norm)
     {
       // Sanity checks.
       if(target_vec == NULL) 
@@ -141,17 +135,17 @@ namespace Hermes
 
       // If projection norm is not provided, set it
       // to match the type of the space.
-      ProjNormType norm = HERMES_UNSET_NORM;
+      NormType norm = HERMES_UNSET_NORM;
       if(proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
         {
-          case HERMES_H1_SPACE: norm = HERMES_H1_NORM; break;
-          case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
-          case HERMES_HDIV_SPACE: norm = HERMES_HDIV_NORM; break;
-          case HERMES_L2_SPACE: norm = HERMES_L2_NORM; break;
-          default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
+        case HERMES_H1_SPACE: norm = HERMES_H1_NORM; break;
+        case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
+        case HERMES_HDIV_SPACE: norm = HERMES_HDIV_NORM; break;
+        case HERMES_L2_SPACE: norm = HERMES_L2_NORM; break;
+        default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
         }
       }
       else norm = proj_norm;
@@ -170,29 +164,28 @@ namespace Hermes
 
       // Clean up.
       delete proj_wf;
-		}
+    }
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
-        MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
-        ProjNormType proj_norm)
+      MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar> target_sln,
+      NormType proj_norm)
     {
       if(proj_norm == HERMES_UNSET_NORM)
       {
         SpaceType space_type = space->get_type();
         switch (space_type)
         {
-          case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
-          case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
-          case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
-          case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
-          default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
+        case HERMES_H1_SPACE: proj_norm = HERMES_H1_NORM; break;
+        case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
+        case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
+        case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
+        default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
         }
       }
 
       // Calculate the coefficient vector.
-      int ndof = space->get_num_dofs();
-      Scalar* target_vec = new Scalar[ndof];
+      Scalar* target_vec = new Scalar[space->get_num_dofs()];
       project_global(space, source_sln, target_vec, proj_norm);
 
       // Translate coefficient vector into a Solution.
@@ -204,7 +197,7 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
-        Scalar* target_vec, Hermes::vector<ProjNormType> proj_norms)
+      Scalar* target_vec, Hermes::vector<NormType> proj_norms)
     {
       int n = spaces.size();
 
@@ -239,7 +232,7 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
-        Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns, Hermes::vector<ProjNormType> proj_norms, bool delete_old_meshes)
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns, Hermes::vector<NormType> proj_norms, bool delete_old_meshes)
     {
       int n = spaces.size();
 

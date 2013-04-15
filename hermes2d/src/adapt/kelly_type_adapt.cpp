@@ -37,7 +37,7 @@ namespace Hermes
     KellyTypeAdapt<Scalar>::KellyTypeAdapt(Hermes::vector< SpaceSharedPtr<Scalar> >& spaces_,
                                            bool ignore_visited_segments_,
                                            Hermes::vector<const InterfaceEstimatorScalingFunction*> interface_scaling_fns_,
-                                           Hermes::vector<ProjNormType > norms_)
+                                           Hermes::vector<NormType > norms_)
       : Adapt<Scalar>(spaces_, norms_)
     {
       error_estimators_surf.reserve(this->num);
@@ -62,7 +62,7 @@ namespace Hermes
     KellyTypeAdapt<Scalar>::KellyTypeAdapt(SpaceSharedPtr<Scalar> space_,
                                            bool ignore_visited_segments_,
                                            const InterfaceEstimatorScalingFunction* interface_scaling_fn_,
-                                           ProjNormType norm_)
+                                           NormType norm_)
       : Adapt<Scalar>(space_, norm_)
     {
       if(interface_scaling_fn_ == NULL)

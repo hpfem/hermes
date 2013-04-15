@@ -213,12 +213,12 @@ namespace Hermes
                      bool ignore_visited_segments = true,
                      Hermes::vector<const InterfaceEstimatorScalingFunction*>
                        interface_scaling_fns_ = Hermes::vector<const InterfaceEstimatorScalingFunction*>(),
-                     Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>());
+                     Hermes::vector<NormType> norms_ = Hermes::vector<NormType>());
 
       KellyTypeAdapt(SpaceSharedPtr<Scalar> space,
                      bool ignore_visited_segments = true,
                      const InterfaceEstimatorScalingFunction* interface_scaling_fn_ = NULL,
-                     ProjNormType norm_ = HERMES_UNSET_NORM);
+                     NormType norm_ = HERMES_UNSET_NORM);
 
       /// Destructor.
       virtual ~KellyTypeAdapt()
@@ -353,7 +353,7 @@ namespace Hermes
       ///
       BasicKellyAdapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_,
                       double const_by_laplacian = 1.0,
-                      Hermes::vector<ProjNormType> norms_ = Hermes::vector<ProjNormType>())
+                      Hermes::vector<NormType> norms_ = Hermes::vector<NormType>())
         : KellyTypeAdapt<Scalar>(spaces_, true, Hermes::vector<const InterfaceEstimatorScalingFunction*>(), norms_)
       {
         set_scaling_consts(const_by_laplacian);
@@ -361,7 +361,7 @@ namespace Hermes
           this->error_estimators_surf.push_back(new ErrorEstimatorFormKelly(i, const_by_laplacian));
       }
 
-      BasicKellyAdapt(SpaceSharedPtr<Scalar> space_, double const_by_laplacian = 1.0, ProjNormType norm_ = HERMES_UNSET_NORM)
+      BasicKellyAdapt(SpaceSharedPtr<Scalar> space_, double const_by_laplacian = 1.0, NormType norm_ = HERMES_UNSET_NORM)
         : KellyTypeAdapt<Scalar>(space_, true, NULL, norm_)
       {
         set_scaling_consts(const_by_laplacian);

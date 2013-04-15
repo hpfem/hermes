@@ -15,7 +15,7 @@
 /*! \file tables.cpp
 \brief Butcher tables. Including the class Table and enum ButcherTableType.
 */
-#include "tables.h"
+#include "table.h"
 #include "matrix.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
