@@ -108,7 +108,7 @@ project(hermes2d)
     src/mixins2d.cpp
     src/neighbor.cpp
     src/graph.cpp
-    src/norm_calculator.cpp
+    src/norm_form.cpp
     src/spline.cpp
     
     src/boundary_conditions/essential_boundary_conditions.cpp
@@ -206,7 +206,9 @@ project(hermes2d)
     src/adapt/kelly_type_adapt.cpp
     src/adapt/error_calculator.cpp
     src/adapt/error_thread_calculator.cpp
-
+    
+    src/refinement_selectors/candidates.cpp
+    src/refinement_selectors/element_to_refine.cpp
     src/refinement_selectors/selector.cpp
     src/refinement_selectors/order_permutator.cpp
     src/refinement_selectors/optimum_selector.cpp
@@ -214,9 +216,6 @@ project(hermes2d)
     src/refinement_selectors/l2_proj_based_selector.cpp
     src/refinement_selectors/h1_proj_based_selector.cpp
     src/refinement_selectors/hcurl_proj_based_selector.cpp
-
-    src/mesh/element_to_refine.cpp
-    src/mesh/refinement_type.cpp
   )
   
   SOURCE_GROUP(
@@ -310,6 +309,8 @@ project(hermes2d)
 
   SOURCE_GROUP(
     "Source Files\\Adaptivity\\Refinement Selectors" FILES 
+    src/refinement_selectors/candidates.cpp
+    src/refinement_selectors/element_to_refine.cpp
     src/refinement_selectors/selector.cpp
     src/refinement_selectors/order_permutator.cpp
     src/refinement_selectors/optimum_selector.cpp
@@ -317,9 +318,6 @@ project(hermes2d)
     src/refinement_selectors/l2_proj_based_selector.cpp
     src/refinement_selectors/h1_proj_based_selector.cpp
     src/refinement_selectors/hcurl_proj_based_selector.cpp
-
-    src/mesh/element_to_refine.cpp
-    src/mesh/refinement_type.cpp
   )
   
   set(HEADERS
@@ -332,7 +330,7 @@ project(hermes2d)
     include/sub_element_map.h
     include/graph.h
     include/global.h
-    include/norm_calculator.h
+    include/norm_form.h
     include/spline.h
 
     include/boundary_conditions/essential_boundary_conditions.h
@@ -433,10 +431,9 @@ project(hermes2d)
     include/adapt/kelly_type_adapt.h
     include/adapt/error_calculator.h
     include/adapt/error_thread_calculator.h
-
-    include/mesh/refinement_type.h
-    include/mesh/element_to_refine.h
     
+    include/refinement_selectors/element_to_refine.h
+    include/refinement_selectors/candidates.h
     include/refinement_selectors/selector.h
     include/refinement_selectors/order_permutator.h
     include/refinement_selectors/optimum_selector.h
@@ -530,13 +527,12 @@ project(hermes2d)
     include/adapt/kelly_type_adapt.h
     include/adapt/error_calculator.h
     include/adapt/error_thread_calculator.h
-
-    include/mesh/refinement_type.h
-    include/mesh/element_to_refine.h
     )
     
   SOURCE_GROUP(
-    "Header Files\\Adaptivity\\Refinement Selectors" FILES  
+    "Header Files\\Adaptivity\\Refinement Selectors" FILES
+    include/refinement_selectors/candidates.h
+    include/refinement_selectors/element_to_refine.h
     include/refinement_selectors/selector.h
     include/refinement_selectors/order_permutator.h
     include/refinement_selectors/optimum_selector.h

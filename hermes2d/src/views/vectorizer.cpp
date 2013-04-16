@@ -545,9 +545,8 @@ namespace Hermes
           meshes.push_back(ydisp->get_mesh());
 
         // Parallelization
-        int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-        MeshFunction<double>*** fns = new MeshFunction<double>**[num_threads_used];
-        for(unsigned int i = 0; i < num_threads_used; i++)
+        MeshFunction<double>*** fns = new MeshFunction<double>**[this->num_threads_used];
+        for(unsigned int i = 0; i < this->num_threads_used; i++)
         {
           fns[i] = new MeshFunction<double>*[4];
           fns[i][0] = xsln->clone();
@@ -597,12 +596,12 @@ namespace Hermes
         int num_states;
         Traverse::State** states = trav_master.get_states(meshes, num_states);
 
-#pragma omp parallel shared(trav_master) num_threads(num_threads_used)
+#pragma omp parallel shared(trav_master) num_threads(this->num_threads_used)
         {
           int thread_number = omp_get_thread_num();
-          int start = (num_states / num_threads_used) * thread_number;
-          int end = (num_states / num_threads_used) * (thread_number + 1);
-          if(thread_number == num_threads_used - 1)
+          int start = (num_states / this->num_threads_used) * thread_number;
+          int end = (num_states / this->num_threads_used) * (thread_number + 1);
+          if(thread_number == this->num_threads_used - 1)
             end = num_states;
 
           for(int state_i = start; state_i < end; state_i++)
@@ -720,7 +719,7 @@ namespace Hermes
 
         ::free(states);
 
-        for(unsigned int i = 0; i < num_threads_used; i++)
+        for(unsigned int i = 0; i < this->num_threads_used; i++)
         {
           for(unsigned int j = 0; j < (2 + (xdisp != NULL? 1 : 0) + (ydisp != NULL ? 1 : 0)); j++)
             delete fns[i][j];

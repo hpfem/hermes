@@ -17,6 +17,7 @@
 #define __H2D_ERROR_THREAD_CALCULATOR_H
 
 #include "error_calculator.h"
+#include "discrete_problem/dg/discrete_problem_dg_assembler.h"
 
 namespace Hermes
 {
@@ -26,7 +27,7 @@ namespace Hermes
     class ErrorThreadCalculator
     {
     public:
-      ErrorThreadCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions, ErrorCalculator<Scalar>* errorCalculator);
+      ErrorThreadCalculator(ErrorCalculator<Scalar>* errorCalculator);
       ~ErrorThreadCalculator();
       void evaluate_one_state(Traverse::State* current_state);
 

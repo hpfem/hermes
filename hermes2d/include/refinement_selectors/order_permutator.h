@@ -16,11 +16,14 @@
 #ifndef __H2D_REFINEMENT_ORDER_PERMUTATOR_H
 #define __H2D_REFINEMENT_ORDER_PERMUTATOR_H
 
+#include "hermes_common.h"
+
 namespace Hermes
 {
   namespace Hermes2D
   {
-    namespace RefinementSelectors {
+    namespace RefinementSelectors
+    {
       /// Hermes::Order permutator. Generates all permutations of orders from a set defined by a range of orders. \ingroup g_selectors
       /** Used to generate all possible generation of horizontal and vertical orders bettween
       *  the starting order and the ending order. Both the starting order and the ending order are included.
@@ -31,7 +34,8 @@ namespace Hermes
       int order_h = order_perm.get_order_h();
       } while (order_perm.next());
       *  \endcode */
-      class HERMES_API OrderPermutator {
+      class HERMES_API OrderPermutator
+      {
       protected:
         int order_h; ///< The current horizontal order.
         int order_v; ///< The current verical order.

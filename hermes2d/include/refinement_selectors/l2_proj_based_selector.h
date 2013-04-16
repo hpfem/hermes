@@ -48,8 +48,6 @@ namespace Hermes
           H2D_L2FE_NUM = 1 ///< A total considered function expansion.
         };
 
-        static const int H2DRS_MAX_L2_ORDER; ///< A maximum used order in this L2-space selector.
-
         Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_L2FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
@@ -57,14 +55,11 @@ namespace Hermes
         *  Overriden function. For details, see OptimumSelector::set_current_order_range().
         *  \todo Replace calculations inside with calculations that uses symbolic constants instead of fixed numbers.
         *  \todo The original implementation uses subtracts 1 in H1 and Hcurl while L2 subtracts 2. Why? */
-        virtual void set_current_order_range(Element* element);
+        virtual void get_current_order_range(Element* element, int& min_order, int& max_order);
 
         /// Returns an array of values of the reference solution at integration points.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */
         virtual Scalar** precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order);
-
-        /**  Overriden function. For details, see OptimumSelector::create_candidates(). */
-        void create_candidates(Element* e, int quad_order, int max_ha_quad_order, int max_p_quad_order);
 
         /// Calculates values of shape function at GIP for all transformations.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_shapes(). */

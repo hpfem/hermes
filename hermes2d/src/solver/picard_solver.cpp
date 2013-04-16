@@ -261,7 +261,7 @@ namespace Hermes
     template<typename Scalar>
     double PicardSolver<Scalar>::calculate_relative_error(int ndof, Scalar* coeff_vec)
     {
-      double last_iter_vec_norm = Global<Scalar>::get_l2_norm(coeff_vec, ndof);
+      double last_iter_vec_norm = get_l2_norm(coeff_vec, ndof);
       if(last_iter_vec_norm < 1e-12)
       {
         this->warn("\tPicard: a very small error threshold met, the loop should end.");

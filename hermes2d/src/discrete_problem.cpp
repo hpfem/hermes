@@ -62,9 +62,8 @@ namespace Hermes
 
       // Local number of threads - to avoid calling it over and over again, and against faults caused by the
       // value being changed while assembling.
-      num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[num_threads_used];
-      for(int i = 0; i < num_threads_used; i++)
+      this->threadAssembler = new DiscreteProblemThreadAssembler<Scalar>*[this->num_threads_used];
+      for(int i = 0; i < this->num_threads_used; i++)
         this->threadAssembler[i] = new DiscreteProblemThreadAssembler<Scalar>(&this->selectiveAssembler);
     }
 
@@ -80,7 +79,7 @@ namespace Hermes
     DiscreteProblem<Scalar>::~DiscreteProblem()
     {
       
-      for(int i = 0; i < num_threads_used; i++)
+      for(int i = 0; i < this->num_threads_used; i++)
         delete this->threadAssembler[i];
       delete [] this->threadAssembler;
     }
@@ -302,12 +301,12 @@ namespace Hermes
         // Is this a DG assembling.
         bool is_DG = this->wf->is_DG();
 
-  #pragma omp parallel num_threads(num_threads_used)
+  #pragma omp parallel num_threads(this->num_threads_used)
         {
           int thread_number = omp_get_thread_num();
-          int start = (num_states / num_threads_used) * thread_number;
-          int end = (num_states / num_threads_used) * (thread_number + 1);
-          if(thread_number == num_threads_used - 1)
+          int start = (num_states / this->num_threads_used) * thread_number;
+          int end = (num_states / this->num_threads_used) * (thread_number + 1);
+          if(thread_number == this->num_threads_used - 1)
             end = num_states;
 
           this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);

@@ -16,22 +16,17 @@
 #ifndef __H2D_ADAPT_H
 #define __H2D_ADAPT_H
 
-#include "../forms.h"
 #include "../space/space.h"
-#include "../weakform/weakform.h"
-#include "../integrals/h1.h"
-#include "../integrals/hcurl.h"
-#include "../integrals/hdiv.h"
-#include "../integrals/l2.h"
-#include "../mesh/element_to_refine.h"
+#include "error_calculator.h"
 #include "../refinement_selectors/selector.h"
 #include "exceptions.h"
-#include "../global.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class ErrorCalculator;
+
     /** \defgroup g_adapt Adaptivity
     *  \brief Adaptivity provides framework for modifying elements in order to decrease errors of the solution.
     *
@@ -52,7 +47,10 @@ namespace Hermes
     *  and it acts as a container for the calculated errors.
     */
     template<typename Scalar>
-    class HERMES_API Adapt : public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::Loggable
+    class HERMES_API Adapt :
+      public Hermes::Mixins::TimeMeasurable,
+      public Hermes::Mixins::Loggable,
+      public Hermes::Hermes2D::Mixins::Parallel
     {
     public:
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
@@ -76,7 +74,7 @@ namespace Hermes
       /**
       *  \param[in] refinement_selectors Vector of selectors.
       *  \return True if no element was refined. In usual case, this indicates that adaptivity is not able to refine anything and the adaptivity loop should end. */
-      bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*> refinement_selectors);
+      bool adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors);
 
       /// Refines elements based on results from the ErrorCalculator class.
       /**
@@ -95,6 +93,15 @@ namespace Hermes
       void set_regularization_level(int regularization);
 
     protected:
+      // Initialization.
+      void init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, int** element_refinement_location, MeshSharedPtr* meshes);
+      // Return the number of element where a refinement will be sought.
+      int calculate_attempted_element_refinements_count();
+      // Handle meshes and spaces at the end of the routine.
+      void adapt_postprocess(MeshSharedPtr* meshes, int element_refinements_count);
+      // Deinitialization.
+      void deinit_adapt(int** element_refinement_location);
+
       /// Common code for the constructors.
       void init();
 
@@ -105,7 +112,7 @@ namespace Hermes
       double threshold;
 
       /// Decide if the refinement at hand will be carried out.
-      bool add_refinement(double processed_error_squared, double max_error, double threshold, int refinement_count, double current_error);
+      bool add_refinement(double processed_error_squared, double max_error_squared, double error_sum_squared, typename ErrorCalculator<Scalar>::ElementReference* element_reference);
 
       /// Apply a single refinement.
       /** \param[in] A refinement to apply. */
@@ -113,16 +120,16 @@ namespace Hermes
 
       /// Apply a vector of refinements.
       /** \param[in] A vector of refinements to apply. */
-      virtual void apply_refinements(std::vector<ElementToRefine>& elems_to_refine);
+      virtual void apply_refinements(ElementToRefine* elems_to_refine, int num_elem_to_process);
 
       /// Fixes refinements of a mesh which is shared among multiple components of a multimesh.
       /** If a mesh is shared among components, it has to be refined similarly in order to avoid inconsistency.
       *  \param[in] meshes An array of meshes of components.
-      *  \param[in] elems_to_refine A vector of refinements.
+      *  \param[in] elems_to_refine An array of refinements.
+      *  \param[in] num_elem_to_process Length of the array elems_to_refine.
       *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
-      *  \param[in] refinement_selector A selected used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
-      void fix_shared_mesh_refinements(MeshSharedPtr * meshes, std::vector<ElementToRefine>& elems_to_refine, int** idx,
-        RefinementSelectors::Selector<Scalar>*** refinement_selectors);
+      *  \param[in] refinement_selectors Selectors used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
+      void fix_shared_mesh_refinements(MeshSharedPtr * meshes, ElementToRefine*& elems_to_refine, int num_elem_to_process, int** idx, RefinementSelectors::Selector<Scalar>** refinement_selectors);
 
       /// Enforces the same order to an element of a mesh which is shared among multiple components.
       /** \param[in] meshes An array of meshes of components. */
@@ -138,7 +145,7 @@ namespace Hermes
       Hermes::vector<SpaceSharedPtr<Scalar> > spaces;
 
       /// Error calculator.
-      ErrorCalculator<Scalar>* error_calculator
+      ErrorCalculator<Scalar>* errorCalculator;
 
       /// Internal.
       std::exception* caughtException;

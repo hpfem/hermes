@@ -1,5 +1,6 @@
 #ifndef __H2D_MIXINS_H
 #define __H2D_MIXINS_H
+#include "api2d.h"
 #include "global.h"
 namespace Hermes
 {
@@ -18,7 +19,7 @@ namespace Hermes
     /// could use - setting of spaces, output of linear algebraic structures, ...
     namespace Mixins
     {
-       /// \ingroup g_mixins2d
+      /// \ingroup g_mixins2d
       /// Mixin that allows for asking about the instance state (ok / not ok).
       class HERMES_API StateQueryable
       {
@@ -63,7 +64,7 @@ namespace Hermes
 
         /// Processes the matrix.
         void process_matrix_output(SparseMatrix<Scalar>* matrix, int iteration);
-        
+
         /// Processes the matrix.
         void process_vector_output(Vector<Scalar>* rhs, int iteration);
 
@@ -85,7 +86,7 @@ namespace Hermes
         /// Sets number format for the matrix output.
         /// Default: "%lf".
         void set_matrix_number_format(char* number_format);
-        
+
         /// Sets this instance to output the rhs in several first iterations.
         /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the rhs will be saved.
         void output_rhs(int firstIterations = -1);
@@ -102,7 +103,7 @@ namespace Hermes
         /// Sets number format for the vector output.
         /// Default: "%lf".
         void set_rhs_number_format(char* number_format);
-        
+
       protected:
         bool print_matrix_zero_values;
         bool output_matrixOn;
@@ -110,14 +111,23 @@ namespace Hermes
         std::string matrixFilename;
         std::string matrixVarname;
         EMatrixDumpFormat matrixFormat;
-		char* matrix_number_format;
+        char* matrix_number_format;
 
         bool output_rhsOn;
         int output_rhsIterations;
         std::string RhsFilename;
         std::string RhsVarname;
         EMatrixDumpFormat RhsFormat;
-		char* rhs_number_format;
+        char* rhs_number_format;
+      };
+
+      /// \brief Class utilizes parallel calculation
+      class HERMES_API Parallel
+      {
+      protected:
+        Parallel();
+      protected:
+        int num_threads_used;
       };
     }
   }

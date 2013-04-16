@@ -16,21 +16,24 @@
 #ifndef __H2D_ERROR_CALCULATOR_H
 #define __H2D_ERROR_CALCULATOR_H
 
-#include "../forms.h"
-#include "../norm_calculator.h"
-#include "../discrete_problem/dg/discrete_problem_dg_assembler.h"
+#include "../weakform/weakform.h"
+#include "norm_form.h"
+#include "error_thread_calculator.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class ErrorThreadCalculator;
+
     /// Evaluation of an error between a (coarse) solution and a reference solution. \ingroup g_adapt
     /** The class calculates error estimates and it acts as a container for the calculated errors.
     */
     template<typename Scalar>
     class HERMES_API ErrorCalculator :
       public Hermes::Mixins::TimeMeasurable,
-      public Hermes::Mixins::Loggable
+      public Hermes::Mixins::Loggable,
+      public Hermes::Hermes2D::Mixins::Parallel
     {
     public:
       enum ErrorCalculationStrategy
@@ -47,22 +50,18 @@ namespace Hermes
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       /// IMPORTANT: if the parameter is passed as false, this, and also any previous error calculations are lost and it is not possible to get back to them.
       void calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions, bool sort_and_store = true);
-
+      
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
       void calculate_errors(MeshFunctionSharedPtr<Scalar>& coarse_solution, MeshFunctionSharedPtr<Scalar>& fine_solution, bool sort_and_store = true);
 
       virtual ~ErrorCalculator();  ///< Destructor. Deallocates allocated private data.
 
-      /// Adds user defined bilinear form which is used to calculate error.
+      /// Adds user defined norm form which is used to calculate error.
       /// If the strategy is ErrorCalculationStrategy::RelativeError, this form is also used as a "norm" form to divide the absolute error by the norm of the "fine" solution(s).
-      /**  \param[in] i The first component index.
-      *  \param[in] j The second component index.
-      *  \param[in] bi_form A bilinear form which calculates value.
-      *  \param[in] bi_ord A bilinear form which calculates order. */
-      void add_error_form(MatrixFormVol<Scalar>* form);
-      void add_error_form(MatrixFormSurf<Scalar>* form);
-      void add_error_form(MatrixFormDG<Scalar>* form);
+      void add_error_form_vol(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY);
+      void add_error_form_surf(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY);
+      void add_error_form_DG(DiscontinuousNormForm<Scalar>* form);
 
       /// Returns a squared error of an element.
       /** \param[in] A component index.
@@ -75,9 +74,13 @@ namespace Hermes
       double get_total_error_squared() const;
       double get_total_norm_squared() const;
 
-    private:
+    protected:
       /// Initialize the data storage.
-      void init_data_storage(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions);
+      void init_data_storage();
+
+      /// Data.
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
       
       /// Absolute / Relative error.
       typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy;
@@ -109,16 +112,14 @@ namespace Hermes
       double  norms_squared_sum;
 
       /// Holds volumetric matrix forms.
-      Hermes::vector<MatrixFormVol<Scalar> *> mfvol;
+      Hermes::vector<ContinuousNormForm<Scalar> *> mfvol;
       /// Holds surface matrix forms.
-      Hermes::vector<MatrixFormSurf<Scalar> *> mfsurf;
+      Hermes::vector<ContinuousNormForm<Scalar> *> mfsurf;
       /// Holds DG matrix forms.
-      Hermes::vector<MatrixFormDG<Scalar> *> mfDG;
+      Hermes::vector<DiscontinuousNormForm<Scalar> *> mfDG;
 
       /// This is for adaptivity, saying that the errors are the correct ones.
       bool elements_stored;
-
-      int num_threads_used;
 
       static int compareElementReference (const void * a, const void * b)
       {
@@ -131,6 +132,28 @@ namespace Hermes
       };
 
       friend class Adapt<Scalar>;
+      friend class ErrorThreadCalculator<Scalar>;
+    };
+
+    template<typename Scalar, NormType normType>
+    class HERMES_API DefaultErrorCalculator : public ErrorCalculator<Scalar>
+    {
+    public:
+      DefaultErrorCalculator(typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy, int component_count);
+      virtual ~DefaultErrorCalculator();
+    };
+
+    template<typename Scalar, NormType normType>
+    class HERMES_API DefaultNormCalculator : protected ErrorCalculator<Scalar>
+    {
+    public:
+      DefaultNormCalculator(int component_count);
+      virtual ~DefaultNormCalculator();
+      
+      /// Norms calculation.
+      double calculate_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& solutions);
+      /// Norms calculation.
+      double calculate_norm(MeshFunctionSharedPtr<Scalar> & solution);
     };
   }
 }

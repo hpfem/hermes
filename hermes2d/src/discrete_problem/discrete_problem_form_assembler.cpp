@@ -20,7 +20,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    bool DiscreteProblemFormAssembler<Scalar>::form_to_be_assembled(MatrixForm<Scalar>* form, Traverse::State* current_state)
+    bool DiscreteProblemFormAssembler<Scalar>::form_to_be_assembled(MatrixForm<double, Scalar>* form, Traverse::State* current_state)
     {
       if(current_state->e[form->i] && current_state->e[form->j])
       {
@@ -40,7 +40,7 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemFormAssembler<Scalar>::form_to_be_assembled(MatrixFormVol<Scalar>* form, Traverse::State* current_state)
     {
-      if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
+      if(!form_to_be_assembled((MatrixForm<double, Scalar>*)form, current_state))
         return false;
 
       if(form->assembleEverywhere)
@@ -57,7 +57,7 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemFormAssembler<Scalar>::form_to_be_assembled(MatrixFormSurf<Scalar>* form, Traverse::State* current_state)
     {
-      if(!form_to_be_assembled((MatrixForm<Scalar>*)form, current_state))
+      if(!form_to_be_assembled((MatrixForm<double, Scalar>*)form, current_state))
         return false;
 
       if(current_state->rep->en[current_state->isurf]->marker == 0)
@@ -123,7 +123,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemFormAssembler<Scalar>::assemble_matrix_form(MatrixForm<Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
+    void DiscreteProblemFormAssembler<Scalar>::assemble_matrix_form(MatrixForm<double, Scalar>* form, int order, Func<double>** base_fns, Func<double>** test_fns, Func<Scalar>** ext, Func<Scalar>** u_ext,
       AsmList<Scalar>* current_als_i, AsmList<Scalar>* current_als_j, Traverse::State* current_state, int n_quadrature_points, Geom<double>* geometry, double* jacobian_x_weights)
     {
       bool surface_form = (dynamic_cast<MatrixFormVol<Scalar>*>(form) == NULL);

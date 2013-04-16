@@ -46,7 +46,7 @@ namespace Hermes
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
       DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      DiscreteProblemDGAssembler(Hermes::vector<MatrixFormDG<Scalar>*>& mfDG);
+      DiscreteProblemDGAssembler(Hermes::vector<MatrixFormDG<Scalar>*>& mfDG, int spaces_size);
       
       /// Destructor.
       ~DiscreteProblemDGAssembler();
@@ -90,8 +90,10 @@ namespace Hermes
       AsmList<Scalar>** als;
       Hermes::vector<Transformable *> fns;
       WeakForm<Scalar>* wf;
-      Hermes::vector<MatrixFormDG<Scalar> >& mfDG;
-      Hermes::vector<VectorFormDG<Scalar> >& vfDG;
+      Hermes::vector<MatrixFormDG<Scalar>*>& mfDG;
+      bool matrix_forms_present;
+      Hermes::vector<VectorFormDG<Scalar>*>& vfDG;
+      bool vector_forms_present;
       int spaces_size;
       bool nonlinear;
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;

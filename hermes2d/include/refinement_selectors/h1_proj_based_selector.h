@@ -52,15 +52,13 @@ namespace Hermes
           H2D_H1FE_NUM = 3 ///< A total considered function expansion.
         };
 
-        static const int H2DRS_MAX_H1_ORDER; ///< A maximum used order in this H1-space selector.
-
         Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_H1FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
         /** The default order range is[1, 9]. If curved, the upper boundary of the range becomes lower.
-        *  Overriden function. For details, see OptimumSelector::set_current_order_range().
+        *  Overriden function. For details, see OptimumSelector::get_current_order_range().
         *  \todo Replace calculations inside with calculations that uses symbolic constants instead of fixed numbers. */
-        virtual void set_current_order_range(Element* element);
+        virtual void get_current_order_range(Element* element, int& min_order, int& max_order);
 
         /// Returns an array of values of the reference solution at integration points.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */

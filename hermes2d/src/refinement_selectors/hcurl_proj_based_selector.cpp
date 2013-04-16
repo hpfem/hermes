@@ -41,14 +41,14 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void HcurlProjBasedSelector<Scalar>::set_current_order_range(Element* element)
+      void HcurlProjBasedSelector<Scalar>::get_current_order_range(Element* element, int& min_order_, int& max_order_)
       {
-        this->current_max_order = this->max_order;
-        if(this->current_max_order == H2DRS_DEFAULT_ORDER)
-          this->current_max_order = std::min(H2DRS_MAX_HCURL_ORDER, (20 - element->iro_cache)/2 - 1); // default
+        int max_element_order = (20 - element->iro_cache)/2 - 1;
+        if(this->max_order == H2DRS_DEFAULT_ORDER)
+          max_order_ = max_element_order;
         else
-          this->current_max_order = std::min(this->max_order, (20 - element->iro_cache)/2 - 1); // user specified
-        this->current_min_order = 0;
+          max_order_ = std::min(this->max_order, max_element_order);
+        min_order_ = 0;
       }
 
       template<typename Scalar>

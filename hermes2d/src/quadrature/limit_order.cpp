@@ -69,9 +69,8 @@ namespace Hermes
 #pragma omp critical (warn_oder)
         if(!warned_order)
         {
-          Global<double> logger;
           /// \todo Fix this, so that it complies with the rest of the code.
-          logger.warn("Warning: Not enough integration rules for exact integration.");
+          Hermes::Mixins::Loggable::Static::warn("Warning: Not enough integration rules for exact integration.");
           warned_order = true;
         }
       }

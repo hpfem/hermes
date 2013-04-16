@@ -8720,6 +8720,7 @@ namespace Hermes
       ref_vert[1][3][1] =  1.0;
 
       max_order = 10;
+      min_order = 0;
       num_components = 2;
 
       ebias = 0;  // TODO

@@ -16,7 +16,8 @@
 #ifndef __H2D_ELEMENT_TO_REFINE_H
 #define __H2D_ELEMENT_TO_REFINE_H
 
-#include "refinement_type.h"
+#include "candidates.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -47,8 +48,8 @@ namespace Hermes
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
     private:
-      int id; ///< An ID of the element. -1 if invalid.
-      int comp; ///< An index of the component. -1 if invalid.
+      int id; ///< An ID of the element.
+      int comp; ///< An index of the component.
       int split; ///< Proposed refinement. Possible values are defined in the enum ::RefinementType.
       int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
       int q[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of the best H-refinement. These orders are used in a case multiple components shares a single mesh.

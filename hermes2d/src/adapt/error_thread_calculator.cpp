@@ -21,7 +21,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    ErrorThreadCalculator<Scalar>::ErrorThreadCalculator(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions, ErrorCalculator<Scalar>* errorCalculator) :
+    ErrorThreadCalculator<Scalar>::ErrorThreadCalculator(ErrorCalculator<Scalar>* errorCalculator) :
       errorCalculator(errorCalculator)
     {
       slns = new Solution<Scalar>*[this->errorCalculator->component_count];
@@ -29,8 +29,8 @@ namespace Hermes
 
       for (int j = 0; j < this->errorCalculator->component_count; j++)
       {
-        slns[j] = static_cast<Solution<Scalar>* >(coarse_solutions[j]->clone());
-        rslns[j] = static_cast<Solution<Scalar>* >(fine_solutions[j]->clone());
+        slns[j] = static_cast<Solution<Scalar>* >(errorCalculator->coarse_solutions[j]->clone());
+        rslns[j] = static_cast<Solution<Scalar>* >(errorCalculator->fine_solutions[j]->clone());
       }
     }
 
@@ -60,7 +60,7 @@ namespace Hermes
         rslns[i]->set_transform(current_state->sub_idx[this->errorCalculator->component_count + i]);
 
         if(!this->errorCalculator->element_references[running_count + current_state->e[i]->id])
-          this->errorCalculator->element_references[running_count + current_state->e[i]->id] = new ElementReference(i, current_state->e[i]->id, &this->errorCalculator->errors[i][current_state->e[i]->id]);
+          this->errorCalculator->element_references[running_count + current_state->e[i]->id] = new ErrorCalculator<Scalar>::ElementReference(i, current_state->e[i]->id, &this->errorCalculator->errors[i][current_state->e[i]->id]);
         running_count += slns[i]->get_mesh()->get_num_active_elements();
       }
 
@@ -92,7 +92,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ErrorThreadCalculator<Scalar>::DGErrorCalculator::DGErrorCalculator(ErrorThreadCalculator* errorThreadCalculator) : DiscreteProblemDGAssembler<Scalar>(errorThreadCalculator->errorCalculator->mfDG), errorThreadCalculator(errorThreadCalculator)
+    ErrorThreadCalculator<Scalar>::DGErrorCalculator::DGErrorCalculator(ErrorThreadCalculator* errorThreadCalculator) : DiscreteProblemDGAssembler<Scalar>(errorThreadCalculator->errorCalculator->mfDG, errorThreadCalculator->errorCalculator->component_count), errorThreadCalculator(errorThreadCalculator)
     {
     }
 
@@ -129,7 +129,6 @@ namespace Hermes
       int n_quadrature_points;
       Geom<double>* geometry;
       double* jacobian_x_weights;
-      Geom<double>* e;
 
       // Create the extended shapeset on the union of the central element and its current neighbor.
       int order = 20;
@@ -139,14 +138,13 @@ namespace Hermes
         current_neighbor_searches[i]->set_quad_order(order);
       order_base = order;
       n_quadrature_points = init_surface_geometry_points(this->errorThreadCalculator->rslns[0]->get_refmap(), order_base, current_state->isurf, current_state->rep->marker, geometry, jacobian_x_weights);
-      e = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[0]->neighb_el->marker, current_neighbor_searches[0]->neighb_el->id, current_neighbor_searches[0]->neighb_el->get_diameter());
 
       DiscontinuousFunc<Scalar>** difference_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
       DiscontinuousFunc<Scalar>** rsln_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
       for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
       {
-        difference_funcs[i] = current_neighbor_searches[i]->init_ext_fn(slns[i]);
-        rsln_funcs[i] = current_neighbor_searches[i + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(rslns[i]);
+        difference_funcs[i] = current_neighbor_searches[i]->init_ext_fn(this->errorThreadCalculator->slns[i]);
+        rsln_funcs[i] = current_neighbor_searches[i + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[i]);
         difference_funcs[i]->subtract(rsln_funcs[i]);
       }
 
@@ -154,7 +152,7 @@ namespace Hermes
       {
         MatrixFormDG<Scalar>* mfs = this->mfDG[current_mfDG_i];
 
-        this->evaluate_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], &this->errors[form->i][current_state->e[form->i]->id], (this->strategy == RelativeError ? &this->norms[form->i][current_state->e[form->i]->id] : NULL));
+        this->errorThreadCalculator->evaluate_form(mfs, difference_funcs[mfs->i], difference_funcs[mfs->j], rsln_funcs[mfs->i], rsln_funcs[mfs->j], &this->errors[mfs->i][current_state->e[mfs->i]->id], (this->strategy == RelativeError ? &this->norms[mfs->i][current_state->e[mfs->i]->id] : NULL));
       }
 
       // deinitialize Funcs
@@ -167,8 +165,8 @@ namespace Hermes
       }
 
       delete [] jacobian_x_weights;
-      e->free();
-      delete e;
+      geometry->free();
+      delete geometry;
 
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.
@@ -198,7 +196,7 @@ namespace Hermes
       for(int i = 0; i < this->errorCalculator->mfvol.size(); i++)
       {
         MatrixFormVol<Scalar>* form = this->errorCalculator->mfvol[i];
-        this->evaluate_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], &this->errorCalculator->errors[form->i][current_state->e[form->i]->id], (this->errorCalculator->strategy == RelativeError ? &this->errorCalculator->norms[form->i][current_state->e[form->i]->id] : NULL));
+        this->evaluate_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], &this->errorCalculator->errors[form->i][current_state->e[form->i]->id], (this->errorCalculator->strategy == ErrorCalculator<Scalar>::RelativeError ? &this->errorCalculator->norms[form->i][current_state->e[form->i]->id] : NULL));
       }
 
       // deinitialize Funcs
@@ -234,7 +232,7 @@ namespace Hermes
       for(int i = 0; i < this->errorCalculator->mfsurf.size(); i++)
       {
         MatrixFormSurf<Scalar>* form = this->errorCalculator->mfsurf[i];
-        this->evaluate_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], &this->errorCalculator->errors[form->i][current_state->e[form->i]->id], (this->errorCalculator->strategy == RelativeError ? &this->errorCalculator->norms[form->i][current_state->e[form->i]->id] : NULL));
+        this->evaluate_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], &this->errorCalculator->errors[form->i][current_state->e[form->i]->id], (this->errorCalculator->strategy == ErrorCalculator<Scalar>::RelativeError ? &this->errorCalculator->norms[form->i][current_state->e[form->i]->id] : NULL));
       }
 
       // deinitialize Funcs
@@ -280,5 +278,8 @@ namespace Hermes
         (*norm) += norm_value;
       }
     }
+
+    template HERMES_API class ErrorThreadCalculator<double>;
+    template HERMES_API class ErrorThreadCalculator<std::complex<double> >;
   }
 }

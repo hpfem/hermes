@@ -25,6 +25,7 @@
 #include "common.h"
 #include "vector.h"
 #include "exceptions.h"
+#include "api.h"
 
 namespace Hermes
 {

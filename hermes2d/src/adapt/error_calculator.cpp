@@ -14,7 +14,9 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "adapt/error_calculator.h"
+#include "function/exact_solution.h"
 #include "adapt/error_thread_calculator.h"
+#include "norm_form.h"
 #include "api2d.h"
 #include "mesh/traverse.h"
 #include <stdlib.h>
@@ -33,8 +35,6 @@ namespace Hermes
     {
       memset(errors, 0, sizeof(double*) * H2D_MAX_COMPONENTS);
       memset(norms, 0, sizeof(double*) * H2D_MAX_COMPONENTS);
-
-      num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
     }
 
     template<typename Scalar>
@@ -53,7 +53,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::init_data_storage(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions)
+    void ErrorCalculator<Scalar>::init_data_storage()
     {
       this->num_act_elems = 0;
       errors_squared_sum = 0.;
@@ -61,7 +61,7 @@ namespace Hermes
 
       for(int i = 0; i < this->component_count; i++)
       {
-        int num_elements_i = coarse_solutions[i]->get_mesh()->get_max_element_id();
+        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_max_element_id();
 
         if(errors[i] == NULL)
           errors[i] = (double*)calloc(num_elements_i, sizeof(double));
@@ -104,13 +104,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions, bool sort_and_store)
+    void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions_, bool sort_and_store)
     {
       this->component_count = coarse_solutions.size();
       if(fine_solutions.size() != this->component_count)
         throw Exceptions::LengthException(0, fine_solutions.size(), this->component_count);
 
-      this->init_data_storage(coarse_solutions);
+      this->coarse_solutions = coarse_solutions_;
+      this->fine_solutions = fine_solutions_;
+
+      this->init_data_storage();
 
       // Prepare multi-mesh traversal and error arrays.
       Hermes::vector<MeshSharedPtr > meshes;
@@ -124,16 +127,17 @@ namespace Hermes
       Traverse trav(this->component_count);
       Traverse::State** states = trav.get_states(meshes, num_states);
 
-#pragma omp parallel num_threads(num_threads_used)
+
+#pragma omp parallel num_threads(this->num_threads_used)
       {
         int thread_number = omp_get_thread_num();
-        int start = (num_states / num_threads_used) * thread_number;
-        int end = (num_states / num_threads_used) * (thread_number + 1);
-        if(thread_number == num_threads_used - 1)
+        int start = (num_states / this->num_threads_used) * thread_number;
+        int end = (num_states / this->num_threads_used) * (thread_number + 1);
+        if(thread_number == this->num_threads_used - 1)
           end = num_states;
 
         // Create a calculator for this thread.
-        ErrorThreadCalculator<Scalar> errorThreadCalculator(coarse_solutions, fine_solutions, this);
+        ErrorThreadCalculator<Scalar> errorThreadCalculator(this);
 
         // Do the work.
         for(int state_i = start; state_i < end; state_i++)
@@ -142,7 +146,6 @@ namespace Hermes
 
       if(sort_and_store)
       {
-        // sort.
         std::qsort(this->element_references, this->num_act_elems, sizeof(ElementReference*), &this->compareElementReference);
         elements_stored = true;
       }
@@ -150,23 +153,42 @@ namespace Hermes
         elements_stored = false;
     }
 
+    
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::add_error_form(MatrixFormVol<Scalar>* form)
+    void ErrorCalculator<Scalar>::add_error_form_vol(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY)
     {
+      Mesh::MarkersConversion::IntValid markerInfo = this->coarse_solutions[0]->get_mesh()->get_element_markers_conversion().get_internal_marker(marker);
+      if(markerInfo.valid)
+        form->set_marker(markerInfo.marker);
+      else
+      {
+        throw Exceptions::Exception("Marker not valid in ErrorCalculator<Scalar>::add_error_form_vol.");
+        return;
+      }
       this->mfvol.push_back(form);
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::add_error_form(MatrixFormSurf<Scalar>* form)
+    void ErrorCalculator<Scalar>::add_error_form_surf(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY)
     {
+      Mesh::MarkersConversion::IntValid markerInfo = this->coarse_solutions[0]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(marker);
+      if(markerInfo.valid)
+        form->set_marker(markerInfo.marker);
+      else
+      {
+        throw Exceptions::Exception("Marker not valid in ErrorCalculator<Scalar>::add_error_form_surf.");
+        return;
+      }
       this->mfsurf.push_back(form);
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::add_error_form(MatrixFormDG<Scalar>* form)
+    void ErrorCalculator<Scalar>::add_error_form_DG(DiscontinuousNormForm<Scalar>* form)
     {
       this->mfDG.push_back(form);
     }
+
+    
 
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_element_error_squared(int component, int element_id) const
@@ -220,6 +242,76 @@ namespace Hermes
       return this->norms_squared_sum;
     }
 
+    template<typename Scalar, NormType normType>
+    DefaultErrorCalculator<Scalar, normType>::DefaultErrorCalculator(typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy, int component_count) : ErrorCalculator<Scalar>(strategy)
+    {
+      for(int i = 0; i < component_count; i++)
+      {
+        this->add_error_form_vol(new DefaultContinuousNormForm<Scalar, normType>(i, i));
+      }
+    }
+
+    template<typename Scalar, NormType normType>
+    DefaultNormCalculator<Scalar, normType>::DefaultNormCalculator(int component_count) : ErrorCalculator<Scalar>(ErrorCalculator<Scalar>::AbsoluteError)
+    {
+      for(int i = 0; i < component_count; i++)
+      {
+        this->add_error_form_vol(new DefaultContinuousNormForm<Scalar, normType>(i, i));
+      }
+    }
+    
+    template<typename Scalar, NormType normType>
+    double DefaultNormCalculator<Scalar, normType>::calculate_norms(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& solutions)
+    {
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > zero_fine_solutions;
+      for(int i = 0; i < solutions.size(); i++)
+        zero_fine_solutions.push_back(MeshFunctionSharedPtr<Scalar>(new ZeroSolution<Scalar>(solutions[i]->get_mesh())));
+      this->calculate_errors(solutions, zero_fine_solutions, false);
+
+      return this->get_total_error_squared();
+    }
+
+    template<typename Scalar, NormType normType>
+    double DefaultNormCalculator<Scalar, normType>::calculate_norm(MeshFunctionSharedPtr<Scalar> & solution)
+    {
+      MeshFunctionSharedPtr<Scalar> zero_fine_solution(new ZeroSolution<Scalar>(solution->get_mesh()));
+      this->calculate_errors(solution, zero_fine_solution, false);
+
+      return this->get_total_error_squared();
+    }
+
+    template<typename Scalar, NormType normType>
+    DefaultErrorCalculator<Scalar, normType>::~DefaultErrorCalculator()
+    {
+      for(int i = 0; i < this->mfvol.size(); i++)
+        delete this->mfvol[i];
+    }
+
+    template<typename Scalar, NormType normType>
+    DefaultNormCalculator<Scalar, normType>::~DefaultNormCalculator()
+    {
+      for(int i = 0; i < this->mfvol.size(); i++)
+        delete this->mfvol[i];
+    }
+
+    template HERMES_API class DefaultErrorCalculator<double, HERMES_H1_NORM>;
+    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_H1_NORM>;
+    template HERMES_API class DefaultErrorCalculator<double, HERMES_L2_NORM>;
+    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_L2_NORM>;
+    template HERMES_API class DefaultErrorCalculator<double, HERMES_HCURL_NORM>;
+    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_HCURL_NORM>;
+    template HERMES_API class DefaultErrorCalculator<double, HERMES_HDIV_NORM>;
+    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_HDIV_NORM>;
+
+    template HERMES_API class DefaultNormCalculator<double, HERMES_H1_NORM>;
+    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_H1_NORM>;
+    template HERMES_API class DefaultNormCalculator<double, HERMES_L2_NORM>;
+    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_L2_NORM>;
+    template HERMES_API class DefaultNormCalculator<double, HERMES_HCURL_NORM>;
+    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_HCURL_NORM>;
+    template HERMES_API class DefaultNormCalculator<double, HERMES_HDIV_NORM>;
+    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_HDIV_NORM>;
+    
     template HERMES_API class ErrorCalculator<double>;
     template HERMES_API class ErrorCalculator<std::complex<double> >;
   }

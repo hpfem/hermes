@@ -167,7 +167,15 @@ namespace Hermes
 
     Shapeset::~Shapeset() { free_constrained_edge_combinations(); }
 
-    int Shapeset::get_max_order() const { return max_order; }
+    int Shapeset::get_max_order() const
+    {
+      return max_order;
+    }
+
+    int Shapeset::get_min_order() const 
+    {
+      return min_order;
+    }
 
     int Shapeset::get_num_components() const { return num_components; }
 

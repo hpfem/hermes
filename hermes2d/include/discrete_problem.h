@@ -44,7 +44,8 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Mixins::IntegrableWithGlobalOrder,
-      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
+      public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>,
+      public Hermes::Hermes2D::Mixins::Parallel
     {
     public:
       /// Constructor for multiple components / equations.
@@ -128,8 +129,6 @@ namespace Hermes
 
       /// Select the right things to assemble
       DiscreteProblemSelectiveAssembler<Scalar> selectiveAssembler;
-
-      int num_threads_used;
 
       template<typename T> friend class Solver;
       template<typename T> friend class LinearSolver;

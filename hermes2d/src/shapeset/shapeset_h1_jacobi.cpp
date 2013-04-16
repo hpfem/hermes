@@ -4245,6 +4245,7 @@ namespace Hermes
       ref_vert[1][3][1] =  1.0;
 
       max_order = 10;
+      min_order = 1;
       num_components = 1;
 
       ebias = 2;

@@ -17,7 +17,7 @@
 #define __H2D_REFINEMENT_SELECTOR_H
 
 #ifndef _MSC_VER
-#include "../mesh/refinement_type.h"
+#include "refinement_type.h"
 
 namespace Hermes
 {
@@ -29,7 +29,7 @@ namespace Hermes
   }
 }
 #else
-#include "../mesh/element_to_refine.h"
+#include "element_to_refine.h"
 #endif
 #include "../mesh/mesh.h"
 
@@ -61,10 +61,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-#define H2DRS_DEFAULT_ORDER -1 ///< A default order. Used to indicate an unkonwn order or a maximum support order.  \ingroup g_selectors
-#define H2DRS_MAX_ORDER 10 ///< A maximum order suported by refinement selectors. \ingroup g_selectors
-#define H2D_NUM_SHAPES_SIZE 12 ///< A maximum order suported by refinement selectors. \ingroup g_selectors
-
     /// Namespace which encapsulates all refinement selectors. \ingroup g_selectors
     namespace RefinementSelectors {
       /// A parent of all refinement selectors. Abstract class. \ingroup g_selectors
@@ -96,11 +92,12 @@ namespace Hermes
           virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) = 0;
 
       protected:
+        const int min_order; ///< A minimum allowed order.
         const int max_order; ///< A maximum allowed order.
+
         /// Constructor
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
-        Selector(int max_order = H2DRS_DEFAULT_ORDER) : max_order(max_order), isAClone(false) {};
-
+        Selector(int min_order = 1, int max_order = H2DRS_DEFAULT_ORDER) : min_order(min_order), max_order(max_order), isAClone(false) {};
 
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;

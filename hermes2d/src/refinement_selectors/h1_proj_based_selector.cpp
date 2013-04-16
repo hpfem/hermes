@@ -11,11 +11,8 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template<typename Scalar>
-      const int H1ProjBasedSelector<Scalar>::H2DRS_MAX_H1_ORDER = H2DRS_MAX_ORDER;
-
-      template<typename Scalar>
       H1ProjBasedSelector<Scalar>::H1ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, H1Shapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new H1Shapeset() : user_shapeset, Range(1, 1), Range(2, H2DRS_MAX_H1_ORDER)), user_shapeset(user_shapeset == NULL ? false : true)
+        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new H1Shapeset() : user_shapeset, Range(1, 1), Range(2, H2DRS_MAX_ORDER)), user_shapeset(user_shapeset == NULL ? false : true)
       {
         if(user_shapeset != NULL)
         {
@@ -41,15 +38,14 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void H1ProjBasedSelector<Scalar>::set_current_order_range(Element* element)
+      void H1ProjBasedSelector<Scalar>::get_current_order_range(Element* element, int& min_order_, int& max_order_)
       {
-        this->current_max_order = this->max_order;
         int max_element_order = (20 - element->iro_cache)/2 - 1;
-        if(this->current_max_order == H2DRS_DEFAULT_ORDER)
-          this->current_max_order = max_element_order; // default
+        if(this->max_order == H2DRS_DEFAULT_ORDER)
+          max_order_ = max_element_order;
         else
-          this->current_max_order = std::min(this->current_max_order, max_element_order); // user specified
-        this->current_min_order = 1;
+          max_order_ = std::min(this->max_order, max_element_order);
+        min_order_ = 1;
       }
 
       template<typename Scalar>

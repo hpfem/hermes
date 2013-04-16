@@ -18,6 +18,7 @@
 
 #include "global.h"
 #include "../quadrature/quad_all.h"
+#include "mixins2d.h"
 
 namespace Hermes
 {
@@ -67,7 +68,10 @@ namespace Hermes
 
       /// Base class for Linearizer, Orderizer, Vectorizer.
 
-      class HERMES_API LinearizerBase : public Hermes::Mixins::TimeMeasurable, public Hermes::Mixins::Loggable
+      class HERMES_API LinearizerBase : 
+        public Hermes::Mixins::TimeMeasurable,
+        public Hermes::Mixins::Loggable,
+        public Hermes::Hermes2D::Mixins::Parallel
       {
       public:
         void set_max_absolute_value(double max_abs);

@@ -377,6 +377,70 @@ namespace Hermes
       };
 
       static unsigned int get_instance_count();
+
+      class HERMES_API MarkersConversion
+      {
+      public:
+        MarkersConversion();
+
+        /// Function inserting a marker into conversion_table_for_element_markers.
+        /// This function controls if this user_marker x internal_marker is already
+        /// present, and if not, it inserts the std::pair.
+        /// \return The internal marker where user_marker was inserted.
+        int insert_marker(std::string user_marker);
+
+        /// Struct for return type of get_user_marker().
+        struct StringValid
+        {
+          StringValid();
+          StringValid(std::string marker, bool valid);
+          std::string marker;
+          bool valid;
+        };
+
+        /// Struct for return type of get_internal_marker().
+        struct IntValid
+        {
+          IntValid();
+          IntValid(int marker, bool valid);
+          int marker;
+          bool valid;
+        };
+
+        /// Lookup functions.
+        /// Find a user marker for this internal marker.
+        StringValid get_user_marker(int internal_marker) const;
+
+        /// Find an internal marker for this user_marker.
+        IntValid get_internal_marker(std::string user_marker) const;
+
+        enum MarkersConversionType {
+          HERMES_ELEMENT_MARKERS_CONVERSION = 0,
+          HERMES_BOUNDARY_MARKERS_CONVERSION = 1
+        };
+
+        virtual MarkersConversionType get_type() const = 0;
+
+      protected:
+
+        /// Info about the maximum marker used so far, used in determining
+        /// of the internal marker for a user-supplied std::string identification for
+        /// the purpose of disambiguity.
+        int min_marker_unused;
+
+        /// Conversion tables between the std::string markers the user sets and
+        /// the markers used internally as members of Elements, Nodes.
+        std::map<int, std::string> conversion_table;
+
+        /// Inverse tables, so that it is possible to search using either
+        /// the internal representation, or the user std::string value.
+        std::map<std::string, int> conversion_table_inverse;
+
+        friend class Space<double>;
+        friend class Space<std::complex<double> >;
+        friend class Mesh;
+      };
+
     private:
       static unsigned int instance_count;
 
@@ -437,68 +501,6 @@ namespace Hermes
       void regularize_triangle(Element* e);
       void regularize_quad(Element* e);
       void flatten();
-
-      class HERMES_API MarkersConversion
-      {
-      public:
-        MarkersConversion();
-
-        /// Info about the maximum marker used so far, used in determining
-        /// of the internal marker for a user-supplied std::string identification for
-        /// the purpose of disambiguity.
-        int min_marker_unused;
-
-        /// Function inserting a marker into conversion_table_for_element_markers.
-        /// This function controls if this user_marker x internal_marker is already
-        /// present, and if not, it inserts the std::pair.
-        /// \return The internal marker where user_marker was inserted.
-        int insert_marker(std::string user_marker);
-
-        /// Struct for return type of get_user_marker().
-        struct StringValid
-        {
-          StringValid();
-          StringValid(std::string marker, bool valid);
-          std::string marker;
-          bool valid;
-        };
-
-        /// Struct for return type of get_internal_marker().
-        struct IntValid
-        {
-          IntValid();
-          IntValid(int marker, bool valid);
-          int marker;
-          bool valid;
-        };
-
-        /// Lookup functions.
-        /// Find a user marker for this internal marker.
-        StringValid get_user_marker(int internal_marker) const;
-
-        /// Find an internal marker for this user_marker.
-        IntValid get_internal_marker(std::string user_marker) const;
-
-        enum MarkersConversionType {
-          HERMES_ELEMENT_MARKERS_CONVERSION = 0,
-          HERMES_BOUNDARY_MARKERS_CONVERSION = 1
-        };
-
-        virtual MarkersConversionType get_type() const = 0;
-
-      protected:
-        /// Conversion tables between the std::string markers the user sets and
-        /// the markers used internally as members of Elements, Nodes.
-        std::map<int, std::string> conversion_table;
-
-        /// Inverse tables, so that it is possible to search using either
-        /// the internal representation, or the user std::string value.
-        std::map<std::string, int> conversion_table_inverse;
-
-        friend class Space<double>;
-        friend class Space<std::complex<double> >;
-        friend class Mesh;
-      };
 
       /// \brief Curved element exception.
       /// Exception occurs when there is a curved element where we only process not curved.

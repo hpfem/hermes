@@ -61,7 +61,7 @@ namespace Hermes
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
         /** The default order range is[1, ::H2DRS_MAX_HCURL_ORDER]. If curved, the upper boundary of the range becomes lower.
         *  Overriden function. For details, see OptimumSelector::set_current_order_range(). */
-        virtual void set_current_order_range(Element* element);
+        virtual void get_current_order_range(Element* element, int& min_order, int& max_order);
 
         /// Returns an array of values of the reference solution at integration points.
         /**  Overriden function. For details, see ProjBasedSelector::precalc_ref_solution(). */

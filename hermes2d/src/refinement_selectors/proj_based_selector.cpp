@@ -35,13 +35,6 @@ namespace Hermes
           for(int i = 0; i < H2DRS_MAX_ORDER + 2; i++)
             for(int k = 0; k < H2DRS_MAX_ORDER + 2; k++)
               proj_matrix_cache[m][i][k] = NULL;
-
-        //allocate caches
-        int max_inx = this->max_shape_inx[0];
-        for(int i = 1; i < H2D_NUM_MODES; i++)
-          max_inx = std::max(max_inx, this->max_shape_inx[i]);
-        nonortho_rhs_cache.resize(max_inx + 1);
-        ortho_rhs_cache.resize(max_inx + 1);
       }
 
       template<typename Scalar>
@@ -123,13 +116,13 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void ProjBasedSelector<Scalar>::evaluate_cands_error(Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error)
+      void ProjBasedSelector<Scalar>::evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error)
       {
         bool tri = e->is_triangle();
 
         // find range of orders
         typename OptimumSelector<Scalar>::CandsInfo info_h, info_p, info_aniso;
-        this->update_cands_info(info_h, info_p, info_aniso);
+        this->update_cands_info(candidates, info_h, info_p, info_aniso);
 
         // calculate squared projection errors of elements of candidates
         CandElemProjError herr[4], anisoerr[4], perr;
@@ -139,10 +132,10 @@ namespace Hermes
         double sum_err = 0.0;
         double sum_sqr_err = 0.0;
         int num_processed = 0;
-        typename OptimumSelector<Scalar>::Cand& unrefined_c = this->candidates[0];
-        for (unsigned i = 0; i < this->candidates.size(); i++)
+        Cand& unrefined_c = candidates[0];
+        for (unsigned i = 0; i < candidates.size(); i++)
         {
-          typename OptimumSelector<Scalar>::Cand& c = this->candidates[i];
+          typename Cand& c = candidates[i];
           double error_squared = 0.0;
           if(tri) { //triangle
             switch(c.split)
@@ -242,8 +235,8 @@ namespace Hermes
 
         // everything is done on the reference domain
         Solution<Scalar>* rsln_sln = dynamic_cast<Solution<Scalar>*>(rsln);
-          if(rsln_sln != NULL)
-            rsln_sln->enable_transform(false);
+        if(rsln_sln != NULL)
+          rsln_sln->enable_transform(false);
 
         // obtain reference solution values on all four refined sons
         Scalar** rval[H2D_MAX_ELEMENT_SONS];
@@ -436,7 +429,7 @@ namespace Hermes
         )
       {
         //allocate space
-        int max_num_shapes = this->next_order_shape[mode][this->current_max_order];
+        int max_num_shapes = this->next_order_shape[mode][this->max_order];
         Scalar* right_side = new Scalar[max_num_shapes];
         int* shape_inxs = new int[max_num_shapes];
         int* indx = new int[max_num_shapes]; //solver data
@@ -450,11 +443,13 @@ namespace Hermes
         for(int i = 0; i < num_sub && ortho_svals_available; i++)
           ortho_svals_available &= !sub_ortho_svals[i]->empty();
 
-        //clenup of the cache
+        /// An array of cached right-hand side values.
+        Hermes::vector< ValueCacheItem<Scalar> > nonortho_rhs_cache;
+        Hermes::vector< ValueCacheItem<Scalar> > ortho_rhs_cache;
         for(int i = 0; i <= this->max_shape_inx[mode]; i++)
         {
-          nonortho_rhs_cache[i] = ValueCacheItem<Scalar>();
-          ortho_rhs_cache[i] = ValueCacheItem<Scalar>();
+          nonortho_rhs_cache.push_back(ValueCacheItem<Scalar>());
+          ortho_rhs_cache.push_back(ValueCacheItem<Scalar>());
         }
 
         //calculate for all orders

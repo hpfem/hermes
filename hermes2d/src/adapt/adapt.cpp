@@ -13,14 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "error_calculator.h"
+#include "adapt.h"
+#include "projections/ogprojection.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces_, ErrorCalculator<Scalar>* error_calculator) : error_calculator(error_calculator)
+    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces_, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator)
     {
       for(unsigned int i = 0; i < spaces_.size(); i++)
         spaces.push_back(spaces_[i]);
@@ -29,7 +30,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar>& space) : error_calculator(error_calculator)
+    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar>& space, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator)
     {
       spaces.push_back(space);
       this->init();
@@ -38,36 +39,22 @@ namespace Hermes
     template<typename Scalar>
     Adapt<Scalar>::~Adapt()
     {
-      for (int i = 0; i < this->num; i++)
-        delete [] errors[i];
-
-      for (int i = 0; i < this->num; i++)
-        for (int j = 0; j < this->num; j++)
-          if(error_form[i][j] && own_forms[i][j])
-          {
-            delete error_form[i][j];
-            own_forms[i][j] = false;
-          }
-
-      for(int i = 0; i < H2D_MAX_COMPONENTS; i++)
-        delete [] own_forms[i];
-      delete [] own_forms;
     }
 
     template<typename Scalar>
     void Adapt<Scalar>::init()
     {
-      if(!this->error_calculator)
+      if(!this->errorCalculator)
         throw Exceptions::Exception("Error calculator must not be NULL in Adapt::Adapt().");
 
       this->num = spaces.size();
-      
+
       if(this->num > H2D_MAX_COMPONENTS)
         throw Exceptions::ValueException("components", this->num, 0, H2D_MAX_COMPONENTS);
 
       for(unsigned int i = 0; i < this->num; i++)
       {
-        if(spaces[i].empty())
+        if(!spaces[i])
           throw Exceptions::NullException(0, i);
         spaces[i]->check();
       }
@@ -83,24 +70,24 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::set_regularization_level(int regularization-)
+    void Adapt<Scalar>::set_regularization_level(int regularization_)
     {
       this->regularization = regularization_;
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::add_refinement(double processed_error_squared, double max_error, double threshold, int refinement_count, double current_error)
+    bool Adapt<Scalar>::add_refinement(double processed_error_squared, double max_error_squared, double error_sum_squared, typename ErrorCalculator<Scalar>::ElementReference* element_reference)
     {
       switch(this->strategy)
       {
       case Cumulative:
-        if(processed_error_squared > (threshold*threshold) * errors_squared_sum)
+        if(processed_error_squared > (threshold*threshold) * error_sum_squared)
           return false;
         else
           return true;
         break;
       case SingleElement:
-        if(current_error > threshold * max_error)
+        if(*(element_reference->error) > (threshold*threshold) * max_error_squared)
           return true;
         else
           return false;
@@ -113,176 +100,131 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors, double threshold, int regularize)
+    void Adapt<Scalar>::init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, int** element_refinement_location, MeshSharedPtr* meshes)
     {
+      // Start time measurement.
       this->tick();
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
 
-      if(!this->error_calculator->elements_stored)
+      // Checks.
+      if(!this->errorCalculator->elements_stored)
         throw Exceptions::Exception("element errors have to be calculated first, call ErrorCalculator::calculate_errors().");
-
       if(refinement_selectors.empty())
         throw Exceptions::NullException(1);
-
       if(spaces.size() != refinement_selectors.size())
         throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
 
-      //get meshes
-      int max_id = -1;
-      MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
+      // Get meshes
+      element_refinement_location = new int*[this->num];
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->spaces[j]->get_mesh();
-        if(rsln[j])
-        {
-          rsln[j]->set_quad_2d(&g_quad_2d_std);
-          rsln[j]->enable_transform(false);
-        }
-        if(meshes[j]->get_max_element_id() > max_id)
-          max_id = meshes[j]->get_max_element_id();
+        element_refinement_location[j] = (int*)calloc(meshes[j]->get_max_element_id(), sizeof(int));
       }
 
-      //reset element refinement info
-      int** idx = new int*[max_id];
-      for(int i = 0; i < max_id; i++)
-        idx[i] = new int[num];
+      for (int j = 0; j < this->num; j++)
+      {
+        Solution<Scalar>* temp = dynamic_cast<Solution<Scalar>*>(this->errorCalculator->fine_solutions[j].get());
+        if(temp)
+          temp->enable_transform(false);
+      }
+    }
 
-      Element* e;
-      for(int j = 0; j < max_id; j++)
-        for(int l = 0; l < this->num; l++)
-          idx[j][l] = -1; // element not refined
+    template<typename Scalar>
+    int Adapt<Scalar>::calculate_attempted_element_refinements_count()
+    {
+      unsigned int attempted_element_refinements_count = 0;
 
+      // Processed error so far.
       double processed_error_squared = 0.0;
+      // Maximum error - the first one in the error calculator's array.
+      double max_error_squared = *(this->errorCalculator->element_references[0]->error);
+      // Total error.
+      double sum_error_squared = this->errorCalculator->get_total_error_squared();
 
-      Hermes::vector<ElementToRefine> elem_inx_to_proc; //list of indices of elements that are going to be processed
-      elem_inx_to_proc.reserve(this->error_calculator->num_act_elems);
-
-      double max_error;
-      int num_ignored_elem = 0; //a number of ignored elements
-      int num_not_changed = 0; //a number of element that were not changed
-      int num_priority_elem = 0; //a number of elements that were processed using priority queue
-
-      // Structures traversed in reality using strategies.
-      Hermes::vector<int> ids;
-      Hermes::vector<int> components;
-      Hermes::vector<int> current_orders;
-      bool first_regular_element = true; // true if first regular element was not processed yet
-      bool error_level_reached = false;
-
-      for(int element_inspected_i = 0; element_inspected_i < this->error_calculator->num_act_elems; element_inspected_i++)
+      // For ALL elements on ALL meshes.
+      // The stopping condition for this loop is the stopping condition for adaptivity.
+      for(int element_inspected_i = 0; element_inspected_i < this->errorCalculator->num_act_elems; element_inspected_i++)
       {
-        // Set the maximum error
-        if(element_inspected_i == 0)
-          max_error = thr * err_squared;
+        // Get the element info from the error calculator.
+        ErrorCalculator<Scalar>::ElementReference* element_reference = this->errorCalculator->element_references[element_inspected_i];
 
-        ErrorCalculator<Scalar>::ElementReference* element_reference = this->error_calculator->element_references[element_inspected_i];
-
-        if(this->add_refinement(processed_error_squared, max_error, this->threshold, element_inspected_i, (*element_reference->error))
-        {
-          err0_squared = err_squared;
-          processed_error_squared += err_squared;
-          ids.push_back(id);
-          components.push_back(comp);
-          current_orders.push_back(this->spaces[comp]->get_element_order(id));
-          spaces[comp]->edata[id].changed_in_last_adaptation = true;
-        }
-        else
+        // Ask the strategy if we should add this refinement or break the loop.
+        if(!this->add_refinement(processed_error_squared, max_error_squared, sum_error_squared, element_reference))
           break;
+
+        processed_error_squared += *(element_reference->error);
+
+        attempted_element_refinements_count++;
       }
 
-      if(ids.empty())
-      {
-        this->warn("None of the elements selected for refinement was refined. Adaptivity step successful, returning 'true'.");
-        return true;
-      }
+      return attempted_element_refinements_count;
+    }
 
-      // RefinementSelectors cloning.
-      int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
-      RefinementSelectors::Selector<Scalar>*** global_refinement_selectors = new RefinementSelectors::Selector<Scalar>**[num_threads_used];
+    template<typename Scalar>
+    bool Adapt<Scalar>::adapt(Hermes::vector<RefinementSelectors::Selector<Scalar> *>& refinement_selectors)
+    {
+      // Initialize.
+      MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
+      int* element_refinement_location[H2D_MAX_COMPONENTS];
+      this->init_adapt(refinement_selectors, element_refinement_location, meshes);
 
-      for(unsigned int i = 0; i < num_threads_used; i++)
-      {
-        global_refinement_selectors[i] = new RefinementSelectors::Selector<Scalar>*[refinement_selectors.size()];
-        for (unsigned int j = 0; j < refinement_selectors.size(); j++)
-        {
-          if(i == 0)
-            global_refinement_selectors[i][j] = refinement_selectors[j];
-          else
-          {
-            global_refinement_selectors[i][j] = refinement_selectors[j]->clone();
-            RefinementSelectors::ProjBasedSelector<Scalar>* proj_based_selector_i_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j]);
-            RefinementSelectors::ProjBasedSelector<Scalar>* proj_based_selector_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j]);
-            RefinementSelectors::ProjBasedSelector<Scalar>* optimum_selector_i_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(global_refinement_selectors[i][j]);
-            RefinementSelectors::ProjBasedSelector<Scalar>* optimum_selector_j = dynamic_cast<RefinementSelectors::ProjBasedSelector<Scalar>*>(refinement_selectors[j]);
-            if(proj_based_selector_i_j)
-            {
-              proj_based_selector_i_j->cached_shape_vals_valid = proj_based_selector_j->cached_shape_vals_valid;
-              proj_based_selector_i_j->cached_shape_ortho_vals = proj_based_selector_j->cached_shape_ortho_vals;
-              proj_based_selector_i_j->cached_shape_vals = proj_based_selector_j->cached_shape_vals;
-            }
-            if(optimum_selector_i_j)
-              optimum_selector_i_j->num_shapes = optimum_selector_j->num_shapes;
-          }
-        }
-      }
+      // This is the number of refinements attempted.
+      int attempted_element_refinements_count = calculate_attempted_element_refinements_count();
 
-      // Solution cloning.
-      Solution<Scalar>*** rslns = new Solution<Scalar>**[num_threads_used];
-
-      for(unsigned int i = 0; i < num_threads_used; i++)
-      {
-        rslns[i] = new Solution<Scalar>*[this->num];
-        for (int j = 0; j < this->num; j++)
-        {
-          if(rsln[j])
-            rslns[i][j] = static_cast<Solution<Scalar>* >(rsln[j]->clone());
-        }
-      }
-
+      // Time measurement.
       this->tick();
       this->info("\tAdaptivity: data preparation duration: %f s.", this->last());
 
-      // For statistics.
-      int num_elements_for_refinenement = ids.size();
-      int* numberOfCandidates = new int[num_elements_for_refinenement];
+      // List of indices of elements that are going to be processed
+      ElementToRefine* elements_to_refine = new ElementToRefine[attempted_element_refinements_count];
 
       // Parallel section
-#pragma omp parallel num_threads(num_threads_used)
+#pragma omp parallel num_threads(this->num_threads_used)
       {
         int thread_number = omp_get_thread_num();
-        int start = (num_elements_for_refinenement / num_threads_used) * thread_number;
-        int end = (num_elements_for_refinenement / num_threads_used) * (thread_number + 1);
-        if(thread_number == num_threads_used - 1)
-          end = num_elements_for_refinenement;
+        int start = (attempted_element_refinements_count / this->num_threads_used) * thread_number;
+        int end = (attempted_element_refinements_count / this->num_threads_used) * (thread_number + 1);
+        if(thread_number == this->num_threads_used - 1)
+          end = attempted_element_refinements_count;
+
+        // Projected solutions obtaining.
+        MeshFunctionSharedPtr<Scalar>* rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
+        OGProjection<Scalar> ogProjection;
+
+        for(unsigned int i = 0; i < this->num; i++)
+        {
+          rslns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
+
+          typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
+          MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
+          typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh);
+          SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
+
+          ogProjection.project_global(ref_space, this->errorCalculator->fine_solutions[i], rslns[i]);
+        }
+
         for(int id_to_refine = start; id_to_refine < end; id_to_refine++)
         {
           try
           {
-            RefinementSelectors::Selector<Scalar>** current_refinement_selectors = global_refinement_selectors[thread_number];
-            Solution<Scalar>** current_rslns = rslns[thread_number];
+            // Get the appropriate element reference from the error calculator.
+            ErrorCalculator<Scalar>::ElementReference* element_reference = this->errorCalculator->element_references[id_to_refine];
+            int element_id = element_reference->element_id;
+            int component = element_reference->comp;
+            int current_order = this->spaces[component]->get_element_order(element_id);
 
-            // Get refinement suggestion
-            ElementToRefine elem_ref(ids[id_to_refine], components[id_to_refine]);
+            // Get refinement suggestion.
+            ElementToRefine elem_ref(element_id, component);
 
-            // rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-            current_refinement_selectors[components[id_to_refine]]->select_refinement(meshes[components[id_to_refine]]->get_element(ids[id_to_refine]), current_orders[id_to_refine], current_rslns[components[id_to_refine]], elem_ref);
-            
-            //add to a list of elements that are going to be refined
-#pragma omp critical (elem_ref_being_pushed_back)
-            {
-              idx[ids[id_to_refine]][components[id_to_refine]] = elem_inx_to_proc.size();
-              elem_inx_to_proc.push_back(elem_ref);
-            }
+            // Rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
+            refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, rslns[component].get(), elem_ref);
 
-            if(this->get_verbose_output())
-            {
-						  if(dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]]))
-								  numberOfCandidates[id_to_refine] = dynamic_cast<Hermes::Hermes2D::RefinementSelectors::OptimumSelector<Scalar>*>(current_refinement_selectors[components[id_to_refine]])->get_candidates().size();
-              else
-								  numberOfCandidates[id_to_refine] = 0;
-            }
+            // Put this refinement to the storage.
+            elements_to_refine[id_to_refine] = elem_ref;
+
           }
           catch(Hermes::Exceptions::Exception& exception)
           {
@@ -295,129 +237,114 @@ namespace Hermes
               this->caughtException = new std::exception(exception);
           }
         }
+
+        delete [] rslns;
       }
 
-      if(this->caughtException == NULL)
+      if(this->caughtException)
       {
-        if(this->get_verbose_output())
-        {
-          int averageNumberOfCandidates = 0;
-          for(int i = 0; i < num_elements_for_refinenement; i++)
-              averageNumberOfCandidates += numberOfCandidates[i];
-          averageNumberOfCandidates = averageNumberOfCandidates / num_elements_for_refinenement;
-
-          this->info("\tAdaptivity: total number of refined Elements: %i.", num_elements_for_refinenement);
-          this->info("\tAdaptivity: average number of candidates per refined Element: %i.", averageNumberOfCandidates);
-        }
+        this->deinit_adapt(element_refinement_location);
+        throw *(this->caughtException);
+        return false;
       }
 
-      delete [] numberOfCandidates;
-
+      // Time measurement.
       this->tick();
       this->info("\tAdaptivity: refinement selection duration: %f s.", this->last());
 
-      if(this->caughtException == NULL)
-        fix_shared_mesh_refinements(meshes, elem_inx_to_proc, idx, global_refinement_selectors);
+      // Before applying, fix the shared mesh refinements.
+      fix_shared_mesh_refinements(meshes, elements_to_refine, attempted_element_refinements_count, element_refinement_location, &refinement_selectors.front());
 
-      for(unsigned int i = 0; i < num_threads_used; i++)
-      {
-        if(i > 0)
-          for (unsigned int j = 0; j < refinement_selectors.size(); j++)
-            delete global_refinement_selectors[i][j];
-        delete [] global_refinement_selectors[i];
-      }
-      delete [] global_refinement_selectors;
-
-      for(unsigned int i = 0; i < num_threads_used; i++)
-      {
-        if(rslns[i])
-        {
-          for (unsigned int j = 0; j < this->num; j++)
-            if(rsln[j])
-              delete rslns[i][j];
-          delete [] rslns[i];
-        }
-      }
-      delete [] rslns;
-
-      for(int i = 0; i < max_id; i++)
-        delete [] idx[i];
-      delete [] idx;
-
-      if(this->caughtException)
-        throw *(this->caughtException);
-      
-      //apply refinements
-      apply_refinements(elem_inx_to_proc);
+      // Apply refinements
+      apply_refinements(elements_to_refine, attempted_element_refinements_count);
 
       // in singlemesh case, impose same orders across meshes
       homogenize_shared_mesh_orders(meshes);
 
-      // mesh regularization
-      if(regularize >= 0)
-      {
-        if(regularize == 0)
-        {
-          regularize = 1;
-          this->warn("Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
-        }
-        for (int i = 0; i < this->num; i++)
-        {
-          int* parents;
-          parents = meshes[i]->regularize(regularize);
-          this->spaces[i]->distribute_orders(meshes[i], parents);
-          ::free(parents);
-        }
-      }
+      this->adapt_postprocess(meshes, attempted_element_refinements_count);
 
-      for (int j = 0; j < this->num; j++)
-        if(rsln[j])
-          rsln[j]->enable_transform(true);
+      delete [] elements_to_refine;
 
-      //store for the user to retrieve
-      last_refinements.swap(elem_inx_to_proc);
-
-      have_errors = false;
-      if(strat == 2)
-        have_errors = true; // space without changes
-
-      // since space changed, assign dofs:
-      for(unsigned int i = 0; i < this->spaces.size(); i++)
-        this->spaces[i]->assign_dofs();
-
-      for (int i = 0; i < this->num; i++)
-      {
-        for_all_active_elements(e, this->spaces[i]->get_mesh())
-          this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
-        for(int id_to_refine = 0; id_to_refine < ids.size(); id_to_refine++)
-          this->spaces[i]->edata[ids[id_to_refine]].changed_in_last_adaptation = false;
-      }
+      this->deinit_adapt(element_refinement_location);
 
       return false;
     }
 
     template<typename Scalar>
-    bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector, double thr, int strat,
-      int regularize, double to_be_processed)
+    void Adapt<Scalar>::deinit_adapt(int** element_refinement_location)
     {
-      if(refinement_selector==NULL)
-        throw Exceptions::NullException(1);
-      Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
-      refinement_selectors.push_back(refinement_selector);
-      return adapt(refinement_selectors, thr, strat, regularize, to_be_processed);
+      // Get meshes
+      for (int j = 0; j < this->num; j++)
+        ::free(element_refinement_location[j]);
+      delete [] element_refinement_location;
+
+      for (int j = 0; j < this->num; j++)
+      {
+        Solution<Scalar>* temp = dynamic_cast<Solution<Scalar>*>(this->errorCalculator->fine_solutions[j].get());
+        if(temp)
+          temp->enable_transform(true);
+      }
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fix_shared_mesh_refinements(MeshSharedPtr* meshes, std::vector<ElementToRefine>& elems_to_refine,
-      int** idx, RefinementSelectors::Selector<Scalar> *** refinement_selectors)
+    void Adapt<Scalar>::adapt_postprocess(MeshSharedPtr* meshes, int element_refinements_count)
     {
-      int num_elem_to_proc = elems_to_refine.size();
+      // mesh regularization
+      if(this->regularization >= 0)
+      {
+        if(this->regularization == 0)
+        {
+          this->regularization = 1;
+          this->warn("Total mesh regularization is not supported in adaptivity. 1-irregular mesh is used instead.");
+        }
+        for (int i = 0; i < this->num; i++)
+        {
+          int* parents;
+          parents = meshes[i]->regularize(this->regularization);
+          this->spaces[i]->distribute_orders(meshes[i], parents);
+          ::free(parents);
+        }
+      }
 
-      RefinementSelectors::Selector<Scalar>** current_refinement_selectors;
+      // since space changed, assign dofs:
+      for(unsigned int i = 0; i < this->spaces.size(); i++)
+        this->spaces[i]->assign_dofs();
+
+      Element* e;
+      for (int i = 0; i < this->num; i++)
+      {
+        for_all_active_elements(e, this->spaces[i]->get_mesh())
+          this->spaces[i]->edata[e->id].changed_in_last_adaptation = false;
+      }
+
+      // EXTREMELY important - set the changed_in_last_adaptation to changed elements.
+      for(int i = 0; i < element_refinements_count; i++)
+      {
+        ErrorCalculator<Scalar>::ElementReference* element_reference = this->errorCalculator->element_references[i];
+        int element_id = element_reference->element_id;
+        int component = element_reference->comp;
+        this->spaces[component]->edata[element_id].changed_in_last_adaptation = true;
+      }
+    }
+
+    template<typename Scalar>
+    bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector)
+    {
+      if(!refinement_selector)
+        throw Exceptions::NullException(1);
+      Hermes::vector<RefinementSelectors::Selector<Scalar> *> refinement_selectors;
+      refinement_selectors.push_back(refinement_selector);
+      return adapt(refinement_selectors);
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::fix_shared_mesh_refinements(MeshSharedPtr* meshes, ElementToRefine*& elems_to_refine, int num_elem_to_proc, int** idx, RefinementSelectors::Selector<Scalar>** refinement_selectors)
+    {
+      // For additions.
+      std::vector<ElementToRefine> new_elems_to_refine;
 
       for(int inx = 0; inx < num_elem_to_proc; inx++)
       {
-        current_refinement_selectors = refinement_selectors[omp_get_thread_num()];
         ElementToRefine& elem_ref = elems_to_refine[inx];
         int current_quad_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
         Element* current_elem = meshes[elem_ref.comp]->get_element(elem_ref.id);
@@ -427,7 +354,8 @@ namespace Hermes
         for (int j = 0; j < this->num; j++)
         {
           if(selected_refinement == H2D_REFINEMENT_H) break; // iso refinement is max what can be recieved
-          if(j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if a mesh is shared
+          if(j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp])
+          { // if a mesh is shared
             int ii = idx[elem_ref.id][j];
             if(ii >= 0) { // and the sample element is about to be refined by another compoment
               const ElementToRefine& elem_ref_ii = elems_to_refine[ii];
@@ -457,7 +385,7 @@ namespace Hermes
               if(elem_ref.split != selected_refinement)
               {
                 elem_ref.split = selected_refinement;
-                current_refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref.split, elem_ref.p, suggested_orders);
+                refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref.split, elem_ref.p, suggested_orders);
               }
 
               // change other refinements
@@ -468,20 +396,26 @@ namespace Hermes
                 if(elem_ref_ii.split != selected_refinement)
                 {
                   elem_ref_ii.split = selected_refinement;
-                  current_refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_ii.split, elem_ref_ii.p, suggested_orders);
+                  refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_ii.split, elem_ref_ii.p, suggested_orders);
                 }
               }
               else
               { // element (of the other comp.) not refined at all: assign refinement
                 ElementToRefine elem_ref_new(elem_ref.id, j);
                 elem_ref_new.split = selected_refinement;
-                current_refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_new.split, elem_ref_new.p, suggested_orders);
-                elems_to_refine.push_back(elem_ref_new);
+                refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_new.split, elem_ref_new.p, suggested_orders);
+                new_elems_to_refine.push_back(elem_ref_new);
               }
             }
           }
         }
       }
+
+      // Adding the additions.
+      if(new_elems_to_refine.size() > 0)
+        elems_to_refine = (ElementToRefine*)realloc(elems_to_refine, (num_elem_to_proc + new_elems_to_refine.size()) * sizeof(ElementToRefine));
+      for(int inx = 0; inx < new_elems_to_refine.size(); inx++)
+        elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
     }
 
     template<typename Scalar>
@@ -509,11 +443,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::apply_refinements(std::vector<ElementToRefine>& elems_to_refine)
+    void Adapt<Scalar>::apply_refinements(ElementToRefine* elems_to_refine, int num_elem_to_process)
     {
-      for (std::vector<ElementToRefine>::const_iterator elem_ref = elems_to_refine.begin();
-        elem_ref != elems_to_refine.end(); elem_ref++)
-        apply_refinement(*elem_ref);
+      for (int i = 0; i < num_elem_to_process; i++)
+        apply_refinement(elems_to_refine[i]);
     }
 
     template<typename Scalar>
