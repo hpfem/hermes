@@ -41,7 +41,20 @@ namespace Hermes
     *
     */
 
-    /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity. \ingroup g_adapt
+    /// Enum for selecting the stopping criterion of the loop over all elements.
+    /// \ingroup g_adapt
+    /// Serves for only inspect such a portion of all elements of all meshes in the system
+    /// for potential refinement.
+    /// Default: Cumulative.
+    enum AdaptivityStoppingCriterion
+    {
+      /// Refine elements until prescribed portion of error is processed.
+      AdaptStoppingCriterionCumulative,
+      AdaptStoppingCriterionSingleElement
+    };
+
+    /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity.
+    /// \ingroup g_adapt
     /** The class provides basic functionality necessary to adaptively refine elements.
     *  Given a reference solution and a coarse solution, it calculates error estimates
     *  and it acts as a container for the calculated errors.
@@ -59,17 +72,6 @@ namespace Hermes
       Adapt(SpaceSharedPtr<Scalar>& space, ErrorCalculator<Scalar>* error_calculator);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
-      /// Enum for selecting the stopping criterion of the loop over all elements.
-      /// Serves for only inspect such a portion of all elements of all meshes in the system
-      /// for potential refinement.
-      /// Default: Cumulative.
-      enum StoppingCriterionStrategy
-      {
-        /// Refine elements until prescribed portion of error is processed.
-        Cumulative,
-        SingleElement
-      };
-
       /// Refines elements based on results from the ErrorCalculator class.
       /**
       *  \param[in] refinement_selectors Vector of selectors.
@@ -83,10 +85,11 @@ namespace Hermes
       bool adapt(RefinementSelectors::Selector<Scalar>* refinement_selector);
 
       /// Set the current strategy.
-      /// \param[in] strategy The strategy, see the info for StoppingCriterionStrategy enum.
+      /// \param[in] strategy The strategy, see the info for AdaptivityStoppingCriterion enum.
       /// \param[in] threshold The number representing a threshold in a meaning specific to the strategy.
-      /// Default for threshold: 0.3.
-      void set_strategy(typename Adapt<Scalar>::StoppingCriterionStrategy strategy, double threshold = 0.3);
+      /// Default strategy : AdaptStoppingCriterionCumulative.
+      /// Default threshold: 0.3.
+      void set_strategy(AdaptivityStoppingCriterion strategy, double threshold = 0.3);
 
       /// Set the regularization level.
       /// See attribute regularization.
@@ -106,7 +109,7 @@ namespace Hermes
       void init();
 
       /// Current strategy.
-      typename Adapt<Scalar>::StoppingCriterionStrategy strategy;
+      AdaptivityStoppingCriterion strategy;
 
       /// Current threshold.
       double threshold;

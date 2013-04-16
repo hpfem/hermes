@@ -421,6 +421,8 @@ namespace Hermes
 
         virtual MarkersConversionType get_type() const = 0;
 
+        int size() const;
+
       protected:
 
         /// Info about the maximum marker used so far, used in determining

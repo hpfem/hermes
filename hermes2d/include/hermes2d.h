@@ -83,8 +83,7 @@
 #include "views/vector_base_view.h"
 #include "views/vector_view.h"
 
-#include "mesh/refinement_type.h"
-#include "mesh/element_to_refine.h"
+#include "refinement_selectors/element_to_refine.h"
 #include "refinement_selectors/selector.h"
 #include "refinement_selectors/order_permutator.h"
 #include "refinement_selectors/optimum_selector.h"
@@ -94,8 +93,10 @@
 #include "refinement_selectors/hcurl_proj_based_selector.h"
 
 #include "adapt/adapt.h"
+#include "adapt/error_calculator.h"
+#include "adapt/error_thread_calculator.h"
 #include "adapt/kelly_type_adapt.h"
-#include "neighbor.h"
+#include "neighbor_search.h"
 #include "projections/localprojection.h"
 #include "projections/ogprojection.h"
 #include "projections/ogprojection_nox.h"

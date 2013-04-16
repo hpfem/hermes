@@ -35,8 +35,6 @@ namespace Hermes
       als(threadAssembler->als),
       fns(threadAssembler->fns),
       wf(threadAssembler->wf),
-      mfDG(threadAssembler->wf->mfDG),
-      vfDG(threadAssembler->wf->vfDG),
       spaces_size(threadAssembler->spaces_size),
       nonlinear(threadAssembler->nonlinear),
       current_mat(threadAssembler->current_mat),
@@ -46,32 +44,18 @@ namespace Hermes
       do_not_use_cache(threadAssembler->do_not_use_cache),
       spaces(spaces)
     {
-      matrix_forms_present = (mfDG.size() > 0);
-      vector_forms_present = (vfDG.size() > 0);
-      if(matrix_forms_present)
+      this->DG_matrix_forms_present = false;
+      this->DG_vector_forms_present = false;
+      if(this->wf)
       {
-        npss = new PrecalcShapeset*[spaces_size];
-        nrefmaps = new RefMap*[spaces_size];
+        if(!this->wf->mfDG.empty())
+          this->DG_matrix_forms_present = true;
 
-        for (unsigned int j = 0; j < spaces_size; j++)
-        {
-          npss[j] = new PrecalcShapeset(spaces[j]->shapeset);
-          nrefmaps[j] = new RefMap();
-        }
+        if(!this->wf->vfDG.empty())
+          this->DG_vector_forms_present = true;
       }
-    }
 
-    template<typename Scalar>
-    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(Hermes::vector<MatrixFormDG<Scalar>*>& mfDG, int spaces_size)
-      : mfDG(mfDG),
-      vfDG(Hermes::vector<VectorFormDG<Scalar>*>()),
-      spaces(Hermes::vector<SpaceSharedPtr<Scalar> >()),
-      spaces_size(spaces_size),
-      current_state(NULL)
-    {
-      matrix_forms_present = (mfDG.size() > 0);
-      vector_forms_present = (vfDG.size() > 0);
-      if(matrix_forms_present)
+      if(DG_matrix_forms_present)
       {
         npss = new PrecalcShapeset*[spaces_size];
         nrefmaps = new RefMap*[spaces_size];
@@ -87,13 +71,13 @@ namespace Hermes
     template<typename Scalar>
     NeighborSearch<Scalar>* DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(NeighborSearch<Scalar>** neighbor_searches, int index)
     {
-      return neighbor_searches[index + this->spaces_size];
+      return neighbor_searches[index + this->wf->get_neq()];
     }
 
     template<typename Scalar>
     DiscreteProblemDGAssembler<Scalar>::~DiscreteProblemDGAssembler()
     {
-      if(matrix_forms_present)
+      if(DG_matrix_forms_present)
       {
         for (unsigned int j = 0; j < spaces_size; j++)
         {
@@ -116,7 +100,7 @@ namespace Hermes
       this->num_neighbors = new int[this->current_state->rep->nvert];
       processed = new bool*[current_state->rep->nvert];
 
-      if(matrix_forms_present)
+      if(DG_matrix_forms_present)
       {
         for (unsigned int i = 0; i < spaces_size; i++)
         {
@@ -129,10 +113,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemDGAssembler<Scalar>::assemble_one_state()
     {
-      bool intra_edge_passed_DG[H2D_MAX_NUMBER_VERTICES];
-      for(int a = 0; a < H2D_MAX_NUMBER_VERTICES; a++)
-        intra_edge_passed_DG[a] = false;
-
 #pragma omp critical (DG)
       {
         for(unsigned int i = 0; i < current_state->num; i++)
@@ -154,12 +134,11 @@ namespace Hermes
 #endif
             for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors[current_state->isurf]; neighbor_i++)
             {
-              if(!vector_forms_present && processed[current_state->isurf][neighbor_i])
+              if(!DG_vector_forms_present && processed[current_state->isurf][neighbor_i])
                 continue;
 
               // DG-inner-edge-wise parameters for WeakForm.
-              if(wf)
-                wf->set_active_DG_state(current_state->e, current_state->isurf);
+              wf->set_active_DG_state(current_state->e, current_state->isurf);
 
               assemble_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, neighbor_searches[current_state->isurf]);
             }
@@ -211,7 +190,7 @@ namespace Hermes
       }
 
       // For neighbor psss.
-      if(current_mat && matrix_forms_present && !edge_processed)
+      if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
         for(unsigned int idx_i = 0; idx_i < spaces_size; idx_i++)
         {
@@ -228,7 +207,7 @@ namespace Hermes
         refmaps[i]->force_transform(pss[i]->get_transform(), pss[i]->get_ctm());
 
         // Neighbor.
-        if(current_mat && matrix_forms_present && !edge_processed)
+        if(current_mat && DG_matrix_forms_present && !edge_processed)
         {
           nrefmaps[i]->set_active_element(npss[i]->get_active_element());
           nrefmaps[i]->force_transform(npss[i]->get_transform(), npss[i]->get_ctm());
@@ -254,7 +233,7 @@ namespace Hermes
         n_quadrature_points = init_surface_geometry_points(refmaps[i], order_base, current_state->isurf, current_state->rep->marker, geometry[i], jacobian_x_weights[i]);
         e[i] = new InterfaceGeom<double>(geometry[i], current_neighbor_searches[i]->neighb_el->marker, current_neighbor_searches[i]->neighb_el->id, current_neighbor_searches[i]->neighb_el->get_diameter());
 
-        if(current_mat && matrix_forms_present && !edge_processed)
+        if(current_mat && DG_matrix_forms_present && !edge_processed)
         {
           ext_asmlist[i] = current_neighbor_searches[i]->create_extended_asmlist(spaces[i], als[i]);
           testFunctions[i] = new DiscontinuousFunc<double>*[ext_asmlist[i]->cnt];
@@ -278,9 +257,7 @@ namespace Hermes
         }
       }
 
-      DiscontinuousFunc<Scalar>** ext = NULL;
-      if(wf)
-        ext = init_ext_fns(wf->ext, current_neighbor_searches, order);
+      DiscontinuousFunc<Scalar>** ext = init_ext_fns(wf->ext, current_neighbor_searches, order);
 
       DiscontinuousFunc<Scalar>** u_ext_func = new DiscontinuousFunc<Scalar>*[this->spaces_size];
       if(this->nonlinear)
@@ -301,14 +278,14 @@ namespace Hermes
             u_ext_func[u_ext_func_i] = NULL;
       }
 
-      if(current_mat && matrix_forms_present && !edge_processed)
+      if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
-        for(int current_mfsurf_i = 0; current_mfsurf_i < this->mfDG.size(); current_mfsurf_i++)
+        for(int current_mfsurf_i = 0; current_mfsurf_i < wf->mfDG.size(); current_mfsurf_i++)
         {
-          if(!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)this->mfDG[current_mfsurf_i], current_state))
+          if(!this->selectiveAssembler->form_to_be_assembled((MatrixForm<Scalar>*)wf->mfDG[current_mfsurf_i], current_state))
             continue;
 
-          MatrixFormDG<Scalar>* mfs = this->mfDG[current_mfsurf_i];
+          MatrixFormDG<Scalar>* mfs = wf->mfDG[current_mfsurf_i];
 
           int m = mfs->i;
           int n = mfs->j;
@@ -352,7 +329,7 @@ namespace Hermes
         }
       }
 
-      if(current_mat && matrix_forms_present && !edge_processed)
+      if(current_mat && DG_matrix_forms_present && !edge_processed)
       {
         for(int i = 0; i < this->spaces_size; i++)
         {
@@ -370,11 +347,11 @@ namespace Hermes
       delete [] testFunctions;
       delete [] ext_asmlist;
 
-      if(current_rhs && vector_forms_present)
+      if(current_rhs && DG_vector_forms_present)
       {
-        for (unsigned int ww = 0; ww < this->vfDG.size(); ww++)
+        for (unsigned int ww = 0; ww < wf->vfDG.size(); ww++)
         {
-          VectorFormDG<Scalar>* vfs = this->vfDG[ww];
+          VectorFormDG<Scalar>* vfs = wf->vfDG[ww];
           if(vfs->areas[0] != H2D_DG_INNER_EDGE)
             continue;
 
@@ -402,7 +379,7 @@ namespace Hermes
         }
       }
 
-      if(ext && wf)
+      if(ext)
       {
         for(unsigned int i = 0; i < wf->ext.size(); i++)
         {

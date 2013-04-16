@@ -18,7 +18,7 @@
 
 #include "multimesh_dg_neighbor_tree_node.h"
 #include "mesh/traverse.h"
-#include "neighbor.h"
+#include "neighbor_search.h"
 
 namespace Hermes
 {

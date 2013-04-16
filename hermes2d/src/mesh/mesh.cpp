@@ -2312,6 +2312,11 @@ namespace Hermes
       return this->min_marker_unused++;
     }
 
+    int Mesh::MarkersConversion::size() const
+    {
+      return this->conversion_table.size();
+    }
+
     Mesh::MarkersConversion::StringValid Mesh::MarkersConversion::get_user_marker(int internal_marker) const
     {
       if(internal_marker == H2D_DG_INNER_EDGE_INT)

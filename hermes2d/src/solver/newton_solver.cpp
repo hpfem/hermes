@@ -17,6 +17,7 @@
 // along with Hermes2D; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "solver/newton_solver.h"
+#include "error_calculator.h"
 #include "projections/ogprojection.h"
 #include "hermes_common.h"
 
@@ -249,8 +250,8 @@ namespace Hermes
 
         // Calculate the norm.
         
-        SimpleNormCalculator<Scalar, HERMES_L2_NORM> errorCalculator(solutions.size());
-        return errorCalculator.calculate_norms(solutions);
+        DefaultNormCalculator<Scalar, HERMES_L2_NORM> normCalculator(solutions.size());
+        return normCalculator.calculate_norms(solutions);
       }
       else
       {

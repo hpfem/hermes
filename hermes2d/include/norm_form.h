@@ -29,107 +29,77 @@ namespace Hermes
   /// Namespace containing definitions specific for Hermes2D.
   namespace Hermes2D
   {
-    class NormForm
+    class HERMES_API NormForm
     {
     public:
       NormForm(int i, int j);
 
-    protected:
+      /// set area
+      /// \todo use this - it is not used so far.
+      void set_area(std::string area);
+
+      /// Coordinates.
       int i, j;
+
+    protected:
+      std::string area;
     };
 
     template<typename Scalar>
-    class ContinuousNormForm : public NormForm
+    class HERMES_API NormFormVol : public NormForm
     {
     public:
-      ContinuousNormForm(int i, int j);
-
-      void set_marker(int marker);
+      NormFormVol(int i, int j);
 
       virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const = 0;
-    protected:
-      int marker;
     };
 
     template<typename Scalar>
-    class DiscontinuousNormForm : public NormForm
+    class HERMES_API NormFormSurf : public NormForm
     {
     public:
-      DiscontinuousNormForm(int i, int j);
+      NormFormSurf(int i, int j);
+
+      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const = 0;
+    };
+
+    template<typename Scalar>
+    class HERMES_API NormFormDG : public NormForm
+    {
+    public:
+      NormFormDG(int i, int j);
 
       virtual Scalar value(int n, double *wt, DiscontinuousFunc<Scalar> *u, DiscontinuousFunc<Scalar> *v, Geom<double> *e) const = 0;
     };
 
-    template<typename Scalar>
-    class MatrixNormFormVol : public MatrixFormVol<Scalar>
+    template <typename Scalar>
+    class HERMES_API DefaultNormFormVol : public NormFormVol<Scalar>
     {
     public:
-      MatrixNormFormVol(int i, int j, ContinuousNormForm<Scalar>* normForm) : MatrixFormVol<Scalar>(i, j), normForm(normForm) {};
+      DefaultNormFormVol(int i, int j, NormType normType);
+      
+      Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
 
-      virtual double value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
-                           Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
-      {
-        return this->normForm->value(n, wt, u, v);
-      }
+    protected:
+      NormType normType;
+    };
 
-      virtual Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
-                      Geom<Ord> *e, Func<Ord> **ext) const
-      {
-        return u->val[0] * v->val[0];
-      }
+    template<typename Scalar>
+    class HERMES_API MatrixDefaultNormFormVol : public MatrixFormVol<Scalar>
+    {
+    public:
+      MatrixDefaultNormFormVol(int i, int j, NormType normType);
+
+      Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u,
+                           Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *u, Func<Ord> *v,
+                      Geom<Ord> *e, Func<Ord> **ext) const;
     
-      MatrixFormVol<double>* clone() const { return new MatrixNormFormVol(*this); };
+      MatrixFormVol<Scalar>* clone() const;
 
       protected:
-        ContinuousNormForm<Scalar>* normForm;
-    };
-
-    template <typename Scalar, NormType normType>
-    class DefaultContinuousNormForm : public ContinuousNormForm<Scalar>
-    {
-    public:
-      DefaultContinuousNormForm(int i, int j);
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
-    };
-
-    template <typename Scalar>
-    class DefaultContinuousNormForm<Scalar, HERMES_L2_NORM> : public ContinuousNormForm<Scalar>
-    {
-    public:
-      DefaultContinuousNormForm(int i, int j);
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
-    };
-
-    template <typename Scalar>
-    class DefaultContinuousNormForm<Scalar, HERMES_H1_NORM> : public ContinuousNormForm<Scalar>
-    {
-    public:
-      DefaultContinuousNormForm(int i, int j);
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
-    };
-
-    template <typename Scalar>
-    class DefaultContinuousNormForm<Scalar, HERMES_H1_SEMINORM> : public ContinuousNormForm<Scalar>
-    {
-    public:
-      DefaultContinuousNormForm(int i, int j);
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
-    };
-
-    template <typename Scalar>
-    class DefaultContinuousNormForm<Scalar, HERMES_HCURL_NORM> : public ContinuousNormForm<Scalar>
-    {
-    public:
-      DefaultContinuousNormForm(int i, int j);
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
-    };
-
-    template <typename Scalar>
-    class DefaultContinuousNormForm<Scalar, HERMES_HDIV_NORM> : public ContinuousNormForm<Scalar>
-    {
-    public:
-      DefaultContinuousNormForm(int i, int j);
-      virtual Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
+      NormType normType;
     };
   }
 }

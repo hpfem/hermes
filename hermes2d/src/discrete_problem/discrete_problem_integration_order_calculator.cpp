@@ -23,7 +23,7 @@
 #include "shapeset/precalc.h"
 #include "mesh/refmap.h"
 #include "function/solution.h"
-#include "neighbor.h"
+#include "neighbor_search.h"
 #include "api2d.h"
 #include <algorithm>
 

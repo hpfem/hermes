@@ -26,8 +26,8 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    ErrorCalculator<Scalar>::ErrorCalculator(typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy) :
-      strategy(strategy),
+    ErrorCalculator<Scalar>::ErrorCalculator(CalculatedErrorType errorType) :
+      errorType(errorType),
       elements_stored(false),
       element_references(NULL),
       errors_squared_sum(0.0),
@@ -59,9 +59,12 @@ namespace Hermes
       errors_squared_sum = 0.;
       norms_squared_sum = 0.;
 
+      // For all components, get the number of active elements,
+      // make room for elements, optionally for norms, and incerementaly
+      // calculate the total number of elements.
       for(int i = 0; i < this->component_count; i++)
       {
-        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_max_element_id();
+        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_active_elements();
 
         if(errors[i] == NULL)
           errors[i] = (double*)calloc(num_elements_i, sizeof(double));
@@ -70,7 +73,7 @@ namespace Hermes
           errors[i] = (double*)realloc(errors[i], num_elements_i * sizeof(double));
           memset(errors[i], 0, sizeof(double) * num_elements_i);
         }
-        if(this->strategy == this->RelativeError)
+        if(this->errorType == RelativeError)
         {
           if(norms[i] == NULL)
             norms[i] = (double*)calloc(num_elements_i, sizeof(double));
@@ -87,10 +90,21 @@ namespace Hermes
         this->num_act_elems += num_elements_i;
       }
 
+      // Create the array for references and initialize it.
       if(this->element_references)
         ::free(this->element_references);
 
-      this->element_references = (ElementReference**)calloc(this->num_act_elems, sizeof(ElementReference*));
+      this->element_references = (ElementReference*)malloc(this->num_act_elems * sizeof(ElementReference));
+
+      int running_count = 0;
+      for(int i = 0; i < this->component_count; i++)
+      {
+        Element* e;
+        for_all_active_elements(e, this->coarse_solutions[i]->get_mesh())
+        {
+          this->element_references[running_count++] = ErrorCalculator<Scalar>::ElementReference(i, e->id, &this->errors[i][e->id]);
+        }
+      }
     }
 
     template<typename Scalar>
@@ -104,14 +118,33 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    bool ErrorCalculator<Scalar>::isOkay() const
+    {
+      bool okay = true;
+
+      if(fine_solutions.size() != this->component_count)
+      {
+        okay = false;
+        throw Exceptions::LengthException(0, fine_solutions.size(), this->component_count);
+      }
+
+      if(this->mfvol.empty() && this->mfsurf.empty() && this->mfDG.empty())
+      {
+        okay = false;
+        throw Exceptions::Exception("No error forms - instances of NormForm<Scalar> passed to ErrorCalculator via add_error_form().");
+      }
+
+      return okay;
+    }
+
+    template<typename Scalar>
     void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions_, bool sort_and_store)
     {
-      this->component_count = coarse_solutions.size();
-      if(fine_solutions.size() != this->component_count)
-        throw Exceptions::LengthException(0, fine_solutions.size(), this->component_count);
-
       this->coarse_solutions = coarse_solutions_;
       this->fine_solutions = fine_solutions_;
+      this->component_count = coarse_solutions.size();
+      
+      this->check();
 
       this->init_data_storage();
 
@@ -126,7 +159,6 @@ namespace Hermes
       int num_states;
       Traverse trav(this->component_count);
       Traverse::State** states = trav.get_states(meshes, num_states);
-
 
 #pragma omp parallel num_threads(this->num_threads_used)
       {
@@ -144,55 +176,73 @@ namespace Hermes
           errorThreadCalculator.evaluate_one_state(states[state_i]);
       }
 
+      // Sums calculation.
+      for(int i = 0; i < this->component_count; i++)
+      {
+        for(int j = 0; j < this->element_count[i]; j++)
+        {
+          if(this->errorType == RelativeError)
+          {
+            component_norms[i] += norms[i][j];
+            component_errors[i] += errors[i][j] * norms[i][j];
+          }
+          else
+            component_errors[i] += errors[i][j];
+        }
+
+        norms_squared_sum += component_norms[i];
+        errors_squared_sum += component_errors[i];
+        if(this->errorType == RelativeError)
+          component_errors[i] /= component_norms[i];
+      }
+      if(this->errorType == RelativeError)
+        errors_squared_sum /= norms_squared_sum;
+
       if(sort_and_store)
       {
-        std::qsort(this->element_references, this->num_act_elems, sizeof(ElementReference*), &this->compareElementReference);
+        std::qsort(this->element_references, this->num_act_elems, sizeof(ElementReference), &this->compareElementReference);
         elements_stored = true;
       }
       else
         elements_stored = false;
     }
-
     
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::add_error_form_vol(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY)
+    void ErrorCalculator<Scalar>::add_error_form(NormFormVol<Scalar>* form)
     {
-      Mesh::MarkersConversion::IntValid markerInfo = this->coarse_solutions[0]->get_mesh()->get_element_markers_conversion().get_internal_marker(marker);
-      if(markerInfo.valid)
-        form->set_marker(markerInfo.marker);
-      else
-      {
-        throw Exceptions::Exception("Marker not valid in ErrorCalculator<Scalar>::add_error_form_vol.");
-        return;
-      }
       this->mfvol.push_back(form);
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::add_error_form_surf(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY)
+    void ErrorCalculator<Scalar>::add_error_form(NormFormSurf<Scalar>* form)
     {
-      Mesh::MarkersConversion::IntValid markerInfo = this->coarse_solutions[0]->get_mesh()->get_boundary_markers_conversion().get_internal_marker(marker);
-      if(markerInfo.valid)
-        form->set_marker(markerInfo.marker);
-      else
-      {
-        throw Exceptions::Exception("Marker not valid in ErrorCalculator<Scalar>::add_error_form_surf.");
-        return;
-      }
       this->mfsurf.push_back(form);
     }
 
     template<typename Scalar>
-    void ErrorCalculator<Scalar>::add_error_form_DG(DiscontinuousNormForm<Scalar>* form)
+    void ErrorCalculator<Scalar>::add_error_form(NormFormDG<Scalar>* form)
     {
       this->mfDG.push_back(form);
     }
-
     
+    template<typename Scalar>
+    bool ErrorCalculator<Scalar>::data_prepared_for_querying() const
+    {
+      if(!this->elements_stored)
+      {
+        throw Hermes::Exceptions::Exception("Elements / norms have not been calculated so far.");
+        return false;
+      }
+
+      return true;
+    }
 
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_element_error_squared(int component, int element_id) const
     {
+      if(!this->data_prepared_for_querying())
+        return 0.0;
+      
       if(component >= this->component_count)
         throw Hermes::Exceptions::ValueException("component", component, this->component_count);
       if(element_id >= element_count[component])
@@ -204,6 +254,8 @@ namespace Hermes
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_element_norm_squared(int component, int element_id) const
     {
+      if(!this->data_prepared_for_querying())
+        return 0.0;
       if(component >= this->component_count)
         throw Hermes::Exceptions::ValueException("component", component, this->component_count);
       if(element_id >= element_count[component])
@@ -215,6 +267,8 @@ namespace Hermes
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_error_squared(int component) const
     {
+      if(!this->data_prepared_for_querying())
+        return 0.0;
       if(component >= this->component_count)
         throw Hermes::Exceptions::ValueException("component", component, this->component_count);
 
@@ -224,6 +278,8 @@ namespace Hermes
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_norm_squared(int component) const
     {
+      if(!this->data_prepared_for_querying())
+        return 0.0;
       if(component >= this->component_count)
         throw Hermes::Exceptions::ValueException("component", component, this->component_count);
 
@@ -233,30 +289,34 @@ namespace Hermes
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_total_error_squared() const
     {
+      if(!this->data_prepared_for_querying())
+        return 0.0;
       return this->errors_squared_sum;
     }
 
     template<typename Scalar>
     double ErrorCalculator<Scalar>::get_total_norm_squared() const
     {
+      if(!this->data_prepared_for_querying())
+        return 0.0;
       return this->norms_squared_sum;
     }
 
     template<typename Scalar, NormType normType>
-    DefaultErrorCalculator<Scalar, normType>::DefaultErrorCalculator(typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy, int component_count) : ErrorCalculator<Scalar>(strategy)
+    DefaultErrorCalculator<Scalar, normType>::DefaultErrorCalculator(CalculatedErrorType errorType, int component_count) : ErrorCalculator<Scalar>(errorType)
     {
       for(int i = 0; i < component_count; i++)
       {
-        this->add_error_form_vol(new DefaultContinuousNormForm<Scalar, normType>(i, i));
+        this->add_error_form(new DefaultNormFormVol<Scalar>(i, i, normType));
       }
     }
 
     template<typename Scalar, NormType normType>
-    DefaultNormCalculator<Scalar, normType>::DefaultNormCalculator(int component_count) : ErrorCalculator<Scalar>(ErrorCalculator<Scalar>::AbsoluteError)
+    DefaultNormCalculator<Scalar, normType>::DefaultNormCalculator(int component_count) : ErrorCalculator<Scalar>(AbsoluteError)
     {
       for(int i = 0; i < component_count; i++)
       {
-        this->add_error_form_vol(new DefaultContinuousNormForm<Scalar, normType>(i, i));
+        this->add_error_form(new DefaultNormFormVol<Scalar>(i, i, normType));
       }
     }
     

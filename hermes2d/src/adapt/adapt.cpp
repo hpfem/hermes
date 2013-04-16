@@ -60,10 +60,12 @@ namespace Hermes
       }
 
       regularization = -1;
+
+      this->set_strategy(AdaptStoppingCriterionCumulative);
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::set_strategy(typename Adapt<Scalar>::StoppingCriterionStrategy strategy_, double threshold_)
+    void Adapt<Scalar>::set_strategy(AdaptivityStoppingCriterion strategy_, double threshold_)
     {
       this->strategy = strategy_;
       this->threshold = threshold_;
@@ -80,13 +82,13 @@ namespace Hermes
     {
       switch(this->strategy)
       {
-      case Cumulative:
+      case AdaptStoppingCriterionCumulative:
         if(processed_error_squared > (threshold*threshold) * error_sum_squared)
           return false;
         else
           return true;
         break;
-      case SingleElement:
+      case AdaptStoppingCriterionSingleElement:
         if(*(element_reference->error) > (threshold*threshold) * max_error_squared)
           return true;
         else
@@ -117,7 +119,6 @@ namespace Hermes
         throw Exceptions::LengthException(1, refinement_selectors.size(), spaces.size());
 
       // Get meshes
-      element_refinement_location = new int*[this->num];
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->spaces[j]->get_mesh();
@@ -140,7 +141,7 @@ namespace Hermes
       // Processed error so far.
       double processed_error_squared = 0.0;
       // Maximum error - the first one in the error calculator's array.
-      double max_error_squared = *(this->errorCalculator->element_references[0]->error);
+      double max_error_squared = *(this->errorCalculator->element_references[0].error);
       // Total error.
       double sum_error_squared = this->errorCalculator->get_total_error_squared();
 
@@ -149,13 +150,13 @@ namespace Hermes
       for(int element_inspected_i = 0; element_inspected_i < this->errorCalculator->num_act_elems; element_inspected_i++)
       {
         // Get the element info from the error calculator.
-        ErrorCalculator<Scalar>::ElementReference* element_reference = this->errorCalculator->element_references[element_inspected_i];
+        ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->element_references[element_inspected_i];
 
         // Ask the strategy if we should add this refinement or break the loop.
-        if(!this->add_refinement(processed_error_squared, max_error_squared, sum_error_squared, element_reference))
+        if(!this->add_refinement(processed_error_squared, max_error_squared, sum_error_squared, &element_reference))
           break;
 
-        processed_error_squared += *(element_reference->error);
+        processed_error_squared += *(element_reference.error);
 
         attempted_element_refinements_count++;
       }
@@ -211,9 +212,9 @@ namespace Hermes
           try
           {
             // Get the appropriate element reference from the error calculator.
-            ErrorCalculator<Scalar>::ElementReference* element_reference = this->errorCalculator->element_references[id_to_refine];
-            int element_id = element_reference->element_id;
-            int component = element_reference->comp;
+            ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->element_references[id_to_refine];
+            int element_id = element_reference.element_id;
+            int component = element_reference.comp;
             int current_order = this->spaces[component]->get_element_order(element_id);
 
             // Get refinement suggestion.
@@ -276,7 +277,6 @@ namespace Hermes
       // Get meshes
       for (int j = 0; j < this->num; j++)
         ::free(element_refinement_location[j]);
-      delete [] element_refinement_location;
 
       for (int j = 0; j < this->num; j++)
       {
@@ -320,9 +320,9 @@ namespace Hermes
       // EXTREMELY important - set the changed_in_last_adaptation to changed elements.
       for(int i = 0; i < element_refinements_count; i++)
       {
-        ErrorCalculator<Scalar>::ElementReference* element_reference = this->errorCalculator->element_references[i];
-        int element_id = element_reference->element_id;
-        int component = element_reference->comp;
+        ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->element_references[i];
+        int element_id = element_reference.element_id;
+        int component = element_reference.comp;
         this->spaces[component]->edata[element_id].changed_in_last_adaptation = true;
       }
     }

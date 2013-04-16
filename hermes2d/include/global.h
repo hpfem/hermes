@@ -110,7 +110,7 @@ namespace Hermes
 #define H2D_MAKE_EDGE_ORDER(mode, edge, order) ((mode == HERMES_MODE_TRIANGLE || edge == 0 || edge == 2) ? H2D_GET_H_ORDER(order) : H2D_GET_V_ORDER(order))
 
     template<typename Scalar>
-    HERMES_API double get_l2_norm(Vector<Scalar>* vec)
+    double get_l2_norm(Vector<Scalar>* vec)
     {
       Scalar val = 0;
       for (unsigned int i = 0; i < vec->length(); i++)
@@ -122,7 +122,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    HERMES_API double get_l2_norm(Scalar* vec, int count)
+    double get_l2_norm(Scalar* vec, int count)
     {
       Scalar val = 0;
       for (unsigned int i = 0; i < count; i++)

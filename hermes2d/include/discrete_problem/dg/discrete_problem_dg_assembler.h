@@ -22,11 +22,10 @@
 #include "forms.h"
 #include "weakform/weakform.h"
 #include "function/function.h"
-#include "neighbor.h"
+#include "neighbor_search.h"
 #include "refinement_selectors/selector.h"
 #include "exceptions.h"
 #include "mixins2d.h"
-#include "multimesh_dg_neighbor_tree.h"
 #include "multimesh_dg_neighbor_tree.h"
 #include "discrete_problem/discrete_problem_selective_assembler.h"
 
@@ -46,7 +45,6 @@ namespace Hermes
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
       DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      DiscreteProblemDGAssembler(Hermes::vector<MatrixFormDG<Scalar>*>& mfDG, int spaces_size);
       
       /// Destructor.
       ~DiscreteProblemDGAssembler();
@@ -58,11 +56,17 @@ namespace Hermes
       /// Deinitialize assembling for a state.
       void deinit_assembling_one_state();
 
-    protected:
+    private:
+      /// There is a matrix form set on DG_INNER_EDGE area or not.
+      bool DG_matrix_forms_present;
+
+      /// There is a vector form set on DG_INNER_EDGE area or not.
+      bool DG_vector_forms_present;
+
       /// Initialize assembling for a neighbor.
       void init_assembling_one_neighbor();
       /// Assemble one DG neighbor.
-      virtual void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches);
+      void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches);
       /// Deinitialize assembling for a neighbor.
       void deinit_assembling_one_neighbor();
 
@@ -90,10 +94,6 @@ namespace Hermes
       AsmList<Scalar>** als;
       Hermes::vector<Transformable *> fns;
       WeakForm<Scalar>* wf;
-      Hermes::vector<MatrixFormDG<Scalar>*>& mfDG;
-      bool matrix_forms_present;
-      Hermes::vector<VectorFormDG<Scalar>*>& vfDG;
-      bool vector_forms_present;
       int spaces_size;
       bool nonlinear;
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;

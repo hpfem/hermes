@@ -93,7 +93,7 @@ namespace Hermes
         *  \param[in] max_p_quad_order A maximum encoded order of an element of a P-candidate.
         *  \return A vector of candidates. The first candidate has to be equal to the original element with a refinement ::H2D_REFINEMENT_P.
          */
-        virtual Hermes::vector<Cand>& create_candidates(Element* e, int quad_order);
+        virtual Hermes::vector<Cand> create_candidates(Element* e, int quad_order);
 
         /// Calculates error, dofs, and score of candidates.
         /** \param[in] e An element that is being refined.

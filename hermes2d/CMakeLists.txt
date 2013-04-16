@@ -106,7 +106,7 @@ project(hermes2d)
     src/calculation_continuity.cpp
     src/forms.cpp
     src/mixins2d.cpp
-    src/neighbor.cpp
+    src/neighbor_search.cpp
     src/graph.cpp
     src/norm_form.cpp
     src/spline.cpp
@@ -326,7 +326,7 @@ project(hermes2d)
     include/calculation_continuity.h
     include/forms.h
     include/mixins2d.h
-    include/neighbor.h
+    include/neighbor_search.h
     include/sub_element_map.h
     include/graph.h
     include/global.h

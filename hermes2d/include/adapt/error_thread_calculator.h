@@ -17,12 +17,13 @@
 #define __H2D_ERROR_THREAD_CALCULATOR_H
 
 #include "error_calculator.h"
-#include "discrete_problem/dg/discrete_problem_dg_assembler.h"
 
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class ErrorCalculator;
+
     template<typename Scalar>
     class ErrorThreadCalculator
     {
@@ -31,10 +32,33 @@ namespace Hermes
       ~ErrorThreadCalculator();
       void evaluate_one_state(Traverse::State* current_state);
 
+      class DGErrorCalculator
+      {
+      public:
+        DGErrorCalculator(ErrorThreadCalculator* errorThreadCalculator);
+
+        /// Assemble DG forms.
+        void assemble_one_edge();
+
+        /// Initialize neighbors.
+        bool init_neighbors();
+
+        void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i);
+      private:
+        ErrorThreadCalculator* errorThreadCalculator;
+        Traverse::State* current_state;
+
+        NeighborSearch<Scalar>** neighbor_searches;
+        int num_neighbors;
+        bool* processed;
+      };
+    private:
       void evaluate_volumetric_forms(Traverse::State* current_state, int order);
       void evaluate_surface_forms_one_edge(Traverse::State* current_state, int order);
-      void evaluate_DG_forms_one_edge(Traverse::State* current_state, int order);
-      void evaluate_form(MatrixForm<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm);
+      
+      void evaluate_volumetric_form(NormFormVol<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm);
+      void evaluate_surface_form(NormFormSurf<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm);
+      void evaluate_DG_form(NormFormDG<Scalar>* form, DiscontinuousFunc<Scalar>* difference_func_i, DiscontinuousFunc<Scalar>* difference_func_j, DiscontinuousFunc<Scalar>* rsln_i, DiscontinuousFunc<Scalar>* rsln_j, double* error, double* norm);
 
       int n_quadrature_points;
       Geom<double>* geometry;
@@ -42,16 +66,9 @@ namespace Hermes
       Solution<Scalar>** slns;
       Solution<Scalar>** rslns;
 
-      ErrorCalculator<Scalar>* errorCalculator;
+      Traverse::State* current_state;
 
-      class DGErrorCalculator : public DiscreteProblemDGAssembler<Scalar>
-      {
-      public:
-        DGErrorCalculator(ErrorThreadCalculator* errorThreadCalculator);
-        void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i, NeighborSearch<Scalar>** neighbor_searches);
-      private:
-        ErrorThreadCalculator* errorThreadCalculator;
-      };
+      ErrorCalculator<Scalar>* errorCalculator;
     };
   }
 }

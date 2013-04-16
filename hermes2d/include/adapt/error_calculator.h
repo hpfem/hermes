@@ -26,6 +26,13 @@ namespace Hermes
   {
     template<typename Scalar> class ErrorThreadCalculator;
 
+    /// Enum passed to the class ErrorCalculator specifying the calculated errors.
+    enum CalculatedErrorType
+    {
+      AbsoluteError,
+      RelativeError
+    };
+
     /// Evaluation of an error between a (coarse) solution and a reference solution. \ingroup g_adapt
     /** The class calculates error estimates and it acts as a container for the calculated errors.
     */
@@ -33,18 +40,13 @@ namespace Hermes
     class HERMES_API ErrorCalculator :
       public Hermes::Mixins::TimeMeasurable,
       public Hermes::Mixins::Loggable,
-      public Hermes::Hermes2D::Mixins::Parallel
+      public Hermes::Hermes2D::Mixins::Parallel,
+      public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
-      enum ErrorCalculationStrategy
-      {
-        AbsoluteError,
-        RelativeError
-      };
-
       /// Constructor. Suitable for problems where various solution components belong to different spaces (L2, H1, Hcurl,
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
-      ErrorCalculator(typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy);
+      ErrorCalculator(CalculatedErrorType errorType);
       
       /// Calculates the errors between coarse_solutions and fine_solutions.
       /// \param[in] sort_and_store If true, these errors are going to be sorted, stored and used for the purposes of adaptivity.
@@ -58,10 +60,10 @@ namespace Hermes
       virtual ~ErrorCalculator();  ///< Destructor. Deallocates allocated private data.
 
       /// Adds user defined norm form which is used to calculate error.
-      /// If the strategy is ErrorCalculationStrategy::RelativeError, this form is also used as a "norm" form to divide the absolute error by the norm of the "fine" solution(s).
-      void add_error_form_vol(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY);
-      void add_error_form_surf(ContinuousNormForm<Scalar>* form, std::string marker = HERMES_ANY);
-      void add_error_form_DG(DiscontinuousNormForm<Scalar>* form);
+      /// If the errorType is CalculatedErrorType::RelativeError, this form is also used as a "norm" form to divide the absolute error by the norm of the "fine" solution(s).
+      void add_error_form(NormFormVol<Scalar>* form);
+      void add_error_form(NormFormSurf<Scalar>* form);
+      void add_error_form(NormFormDG<Scalar>* form);
 
       /// Returns a squared error of an element.
       /** \param[in] A component index.
@@ -75,6 +77,13 @@ namespace Hermes
       double get_total_norm_squared() const;
 
     protected:
+      /// State querying helpers.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "ErrorCalculator"; }
+      
+      /// Common check for data querying.
+      bool data_prepared_for_querying() const;
+
       /// Initialize the data storage.
       void init_data_storage();
 
@@ -83,18 +92,18 @@ namespace Hermes
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
       
       /// Absolute / Relative error.
-      typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy;
+      CalculatedErrorType errorType;
 
       /// A reference to an element.
       struct ElementReference {
         int element_id; ///< An element ID. Invalid if below 0.
         int comp; ///< A component which this element belongs to. Invalid if below 0.
-        double* error;///< Pointer to the final error, respecting the strategy.
-        ElementReference(int element_id, int comp, double* error) : element_id(element_id), comp(comp), error(error) {}; ///< Constructor. It creates an invalid element reference.
+        double* error;///< Pointer to the final error, respecting the errorType.
+        ElementReference(int comp, int element_id, double* error) : element_id(element_id), comp(comp), error(error) {}; ///< Constructor. It creates an invalid element reference.
       };
 
       /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
-      ElementReference** element_references;
+      ElementReference* element_references;
 
       /// Number of solution components.
       int component_count;
@@ -102,7 +111,7 @@ namespace Hermes
       /// A total number of active elements across all provided meshes.
       int num_act_elems;
 
-      /// Errors of elements. Meaning of the error depeds on the strategy.
+      /// Errors of elements. Meaning of the error depeds on the errorType.
       double* errors[H2D_MAX_COMPONENTS];
       double* norms[H2D_MAX_COMPONENTS];
       double component_errors[H2D_MAX_COMPONENTS];
@@ -112,20 +121,20 @@ namespace Hermes
       double  norms_squared_sum;
 
       /// Holds volumetric matrix forms.
-      Hermes::vector<ContinuousNormForm<Scalar> *> mfvol;
+      Hermes::vector<NormFormVol<Scalar> *> mfvol;
       /// Holds surface matrix forms.
-      Hermes::vector<ContinuousNormForm<Scalar> *> mfsurf;
+      Hermes::vector<NormFormSurf<Scalar> *> mfsurf;
       /// Holds DG matrix forms.
-      Hermes::vector<DiscontinuousNormForm<Scalar> *> mfDG;
+      Hermes::vector<NormFormDG<Scalar> *> mfDG;
 
       /// This is for adaptivity, saying that the errors are the correct ones.
       bool elements_stored;
 
       static int compareElementReference (const void * a, const void * b)
       {
-        ElementReference* ref_a = (ElementReference*)a;
-        ElementReference* ref_b = (ElementReference*)b;
-        if(*(ref_a->error) < *(ref_b->error))
+        ElementReference* ref_a = (ElementReference*)(a);
+        ElementReference* ref_b = (ElementReference*)(b);
+        if(*((*ref_a).error) > *((*ref_b).error))
           return -1;
         else
           return 1;
@@ -139,7 +148,7 @@ namespace Hermes
     class HERMES_API DefaultErrorCalculator : public ErrorCalculator<Scalar>
     {
     public:
-      DefaultErrorCalculator(typename ErrorCalculator<Scalar>::ErrorCalculationStrategy strategy, int component_count);
+      DefaultErrorCalculator(CalculatedErrorType errorType, int component_count);
       virtual ~DefaultErrorCalculator();
     };
 

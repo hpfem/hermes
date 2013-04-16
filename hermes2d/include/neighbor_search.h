@@ -15,7 +15,7 @@ namespace Hermes
   {
     /*** Class NeighborSearch. ***/
 
-    /*!\class NeighborSearch neighbor.h "src/neighbor.h"
+    /*!\class NeighborSearch neighbor_search.h "src/neighbor_search.h"
     * \brief This class characterizes a neighborhood of a given edge in terms of adjacent elements
     *        and provides methods for getting limit values of discontinuous functions from both sides of the edge.
     *
@@ -429,6 +429,7 @@ namespace Hermes
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class MultimeshDGNeighborTree;
       template<typename T> friend class DiscreteProblemDGAssembler;
+      template<typename T> friend class ErrorThreadCalculator<T>::DGErrorCalculator;
     };
   }
 }

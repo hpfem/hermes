@@ -411,7 +411,7 @@ namespace Hermes
           for(int i = 0; i < residuals_vector.size(); i++)
             meshFns.push_back(residuals_vector[i]);
 
-          SimpleNormCalculator<Scalar, HERMES_L2_NORM> errorCalculator(meshFns.size());
+          DefaultNormCalculator<Scalar, HERMES_L2_NORM> errorCalculator(meshFns.size());
           residual_norm = errorCalculator.calculate_norms(meshFns);
         }
 
@@ -579,7 +579,7 @@ namespace Hermes
         if(spaces[component_i]->get_type() == HERMES_H1_SPACE
            || spaces[component_i]->get_type() == HERMES_L2_SPACE)
         {
-          NormCalculator::NormForm<MatrixFormVol<Scalar>, Scalar, HERMES_L2_NORM>* proj_form = new NormCalculator::NormForm<MatrixFormVol<Scalar>, Scalar, HERMES_L2_NORM>(component_i, component_i);
+          MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_L2_NORM);
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
           proj_form->u_ext_offset = 0;
@@ -588,7 +588,7 @@ namespace Hermes
         if(spaces[component_i]->get_type() == HERMES_HDIV_SPACE
            || spaces[component_i]->get_type() == HERMES_HCURL_SPACE)
         {
-          NormCalculator::NormForm<MatrixFormVol<Scalar>, Scalar, HERMES_HCURL_NORM>* proj_form = new NormCalculator::NormForm<MatrixFormVol<Scalar>, Scalar, HERMES_HCURL_NORM>(component_i, component_i);
+          MatrixDefaultNormFormVol<Scalar>* proj_form = new MatrixDefaultNormFormVol<Scalar>(component_i, component_i, HERMES_HCURL_NORM);
           proj_form->areas.push_back(HERMES_ANY);
           proj_form->scaling_factor = 1.0;
           proj_form->u_ext_offset = 0;

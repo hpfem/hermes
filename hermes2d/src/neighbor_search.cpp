@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "neighbor.h"
+#include "neighbor_search.h"
 #include <algorithm>
 
 namespace Hermes

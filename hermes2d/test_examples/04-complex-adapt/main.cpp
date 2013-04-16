@@ -64,8 +64,12 @@ const double J_EXT = 1e6;
 const double FREQ = 5e3;
 const double OMEGA = 2 * M_PI * FREQ;
 
+typedef std::complex<double> complex;
+
 int main(int argc, char* argv[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
+
   Hermes::Mixins::TimeMeasurable m;
   m.tick();
 
@@ -78,35 +82,36 @@ int main(int argc, char* argv[])
   for (int i = 0; i < INIT_REF_NUM; i++) mesh->refine_all_elements();
 
   // Initialize boundary conditions.
-  Hermes::Hermes2D::DefaultEssentialBCConst<std::complex<double> > bc_essential("Dirichlet", std::complex<double>(0.0, 0.0));
-  EssentialBCs<std::complex<double> > bcs(&bc_essential);
+  Hermes::Hermes2D::DefaultEssentialBCConst<complex> bc_essential("Dirichlet", complex(0.0, 0.0));
+  EssentialBCs<complex> bcs(&bc_essential);
 
   // Create an H1 space with default shapeset.
-  SpaceSharedPtr<std::complex<double> > space(new H1Space<std::complex<double> >(mesh, &bcs, P_INIT));
+  SpaceSharedPtr<complex> space(new H1Space<complex>(mesh, &bcs, P_INIT));
   int ndof = space->get_num_dofs();
 
   // Initialize the weak formulation.
   CustomWeakForm wf("Air", MU_0, "Iron", MU_IRON, GAMMA_IRON,
-    "Wire", MU_0, std::complex<double>(J_EXT, 0.0), OMEGA);
+    "Wire", MU_0, complex(J_EXT, 0.0), OMEGA);
 
   // Initialize coarse and reference mesh solution.
-  MeshFunctionSharedPtr<std::complex<double> > sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
-  MeshFunctionSharedPtr<std::complex<double> > ref_sln(new Hermes::Hermes2D::Solution<std::complex<double> >());
+  MeshFunctionSharedPtr<complex> sln(new Hermes::Hermes2D::Solution<complex>());
+  MeshFunctionSharedPtr<complex> ref_sln(new Hermes::Hermes2D::Solution<complex>());
 
   // Initialize refinement selector.
-  H1ProjBasedSelector<std::complex<double> > selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  H1ProjBasedSelector<complex> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
   // Initialize views.
   Views::ScalarView sview("Solution", new Views::WinGeom(0, 0, 600, 350));
+  Views::ScalarView sview2("Ref. Solution", new Views::WinGeom(0, 0, 600, 350));
   Views::OrderView oview("Polynomial orders", new Views::WinGeom(610, 0, 520, 350));
 
   // DOF and CPU convergence graphs initialization.
   SimpleGraph graph_dof, graph_cpu;
 
-  DiscreteProblem<std::complex<double> > dp(&wf, space);
+  DiscreteProblem<complex> dp(&wf, space);
 
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
-  Hermes::Hermes2D::NewtonSolver<std::complex<double> > newton(&dp);
+  Hermes::Hermes2D::NewtonSolver<complex> newton(&dp);
     
   Views::MeshView m1, m2;
   Views::OrderView o1, o2;
@@ -115,8 +120,10 @@ int main(int argc, char* argv[])
   do
   {
     // Construct globally refined reference mesh and setup reference space->
-    Space<std::complex<double> >::ReferenceSpaceCreator ref_space_creator(space, mesh);
-    SpaceSharedPtr<std::complex<double> > ref_space = ref_space_creator.create_ref_space();
+    Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
+    MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
+    Space<complex>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
+    SpaceSharedPtr<complex> ref_space = ref_space_creator.create_ref_space();
     
     newton.set_space(ref_space);
 
@@ -125,8 +132,8 @@ int main(int argc, char* argv[])
     // Initialize reference problem.
 
     // Initial coefficient vector for the Newton's method.
-    std::complex<double>* coeff_vec = new std::complex<double>[ndof_ref];
-    memset(coeff_vec, 0, ndof_ref * sizeof(std::complex<double>));
+    complex* coeff_vec = new complex[ndof_ref];
+    memset(coeff_vec, 0, ndof_ref * sizeof(complex));
 
     // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
     // For iterative solver.
@@ -144,39 +151,40 @@ int main(int argc, char* argv[])
       e.print_msg();
     }
 
-    Hermes::Hermes2D::Solution<std::complex<double> >::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
+    Hermes::Hermes2D::Solution<complex>::vector_to_solution(newton.get_sln_vector(), ref_space, ref_sln);
 
     // Project the fine mesh solution onto the coarse mesh.
-    OGProjection<std::complex<double> > ogProjection;
+    OGProjection<complex> ogProjection;
     ogProjection.project_global(space, ref_sln, sln);
 
     // View the coarse mesh solution and polynomial orders.
     MeshFunctionSharedPtr<double> real_filter(new RealFilter(sln));
-    //sview.show(real_filter);
+    MeshFunctionSharedPtr<double> rreal_filter(new RealFilter(ref_sln));
+    sview.show(real_filter);
+    sview2.show(rreal_filter);
 
     oview.show(space);
+    oview.wait_for_keypress();
 
     // Calculate element errors and total error estimate.
-    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(space);
-    double err_est_rel = adaptivity->calc_err_est(sln, ref_sln) * 100;
-    std::cout << (std::string)"Relative error: " << err_est_rel << std::endl;
+    DefaultErrorCalculator<complex, HERMES_H1_NORM> error_calculator(RelativeError, 1);
+    error_calculator.calculate_errors(sln, ref_sln);
 
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof.add_values(space->get_num_dofs(), err_est_rel);
-    graph_dof.save("conv_dof_est.dat");
+    Adapt<complex> adaptivity(space, &error_calculator);
+
+    std::cout << (std::string)"Relative error: " << error_calculator.get_total_error_squared() * 100. << std::endl;
 
     // If err_est too large, adapt the mesh->
-    if(err_est_rel < ERR_STOP) done = true;
+    if(error_calculator.get_total_error_squared()  * 100. < ERR_STOP)
+      done = true;
     else
     {
       std::cout << (std::string)"Adapting..." << std::endl << std::endl;
-      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      adaptivity.adapt(&selector);
     }
-    if(space->get_num_dofs() >= NDOF_STOP) done = true;
 
     // Clean up.
     delete [] coeff_vec;
-    delete adaptivity;
 
     // Increase counter.
     as++;

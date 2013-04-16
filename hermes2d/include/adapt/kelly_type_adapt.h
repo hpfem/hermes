@@ -17,7 +17,7 @@
 #define KELLY_TYPE_ADAPT_H
 
 #include "adapt.h"
-#include "../neighbor.h"
+#include "../neighbor_search.h"
 #include "../discrete_problem.h"
 
 namespace Hermes

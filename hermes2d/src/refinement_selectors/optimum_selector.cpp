@@ -357,7 +357,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Hermes::vector<Cand>& OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order)
+      Hermes::vector<Cand> OptimumSelector<Scalar>::create_candidates(Element* e, int quad_order)
       {
         Hermes::vector<Cand> candidates;
 
