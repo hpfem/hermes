@@ -651,24 +651,24 @@ namespace Hermes
     {
     }
 
-    void OutputAttachable::on_initialization()
+    bool OutputAttachable::on_initialization()
     {
-
+      return true;
     }
 
-    void OutputAttachable::on_step_begin()
+    bool OutputAttachable::on_step_begin()
     {
-
+      return true;
     }
 
-    void OutputAttachable::on_step_end()
+    bool OutputAttachable::on_step_end()
     {
-
+      return true;
     }
 
-    void OutputAttachable::on_finish()
+    bool OutputAttachable::on_finish()
     {
-
+      return true;
     }
 
     template<typename T>

@@ -429,8 +429,15 @@ namespace Hermes
           {
             for (int i = 0; i < ndof; i++)
               coeff_vec[i] = coeff_vec_back[i] + current_damping_coefficient * (coeff_vec[i] - coeff_vec_back[i]);
-            this->on_step_end();
-            continue;
+            if(this->on_step_end())
+              continue;
+            else
+            {
+              memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
+              this->info("Aborted");
+              this->finalize_solving(coeff_vec, coeff_vec_back);
+              return;
+            }
           }
         }
 
@@ -509,7 +516,15 @@ namespace Hermes
           coeff_vec[i] += current_damping_coefficient * sln_vector[i];
 
         // User method call.
-        this->on_step_end();
+        if(this->on_step_end())
+          continue;
+        else
+        {
+          memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
+          this->info("Aborted");
+          this->finalize_solving(coeff_vec, coeff_vec_back);
+          return;
+        }
 
         // Increase the iteration count.
         it++;

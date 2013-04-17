@@ -372,6 +372,13 @@ namespace Hermes
           break;
         }
 
+        if(!this->on_step_end())
+        {
+          this->info("Aborted");
+          this->deinit_solving(coeff_vec);
+          return;
+        }
+
         // Increase counter of iterations.
         it++;
 

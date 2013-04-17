@@ -241,10 +241,14 @@ namespace Hermes
     {
     public:
       OutputAttachable();
-      virtual void on_initialization();
-      virtual void on_step_begin();
-      virtual void on_step_end();
-      virtual void on_finish();
+      /// \return Whether or not should the processing continue.
+      virtual bool on_initialization();
+      /// \return Whether or not should the processing continue.
+      virtual bool on_step_begin();
+      /// \return Whether or not should the processing continue.
+      virtual bool on_step_end();
+      /// \return Whether or not should the processing continue.
+      virtual bool on_finish();
 
     protected:
       template<typename T>
