@@ -1,5 +1,7 @@
 add_subdirectory("01-poisson")
 
+add_subdirectory("01-intro")
+
 add_subdirectory("02-poisson-newton")
 
 add_subdirectory("03-navier-stokes")
