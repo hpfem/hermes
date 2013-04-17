@@ -16,7 +16,7 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<
   UMFPackVector<double>* rhs = new UMFPackVector<double>(ndof);
   double* coeff_vec =NULL; 
   if(mat==NULL) 		//=> masslumping	
-  { 
+  {
     UMFPackMatrix<double>* lumped_matrix = new UMFPackMatrix<double>;   //M_L 
     dp->assemble(matrix, rhs);  		 
     int size = matrix->get_size();
@@ -105,5 +105,3 @@ void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, Mes
   delete proj_wf;
 
 }
-
-

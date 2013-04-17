@@ -46,7 +46,7 @@ const int UNREF_FREQ = 1;                         // Every UNREF_FREQth time ste
 const int UNREF_METHOD = 1;                       // 1... mesh reset to basemesh and poly degrees to P_INIT.   
 // 2... one ref. layer shaved off, poly degrees reset to P_INIT.
 // 3... one ref. layer shaved off, poly degrees decreased by one. 
-const double THRESHOLD = 0.3;                      // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.75;                      // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 1;                           // Adaptive strategy:
 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
@@ -69,7 +69,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
 // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
 // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 7.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.1;                      // Stopping criterion for adaptivity (rel. error tolerance between the
 // fine mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
 // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -142,9 +142,11 @@ int main(int argc, char* argv[])
   double* u_H =NULL;
   double* ref_sln_double =NULL;
 
-
   int ref_ndof, ndof; double err_est_rel_total;
-  Adapt<double> adaptivity(space, HERMES_L2_NORM);
+  DefaultErrorCalculator<double, HERMES_L2_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
+  
+  Adapt<double> adaptivity(space, &error_calculator);
+  adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
 
   OGProjection<double> ogProjection;	
   Lumped_Projection lumpedProjection;	
@@ -179,11 +181,11 @@ int main(int argc, char* argv[])
         space->adjust_element_order(-1, -1, P_INIT, P_INIT);
         break;
       default: Exceptions::Exception("Wrong global derefinement method.");
-        space->assign_dofs();
       }      
     }
 
     bool done = false; int as = 1;	
+    space->assign_dofs();
 
     do 
     {
@@ -234,11 +236,11 @@ int main(int argc, char* argv[])
       Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh, 0);
       SpaceSharedPtr<double> ref_space = ref_space_creator.create_ref_space();
 
-      HPAdapt * adapting = new HPAdapt(ref_space, HERMES_L2_NORM);	
+      HPAdapt* adapting = new HPAdapt(ref_space);	
 
       // increase p in smooth regions, h refine in non-smooth regions 
       Hermes::Mixins::Loggable::Static::info("Calling adapt_smooth()...");
-      if(adapting->adapt_smooth(smooth_elem_ref, P_MAX)==false) 
+      if(adapting->adapt_smooth(smooth_elem_ref, P_MAX) == false) 
         throw Exceptions::Exception("reference space couldn't be constructed");							
 
       delete adapting;
@@ -299,14 +301,15 @@ int main(int argc, char* argv[])
       // Project the fine mesh solution onto the coarse mesh.
       ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM); 
       // Calculate element errors and total error estimate.
-      err_est_rel_total = adaptivity.calc_err_est(sln, ref_sln) * 100;
+      error_calculator.calculate_errors(sln, ref_sln);
+      double err_est_rel_total = error_calculator.get_total_error_squared() * 100;
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%", ndof,ref_ndof, err_est_rel_total);				
       // If err_est_rel too large, adapt the mesh->
       if((err_est_rel_total < ERR_STOP)||(as>=ADAPSTEP_MAX)) done = true;
       else
       {
-        done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity.adapt(&selector);
         // Increase the counter of performed adaptivity steps.
         if(done == false)  as++;
       }

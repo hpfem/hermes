@@ -228,7 +228,6 @@ int main(int argc, char* argv[])
       Adapt<double> adaptivity(space, &error_calculator);
       adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
 
-
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_ref: %d, err_est_rel: %g%%",
         Space<double>::get_num_dofs(space), Space<double>::get_num_dofs(ref_space), err_est_rel);
