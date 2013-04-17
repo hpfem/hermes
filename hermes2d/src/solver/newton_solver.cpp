@@ -198,7 +198,7 @@ namespace Hermes
             return NotConverged;
           break;
         case RelativeToPreviousNorm:
-          if(((1 - residual_norm / initial_residual_norm) < this->newton_tolerance) && iteration > 1)
+          if(((1 - residual_norm / previous_residual_norm) < this->newton_tolerance) && iteration > 1)
             return Converged;
           else
             return NotConverged;
@@ -410,7 +410,7 @@ namespace Hermes
         this->process_vector_output(this->residual, it);
       
         // Current residual norm && current_damping_coefficient.
-        double residual_norm = this->calculate_residual_norm();
+        residual_norm = this->calculate_residual_norm();
 
         // Initial residual norm.
         if(it == 1)
@@ -429,15 +429,14 @@ namespace Hermes
           {
             for (int i = 0; i < ndof; i++)
               coeff_vec[i] = coeff_vec_back[i] + current_damping_coefficient * (coeff_vec[i] - coeff_vec_back[i]);
-            if(this->on_step_end())
-              continue;
-            else
+            if(!this->on_step_end())
             {
               memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
               this->info("Aborted");
               this->finalize_solving(coeff_vec, coeff_vec_back);
               return;
             }
+            continue;
           }
         }
 
@@ -516,9 +515,7 @@ namespace Hermes
           coeff_vec[i] += current_damping_coefficient * sln_vector[i];
 
         // User method call.
-        if(this->on_step_end())
-          continue;
-        else
+        if(!this->on_step_end())
         {
           memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
           this->info("Aborted");
