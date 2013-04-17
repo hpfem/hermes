@@ -32,6 +32,7 @@ namespace Hermes
 #include "element_to_refine.h"
 #endif
 #include "../mesh/mesh.h"
+#include "adapt/error_calculator.h"
 
 /** \defgroup g_selectors Refinement Selectors
 *  \brief Refinement selectors allows to select a refinement
@@ -82,7 +83,7 @@ namespace Hermes
           *  \param[in] rsln A reference solution which is used to select a refinement.
           *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
           *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
-          virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement) = 0;
+          virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType) = 0;
           /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
           /** \param[in] element An element which is about the be refined.
           *  \param[in] orig_quad_order An encoded order of the element.
@@ -105,6 +106,7 @@ namespace Hermes
         /// Internal.
       protected:
         bool isAClone;
+        CalculatedErrorType errorType;
       };
 
       /// A selector that selects H-refinements only. \ingroup g_selectors
@@ -120,7 +122,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
-        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement);
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType);
 
         /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
@@ -148,7 +150,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Increases an order ising POnlySelector::order_h_inc and POnlySelector::order_v_inc. Fails if the order cannot be increased due to the maximum order. For details, see Selector::select_refinement. */
-        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement);
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType);
 
         /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
         /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.

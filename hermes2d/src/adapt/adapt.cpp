@@ -221,7 +221,7 @@ namespace Hermes
             ElementToRefine elem_ref(element_id, component);
 
             // Rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-            refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, rslns[component].get(), elem_ref);
+            refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, rslns[component].get(), elem_ref, this->errorCalculator->errorType);
 
             // Put this refinement to the storage.
             elements_to_refine[id_to_refine] = elem_ref;

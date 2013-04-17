@@ -15,8 +15,11 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool HOnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
+      bool HOnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType)
       {
+        // Very important - set the current error type.
+        this->errorType = errorType;
+
         refinement.split = H2D_REFINEMENT_H;
         refinement.p[0] = refinement.p[1] = refinement.p[2] = refinement.p[3] = quad_order;
         refinement.q[0] = refinement.q[1] = refinement.q[2] = refinement.q[3] = quad_order;
@@ -51,8 +54,11 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool POnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
+      bool POnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType)
       {
+        // Very important - set the current error type.
+        this->errorType = errorType;
+
         refinement.split = H2D_REFINEMENT_P;
 
         //determin max. order

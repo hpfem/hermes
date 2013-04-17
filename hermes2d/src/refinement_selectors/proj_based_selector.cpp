@@ -241,10 +241,6 @@ namespace Hermes
         // obtain reference solution values on all four refined sons
         Scalar** rval[H2D_MAX_ELEMENT_SONS];
         Element* base_element = rsln->get_mesh()->get_element(e->id);
-        if(base_element->active)
-        {
-          this->info("Have you calculated element errors twice with solutions_for_adaptivity == true?");
-        };
 
         // value on base element.
         if(base_element->active)

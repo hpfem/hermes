@@ -41,7 +41,7 @@ const bool VTK_VISUALIZATION = false;
 const int P_INIT = 1;                             
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.8;                     
+const double THRESHOLD = 0.666;                     
 // Adaptive strategy:
 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
 //   error is processed. If more elements have similar errors, refine
@@ -55,7 +55,7 @@ const int STRATEGY = 0;
 // Predefined list of element refinement candidates. Possible values are
 // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
 // H2D_HP_ANISO_P, H2D_HP_ANISO.
-const CandList CAND_LIST = H2D_HP_ANISO_H;        
+const CandList CAND_LIST = H2D_HP_ANISO;        
 // Maximum allowed level of hanging nodes:
 // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
 // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
@@ -83,6 +83,8 @@ const double EPS_AIR = 1.0 * EPS0;
 
 int main(int argc, char* argv[])
 {
+  Hermes2DApi.set_integral_param_value(numThreads, 1);
+
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;
@@ -192,17 +194,13 @@ int main(int argc, char* argv[])
 
     // Calculate element errors and total error estimate.
     Hermes::Mixins::Loggable::Static::info("Calculating error estimate.");
-    Adapt<double> adaptivity(space);
-    bool solutions_for_adapt = true;
-    // In the following function, the Boolean parameter "solutions_for_adapt" determines whether
-    // the calculated errors are intended for use with adaptivity (this may not be the case, for example,
-    // when error wrt. an exact solution is calculated). The default value is solutions_for_adapt = true,
-    // The last parameter "error_flags" determine whether the total and element errors are treated as
-    // absolute or relative. Its default value is error_flags = HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL.
-    // In subsequent examples and benchmarks, these two parameters will be often used with
-    // their default values, and thus they will not be present in the code explicitly.
-    double err_est_rel = adaptivity.calc_err_est(sln, ref_sln, solutions_for_adapt,
-                         HERMES_TOTAL_ERROR_REL | HERMES_ELEMENT_ERROR_REL) * 100;
+
+    DefaultErrorCalculator<double, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
+    error_calculator.calculate_errors(sln, ref_sln);
+    double err_est_rel = error_calculator.get_total_error_squared() * 100;
+
+    Adapt<double> adaptivity(space, &error_calculator);
+    adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
 
     // Report results.
     Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_fine: %d, err_est_rel: %g%%",
@@ -224,7 +222,7 @@ int main(int argc, char* argv[])
     else
     {
       Hermes::Mixins::Loggable::Static::info("Adapting coarse mesh.");
-      done = adaptivity.adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity.adapt(&selector);
 
       // Increase the counter of performed adaptivity steps.
       if (done == false)  

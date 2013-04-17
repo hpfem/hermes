@@ -113,6 +113,9 @@ namespace Hermes
         return hcurl_norm<Scalar>(n, wt, u, v);
       case HERMES_HDIV_NORM:
         return hdiv_norm<Scalar>(n, wt, u, v);
+      default:
+        throw Hermes::Exceptions::Exception("Unknown norm in DefaultNormFormVol<Scalar>::value.");
+        return 0.0;
       }
     }
     template<typename Scalar>
@@ -136,6 +139,9 @@ namespace Hermes
         return hcurl_norm<double>(n, wt, u, v);
       case HERMES_HDIV_NORM:
         return hdiv_norm<double>(n, wt, u, v);
+      default:
+        throw Hermes::Exceptions::Exception("Unknown norm in MatrixDefaultNormFormVol<Scalar>::value.");
+        return 0.0;
       }
     }
 
@@ -155,6 +161,9 @@ namespace Hermes
         return hcurl_norm<Ord>(n, wt, u, v);
       case HERMES_HDIV_NORM:
         return hdiv_norm<Ord>(n, wt, u, v);
+      default:
+        throw Hermes::Exceptions::Exception("Unknown norm in MatrixDefaultNormFormVol<Scalar>::ord.");
+        return Ord(0);
       }
     }
 

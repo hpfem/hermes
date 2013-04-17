@@ -30,7 +30,8 @@ namespace Hermes
     enum CalculatedErrorType
     {
       AbsoluteError,
-      RelativeError
+      RelativeErrorToElementNorm,
+      RelativeErrorToGlobalNorm
     };
 
     /// Evaluation of an error between a (coarse) solution and a reference solution. \ingroup g_adapt
@@ -87,6 +88,10 @@ namespace Hermes
       /// Initialize the data storage.
       void init_data_storage();
 
+      /// Sums calculation & error postprocessing (make it relative).
+      /// Called at the end of error_calculation.
+      void postprocess_error();
+
       /// Data.
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > fine_solutions;
@@ -96,10 +101,13 @@ namespace Hermes
 
       /// A reference to an element.
       struct ElementReference {
+        /// Constructor. It creates an invalid element reference.
+        ElementReference(int comp, int element_id, double* error, double* norm) : element_id(element_id), comp(comp), error(error), norm(norm) {};
+        
         int element_id; ///< An element ID. Invalid if below 0.
         int comp; ///< A component which this element belongs to. Invalid if below 0.
         double* error;///< Pointer to the final error, respecting the errorType.
-        ElementReference(int comp, int element_id, double* error) : element_id(element_id), comp(comp), error(error) {}; ///< Constructor. It creates an invalid element reference.
+        double* norm;///< Pointer to the norm.
       };
 
       /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().

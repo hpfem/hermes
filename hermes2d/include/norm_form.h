@@ -22,7 +22,7 @@
 #ifndef __H2D_NORM_FORM_H_
 #define __H2D_NORM_FORM_H_
 
-#include "weakform.h"
+#include "weakform/weakform.h"
 
 namespace Hermes
 {

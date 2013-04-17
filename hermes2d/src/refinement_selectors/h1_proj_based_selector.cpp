@@ -241,7 +241,6 @@ namespace Hermes
 
               value += gip_points[j][H2D_GIP2D_W] * (value0*value1 + dx0*dx1 + dy0*dy1);
             }
-
             matrix_row[k] = value;
           }
         }
@@ -262,19 +261,7 @@ namespace Hermes
           shape_value[H2D_H1FE_VALUE] = sub_shape.svals[H2D_H1FE_VALUE][gip_inx];
           shape_value[H2D_H1FE_DX] = sub_shape.svals[H2D_H1FE_DX][gip_inx];
           shape_value[H2D_H1FE_DY] = sub_shape.svals[H2D_H1FE_DY][gip_inx];
-
-          ////DEBUG-BEGIN
-          //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
-          //double ref_y = gip_pt[H2D_GIP2D_Y] * sub_trf.trf->m[1] + sub_trf.trf->t[1];
-          //Scalar shape_value[H2D_H1FE_NUM] = {0, 0, 0};
-          //shape_value[H2D_H1FE_VALUE] = shapeset->get_fn_value(sub_shape.inx, ref_x, ref_y, 0);
-          //shape_value[H2D_H1FE_DX] = shapeset->get_dx_value(sub_shape.inx, ref_x, ref_y, 0);
-          //shape_value[H2D_H1FE_DY] = shapeset->get_dy_value(sub_shape.inx, ref_x, ref_y, 0);
-          //error_if(std::abs(shape_value[H2D_H1FE_VALUE] - shape_valueA[H2D_H1FE_VALUE]) > 1E-15
-          //  || std::abs(shape_value[H2D_H1FE_DX] - shape_valueA[H2D_H1FE_DX]) > 1E-15
-          //  || std::abs(shape_value[H2D_H1FE_DY] - shape_valueA[H2D_H1FE_DY]) > 1E-15, "A1");
-          ////DEBUG-END
-
+          
           //get value of ref. solution
           Scalar ref_value[H2D_H1FE_NUM];
           ref_value[H2D_H1FE_VALUE] = sub_gip.rvals[H2D_H1FE_VALUE][gip_inx];
@@ -295,6 +282,7 @@ namespace Hermes
       double H1ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
       {
         double total_error_squared = 0;
+        double total_norm_squared = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           double3 &gip_pt = sub_gip.gip_points[gip_inx];
@@ -308,23 +296,8 @@ namespace Hermes
             proj_value[H2D_H1FE_DX] += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_H1FE_DX][gip_inx];
             proj_value[H2D_H1FE_DY] += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_H1FE_DY][gip_inx];
           }
-
-          ////DEBUG-BEGIN
-          //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
-          //double ref_y = gip_pt[H2D_GIP2D_Y] * sub_trf.trf->m[1] + sub_trf.trf->t[1];
-          //Scalar proj_valueA[H2D_H1FE_NUM] = {0, 0, 0};
-          //for(int i = 0; i < elem_proj.num_shapes; i++)
+          
           {
-            //  int shape_inx = elem_proj.shape_inxs[i];
-            //  proj_valueA[H2D_H1FE_VALUE] += elem_proj.shape_coeffs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 0);
-            //  proj_valueA[H2D_H1FE_DX] += elem_proj.shape_coeffs[i] * shapeset->get_dx_value(shape_inx, ref_x, ref_y, 0);
-            //  proj_valueA[H2D_H1FE_DY] += elem_proj.shape_coeffs[i] * shapeset->get_dy_value(shape_inx, ref_x, ref_y, 0);
-            //}
-            //error_if(std::abs(proj_value[H2D_H1FE_VALUE] - proj_valueA[H2D_H1FE_VALUE]) > 1E-15
-            //  || std::abs(proj_value[H2D_H1FE_DX] - proj_valueA[H2D_H1FE_DX]) > 1E-15
-            //  || std::abs(proj_value[H2D_H1FE_DY] - proj_valueA[H2D_H1FE_DY]) > 1E-15, "A2");
-            ////DEBUG-END
-
             //get value of ref. solution
             Scalar ref_value[3];
             ref_value[H2D_H1FE_VALUE] = sub_gip.rvals[H2D_H1FE_VALUE][gip_inx];
@@ -337,8 +310,14 @@ namespace Hermes
               + sqr(proj_value[H2D_H1FE_DY] - ref_value[H2D_H1FE_DY]);
 
             total_error_squared += gip_pt[H2D_GIP2D_W] * error_squared;
+
+            if(this->errorType == RelativeErrorToElementNorm)
+              total_norm_squared += gip_pt[H2D_GIP2D_W] * (sqr(ref_value[H2D_H1FE_VALUE]) + sqr(ref_value[H2D_H1FE_DX]) + sqr(ref_value[H2D_H1FE_DY]));
           }
         }
+        if(this->errorType == RelativeErrorToElementNorm)
+          total_error_squared /= total_norm_squared;
+
         return total_error_squared;
       }
       template class HERMES_API H1ProjBasedSelector<double>;

@@ -64,7 +64,7 @@ namespace Hermes
       // calculate the total number of elements.
       for(int i = 0; i < this->component_count; i++)
       {
-        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_active_elements();
+        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_elements();
 
         if(errors[i] == NULL)
           errors[i] = (double*)calloc(num_elements_i, sizeof(double));
@@ -73,21 +73,20 @@ namespace Hermes
           errors[i] = (double*)realloc(errors[i], num_elements_i * sizeof(double));
           memset(errors[i], 0, sizeof(double) * num_elements_i);
         }
-        if(this->errorType == RelativeError)
+         
+        if(norms[i] == NULL)
+          norms[i] = (double*)calloc(num_elements_i, sizeof(double));
+        else
         {
-          if(norms[i] == NULL)
-            norms[i] = (double*)calloc(num_elements_i, sizeof(double));
-          else
-          {
-            norms[i] = (double*)realloc(norms[i], num_elements_i * sizeof(double));
-            memset(norms[i], 0, sizeof(double) * num_elements_i);
-          }
+          norms[i] = (double*)realloc(norms[i], num_elements_i * sizeof(double));
+          memset(norms[i], 0, sizeof(double) * num_elements_i);
         }
 
         component_errors[i] = 0.;
         component_norms[i] = 0.;
-        element_count[i] = num_elements_i;
-        this->num_act_elems += num_elements_i;
+        int num_active_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_active_elements();
+        element_count[i] = num_active_elements_i;
+        this->num_act_elems += num_active_elements_i;
       }
 
       // Create the array for references and initialize it.
@@ -96,13 +95,13 @@ namespace Hermes
 
       this->element_references = (ElementReference*)malloc(this->num_act_elems * sizeof(ElementReference));
 
-      int running_count = 0;
+      int running_count_total = 0;
       for(int i = 0; i < this->component_count; i++)
       {
         Element* e;
         for_all_active_elements(e, this->coarse_solutions[i]->get_mesh())
         {
-          this->element_references[running_count++] = ErrorCalculator<Scalar>::ElementReference(i, e->id, &this->errors[i][e->id]);
+          this->element_references[running_count_total++] = ErrorCalculator<Scalar>::ElementReference(i, e->id, &this->errors[i][e->id], &this->norms[i][e->id]);
         }
       }
     }
@@ -136,7 +135,7 @@ namespace Hermes
 
       return okay;
     }
-
+    static int asdf = 0;
     template<typename Scalar>
     void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions_, bool sort_and_store)
     {
@@ -176,37 +175,57 @@ namespace Hermes
           errorThreadCalculator.evaluate_one_state(states[state_i]);
       }
 
-      // Sums calculation.
-      for(int i = 0; i < this->component_count; i++)
-      {
-        for(int j = 0; j < this->element_count[i]; j++)
-        {
-          if(this->errorType == RelativeError)
-          {
-            component_norms[i] += norms[i][j];
-            component_errors[i] += errors[i][j] * norms[i][j];
-          }
-          else
-            component_errors[i] += errors[i][j];
-        }
-
-        norms_squared_sum += component_norms[i];
-        errors_squared_sum += component_errors[i];
-        if(this->errorType == RelativeError)
-          component_errors[i] /= component_norms[i];
-      }
-      if(this->errorType == RelativeError)
-        errors_squared_sum /= norms_squared_sum;
+      // Sums calculation & error postprocessing.
+      this->postprocess_error();
 
       if(sort_and_store)
       {
         std::qsort(this->element_references, this->num_act_elems, sizeof(ElementReference), &this->compareElementReference);
         elements_stored = true;
+        std::stringstream ss;
+        ss << "file" << asdf++ << ".dat";
+        std::ofstream out(ss.str().c_str());
+        for(int i = 0; i < this->num_act_elems; i++)
+          out << *this->element_references[i].error << std::endl;
+        out.close();
       }
       else
         elements_stored = false;
     }
-    
+
+    template<typename Scalar>
+    void ErrorCalculator<Scalar>::postprocess_error()
+    {
+      // Indexer through active elements on all meshes.
+      int running_indexer = 0;
+      for(int i = 0; i < this->component_count; i++)
+      {
+        for(int j = 0; j < this->element_count[i]; j++)
+        {
+          component_errors[i] += *(this->element_references[running_indexer + j].error);
+          component_norms[i] += *(this->element_references[running_indexer + j].norm);
+
+          if(this->errorType == RelativeErrorToElementNorm)
+					   *(this->element_references[running_indexer + j].error) /= *(this->element_references[running_indexer + j].norm);
+        }
+
+        if(this->errorType == RelativeErrorToGlobalNorm)
+          for(int j = 0; j < this->element_count[i]; j++)
+					   *(this->element_references[running_indexer + j].error) /= component_norms[i];
+
+        norms_squared_sum += component_norms[i];
+        errors_squared_sum += component_errors[i];
+        
+        if(this->errorType == RelativeErrorToGlobalNorm || this->errorType == RelativeErrorToElementNorm)
+          component_errors[i] /= component_norms[i];
+
+        running_indexer += this->element_count[i];
+      }
+
+      if(this->errorType == RelativeErrorToGlobalNorm || this->errorType == RelativeErrorToElementNorm)
+        errors_squared_sum /= norms_squared_sum;
+    }
+
     template<typename Scalar>
     void ErrorCalculator<Scalar>::add_error_form(NormFormVol<Scalar>* form)
     {

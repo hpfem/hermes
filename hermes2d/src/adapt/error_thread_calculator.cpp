@@ -226,9 +226,10 @@ namespace Hermes
       {
         NormFormDG<Scalar>* mfs = this->errorThreadCalculator->errorCalculator->mfDG[current_mfDG_i];
 
-        this->errorThreadCalculator->evaluate_DG_form(mfs, difference_funcs[mfs->i], difference_funcs[mfs->j], rsln_funcs[mfs->i], rsln_funcs[mfs->j], 
-          &this->errorThreadCalculator->errorCalculator->errors[mfs->i][current_state->e[mfs->i]->id],
-          (this->errorThreadCalculator->errorCalculator->errorType == RelativeError ? &this->errorThreadCalculator->errorCalculator->norms[mfs->i][current_state->e[mfs->i]->id] : NULL));
+        double* error = &this->errorThreadCalculator->errorCalculator->errors[mfs->i][current_state->e[mfs->i]->id];
+        double* norm = &this->errorThreadCalculator->errorCalculator->norms[mfs->i][current_state->e[mfs->i]->id];
+        
+        this->errorThreadCalculator->evaluate_DG_form(mfs, difference_funcs[mfs->i], difference_funcs[mfs->j], rsln_funcs[mfs->i], rsln_funcs[mfs->j], error, norm);
       }
 
       // deinitialize Funcs
@@ -272,7 +273,11 @@ namespace Hermes
       for(int i = 0; i < this->errorCalculator->mfvol.size(); i++)
       {
         NormFormVol<Scalar>* form = this->errorCalculator->mfvol[i];
-        this->evaluate_volumetric_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], &this->errorCalculator->errors[form->i][current_state->e[form->i]->id], (this->errorCalculator->errorType == RelativeError ? &this->errorCalculator->norms[form->i][current_state->e[form->i]->id] : NULL));
+
+        double* error = &this->errorCalculator->errors[form->i][current_state->e[form->i]->id];
+        double* norm = &this->errorCalculator->norms[form->i][current_state->e[form->i]->id];
+
+        this->evaluate_volumetric_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], error, norm);
       }
 
       // deinitialize Funcs
@@ -308,8 +313,11 @@ namespace Hermes
       for(int i = 0; i < this->errorCalculator->mfsurf.size(); i++)
       {
         NormFormSurf<Scalar>* form = this->errorCalculator->mfsurf[i];
-        this->evaluate_surface_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j],
-          &this->errorCalculator->errors[form->i][current_state->e[form->i]->id], (this->errorCalculator->errorType == RelativeError ? &this->errorCalculator->norms[form->i][current_state->e[form->i]->id] : NULL));
+     
+        double* error = &this->errorCalculator->errors[form->i][current_state->e[form->i]->id];
+        double* norm = &this->errorCalculator->norms[form->i][current_state->e[form->i]->id];
+
+        this->evaluate_surface_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], error, norm);
       }
 
       // deinitialize Funcs
@@ -332,40 +340,33 @@ namespace Hermes
     {
       double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
 
-      if(norm)
-      {
-        double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
-        
-        error_value /= norm_value;
-
-#pragma omp atomic
-        (*norm) += norm_value;
-      }
-
 #pragma omp atomic
       (*error) += error_value;
+
+      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
+        
+#pragma omp atomic
+      (*norm) += norm_value;
     }
 
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_surface_form(NormFormSurf<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm)
     {
       double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
-
+      
       // 1D quadrature has the weights summed to 2.
       error_value *= 0.5;
 
-      if(norm)
-      {
-        double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
-
-        error_value /= norm_value;
-
-#pragma omp atomic
-        (*norm) += norm_value;
-      }
-
 #pragma omp atomic
       (*error) += error_value;
+
+      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
+
+      // 1D quadrature has the weights summed to 2.
+      norm_value *= 0.5;
+
+#pragma omp atomic
+      (*norm) += norm_value;
     }
 
     template<typename Scalar>
@@ -376,18 +377,13 @@ namespace Hermes
       // 1D quadrature has the weights summed to 2.
       error_value *= 0.5;
 
-      if(norm)
-      {
-        double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
-
-        error_value /= norm_value;
-
-#pragma omp atomic
-        (*norm) += norm_value;
-      }
-      
 #pragma omp atomic
       (*error) += error_value;
+
+      double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
+
+#pragma omp atomic
+      (*norm) += norm_value;
     }
 
     template HERMES_API class ErrorThreadCalculator<double>;
