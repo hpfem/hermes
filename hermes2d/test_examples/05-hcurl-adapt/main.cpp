@@ -174,16 +174,14 @@ int main(int argc, char* argv[])
     }
 
     // Calculate element errors and total error estimate.
-    Adapt<std::complex<double> >* adaptivity = new Adapt<std::complex<double> >(space);
-    adaptivity->set_verbose_output(true);
-
-    double err_est_rel = adaptivity->calc_err_est(sln, ref_sln) * 100;
+    DefaultErrorCalculator<std::complex<double> , HERMES_HCURL_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
+    error_calculator.calculate_errors(sln, sln_exact, false);
+    double err_exact_rel = error_calculator.get_total_error_squared() * 100;
+    // Calculate exact error.
+    error_calculator.calculate_errors(sln, ref_sln);
+    double err_est_rel = error_calculator.get_total_error_squared() * 100;
 
     Hermes::Mixins::Loggable::Static::info("\nError estimate: %f%%.\n", err_est_rel);
-
-    // Calculate exact error.
-    bool solutions_for_adapt = false;
-    double err_exact_rel = adaptivity->calc_err_exact(sln, sln_exact, solutions_for_adapt) * 100;
     Hermes::Mixins::Loggable::Static::info("\nError exact: %f%%.\n", err_exact_rel);
 
     // Add entry to DOF and CPU convergence graphs.
@@ -192,11 +190,14 @@ int main(int argc, char* argv[])
     graph_dof_exact.add_values(space->get_num_dofs(), err_exact_rel);
     graph_dof_exact.save("conv_dof_exact.dat");
 
+    Adapt<std::complex<double> > adaptivity(space, &error_calculator);
+    adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
+
     // If err_est_rel too large, adapt the mesh->
     if(err_est_rel < ERR_STOP) done = true;
     else
     {
-      done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity.adapt(&selector);
 
       // Increase the counter of performed adaptivity steps.
       if(done == false)  as++;
@@ -205,7 +206,6 @@ int main(int argc, char* argv[])
 
     // Clean up.
     delete [] coeff_vec;
-    delete adaptivity;
   }
   while (done == false);
 

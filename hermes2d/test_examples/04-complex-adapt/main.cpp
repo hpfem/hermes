@@ -164,10 +164,9 @@ int main(int argc, char* argv[])
     sview2.show(rreal_filter);
 
     oview.show(space);
-    oview.wait_for_keypress();
 
     // Calculate element errors and total error estimate.
-    DefaultErrorCalculator<complex, HERMES_H1_NORM> error_calculator(RelativeError, 1);
+    DefaultErrorCalculator<complex, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
     error_calculator.calculate_errors(sln, ref_sln);
 
     Adapt<complex> adaptivity(space, &error_calculator);

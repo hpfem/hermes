@@ -217,20 +217,21 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     Hermes::Mixins::Loggable::Static::info("Calculating error estimate and exact error.");
-    Adapt<double>* adaptivity = new Adapt<double>(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space));
-
-    // Calculate error estimate for each solution component and the total error estimate.
-    Hermes::vector<double> err_est_rel;
-    double err_est_rel_total = adaptivity->calc_err_est(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln),
-                                                        Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln),
-                                                        &err_est_rel) * 100;
-
-    // Calculate exact error for each solution component and the total exact error.
+    DefaultErrorCalculator<double, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 2);
+    error_calculator.calculate_errors(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln), Hermes::vector<MeshFunctionSharedPtr<double> >(exact_u, exact_v), false);
+    double err_exact_rel_total = error_calculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_exact_rel;
-    bool solutions_for_adapt = false;
-    double err_exact_rel_total = adaptivity->calc_err_exact(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln),
-                                                            Hermes::vector<MeshFunctionSharedPtr<double> >(exact_u, exact_v),
-                                                            &err_exact_rel, solutions_for_adapt) * 100;
+    err_exact_rel.push_back(error_calculator.get_error_squared(0));
+    err_exact_rel.push_back(error_calculator.get_error_squared(1));
+
+    error_calculator.calculate_errors(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln), Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln), true);
+    double err_est_rel_total = error_calculator.get_total_error_squared() * 100;
+    Hermes::vector<double> err_est_rel;
+    err_est_rel.push_back(error_calculator.get_error_squared(0));
+    err_est_rel.push_back(error_calculator.get_error_squared(1));
+
+    Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
+    adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
 
     // Time measurement.
     cpu_time.tick();
@@ -238,10 +239,10 @@ int main(int argc, char* argv[])
     // Report results.
     Hermes::Mixins::Loggable::Static::info("ndof_coarse[0]: %d, ndof_fine[0]: %d",
                                            u_space->get_num_dofs(), u_ref_space->get_num_dofs());
-    Hermes::Mixins::Loggable::Static::info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0]*100, err_exact_rel[0]*100);
+    Hermes::Mixins::Loggable::Static::info("err_est_rel[0]: %g%%, err_exact_rel[0]: %g%%", err_est_rel[0], err_exact_rel[0]);
     Hermes::Mixins::Loggable::Static::info("ndof_coarse[1]: %d, ndof_fine[1]: %d",
                                            v_space->get_num_dofs(), v_ref_space->get_num_dofs());
-    Hermes::Mixins::Loggable::Static::info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1]*100, err_exact_rel[1]*100);
+    Hermes::Mixins::Loggable::Static::info("err_est_rel[1]: %g%%, err_exact_rel[1]: %g%%", err_est_rel[1], err_exact_rel[1]);
     Hermes::Mixins::Loggable::Static::info("ndof_coarse_total: %d, ndof_fine_total: %d",
                                            Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)),
                                            Space<double>::get_num_dofs(ref_spaces_const));
@@ -266,13 +267,9 @@ int main(int argc, char* argv[])
     else
     {
       Hermes::Mixins::Loggable::Static::info("Adapting coarse mesh.");
-      done = adaptivity->adapt(Hermes::vector<RefinementSelectors::Selector<double> *>(&selector, &selector),
-                               THRESHOLD, STRATEGY, MESH_REGULARITY);
+      done = adaptivity.adapt(Hermes::vector<RefinementSelectors::Selector<double> *>(&selector, &selector));
     }
     if (Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)) >= NDOF_STOP) done = true;
-
-    // Clean up.
-    delete adaptivity;
 
     // Increase counter.
     as++;

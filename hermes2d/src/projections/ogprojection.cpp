@@ -38,6 +38,7 @@ namespace Hermes
 
       // Initialize linear solver.
       Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp);
+      linear_solver.set_verbose_output(false);
 
       // Perform Newton iteration.
       linear_solver.solve();
@@ -211,16 +212,6 @@ namespace Hermes
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(i == 0)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-th space", i);
-        if(i == 1)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-st space", i);
-        if(i == 2)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-nd space", i);
-        if(i == 3)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-rd space", i);
-        if(i > 3)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-th space", i);
         if(proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_vec + start_index, HERMES_UNSET_NORM);
         else
@@ -246,16 +237,6 @@ namespace Hermes
       int start_index = 0;
       for (int i = 0; i < n; i++)
       {
-        if(i == 0)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-th space", i);
-        if(i == 1)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-st space", i);
-        if(i == 2)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-nd space", i);
-        if(i == 3)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-rd space", i);
-        if(i > 3)
-          Hermes::Mixins::Loggable::Static::info("Projection: %d-th space", i);
         if(proj_norms.empty())
           project_global(spaces[i], source_slns[i], target_slns[i], HERMES_UNSET_NORM);
         else

@@ -182,6 +182,22 @@ namespace Hermes
       // List of indices of elements that are going to be processed
       ElementToRefine* elements_to_refine = new ElementToRefine[attempted_element_refinements_count];
 
+      // Projected solutions obtaining.
+      MeshFunctionSharedPtr<Scalar>* rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
+      OGProjection<Scalar> ogProjection;
+
+      for(unsigned int i = 0; i < this->num; i++)
+      {
+        rslns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
+
+        typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
+        MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
+        typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh);
+        SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
+
+        ogProjection.project_global(ref_space, this->errorCalculator->fine_solutions[i], rslns[i]);
+      }
+
       // Parallel section
 #pragma omp parallel num_threads(this->num_threads_used)
       {
@@ -191,21 +207,10 @@ namespace Hermes
         if(thread_number == this->num_threads_used - 1)
           end = attempted_element_refinements_count;
 
-        // Projected solutions obtaining.
-        MeshFunctionSharedPtr<Scalar>* rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
-        OGProjection<Scalar> ogProjection;
-
+        // rslns cloning.
+        MeshFunctionSharedPtr<Scalar>* current_rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
         for(unsigned int i = 0; i < this->num; i++)
-        {
-          rslns[i] = MeshFunctionSharedPtr<Scalar>(new Solution<Scalar>());
-
-          typename Mesh::ReferenceMeshCreator ref_mesh_creator(this->spaces[i]->get_mesh());
-          MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-          typename Space<Scalar>::ReferenceSpaceCreator ref_space_creator(this->spaces[i], ref_mesh);
-          SpaceSharedPtr<Scalar> ref_space = ref_space_creator.create_ref_space();
-
-          ogProjection.project_global(ref_space, this->errorCalculator->fine_solutions[i], rslns[i]);
-        }
+          current_rslns[i] = rslns[i]->clone();
 
         for(int id_to_refine = start; id_to_refine < end; id_to_refine++)
         {
@@ -221,7 +226,7 @@ namespace Hermes
             ElementToRefine elem_ref(element_id, component);
 
             // Rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
-            refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, rslns[component].get(), elem_ref, this->errorCalculator->errorType);
+            refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, current_rslns[component].get(), elem_ref, this->errorCalculator->errorType);
 
             // Put this refinement to the storage.
             elements_to_refine[id_to_refine] = elem_ref;
@@ -238,9 +243,11 @@ namespace Hermes
               this->caughtException = new std::exception(exception);
           }
         }
-
-        delete [] rslns;
+      
+        delete [] current_rslns;
       }
+
+      delete [] rslns;
 
       if(this->caughtException)
       {
@@ -452,11 +459,10 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
-      SpaceSharedPtr<Scalar> space = this->spaces[elem_ref.comp];
-      MeshSharedPtr mesh = space->get_mesh();
+      SpaceSharedPtr<Scalar>& space = this->spaces[elem_ref.comp];
+      MeshSharedPtr& mesh = space->get_mesh();
 
-      Element* e;
-      e = mesh->get_element(elem_ref.id);
+      Element* e = mesh->get_element(elem_ref.id);
 
       if(elem_ref.split == H2D_REFINEMENT_P)
       {

@@ -247,7 +247,7 @@ namespace Hermes
     template<typename Scalar>
     bool ErrorCalculator<Scalar>::data_prepared_for_querying() const
     {
-      if(!this->elements_stored)
+      if(!this->element_references)
       {
         throw Hermes::Exceptions::Exception("Elements / norms have not been calculated so far.");
         return false;

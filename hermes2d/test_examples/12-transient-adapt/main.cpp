@@ -35,7 +35,7 @@ const int P_INIT = 1;
 // Time step. 
 double time_step = 0.05;                           
 // Time interval length.
-const double T_FINAL = 0.51;                       
+const double T_FINAL = 3.0;                       
 
 // Adaptivity
 // Every UNREF_FREQth time step the mesh is derefined.
@@ -72,7 +72,7 @@ const int MESH_REGULARITY = -1;
 // candidates in hp-adaptivity. Default value is 1.0. 
 const double CONV_EXP = 1.0;                      
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1.0;                      
+const double ERR_STOP = 0.5;                      
 // Adaptivity process stops when the number of degrees of freedom grows
 // over this limit. This is to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;                      
@@ -220,19 +220,25 @@ int main(int argc, char* argv[])
 
       // Calculate element errors and total error estimate.
       Hermes::Mixins::Loggable::Static::info("Calculating error estimate.");
-      Adapt<double>* adaptivity = new Adapt<double>(space);
-      double err_est_rel_total = adaptivity->calc_err_est(sln_coarse, sln_time_new) * 100;
+
+      DefaultErrorCalculator<double, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
+      error_calculator.calculate_errors(sln_coarse, sln_time_new);
+      double err_est_rel = error_calculator.get_total_error_squared() * 100;
+
+      Adapt<double> adaptivity(space, &error_calculator);
+      adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
+
 
       // Report results.
       Hermes::Mixins::Loggable::Static::info("ndof_coarse: %d, ndof_ref: %d, err_est_rel: %g%%",
-        Space<double>::get_num_dofs(space), Space<double>::get_num_dofs(ref_space), err_est_rel_total);
+        Space<double>::get_num_dofs(space), Space<double>::get_num_dofs(ref_space), err_est_rel);
 
       // If err_est too large, adapt the mesh->
-      if (err_est_rel_total < ERR_STOP) done = true;
+      if (err_est_rel < ERR_STOP) done = true;
       else
       {
         Hermes::Mixins::Loggable::Static::info("Adapting the coarse mesh.");
-        done = adaptivity->adapt(&selector, THRESHOLD, STRATEGY, MESH_REGULARITY);
+        done = adaptivity.adapt(&selector);
 
         if (Space<double>::get_num_dofs(space) >= NDOF_STOP)
           done = true;
@@ -253,9 +259,6 @@ int main(int argc, char* argv[])
         ordview.set_title(title);
         ordview.show(space);
       }
-
-      // Clean up.
-      delete adaptivity;
     }
     while (done == false);
 
