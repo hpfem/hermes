@@ -87,7 +87,7 @@ namespace Hermes
 
       /// Sets the current convergence measurement.
       /// Default: AbsoluteNorm
-      void set_convergence_measurement(typename NewtonSolverConvergenceMeasurement measurement);
+      void set_convergence_measurement(NewtonSolverConvergenceMeasurement measurement);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       /// Default: 1E9
