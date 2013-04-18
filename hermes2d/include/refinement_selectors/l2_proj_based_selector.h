@@ -38,8 +38,6 @@ namespace Hermes
         L2ProjBasedSelector(CandList cand_list = H2D_HP_ANISO, double conv_exp = 1.0, int max_order = H2DRS_DEFAULT_ORDER, L2Shapeset* user_shapeset = NULL);
         /// Destructor.
         ~L2ProjBasedSelector();
-        /// Cloning for paralelism.
-        virtual Selector<Scalar>* clone();
 
       protected: //overloads
         /// A function expansion of a function f used by this selector.
@@ -47,8 +45,6 @@ namespace Hermes
           H2D_L2FE_VALUE = 0, ///< A function expansion: f.
           H2D_L2FE_NUM = 1 ///< A total considered function expansion.
         };
-
-        Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_L2FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
         /** The default order range is[1, 8]. If curved, the upper boundary of the range becomes lower.

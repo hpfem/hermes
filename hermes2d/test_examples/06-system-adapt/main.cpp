@@ -47,7 +47,7 @@ const int INIT_REF_BDY = 5;
 const bool MULTI = true;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 1.3;
+const double THRESHOLD = 0.75;
 // Adaptive strategy:
 // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
 //   error is processed. If more elements have similar errors, refine
@@ -73,7 +73,7 @@ const int MESH_REGULARITY = -1;
 // candidates in hp-adaptivity. Default value is 1.0.
 const double CONV_EXP = 1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 15.0;
+const double ERR_STOP = 0.1;
 // Adaptivity process stops when the number of degrees of freedom grows over
 // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
@@ -221,14 +221,14 @@ int main(int argc, char* argv[])
     error_calculator.calculate_errors(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln), Hermes::vector<MeshFunctionSharedPtr<double> >(exact_u, exact_v), false);
     double err_exact_rel_total = error_calculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_exact_rel;
-    err_exact_rel.push_back(error_calculator.get_error_squared(0));
-    err_exact_rel.push_back(error_calculator.get_error_squared(1));
+    err_exact_rel.push_back(error_calculator.get_error_squared(0) * 100);
+    err_exact_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
     error_calculator.calculate_errors(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln), Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln), true);
     double err_est_rel_total = error_calculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_est_rel;
-    err_est_rel.push_back(error_calculator.get_error_squared(0));
-    err_est_rel.push_back(error_calculator.get_error_squared(1));
+    err_est_rel.push_back(error_calculator.get_error_squared(0) * 100);
+    err_est_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
     Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
     adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
@@ -269,7 +269,8 @@ int main(int argc, char* argv[])
       Hermes::Mixins::Loggable::Static::info("Adapting coarse mesh.");
       done = adaptivity.adapt(Hermes::vector<RefinementSelectors::Selector<double> *>(&selector, &selector));
     }
-    if (Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)) >= NDOF_STOP) done = true;
+    if (Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)) >= NDOF_STOP)
+      done = true;
 
     // Increase counter.
     as++;
@@ -279,6 +280,6 @@ int main(int argc, char* argv[])
   Hermes::Mixins::Loggable::Static::info("Total running time: %g s", cpu_time.accumulated());
 
   // Wait for all views to be closed.
-  // Views::View::wait();
+   Views::View::wait();
   return 0;
 }

@@ -74,8 +74,6 @@ namespace Hermes
       {
       public:
         virtual ~Selector() {};
-        /// Cloning for paralelism.
-        virtual Selector<Scalar>* clone() = 0;
           /// Selects a refinement.
           /** This methods has to be implemented.
           *  \param[in] element An element which is being refined.
@@ -98,14 +96,13 @@ namespace Hermes
 
         /// Constructor
         /** \param[in] max_order A maximum order used by this selector. If it is ::H2DRS_DEFAULT_ORDER, a maximum supported order is used. */
-        Selector(int min_order = 1, int max_order = H2DRS_DEFAULT_ORDER) : min_order(min_order), max_order(max_order), isAClone(false) {};
+        Selector(int min_order = 1, int max_order = H2DRS_DEFAULT_ORDER) : min_order(min_order), max_order(max_order) {};
 
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;
         
         /// Internal.
       protected:
-        bool isAClone;
         CalculatedErrorType errorType;
       };
 
@@ -115,10 +112,6 @@ namespace Hermes
       public:
         /// Constructor.
         HOnlySelector() : Selector<Scalar>() {};
-
-        /// Cloning for paralelism.
-        virtual Selector<Scalar>* clone();
-
       protected:
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
@@ -143,9 +136,6 @@ namespace Hermes
         *  \param[in] order_h_inc An increase of the horizontal order in a quadrilateral and an order in a triangle. The increase has to be greater or equal to 0.
         *  \param[in] order_v_inc An increase of the vertical order in a quadrilateral. The increase has to be greater or equal to 0. */
         POnlySelector(int max_order, int order_h_inc, int order_v_inc);
-
-        /// Cloning for paralelism.
-        virtual Selector<Scalar>* clone();
 
       protected:
         /// Selects a refinement.

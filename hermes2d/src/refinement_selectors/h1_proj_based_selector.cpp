@@ -27,15 +27,6 @@ namespace Hermes
         if(!this->user_shapeset)
           delete this->shapeset;
       }
-      
-      template<typename Scalar>
-      Selector<Scalar>* H1ProjBasedSelector<Scalar>::clone()
-      {
-        H1ProjBasedSelector<Scalar>* newSelector = new H1ProjBasedSelector(this->cand_list, this->conv_exp, this->max_order, (H1Shapeset*)this->shapeset);
-        newSelector->set_error_weights(this->error_weight_h, this->error_weight_p, this->error_weight_aniso);
-        newSelector->isAClone = true;
-        return newSelector;
-      }
 
       template<typename Scalar>
       void H1ProjBasedSelector<Scalar>::get_current_order_range(Element* element, int& min_order_, int& max_order_)
@@ -203,11 +194,10 @@ namespace Hermes
       Scalar** H1ProjBasedSelector<Scalar>::precalc_ref_solution(int inx_son, MeshFunction<Scalar>* rsln, Element* element, int intr_gip_order)
       {
         //fill with values
-        Scalar** rvals_son = precalc_rvals[inx_son];
+        Scalar** rvals_son = new Scalar*[H2D_H1FE_NUM];
         rvals_son[H2D_H1FE_VALUE] = rsln->get_fn_values(0);
         rvals_son[H2D_H1FE_DX] = rsln->get_dx_values(0);
         rvals_son[H2D_H1FE_DY] = rsln->get_dy_values(0);
-
         return rvals_son;
       }
 

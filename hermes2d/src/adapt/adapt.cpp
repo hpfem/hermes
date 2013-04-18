@@ -21,16 +21,13 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces_, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator)
+    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator), spaces(spaces_)
     {
-      for(unsigned int i = 0; i < spaces_.size(); i++)
-        spaces.push_back(spaces_[i]);
-
       this->init();
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar>& space, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator)
+    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator)
     {
       spaces.push_back(space);
       this->init();

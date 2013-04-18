@@ -83,8 +83,6 @@ const double EPS_AIR = 1.0 * EPS0;
 
 int main(int argc, char* argv[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
-
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   MeshReaderH2D mloader;

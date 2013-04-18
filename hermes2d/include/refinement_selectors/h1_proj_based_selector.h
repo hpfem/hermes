@@ -40,9 +40,6 @@ namespace Hermes
         /// Destructor.
         ~H1ProjBasedSelector();
 
-        /// Cloning for paralelism.
-        virtual Selector<Scalar>* clone();
-
       protected: //overloads
         /// A function expansion of a function f used by this selector.
         enum LocalFuncExpansion {
@@ -51,8 +48,6 @@ namespace Hermes
           H2D_H1FE_DY = 2, ///< A function expansion: df/dy.
           H2D_H1FE_NUM = 3 ///< A total considered function expansion.
         };
-
-        Scalar* precalc_rvals[H2D_MAX_ELEMENT_SONS][H2D_H1FE_NUM]; ///< Array of arrays of precalculates. The first index is an index of a subdomain, the second index is an index of a function expansion (see enum LocalFuncExpansion).
 
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
         /** The default order range is[1, 9]. If curved, the upper boundary of the range becomes lower.

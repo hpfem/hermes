@@ -1,4 +1,5 @@
 #include "proj_based_selector.h"
+#include "hcurl_proj_based_selector.h"
 #include <algorithm>
 #include "global.h"
 #include "solution.h"
@@ -51,12 +52,9 @@ namespace Hermes
             }
         }
 
-        if(!this->isAClone)
-        {
-          delete [] cached_shape_vals_valid;
-          delete [] cached_shape_ortho_vals;
-          delete [] cached_shape_vals;
-        }
+        delete [] cached_shape_vals_valid;
+        delete [] cached_shape_ortho_vals;
+        delete [] cached_shape_vals;
       }
 
       template<typename Scalar>
@@ -412,6 +410,13 @@ namespace Hermes
               , sub_svals, sub_ortho_svals
               , info_p, perr);
           }
+        }
+				const HcurlProjBasedSelector<Scalar>* hcurl_casted = dynamic_cast<const HcurlProjBasedSelector<Scalar>*>(this);
+        for (int son = 0; son < H2D_MAX_ELEMENT_SONS; son++)
+        {
+          if(hcurl_casted)
+            delete [] rval[son][HcurlProjBasedSelector<Scalar>::H2D_HCFE_CURL];
+          delete [] rval[son];
         }
       }
 

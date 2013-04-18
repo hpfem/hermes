@@ -16,7 +16,6 @@ namespace Hermes
       template<typename Scalar>
       HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
         : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
-        , precalc_rvals_curl(NULL)
       {
         if(user_shapeset != NULL)
         {
@@ -26,18 +25,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      Selector<Scalar>* HcurlProjBasedSelector<Scalar>::clone()
-      {
-        HcurlProjBasedSelector* newSelector = new HcurlProjBasedSelector(this->cand_list, this->conv_exp, this->max_order);
-        newSelector->set_error_weights(this->error_weight_h, this->error_weight_p, this->error_weight_aniso);
-        newSelector->isAClone = true;
-        return newSelector;
-      }
-
-      template<typename Scalar>
       HcurlProjBasedSelector<Scalar>::~HcurlProjBasedSelector()
       {
-        delete [] precalc_rvals_curl;
       }
 
       template<typename Scalar>
@@ -207,19 +196,15 @@ namespace Hermes
       {
         const int num_gip = rsln->get_quad_2d()->get_num_points(intr_gip_order, rsln->get_active_element()->get_mode());
 
-        //allocate space for Curl
-        if(precalc_rvals_curl == NULL)
-          precalc_rvals_curl = new_matrix<Scalar>(H2D_MAX_ELEMENT_SONS, num_gip);
-
         //prepre for curl
-        Scalar* curl = precalc_rvals_curl[inx_son];
+        Scalar* curl = new Scalar[num_gip];
         Scalar* d1dx = rsln->get_dx_values(1);
         Scalar* d0dy = rsln->get_dy_values(0);
         for(int i = 0; i < num_gip; i++)
           curl[i] = d1dx[i] - d0dy[i];
 
         //fill with values
-        Scalar** rvals_son = precalc_rvals[inx_son];
+        Scalar** rvals_son = new Scalar*[H2D_HCFE_NUM];
         rvals_son[H2D_HCFE_VALUE0] = rsln->get_fn_values(0);
         rvals_son[H2D_HCFE_VALUE1] = rsln->get_fn_values(1);
         rvals_son[H2D_HCFE_CURL] = curl;
@@ -282,17 +267,6 @@ namespace Hermes
           Scalar shape_value1 = sub_shape.svals[H2D_HCFE_VALUE1][gip_inx];
           Scalar shape_curl = sub_shape.svals[H2D_HCFE_CURL][gip_inx];
 
-          ////DEBUG-BEGIN
-          //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
-          //double ref_y = gip_pt[H2D_GIP2D_Y] * sub_trf.trf->m[1] + sub_trf.trf->t[1];
-          //std::complex<double> shape_value0A = shapeset->get_fn_value(sub_shape.inx, ref_x, ref_y, 0);
-          //std::complex<double> shape_value1A = shapeset->get_fn_value(sub_shape.inx, ref_x, ref_y, 1);
-          //std::complex<double> shape_curlA = shapeset->get_dx_value(sub_shape.inx, ref_x, ref_y, 1) - shapeset->get_dy_value(sub_shape.inx, ref_x, ref_y, 0);
-          //error_if(std::abs(shape_value0 - shape_value0A) > 1E-15
-          //  || std::abs(shape_value1 - shape_value1A) > 1E-15
-          //  || std::abs(shape_curl - shape_curlA) > 1E-15, "A1");
-          ////DEBUG-END
-
           //get value of ref. solution
           Scalar ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
           Scalar ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];
@@ -328,22 +302,7 @@ namespace Hermes
             proj_curl += elem_proj.shape_coeffs[i] * elem_proj.svals[shape_inx][H2D_HCFE_CURL][gip_inx];
           }
 
-          ////DEBUG-BEGIN
-          //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
-          //double ref_y = gip_pt[H2D_GIP2D_Y] * sub_trf.trf->m[1] + sub_trf.trf->t[1];
-          //std::complex<double> proj_value0A = 0, proj_value1A = 0, proj_curlA = 0;
-          //for(int i = 0; i < elem_proj.num_shapes; i++)
           {
-            //  int shape_inx = elem_proj.shape_inxs[i];
-            //  proj_value0A += elem_proj.shape_coeffs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 0);
-            //  proj_value1A += elem_proj.shape_coeffs[i] * shapeset->get_fn_value(shape_inx, ref_x, ref_y, 1);
-            //  proj_curlA += elem_proj.shape_coeffs[i] * (shapeset->get_dx_value(shape_inx, ref_x, ref_y, 1) - shapeset->get_dy_value(shape_inx, ref_x, ref_y, 0));
-            //}
-            //error_if(std::abs(proj_value0 - proj_value0A) > 1E-15
-            //  || std::abs(proj_value1 - proj_value1A) > 1E-15
-            //  || std::abs(proj_curl - proj_curlA) > 1E-15, "A1");
-            ////DEBUG-END
-
             //get value of ref. solution
             Scalar ref_value0 = sub_trf.coef_mx * sub_gip.rvals[H2D_HCFE_VALUE0][gip_inx];
             Scalar ref_value1 = sub_trf.coef_my * sub_gip.rvals[H2D_HCFE_VALUE1][gip_inx];

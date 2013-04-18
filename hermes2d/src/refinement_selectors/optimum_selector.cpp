@@ -54,22 +54,19 @@ namespace Hermes
       template<typename Scalar>
       OptimumSelector<Scalar>::~OptimumSelector()
       {
-        if(!this->isAClone)
+        for(int i = 0; i < 2; i++)
         {
-          for(int i = 0; i < 2; i++)
+          for(int j = 0; j < H2D_NUM_SHAPES_SIZE; j++)
           {
-            for(int j = 0; j < H2D_NUM_SHAPES_SIZE; j++)
+            for(int k = 0; k < H2D_NUM_SHAPES_SIZE; k++)
             {
-              for(int k = 0; k < H2D_NUM_SHAPES_SIZE; k++)
-              {
-                delete [] num_shapes[i][j][k];
-              }
-              delete [] num_shapes[i][j];
+              delete [] num_shapes[i][j][k];
             }
-            delete [] num_shapes[i];
+            delete [] num_shapes[i][j];
           }
-          delete [] num_shapes;
+          delete [] num_shapes[i];
         }
+        delete [] num_shapes;
       }
       
       template<typename Scalar>

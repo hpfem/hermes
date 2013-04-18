@@ -68,8 +68,6 @@ typedef std::complex<double> complex;
 
 int main(int argc, char* argv[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
-
   Hermes::Mixins::TimeMeasurable m;
   m.tick();
 

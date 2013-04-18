@@ -9,12 +9,6 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template<typename Scalar>
-      Selector<Scalar>* HOnlySelector<Scalar>::clone()
-      {
-        return new HOnlySelector();
-      }
-
-      template<typename Scalar>
       bool HOnlySelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType)
       {
         // Very important - set the current error type.
@@ -35,12 +29,6 @@ namespace Hermes
         else
           for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
             tgt_quad_orders[i] = orig_quad_order;
-      }
-
-      template<typename Scalar>
-      Selector<Scalar>* POnlySelector<Scalar>::clone()
-      {
-        return new POnlySelector(this->max_order, this->order_h_inc, this->order_v_inc);
       }
 
       template<typename Scalar>
