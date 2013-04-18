@@ -32,6 +32,7 @@ namespace Hermes
     /** \defgroup userSolvingAPI User solving API
      * \brief Collection of classes that provide the top-level solving capabilities.
     */
+
     template <typename Scalar>
     class Solver: 
       public Hermes::Mixins::Loggable, 

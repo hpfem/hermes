@@ -130,8 +130,6 @@ namespace Hermes
       /// Tolerance.
       double picard_tolerance;
 
-      /// Parameters for OutputAttachable mixin.
-      Hermes::Mixins::OutputAttachable::Parameter<int> p_vec_in_memory;
 
       // Anderson.
       int num_last_vectors_used;
@@ -148,17 +146,19 @@ namespace Hermes
       void deinit_anderson();
 
       /// Handle the previous vectors.
-      void handle_previous_vectors(int ndof, int& vec_in_memory);
+      void handle_previous_vectors(int ndof, unsigned int& vec_in_memory);
       /// Calcualte the coefficients.
       void calculate_anderson_coeffs(int ndof);
 
 #pragma region OutputAttachable
       // For derived classes - read-only access.
-      const Hermes::Mixins::OutputAttachable::Parameter<int>& iteration() const { return this->p_iteration; };
+      const OutputParameterUnsignedInt& iteration() const { return this->p_iteration; };
+      const OutputParameterUnsignedInt& vec_in_memory() const { return this->p_vec_in_memory; };
 
     private:
       // Parameters for OutputAttachable mixin.
-      Hermes::Mixins::OutputAttachable::Parameter<int> p_iteration;
+      OutputParameterUnsignedInt p_iteration;
+      OutputParameterUnsignedInt p_vec_in_memory;
 #pragma endregion
     };
   }

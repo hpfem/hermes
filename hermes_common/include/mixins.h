@@ -250,7 +250,6 @@ namespace Hermes
       /// \return Whether or not should the processing continue.
       virtual bool on_finish();
 
-    protected:
       template<typename T>
       class Parameter
       {
@@ -260,12 +259,20 @@ namespace Hermes
       };
 
       template<typename T>
-      void set_parameter_value(Parameter<T>& parameter, T* value);
+      const T& get_parameter_value(const Parameter<T>& parameter);
 
-    public:
+    protected:
       template<typename T>
-      T get_parameter_value(const Parameter<T>& parameter);
+      void set_parameter_value(Parameter<T>& parameter, T* value);
     };
   }
+
+  typedef Hermes::Mixins::OutputAttachable::Parameter<unsigned int> OutputParameterUnsignedInt;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<double> OutputParameterDouble;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<bool> OutputParameterBool;
+  
+  typedef Hermes::Mixins::OutputAttachable::Parameter<Hermes::vector<unsigned int> > OutputParameterUnsignedIntVector;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<Hermes::vector<double> > OutputParameterDoubleVector;
+  typedef Hermes::Mixins::OutputAttachable::Parameter<Hermes::vector<bool> > OutputParameterBoolVector;
 }
 #endif

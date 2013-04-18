@@ -211,6 +211,7 @@ project(hermes2d)
     
     src/solver/nox_solver.cpp
     src/solver/newton_solver.cpp
+    src/solver/newton_solver_convergence_measurement.cpp
     src/solver/picard_solver.cpp
     src/solver/runge_kutta.cpp
   )
@@ -222,6 +223,7 @@ project(hermes2d)
     src/solver/nonlinear_solver.cpp
     
     src/solver/nox_solver.cpp
+    src/solver/newton_solver_convergence_measurement.cpp
     src/solver/newton_solver.cpp
     src/solver/picard_solver.cpp
     src/solver/runge_kutta.cpp
@@ -355,6 +357,7 @@ project(hermes2d)
     include/solver/nonlinear_solver.h
     
     include/solver/nox_solver.h
+    include/solver/newton_solver_convergence_measurement.h
     include/solver/newton_solver.h
     include/solver/picard_solver.h
     include/solver/runge_kutta.h
@@ -368,6 +371,7 @@ project(hermes2d)
     
     include/solver/nox_solver.h
     include/solver/newton_solver.h
+    include/solver/newton_solver_convergence_measurement.h
     include/solver/picard_solver.h
     include/solver/runge_kutta.h
   )

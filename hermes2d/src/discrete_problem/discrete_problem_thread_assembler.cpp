@@ -553,7 +553,8 @@ namespace Hermes
       }
 
       // Insert the local stiffness matrix into the global one.
-      this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
+      if(this->current_mat)
+        this->current_mat->add(current_als_i->cnt, current_als_j->cnt, local_stiffness_matrix, current_als_i->dof, current_als_j->dof);
 
       // Insert also the off-diagonal (anti-)symmetric block, if required.
       if(tra)
@@ -562,7 +563,8 @@ namespace Hermes
           chsgn(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
         transpose(local_stiffness_matrix, current_als_i->cnt, current_als_j->cnt);
 
-        this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
+        if(this->current_mat)
+          this->current_mat->add(current_als_j->cnt, current_als_i->cnt, local_stiffness_matrix, current_als_j->dof, current_als_i->dof);
 
         if(this->add_dirichlet_lift && this->current_rhs)
         {

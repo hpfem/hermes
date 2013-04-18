@@ -218,7 +218,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PicardSolver<Scalar>::handle_previous_vectors(int ndof, int& vec_in_memory)
+    void PicardSolver<Scalar>::handle_previous_vectors(int ndof, unsigned int& vec_in_memory)
     {
       // If Anderson is used, store the new vector in the memory.
       if (anderson_is_on)
@@ -316,8 +316,9 @@ namespace Hermes
 
       this->init_anderson(ndof);
 
-      int it = 1;
-      int vec_in_memory = 1;   // There is already one vector in the memory.
+      unsigned int it = 1;
+      unsigned int vec_in_memory = 1;   // There is already one vector in the memory.
+      this->set_parameter_value(this->p_iteration, &it);
       this->set_parameter_value(this->p_vec_in_memory, &vec_in_memory);
 
       while (true)
