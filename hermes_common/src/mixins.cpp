@@ -678,6 +678,12 @@ namespace Hermes
     }
 
     template<typename T>
+    T& OutputAttachable::get_parameter_value(Parameter<T>& parameter)
+    {
+      return *parameter.value;
+    }
+
+    template<typename T>
     void OutputAttachable::set_parameter_value(Parameter<T>& parameter, T* value)
     {
       parameter.value = value;
@@ -690,10 +696,16 @@ namespace Hermes
     template HERMES_API const Hermes::vector<double>& OutputAttachable::get_parameter_value<Hermes::vector<double> >(const Parameter<Hermes::vector<double> >& parameter);
     template HERMES_API const Hermes::vector<bool>& OutputAttachable::get_parameter_value<Hermes::vector<bool> >(const Parameter<Hermes::vector<bool> >& parameter);
     
+    template HERMES_API unsigned int& OutputAttachable::get_parameter_value<unsigned int>(Parameter<unsigned int>& parameter);
+    template HERMES_API double& OutputAttachable::get_parameter_value<double>(Parameter<double>& parameter);
+    template HERMES_API bool& OutputAttachable::get_parameter_value<bool>(Parameter<bool>& parameter);
+    template HERMES_API Hermes::vector<unsigned int>& OutputAttachable::get_parameter_value<Hermes::vector<unsigned int> >(Parameter<Hermes::vector<unsigned int> >& parameter);
+    template HERMES_API Hermes::vector<double>& OutputAttachable::get_parameter_value<Hermes::vector<double> >(Parameter<Hermes::vector<double> >& parameter);
+    template HERMES_API Hermes::vector<bool>& OutputAttachable::get_parameter_value<Hermes::vector<bool> >(Parameter<Hermes::vector<bool> >& parameter);
+
     template HERMES_API void OutputAttachable::set_parameter_value<unsigned int>(Parameter<unsigned int>& parameter, unsigned int* value);
     template HERMES_API void OutputAttachable::set_parameter_value<double>(Parameter<double>& parameter, double* value);
     template HERMES_API void OutputAttachable::set_parameter_value<bool>(Parameter<bool>& parameter, bool* value);
-    
     template HERMES_API void OutputAttachable::set_parameter_value<Hermes::vector<unsigned int> >(Parameter<Hermes::vector<unsigned int> >& parameter, Hermes::vector<unsigned int>* value);
     template HERMES_API void OutputAttachable::set_parameter_value<Hermes::vector<double> >(Parameter<Hermes::vector<double> >& parameter, Hermes::vector<double>* value);
     template HERMES_API void OutputAttachable::set_parameter_value<Hermes::vector<bool> >(Parameter<Hermes::vector<bool> >& parameter, Hermes::vector<bool>* value);

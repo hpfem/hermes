@@ -169,19 +169,19 @@ namespace Hermes
         Error
       };
 
-      class NewtonException : public Hermes::Exceptions::Exception
+      class HERMES_API NewtonException : public Hermes::Exceptions::Exception
       {
       public:
-        NewtonException(ConvergenceState convergenceState);
+        NewtonException(typename NewtonSolver<Scalar>::ConvergenceState convergenceState);
 
-        ConvergenceState get_exception_state();
+        typename NewtonSolver<Scalar>::ConvergenceState get_exception_state();
 
       protected:
-        ConvergenceState convergenceState;
+        typename NewtonSolver<Scalar>::ConvergenceState convergenceState;
       };
 
       /// Find out the state.
-      typename NewtonSolver<Scalar>::ConvergenceState get_convergence_state();
+      bool test_convergence(Scalar* coeff_vec);
 #pragma endregion
 
     protected:
@@ -189,9 +189,14 @@ namespace Hermes
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NewtonSolver"; }
 
-      void init_solving(int ndof, Scalar*& coeff_vec, Scalar*& coeff_vec_back);
-      void finalize_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
-      void deinit_solving(Scalar* coeff_vec, Scalar*& coeff_vec_back);
+      void init_solving(Scalar*& coeff_vec);
+
+      void do_initial_step(Scalar* coeff_vec);
+      void assemble_residual(Scalar* coeff_vec);
+      void solve_linear_system(Scalar* coeff_vec);
+
+      void finalize_solving(Scalar* coeff_vec);
+      void deinit_solving(Scalar* coeff_vec);
 
       /// Calculates the residual norm.
       double calculate_residual_norm();
@@ -212,7 +217,6 @@ namespace Hermes
       double max_allowed_residual_norm;
 
       bool residual_as_function;
-      
 
 #pragma region damping-private
       /// Manual / auto.
@@ -265,6 +269,10 @@ namespace Hermes
       OutputParameterBool p_residual_norm_drop;
       OutputParameterUnsignedInt p_iteration;
 #pragma endregion
+
+    private:
+      Scalar* coeff_vec_back;
+      int ndof;
 
       friend bool newtonConverged<Scalar>(NewtonSolver<Scalar>*);
     };

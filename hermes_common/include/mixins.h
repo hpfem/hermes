@@ -261,6 +261,9 @@ namespace Hermes
       template<typename T>
       const T& get_parameter_value(const Parameter<T>& parameter);
 
+      template<typename T>
+      T& get_parameter_value(Parameter<T>& parameter);
+
     protected:
       template<typename T>
       void set_parameter_value(Parameter<T>& parameter, T* value);
