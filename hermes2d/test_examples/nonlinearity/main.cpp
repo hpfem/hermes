@@ -80,16 +80,16 @@ int main(int argc, char* argv[])
   newton.set_max_allowed_iterations(NEWTON_MAX_ITER);
 
   // 1st - OK
-  //newton.set_sufficient_improvement_factor(1.1);
+  // newton.set_sufficient_improvement_factor(1.1);
 
   // 2nd - OK
-  //newton.set_manual_damping_coeff(0.1);
+  // newton.set_manual_damping_coeff(0.1);
 
-  // 3rd - BAD
-  //newton.set_auto_damping_ratio(0.1);
+  // 3rd - NOT OK
+  // newton.set_auto_damping_ratio(0.1);
 
-  // 4th - BAD
-  //newton.set_min_allowed_damping_coeff(1e-10);
+  // 4th - NOT OK
+  // newton.set_min_allowed_damping_coeff(1e-10);
 
   newton.set_tolerance(NEWTON_TOL);
     

@@ -386,12 +386,6 @@ namespace Hermes
 
       double residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 1];
       double previous_residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 2];
-
-#ifdef _DEBUG
-      // The following should hold, as if the previous norm was smaller, the step
-      // should be restarted with updated damping coefficient.
-      assert(previous_residual_norm > residual_norm);
-#endif
       
       if(successful_steps_with_reused_jacobian >= this->max_steps_with_reused_jacobian)
       {
@@ -425,7 +419,15 @@ namespace Hermes
       this->get_parameter_value(p_solution_norms).push_back(Global<Scalar>::get_l2_norm(coeff_vec, this->ndof));
 
       // Assemble the system.
-      this->dp->assemble(coeff_vec, this->jacobian, this->residual);
+      if(this->jacobian_reusable && this->reuse_jacobian_values())
+      {
+        this->dp->assemble(coeff_vec, this->residual);
+      }
+      else
+      {
+        this->dp->assemble(coeff_vec, this->jacobian, this->residual);
+        this->jacobian_reusable = true;
+      }
       this->residual->change_sign();
 
       // Output.
@@ -616,6 +618,8 @@ namespace Hermes
         this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
 
         this->solve_linear_system(coeff_vec);
+        this->jacobian_reusable = true;
+
 
         // Increase the iteration count.
         it++;
@@ -624,8 +628,5 @@ namespace Hermes
 
     template class HERMES_API NewtonSolver<double>;
     template class HERMES_API NewtonSolver<std::complex<double> >;
-
-    template class HERMES_API NewtonSolver<double>::NewtonException;
-    template class HERMES_API NewtonSolver<std::complex<double> >::NewtonException;
   }
 }

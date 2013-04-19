@@ -170,6 +170,7 @@ if(HERMES_VISUALIZATION)
   newton.set_tolerance(NEWTON_TOL);
   //newton.keep_element_values(1, WeakForm<double>::FormVol, WeakForm<double>::MatrixForm);
   newton.set_sufficient_improvement_factor_jacobian(1e-2);
+  newton.set_jacobian_constant();
 
   // Time-stepping loop:
   char title[100];
