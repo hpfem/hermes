@@ -661,6 +661,11 @@ namespace Hermes
       return true;
     }
 
+    bool OutputAttachable::on_initial_step_end()
+    {
+      return true;
+    }
+
     bool OutputAttachable::on_step_end()
     {
       return true;

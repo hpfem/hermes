@@ -447,6 +447,14 @@ namespace Hermes
 
       this->solve_linear_system(coeff_vec);
 
+      if(!this->on_initial_step_end())
+      {
+        memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
+        this->info("Aborted");
+        this->finalize_solving(coeff_vec);
+        return;
+      }
+
       this->get_parameter_value(p_iteration)++;
     }
 
@@ -569,14 +577,6 @@ namespace Hermes
             // Try with the different damping coefficient.
             for (int i = 0; i < ndof; i++)
               coeff_vec[i] = coeff_vec_back[i] + current_damping_coefficient * (coeff_vec[i] - coeff_vec_back[i]);
-
-            if(!this->on_step_end())
-            {
-              memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
-              this->info("Aborted");
-              this->finalize_solving(coeff_vec);
-              return;
-            }
           }
         }
         while (!residual_norm_drop);
@@ -620,6 +620,13 @@ namespace Hermes
         this->solve_linear_system(coeff_vec);
         this->jacobian_reusable = true;
 
+        if(!this->on_step_end())
+        {
+          memcpy(this->sln_vector, coeff_vec, ndof * sizeof(Scalar));
+          this->info("Aborted");
+          this->finalize_solving(coeff_vec);
+          return;
+        }
 
         // Increase the iteration count.
         it++;

@@ -342,7 +342,7 @@ namespace Hermes
         this->handle_previous_vectors(ndof, vec_in_memory);
 
         double rel_error = this->calculate_relative_error(ndof, coeff_vec);
-        
+
         // Output for the user.
         this->info("\tPicard: iteration %d, nDOFs %d, relative error %g%%", it, ndof, rel_error * 100);
 
@@ -373,11 +373,23 @@ namespace Hermes
           break;
         }
 
-        if(!this->on_step_end())
+        if(it == 1)
         {
-          this->info("Aborted");
-          this->deinit_solving(coeff_vec);
-          return;
+          if(!this->on_initial_step_end())
+          {
+            this->info("Aborted");
+            this->deinit_solving(coeff_vec);
+            return;
+          }
+        }
+        else
+        {
+          if(!this->on_step_end())
+          {
+            this->info("Aborted");
+            this->deinit_solving(coeff_vec);
+            return;
+          }
         }
 
         // Increase counter of iterations.

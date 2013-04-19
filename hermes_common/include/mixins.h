@@ -246,6 +246,8 @@ namespace Hermes
       /// \return Whether or not should the processing continue.
       virtual bool on_step_begin();
       /// \return Whether or not should the processing continue.
+      virtual bool on_initial_step_end();
+      /// \return Whether or not should the processing continue.
       virtual bool on_step_end();
       /// \return Whether or not should the processing continue.
       virtual bool on_finish();
