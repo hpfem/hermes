@@ -25,3 +25,5 @@ add_subdirectory("11-FCT")
 add_subdirectory("12-transient-adapt")
 
 add_subdirectory("13-picard")
+
+add_subdirectory("nonlinearity")
