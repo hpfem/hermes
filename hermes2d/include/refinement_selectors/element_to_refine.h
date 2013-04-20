@@ -40,7 +40,7 @@ namespace Hermes
       /// Constructor.
       /** \param[in] id An ID of the element.
       *  \param[in] comp An index of a component. */
-      ElementToRefine(int id, int comp);
+      ElementToRefine(int id, int comp, double error = -1.0);
 
       /// Copy-contructor.
       ElementToRefine(const ElementToRefine &orig);
@@ -53,6 +53,7 @@ namespace Hermes
       int split; ///< Proposed refinement. Possible values are defined in the enum ::RefinementType.
       int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
       int q[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of the best H-refinement. These orders are used in a case multiple components shares a single mesh.
+      double errors[H2D_MAX_ELEMENT_SONS]; ///< Error of the selected candidate.
 
       /// Returns a number of sons.
       /** \return A number of sons of a given refinement. */
@@ -63,7 +64,9 @@ namespace Hermes
       *  \param[in] dest A destination array.
       *  \param[in] src A source arrapy. */
       static void copy_orders(int* dest, const int* src);
+      static void copy_errors(double* dest, const double* src);
       template<typename T> friend class Adapt;
+      template<typename T> friend class ErrorCalculator;
       template<typename T> friend class RefinementSelectors::Selector;
       template<typename T> friend class RefinementSelectors::HOnlySelector;
       template<typename T> friend class RefinementSelectors::POnlySelector;

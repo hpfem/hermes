@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
     graph_dof_exact.save("conv_dof_exact.dat");
 
     Adapt<std::complex<double> > adaptivity(space, &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
+    adaptivity.set_strategy(AdaptStoppingCriterionLevels, THRESHOLD);
 
     // If err_est_rel too large, adapt the mesh->
     if(err_est_rel < ERR_STOP) done = true;

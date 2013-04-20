@@ -9,11 +9,11 @@ namespace Hermes
     {
     };
 
-    ElementToRefine::ElementToRefine(int id, int comp) : id(id), comp(comp), split(H2D_REFINEMENT_H)
+    ElementToRefine::ElementToRefine(int id, int comp, double error) : id(id), comp(comp), error(error), split(H2D_REFINEMENT_H)
     {
     };
 
-    ElementToRefine::ElementToRefine(const ElementToRefine &orig) : id(orig.id), comp(orig.comp), split(orig.split)
+    ElementToRefine::ElementToRefine(const ElementToRefine &orig) : id(orig.id), comp(orig.comp), split(orig.split), error(error)
     {
       copy_orders(p, orig.p);
       copy_orders(q, orig.q);

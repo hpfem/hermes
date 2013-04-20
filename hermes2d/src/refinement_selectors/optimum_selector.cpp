@@ -19,8 +19,6 @@ namespace Hermes
         max_order, Shapeset* shapeset, const Range& vertex_order, const
         Range& edge_bubble_order) :
       Selector<Scalar>(shapeset->get_min_order(), max_order),
-        opt_symmetric_mesh(true),
-        opt_apply_exp_dof(false),
         cand_list(cand_list),
         conv_exp(conv_exp),
         shapeset(shapeset)
@@ -554,9 +552,9 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error)
+      void OptimumSelector<Scalar>::evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
       {
-        evaluate_cands_error(candidates, e, rsln, avg_error, dev_error);
+        evaluate_cands_error(candidates, e, rsln);
 
         evaluate_cands_dof(candidates, e, rsln);
 
@@ -577,8 +575,6 @@ namespace Hermes
           if(cand.error < unrefined.error && cand.dofs > unrefined.dofs)
           {
             double delta_dof_exp = std::pow(cand.dofs - unrefined.dofs, conv_exp);
-            if(opt_apply_exp_dof)
-              delta_dof_exp = std::pow(cand.dofs, conv_exp) - unrefined_dofs_exp;
             candidates[i].score = (log10(unrefined.error) - log10(cand.error)) / delta_dof_exp;
           }
           else
@@ -593,10 +589,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, const double avg_error, const double dev_error, int* selected_cand, int* selected_h_cand)
+      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand)
       {
-        // select an above-average candidate with the steepest error decrease
-
         //sort according to the score
         const int num_cands = (int)candidates.size();
         if(num_cands > 2)
@@ -604,34 +598,13 @@ namespace Hermes
 
         //select best candidate
         int imax = 1, h_imax = 1;
-        if(opt_symmetric_mesh) { //prefer symmetric mesh
-          //find first valid score that diffres from the next scores
-          while ((imax + 1) < num_cands && std::abs(candidates[imax].score - candidates[imax + 1].score) < H2DRS_SCORE_DIFF_ZERO)
-          {
-            //find the first candidate with a different score
-            Cand& cand_current = candidates[imax];
-            int imax_end = imax + 2;
-            while (imax_end < num_cands && std::abs(cand_current.score - candidates[imax_end].score) < H2DRS_SCORE_DIFF_ZERO)
-              imax_end++;
-
-            imax = imax_end;
-          }
-
-          //find valid H-refinement candidate
-          h_imax = imax;
-          while (h_imax < num_cands && candidates[h_imax].split != H2D_REFINEMENT_H)
-            h_imax++;
-        }
-
+        
         //make sure the result is valid: index is valid, selected candidate has a valid score
         if(imax >= num_cands || candidates[imax].score == 0)
           imax = 0;
-        if(h_imax >= num_cands || candidates[h_imax].score == 0)
-          h_imax = 0;
 
         //report result
         *selected_cand = imax;
-        *selected_h_cand = h_imax;
       }
 
       template<typename Scalar>
@@ -649,38 +622,30 @@ namespace Hermes
         }
 
         //build candidates.
-        int inx_cand, inx_h_cand;
+        int inx_cand;
         Hermes::vector<Cand>& candidates = create_candidates(element, quad_order);
         
         //there are candidates to choose from
         if(candidates.size() > 1)
         { 
           // evaluate candidates (sum partial projection errors, calculate dofs)
-          double avg_error, dev_error;
-          evaluate_candidates(candidates, element, rsln, &avg_error, &dev_error);
+          evaluate_candidates(candidates, element, rsln);
 
           //select candidate
-          select_best_candidate(candidates, element, avg_error, dev_error, &inx_cand, &inx_h_cand);
+          select_best_candidate(candidates, element, &inx_cand);
         }
+
         //there is not candidate to choose from, select the original candidate
         else 
         { 
           inx_cand = 0;
-          inx_h_cand = 0;
         }
 
         //copy result to output
         Cand& cand = candidates[inx_cand];
-        Cand& cand_h = candidates[inx_h_cand];
         refinement.split = cand.split;
         ElementToRefine::copy_orders(refinement.p, cand.p);
-        if(candidates[inx_h_cand].split == H2D_REFINEMENT_H) { //inx_h_cand points to a candidate which is a H-candidate: copy orders
-          ElementToRefine::copy_orders(refinement.q, cand_h.p);
-        }
-        else { //the index is not H-candidate because not candidate was generate: so, fake orders
-          int h_cand_orders[H2D_MAX_ELEMENT_SONS] = { cand_h.p[0], cand_h.p[0], cand_h.p[0], cand_h.p[0] };
-          ElementToRefine::copy_orders(refinement.q, h_cand_orders);
-        }
+        ElementToRefine::copy_errors(refinement.errors, cand.errors);
 
         //modify orders in a case of a triangle such that order_v is zero
         if(element->is_triangle())
@@ -739,17 +704,6 @@ namespace Hermes
           }
           for(int i = 0; i < num_sons; i++)
             tgt_quad_orders[i] = quad_order;
-        }
-      }
-
-      template<typename Scalar>
-      void OptimumSelector<Scalar>::set_option(const SelOption option, bool enable)
-      {
-        switch(option)
-        {
-        case H2D_PREFER_SYMMETRIC_MESH: opt_symmetric_mesh = enable; break;
-        case H2D_APPLY_CONV_EXP_DOF: opt_apply_exp_dof = enable; break;
-        default: throw Hermes::Exceptions::Exception("Unknown option %d.", (int)option);
         }
       }
 

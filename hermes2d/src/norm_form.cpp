@@ -21,8 +21,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    template<typename Scalar>
-    static Scalar l2_norm(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v)
+    template<typename Real, typename Scalar>
+    static Scalar l2_norm(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
     {
       Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
@@ -30,8 +30,8 @@ namespace Hermes
       return result;
     }
 
-    template<typename Scalar>
-    static Scalar h1_norm(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v)
+    template<typename Real, typename Scalar>
+    static Scalar h1_norm(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
     {
       Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
@@ -39,8 +39,8 @@ namespace Hermes
       return result;
     }
 
-    template<typename Scalar>
-    static Scalar h1_seminorm(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v)
+    template<typename Real, typename Scalar>
+    static Scalar h1_seminorm(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
     {
       Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
@@ -48,8 +48,8 @@ namespace Hermes
       return result;
     }
 
-    template<typename Scalar>
-    static Scalar hcurl_norm(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v)
+    template<typename Real, typename Scalar>
+    static Scalar hcurl_norm(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
     {
       Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
@@ -57,12 +57,12 @@ namespace Hermes
       return result;
     }
 
-    template<typename Scalar>
-    static Scalar hdiv_norm(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v)
+    template<typename Real, typename Scalar>
+    static Scalar hdiv_norm(int n, double *wt, Func<Scalar> *u, Func<Real> *v)
     {
       Scalar result = Scalar(0);
       for (int i = 0; i < n; i++)
-        result += wt[i] * (u->curl[i] * conj(v->curl[i]) + u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
+        result += wt[i] * (u->div[i] * conj(v->div[i]) + u->val0[i] * conj(v->val0[i]) + u->val1[i] * conj(v->val1[i]));
       return result;
     }
 
@@ -104,15 +104,15 @@ namespace Hermes
       switch(this->normType)
       {
       case HERMES_L2_NORM:
-        return l2_norm<Scalar>(n, wt, u, v);
+        return l2_norm<Scalar, Scalar>(n, wt, u, v);
       case HERMES_H1_NORM:
-        return h1_norm<Scalar>(n, wt, u, v);
+        return h1_norm<Scalar, Scalar>(n, wt, u, v);
       case HERMES_H1_SEMINORM:
-        return h1_seminorm<Scalar>(n, wt, u, v);
+        return h1_seminorm<Scalar, Scalar>(n, wt, u, v);
       case HERMES_HCURL_NORM:
-        return hcurl_norm<Scalar>(n, wt, u, v);
+        return hcurl_norm<Scalar, Scalar>(n, wt, u, v);
       case HERMES_HDIV_NORM:
-        return hdiv_norm<Scalar>(n, wt, u, v);
+        return hdiv_norm<Scalar, Scalar>(n, wt, u, v);
       default:
         throw Hermes::Exceptions::Exception("Unknown norm in DefaultNormFormVol<Scalar>::value.");
         return 0.0;
@@ -121,6 +121,7 @@ namespace Hermes
     template<typename Scalar>
     MatrixDefaultNormFormVol<Scalar>::MatrixDefaultNormFormVol(int i, int j, NormType normType) : MatrixFormVol<Scalar>(i, j), normType(normType)
     {
+      this->setSymFlag(HERMES_SYM);
     }
 
     template<typename Scalar>
@@ -130,15 +131,15 @@ namespace Hermes
       switch(this->normType)
       {
       case HERMES_L2_NORM:
-        return l2_norm<double>(n, wt, u, v);
+        return l2_norm<double, double>(n, wt, u, v);
       case HERMES_H1_NORM:
-        return h1_norm<double>(n, wt, u, v);
+        return h1_norm<double, double>(n, wt, u, v);
       case HERMES_H1_SEMINORM:
-        return h1_seminorm<double>(n, wt, u, v);
+        return h1_seminorm<double, double>(n, wt, u, v);
       case HERMES_HCURL_NORM:
-        return hcurl_norm<double>(n, wt, u, v);
+        return hcurl_norm<double, double>(n, wt, u, v);
       case HERMES_HDIV_NORM:
-        return hdiv_norm<double>(n, wt, u, v);
+        return hdiv_norm<double, double>(n, wt, u, v);
       default:
         throw Hermes::Exceptions::Exception("Unknown norm in MatrixDefaultNormFormVol<Scalar>::value.");
         return 0.0;
@@ -152,15 +153,15 @@ namespace Hermes
       switch(this->normType)
       {
       case HERMES_L2_NORM:
-        return l2_norm<Ord>(n, wt, u, v);
+        return l2_norm<Ord, Ord>(n, wt, u, v);
       case HERMES_H1_NORM:
-        return h1_norm<Ord>(n, wt, u, v);
+        return h1_norm<Ord, Ord>(n, wt, u, v);
       case HERMES_H1_SEMINORM:
-        return h1_seminorm<Ord>(n, wt, u, v);
+        return h1_seminorm<Ord, Ord>(n, wt, u, v);
       case HERMES_HCURL_NORM:
-        return hcurl_norm<Ord>(n, wt, u, v);
+        return hcurl_norm<Ord, Ord>(n, wt, u, v);
       case HERMES_HDIV_NORM:
-        return hdiv_norm<Ord>(n, wt, u, v);
+        return hdiv_norm<Ord, Ord>(n, wt, u, v);
       default:
         throw Hermes::Exceptions::Exception("Unknown norm in MatrixDefaultNormFormVol<Scalar>::ord.");
         return Ord(0);
@@ -173,6 +174,60 @@ namespace Hermes
       return new MatrixDefaultNormFormVol(*this);
     }
 
+    template<typename Scalar>
+    VectorDefaultNormFormVol<Scalar>::VectorDefaultNormFormVol(int i, NormType normType) : VectorFormVol<Scalar>(i), normType(normType)
+    {
+    }
+
+    template<typename Scalar>
+    Scalar VectorDefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const
+    {
+      switch(this->normType)
+      {
+      case HERMES_L2_NORM:
+        return l2_norm<double, Scalar>(n, wt, ext[0], v);
+      case HERMES_H1_NORM:
+        return h1_norm<double, Scalar>(n, wt, ext[0], v);
+      case HERMES_H1_SEMINORM:
+        return h1_seminorm<double, Scalar>(n, wt, ext[0], v);
+      case HERMES_HCURL_NORM:
+        return hcurl_norm<double, Scalar>(n, wt, ext[0], v);
+      case HERMES_HDIV_NORM:
+        return hdiv_norm<double, Scalar>(n, wt, ext[0], v);
+      default:
+        throw Hermes::Exceptions::Exception("Unknown norm in VectorDefaultNormFormVol<Scalar>::value.");
+        return 0.0;
+      }
+    }
+
+    template<typename Scalar>
+    Ord VectorDefaultNormFormVol<Scalar>::ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v,
+      Geom<Ord> *e, Func<Ord> **ext) const
+    {
+      switch(this->normType)
+      {
+      case HERMES_L2_NORM:
+        return l2_norm<Ord, Ord>(n, wt, ext[0], v);
+      case HERMES_H1_NORM:
+        return h1_norm<Ord, Ord>(n, wt, ext[0], v);
+      case HERMES_H1_SEMINORM:
+        return h1_seminorm<Ord, Ord>(n, wt, ext[0], v);
+      case HERMES_HCURL_NORM:
+        return hcurl_norm<Ord, Ord>(n, wt, ext[0], v);
+      case HERMES_HDIV_NORM:
+        return hdiv_norm<Ord, Ord>(n, wt, ext[0], v);
+      default:
+        throw Hermes::Exceptions::Exception("Unknown norm in VectorDefaultNormFormVol<Scalar>::ord.");
+        return Ord(0);
+      }
+    }
+
+    template<typename Scalar>
+    VectorFormVol<Scalar>* VectorDefaultNormFormVol<Scalar>::clone() const
+    {
+      return new VectorDefaultNormFormVol(*this);
+    }
+
     template HERMES_API class NormFormVol<double>;
     template HERMES_API class NormFormVol<std::complex<double> >;
     template HERMES_API class NormFormSurf<double>;
@@ -183,5 +238,7 @@ namespace Hermes
     template HERMES_API class DefaultNormFormVol<std::complex<double> >;
     template HERMES_API class MatrixDefaultNormFormVol<double>;
     template HERMES_API class MatrixDefaultNormFormVol<std::complex<double> >;
+    template HERMES_API class VectorDefaultNormFormVol<double>;
+    template HERMES_API class VectorDefaultNormFormVol<std::complex<double> >;
   }
 }

@@ -89,7 +89,8 @@ namespace Hermes
       class HERMES_API Cand 
       {
       public:
-        double error; ///< An error of this candidate.
+        double error; ///< Error of this candidate's sons.
+        double errors[H2D_MAX_ELEMENT_SONS]; ///< Error of this candidate's sons.
         int dofs;  ///< An estimated number of DOFs.
         int split; ///< A refinement, see the enum RefinementType.
         int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons, see ::H2D_MAKE_QUAD_ORDER. In a case of a triangle, the vertical order is equal to the horizontal one.

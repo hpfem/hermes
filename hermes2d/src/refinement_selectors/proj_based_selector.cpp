@@ -114,7 +114,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void ProjBasedSelector<Scalar>::evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error)
+      void ProjBasedSelector<Scalar>::evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln)
       {
         bool tri = e->is_triangle();
 
@@ -127,9 +127,6 @@ namespace Hermes
         calc_projection_errors(e, info_h, info_p, info_aniso, rsln, herr, perr, anisoerr);
 
         //evaluate errors and dofs
-        double sum_err = 0.0;
-        double sum_sqr_err = 0.0;
-        int num_processed = 0;
         Cand& unrefined_c = candidates[0];
         for (unsigned i = 0; i < candidates.size(); i++)
         {
@@ -143,7 +140,8 @@ namespace Hermes
               for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
               {
                 int order = H2D_GET_H_ORDER(c.p[j]);
-                error_squared += herr[j][order][order];
+                c.errors[j] = herr[j][order][order];
+                error_squared += c.errors[j];
               }
               error_squared *= 0.25; //element of a candidate occupies 1/4 of the reference domain defined over a candidate
               break;
@@ -151,6 +149,7 @@ namespace Hermes
             case H2D_REFINEMENT_P:
               {
                 int order = H2D_GET_H_ORDER(c.p[0]);
+                c.errors[0] = perr[order][order];
                 error_squared = perr[order][order];
               }
               break;
@@ -167,7 +166,8 @@ namespace Hermes
               for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
               {
                 int order_h = H2D_GET_H_ORDER(c.p[j]), order_v = H2D_GET_V_ORDER(c.p[j]);
-                error_squared += herr[j][order_h][order_v];
+                c.errors[j] = herr[j][order_h][order_h];
+                error_squared += c.errors[j];
               }
               error_squared *= 0.25; //element of a candidate occupies 1/4 of the reference domain defined over a candidate
               break;
@@ -177,7 +177,10 @@ namespace Hermes
               {
                 error_squared = 0.0;
                 for (int j = 0; j < 2; j++)
-                  error_squared += anisoerr[(c.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
+                {
+                  c.errors[j] = anisoerr[(c.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2][H2D_GET_H_ORDER(c.p[j])][H2D_GET_V_ORDER(c.p[j])];
+                  error_squared += c.errors[j];
+                }
                 error_squared *= 0.5;  //element of a candidate occupies 1/2 of the reference domain defined over a candidate
               }
               break;
@@ -185,7 +188,8 @@ namespace Hermes
             case H2D_REFINEMENT_P:
               {
                 int order_h = H2D_GET_H_ORDER(c.p[0]), order_v = H2D_GET_V_ORDER(c.p[0]);
-                error_squared = perr[order_h][order_v];
+                c.errors[0] = perr[order_h][order_v];
+                error_squared = c.errors[0];
               }
               break;
 
@@ -206,18 +210,7 @@ namespace Hermes
           case H2D_REFINEMENT_P: c.error *= error_weight_p; break;
           default: throw Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
           }
-
-          //calculate statistics
-          if(i == 0 || c.error <= unrefined_c.error)
-          {
-            sum_err += log10(c.error);
-            sum_sqr_err += Hermes::sqr(log10(c.error));
-            num_processed++;
-          }
         }
-
-        *avg_error = sum_err / num_processed;  // mean
-        *dev_error = sqrt(sum_sqr_err/num_processed - Hermes::sqr(*avg_error)); // deviation is square root of variance
       }
 
       template<typename Scalar>

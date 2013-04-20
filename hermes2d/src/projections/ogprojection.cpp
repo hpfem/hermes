@@ -155,9 +155,9 @@ namespace Hermes
       proj_wf->warned_nonOverride = true;
       proj_wf->set_ext(source_meshfn);
       // Add Jacobian.
-      proj_wf->add_matrix_form(new ProjectionMatrixFormVol(0, 0, norm));
+      proj_wf->add_matrix_form(new MatrixDefaultNormFormVol<Scalar>(0, 0, norm));
       // Add Residual.
-      proj_wf->add_vector_form(new ProjectionVectorFormVol(0, norm));
+      proj_wf->add_vector_form(new VectorDefaultNormFormVol<Scalar>(0, norm));
 
       // Call main function.
       project_internal(space, proj_wf, target_vec);

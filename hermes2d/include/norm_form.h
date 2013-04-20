@@ -101,6 +101,22 @@ namespace Hermes
       protected:
       NormType normType;
     };
+
+    template<typename Scalar>
+    class HERMES_API VectorDefaultNormFormVol : public VectorFormVol<Scalar>
+    {
+    public:
+      VectorDefaultNormFormVol(int i, NormType normType);
+
+      Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v, Geom<double> *e, Func<Scalar> **ext) const;
+
+      Ord ord(int n, double *wt, Func<Ord> *u_ext[], Func<Ord> *v, Geom<Ord> *e, Func<Ord> **ext) const;
+    
+      VectorFormVol<Scalar>* clone() const;
+
+      protected:
+      NormType normType;
+    };
   }
 }
 #endif

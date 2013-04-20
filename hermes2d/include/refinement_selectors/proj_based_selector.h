@@ -234,7 +234,7 @@ namespace Hermes
 
         /// Calculates error of candidates.
         /** Overriden function. For details, see OptimumSelector::evaluate_cands_error(). */
-        virtual void evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error);
+        virtual void evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
 
         /// Calculates projection errors of an elements of candidates for all permutations of orders.
         /** Errors are not normalized and they are squared.

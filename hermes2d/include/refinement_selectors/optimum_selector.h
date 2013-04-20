@@ -31,24 +31,8 @@ namespace Hermes
       /** This is a base class for all selectors that chooses an candidate based on some
       *  evaluated criteria. Currently, the criteria is based on an error change per DOF. */
       template<typename Scalar>
-      class HERMES_API OptimumSelector : public Selector<Scalar> {
-      protected: //options
-        bool opt_symmetric_mesh; ///< True if ::H2D_PREFER_SYMMETRIC_MESH is set. True by default.
-        bool opt_apply_exp_dof; ///< True if ::H2D_APPLY_CONV_EXP_DOF is set. False by default.
-      public:
-        /// Enables or disables an option.
-        /** If overridden, the implementation has to call a parent implementation.
-        *  \param[in] option An option that is going to be enabled. For possible values, see SelOption.
-        *  \param[in] enable True to enable, false to disable. */
-        virtual void set_option(const SelOption option, bool enable);
-
-        /// Number of shape functions for
-        /// - mode
-        /// - horizontal order + 1 (any)
-        /// - vertical order + 1 (any)
-        /// - shape function type
-        int ****num_shapes;
-
+      class HERMES_API OptimumSelector : public Selector<Scalar>
+      {
       protected:
         /// Constructor.
         /** \note Parameters \a vertex_order and \a edge_bubble_order fixes the fact that a shapeset returns a valid index even though a given shape is not invalid in the space.
@@ -111,7 +95,7 @@ namespace Hermes
         *  \param[in] rsln A reference solution which is used to calculate the error.
         *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
         *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
-        void evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error);
+        void evaluate_candidates(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln);
 
         /// Sorts and selects the best candidate and the best H-candidate according to the score.
         /** Any two candidates with the same score are skipped since it is not possible to decide between them.
@@ -127,15 +111,14 @@ namespace Hermes
         *  \param[out] selected_cand A pointer to a selected index of the best candidate. If the index is 0, the algorithm was not able to decide.
         *  \param[out] selected_h_cand A pointer to a selected index of the best H-candidate. If the index is 0, the algorithm was not able to decide.
         */
-        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, const double avg_error, const double dev_error, int* selected_cand, int* selected_h_cand);
+        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand);
 
         /// Calculates error of candidates.
         /** This method has to be implemented in inherited classes.
         *  \param[in] e An element that is being refined.
         *  \param[in] rsln A reference solution which is used to calculate the error.
-        *  \param[out] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL.
-        *  \param[out] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate. It cannot be NULL. */
-        virtual void evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln, double* avg_error, double* dev_error) = 0;
+        */
+        virtual void evaluate_cands_error(Hermes::vector<Cand>& candidates, Element* e, MeshFunction<Scalar>* rsln) = 0;
 
         /// Calculates DOF of candidates.
         /** It uses a list of shape indices (OptimumSelector::shape_indices) to
@@ -155,6 +138,12 @@ namespace Hermes
         *  \param[in] e An element that is being refined. */
         virtual void evaluate_cands_score(Hermes::vector<Cand>& candidates, Element* e);
 
+        /// Number of shape functions for
+        /// - mode
+        /// - horizontal order + 1 (any)
+        /// - vertical order + 1 (any)
+        /// - shape function type
+        int ****num_shapes;
       private:
         /// Compares scores. Used to sort scores ascending.
         /** \param[in] a The first candidate.

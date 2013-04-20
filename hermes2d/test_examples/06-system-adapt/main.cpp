@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
     err_est_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
     Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
+    adaptivity.set_strategy(AdaptStoppingCriterionLevels, THRESHOLD);
 
     // Time measurement.
     cpu_time.tick();

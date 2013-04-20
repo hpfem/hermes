@@ -45,12 +45,12 @@ namespace Hermes
     /// \ingroup g_adapt
     /// Serves for only inspect such a portion of all elements of all meshes in the system
     /// for potential refinement.
-    /// Default: Cumulative.
     enum AdaptivityStoppingCriterion
     {
       /// Refine elements until prescribed portion of error is processed.
       AdaptStoppingCriterionCumulative,
-      AdaptStoppingCriterionSingleElement
+      AdaptStoppingCriterionSingleElement,
+      AdaptStoppingCriterionLevels
     };
 
     /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity.
@@ -58,6 +58,7 @@ namespace Hermes
     /** The class provides basic functionality necessary to adaptively refine elements.
     *  Given a reference solution and a coarse solution, it calculates error estimates
     *  and it acts as a container for the calculated errors.
+    *  For default values of attributes, see the method set_defaults().
     */
     template<typename Scalar>
     class HERMES_API Adapt :
@@ -91,18 +92,38 @@ namespace Hermes
       /// Default threshold: 0.3.
       void set_strategy(AdaptivityStoppingCriterion strategy, double threshold = 0.3);
 
+      /// (Experimental)
+      /// Iterative improvement - at the end of the adaptation algorithm, the resulting space is used for error calculation between the
+      /// Reference solution and its coarse component and if the previous error divided by error after refinements are applied 
+      /// is not below iterative_improvement_factor, another adaptivity step is performed.
+      /// \param[in] iterative_improvement_factor The factor.
+      void set_iterative_improvement(double iterative_improvement_factor = 1e-1);
+
       /// Set the regularization level.
       /// See attribute regularization.
       void set_regularization_level(int regularization);
 
     protected:
-      // Initialization.
+      /// Set default values.
+      void set_defaults();
+
+      /// (Experimental)
+      /// Iterative improvement - at the end of the adaptation algorithm, the resulting space is used for error calculation between the
+      /// Reference solution and its coarse component and if the previous error divided by error after refinements are applied 
+      /// is not below iterative_improvement_factor, another adaptivity step is performed.
+      bool iterative_improvement;
+      /// Prescribed factor for the iterative improvement.
+      double iterative_improvement_factor;
+      /// Internal.
+      int iterative_improvement_iteration;
+
+      /// Initialization.
       void init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, int** element_refinement_location, MeshSharedPtr* meshes);
-      // Return the number of element where a refinement will be sought.
+      /// Return the number of element where a refinement will be sought.
       int calculate_attempted_element_refinements_count();
-      // Handle meshes and spaces at the end of the routine.
+      /// Handle meshes and spaces at the end of the routine.
       void adapt_postprocess(MeshSharedPtr* meshes, int element_refinements_count);
-      // Deinitialization.
+      /// Deinitialization.
       void deinit_adapt(int** element_refinement_location);
 
       /// Common code for the constructors.
@@ -115,7 +136,7 @@ namespace Hermes
       double threshold;
 
       /// Decide if the refinement at hand will be carried out.
-      bool add_refinement(double processed_error_squared, double max_error_squared, double error_sum_squared, typename ErrorCalculator<Scalar>::ElementReference* element_reference);
+      bool add_refinement(double processed_error_squared, double max_error_squared, int element_inspected_i);
 
       /// Apply a single refinement.
       /** \param[in] A refinement to apply. */
@@ -140,6 +161,10 @@ namespace Hermes
 
       /// Number of solution components (as in wf->neq).
       int num;
+
+      /// Total error from the error calculator.
+      /// Stored because of iterative_improvement.
+      double sum_error_squared;
 
       /// Regularization (max. level of hanging nodes) level.
       int regularization;

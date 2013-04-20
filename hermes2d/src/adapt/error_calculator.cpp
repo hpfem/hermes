@@ -107,6 +107,76 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void ErrorCalculator<Scalar>::adjust_to_refinements(ElementToRefine* elems_to_refine, int num_elem_to_process)
+    {
+      int* errors_size_increase = new int[this->component_count];
+      memset(errors_size_increase, 0, this->component_count * sizeof(int));
+      int element_refs_size_increase = 0;
+
+      for(int i = 0; i < this->component_count; i++)
+      {
+        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_elements();
+
+        errors[i] = (double*)realloc(errors[i], num_elements_i * sizeof(double));
+        
+        int num_active_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_active_elements();
+        this->element_count[i] = num_active_elements_i;
+        this->num_act_elems += num_active_elements_i;
+      }
+
+      this->element_references = (ElementReference*)realloc(this->element_references, this->num_act_elems * sizeof(ElementReference));
+
+      for (int i = 0; i < num_elem_to_process; i++)
+      {
+        ElementToRefine& elem_ref = elems_to_refine[i];
+        if(elem_ref.id == -1 || elem_ref.split == H2D_REFINEMENT_P)
+        {
+          this->errors[elem_ref.comp][elem_ref.id] = elem_ref.errors[0];
+          continue;
+        }
+        else
+        {
+          Element* e = this->coarse_solutions[elem_ref.comp]->get_mesh()->get_element(elem_ref.id);
+          for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
+          {
+            if(e->sons[j])
+            {
+              this->errors[elem_ref.comp][e->sons[j]->id] = elem_ref.errors[j];
+              this->element_references[running_count_total++] = ErrorCalculator<Scalar>::ElementReference(elem_ref.comp, e->sons[j]->id, &this->errors[elem_ref.comp][e->sons[j]->id], NULL);
+            }
+          }
+        }
+      }
+
+      std::qsort(this->element_references, this->num_act_elems, sizeof(ElementReference), &this->compareElementReference);
+
+      int running_indexer = 0;
+      for(int i = 0; i < this->component_count; i++)
+      {
+        component_errors[i] = 0;
+
+        for(int j = 0; j < this->element_count[i]; j++)
+          component_errors[i] += *(this->element_references[running_indexer + j].error);
+
+        if(this->errorType == RelativeErrorToGlobalNorm)
+          for (int k = 0; k < num_elem_to_process; k++)
+            for(int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
+					    *(elems_to_refine[k].error) /= component_norms[i];
+
+        norms_squared_sum += component_norms[i];
+        errors_squared_sum += component_errors[i];
+        
+        if(this->errorType == RelativeErrorToGlobalNorm || this->errorType == RelativeErrorToElementNorm)
+          component_errors[i] /= component_norms[i];
+
+        running_indexer += this->element_count[i];
+      }
+
+      if(this->errorType == RelativeErrorToGlobalNorm || this->errorType == RelativeErrorToElementNorm)
+        errors_squared_sum /= norms_squared_sum;
+    }
+
+    template<typename Scalar>
     void ErrorCalculator<Scalar>::calculate_errors(MeshFunctionSharedPtr<Scalar>& coarse_solution, MeshFunctionSharedPtr<Scalar>& fine_solution, bool sort_and_store)
     {
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > coarse_solutions;
@@ -182,12 +252,6 @@ namespace Hermes
       {
         std::qsort(this->element_references, this->num_act_elems, sizeof(ElementReference), &this->compareElementReference);
         elements_stored = true;
-        std::stringstream ss;
-        ss << "file" << asdf++ << ".dat";
-        std::ofstream out(ss.str().c_str());
-        for(int i = 0; i < this->num_act_elems; i++)
-          out << *this->element_references[i].error << std::endl;
-        out.close();
       }
       else
         elements_stored = false;

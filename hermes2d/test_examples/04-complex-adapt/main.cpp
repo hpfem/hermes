@@ -19,7 +19,7 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 //  The following parameters can be changed:
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
-const double THRESHOLD = 0.3;                     // This is a quantitative parameter of the adapt(...) function and
+const double THRESHOLD = 0.95;                     // This is a quantitative parameter of the adapt(...) function and
                                                   // it has different meanings for various adaptive strategies (see below).
 const int STRATEGY = 0;                           // Adaptive strategy:
                                                   // STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
@@ -42,7 +42,7 @@ const int MESH_REGULARITY = -1;                   // Maximum allowed level of ha
                                                   // their notoriously bad performance.
 const double CONV_EXP = 1.0;                      // Default value is 1.0. This parameter influences the selection of
                                                   // cancidates in hp-adaptivity. See get_optimal_refinement() for details.
-const double ERR_STOP = 1.0;                      // Stopping criterion for adaptivity (rel. error tolerance between the
+const double ERR_STOP = 0.01;                      // Stopping criterion for adaptivity (rel. error tolerance between the
                                                   // reference mesh and coarse mesh solution in percent).
 const int NDOF_STOP = 60000;                      // Adaptivity process stops when the number of degrees of freedom grows
                                                   // over this limit. This is to prevent h-adaptivity to go on forever.
@@ -168,8 +168,10 @@ int main(int argc, char* argv[])
     error_calculator.calculate_errors(sln, ref_sln);
 
     Adapt<complex> adaptivity(space, &error_calculator);
+    adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.75);
+    adaptivity.set_iterative_improvement(1e-1);
 
-    std::cout << (std::string)"Relative error: " << error_calculator.get_total_error_squared() * 100. << std::endl;
+    std::cout << (std::string)"Relative error: " << error_calculator.get_total_error_squared() * 100. << '%' << std::endl;
 
     // If err_est too large, adapt the mesh->
     if(error_calculator.get_total_error_squared()  * 100. < ERR_STOP)
