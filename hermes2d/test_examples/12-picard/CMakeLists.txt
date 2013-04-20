@@ -1,4 +1,4 @@
-project(nonlinearity)
+project(12-picard)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp)
 

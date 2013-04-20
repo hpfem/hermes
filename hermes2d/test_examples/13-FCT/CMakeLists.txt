@@ -1,4 +1,4 @@
-project(11-FCT-solid_body_rotation)
+project(13-FCT-solid_body_rotation)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp lumped_projection.cpp hp_adapt.cpp highOrder.cpp lowOrder.cpp fct.cpp reg_estimator.cpp prev_solution.cpp)
 #include (${hermes2d_SOURCE_DIR}/CMake.common)

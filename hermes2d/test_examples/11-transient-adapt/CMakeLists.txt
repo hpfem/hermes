@@ -1,4 +1,4 @@
-project(13-picard)
+project(11-transient-adapt)
 
 add_executable(${PROJECT_NAME} main.cpp definitions.cpp)
 
