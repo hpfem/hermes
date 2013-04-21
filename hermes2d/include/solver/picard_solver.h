@@ -86,6 +86,7 @@ namespace Hermes
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec);
 
+#pragma region anderson-public
       /// Turn on / off the Anderson acceleration. By default it is off.
       void use_Anderson_acceleration(bool to_set);
     
@@ -99,7 +100,8 @@ namespace Hermes
       /// Set the Anderson beta coefficient. See the details about the Anderson acceleration for 
       /// explanation of this parameter.
       void set_anderson_beta(double beta);
-      
+#pragma endregion
+
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -118,19 +120,20 @@ namespace Hermes
       /// Find out the state.
       typename PicardSolver<Scalar>::ConvergenceState get_convergence_state(double relative_error, int iteration);
 
-      void init_solving(int ndof, Scalar*& coeff_vec);
+      void init_solving(Scalar*& coeff_vec);
       void deinit_solving(Scalar* coeff_vec);
 
       void init_picard();
 
-      double calculate_relative_error(int ndof, Scalar* coeff_vec);
+      double calculate_relative_error(Scalar* coeff_vec);
       
       bool verbose_output_linear_solver;
+      int ndof;
 
       /// Tolerance.
       double picard_tolerance;
 
-
+#pragma region anderson-private
       // Anderson.
       int num_last_vectors_used;
       bool anderson_is_on;
@@ -139,16 +142,18 @@ namespace Hermes
       Scalar** previous_vectors;
       /// To store num_last_vectors_used - 1 Anderson coefficients.
       Scalar* anderson_coeffs;
-
+      
       /// Initialization.
-      void init_anderson(int ndof);
+      void init_anderson();
       /// Deinitialization.
       void deinit_anderson();
 
       /// Handle the previous vectors.
-      void handle_previous_vectors(int ndof, unsigned int& vec_in_memory);
+      void handle_previous_vectors(unsigned int& vec_in_memory);
       /// Calcualte the coefficients.
-      void calculate_anderson_coeffs(int ndof);
+      void calculate_anderson_coeffs();
+
+#pragma endregion
 
 #pragma region OutputAttachable
       // For derived classes - read-only access.
