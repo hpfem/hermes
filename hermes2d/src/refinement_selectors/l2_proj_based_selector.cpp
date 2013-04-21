@@ -238,13 +238,6 @@ namespace Hermes
           //get value of a shape function
           double shape_value = sub_shape.svals[H2D_L2FE_VALUE][gip_inx];
 
-          ////DEBUG-BEGIN
-          //double ref_x = gip_pt[H2D_GIP2D_X] * sub_trf.trf->m[0] + sub_trf.trf->t[0];
-          //double ref_y = gip_pt[H2D_GIP2D_Y] * sub_trf.trf->m[1] + sub_trf.trf->t[1];
-          //double shape_valueA = shapeset->get_fn_value(sub_shape.inx, ref_x, ref_y, 0);
-          //error_if(std::abs(shape_value - shape_valueA) > 1E-14, "A0");
-          ////DEBUG-END
-
           //get value of ref. solution
           Scalar ref_value;
           ref_value = sub_gip.rvals[H2D_L2FE_VALUE][gip_inx];

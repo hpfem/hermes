@@ -15,8 +15,9 @@ namespace Hermes
 
     ElementToRefine::ElementToRefine(const ElementToRefine &orig) : id(orig.id), comp(orig.comp), split(orig.split)
     {
-      copy_orders(p, orig.p);
-      copy_orders(q, orig.q);
+      copy_orders(this->refinement_polynomial_order, orig.refinement_polynomial_order);
+      for(int i = 0; i < 5; i++)
+        copy_orders(this->best_refinement_polynomial_order_type[i], orig.best_refinement_polynomial_order_type[i]);
       copy_errors(errors, orig.errors);
     };
 
@@ -40,8 +41,9 @@ namespace Hermes
       id = orig.id;
       comp = orig.comp;
       split = orig.split;
-      copy_orders(p, orig.p);
-      copy_orders(q, orig.q);
+      copy_orders(this->refinement_polynomial_order, orig.refinement_polynomial_order);
+      for(int i = 0; i < 5; i++)
+        copy_orders(this->best_refinement_polynomial_order_type[i], orig.best_refinement_polynomial_order_type[i]);
       return *this;
     }
   }

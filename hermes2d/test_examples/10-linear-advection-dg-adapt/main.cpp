@@ -74,9 +74,6 @@ int main(int argc, char* args[])
   // Initialize refinement selector.
   L2ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
 
-  // Disable weighting of refinement candidates.
-  selector.set_error_weights(1, 1, 1);
-
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
 
@@ -134,7 +131,8 @@ int main(int argc, char* args[])
     double err_est_rel = error_calculator.get_total_error_squared() * 100;
 
     Adapt<double> adaptivity(space, &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionCumulative, THRESHOLD);
+    adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, THRESHOLD);
+    //adaptivity.set_iterative_improvement(1e-1);
 
     std::cout << "Error: " << err_est_rel << "%." << std::endl;
 

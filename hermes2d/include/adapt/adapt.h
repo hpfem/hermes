@@ -118,13 +118,13 @@ namespace Hermes
       int iterative_improvement_iteration;
 
       /// Initialization.
-      void init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, int** element_refinement_location, MeshSharedPtr* meshes);
+      void init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes);
       /// Return the number of element where a refinement will be sought.
       int calculate_attempted_element_refinements_count();
       /// Handle meshes and spaces at the end of the routine.
       void adapt_postprocess(MeshSharedPtr* meshes, int element_refinements_count);
       /// Deinitialization.
-      void deinit_adapt(int** element_refinement_location);
+      void deinit_adapt(ElementToRefine*** element_refinement_location);
 
       /// Common code for the constructors.
       void init();
@@ -153,7 +153,7 @@ namespace Hermes
       *  \param[in] num_elem_to_process Length of the array elems_to_refine.
       *  \param[in] idx A 2D array that translates a pair (a component index, an element id) to an index of a refinement in the vector of refinements. If the index is below zero, a given element was not refined.
       *  \param[in] refinement_selectors Selectors used by the adaptivity. The selector is used to correct orders of modified refinements using RefinementSelectors::Selector::update_shared_mesh_orders(). */
-      void fix_shared_mesh_refinements(MeshSharedPtr * meshes, ElementToRefine*& elems_to_refine, int num_elem_to_process, int** idx, RefinementSelectors::Selector<Scalar>** refinement_selectors);
+      void fix_shared_mesh_refinements(MeshSharedPtr * meshes, ElementToRefine*& elems_to_refine, int& num_elem_to_process, ElementToRefine*** refinement_location, RefinementSelectors::Selector<Scalar>** refinement_selectors);
 
       /// Enforces the same order to an element of a mesh which is shared among multiple components.
       /** \param[in] meshes An array of meshes of components. */

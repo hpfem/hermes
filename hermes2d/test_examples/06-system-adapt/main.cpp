@@ -73,7 +73,7 @@ const int MESH_REGULARITY = -1;
 // candidates in hp-adaptivity. Default value is 1.0.
 const double CONV_EXP = 1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 0.1;
+const double ERR_STOP = 1.5;
 // Adaptivity process stops when the number of degrees of freedom grows over
 // this limit. This is mainly to prevent h-adaptivity to go on forever.
 const int NDOF_STOP = 60000;
@@ -102,17 +102,19 @@ int main(int argc, char* argv[])
   MeshSharedPtr u_mesh(new Mesh), v_mesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", u_mesh);
-  if (MULTI == false) u_mesh->refine_towards_boundary("Bdy", INIT_REF_BDY);
+  if (MULTI == false)
+    u_mesh->refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Create initial mesh (master mesh).
   v_mesh->copy(u_mesh);
 
   // Initial mesh refinements in the v_mesh towards the boundary.
-  if (MULTI == true) v_mesh->refine_towards_boundary("Bdy", INIT_REF_BDY);
+  if (MULTI == true)
+    v_mesh->refine_towards_boundary("Bdy", INIT_REF_BDY);
 
   // Set exact solutions.
   MeshFunctionSharedPtr<double> exact_u(new ExactSolutionFitzHughNagumo1 (u_mesh));
-  MeshFunctionSharedPtr<double> exact_v(new ExactSolutionFitzHughNagumo2 (v_mesh, K));
+  MeshFunctionSharedPtr<double> exact_v(new ExactSolutionFitzHughNagumo2 (MULTI ? v_mesh : u_mesh, K));
 
   // Define right-hand sides.
   CustomRightHandSide1 g1(K, D_u, SIGMA);
@@ -169,7 +171,7 @@ int main(int argc, char* argv[])
     MeshSharedPtr v_ref_mesh = v_ref_mesh_creator.create_ref_mesh();
     Space<double>::ReferenceSpaceCreator u_ref_space_creator(u_space, u_ref_mesh);
     SpaceSharedPtr<double> u_ref_space = u_ref_space_creator.create_ref_space();
-    Space<double>::ReferenceSpaceCreator v_ref_space_creator(v_space, v_ref_mesh);
+    Space<double>::ReferenceSpaceCreator v_ref_space_creator(v_space, MULTI ? v_ref_mesh : u_ref_mesh);
     SpaceSharedPtr<double> v_ref_space = v_ref_space_creator.create_ref_space();
 
     Hermes::vector<SpaceSharedPtr<double> > ref_spaces_const(u_ref_space, v_ref_space);
@@ -231,7 +233,8 @@ int main(int argc, char* argv[])
     err_est_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
     Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionLevels, THRESHOLD);
+    //adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, 0.95);
+    adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.5);
 
     // Time measurement.
     cpu_time.tick();

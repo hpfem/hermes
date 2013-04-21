@@ -127,7 +127,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, int** element_refinement_location, MeshSharedPtr* meshes)
+    void Adapt<Scalar>::init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes)
     {
       // Start time measurement.
       this->tick();
@@ -147,7 +147,7 @@ namespace Hermes
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->spaces[j]->get_mesh();
-        element_refinement_location[j] = (int*)calloc(meshes[j]->get_max_element_id(), sizeof(int));
+        element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id(), sizeof(ElementToRefine*));
       }
 
       // Set this for solutions.
@@ -198,7 +198,7 @@ namespace Hermes
     {
       // Initialize.
       MeshSharedPtr meshes[H2D_MAX_COMPONENTS];
-      int* element_refinement_location[H2D_MAX_COMPONENTS];
+      ElementToRefine** element_refinement_location[H2D_MAX_COMPONENTS];
       this->init_adapt(refinement_selectors, element_refinement_location, meshes);
 
       // This is the number of refinements attempted.
@@ -253,6 +253,7 @@ namespace Hermes
 
             // Get refinement suggestion.
             ElementToRefine elem_ref(element_id, component);
+            element_refinement_location[component][element_id] = &elem_ref;
 
             // Rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
             if(refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, current_rslns[component].get(), elem_ref, this->errorCalculator->errorType))
@@ -330,7 +331,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::deinit_adapt(int** element_refinement_location)
+    void Adapt<Scalar>::deinit_adapt(ElementToRefine*** element_refinement_location)
     {
       // Get meshes
       for (int j = 0; j < this->num; j++)
@@ -396,8 +397,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::fix_shared_mesh_refinements(MeshSharedPtr* meshes, ElementToRefine*& elems_to_refine, int num_elem_to_proc, int** idx, RefinementSelectors::Selector<Scalar>** refinement_selectors)
+    void Adapt<Scalar>::fix_shared_mesh_refinements(MeshSharedPtr* meshes, ElementToRefine*& elems_to_refine, int& num_elem_to_proc, ElementToRefine*** idx, RefinementSelectors::Selector<Scalar>** refinement_selectors)
     {
+      // Simple returns.
+      if(this->num == 1)
+        return;
+      
       // For additions.
       std::vector<ElementToRefine> new_elems_to_refine;
 
@@ -406,22 +411,28 @@ namespace Hermes
         ElementToRefine& elem_ref = elems_to_refine[inx];
         if(elem_ref.id == -1)
           continue;
-        int current_quad_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
+        int current_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
         Element* current_elem = meshes[elem_ref.comp]->get_element(elem_ref.id);
 
         //select a refinement used by all components that share a mesh which is about to be refined
         int selected_refinement = elem_ref.split;
         for (int j = 0; j < this->num; j++)
         {
-          if(selected_refinement == H2D_REFINEMENT_H) break; // iso refinement is max what can be recieved
-          if(j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp])
-          { // if a mesh is shared
-            int ii = idx[elem_ref.id][j];
-            if(ii >= 0) { // and the sample element is about to be refined by another compoment
-              const ElementToRefine& elem_ref_ii = elems_to_refine[ii];
-              if(elem_ref_ii.split != selected_refinement && elem_ref_ii.split != H2D_REFINEMENT_P) { //select more complicated refinement
-                if((elem_ref_ii.split == H2D_REFINEMENT_ANISO_H || elem_ref_ii.split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
-                  selected_refinement = elem_ref_ii.split;
+          if(selected_refinement == H2D_REFINEMENT_H)
+            break; // iso refinement is max what can be recieved
+
+          // if a mesh is shared
+          if(j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
+          {
+            // and the sample element is about to be refined by another compoment
+            if(idx[j][elem_ref.id])
+            { 
+              ElementToRefine* elem_ref_ii = idx[j][elem_ref.id];
+              //select more complicated refinement
+              if(elem_ref_ii->split != selected_refinement && elem_ref_ii->split != H2D_REFINEMENT_P)
+              { 
+                if((elem_ref_ii->split == H2D_REFINEMENT_ANISO_H || elem_ref_ii->split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
+                  selected_refinement = elem_ref_ii->split;
                 else
                   selected_refinement = H2D_REFINEMENT_H;
               }
@@ -432,38 +443,43 @@ namespace Hermes
         //fix other refinements according to the selected refinement
         if(selected_refinement != H2D_REFINEMENT_P)
         {
-          //get suggested orders for the selected refinement
-          const int* suggested_orders = NULL;
-          if(selected_refinement == H2D_REFINEMENT_H)
-            suggested_orders = elem_ref.q;
-
           //update orders
           for (int j = 0; j < this->num; j++)
           {
-            if(j != elem_ref.comp && meshes[j] == meshes[elem_ref.comp]) { // if components share the mesh
+            // if components share the mesh
+            if(j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
+            { 
               // change currently processed refinement
               if(elem_ref.split != selected_refinement)
               {
                 elem_ref.split = selected_refinement;
-                refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref.split, elem_ref.p, suggested_orders);
+                ElementToRefine::copy_orders(elem_ref.refinement_polynomial_order, elem_ref.best_refinement_polynomial_order_type[selected_refinement]);
               }
 
               // change other refinements
-              int ii = idx[elem_ref.id][j];
-              if(ii >= 0)
+              if(idx[j][elem_ref.id])
               {
-                ElementToRefine& elem_ref_ii = elems_to_refine[ii];
-                if(elem_ref_ii.split != selected_refinement)
+                ElementToRefine* elem_ref_ii = idx[j][elem_ref.id];
+                if(elem_ref_ii->split != selected_refinement)
                 {
-                  elem_ref_ii.split = selected_refinement;
-                  refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_ii.split, elem_ref_ii.p, suggested_orders);
+                  elem_ref_ii->split = selected_refinement;
+                  if(elem_ref_ii->best_refinement_polynomial_order_type[selected_refinement])
+                    ElementToRefine::copy_orders(elem_ref_ii->refinement_polynomial_order, elem_ref_ii->best_refinement_polynomial_order_type[selected_refinement]);
+                  else
+                  {
+                    // This should occur only if the original refinement was a p-refinement.
+#ifdef _DEBUG
+                    this->warn("The best refinement poly degree is missing in fix_shared_mesh_refinements.");
+#endif 
+                    elem_ref_ii->refinement_polynomial_order[3] = elem_ref_ii->refinement_polynomial_order[2] = elem_ref_ii->refinement_polynomial_order[1] = elem_ref_ii->refinement_polynomial_order[0];
+                  }
                 }
               }
               else
               { // element (of the other comp.) not refined at all: assign refinement
                 ElementToRefine elem_ref_new(elem_ref.id, j);
                 elem_ref_new.split = selected_refinement;
-                refinement_selectors[j]->generate_shared_mesh_orders(current_elem, current_quad_order, elem_ref_new.split, elem_ref_new.p, suggested_orders);
+                ElementToRefine::copy_orders(elem_ref_new.refinement_polynomial_order, elem_ref.refinement_polynomial_order);
                 new_elems_to_refine.push_back(elem_ref_new);
               }
             }
@@ -476,6 +492,7 @@ namespace Hermes
         elems_to_refine = (ElementToRefine*)realloc(elems_to_refine, (num_elem_to_proc + new_elems_to_refine.size()) * sizeof(ElementToRefine));
       for(int inx = 0; inx < new_elems_to_refine.size(); inx++)
         elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
+      num_elem_to_proc += new_elems_to_refine.size();
     }
 
     template<typename Scalar>
@@ -522,7 +539,7 @@ namespace Hermes
 
       if(elem_ref.split == H2D_REFINEMENT_P)
       {
-        space->set_element_order_internal(elem_ref.id, elem_ref.p[0]);
+        space->set_element_order_internal(elem_ref.id, elem_ref.refinement_polynomial_order[0]);
         space->edata[elem_ref.id].changed_in_last_adaptation = true;
       }
       else if(elem_ref.split == H2D_REFINEMENT_H)
@@ -531,7 +548,7 @@ namespace Hermes
           mesh->refine_element_id(elem_ref.id);
         for (int j = 0; j < 4; j++)
         {
-          space->set_element_order_internal(e->sons[j]->id, elem_ref.p[j]);
+          space->set_element_order_internal(e->sons[j]->id, elem_ref.refinement_polynomial_order[j]);
           space->edata[e->sons[j]->id].changed_in_last_adaptation = true;
         }
       }
@@ -541,7 +558,7 @@ namespace Hermes
           mesh->refine_element_id(elem_ref.id, elem_ref.split);
         for (int j = 0; j < 2; j++)
         {
-          space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id, elem_ref.p[j]);
+          space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id, elem_ref.refinement_polynomial_order[j]);
           space->edata[e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id].changed_in_last_adaptation = true;
         }
       }

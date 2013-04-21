@@ -26,10 +26,10 @@ namespace Hermes
   {
     /// Possible refinements of an element.
     enum RefinementType {
-      H2D_REFINEMENT_P = -1, ///< P-refinement.
-      H2D_REFINEMENT_H = 0, ///< H-refinement.
-      H2D_REFINEMENT_ANISO_H = 1, ///< ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
-      H2D_REFINEMENT_ANISO_V = 2 ///< ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
+      H2D_REFINEMENT_P = 1, ///< P-refinement.
+      H2D_REFINEMENT_H = 2, ///< H-refinement.
+      H2D_REFINEMENT_ANISO_H = 3, ///< ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
+      H2D_REFINEMENT_ANISO_V = 4 ///< ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
     };
 
     /// Retuns true if a given refinement is an ANISO-refinement.
@@ -61,12 +61,6 @@ namespace Hermes
         H2D_HP_ANISO_H, ///< H-, ANISO- and P-candidates. Hermes::Orders are modified uniformly.
         H2D_HP_ANISO_P, ///< H- and P-candidates only. Hermes::Orders are modified non-uniformly.
         H2D_HP_ANISO ///< H-, ANISO- and P-candidates. Hermes::Orders are modified non-uniformly.
-      };
-
-      /// Options of the selector. \ingroup g_selectors
-      enum SelOption {
-        H2D_PREFER_SYMMETRIC_MESH, ///< Prefer symmetric mesh when selection of the best candidate is done. If two or more candiates has the same score, they are skipped. This option is set by default.
-        H2D_APPLY_CONV_EXP_DOF ///< Use \f$d^c - d_0^c\f$, where \f$c\f$ is the convergence exponent, instead of \f$(d - d_0)^c\f$ to evaluate the score in the method OptimumSelector::evaluate_cands_score(). This option is not set by default.
       };
 
       /// Returns a string representation of a predefined candidate list. \ingroup g_selectors

@@ -82,14 +82,7 @@ namespace Hermes
           *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
           *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
           virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType) = 0;
-          /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
-          /** \param[in] element An element which is about the be refined.
-          *  \param[in] orig_quad_order An encoded order of the element.
-          *  \param[in] refinement A refinement of the element in the mesh. Possible values are defined by the enum RefinementType.
-          *  \param[out] tgt_quad_orders Generated encoded orders.
-          *  \param[in] suggested_quad_orders Suggested encoded orders. If not NULL, the method should copy them to the output. If NULL, the method have to calculate orders. */
-          virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders) = 0;
-
+          
       protected:
         const int min_order; ///< A minimum allowed order.
         const int max_order; ///< A maximum allowed order.
@@ -116,11 +109,7 @@ namespace Hermes
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
         virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType);
-
-        /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
-        /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
-        *  For details, see Selector::generate_shared_mesh_orders. */
-        virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
+        
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;
       };
@@ -142,10 +131,6 @@ namespace Hermes
         /** Increases an order ising POnlySelector::order_h_inc and POnlySelector::order_v_inc. Fails if the order cannot be increased due to the maximum order. For details, see Selector::select_refinement. */
         virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType);
 
-        /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
-        /** If a parameter suggested_quad_orders is NULL, the method uses an encoded order in orig_quad_order.
-        *  For details, see Selector::generate_shared_mesh_orders. */
-        virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders);
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;
       };

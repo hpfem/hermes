@@ -306,12 +306,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::append_candidates_split(Hermes::vector<Cand>& candidates, const int start_quad_order, const int last_quad_order, const int split, bool iso_p)
+      void OptimumSelector<Scalar>::append_candidates_split(Hermes::vector<Cand>& candidates, const int start_order, const int last_order, const int split, bool iso_p)
       {
         //check whether end orders are not lower than start orders
-        if(last_quad_order < 0 || start_quad_order < 0)
+        if(last_order < 0 || start_order < 0)
           return;
-        if(H2D_GET_H_ORDER(start_quad_order) > H2D_GET_H_ORDER(last_quad_order) || H2D_GET_V_ORDER(start_quad_order) > H2D_GET_V_ORDER(last_quad_order))
+        if(H2D_GET_H_ORDER(start_order) > H2D_GET_H_ORDER(last_order) || H2D_GET_V_ORDER(start_order) > H2D_GET_V_ORDER(last_order))
           return;
 
         //get number of sons
@@ -322,8 +322,8 @@ namespace Hermes
         OrderPermutator quad_perms[H2D_MAX_ELEMENT_SONS];
         for(int i = 0; i < num_sons; i++)
         {
-          quad_orders[i] = start_quad_order;
-          quad_perms[i] = OrderPermutator(start_quad_order, last_quad_order, iso_p, &quad_orders[i]);
+          quad_orders[i] = start_order;
+          quad_perms[i] = OrderPermutator(start_order, last_order, iso_p, &quad_orders[i]);
         }
         for(int i = num_sons; i < H2D_MAX_ELEMENT_SONS; i++)
           quad_orders[i] = 0;
@@ -374,67 +374,67 @@ namespace Hermes
         //and restrict it according to the given adapt-type)
         bool iso_p = false;
         int start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
-        int start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
+        int start_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         int last_order_h = std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), last_order_v = std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC);
-        int last_quad_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
+        int last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
         switch(cand_list)
         {
         case H2D_H_ISO:
-        case H2D_H_ANISO: last_quad_order = start_quad_order; break; //no P-candidates except the original candidate
+        case H2D_H_ANISO: last_order = start_order; break; //no P-candidates except the original candidate
         case H2D_P_ISO:
         case H2D_HP_ISO:
         case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
         }
-        append_candidates_split(candidates, quad_order, last_quad_order, H2D_REFINEMENT_P, tri || iso_p);
+        append_candidates_split(candidates, quad_order, last_order, H2D_REFINEMENT_P, tri || iso_p);
 
         //generate all H-candidates
         iso_p = false;
         start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
-        start_quad_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
+        start_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         last_order_h = std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), last_order_v = std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC);
-        last_quad_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
+        last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
         switch(cand_list)
         {
         case H2D_H_ISO:
         case H2D_H_ANISO:
-          last_quad_order = start_quad_order = quad_order; break; //no only one candidate will be created
+          last_order = start_order = quad_order; break; //no only one candidate will be created
         case H2D_P_ISO:
-        case H2D_P_ANISO: last_quad_order = -1; break; //no H-candidate will be generated
+        case H2D_P_ANISO: last_order = -1; break; //no H-candidate will be generated
         case H2D_HP_ISO:
         case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
         }
-        append_candidates_split(candidates, start_quad_order, last_quad_order, H2D_REFINEMENT_H, tri || iso_p);
+        append_candidates_split(candidates, start_order, last_order, H2D_REFINEMENT_H, tri || iso_p);
 
         //generate all ANISO-candidates
         /** \todo Find and why is iro_cache compared with the number 8. What does the number 8 mean? */
         if(!tri && e->iro_cache < 8 && (cand_list == H2D_H_ANISO || cand_list == H2D_HP_ANISO_H || cand_list == H2D_HP_ANISO))
         {
           iso_p = false;
-          int start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v - 1)));
-          int last_quad_order_hz = H2D_MAKE_QUAD_ORDER(std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_quad_order) + H2DRS_MAX_ORDER_INC));
-          int start_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h - 1)), order_v);
-          int last_quad_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_quad_order) + H2DRS_MAX_ORDER_INC), std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC));
+          int start_order_hz = H2D_MAKE_QUAD_ORDER(order_h, std::max(current_min_order, (order_v - 1)));
+          int last_order_hz = H2D_MAKE_QUAD_ORDER(std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), std::min(order_v, H2D_GET_V_ORDER(start_order) + H2DRS_MAX_ORDER_INC));
+          int start_order_vt = H2D_MAKE_QUAD_ORDER(std::max(current_min_order, (order_h - 1)), order_v);
+          int last_order_vt = H2D_MAKE_QUAD_ORDER(std::min(order_h, H2D_GET_H_ORDER(start_order) + H2DRS_MAX_ORDER_INC), std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC));
           switch(cand_list)
           {
           case H2D_H_ANISO:
-            last_quad_order_hz = start_quad_order_hz = quad_order;
-            last_quad_order_vt = start_quad_order_vt = quad_order;
+            last_order_hz = start_order_hz = quad_order;
+            last_order_vt = start_order_vt = quad_order;
             break; //only one candidate will be created
           case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
           }
           if(iso_p) { //make orders uniform: take mininmum order since nonuniformity is caused by different handling of orders along directions
-            int order = std::min(H2D_GET_H_ORDER(start_quad_order_hz), H2D_GET_V_ORDER(start_quad_order_hz));
-            start_quad_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
-            order = std::min(H2D_GET_H_ORDER(start_quad_order_vt), H2D_GET_V_ORDER(start_quad_order_vt));
-            start_quad_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
+            int order = std::min(H2D_GET_H_ORDER(start_order_hz), H2D_GET_V_ORDER(start_order_hz));
+            start_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
+            order = std::min(H2D_GET_H_ORDER(start_order_vt), H2D_GET_V_ORDER(start_order_vt));
+            start_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
 
-            order = std::min(H2D_GET_H_ORDER(last_quad_order_hz), H2D_GET_V_ORDER(last_quad_order_hz));
-            last_quad_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
-            order = std::min(H2D_GET_H_ORDER(last_quad_order_vt), H2D_GET_V_ORDER(last_quad_order_vt));
-            last_quad_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
+            order = std::min(H2D_GET_H_ORDER(last_order_hz), H2D_GET_V_ORDER(last_order_hz));
+            last_order_hz = H2D_MAKE_QUAD_ORDER(order, order);
+            order = std::min(H2D_GET_H_ORDER(last_order_vt), H2D_GET_V_ORDER(last_order_vt));
+            last_order_vt = H2D_MAKE_QUAD_ORDER(order, order);
           }
-          append_candidates_split(candidates, start_quad_order_hz, last_quad_order_hz, H2D_REFINEMENT_ANISO_H, iso_p);
-          append_candidates_split(candidates, start_quad_order_vt, last_quad_order_vt, H2D_REFINEMENT_ANISO_V, iso_p);
+          append_candidates_split(candidates, start_order_hz, last_order_hz, H2D_REFINEMENT_ANISO_H, iso_p);
+          append_candidates_split(candidates, start_order_vt, last_order_vt, H2D_REFINEMENT_ANISO_V, iso_p);
         }
 
         return candidates;
@@ -589,44 +589,57 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand, int* selected_h_cand)
+      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand* best_candidates[5])
       {
         //sort according to the score
         const int num_cands = (int)candidates.size();
+        
         if(num_cands > 2)
           std::sort(candidates.begin() + 1, candidates.end(), compare_cand_score);
 
-        //select best candidate
-        int imax = 1, h_imax = 1;
-        if(true) 
-        { //prefer symmetric mesh
-          //find first valid score that diffres from the next scores
-          while ((imax + 1) < num_cands && std::abs(candidates[imax].score - candidates[imax + 1].score) < H2DRS_SCORE_DIFF_ZERO)
+        // Overall best candidate.
+        if(candidates[1].score == 0)
+          // This means that the best candidate is the 'do-nothing' one.
+          best_candidates[0] = &candidates[0];
+        else
+          // The one with the highest score is the best.
+          best_candidates[0] = &candidates[1];
+
+        for(int i = 0; i < num_cands; i++)
+        {
+          if(candidates[i].split == H2D_REFINEMENT_P)
           {
-            //find the first candidate with a different score
-            Cand& cand_current = candidates[imax];
-            int imax_end = imax + 2;
-            while (imax_end < num_cands && std::abs(cand_current.score - candidates[imax_end].score) < H2DRS_SCORE_DIFF_ZERO)
-              imax_end++;
-
-            imax = imax_end;
+            best_candidates[H2D_REFINEMENT_P] = &candidates[i];
+            break;
           }
-
-          //find valid H-refinement candidate
-          h_imax = imax;
-          while (h_imax < num_cands && candidates[h_imax].split != H2D_REFINEMENT_H)
-            h_imax++;
         }
 
-        //make sure the result is valid: index is valid, selected candidate has a valid score
-        if(imax >= num_cands || candidates[imax].score == 0)
-          imax = 0;
-        if(h_imax >= num_cands || candidates[h_imax].score == 0)
-          h_imax = 0;
+        for(int i = 0; i < num_cands; i++)
+        {
+          if(candidates[i].split == H2D_REFINEMENT_H)
+          {
+            best_candidates[H2D_REFINEMENT_H] = &candidates[i];
+            break;
+          }
+        }
 
-        //report result
-        *selected_cand = imax;
-        *selected_h_cand = h_imax;
+        for(int i = 0; i < num_cands; i++)
+        {
+          if(candidates[i].split == H2D_REFINEMENT_ANISO_H)
+          {
+            best_candidates[H2D_REFINEMENT_ANISO_H] = &candidates[i];
+            break;
+          }
+        }
+
+        for(int i = 0; i < num_cands; i++)
+        {
+          if(candidates[i].split == H2D_REFINEMENT_ANISO_V)
+          {
+            best_candidates[H2D_REFINEMENT_ANISO_V] = &candidates[i];
+            break;
+          }
+        }
       }
 
       template<typename Scalar>
@@ -644,98 +657,53 @@ namespace Hermes
         }
 
         //build candidates.
-        int inx_cand, inx_h_cand;
         Hermes::vector<Cand>& candidates = create_candidates(element, quad_order);
-        
         //there are candidates to choose from
+        Cand* best_candidates[5];
+        // Initialization
+        memset(best_candidates, 0, 5 * sizeof(Cand*));
+
         if(candidates.size() > 1)
         { 
           // evaluate candidates (sum partial projection errors, calculate dofs)
           evaluate_candidates(candidates, element, rsln);
 
           //select candidate
-          select_best_candidate(candidates, element, &inx_cand, &inx_h_cand);
+          select_best_candidate(candidates, element, best_candidates);
         }
 
         //there is not candidate to choose from, select the original candidate
         else 
         { 
-          inx_cand = 0;
-          inx_h_cand = 0;
+          best_candidates[0] = &candidates[0];
         }
 
         //copy result to output
-        Cand& cand = candidates[inx_cand];
-        Cand& cand_h = candidates[inx_h_cand];
-        refinement.split = cand.split;
-        ElementToRefine::copy_orders(refinement.p, cand.p);
-        if(candidates[inx_h_cand].split == H2D_REFINEMENT_H) { //inx_h_cand points to a candidate which is a H-candidate: copy orders
-          ElementToRefine::copy_orders(refinement.q, cand_h.p);
-        }
-        else { //the index is not H-candidate because not candidate was generate: so, fake orders
-          int h_cand_orders[H2D_MAX_ELEMENT_SONS] = { cand_h.p[0], cand_h.p[0], cand_h.p[0], cand_h.p[0] };
-          ElementToRefine::copy_orders(refinement.q, h_cand_orders);
-        }
-        ElementToRefine::copy_errors(refinement.errors, cand.errors);
+        refinement.split = best_candidates[0]->split;
+        ElementToRefine::copy_orders(refinement.refinement_polynomial_order, best_candidates[0]->p);
+        for(int i = 1; i < 5; i++)
+          if(best_candidates[i] != NULL)
+            ElementToRefine::copy_orders(refinement.best_refinement_polynomial_order_type[i], best_candidates[i]->p);
+
+        ElementToRefine::copy_errors(refinement.errors, best_candidates[0]->errors);
 
         //modify orders in a case of a triangle such that order_v is zero
         if(element->is_triangle())
         {
           for(int i = 0; i < H2D_MAX_ELEMENT_SONS; i++)
           {
-            if(!(H2D_GET_V_ORDER(refinement.p[i]) == 0 || H2D_GET_H_ORDER(refinement.p[i]) == H2D_GET_V_ORDER(refinement.p[i])))
-              throw Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.p[i]), H2D_GET_V_ORDER(refinement.p[i]), i);
-            refinement.p[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.p[i]), 0);
-            if(!(H2D_GET_V_ORDER(refinement.q[i]) == 0 || H2D_GET_H_ORDER(refinement.q[i]) == H2D_GET_V_ORDER(refinement.q[i])))
-              throw Exceptions::Exception("Triangle processed but the resulting q-order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.q[i]), H2D_GET_V_ORDER(refinement.q[i]), i);
-            refinement.q[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.q[i]), 0);
+#ifdef _DEBUG
+            if(!(H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]) == 0 || H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]) == H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i])))
+              throw Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]), i);
+#endif
+            refinement.refinement_polynomial_order[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), 0);
           }
         }
 
-        if(inx_cand == 0)
+        if(best_candidates[0] == &candidates[0])
           return false;
         else
           return true;
-      }
-
-      template<typename Scalar>
-      void OptimumSelector<Scalar>::generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders)
-      {
-        if(refinement == H2D_REFINEMENT_P)
-          throw Exceptions::Exception("P-candidate not supported for updating shared orders");
-        const int num_sons = get_refin_sons(refinement);
-        if(suggested_quad_orders != NULL)
-        {
-          for(int i = 0; i < num_sons; i++)
-            tgt_quad_orders[i] = suggested_quad_orders[i];
-        }
-        else
-        {
-          //calculate new quad_orders
-          int quad_order = orig_quad_order;
-          if(cand_list != H2D_H_ISO && cand_list != H2D_H_ANISO) { //H_ISO and H_ANISO has to keep given order
-            int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
-            switch(refinement)
-            {
-            case H2D_REFINEMENT_H:
-              order_h = std::max(1, (order_h + 1)/2);
-              order_v = std::max(1, (order_v + 1)/2);
-              break;
-            case H2D_REFINEMENT_ANISO_H:
-              order_v = std::max(1, 2*(order_v + 1)/3);
-              break;
-            case H2D_REFINEMENT_ANISO_V:
-              order_h = std::max(1, 2*(order_h + 1)/3);
-              break;
-            }
-            if(element->is_triangle())
-              quad_order = H2D_MAKE_QUAD_ORDER(order_h, 0);
-            else
-              quad_order = H2D_MAKE_QUAD_ORDER(order_h, order_v);
-          }
-          for(int i = 0; i < num_sons; i++)
-            tgt_quad_orders[i] = quad_order;
-        }
       }
 
       template class HERMES_API OptimumSelector<double>;

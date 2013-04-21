@@ -49,7 +49,7 @@ namespace Hermes
         struct CandsInfo
         {
           bool uniform_orders; ///< True if all elements of all examined candidates have uniform orders.
-          int min_quad_order; ///< Minimum quad order of all elements of all examined candidates. If less than zero, no candidate is generated.
+          int min_quad_order; ///< Minimum quad order of all elements of all examined candidates.
           int max_quad_order; ///< Maximum quad order of all elements of all examined candidates. If less than zero, no candidate is generated.
 
           /// Default constructor. Creates info that declares no candidates and uniform orders.
@@ -108,10 +108,11 @@ namespace Hermes
         *  \param[in] e An element that is being refined.
         *  \param[in] avg_error An average of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate.
         *  \param[in] dev_error A deviation of \f$\log_{10} e\f$ where \f$e\f$ is an error of a candidate.
-        *  \param[out] selected_cand A pointer to a selected index of the best candidate. If the index is 0, the algorithm was not able to decide.
-        *  \param[out] selected_h_cand A pointer to a selected index of the best H-candidate. If the index is 0, the algorithm was not able to decide.
+        *  \param[out] best_candidates Four best candidates \
+        *     0 - overall
+        *     1 - 4 : indexed by enum RefinementType.
         */
-        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand, int* selected_h_cand);
+        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand* best_candidates[5]);
 
         /// Calculates error of candidates.
         /** This method has to be implemented in inherited classes.
@@ -239,10 +240,6 @@ namespace Hermes
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
         virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType); ///< Selects refinement.
-
-        /// Generates orders of elements which will be created due to a proposed refinement in another component that shares the same a mesh.
-        /** Overriden function. For details, see Selector::generate_shared_mesh_orders(). */
-        virtual void generate_shared_mesh_orders(const Element* element, const int orig_quad_order, const int refinement, int tgt_quad_orders[H2D_MAX_ELEMENT_SONS], const int* suggested_quad_orders); ///< Updates orders of a refinement in another multimesh component which shares a mesh.
       };
     }
   }

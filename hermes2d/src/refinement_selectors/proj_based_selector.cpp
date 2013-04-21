@@ -166,7 +166,7 @@ namespace Hermes
               for (int j = 0; j < H2D_MAX_ELEMENT_SONS; j++)
               {
                 int order_h = H2D_GET_H_ORDER(c.p[j]), order_v = H2D_GET_V_ORDER(c.p[j]);
-                c.errors[j] = herr[j][order_h][order_h];
+                c.errors[j] = herr[j][order_h][order_v];
                 error_squared += c.errors[j];
               }
               error_squared *= 0.25; //element of a candidate occupies 1/4 of the reference domain defined over a candidate
@@ -423,7 +423,7 @@ namespace Hermes
         )
       {
         //allocate space
-        int max_num_shapes = this->next_order_shape[mode][this->max_order];
+        int max_num_shapes = this->next_order_shape[mode][this->max_order == H2DRS_DEFAULT_ORDER ? H2DRS_MAX_ORDER : this->max_order];
         Scalar* right_side = new Scalar[max_num_shapes];
         int* shape_inxs = new int[max_num_shapes];
         int* indx = new int[max_num_shapes]; //solver data

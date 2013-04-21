@@ -51,8 +51,10 @@ namespace Hermes
       int id; ///< An ID of the element.
       int comp; ///< An index of the component.
       int split; ///< Proposed refinement. Possible values are defined in the enum ::RefinementType.
-      int p[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
-      int q[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of the best H-refinement. These orders are used in a case multiple components shares a single mesh.
+      int refinement_polynomial_order[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
+      /// Encoded orders of the best refinement of a certaint type.
+      /// Indexed by enum RefinementType.
+      int best_refinement_polynomial_order_type[4][H2D_MAX_ELEMENT_SONS]; 
       double errors[H2D_MAX_ELEMENT_SONS]; ///< Error of the selected candidate.
 
       /// Returns a number of sons.
