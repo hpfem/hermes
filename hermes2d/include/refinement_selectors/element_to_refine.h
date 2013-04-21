@@ -40,7 +40,7 @@ namespace Hermes
       /// Constructor.
       /** \param[in] id An ID of the element.
       *  \param[in] comp An index of a component. */
-      ElementToRefine(int id, int comp, double error = -1.0);
+      ElementToRefine(int id, int comp);
 
       /// Copy-contructor.
       ElementToRefine(const ElementToRefine &orig);

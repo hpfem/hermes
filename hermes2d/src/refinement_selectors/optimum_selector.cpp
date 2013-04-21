@@ -589,7 +589,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand)
+      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand, int* selected_h_cand)
       {
         //sort according to the score
         const int num_cands = (int)candidates.size();
@@ -598,13 +598,35 @@ namespace Hermes
 
         //select best candidate
         int imax = 1, h_imax = 1;
-        
+        if(true) 
+        { //prefer symmetric mesh
+          //find first valid score that diffres from the next scores
+          while ((imax + 1) < num_cands && std::abs(candidates[imax].score - candidates[imax + 1].score) < H2DRS_SCORE_DIFF_ZERO)
+          {
+            //find the first candidate with a different score
+            Cand& cand_current = candidates[imax];
+            int imax_end = imax + 2;
+            while (imax_end < num_cands && std::abs(cand_current.score - candidates[imax_end].score) < H2DRS_SCORE_DIFF_ZERO)
+              imax_end++;
+
+            imax = imax_end;
+          }
+
+          //find valid H-refinement candidate
+          h_imax = imax;
+          while (h_imax < num_cands && candidates[h_imax].split != H2D_REFINEMENT_H)
+            h_imax++;
+        }
+
         //make sure the result is valid: index is valid, selected candidate has a valid score
         if(imax >= num_cands || candidates[imax].score == 0)
           imax = 0;
+        if(h_imax >= num_cands || candidates[h_imax].score == 0)
+          h_imax = 0;
 
         //report result
         *selected_cand = imax;
+        *selected_h_cand = h_imax;
       }
 
       template<typename Scalar>
@@ -622,7 +644,7 @@ namespace Hermes
         }
 
         //build candidates.
-        int inx_cand;
+        int inx_cand, inx_h_cand;
         Hermes::vector<Cand>& candidates = create_candidates(element, quad_order);
         
         //there are candidates to choose from
@@ -632,19 +654,28 @@ namespace Hermes
           evaluate_candidates(candidates, element, rsln);
 
           //select candidate
-          select_best_candidate(candidates, element, &inx_cand);
+          select_best_candidate(candidates, element, &inx_cand, &inx_h_cand);
         }
 
         //there is not candidate to choose from, select the original candidate
         else 
         { 
           inx_cand = 0;
+          inx_h_cand = 0;
         }
 
         //copy result to output
         Cand& cand = candidates[inx_cand];
+        Cand& cand_h = candidates[inx_h_cand];
         refinement.split = cand.split;
         ElementToRefine::copy_orders(refinement.p, cand.p);
+        if(candidates[inx_h_cand].split == H2D_REFINEMENT_H) { //inx_h_cand points to a candidate which is a H-candidate: copy orders
+          ElementToRefine::copy_orders(refinement.q, cand_h.p);
+        }
+        else { //the index is not H-candidate because not candidate was generate: so, fake orders
+          int h_cand_orders[H2D_MAX_ELEMENT_SONS] = { cand_h.p[0], cand_h.p[0], cand_h.p[0], cand_h.p[0] };
+          ElementToRefine::copy_orders(refinement.q, h_cand_orders);
+        }
         ElementToRefine::copy_errors(refinement.errors, cand.errors);
 
         //modify orders in a case of a triangle such that order_v is zero

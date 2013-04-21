@@ -111,7 +111,7 @@ namespace Hermes
         *  \param[out] selected_cand A pointer to a selected index of the best candidate. If the index is 0, the algorithm was not able to decide.
         *  \param[out] selected_h_cand A pointer to a selected index of the best H-candidate. If the index is 0, the algorithm was not able to decide.
         */
-        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand);
+        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, int* selected_cand, int* selected_h_cand);
 
         /// Calculates error of candidates.
         /** This method has to be implemented in inherited classes.

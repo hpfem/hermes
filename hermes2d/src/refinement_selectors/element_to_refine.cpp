@@ -9,14 +9,15 @@ namespace Hermes
     {
     };
 
-    ElementToRefine::ElementToRefine(int id, int comp, double error) : id(id), comp(comp), error(error), split(H2D_REFINEMENT_H)
+    ElementToRefine::ElementToRefine(int id, int comp) : id(id), comp(comp), split(H2D_REFINEMENT_H)
     {
     };
 
-    ElementToRefine::ElementToRefine(const ElementToRefine &orig) : id(orig.id), comp(orig.comp), split(orig.split), error(error)
+    ElementToRefine::ElementToRefine(const ElementToRefine &orig) : id(orig.id), comp(orig.comp), split(orig.split)
     {
       copy_orders(p, orig.p);
       copy_orders(q, orig.q);
+      copy_errors(errors, orig.errors);
     };
 
     int ElementToRefine::get_num_sons() const
@@ -27,6 +28,11 @@ namespace Hermes
     void ElementToRefine::copy_orders(int* dest, const int* src)
     {
       memcpy(dest, src, sizeof(int) * H2D_MAX_ELEMENT_SONS);
+    }
+
+    void ElementToRefine::copy_errors(double* dest, const double* src)
+    {
+      memcpy(dest, src, sizeof(double) * H2D_MAX_ELEMENT_SONS);
     }
 
     ElementToRefine& ElementToRefine::operator=(const ElementToRefine& orig)

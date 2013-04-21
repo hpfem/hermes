@@ -168,8 +168,8 @@ int main(int argc, char* argv[])
     error_calculator.calculate_errors(sln, ref_sln);
 
     Adapt<complex> adaptivity(space, &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.75);
-    adaptivity.set_iterative_improvement(1e-1);
+    adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.3);
+    //adaptivity.set_iterative_improvement(1e-1);
 
     std::cout << (std::string)"Relative error: " << error_calculator.get_total_error_squared() * 100. << '%' << std::endl;
 

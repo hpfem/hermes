@@ -302,11 +302,15 @@ namespace Hermes
 
       this->adapt_postprocess(meshes, attempted_element_refinements_count);
 
+      delete [] elements_to_refine;
+
       this->deinit_adapt(element_refinement_location);
 
       if(this->iterative_improvement)
       {
-        this->errorCalculator->adjust_to_refinements(elements_to_refine);
+        OGProjection<Scalar>::project_global(this->spaces, this->errorCalculator->fine_solutions, this->errorCalculator->coarse_solutions);
+
+        this->errorCalculator->calculate_errors(this->errorCalculator->coarse_solutions, this->errorCalculator->fine_solutions);
         
         double error_after_refinements = this->errorCalculator->get_total_error_squared();
         
@@ -322,8 +326,6 @@ namespace Hermes
           this->iterative_improvement_iteration = 0;
       }
 
-      delete [] elements_to_refine;
-      
       return false;
     }
 
@@ -511,7 +513,8 @@ namespace Hermes
     void Adapt<Scalar>::apply_refinement(const ElementToRefine& elem_ref)
     {
       if(elem_ref.id == -1)
-        continue;
+        return;
+
       SpaceSharedPtr<Scalar>& space = this->spaces[elem_ref.comp];
       MeshSharedPtr& mesh = space->get_mesh();
 

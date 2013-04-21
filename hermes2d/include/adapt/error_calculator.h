@@ -19,7 +19,6 @@
 #include "../weakform/weakform.h"
 #include "norm_form.h"
 #include "error_thread_calculator.h"
-#include "refinement_selectors/element_to_refine.h"
 
 namespace Hermes
 {
@@ -79,9 +78,6 @@ namespace Hermes
       double get_total_norm_squared() const;
 
     protected:
-      /// For iterative improvement of adaptation.
-      void adjust_to_refinements(ElementToRefine* elems_to_refine, int num_elem_to_process);
-
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "ErrorCalculator"; }
