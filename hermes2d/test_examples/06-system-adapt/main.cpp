@@ -135,6 +135,9 @@ int main(int argc, char* argv[])
 
   // Initialize coarse and reference mesh solutions.
   MeshFunctionSharedPtr<double> u_sln(new Solution<double>()), v_sln(new Solution<double>()), u_ref_sln(new Solution<double>()), v_ref_sln(new Solution<double>());
+  Hermes::vector<MeshFunctionSharedPtr<double> > slns(u_sln, v_sln);
+  Hermes::vector<MeshFunctionSharedPtr<double> > ref_slns(u_ref_sln, v_ref_sln);
+  Hermes::vector<MeshFunctionSharedPtr<double> > exact_slns(exact_u, exact_v);
 
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
@@ -205,9 +208,7 @@ int main(int argc, char* argv[])
 
     // Project the fine mesh solution onto the coarse mesh.
     Hermes::Mixins::Loggable::Static::info("Projecting reference solution on coarse mesh.");
-    OGProjection<double> ogProjection; ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space),
-                                                                   Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln),
-                                                                   Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln));
+    OGProjection<double> ogProjection; ogProjection.project_global(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), ref_slns, slns);
 
     cpu_time.tick();
 
@@ -220,13 +221,13 @@ int main(int argc, char* argv[])
     // Calculate element errors.
     Hermes::Mixins::Loggable::Static::info("Calculating error estimate and exact error.");
     DefaultErrorCalculator<double, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 2);
-    error_calculator.calculate_errors(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln), Hermes::vector<MeshFunctionSharedPtr<double> >(exact_u, exact_v), false);
+    error_calculator.calculate_errors(slns, exact_slns, false);
     double err_exact_rel_total = error_calculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_exact_rel;
     err_exact_rel.push_back(error_calculator.get_error_squared(0) * 100);
     err_exact_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
-    error_calculator.calculate_errors(Hermes::vector<MeshFunctionSharedPtr<double> >(u_sln, v_sln), Hermes::vector<MeshFunctionSharedPtr<double> >(u_ref_sln, v_ref_sln), true);
+    error_calculator.calculate_errors(slns, ref_slns, true);
     double err_est_rel_total = error_calculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_est_rel;
     err_est_rel.push_back(error_calculator.get_error_squared(0) * 100);
@@ -270,7 +271,8 @@ int main(int argc, char* argv[])
     else
     {
       Hermes::Mixins::Loggable::Static::info("Adapting coarse mesh.");
-      done = adaptivity.adapt(Hermes::vector<RefinementSelectors::Selector<double> *>(&selector, &selector));
+      Hermes::vector<RefinementSelectors::Selector<double> *> selectors(&selector, &selector);
+      done = adaptivity.adapt(selectors);
     }
     if (Space<double>::get_num_dofs(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space)) >= NDOF_STOP)
       done = true;
