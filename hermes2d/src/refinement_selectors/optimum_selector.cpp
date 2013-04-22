@@ -370,14 +370,12 @@ namespace Hermes
         //generate all P-candidates (start from intention of generating all possible candidates
         //and restrict it according to the given adapt-type)
         bool iso_p = false;
-        int start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
-        int start_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         int last_order_h = std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), last_order_v = std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC);
         int last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
         switch(cand_list)
         {
         case H2D_H_ISO:
-        case H2D_H_ANISO: last_order = start_order; break; //no P-candidates except the original candidate
+        case H2D_H_ANISO: last_order = quad_order; break; //no P-candidates except the original candidate
         case H2D_P_ISO:
         case H2D_HP_ISO:
         case H2D_HP_ANISO_H: iso_p = true; break; //iso change of orders
@@ -386,8 +384,8 @@ namespace Hermes
 
         //generate all H-candidates
         iso_p = false;
-        start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
-        start_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
+        int start_order_h = std::max(current_min_order, order_h - 1), start_order_v = std::max(current_min_order, order_v - 1);
+        int start_order = H2D_MAKE_QUAD_ORDER(start_order_h, start_order_v);
         last_order_h = std::min(current_max_order, order_h + H2DRS_MAX_ORDER_INC), last_order_v = std::min(current_max_order, order_v + H2DRS_MAX_ORDER_INC);
         last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
         switch(cand_list)
@@ -565,11 +563,11 @@ namespace Hermes
         Cand& unrefined = candidates[0];
         const int num_cands = (int)candidates.size();
         unrefined.score = 0;
-        const double unrefined_dofs_exp = std::pow(unrefined.dofs, conv_exp);
+
         for (int i = 1; i < num_cands; i++)
         {
           Cand& cand = candidates[i];
-          if(cand.error < unrefined.error && cand.dofs > unrefined.dofs)
+          if(cand.error < unrefined.error)
           {
             double delta_dof_exp = std::pow(cand.dofs - unrefined.dofs, conv_exp);
             candidates[i].score = (log10(unrefined.error) - log10(cand.error)) / delta_dof_exp;
@@ -670,10 +668,13 @@ namespace Hermes
         }
 
         //there is not candidate to choose from, select the original candidate
-        else 
+        else
         { 
           best_candidates[0] = &candidates[0];
         }
+
+        if(best_candidates[0] == &candidates[0])
+          return false;
 
         //copy result to output
         refinement.split = best_candidates[0]->split;
@@ -697,10 +698,7 @@ namespace Hermes
           }
         }
 
-        if(best_candidates[0] == &candidates[0])
-          return false;
-        else
-          return true;
+        return true;
       }
 
       template class HERMES_API OptimumSelector<double>;
