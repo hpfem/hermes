@@ -1,11 +1,6 @@
 #include "proj_based_selector.h"
 #include "hcurl_proj_based_selector.h"
 #include <algorithm>
-#include "global.h"
-#include "solution.h"
-#include "discrete_problem.h"
-#include "quad_all.h"
-#include "element_to_refine.h"
 #include "order_permutator.h"
 
 namespace Hermes

@@ -16,7 +16,7 @@
 #ifndef __H2D_ELEMENT_TO_REFINE_H
 #define __H2D_ELEMENT_TO_REFINE_H
 
-#include "candidates.h"
+#include "global.h"
 
 namespace Hermes
 {

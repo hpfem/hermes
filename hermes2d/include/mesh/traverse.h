@@ -19,8 +19,6 @@
 #include "hermes_common.h"
 #include "mesh.h"
 
-#include <hash_set>
-
 namespace Hermes
 {
   namespace Hermes2D
@@ -115,40 +113,44 @@ namespace Hermes
       template<typename T> friend class DiscreteProblemThreadAssembler;
       };
 
-      void begin(int n, MeshSharedPtr* meshes, Transformable** fn = NULL);
-      void finish();
-
-      State* get_next_state(int* top_by_ref = NULL, int* id_by_ref = NULL);
+      /// Returns all states on the passed meshes.
+      /// \param[in] meshes Meshes.
+      /// \param[out] num Number of states.
+      /// \return The states.
       State** get_states(Hermes::vector<MeshSharedPtr> meshes, int& num);
-      inline Element*  get_base() const { return base; }
-
+      
+    private:
+      /// Used by get_states.
+      void begin(int n);
+      /// Used by get_states.
+      void finish();
+      /// Used by get_states.
       void init_transforms(State* s, int i);
 
-      UniData** construct_union_mesh(MeshSharedPtr unimesh);
-
-      int num;
-      MeshSharedPtr* meshes;
-      Transformable** fn;
-
-      State* stack;
-      int top, size;
-
-      int id;
-      bool tri;
-      Element* base;
-      int4* sons;
-      uint64_t* subs;
-
-      UniData** unidata;
-      int udsize;
-
-      State* push_state(int* top_by_ref = NULL);
-      void set_boundary_info(State* s);
+#pragma region union-mesh
+      UniData** construct_union_mesh(int n, MeshSharedPtr* meshes, MeshSharedPtr unimesh);
       void union_recurrent(Rect* cr, Element** e, Rect* er, uint64_t* idx, Element* uni);
       uint64_t init_idx(Rect* cr, Rect* er);
 
-      void free_state(State* state);
+      UniData** unidata;
+      int udsize;
+      bool tri;
+#pragma endregion
 
+      /// Internal.
+      int num;
+      /// Internal.
+      State* stack;
+      /// Internal.
+      int top, size;
+
+      /// Internal.
+      State* push_state(int* top_by_ref = NULL);
+      /// Internal.
+      void set_boundary_info(State* s);
+      /// Internal.
+      void free_state(State* state);
+      /// Internal.
       int spaces_size;
 
       MeshSharedPtr unimesh;

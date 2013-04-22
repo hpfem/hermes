@@ -1,10 +1,7 @@
 #include <iostream>
-#include "global.h"
-#include "solution.h"
-#include "discrete_problem.h"
-#include "quad_all.h"
 #include "element_to_refine.h"
 #include "optimum_selector.h"
+#include "order_permutator.h"
 
 #define H2DST_ANY H2DST_VERTEX | H2DST_HORIZ_EDGE | H2DST_VERT_EDGE | H2DST_TRI_EDGE | H2DST_BUBBLE ///< Any type of shape. Used just for masky
 

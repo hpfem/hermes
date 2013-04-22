@@ -17,9 +17,6 @@
 #include "function/exact_solution.h"
 #include "adapt/error_thread_calculator.h"
 #include "norm_form.h"
-#include "api2d.h"
-#include "mesh/traverse.h"
-#include <stdlib.h>
 
 namespace Hermes
 {

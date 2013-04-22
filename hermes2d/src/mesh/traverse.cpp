@@ -13,10 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "global.h"
 #include "mesh.h"
-#include "transformable.h"
 #include "traverse.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -132,24 +131,24 @@ namespace Hermes
     /*
     void Traverse::State::operator=(const State * other)
     {
-      // Delete part.
-      if(e != NULL)
-        delete [] e;
-      if(sub_idx != NULL)
-        delete [] sub_idx;
+    // Delete part.
+    if(e != NULL)
+    delete [] e;
+    if(sub_idx != NULL)
+    delete [] sub_idx;
 
-      this->num = other->num;
+    this->num = other->num;
 
-      this->e = new Element*[num];
-      this->sub_idx = new uint64_t[num];
-      memcpy(this->e, other->e, num * sizeof(Element*));
-      memcpy(this->sub_idx, other->sub_idx, num * sizeof(uint64_t));
-      memcpy(this->bnd, other->bnd, 4 * sizeof(bool));
+    this->e = new Element*[num];
+    this->sub_idx = new uint64_t[num];
+    memcpy(this->e, other->e, num * sizeof(Element*));
+    memcpy(this->sub_idx, other->sub_idx, num * sizeof(uint64_t));
+    memcpy(this->bnd, other->bnd, 4 * sizeof(bool));
 
-      this->rep = other->rep;
-      this->visited = other->visited;
-      this->isurf = other->isurf;
-      this->isBnd = other->isBnd;
+    this->rep = other->rep;
+    this->visited = other->visited;
+    this->isurf = other->isurf;
+    this->isBnd = other->isBnd;
     }
     */
     Traverse::State* Traverse::State::clone(const Traverse::State * other)
@@ -291,7 +290,9 @@ namespace Hermes
       State** states = (State**)malloc(sizeof(State*)*predictedCount);
 
       this->num = meshes.size();
-      this->begin(num, &meshes.front());
+      this->begin(num);
+
+      int id = 0;
 
       while (1)
       {
@@ -403,9 +404,9 @@ namespace Hermes
               s->rep_subidx = s->sub_idx[j];
               s->rep_i = j;
             }
-          if(s->rep)
-            states[count++] = State::clone(s);
-          continue;
+            if(s->rep)
+              states[count++] = State::clone(s);
+            continue;
         }
 
         // Triangle: push son states
@@ -572,347 +573,69 @@ namespace Hermes
       this->finish();
     }
 
-    Traverse::State* Traverse::get_next_state(int* top_by_ref, int* id_by_ref)
+    static void testMeshesCompliance(int n, MeshSharedPtr* meshes)
     {
-      // Serial / parallel code.
-      int* top_f = (top_by_ref == NULL) ? &this->top : top_by_ref;
-      int* id_f = (id_by_ref == NULL) ? &this->id : id_by_ref;
+      // Test whether all master meshes have the same number of elements.
+          int base_elem_num = meshes[0]->get_num_base_elements();
+          for (int i = 1; i < n; i++)
+            if(base_elem_num != meshes[i]->get_num_base_elements())
+              throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
 
-      while (1)
-      {
-        int i, son;
-        // When the stack of states is not empty (i.e. not at the beginning) the function starts here.
-        // If the top state was visited already, we are returning through it:
-        // undo all its transformations, pop it and continue with a non-visited one
-        State* s;
+          Element* e;
+          // Test whether areas of corresponding elements are the same.
+          double *areas = new double[base_elem_num];
+          memset(areas, 0, base_elem_num*sizeof(double));
 
-        while (*top_f > 0 && (s = stack + (*top_f)-1)->visited)
-          (*top_f)--;
-
-        // The stack is empty, take next base element
-        // The process starts here (at the beginning the stack is always empty, i.e. top == 0)
-        if(*top_f <= 0)
-        {
-          // Push the state of a new base element.
-          // This function only allocates memory for the new state,
-          // with as many Elements* as there are meshes in this stage.
-          // (Traverse knows what stage it is, because it is being initialized by calling trav.begin(..)).
-          s = push_state(top_f);
-          s->cr = H2D_UNITY;
-          while (1)
+          // Read base element areas from the first mesh,
+          // Also get minimum element area.
+          int counter = 0;
+          double min_elem_area = 1e30;  
+          for_all_base_elements_incl_inactive(e, meshes[0])
           {
-            // No more base elements? we're finished.
-            // Id is set to zero at the beginning by the function trav.begin(..).
-            if(*id_f >= meshes[0]->get_num_base_elements())
-              return NULL;
-            int nused = 0;
-            // The variable num is the number of meshes in the stage
-            for (i = 0; i < num; i++)
-            {
-              // Retrieve the Element with this id on the i-th mesh.
-              s->e[i] = meshes[i]->get_element(*id_f);
-              if(!s->e[i]->used)
-              {
-                s->e[i] = NULL;
-                continue;
-              }
-              else
-                s->rep = s->e[i];
-              s->er[i] = H2D_UNITY;
-              nused++;
-            }
-            // If there is any used element in this stage we continue with the calculation
-            // (break this cycle looking for such an element id).
-            if(nused)
-              break;
-            (*id_f)++;
-          }
-
-          (*id_f)++;
-
-          if(s->rep->is_triangle())
-            for (i = 0; i < 3; i++)
-              s->bnd[i] = true;
-        }
-
-        // Entering a new state, perform transformations.
-        s->visited = true;
-        for (i = 0; i < num; i++)
-        {
-          // ..where the element is used ..
-          if(s->e[i] != NULL)
-            if(s->sub_idx[i] == 0 && s->e[i]->active)
-              if(!s->rep->is_triangle())
-                init_transforms(s, i);
-        }
-
-        // Is this the leaf state?
-        bool leaf = true;
-        for (i = 0; i < num; i++)
-        {
-          if(s->e[i] != NULL)
-            if(!s->e[i]->active)
-            {
-              leaf = false;
-              break;
-            }
-        }
-
-        // if yes, set boundary flags and return the state
-        if(leaf)
-        {
-          if(fn != NULL)
-            for (i = 0; i < num; i++)
-              if(s->e[i] != NULL)
-              {
-                fn[i]->set_active_element(s->e[i]);
-                fn[i]->set_transform(s->sub_idx[i]);
-              }
-              set_boundary_info(s);
-              return s;
-        }
-
-        // Triangle: push son states
-        if(s->rep->is_triangle())
-        {
-          // Triangle always has 4 sons.
-          for (son = 0; son <= 3; son++)
-          {
-            State* ns = push_state(top_f);
-            // For every mesh..
-            for (i = 0; i < num; i++)
-            {
-              // ..if the element is not used.
-              if(s->e[i] == NULL)
-              {
-                ns->e[i] = NULL;
-              }
-              else if(s->e[i]->active)
-              {
-                ns->rep = s->e[i];
-                ns->e[i] = s->e[i];
-                ns->sub_idx[i] = s->sub_idx[i];
-                ns->push_transform(son, i, true);
-              }
-              // ..we move to the son.
-              else
-              {
-                ns->e[i] = s->e[i]->sons[son];
-                // If the son's element is active.
-                if(ns->e[i]->active)
-                  ns->sub_idx[i] = 0;
-                if(ns->e[i] != NULL)
-                  ns->rep = ns->e[i];
-              }
-            }
-
-            // Determine boundary flags and positions for the new state.
-            if(son < 3)
-            {
-              memcpy(ns->bnd, s->bnd, sizeof(ns->bnd));
-
-              switch (son)
-              {
-              case 0: ns->bnd[1] = false; break;
-              case 1: ns->bnd[2] = false; break;
-              case 2: ns->bnd[0] = false; break;
-              }
-            }
+            if(!e->used)
+              areas[counter] = 0.0;
             else
             {
-              memset(ns->bnd, 0, sizeof(ns->bnd));
+              areas[counter] = e->get_area();
+              if(areas[counter] < min_elem_area)
+                min_elem_area = areas[counter];
             }
-          }
-        }
-        // Quad: this is a little more complicated, same principle, though.
-        else
-        {
-          // Obtain split types and son numbers for the current rectangle on all elements.
-          int split = 0;
-          int4* current_sons = new int4[num];
-          for (i = 0; i < num; i++)
-            if(s->e[i] != NULL && !s->e[i]->active)
-              split |= get_split_and_sons(s->e[i], &s->cr, s->er + i, current_sons[i]);
 
-          // Both splits: recur to four sons, similar to triangles.
-          if(split == 3)
+            counter++;
+          }
+          // take one mesh at a time and compare element areas to the areas[] array
+          double tolerance = min_elem_area/100.;
+
+          if(min_elem_area < 0)
+            throw Exceptions::ValueException("min_elem_area", 0.0, 1e-10);
+
+          for (int i = 1; i < n; i++)
           {
-            for (son = 0; son <= 3; son++)
+            counter = 0;
+            for_all_base_elements_incl_inactive(e, meshes[i])
             {
-              State* ns = push_state(top_f);
-              // Sets the son's "base" rectangle to the correct one.
-              move_to_son(&ns->cr, &s->cr, son);
-
-              for (i = 0; i < num; i++)
-              {
-                if(s->e[i] == NULL)
+              if(e->used)
+                if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > 1e-15)
                 {
-                  ns->e[i] = NULL;
+                  throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
                 }
-                else if(s->e[i]->active)
-                {
-                  ns->e[i] = s->e[i];
-                  ns->sub_idx[i] = s->sub_idx[i];
-                  ns->push_transform(son, i);
-                }
-                else
-                {
-                  ns->e[i] = s->e[i]->sons[current_sons[i][son] & 3];
-                  // Sets the son's "current mesh" rectangle correctly.
-                  move_to_son(ns->er + i, s->er + i, current_sons[i][son]);
-                  if(ns->e[i]->active)
-                    ns->sub_idx[i] = 0;
-                }
-                if(ns->e[i] != NULL)
-                  ns->rep = ns->e[i];
-              }
+                counter++;
             }
           }
-          // V or h split, recur to two sons.
-          else if(split > 0)
-          {
-            int son0 = 4, son1 = 5;
-            if(split == 2) { son0 = 6; son1 = 7; }
-
-            for (son = son0; son <= son1; son++)
-            {
-              State* ns = push_state(top_f);
-              move_to_son(&ns->cr, &s->cr, son);
-
-              int j = (son == 4 || son == 6) ? 0 : 2;
-              for (i = 0; i < num; i++)
-              {
-                if(s->e[i] == NULL)
-                {
-                  ns->e[i] = NULL;
-                }
-                else
-                {
-                  if(s->e[i]->active)
-                  {
-                    ns->e[i] = s->e[i];
-                    ns->sub_idx[i] = s->sub_idx[i];
-                    ns->push_transform(son, i);
-                  }
-                  else
-                  {
-                    ns->e[i] = s->e[i]->sons[current_sons[i][j] & 3];
-                    move_to_son(ns->er + i, s->er + i, current_sons[i][j]);
-                    if(ns->e[i]->active)
-                      ns->sub_idx[i] = 0;
-                  }
-                  if(ns->e[i] != NULL)
-                    ns->rep = ns->e[i];
-                }
-              }
-            }
-          }
-
-          // No splits, recur to one son.
-          else
-          {
-            State* ns = push_state(top_f);
-            memcpy(&ns->cr, &s->cr, sizeof(Rect));
-
-            for (i = 0; i < num; i++)
-            {
-              if(s->e[i] == NULL)
-              {
-                ns->e[i] = NULL;
-              }
-              else if(s->e[i]->active)
-              {
-                ns->e[i] = s->e[i];
-                memcpy(&ns->er[i], &ns->cr, sizeof(Rect));
-              }
-              else
-              {
-                ns->e[i] = s->e[i]->sons[current_sons[i][0] & 3];
-                move_to_son(ns->er + i, s->er + i, current_sons[i][0]);
-                if(ns->e[i]->active)
-                  ns->sub_idx[i] = 0;
-                if(ns->e[i] != NULL)
-                  ns->rep = ns->e[i];
-              }
-            }
-          }
-          delete [] current_sons;
-        }
-      }
+          delete [] areas;
     }
 
-    void Traverse::begin(int n, MeshSharedPtr* meshes, Transformable** fn)
+    void Traverse::begin(int n)
     {
-      //if(stack != NULL) finish();
-
       assert(n > 0);
       num = n;
 
-      this->meshes = meshes;
-      this->fn = fn;
-
       size = 256;
-      
-      {
-        stack = new State[size];
-        memset(stack, 0, size * sizeof(State));
 
-        sons = new int4[num];
-        subs = new uint64_t[num];
+      stack = new State[size];
+      memset(stack, 0, size * sizeof(State));
 
-        id = 0;
-        top = 0;
-
-        // Test whether all master meshes have the same number of elements.
-        int base_elem_num = meshes[0]->get_num_base_elements();
-        for (int i = 1; i < n; i++)
-          if(base_elem_num != meshes[i]->get_num_base_elements())
-            throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
-
-        Element* e;
-        // Test whether areas of corresponding elements are the same.
-        double *areas = new double[base_elem_num];
-        memset(areas, 0, base_elem_num*sizeof(double));
-
-        // Read base element areas from the first mesh,
-        // Also get minimum element area.
-        int counter = 0;
-        double min_elem_area = 1e30;  
-        for_all_base_elements_incl_inactive(e, meshes[0])
-        {
-          if(!e->used)
-            areas[counter] = 0.0;
-          else
-          {
-            areas[counter] = e->get_area();
-            if(areas[counter] < min_elem_area)
-              min_elem_area = areas[counter];
-          }
-
-          counter++;
-        }
-        // take one mesh at a time and compare element areas to the areas[] array
-        double tolerance = min_elem_area/100.;
-
-        if(min_elem_area < 0)
-          throw Exceptions::ValueException("min_elem_area", 0.0, 1e-10);
-
-        for (int i = 1; i < n; i++)
-        {
-          counter = 0;
-          for_all_base_elements_incl_inactive(e, meshes[i])
-          {
-            if(e->used)
-              if(fabs(areas[counter] - e->get_area()) > tolerance && areas[counter] > 1e-15)
-              {
-                this->info("counter = %d, area_1 = %g, area_2 = %g.\n", counter, areas[counter], e->get_area());
-                throw Hermes::Exceptions::Exception("Meshes not compatible in Traverse::begin().");
-              }
-              counter++;
-          }
-        }
-        delete [] areas;
-      }
+      top = 0;
     }
 
     void Traverse::free_state(Traverse::State* state)
@@ -925,19 +648,15 @@ namespace Hermes
 
     void Traverse::finish()
     {
-      {
-        delete [] subs;
-        delete [] sons;
+      if(stack == NULL)
+        return;
 
-        if(stack == NULL) return;
+      for (int i = 0; i < size; i++)
+        if(stack[i].e != NULL)
+          free_state(stack + i);
 
-        for (int i = 0; i < size; i++)
-          if(stack[i].e != NULL)
-            free_state(stack + i);
-
-        delete [] stack;
-        stack = NULL;
-      }
+      delete [] stack;
+      stack = NULL;
     }
 
     uint64_t Traverse::init_idx(Rect* cr, Rect* er)
@@ -1110,8 +829,14 @@ namespace Hermes
         delete [] idx_new;
     }
 
-    UniData** Traverse::construct_union_mesh(MeshSharedPtr unimesh)
+    UniData** Traverse::construct_union_mesh(int n, MeshSharedPtr* meshes, MeshSharedPtr unimesh)
     {
+      // Initial check.
+      testMeshesCompliance(n, meshes);
+
+      // Initialization.
+      this->begin(n);
+
       int i;
       Element** e = new Element*[num];
       Rect* er = new Rect[num];
@@ -1120,6 +845,7 @@ namespace Hermes
       this->unimesh = unimesh;
       unimesh->copy_base(meshes[0]);
 
+      // Unimesh initialization.
       udsize = 0;
       unidata = new UniData*[num];
       memset(unidata, 0, sizeof(UniData*) * num);
@@ -1127,7 +853,8 @@ namespace Hermes
       uint64_t* idx = new uint64_t[num];
       memset(idx, 0, num*sizeof(uint64_t));
 
-      for (id = 0; id < meshes[0]->get_num_base_elements(); id++)
+      // Calculation.
+      for (int id = 0; id < meshes[0]->get_num_base_elements(); id++)
       {
         for (i = 0; i < num; i++)
         {
@@ -1135,8 +862,7 @@ namespace Hermes
           static const Rect H2D_UNITY = { 0, 0, ONE, ONE };
           cr = er[i] = H2D_UNITY;
         }
-        base = e[0];
-        tri = base->is_triangle();
+        tri = e[0]->is_triangle();
         union_recurrent(&cr, e, er, idx, unimesh->get_element(id));
       }
 

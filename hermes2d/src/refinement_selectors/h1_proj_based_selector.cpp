@@ -1,9 +1,6 @@
-#include "global.h"
 #include "matrix.h"
-#include "solution.h"
-#include "shapeset/shapeset_h1_all.h"
-#include "element_to_refine.h"
 #include "h1_proj_based_selector.h"
+
 namespace Hermes
 {
   namespace Hermes2D

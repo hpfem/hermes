@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "order_permutator.h"
+
 namespace Hermes
 {
   namespace Hermes2D

@@ -17,6 +17,7 @@
 #define __H2D_REFINEMENT_SELECTORS_L2_PROJ_BASED_SELECTOR_H
 
 #include "proj_based_selector.h"
+#include "shapeset/shapeset_l2_all.h"
 namespace Hermes
 {
   namespace Hermes2D

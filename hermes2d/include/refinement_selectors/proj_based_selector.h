@@ -16,7 +16,6 @@
 #ifndef __H2D_REFINEMENT_PROJ_BASED_SELECTOR_H
 #define __H2D_REFINEMENT_PROJ_BASED_SELECTOR_H
 
-#include "../global.h"
 #include "optimum_selector.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;

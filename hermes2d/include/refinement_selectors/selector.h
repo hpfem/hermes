@@ -16,21 +16,7 @@
 #ifndef __H2D_REFINEMENT_SELECTOR_H
 #define __H2D_REFINEMENT_SELECTOR_H
 
-#ifndef _MSC_VER
-#include "refinement_type.h"
-
-namespace Hermes
-{
-  namespace Hermes2D
-  {
-    class ElementToRefine;
-    struct Element;
-    template<typename Scalar> class Solution;
-  }
-}
-#else
 #include "element_to_refine.h"
-#endif
 #include "../mesh/mesh.h"
 #include "adapt/error_calculator.h"
 

@@ -17,7 +17,6 @@
 #define __H2D_CANDIDATES_H
 
 #include <ostream>
-#include "order_permutator.h"
 #include "global.h"
 
 namespace Hermes

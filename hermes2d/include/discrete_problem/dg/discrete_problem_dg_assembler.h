@@ -17,8 +17,6 @@
 #define __H2D_DISCRETE_PROBLEM_DG_ASSEMBLER_H
 
 #include "hermes_common.h"
-#include "adapt/adapt.h"
-#include "graph.h"
 #include "forms.h"
 #include "weakform/weakform.h"
 #include "function/function.h"

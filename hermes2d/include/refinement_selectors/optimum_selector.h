@@ -17,9 +17,9 @@
 #define __H2D_REFINEMENT_OPTIMUM_SELECTOR_H
 
 #include <ostream>
-#include "order_permutator.h"
 #include "selector.h"
 #include "../shapeset/shapeset.h"
+#include "candidates.h"
 
 namespace Hermes
 {

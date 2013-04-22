@@ -1,5 +1,5 @@
-#include "global.h"
 #include "element_to_refine.h"
+#include "refinement_selectors\candidates.h"
 
 namespace Hermes
 {

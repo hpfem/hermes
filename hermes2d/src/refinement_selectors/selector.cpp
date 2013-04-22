@@ -1,7 +1,7 @@
 #include "global.h"
-#include "solution.h"
-#include "element_to_refine.h"
 #include "selector.h"
+#include "candidates.h"
+
 namespace Hermes
 {
   namespace Hermes2D

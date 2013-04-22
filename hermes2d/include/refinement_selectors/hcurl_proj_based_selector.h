@@ -18,7 +18,6 @@
 
 #include "proj_based_selector.h"
 #include "shapeset/shapeset_hc_all.h"
-#include <complex>
 namespace Hermes
 {
   namespace Hermes2D
