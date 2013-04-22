@@ -13,8 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "weakforms_h1.h"
-#include "api2d.h"
+#include "weakform_library/weakforms_h1.h"
+#include "weakform_library/integrals_h1.h"
+
 namespace Hermes
 {
   namespace Hermes2D

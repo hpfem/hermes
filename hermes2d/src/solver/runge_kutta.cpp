@@ -478,11 +478,7 @@ namespace Hermes
       // FIXME - this projection is not needed when the
       //         spaces are the same (if spatial adaptivity is not used).
       Scalar* coeff_vec = new Scalar[ndof];
-      OGProjection<Scalar> ogProjection;
-      ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
-
-      OGProjection<Scalar> ogProjection;
-      ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
+      OGProjection<Scalar>::project_global(spaces, slns_time_prev, coeff_vec);
 
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)

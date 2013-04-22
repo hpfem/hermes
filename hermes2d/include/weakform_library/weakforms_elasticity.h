@@ -16,7 +16,6 @@
 #ifndef __H2D_ELASTICITY_WEAK_FORMS_H
 #define __H2D_ELASTICITY_WEAK_FORMS_H
 
-#include "../integrals/h1.h"
 #include "../weakform/weakform.h"
 #include "../spline.h"
 

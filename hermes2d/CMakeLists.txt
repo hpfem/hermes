@@ -101,17 +101,22 @@ project(hermes2d)
   # Source files for the Hermes2d library.
   #
   set(SRC
+    src/boundary_conditions/essential_boundary_conditions.cpp
     src/api2d.cpp
-    src/asmlist.cpp
     src/calculation_continuity.cpp
-    src/forms.cpp
-    src/mixins2d.cpp
-    src/neighbor_search.cpp
     src/graph.cpp
+    src/mixins2d.cpp
+    src/weakform/weakform.cpp
+  
+    src/neighbor_search.cpp
     src/norm_form.cpp
     src/spline.cpp
-    
-    src/boundary_conditions/essential_boundary_conditions.cpp
+    src/forms.cpp
+    src/asmlist.cpp
+    src/projections/ogprojection.cpp
+    src/projections/ogprojection_nox.cpp
+    src/quadrature/limit_order.cpp
+    src/quadrature/quad_std.cpp
 
     src/function/transformable.cpp
     src/function/function.cpp
@@ -134,9 +139,6 @@ project(hermes2d)
     src/mesh/mesh.cpp
     src/mesh/traverse.cpp
     src/mesh/mesh_data.cpp
-
-    src/quadrature/limit_order.cpp
-    src/quadrature/quad_std.cpp
 
     src/shapeset/shapeset.cpp
     src/shapeset/shapeset_h1_ortho.cpp
@@ -169,11 +171,6 @@ project(hermes2d)
     src/views/linearizer_base.cpp
     src/views/orderizer.cpp
     src/views/vectorizer.cpp
-
-    src/weakform/weakform.cpp
-  
-    src/projections/ogprojection.cpp
-    src/projections/ogprojection_nox.cpp
     
     src/weakform_library/weakforms_elasticity.cpp
     src/weakform_library/weakforms_h1.cpp
@@ -218,6 +215,28 @@ project(hermes2d)
   )
   
   SOURCE_GROUP(
+    "Source Files\\Internal" FILES 
+    src/neighbor_search.cpp
+    src/norm_form.cpp
+    src/spline.cpp
+    src/forms.cpp
+    src/asmlist.cpp
+    src/projections/ogprojection.cpp
+    src/projections/ogprojection_nox.cpp
+    src/quadrature/limit_order.cpp
+    src/quadrature/quad_std.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Weakform Library" FILES 
+    src/weakform_library/weakforms_elasticity.cpp
+    src/weakform_library/weakforms_h1.cpp
+    src/weakform_library/weakforms_hcurl.cpp
+    src/weakform_library/weakforms_maxwell.cpp
+    src/weakform_library/weakforms_neutronics.cpp
+  )
+  
+  SOURCE_GROUP(
     "Source Files\\Mesh Functions" FILES 
     src/function/transformable.cpp
     src/function/function.cpp
@@ -225,7 +244,7 @@ project(hermes2d)
     src/function/solution.cpp
     src/function/filter.cpp
     src/function/mesh_function.cpp
-    src/function/solution_h2d_xml.cpp
+    src/function/solution_h2d_xml.cpp 
   )
   
   SOURCE_GROUP(
@@ -332,18 +351,24 @@ project(hermes2d)
   
   set(HEADERS
     include/api2d.h
-    include/asmlist.h
+    include/boundary_conditions/essential_boundary_conditions.h
     include/calculation_continuity.h
-    include/forms.h
     include/mixins2d.h
+    include/graph.h
+    include/weakform/weakform.h
+    
+    include/projections/ogprojection.h
+    include/projections/ogprojection_nox.h
+    include/global.h
+    include/asmlist.h
+    include/forms.h
     include/neighbor_search.h
     include/sub_element_map.h
-    include/graph.h
-    include/global.h
     include/norm_form.h
     include/spline.h
-
-    include/boundary_conditions/essential_boundary_conditions.h
+    include/quadrature/limit_order.h
+    include/quadrature/quad.h
+    include/quadrature/quad_all.h
 
     include/function/transformable.h
     include/function/function.h
@@ -353,11 +378,6 @@ project(hermes2d)
     include/function/mesh_function.h
     include/function/solution_h2d_xml.h
 
-    include/integrals/l2.h
-    include/integrals/h1.h
-    include/integrals/hdiv.h
-    include/integrals/hcurl.h
-    
     include/mesh/refmap.h
     include/mesh/curved.h
     include/mesh/mesh_reader_exodusii.h
@@ -371,10 +391,6 @@ project(hermes2d)
     include/mesh/mesh.h
     include/mesh/traverse.h
     include/mesh/mesh_data.h
-
-    include/quadrature/limit_order.h
-    include/quadrature/quad.h
-    include/quadrature/quad_all.h
 
     include/shapeset/shapeset.h
     include/shapeset/shapeset_h1_all.h
@@ -405,13 +421,9 @@ project(hermes2d)
     include/views/orderizer.h
     include/views/vectorizer.h
 
-    include/weakform/weakform.h
-    
-    include/projections/ogprojection.h
-    include/projections/ogprojection_nox.h
-
     include/weakform_library/weakforms_elasticity.h
     include/weakform_library/weakforms_h1.h
+    include/weakform_library/integrals_h1.h
     include/weakform_library/weakforms_hcurl.h
     include/weakform_library/weakforms_maxwell.h
     include/weakform_library/weakforms_neutronics.h
@@ -429,7 +441,6 @@ project(hermes2d)
     include/solver/solver.h
     include/solver/linear_solver.h
     include/solver/nonlinear_solver.h
-    
     include/solver/nox_solver.h
     include/solver/newton_solver_convergence_measurement.h
     include/solver/newton_solver.h
@@ -450,6 +461,32 @@ project(hermes2d)
     include/refinement_selectors/l2_proj_based_selector.h
     include/refinement_selectors/h1_proj_based_selector.h
     include/refinement_selectors/hcurl_proj_based_selector.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Internal" FILES 
+    include/projections/ogprojection.h
+    include/projections/ogprojection_nox.h
+    include/global.h
+    include/asmlist.h
+    include/forms.h
+    include/neighbor_search.h
+    include/sub_element_map.h
+    include/norm_form.h
+    include/spline.h
+    include/quadrature/limit_order.h
+    include/quadrature/quad.h
+    include/quadrature/quad_all.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Weakform Library" FILES 
+    include/weakform_library/weakforms_elasticity.h
+    include/weakform_library/weakforms_h1.h
+    include/weakform_library/integrals_h1.h
+    include/weakform_library/weakforms_hcurl.h
+    include/weakform_library/weakforms_maxwell.h
+    include/weakform_library/weakforms_neutronics.h
   )
   
   SOURCE_GROUP(
@@ -624,7 +661,6 @@ project(hermes2d)
   file(GLOB INC_BC         "include/boundary_conditions/*.h")
   file(GLOB INC_SHAPESET   "include/shapeset/*.h")
   file(GLOB INC_FUNCTION   "include/function/*.h")
-  file(GLOB INC_INTEGRALS  "include/integrals/*.h")
   file(GLOB INC_LINEARIZER "include/linearizer/*.h")
   file(GLOB INC_ADAPT      "include/adapt/*.h")
   file(GLOB INC_PROJECTIONS "include/projections/*.h")

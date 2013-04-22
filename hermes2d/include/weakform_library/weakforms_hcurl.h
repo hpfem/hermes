@@ -16,7 +16,6 @@
 #ifndef __H2D_HCURL_WEAK_FORMS_H
 #define __H2D_HCURL_WEAK_FORMS_H
 
-#include "../integrals/hcurl.h"
 #include "../weakform/weakform.h"
 #include "../spline.h"
 

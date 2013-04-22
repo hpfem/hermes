@@ -16,7 +16,6 @@
 #include "discrete_problem.h"
 #include "function/exact_solution.h"
 #include "global.h"
-#include "integrals/h1.h"
 #include "quadrature/limit_order.h"
 #include "mesh/traverse.h"
 #include "space/space.h"
