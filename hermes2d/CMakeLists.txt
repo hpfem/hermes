@@ -218,6 +218,17 @@ project(hermes2d)
   )
   
   SOURCE_GROUP(
+    "Source Files\\Mesh Functions" FILES 
+    src/function/transformable.cpp
+    src/function/function.cpp
+    src/function/exact_solution.cpp
+    src/function/solution.cpp
+    src/function/filter.cpp
+    src/function/mesh_function.cpp
+    src/function/solution_h2d_xml.cpp
+  )
+  
+  SOURCE_GROUP(
     "Source Files\\Mesh" FILES 
     src/mesh/refmap.cpp
     src/mesh/curved.cpp
@@ -439,6 +450,17 @@ project(hermes2d)
     include/refinement_selectors/l2_proj_based_selector.h
     include/refinement_selectors/h1_proj_based_selector.h
     include/refinement_selectors/hcurl_proj_based_selector.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Mesh Functions" FILES 
+    include/function/transformable.h
+    include/function/function.h
+    include/function/exact_solution.h
+    include/function/solution.h
+    include/function/filter.h
+    include/function/mesh_function.h
+    include/function/solution_h2d_xml.h
   )
     
   SOURCE_GROUP(
