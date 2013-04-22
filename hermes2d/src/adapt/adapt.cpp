@@ -534,9 +534,8 @@ namespace Hermes
         return;
 
       SpaceSharedPtr<Scalar>& space = this->spaces[elem_ref.comp];
-      MeshSharedPtr& mesh = space->get_mesh();
 
-      Element* e = mesh->get_element(elem_ref.id);
+      Element* e = space->get_mesh()->get_element(elem_ref.id);
 
       if(elem_ref.split == H2D_REFINEMENT_P)
       {
@@ -546,7 +545,7 @@ namespace Hermes
       else if(elem_ref.split == H2D_REFINEMENT_H)
       {
         if(e->active)
-          mesh->refine_element_id(elem_ref.id);
+          space->get_mesh()->refine_element_id(elem_ref.id);
         for (int j = 0; j < 4; j++)
         {
           space->set_element_order_internal(e->sons[j]->id, elem_ref.refinement_polynomial_order[j]);
@@ -556,7 +555,7 @@ namespace Hermes
       else
       {
         if(e->active)
-          mesh->refine_element_id(elem_ref.id, elem_ref.split);
+          space->get_mesh()->refine_element_id(elem_ref.id, elem_ref.split);
         for (int j = 0; j < 2; j++)
         {
           space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id, elem_ref.refinement_polynomial_order[j]);

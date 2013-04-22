@@ -125,9 +125,10 @@ namespace Hermes
         Cand& unrefined_c = candidates[0];
         for (unsigned i = 0; i < candidates.size(); i++)
         {
-          typename Cand& c = candidates[i];
+          Cand& c = candidates[i];
           double error_squared = 0.0;
-          if(tri) { //triangle
+          if(tri)
+          {
             switch(c.split)
             {
             case H2D_REFINEMENT_H:
@@ -153,7 +154,9 @@ namespace Hermes
               throw Hermes::Exceptions::Exception("Unknown split type \"%d\" at candidate %d", c.split, i);
             }
           }
-          else { //quad
+          else
+          {
+            //quad
             switch(c.split)
             {
             case H2D_REFINEMENT_H:

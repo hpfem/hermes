@@ -29,14 +29,14 @@ namespace Hermes
     Range();
     Range(const int& lower_bound, const int& upper_bound);
     /// True if range is empty.
-    inline bool empty() const;
+    bool empty() const;
     /// Lower boundary.
-    inline const int& lower() const;
+    const int& lower() const;
     /// Upper boundary.
-    inline const int& upper() const;
-    inline bool is_in_closed(const Range& range) const;
-    inline bool is_in_closed(const int& value) const;
-    inline bool is_in_open(const int& value) const;
+    const int& upper() const;
+    bool is_in_closed(const Range& range) const;
+    bool is_in_closed(const int& value) const;
+    bool is_in_open(const int& value) const;
     void enlarge_to_include(const int& value);
 
     static Range make_envelope(const Range& a, const Range& b);

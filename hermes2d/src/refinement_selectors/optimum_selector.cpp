@@ -654,7 +654,7 @@ namespace Hermes
         }
 
         //build candidates.
-        Hermes::vector<Cand>& candidates = create_candidates(element, quad_order);
+        Hermes::vector<Cand> candidates = create_candidates(element, quad_order);
         //there are candidates to choose from
         Cand* best_candidates[5];
         // Initialization

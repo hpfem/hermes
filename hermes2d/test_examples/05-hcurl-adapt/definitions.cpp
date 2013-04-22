@@ -1,7 +1,4 @@
-#include "weakform/weakform.h"
-#include "integrals/hcurl.h"
-#include "weakform_library/weakforms_hcurl.h"
-#include "function/exact_solution.h"
+#include "hermes2d.h"
 
 /* Exact solution */
 
