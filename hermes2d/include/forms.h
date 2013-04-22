@@ -116,7 +116,7 @@ namespace Hermes
       /// \param[in]  support_on_neighbor True if \c fn is defined on the neighbor element, false if on the central element.
       /// \param[in]  reverse             Same meaning as \c reverse_neighbor_side.
       ///
-      DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor = false, bool reverse = false);
+      DiscontinuousFunc(Func<T>* fn, bool support_on_neighbor, bool reverse = false);
 
       /// Two-component constructor.
       ///

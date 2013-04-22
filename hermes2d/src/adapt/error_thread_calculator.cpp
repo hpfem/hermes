@@ -157,7 +157,7 @@ namespace Hermes
           if(i < this->errorThreadCalculator->errorCalculator->component_count)
             ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->slns[i]->get_mesh());
           else
-            ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->rslns[i]->get_mesh());
+            ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->rslns[i - this->errorThreadCalculator->errorCalculator->component_count]->get_mesh());
 
           ns->original_central_el_transform = current_state->sub_idx[i];
           neighbor_searches[i] = ns;
@@ -200,18 +200,17 @@ namespace Hermes
 
       /***/
       // The computation takes place here.
-      int n_quadrature_points;
-      Geom<double>* geometry;
-      double* jacobian_x_weights;
-
       // Create the extended shapeset on the union of the central element and its current neighbor.
       int order = 20;
       int order_base = 20;
 
       for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
+      {
         neighbor_searches[i]->set_quad_order(order);
+        neighbor_searches[i + this->errorThreadCalculator->errorCalculator->component_count]->set_quad_order(order);
+      }
       order_base = order;
-      n_quadrature_points = init_surface_geometry_points(this->errorThreadCalculator->rslns[0]->get_refmap(), order_base, current_state->isurf, current_state->rep->marker, geometry, jacobian_x_weights);
+      this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(this->errorThreadCalculator->rslns[0]->get_refmap(), order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
 
       DiscontinuousFunc<Scalar>** difference_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
       DiscontinuousFunc<Scalar>** rsln_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
@@ -219,7 +218,7 @@ namespace Hermes
       {
         difference_funcs[i] = neighbor_searches[i]->init_ext_fn(this->errorThreadCalculator->slns[i]);
         rsln_funcs[i] = neighbor_searches[i + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[i]);
-        difference_funcs[i]->subtract(rsln_funcs[i]);
+        difference_funcs[i]->subtract(*rsln_funcs[i]);
       }
 
       for(int current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
@@ -241,9 +240,9 @@ namespace Hermes
         delete rsln_funcs[i];
       }
 
-      delete [] jacobian_x_weights;
-      geometry->free();
-      delete geometry;
+      delete [] this->errorThreadCalculator->jacobian_x_weights;
+      this->errorThreadCalculator->geometry->free();
+      delete this->errorThreadCalculator->geometry;
 
       // This is just cleaning after ourselves.
       // Clear the transformations from the RefMaps and all functions.

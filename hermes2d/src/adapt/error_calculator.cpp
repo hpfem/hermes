@@ -172,6 +172,16 @@ namespace Hermes
           errorThreadCalculator.evaluate_one_state(states[state_i]);
       }
 
+      // Clean after ourselves.
+      for(int i = 0; i < this->component_count; i++)
+      {
+        Element* e;
+        for_all_active_elements(e, coarse_solutions[i]->get_mesh())
+          e->visited = false;
+        for_all_active_elements(e, fine_solutions[i]->get_mesh())
+          e->visited = false;
+      }
+
       // Sums calculation & error postprocessing.
       this->postprocess_error();
 

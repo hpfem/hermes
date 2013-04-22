@@ -62,11 +62,6 @@
 #include "discrete_problem.h"
 #include "forms.h"
 
-#include "integrals/h1.h"
-#include "integrals/hcurl.h"
-#include "integrals/hdiv.h"
-#include "integrals/l2.h"
-
 #include "function/exact_solution.h"
 #include "function/solution.h"
 #include "function/mesh_function.h"
@@ -107,6 +102,7 @@
 // No inclusions here.
 #else
 #include "weakform_library/weakforms_elasticity.h"
+#include "weakform_library/integrals_h1.h"
 #include "weakform_library/weakforms_h1.h"
 #include "weakform_library/weakforms_hcurl.h"
 #include "weakform_library/weakforms_maxwell.h"
