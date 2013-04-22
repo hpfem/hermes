@@ -88,9 +88,6 @@ namespace Hermes
       /// Constructor for one equation.
       RungeKutta(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar> space, ButcherTable* bt);
 
-      /// Projections will be local (projection-based).
-      void use_local_projections();
-
       void set_start_from_zero_K_vector();
       void set_residual_as_solutions();
       void set_block_diagonal_jacobian();
@@ -207,7 +204,6 @@ namespace Hermes
       /// Number of previous calls to rk_time_step_newton().
       unsigned int iteration;
 
-      bool do_global_projections;
       bool freeze_jacobian;
       double newton_tol;
       int newton_max_iter;

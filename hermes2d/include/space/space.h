@@ -446,7 +446,6 @@ namespace Hermes
       template<typename T> friend class PicardSolver;
       template<typename T> friend class LinearSolver;
       template<typename T> friend class OGProjectionNOX;
-      template<typename T> friend class LocalProjection;
       template<typename T> friend class Solution;
       template<typename T> friend class RungeKutta;
       template<typename T> friend class ExactSolution;

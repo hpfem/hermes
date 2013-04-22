@@ -16,7 +16,6 @@
 #include "solver/runge_kutta.h"
 #include "discrete_problem.h"
 #include "projections/ogprojection.h"
-#include "projections/localprojection.h"
 #include "norm_form.h"
 namespace Hermes
 {
@@ -38,8 +37,6 @@ namespace Hermes
 
       if(bt==NULL)
         throw Exceptions::NullException(2);
-
-      do_global_projections = true;
 
       matrix_right = create_matrix<Scalar>();
       matrix_left = create_matrix<Scalar>();
@@ -72,8 +69,6 @@ namespace Hermes
       this->spaces_mutable.push_back(space);
 
       if(bt==NULL) throw Exceptions::NullException(2);
-
-      do_global_projections = true;
 
       matrix_right = create_matrix<Scalar>();
       matrix_left = create_matrix<Scalar>();
@@ -266,12 +261,6 @@ namespace Hermes
       delete [] K_vector;
       delete [] u_ext_vec;
       delete [] vector_left;
-    }
-
-    template<typename Scalar>
-    void RungeKutta<Scalar>::use_local_projections()
-    {
-      do_global_projections = false;
     }
 
     template<typename Scalar>
@@ -489,27 +478,11 @@ namespace Hermes
       // FIXME - this projection is not needed when the
       //         spaces are the same (if spatial adaptivity is not used).
       Scalar* coeff_vec = new Scalar[ndof];
-      if(do_global_projections)
-      {
-        OGProjection<Scalar> ogProjection;
-        ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
-      }
-      else
-      {
-        LocalProjection<Scalar> ogProjection;
-        ogProjection.project_local(spaces, slns_time_prev, coeff_vec);
-      }
+      OGProjection<Scalar> ogProjection;
+      ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
 
-      if(do_global_projections)
-      {
-        OGProjection<Scalar> ogProjection;
-        ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
-      }
-      else
-      {
-        LocalProjection<Scalar> ogProjection;
-        ogProjection.project_local(spaces, slns_time_prev, coeff_vec);
-      }
+      OGProjection<Scalar> ogProjection;
+      ogProjection.project_global(spaces, slns_time_prev, coeff_vec);
 
       // Calculate new time level solution in the stage space (u_{n + 1} = u_n + h \sum_{j = 1}^s b_j k_j).
       for (int i = 0; i < ndof; i++)
