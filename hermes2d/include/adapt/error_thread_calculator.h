@@ -23,6 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar> class ErrorCalculator;
+    template<typename Scalar> class NeighborSearch;
 
     template<typename Scalar>
     class ErrorThreadCalculator

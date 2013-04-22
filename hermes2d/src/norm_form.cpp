@@ -95,9 +95,6 @@ namespace Hermes
     {
     }
 
-    template HERMES_API class DefaultNormFormVol<double>;
-    template HERMES_API class DefaultNormFormVol<std::complex<double> >;
-
     template<typename Scalar>
     Scalar DefaultNormFormVol<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const
     {

@@ -8,11 +8,14 @@
 #include "mesh/refmap.h"
 #include "asmlist.h"
 #include "space/space.h"
-#include "adapt/error_calculator.h"
+#include "adapt/error_thread_calculator.h"
+
 namespace Hermes
 {
   namespace Hermes2D
   {
+    template<typename Scalar> class ErrorThreadCalculator;
+
     /*** Class NeighborSearch. ***/
 
     /*!\class NeighborSearch neighbor_search.h "src/neighbor_search.h"

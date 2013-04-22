@@ -15,7 +15,7 @@
 
 #include "adapt.h"
 #include "projections/ogprojection.h"
-#include "refinement_selectors\candidates.h"
+#include "refinement_selectors/candidates.h"
 
 namespace Hermes
 {
