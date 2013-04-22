@@ -122,7 +122,6 @@ namespace Hermes
         calc_projection_errors(e, info_h, info_p, info_aniso, rsln, herr, perr, anisoerr);
 
         //evaluate errors and dofs
-        Cand& unrefined_c = candidates[0];
         for (unsigned i = 0; i < candidates.size(); i++)
         {
           Cand& c = candidates[i];

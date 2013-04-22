@@ -15,7 +15,11 @@ namespace Hermes
         this->errorType = errorType;
 
         refinement.split = H2D_REFINEMENT_H;
-        refinement.refinement_polynomial_order[0] = refinement.refinement_polynomial_order[1] = refinement.refinement_polynomial_order[2] = refinement.refinement_polynomial_order[3] = order;
+        refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H][0] = 
+          refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H][1] = 
+          refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H][2] = 
+          refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H][3] = 
+          order;
         ElementToRefine::copy_orders(refinement.refinement_polynomial_order, refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H]);
         return true;
       }

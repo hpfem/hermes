@@ -61,7 +61,7 @@ const int STRATEGY = 0;
 // Predefined list of element refinement candidates. Possible values are
 // H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO,
 // H2D_HP_ANISO_H, H2D_HP_ANISO_P, H2D_HP_ANISO.
-const CandList CAND_LIST = H2D_HP_ANISO;
+const CandList CAND_LIST = H2D_H_ANISO;
 // Maximum allowed level of hanging nodes:
 // MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
 // MESH_REGULARITY = 1 ... at most one-level hanging nodes,
@@ -141,6 +141,7 @@ int main(int argc, char* argv[])
 
   // Initialize refinement selector.
   H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  //HOnlySelector<double> selector;
 
   // Initialize views.
   Views::ScalarView s_view_0("Solution[0]", new Views::WinGeom(0, 0, 440, 350));
@@ -234,8 +235,8 @@ int main(int argc, char* argv[])
     err_est_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
     Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
-    //adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, 0.95);
-    adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.5);
+    adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, 0.5);
+    //adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.5);
 
     // Time measurement.
     cpu_time.tick();

@@ -555,11 +555,13 @@ namespace Hermes
       else
       {
         if(e->active)
-          space->get_mesh()->refine_element_id(elem_ref.id, elem_ref.split);
+        {
+          space->get_mesh()->refine_element_id(elem_ref.id, (elem_ref.split == H2D_REFINEMENT_ANISO_H ? 1 : 2));
+        }
         for (int j = 0; j < 2; j++)
         {
-          space->set_element_order_internal(e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id, elem_ref.refinement_polynomial_order[j]);
-          space->edata[e->sons[ (elem_ref.split == 1) ? j : j + 2 ]->id].changed_in_last_adaptation = true;
+          space->set_element_order_internal(e->sons[ (elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2 ]->id, elem_ref.refinement_polynomial_order[j]);
+          space->edata[e->sons[ (elem_ref.split == H2D_REFINEMENT_ANISO_H) ? j : j + 2 ]->id].changed_in_last_adaptation = true;
         }
       }
     }
