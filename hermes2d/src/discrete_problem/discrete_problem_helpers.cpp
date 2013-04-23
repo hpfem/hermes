@@ -74,7 +74,13 @@ namespace Hermes
         return this->wf;
       }
 
-      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : do_not_use_cache(false), report_cache_hits_and_misses(false)
+      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : 
+        do_not_use_cache(false),
+        report_cache_hits_and_misses(false),
+        cache_searches(0),
+        cache_record_found(0),
+        cache_record_found_reinit(0),
+        cache_record_not_found(0)
       {
       }
 
@@ -87,7 +93,34 @@ namespace Hermes
       {
         this->report_cache_hits_and_misses = to_set;
       }
+
+      void DiscreteProblemCacheSettings::get_cache_hits_and_misses(int& cache_searches_, int& cache_record_found_, int& cache_record_found_reinit_, int& cache_record_not_found_)
+      {
+        if(!this->report_cache_hits_and_misses)
+          throw Exceptions::Exception("Asked for cache hits and misses, without turning on the calculation.");
+
+        cache_searches_ = this->cache_searches;
+        cache_record_found_ = this->cache_record_found;
+        cache_record_found_reinit_ = this->cache_record_found_reinit;
+        cache_record_not_found_ = this->cache_searches;
+      }
       
+      void DiscreteProblemCacheSettings::add_cache_hits_and_misses(DiscreteProblemCacheSettings* other)
+      {
+        this->cache_searches += other->cache_searches;
+        this->cache_record_found += other->cache_record_found;
+        this->cache_record_found_reinit += other->cache_record_found_reinit;
+        this->cache_record_not_found += other->cache_searches;
+      }
+
+      void DiscreteProblemCacheSettings::zero_cache_hits_and_misses()
+      {
+        cache_searches = 0;
+        cache_record_found = 0;
+        cache_record_found_reinit = 0;
+        cache_record_not_found = 0;
+      }
+
       template<typename Scalar>
       DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(NULL), current_rhs(NULL)
       {

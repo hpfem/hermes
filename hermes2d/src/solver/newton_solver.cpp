@@ -355,6 +355,10 @@ namespace Hermes
       this->sln_vector = new Scalar[ndof];
 
       this->on_initialization();
+
+      // Optionally zero cache hits and misses.
+      if(this->report_cache_hits_and_misses)
+        this->zero_cache_hits_and_misses();
     }
 
     template<typename Scalar>
@@ -430,6 +434,9 @@ namespace Hermes
         this->dp->assemble(coeff_vec, this->jacobian, this->residual);
         this->jacobian_reusable = true;
       }
+      if(this->report_cache_hits_and_misses)
+        this->add_cache_hits_and_misses(this->dp);
+
       this->residual->change_sign();
 
       // Output.
@@ -458,6 +465,9 @@ namespace Hermes
     {
       // Assemble just the residual vector & change its sign.
       this->dp->assemble(coeff_vec, this->residual);
+      if(this->report_cache_hits_and_misses)
+        this->add_cache_hits_and_misses(this->dp);
+      
       this->residual->change_sign();
 
       double residual_norm = this->calculate_residual_norm();
@@ -629,6 +639,8 @@ namespace Hermes
         // Reassemble the jacobian once not reusable anymore.
         this->info("\tNewton: re-calculating Jacobian.");
         this->dp->assemble(coeff_vec, this->jacobian);
+        if(this->report_cache_hits_and_misses)
+          this->add_cache_hits_and_misses(this->dp);
 
         // Set factorization schemes.
         if(this->jacobian_reusable)
