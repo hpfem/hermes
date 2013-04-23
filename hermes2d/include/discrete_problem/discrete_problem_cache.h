@@ -76,8 +76,6 @@ namespace Hermes
         int* n_quadrature_pointsSurface;
         int* orderSurface;
         int** asmlistSurfaceCnt;
-
-        friend class DiscreteProblemCache<Scalar>;
       };
 
       /// Returns the cache record and information whether it is initialized (found in the cache).
@@ -88,20 +86,8 @@ namespace Hermes
     private:
       /// Special handling of adaptivity situtation.
       bool get_adaptivity(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record);
-
-      /// Starting size of the recordTable.
-      static const int DEFAULT_SIZE = 1e5;
-      /// Average number of subelements.
-      static const int GUESS_NUMBER_OF_SUBELEMENTS = 16;
-      /// Starting size of the hashTable.
-      static const int DEFAULT_HASH_TABLE_SIZE = DEFAULT_SIZE * GUESS_NUMBER_OF_SUBELEMENTS;
-
-      int size;
-      int hash_table_size;
-
-      CacheRecord **recordTable;
-      int recordCount;
-
+      
+#pragma region hash_table_handling
       class StateHash
       {
       private:
@@ -127,8 +113,22 @@ namespace Hermes
       int get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i);
 
       int hashFunction(int rep_id, int parent_son, int rep_sub_idx, int rep_i) const;
+#pragma endregion
 
-      friend class DiscreteProblem<Scalar>;
+#pragma region internal
+      int size;
+      int hash_table_size;
+
+      CacheRecord **recordTable;
+      int recordCount;
+
+      /// Starting size of the recordTable.
+      static const int DEFAULT_SIZE = 1e5;
+      /// Average number of subelements.
+      static const int GUESS_NUMBER_OF_SUBELEMENTS = 16;
+      /// Starting size of the hashTable.
+      static const int DEFAULT_HASH_TABLE_SIZE = DEFAULT_SIZE * GUESS_NUMBER_OF_SUBELEMENTS;
+#pragma endregion
     };
   }
 }

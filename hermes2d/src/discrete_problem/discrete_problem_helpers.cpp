@@ -74,15 +74,20 @@ namespace Hermes
         return this->wf;
       }
 
-      void DiscreteProblemCacheSettings::set_do_not_use_cache()
-      {
-        this->do_not_use_cache = true;
-      }
-
-      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : do_not_use_cache(false)
+      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : do_not_use_cache(false), report_cache_hits_and_misses(false)
       {
       }
 
+      void DiscreteProblemCacheSettings::set_do_not_use_cache(bool to_set)
+      {
+        this->do_not_use_cache = to_set;
+      }
+
+      void DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(bool to_set)
+      {
+        this->report_cache_hits_and_misses = to_set;
+      }
+      
       template<typename Scalar>
       DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(NULL), current_rhs(NULL)
       {

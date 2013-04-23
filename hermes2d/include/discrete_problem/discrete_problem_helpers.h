@@ -70,12 +70,16 @@ namespace Hermes
       {
       public:
         /// If the cache should not be used for any reason.
-        void set_do_not_use_cache();
+        void set_do_not_use_cache(bool to_set = true);
+        
+        /// Reports cache hits and misses.
+        void set_report_cache_hits_and_misses(bool to_set = true);
 
       protected:
         DiscreteProblemCacheSettings();
         
         bool do_not_use_cache;
+        bool report_cache_hits_and_misses;
       };
 
       template<typename Scalar>
