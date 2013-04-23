@@ -23,7 +23,6 @@
 #define __H2D_SOLVER_NEWTON_H_
 
 #include "global.h"
-#include "discrete_problem.h"
 #include "nonlinear_solver.h"
 #include "newton_solver_convergence_measurement.h"
 #include "exceptions.h"

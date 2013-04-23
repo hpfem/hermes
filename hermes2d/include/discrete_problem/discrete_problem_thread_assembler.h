@@ -36,6 +36,7 @@ namespace Hermes
     class HERMES_API DiscreteProblemThreadAssembler : 
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>,
       public Hermes::Hermes2D::Mixins::DiscreteProblemRungeKutta<Scalar>,
+      public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
       public Hermes::Hermes2D::Mixins::DiscreteProblemMatrixVector<Scalar>
     {
     private:
@@ -56,7 +57,7 @@ namespace Hermes
       void init_assembling_one_state(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state);
       /// Takes the global cache and according to the current_state, it
       /// either gets or gets a record.
-      void handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache, bool do_not_use_cache);
+      void handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache);
       /// Assemble the state.
       void assemble_one_state();
       /// Matrix volumetric forms - assemble the form.
@@ -95,7 +96,6 @@ namespace Hermes
       int spaces_size;
       bool nonlinear, add_dirichlet_lift;
 
-      bool do_not_use_cache;
       Traverse::State* current_state;
       typename DiscreteProblemCache<Scalar>::CacheRecord* current_cache_record;
       

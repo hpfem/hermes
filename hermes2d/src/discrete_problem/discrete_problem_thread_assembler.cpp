@@ -106,12 +106,8 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::init_assembling(Solution<Scalar>** u_ext_sln, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool nonlinear_, bool add_dirichlet_lift_)
     {
-#ifdef _DEBUG_DP_CACHE
-      cache_searches = 0;
-      cache_record_found = 0;
-      cache_record_found_reinit = 0;
-      cache_record_not_found = 0;
-#endif
+      if(this->report_cache_hits_and_misses)
+        this->zero_cache_hits_and_misses();
 
       this->nonlinear = nonlinear_;
       this->add_dirichlet_lift = add_dirichlet_lift_;
@@ -195,10 +191,8 @@ namespace Hermes
 
 
     template<typename Scalar>
-    void DiscreteProblemThreadAssembler<Scalar>::handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache, bool do_not_use_cache_)
+    void DiscreteProblemThreadAssembler<Scalar>::handle_cache(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, DiscreteProblemCache<Scalar>* cache)
     {
-      this->do_not_use_cache = do_not_use_cache_;
-
       if(this->do_not_use_cache)
       {
         this->current_cache_record = new typename DiscreteProblemCache<Scalar>::CacheRecord;
@@ -207,16 +201,14 @@ namespace Hermes
         return;
       }
 
-#ifdef _DEBUG_DP_CACHE
-      cache_searches++;
-#endif
+      if(this->report_cache_hits_and_misses)
+        cache_searches++;
 
       this->current_cache_record = NULL;
       if(cache->get(current_state->rep, current_state->rep_subidx, current_state->rep_i, this->current_cache_record))
       {
-#ifdef _DEBUG_DP_CACHE
-        cache_record_found++;
-#endif
+        if(this->report_cache_hits_and_misses)
+          cache_record_found++;
 
         bool reinit = false;
         for(unsigned int i = 0; i < this->spaces_size; i++)
@@ -251,9 +243,9 @@ namespace Hermes
         }
         if(reinit)
         {
-#ifdef _DEBUG_DP_CACHE
-          cache_record_found_reinit++;
-#endif
+          if(this->report_cache_hits_and_misses)
+            cache_record_found_reinit++;
+
           this->current_cache_record->free();
           int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
           this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
@@ -261,9 +253,8 @@ namespace Hermes
       }
       else
       {
-#ifdef _DEBUG_DP_CACHE
-        cache_record_not_found++;
-#endif
+        if(this->report_cache_hits_and_misses)
+          cache_record_not_found++;
         int order = this->integrationOrderCalculator.calculate_order(spaces, current_state, refmaps, u_ext, this->wf);
         this->current_cache_record->init(current_state, pss, refmaps, u_ext, als, alsSurface, this->wf, order);
       }
@@ -664,17 +655,6 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblemThreadAssembler<Scalar>::deinit_assembling()
     {
-#ifdef _DEBUG_DP_CACHE
-      if(!this->do_not_use_cache)
-      {
-        std::cout << std::endl;
-        std::cout << "cache_searches  " << cache_searches << std::endl;
-        std::cout << "cache_record_found  " << cache_record_found << std::endl;
-        std::cout << "cache_record_found_reinit  " << cache_record_found_reinit << std::endl;
-        std::cout << "cache_record_not_found  " << cache_record_not_found << std::endl;
-        std::cout << std::endl;
-      }
-#endif
     }
 
     template<typename Scalar>

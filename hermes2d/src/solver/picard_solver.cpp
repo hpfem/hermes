@@ -305,6 +305,10 @@ namespace Hermes
       }
 
       this->on_initialization();
+
+      // Optionally zero cache hits and misses.
+      if(this->report_cache_hits_and_misses)
+        this->zero_cache_hits_and_misses();
     }
 
     template<typename Scalar>
@@ -327,6 +331,8 @@ namespace Hermes
 
         // Assemble the residual and also jacobian when necessary (nonconstant jacobian, not reusable, ...).
         this->conditionally_assemble(coeff_vec);
+        if(this->report_cache_hits_and_misses)
+          this->add_cache_hits_and_misses(this->dp);
 
         this->process_matrix_output(this->jacobian, it); 
         this->process_vector_output(this->residual, it);

@@ -88,6 +88,20 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void Solver<Scalar>::set_do_not_use_cache(bool to_set)
+    {
+      DiscreteProblemCacheSettings::set_do_not_use_cache(to_set);
+      this->dp->set_do_not_use_cache(to_set);
+    }
+
+    template<typename Scalar>
+    void Solver<Scalar>::set_report_cache_hits_and_misses(bool to_set)
+    {
+      DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
+      this->dp->set_report_cache_hits_and_misses(to_set);
+    }
+      
+    template<typename Scalar>
     void Solver<Scalar>::keep_element_values(int marker, typename WeakForm<Scalar>::FormIntegrationDimension dimension, typename WeakForm<Scalar>::FormEquationSide equation_side)
     {
       this->dp->selectiveAssembler.state_reuse_kept[dimension][equation_side][marker] = true;

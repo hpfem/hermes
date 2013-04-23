@@ -72,7 +72,7 @@ namespace Hermes
       void assemble(Scalar* coeff_vec, Vector<Scalar>* rhs = NULL);
       /// Light version passing NULL for the coefficient vector. External solutions
       /// are initialized with zeros.
-      virtual void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
+      void assemble(SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs = NULL);
       /// Light version passing NULL for the coefficient vector. External solutions
       /// are initialized with zeros.
       /// Without the matrix.
@@ -81,18 +81,24 @@ namespace Hermes
       void assemble(Solution<Scalar>** u_ext_sln, SparseMatrix<Scalar>* mat, Vector<Scalar>* rhs);
 
       /// set time information for time-dependent problems.
-      virtual void set_time(double time);
-      virtual void set_time_step(double time_step);
+      void set_time(double time);
+      void set_time_step(double time_step);
 
       /// Sets new spaces for the instance.
-      virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
-      virtual void set_space(SpaceSharedPtr<Scalar>& space);
+      void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      void set_space(SpaceSharedPtr<Scalar>& space);
 
       /// Set the weak forms.
       void set_weak_formulation(WeakForm<Scalar>* wf);
 
       /// Get all spaces as a Hermes::vector.
-      virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
+      Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();
+
+      /// If the cache should not be used for any reason.
+      void set_do_not_use_cache(bool to_set = true);
+      
+      /// Reports cache hits and misses.
+      void set_report_cache_hits_and_misses(bool to_set = true);
 
     protected:
       /// Initialize states.
@@ -100,11 +106,11 @@ namespace Hermes
       void deinit_assembling(Traverse::State** states, int num_states);
 
       /// RungeKutta helpers.
-      virtual void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
+      void set_RK(int original_spaces_count, bool force_diagonal_blocks = NULL, Table* block_weights = NULL);
 
       /// State querying helpers.
-      virtual bool isOkay() const;
-      virtual inline std::string getClassName() const { return "DiscreteProblem"; }
+      bool isOkay() const;
+      inline std::string getClassName() const { return "DiscreteProblem"; }
 
       /// Init function. Common code for the constructors.
       void init();
@@ -117,8 +123,8 @@ namespace Hermes
       bool nonlinear, add_dirichlet_lift;
       
       /// DiscreteProblemMatrixVector methods.
-      virtual void set_matrix(SparseMatrix<Scalar>* mat);
-      virtual void set_rhs(Vector<Scalar>* rhs);
+      void set_matrix(SparseMatrix<Scalar>* mat);
+      void set_rhs(Vector<Scalar>* rhs);
       void invalidate_matrix();
 
       /// The cache.

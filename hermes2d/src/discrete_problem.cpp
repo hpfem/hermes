@@ -133,6 +133,22 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_do_not_use_cache(bool to_set)
+    {
+      DiscreteProblemCacheSettings::set_do_not_use_cache(to_set);
+      for(int i = 0; i < this->num_threads_used; i++)
+        this->threadAssembler[i]->set_do_not_use_cache(to_set);
+    }
+
+    template<typename Scalar>
+    void DiscreteProblem<Scalar>::set_report_cache_hits_and_misses(bool to_set)
+    {
+      DiscreteProblemCacheSettings::set_report_cache_hits_and_misses(to_set);
+      for(int i = 0; i < this->num_threads_used; i++)
+        this->threadAssembler[i]->set_report_cache_hits_and_misses(to_set);
+    }
+      
+    template<typename Scalar>
     void DiscreteProblem<Scalar>::invalidate_matrix()
     {
       this->selectiveAssembler.matrix_structure_reusable = false;
@@ -246,6 +262,10 @@ namespace Hermes
     template<typename Scalar>
     void DiscreteProblem<Scalar>::init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln)
     {
+      // Optionally zero cache hits and misses.
+      if(this->report_cache_hits_and_misses)
+        this->zero_cache_hits_and_misses();
+
       // Vector of meshes.
       Hermes::vector<MeshSharedPtr > meshes;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)
@@ -319,7 +339,7 @@ namespace Hermes
 
             this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
 
-            this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache, this->do_not_use_cache);
+            this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache);
 
             this->threadAssembler[thread_number]->assemble_one_state();
 
@@ -367,7 +387,12 @@ namespace Hermes
     void DiscreteProblem<Scalar>::deinit_assembling(Traverse::State** states, int num_states)
     {
       for(int i = 0; i < this->num_threads_used; i++)
+      {
         this->threadAssembler[i]->deinit_assembling();
+
+        if(this->report_cache_hits_and_misses)
+          this->add_cache_hits_and_misses(this->threadAssembler[i]);
+      }
 
       for(int i = 0; i < num_states; i++)
         delete states[i];

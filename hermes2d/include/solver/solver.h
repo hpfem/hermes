@@ -53,6 +53,8 @@ namespace Hermes
       Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~Solver();
 
+      /// Experimental
+      /// \todo delete this?
       /// Method setting that the element values on an internal marker will be kept if reusable from a previous solution.
       /// IMPORTANT: so far this method is implemented (works) only on the matrix and volumetric markers.
       /// It is for a discussion if anything else is needed.
@@ -86,6 +88,12 @@ namespace Hermes
 
       /// Get the Residual.
       Vector<Scalar>* get_residual();
+
+      /// If the cache should not be used for any reason.
+      virtual void set_do_not_use_cache(bool to_set = true);
+      
+      /// Reports cache hits and misses.
+      virtual void set_report_cache_hits_and_misses(bool to_set = true);
 
     protected:
       /// Handle the jacobian re-calculation and re-usage of a previous one.
