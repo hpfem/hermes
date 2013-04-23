@@ -74,13 +74,7 @@ namespace Hermes
         return this->wf;
       }
 
-      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : 
-        do_not_use_cache(false),
-        report_cache_hits_and_misses(false),
-        cache_searches(0),
-        cache_record_found(0),
-        cache_record_found_reinit(0),
-        cache_record_not_found(0)
+      DiscreteProblemCacheSettings::DiscreteProblemCacheSettings() : do_not_use_cache(false), report_cache_hits_and_misses(false)
       {
       }
 
@@ -93,34 +87,7 @@ namespace Hermes
       {
         this->report_cache_hits_and_misses = to_set;
       }
-
-      void DiscreteProblemCacheSettings::get_cache_hits_and_misses(int& cache_searches_, int& cache_record_found_, int& cache_record_found_reinit_, int& cache_record_not_found_)
-      {
-        if(!this->report_cache_hits_and_misses)
-          throw Exceptions::Exception("Asked for cache hits and misses, without turning on the calculation.");
-
-        cache_searches_ = this->cache_searches;
-        cache_record_found_ = this->cache_record_found;
-        cache_record_found_reinit_ = this->cache_record_found_reinit;
-        cache_record_not_found_ = this->cache_record_not_found;
-      }
       
-      void DiscreteProblemCacheSettings::add_cache_hits_and_misses(DiscreteProblemCacheSettings* other)
-      {
-        this->cache_searches += other->cache_searches;
-        this->cache_record_found += other->cache_record_found;
-        this->cache_record_found_reinit += other->cache_record_found_reinit;
-        this->cache_record_not_found += other->cache_record_not_found;
-      }
-
-      void DiscreteProblemCacheSettings::zero_cache_hits_and_misses()
-      {
-        cache_searches = 0;
-        cache_record_found = 0;
-        cache_record_found_reinit = 0;
-        cache_record_not_found = 0;
-      }
-
       template<typename Scalar>
       DiscreteProblemMatrixVector<Scalar>::DiscreteProblemMatrixVector() : current_mat(NULL), current_rhs(NULL)
       {
@@ -148,70 +115,36 @@ namespace Hermes
       template class HERMES_API DiscreteProblemMatrixVector<std::complex<double> >;
     }
 
-    int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
+    int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      int i = 0;
-      RefMap* rep_reference_mapping = NULL;
-      for(int i = 0; i < reference_mapping_count; i++)
-      {
-        if(reference_mapping[i])
-          if(reference_mapping[i]->get_active_element())
-          {
-            rep_reference_mapping = reference_mapping[i];
-            break;
-          }
-      }
-      
-      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_reference_mapping->get_active_element()->get_mode());
-      int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_reference_mapping->get_active_element()->get_mode());
+      double3* pt = reference_mapping->get_quad_2d()->get_points(order, reference_mapping->get_active_element()->get_mode());
+      int np = reference_mapping->get_quad_2d()->get_num_points(order, reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
-      geometry = init_geom_vol(rep_reference_mapping, order);
-
-      for(int i = 0; i < reference_mapping_count; i++)
-        if(reference_mapping[i])
-          if(reference_mapping[i]->get_active_element())
-          {
-            geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-            geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
-          }
-
+      geometry = init_geom_vol(reference_mapping, order);
       double* jac = NULL;
-      if(!rep_reference_mapping->is_jacobian_const())
-        jac = rep_reference_mapping->get_jacobian(order);
+      if(!reference_mapping->is_jacobian_const())
+        jac = reference_mapping->get_jacobian(order);
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
       {
-        if(rep_reference_mapping->is_jacobian_const())
-          jacobian_x_weights[i] = pt[i][2] * rep_reference_mapping->get_const_jacobian();
+        if(reference_mapping->is_jacobian_const())
+          jacobian_x_weights[i] = pt[i][2] * reference_mapping->get_const_jacobian();
         else
           jacobian_x_weights[i] = pt[i][2] * jac[i];
       }
       return np;
     }
 
-    int init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights)
+    int init_surface_geometry_points(RefMap* reference_mapping, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      int i = 0;
-      RefMap* rep_reference_mapping;
-      do
-        rep_reference_mapping = reference_mapping[i++];
-      while(!rep_reference_mapping);
-
-      int eo = rep_reference_mapping->get_quad_2d()->get_edge_points(isurf, order, rep_reference_mapping->get_active_element()->get_mode());
-      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(eo, rep_reference_mapping->get_active_element()->get_mode());
-      int np = rep_reference_mapping->get_quad_2d()->get_num_points(eo, rep_reference_mapping->get_active_element()->get_mode());
+      int eo = reference_mapping->get_quad_2d()->get_edge_points(isurf, order, reference_mapping->get_active_element()->get_mode());
+      double3* pt = reference_mapping->get_quad_2d()->get_points(eo, reference_mapping->get_active_element()->get_mode());
+      int np = reference_mapping->get_quad_2d()->get_num_points(eo, reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
       double3* tan;
-      geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
-      for(int i = 0; i < reference_mapping_count; i++)
-        if(reference_mapping[i]->get_active_element())
-        {
-          geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-          geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
-        }
-
+      geometry = init_geom_surf(reference_mapping, isurf, marker, eo, tan);
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];
