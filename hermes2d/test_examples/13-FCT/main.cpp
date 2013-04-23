@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
   bool mode_3D = true;
 
   // Create a refinement selector.
-  H1ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  H1ProjBasedSelector<double> selector(CAND_LIST);
 
   //Initialize
   UMFPackMatrix<double> * mass_matrix = new UMFPackMatrix<double> ;   //M_c/tau

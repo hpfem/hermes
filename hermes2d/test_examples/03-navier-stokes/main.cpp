@@ -72,10 +72,6 @@ const int max_allowed_iterations = 10;                   // Maximum allowed numb
 const double H = 5;                               // Domain height (necessary to define the parabolic
 // velocity profile at inlet).
 
-// Possibilities: Hermes::SOLVER_AMESOS, Hermes::SOLVER_AZTECOO, Hermes::SOLVER_MUMPS,
-// Hermes::SOLVER_PETSC, Hermes::SOLVER_SUPERLU, Hermes::SOLVER_UMFPACK.
-Hermes::MatrixSolverType matrix_solver_type = Hermes::SOLVER_UMFPACK;
-
 // Boundary markers.
 const std::string BDY_BOTTOM = "1";
 const std::string BDY_RIGHT = "2";

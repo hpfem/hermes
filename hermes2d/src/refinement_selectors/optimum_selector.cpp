@@ -12,12 +12,11 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template<typename Scalar>
-      OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, double conv_exp, int
+      OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, int
         max_order, Shapeset* shapeset, const Range& vertex_order, const
         Range& edge_bubble_order) :
       Selector<Scalar>(shapeset->get_min_order(), max_order),
         cand_list(cand_list),
-        conv_exp(conv_exp),
         shapeset(shapeset)
       {
         if(shapeset == NULL)
@@ -569,8 +568,8 @@ namespace Hermes
           Cand& cand = candidates[i];
           if(cand.error < unrefined.error)
           {
-            double delta_dof_exp = std::pow(cand.dofs - unrefined.dofs, conv_exp);
-            candidates[i].score = (log10(unrefined.error) - log10(cand.error)) / delta_dof_exp;
+            double delta_dof = cand.dofs - unrefined.dofs;
+            candidates[i].score = (log10(unrefined.error) - log10(cand.error)) / delta_dof;
           }
           else
             candidates[i].score = 0;

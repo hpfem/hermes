@@ -17,8 +17,5 @@ y = data[:, 1]
 loglog(x, y, '-s', label="error (est)")
 legend()
 
-# initialize new window
-pylab.figure()
-
 # finalize
 show()

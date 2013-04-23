@@ -37,12 +37,11 @@ namespace Hermes
         /// Constructor.
         /** \note Parameters \a vertex_order and \a edge_bubble_order fixes the fact that a shapeset returns a valid index even though a given shape is not invalid in the space.
         *  \param[in] cand_list A predefined list of candidates.
-        *  \param[in] conv_exp A conversion exponent, see evaluate_cands_score().
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used.
         *  \param[in] shapeset A shapeset. It cannot be NULL.
         *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range()) to skip vertex functions.
         *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range()) to skip edge and bubble functions. */
-        OptimumSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
+        OptimumSelector(CandList cand_list, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
 
         //candidates
         /// Information about candidates.
@@ -61,7 +60,6 @@ namespace Hermes
         };
 
         const CandList cand_list; ///< Allowed candidate types.
-        const double conv_exp; ///< Convergence power. Modifies difference between DOFs before they are used to calculate the score.
 
         /// Updates information about candidates. Initial information is provided.
         /** \param[in,out] info_h Information about all H-candidates.
@@ -132,7 +130,7 @@ namespace Hermes
         /** It calculates score \f$s\f$ of a candidate as \f[s = \frac{\log_{10} e_0 - \log_{10} e}{(d - d_0)^c},\f]
         *  where \f$e\f$ and \f$e_0\f$ are errors of a candidate and the original element (i.e. a candidate at the index 0)
         *  respectively, \f$d\f$ and \f$d_0\f$ are number of DOFs of a candidate and the original element (i.e. a candidate at the index 0)
-        *  respectively, and \f$c\f$ is a convergence exponent (OptimumSelector::conv_exp).
+        *  respectively.
         *  If the score is zero, the score is invalid.
         *
         *  If overridden, the higher score the better candidate.

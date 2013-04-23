@@ -21,41 +21,12 @@ const int P_INIT = 1;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
 const double THRESHOLD = 0.9;
-// Adaptive strategy:
-// STRATEGY = 0 ... refine elements until sqrt(THRESHOLD) times total
-//   error is processed. If more elements have similar errors, refine
-//   all to keep the mesh symmetric.
-// STRATEGY = 1 ... refine all elements whose error is larger
-//   than THRESHOLD times maximum element error.
-// STRATEGY = 2 ... refine all elements whose error is larger
-//   than THRESHOLD.
-const int STRATEGY = 0;
-// Predefined list of element refinement candidates. Possible values are
-// H2D_P_ISO, H2D_P_ANISO, H2D_H_ISO, H2D_H_ANISO, H2D_HP_ISO, H2D_HP_ANISO_H
-// H2D_HP_ANISO_P, H2D_HP_ANISO.
+// This is a stopping criterion for Adaptivity.
+const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionSingleElement;
+// Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
-// Maximum allowed level of hanging nodes:
-// MESH_REGULARITY = -1 ... arbitrary level hangning nodes (default),
-// MESH_REGULARITY = 1 ... at most one-level hanging nodes,
-// MESH_REGULARITY = 2 ... at most two-level hanging nodes, etc.
-// Note that regular meshes are not supported, this is due to
-// their notoriously bad performance.
-const int MESH_REGULARITY = -1;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1e-1;
-// This parameter influences the selection of
-// candidates in hp-adaptivity. Default value is 1.0.
-const double CONV_EXP = 1.0;
-// Adaptivity process stops when the number of degrees of freedom grows
-// over this limit. This is to prevent h-adaptivity to go on forever.
-const int NDOF_STOP = 60000;
-// Name of the iterative method employed by AztecOO (ignored by the other solvers).
-// Possibilities: gmres, cg, cgs, tfqmr, bicgstab.
-const char* iterative_method = "bicgstab";
-// Name of the preconditioner employed by AztecOO (ignored by the other solvers).
-// Possibilities: none, jacobi, neumann, least-squares, or a
-// preconditioner from IFPACK (see solver/aztecoo.h).
-const char* preconditioner = "jacobi";
+const double ERR_STOP = 1e-3;
 
 int main(int argc, char* args[])
 {
@@ -72,7 +43,7 @@ int main(int argc, char* args[])
   SpaceSharedPtr<double> space(new L2Space<double>(mesh, P_INIT));
 
   // Initialize refinement selector.
-  L2ProjBasedSelector<double> selector(CAND_LIST, CONV_EXP, H2DRS_DEFAULT_ORDER);
+  L2ProjBasedSelector<double> selector(CAND_LIST);
 
   // DOF and CPU convergence graphs.
   SimpleGraph graph_dof_est, graph_cpu_est;
@@ -141,17 +112,10 @@ int main(int argc, char* args[])
     graph_dof_est.save("conv_dof_est.dat");
 
     // If err_est_rel too large, adapt the mesh->
-    if(err_est_rel < ERR_STOP) done = true;
+    if(err_est_rel < ERR_STOP)
+      done = true;
     else
-    {
       done = adaptivity.adapt(&selector);
-
-      if(Space<double>::get_num_dofs(space) >= NDOF_STOP)
-      {
-        done = true;
-        break;
-      }
-    }
     as++;
   }
   while (done == false);

@@ -167,12 +167,11 @@ namespace Hermes
         /// Constructor.
         /** Intializes attributes, projection matrix cache (ProjBasedSelector::proj_matrix_cache), and allocates rhs cache (ProjBasedSelector::rhs_cache).
         *  \param[in] cand_list A predefined list of candidates.
-        *  \param[in] conv_exp A conversion exponent, see evaluate_cands_score().
         *  \param[in] max_order A maximum order which considered. If ::H2DRS_DEFAULT_ORDER, a maximum order supported by the selector is used.
         *  \param[in] shapeset A shapeset. It cannot be NULL.
         *  \param[in] vertex_order A range of orders for vertex functions. Use an empty range (i.e. Range()) to skip vertex functions.
         *  \param[in] edge_bubble_order A range of orders for edge and bubble functions. Use an empty range (i.e. Range()) to skip edge and bubble functions. */
-        ProjBasedSelector(CandList cand_list, double conv_exp, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
+        ProjBasedSelector(CandList cand_list, int max_order, Shapeset* shapeset, const Range& vertex_order, const Range& edge_bubble_order);
 
       protected: //internal logic
         /// True if the selector has already warned about possible inefficiency.

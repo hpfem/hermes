@@ -11,8 +11,8 @@ namespace Hermes
       const int HcurlProjBasedSelector<Scalar>::H2DRS_MAX_HCURL_ORDER = 6;
 
       template<typename Scalar>
-      HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, double conv_exp, int max_order, HcurlShapeset* user_shapeset)
-        : ProjBasedSelector<Scalar>(cand_list, conv_exp, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
+      HcurlProjBasedSelector<Scalar>::HcurlProjBasedSelector(CandList cand_list, int max_order, HcurlShapeset* user_shapeset)
+        : ProjBasedSelector<Scalar>(cand_list, max_order, user_shapeset == NULL ? new HcurlShapeset() : user_shapeset, Range(), Range(0, H2DRS_MAX_HCURL_ORDER))
       {
         if(user_shapeset != NULL)
         {

@@ -10,10 +10,10 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template<typename Scalar>
-      ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, double conv_exp, int
+      ProjBasedSelector<Scalar>::ProjBasedSelector(CandList cand_list, int
         max_order, Shapeset* shapeset, const Range& vertex_order, const
         Range& edge_bubble_order) :
-      OptimumSelector<Scalar>(cand_list, conv_exp, max_order, shapeset, vertex_order, edge_bubble_order),
+      OptimumSelector<Scalar>(cand_list, max_order, shapeset, vertex_order, edge_bubble_order),
         warn_uniform_orders(false),
         error_weight_h(H2DRS_DEFAULT_ERR_WEIGHT_H),
         error_weight_p(H2DRS_DEFAULT_ERR_WEIGHT_P),

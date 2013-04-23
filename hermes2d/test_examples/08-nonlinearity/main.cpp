@@ -29,9 +29,6 @@ const int NEWTON_MAX_ITER = 100;
 const int INIT_GLOB_REF_NUM = 3;                  
 // Number of initial refinements towards boundary.
 const int INIT_BDY_REF_NUM = 4;                   
-// Matrix solver: SOLVER_AMESOS, SOLVER_AZTECOO, SOLVER_MUMPS,
-// SOLVER_PETSC, SOLVER_SUPERLU, SOLVER_UMFPACK.
-MatrixSolverType matrix_solver = SOLVER_UMFPACK;  
 
 // Problem parameters.
 double heat_src = 1.0;
