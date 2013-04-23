@@ -52,14 +52,16 @@ namespace Hermes
 
     public:
       /// Sets the attribute verbose_output to the paramater option passed.
-      void set_verbose_output(bool to_set);
+      /// \todo Use this in solvers etc.
+      virtual void set_verbose_output(bool to_set);
 
       /// Returns the current value of verbose_output;
       bool get_verbose_output() const;
 
       /// Provides a callback for logging.
       /// \param[in] callback Function to be called for the messaging when verbose_output is set to yes.
-      void set_verbose_callback(callbackFn callback);
+      /// \todo Use this in solvers etc.
+      virtual void set_verbose_callback(callbackFn callback);
     public:
       /// Returns the current value of verbose_callback;
       callbackFn get_verbose_callback() const;
@@ -218,7 +220,8 @@ namespace Hermes
     {
     public:
       IntegrableWithGlobalOrder();
-      void set_global_integration_order(unsigned int order);
+      /// \todo Use this in solvers etc.
+      virtual void set_global_integration_order(unsigned int order);
       bool global_integration_order_set;
       unsigned int global_integration_order;
     };
