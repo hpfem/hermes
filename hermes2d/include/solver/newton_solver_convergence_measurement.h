@@ -32,7 +32,7 @@ namespace Hermes
 
     /// Convergence measurement strategies.
     /// This specifies the quantity that is compared to newton_tolerance (settable by set_tolerance()).
-    enum NewtonSolverConvergenceMeasurement
+    enum NewtonSolverConvergenceMeasurementType
     {
       ResidualNormRelativeToInitial,
       ResidualNormRelativeToPrevious,
@@ -44,8 +44,12 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    /// Convergence measurement function - returns converged true/false.
-    HERMES_API bool newtonConverged(NewtonSolver<Scalar>*);
+    class HERMES_API NewtonSolverConvergenceMeasurement
+    {
+    public:
+      /// Convergence measurement function - returns converged true/false.
+      static bool converged(NewtonSolver<Scalar>* newtonSolver);
+    };
   }
 }
 #endif

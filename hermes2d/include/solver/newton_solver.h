@@ -86,7 +86,7 @@ namespace Hermes
 
       /// Sets the current convergence measurement.
       /// Default: AbsoluteNorm
-      void set_convergence_measurement(NewtonSolverConvergenceMeasurement measurement);
+      void set_convergence_measurement(NewtonSolverConvergenceMeasurementType measurement);
 
       /// Sets the maximum allowed norm of the residual during the calculation.
       /// Default: 1E9
@@ -180,7 +180,12 @@ namespace Hermes
       };
 
       /// Find out the state.
-      bool test_convergence(Scalar* coeff_vec);
+      typename NewtonSolver<Scalar>::ConvergenceState get_convergence_state(Scalar* coeff_vec);
+
+      /// Act upon the state.
+      /// \return If the main loop in solve() should finalize after this.
+      bool handle_convergence_state_return_finished(typename NewtonSolver<Scalar>::ConvergenceState state, Scalar* coeff_vec);
+
 #pragma endregion
 
     protected:
@@ -190,7 +195,7 @@ namespace Hermes
 
       void init_solving(Scalar*& coeff_vec);
 
-      void do_initial_step(Scalar* coeff_vec);
+      bool do_initial_step_return_finished(Scalar* coeff_vec);
       void assemble_residual(Scalar* coeff_vec);
       void solve_linear_system(Scalar* coeff_vec);
 
@@ -203,7 +208,7 @@ namespace Hermes
       /// Calculates the new damping coefficient.
       double calculate_damping_coefficient(bool& damping_coefficient_drop, unsigned int& successful_steps);
 
-      NewtonSolverConvergenceMeasurement current_convergence_measurement;
+      NewtonSolverConvergenceMeasurementType current_convergence_measurement;
       
       /// Internal setting of default values (see individual set methods).
       void init_newton();
@@ -273,7 +278,7 @@ namespace Hermes
       Scalar* coeff_vec_back;
       int ndof;
 
-      friend bool newtonConverged<Scalar>(NewtonSolver<Scalar>*);
+      friend class NewtonSolverConvergenceMeasurement<Scalar>;
     };
   }
 }

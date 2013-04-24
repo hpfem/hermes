@@ -28,6 +28,7 @@ namespace Hermes
   {
     Exception::Exception() : std::exception(), message(new char[1000])
     {
+      strcpy(message, "<unknown>");
     }
 
     Exception::Exception(const char * msg, ...) : std::exception(), message(new char[1000])
@@ -45,10 +46,7 @@ namespace Hermes
 
     void Exception::print_msg() const
     {
-      if(message)
-        printf("Exception: %s\n", message);
-      else
-        printf("Default exception\n");
+      printf("Exception: %s\n", message);
       if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::exceptionsPrintCallstack) == 1)
         CallStack::dump(0);
     }

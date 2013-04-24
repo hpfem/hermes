@@ -28,7 +28,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    HERMES_API bool newtonConverged(NewtonSolver<Scalar>* newton)
+    bool NewtonSolverConvergenceMeasurement<Scalar>::converged(NewtonSolver<Scalar>* newton)
     {
       // get iteration.
       unsigned int iteration = newton->get_parameter_value(newton->iteration());
@@ -94,7 +94,7 @@ namespace Hermes
       return false;
     }
 
-    template HERMES_API bool newtonConverged(NewtonSolver<double>* newton);
-    template HERMES_API bool newtonConverged(NewtonSolver<std::complex<double> >* newton);
+    template class HERMES_API NewtonSolverConvergenceMeasurement<double>;
+    template class HERMES_API NewtonSolverConvergenceMeasurement<std::complex<double> >;
   }
 }
