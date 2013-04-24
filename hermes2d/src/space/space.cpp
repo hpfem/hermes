@@ -197,6 +197,10 @@ namespace Hermes
 
       if(ndata == NULL || edata == NULL || !nsize || !esize)
         return false;
+
+      if(ndof == 0)
+        return false;
+
       if(seq < 0)
         return false;
       if(this->mesh == NULL)

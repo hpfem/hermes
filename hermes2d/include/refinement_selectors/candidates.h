@@ -25,10 +25,10 @@ namespace Hermes
   {
     /// Possible refinements of an element.
     enum RefinementType {
-      H2D_REFINEMENT_P = 1, ///< P-refinement.
-      H2D_REFINEMENT_H = 2, ///< H-refinement.
-      H2D_REFINEMENT_ANISO_H = 3, ///< ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
-      H2D_REFINEMENT_ANISO_V = 4 ///< ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
+      H2D_REFINEMENT_P = 0, ///< P-refinement.
+      H2D_REFINEMENT_H = 1, ///< H-refinement.
+      H2D_REFINEMENT_ANISO_H = 2, ///< ANISO-refienement. The element is split along the horizontal axis. Quadrilaterals only.
+      H2D_REFINEMENT_ANISO_V = 3 ///< ANISO-refienement. The element is split along the vertical axis. Quadrilaterals only.
     };
 
     /// Retuns true if a given refinement is an ANISO-refinement.

@@ -47,7 +47,7 @@ const int INIT_REF_BDY = 5;
 const bool MULTI = true;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.75;
+const double THRESHOLD = 0.25;
 // This is a stopping criterion for Adaptivity.
 const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionSingleElement;
 // Predefined list of element refinement candidates.
@@ -206,8 +206,7 @@ int main(int argc, char* argv[])
     err_est_rel.push_back(error_calculator.get_error_squared(1) * 100);
 
     Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, 0.5);
-    //adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.5);
+    adaptivity.set_strategy(stoppingCriterion, THRESHOLD);
 
     // Time measurement.
     cpu_time.tick();

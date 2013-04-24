@@ -110,7 +110,7 @@ namespace Hermes
         *     0 - overall
         *     1 - 4 : indexed by enum RefinementType.
         */
-        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand* best_candidates[5]);
+        virtual void select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand*& best_candidate, Cand* best_candidates_specific_type[4]);
 
         /// Calculates error of candidates.
         /** This method has to be implemented in inherited classes.

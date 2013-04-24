@@ -583,7 +583,7 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand* best_candidates[5])
+      void OptimumSelector<Scalar>::select_best_candidate(Hermes::vector<Cand>& candidates, Element* e, Cand*& best_candidate, Cand* best_candidates_specific_type[4])
       {
         //sort according to the score
         const int num_cands = (int)candidates.size();
@@ -594,16 +594,16 @@ namespace Hermes
         // Overall best candidate.
         if(candidates[1].score == 0)
           // This means that the best candidate is the 'do-nothing' one.
-          best_candidates[0] = &candidates[0];
+          best_candidate = &candidates[0];
         else
           // The one with the highest score is the best.
-          best_candidates[0] = &candidates[1];
+          best_candidate = &candidates[1];
 
         for(int i = 0; i < num_cands; i++)
         {
           if(candidates[i].split == H2D_REFINEMENT_P)
           {
-            best_candidates[H2D_REFINEMENT_P] = &candidates[i];
+            best_candidates_specific_type[H2D_REFINEMENT_P] = &candidates[i];
             break;
           }
         }
@@ -612,7 +612,7 @@ namespace Hermes
         {
           if(candidates[i].split == H2D_REFINEMENT_H)
           {
-            best_candidates[H2D_REFINEMENT_H] = &candidates[i];
+            best_candidates_specific_type[H2D_REFINEMENT_H] = &candidates[i];
             break;
           }
         }
@@ -621,7 +621,7 @@ namespace Hermes
         {
           if(candidates[i].split == H2D_REFINEMENT_ANISO_H)
           {
-            best_candidates[H2D_REFINEMENT_ANISO_H] = &candidates[i];
+            best_candidates_specific_type[H2D_REFINEMENT_ANISO_H] = &candidates[i];
             break;
           }
         }
@@ -630,7 +630,7 @@ namespace Hermes
         {
           if(candidates[i].split == H2D_REFINEMENT_ANISO_V)
           {
-            best_candidates[H2D_REFINEMENT_ANISO_V] = &candidates[i];
+            best_candidates_specific_type[H2D_REFINEMENT_ANISO_V] = &candidates[i];
             break;
           }
         }
@@ -653,9 +653,9 @@ namespace Hermes
         //build candidates.
         Hermes::vector<Cand> candidates = create_candidates(element, quad_order);
         //there are candidates to choose from
-        Cand* best_candidates[5];
-        // Initialization
-        memset(best_candidates, 0, 5 * sizeof(Cand*));
+        Cand* best_candidate;
+        Cand* best_candidates_specific_type[4];
+        memset(best_candidates_specific_type, 0, 4 * sizeof(Cand*));
 
         if(candidates.size() > 1)
         { 
@@ -663,26 +663,26 @@ namespace Hermes
           evaluate_candidates(candidates, element, rsln);
 
           //select candidate
-          select_best_candidate(candidates, element, best_candidates);
+          select_best_candidate(candidates, element, best_candidate, best_candidates_specific_type);
         }
 
         //there is not candidate to choose from, select the original candidate
         else
         { 
-          best_candidates[0] = &candidates[0];
+          best_candidate = &candidates[0];
         }
 
-        if(best_candidates[0] == &candidates[0])
+        if(best_candidate == &candidates[0])
           return false;
 
         //copy result to output
-        refinement.split = best_candidates[0]->split;
-        ElementToRefine::copy_orders(refinement.refinement_polynomial_order, best_candidates[0]->p);
-        for(int i = 1; i < 5; i++)
-          if(best_candidates[i] != NULL)
-            ElementToRefine::copy_orders(refinement.best_refinement_polynomial_order_type[i], best_candidates[i]->p);
+        refinement.split = best_candidate->split;
+        ElementToRefine::copy_orders(refinement.refinement_polynomial_order, best_candidate->p);
+        for(int i = 1; i < 4; i++)
+          if(best_candidates_specific_type[i] != NULL)
+            ElementToRefine::copy_orders(refinement.best_refinement_polynomial_order_type[i], best_candidates_specific_type[i]->p);
 
-        ElementToRefine::copy_errors(refinement.errors, best_candidates[0]->errors);
+        ElementToRefine::copy_errors(refinement.errors, best_candidate->errors);
 
         //modify orders in a case of a triangle such that order_v is zero
         if(element->is_triangle())

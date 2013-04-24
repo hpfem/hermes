@@ -115,8 +115,6 @@ namespace Hermes
     {
       if(attribute != NULL && other_attribute != NULL)
       {
-        if(other_attribute == NULL)
-          throw Hermes::Exceptions::Exception("Unable to add a function expansion, the desired attribute is NULL in the other function.");
         for(int i = 0; i < num_gip; i++)
           attribute[i] += other_attribute[i];
       }

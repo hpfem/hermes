@@ -132,13 +132,13 @@ namespace Hermes
 
       return okay;
     }
-    static int asdf = 0;
+    
     template<typename Scalar>
     void ErrorCalculator<Scalar>::calculate_errors(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& coarse_solutions_, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& fine_solutions_, bool sort_and_store)
     {
       this->coarse_solutions = coarse_solutions_;
       this->fine_solutions = fine_solutions_;
-      this->component_count = coarse_solutions.size();
+      this->component_count = this->coarse_solutions.size();
       
       this->check();
 

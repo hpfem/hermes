@@ -248,7 +248,7 @@ namespace Hermes
     template<typename Scalar>
     bool DiscreteProblemCache<Scalar>::get_adaptivity(Element* rep, int rep_sub_idx, int rep_i, CacheRecord*& cache_record)
     {
-      int parent_son;
+      int parent_son = -1;
       for(int i = 0; i < 4; i++)
       {
         if(rep->parent->sons[i] == rep)
@@ -257,6 +257,10 @@ namespace Hermes
           break;
         }
       }
+
+#ifdef _DEBUG
+      assert(parent_son != -1);
+#endif
 
       int hash = this->get_hash_record(rep->parent->id, parent_son, rep_sub_idx, rep_i);
       if (this->hashTable[hash] == NULL)
