@@ -63,19 +63,22 @@ namespace Hermes
 
         // if not found, create a new one
 #pragma omp critical(realloc_vertices)
-        try
         {
-          i = add_vertex();
+          try
+          {
+            i = add_vertex();
+          }
+          catch(std::exception& e)
+          {
+            if(this->caughtException)
+              this->caughtException = new Hermes::Exceptions::Exception(e.what());
+          }
         }
-        catch(std::exception& e)
-        {
-          if(this->caughtException == NULL)
-            this->caughtException = new Hermes::Exceptions::Exception(e.what());
-        }
-        if(this->caughtException != NULL)
+        if(this->caughtException)
         {
           return -1;
         }
+        
         verts[i][0] = x;
         verts[i][1] = y;
         verts[i][2] = xvalue;
