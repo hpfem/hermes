@@ -42,8 +42,11 @@ namespace Hermes
       virtual ~NonlinearSolver();
 
       /// Basic solve method.
+      virtual void solve();
+
+      /// Basic solve method.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
-      virtual void solve(Scalar* coeff_vec = NULL) = 0;
+      virtual void solve(Scalar* coeff_vec) = 0;
 
       /// Solve.
       /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.

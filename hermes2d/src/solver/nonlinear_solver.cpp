@@ -60,6 +60,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void NonlinearSolver<Scalar>::solve()
+    {
+      this->solve(NULL);
+    }
+
+    template<typename Scalar>
     void NonlinearSolver<Scalar>::solve(MeshFunctionSharedPtr<Scalar>& initial_guess)
     {
       if(this->dp->get_spaces().size() != 1)

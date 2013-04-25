@@ -82,7 +82,7 @@ namespace Hermes
       using NonlinearSolver<Scalar>::solve;
       /// Solve.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
-      virtual void solve(Scalar* coeff_vec = NULL);
+      virtual void solve(Scalar* coeff_vec);
 
       /// Sets the current convergence measurement.
       /// Default: AbsoluteNorm

@@ -172,7 +172,6 @@ namespace Hermes
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, Func<Scalar> **ext) const;
-
         virtual Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, Func<Ord> **ext) const;
 
@@ -420,12 +419,14 @@ namespace Hermes
       class HERMES_API DefaultWeakFormPoisson : public WeakForm<Scalar>
       {
       public:
-        DefaultWeakFormPoisson();
+        DefaultWeakFormPoisson(std::string area, Hermes1DFunction<Scalar>* coeff, Hermes2DFunction<Scalar>* f, GeomType gt = HERMES_PLANAR);
+      };
 
-        DefaultWeakFormPoisson(std::string area,
-          Hermes1DFunction<Scalar>* coeff,
-          Hermes2DFunction<Scalar>* f,
-          GeomType gt = HERMES_PLANAR);
+      template<typename Scalar>
+      class HERMES_API DefaultWeakFormPoissonLinear : public WeakForm<Scalar>
+      {
+      public:
+        DefaultWeakFormPoissonLinear(std::string area, Hermes2DFunction<Scalar>* f, GeomType gt = HERMES_PLANAR);
       };
     };
   }

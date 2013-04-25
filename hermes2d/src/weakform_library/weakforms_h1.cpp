@@ -1083,11 +1083,6 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson() : WeakForm<Scalar>()
-      {
-      };
-
-      template<typename Scalar>
       DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson(std::string area,
         Hermes1DFunction<Scalar>* coeff,
         Hermes2DFunction<Scalar>* f,
@@ -1100,6 +1095,18 @@ namespace Hermes
         // Residual.
         this->add_vector_form(new DefaultResidualDiffusion<Scalar>(0, area, coeff, gt));
         this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, f, gt));
+      };
+
+      template<typename Scalar>
+      DefaultWeakFormPoissonLinear<Scalar>::DefaultWeakFormPoissonLinear(std::string area,
+        Hermes2DFunction<Scalar>* f,
+        GeomType gt) : WeakForm<Scalar>()
+      {
+        // Jacobian.
+        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, NULL, HERMES_SYM));
+
+        // Residual.
+        this->add_vector_form(new DefaultVectorFormVol<Scalar>(0, area, f));
       };
 
       template class HERMES_API DefaultMatrixFormVol<double>;
@@ -1126,6 +1133,8 @@ namespace Hermes
       template class HERMES_API DefaultWeakFormLaplace<std::complex<double> >;
       template class HERMES_API DefaultWeakFormPoisson<double>;
       template class HERMES_API DefaultWeakFormPoisson<std::complex<double> >;
+      template class HERMES_API DefaultWeakFormPoissonLinear<double>;
+      template class HERMES_API DefaultWeakFormPoissonLinear<std::complex<double> >;
       template class HERMES_API DefaultResidualSurf<double>;
       template class HERMES_API DefaultResidualSurf<std::complex<double> >;
       template class HERMES_API DefaultResidualVol<double>;

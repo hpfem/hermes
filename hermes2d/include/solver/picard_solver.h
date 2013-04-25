@@ -84,7 +84,7 @@ namespace Hermes
       using NonlinearSolver<Scalar>::solve;
       /// Solve.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
-      virtual void solve(Scalar* coeff_vec = NULL);
+      virtual void solve(Scalar* coeff_vec);
 
       /// Turn on / off the Anderson acceleration. By default it is off.
       void use_Anderson_acceleration(bool to_set);

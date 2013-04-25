@@ -95,6 +95,9 @@ namespace Hermes
       /// Reports cache hits and misses.
       virtual void set_report_cache_hits_and_misses(bool to_set = true);
 
+      /// Basic solve method.
+      virtual void solve() = 0;
+
     protected:
       /// Handle the jacobian re-calculation and re-usage of a previous one.
       void conditionally_assemble(Scalar* coeff_vec = NULL, bool force_reuse_jacobian_values = false, bool assemble_residual = true);
