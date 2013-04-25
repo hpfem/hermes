@@ -114,7 +114,7 @@ namespace Hermes
       /// Default: default is the automatic damping, default coefficient if manual damping used is set by this method.
       /// \param[in] onOff on(true)-manual damping, off(false)-automatic damping.
       /// \param[in] coeff The (perpetual) damping coefficient in the case of manual damping. Ignored in the case of automatic damping.
-      void set_manual_damping_coeff(bool onOff, double coeff = 1.0);
+      void set_manual_damping_coeff(bool onOff, double coeff);
       
       /// Make the automatic damping start with this coefficient.
       /// This will also be the top bound for the coefficient.
@@ -206,7 +206,7 @@ namespace Hermes
       double calculate_residual_norm();
 
       /// Calculates the new damping coefficient.
-      double calculate_damping_coefficient(bool& damping_coefficient_drop, unsigned int& successful_steps);
+      bool calculate_damping_coefficient(unsigned int& successful_steps);
 
       NewtonSolverConvergenceMeasurementType current_convergence_measurement;
       
@@ -258,7 +258,7 @@ namespace Hermes
       const OutputParameterUnsignedInt& successful_steps_damping() const { return this->p_successful_steps_damping; };
       const OutputParameterUnsignedInt& successful_steps_jacobian() const { return this->p_successful_steps_jacobian; };
       
-      const OutputParameterDouble& current_damping_coefficient() const { return this->p_current_damping_coefficient; };
+      const OutputParameterDoubleVector& damping_coefficients() const { return this->p_damping_coefficients; };
       const OutputParameterBool& residual_norm_drop() const { return this->p_residual_norm_drop; };
       const OutputParameterUnsignedInt& iteration() const { return this->p_iteration; };
 
@@ -269,7 +269,7 @@ namespace Hermes
       OutputParameterDouble p_solution_change_norm;
       OutputParameterUnsignedInt p_successful_steps_damping;
       OutputParameterUnsignedInt p_successful_steps_jacobian;
-      OutputParameterDouble p_current_damping_coefficient;
+      OutputParameterDoubleVector p_damping_coefficients;
       OutputParameterBool p_residual_norm_drop;
       OutputParameterUnsignedInt p_iteration;
 #pragma endregion
