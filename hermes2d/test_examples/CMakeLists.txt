@@ -27,3 +27,6 @@ add_subdirectory("12-picard")
 add_subdirectory("13-FCT")
 
 add_subdirectory("14-error-calculation")
+
+add_subdirectory("acoustic")
+
