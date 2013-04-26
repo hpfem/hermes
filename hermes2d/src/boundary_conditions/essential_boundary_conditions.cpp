@@ -86,7 +86,7 @@ namespace Hermes
       else
         throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConst.");
       
-      for (unsigned int i = 0; i < this->markers.size(); i++)
+      for (unsigned int i = 0; i < markers_.size(); i++)
         this->markers.push_back(markers_[i]);
     }
 
@@ -119,7 +119,7 @@ namespace Hermes
       else
         throw Exceptions::Exception("Wrong mesh function type passed to DefaultEssentialBCNonConstHcurl.");
 
-      for (unsigned int i = 0; i < this->markers.size(); i++)
+      for (unsigned int i = 0; i < markers_.size(); i++)
         this->markers.push_back(markers_[i]);
     }
 
