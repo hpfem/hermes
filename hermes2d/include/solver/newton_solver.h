@@ -180,7 +180,7 @@ namespace Hermes
       };
 
       /// Find out the state.
-      typename NewtonSolver<Scalar>::ConvergenceState get_convergence_state(Scalar* coeff_vec);
+      typename NewtonSolver<Scalar>::ConvergenceState get_convergence_state();
 
       /// Act upon the state.
       /// \return If the main loop in solve() should finalize after this.
@@ -189,6 +189,11 @@ namespace Hermes
 #pragma endregion
 
     protected:
+      /// \return Whether or not should the processing continue.
+      virtual void on_damping_factor_updated();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_begin();
+
       /// State querying helpers.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "NewtonSolver"; }
