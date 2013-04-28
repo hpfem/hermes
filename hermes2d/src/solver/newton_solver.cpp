@@ -78,6 +78,8 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_sufficient_improvement_factor_jacobian(double ratio)
     {
+      if(ratio < 0.0)
+        throw Exceptions::ValueException("sufficient_improvement_factor_jacobian", sufficient_improvement_factor_jacobian, 0.0);
       this->sufficient_improvement_factor_jacobian = ratio;
     }
 
@@ -90,13 +92,15 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_tolerance(double tolerance_)
     {
+      if(tolerance_ < 0.0)
+        throw Exceptions::ValueException("newton_tolerance", newton_tolerance, 0.0);
       this->newton_tolerance = tolerance_;
     }
 
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_max_allowed_residual_norm(double max_allowed_residual_norm_to_set)
     {
-      if(max_allowed_residual_norm_to_set <= 0.0)
+      if(max_allowed_residual_norm_to_set < 0.0)
         throw Exceptions::ValueException("max_allowed_residual_norm_to_set", max_allowed_residual_norm_to_set, 0.0);
       this->max_allowed_residual_norm = max_allowed_residual_norm_to_set;
     }
@@ -104,7 +108,7 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_min_allowed_damping_coeff(double min_allowed_damping_coeff_to_set)
     {
-      if(min_allowed_damping_coeff_to_set <= 0.0)
+      if(min_allowed_damping_coeff_to_set < 0.0)
         throw Exceptions::ValueException("min_allowed_damping_coeff_to_set", min_allowed_damping_coeff_to_set, 0.0);
       this->min_allowed_damping_coeff = min_allowed_damping_coeff_to_set;
     }
@@ -148,8 +152,8 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_auto_damping_ratio(double ratio)
     {
-      if(ratio <= 0.0 || ratio >= 1.0)
-        throw Exceptions::ValueException("ratio", ratio, 0.0, 1.0);
+      if(ratio <= 1.0)
+        throw Exceptions::ValueException("ratio", ratio, 1.0);
       if(this->manual_damping)
         this->warn("Manual damping is turned on and you called set_initial_auto_damping_coeff(), turn off manual damping first by set_manual_damping_coeff(false);");
       this->auto_damping_ratio = ratio;
@@ -542,6 +546,7 @@ namespace Hermes
         // Handle the event of step beginning.
         this->on_step_begin();
 
+#pragma region damping_factor_loop
         // Loop searching for the damping coefficient.
         do
         {
@@ -573,7 +578,7 @@ namespace Hermes
 
             // Try with the different damping coefficient.
             // Important thing here is the factor used that must be calculated from the current one and the previous one.
-            // This results in the following relation (since the damping coefficient is only updated one way.
+            // This results in the following relation (since the damping coefficient is only updated one way).
             double factor = damping_coefficients.back() * (1 - this->auto_damping_ratio);
             for (int i = 0; i < ndof; i++)
               coeff_vec[i] = coeff_vec_back[i] + factor * (coeff_vec[i] - coeff_vec_back[i]);
@@ -583,10 +588,12 @@ namespace Hermes
           }
         }
         while (!residual_norm_drop);
+#pragma endregion
 
         // Damping factor was updated, handle the event.
         this->on_damping_factor_updated();
 
+#pragma region jacobian_reusage_loop
         // Loop until jacobian is not reusable anymore.
         // The whole loop is skipped if the jacobian is not suitable for being reused at all.
         while(this->jacobian_reusable && (this->reuse_jacobian_values() || force_reuse_jacobian_values(successful_steps_jacobian)))
@@ -617,6 +624,7 @@ namespace Hermes
           if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
             return;
         }
+#pragma endregion
 
         // Reassemble the jacobian once not reusable anymore.
         this->info("\tNewton: re-calculating Jacobian.");
