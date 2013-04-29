@@ -232,6 +232,7 @@ int main(int argc, char* argv[])
         derefined_in_this_step = false;
         as = 1;
         Hermes::Mixins::Loggable::Static::info("\n\nIteration - inner loop: %u, Time: %g.", ++iteration, time);
+        Space<double>::update_essential_bc_values(rspaces, time);
         
         linear_solver.solve();
         
