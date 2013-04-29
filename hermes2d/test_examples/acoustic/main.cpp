@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     //mloader.load("domain_apartment_test.xml", mesh);
 
     Hermes::Hermes2D::MeshReaderH2DXML mloader;
-    mloader.load("../test.xml", mesh);
+    mloader.load("test.xml", mesh);
   }
   catch(std::exception& e)
   {
