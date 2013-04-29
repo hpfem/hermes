@@ -453,7 +453,7 @@ namespace Hermes
         }
       }
 
-      if(this->mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL.\n");
+      if(this->mesh == NULL) throw Hermes::Exceptions::Exception("mesh == NULL");
       init_dxdy_buffer();
       this->element = NULL;
       if(Solution<Scalar>::static_verbose_output)

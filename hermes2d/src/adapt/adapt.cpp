@@ -411,8 +411,6 @@ namespace Hermes
         ElementToRefine& elem_ref = elems_to_refine[inx];
         if(elem_ref.id == -1)
           continue;
-        int current_order = this->spaces[elem_ref.comp]->get_element_order(elem_ref.id);
-        Element* current_elem = meshes[elem_ref.comp]->get_element(elem_ref.id);
 
         //select a refinement used by all components that share a mesh which is about to be refined
         int selected_refinement = elem_ref.split;

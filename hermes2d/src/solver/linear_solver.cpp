@@ -98,7 +98,7 @@ namespace Hermes
       this->on_finish();
       
       this->tick();
-      this->info("\tLinear solver solution duration: %f s.\n", this->last());
+      this->info("\tLinear solver solution duration: %f s.", this->last());
     }
 
     template class HERMES_API LinearSolver<double>;
