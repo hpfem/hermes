@@ -25,14 +25,19 @@ const CalculatedErrorType errorType = RelativeErrorToGlobalNorm;
 // Stopping criterion for adaptivity.
 double REFINEMENT_THRESHOLD(double time, double norm)
 {
-  double toReturn = 10.0;
-  if(time > time_step * 10)
-  {
-    if(std::log10(norm / 1e10) > 0)
-      toReturn = toReturn / (std::log10(norm / 1e10) + 1);
-  }
+  double toReturn = 5.0;
+  /*
+    if(time > time_step * 10)
+    {
+      if(std::log10(norm / 1e10) > 0)
+        toReturn = toReturn / (std::log10(norm / 1e10) + 1);
+    }
 
-  std::cout << "\tREFINEMENT_THRESHOLD: " << toReturn << std::endl;
+  */
+  
+  toReturn = toReturn / std::max(std::log10(time / time_step) / 3, 1.0);
+
+  std::cout << "\tCurrent refinement threshold: " << toReturn << std::endl;
 
   return toReturn;
 }
@@ -70,7 +75,7 @@ private:
 
 int main(int argc, char* argv[])
 {
-  Hermes2DApi.set_integral_param_value(numThreads, 1);
+  //Hermes2DApi.set_integral_param_value(numThreads, 1);
 
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
@@ -136,6 +141,7 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, spaces);
+  linear_solver.set_do_not_use_cache();
   linear_solver.set_jacobian_constant();
 
   // Adaptivity.
@@ -186,7 +192,7 @@ int main(int argc, char* argv[])
       Hermes::vector<SpaceSharedPtr<double> > rspaces(rspace_value, rspace_derivative);
       Space<double>::update_essential_bc_values(rspaces, time);
       
-      Hermes::Mixins::Loggable::Static::info("\tAdaptivity step %d:", as++);
+      Hermes::Mixins::Loggable::Static::info("\n\tAdaptivity step %d:", as++);
       Hermes::Mixins::Loggable::Static::info("\tCoarse DOF: %d,  Fine DOF: %d.", Space<double>::get_num_dofs(spaces), Space<double>::get_num_dofs(rspaces));
       
       linear_solver.set_spaces(rspaces);
@@ -202,8 +208,8 @@ int main(int argc, char* argv[])
       Hermes::Mixins::Loggable::Static::info("\tTotal norm: %g.", error_calculator.get_total_norm_squared());
 
       // View the coarse mesh solution and polynomial orders.
-      // viewS.show(rsln_value);
-      // oview.show(rspace_value);
+      viewS.show(rsln_value);
+      oview.show(rspace_value);
 
       // Add entry to DOF and CPU convergence graphs.
       /*
@@ -245,8 +251,8 @@ int main(int argc, char* argv[])
         Hermes::Mixins::Loggable::Static::info("\tTotal error: %g%%.", err_est_rel);
         Hermes::Mixins::Loggable::Static::info("\tTotal norm: %g.", error_calculator.get_total_norm_squared());
 
-        // viewS.show(rsln_value);
-        // oview.show(rspace_value);
+        viewS.show(rsln_value);
+        oview.show(rspace_value);
       }
       
       // We are above the error.
