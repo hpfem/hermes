@@ -160,6 +160,30 @@ public:
     }
   }
 
+  MyWeakForm(
+    std::string acoustic_impedance_marker,
+    double acoustic_impedance_value,
+    Hermes::vector<MeshFunctionSharedPtr<double> > prev_slns
+    ) : WeakForm<double>(2), prev_slns(prev_slns)
+  {
+    this->set_ext(prev_slns);
+
+    double acoustic_density = 1.25;
+    double acoustic_speed = 343.;
+    this->add_matrix_form(new volume_matrix_acoustic_transient_planar_linear_form_1_1<double>(0, 0, acoustic_density, acoustic_speed));
+    this->add_matrix_form(new volume_matrix_acoustic_transient_planar_linear_form_1_2<double>(0, 1, acoustic_density, acoustic_speed));
+    this->add_matrix_form(new volume_matrix_acoustic_transient_planar_linear_form_2_1<double>(1, 0, acoustic_density, acoustic_speed));
+    this->add_matrix_form(new volume_matrix_acoustic_transient_planar_linear_form_2_2<double>(1, 1, acoustic_density, acoustic_speed));
+
+    this->add_vector_form(new volume_vector_acoustic_transient_planar_linear_form_1_2<double>(0, acoustic_density, acoustic_speed));
+    this->add_vector_form(new volume_vector_acoustic_transient_planar_linear_form_2_1<double>(1, acoustic_density, acoustic_speed));
+
+    surface_matrix_acoustic_transient_planar_linear_form_1_2_acoustic_impedance<double>* matrix_form = new surface_matrix_acoustic_transient_planar_linear_form_1_2_acoustic_impedance<double>(0, 1);
+    matrix_form->set_area(acoustic_impedance_marker);
+    matrix_form->ac_Z0 = acoustic_impedance_value;
+    this->add_matrix_form_surf(matrix_form);
+  }
+
   Hermes::vector<std::string> acoustic_impedance_markers;
   Hermes::vector<double> acoustic_impedance_values;
   Hermes::vector<MeshFunctionSharedPtr<double> > prev_slns;
@@ -170,6 +194,11 @@ class CustomBCValue : public EssentialBoundaryCondition<double>
 public:
   CustomBCValue(Hermes::vector<std::string> markers, double amplitude = 1., double frequency = 1000.)
     : EssentialBoundaryCondition<double>(markers), amplitude(amplitude), frequency(frequency)
+  {
+  }
+
+  CustomBCValue(std::string marker, double amplitude = 1., double frequency = 1000.)
+    : EssentialBoundaryCondition<double>(marker), amplitude(amplitude), frequency(frequency)
   {
   }
 
@@ -189,6 +218,11 @@ class CustomBCDerivative : public EssentialBoundaryCondition<double>
 public:
   CustomBCDerivative(Hermes::vector<std::string> markers, double amplitude = 1., double frequency = 1000.)
     : EssentialBoundaryCondition<double>(markers), amplitude(amplitude), frequency(frequency)
+  {
+  }
+
+  CustomBCDerivative(std::string marker, double amplitude = 1., double frequency = 1000.)
+    : EssentialBoundaryCondition<double>(marker), amplitude(amplitude), frequency(frequency)
   {
   }
 
