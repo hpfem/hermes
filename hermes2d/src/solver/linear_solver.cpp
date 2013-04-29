@@ -86,7 +86,7 @@ namespace Hermes
       // Assemble the residual always and the jacobian when necessary (nonconstant jacobian, not reusable, ...).
       this->conditionally_assemble();
       if(this->report_cache_hits_and_misses)
-          this->add_cache_hits_and_misses(this->dp);
+        this->add_cache_hits_and_misses(this->dp);
 
       this->process_matrix_output(this->jacobian, 1);
       this->process_vector_output(this->residual, 1);

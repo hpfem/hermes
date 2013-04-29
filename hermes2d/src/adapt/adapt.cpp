@@ -302,11 +302,10 @@ namespace Hermes
       // in singlemesh case, impose same orders across meshes
       homogenize_shared_mesh_orders(meshes);
 
-      this->adapt_postprocess(meshes, attempted_element_refinements_count);
-
+      this->deinit_adapt(element_refinement_location);
       delete [] elements_to_refine;
 
-      this->deinit_adapt(element_refinement_location);
+      this->adapt_postprocess(meshes, attempted_element_refinements_count);
 
       if(this->iterative_improvement)
       {
@@ -490,10 +489,16 @@ namespace Hermes
 
       // Adding the additions.
       if(new_elems_to_refine.size() > 0)
-        elems_to_refine = (ElementToRefine*)realloc(elems_to_refine, (num_elem_to_proc + new_elems_to_refine.size()) * sizeof(ElementToRefine));
-      for(int inx = 0; inx < new_elems_to_refine.size(); inx++)
-        elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
-      num_elem_to_proc += new_elems_to_refine.size();
+      {
+        ElementToRefine* new_elems_to_refine_array = new ElementToRefine[num_elem_to_proc + new_elems_to_refine.size()];
+        memcpy(new_elems_to_refine_array, elems_to_refine, num_elem_to_proc * sizeof(ElementToRefine));
+        delete [] elems_to_refine;
+        elems_to_refine = new_elems_to_refine_array;
+
+        for(int inx = 0; inx < new_elems_to_refine.size(); inx++)
+          elems_to_refine[num_elem_to_proc + inx] = new_elems_to_refine[inx];
+        num_elem_to_proc += new_elems_to_refine.size();
+      }
     }
 
     template<typename Scalar>

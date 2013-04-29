@@ -302,6 +302,7 @@ namespace Hermes
               total_norm_squared += gip_pt[H2D_GIP2D_W] * (sqr(ref_value[H2D_H1FE_VALUE]) + sqr(ref_value[H2D_H1FE_DX]) + sqr(ref_value[H2D_H1FE_DY]));
           }
         }
+
         if(this->errorType == RelativeErrorToElementNorm)
           total_error_squared /= total_norm_squared;
 

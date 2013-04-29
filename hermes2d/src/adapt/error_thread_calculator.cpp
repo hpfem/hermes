@@ -287,6 +287,8 @@ namespace Hermes
         rsln_funcs[i]->free_fn();
         delete rsln_funcs[i];
       }
+      delete [] difference_funcs;
+      delete [] rsln_funcs;
 
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
@@ -327,6 +329,8 @@ namespace Hermes
         rsln_funcs[i]->free_fn();
         delete rsln_funcs[i];
       }
+      delete [] difference_funcs;
+      delete [] rsln_funcs;
 
       // deinitialize points & geometry & jacobian times weights
       geometry->free();

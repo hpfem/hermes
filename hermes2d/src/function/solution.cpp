@@ -490,16 +490,15 @@ namespace Hermes
         }
       }
 
-#pragma omp parallel num_threads(solutions.size())
+      for (int i=0; i < spaces.size(); i++)
       {
-        int thread_number = omp_get_thread_num();
         if(Solution<Scalar>::static_verbose_output)
-          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", thread_number);
+          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
         if(add_dir_lift == Hermes::vector<bool>())
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], true, start_indices_new[thread_number]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], add_dir_lift[thread_number], start_indices_new[thread_number]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
     }
 
@@ -558,16 +557,15 @@ namespace Hermes
         }
       }
 
-#pragma omp parallel num_threads(solutions.size())
+      for (int i=0; i < spaces.size(); i++)
       {
-        int thread_number = omp_get_thread_num();
         if(Solution<Scalar>::static_verbose_output)
-          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", thread_number);
+          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
         if(add_dir_lift == Hermes::vector<bool>())
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], true, start_indices_new[thread_number]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], add_dir_lift[thread_number], start_indices_new[thread_number]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
     }
 
@@ -589,13 +587,12 @@ namespace Hermes
         counter += spaces[i]->get_num_dofs();
       }
 
-#pragma omp parallel num_threads(solutions.size())
+      for (int i=0; i < spaces.size(); i++)
       {
-        int thread_number = omp_get_thread_num();
         if(Solution<Scalar>::static_verbose_output)
-          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", thread_number);
+          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
-        Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], add_dir_lift, start_indices_new[thread_number]);
+        Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift, start_indices_new[i]);
       }
     }
 
@@ -617,13 +614,12 @@ namespace Hermes
         counter += spaces[i]->get_num_dofs();
       }
 
-#pragma omp parallel num_threads(solutions.size())
+      for (int i=0; i < spaces.size(); i++)
       {
-        int thread_number = omp_get_thread_num();
         if(Solution<Scalar>::static_verbose_output)
-          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", thread_number);
+          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
-        Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], add_dir_lift, start_indices_new[thread_number]);
+        Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift, start_indices_new[i]);
       }
     }
 
@@ -672,17 +668,16 @@ namespace Hermes
           start_indices_new.push_back(start_indices[i]);
         }
       }
-
-#pragma omp parallel num_threads(solutions.size())
+      
+      for (int i=0; i < spaces.size(); i++)
       {
-        int thread_number = omp_get_thread_num();
         if(Solution<Scalar>::static_verbose_output)
-          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", thread_number);
+          Hermes::Mixins::Loggable::Static::info("Vector to Solution: %d-th solution", i);
 
         if(add_dir_lift == Hermes::vector<bool>())
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], true, start_indices_new[thread_number]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], true, start_indices_new[i]);
         else
-          Solution<Scalar>::vector_to_solution(solution_vector, spaces[thread_number], solutions[thread_number], add_dir_lift[thread_number], start_indices_new[thread_number]);
+          Solution<Scalar>::vector_to_solution(solution_vector, spaces[i], solutions[i], add_dir_lift[i], start_indices_new[i]);
       }
     }
 

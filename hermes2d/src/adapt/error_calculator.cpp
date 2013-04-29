@@ -172,6 +172,10 @@ namespace Hermes
           errorThreadCalculator.evaluate_one_state(states[state_i]);
       }
 
+      for(int i = 0; i < num_states; i++)
+        delete states[i];
+      free(states);
+
       // Clean after ourselves.
       for(int i = 0; i < this->component_count; i++)
       {
