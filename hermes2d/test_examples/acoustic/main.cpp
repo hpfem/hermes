@@ -52,7 +52,7 @@ public:
   {
   }
 private:
-  void evaluate_cands_score(Hermes::vector<Cand>& candidates, Element* e)
+  void evaluate_cands_score(Hermes::vector<Cand>& candidates, Hermes2D::Element* e)
   {
     //calculate score of candidates
     Cand& unrefined = candidates[0];
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
   Hermes::vector<MeshFunctionSharedPtr<double> > prevslns(prev_value, prev_derivative);
 
   Hermes::Hermes2D::Views::ScalarView viewS("Solution");
-  viewS.set_min_max_range(-AMPLITUDE * 1.5, AMPLITUDE * 1.5);
+  viewS.set_min_max_range(-AMPLITUDE, AMPLITUDE);
   Views::OrderView oview("Polynomial orders");
 
   MyWeakForm wf(matched_boundary, matched_boundaries_values, prevslns);

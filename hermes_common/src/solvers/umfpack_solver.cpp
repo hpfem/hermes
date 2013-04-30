@@ -886,7 +886,8 @@ namespace Hermes
       switch(eff_fact_scheme)
       {
       case HERMES_FACTORIZE_FROM_SCRATCH:
-        if(symbolic != NULL) umfpack_di_free_symbolic(&symbolic);
+        if(symbolic != NULL)
+          umfpack_di_free_symbolic(&symbolic);
 
         //debug_log("Factorizing symbolically.");
         status = umfpack_di_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, NULL, NULL);
@@ -900,7 +901,8 @@ namespace Hermes
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
-        if(numeric != NULL) umfpack_di_free_numeric(&numeric);
+        if(numeric != NULL)
+          umfpack_di_free_numeric(&numeric);
 
         //debug_log("Factorizing numerically.");
         status = umfpack_di_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, NULL, NULL);
