@@ -51,6 +51,15 @@ namespace Hermes
       typedef void(*callbackFn)(const char*);
 
     public:
+      Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL);
+
+      void info(const char* msg, ...) const;
+      void info_if(bool cond, const char* msg, ...) const;
+      void warn(const char* msg, ...) const;
+      void warn_if(bool cond, const char* msg, ...) const;
+      void error(const char* msg, ...) const;
+      void error_if(bool cond, const char* msg, ...) const;
+
       /// Sets the attribute verbose_output to the paramater option passed.
       /// \todo Use this in solvers etc.
       virtual void set_verbose_output(bool to_set);
@@ -62,7 +71,7 @@ namespace Hermes
       /// \param[in] callback Function to be called for the messaging when verbose_output is set to yes.
       /// \todo Use this in solvers etc.
       virtual void set_verbose_callback(callbackFn callback);
-    public:
+      
       /// Returns the current value of verbose_callback;
       callbackFn get_verbose_callback() const;
 
@@ -75,14 +84,6 @@ namespace Hermes
         static void error(const char* msg, ...);
       };
     protected:
-      Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL);
-
-      void info(const char* msg, ...) const;
-      void info_if(bool cond, const char* msg, ...) const;
-      void warn(const char* msg, ...) const;
-      void warn_if(bool cond, const char* msg, ...) const;
-      void error(const char* msg, ...) const;
-      void error_if(bool cond, const char* msg, ...) const;
       
       /* file operations */
       void hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const;
