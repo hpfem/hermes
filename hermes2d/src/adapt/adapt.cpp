@@ -148,7 +148,7 @@ namespace Hermes
       for (int j = 0; j < this->num; j++)
       {
         meshes[j] = this->spaces[j]->get_mesh();
-        element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id(), sizeof(ElementToRefine*));
+        element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id() + 1, sizeof(ElementToRefine*));
       }
 
       // Set this for solutions.
@@ -254,13 +254,13 @@ namespace Hermes
 
             // Get refinement suggestion.
             ElementToRefine elem_ref(element_id, component);
-            element_refinement_location[component][element_id] = &elem_ref;
 
             // Rsln[comp] may be unset if refinement_selectors[comp] == HOnlySelector or POnlySelector
             if(refinement_selectors[component]->select_refinement(meshes[component]->get_element(element_id), current_order, current_rslns[component].get(), elem_ref, this->errorCalculator->errorType))
             {
               // Put this refinement to the storage.
               elements_to_refine[id_to_refine] = elem_ref;
+              element_refinement_location[component][element_id] = &elements_to_refine[id_to_refine];
             }
             else
               elements_to_refine[id_to_refine] = ElementToRefine(-1, -1);
@@ -360,7 +360,9 @@ namespace Hermes
         {
           int* parents;
           parents = meshes[i]->regularize(this->regularization);
-          this->spaces[i]->distribute_orders(meshes[i], parents);
+          for(int j = 0; j < this->num; j++)
+            if(this->spaces[i]->get_mesh()->get_seq() == this->spaces[j]->get_mesh()->get_seq())
+              this->spaces[j]->distribute_orders(meshes[i], parents);
           ::free(parents);
         }
       }
@@ -427,7 +429,7 @@ namespace Hermes
             { 
               ElementToRefine* elem_ref_ii = idx[j][elem_ref.id];
               //select more complicated refinement
-              if(elem_ref_ii->split != selected_refinement && elem_ref_ii->split != H2D_REFINEMENT_P)
+              if((elem_ref_ii->split != selected_refinement) && (elem_ref_ii->split != H2D_REFINEMENT_P))
               { 
                 if((elem_ref_ii->split == H2D_REFINEMENT_ANISO_H || elem_ref_ii->split == H2D_REFINEMENT_ANISO_V) && selected_refinement == H2D_REFINEMENT_P)
                   selected_refinement = elem_ref_ii->split;
@@ -441,19 +443,19 @@ namespace Hermes
         //fix other refinements according to the selected refinement
         if(selected_refinement != H2D_REFINEMENT_P)
         {
+          // change currently processed refinement
+          if(elem_ref.split != selected_refinement)
+          {
+            elem_ref.split = selected_refinement;
+            ElementToRefine::copy_orders(elem_ref.refinement_polynomial_order, elem_ref.best_refinement_polynomial_order_type[selected_refinement]);
+          }
+              
           //update orders
           for (int j = 0; j < this->num; j++)
           {
             // if components share the mesh
             if(j != elem_ref.comp && meshes[j]->get_seq() == meshes[elem_ref.comp]->get_seq())
             { 
-              // change currently processed refinement
-              if(elem_ref.split != selected_refinement)
-              {
-                elem_ref.split = selected_refinement;
-                ElementToRefine::copy_orders(elem_ref.refinement_polynomial_order, elem_ref.best_refinement_polynomial_order_type[selected_refinement]);
-              }
-
               // change other refinements
               if(idx[j][elem_ref.id])
               {
@@ -511,14 +513,16 @@ namespace Hermes
           int current_order_h = H2D_GET_H_ORDER(current_quad_order), current_order_v = H2D_GET_V_ORDER(current_quad_order);
 
           for (int j = 0; j < this->num; j++)
-            if((j != i) && (meshes[j] == meshes[i])) // components share the mesh
+          {
+            if((j != i) && (meshes[j]->get_seq() == meshes[i]->get_seq()))
             {
               int quad_order = this->spaces[j]->get_element_order(e->id);
               current_order_h = std::max(current_order_h, H2D_GET_H_ORDER(quad_order));
               current_order_v = std::max(current_order_v, H2D_GET_V_ORDER(quad_order));
             }
+          }
 
-            this->spaces[i]->set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(current_order_h, current_order_v));
+          this->spaces[i]->set_element_order_internal(e->id, H2D_MAKE_QUAD_ORDER(current_order_h, current_order_v));
         }
       }
     }

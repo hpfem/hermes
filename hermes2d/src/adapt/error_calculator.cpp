@@ -61,7 +61,7 @@ namespace Hermes
       // calculate the total number of elements.
       for(int i = 0; i < this->component_count; i++)
       {
-        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_num_elements();
+        int num_elements_i = this->coarse_solutions[i]->get_mesh()->get_max_element_id();
 
         if(errors[i] == NULL)
           errors[i] = (double*)calloc(num_elements_i, sizeof(double));
