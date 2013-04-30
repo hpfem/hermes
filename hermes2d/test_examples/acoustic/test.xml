@@ -4,17 +4,21 @@
   xmlns:element="XMLMesh"
   xsi:schemaLocation="XMLMesh ../../xml_schemas/mesh_h2d_xml.xsd">
   <vertices>
-    <v x="0" y="0" i="0"/>
-    <v x="0" y="1" i="1"/>
-    <v x="0" y="2" i="2"/>
+    <v x="0" y="1" i="0"/>
+    <v x="0" y="2" i="1"/>
+    <v x="0" y="3" i="2"/>
     
-    <v x="2" y="0" i="3"/>
-    <v x="2" y="1" i="4"/>
-    <v x="2" y="2" i="5"/>
+    <v x="2" y="1" i="3"/>
+    <v x="2" y="2" i="4"/>
+    <v x="2" y="3" i="5"/>
     
-    <v x="4" y="0" i="6"/>
-    <v x="4" y="1" i="7"/>
-    <v x="4" y="2" i="8"/>
+    <v x="4" y="1" i="6"/>
+    <v x="4" y="2" i="7"/>
+    <v x="4" y="3" i="8"/>
+    
+    <v x="0" y="0" i="9"/>
+    <v x="2" y="0" i="10"/>
+    <v x="4" y="0" i="11"/>
   </vertices>
 
   <elements>
@@ -22,15 +26,19 @@
     <mesh:q v1="3" v2="6" v3="7" v4="4" m="Air" />
     <mesh:q v1="1" v2="4" v3="5" v4="2" m="Air" />
     <mesh:q v1="4" v2="7" v3="8" v4="5" m="Air" />
+    <mesh:q v1="9" v2="10" v3="3" v4="0" m="Air" />
+    <mesh:q v1="10" v2="11" v3="6" v4="3" m="Air" />
   </elements>
 
   <edges>
-    <ed v1="0" v2="3" m="Wall" />
-    <ed v1="3" v2="6" m="Wall" />
+    <ed v1="9" v2="10" m="Wall" />
+    <ed v1="10" v2="11" m="Wall" />
+    <ed v1="11" v2="6" m="None" />
     <ed v1="8" v2="5" m="Wall" />
     <ed v1="5" v2="2" m="Wall" />
     <ed v1="0" v2="1" m="Source" />
-    <ed v1="1" v2="2" m="Source" />
+    <ed v1="1" v2="2" m="None" />
+    <ed v1="9" v2="0" m="None" />
     <ed v1="6" v2="7" m="None" />
     <ed v1="7" v2="8" m="None" />
   </edges>
