@@ -73,6 +73,9 @@ namespace Hermes
       virtual void set_time(double time);
       virtual void set_time_step(double time_step);
 
+      // Verbose output.
+      virtual void set_verbose_output(bool to_set);
+
       /// SettableSpaces helper.
       virtual void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual Hermes::vector<SpaceSharedPtr<Scalar> >& get_spaces();

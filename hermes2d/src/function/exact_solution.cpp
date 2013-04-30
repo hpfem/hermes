@@ -126,7 +126,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ConstantSolution<Scalar>::ConstantSolution(MeshSharedPtr mesh, Scalar constant) : ExactSolutionScalar<Scalar>(mesh), constant(constant) {};
+    ConstantSolution<Scalar>::ConstantSolution(MeshSharedPtr mesh, Scalar constant) : ExactSolutionScalar<Scalar>(mesh), constant(constant)
+    {
+      this->order = 0;
+    };
 
     template<typename Scalar>
     Scalar ConstantSolution<Scalar>::value (double x, double y) const {
@@ -218,7 +221,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ZeroSolution<Scalar>::ZeroSolution(MeshSharedPtr mesh) : ExactSolutionScalar<Scalar>(mesh) {};
+    ZeroSolution<Scalar>::ZeroSolution(MeshSharedPtr mesh) : ExactSolutionScalar<Scalar>(mesh)
+    {
+      this->order = 0;
+    };
 
     template<typename Scalar>
     Scalar ZeroSolution<Scalar>::value (double x, double y) const {
@@ -317,7 +323,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ConstantSolutionVector<Scalar>::ConstantSolutionVector(MeshSharedPtr mesh, Scalar constantX, Scalar constantY) : ExactSolutionVector<Scalar>(mesh), constantX(constantX), constantY(constantY) {};
+    ConstantSolutionVector<Scalar>::ConstantSolutionVector(MeshSharedPtr mesh, Scalar constantX, Scalar constantY) : ExactSolutionVector<Scalar>(mesh), constantX(constantX), constantY(constantY)
+    {
+      this->order = 0;
+    };
 
     template<typename Scalar>
     MeshFunction<Scalar>* ConstantSolutionVector<Scalar>::clone() const
@@ -416,7 +425,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    ZeroSolutionVector<Scalar>::ZeroSolutionVector(MeshSharedPtr mesh) : ExactSolutionVector<Scalar>(mesh) {};
+    ZeroSolutionVector<Scalar>::ZeroSolutionVector(MeshSharedPtr mesh) : ExactSolutionVector<Scalar>(mesh)
+    {
+      this->order = 0;
+    };
 
     template<typename Scalar>
     Scalar2<Scalar> ZeroSolutionVector<Scalar>::value (double x, double y) const {

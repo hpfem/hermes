@@ -80,6 +80,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
+     void Solver<Scalar>::set_verbose_output(bool to_set)
+    {
+      Loggable::set_verbose_output(to_set);
+      this->matrix_solver->set_verbose_output(to_set);
+    }
+
+    template<typename Scalar>
     void Solver<Scalar>::set_jacobian_constant(bool to_set)
     {
       this->constant_jacobian = to_set;
@@ -207,7 +214,7 @@ namespace Hermes
       }
       else
       {
-        this->info("\tSolver: recalculating Jacobian.");
+        this->info("\tSolver: Calculating Jacobian.");
         if(assemble_residual)
           this->dp->assemble(coeff_vec, this->jacobian, this->residual);
         else
