@@ -875,6 +875,9 @@ namespace Hermes
     template<>
     bool UMFPackLinearMatrixSolver<double>::setup_factorization()
     {
+      double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
+      Control[UMFPACK_PRL] = 0;
+
       // Perform both factorization phases for the first time.
       int eff_fact_scheme;
       if(factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
@@ -889,13 +892,16 @@ namespace Hermes
         if(symbolic != NULL)
           umfpack_di_free_symbolic(&symbolic);
 
-        //debug_log("Factorizing symbolically.");
-        status = umfpack_di_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, NULL, NULL);
+        // Factorizing symbolically.
+        status = umfpack_di_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, Control, Info);
         if(status != UMFPACK_OK)
         {
           check_status("umfpack_di_symbolic", status);
           return false;
         }
+        else
+          umfpack_di_report_info (Control, Info);
+
         if(symbolic == NULL)
           throw Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
@@ -904,13 +910,16 @@ namespace Hermes
         if(numeric != NULL)
           umfpack_di_free_numeric(&numeric);
 
-        //debug_log("Factorizing numerically.");
-        status = umfpack_di_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, NULL, NULL);
+        // Factorizing numerically.
+        status = umfpack_di_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, Control, Info);
         if(status != UMFPACK_OK)
         {
           check_status("umfpack_di_numeric", status);
           return false;
         }
+        else
+          umfpack_di_report_info (Control, Info);
+
         if(numeric == NULL)
           throw Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
@@ -922,7 +931,7 @@ namespace Hermes
     UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
     {
-      }
+    }
 
     template<typename Scalar>
     UMFPackLinearMatrixSolver<Scalar>::~UMFPackLinearMatrixSolver()
