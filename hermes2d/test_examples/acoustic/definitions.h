@@ -206,7 +206,10 @@ public:
 
   virtual double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
-    return this->amplitude * std::sin(2 * M_PI * this->frequency * this->current_time);
+    if(this->frequency * this->current_time >= 1.)
+      return 0.;
+    else
+      return this->amplitude * std::sin(2 * M_PI * this->frequency * this->current_time);
   }
 
   double amplitude;
@@ -230,7 +233,10 @@ public:
 
   virtual double value(double x, double y, double n_x, double n_y, double t_x, double t_y) const
   {
-    return 2 * M_PI * this->frequency * this->amplitude * std::cos(2 * M_PI * this->frequency * this->current_time);
+    if(this->frequency * this->current_time >= 1.)
+      return 0.;
+    else
+      return 2 * M_PI * this->frequency * this->amplitude * std::cos(2 * M_PI * this->frequency * this->current_time);
   }
 
   double amplitude;
