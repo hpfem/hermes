@@ -102,7 +102,7 @@ namespace Hermes
         cache_searches_ = this->cache_searches;
         cache_record_found_ = this->cache_record_found;
         cache_record_found_reinit_ = this->cache_record_found_reinit;
-        cache_record_not_found_ = this->cache_searches;
+        cache_record_not_found_ = this->cache_record_not_found;
       }
       
       void DiscreteProblemCacheSettings::add_cache_hits_and_misses(DiscreteProblemCacheSettings* other)
@@ -110,7 +110,7 @@ namespace Hermes
         this->cache_searches += other->cache_searches;
         this->cache_record_found += other->cache_record_found;
         this->cache_record_found_reinit += other->cache_record_found_reinit;
-        this->cache_record_not_found += other->cache_searches;
+        this->cache_record_not_found += other->cache_record_not_found;
       }
 
       void DiscreteProblemCacheSettings::zero_cache_hits_and_misses()
