@@ -9,11 +9,11 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 const int P_INIT = 1;
 // Initial number of uniform refinements.
 const int INIT_REF_NUM = 0;
-const int INIT_REF_NUM_BDY = 2;
+const int INIT_REF_NUM_BDY = 4;
 // This is a quantitative parameter of Adaptivity.
-const double THRESHOLD = 0.9;
+const double THRESHOLD = 0.333;
 // This is a stopping criterion for Adaptivity.
-const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionLevels;
+const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionCumulative;
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Maximum allowed level of hanging nodes.
@@ -21,13 +21,13 @@ const int MESH_REGULARITY = -1;
 // Error measurement type.
 const CalculatedErrorType errorType = RelativeErrorToGlobalNorm;
 
-const double AMPLITUDE = 1.0;
+const double AMPLITUDE = 0.01;
 const double FREQUENCY = 1000;
 // Time step.
-const double time_step = 0.005 / FREQUENCY;
+const double time_step = 0.01 / FREQUENCY;
 
 // Derefinement time_step
-const int derefinement_period = 15;
+const int derefinement_period = 3;
 const int adaptivity_offset = 10;
 
 double FACTOR = 50;
@@ -35,10 +35,7 @@ double FACTOR = 50;
 // Stopping criterion for adaptivity.
 double REFINEMENT_THRESHOLD(double time, double norm)
 {
-  if(time / time_step < adaptivity_offset)
-    return 100000.;
-
-  double toReturn = 100.0;
+  double toReturn = 50.0;
   double minimum = 1.0;
   
   toReturn = (toReturn - minimum) * FACTOR * std::min(time_step / time, 1.0) + minimum;
@@ -46,7 +43,6 @@ double REFINEMENT_THRESHOLD(double time, double norm)
   std::cout << "\tCurrent refinement threshold: " << toReturn << std::endl;
   return toReturn;
 }
-
 
 Hermes::Hermes2D::Views::ScalarView viewS("Solution");
 Views::OrderView oview("Polynomial orders");
@@ -99,17 +95,47 @@ private:
       if(cand.error < unrefined.error)
       {
         double delta_dof = cand.dofs - unrefined.dofs;
-        candidates[i].score = std::log(unrefined.error / cand.error) * std::pow((double)unrefined.dofs / (double)cand.dofs, 2.0);
+        candidates[i].score = (log10(unrefined.error) - log10(cand.error)) / delta_dof;
       }
       else
         candidates[i].score = 0;
+    }
+  }
+
+  Hermes::vector<Cand> create_candidates(Element* e, int quad_order)
+  {
+    Hermes::vector<Cand> candidates;
+
+    if(this->cand_list == H2D_NONE)
+    {
+
+      // Get the current order range.
+      int current_min_order, current_max_order;
+      this->get_current_order_range(e, current_min_order, current_max_order);
+
+      int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
+
+      if(current_max_order < std::max(order_h, order_v))
+        current_max_order = std::max(order_h, order_v);
+
+      int last_order_h = std::min(current_max_order, order_h + 1), last_order_v = std::min(current_max_order, order_v + 1);
+      int last_order = H2D_MAKE_QUAD_ORDER(last_order_h, last_order_v);
+
+      candidates.push_back(Cand(H2D_REFINEMENT_P, quad_order));
+      candidates.push_back(Cand(H2D_REFINEMENT_P, last_order));
+      candidates.push_back(Cand(H2D_REFINEMENT_H, quad_order, quad_order, quad_order, quad_order));
+      
+      return candidates;
+    }
+    else
+    {
+      return H1ProjBasedSelector<double>::create_candidates(e, quad_order);
     }
   }
 };
 
 int main(int argc, char* argv[])
 {
-  //Hermes2DApi.set_integral_param_value(numThreads, 1);
   logger.set_verbose_output(true);
 
   // Load the mesh.
@@ -210,10 +236,6 @@ int main(int argc, char* argv[])
       space_derivative->adjust_element_order(-1, -1, P_INIT, P_INIT);
       Space<double>::assign_dofs(Hermes::vector<SpaceSharedPtr<double> >(space_value, space_derivative));
       force_derefinement = false;
-      char tmpStr[1000];
-      MallocExtension::instance()->GetStats(tmpStr, 1000);
-      printf("%s\n", tmpStr);
-      MallocExtension::instance()->ReleaseFreeMemory();
     }
 
     int as = 1;
@@ -236,6 +258,13 @@ int main(int argc, char* argv[])
       try
       {
         linear_solver.solve();
+      
+        Solution<double>::vector_to_solutions(linear_solver.get_sln_vector(), rspaces, rslns);
+        OGProjection<double>::project_global(spaces, rslns, slns);
+
+        output(rslns, rspaces[0]);
+
+        error_calculator.calculate_errors(slns, rslns);
       }
       catch(std::exception& e)
       {
@@ -246,13 +275,7 @@ int main(int argc, char* argv[])
         FACTOR *= 1.5;
         break;
       }
-      
-      Solution<double>::vector_to_solutions(linear_solver.get_sln_vector(), rspaces, rslns);
-      OGProjection<double>::project_global(spaces, rslns, slns);
 
-      output(rslns, rspaces[0]);
-
-      error_calculator.calculate_errors(slns, rslns);
       double err_est_rel = (error_calculator.get_error_squared(0) + error_calculator.get_error_squared(1))* 100.0;
 
       // Report results.
@@ -301,7 +324,10 @@ int main(int argc, char* argv[])
       // We are above the error.
       try
       {
-        adaptivity.adapt(selectors);
+        if(iteration > adaptivity_offset)
+          adaptivity.adapt(selectors);
+        else
+          break;
       }
       catch(std::exception& e)
       {
