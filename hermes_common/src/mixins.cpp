@@ -22,6 +22,7 @@ namespace Hermes
   namespace Mixins
   {
     Loggable::LoggerMonitor Loggable::logger_monitor;
+    char Loggable::logFileName[1000];
 
     std::map<std::string, bool> Loggable::logger_written;
 
@@ -397,7 +398,7 @@ namespace Hermes
 
     Loggable::HermesLogEventInfo* Loggable::hermes_build_log_info(char event) const
     {
-      return new Loggable::HermesLogEventInfo(event, HERMES_LOG_FILE, __CURRENT_FUNCTION, __FILE__, __LINE__);
+      return new Loggable::HermesLogEventInfo(event, Loggable::logFileName, __CURRENT_FUNCTION, __FILE__, __LINE__);
     }
 
     void Loggable::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const

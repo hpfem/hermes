@@ -83,6 +83,9 @@ namespace Hermes
         static void warn(const char* msg, ...);
         static void error(const char* msg, ...);
       };
+
+      /// Logfile name.
+      static char logFileName[1000];
     protected:
       
       /* file operations */

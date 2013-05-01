@@ -152,22 +152,6 @@ namespace Hermes
   inline double pow(double x, double y) { return std::pow(x, y); }
   inline double log(double x) { return std::log(x); }
 
-  /* log file */
-  #undef HERMES_LOG_FILE
-  #ifdef HERMES_REPORT_NO_FILE
-  #  define HERMES_LOG_FILE NULL
-  #else
-  # ifdef HERMES_REPORT_FILE
-  #  define HERMES_LOG_FILE HERMES_REPORT_FILE
-  # else
-  #  ifndef HERMES_TEST
-  #    define HERMES_LOG_FILE "hermes.log" // default filename for a library
-  #  else
-  #    define HERMES_LOG_FILE "test.log" // default filename for a library test
-  #  endif
-  # endif
-  # endif
-
   /* event codes */
   #define HERMES_EC_ERROR 'E' ///< An event code: warnings. \internal
   #define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
