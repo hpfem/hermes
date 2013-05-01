@@ -151,14 +151,6 @@ namespace Hermes
         element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id() + 1, sizeof(ElementToRefine*));
       }
 
-      // Set this for solutions.
-      for (int j = 0; j < this->num; j++)
-      {
-        Solution<Scalar>* temp = dynamic_cast<Solution<Scalar>*>(this->errorCalculator->fine_solutions[j].get());
-        if(temp)
-          temp->enable_transform(false);
-      }
-
       // Very important global setting.
       // Total error.
       if(this->iterative_improvement_iteration == 0)
@@ -333,16 +325,9 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::deinit_adapt(ElementToRefine*** element_refinement_location)
     {
-      // Get meshes
+      // Free data.
       for (int j = 0; j < this->num; j++)
         ::free(element_refinement_location[j]);
-
-      for (int j = 0; j < this->num; j++)
-      {
-        Solution<Scalar>* temp = dynamic_cast<Solution<Scalar>*>(this->errorCalculator->fine_solutions[j].get());
-        if(temp)
-          temp->enable_transform(true);
-      }
     }
 
     template<typename Scalar>
