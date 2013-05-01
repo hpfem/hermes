@@ -45,6 +45,7 @@ namespace Hermes
       {
         switch(cand_list)
         {
+        case H2D_NONE: return "Custom";
         case H2D_P_ISO: return "P_ISO";
         case H2D_P_ANISO: return "P_ANISO";
         case H2D_H_ISO: return "H_ISO";
@@ -67,6 +68,24 @@ namespace Hermes
         case H2D_P_ANISO:
         case H2D_H_ISO:
         case H2D_H_ANISO: return false; break;
+        case H2D_NONE:
+        case H2D_HP_ISO:
+        case H2D_HP_ANISO_H:
+        case H2D_HP_ANISO_P:
+        case H2D_HP_ANISO: return true; break;
+        default: throw Hermes::Exceptions::Exception("Invalid adapt type %d.", cand_list); return false;
+        }
+      }
+
+       HERMES_API bool is_p(const CandList cand_list)
+      {
+        switch(cand_list)
+        {
+        case H2D_H_ISO:
+        case H2D_H_ANISO: return false; break;
+        case H2D_NONE:
+        case H2D_P_ISO:
+        case H2D_P_ANISO:
         case H2D_HP_ISO:
         case H2D_HP_ANISO_H:
         case H2D_HP_ANISO_P:
@@ -79,6 +98,7 @@ namespace Hermes
       {
         switch(cand_list)
         {
+        case H2D_NONE: return false;
         case H2D_P_ISO: return false;
         case H2D_P_ANISO: return true;
         case H2D_H_ISO: return false;

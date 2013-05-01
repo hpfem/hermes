@@ -73,6 +73,11 @@ namespace Hermes
       *  \return True if a predefined candidate list may contain candidates that are HP. */
       extern HERMES_API bool is_hp(const CandList cand_list);
 
+      /// Returns true if a predefined candidate list may contain candidates that increase P. \ingroup g_selectors
+      /** \param cand_list A predefined list of candidates.
+      *  \return True if a predefined candidate list may contain candidates that increase P. */
+      extern HERMES_API bool is_p(const CandList cand_list);
+
       /// Returns true if a predefined candidate list may contain candidates with an anisotropic change of orders. \ingroup g_selectors
       /** \param cand_list A predefined list of candidates.
       *  \return True if a predefined candidate list may contain candidates with an anisotropic change of orders. */
