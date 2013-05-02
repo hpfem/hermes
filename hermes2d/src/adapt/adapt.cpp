@@ -22,6 +22,56 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
+    AdaptStoppingCriterionCumulative<Scalar>::AdaptStoppingCriterionCumulative(double threshold) : threshold(threshold)
+    {
+    }
+
+    template<typename Scalar>
+    bool AdaptStoppingCriterionCumulative<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
+    {
+      if(processed_error_squared > (threshold*threshold) * error_calculator->errors_squared_sum)
+        return false;
+      else
+        return true;
+    }
+
+    template<typename Scalar>
+    AdaptStoppingCriterionSingleElement<Scalar>::AdaptStoppingCriterionSingleElement(double threshold) : threshold(threshold)
+    {
+    }
+
+    template<typename Scalar>
+    bool AdaptStoppingCriterionSingleElement<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
+    {
+      typename ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->element_references[element_inspected_i];
+      if(*(element_reference.error) > (threshold*threshold) * max_error_squared)
+        return true;
+      else
+        return false;
+    }
+
+    template<typename Scalar>
+    AdaptStoppingCriterionLevels<Scalar>::AdaptStoppingCriterionLevels(double threshold) : threshold(threshold)
+    {
+    }
+
+    template<typename Scalar>
+    bool AdaptStoppingCriterionLevels<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
+    {
+      typename ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->element_references[element_inspected_i];
+      if(element_inspected_i == 0)
+        return true;
+      else
+      {
+        typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = this->errorCalculator->element_references[element_inspected_i - 1];
+        if(*(element_reference.error) > (threshold*threshold) * *((previous_element_reference).error))
+          return true;
+        else
+          return false;
+      }
+    }
+
+    template<typename Scalar>
     Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator), spaces(spaces_)
     {
       this->init();
@@ -44,8 +94,7 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::set_defaults()
     {
-      this->set_strategy(AdaptStoppingCriterionCumulative);
-      this->iterative_improvement = false;
+      this->strategy = NULL;
       regularization = -1;
     }
 
@@ -66,15 +115,12 @@ namespace Hermes
           throw Exceptions::NullException(0, i);
         spaces[i]->check();
       }
-
-      iterative_improvement_iteration = 0;
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::set_strategy(AdaptivityStoppingCriterion strategy_, double threshold_)
+    void Adapt<Scalar>::set_strategy(AdaptivityStoppingCriterion<Scalar>* strategy_)
     {
       this->strategy = strategy_;
-      this->threshold = threshold_;
     }
 
     template<typename Scalar>
@@ -84,47 +130,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Adapt<Scalar>::set_iterative_improvement(double factor)
+    bool Adapt<Scalar>::isOkay() const
     {
-      this->iterative_improvement = true;
-      this->iterative_improvement_factor = factor;
-    }
+      if(!this->strategy)
+        return false;
 
-    template<typename Scalar>
-    bool Adapt<Scalar>::add_refinement(double processed_error_squared, double max_error_squared, int element_inspected_i)
-    {
-      typename ErrorCalculator<Scalar>::ElementReference& element_reference = this->errorCalculator->element_references[element_inspected_i];
-      switch(this->strategy)
-      {
-      case AdaptStoppingCriterionCumulative:
-        if(processed_error_squared > (threshold*threshold) * sum_error_squared)
-          return false;
-        else
-          return true;
-        break;
-      case AdaptStoppingCriterionSingleElement:
-        if(*(element_reference.error) > (threshold*threshold) * max_error_squared)
-          return true;
-        else
-          return false;
-        break;
-      case AdaptStoppingCriterionLevels:
-        if(element_inspected_i == 0)
-          return true;
-        else
-        {
-          typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = this->errorCalculator->element_references[element_inspected_i - 1];
-          if(*(element_reference.error) > (threshold*threshold) * *((previous_element_reference).error))
-            return true;
-          else
-            return false;
-        }
-        break;
-      default:
-        throw Exceptions::Exception("Unknown strategy in Adaptivity.");
-      }
-
-      return false;
+      return true;
     }
 
     template<typename Scalar>
@@ -132,6 +143,9 @@ namespace Hermes
     {
       // Start time measurement.
       this->tick();
+
+      // Check.
+      this->check();
 
       // Important, sets the current caughtException to NULL.
       this->caughtException = NULL;
@@ -150,11 +164,6 @@ namespace Hermes
         meshes[j] = this->spaces[j]->get_mesh();
         element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id() + 1, sizeof(ElementToRefine*));
       }
-
-      // Very important global setting.
-      // Total error.
-      if(this->iterative_improvement_iteration == 0)
-        this->sum_error_squared = this->errorCalculator->get_total_error_squared();
     }
 
     template<typename Scalar>
@@ -175,7 +184,7 @@ namespace Hermes
         typename ErrorCalculator<Scalar>::ElementReference element_reference = this->errorCalculator->element_references[element_inspected_i];
 
         // Ask the strategy if we should add this refinement or break the loop.
-        if(!this->add_refinement(processed_error_squared, max_error_squared, element_inspected_i))
+        if(!this->strategy->add_refinement(this->errorCalculator, processed_error_squared, max_error_squared, element_inspected_i))
           break;
 
         processed_error_squared += *(element_reference.error);
@@ -298,26 +307,6 @@ namespace Hermes
       delete [] elements_to_refine;
 
       this->adapt_postprocess(meshes, attempted_element_refinements_count);
-
-      if(this->iterative_improvement)
-      {
-        OGProjection<Scalar>::project_global(this->spaces, this->errorCalculator->fine_solutions, this->errorCalculator->coarse_solutions);
-
-        this->errorCalculator->calculate_errors(this->errorCalculator->coarse_solutions, this->errorCalculator->fine_solutions);
-        
-        double error_after_refinements = this->errorCalculator->get_total_error_squared();
-        
-#ifdef _DEBUG
-        std::cout << "Iterative improvement projection error: " << error_after_refinements * 100 << '%' << std::endl;
-#endif
-        if(error_after_refinements / this->sum_error_squared > this->iterative_improvement_factor)
-        {
-          this->iterative_improvement_iteration++;
-          this->adapt(refinement_selectors);
-        }
-        else
-          this->iterative_improvement_iteration = 0;
-      }
 
       return false;
     }

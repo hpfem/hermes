@@ -45,14 +45,50 @@ namespace Hermes
     /// \ingroup g_adapt
     /// Serves for only inspect such a portion of all elements of all meshes in the system
     /// for potential refinement.
-    enum AdaptivityStoppingCriterion
+    template<typename Scalar>
+    class AdaptivityStoppingCriterion
     {
-      /// Refine elements until prescribed portion of error is processed.
-      AdaptStoppingCriterionCumulative,
-      AdaptStoppingCriterionSingleElement,
-      AdaptStoppingCriterionLevels
+    public:
+      /// Decide if the refinement at hand will be carried out.
+      virtual bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i) = 0;
     };
 
+    template<typename Scalar>
+    class AdaptStoppingCriterionCumulative : public AdaptivityStoppingCriterion<Scalar>
+    {
+    public:
+      AdaptStoppingCriterionCumulative(double threshold);
+
+      /// Decide if the refinement at hand will be carried out.
+      bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
+    private:
+      double threshold;
+    };
+    
+    template<typename Scalar>
+    class AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion<Scalar>
+    {
+    public:
+      AdaptStoppingCriterionSingleElement(double threshold);
+
+      /// Decide if the refinement at hand will be carried out.
+      bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
+    private:
+      double threshold;
+    };
+    
+    template<typename Scalar>
+    class AdaptStoppingCriterionLevels : public AdaptivityStoppingCriterion<Scalar>
+    {
+    public:
+      AdaptStoppingCriterionLevels(double threshold);
+
+      /// Decide if the refinement at hand will be carried out.
+      bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
+    private:
+      double threshold;
+    };
+    
     /// Evaluation of an error between a (coarse) solution and a reference solution and adaptivity.
     /// \ingroup g_adapt
     /** The class provides basic functionality necessary to adaptively refine elements.
@@ -64,6 +100,7 @@ namespace Hermes
     class HERMES_API Adapt :
       public Hermes::Mixins::TimeMeasurable,
       public Hermes::Mixins::Loggable,
+      public Hermes::Hermes2D::Mixins::StateQueryable, 
       public Hermes::Hermes2D::Mixins::Parallel
     {
     public:
@@ -86,36 +123,20 @@ namespace Hermes
       bool adapt(RefinementSelectors::Selector<Scalar>* refinement_selector);
 
       /// Set the current strategy.
-      /// \param[in] strategy The strategy, see the info for AdaptivityStoppingCriterion enum.
-      /// \param[in] threshold The number representing a threshold in a meaning specific to the strategy.
-      /// Default strategy : AdaptStoppingCriterionCumulative.
-      /// Default threshold: 0.3.
-      void set_strategy(AdaptivityStoppingCriterion strategy, double threshold = 0.3);
-
-      /// (Experimental)
-      /// Iterative improvement - at the end of the adaptation algorithm, the resulting space is used for error calculation between the
-      /// Reference solution and its coarse component and if the previous error divided by error after refinements are applied 
-      /// is not below iterative_improvement_factor, another adaptivity step is performed.
-      /// \param[in] iterative_improvement_factor The factor.
-      void set_iterative_improvement(double iterative_improvement_factor = 1e-1);
+      /// \param[in] strategy The strategy, see the info for AdaptivityStoppingCriterion.
+      void set_strategy(AdaptivityStoppingCriterion<Scalar>* strategy);
 
       /// Set the regularization level.
       /// See attribute regularization.
       void set_regularization_level(int regularization);
 
+      /// Internal checking.
+      virtual bool isOkay() const;
+      inline std::string getClassName() const { return "Adapt"; }
+
     protected:
       /// Set default values.
       void set_defaults();
-
-      /// (Experimental)
-      /// Iterative improvement - at the end of the adaptation algorithm, the resulting space is used for error calculation between the
-      /// Reference solution and its coarse component and if the previous error divided by error after refinements are applied 
-      /// is not below iterative_improvement_factor, another adaptivity step is performed.
-      bool iterative_improvement;
-      /// Prescribed factor for the iterative improvement.
-      double iterative_improvement_factor;
-      /// Internal.
-      int iterative_improvement_iteration;
 
       /// Initialization.
       void init_adapt(Hermes::vector<RefinementSelectors::Selector<Scalar>*>& refinement_selectors, ElementToRefine*** element_refinement_location, MeshSharedPtr* meshes);
@@ -130,13 +151,7 @@ namespace Hermes
       void init();
 
       /// Current strategy.
-      AdaptivityStoppingCriterion strategy;
-
-      /// Current threshold.
-      double threshold;
-
-      /// Decide if the refinement at hand will be carried out.
-      bool add_refinement(double processed_error_squared, double max_error_squared, int element_inspected_i);
+      AdaptivityStoppingCriterion<Scalar>* strategy;
 
       /// Apply a single refinement.
       /** \param[in] A refinement to apply. */
@@ -161,10 +176,6 @@ namespace Hermes
 
       /// Number of solution components (as in wf->neq).
       int num;
-
-      /// Total error from the error calculator.
-      /// Stored because of iterative_improvement.
-      double sum_error_squared;
 
       /// Regularization (max. level of hanging nodes) level.
       int regularization;
