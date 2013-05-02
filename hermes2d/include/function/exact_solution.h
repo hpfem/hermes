@@ -78,6 +78,36 @@ namespace Hermes
       virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
     };
 
+
+    /// @ingroup meshFunctions
+    template<typename Scalar>
+    class HERMES_API ExactSolutionConstantArray : public ExactSolutionScalar<Scalar>
+    {
+    public:
+      ExactSolutionConstantArray(MeshSharedPtr mesh, Scalar* valueArray);
+      virtual ~ExactSolutionConstantArray() {};
+
+      virtual MeshFunction<Scalar>* clone() const;
+
+      /// Function returning the value.
+      virtual Scalar value (double x, double y) const;
+      virtual Ord ord(Ord x, Ord y) const;
+
+      /// Function returning the derivatives.
+      virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
+
+      inline std::string getClassName() const { return "ExactSolutionConstantArray"; }
+
+      void setArray(Scalar* valueArray);
+
+    protected:
+      /// For scaling of the solution.
+      Scalar* valueArray;
+      template<typename T> friend class Solution;
+    };
+
+    
+
     /// @ingroup meshFunctions
     template<typename Scalar>
     class HERMES_API ExactSolutionVector : public ExactSolution<Scalar>
