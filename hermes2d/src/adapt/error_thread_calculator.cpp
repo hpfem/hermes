@@ -17,6 +17,7 @@
 #include "discrete_problem/discrete_problem_helpers.h"
 #include "discrete_problem/dg/multimesh_dg_neighbor_tree.h"
 #include "neighbor_search.h"
+#include "mesh/refmap.h"
 #include "forms.h"
 #include <stdlib.h>
 
@@ -210,7 +211,12 @@ namespace Hermes
         neighbor_searches[i + this->errorThreadCalculator->errorCalculator->component_count]->set_quad_order(order);
       }
       order_base = order;
-      this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(this->errorThreadCalculator->rslns[0]->get_refmap(), order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
+
+      RefMap** refmaps = new RefMap*[this->errorThreadCalculator->errorCalculator->component_count];
+      for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
+        refmaps[i] = this->errorThreadCalculator->slns[i]->get_refmap();
+      this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
+      delete [] refmaps;
 
       DiscontinuousFunc<Scalar>** difference_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
       DiscontinuousFunc<Scalar>** rsln_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
@@ -256,9 +262,13 @@ namespace Hermes
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_volumetric_forms(Traverse::State* current_state, int order)
     {
-      // initialize points & geometry & jacobian times weights
-      this->n_quadrature_points = init_geometry_points(rslns[0]->get_refmap(), order, this->geometry, this->jacobian_x_weights);
-
+      // initialize points & geometry & jacobian times weights.
+      RefMap** refmaps = new RefMap*[this->errorCalculator->component_count];
+      for(int i = 0; i < this->errorCalculator->component_count; i++)
+        refmaps[i] = slns[i]->get_refmap();
+      this->n_quadrature_points = init_geometry_points(refmaps, this->errorCalculator->component_count, order, this->geometry, this->jacobian_x_weights);
+      delete [] refmaps;
+      
       // initialize Funcs
       Func<Scalar>** difference_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
       Func<Scalar>** rsln_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
@@ -299,7 +309,11 @@ namespace Hermes
     template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_surface_forms_one_edge(Traverse::State* current_state, int order)
     {
-      this->n_quadrature_points = init_surface_geometry_points(rslns[0]->get_refmap(), order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
+      RefMap** refmaps = new RefMap*[this->errorCalculator->component_count];
+      for(int i = 0; i < this->errorCalculator->component_count; i++)
+        refmaps[i] = slns[i]->get_refmap();
+      this->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
+      delete [] refmaps;
 
       // initialize Funcs
       Func<Scalar>** difference_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
@@ -342,7 +356,6 @@ namespace Hermes
     void ErrorThreadCalculator<Scalar>::evaluate_volumetric_form(NormFormVol<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm)
     {
       double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
-
 #pragma omp atomic
       (*error) += error_value;
 

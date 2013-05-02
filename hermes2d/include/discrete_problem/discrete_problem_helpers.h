@@ -112,8 +112,8 @@ namespace Hermes
 
     /// \ingroup Helper methods inside {calc_order_*, assemble_*}
     /// Init geometry, jacobian * weights, return the number of integration points.
-    HERMES_API int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights);
-    HERMES_API int init_surface_geometry_points(RefMap* reference_mapping, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights);
+    HERMES_API int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights);
+    HERMES_API int init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights);
   }
 }
 #endif
