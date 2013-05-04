@@ -67,7 +67,7 @@ namespace Hermes
           *  \param[in] rsln A reference solution which is used to select a refinement.
           *  \param[out] refinement A selected refinement. It contains a valid contents if and only if the method returns true.
           *  \return True if a refinement was proposed. False if the selector is unable to select a refinement or it suggest that the element should not be refined. */
-          virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType) = 0;
+          virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement) = 0;
           
       protected:
         const int min_order; ///< A minimum allowed order.
@@ -79,10 +79,6 @@ namespace Hermes
 
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;
-        
-        /// Internal.
-      protected:
-        CalculatedErrorType errorType;
       };
 
       /// A selector that selects H-refinements only. \ingroup g_selectors
@@ -94,7 +90,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Selects a H-refienements. For details, see Selector::select_refinement. */
-        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType);
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement);
         
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;
@@ -115,7 +111,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Increases an order ising POnlySelector::order_h_inc and POnlySelector::order_v_inc. Fails if the order cannot be increased due to the maximum order. For details, see Selector::select_refinement. */
-        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType);
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement);
 
         template<typename T> friend class Adapt;
         template<typename T> friend class KellyTypeAdapt;

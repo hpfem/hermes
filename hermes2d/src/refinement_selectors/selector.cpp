@@ -9,11 +9,8 @@ namespace Hermes
     namespace RefinementSelectors
     {
       template<typename Scalar>
-      bool HOnlySelector<Scalar>::select_refinement(Element* element, int order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType)
+      bool HOnlySelector<Scalar>::select_refinement(Element* element, int order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
       {
-        // Very important - set the current error type.
-        this->errorType = errorType;
-
         refinement.split = H2D_REFINEMENT_H;
         refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H][0] = 
           refinement.best_refinement_polynomial_order_type[H2D_REFINEMENT_H][1] = 
@@ -35,11 +32,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool POnlySelector<Scalar>::select_refinement(Element* element, int order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType)
+      bool POnlySelector<Scalar>::select_refinement(Element* element, int order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
       {
-        // Very important - set the current error type.
-        this->errorType = errorType;
-
         refinement.split = H2D_REFINEMENT_P;
 
         //determin max. order

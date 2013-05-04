@@ -637,11 +637,8 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType)
+      bool OptimumSelector<Scalar>::select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement)
       {
-        // Very important - set the current error type.
-        this->errorType = errorType;
-
         //make an uniform order in a case of a triangle
         int order_h = H2D_GET_H_ORDER(quad_order), order_v = H2D_GET_V_ORDER(quad_order);
         if(element->is_triangle())

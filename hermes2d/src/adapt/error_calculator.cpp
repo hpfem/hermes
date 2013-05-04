@@ -209,7 +209,7 @@ namespace Hermes
         {
           component_errors[i] += *(this->element_references[running_indexer + j].error);
           component_norms[i] += *(this->element_references[running_indexer + j].norm);
-
+          
           if(this->errorType == RelativeErrorToElementNorm)
 					   *(this->element_references[running_indexer + j].error) /= *(this->element_references[running_indexer + j].norm);
         }

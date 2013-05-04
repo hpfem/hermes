@@ -237,7 +237,7 @@ namespace Hermes
       protected:
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
-        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement, CalculatedErrorType errorType); ///< Selects refinement.
+        virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement); ///< Selects refinement.
       };
     }
   }

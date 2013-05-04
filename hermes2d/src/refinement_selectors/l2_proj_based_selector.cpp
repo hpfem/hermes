@@ -251,7 +251,6 @@ namespace Hermes
       double L2ProjBasedSelector<Scalar>::evaluate_error_squared_subdomain(Element* sub_elem, const typename ProjBasedSelector<Scalar>::ElemGIP& sub_gip, const typename ProjBasedSelector<Scalar>::ElemSubTrf& sub_trf, const typename ProjBasedSelector<Scalar>::ElemProj& elem_proj)
       {
         double total_error_squared = 0;
-        double total_norm_squared = 0;
         for(int gip_inx = 0; gip_inx < sub_gip.num_gip_points; gip_inx++)
         {
           //get location and transform it
@@ -272,13 +271,7 @@ namespace Hermes
           double error_squared = sqr(proj_value - ref_value);
 
           total_error_squared += gip_pt[H2D_GIP2D_W] * error_squared;
-
-          if(this->errorType == RelativeErrorToElementNorm)
-            total_norm_squared += gip_pt[H2D_GIP2D_W] * sqr(ref_value);
         }
-
-        if(this->errorType == RelativeErrorToElementNorm)
-          total_error_squared /= total_norm_squared;
 
         return total_error_squared;
       }
