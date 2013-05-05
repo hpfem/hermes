@@ -63,7 +63,7 @@ namespace Hermes
         return true;
       else
       {
-        typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = this->errorCalculator->element_references[element_inspected_i - 1];
+        typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = error_calculator->element_references[element_inspected_i - 1];
         if(*(element_reference.error) > (threshold*threshold) * *((previous_element_reference).error))
           return true;
         else
@@ -546,6 +546,13 @@ namespace Hermes
         }
       }
     }
+
+    template HERMES_API class AdaptStoppingCriterionCumulative<double>;
+    template HERMES_API class AdaptStoppingCriterionCumulative<std::complex<double> >;
+    template HERMES_API class AdaptStoppingCriterionSingleElement<double>;
+    template HERMES_API class AdaptStoppingCriterionSingleElement<std::complex<double> >;
+    template HERMES_API class AdaptStoppingCriterionLevels<double>;
+    template HERMES_API class AdaptStoppingCriterionLevels<std::complex<double> >;
 
     template HERMES_API class Adapt<double>;
     template HERMES_API class Adapt<std::complex<double> >;

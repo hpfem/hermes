@@ -54,7 +54,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    class AdaptStoppingCriterionCumulative : public AdaptivityStoppingCriterion<Scalar>
+    class HERMES_API AdaptStoppingCriterionCumulative : public AdaptivityStoppingCriterion<Scalar>
     {
     public:
       AdaptStoppingCriterionCumulative(double threshold);
@@ -66,7 +66,7 @@ namespace Hermes
     };
     
     template<typename Scalar>
-    class AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion<Scalar>
+    class HERMES_API AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion<Scalar>
     {
     public:
       AdaptStoppingCriterionSingleElement(double threshold);
@@ -78,7 +78,7 @@ namespace Hermes
     };
     
     template<typename Scalar>
-    class AdaptStoppingCriterionLevels : public AdaptivityStoppingCriterion<Scalar>
+    class HERMES_API AdaptStoppingCriterionLevels : public AdaptivityStoppingCriterion<Scalar>
     {
     public:
       AdaptStoppingCriterionLevels(double threshold);
