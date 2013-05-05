@@ -26,6 +26,11 @@
 #include "linear_matrix_solver.h"
 #include "matrix.h"
 
+extern "C"
+{
+#include <umfpack.h>
+}
+
 using namespace Hermes::Algebra;
 
 namespace Hermes
@@ -199,6 +204,13 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
       void check_status(const char *fn_name, int status);
+
+      /// For output (the array Info is filled regardless of the value of the level).
+      void set_output_level(double level);
+
+      /// For reporting.
+      double Info [UMFPACK_INFO];
+      double Control [UMFPACK_CONTROL];
     };
 
     /// \brief UMFPack matrix iterator. \todo document members

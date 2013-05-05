@@ -69,7 +69,7 @@ namespace Hermes
     template<typename Scalar>
     void LinearMatrixSolver<Scalar>::set_factorization_scheme()
     {
-      set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+      set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
     }
 
     template<typename Scalar>

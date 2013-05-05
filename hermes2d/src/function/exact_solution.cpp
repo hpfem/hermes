@@ -35,9 +35,6 @@ namespace Hermes
       return NULL;
     }
 
-
-    
-
     template<typename Scalar>
     ExactSolutionScalar<Scalar>::ExactSolutionScalar(MeshSharedPtr mesh) : ExactSolution<Scalar>(mesh)
     {
@@ -49,7 +46,6 @@ namespace Hermes
     {
       return 1;
     }
-
 
     template<typename Scalar>
     ExactSolutionConstantArray<Scalar>::ExactSolutionConstantArray(MeshSharedPtr mesh, Scalar* valueArray) : ExactSolutionScalar<Scalar>(mesh), valueArray(valueArray)

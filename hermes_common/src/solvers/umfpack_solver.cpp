@@ -23,11 +23,6 @@
 #ifdef WITH_UMFPACK
 #include "umfpack_solver.h"
 
-extern "C"
-{
-#include <umfpack.h>
-}
-
 namespace Hermes
 {
   namespace Algebra
@@ -812,6 +807,12 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
+    void UMFPackLinearMatrixSolver<Scalar>::set_output_level(double level)
+    { 
+      Control[UMFPACK_PRL] = level;
+    }
+
+    template<typename Scalar>
     bool UMFPackIterator<Scalar>::init()
     {
       if(this->size == 0 || this->nnz == 0) return false;
@@ -875,22 +876,21 @@ namespace Hermes
     template<>
     bool UMFPackLinearMatrixSolver<double>::setup_factorization()
     {
-      double Info [UMFPACK_INFO], Control [UMFPACK_CONTROL];
-      Control[UMFPACK_PRL] = 0;
-
       // Perform both factorization phases for the first time.
-      int eff_fact_scheme;
       if(factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && symbolic == NULL && numeric == NULL)
-        eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+        factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
       else
-        eff_fact_scheme = factorization_scheme;
+        factorization_scheme = factorization_scheme;
 
       int status;
-      switch(eff_fact_scheme)
+      switch(factorization_scheme)
       {
       case HERMES_FACTORIZE_FROM_SCRATCH:
         if(symbolic != NULL)
+        {
           umfpack_di_free_symbolic(&symbolic);
+          memset(Info, 0, 90 * sizeof(double));
+        } 
 
         // Factorizing symbolically.
         status = umfpack_di_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, Control, Info);
@@ -899,22 +899,25 @@ namespace Hermes
           check_status("umfpack_di_symbolic", status);
           return false;
         }
-        else
-          umfpack_di_report_info (Control, Info);
-
+        
         if(symbolic == NULL)
           throw Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
         if(numeric != NULL)
+        {
           umfpack_di_free_numeric(&numeric);
+          memset(Info + 0, 0, 90 * sizeof(double));
+        }
 
         // Factorizing numerically.
         status = umfpack_di_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, Control, Info);
         if(status != UMFPACK_OK)
         {
           check_status("umfpack_di_numeric", status);
+          if(numeric)
+            umfpack_di_free_numeric(&numeric);
           return false;
         }
         else
@@ -931,6 +934,7 @@ namespace Hermes
     UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
     {
+      umfpack_di_defaults(Control);
     }
 
     template<typename Scalar>

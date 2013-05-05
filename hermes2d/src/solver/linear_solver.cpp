@@ -91,12 +91,31 @@ namespace Hermes
       this->process_matrix_output(this->jacobian, 1);
       this->process_vector_output(this->residual, 1);
 
-      this->matrix_solver->solve();
+      if(this->matrix_solver->solve())
+      {
+        if(this->do_UMFPACK_reporting)
+        {
+          UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
+          if(matrix_solver->get_used_factorization_scheme() != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+          {
+            this->UMFPACK_reporting_data[FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+            this->UMFPACK_reporting_data[PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+            this->UMFPACK_reporting_data[Flops] = umfpack_matrix_solver->Info[UMFPACK_FLOPS];
+          }
+          else
+            memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
+        }
+      }
+      else
+      {
+        this->on_finish();
+        throw Exceptions::LinearMatrixSolverException();
+      }
 
       this->sln_vector = this->matrix_solver->get_sln_vector();
 
       this->on_finish();
-      
+
       this->tick();
       this->info("\tLinear solver solution duration: %f s.", this->last());
     }

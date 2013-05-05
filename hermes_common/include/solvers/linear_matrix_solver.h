@@ -111,6 +111,9 @@ namespace Hermes
       /// Get size of matrix
       virtual int get_matrix_size() = 0;
 
+      /// Get factorization scheme.
+      virtual FactorizationScheme get_used_factorization_scheme() { return HERMES_FACTORIZE_FROM_SCRATCH; };
+
       /// Set factorization scheme.
       /// @param[in] reuse_scheme factoriztion scheme to set
       virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
@@ -134,6 +137,8 @@ namespace Hermes
     public:
       DirectSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH)
         : LinearMatrixSolver<Scalar>(), factorization_scheme(factorization_scheme) {};
+
+      virtual FactorizationScheme get_used_factorization_scheme() { return (FactorizationScheme)factorization_scheme; };
 
     protected:
       virtual void set_factorization_scheme(FactorizationScheme reuse_scheme);

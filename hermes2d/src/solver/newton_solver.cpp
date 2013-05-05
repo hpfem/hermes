@@ -351,6 +351,10 @@ namespace Hermes
       // Optionally zero cache hits and misses.
       if(this->report_cache_hits_and_misses)
         this->zero_cache_hits_and_misses();
+
+      // UMFPACK reporting.
+      if(this->do_UMFPACK_reporting)
+        memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
     }
 
     template<typename Scalar>
@@ -477,6 +481,17 @@ namespace Hermes
     {
       if(this->matrix_solver->solve())
       {
+        if(this->do_UMFPACK_reporting)
+        {
+          UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
+          if(matrix_solver->get_used_factorization_scheme() != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+          {
+            this->UMFPACK_reporting_data[FactorizationSize] = std::max(this->UMFPACK_reporting_data[FactorizationSize], umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT]);
+            this->UMFPACK_reporting_data[PeakMemoryUsage] += umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+            this->UMFPACK_reporting_data[Flops] += umfpack_matrix_solver->Info[UMFPACK_FLOPS];
+          }
+        }
+
         // store the previous coeff_vec to coeff_vec_back.
         memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
 
@@ -497,7 +512,7 @@ namespace Hermes
       }
       else
       {
-        this->deinit_solving(coeff_vec);
+        this->finalize_solving(coeff_vec);
         throw Exceptions::LinearMatrixSolverException();
       }
     }
