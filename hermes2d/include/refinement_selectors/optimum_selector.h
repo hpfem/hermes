@@ -59,7 +59,7 @@ namespace Hermes
           bool is_empty() const { return (min_quad_order < 0 || max_quad_order < 0); };
         };
 
-        const CandList cand_list; ///< Allowed candidate types.
+        CandList cand_list; ///< Allowed candidate types.
 
         /// Updates information about candidates. Initial information is provided.
         /** \param[in,out] info_h Information about all H-candidates.
