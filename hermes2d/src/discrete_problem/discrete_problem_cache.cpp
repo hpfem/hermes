@@ -220,6 +220,7 @@ namespace Hermes
         if(!this->hashTableUsed[i] && this->hashTable[i])
         {
           delete this->recordTable[this->hashTable[i]->cache_record_index];
+          this->recordTable[this->hashTable[i]->cache_record_index] = NULL;
           delete this->hashTable[i];
           this->hashTable[i] = NULL;
         }
@@ -239,7 +240,7 @@ namespace Hermes
     int DiscreteProblemCache<Scalar>::get_hash_record(int rep_id, int parent_son, int rep_sub_idx, int rep_i)
     {
       int hash = this->hashFunction(rep_id, parent_son, rep_sub_idx, rep_i);
-      while (hashTable[hash] && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i))
+      while (hashTable[hash] && (hashTable[hash]->rep_id != rep_id || hashTable[hash]->parent_son != parent_son || hashTable[hash]->rep_sub_idx != rep_sub_idx || hashTable[hash]->rep_i != rep_i || this->recordTable[hashTable[hash]->cache_record_index] == NULL))
         hash = (hash + 1) % hash_table_size;
       hashTableUsed[hash] = true;
       return hash;
