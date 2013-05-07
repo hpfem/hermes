@@ -22,7 +22,7 @@
 #include "forms.h"
 #include "weakform/weakform.h"
 #include "function/function.h"
-#include "neighbor_search.h"
+#include "neighbor.h"
 #include "refinement_selectors/selector.h"
 #include "exceptions.h"
 #include "mixins2d.h"
