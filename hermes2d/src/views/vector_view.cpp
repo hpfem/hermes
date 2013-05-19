@@ -262,7 +262,7 @@ namespace Hermes
         int2* edges = vec->get_edges();
         for (i = 0; i < vec->get_num_edges(); i++)
         {
-          if(lines || edges[i][2] != 0)
+          if(lines)
           {
             glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
             glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);

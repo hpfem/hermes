@@ -239,6 +239,9 @@ namespace Hermes
       {
       public:
         /// Constructor.
+        /// \param[in] order_increase Increase of the polynomial order.
+        ReferenceSpaceCreator(unsigned int order_increase = 1);
+        /// Constructor.
         /// \param[in] coarse_space The coarse (original) space.
         /// \param[in] ref_mesh The refined mesh.
         /// \param[in] order_increase Increase of the polynomial order.
@@ -250,6 +253,7 @@ namespace Hermes
 
         /// Methods that user calls to get the reference space pointer (has to be properly casted if necessary).
         virtual SpaceSharedPtr<Scalar> create_ref_space(bool assign_dofs = true);
+        virtual SpaceSharedPtr<Scalar> create_ref_space(SpaceSharedPtr<Scalar> coarse_space, MeshSharedPtr ref_mesh, bool assign_dofs = true);
 
       private:
         /// Construction initialization.

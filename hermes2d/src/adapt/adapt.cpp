@@ -72,14 +72,14 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator), spaces(spaces_)
+    Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), spaces(spaces_), strategy(strategy)
     {
       this->init();
       this->set_defaults();
     }
 
     template<typename Scalar>
-    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* errorCalculator) : errorCalculator(errorCalculator)
+    Adapt<Scalar>::Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
     {
       spaces.push_back(space);
       this->init();
@@ -94,7 +94,6 @@ namespace Hermes
     template<typename Scalar>
     void Adapt<Scalar>::set_defaults()
     {
-      this->strategy = NULL;
       regularization = -1;
     }
 
@@ -133,8 +132,10 @@ namespace Hermes
     bool Adapt<Scalar>::isOkay() const
     {
       if(!this->strategy)
+      {
+        this->info("\tAdaptivity: strategy is missing.");
         return false;
-
+      }
       return true;
     }
 

@@ -662,6 +662,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(unsigned int order_increase) : order_increase(order_increase)
+    {
+    }
+
+    template<typename Scalar>
     Space<Scalar>::ReferenceSpaceCreator::ReferenceSpaceCreator(SpaceSharedPtr<Scalar> coarse_space, MeshSharedPtr ref_mesh, unsigned int order_increase) : coarse_space(coarse_space), ref_mesh(ref_mesh), order_increase(order_increase)
     {
     }
@@ -711,6 +716,14 @@ namespace Hermes
       }
     }
     
+    template<typename Scalar>
+    SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::create_ref_space(SpaceSharedPtr<Scalar> coarse_space, MeshSharedPtr ref_mesh, bool assign_dofs)
+    {
+      this->coarse_space = coarse_space;
+      this->ref_mesh = ref_mesh;
+      return this->create_ref_space(assign_dofs);
+    }
+
     template<typename Scalar>
     SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::create_ref_space(bool assign_dofs)
     {

@@ -42,7 +42,7 @@ namespace Hermes
           Hermes2DFunction<Scalar>* coeff = HERMES_ONE,
           SymFlag sym = HERMES_NONSYM, GeomType gt = HERMES_PLANAR);
 
-        ~DefaultMatrixFormVol();
+        virtual ~DefaultMatrixFormVol();
 
         virtual Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
           Geom<double> *e, Func<Scalar> **ext) const;
