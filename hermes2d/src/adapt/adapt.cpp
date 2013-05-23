@@ -72,6 +72,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Adapt<Scalar>::Adapt(ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), strategy(strategy)
+    {
+      this->init();
+      this->set_defaults();
+    }
+
+    template<typename Scalar>
     Adapt<Scalar>::Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces_, ErrorCalculator<Scalar>* errorCalculator, AdaptivityStoppingCriterion<Scalar>* strategy) : errorCalculator(errorCalculator), spaces(spaces_), strategy(strategy)
     {
       this->init();
@@ -89,6 +96,21 @@ namespace Hermes
     template<typename Scalar>
     Adapt<Scalar>::~Adapt()
     {
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces)
+    {
+      this->spaces = spaces;
+      this->num = spaces.size();
+    }
+
+    template<typename Scalar>
+    void Adapt<Scalar>::set_space(SpaceSharedPtr<Scalar> space)
+    {
+      this->spaces.clear();
+      this->spaces.push_back(space);
+      this->num = 1;
     }
 
     template<typename Scalar>

@@ -300,7 +300,7 @@ namespace Hermes
           }
         }
 
-        return result;
+        return result * this->coeff->value(0.);
       }
 
       template<typename Scalar>

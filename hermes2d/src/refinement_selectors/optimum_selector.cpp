@@ -558,21 +558,20 @@ namespace Hermes
       template<typename Scalar>
       void OptimumSelector<Scalar>::evaluate_cands_score(Hermes::vector<Cand>& candidates, Element* e)
       {
-        //calculate score of candidates
+        // Original candidate.
         Cand& unrefined = candidates[0];
-        const int num_cands = (int)candidates.size();
+        // Original candidate score is zero.
         unrefined.score = 0;
 
-        for (int i = 1; i < num_cands; i++)
+        for (int i = 1; i < candidates.size(); i++)
         {
-          Cand& cand = candidates[i];
-          if(cand.error < unrefined.error)
-          {
-            double delta_dof = cand.dofs - unrefined.dofs;
-            candidates[i].score = (log10(unrefined.error) - log10(cand.error)) / delta_dof;
-          }
+          Cand& candidate = candidates[i];
+
+          // We are only interested in candidates decreasing the error.
+          if(candidate.error < unrefined.error)
+            candidate.score = (log(unrefined.error / candidate.error)) / (candidate.dofs - unrefined.dofs);
           else
-            candidates[i].score = 0;
+            candidate.score = 0;
         }
       }
 

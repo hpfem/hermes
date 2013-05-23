@@ -605,6 +605,7 @@ namespace Hermes
 
       void ScalarView::draw_tri_contours(double3* vert, int3* tri)
       {
+
         // sort the vertices by their value, keep track of the permutation sign
         int i, idx[3], perm = 0;
         memcpy(idx, tri, sizeof(idx));
@@ -1407,6 +1408,8 @@ namespace Hermes
 
           case 'k':
             contours = !contours;
+            if(contours)
+              this->cont_step = (this->range_max - this->range_min) / 50.;
             refresh();
             break;
 

@@ -109,7 +109,6 @@ namespace Hermes
     /// Returns the value of is_const.
     bool is_constant() const;
 
-  protected:
     /// The function is constant.
     bool is_const;
     /// If the function is constant, this is the value.

@@ -423,10 +423,12 @@ namespace Hermes
       // Assemble the system.
       if(this->jacobian_reusable && this->reuse_jacobian_values())
       {
+        this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         this->dp->assemble(coeff_vec, this->residual);
       }
       else
       {
+        this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
         this->dp->assemble(coeff_vec, this->jacobian, this->residual);
         this->jacobian_reusable = true;
       }

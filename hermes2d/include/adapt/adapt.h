@@ -108,6 +108,7 @@ namespace Hermes
       /// Hdiv). If proj_norms are not specified, they are defined according to the spaces.
       Adapt(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = NULL);
 			Adapt(SpaceSharedPtr<Scalar> space, ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = NULL);
+			Adapt(ErrorCalculator<Scalar>* error_calculator, AdaptivityStoppingCriterion<Scalar>* strategy = NULL);
       virtual ~Adapt();  ///< Destructor. Deallocates allocated private data.
 
       /// Refines elements based on results from the ErrorCalculator class.
@@ -133,6 +134,10 @@ namespace Hermes
       /// Internal checking.
       virtual bool isOkay() const;
       inline std::string getClassName() const { return "Adapt"; }
+
+      /// Set spaces.
+      void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
+      void set_space(SpaceSharedPtr<Scalar> space);
 
     protected:
       /// Set default values.

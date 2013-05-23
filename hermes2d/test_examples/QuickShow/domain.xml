@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mesh:mesh xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:mesh="XMLMesh"
+  xmlns:element="XMLMesh"
+  xsi:schemaLocation="XMLMesh ../../xml_schemas/mesh_h2d_xml.xsd">
+  <variables>
+    <var name="a" value="10.0" />
+    <var name="m_a" value="-10.0" />
+    <var name="b" value="7.70710678118654757" />    
+  </variables>
+
+  <vertices>
+    <v x="0" y="m_a" i="0"/>
+    <v x="a" y="m_a" i="1"/>
+    <v x="m_a" y="0" i="2"/>
+    <v x="0" y="0" i="3"/>
+    <v x="a" y="0" i="4"/>
+    <v x="m_a" y="a" i="5"/>
+    <v x="0" y="a" i="6"/>
+    <v x="b" y="b" i="7"/>
+  </vertices>
+
+  <elements>
+    <mesh:t v1="3" v2="4" v3="7" m="Copper" />
+    <mesh:t v1="3" v2="7" v3="6" m="Aluminum" />
+    <mesh:q v1="0" v2="1" v3="4" v4="3" m="Copper" />
+    <mesh:q v1="2" v2="3" v3="6" v4="5" m="Aluminum" />
+  </elements>
+
+  <edges>
+    <ed v1="0" v2="1" m="Zero" />
+    <ed v1="1" v2="4" m="Bdy" />
+    <ed v1="3" v2="0" m="Zero" />
+    <ed v1="4" v2="7" m="Bdy" />
+    <ed v1="7" v2="6" m="Bdy" />
+    <ed v1="2" v2="3" m="Zero" />
+    <ed v1="6" v2="5" m="Bdy" />
+    <ed v1="5" v2="2" m="Zero" />
+  </edges>
+<!--
+  <curves>
+    <arc v1="4" v2="7" angle="45" />
+    <arc v1="7" v2="6" angle="45" />
+  </curves>
+-->
+</mesh:mesh>
