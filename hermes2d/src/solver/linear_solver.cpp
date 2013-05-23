@@ -96,11 +96,11 @@ namespace Hermes
         if(this->do_UMFPACK_reporting)
         {
           UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
-          if(matrix_solver->get_used_factorization_scheme() != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+          if(this->matrix_solver->get_used_factorization_scheme() != HERMES_REUSE_FACTORIZATION_COMPLETELY)
           {
-            this->UMFPACK_reporting_data[FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
-            this->UMFPACK_reporting_data[PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
-            this->UMFPACK_reporting_data[Flops] = umfpack_matrix_solver->Info[UMFPACK_FLOPS];
+            this->UMFPACK_reporting_data[this->FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+            this->UMFPACK_reporting_data[this->PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+            this->UMFPACK_reporting_data[this->Flops] = umfpack_matrix_solver->Info[UMFPACK_FLOPS];
           }
           else
             memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));

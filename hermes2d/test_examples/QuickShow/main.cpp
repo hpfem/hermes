@@ -92,7 +92,7 @@ const int P_INIT = 1;
   ScalarView solution_view("Solution", new WinGeom(560, 270, 520, 440));
 #pragma endregion
 
-void main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
   // Load mesh.
   load_mesh(mesh, "domain.xml", INIT_REF_NUM);
@@ -200,6 +200,7 @@ void main(int argc, char* argv[])
   #pragma endregion
 
   View::wait();
+  return 0;
 }
 
 
