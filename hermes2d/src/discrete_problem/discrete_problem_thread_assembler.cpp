@@ -340,7 +340,8 @@ namespace Hermes
           delete ext_func[ext_i];
         }
       }
-      delete [] ext_func;
+      if(ext_func)
+        delete [] ext_func;
     }
 
     template<typename Scalar>
