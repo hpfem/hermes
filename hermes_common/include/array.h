@@ -20,7 +20,9 @@
 
 #include <vector>
 #include <limits.h>
-#include "tcmalloc.h"
+#ifdef WITH_TC_MALLOC
+  #include "tcmalloc.h"
+#endif
 
 #ifndef INVALID_IDX
 #define INVALID_IDX      INT_MAX

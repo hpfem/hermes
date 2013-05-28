@@ -40,6 +40,8 @@ project(hermes)
 	set(H2D_MAX_HANGING_NODES_LEVEL 15)
 	#  Use second derivatives (that are turned off by default).
 	set(H2D_USE_SECOND_DERIVATIVES NO)
+  
+  set(WITH_TC_MALLOC YES)
 
   # Installation path:
     set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
@@ -271,8 +273,10 @@ project(hermes)
 
     find_package(PTHREAD REQUIRED)
     
-    find_package(TCMALLOC REQUIRED)
-    include_directories(${TCMALLOC_INCLUDE_DIR})
+    if(WITH_TC_MALLOC)
+      find_package(TCMALLOC REQUIRED)
+      include_directories(${TCMALLOC_INCLUDE_DIR})
+    endif(WITH_TC_MALLOC)
 
     find_package(XSD REQUIRED)
     find_package(XERCES REQUIRED)

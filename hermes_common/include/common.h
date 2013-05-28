@@ -57,9 +57,11 @@
 #include <iostream>
 #include <signal.h>
 
-#include "tcmalloc.h"
-
 #include "config.h"
+
+#ifdef WITH_TC_MALLOC
+  #include "tcmalloc.h"
+#endif
 
 #ifdef WITH_OPENMP
   #include <omp.h>

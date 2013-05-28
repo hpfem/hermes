@@ -17,6 +17,8 @@
 #cmakedefine WITH_EXODUSII
 #cmakedefine WITH_MPI
 
+#cmakedefine WITH_TC_MALLOC
+
 // stacktrace
 #cmakedefine WITH_STACKTRACE
 #cmakedefine EXECINFO_FOUND

@@ -91,6 +91,10 @@ project(hermes_common)
     # is controled in their respective CMakeLists.txt. Note that for unselected
     # TPL's, the respective variables will be empty.
 
+    if(NOT(${WITH_TC_MALLOC}))
+      set(TCMALLOC_LIBRARY "")
+    endif(NOT(${WITH_TC_MALLOC}))
+    
     target_link_libraries(  ${HERMES_COMMON_LIB}
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}
