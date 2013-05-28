@@ -43,7 +43,7 @@ namespace Hermes
     template<typename Scalar>
     bool AdaptStoppingCriterionSingleElement<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
     {
-      typename const ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->get_element_reference(element_inspected_i);
+      const typename ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->get_element_reference(element_inspected_i);
       if(*(element_reference.error) > (threshold*threshold) * max_error_squared)
         return true;
       else
@@ -58,12 +58,12 @@ namespace Hermes
     template<typename Scalar>
     bool AdaptStoppingCriterionLevels<Scalar>::add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i)
     {
-      typename const ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->get_element_reference(element_inspected_i);
+      const typename ErrorCalculator<Scalar>::ElementReference& element_reference = error_calculator->get_element_reference(element_inspected_i);
       if(element_inspected_i == 0)
         return true;
       else
       {
-        typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = error_calculator->get_element_reference(element_inspected_i - 1);
+        const typename ErrorCalculator<Scalar>::ElementReference previous_element_reference = error_calculator->get_element_reference(element_inspected_i - 1);
         if(*(element_reference.error) > (threshold*threshold) * *((previous_element_reference).error))
           return true;
         else
