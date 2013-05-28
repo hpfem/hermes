@@ -43,8 +43,7 @@ public:
 
   void operator=(const MeshFunctionSharedPtr<Scalar>& other);
 
-  virtual ~MeshFunctionSharedPtr();
-
+  ~MeshFunctionSharedPtr();
 };
 
 

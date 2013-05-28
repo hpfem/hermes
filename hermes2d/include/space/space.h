@@ -46,8 +46,7 @@ public:
 
   void operator=(const SpaceSharedPtr<Scalar>& other);
 
-  virtual ~SpaceSharedPtr();
-
+  ~SpaceSharedPtr();
 };
 
 namespace Hermes
