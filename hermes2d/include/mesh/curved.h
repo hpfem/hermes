@@ -39,11 +39,22 @@ namespace Hermes
     /// "http://devworld.apple.com/dev/techsupport/develop/issue25/schneider.html">
     /// here</a>.
     ///
-    struct HERMES_API Nurbs
+    class HERMES_API Nurbs
     {
+    public:
       Nurbs()
       {
         ref = 0; twin = false;
+        pt = NULL;
+        kv = NULL;
+      };
+
+      ~Nurbs()
+      {
+        if(pt)
+          delete [] pt;
+        if(kv)
+          delete [] kv;
       };
       void unref();
 

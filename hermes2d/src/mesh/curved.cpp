@@ -896,7 +896,9 @@ namespace Hermes
       if(!--ref) // fixme: possible leak, we need ~Nurbs too
       {
         delete [] pt;
+        pt = NULL;
         delete [] kv;
+        kv = NULL;
         delete this;
       }
     }
