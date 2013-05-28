@@ -20,41 +20,6 @@
 #include "api2d.h"
 #include "mesh_reader_h2d.h"
 
-
-#ifdef _WINDOWS
-MeshSharedPtr::MeshSharedPtr(Hermes::Hermes2D::Mesh* ptr) : std::shared_ptr<Hermes::Hermes2D::Mesh>(ptr)
-{
-}
-
-MeshSharedPtr::MeshSharedPtr(const MeshSharedPtr& other) : std::shared_ptr<Hermes::Hermes2D::Mesh>(other)
-{
-}
-
-void MeshSharedPtr::operator=(const MeshSharedPtr& other)
-{
-  std::shared_ptr<Hermes::Hermes2D::Mesh>::operator=(other);
-}
-#else
-MeshSharedPtr::MeshSharedPtr(Hermes::Hermes2D::Mesh* ptr) : std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>(ptr)
-{
-}
-
-MeshSharedPtr::MeshSharedPtr(const MeshSharedPtr& other) : std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>(other)
-{
-}
-
-void MeshSharedPtr::operator=(const MeshSharedPtr& other)
-{
-  std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>::operator=(other);
-}
-#endif
-
-MeshSharedPtr::~MeshSharedPtr()
-{
-}
-
-
-
 namespace Hermes
 {
   namespace Hermes2D

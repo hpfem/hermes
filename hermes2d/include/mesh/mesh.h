@@ -31,20 +31,10 @@ namespace Hermes
 }
 
 #ifdef _WINDOWS
-class HERMES_API MeshSharedPtr : public std::shared_ptr<Hermes::Hermes2D::Mesh>
+typedef std::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
 #else
-class HERMES_API MeshSharedPtr : public std::tr1::shared_ptr<Hermes::Hermes2D::Mesh>
+typedef std::tr1::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
 #endif
-{
-public:
-  MeshSharedPtr(Hermes::Hermes2D::Mesh* ptr = NULL);
-
-  MeshSharedPtr(const MeshSharedPtr& other);
-
-  void operator=(const MeshSharedPtr& other);
-
-  virtual ~MeshSharedPtr();
-};
 
 namespace Hermes
 {

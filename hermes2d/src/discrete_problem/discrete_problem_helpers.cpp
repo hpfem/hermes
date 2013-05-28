@@ -151,11 +151,17 @@ namespace Hermes
     int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
       int i = 0;
-      RefMap* rep_reference_mapping;
-      do
-        rep_reference_mapping = reference_mapping[i++];
-      while(!rep_reference_mapping);
-
+      RefMap* rep_reference_mapping = NULL;
+      for(int i = 0; i < reference_mapping_count; i++)
+      {
+        if(reference_mapping[i])
+          if(reference_mapping[i]->get_active_element())
+          {
+            rep_reference_mapping = reference_mapping[i];
+            break;
+          }
+      }
+      
       double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_reference_mapping->get_active_element()->get_mode());
       int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_reference_mapping->get_active_element()->get_mode());
 
@@ -163,11 +169,12 @@ namespace Hermes
       geometry = init_geom_vol(rep_reference_mapping, order);
 
       for(int i = 0; i < reference_mapping_count; i++)
-        if(reference_mapping_count)
-        {
-          geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-          geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
-        }
+        if(reference_mapping[i])
+          if(reference_mapping[i]->get_active_element())
+          {
+            geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
+            geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
+          }
 
       double* jac = NULL;
       if(!rep_reference_mapping->is_jacobian_const())
@@ -199,7 +206,7 @@ namespace Hermes
       double3* tan;
       geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
       for(int i = 0; i < reference_mapping_count; i++)
-        if(reference_mapping_count)
+        if(reference_mapping[i]->get_active_element())
         {
           geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
           geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
