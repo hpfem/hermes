@@ -32,7 +32,7 @@ const int INIT_BDY_REF_NUM = 4;
 
 // Problem parameters.
 double heat_src = 1.0;
-double alpha = 7.69;
+double alpha = 7.0;
 
 int main(int argc, char* argv[])
 {
@@ -73,24 +73,21 @@ int main(int argc, char* argv[])
 
   // Initialize Newton solver.
   NewtonSolver<double> newton(&dp);
+  newton.set_tolerance(NEWTON_TOL);
   newton.set_max_allowed_residual_norm(1e99);
   newton.set_max_allowed_iterations(NEWTON_MAX_ITER);
-  newton.set_sufficient_improvement_factor_jacobian(0.9);
-  newton.set_max_steps_with_reused_jacobian(10);
-
+  
   // 1st - OK
-  // newton.set_sufficient_improvement_factor(1.1);
+  newton.set_sufficient_improvement_factor_jacobian(0.5);
+  newton.set_max_steps_with_reused_jacobian(5);
+  newton.set_initial_auto_damping_coeff(0.95);
+  newton.set_sufficient_improvement_factor(1.1);
+  newton.set_min_allowed_damping_coeff(1e-10);
 
   // 2nd - OK
+  // newton.set_sufficient_improvement_factor_jacobian(0.9);
+  // newton.set_max_steps_with_reused_jacobian(10);
   // newton.set_manual_damping_coeff(0.1);
-
-  // 3rd - NOT OK
-  // newton.set_auto_damping_ratio(0.1);
-
-  // 4th - NOT OK
-  // newton.set_min_allowed_damping_coeff(1e-10);
-
-  newton.set_tolerance(NEWTON_TOL);
     
   // Perform Newton's iteration.
   try

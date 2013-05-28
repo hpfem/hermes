@@ -21,12 +21,17 @@ const int P_INIT = 1;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
 const double THRESHOLD = 0.9;
-// This is a stopping criterion for Adaptivity.
-const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionSingleElement;
+
+// Error calculation & adaptivity.
+DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
+// Stopping criterion for an adaptivity step.
+AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
+// Adaptivity processor class.
+Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1e-3;
+const double ERR_STOP = 1e-1;
 
 int main(int argc, char* args[])
 {
@@ -97,13 +102,10 @@ int main(int argc, char* args[])
     oview.show(space);
 
     // Calculate element errors and total error estimate.
-    DefaultErrorCalculator<double, HERMES_L2_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
-    error_calculator.calculate_errors(sln, ref_sln);
-    double err_est_rel = error_calculator.get_total_error_squared() * 100;
+    errorCalculator.calculate_errors(sln, ref_sln);
+    double err_est_rel = errorCalculator.get_total_error_squared() * 100;
 
-    Adapt<double> adaptivity(space, &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, THRESHOLD);
-    //adaptivity.set_iterative_improvement(1e-1);
+    adaptivity.set_space(space);
 
     std::cout << "Error: " << err_est_rel << "%." << std::endl;
 

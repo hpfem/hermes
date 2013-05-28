@@ -1,8 +1,8 @@
-#define HERMES_REPORT_ALL
-#define HERMES_REPORT_FILE "application.log"
 #include "definitions.h"
 
 using namespace Hermes::Hermes2D::RefinementSelectors;
+
+typedef std::complex<double> complex;
 
 //  This problem describes the distribution of the vector potential in
 //  a 2D domain comprising a wire carrying electrical current, air, and
@@ -20,8 +20,13 @@ using namespace Hermes::Hermes2D::RefinementSelectors;
 const int INIT_REF_NUM = 0;                       // Number of initial uniform mesh refinements.
 const int P_INIT = 1;                             // Initial polynomial degree of all mesh elements.
 const double THRESHOLD = 0.95;                    // This is a quantitative parameter of Adaptivity.
-// This is a stopping criterion for Adaptivity.
-const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionSingleElement;
+
+// Error calculation & adaptivity.
+DefaultErrorCalculator<complex, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
+// Stopping criterion for an adaptivity step.
+AdaptStoppingCriterionSingleElement<complex> stoppingCriterion(0.3);
+// Adaptivity processor class.
+Adapt<complex> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
@@ -35,7 +40,6 @@ const double J_EXT = 1e6;
 const double FREQ = 5e3;
 const double OMEGA = 2 * M_PI * FREQ;
 
-typedef std::complex<double> complex;
 
 int main(int argc, char* argv[])
 {
@@ -87,6 +91,7 @@ int main(int argc, char* argv[])
   Views::OrderView o1, o2;
   // Adaptivity loop:
   int as = 1; bool done = false;
+  adaptivity.set_space(space);
   do
   {
     // Construct globally refined reference mesh and setup reference space->
@@ -130,21 +135,15 @@ int main(int argc, char* argv[])
     oview.show(space);
 
     // Calculate element errors and total error estimate.
-    DefaultErrorCalculator<complex, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
-    error_calculator.calculate_errors(sln, ref_sln);
+    errorCalculator.calculate_errors(sln, ref_sln);
 
-    Adapt<complex> adaptivity(space, &error_calculator);
-    adaptivity.set_strategy(AdaptStoppingCriterionLevels, 0.7);
-    adaptivity.set_strategy(AdaptStoppingCriterionSingleElement, 0.5);
-    //adaptivity.set_iterative_improvement(1e-1);
-
-    std::cout << (std::string)"Relative error: " << error_calculator.get_total_error_squared() * 100. << '%' << std::endl;
+    std::cout << (std::string)"Relative error: " << errorCalculator.get_total_error_squared() * 100. << '%' << std::endl;
 
     // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(space->get_num_dofs(), error_calculator.get_total_error_squared() * 100.);
+    graph_dof_est.add_values(space->get_num_dofs(), errorCalculator.get_total_error_squared() * 100.);
 
     // If err_est too large, adapt the mesh->
-    if(error_calculator.get_total_error_squared()  * 100. < ERR_STOP)
+    if(errorCalculator.get_total_error_squared()  * 100. < ERR_STOP)
       done = true;
     else
     {

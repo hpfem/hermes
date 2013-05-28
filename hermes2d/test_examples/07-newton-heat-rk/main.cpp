@@ -137,12 +137,11 @@ int main(int argc, char* argv[])
 
 	// Initialize Runge-Kutta time stepping.
 	RungeKutta<double> runge_kutta(&wf, space, &bt);
-
+  runge_kutta.set_tolerance(NEWTON_TOL);
 	runge_kutta.set_verbose_output(true);
 	runge_kutta.output_matrix(1);
 	runge_kutta.set_matrix_number_format("%a");
 	runge_kutta.output_rhs(2);
-	runge_kutta.set_global_integration_order(10);
 
 	// Iteration number.
 	int iteration = 0;

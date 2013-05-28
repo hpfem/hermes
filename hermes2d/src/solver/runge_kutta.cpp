@@ -367,7 +367,7 @@ namespace Hermes
         stage_dp_right->assemble(u_ext_vec, NULL, vector_right);
 
         // Finalizing the residual vector.
-        //vector_right->add_vector(vector_left);
+        vector_right->add_vector(vector_left);
 
         // Multiply the residual vector with -1 since the matrix
         // equation reads J(Y^n) \deltaY^{n + 1} = -F(Y^n).

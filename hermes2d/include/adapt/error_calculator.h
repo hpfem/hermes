@@ -77,6 +77,20 @@ namespace Hermes
       double get_total_error_squared() const;
       double get_total_norm_squared() const;
 
+      /// A reference to an element.
+      struct ElementReference {
+        /// Constructor. It creates an invalid element reference.
+        ElementReference(int comp, int element_id, double* error, double* norm) : element_id(element_id), comp(comp), error(error), norm(norm) {};
+        
+        int element_id; ///< An element ID. Invalid if below 0.
+        int comp; ///< A component which this element belongs to. Invalid if below 0.
+        double* error;///< Pointer to the final error, respecting the errorType.
+        double* norm;///< Pointer to the norm.
+      };
+
+      /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
+      const ElementReference& get_element_reference(unsigned int id) const;
+      
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -98,17 +112,6 @@ namespace Hermes
       
       /// Absolute / Relative error.
       CalculatedErrorType errorType;
-
-      /// A reference to an element.
-      struct ElementReference {
-        /// Constructor. It creates an invalid element reference.
-        ElementReference(int comp, int element_id, double* error, double* norm) : element_id(element_id), comp(comp), error(error), norm(norm) {};
-        
-        int element_id; ///< An element ID. Invalid if below 0.
-        int comp; ///< A component which this element belongs to. Invalid if below 0.
-        double* error;///< Pointer to the final error, respecting the errorType.
-        double* norm;///< Pointer to the norm.
-      };
 
       /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       ElementReference* element_references;

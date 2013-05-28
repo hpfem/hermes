@@ -262,6 +262,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    const typename ErrorCalculator<Scalar>::ElementReference& ErrorCalculator<Scalar>::get_element_reference(unsigned int id) const
+    {
+      return this->element_references[id];
+    }
+
+    template<typename Scalar>
     double ErrorCalculator<Scalar>::get_element_error_squared(int component, int element_id) const
     {
       if(!this->data_prepared_for_querying())

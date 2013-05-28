@@ -47,13 +47,18 @@ const int INIT_REF_BDY = 5;
 const bool MULTI = true;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.25;
-// This is a stopping criterion for Adaptivity.
-const AdaptivityStoppingCriterion stoppingCriterion = AdaptStoppingCriterionSingleElement;
+const double THRESHOLD = 0.5;
+
+// Error calculation & adaptivity.
+DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 2);
+// Stopping criterion for an adaptivity step.
+AdaptStoppingCriterionLevels<double> stoppingCriterion(THRESHOLD);
+// Adaptivity processor class.
+Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
 const CandList CAND_LIST = H2D_HP_ANISO;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1e-3;
+const double ERR_STOP = 1e-1;
 
 // Problem parameters.
 const double D_u = 1;
@@ -192,21 +197,19 @@ int main(int argc, char* argv[])
 
     // Calculate element errors.
     Hermes::Mixins::Loggable::Static::info("Calculating error estimate and exact error.");
-    DefaultErrorCalculator<double, HERMES_H1_NORM> error_calculator(RelativeErrorToGlobalNorm, 2);
-    error_calculator.calculate_errors(slns, exact_slns, false);
-    double err_exact_rel_total = error_calculator.get_total_error_squared() * 100;
+    errorCalculator.calculate_errors(slns, exact_slns, false);
+    double err_exact_rel_total = errorCalculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_exact_rel;
-    err_exact_rel.push_back(error_calculator.get_error_squared(0) * 100);
-    err_exact_rel.push_back(error_calculator.get_error_squared(1) * 100);
+    err_exact_rel.push_back(errorCalculator.get_error_squared(0) * 100);
+    err_exact_rel.push_back(errorCalculator.get_error_squared(1) * 100);
 
-    error_calculator.calculate_errors(slns, ref_slns, true);
-    double err_est_rel_total = error_calculator.get_total_error_squared() * 100;
+    errorCalculator.calculate_errors(slns, ref_slns, true);
+    double err_est_rel_total = errorCalculator.get_total_error_squared() * 100;
     Hermes::vector<double> err_est_rel;
-    err_est_rel.push_back(error_calculator.get_error_squared(0) * 100);
-    err_est_rel.push_back(error_calculator.get_error_squared(1) * 100);
+    err_est_rel.push_back(errorCalculator.get_error_squared(0) * 100);
+    err_est_rel.push_back(errorCalculator.get_error_squared(1) * 100);
 
-    Adapt<double> adaptivity(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space), &error_calculator);
-    adaptivity.set_strategy(stoppingCriterion, THRESHOLD);
+    adaptivity.set_spaces(Hermes::vector<SpaceSharedPtr<double> >(u_space, v_space));
 
     // Time measurement.
     cpu_time.tick();
