@@ -80,3 +80,18 @@ Debug/
 *.sty
 *.dvi
 *.vtk
+
+# Misc
+*.exe
+*.dat
+*.lastbuildstate
+*.cfg
+*.bak
+*.options
+*.pdr.*
+*.jit
+*My Inspector*
+*.exp
+*.ipgset
+*.psess
+*.vsp
