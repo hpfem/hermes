@@ -47,15 +47,20 @@ namespace Hermes
 
       /// Assignment operator.
       ElementToRefine& operator=(const ElementToRefine& orig);
-    private:
-      int id; ///< An ID of the element.
-      int comp; ///< An index of the component.
-      int split; ///< Proposed refinement. Possible values are defined in the enum ::RefinementType.
-      int refinement_polynomial_order[H2D_MAX_ELEMENT_SONS]; ///< Encoded orders of sons.
+    
+      /// An ID of the element.
+      int id;
+      /// An index of the component.
+      int comp;
+      /// Proposed refinement. Possible values are defined in the enum ::RefinementType.
+      int split;
+      /// Encoded orders of sons.
+      int refinement_polynomial_order[H2D_MAX_ELEMENT_SONS];
       /// Encoded orders of the best refinement of a certaint type.
       /// Indexed by enum RefinementType.
       int best_refinement_polynomial_order_type[4][H2D_MAX_ELEMENT_SONS]; 
-      double errors[H2D_MAX_ELEMENT_SONS]; ///< Error of the selected candidate.
+      /// Error of the selected candidate.
+      double errors[H2D_MAX_ELEMENT_SONS];
 
       /// Returns a number of sons.
       /** \return A number of sons of a given refinement. */
