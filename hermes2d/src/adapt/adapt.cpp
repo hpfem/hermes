@@ -153,6 +153,12 @@ namespace Hermes
     template<typename Scalar>
     bool Adapt<Scalar>::isOkay() const
     {
+      if(!this->spaces.size())
+      {
+        this->info("\tAdaptivity: spaces are missing.");
+        return false;
+      }
+
       if(!this->strategy)
       {
         this->info("\tAdaptivity: strategy is missing.");

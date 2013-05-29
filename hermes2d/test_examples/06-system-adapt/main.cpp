@@ -52,7 +52,7 @@ const double THRESHOLD = 0.5;
 // Error calculation & adaptivity.
 DefaultErrorCalculator<double, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 2);
 // Stopping criterion for an adaptivity step.
-AdaptStoppingCriterionLevels<double> stoppingCriterion(THRESHOLD);
+AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
 // Adaptivity processor class.
 Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
