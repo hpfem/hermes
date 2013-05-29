@@ -57,7 +57,7 @@ namespace Hermes
       /// @param[in] ap index to ap/ax, where each column starts (size is matrix size + 1)
       /// @param[in] ai row indices
       /// @param[in] ax values
-      void create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax);
+      void create(unsigned int size, unsigned int nnz, Int* ap, Int* ai, Scalar* ax);
 
       /// \brief Default constructor.
       CSCMatrix();
@@ -101,10 +101,10 @@ namespace Hermes
       CSCMatrix* duplicate();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ap
-      int *get_Ap();
+      Int *get_Ap();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ai
-      int *get_Ai();
+      Int *get_Ai();
       // Exposes pointers to the CSC arrays.
       /// @return pointer to #Ax
       Scalar *get_Ax();
@@ -114,9 +114,9 @@ namespace Hermes
       /// Matrix entries (column-wise).
       Scalar *Ax;
       /// Row indices of values in Ax.
-      int *Ai;
+      Int *Ai;
       /// Index to Ax/Ai, where each column starts.
-      int *Ap;
+      Int *Ap;
       /// Number of non-zero entries ( =  Ap[size]).
       unsigned int nnz;
       template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
@@ -227,8 +227,8 @@ namespace Hermes
     protected:
       int size;
       int nnz;
-      int* Ai;
-      int* Ap;
+      Int* Ai;
+      Int* Ap;
       Scalar* Ax;
       int Ai_pos;
       int Ap_pos;

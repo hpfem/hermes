@@ -42,6 +42,12 @@ namespace Hermes
   /// \brief Namespace containing classes for vector / matrix operations.
   namespace Algebra
   {
+    /// Integer. Either 32-bit one or 64-bit one.
+#ifdef _64_BIT
+#define Int __int64
+#else
+#define Int int
+#endif
     /// Contains operation on dense matrices.
     namespace DenseMatrixOperations
     {
@@ -475,7 +481,7 @@ namespace Hermes
       /// @param[in] max maximum indices to be stored (probably)
       /// \todo max parameter does nothing (not implemented)
       /// @return number of indices
-      int sort_and_store_indices(Page *page, int *buffer, int *max);
+      Int sort_and_store_indices(Page *page, Int *buffer, Int *max);
       /// get number of indices in all pages
       /// @return number of indices
       int get_num_indices();

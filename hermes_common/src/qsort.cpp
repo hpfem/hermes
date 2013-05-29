@@ -25,11 +25,13 @@
 
 #define MAX_THRESH 4
 
-typedef struct
+template<typename intType>
+class stack_node
 {
-  int *lo;
-  int *hi;
-} stack_node;
+public:
+  intType *lo;
+  intType *hi;
+} ;
 
 #define STACK_SIZE      (CHAR_BIT * sizeof(size_t))
 #define PUSH(low, high) ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
@@ -39,25 +41,26 @@ typedef struct
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
 /// \brief The QuickSort routine from glibc-2.5 modified for sorting int arrays.
-void qsort_int(int* pbase, size_t total_elems)
+template<typename intType>
+void qsort_int(intType* pbase, size_t total_elems)
 {
-  register int *base_ptr = pbase;
+  register intType *base_ptr = pbase;
 
   if(total_elems == 0) return;
 
   if(total_elems > MAX_THRESH)
   {
-    int *lo = base_ptr;
-    int *hi = lo + total_elems - 1;
-    stack_node stack[STACK_SIZE];
-    stack_node *top = stack;
+    intType *lo = base_ptr;
+    intType *hi = lo + total_elems - 1;
+    stack_node<intType> stack[STACK_SIZE];
+    stack_node<intType> *top = stack;
 
     PUSH(NULL, NULL);
 
     while (STACK_NOT_EMPTY)
     {
-      int *left_ptr;
-      int *right_ptr;
+      intType *left_ptr;
+      intType *right_ptr;
 
       // Select median value from among LO, MID, and HI. Rearrange
       // LO and HI so the three values are sorted. This lowers the
@@ -65,7 +68,7 @@ void qsort_int(int* pbase, size_t total_elems)
       // skips a comparison for both the LEFT_PTR and RIGHT_PTR in
       // the while loops.
 
-      int *mid = lo + ((hi - lo) >> 1);
+      intType *mid = lo + ((hi - lo) >> 1);
 
       if(*mid < *lo)
         SWAP (mid, lo);
@@ -148,10 +151,10 @@ jump_over:
   // of the array to sort, and END_PTR points at the very last element in
   // the array (*not* one beyond it!).
   {
-    int *const end_ptr = base_ptr + total_elems - 1;
-    int *tmp_ptr = base_ptr;
-    int *thresh = min(end_ptr, base_ptr + MAX_THRESH);
-    register int *run_ptr;
+    intType *const end_ptr = base_ptr + total_elems - 1;
+    intType *tmp_ptr = base_ptr;
+    intType *thresh = min(end_ptr, base_ptr + MAX_THRESH);
+    register intType *run_ptr;
 
     // Find smallest element in first threshold and place it at the
     // array's beginning.  This is the smallest array element,
@@ -175,8 +178,8 @@ jump_over:
       tmp_ptr++;
       if(tmp_ptr != run_ptr)
       {
-        int c = *run_ptr;
-        register int *hi, *lo;
+        intType c = *run_ptr;
+        register intType *hi, *lo;
 
         for (hi = lo = run_ptr; --lo >= tmp_ptr; hi = lo)
           *hi = *lo;
@@ -185,3 +188,6 @@ jump_over:
     }
   }
 }
+
+template void qsort_int(int* pbase, size_t total_elems);
+template void qsort_int(__int64* pbase, size_t total_elems);

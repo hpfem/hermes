@@ -27,7 +27,7 @@ namespace Hermes
 {
   namespace Algebra
   {
-    static int find_position(int *Ai, int Alen, int idx)
+    static int find_position(Int *Ai, int Alen, int idx)
     {
       assert(Ai != NULL);
       assert(Alen > 0);
@@ -102,9 +102,9 @@ namespace Hermes
       assert(this->pages != NULL);
 
       // initialize the arrays Ap and Ai
-      Ap = new int[this->size + 1];
+      Ap = new Int[this->size + 1];
       int aisize = this->get_num_indices();
-      Ai = new int[aisize];
+      Ai = new Int[aisize];
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i;
@@ -564,12 +564,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CSCMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
+    void CSCMatrix<Scalar>::create(unsigned int size, unsigned int nnz, Int* ap, Int* ai, Scalar* ax)
     {
       this->nnz = nnz;
       this->size = size;
-      this->Ap = new int[this->size + 1]; assert(this->Ap != NULL);
-      this->Ai = new int[nnz];    assert(this->Ai != NULL);
+      this->Ap = new Int[this->size + 1]; assert(this->Ap != NULL);
+      this->Ai = new Int[nnz];    assert(this->Ai != NULL);
       this->Ax = new Scalar[nnz]; assert(this->Ax != NULL);
       for (unsigned int i = 0; i < this->size + 1; i++) this->Ap[i] = ap[i];
       for (unsigned int i = 0; i < nnz; i++)
@@ -588,13 +588,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int *CSCMatrix<Scalar>::get_Ap()
+    Int *CSCMatrix<Scalar>::get_Ap()
     {
       return this->Ap;
     }
 
     template<typename Scalar>
-    int *CSCMatrix<Scalar>::get_Ai()
+    Int *CSCMatrix<Scalar>::get_Ai()
     {
       return this->Ai;
     }

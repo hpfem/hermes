@@ -177,10 +177,10 @@ void Hermes::Algebra::SparseMatrix<Scalar>::pre_add_ij(unsigned int row, unsigne
 }
 
 template<typename Scalar>
-int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, int *buffer, int *max)
+Int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, Int *buffer, Int *max)
 {
   // gather all pages in the buffer, deleting them along the way
-  int *end = buffer;
+  Int *end = buffer;
   while (page != NULL)
   {
     memcpy(end, page->idx, sizeof(int) * page->count);
@@ -192,8 +192,8 @@ int Hermes::Algebra::SparseMatrix<Scalar>::sort_and_store_indices(Page *page, in
 
   // sort the indices and remove duplicities
   qsort_int(buffer, end - buffer);
-  int *q = buffer;
-  for (int *p = buffer, last = -1; p < end; p++) if(*p != last) *q++= last = *p;
+  Int *q = buffer;
+  for (Int *p = buffer, last = -1; p < end; p++) if(*p != last) *q++= last = *p;
 
   return q - buffer;
 }

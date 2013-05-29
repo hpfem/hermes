@@ -21,4 +21,5 @@
 */
 
 #include "compat.h"
-HERMES_API void qsort_int(int* pbase, size_t total_elems);
+template<typename intType>
+HERMES_API void qsort_int(intType* pbase, size_t total_elems);
