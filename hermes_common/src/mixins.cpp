@@ -56,7 +56,7 @@ namespace Hermes
       va_end(arglist);
 
       //Windows platform
-#ifdef WIN32
+#ifdef _WINDOWS
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
 
       //generate console settings
@@ -110,7 +110,7 @@ namespace Hermes
       va_end(arglist);
 
       //Windows platform
-#ifdef WIN32
+#ifdef _WINDOWS
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
 
       //generate console settings
@@ -164,7 +164,7 @@ namespace Hermes
       va_end(arglist);
 
       //Windows platform
-#ifdef WIN32
+#ifdef _WINDOWS
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
 
       //generate console settings
@@ -332,7 +332,7 @@ namespace Hermes
     bool Loggable::write_console(const char code, const char* text) const
     {
       //Windows platform
-#ifdef WIN32
+#ifdef _WINDOWS
       HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
       if(h_console == INVALID_HANDLE_VALUE)
         return false;
@@ -494,7 +494,7 @@ namespace Hermes
     TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == NULL ? "unnamed" : name)
     {
       //initialization
-#ifdef WIN32  //Windows
+#ifdef _WINDOWS  //Windows
       LARGE_INTEGER freq;
       if(QueryPerformanceFrequency(&freq))
         frequency = (double)freq.QuadPart;
@@ -506,7 +506,7 @@ namespace Hermes
 
     TimeMeasurable::SysTime TimeMeasurable::get_time() const
     {
-#ifdef WIN32  //Windows
+#ifdef _WINDOWS  //Windows
       if(frequency > 0)
       {
         LARGE_INTEGER ticks;
@@ -530,7 +530,7 @@ namespace Hermes
 
     double TimeMeasurable::period_in_seconds(const SysTime& begin, const SysTime& end) const
     {
-#ifdef WIN32  //Windows
+#ifdef _WINDOWS  //Windows
       uint64_t period = end - begin;
       if(frequency > 0)
         return period / frequency;

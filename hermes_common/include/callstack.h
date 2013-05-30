@@ -25,7 +25,7 @@
 #include "compat.h"
 #include "common.h"
 #ifdef WITH_STACKTRACE
-  #ifdef WIN32
+  #ifdef _WINDOWS
     #include <windows.h>
     #include "StackWalker.h"
 

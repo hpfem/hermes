@@ -46,7 +46,7 @@ void CallStack::dump(int signalCode)
 {
 // Basically WIN stuff
 #ifdef WITH_STACKTRACE
-  #ifdef WIN32
+  #ifdef _WINDOWS
     MyStackWalker sw;
     sw.ShowCallstack();
   #else

@@ -202,7 +202,7 @@ namespace Hermes
       std::string last_str() const;
 
     private:
-  #ifdef WIN32 //Windows
+  #ifdef _WINDOWS //Windows
       typedef uint64_t SysTime;
       double frequency; ///< Frequency of the performance timer. If zero, no hi-res timer is supported. (Win32 only)
   #else //Linux

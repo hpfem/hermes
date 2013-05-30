@@ -31,7 +31,7 @@ namespace Hermes
     this->default_val = default_val;
     this->user_set = false;
   }
-
+  
   Api::Api()
   {
     signal(SIGABRT, CallStack::dump);

@@ -42,12 +42,14 @@ namespace Hermes
   /// \brief Namespace containing classes for vector / matrix operations.
   namespace Algebra
   {
-    /// Integer. Either 32-bit one or 64-bit one.
+    /// Integer. For purposes of matrix-storage.
+    /// Motivated by UMFPACK, which uses these two exact number lengths.
 #ifdef _64_BIT
 #define Int __int64
 #else
 #define Int int
 #endif
+
     /// Contains operation on dense matrices.
     namespace DenseMatrixOperations
     {

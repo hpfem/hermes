@@ -27,6 +27,24 @@ namespace Hermes
 {
   namespace Algebra
   {
+#ifdef _64_BIT
+  #define umfpack_real_symbolic umfpack_dl_symbolic
+  #define umfpack_real_numeric umfpack_dl_numeric
+  #define umfpack_real_solve umfpack_dl_solve
+
+  #define umfpack_complex_symbolic umfpack_zl_symbolic
+  #define umfpack_complex_numeric umfpack_zl_numeric
+  #define umfpack_complex_solve umfpack_zl_solve
+#else
+  #define umfpack_real_symbolic umfpack_di_symbolic
+  #define umfpack_real_numeric umfpack_di_numeric
+  #define umfpack_real_solve umfpack_di_solve
+
+  #define umfpack_complex_symbolic umfpack_zi_symbolic
+  #define umfpack_complex_numeric umfpack_zi_numeric
+  #define umfpack_complex_solve umfpack_zi_solve
+#endif
+
     static int find_position(Int *Ai, int Alen, int idx)
     {
       assert(Ai != NULL);
@@ -893,7 +911,7 @@ namespace Hermes
         } 
 
         // Factorizing symbolically.
-        status = umfpack_di_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, Control, Info);
+        status = umfpack_real_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, Control, Info);
         if(status != UMFPACK_OK)
         {
           check_status("umfpack_di_symbolic", status);
@@ -912,7 +930,7 @@ namespace Hermes
         }
 
         // Factorizing numerically.
-        status = umfpack_di_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, Control, Info);
+        status = umfpack_real_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, Control, Info);
         if(status != UMFPACK_OK)
         {
           check_status("umfpack_di_numeric", status);
@@ -966,7 +984,7 @@ namespace Hermes
           if(symbolic != NULL)
             umfpack_zi_free_symbolic(&symbolic);
 
-          status = umfpack_zi_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, &symbolic, NULL, NULL);
+          status = umfpack_complex_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, &symbolic, NULL, NULL);
           if(status != UMFPACK_OK)
           {
             check_status("umfpack_di_symbolic", status);
@@ -980,7 +998,7 @@ namespace Hermes
           if(numeric != NULL)
             umfpack_zi_free_numeric(&numeric);
 
-        status = umfpack_zi_numeric(m->get_Ap(), m->get_Ai(), (double *) m->get_Ax(), NULL, symbolic, &numeric, NULL, NULL);
+        status = umfpack_complex_numeric(m->get_Ap(), m->get_Ai(), (double *) m->get_Ax(), NULL, symbolic, &numeric, NULL, NULL);
         if(status != UMFPACK_OK)
         {
           check_status("umfpack_di_numeric", status);
@@ -1027,7 +1045,7 @@ namespace Hermes
         delete [] sln;
       sln = new double[m->get_size()];
       memset(sln, 0, m->get_size() * sizeof(double));
-      int status = umfpack_di_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
+      int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
       if(status != UMFPACK_OK)
       {
         check_status("umfpack_di_solve", status);
@@ -1058,7 +1076,7 @@ namespace Hermes
         delete [] sln;
       sln = new std::complex<double>[m->get_size()];
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
-      int status = umfpack_zi_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
+      int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
       if(status != UMFPACK_OK)
       {
         check_status("umfpack_di_solve", status);

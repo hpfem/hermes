@@ -1,4 +1,3 @@
-set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_HOME_DIRECTORY}/cmake/cxx_flag_overrides.cmake)
 project(hermes)
   cmake_minimum_required(VERSION 2.8)
 
@@ -14,6 +13,7 @@ project(hermes)
   # Global
     # Optional stacktrace
     set(WITH_STACKTRACE NO)
+    set(64_BIT YES)
   
   # HermesCommon
     set(HERMES_COMMON_DEBUG     YES)
@@ -117,6 +117,10 @@ project(hermes)
   
 	# Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
+  
+  if(${64_BIT} AND ${WIN32} AND ${WITH_TC_MALLOC})
+    message(FATAL_ERROR "\nTC_malloc does not work in 64-bit on Windows.\nChange either WITH_TC_MALLOC or 64_BIT.")
+  endif(${64_BIT} AND ${WIN32} AND ${WITH_TC_MALLOC})
   
   ### END DEFAULT CONFIGURATION ###
     
@@ -250,13 +254,20 @@ project(hermes)
 
   # This overrides CXX flags for MSVC
   if(MSVC)
-    set(MSVC_DEFINES "/DWIN32 /D_WINDOWS /Dpopen=_popen /Dpclose=_pclose /D__value=_value /Dfinite=_finite /Dhypot=_hypot /Disatty=_isatty /Dfileno=_fileno /D_CRT_SECURE_NO_WARNINGS /DYY_NO_UNISTD_H /D_USE_MATH_DEFINES /DIMPLEMENT_C99 /wd4275 /wd4251")
+    if(64_BIT)
+      set(MSVC_DEFINES "/DWIN64 /D_64_BIT /D_WINDOWS /Dpopen=_popen /Dpclose=_pclose /D__value=_value /Dfinite=_finite /Dhypot=_hypot /Disatty=_isatty /Dfileno=_fileno /D_CRT_SECURE_NO_WARNINGS /DYY_NO_UNISTD_H /D_USE_MATH_DEFINES /DIMPLEMENT_C99 /wd4275 /wd4251")
+    else(64_BIT)
+      set(MSVC_DEFINES "/DWIN32 /D_WINDOWS /Dpopen=_popen /Dpclose=_pclose /D__value=_value /Dfinite=_finite /Dhypot=_hypot /Disatty=_isatty /Dfileno=_fileno /D_CRT_SECURE_NO_WARNINGS /DYY_NO_UNISTD_H /D_USE_MATH_DEFINES /DIMPLEMENT_C99 /wd4275 /wd4251")
+    endif(64_BIT)
     set(CMAKE_CXX_FLAGS_DEBUG_INIT          "/D_DEBUG /Od /Ob2 /MDd /Zi /RTC1 ${MSVC_DEFINES}")
     set(DEBUG_FLAGS ${DEBUG_FLAGS} "${CMAKE_CXX_FLAGS_DEBUG_INIT}")
     set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "/O2 /Ob2 /MD ${MSVC_DEFINES}")
     set(CMAKE_CXX_FLAGS_RELEASE_INIT        "/DNDEBUG /O2 /Ob2 /MD ${MSVC_DEFINES}")
     set(RELEASE_FLAGS ${RELEASE_FLAGS} "${CMAKE_CXX_FLAGS_RELEASE_INIT}")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/DNDEBUG /O2 /Ob2 /MD /Zi ${MSVC_DEFINES}")
+    if(64_BIT)
+      string (REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    endif(64_BIT)
   else(MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG_INIT          "${CMAKE_CXX_FLAGS_DEBUG_INIT} -D_DEBUG")
   endif(MSVC)

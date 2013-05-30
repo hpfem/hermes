@@ -17,7 +17,7 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#ifndef WIN32
+#ifndef _WINDOWS
 #include <sys/time.h>
 #include <unistd.h>
 #endif
@@ -127,7 +127,7 @@ namespace Hermes
           view_sync.leave();
 
           //wait for 10 ms
-#ifdef WIN32
+#ifdef _WINDOWS
           Sleep(10);
 #else
           usleep(10*1000);
@@ -391,7 +391,7 @@ namespace Hermes
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
         //obtain other parameters
-#ifdef WIN32
+#ifdef _WINDOWS
         double_click_delay_ms = GetDoubleClickTime();
 #endif
 

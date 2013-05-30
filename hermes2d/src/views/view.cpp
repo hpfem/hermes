@@ -18,7 +18,7 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#ifndef WIN32
+#ifndef _WINDOWS
 # include <sys/time.h>
 #endif
 
@@ -559,7 +559,7 @@ namespace Hermes
 
       double View::get_tick_count()
       {
-#ifdef WIN32
+#ifdef _WINDOWS
         LARGE_INTEGER freq, ticks;
         QueryPerformanceFrequency(&freq);
         QueryPerformanceCounter(&ticks);
