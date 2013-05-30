@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
       // Output mesh and element orders in VTK format.
       Hermes::Hermes2D::Views::Orderizer ord;
-      ord.save_mesh_vtk(space, "mesh->vtk");
+      ord.save_mesh_vtk(space, "mesh.vtk");
       ord.save_orders_vtk(space, "ord.vtk");
     }
 
