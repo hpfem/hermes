@@ -12,7 +12,11 @@ IF ("$ENV{MY_UMFPACK_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_UMFPACK_INC_DIRS}" STREQ
     # Alternatively, you may simply specify UMFPACK_ROOT in CMake.vars. This is 
     # the traditional way used also in the spkg files from the hpfem/solvers
     # repository and in the Hermes spkg.
-    SET(MY_UMFPACK_LIB_DIRS ${UMFPACK_ROOT}/lib) 
+    if(64_BIT)
+        SET(MY_UMFPACK_LIB_DIRS ${UMFPACK_ROOT}/lib/x64) 
+    else(64_BIT) 
+        SET(MY_UMFPACK_LIB_DIRS ${UMFPACK_ROOT}/lib) 
+    endif(64_BIT)
     SET(MY_UMFPACK_INC_DIRS ${UMFPACK_ROOT}/include)
   ENDIF (NOT MY_UMFPACK_LIB_DIRS OR NOT MY_UMFPACK_INC_DIRS)
 ELSE ("$ENV{MY_UMFPACK_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_UMFPACK_INC_DIRS}" STREQUAL "")

@@ -6,7 +6,13 @@
 FIND_PATH(HDF5_INCLUDE_DIR hdf5.h ${HDF5_ROOT}/include)
 
 #FIND_LIBRARY(HDF5_LIBRARY hdf5 /usr/lib/ /usr/local/lib/hdf5 ${HDF5_ROOT}) 
-FIND_LIBRARY(HDF5_LIBRARY hdf5 ${HDF5_ROOT}/lib) 
+
+if(64_BIT)
+  FIND_LIBRARY(HDF5_LIBRARY hdf5 ${HDF5_ROOT}/lib/x64)
+else(64_BIT)  
+  FIND_LIBRARY(HDF5_LIBRARY hdf5 ${HDF5_ROOT}/lib)
+endif(64_BIT)
+
 #FIND_FILE(HDF5_LIBRARY libhdf5.a /usr/lib /usr/local/lib/hfd5 ${HDF5_ROOT}) 
 
 INCLUDE(FindPackageHandleStandardArgs)

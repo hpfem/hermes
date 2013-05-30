@@ -8,7 +8,10 @@ else(MSVC)
 	set(GLEW_LIBRARY_NAME GLEW)
 endif(MSVC)
 
-FIND_LIBRARY(GLEW_LIBRARY ${GLEW_LIBRARY_NAME} ${GLEW_ROOT}/lib /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib)
-
+if(64_BIT)
+  FIND_LIBRARY(GLEW_LIBRARY ${GLEW_LIBRARY_NAME} ${GLEW_ROOT}/lib/x64 /usr/lib64 /usr/local/lib64)
+else(64_BIT)  
+  FIND_LIBRARY(GLEW_LIBRARY ${GLEW_LIBRARY_NAME} ${GLEW_ROOT}/lib /usr/lib /usr/local/lib)
+endif(64_BIT)
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLEW DEFAULT_MSG GLEW_LIBRARY)

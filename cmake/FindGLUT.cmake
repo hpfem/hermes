@@ -8,7 +8,10 @@ else(MSVC)
 	set(GLUT_LIBRARY_NAME glut)
 endif(MSVC)
 
-FIND_LIBRARY(GLUT_LIBRARY ${GLUT_LIBRARY_NAME} ${GLUT_ROOT}/lib /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib)
-
+if(64_BIT)
+  FIND_LIBRARY(GLUT_LIBRARY ${GLUT_LIBRARY_NAME} ${GLUT_ROOT}/lib/x64 /usr/lib64 /usr/local/lib64)
+else(64_BIT)  
+  FIND_LIBRARY(GLUT_LIBRARY ${GLUT_LIBRARY_NAME} ${GLUT_ROOT}/lib /usr/lib /usr/local/lib)
+endif(64_BIT)
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT DEFAULT_MSG GLUT_LIBRARY)
