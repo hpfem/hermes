@@ -18,6 +18,7 @@
 #cmakedefine WITH_MPI
 
 #cmakedefine WITH_TC_MALLOC
+#cmakedefine UMFPACK_LONG_INT
 
 // stacktrace
 #cmakedefine WITH_STACKTRACE

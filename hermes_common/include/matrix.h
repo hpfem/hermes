@@ -44,7 +44,7 @@ namespace Hermes
   {
     /// Integer. For purposes of matrix-storage.
     /// Motivated by UMFPACK, which uses these two exact number lengths.
-#ifdef _64_BIT
+#ifdef UMFPACK_LONG_INT
 #define Int __int64
 #else
 #define Int int

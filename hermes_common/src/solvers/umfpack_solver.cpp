@@ -27,7 +27,7 @@ namespace Hermes
 {
   namespace Algebra
   {
-#ifdef _64_BIT
+#ifdef UMFPACK_LONG_INT
   #define umfpack_real_symbolic umfpack_dl_symbolic
   #define umfpack_real_numeric umfpack_dl_numeric
   #define umfpack_real_solve umfpack_dl_solve
