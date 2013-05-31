@@ -30,6 +30,7 @@ project(hermes_common)
     src/solvers/aztecoo_solver.cpp
     src/solvers/amesos_solver.cpp
     src/solvers/mumps_solver.cpp
+    src/solvers/paralution_solver.cpp
     src/solvers/superlu_solver.cpp
     src/solvers/superlu_solver_real.cpp
     src/solvers/superlu_solver_cplx.cpp
@@ -59,6 +60,7 @@ project(hermes_common)
     include/solvers/aztecoo_solver.h
     include/solvers/amesos_solver.h
     include/solvers/mumps_solver.h
+    include/solvers/paralution_solver.h
     include/solvers/superlu_solver.h
     include/solvers/petsc_solver.h
     include/solvers/umfpack_solver.h
@@ -99,7 +101,7 @@ project(hermes_common)
       ${EXODUSII_LIBRARIES}
       ${HDF5_LIBRARY}
       ${METIS_LIBRARY}
-      ${UMFPACK_LIBRARIES}
+      ${UMFPACK_LIBRARIES} ${PARALUTION_LIBRARY}
       ${TRILINOS_LIBRARIES}
       ${PETSC_LIBRARIES}
       ${MUMPS_LIBRARIES}

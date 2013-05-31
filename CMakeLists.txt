@@ -50,6 +50,8 @@ project(hermes)
   # Standard UMFPACK
     # UMFPACK is chosen by default.
     set(WITH_UMFPACK YES)
+    # PARALUTION is chosen by default.
+    set(WITH_PARALUTION YES)
     # UMFPACK's longer integer.
     # For some reason does not work in 64-bit.
     set(UMFPACK_LONG_INT YES)
@@ -309,7 +311,12 @@ project(hermes)
       find_package(UMFPACK REQUIRED)
       include_directories(${UMFPACK_INCLUDE_DIRS})
     endif(WITH_UMFPACK)
-
+    
+    if(WITH_PARALUTION)
+      find_package(PARALUTION REQUIRED)
+      include_directories(${PARALUTION_INCLUDE_DIRS})
+    endif(WITH_PARALUTION)
+    
     if(MSVC)
       if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
           # The search for CLAPACK and associated libraries will be performed

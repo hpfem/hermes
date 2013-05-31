@@ -19,7 +19,7 @@
 /*! \file umfpack_solver.h
 \brief UMFPACK solver interface.
 */
-#ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_
+#ifndef __HERMES_COMMON_UMFPACK_SOLVER_H_ 
 #define __HERMES_COMMON_UMFPACK_SOLVER_H_
 #include "config.h"
 #ifdef WITH_UMFPACK
