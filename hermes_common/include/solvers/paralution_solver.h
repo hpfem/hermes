@@ -36,51 +36,31 @@ namespace Hermes
   {
     using namespace Hermes::Solvers;
 
+    /** Various types of matrix storage PARALUTION can do - commented out are those that are not implemented on our side so far */
     enum ParalutionMatrixType
     {
       ParalutionMatrixTypeCSR,
-      ParalutionMatrixTypeBCSR,
-      ParalutionMatrixTypeMCSR,
-      ParalutionMatrixTypeCOO,
-      ParalutionMatrixTypeDIA,
-      ParalutionMatrixTypeELL,
-      ParalutionMatrixTypeHYB,
-      ParalutionMatrixTypeDENSE
+      // ParalutionMatrixTypeBCSR,
+      // ParalutionMatrixTypeMCSR,
+      // ParalutionMatrixTypeCOO,
+      // ParalutionMatrixTypeDIA,
+      // ParalutionMatrixTypeELL,
+      // ParalutionMatrixTypeHYB,
+      // ParalutionMatrixTypeDENSE
     };
 
     /// \brief General Paralution matrix.
     template <typename Scalar>
-    class HERMES_API ParalutionMatrix : public SparseMatrix<Scalar>
+    class HERMES_API ParalutionMatrix : public CSCMatrix<Scalar>
     {
-    public:
       /// \brief Default constructor.
       ParalutionMatrix(ParalutionMatrixType type = ParalutionMatrixTypeCSR);
       virtual ~ParalutionMatrix();
-
-      virtual void alloc();
-      virtual void free();
-      virtual Scalar get(unsigned int m, unsigned int n);
-      virtual void zero();
-      virtual void add(unsigned int m, unsigned int n, Scalar v);
-      virtual void add_to_diagonal(Scalar v);
-      
-
-      virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
-      
-      virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
-      
-      virtual unsigned int get_matrix_size() const;
-      virtual unsigned int get_nnz() const;
-      virtual double get_fill_in() const;
-
-      // Applies the matrix to vector_in and saves result to vector_out.
-      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
-      // Multiplies matrix with a Scalar.
-      void multiply_with_Scalar(Scalar value);
+      template<typename T> friend SparseMatrix<T>*  create_matrix();
 
     private:
       paralution::LocalMatrix<Scalar>* paralutionMatrix;
+      ParalutionMatrixType paralutionMatrixType;
     };
 
     /// \brief Class representing the vector for UMFPACK.
@@ -107,6 +87,7 @@ namespace Hermes
       paralution::LocalVector<Scalar>* paralutionVector;
     };
   }
+
   namespace Solvers
   {
     /// \brief Encapsulation of PARALUTION linear solver.
@@ -124,6 +105,11 @@ namespace Hermes
 
       virtual bool solve();
       virtual int get_matrix_size();
+
+      virtual int get_num_iters();
+      virtual double get_residual();
+
+      virtual void set_precond(Precond<Scalar> *pc);
 
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *m;

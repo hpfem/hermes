@@ -27,6 +27,7 @@
 #include "mixins.h"
 
 using namespace Hermes::Algebra;
+using namespace Hermes::Solvers;
 
 /// \brief General namespace for the Hermes library.
 namespace Hermes
@@ -103,11 +104,10 @@ namespace Hermes
       /// @return solution vector ( #sln )
       Scalar *get_sln_vector();
 
-      /// @return #error
-      int get_error();
       /// Get time spent on solving.
       /// @return time spent on solving in secs ( #time )
       double get_time();
+
       /// Get size of matrix
       virtual int get_matrix_size() = 0;
 
@@ -124,9 +124,9 @@ namespace Hermes
     protected:
       /// Solution vector.
       Scalar *sln;
-      /// \todo document (not sure what it do)
-      int error;
-      double time;  ///< Time spent on solving (in secs).
+
+      ///< Time spent on solving (in secs).
+      double time;
     };
 
     /// \brief Base class for defining interface for direct linear solvers.
@@ -164,8 +164,6 @@ namespace Hermes
       /// Set maximum number of iterations to perform.
       /// @param[in] iters - number of iterations
       void set_max_iters(int iters);
-
-      virtual void set_precond(const char *name) = 0;
 
       virtual void set_precond(Precond<Scalar> *pc) = 0;
 

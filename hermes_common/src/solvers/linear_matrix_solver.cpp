@@ -55,12 +55,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int LinearMatrixSolver<Scalar>::get_error()
-    {
-      return error;
-    }
-
-    template<typename Scalar>
     double LinearMatrixSolver<Scalar>::get_time()
     {
       return time;

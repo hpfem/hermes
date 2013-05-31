@@ -52,9 +52,6 @@ project(hermes)
     set(WITH_UMFPACK YES)
     # PARALUTION is chosen by default.
     set(WITH_PARALUTION YES)
-    # UMFPACK's longer integer.
-    # For some reason does not work in 64-bit.
-    set(UMFPACK_LONG_INT YES)
     
   ################################## CURRENTLY NOT SUPPORTED ###################################
   #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
@@ -126,10 +123,6 @@ project(hermes)
   if(${64_BIT} AND ${WIN32} AND ${WITH_TC_MALLOC})
     message(FATAL_ERROR "\nTC_malloc does not work in 64-bit on Windows.\nChange either WITH_TC_MALLOC or 64_BIT.")
   endif(${64_BIT} AND ${WIN32} AND ${WITH_TC_MALLOC})
-  
-  if(${64_BIT} AND ${WITH_UMFPACK})
-    set(UMFPACK_LONG_INT NO)
-  endif(${64_BIT} AND ${WITH_UMFPACK})
   
   ### END DEFAULT CONFIGURATION ###
     
