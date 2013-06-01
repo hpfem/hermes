@@ -271,6 +271,31 @@ namespace Hermes
       return new MethodNotOverridenException(*this);
     }
 
+    MethodNotImplementedException::MethodNotImplementedException(const char * name, ...) : Exception()
+    {
+      char* text = new char[1024];
+      sprintf(text, "Sorry, method not implemented so far: ");
+
+      // print the message
+      va_list arglist;
+      va_start(arglist, name);
+      vsprintf(text = text + strlen("Sorry, method not implemented so far: "), name, arglist);
+      va_end(arglist);
+      message = text - strlen("Sorry, method not implemented so far: ");
+    }
+
+    MethodNotImplementedException::MethodNotImplementedException(const MethodNotImplementedException&e)
+    {
+      char * msg = new char[strlen(e.what())+1];
+      strcpy(msg, e.what());
+      message = msg;
+    }
+
+    Exception* MethodNotImplementedException::clone()
+    {
+      return new MethodNotImplementedException(*this);
+    }
+
     MeshLoadFailureException::MeshLoadFailureException(const char * reason, ...) : Exception()
     {
       char * text = new char[strlen(reason)+1];
