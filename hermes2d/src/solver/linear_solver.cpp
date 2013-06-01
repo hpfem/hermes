@@ -81,6 +81,7 @@ namespace Hermes
       if(this->report_cache_hits_and_misses)
         this->zero_cache_hits_and_misses();
 
+      this->info("\tLinear: assembling...");
       Space<Scalar>::assign_dofs(this->dp->get_spaces());
 
       // Assemble the residual always and the jacobian when necessary (nonconstant jacobian, not reusable, ...).
@@ -91,6 +92,7 @@ namespace Hermes
       this->process_matrix_output(this->jacobian, 1);
       this->process_vector_output(this->residual, 1);
 
+      this->info("\tLinear: assembling done. Solving...");
       if(this->matrix_solver->solve())
       {
         if(this->do_UMFPACK_reporting)
@@ -117,7 +119,8 @@ namespace Hermes
       this->on_finish();
 
       this->tick();
-      this->info("\tLinear solver solution duration: %f s.", this->last());
+      this->info("\tLinear: done.");
+      this->info("\tLinear: solution duration: %f s.", this->last());
     }
 
     template class HERMES_API LinearSolver<double>;
