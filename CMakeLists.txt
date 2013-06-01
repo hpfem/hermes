@@ -13,7 +13,7 @@ project(hermes)
   # Global
     # Optional stacktrace
     set(WITH_STACKTRACE NO)
-    set(64_BIT YES)
+    set(64_BIT NO)
   
   # HermesCommon
     set(HERMES_COMMON_DEBUG     YES)
