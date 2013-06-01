@@ -190,4 +190,3 @@ jump_over:
 }
 
 template void qsort_int(int* pbase, size_t total_elems);
-template void qsort_int(__int64* pbase, size_t total_elems);
