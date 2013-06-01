@@ -65,10 +65,6 @@ namespace Hermes
   };
 
   /// Global instance used inside Hermes which is also accessible to users.
-#ifdef HERMES_COMMON
-  __declspec(dllexport) extern Hermes::Api HermesCommonApi;
-#else
-  __declspec(dllimport) extern Hermes::Api HermesCommonApi;
-#endif
+  HERMES_COMMON_API extern Hermes::Api HermesCommonApi;
 }
 #endif

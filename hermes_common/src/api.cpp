@@ -72,5 +72,9 @@ namespace Hermes
     this->parameters.find(param)->second->user_val = value;
   }
 
+#if defined(WIN32) || defined(_WINDOWS)
   __declspec(dllexport) Hermes::Api HermesCommonApi;
+#else
+  Hermes::Api HermesCommonApi;
+#endif
 }

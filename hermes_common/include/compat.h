@@ -51,6 +51,16 @@ FILE *fmemopen (void *buf, size_t size, const char *opentype);
   #endif
 #endif
 
+#if defined(WIN32) || defined(_WINDOWS)
+#ifdef HERMES_COMMON
+  #define HERMES_COMMON_API __declspec(dllexport)
+#else
+  #define HERMES_COMMON_API __declspec(dllimport)
+#endif
+#else
+  #define HERMES_COMMON_API 
+#endif
+
 #ifndef HAVE_STRCASECMP
 #define strcasecmp strcmp
 #endif
