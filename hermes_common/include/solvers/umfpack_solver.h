@@ -24,7 +24,7 @@
 #include "config.h"
 #ifdef WITH_UMFPACK
 #include "linear_matrix_solver.h"
-#include "matrix.h"
+#include "cs_matrix.h"
 
 extern "C"
 {
@@ -46,6 +46,7 @@ namespace Hermes
     template <typename Scalar>
     class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar>
     {
+      // Friends.
       template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::CSCIterator;
       template<typename T> friend SparseMatrix<T>*  create_matrix();
@@ -56,6 +57,7 @@ namespace Hermes
     class HERMES_API UMFPackVector : public Vector<Scalar>
     {
     public:
+      /// Default constructor.
       UMFPackVector();
       /// Constructor of vector with specific size.
       /// @param[in] size size of vector

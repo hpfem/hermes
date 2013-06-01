@@ -36,17 +36,15 @@ namespace Hermes
   namespace Algebra
   {
     template<typename Scalar>
-    UMFPackVector<Scalar>::UMFPackVector()
+    UMFPackVector<Scalar>::UMFPackVector() : Vector<Scalar>()
     {
       v = NULL;
       this->size = 0;
     }
 
     template<typename Scalar>
-    UMFPackVector<Scalar>::UMFPackVector(unsigned int size)
+    UMFPackVector<Scalar>::UMFPackVector(unsigned int size) : Vector<Scalar>(size), v(NULL)
     {
-      v = NULL;
-      this->size = size;
       this->alloc(size);
     }
 

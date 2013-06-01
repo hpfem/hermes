@@ -29,15 +29,34 @@ namespace Hermes
   {
     template<typename Scalar>
     ParalutionMatrix<Scalar>::ParalutionMatrix(ParalutionMatrixType type) 
-      : paralutionMatrixType(type)
+      : CSRMatrix<Scalar>(), paralutionMatrixType(type)
     {
-      this->paralutionMatrix = new paralution::LocalMatrix();
     }
 
     template<typename Scalar>
     ParalutionMatrix<Scalar>::~ParalutionMatrix()
     {
-      delete this->paralutionMatrix;
+      this->paralutionMatrix.Clear();
+    }
+
+    template<typename Scalar>
+    void ParalutionMatrix<Scalar>::free()
+    {
+      CSRMatrix<Scalar>::free();
+      this->paralutionMatrix.Clear();
+    }
+
+    template<typename Scalar>
+    void ParalutionMatrix<Scalar>::zero()
+    {
+      CSRMatrix<Scalar>::zero();
+      this->paralutionMatrix.Zeros();
+    }
+
+    template<typename Scalar>
+    paralution::LocalMatrix<Scalar>& ParalutionMatrix<Scalar>::get_paralutionMatrix()
+    {
+      return this->paralutionMatrix;
     }
 
     template<typename Scalar>
@@ -46,9 +65,9 @@ namespace Hermes
       assert(this->pages != NULL);
 
       // initialize the arrays Ap and Ai
-      int* Ap = new int[this->size + 1];
+      Ap = new int[this->size + 1];
       int aisize = this->get_num_indices();
-      int* Ai = new int[aisize];
+      Ai = new int[aisize];
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i;
@@ -65,207 +84,228 @@ namespace Hermes
 
       nnz = Ap[this->size];
 
-      switch(this->paralutionMatrixType)
-      {
-      case ParalutionMatrixTypeCSR :
-        this->paralutionMatrix->AllocateCSR("Paralution matrix", nnz, size, size);
-        break;
-      case ParalutionMatrixTypeMCSR :
-        this->paralutionMatrix->AllocateMCSR("Paralution matrix", nnz, size, size);
-        break;
-      case ParalutionMatrixTypeCOO :
-        this->paralutionMatrix->AllocateCOO("Paralution matrix", nnz, size, size);
-        break;
-      case ParalutionMatrixTypeDENSE :
-        this->paralutionMatrix->AllocateDENSE("Paralution matrix", nnz, size, size);
-        break;
-      }
+      Ax = new Scalar[nnz];
+      memset(Ax, 0, sizeof(Scalar) * nnz);
 
-      delete [] Ai;
-      delete [] Ap;
+      this->paralutionMatrix.SetDataPtrCSR(&this->Ap, &this->Ai, &this->Ax, "paralutionMatrix", this->nnz, this->size, this->size);
     }
 
+    
     template<typename Scalar>
-    void ParalutionMatrix<Scalar>::free()
-    {
-      this->paralutionMatrix->Clear();
-    }
-
-    template<typename Scalar>
-    Scalar ParalutionMatrix<Scalar>::get(unsigned int m, unsigned int n)
-    {
-      Scalar toReturn;
-      int row, column;
-      paralution::LocalMatrix<Scalar> localMatrix;
-      localMatrix.AllocateDENSE("temporary", 1, 1);
-      return this->paralutionMatrix->ExtractSubMatrix(m, n, 1, 1, &localMatrix);
-      localMatrix.CopyToCSR(&row, &col, &toReturn);
-      return toReturn;
-    }
-
-    template<typename Scalar>
-    void ParalutionMatrix<Scalar>::zero()
-    {
-      this->paralutionMatrix->Zeros();
-    }
-
-    template<typename Scalar>
-    void ParalutionMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar v)
-    {
-      this->paralutionMatrix->SetDataPtrCOO(&&n, &&m, &&v, "temporary", 1, 1, 1);
-    }
-
-    template<typename Scalar>
-    void ParalutionMatrix<Scalar>::add_to_diagonal(Scalar v)
-    {
-      this->paralutionMatrix->AddScalarDiagonal(v);
-    }
-
-    template<typename Scalar>
-    void ParalutionMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
-    {
-      // not implemented yet.
-    }
-
-    template<typename Scalar>
-    void ParalutionMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
-    {
-      this->paralutionMatrix->SetDataPtrCOO(&rows, &cols, &&m, mat, "temporary", 1, 1, 1);
-    }
-    template<typename Scalar>
-    bool ParalutionMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf")
+    ParalutionVector<Scalar>::ParalutionVector() : Vector<Scalar>(), v(NULL)
     {
     }
 
     template<typename Scalar>
-    unsigned int ParalutionMatrix<Scalar>::get_matrix_size() const
+    ParalutionVector<Scalar>::ParalutionVector(unsigned int size) : Vector<Scalar>(size), v(NULL)
     {
-    }
-    template<typename Scalar>
-    unsigned int ParalutionMatrix<Scalar>::get_nnz() const
-    {
-    }
-    template<typename Scalar>
-    double ParalutionMatrix<Scalar>::get_fill_in() const
-    {
+      this->alloc(size);
+      this->paralutionVector.SetDataPtr(&this->v, "paralutionVector", this->size);
     }
 
     template<typename Scalar>
-    void ParalutionMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+    void ParalutionVector<Scalar>::alloc(unsigned int n)
     {
-    }
-
-    template<typename Scalar>
-    void ParalutionMatrix<Scalar>::multiply_with_Scalar(Scalar value)
-    {
-    }
-
-    template<typename Scalar>
-    ParalutionVector<Scalar>::ParalutionVector()
-    {
+      free();
+      this->size = n;
+      v = new Scalar[n];
+      this->zero();
+      this->paralutionVector.SetDataPtr(&this->v, "vector", this->size);
     }
 
     template<typename Scalar>
     ParalutionVector<Scalar>::~ParalutionVector()
     {
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::alloc(unsigned int ndofs)
-    {
+      this->paralutionVector.Clear();
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::free()
     {
+      delete [] v;
+      v = NULL;
+      this->size = 0;
+      this->paralutionVector.Clear();
     }
 
     template<typename Scalar>
-    Scalar ParalutionVector<Scalar>::get(unsigned int idx)
+    paralution::LocalVector<Scalar>& ParalutionVector<Scalar>::get_paralutionVector()
     {
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::extract(Scalar *v) const
-    {
+      return this->paralutionVector;
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::zero()
     {
+      memset(v, 0, this->size * sizeof(Scalar));
+      this->paralutionVector.Zeros();
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::change_sign()
     {
+      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::set(unsigned int idx, Scalar y)
     {
+      v[idx] = y;
     }
 
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::add(unsigned int idx, Scalar y)
+    template<>
+    void ParalutionVector<double>::add(unsigned int idx, double y)
     {
+#pragma omp atomic
+      v[idx] += y;
     }
+
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
     {
+      for (unsigned int i = 0; i < n; i++)
+        v[idx[i]] += y[i];
+    }
+
+    template<typename Scalar>
+    Scalar ParalutionVector<Scalar>::get(unsigned int idx)
+    {
+      return v[idx];
+    }
+
+    template<typename Scalar>
+    void ParalutionVector<Scalar>::extract(Scalar *v) const
+    {
+      memcpy(v, this->v, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::add_vector(Scalar* vec)
     {
+      for (unsigned int i = 0; i < this->length(); i++)
+        this->v[i] += vec[i];
     }
 
-    template<typename Scalar>
-    bool ParalutionVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf")
+    template<>
+    bool ParalutionVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
+      switch (fmt)
+      {
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
+        for (unsigned int i = 0; i < this->size; i++)
+        {
+          Hermes::Helpers::fprint_num(file, v[i], number_format);
+          fprintf(file, "\n");
+        }
+        fprintf(file, " ];\n");
+        return true;
+
+      case DF_HERMES_BIN:
+        {
+          hermes_fwrite("HERMESR\001", 1, 8, file);
+          int ssize = sizeof(double);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(v, sizeof(double), this->size, file);
+          return true;
+        }
+
+      case DF_PLAIN_ASCII:
+        {
+          fprintf(file, "\n");
+          for (unsigned int i = 0; i < size; i++)
+          {
+            Hermes::Helpers::fprint_num(file, v[i], number_format);
+            fprintf(file, "\n");
+          }
+
+          return true;
+        }
+
+      default:
+        return false;
+      }
     }
+
+    template class HERMES_API ParalutionMatrix<double>;
+    template class HERMES_API ParalutionVector<double>;
   }
   namespace Solvers
   {
-    template <typename Scalar>
-    ParalutionLinearMatrixSolver<Scalar>::ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs)
+    template<typename Scalar>
+    ParalutionLinearMatrixSolver<Scalar>::ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : IterSolver<Scalar>(), matrix(matrix), rhs(rhs)
     {
     }
 
-    template <typename Scalar>
+    template<typename Scalar>
     ParalutionLinearMatrixSolver<Scalar>::~ParalutionLinearMatrixSolver()
     {
     }
 
-    template <typename Scalar>
+    template<typename Scalar>
     bool ParalutionLinearMatrixSolver<Scalar>::solve()
     {
+      paralution::init_paralution();
+      paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
+      paralution::info_paralution();
+
+      this->matrix->get_paralutionMatrix().MoveToAccelerator();
+      rhs->get_paralutionVector().MoveToAccelerator();
+
+      assert(matrix != NULL);
+      assert(rhs != NULL);
+      assert(matrix->get_size() == rhs->length());
+
+      this->paralutionSolver.SetOperator(this->matrix->get_paralutionMatrix());
+      this->paralutionSolver.SetPreconditioner(this->paralutionPreconditioner);
+
+      this->paralutionSolver.Build();
+
+      paralution::LocalVector<Scalar> x;
+      x.Allocate("x", matrix->get_size());
+      x.MoveToAccelerator();
+
+      this->paralutionSolver.Solve(rhs->get_paralutionVector(), &x);
+
+      x.LeaveDataPtr(&sln);
+
+      paralution::stop_paralution();
+      return true;
     }
 
-    template <typename Scalar>
+    template<typename Scalar>
     int ParalutionLinearMatrixSolver<Scalar>::get_matrix_size()
     {
+      return matrix->get_size();
     }
 
-    template <typename Scalar>
+    template<typename Scalar>
     int ParalutionLinearMatrixSolver<Scalar>::get_num_iters()
     {
+      return 0;
     }
 
-    template <typename Scalar>
+    template<typename Scalar>
     double ParalutionLinearMatrixSolver<Scalar>::get_residual()
     {
+      return 0.;
     }
 
-    template <typename Scalar>
+    template<typename Scalar>
     void ParalutionLinearMatrixSolver<Scalar>::set_precond(Precond<Scalar> *pc)
     {
     }
+
+    template class HERMES_API ParalutionLinearMatrixSolver<double>;
   }
 }
 #endif

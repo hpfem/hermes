@@ -26,6 +26,7 @@
 #include "petsc_solver.h"
 #include "mumps_solver.h"
 #include "aztecoo_solver.h"
+#include "paralution_solver.h"
 #include "api.h"
 
 using namespace Hermes::Algebra;
@@ -66,17 +67,17 @@ namespace Hermes
       set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
     }
 
-    template<typename Scalar>
-    LinearMatrixSolver<Scalar>* create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs)
+    template<>
+    HERMES_API LinearMatrixSolver<double>* create_linear_solver(Matrix<double>* matrix, Vector<double>* rhs)
     {
-      Vector<Scalar>* rhs_dummy = NULL;
+      Vector<double>* rhs_dummy = NULL;
       switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
       case Hermes::SOLVER_AZTECOO:
         {
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
-          if(rhs != NULL) return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-          else return new AztecOOSolver<Scalar>(static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
+          if(rhs != NULL) return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
+          else return new AztecOOSolver<double>(static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("AztecOO not installed.");
 #endif
@@ -85,8 +86,8 @@ namespace Hermes
       case Hermes::SOLVER_AMESOS:
         {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
-          if(rhs != NULL) return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs));
-          else return new AmesosSolver<Scalar>("Amesos_Klu", static_cast<EpetraMatrix<Scalar>*>(matrix), static_cast<EpetraVector<Scalar>*>(rhs_dummy));
+          if(rhs != NULL) return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs));
+          else return new AmesosSolver<double>("Amesos_Klu", static_cast<EpetraMatrix<double>*>(matrix), static_cast<EpetraVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("Amesos not installed.");
 #endif
@@ -95,8 +96,8 @@ namespace Hermes
       case Hermes::SOLVER_MUMPS:
         {
 #ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs));
-          else return new MumpsSolver<Scalar>(static_cast<MumpsMatrix<Scalar>*>(matrix), static_cast<MumpsVector<Scalar>*>(rhs_dummy));
+          if(rhs != NULL) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<MumpsVector<double>*>(rhs));
+          else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<MumpsVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
@@ -105,8 +106,8 @@ namespace Hermes
       case Hermes::SOLVER_PETSC:
         {
 #ifdef WITH_PETSC
-          if(rhs != NULL) return new PetscLinearMatrixSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs));
-          else return new PetscLinearMatrixSolver<Scalar>(static_cast<PetscMatrix<Scalar>*>(matrix), static_cast<PetscVector<Scalar>*>(rhs_dummy));
+          if(rhs != NULL) return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs));
+          else return new PetscLinearMatrixSolver<double>(static_cast<PetscMatrix<double>*>(matrix), static_cast<PetscVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("PETSc not installed.");
 #endif
@@ -115,18 +116,108 @@ namespace Hermes
       case Hermes::SOLVER_UMFPACK:
         {
 #ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs));
-          else return new UMFPackLinearMatrixSolver<Scalar>(static_cast<UMFPackMatrix<Scalar>*>(matrix), static_cast<UMFPackVector<Scalar>*>(rhs_dummy));
+          if(rhs != NULL) return new UMFPackLinearMatrixSolver<double>(static_cast<UMFPackMatrix<double>*>(matrix), static_cast<UMFPackVector<double>*>(rhs));
+          else return new UMFPackLinearMatrixSolver<double>(static_cast<UMFPackMatrix<double>*>(matrix), static_cast<UMFPackVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_PARALUTION:
+        {
+#ifdef WITH_PARALUTION
+          return new ParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
+#else
+          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
           break;
         }
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs));
-          else return new SuperLUSolver<Scalar>(static_cast<SuperLUMatrix<Scalar>*>(matrix), static_cast<SuperLUVector<Scalar>*>(rhs_dummy));
+          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<SuperLUMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs));
+          else return new SuperLUSolver<double>(static_cast<SuperLUMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs_dummy));
+#else
+          throw Hermes::Exceptions::Exception("SuperLU was not installed.");
+#endif
+          break;
+        }
+      default:
+        throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
+      }
+      return NULL;
+    }
+
+    template<>
+    HERMES_API LinearMatrixSolver<std::complex<double> >* create_linear_solver(Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs)
+    {
+      Vector<std::complex<double> >* rhs_dummy = NULL;
+      switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      {
+      case Hermes::SOLVER_AZTECOO:
+        {
+#if defined HAVE_AZTECOO && defined HAVE_EPETRA
+          if(rhs != NULL) return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
+          else return new AztecOOSolver<std::complex<double> >(static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
+#else
+          throw Hermes::Exceptions::Exception("AztecOO not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_AMESOS:
+        {
+#if defined HAVE_AMESOS && defined HAVE_EPETRA
+          if(rhs != NULL) return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs));
+          else return new AmesosSolver<std::complex<double> >("Amesos_Klu", static_cast<EpetraMatrix<std::complex<double> >*>(matrix), static_cast<EpetraVector<std::complex<double> >*>(rhs_dummy));
+#else
+          throw Hermes::Exceptions::Exception("Amesos not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_MUMPS:
+        {
+#ifdef WITH_MUMPS
+          if(rhs != NULL) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<MumpsVector<std::complex<double> >*>(rhs));
+          else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<MumpsVector<std::complex<double> >*>(rhs_dummy));
+#else
+          throw Hermes::Exceptions::Exception("MUMPS was not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_PETSC:
+        {
+#ifdef WITH_PETSC
+          if(rhs != NULL) return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs));
+          else return new PetscLinearMatrixSolver<std::complex<double> >(static_cast<PetscMatrix<std::complex<double> >*>(matrix), static_cast<PetscVector<std::complex<double> >*>(rhs_dummy));
+#else
+          throw Hermes::Exceptions::Exception("PETSc not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_UMFPACK:
+        {
+#ifdef WITH_UMFPACK
+          if(rhs != NULL) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<UMFPackMatrix<std::complex<double> >*>(matrix), static_cast<UMFPackVector<std::complex<double> >*>(rhs));
+          else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<UMFPackMatrix<std::complex<double> >*>(matrix), static_cast<UMFPackVector<std::complex<double> >*>(rhs_dummy));
+#else
+          throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_PARALUTION:
+        {
+#ifdef WITH_PARALUTION
+          throw Hermes::Exceptions::Exception("PARALUTION only works for real problems.");
+#else
+          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_SUPERLU:
+        {
+#ifdef WITH_SUPERLU
+          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<SuperLUMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs));
+          else return new SuperLUSolver<std::complex<double> >(static_cast<SuperLUMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
@@ -155,10 +246,6 @@ namespace Hermes
     {
       this->max_iters = iters;
     }
-
-    template HERMES_API LinearMatrixSolver<double>*  create_linear_solver(Matrix<double>* matrix, Vector<double>* rhs);
-
-    template HERMES_API LinearMatrixSolver<std::complex<double> >*  create_linear_solver(Matrix<std::complex<double> >* matrix, Vector<std::complex<double> >* rhs);
 
     template class HERMES_API LinearMatrixSolver<double>;
     template class HERMES_API LinearMatrixSolver<std::complex<double> >;

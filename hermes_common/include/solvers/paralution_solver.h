@@ -24,7 +24,7 @@
 #include "config.h"
 #ifdef WITH_PARALUTION
 #include "linear_matrix_solver.h"
-#include "matrix.h"
+#include "cs_matrix.h"
 
 #include "paralution.hpp"
 
@@ -51,16 +51,26 @@ namespace Hermes
 
     /// \brief General Paralution matrix.
     template <typename Scalar>
-    class HERMES_API ParalutionMatrix : public CSCMatrix<Scalar>
+    class HERMES_API ParalutionMatrix : public CSRMatrix<Scalar>
     {
+    public:
       /// \brief Default constructor.
       ParalutionMatrix(ParalutionMatrixType type = ParalutionMatrixTypeCSR);
       virtual ~ParalutionMatrix();
-      template<typename T> friend SparseMatrix<T>*  create_matrix();
+
+      virtual void free();
+      virtual void zero();
+      virtual void alloc();
+
+      paralution::LocalMatrix<Scalar>& get_paralutionMatrix();
 
     private:
-      paralution::LocalMatrix<Scalar>* paralutionMatrix;
+      paralution::LocalMatrix<Scalar> paralutionMatrix;
       ParalutionMatrixType paralutionMatrixType;
+
+      // Friends.
+      template<typename T> friend SparseMatrix<T>*  create_matrix();
+      template<typename T> friend SparseMatrix<T>*  create_matrix();
     };
 
     /// \brief Class representing the vector for UMFPACK.
@@ -68,7 +78,11 @@ namespace Hermes
     class HERMES_API ParalutionVector : public Vector<Scalar>
     {
     public:
+      /// Default constructor.
       ParalutionVector();
+      /// Constructor of vector with specific size.
+      /// @param[in] size size of vector
+      ParalutionVector(unsigned int size);
       virtual ~ParalutionVector();
       virtual void alloc(unsigned int ndofs);
       virtual void free();
@@ -83,8 +97,11 @@ namespace Hermes
       virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
     
+      paralution::LocalVector<Scalar>& get_paralutionVector();
+
     private:
-      paralution::LocalVector<Scalar>* paralutionVector;
+      Scalar *v;
+      paralution::LocalVector<Scalar> paralutionVector;
     };
   }
 
@@ -112,9 +129,16 @@ namespace Hermes
       virtual void set_precond(Precond<Scalar> *pc);
 
       /// Matrix to solve.
-      ParalutionMatrix<Scalar> *m;
+      ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
       ParalutionVector<Scalar> *rhs;
+      
+    private:
+      // Linear Solver
+      paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar> paralutionSolver;
+
+      // Preconditioner
+      paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar> paralutionPreconditioner;
 
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
     };

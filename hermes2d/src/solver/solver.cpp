@@ -72,6 +72,7 @@ namespace Hermes
       this->jacobian = create_matrix<Scalar>();
       this->residual = create_vector<Scalar>();
       this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual);
+
       this->set_verbose_output(true);
       this->sln_vector = NULL;
 

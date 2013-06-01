@@ -28,6 +28,7 @@
 #include "solvers/petsc_solver.h"
 #include "solvers/umfpack_solver.h"
 #include "solvers/superlu_solver.h"
+#include "solvers/paralution_solver.h"
 #include "solvers/precond.h"
 #include "solvers/precond_ifpack.h"
 #include "solvers/precond_ml.h"
