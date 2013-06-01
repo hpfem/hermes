@@ -165,7 +165,7 @@ namespace Hermes
       virtual void add_as_block(unsigned int i, unsigned int j, CSMatrix<Scalar>* mat);
 
       // Duplicates a matrix (including allocation).
-      virtual CSMatrix* duplicate();
+      virtual CSMatrix<Scalar>* duplicate();
     };
 
     /// \brief General CSR Matrix class.
@@ -204,7 +204,7 @@ namespace Hermes
       virtual void add_as_block(unsigned int i, unsigned int j, CSMatrix<Scalar>* mat);
 
       // Duplicates a matrix (including allocation).
-      virtual CSMatrix* duplicate();
+      virtual CSMatrix<Scalar>* duplicate();
     };
   }
   
