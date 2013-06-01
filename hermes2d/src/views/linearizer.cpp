@@ -581,7 +581,6 @@ namespace Hermes
           meshes.push_back(ydisp->get_mesh());
 
         // Parallelization
-        int num_threads_used = Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads);
         MeshFunction<double>*** fns = new MeshFunction<double>**[num_threads_used];
         for(unsigned int i = 0; i < num_threads_used; i++)
         {
