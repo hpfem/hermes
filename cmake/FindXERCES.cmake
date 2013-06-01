@@ -9,7 +9,7 @@ FIND_PATH(XERCES_INCLUDE_DIR xercesc/sax/InputSource.hpp xercesc/dom/DOMDocument
 if(64_BIT)
     FIND_LIBRARY(XERCES_LIBRARY ${XERCES_LIBRARY_NAMES} ${XERCES_ROOT}/lib/x64 /usr/lib64 /usr/local/lib64)
 else(64_BIT) 
-    FIND_LIBRARY(XERCES_LIBRARY ${XERCES_LIBRARY_NAMES} ${XERCES_ROOT}/lib/x64 /usr/lib64 /usr/local/lib)
+    FIND_LIBRARY(XERCES_LIBRARY ${XERCES_LIBRARY_NAMES} ${XERCES_ROOT}/lib /usr/lib /usr/local/lib)
 endif(64_BIT)
     
 # Report the found libraries, quit with fatal error if any required library has not been found.
