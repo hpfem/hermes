@@ -782,9 +782,9 @@ namespace Hermes
     template<typename Scalar>
     void CSCIterator<Scalar>::get_current_position(int& i, int& j, Scalar& val)
     {
-      i = Ai[Ai_pos];
-      j = Ap_pos;
-      val = Ax[Ai_pos];
+      i = this->Ai[this->Ai_pos];
+      j = this->Ap_pos;
+      val = this->Ax[this->Ai_pos];
     }
 
     template<typename Scalar>
@@ -809,9 +809,9 @@ namespace Hermes
     template<typename Scalar>
     void CSRIterator<Scalar>::get_current_position(int& i, int& j, Scalar& val)
     {
-      i = Ai[Ai_pos];
-      j = Ap_pos;
-      val = Ax[Ai_pos];
+      i = this->Ai[this->Ai_pos];
+      j = this->Ap_pos;
+      val = this->Ax[this->Ai_pos];
     }
 
     template<typename Scalar>
