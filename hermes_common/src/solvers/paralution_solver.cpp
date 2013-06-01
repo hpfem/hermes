@@ -65,27 +65,27 @@ namespace Hermes
       assert(this->pages != NULL);
 
       // initialize the arrays Ap and Ai
-      Ap = new int[this->size + 1];
+      this->Ap = new int[this->size + 1];
       int aisize = this->get_num_indices();
-      Ai = new int[aisize];
+      this->Ai = new int[aisize];
 
       // sort the indices and remove duplicities, insert into Ai
       unsigned int i;
       int pos = 0;
       for (i = 0; i < this->size; i++)
       {
-        Ap[i] = pos;
-        pos += this->sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
+        this->Ap[i] = pos;
+        pos += this->sort_and_store_indices(this->pages[i], this->Ai + pos, this->Ai + aisize);
       }
-      Ap[i] = pos;
+      this->Ap[i] = pos;
 
       delete [] this->pages;
       this->pages = NULL;
 
-      nnz = Ap[this->size];
+      this->nnz = this->Ap[this->size];
 
-      Ax = new Scalar[nnz];
-      memset(Ax, 0, sizeof(Scalar) * nnz);
+      this->Ax = new Scalar[this->nnz];
+      memset(this->Ax, 0, sizeof(Scalar) * this->nnz);
 
       this->paralutionMatrix.SetDataPtrCSR(&this->Ap, &this->Ai, &this->Ax, "paralutionMatrix", this->nnz, this->size, this->size);
     }
@@ -276,9 +276,11 @@ namespace Hermes
 
       this->paralutionSolver.Solve(rhs->get_paralutionVector(), &x);
 
-      x.LeaveDataPtr(&sln);
+      x.LeaveDataPtr(&this->sln);
 
       paralution::stop_paralution();
+
+      x.Clear();
       return true;
     }
 
