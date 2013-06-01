@@ -142,7 +142,7 @@ namespace Hermes
         this->rhs_number_format = number_format;
       }
 
-      Parallel::Parallel() : num_threads_used(Hermes2DApi.get_integral_param_value(Hermes::Hermes2D::numThreads))
+      Parallel::Parallel() : num_threads_used(HermesCommonApi.get_integral_param_value(numThreads))
       {
       }
 
