@@ -22,6 +22,11 @@
 #     set(PETSC_ROOT /opt/petsc/petsc-3.1-p7)
 #     set(PETSC_ARCH linux-cxx)
 #
+
+IF(WIN32)
+  MESSAGE(FATAL_ERROR "PETSc only supported on Linux.")
+ENDIF(WIN32)
+
 SET(COMMON_PETSC_INCLUDE_DIRS
     /usr/lib/petscdir/3.1/include
     /usr/include

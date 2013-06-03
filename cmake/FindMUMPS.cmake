@@ -11,6 +11,11 @@
 
 # CMake maybe looks into the following paths by itself, but specifying them 
 # explicitly doesn't hurt either.
+
+IF(WIN32)
+  MESSAGE(FATAL_ERROR "MUMPS only supported on Linux.")
+ENDIF(WIN32)
+
 SET(MUMPS_INCLUDE_SEARCH_PATH
 	/usr/include
 	/usr/include/mumps_seq

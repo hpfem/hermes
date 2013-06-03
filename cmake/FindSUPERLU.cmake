@@ -12,7 +12,11 @@ IF ("$ENV{MY_SUPERLU_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_SUPERLU_INC_DIRS}" STREQ
     # Alternatively, you may simply specify SUPERLU_ROOT in CMake.vars. This is 
     # the traditional way used also in the spkg files from the hpfem/solvers
     # repository and in the Hermes spkg.
-    SET(MY_SUPERLU_LIB_DIRS ${SUPERLU_ROOT}/lib ${SUPERLU_ROOT}/lib/x64)
+    IF(WIN64)
+      SET(MY_SUPERLU_LIB_DIRS ${SUPERLU_ROOT}/lib/x64 ${SUPERLU_ROOT}/lib)
+    ELSE(WIN64)
+      SET(MY_SUPERLU_LIB_DIRS ${SUPERLU_ROOT}/lib)
+    ENDIF(WIN64)
     SET(MY_SUPERLU_INC_DIRS ${SUPERLU_ROOT}/include)
   ENDIF (NOT MY_SUPERLU_LIB_DIRS OR NOT MY_SUPERLU_INC_DIRS)
 ELSE ("$ENV{MY_SUPERLU_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_SUPERLU_INC_DIRS}" STREQUAL "")

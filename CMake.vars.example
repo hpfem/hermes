@@ -1,6 +1,6 @@
 # This is a sample CMake.vars file for Hermes.
 #set(H2D_WITH_GLUT NO)
-#set(H2D_WITH_VIEWER_GUI YES)
+#set(WITH_TRILINOS NO)
 
 # Some search paths.
 if (WIN32)
@@ -10,9 +10,11 @@ if (WIN32)
   set(XERCES_ROOT "d:/hpfem/hermes/dependencies")
   set(XSD_ROOT "d:/hpfem/hermes/dependencies")
   set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies")
+  set(PARALUTION_ROOT "d:/hpfem/hermes/dependencies")
   set(TCMALLOC_ROOT "d:/hpfem/hermes/dependencies")
   set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies")
   set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies")
+  
   # Target (installation) path.
   set(TARGET_ROOT "d:/hpfem/hermes/dependencies")
 else()
@@ -29,4 +31,3 @@ if (WIN32)
 else() 
   set(TRILINOS_ROOT "~/solvers/trilinos")
 endif()
-SET(WITH_TRILINOS NO)

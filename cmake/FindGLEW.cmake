@@ -2,16 +2,11 @@
 # GLEW
 #
 
-if(MSVC)
-	set(GLEW_LIBRARY_NAME glew32)
-else(MSVC)
-	set(GLEW_LIBRARY_NAME GLEW)
-endif(MSVC)
+if(WIN64)
+  FIND_LIBRARY(GLEW_LIBRARY glew32 GLEW ${GLEW_ROOT}/lib/x64 ${GLEW_ROOT}/lib)
+else(WIN64)  
+  FIND_LIBRARY(GLEW_LIBRARY glew32 GLEW ${GLEW_ROOT}/lib /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64)
+endif(WIN64)
 
-if(64_BIT)
-  FIND_LIBRARY(GLEW_LIBRARY ${GLEW_LIBRARY_NAME} ${GLEW_ROOT}/lib/x64 /usr/lib64 /usr/local/lib64)
-else(64_BIT)  
-  FIND_LIBRARY(GLEW_LIBRARY ${GLEW_LIBRARY_NAME} ${GLEW_ROOT}/lib /usr/lib /usr/local/lib)
-endif(64_BIT)
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLEW DEFAULT_MSG GLEW_LIBRARY)

@@ -56,11 +56,6 @@ project(hermes2d)
     add_definitions(-DNOGLUT)
   endif(H2D_WITH_GLUT)
 
-  if(H2D_WITH_VIEWER_GUI)
-    find_package(ANTTWEAKBAR REQUIRED)
-    include_directories(${ANTTWEAKBAR_INCLUDE_DIR})
-  endif(H2D_WITH_VIEWER_GUI)
-  
   # Mesh format.
   if(WITH_HDF5)
     find_package(HDF5 REQUIRED)

@@ -16,12 +16,12 @@ SET(TRILINOS_INCLUDE_SEARCH_PATH
   ${TRILINOS_ROOT}/include
 )
 
-SET(TRILINOS_LIB_SEARCH_PATH
-	/usr/lib64
-	/usr/lib
-	/usr/local/lib/
-        ${TRILINOS_ROOT}/lib
-)
+if(WIN64)
+  SET(TRILINOS_LIB_SEARCH_PATH ${TRILINOS_ROOT}/lib/x64 ${TRILINOS_ROOT}/lib)
+else(WIN64)
+  SET(TRILINOS_LIB_SEARCH_PATH /usr/lib64 /usr/lib /usr/local/lib/ ${TRILINOS_ROOT}/lib)
+endif(WIN64)
+
 FIND_PATH(AMESOS_INCLUDE_PATH       Amesos.h                       ${TRILINOS_INCLUDE_SEARCH_PATH})
 FIND_PATH(AZTECOO_INCLUDE_PATH      AztecOO.h                      ${TRILINOS_INCLUDE_SEARCH_PATH})
 FIND_PATH(EPETRA_INCLUDE_PATH       Epetra_Object.h                ${TRILINOS_INCLUDE_SEARCH_PATH})

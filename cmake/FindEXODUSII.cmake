@@ -10,26 +10,20 @@ SET(NETCDF_INCLUDE_SEARCH_PATH
 	/usr/include
 	/usr/local/include/
 )
- 
-SET(NETCDF_LIB_SEARCH_PATH
-	${NETCDF_ROOT}/lib
-	/usr/lib64
-	/usr/lib
-	/usr/local/lib/
-)
- 
+
 SET(EXODUSII_INCLUDE_SEARCH_PATH
 	${EXODUSII_ROOT}/include
 	/usr/include
 	/usr/local/include/
 )
  
-SET(EXODUSII_LIB_SEARCH_PATH
-	${EXODUSII_ROOT}/lib
-	/usr/lib64 
-	/usr/lib 
-	/usr/local/lib/ 
-)
+IF(WIN64)
+  SET(NETCDF_LIB_SEARCH_PATH ${NETCDF_ROOT}/lib/x64 ${NETCDF_ROOT}/lib /usr/lib64 /usr/lib /usr/local/lib/)
+  SET(EXODUSII_LIB_SEARCH_PATH ${EXODUSII_ROOT}/lib/x64 ${EXODUSII_ROOT}/lib /usr/lib64 /usr/lib /usr/local/lib/)
+ELSE(WIN64)
+  SET(NETCDF_LIB_SEARCH_PATH ${NETCDF_ROOT}/lib /usr/lib64 /usr/lib /usr/local/lib/)
+  SET(EXODUSII_LIB_SEARCH_PATH ${EXODUSII_ROOT}/lib /usr/lib64 /usr/lib /usr/local/lib/)
+ENDIF(WIN64)
  
 FIND_PATH(EXODUSII_INCLUDE_PATH exodusII.h ${EXODUSII_INCLUDE_SEARCH_PATH})
 FIND_PATH(NETCDF_INCLUDE_PATH netcdf.h ${NETCDF_INCLUDE_SEARCH_PATH})

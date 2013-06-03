@@ -12,11 +12,11 @@ IF ("$ENV{MY_UMFPACK_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_UMFPACK_INC_DIRS}" STREQ
     # Alternatively, you may simply specify UMFPACK_ROOT in CMake.vars. This is 
     # the traditional way used also in the spkg files from the hpfem/solvers
     # repository and in the Hermes spkg.
-    if(64_BIT)
-        SET(MY_UMFPACK_LIB_DIRS ${UMFPACK_ROOT}/lib/x64) 
-    else(64_BIT) 
+    if(WIN64)
+        SET(MY_UMFPACK_LIB_DIRS ${UMFPACK_ROOT}/lib/x64 ${UMFPACK_ROOT}/lib) 
+    else(WIN64) 
         SET(MY_UMFPACK_LIB_DIRS ${UMFPACK_ROOT}/lib) 
-    endif(64_BIT)
+    endif(WIN64)
     SET(MY_UMFPACK_INC_DIRS ${UMFPACK_ROOT}/include)
   ENDIF (NOT MY_UMFPACK_LIB_DIRS OR NOT MY_UMFPACK_INC_DIRS)
 ELSE ("$ENV{MY_UMFPACK_LIB_DIRS}" STREQUAL "" OR "$ENV{MY_UMFPACK_INC_DIRS}" STREQUAL "")
@@ -32,7 +32,8 @@ FIND_PATH(AMD_INCLUDE_DIR     amd.h     /usr/include /usr/local/include/AMD /usr
 FIND_LIBRARY(UMFPACK_LIBRARY  NAMES libumfpack umfpack  PATHS ${MY_UMFPACK_LIB_DIRS}  NO_DEFAULT_PATH) 
 FIND_LIBRARY(SSC_LIBRARY  NAMES libsuitesparseconfig suitesparseconfig  PATHS ${MY_UMFPACK_LIB_DIRS}  NO_DEFAULT_PATH) 
 FIND_LIBRARY(AMD_LIBRARY      NAMES libamd amd          PATHS ${MY_UMFPACK_LIB_DIRS}  NO_DEFAULT_PATH)
-FIND_LIBRARY(UMFPACK_LIBRARY  NAMES libumfpack umfpack  PATHS /usr/lib /usr/local/lib/UMFPACK) 
+
+FIND_LIBRARY(UMFPACK_LIBRARY  NAMES libumfpack umfpack  PATHS /usr/lib /usr/local/lib/UMFPACK)
 FIND_LIBRARY(SSC_LIBRARY  NAMES libsuitesparseconfig suitesparseconfig  PATHS /usr/lib /usr/local/lib/UMFPACK)
 FIND_LIBRARY(AMD_LIBRARY      NAMES libamd amd          PATHS /usr/lib /usr/local/lib/AMD)
 
