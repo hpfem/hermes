@@ -57,8 +57,6 @@ static const int H2D_TRF_IDENTITY = H2D_TRF_QUAD_NUM;
 #define H2DRS_INTR_GIP_ORDER 20 ///< An integration order used to integrate while evaluating a candidate. \internal \ingroup g_selectors
 #define H2DRS_MAX_ORDER_INC 1 ///< Maximum increase of an order in candidates. \ingroup g_selectors
 
-#define H2DRS_SCORE_DIFF_ZERO 1E-13 ///< A threshold of difference between scores. Anything below this values is considered zero. \internal \ingroup g_selectors
-
 #define H2DRS_ORDER_ANY -1 ///< Any order. Used as a wildcard to indicate that a given order can by any valid order. \internal \ingroup g_selectors
 
 # define H2DRS_DEFAULT_ERR_WEIGHT_H 2.0 ///< A default multiplicative coefficient of an error of a H-candidate. \ingroup g_selectors
