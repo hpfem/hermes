@@ -263,12 +263,14 @@ namespace Hermes
         Solution<Scalar>::vector_to_solutions(this->residual, this->dp->get_spaces(), solutions, dir_lift_false);
 
         // Calculate the norm.
-        return Global<Scalar>::calc_norms(solutionsPtrs);
+
+        DefaultNormCalculator<Scalar, HERMES_L2_NORM> normCalculator(solutions.size());
+        return normCalculator.calculate_norms(solutions);
       }
       else
       {
         // Calculate the l2-norm of residual vector, this is the traditional way.
-        return Global<Scalar>::get_l2_norm(this->residual);
+        return get_l2_norm(this->residual);
       }
     }
 
@@ -359,6 +361,10 @@ namespace Hermes
       // Optionally zero cache hits and misses.
       if(this->report_cache_hits_and_misses)
         this->zero_cache_hits_and_misses();
+
+      // UMFPACK reporting.
+      if(this->do_UMFPACK_reporting)
+        memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
     }
 
     template<typename Scalar>
@@ -422,15 +428,17 @@ namespace Hermes
     bool NewtonSolver<Scalar>::do_initial_step_return_finished(Scalar* coeff_vec)
     {
       // Store the initial norm.
-      this->get_parameter_value(p_solution_norms).push_back(Global<Scalar>::get_l2_norm(coeff_vec, this->ndof));
+      this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
 
       // Assemble the system.
       if(this->jacobian_reusable && this->reuse_jacobian_values())
       {
+        this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
         this->dp->assemble(coeff_vec, this->residual);
       }
       else
       {
+        this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
         this->dp->assemble(coeff_vec, this->jacobian, this->residual);
         this->jacobian_reusable = true;
       }
@@ -485,6 +493,17 @@ namespace Hermes
     {
       if(this->matrix_solver->solve())
       {
+        if(this->do_UMFPACK_reporting)
+        {
+          UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
+          if(this->matrix_solver->get_used_factorization_scheme() != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+          {
+            this->UMFPACK_reporting_data[this->FactorizationSize] = std::max(this->UMFPACK_reporting_data[this->FactorizationSize], umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT]);
+            this->UMFPACK_reporting_data[this->PeakMemoryUsage] += umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+            this->UMFPACK_reporting_data[this->Flops] += umfpack_matrix_solver->Info[UMFPACK_FLOPS];
+          }
+        }
+
         // store the previous coeff_vec to coeff_vec_back.
         memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
 
@@ -494,14 +513,14 @@ namespace Hermes
         double current_damping_coefficient = this->get_parameter_value(this->p_damping_coefficients).back();
 
         // store the solution norm change.
-        this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * Global<Scalar>::get_l2_norm(sln_vector_local, ndof);
+        this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(sln_vector_local, ndof);
 
         // add the increment to the solution.
         for (int i = 0; i < ndof; i++)
           coeff_vec[i] += current_damping_coefficient * sln_vector_local[i];
 
         // store the solution norm.
-        this->get_parameter_value(p_solution_norms).push_back(Global<Scalar>::get_l2_norm(coeff_vec, this->ndof));
+        this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
       }
       else
       {
@@ -594,7 +613,7 @@ namespace Hermes
               coeff_vec[i] = coeff_vec_back[i] + factor * (coeff_vec[i] - coeff_vec_back[i]);
 
             // Add new solution norm.
-            solution_norms.push_back(Global<Scalar>::get_l2_norm(coeff_vec, this->ndof));
+            solution_norms.push_back(get_l2_norm(coeff_vec, this->ndof));
           }
         }
         while (!residual_norm_drop);

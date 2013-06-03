@@ -102,7 +102,7 @@ namespace Hermes
         cache_searches_ = this->cache_searches;
         cache_record_found_ = this->cache_record_found;
         cache_record_found_reinit_ = this->cache_record_found_reinit;
-        cache_record_not_found_ = this->cache_searches;
+        cache_record_not_found_ = this->cache_record_not_found;
       }
       
       void DiscreteProblemCacheSettings::add_cache_hits_and_misses(DiscreteProblemCacheSettings* other)
@@ -110,7 +110,7 @@ namespace Hermes
         this->cache_searches += other->cache_searches;
         this->cache_record_found += other->cache_record_found;
         this->cache_record_found_reinit += other->cache_record_found_reinit;
-        this->cache_record_not_found += other->cache_searches;
+        this->cache_record_not_found += other->cache_record_not_found;
       }
 
       void DiscreteProblemCacheSettings::zero_cache_hits_and_misses()
@@ -148,36 +148,70 @@ namespace Hermes
       template class HERMES_API DiscreteProblemMatrixVector<std::complex<double> >;
     }
 
-    int init_geometry_points(RefMap* reference_mapping, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
+    int init_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int order, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      double3* pt = reference_mapping->get_quad_2d()->get_points(order, reference_mapping->get_active_element()->get_mode());
-      int np = reference_mapping->get_quad_2d()->get_num_points(order, reference_mapping->get_active_element()->get_mode());
+      int i = 0;
+      RefMap* rep_reference_mapping = NULL;
+      for(int i = 0; i < reference_mapping_count; i++)
+      {
+        if(reference_mapping[i])
+          if(reference_mapping[i]->get_active_element())
+          {
+            rep_reference_mapping = reference_mapping[i];
+            break;
+          }
+      }
+      
+      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(order, rep_reference_mapping->get_active_element()->get_mode());
+      int np = rep_reference_mapping->get_quad_2d()->get_num_points(order, rep_reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
-      geometry = init_geom_vol(reference_mapping, order);
+      geometry = init_geom_vol(rep_reference_mapping, order);
+
+      for(int i = 0; i < reference_mapping_count; i++)
+        if(reference_mapping[i])
+          if(reference_mapping[i]->get_active_element())
+          {
+            geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
+            geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
+          }
+
       double* jac = NULL;
-      if(!reference_mapping->is_jacobian_const())
-        jac = reference_mapping->get_jacobian(order);
+      if(!rep_reference_mapping->is_jacobian_const())
+        jac = rep_reference_mapping->get_jacobian(order);
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
       {
-        if(reference_mapping->is_jacobian_const())
-          jacobian_x_weights[i] = pt[i][2] * reference_mapping->get_const_jacobian();
+        if(rep_reference_mapping->is_jacobian_const())
+          jacobian_x_weights[i] = pt[i][2] * rep_reference_mapping->get_const_jacobian();
         else
           jacobian_x_weights[i] = pt[i][2] * jac[i];
       }
       return np;
     }
 
-    int init_surface_geometry_points(RefMap* reference_mapping, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights)
+    int init_surface_geometry_points(RefMap** reference_mapping, int reference_mapping_count, int& order, int isurf, int marker, Geom<double>*& geometry, double*& jacobian_x_weights)
     {
-      int eo = reference_mapping->get_quad_2d()->get_edge_points(isurf, order, reference_mapping->get_active_element()->get_mode());
-      double3* pt = reference_mapping->get_quad_2d()->get_points(eo, reference_mapping->get_active_element()->get_mode());
-      int np = reference_mapping->get_quad_2d()->get_num_points(eo, reference_mapping->get_active_element()->get_mode());
+      int i = 0;
+      RefMap* rep_reference_mapping;
+      do
+        rep_reference_mapping = reference_mapping[i++];
+      while(!rep_reference_mapping);
+
+      int eo = rep_reference_mapping->get_quad_2d()->get_edge_points(isurf, order, rep_reference_mapping->get_active_element()->get_mode());
+      double3* pt = rep_reference_mapping->get_quad_2d()->get_points(eo, rep_reference_mapping->get_active_element()->get_mode());
+      int np = rep_reference_mapping->get_quad_2d()->get_num_points(eo, rep_reference_mapping->get_active_element()->get_mode());
 
       // Init geometry and jacobian*weights.
       double3* tan;
-      geometry = init_geom_surf(reference_mapping, isurf, marker, eo, tan);
+      geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
+      for(int i = 0; i < reference_mapping_count; i++)
+        if(reference_mapping[i]->get_active_element())
+        {
+          geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
+          geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
+        }
+
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];

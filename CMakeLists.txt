@@ -13,8 +13,13 @@ project(hermes)
   # Global
     # Optional stacktrace
     set(WITH_STACKTRACE NO)
-    set(64_BIT NO)
-  
+    # For Win64
+    if(${CMAKE_CL_64})
+      set(WIN64 YES)
+    else(${CMAKE_CL_64})
+      set(WIN64 NO)
+    endif(${CMAKE_CL_64})
+    
   # HermesCommon
     set(HERMES_COMMON_DEBUG     YES)
     set(HERMES_COMMON_RELEASE   YES)
@@ -120,9 +125,9 @@ project(hermes)
 	# Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
   
-  if(${64_BIT} AND WIN32 AND ${WITH_TC_MALLOC})
+  if(${WIN64} AND ${WITH_TC_MALLOC})
     message(FATAL_ERROR "\nTC_malloc does not work in 64-bit on Windows.\nChange either WITH_TC_MALLOC or 64_BIT.")
-  endif(${64_BIT} AND WIN32 AND ${WITH_TC_MALLOC})
+  endif(${WIN64} AND ${WITH_TC_MALLOC})
   
   ### END DEFAULT CONFIGURATION ###
     
@@ -433,12 +438,16 @@ project(hermes)
   message("\nConfiguration results")
   message("---------------------")
   message("Build with UMFPACK: ${WITH_UMFPACK}")
+  message("Build with UMFPACK: ${WITH_PARALUTION}")
+  if(WIN32)
+    message("Build with WIN64: ${WIN64}")
+  elseif(WIN32)
+  message("Build with OPENMP: ${WITH_OPENMP}")
   message("Build with PETSC: ${WITH_PETSC}")
   message("Build with MUMPS: ${WITH_MUMPS}")
   message("Build with SUPERLU${MT}: ${WITH_SUPERLU}")
   message("Build with TRILINOS: ${WITH_TRILINOS}")
   message("Build with MPI: ${WITH_MPI}")
-  message("Build with OPENMP: ${WITH_OPENMP}")
   message("Build with EXODUSII: ${WITH_EXODUSII}")
   
   message("---------------------")
@@ -450,9 +459,9 @@ project(hermes)
   if(WITH_H2D)
     message("\tBuild Hermes2D Debug version: ${H2D_DEBUG}")
     message("\tBuild Hermes2D Release version: ${H2D_RELEASE}")
-  message("---------------------")
+    message("---------------------")
     message("\tBuild Hermes2D with test examples: ${H2D_WITH_TEST_EXAMPLES}")
-  message("---------------------")
+    message("---------------------")
     message("\tBuild Hermes2D with GLUT: ${H2D_WITH_GLUT}")
   endif(WITH_H2D)
   message("\n")
