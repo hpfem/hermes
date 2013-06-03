@@ -134,6 +134,7 @@ project(hermes_common)
                          ${HERMES_COMMON_LIB_DEBUG}
                          ${HERMES_COMMON_LIB_RELEASE})
       INSTALL_LIB(${HERMES_COMMON_LIB_DEBUG})
+      set(HERMES_COMMON ${HERMES_COMMON_LIB_DEBUG})
     endif(${HERMES_COMMON_DEBUG})
     
     if(${HERMES_COMMON_RELEASE})
@@ -142,6 +143,7 @@ project(hermes_common)
                          ${HERMES_COMMON_LIB_RELEASE}
                          ${HERMES_COMMON_LIB_RELEASE})
       INSTALL_LIB(${HERMES_COMMON_LIB_RELEASE})
+      set(HERMES_COMMON ${HERMES_COMMON_LIB_RELEASE})
     endif(${HERMES_COMMON_RELEASE})
   else(MSVC)
     if(HERMES_COMMON_DEBUG)
