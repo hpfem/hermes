@@ -707,6 +707,22 @@ namespace Hermes
       return false;
     }
 
+    template<typename Scalar>
+    void CSRMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
+    {
+      CSMatrix<Scalar>::pre_add_ij(row, col);
+      return;
+
+      if(pages[row] == NULL || pages[row]->count >= PAGE_SIZE)
+      {
+        Page *new_page = new Page;
+        new_page->count = 0;
+        new_page->next = pages[row];
+        pages[row] = new_page;
+      }
+      pages[row]->idx[pages[row]->count++] = col;
+    }
+
     template<>
     bool CSRMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {

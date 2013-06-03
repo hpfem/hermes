@@ -205,6 +205,14 @@ namespace Hermes
 
       // Duplicates a matrix (including allocation).
       virtual CSMatrix<Scalar>* duplicate();
+
+      /// Important - normal SparseMatrix has the pages structure suitable for CSC matrix, so we need
+      /// to override the structure creation here.
+      /// add indices of nonzero matrix element
+      ///
+      /// @param[in] row  - row index
+      /// @param[in] col  - column index
+      virtual void pre_add_ij(unsigned int row, unsigned int col);
     };
   }
   

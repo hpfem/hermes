@@ -198,7 +198,9 @@ namespace Hermes
       // sort the indices and remove duplicities
       qsort_int(buffer, end - buffer);
       int *q = buffer;
-      for (int *p = buffer, last = -1; p < end; p++) if(*p != last) *q++= last = *p;
+      for (int *p = buffer, last = -1; p < end; p++)
+        if(*p != last)
+          *q++ = last = *p;
 
       return q - buffer;
     }
