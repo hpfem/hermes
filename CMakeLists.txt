@@ -315,7 +315,7 @@ project(hermes)
     
     if(WITH_PARALUTION)
       find_package(PARALUTION REQUIRED)
-      include_directories(${PARALUTION_INCLUDE_DIRS})
+      include_directories(${PARALUTION_INCLUDE_DIR})
     endif(WITH_PARALUTION)
     
     if(MSVC)
