@@ -62,35 +62,12 @@ namespace Hermes
     template<typename Scalar>
     void ParalutionMatrix<Scalar>::alloc()
     {
-      assert(this->pages != NULL);
-
-      // initialize the arrays Ap and Ai
-      this->Ap = new int[this->size + 1];
-      int aisize = this->get_num_indices();
-      this->Ai = new int[aisize];
-
-      // sort the indices and remove duplicities, insert into Ai
-      unsigned int i;
-      int pos = 0;
-      for (i = 0; i < this->size; i++)
-      {
-        this->Ap[i] = pos;
-        pos += this->sort_and_store_indices(this->pages[i], this->Ai + pos, this->Ai + aisize);
-      }
-      this->Ap[i] = pos;
-
-      delete [] this->pages;
-      this->pages = NULL;
-
-      this->nnz = this->Ap[this->size];
-
-      this->Ax = new Scalar[this->nnz];
-      memset(this->Ax, 0, sizeof(Scalar) * this->nnz);
+      CSRMatrix<Scalar>::alloc();
 
       this->paralutionMatrix.SetDataPtrCSR(&this->Ap, &this->Ai, &this->Ax, "paralutionMatrix", this->nnz, this->size, this->size);
     }
 
-    
+
     template<typename Scalar>
     ParalutionVector<Scalar>::ParalutionVector() : Vector<Scalar>(), v(NULL)
     {
@@ -241,6 +218,12 @@ namespace Hermes
   }
   namespace Solvers
   {
+#if defined(WIN32) || defined(_WINDOWS)
+    __declspec(dllexport) ParalutionInitialization paralutionInitializer;
+#else
+    ParalutionInitialization paralutionInitializer;
+#endif
+
     template<typename Scalar>
     ParalutionLinearMatrixSolver<Scalar>::ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : IterSolver<Scalar>(), matrix(matrix), rhs(rhs)
     {
@@ -254,10 +237,6 @@ namespace Hermes
     template<typename Scalar>
     bool ParalutionLinearMatrixSolver<Scalar>::solve()
     {
-      paralution::init_paralution();
-      paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
-      paralution::info_paralution();
-
       this->matrix->get_paralutionMatrix().MoveToAccelerator();
       rhs->get_paralutionVector().MoveToAccelerator();
 
@@ -265,6 +244,7 @@ namespace Hermes
       assert(rhs != NULL);
       assert(matrix->get_size() == rhs->length());
 
+      this->paralutionSolver.Clear();
       this->paralutionSolver.SetOperator(this->matrix->get_paralutionMatrix());
       this->paralutionSolver.SetPreconditioner(this->paralutionPreconditioner);
 
@@ -277,8 +257,6 @@ namespace Hermes
       this->paralutionSolver.Solve(rhs->get_paralutionVector(), &x);
 
       x.LeaveDataPtr(&this->sln);
-
-      paralution::stop_paralution();
 
       x.Clear();
       return true;

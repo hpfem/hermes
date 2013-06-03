@@ -127,17 +127,17 @@ namespace Hermes
     void CSMatrix<Scalar>::free()
     {
       nnz = 0;
-      if(Ap != NULL)
+      if(Ap)
       {
         delete [] Ap;
         Ap = NULL;
       }
-      if(Ai != NULL)
+      if(Ai)
       {
         delete [] Ai;
         Ai = NULL;
       }
-      if(Ax != NULL)
+      if(Ax)
       {
         delete [] Ax;
         Ax = NULL;

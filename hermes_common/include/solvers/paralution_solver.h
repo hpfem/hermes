@@ -107,6 +107,24 @@ namespace Hermes
 
   namespace Solvers
   {
+    class HERMES_API ParalutionInitialization
+    {
+    public:
+      ParalutionInitialization()
+      {
+        paralution::init_paralution();
+        paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
+        paralution::info_paralution();
+      }
+
+      ~ParalutionInitialization()
+      {
+        paralution::stop_paralution();
+      }
+    };
+
+    HERMES_COMMON_API extern ParalutionInitialization paralutionInitializer;
+
     /// \brief Encapsulation of PARALUTION linear solver.
     ///
     /// @ingroup Solvers
@@ -132,7 +150,7 @@ namespace Hermes
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
       ParalutionVector<Scalar> *rhs;
-      
+
     private:
       // Linear Solver
       paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar> paralutionSolver;
