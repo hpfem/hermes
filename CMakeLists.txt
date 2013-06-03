@@ -125,10 +125,6 @@ project(hermes)
 	# Allow to override the default values in CMake.vars:
 	include(CMake.vars OPTIONAL)
   
-  if(${WIN64} AND ${WITH_TC_MALLOC})
-    message(FATAL_ERROR "\nTC_malloc does not work in 64-bit on Windows.\nChange either WITH_TC_MALLOC or 64_BIT.")
-  endif(${WIN64} AND ${WITH_TC_MALLOC})
-  
   ### END DEFAULT CONFIGURATION ###
     
   set(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake)
