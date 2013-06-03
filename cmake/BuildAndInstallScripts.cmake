@@ -11,8 +11,7 @@ endmacro(MAKE_PATH)
 
 # This ensures that a .dll library is built for both debug and release configurations under MSVC.
 macro(ADD_MSVC_BUILD_FLAGS LIB LIB_DEBUG LIB_RELEASE)
-  get_target_property(FLAGS ${LIB} COMPILE_FLAGS)
-  
+  get_target_property(FLAGS ${LIB} COMPILE_FLAGS)  
   set_target_properties(${LIB} PROPERTIES COMPILE_FLAGS "-DEXPORT_HERMES_DLL ${FLAGS}")
   set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME "${LIB_DEBUG}")
   set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB_RELEASE})
