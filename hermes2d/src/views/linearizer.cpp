@@ -334,8 +334,8 @@ namespace Hermes
               }
 
               // This is just to make some sense.
-              if(fabs(max) < 1E-10)
-                max = 1E-10;
+              if(fabs(max) < Hermes::epsilon)
+                max = Hermes::epsilon;
 
               idx = quad_indices[0];
 
@@ -800,9 +800,9 @@ namespace Hermes
           {
             if(
               this->info[i][0] == p1 && this->info[i][1] == p2 &&
-              (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*1e-8) &&
-              (fabs(x - verts[i][0]) < 1e-8) &&
-              (fabs(y - verts[i][1]) < 1e-8)
+              (value == verts[i][2] || fabs(value - verts[i][2]) < this->max*Hermes::Epsilon) &&
+              (fabs(x - verts[i][0]) < Hermes::Epsilon) &&
+              (fabs(y - verts[i][1]) < Hermes::Epsilon)
               )
               return i;
             // note that we won't return a vertex with a different value than the required one;

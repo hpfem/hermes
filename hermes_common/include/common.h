@@ -140,6 +140,9 @@ typedef unsigned __int64 uint64_t;
 
 namespace Hermes
 {
+  const double epsilon = 1e-12;
+  const double Epsilon = 1e-8;
+
   inline double sqr(int x) { return x*x; }
   inline double sqr(double x) { return x*x; }
   inline double sqrt(double x) { return std::sqrt(x); }

@@ -24,13 +24,13 @@ namespace Hermes
     {
       if(current_state->e[form->i] && current_state->e[form->j])
       {
-        if(fabs(form->scaling_factor) < 1e-12)
+        if(fabs(form->scaling_factor) < Hermes::epsilon)
           return false;
 
         // If a block scaling table is provided, and if the scaling coefficient
         // A_mn for this block is zero, then the form does not need to be assembled.
         if(this->block_weights)
-          if(fabs(this->block_weights->get_A(form->i, form->j)) < 1e-12)
+          if(fabs(this->block_weights->get_A(form->i, form->j)) < Hermes::epsilon)
             return false;
         return true;
       }
@@ -79,7 +79,7 @@ namespace Hermes
     {
       if(!current_state->e[form->i])
         return false;
-      if(fabs(form->scaling_factor) < 1e-12)
+      if(fabs(form->scaling_factor) < Hermes::epsilon)
         return false;
 
       return true;
@@ -161,7 +161,7 @@ namespace Hermes
 
         if((!tra || surface_form) && current_als_i->dof[i] < 0)
           continue;
-        if(std::abs(current_als_i->coef[i]) < 1e-12)
+        if(std::abs(current_als_i->coef[i]) < Hermes::epsilon)
           continue;
         if(!sym)
         {
@@ -169,8 +169,8 @@ namespace Hermes
           {
             if(current_als_j->dof[j] >= 0)
             {
-              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if(std::abs(current_als_j->coef[j]) < 1e-12)
+              // Is this necessary, i.e. is there a coefficient smaller than Hermes::epsilon?
+              if(std::abs(current_als_j->coef[j]) < Hermes::epsilon)
                 continue;
 
               Func<double>* u = base_fns[j];
@@ -192,8 +192,8 @@ namespace Hermes
               continue;
             if(current_als_j->dof[j] >= 0)
             {
-              // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-              if(std::abs(current_als_j->coef[j]) < 1e-12)
+              // Is this necessary, i.e. is there a coefficient smaller than Hermes::epsilon?
+              if(std::abs(current_als_j->coef[j]) < Hermes::epsilon)
                 continue;
 
               Func<double>* u = base_fns[j];
@@ -268,8 +268,8 @@ namespace Hermes
         if(current_als_i->dof[i] < 0)
           continue;
 
-        // Is this necessary, i.e. is there a coefficient smaller than 1e-12?
-        if(std::abs(current_als_i->coef[i]) < 1e-12)
+        // Is this necessary, i.e. is there a coefficient smaller than Hermes::epsilon?
+        if(std::abs(current_als_i->coef[i]) < Hermes::epsilon)
           continue;
 
         Func<double>* v = test_fns[i];

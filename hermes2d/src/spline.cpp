@@ -242,7 +242,7 @@ namespace Hermes
       }
 
       // Check for improperly ordered or duplicated points.
-      double eps = 1e-8;
+      double eps = Hermes::Epsilon;
       for (int i = 0; i < nelem; i++)
       {
         if(points[i + 1] < points[i] + eps)

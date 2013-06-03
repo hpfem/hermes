@@ -351,13 +351,13 @@ namespace Hermes
     {
       if(current_state->e[form->i] && current_state->e[form->j])
       {
-        if(fabs(form->scaling_factor) < 1e-12)
+        if(fabs(form->scaling_factor) < Hermes::epsilon)
           return false;
 
         // If a block scaling table is provided, and if the scaling coefficient
         // A_mn for this block is zero, then the form does not need to be assembled.
         if(this->block_weights)
-          if(fabs(this->block_weights->get_A(form->i, form->j)) < 1e-12)
+          if(fabs(this->block_weights->get_A(form->i, form->j)) < Hermes::epsilon)
             return false;
         return true;
       }
@@ -412,7 +412,7 @@ namespace Hermes
     {
       if(!current_state->e[form->i])
         return false;
-      if(fabs(form->scaling_factor) < 1e-12)
+      if(fabs(form->scaling_factor) < Hermes::epsilon)
         return false;
 
       return true;

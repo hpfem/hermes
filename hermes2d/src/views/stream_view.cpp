@@ -67,7 +67,7 @@ namespace Hermes
         double x1 = vert[tri[0]][0], x2 = vert[tri[1]][0], x3 = vert[tri[2]][0];
         double y1 = vert[tri[0]][1], y2 = vert[tri[1]][1], y3 = vert[tri[2]][1];
         double jac = ((x1 - x3)*(y2 - y3) - (x2 - x3)*(y1 - y3));
-        double eps = jac * 1e-8;
+        double eps = jac * Hermes::Epsilon;
         double a = ((y2 - y3) * (x - x3) - (x2 - x3) * (y - y3));
         double b = ((x1 - x3) * (y - y3) - (y1 - y3) * (x - x3));
         double c = jac - a - b;
@@ -468,7 +468,7 @@ namespace Hermes
         if(range_auto) { min = vec->get_min_value(); max = vec->get_max_value(); }
         double irange = 1.0 / (max - min);
         // special case: constant solution
-        if(fabs(min - max) < 1e-8) { irange = 1.0; min -= 0.5; }
+        if(fabs(min - max) < Hermes::Epsilon) { irange = 1.0; min -= 0.5; }
 
         // draw all triangles
         int3* xtris = vec->get_triangles();

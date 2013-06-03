@@ -1272,7 +1272,7 @@ namespace Hermes
       double length_pq = vector_length(pq_1, pq_2);
       double length_pr = vector_length(pr_1, pr_2);
       double sin_angle = (pq_1*pr_2 - pq_2*pr_1)/(length_pq*length_pr);
-      if(fabs(sin_angle) < 1e-8) return true;
+      if(fabs(sin_angle) < Hermes::Epsilon) return true;
       else return false;
     }
 
@@ -1289,8 +1289,8 @@ namespace Hermes
         length_1 = vector_length(v1->x - v0->x, v1->y - v0->y),
         length_2 = vector_length(v2->x - v1->x, v2->y - v1->y),
         length_3 = vector_length(v0->x - v2->x, v0->y - v2->y);
-      if(length_1 < 1e-14 || length_2 < 1e-14 || length_3 < 1e-14)
-        throw Hermes::Exceptions::Exception("Edge of triangular element #%d has length less than 1e-14.", i);
+      if(length_1 < Hermes::epsilon || length_2 < Hermes::epsilon || length_3 < Hermes::epsilon)
+        throw Hermes::Exceptions::Exception("Edge of triangular element #%d has length less than Hermes::epsilon.", i);
 
       // checking that vertices do not lie on the same line
       if(same_line(v0->x, v0->y, v1->x, v1->y, v2->x, v2->y))
@@ -1311,15 +1311,15 @@ namespace Hermes
         length_2 = vector_length(v2->x - v1->x, v2->y - v1->y),
         length_3 = vector_length(v3->x - v2->x, v3->y - v2->y),
         length_4 = vector_length(v0->x - v3->x, v0->y - v3->y);
-      if(length_1 < 1e-14 || length_2 < 1e-14 || length_3 < 1e-14 || length_4 < 1e-14)
-        throw Hermes::Exceptions::Exception("Edge of quad element #%d has length less than 1e-14.", i);
+      if(length_1 < Hermes::epsilon || length_2 < Hermes::epsilon || length_3 < Hermes::epsilon || length_4 < Hermes::epsilon)
+        throw Hermes::Exceptions::Exception("Edge of quad element #%d has length less than Hermes::epsilon.", i);
 
       // checking that both diagonals have nonzero length
       double
         diag_1 = vector_length(v2->x - v0->x, v2->y - v0->y),
         diag_2 = vector_length(v3->x - v1->x, v3->y - v1->y);
-      if(diag_1 < 1e-14 || diag_2 < 1e-14)
-        throw Hermes::Exceptions::Exception("Diagonal of quad element #%d has length less than 1e-14.", i);
+      if(diag_1 < Hermes::epsilon || diag_2 < Hermes::epsilon)
+        throw Hermes::Exceptions::Exception("Diagonal of quad element #%d has length less than Hermes::epsilon.", i);
 
       // checking that vertices v0, v1, v2 do not lie on the same line
       if(same_line(v0->x, v0->y, v1->x, v1->y, v2->x, v2->y))

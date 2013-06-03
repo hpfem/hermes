@@ -229,7 +229,7 @@ namespace Hermes
         if(range_auto) { min = vec->get_min_value(); max = vec->get_max_value(); }
         double irange = 1.0 / (max - min);
         // special case: constant solution
-        if(fabs(min - max) < 1e-8) { irange = 1.0; min -= 0.5; }
+        if(fabs(min - max) < Hermes::Epsilon) { irange = 1.0; min -= 0.5; }
 
         // draw all triangles
         int3* xtris = vec->get_triangles();

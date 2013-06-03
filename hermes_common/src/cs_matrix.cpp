@@ -428,7 +428,7 @@ namespace Hermes
       case DF_PLAIN_ASCII:
         exit(1);
         {
-          const double zero_cutoff = 1e-10;
+          const double zero_cutoff = Hermes::epsilon;
           double *ascii_entry_buff = new double[nnz];
           int *ascii_entry_i = new int[nnz];
           int *ascii_entry_j = new int[nnz];
@@ -533,7 +533,7 @@ namespace Hermes
       case DF_PLAIN_ASCII:
         exit(1);
         {
-          const double zero_cutoff = 1e-10;
+          const double zero_cutoff = Hermes::epsilon;
           std::complex<double> *ascii_entry_buff = new std::complex<double>[nnz];
           int *ascii_entry_i = new int[nnz];
           int *ascii_entry_j = new int[nnz];
