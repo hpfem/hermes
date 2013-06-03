@@ -41,7 +41,7 @@ namespace Hermes
     *
     */
 
-    /// Enum for selecting the stopping criterion of the loop over all elements.
+    /// Class for selecting the stopping criterion of the loop over all elements ordered descending wrt. their error.
     /// \ingroup g_adapt
     /// Serves for only inspect such a portion of all elements of all meshes in the system
     /// for potential refinement.
@@ -49,43 +49,65 @@ namespace Hermes
     class AdaptivityStoppingCriterion
     {
     public:
+      /// Main AdaptivityStoppingCriterion method. It is evaluated in the loop over all elements ordered descending wrt. their error.
+      /// The loop ends with the first negative result of a call to this method.
       /// Decide if the refinement at hand will be carried out.
       virtual bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i) = 0;
     };
 
+    /// Stopping criterion based on cumulative processed error.
+    /// The method add_refinement will return false as soon as the already processed refinements counted for AdaptStoppingCriterionCumulative::threshold
+    /// of the total error.
     template<typename Scalar>
     class HERMES_API AdaptStoppingCriterionCumulative : public AdaptivityStoppingCriterion<Scalar>
     {
     public:
+      /// Constructor specifying the threshold (see description of threshold).
       AdaptStoppingCriterionCumulative(double threshold);
 
       /// Decide if the refinement at hand will be carried out.
+      /// Will return false as soon as the already processed refinements counted for AdaptStoppingCriterionCumulative::threshold
+      /// of the total error.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
     private:
+      /// The quantity representing the portion (fraction) of total error that is processed.
+      /// See comments above.
       double threshold;
     };
     
+    /// Stopping criterion based on maximum element error.
+    /// The method add_refinement will return false as soon as the particular element carries lower error than AdaptStoppingCriterionCumulative::threshold
+    /// times the maximum element error.
     template<typename Scalar>
     class HERMES_API AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion<Scalar>
     {
     public:
+      /// Constructor specifying the threshold (see description of threshold).
       AdaptStoppingCriterionSingleElement(double threshold);
 
       /// Decide if the refinement at hand will be carried out.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
     private:
+      /// The quantity representing the portion (fraction) of maximum error tha processed elements contain.
+      /// See comments above.
       double threshold;
     };
     
+    /// Stopping criterion based on refining elements with similar errors.
+    /// The method add_refinement will return false as soon as the particular element carries significantly less error than the previous one in the descending sequence.
+    /// Useful e.g. when we are more interested in overall solution quality than resolution of a steep singularity etc.
     template<typename Scalar>
     class HERMES_API AdaptStoppingCriterionLevels : public AdaptivityStoppingCriterion<Scalar>
     {
     public:
+      /// Constructor specifying the threshold (see description of threshold).
       AdaptStoppingCriterionLevels(double threshold);
 
       /// Decide if the refinement at hand will be carried out.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
     private:
+      /// The quantity representing the portion (fraction) of the current element error and the previous one for those that will be refined..
+      /// See comments above.
       double threshold;
     };
     
