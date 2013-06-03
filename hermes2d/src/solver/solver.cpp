@@ -183,6 +183,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    LinearMatrixSolver<Scalar>* Solver<Scalar>::get_linear_solver()
+    {
+      return this->matrix_solver;
+    }
+
+    template<typename Scalar>
     void Solver<Scalar>::set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
     {
       this->dp->set_spaces(spaces);

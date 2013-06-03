@@ -95,6 +95,9 @@ namespace Hermes
       /// Get the Residual.
       Vector<Scalar>* get_residual();
 
+      /// Get the Linear solver (thus influence its behavior).
+      LinearMatrixSolver<Scalar>* get_linear_solver();
+
       /// If the cache should not be used for any reason.
       virtual void set_do_not_use_cache(bool to_set = true);
       
