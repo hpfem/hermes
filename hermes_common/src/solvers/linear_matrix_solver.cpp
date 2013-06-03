@@ -239,6 +239,14 @@ namespace Hermes
     void IterSolver<Scalar>::set_tolerance(double tol)
     {
       this->tolerance = tol;
+      this->toleranceType = AbsoluteTolerance;
+    }
+
+    template<typename Scalar>
+    void IterSolver<Scalar>::set_tolerance(double tol, typename IterSolver<Scalar>::ToleranceType toleranceType)
+    {
+      this->tolerance = tol;
+      this->toleranceType = toleranceType;
     }
 
     template<typename Scalar>

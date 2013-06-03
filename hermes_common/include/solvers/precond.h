@@ -43,6 +43,16 @@ namespace Hermes
     /// @ingroup preconds
     template <typename Scalar>
     class Precond
+    {
+    public:
+      virtual ~Precond() {};
+    };
+
+    /// \brief Abstract class for Epetra preconditioners.
+    ///
+    /// @ingroup preconds
+    template <typename Scalar>
+    class EpetraPrecond : public Precond<Scalar>
 #ifdef HAVE_EPETRA
       : public Epetra_Operator
 #endif

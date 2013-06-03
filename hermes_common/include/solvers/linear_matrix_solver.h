@@ -154,22 +154,42 @@ namespace Hermes
     public:
       IterSolver() : LinearMatrixSolver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
 
+      /// Various tolerances.
+      /// Not necessarily supported by all iterative solvers used.
+      enum ToleranceType
+      {
+        AbsoluteTolerance,
+        RelativeTolerance,
+        DivergenceTolerance
+      };
+
       virtual int get_num_iters() = 0;
       virtual double get_residual() = 0;
 
       /// Set the convergence tolerance.
       /// @param[in] tol - the tolerance to set
-      void set_tolerance(double tol);
+      virtual void set_tolerance(double tol);
+
+      /// Set the convergence tolerance.
+      /// @param[in] tolerance - the tolerance to set
+      /// @param[in] toleranceType - the tolerance to set
+      virtual void set_tolerance(double tolerance, ToleranceType toleranceType);
 
       /// Set maximum number of iterations to perform.
       /// @param[in] iters - number of iterations
-      void set_max_iters(int iters);
+      virtual void set_max_iters(int iters);
 
       virtual void set_precond(Precond<Scalar> *pc) = 0;
 
     protected:
-      int max_iters;          ///< Maximum number of iterations.
-      double tolerance;       ///< Convergence tolerance.
+      /// Maximum number of iterations.
+      int max_iters;
+      /// Convergence tolerance.
+      double tolerance;
+      /// Convergence tolerance type.
+      /// See the enum.
+      ToleranceType toleranceType;
+      /// Whether the solver is preconditioned.
       bool precond_yes;
     };
 

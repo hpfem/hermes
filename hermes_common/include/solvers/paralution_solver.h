@@ -27,6 +27,7 @@
 #include "cs_matrix.h"
 
 #include "paralution.hpp"
+#include "precond.h"
 
 using namespace Hermes::Algebra;
 
@@ -96,7 +97,7 @@ namespace Hermes
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
-    
+
       paralution::LocalVector<Scalar>& get_paralutionVector();
 
     private:
@@ -138,27 +139,82 @@ namespace Hermes
       ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
       virtual ~ParalutionLinearMatrixSolver();
 
-      virtual bool solve();
-      virtual int get_matrix_size();
+      /// The solver type.
+      /// Default: CG
+      enum ParalutionSolverType
+      {
+        CG,
+        GMRES,
+        BiCGStab,
+        AMG
+      };
 
+      /// Set current solver type.
+      /// This destroys the current solver (NOT the matrix, and rhs).
+      void set_solver_type(ParalutionSolverType paralutionSolverType);
+
+      virtual bool solve();
+
+      /// Set the convergence tolerance.
+      /// @param[in] tolerance - the tolerance to set
+      /// @param[in] toleranceType - the tolerance to set
+      virtual void set_tolerance(double tolerance, ToleranceType toleranceType);
+
+      /// Set maximum number of iterations to perform.
+      /// @param[in] iters - number of iterations
+      /// Default:100.
+      virtual void set_max_iters(int iters);
+
+      /// Get number of iterations.
       virtual int get_num_iters();
+
+      /// Get the residual value.
       virtual double get_residual();
 
       virtual void set_precond(Precond<Scalar> *pc);
 
+      /// Sets the verboseness.
+      virtual void set_verbose_output(bool to_set);
+
+      /// Utility.
+      virtual int get_matrix_size();
+
+    private:
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
       ParalutionVector<Scalar> *rhs;
 
-    private:
       // Linear Solver
-      paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar> paralutionSolver;
-
-      // Preconditioner
-      paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar> paralutionPreconditioner;
+      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
 
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+    };
+
+    /// \brief A PARALUTION preconditioner.
+    ///
+    /// @ingroup preconds
+    template <typename Scalar>
+    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
+    {
+    public:
+      /// The preconditioner type.
+      enum ParalutionPrecondType
+      {
+        Jacobi,
+        ILU,
+        IC,
+        AIChebyshev
+      };
+
+      /// Constructor.
+      /// \param[in] paralutionPrecondType The preconditioner type to create.
+      ParalutionPrecond(ParalutionPrecondType paralutionPrecondType);
+      
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
+    private:
+      // Paralution preconditioner
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
     };
   }
 }
