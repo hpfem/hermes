@@ -690,7 +690,6 @@ namespace Hermes
     }
 
     //// bubble part of projection based interpolation /////////////////////////////////////////////////
-
     void CurvMap::old_projection(Element* e, int order, double2* proj, double* old[2], H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
       int mo2 = quad2d.get_max_order(e->get_mode());
@@ -796,7 +795,6 @@ namespace Hermes
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-
     void CurvMap::ref_map_projection(Element* e, Nurbs** nurbs, int order, double2* proj, H1ShapesetJacobi* ref_map_shapeset, PrecalcShapeset* ref_map_pss)
     {
       // vertex part
