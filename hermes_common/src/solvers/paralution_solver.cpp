@@ -383,8 +383,17 @@ namespace Hermes
           break;
         case ILU:
           {
-            paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* p = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-            this->paralutionPreconditioner = p;
+            this->paralutionPreconditioner = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+          }
+          break;
+        case MultiColoredILU:
+          {
+            this->paralutionPreconditioner = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+          }
+          break;
+        case MultiColoredSGS:
+          {
+            this->paralutionPreconditioner = new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
           }
           break;
         case IC:
