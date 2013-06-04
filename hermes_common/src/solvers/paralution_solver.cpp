@@ -23,6 +23,8 @@
 #ifdef WITH_PARALUTION
 #include "paralution_solver.h"
 
+#include <limits>
+
 namespace Hermes
 {
   namespace Algebra
