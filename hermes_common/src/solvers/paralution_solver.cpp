@@ -351,7 +351,7 @@ namespace Hermes
     template<typename Scalar>
     void ParalutionLinearMatrixSolver<Scalar>::set_verbose_output(bool to_set)
     {
-      Loggable::set_verbose_output(to_set);
+      Hermes::Mixins::Loggable::set_verbose_output(to_set);
       this->paralutionSolver->Verbose(10);
     }
 
