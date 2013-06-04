@@ -112,7 +112,7 @@ namespace Hermes
       int pos = 0;
       for (unsigned int i = 0; i < this->size; i++)
       {
-        nnz_array[i] = sort_and_store_indices(this->pages[i], ai + pos, ai + aisize);
+        nnz_array[i] = this->sort_and_store_indices(this->pages[i], ai + pos, ai + aisize);
         pos += nnz_array[i];
       }
       // stote the number of nonzeros

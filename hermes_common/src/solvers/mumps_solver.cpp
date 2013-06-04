@@ -100,7 +100,7 @@ namespace Hermes
       for (i = 0; i < this->size; i++)
       {
         Ap[i] = pos;
-        pos += sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
+        pos += this->sort_and_store_indices(this->pages[i], Ai + pos, Ai + aisize);
       }
       Ap[i] = pos;
 
@@ -219,7 +219,7 @@ namespace Hermes
         for (unsigned int i = 0; i < nnz; i++)
         {
           fprintf(file, "%d %d ", irn[i], jcn[i]);
-          Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]));
+          Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]), number_format);
           fprintf(file, "\n");
         }
         return true;
@@ -230,7 +230,7 @@ namespace Hermes
           for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-            Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]));
+            Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]), number_format);
             fprintf(file, "\n");
           }
           fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
