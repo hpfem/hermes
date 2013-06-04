@@ -37,9 +37,9 @@ namespace Hermes
     ParalutionMatrix<Scalar>::~ParalutionMatrix()
     {
       this->paralutionMatrix.Clear();
-      Ap = NULL;
-      Ai = NULL;
-      Ax = NULL;
+      this->Ap = NULL;
+      this->Ai = NULL;
+      this->Ax = NULL;
     }
 
     template<typename Scalar>
@@ -334,13 +334,13 @@ namespace Hermes
       IterSolver<Scalar>::set_tolerance(tol, toleranceType);
       switch(toleranceType)
       {
-      case AbsoluteTolerance:
+      case IterSolver<Scalar>::AbsoluteTolerance:
         this->paralutionSolver->InitTol(tol, 1., 1.);
         break;
-      case RelativeTolerance:
+      case IterSolver<Scalar>::RelativeTolerance:
         this->paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), tol, 1.);
         break;
-      case DivergenceTolerance:
+      case IterSolver<Scalar>::DivergenceTolerance:
         this->paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), 1., tol);
         break;
       }
