@@ -158,7 +158,7 @@ namespace Hermes
       /// Set the convergence tolerance.
       /// @param[in] tolerance - the tolerance to set
       /// @param[in] toleranceType - the tolerance to set
-      virtual void set_tolerance(double tolerance, ToleranceType toleranceType);
+      virtual void set_tolerance(double tolerance, typename IterSolver<Scalar>::ToleranceType toleranceType);
 
       /// Set maximum number of iterations to perform.
       /// @param[in] iters - number of iterations
@@ -179,7 +179,6 @@ namespace Hermes
       /// Utility.
       virtual int get_matrix_size();
 
-    private:
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.

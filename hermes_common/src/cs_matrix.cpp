@@ -713,14 +713,14 @@ namespace Hermes
       CSMatrix<Scalar>::pre_add_ij(row, col);
       return;
 
-      if(pages[row] == NULL || pages[row]->count >= PAGE_SIZE)
+      if(this->pages[row] == NULL || this->pages[row]->count >= SparseMatrix<Scalar>::PAGE_SIZE)
       {
-        Page *new_page = new Page;
+        typename SparseMatrix<Scalar>::Page *new_page = new typename SparseMatrix<Scalar>::Page;
         new_page->count = 0;
-        new_page->next = pages[row];
-        pages[row] = new_page;
+        new_page->next = this->pages[row];
+        this->pages[row] = new_page;
       }
-      pages[row]->idx[pages[row]->count++] = col;
+      this->pages[row]->idx[this->pages[row]->count++] = col;
     }
 
     template<>
