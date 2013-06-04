@@ -19,6 +19,7 @@
 #include "global.h"
 #include "api2d.h"
 #include "mesh_reader_h2d.h"
+#include "forms.h"
 
 namespace Hermes
 {
@@ -165,10 +166,11 @@ namespace Hermes
       return NULL;
     }
 
-    double Element::get_area()
+    double Element::get_area(bool precise_for_curvature)
     {
       if(!this->areaCalculated)
       {
+        // First some basic arithmetics.
         double ax, ay, bx, by;
         ax = vn[1]->x - vn[0]->x;
         ay = vn[1]->y - vn[0]->y;
@@ -184,7 +186,91 @@ namespace Hermes
 
           this->area = area + 0.5*(ax*by - ay*bx);
         }
-        this->areaCalculated = true;
+
+        // Either the basic approximation is fine.
+        if(!this->is_curved() || !precise_for_curvature)
+          this->areaCalculated = true;
+        // Or we want to capture the curvature precisely.
+        else
+        {
+          // Utility data.
+          RefMap refmap_curv;
+          RefMap refmap_straight;
+          double3* tan;
+
+          double x_center, y_center;
+          this->get_center(x_center, y_center);
+            
+          for(int isurf = 0; isurf < this->nvert; isurf++)
+          {
+            // 0 - prepare data structures.
+            int eo = g_quad_2d_std.get_edge_points(isurf, this->get_mode() == HERMES_MODE_TRIANGLE ? g_max_tri : g_max_quad, this->get_mode());
+            double3* pt = g_quad_2d_std.get_points(eo, this->get_mode());
+            int np = g_quad_2d_std.get_num_points(eo, this->get_mode());
+            double* x_curv = new double[np];
+            double* y_curv = new double[np];
+            double* x_straight = new double[np];
+            double* y_straight = new double[np];
+            
+            // 1 - get the x,y coordinates for the curved element.
+            refmap_curv.set_active_element(this);
+            Geom<double>* geometry = init_geom_surf(&refmap_curv, isurf, this->en[isurf]->marker, eo, tan);
+            memcpy(x_curv, geometry->x, np*sizeof(double));
+            memcpy(y_curv, geometry->y, np*sizeof(double));
+
+            // 2. - act if there was no curvature
+            CurvMap* cm_temp = this->cm;
+            this->cm = NULL;
+            refmap_straight.set_active_element(this);
+            geometry = init_geom_surf(&refmap_straight, isurf, this->en[isurf]->marker, eo, tan);
+            memcpy(x_straight, geometry->x, np*sizeof(double));
+            memcpy(y_straight, geometry->y, np*sizeof(double));
+
+            // 3. - compare the two, get the updated area.
+            bool previous_add_or_subtract;
+            double previous_distance;
+            for(int i = 0; i < np; i++)
+            {
+              // Distance between the curved and straight edges.
+              double distance_i = std::sqrt(std::pow(x_straight[i] - x_curv[i], 2.0) + std::pow(y_straight[i] - y_curv[i], 2.0));
+
+              // Add to- or Subtract from- the area (depends on the curvature and we shall decide based on distance from the element center).
+              double distance_from_center_curved = std::pow(x_center - x_curv[i], 2.0) + std::pow(y_center - y_curv[i], 2.0);
+              double distance_from_center_straight = std::pow(x_center - x_straight[i], 2.0) + std::pow(y_center - y_straight[i], 2.0);
+              bool add = distance_from_center_curved > distance_from_center_straight;
+
+              // Calculate now the area delta.
+              // It depends on the integration point number etc.
+              double area_delta;
+              if(i == 0)
+              {
+                double distance_along_edge = std::sqrt(std::pow(x_straight[i] - this->vn[isurf]->x, 2.0) + std::pow(y_straight[i] - this->vn[isurf]->y, 2.0));
+                area_delta = distance_i * distance_along_edge * 0.5;
+              }
+              if(i > 0 && i < np - 1)
+              {
+                double distance_along_edge = std::sqrt(std::pow(x_straight[i] - x_straight[i - 1], 2.0) + std::pow(y_straight[i] - y_straight[i - 1], 2.0));
+                area_delta = 0.5*(distance_i + previous_distance) * distance_along_edge;
+              }
+              if(i == np - 1)
+              {
+                double distance_along_edge = std::sqrt(std::pow(x_straight[i] - this->vn[(isurf + 1) % this->nvert]->x, 2.0) + std::pow(y_straight[i] - this->vn[(isurf + 1) % this->nvert]->y, 2.0));
+                area_delta = distance_i * distance_along_edge * 0.5;
+              }
+
+              if(add)
+                area += area_delta;
+              else
+                area -= area_delta;
+
+              previous_add_or_subtract = add;
+              previous_distance = distance_i;
+            }
+
+            // 4. - re-add the curvature.
+            this->cm = cm_temp;
+          }
+        }
       }
       return this->area;
     }

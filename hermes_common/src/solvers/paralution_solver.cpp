@@ -278,16 +278,12 @@ namespace Hermes
     template<typename Scalar>
     bool ParalutionLinearMatrixSolver<Scalar>::solve()
     {
-      this->matrix->get_paralutionMatrix().MoveToAccelerator();
-      rhs->get_paralutionVector().MoveToAccelerator();
-
       paralution::LocalVector<Scalar> x;
       x.Allocate("x", matrix->get_size());
-      x.MoveToAccelerator();
+      x.Zeros();
 
       if(std::abs(rhs->get_paralutionVector().Norm()) < Hermes::epsilon)
       {
-        x.Zeros();
         x.LeaveDataPtr(&this->sln);
         x.Clear();
         return true;
@@ -297,15 +293,13 @@ namespace Hermes
       assert(rhs != NULL);
       assert(matrix->get_size() == rhs->length());
 
-      this->paralutionSolver->Clear();
       this->paralutionSolver->SetOperator(this->matrix->get_paralutionMatrix());
-
       this->paralutionSolver->Build();
-
 
       this->paralutionSolver->Solve(rhs->get_paralutionVector(), &x);
 
       x.LeaveDataPtr(&this->sln);
+      this->paralutionSolver->Clear();
 
       x.Clear();
       return true;
@@ -383,8 +377,17 @@ namespace Hermes
           break;
         case ILU:
           {
-            paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* p = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-            this->paralutionPreconditioner = p;
+            this->paralutionPreconditioner = new paralution::ILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+          }
+          break;
+        case MultiColoredILU:
+          {
+            this->paralutionPreconditioner = new paralution::MultiColoredILU<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+          }
+          break;
+        case MultiColoredSGS:
+          {
+            this->paralutionPreconditioner = new paralution::MultiColoredSGS<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
           }
           break;
         case IC:

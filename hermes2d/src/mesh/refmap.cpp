@@ -234,7 +234,6 @@ namespace Hermes
       int i, j, np = quad_2d->get_num_points(order, element->get_mode());
 
       // construct jacobi matrices of the direct reference map for all integration points
-
       double2x2* m = new double2x2[np];
       memset(m, 0, np * sizeof(double2x2));
       ref_map_pss.force_transform(sub_idx, ctm);

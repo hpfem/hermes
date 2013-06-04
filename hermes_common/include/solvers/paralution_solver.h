@@ -201,7 +201,9 @@ namespace Hermes
       enum ParalutionPrecondType
       {
         Jacobi,
+        MultiColoredSGS,
         ILU,
+        MultiColoredILU,
         IC,
         AIChebyshev
       };

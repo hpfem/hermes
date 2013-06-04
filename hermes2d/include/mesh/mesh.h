@@ -141,9 +141,11 @@ namespace Hermes
       bool used;     ///< array item usage flag
       Element* parent;     ///< pointer to the parent element for the current son
       bool visited;        ///< true if the element has been visited during assembling
-      /// Calculates the area of the element. For curved elements, this is only
-      /// an approximation: the curvature is not accounted for.
-      double get_area();
+
+      /// Calculates the area of the element.
+      /// \param[in] precise_for_curvature If curved elements should be evaluated exactly. \
+      /// This takes much longer.
+      double get_area(bool precise_for_curvature = false);
 
       /// Returns the length of the longest edge for triangles, and the
       /// length of the longer diagonal for quads. Ignores element curvature.
