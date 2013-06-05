@@ -81,14 +81,15 @@ namespace Hermes
 
     /// @ingroup meshFunctions.
     /// Serves for postprocessing of element-wise constant values (such as the error in adaptivity).
-    template<typename Scalar>
+    /// The second template parameter ValueType must be a type castable to Scalar.
+    template<typename Scalar, typename ValueType>
     class HERMES_API ExactSolutionConstantArray : public ExactSolutionScalar<Scalar>
     {
     public:
       /// Constructor.
       /// \param[in] valueArray Array of element-wise values, sorted according to the elements' ids.
-      ExactSolutionConstantArray(MeshSharedPtr mesh, Scalar* valueArray);
-      virtual ~ExactSolutionConstantArray() {};
+      ExactSolutionConstantArray(MeshSharedPtr mesh, ValueType* valueArray, bool deleteArray = false);
+      virtual ~ExactSolutionConstantArray();
 
       virtual MeshFunction<Scalar>* clone() const;
 
@@ -101,14 +102,17 @@ namespace Hermes
 
       inline std::string getClassName() const { return "ExactSolutionConstantArray"; }
 
-      void setArray(Scalar* valueArray);
+      void setArray(ValueType* valueArray);
 
     protected:
-      /// For scaling of the solution.
-      Scalar* valueArray;
+      /// Array of the values.
+      ValueType* valueArray;
+
+      /// Delete the array.
+      bool deleteArray;
+
       template<typename T> friend class Solution;
     };
-
     
 
     /// @ingroup meshFunctions

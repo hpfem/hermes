@@ -61,7 +61,7 @@ namespace Hermes
         return this->errorMeshFunction[component];
       else
       {
-        this->errorMeshFunction[component].reset(new ExactSolutionConstantArray<double>(coarse_solutions[component]->get_mesh(), this->errors[component]));
+        this->errorMeshFunction[component].reset(new ExactSolutionConstantArray<double, double>(coarse_solutions[component]->get_mesh(), this->errors[component]));
         return this->errorMeshFunction[component];
       }
     }

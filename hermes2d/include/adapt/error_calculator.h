@@ -92,7 +92,7 @@ namespace Hermes
       const ElementReference& get_element_reference(unsigned int id) const;
       
       /// Return the error mesh function - for visualization and other postprocessing of the element-wise error.
-      /// \param i The component.
+      /// \param component The component.
       MeshFunctionSharedPtr<double> get_errorMeshFunction(int component = 0);
     protected:
       /// State querying helpers.

@@ -161,6 +161,9 @@ namespace Hermes
       void set_spaces(Hermes::vector<SpaceSharedPtr<Scalar> > spaces);
       void set_space(SpaceSharedPtr<Scalar> space);
 
+      /// Return the error mesh function - for postprocessing the information about which elements have been refined.
+      /// \param component The component.
+      MeshFunctionSharedPtr<double> get_refinementInfoMeshFunction(int component = 0);
     protected:
       /// Set default values.
       void set_defaults();
@@ -212,6 +215,13 @@ namespace Hermes
 
       /// Error calculator.
       ErrorCalculator<Scalar>* errorCalculator;
+
+      /// Information about performed refinements.
+      ElementToRefine* elements_to_refine;
+      int elements_to_refine_count;
+      
+      /// Mesh function for postprocessing the information about which elements have been refined.
+      MeshFunctionSharedPtr<double> refinementInfoMeshFunction[H2D_MAX_COMPONENTS];
 
       /// Internal.
       std::exception* caughtException;
