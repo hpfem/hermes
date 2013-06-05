@@ -379,7 +379,7 @@ namespace Hermes
 
       resize_tables();
 
-      if(mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && H2D_GET_V_ORDER(order) == 0)
+      if(mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && get_type() != HERMES_UTILITY_L2_SPACES && H2D_GET_V_ORDER(order) == 0)
         order = H2D_MAKE_QUAD_ORDER(order, order);
 
       edata[id].order = order;
@@ -817,7 +817,7 @@ namespace Hermes
     {
       // Adjust wrt. max and min possible orders.
       int mo = shapeset->get_max_order();
-      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
+      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_UTILITY_L2_SPACES || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
       int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(order), mo));
       int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(order), mo));
       order = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
@@ -1202,7 +1202,8 @@ namespace Hermes
             xmlspace.spaceType().set("l2");
             break;
         default:
-            return false;
+          throw Exceptions::Exception("This type of space can not be saved.");
+          return false;
       }
 
       // Utility pointer.
