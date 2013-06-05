@@ -24,7 +24,7 @@ const double THRESHOLD = 0.95;                    // This is a quantitative para
 // Error calculation & adaptivity.
 DefaultErrorCalculator<complex, HERMES_H1_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
 // Stopping criterion for an adaptivity step.
-AdaptStoppingCriterionSingleElement<complex> stoppingCriterion(0.3);
+AdaptStoppingCriterionSingleElement<complex> stoppingCriterion(0.9);
 // Adaptivity processor class.
 Adapt<complex> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
@@ -129,7 +129,6 @@ int main(int argc, char* argv[])
     // View the coarse mesh solution and polynomial orders.
     MeshFunctionSharedPtr<double> real_filter(new RealFilter(sln));
     MeshFunctionSharedPtr<double> rreal_filter(new RealFilter(ref_sln));
-    sview.show(real_filter);
     sview2.show(rreal_filter);
 
     oview.show(space);
@@ -141,6 +140,7 @@ int main(int argc, char* argv[])
 
     // Add entry to DOF and CPU convergence graphs.
     graph_dof_est.add_values(space->get_num_dofs(), errorCalculator.get_total_error_squared() * 100.);
+    sview.show(errorCalculator.get_errorMeshFunction());
 
     // If err_est too large, adapt the mesh->
     if(errorCalculator.get_total_error_squared()  * 100. < ERR_STOP)

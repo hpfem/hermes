@@ -79,11 +79,14 @@ namespace Hermes
     };
 
 
-    /// @ingroup meshFunctions
+    /// @ingroup meshFunctions.
+    /// Serves for postprocessing of element-wise constant values (such as the error in adaptivity).
     template<typename Scalar>
     class HERMES_API ExactSolutionConstantArray : public ExactSolutionScalar<Scalar>
     {
     public:
+      /// Constructor.
+      /// \param[in] valueArray Array of element-wise values, sorted according to the elements' ids.
       ExactSolutionConstantArray(MeshSharedPtr mesh, Scalar* valueArray);
       virtual ~ExactSolutionConstantArray() {};
 
