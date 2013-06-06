@@ -273,5 +273,10 @@ namespace Hermes
       else
         return m_grid[i][j]->getElement(x,y);
     }
+
+    int MeshHashGrid::get_mesh_seq() const
+    {
+      return this->mesh_seq;
+    }
   }
 }

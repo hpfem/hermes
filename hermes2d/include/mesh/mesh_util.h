@@ -67,11 +67,16 @@ namespace Hermes
 
       Hermes::Hermes2D::Element* getElement(double x, double y);
 
+      int get_mesh_seq() const;
+
     private:
       MeshHashGridElement* m_grid[GRID_SIZE][GRID_SIZE];
 
       double intervals_x[GRID_SIZE + 1];
       double intervals_y[GRID_SIZE + 1];
+
+      /// For detecting changes to the mesh that would require the hashgrid to be recalculated.
+      int mesh_seq;
     };
 
     /*  node and son numbering on a triangle:

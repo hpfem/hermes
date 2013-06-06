@@ -1294,8 +1294,18 @@ namespace Hermes
 
     Element* Mesh::element_on_physical_coordinates(double x, double y)
     {
+      // If no hash grid exists, create one.
       if(!this->meshHashGrid)
         this->meshHashGrid = new MeshHashGrid(this);
+      else
+      {
+        // If no the hash grid exists, but the mesh has been refined afterwards, re-create.
+        if(this->get_seq() != this->meshHashGrid->get_mesh_seq())
+        {
+          delete this->meshHashGrid;
+          this->meshHashGrid = new MeshHashGrid(this);
+        }
+      }
 
       return this->meshHashGrid->getElement(x, y);
     }
