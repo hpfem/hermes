@@ -94,13 +94,15 @@ namespace Hermes
       void create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
         int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers);
 
-#pragma region MeshHash
+#pragma region MeshHashGrid
       /// Returns the element pointer located at physical coordinates x, y.
       /// \param[in] x Physical x-coordinate.
       /// \param[in] y Physical y-coordinate.
       /// \param[in] x_reference Optional parameter, in which the x-coordinate of x in the reference domain will be returned.
       /// \param[in] y_reference Optional parameter, in which the y-coordinate of y in the reference domain will be returned.
-      Element* element_on_physical_coordinates(double x, double y, double* x_reference = NULL, double* y_reference = NULL);
+      Element* element_on_physical_coordinates(double x, double y);
+
+      MeshHashGrid* meshHashGrid;
 #pragma endregion
 
 #pragma region getters

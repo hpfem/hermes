@@ -29,10 +29,8 @@ namespace Hermes
     static const int H2D_DG_INNER_EDGE_INT = -54125631;
     static const std::string H2D_DG_INNER_EDGE = "-54125631";
 
-    Mesh::Mesh() : HashTable()
+    Mesh::Mesh() : HashTable(), meshHashGrid(NULL), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++)
     {
-      nbase = nactive = ntopvert = ninitial = 0;
-      seq = g_mesh_seq++;
     }
 
     Mesh::~Mesh() 
@@ -1282,6 +1280,10 @@ namespace Hermes
       }
       elements.free();
       HashTable::free();
+
+      if(this->meshHashGrid)
+        delete this->meshHashGrid;
+
       this->boundary_markers_conversion.conversion_table.clear();
       this->boundary_markers_conversion.conversion_table_inverse.clear();
       this->element_markers_conversion.conversion_table.clear();
@@ -1290,9 +1292,12 @@ namespace Hermes
       this->seq = -1;
     }
 
-    Element* Mesh::element_on_physical_coordinates(double x, double y, double* x_reference, double* y_reference)
+    Element* Mesh::element_on_physical_coordinates(double x, double y)
     {
-      return NULL;
+      if(!this->meshHashGrid)
+        this->meshHashGrid = new MeshHashGrid(this);
+
+      return this->meshHashGrid->getElement(x, y);
     }
 
     void Mesh::copy_converted(MeshSharedPtr mesh)

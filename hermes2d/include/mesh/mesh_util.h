@@ -16,10 +16,64 @@
 #ifndef __H2D_MESH_UTIL_H
 #define __H2D_MESH_UTIL_H
 
+#include "element.h"
+
 namespace Hermes
 {
   namespace Hermes2D
   {
+    class MeshHashGrid;
+
+    class MeshHashGridElement
+    {
+    public:
+      MeshHashGridElement(double lower_left_x, double lower_left_y, double upper_right_x, double upper_right_y, int depth = 0);
+      ~MeshHashGridElement();
+      
+      /// Return the Element 
+      Hermes::Hermes2D::Element* getElement(double x, double y);
+
+    private:
+      inline bool belongs(double x, double y);
+      bool belongs(Hermes::Hermes2D::Element* element);
+      void insert(Hermes::Hermes2D::Element* element);
+
+      double lower_left_x;
+      double lower_left_y;
+      double upper_right_x;
+      double upper_right_y;
+
+      std::set<Hermes::Hermes2D::Element*> m_elements;
+      MeshHashGridElement* m_sons[2][2];
+      int m_depth;
+
+      static const int MAX_ELEMENTS = 50;
+      static const int MAX_DEPTH = 10;
+      bool m_active;
+      friend class MeshHashGrid;
+    };
+
+#define GRID_SIZE  30
+
+    class MeshHashGrid
+    {
+    public:
+      MeshHashGrid(const Mesh* mesh);
+      ~MeshHashGrid();
+
+      // smallest box interval_x X interval_y in which element is contained. If element is curvilinear, has to be made larger
+      // if we knew more about the shape of curvilinear element, this increase could be smaller
+      static void elementBoundingBox(Hermes::Hermes2D::Element* element, double2& p1, double2& p2);
+
+      Hermes::Hermes2D::Element* getElement(double x, double y);
+
+    private:
+      MeshHashGridElement* m_grid[GRID_SIZE][GRID_SIZE];
+
+      double intervals_x[GRID_SIZE + 1];
+      double intervals_y[GRID_SIZE + 1];
+    };
+
     /*  node and son numbering on a triangle:
 
     -Triangle to triangles refinement
