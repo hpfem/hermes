@@ -1641,7 +1641,7 @@ namespace Hermes
       else // HERMES_SLN
       {
         if(e == NULL)
-          e = RefMap::element_on_physical_coordinates(this->mesh, x, y, &xi1, &xi2);
+          e = RefMap::element_on_physical_coordinates(false, this->mesh, x, y, &xi1, &xi2);
         else
           RefMap::untransform(e, x, y, xi1, xi2);
 
