@@ -25,7 +25,6 @@ namespace Hermes
           delete this->shapeset;
       }
 
-
       template<typename Scalar>
       void L2ProjBasedSelector<Scalar>::get_current_order_range(Element* element, int& min_order_, int& max_order_)
       {

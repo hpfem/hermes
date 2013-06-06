@@ -33,6 +33,13 @@ namespace Hermes
       template<typename Scalar>
       class HERMES_API OptimumSelector : public Selector<Scalar>
       {
+      public:
+        /// Destructor.
+        virtual ~OptimumSelector();
+
+        /// Set the score DOF exponent.
+        void set_dof_score_exponent(double exponent);
+
       protected:
         /// Constructor.
         /** \note Parameters \a vertex_order and \a edge_bubble_order fixes the fact that a shapeset returns a valid index even though a given shape is not invalid in the space.
@@ -143,14 +150,13 @@ namespace Hermes
         /// - vertical order + 1 (any)
         /// - shape function type
         int ****num_shapes;
-      private:
+      
         /// Compares scores. Used to sort scores ascending.
         /** \param[in] a The first candidate.
         *  \param[in] b The second candidate.
         *  \return True if score of \a a is greater than the score of \a b. */
         static bool compare_cand_score(const Cand& a, const Cand& b);
 
-      protected:
         //orders and their range
         /// Sets OptimumSelector::current_max_order and OptimumSelector::current_min_order.
         /** This method has to be implemented by derived classes and it is mean to be
@@ -158,7 +164,6 @@ namespace Hermes
         *  \param[in] element An element that is being refined. */
         virtual void get_current_order_range(Element* element, int& min_order, int& max_order) = 0;
 
-      protected:
         //shape functions
         /// A shape function type.
         enum ShapeType {
@@ -231,13 +236,12 @@ namespace Hermes
         *  \return Returns a number of shape functions that satisfies given parameters. */
         int calc_num_shapes(int mode, int order_h, int order_v, int allowed_type_mask);
 
-      public:
-        /// Destructor.
-        virtual ~OptimumSelector();
-      protected:
         /// Selects a refinement.
         /** Overriden function. For details, see Selector::select_refinement(). */
         virtual bool select_refinement(Element* element, int quad_order, MeshFunction<Scalar>* rsln, ElementToRefine& refinement); ///< Selects refinement.
+
+        /// Score DOF exponent. Used in evaluate_cands_score.
+        double dof_score_exponent;
       };
     }
   }
