@@ -44,7 +44,8 @@ namespace Hermes
       double upper_right_x;
       double upper_right_y;
 
-      std::set<Hermes::Hermes2D::Element*> m_elements;
+      Hermes::Hermes2D::Element** elements;
+      int element_count;
       MeshHashGridElement* m_sons[2][2];
       int m_depth;
 
@@ -54,7 +55,7 @@ namespace Hermes
       friend class MeshHashGrid;
     };
 
-#define GRID_SIZE  30
+#define GRID_SIZE 50
 
     class MeshHashGrid
     {
