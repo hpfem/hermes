@@ -368,8 +368,6 @@ namespace Hermes
         int refinement;
       };
 
-      static unsigned int get_instance_count();
-
       class HERMES_API MarkersConversion
       {
       public:
@@ -436,8 +434,6 @@ namespace Hermes
       };
 
     private:
-      static unsigned int instance_count;
-
       /// For internal use.
       void initial_single_check();
       static void initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes);

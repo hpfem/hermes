@@ -27,7 +27,6 @@ namespace Hermes
   {
     static const int H2D_DG_INNER_EDGE_INT = -1234567;
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
-    unsigned int Mesh::instance_count = 0;
 
     bool Node::is_constrained_vertex() const
     {
@@ -338,7 +337,6 @@ namespace Hermes
     {
       nbase = nactive = ntopvert = ninitial = 0;
       seq = g_mesh_seq++;
-      this->instance_count++;
     }
 
     Mesh::~Mesh() 
@@ -1104,11 +1102,6 @@ namespace Hermes
       return -1;
     }
 
-    unsigned int Mesh::get_instance_count()
-    {
-      return instance_count;
-    }
-
     void Mesh::refine_towards_vertex(int vertex_id, int depth, bool mark_as_initial)
     {
       rtv_id = vertex_id;
@@ -1459,8 +1452,6 @@ namespace Hermes
       unsigned int i;
 
       free();
-      // Serves as a Mesh::init() for purposes of pointer calculation.
-      this->instance_count++;
 
       // copy nodes and elements
       HashTable::copy(mesh.get());
@@ -1532,7 +1523,6 @@ namespace Hermes
     void Mesh::init(int size)
     {
       HashTable::init(size);
-      instance_count++;
     }
 
     void Mesh::copy_base(MeshSharedPtr mesh)
@@ -1602,7 +1592,6 @@ namespace Hermes
       this->element_markers_conversion.conversion_table_inverse.clear();
       this->refinements.clear();
       this->seq = -1;
-      instance_count--;
     }
 
     void Mesh::copy_converted(MeshSharedPtr mesh)

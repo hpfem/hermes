@@ -64,15 +64,11 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    unsigned int MeshFunction<Scalar>::instance_count = 0;
-
-    template<typename Scalar>
     MeshFunction<Scalar>::MeshFunction()
       : Function<Scalar>()
     {
       refmap = new RefMap;
       this->element = NULL;
-      instance_count++;
     }
 
     template<typename Scalar>
@@ -81,14 +77,6 @@ namespace Hermes
     {
       this->mesh = mesh;
       this->refmap = new RefMap;
-      instance_count++;
-    }
-
-
-    template<typename Scalar>
-    unsigned int MeshFunction<Scalar>::get_instance_count()
-    {
-      return instance_count;
     }
 
     template<typename Scalar>
@@ -133,13 +121,11 @@ namespace Hermes
     template<typename Scalar>
     void MeshFunction<Scalar>::free()
     {
-      instance_count--;
     }
 
     template<typename Scalar>
     void MeshFunction<Scalar>::init()
     {
-      instance_count++;
     }
 
     template<typename Scalar>
