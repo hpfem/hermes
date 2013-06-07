@@ -126,6 +126,34 @@ namespace Hermes
       }
     };
 
+    /// \brief A PARALUTION preconditioner.
+    ///
+    /// @ingroup preconds
+    template <typename Scalar>
+    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
+    {
+    public:
+      /// The preconditioner type.
+      enum ParalutionPrecondType
+      {
+        Jacobi,
+        MultiColoredSGS,
+        ILU,
+        MultiColoredILU,
+        IC,
+        AIChebyshev
+      };
+
+      /// Constructor.
+      /// \param[in] paralutionPrecondType The preconditioner type to create.
+      ParalutionPrecond(ParalutionPrecondType paralutionPrecondType);
+      
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
+    private:
+      // Paralution preconditioner
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
+    };
+
     /// \brief Encapsulation of PARALUTION linear solver.
     ///
     /// @ingroup Solvers
@@ -180,43 +208,19 @@ namespace Hermes
       /// Utility.
       virtual int get_matrix_size();
 
+    private:
+      /// Preconditioner.
+      ParalutionPrecond<Scalar> *preconditioner;
+
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
       ParalutionVector<Scalar> *rhs;
 
-      // Linear Solver
+      // Linear Solver.
       paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
 
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
-    };
-
-    /// \brief A PARALUTION preconditioner.
-    ///
-    /// @ingroup preconds
-    template <typename Scalar>
-    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
-    {
-    public:
-      /// The preconditioner type.
-      enum ParalutionPrecondType
-      {
-        Jacobi,
-        MultiColoredSGS,
-        ILU,
-        MultiColoredILU,
-        IC,
-        AIChebyshev
-      };
-
-      /// Constructor.
-      /// \param[in] paralutionPrecondType The preconditioner type to create.
-      ParalutionPrecond(ParalutionPrecondType paralutionPrecondType);
-      
-      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
-    private:
-      // Paralution preconditioner
-      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
     };
   }
 }

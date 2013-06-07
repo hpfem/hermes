@@ -223,7 +223,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    ParalutionLinearMatrixSolver<Scalar>::ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : IterSolver<Scalar>(), matrix(matrix), rhs(rhs)
+    ParalutionLinearMatrixSolver<Scalar>::ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : IterSolver<Scalar>(), matrix(matrix), rhs(rhs), preconditioner(NULL)
     {
       paralutionSolver = new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
       this->set_max_iters(10000);
@@ -232,6 +232,8 @@ namespace Hermes
     template<typename Scalar>
     ParalutionLinearMatrixSolver<Scalar>::~ParalutionLinearMatrixSolver()
     {
+      if(preconditioner)
+        delete preconditioner;
     }
 
     template<typename Scalar>
@@ -362,7 +364,7 @@ namespace Hermes
     {
       ParalutionPrecond<Scalar>* paralutionPreconditioner = dynamic_cast<ParalutionPrecond<Scalar>*>(pc);
       if(paralutionPreconditioner)
-        this->paralutionSolver->SetPreconditioner(paralutionPreconditioner->get_paralutionPreconditioner());
+        this->preconditioner = paralutionPreconditioner;
       else
         throw Hermes::Exceptions::Exception("A wrong preconditioner type passed to Paralution.");
     }
