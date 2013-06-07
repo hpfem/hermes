@@ -496,7 +496,7 @@ namespace Hermes
 
       // If the solver is iterative, give him the initial guess.
       Hermes::Solvers::IterSolver<Scalar>* iter_solver = dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(this->matrix_solver);
-      bool solved = iter_solver ? iter_solver->solve(coeff_vec) : matrix_solver->solve();
+      bool solved = iter_solver ? iter_solver->solve(coeff_vec) : this->matrix_solver->solve();
 
       if(solved)
       {

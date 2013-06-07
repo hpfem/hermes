@@ -23,6 +23,7 @@ namespace Hermes
   namespace Hermes2D
   {
     class MeshHashGrid;
+    class Mesh;
 
     class MeshHashGridElement
     {
