@@ -153,6 +153,7 @@ namespace Hermes
       /// This destroys the current solver (NOT the matrix, and rhs).
       void set_solver_type(ParalutionSolverType paralutionSolverType);
 
+      virtual bool solve(Scalar* initial_guess);
       virtual bool solve();
 
       /// Set the convergence tolerance.

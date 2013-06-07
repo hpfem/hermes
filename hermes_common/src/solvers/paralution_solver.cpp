@@ -272,9 +272,17 @@ namespace Hermes
     template<typename Scalar>
     bool ParalutionLinearMatrixSolver<Scalar>::solve()
     {
+      Scalar* initial_guess = new Scalar[this->get_matrix_size()];
+      bool result = this->solve(initial_guess);
+      delete [] initial_guess;
+      return result;
+    }
+
+    template<typename Scalar>
+    bool ParalutionLinearMatrixSolver<Scalar>::solve(Scalar* initial_guess)
+    {
       paralution::LocalVector<Scalar> x;
-      x.Allocate("x", matrix->get_size());
-      x.Zeros();
+      x.SetDataPtr(&initial_guess, "Initial guess", matrix->get_size());
 
       if(std::abs(rhs->get_paralutionVector().Norm()) < Hermes::epsilon)
       {
@@ -283,6 +291,7 @@ namespace Hermes
         return true;
       }
 
+      rhs->get_paralutionVector().WriteFileASCII("rhs");
       assert(matrix != NULL);
       assert(rhs != NULL);
       assert(matrix->get_size() == rhs->length());
@@ -295,7 +304,6 @@ namespace Hermes
       x.LeaveDataPtr(&this->sln);
       this->paralutionSolver->Clear();
 
-      x.Clear();
       return true;
     }
 

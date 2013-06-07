@@ -163,7 +163,15 @@ namespace Hermes
         DivergenceTolerance
       };
 
+      /// Solve.
+      /// @return true on succes
+      /// \param[in] initial guess.
+      virtual bool solve(Scalar* initial_guess) = 0;
+
+      /// Get the number of iterations performed.
       virtual int get_num_iters() = 0;
+      
+      /// Get the final residual.
       virtual double get_residual() = 0;
 
       /// Set the convergence tolerance.
