@@ -108,23 +108,23 @@ namespace Hermes
 
   namespace Solvers
   {
+    /// Utility class for PARALUTION initialization.
+    /// Methods called from HermesCommonApi.
     class HERMES_API ParalutionInitialization
     {
     public:
-      ParalutionInitialization()
+      static void init_paralution()
       {
         paralution::init_paralution();
         paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
         paralution::info_paralution();
       }
 
-      ~ParalutionInitialization()
+      static void deinit_paralution()
       {
         paralution::stop_paralution();
       }
     };
-
-    HERMES_COMMON_API extern ParalutionInitialization paralutionInitializer;
 
     /// \brief Encapsulation of PARALUTION linear solver.
     ///

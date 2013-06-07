@@ -222,17 +222,11 @@ namespace Hermes
   }
   namespace Solvers
   {
-#if defined(WIN32) || defined(_WINDOWS)
-    __declspec(dllexport) ParalutionInitialization paralutionInitializer;
-#else
-    ParalutionInitialization paralutionInitializer;
-#endif
-
     template<typename Scalar>
     ParalutionLinearMatrixSolver<Scalar>::ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *matrix, ParalutionVector<Scalar> *rhs) : IterSolver<Scalar>(), matrix(matrix), rhs(rhs)
     {
       paralutionSolver = new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-      this->set_max_iters(100);
+      this->set_max_iters(10000);
     }
 
     template<typename Scalar>
