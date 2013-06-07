@@ -244,27 +244,27 @@ namespace Hermes
 
       switch(paralutionSolverType)
       {
-        case CG:
-          {
-            this->paralutionSolver = new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-          }
-          break;
-        case GMRES:
-          {
-            this->paralutionSolver = new paralution::GMRES<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-          }
-          break;
-        case BiCGStab:
-          {
-            this->paralutionSolver = new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-          }
-          break;
-        case AMG:
-          {
-            this->paralutionSolver = new paralution::AMG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
-          }
-          break;
-        default:
+      case CG:
+        {
+          this->paralutionSolver = new paralution::CG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+        break;
+      case GMRES:
+        {
+          this->paralutionSolver = new paralution::GMRES<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+        break;
+      case BiCGStab:
+        {
+          this->paralutionSolver = new paralution::BiCGStab<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+        break;
+      case AMG:
+        {
+          this->paralutionSolver = new paralution::AMG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
+        }
+        break;
+      default:
         throw Hermes::Exceptions::Exception("A wrong Paralution solver type passed to ParalutionLinearMatrixSolver constructor.");
       }
 
@@ -299,6 +299,8 @@ namespace Hermes
       assert(matrix->get_size() == rhs->length());
 
       this->paralutionSolver->SetOperator(this->matrix->get_paralutionMatrix());
+      if(this->preconditioner)
+        this->paralutionSolver->SetPreconditioner(this->preconditioner->get_paralutionPreconditioner());
       this->paralutionSolver->Build();
 
       this->paralutionSolver->Solve(rhs->get_paralutionVector(), &x);
@@ -369,11 +371,13 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("A wrong preconditioner type passed to Paralution.");
     }
 
-    template<typename Scalar>
-    ParalutionPrecond<Scalar>::ParalutionPrecond(typename ParalutionPrecond<Scalar>::ParalutionPrecondType paralutionPrecondType) : Precond<Scalar>()
+    namespace Preconditioners
     {
-      switch(paralutionPrecondType)
+      template<typename Scalar>
+      ParalutionPrecond<Scalar>::ParalutionPrecond(typename ParalutionPrecond<Scalar>::ParalutionPrecondType paralutionPrecondType) : Precond<Scalar>()
       {
+        switch(paralutionPrecondType)
+        {
         case Jacobi:
           {
             this->paralutionPreconditioner = new paralution::Jacobi<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>();
@@ -405,18 +409,20 @@ namespace Hermes
           }
           break;
         default:
-        throw Hermes::Exceptions::Exception("A wrong Paralution preconditioner type passed to ParalutionPrecond constructor.");
+          throw Hermes::Exceptions::Exception("A wrong Paralution preconditioner type passed to ParalutionPrecond constructor.");
+        }
       }
-    }
 
-    template<typename Scalar>
-    paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& ParalutionPrecond<Scalar>::get_paralutionPreconditioner()
-    {
-      return (*this->paralutionPreconditioner);
+      template<typename Scalar>
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& ParalutionPrecond<Scalar>::get_paralutionPreconditioner()
+      {
+        return (*this->paralutionPreconditioner);
+      }
+
+      template class HERMES_API ParalutionPrecond<double>;
     }
 
     template class HERMES_API ParalutionLinearMatrixSolver<double>;
-    template class HERMES_API ParalutionPrecond<double>;
   }
 }
 #endif

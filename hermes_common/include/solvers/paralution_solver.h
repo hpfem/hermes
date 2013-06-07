@@ -126,33 +126,36 @@ namespace Hermes
       }
     };
 
-    /// \brief A PARALUTION preconditioner.
-    ///
-    /// @ingroup preconds
-    template <typename Scalar>
-    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
+    namespace Preconditioners
     {
-    public:
-      /// The preconditioner type.
-      enum ParalutionPrecondType
+      /// \brief A PARALUTION preconditioner.
+      ///
+      /// @ingroup preconds
+      template <typename Scalar>
+      class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
       {
-        Jacobi,
-        MultiColoredSGS,
-        ILU,
-        MultiColoredILU,
-        IC,
-        AIChebyshev
-      };
+      public:
+        /// The preconditioner type.
+        enum ParalutionPrecondType
+        {
+          Jacobi,
+          MultiColoredSGS,
+          ILU,
+          MultiColoredILU,
+          IC,
+          AIChebyshev
+        };
 
-      /// Constructor.
-      /// \param[in] paralutionPrecondType The preconditioner type to create.
-      ParalutionPrecond(ParalutionPrecondType paralutionPrecondType);
+        /// Constructor.
+        /// \param[in] paralutionPrecondType The preconditioner type to create.
+        ParalutionPrecond(ParalutionPrecondType paralutionPrecondType);
       
-      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
-    private:
-      // Paralution preconditioner
-      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
-    };
+        paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
+      private:
+        // Paralution preconditioner
+        paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
+      };
+    }
 
     /// \brief Encapsulation of PARALUTION linear solver.
     ///
@@ -210,7 +213,7 @@ namespace Hermes
 
     private:
       /// Preconditioner.
-      ParalutionPrecond<Scalar> *preconditioner;
+      Preconditioners::ParalutionPrecond<Scalar> *preconditioner;
 
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
