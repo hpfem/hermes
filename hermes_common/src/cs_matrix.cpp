@@ -808,9 +808,6 @@ namespace Hermes
     template<typename Scalar>
     void CSRMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
     {
-      CSMatrix<Scalar>::pre_add_ij(row, col);
-      return;
-
       if(this->pages[row] == NULL || this->pages[row]->count >= SparseMatrix<Scalar>::PAGE_SIZE)
       {
         typename SparseMatrix<Scalar>::Page *new_page = new typename SparseMatrix<Scalar>::Page;

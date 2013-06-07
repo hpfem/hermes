@@ -335,13 +335,13 @@ namespace Hermes
       switch(toleranceType)
       {
       case IterSolver<Scalar>::AbsoluteTolerance:
-        this->paralutionSolver->InitTol(tol, 1., 1.);
+        this->paralutionSolver->InitTol(tol, 0., std::numeric_limits<Scalar>::max());
         break;
       case IterSolver<Scalar>::RelativeTolerance:
-        this->paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), tol, 1.);
+        this->paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), tol, std::numeric_limits<Scalar>::max());
         break;
       case IterSolver<Scalar>::DivergenceTolerance:
-        this->paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), 1., tol);
+        this->paralutionSolver->InitTol(std::numeric_limits<Scalar>::max(), 0., tol);
         break;
       }
     }
