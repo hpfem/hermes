@@ -63,10 +63,10 @@ namespace Hermes
     class LinearSolver : public Solver<Scalar>
     {
     public:
-      LinearSolver();
-      LinearSolver(DiscreteProblem<Scalar>* dp);
-      LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
-      LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      LinearSolver(bool force_use_direct_solver = false);
+      LinearSolver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver = false);
+      LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver = false);
+      LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver = false);
       virtual ~LinearSolver();
 
       /// Basic solve method.

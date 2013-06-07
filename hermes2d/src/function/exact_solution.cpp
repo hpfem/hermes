@@ -47,36 +47,43 @@ namespace Hermes
       return 1;
     }
 
-    template<typename Scalar>
-    ExactSolutionConstantArray<Scalar>::ExactSolutionConstantArray(MeshSharedPtr mesh, Scalar* valueArray) : ExactSolutionScalar<Scalar>(mesh), valueArray(valueArray)
+    template<typename Scalar, typename ValueType>
+    ExactSolutionConstantArray<Scalar, ValueType>::ExactSolutionConstantArray(MeshSharedPtr mesh, ValueType* valueArray, bool deleteArray) : ExactSolutionScalar<Scalar>(mesh), valueArray(valueArray), deleteArray(deleteArray)
     {
     }
 
-    template<typename Scalar>
-    MeshFunction<Scalar>* ExactSolutionConstantArray<Scalar>::clone() const
+    template<typename Scalar, typename ValueType>
+    ExactSolutionConstantArray<Scalar, ValueType>::~ExactSolutionConstantArray()
     {
-      return new ExactSolutionConstantArray<Scalar>(this->mesh, this->valueArray);
+      if(this->deleteArray)
+        delete [] this->valueArray;
     }
 
-    template<typename Scalar>
-    Scalar ExactSolutionConstantArray<Scalar>::value (double x, double y) const
+    template<typename Scalar, typename ValueType>
+    MeshFunction<Scalar>* ExactSolutionConstantArray<Scalar, ValueType>::clone() const
+    {
+      return new ExactSolutionConstantArray<Scalar, ValueType>(this->mesh, this->valueArray);
+    }
+
+    template<typename Scalar, typename ValueType>
+    Scalar ExactSolutionConstantArray<Scalar, ValueType>::value (double x, double y) const
     {
       return this->valueArray[this->element->id];
     }
 
-    template<typename Scalar>
-    Ord ExactSolutionConstantArray<Scalar>::ord(Ord x, Ord y) const {
+    template<typename Scalar, typename ValueType>
+    Ord ExactSolutionConstantArray<Scalar, ValueType>::ord(Ord x, Ord y) const {
       return Ord(0);
     }
 
-    template<typename Scalar>
-    void ExactSolutionConstantArray<Scalar>::setArray(Scalar* valueArray)
+    template<typename Scalar, typename ValueType>
+    void ExactSolutionConstantArray<Scalar, ValueType>::setArray(ValueType* valueArray)
     {
       valueArray = valueArray;
     }
 
-    template<typename Scalar>
-    void ExactSolutionConstantArray<Scalar>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
+    template<typename Scalar, typename ValueType>
+    void ExactSolutionConstantArray<Scalar, ValueType>::derivatives (double x, double y, Scalar& dx, Scalar& dy) const {
       dx = 0;
       dy = 0;
     };
@@ -494,8 +501,11 @@ namespace Hermes
     template HERMES_API class ExactSolutionScalar<double>;
     template HERMES_API class ExactSolutionScalar<std::complex<double> >;
     
-    template HERMES_API class ExactSolutionConstantArray<double>;
-    template HERMES_API class ExactSolutionConstantArray<std::complex<double> >;
+    template HERMES_API class ExactSolutionConstantArray<double, double>;
+    template HERMES_API class ExactSolutionConstantArray<double, int>;
+    template HERMES_API class ExactSolutionConstantArray<double, unsigned int>;
+    template HERMES_API class ExactSolutionConstantArray<double, bool>;
+    template HERMES_API class ExactSolutionConstantArray<std::complex<double>, std::complex<double> >;
     
     template HERMES_API class ExactSolutionVector<double>;
     template HERMES_API class ExactSolutionVector<std::complex<double> >;

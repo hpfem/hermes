@@ -50,6 +50,23 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    MeshFunctionSharedPtr<double> ErrorCalculator<Scalar>::get_errorMeshFunction(int component)
+    {
+      if(component >= this->component_count)
+        throw Exceptions::ValueException("component", component, this->component_count);
+
+      // The value is ready to be returned if it has been initialized and no other error calculation has been
+      // performed since.
+      if(this->errorMeshFunction[component])
+        return this->errorMeshFunction[component];
+      else
+      {
+        this->errorMeshFunction[component].reset(new ExactSolutionConstantArray<double, double>(coarse_solutions[component]->get_mesh(), this->errors[component]));
+        return this->errorMeshFunction[component];
+      }
+    }
+
+    template<typename Scalar>
     void ErrorCalculator<Scalar>::init_data_storage()
     {
       this->num_act_elems = 0;
@@ -101,6 +118,11 @@ namespace Hermes
           this->element_references[running_count_total++] = ErrorCalculator<Scalar>::ElementReference(i, e->id, &this->errors[i][e->id], &this->norms[i][e->id]);
         }
       }
+
+      // Also handle the errorMeshFunction.
+      for(int i = 0; i < this->component_count; i++)
+        if(this->errorMeshFunction[i])
+          this->errorMeshFunction[i].reset();
     }
 
     template<typename Scalar>

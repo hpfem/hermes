@@ -16,6 +16,7 @@
 #include "adapt.h"
 #include "projections/ogprojection.h"
 #include "refinement_selectors/candidates.h"
+#include "function/exact_solution.h"
 
 namespace Hermes
 {
@@ -96,6 +97,8 @@ namespace Hermes
     template<typename Scalar>
     Adapt<Scalar>::~Adapt()
     {
+      if(elements_to_refine)
+        delete [] elements_to_refine;
     }
 
     template<typename Scalar>
@@ -136,6 +139,8 @@ namespace Hermes
           throw Exceptions::NullException(0, i);
         spaces[i]->check();
       }
+
+      elements_to_refine = NULL;
     }
 
     template<typename Scalar>
@@ -193,6 +198,15 @@ namespace Hermes
         meshes[j] = this->spaces[j]->get_mesh();
         element_refinement_location[j] = (ElementToRefine**)calloc(meshes[j]->get_max_element_id() + 1, sizeof(ElementToRefine*));
       }
+
+      // Clearing.
+      if(elements_to_refine)
+        delete [] elements_to_refine;
+
+      // Also handle the refinementInfoMeshFunction.
+      for(int i = 0; i < this->num; i++)
+        if(this->refinementInfoMeshFunction[i])
+          this->refinementInfoMeshFunction[i].reset();
     }
 
     template<typename Scalar>
@@ -240,7 +254,8 @@ namespace Hermes
       this->info("\tAdaptivity: data preparation duration: %f s.", this->last());
 
       // List of indices of elements that are going to be processed
-      ElementToRefine* elements_to_refine = new ElementToRefine[attempted_element_refinements_count];
+      this->elements_to_refine_count = attempted_element_refinements_count;
+      this->elements_to_refine = new ElementToRefine[elements_to_refine_count];
 
       // Projected solutions obtaining.
       MeshFunctionSharedPtr<Scalar>* rslns = new MeshFunctionSharedPtr<Scalar>[this->num];
@@ -306,7 +321,7 @@ namespace Hermes
               this->caughtException = new std::exception(exception);
           }
         }
-      
+
         delete [] current_rslns;
       }
 
@@ -333,7 +348,6 @@ namespace Hermes
       homogenize_shared_mesh_orders(meshes);
 
       this->deinit_adapt(element_refinement_location);
-      delete [] elements_to_refine;
 
       this->adapt_postprocess(meshes, attempted_element_refinements_count);
 
@@ -392,6 +406,39 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    MeshFunctionSharedPtr<double> Adapt<Scalar>::get_refinementInfoMeshFunction(int component)
+    {
+      if(component >= this->num)
+        throw Exceptions::ValueException("component", component, this->num);
+
+      // The value is ready to be returned if it has been initialized and no other adaptivity run has been performed since.
+      if(this->refinementInfoMeshFunction[component])
+        return this->refinementInfoMeshFunction[component];
+      else
+      {
+        int* info_array = new int[this->spaces[component]->get_mesh()->get_num_elements()];
+        memset(info_array, 0, sizeof(int) * this->spaces[component]->get_mesh()->get_num_elements());
+        for(int i = 0; i < this->elements_to_refine_count; i++)
+        {
+          if(this->elements_to_refine[i].comp == component)
+          {
+            if(this->elements_to_refine[i].split == 0)
+              info_array[this->elements_to_refine[i].id] = 2;
+            else
+            {
+              int id;
+              for(int sons_i = 0; sons_i < H2D_MAX_ELEMENT_SONS; sons_i++)
+                if(this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i])
+                  info_array[this->spaces[component]->get_mesh()->get_element(this->elements_to_refine[i].id)->sons[sons_i]->id] = this->elements_to_refine[i].split == 1 ? 1 : 2;
+            }
+          }
+        }
+        this->refinementInfoMeshFunction[component].reset(new ExactSolutionConstantArray<double, int>(spaces[component]->get_mesh(), info_array, true));
+        return this->refinementInfoMeshFunction[component];
+      }
+    }
+
+    template<typename Scalar>
     bool Adapt<Scalar>::adapt(RefinementSelectors::Selector<Scalar>* refinement_selector)
     {
       if(!refinement_selector)
@@ -407,7 +454,7 @@ namespace Hermes
       // Simple returns.
       if(this->num == 1)
         return;
-      
+
       // For additions.
       std::vector<ElementToRefine> new_elems_to_refine;
 
@@ -452,7 +499,7 @@ namespace Hermes
             elem_ref.split = selected_refinement;
             ElementToRefine::copy_orders(elem_ref.refinement_polynomial_order, elem_ref.best_refinement_polynomial_order_type[selected_refinement]);
           }
-              
+
           //update orders
           for (int j = 0; j < this->num; j++)
           {

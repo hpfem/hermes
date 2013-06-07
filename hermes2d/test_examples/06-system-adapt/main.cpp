@@ -70,6 +70,8 @@ const double K = 100.;
 
 int main(int argc, char* argv[])
 {
+  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION);
+
   // Time measurement.
   Hermes::Mixins::TimeMeasurable cpu_time;
   cpu_time.tick();
@@ -134,8 +136,6 @@ int main(int argc, char* argv[])
   NewtonSolver<double> newton;
 
   newton.set_weak_formulation(&wf);
-
-  newton.set_tolerance(1e-1);
 
   // Adaptivity loop:
   int as = 1;

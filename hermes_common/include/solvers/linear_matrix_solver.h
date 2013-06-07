@@ -163,7 +163,15 @@ namespace Hermes
         DivergenceTolerance
       };
 
+      /// Solve.
+      /// @return true on succes
+      /// \param[in] initial guess.
+      virtual bool solve(Scalar* initial_guess) = 0;
+
+      /// Get the number of iterations performed.
       virtual int get_num_iters() = 0;
+      
+      /// Get the final residual.
       virtual double get_residual() = 0;
 
       /// Set the convergence tolerance.
@@ -199,7 +207,7 @@ namespace Hermes
     /// @return created linear solver
     template<typename Scalar>
     HERMES_API LinearMatrixSolver<Scalar>*
-      create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
+      create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs, bool use_direct_solver = false);
   }
 }
 /*@}*/ // End of documentation group Solvers.

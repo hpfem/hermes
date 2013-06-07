@@ -106,25 +106,56 @@ namespace Hermes
     };
   }
 
+  namespace Preconditioners
+  {
+    /// \brief A PARALUTION preconditioner.
+    ///
+    /// @ingroup preconds
+    template <typename Scalar>
+    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
+    {
+    public:
+      /// The preconditioner type.
+      enum ParalutionPreconditionerType
+      {
+        Jacobi,
+        MultiColoredSGS,
+        ILU,
+        MultiColoredILU,
+        IC,
+        AIChebyshev
+      };
+
+      /// Constructor.
+      /// \param[in] paralutionPrecondType The preconditioner type to create.
+      ParalutionPrecond(ParalutionPreconditionerType paralutionPrecondType);
+      
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
+    private:
+      // Paralution preconditioner
+      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
+    };
+  }
+
   namespace Solvers
   {
+    /// Utility class for PARALUTION initialization.
+    /// Methods called from HermesCommonApi.
     class HERMES_API ParalutionInitialization
     {
     public:
-      ParalutionInitialization()
+      static void init_paralution()
       {
         paralution::init_paralution();
         paralution::set_omp_threads_paralution(HermesCommonApi.get_integral_param_value(numThreads));
         paralution::info_paralution();
       }
 
-      ~ParalutionInitialization()
+      static void deinit_paralution()
       {
         paralution::stop_paralution();
       }
     };
-
-    HERMES_COMMON_API extern ParalutionInitialization paralutionInitializer;
 
     /// \brief Encapsulation of PARALUTION linear solver.
     ///
@@ -153,6 +184,7 @@ namespace Hermes
       /// This destroys the current solver (NOT the matrix, and rhs).
       void set_solver_type(ParalutionSolverType paralutionSolverType);
 
+      virtual bool solve(Scalar* initial_guess);
       virtual bool solve();
 
       /// Set the convergence tolerance.
@@ -179,43 +211,25 @@ namespace Hermes
       /// Utility.
       virtual int get_matrix_size();
 
+    private:
+      /// Preconditioner.
+      Preconditioners::ParalutionPrecond<Scalar> *preconditioner;
+
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
       ParalutionVector<Scalar> *rhs;
 
-      // Linear Solver
-      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
+      // Paralution solver type.
+      ParalutionSolverType paralutionSolverType;
+
+      // Linear Solver.
+      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* create_paralutionSolver();
+      
+      // Store num_iters.
+      int num_iters;
 
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
-    };
-
-    /// \brief A PARALUTION preconditioner.
-    ///
-    /// @ingroup preconds
-    template <typename Scalar>
-    class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
-    {
-    public:
-      /// The preconditioner type.
-      enum ParalutionPrecondType
-      {
-        Jacobi,
-        MultiColoredSGS,
-        ILU,
-        MultiColoredILU,
-        IC,
-        AIChebyshev
-      };
-
-      /// Constructor.
-      /// \param[in] paralutionPrecondType The preconditioner type to create.
-      ParalutionPrecond(ParalutionPrecondType paralutionPrecondType);
-      
-      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
-    private:
-      // Paralution preconditioner
-      paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
     };
   }
 }

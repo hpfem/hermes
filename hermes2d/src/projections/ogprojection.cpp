@@ -37,7 +37,7 @@ namespace Hermes
       dp.set_do_not_use_cache();
 
       // Initialize linear solver.
-      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp);
+      Hermes::Hermes2D::LinearSolver<Scalar> linear_solver(&dp, true);
       linear_solver.set_verbose_output(false);
 
       // Perform Newton iteration.
@@ -145,6 +145,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: norm = HERMES_L2_NORM; break;
+        case HERMES_UTILITY_L2_SPACES: norm = HERMES_L2_NORM; break;
         default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
         }
       }
@@ -180,6 +181,7 @@ namespace Hermes
         case HERMES_HCURL_SPACE: proj_norm = HERMES_HCURL_NORM; break;
         case HERMES_HDIV_SPACE: proj_norm = HERMES_HDIV_NORM; break;
         case HERMES_L2_SPACE: proj_norm = HERMES_L2_NORM; break;
+        case HERMES_UTILITY_L2_SPACES: proj_norm = HERMES_L2_NORM; break;
         default: throw Hermes::Exceptions::Exception("Unknown space type in OGProjection<Scalar>::project_global().");
         }
       }

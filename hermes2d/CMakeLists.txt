@@ -133,7 +133,9 @@ project(hermes2d)
     src/mesh/mesh_h2d_xml.cpp
     src/mesh/mesh_h1d_xml.cpp
     src/mesh/subdomains_h2d_xml.cpp
+    src/mesh/element.cpp
     src/mesh/mesh.cpp
+    src/mesh/mesh_util.cpp
     src/mesh/traverse.cpp
     src/mesh/mesh_data.cpp
 
@@ -256,7 +258,9 @@ project(hermes2d)
     src/mesh/mesh_h2d_xml.cpp
     src/mesh/mesh_h1d_xml.cpp
     src/mesh/subdomains_h2d_xml.cpp
+    src/mesh/element.cpp
     src/mesh/mesh.cpp
+    src/mesh/mesh_util.cpp
     src/mesh/traverse.cpp
     src/mesh/mesh_data.cpp
   )
@@ -385,7 +389,9 @@ project(hermes2d)
     include/mesh/mesh_h2d_xml.h
     include/mesh/mesh_h1d_xml.h
     include/mesh/subdomains_h2d_xml.h
+    include/mesh/element.h
     include/mesh/mesh.h
+    include/mesh/mesh_util.h
     include/mesh/traverse.h
     include/mesh/mesh_data.h
 
@@ -509,7 +515,9 @@ project(hermes2d)
     include/mesh/mesh_h2d_xml.h
     include/mesh/mesh_h1d_xml.h
     include/mesh/subdomains_h2d_xml.h
+    include/mesh/element.h
     include/mesh/mesh.h
+    include/mesh/mesh_util.h
     include/mesh/traverse.h
     include/mesh/mesh_data.h
   )

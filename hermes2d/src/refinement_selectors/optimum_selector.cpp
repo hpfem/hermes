@@ -14,10 +14,7 @@ namespace Hermes
       template<typename Scalar>
       OptimumSelector<Scalar>::OptimumSelector(CandList cand_list, int
         max_order, Shapeset* shapeset, const Range& vertex_order, const
-        Range& edge_bubble_order) :
-      Selector<Scalar>(shapeset->get_min_order(), max_order),
-        cand_list(cand_list),
-        shapeset(shapeset)
+        Range& edge_bubble_order) : Selector<Scalar>(shapeset->get_min_order(), max_order), cand_list(cand_list), shapeset(shapeset), dof_score_exponent(1.0)
       {
         if(shapeset == NULL)
           throw Exceptions::NullException(3);
@@ -556,6 +553,12 @@ namespace Hermes
       }
 
       template<typename Scalar>
+      void OptimumSelector<Scalar>::set_dof_score_exponent(double exponent)
+      {
+        this->dof_score_exponent = exponent;
+      }
+
+      template<typename Scalar>
       void OptimumSelector<Scalar>::evaluate_cands_score(Hermes::vector<Cand>& candidates, Element* e)
       {
         // Original candidate.
@@ -569,7 +572,7 @@ namespace Hermes
 
           // We are only interested in candidates decreasing the error.
           if(candidate.error < unrefined.error)
-            candidate.score = (log(unrefined.error / candidate.error)) / (candidate.dofs - unrefined.dofs);
+            candidate.score = (log(unrefined.error / candidate.error)) / std::pow(candidate.dofs - unrefined.dofs, this->dof_score_exponent);
           else
             candidate.score = 0;
         }

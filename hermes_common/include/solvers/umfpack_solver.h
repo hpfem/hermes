@@ -85,7 +85,7 @@ namespace Hermes
       Scalar *v;
       template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::CSCIterator;
-      template<typename T> friend Vector<T>* Hermes::Algebra::create_vector();
+      template<typename T> friend Vector<T>* Hermes::Algebra::create_vector(bool);
     };
   }
   namespace Solvers
@@ -122,7 +122,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool);
       void check_status(const char *fn_name, int status);
 
       /// For output (the array Info is filled regardless of the value of the level).

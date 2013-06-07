@@ -491,7 +491,14 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve_linear_system(Scalar* coeff_vec)
     {
-      if(this->matrix_solver->solve())
+      // store the previous coeff_vec to coeff_vec_back.
+      memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
+
+      // If the solver is iterative, give him the initial guess.
+      Hermes::Solvers::IterSolver<Scalar>* iter_solver = dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(this->matrix_solver);
+      bool solved = iter_solver ? iter_solver->solve(coeff_vec) : matrix_solver->solve();
+
+      if(solved)
       {
         if(this->do_UMFPACK_reporting)
         {
@@ -504,22 +511,38 @@ namespace Hermes
           }
         }
 
-        // store the previous coeff_vec to coeff_vec_back.
-        memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
-
-        // obtain the solution increment.
-        Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
-
+        // Get current damping factor.
         double current_damping_coefficient = this->get_parameter_value(this->p_damping_coefficients).back();
 
         // store the solution norm change.
-        this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(sln_vector_local, ndof);
+        // Iterative solvers directly use coeff_vec, so we have to take this into account.
+        if(iter_solver)
+        {
+          // 1. store the solution.
+          for (int i = 0; i < ndof; i++)
+            coeff_vec[i] *= current_damping_coefficient;
 
-        // add the increment to the solution.
-        for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += current_damping_coefficient * sln_vector_local[i];
+          // 2. store the solution change.
+          Scalar* difference = new Scalar[ndof];
+          for(int i = 0; i < ndof; i++)
+            difference[i] = coeff_vec[i] - coeff_vec_back[i];
+          this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(difference, ndof);
+          delete [] difference;
+        }
+        else
+        {
+          // obtain the solution increment.
+          Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
 
-        // store the solution norm.
+          // 1. store the solution.
+          for (int i = 0; i < ndof; i++)
+            coeff_vec[i] += current_damping_coefficient * sln_vector_local[i];
+
+          // 2. store the solution change.
+          this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(sln_vector_local, ndof);
+        }
+
+        // 3. store the solution norm.
         this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
       }
       else

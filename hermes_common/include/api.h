@@ -32,7 +32,8 @@ namespace Hermes
   {
     exceptionsPrintCallstack,
     numThreads,
-    matrixSolverType
+    matrixSolverType,
+    directMatrixSolverType
   };
 
   /// API Class containing settings for the whole HermesCommon.
@@ -41,6 +42,13 @@ namespace Hermes
   public:
     Api();
     ~Api();
+
+    /// Internal.
+    /// Setter handler type.
+    /// Serve for a custom reaction to some parameter settings.
+    /// Such a handler must be registered in the map setter_handlers.
+    typedef void (*SetterHandler)();
+
   protected:
     /// Parameter class, representing one parameter.
     /// Its identifier is a string identifier according to which, the instance is inserted into Api::parameters.
@@ -54,10 +62,23 @@ namespace Hermes
       int user_val;
       int default_val;
     };
+
     /// The storage of parameters.
     /// This storage is not optimized for speed, but for comfort of users.
     /// There should not be any parameters, values of which are sought very often, because of the above reason.
     std::map<HermesCommonApiParam, Parameter*> parameters;
+
+    /// Internal.
+    /// Setter handlers.
+    /// Purpose: when a parameter is set (such as the linear solver), some action might have to be taken to
+    /// serve the event.
+    std::map<std::pair<HermesCommonApiParam, int>, SetterHandler> setter_handlers;
+
+    /// Internal.
+    /// Change handlers.
+    /// Used when the value of a particular parameter changes from the served one to another.
+    /// Also used in destructor.
+    std::map<std::pair<HermesCommonApiParam, int>, SetterHandler> change_handlers;
 
   public:
     int get_integral_param_value(HermesCommonApiParam);

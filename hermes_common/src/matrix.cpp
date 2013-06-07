@@ -228,9 +228,9 @@ namespace Hermes
     }
 
     template<>
-    HERMES_API SparseMatrix<double>* create_matrix()
+    HERMES_API SparseMatrix<double>* create_matrix(bool use_direct_solver)
     {
-      switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
       case Hermes::SOLVER_AMESOS:
         {
@@ -243,6 +243,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_AZTECOO:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
           return new EpetraMatrix<double>;
 #else
@@ -261,6 +263,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PETSC:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
           return new PetscMatrix<double>;
 #else
@@ -279,6 +283,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PARALUTION:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
           return new ParalutionMatrix<double>;
 #else
@@ -302,9 +308,9 @@ namespace Hermes
     }
 
     template<>
-    HERMES_API Vector<double>* create_vector()
+    HERMES_API Vector<double>* create_vector(bool use_direct_solver)
     {
-      switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
       case Hermes::SOLVER_AMESOS:
         {
@@ -317,6 +323,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_AZTECOO:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
           return new EpetraVector<double>;
 #else
@@ -335,6 +343,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PETSC:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
           return new PetscVector<double>;
 #else
@@ -353,6 +363,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PARALUTION:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
           return new ParalutionVector<double>;
 #else
@@ -376,9 +388,9 @@ namespace Hermes
     }
 
     template<>
-    HERMES_API SparseMatrix<std::complex<double> >* create_matrix()
+    HERMES_API SparseMatrix<std::complex<double> >* create_matrix(bool use_direct_solver)
     {
-      switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
       case Hermes::SOLVER_AMESOS:
         {
@@ -391,6 +403,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_AZTECOO:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
           return new EpetraMatrix<std::complex<double> >;
 #else
@@ -409,6 +423,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PETSC:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
           return new PetscMatrix<std::complex<double> >;
 #else
@@ -427,6 +443,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PARALUTION:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
           throw Hermes::Exceptions::Exception("PARALUTION works only for real problems.");
 #else
@@ -450,9 +468,9 @@ namespace Hermes
     }
 
     template<>
-    HERMES_API Vector<std::complex<double> >* create_vector()
+    HERMES_API Vector<std::complex<double> >* create_vector(bool use_direct_solver)
     {
-      switch (Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
+      switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
       case Hermes::SOLVER_AMESOS:
         {
@@ -465,6 +483,9 @@ namespace Hermes
         }
       case Hermes::SOLVER_AZTECOO:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver AztecOO selected as a direct solver.");
+
 #if defined HAVE_AZTECOO && defined HAVE_EPETRA
           return new EpetraVector<std::complex<double> >;
 #else
@@ -483,6 +504,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PETSC:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PETSc selected as a direct solver.");
 #ifdef WITH_PETSC
           return new PetscVector<std::complex<double> >;
 #else
@@ -501,6 +524,8 @@ namespace Hermes
         }
       case Hermes::SOLVER_PARALUTION:
         {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
           throw Hermes::Exceptions::Exception("PARALUTION works only for real problems.");
 #else

@@ -145,10 +145,7 @@ namespace Hermes
 
       /// Returns the order of the edge number edge of the current active element.
       virtual int get_edge_fn_order(int edge);
-
-      static unsigned int get_instance_count();
     protected:
-      static unsigned int instance_count;
       ElementMode2D mode;
       MeshSharedPtr mesh;
       RefMap* refmap;

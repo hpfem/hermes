@@ -703,16 +703,111 @@ namespace Hermes
     template<>
     bool CSRMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
-      throw Exceptions::MethodNotImplementedException("CSRMatrix<double>::dump");
-      return false;
+      switch (fmt)
+      {
+      case DF_MATLAB_SPARSE:
+        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
+          this->size, this->size, nnz, nnz);
+        for (unsigned int j = 0; j < this->size; j++)
+          for (int i = Ap[j]; i < Ap[j + 1]; i++)
+          {
+            fprintf(file, "%d %d ", j + 1, Ai[i] + 1);
+            Hermes::Helpers::fprint_num(file, Ax[i], number_format);
+            fprintf(file, "\n");
+          }
+          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+
+          return true;
+
+      case DF_MATRIX_MARKET:
+        {
+          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
+          int nnz_sym = 0;
+          for (unsigned int j = 0; j < this->size; j++)
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+              if((int)j <= Ai[i]) nnz_sym++;
+          fprintf(file, "%d %d %d\n", this->size, this->size, nnz_sym);
+          for (unsigned int j = 0; j < this->size; j++)
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+              // The following line was replaced with the one below, because it gave a warning
+                // to cause code abort at runtime.
+                  //if(j <= Ai[i]) fprintf(file, "%d %d %24.15e\n", Ai[i] + 1, j + 1, Ax[i]);
+                    if((int)j <= Ai[i])
+                    {
+                      fprintf(file, "%d %d ", (int)j + 1, Ai[i] + 1);
+                      Hermes::Helpers::fprint_num(file, Ax[i], number_format);
+                      fprintf(file, "\n");
+                    }
+
+                    return true;
+        }
+
+      case DF_HERMES_BIN:
+        {
+          hermes_fwrite("HERMESX\001", 1, 8, file);
+          int ssize = sizeof(double);
+          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(double), nnz, file);
+          return true;
+        }
+
+      case DF_PLAIN_ASCII:
+        exit(1);
+        {
+          const double zero_cutoff = Hermes::epsilon;
+          double *ascii_entry_buff = new double[nnz];
+          int *ascii_entry_i = new int[nnz];
+          int *ascii_entry_j = new int[nnz];
+          int k = 0;
+
+          // If real or imaginary part of Scalar entry is below zero_cutoff
+          // it's not included in ascii file, and number of non-zeros is reduced by one.
+          for (unsigned int j = 0; j < size; j++)
+          {
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            {
+              if(real(Ax[i]) > zero_cutoff || imag(Ax[i]) > zero_cutoff)
+              {
+                ascii_entry_buff[k] = Ax[i];
+                ascii_entry_i[k] = j;
+                ascii_entry_j[k] = Ai[i];
+                k++;
+              }
+              else
+                nnz -= 1;
+            }
+          }
+
+          fprintf(file, "%d\n", size);
+          fprintf(file, "%d\n", nnz);
+          for (unsigned int k = 0; k < nnz; k++)
+            fprintf(file, "%d %d %f\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k]);
+
+          //Free memory
+          delete [] ascii_entry_buff;
+          delete [] ascii_entry_i;
+          delete [] ascii_entry_j;
+
+          //Clear pointer
+          ascii_entry_buff = NULL;
+          ascii_entry_i = NULL;
+          ascii_entry_j = NULL;
+
+          return true;
+        }
+
+      default:
+        return false;
+      }
     }
 
     template<typename Scalar>
     void CSRMatrix<Scalar>::pre_add_ij(unsigned int row, unsigned int col)
     {
-      CSMatrix<Scalar>::pre_add_ij(row, col);
-      return;
-
       if(this->pages[row] == NULL || this->pages[row]->count >= SparseMatrix<Scalar>::PAGE_SIZE)
       {
         typename SparseMatrix<Scalar>::Page *new_page = new typename SparseMatrix<Scalar>::Page;

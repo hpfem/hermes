@@ -91,6 +91,9 @@ namespace Hermes
       /// A queue of elements which should be processes. The queue had to be filled by the method fill_regular_queue().
       const ElementReference& get_element_reference(unsigned int id) const;
       
+      /// Return the error mesh function - for visualization and other postprocessing of the element-wise error.
+      /// \param component The component.
+      MeshFunctionSharedPtr<double> get_errorMeshFunction(int component = 0);
     protected:
       /// State querying helpers.
       virtual bool isOkay() const;
@@ -130,6 +133,9 @@ namespace Hermes
       int element_count[H2D_MAX_COMPONENTS];
       double  errors_squared_sum;
       double  norms_squared_sum;
+
+      /// Error mesh function - for visualization and other postprocessing of the element-wise error.
+      MeshFunctionSharedPtr<double> errorMeshFunction[H2D_MAX_COMPONENTS];
 
       /// Holds volumetric matrix forms.
       Hermes::vector<NormFormVol<Scalar> *> mfvol;

@@ -1140,6 +1140,8 @@ namespace Hermes
         case HERMES_L2_SPACE:
           xmlsolution.space().set("l2");
           break;
+        default:
+          throw Exceptions::Exception("This type of solution can not be saved.");
         }
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
@@ -1200,6 +1202,8 @@ namespace Hermes
         case HERMES_L2_SPACE:
           xmlsolution.space().set("l2");
           break;
+        default:
+          throw Exceptions::Exception("This type of solution can not be saved.");
         }
 
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)

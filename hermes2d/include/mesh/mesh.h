@@ -16,19 +16,10 @@
 #ifndef __H2D_MESH_H
 #define __H2D_MESH_H
 
-#include "../global.h"
-#include "curved.h"
+#include "element.h"
+#include "mesh_util.h"
 #include "hash.h"
 #include "../mixins2d.h"
-
-
-namespace Hermes
-{
-  namespace Hermes2D
-  {
-    class Mesh;
-  }
-}
 
 #ifdef _WINDOWS
 typedef std::shared_ptr<Hermes::Hermes2D::Mesh> MeshSharedPtr;
@@ -40,12 +31,6 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    enum ///< node types
-    {
-      HERMES_TYPE_VERTEX = 0,
-      HERMES_TYPE_EDGE = 1
-    };
-
     class Element;
     class HashTable;
 
@@ -66,149 +51,6 @@ namespace Hermes
       template<typename Scalar> class L2ProjBasedSelector;
       template<typename Scalar> class HcurlProjBasedSelector;
     }
-
-    namespace Views
-    {
-      class MeshView;
-    }
-
-    /// \brief Stores one node of a mesh.
-    ///
-    /// There are are two variants of this structure, depending on the value of
-    /// the member 'type':
-    /// <ol> <li> HERMES_TYPE_VERTEX -- vertex node. Has physical coordinates x, y.
-    ///&nbsp;   <li> HERMES_TYPE_EDGE   -- edge node. Only stores edge marker and two element pointers.
-    /// </ol>
-    ///
-    struct HERMES_API Node
-    {
-      int id;          ///< node id number
-      unsigned ref:29; ///< the number of elements using the node
-      unsigned type:1; ///< 0 = vertex node; 1 = edge node
-      unsigned bnd:1;  ///< 1 = boundary node; 0 = inner node
-      unsigned used:1; ///< array item usage flag
-
-      union
-      {
-        struct
-        {
-          double x, y; ///< vertex node coordinates
-        };
-        struct
-        {
-          int marker;       ///< edge marker
-          Element* elem[2]; ///< elements sharing the edge node
-        };
-      };
-
-      int p1, p2; ///< parent id numbers
-      Node* next_hash; ///< next node in hash synonym list
-
-      /// Returns true if the (vertex) node is constrained.
-      bool is_constrained_vertex() const;
-
-      void ref_element(Element* e = NULL);
-      void unref_element(HashTable* ht, Element* e = NULL);
-    };
-
-    /// \brief Stores one element of a mesh.
-    ///
-    /// The element can be a triangle or a quad (nvert == 3 or nvert = 4), active or inactive.
-    ///
-    /// Vertex/node index number
-    ///&nbsp;    [2]
-    ///&nbsp;(3)-------(2)
-    ///&nbsp; |         |
-    ///[3]|  quad.  |[1]
-    ///&nbsp; |         |
-    ///&nbsp;(0)-------(1)
-    ///&nbsp;    [0]
-    /// Active elements are actual existing elements in the mesh, which take part in the
-    /// computation. Inactive elements are those which have once been active, but were refined,
-    /// ie., replaced by several other (smaller) son elements. The purpose of the union is the
-    /// following. Active elements store pointers to their vertex and edge nodes. Inactive
-    /// elements store pointers to thier son elements and to vertex nodes.
-    ///
-    /// If an element has curved edges, the member 'cm' points to an associated CurvMap structure,
-    /// otherwise it is NULL.
-    ///
-    class HERMES_API Element
-    {
-    public:
-      Element();
-      int id;              ///< element id number
-      bool active;   ///< 0 = active, no sons; 1 = inactive (refined), has sons
-      bool used;     ///< array item usage flag
-      Element* parent;     ///< pointer to the parent element for the current son
-      bool visited;        ///< true if the element has been visited during assembling
-
-      /// Calculates the area of the element.
-      /// \param[in] precise_for_curvature If curved elements should be evaluated exactly. \
-      /// This takes much longer.
-      double get_area(bool precise_for_curvature = false);
-
-      /// Returns the length of the longest edge for triangles, and the
-      /// length of the longer diagonal for quads. Ignores element curvature.
-      double get_diameter();
-
-      /// Returns the center of gravity.
-      void get_center(double& x, double& y);
-
-      Node* vn[H2D_MAX_NUMBER_VERTICES];   ///< vertex node pointers
-      union
-      {
-        Node* en[H2D_MAX_NUMBER_EDGES];      ///< edge node pointers
-        Element* sons[H2D_MAX_ELEMENT_SONS]; ///< son elements (up to four)
-      };
-
-      int marker;        ///< element marker
-
-      // returns the edge orientation. This works for the unconstrained edges.
-      int get_edge_orientation(int ie) const;
-      ElementMode2D  get_mode() const;
-
-      bool is_triangle() const;
-      bool is_quad() const;
-      bool is_curved() const;
-      int get_nvert() const;
-
-      bool hsplit() const;
-      bool vsplit() const;
-      bool bsplit() const;
-
-      CurvMap* cm; ///< curved mapping, NULL if not curvilinear
-      /// Serves for saving the once calculated area of this element.
-      bool areaCalculated;
-      /// Serves for saving the once calculated area of this element.
-      double area;
-
-      bool center_set;
-      double x_center, y_center;
-
-      /// Serves for saving the once calculated diameter of this element.
-      bool diameterCalculated;
-      /// Serves for saving the once calculated diameter of this element.
-      double diameter;
-
-      /// Increase in integration order, see RefMap::calc_inv_ref_order()
-      int iro_cache;
-
-      /// Helper functions to obtain the index of the next or previous vertex/edge
-      int next_vert(int i) const;
-      int prev_vert(int i) const;
-
-      /// Returns a pointer to the neighboring element across the edge 'ie', or
-      /// NULL if it does not exist or is across an irregular edge.
-      Element* get_neighbor(int ie) const;
-
-      /// Internal.
-      void ref_all_nodes();
-      /// Internal.
-      void unref_all_nodes(HashTable* ht);
-      
-      unsigned nvert:30; ///< number of vertices (3 or 4)
-    };
-
     /// \brief Represents a finite element mesh.
     /// Typical usage:
     /// MeshSharedPtr mesh;
@@ -252,9 +94,18 @@ namespace Hermes
       void create(int nv, double2* verts, int nt, int3* tris, std::string* tri_markers,
         int nq, int4* quads, std::string* quad_markers, int nm, int2* mark, std::string* boundary_markers);
 
-      /// Frees all data associated with the mesh.
-      void free();
+#pragma region MeshHashGrid
+      /// Returns the element pointer located at physical coordinates x, y.
+      /// \param[in] x Physical x-coordinate.
+      /// \param[in] y Physical y-coordinate.
+      /// \param[in] x_reference Optional parameter, in which the x-coordinate of x in the reference domain will be returned.
+      /// \param[in] y_reference Optional parameter, in which the y-coordinate of y in the reference domain will be returned.
+      Element* element_on_physical_coordinates(double x, double y);
 
+      MeshHashGrid* meshHashGrid;
+#pragma endregion
+
+#pragma region getters
       /// Retrieves an element by its id number.
       Element* get_element(int id) const;
 
@@ -279,6 +130,14 @@ namespace Hermes
       /// Returns the number of edge nodes.
       int get_num_edge_nodes() const;
 
+      /// For internal use.
+      Element* get_element_fast(int id) const;
+
+      /// For internal use.
+      unsigned get_seq() const;
+#pragma endregion
+
+#pragma region refinements
       /// Refines an element.
       /// \param id[in] Element id number.
       /// \param refinement[in] Ignored for triangles. If the element
@@ -336,15 +195,7 @@ namespace Hermes
       /// original state. However, it is not exactly an inverse to
       /// refine_all_elements().
       void unrefine_all_elements(bool keep_initial_refinements = true);
-
-      /// For internal use.
-      Element* get_element_fast(int id) const;
-
-      /// For internal use.
-      unsigned get_seq() const;
-
-      /// For internal use.
-      void set_seq(unsigned seq);
+#pragma endregion
 
       /// Class for creating reference mesh.
       class HERMES_API ReferenceMeshCreator
@@ -367,8 +218,6 @@ namespace Hermes
         MeshSharedPtr coarse_mesh;
         int refinement;
       };
-
-      static unsigned int get_instance_count();
 
       class HERMES_API MarkersConversion
       {
@@ -435,9 +284,13 @@ namespace Hermes
         friend class Mesh;
       };
 
-    private:
-      static unsigned int instance_count;
+      /// Frees all data associated with the mesh.
+      void free();
 
+      /// For internal use.
+      void set_seq(unsigned seq);
+
+    private:
       /// For internal use.
       void initial_single_check();
       static void initial_multimesh_check(Hermes::vector<MeshSharedPtr > meshes);
@@ -571,97 +424,6 @@ namespace Hermes
       ElementMarkersConversion &get_element_markers_conversion();
       BoundaryMarkersConversion &get_boundary_markers_conversion();
 
-      /*  node and son numbering on a triangle:
-
-      -Triangle to triangles refinement
-
-      vn[2]                                       vn[2]
-
-      *                                           *
-
-      / \                                         / \
-      /   \                                       /   \
-      /     \                                     /     \
-      /       \                                   / son[2]\
-      /         \                                 /_________\
-      en[2]   /           \   en[1]                 vn[0] *           * vn[1]
-      *             *                       vn[1]  *-----------*  vn[0]
-      /               \                     vn[2] *  \         /  * vn[2]
-      /                 \                         / \  \ son[3]/  / \
-      /                   \                       /   \  \     /  /   \
-      /                     \                     /     \  \   /  /     \
-      /                       \                   / son[0]\  \ /  /son[1] \
-      /                         \                 /         \  *  /         \
-      *-------------*-------------*               *-----------*   *-----------*
-      vn[0]      vn[1] vn[2] vn[0]      vn[1]
-      vn[0]           en[0]           vn[1]
-
-      -Triangle to quads refinement
-
-      vn[2]                                     vn[2]
-
-      *                                        *
-      / \                                      / \
-      /   \                                    /   \
-      /     \                                  /     \
-      /       \                          vn[3] * son[2]* vn[1]
-      /         \                       vn[3] *  \     /  * vn[2]
-      en[2]   *           *   en[1]                   / \  \   /  / \
-      /             \                         /   \ vn[0] /   \
-      /               \                       /     \  *  /     \
-      /                 \                     /       \   /       \
-      /         *         \                   /   vn[2] * * vn[3]   \
-      /                     \                 /          | |          \
-      /                       \               /  son[0]   | |  son[1]   \
-      /                         \             /            | |            \
-      *-------------*-------------*           *-------------* *-------------*
-      vn[0]      vn[1]   vn[0]        vn[1]
-      vn[0]           en[0]           vn[1]
-
-      node and son numbering on a quad:          refinement '0':
-
-      vn[3]           en[2]           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
-
-      *-------------*-------------*               *------------* *------------*
-      |                           |               |            | |            |
-      |                           |               |            | |            |
-      |                           |               |   son[3]   | |   son[2]   |
-      |                           |               |            | |            |
-      |                           |               |       vn[1]| |vn[0]       |
-      |                           |         vn[0] *------------* *------------* vn[1]
-      en[3]  *                           *  en[1]  vn[3] *------------* *------------* vn[2]
-      |                           |               |       vn[2]| |vn[3]       |
-      |                           |               |            | |            |
-      |                           |               |   son[0]   | |   son[1]   |
-      |                           |               |            | |            |
-      |                           |               |            | |            |
-      |                           |               *------------* *------------*
-      *-------------*-------------*
-      vn[0]        vn[1] vn[0]        vn[1]
-      vn[0]           en[0]           vn[1]
-
-      refinement '1':                             refinement '2':
-
-      vn[3]                           vn[2]       vn[3]        vn[2] vn[3]        vn[2]
-
-      *---------------------------*               *------------* *------------*
-      |                           |               |            | |            |
-      |                           |               |            | |            |
-      |          son[1]           |               |            | |            |
-      |                           |               |            | |            |
-      |                           |               |            | |            |
-      vn[0] *---------------------------* vn[1]         |            | |            |
-      vn[3] *---------------------------* vn[2]         |   son[2]   | |   son[3]   |
-      |                           |               |            | |            |
-      |                           |               |            | |            |
-      |          son[0]           |               |            | |            |
-      |                           |               |            | |            |
-      |                           |               |            | |            |
-      *---------------------------*               *------------* *------------*
-
-      vn[0]                           vn[1]       vn[0]        vn[1] vn[0]        vn[1]
-      */
-
       Element* create_quad(int marker, Node* v0, Node* v1, Node* v2, Node* v3, CurvMap* cm, int id = -1);
       Element* create_triangle(int marker, Node* v0, Node* v1, Node* v2, CurvMap* cm, int id = -1);
       void refine_element(Element* e, int refinement);
@@ -689,48 +451,6 @@ namespace Hermes
       static void check_triangle(int i, Node *&v0, Node *&v1, Node *&v2);
       static void check_quad(int i, Node *&v0, Node *&v1, Node *&v2, Node *&v3);
     };
-
-    static Node* get_edge_node();
-    static Node* get_vertex_node(Node* v1, Node* v2);
-
-    /// Helper macros for easy iteration through all elements, nodes etc. in a Mesh.
-#define for_all_elements(e, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used)
-
-#define for_all_base_elements(e, mesh) \
-  for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used)
-
-#define for_all_base_elements_incl_inactive(e, mesh) \
-  for (int _id = 0; _id < (mesh)->get_num_base_elements(); _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used || !((e) = (mesh)->get_element_fast(_id))->used)
-
-#define for_all_active_elements(e, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used) \
-  if((e)->active)
-
-#define for_all_inactive_elements(e, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_element_id(); _id < _max; _id++) \
-  if(((e) = (mesh)->get_element_fast(_id))->used) \
-  if(!(e)->active)
-
-#define for_all_nodes(n, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-  if(((n) = (mesh)->get_node(_id))->used)
-
-#define for_all_vertex_nodes(n, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-  if(((n) = (mesh)->get_node(_id))->used) \
-  if(!(n)->type)
-
-#define for_all_edge_nodes(n, mesh) \
-  for (int _id = 0, _max = (mesh)->get_max_node_id(); _id < _max; _id++) \
-  if(((n) = (mesh)->get_node(_id))->used) \
-  if((n)->type)
-
-    const int TOP_LEVEL_REF = 123456;
   }
 }
 #endif

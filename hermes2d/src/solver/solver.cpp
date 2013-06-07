@@ -28,27 +28,27 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    Solver<Scalar>::Solver() : dp(new DiscreteProblem<Scalar>()), own_dp(true)
+    Solver<Scalar>::Solver(bool force_use_direct_solver) : dp(new DiscreteProblem<Scalar>()), own_dp(true)
     {
-      this->init();
+      this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp) : dp(dp), own_dp(false)
+    Solver<Scalar>::Solver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) : dp(dp), own_dp(false)
     {
-      this->init();
+      this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
+    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) : dp(new DiscreteProblem<Scalar>(wf, space)), own_dp(true)
     {
-      this->init();
+      this->init(force_use_direct_solver);
     }
 
     template<typename Scalar>
-    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
+    Solver<Scalar>::Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) : dp(new DiscreteProblem<Scalar>(wf, spaces)), own_dp(true)
     {
-      this->init();
+      this->init(force_use_direct_solver);
     }
     
     template<typename Scalar>
@@ -67,11 +67,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Solver<Scalar>::init()
+    void Solver<Scalar>::init(bool force_use_direct_solver)
     {
-      this->jacobian = create_matrix<Scalar>();
-      this->residual = create_vector<Scalar>();
-      this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual);
+      this->jacobian = create_matrix<Scalar>(force_use_direct_solver);
+      this->residual = create_vector<Scalar>(force_use_direct_solver);
+      this->matrix_solver = create_linear_solver<Scalar>(this->jacobian, this->residual, force_use_direct_solver);
 
       this->set_verbose_output(true);
       this->sln_vector = NULL;

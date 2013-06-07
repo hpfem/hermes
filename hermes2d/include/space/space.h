@@ -325,15 +325,11 @@ namespace Hermes
       int get_edge_functions_count();
       /// Returns the total (global) number of bubble functions.
       int get_bubble_functions_count();
-
-      static unsigned int get_instance_count();
       
       /// Internal. Used by DiscreteProblem to detect changes in the space.
       int get_seq() const;
 
     protected:
-      static unsigned int instance_count;
-
       /// Number of degrees of freedom (dimension of the space).
       int ndof;
 

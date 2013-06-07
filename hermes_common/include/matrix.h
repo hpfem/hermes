@@ -40,6 +40,21 @@ namespace Hermes
     SOLVER_AZTECOO
   };
 
+  enum DirectMatrixSolverType
+  {
+    DIRECT_SOLVER_UMFPACK = 0,
+    DIRECT_SOLVER_MUMPS,
+    DIRECT_SOLVER_SUPERLU,
+    DIRECT_SOLVER_AMESOS
+  };
+
+  enum IterativeMatrixSolverType
+  {
+    ITERATIVE_SOLVER_PARALUTION,
+    ITERATIVE_SOLVER_PETSC,
+    ITERATIVE_SOLVER_AZTECOO
+  };
+
   namespace Solvers
   {
     template <typename Scalar> class HERMES_API CSCIterator;
@@ -569,12 +584,12 @@ namespace Hermes
     /// \brief Function returning a vector according to the users's choice.
     /// @return created vector
     template<typename Scalar> HERMES_API
-      Vector<Scalar>* create_vector();
+      Vector<Scalar>* create_vector(bool use_direct_solver = false);
 
     /// \brief Function returning a matrix according to the users's choice.
     /// @return created matrix
     template<typename Scalar> HERMES_API
-      SparseMatrix<Scalar>*  create_matrix();
+      SparseMatrix<Scalar>*  create_matrix(bool use_direct_solver = false);
   }
 }
 #endif
