@@ -207,7 +207,7 @@ namespace Hermes
     /// @return created linear solver
     template<typename Scalar>
     HERMES_API LinearMatrixSolver<Scalar>*
-      create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs);
+      create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs, bool use_direct_solver = false);
   }
 }
 /*@}*/ // End of documentation group Solvers.

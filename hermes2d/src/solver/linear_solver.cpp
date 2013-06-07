@@ -28,25 +28,25 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver() : Solver<Scalar>()
+    LinearSolver<Scalar>::LinearSolver(bool force_use_direct_solver) : Solver<Scalar>(force_use_direct_solver)
     {
       this->init_linear();
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(DiscreteProblem<Scalar>* dp) : Solver<Scalar>(dp)
+    LinearSolver<Scalar>::LinearSolver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver) : Solver<Scalar>(dp, force_use_direct_solver)
     {
       this->init_linear();
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space) : Solver<Scalar>(wf, space)
+    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver) : Solver<Scalar>(wf, space, force_use_direct_solver)
     {
       this->init_linear();
     }
 
     template<typename Scalar>
-    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces) : Solver<Scalar>(wf, spaces)
+    LinearSolver<Scalar>::LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver) : Solver<Scalar>(wf, spaces, force_use_direct_solver)
     {
       this->init_linear();
     }

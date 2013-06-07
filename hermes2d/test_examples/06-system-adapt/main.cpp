@@ -134,11 +134,8 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_exact, graph_cpu_exact;
 
   NewtonSolver<double> newton;
-  ((ParalutionLinearMatrixSolver<double>*)newton.get_linear_solver())->set_precond(new Preconditioners::P
 
   newton.set_weak_formulation(&wf);
-
-  newton.set_tolerance(1e-1);
 
   // Adaptivity loop:
   int as = 1;

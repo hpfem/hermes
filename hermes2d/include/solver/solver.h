@@ -47,10 +47,10 @@ namespace Hermes
       public Hermes::Hermes2D::Mixins::DiscreteProblemWeakForm<Scalar>
     {
     public:
-      Solver();
-      Solver(DiscreteProblem<Scalar>* dp);
-      Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space);
-      Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      Solver(bool force_use_direct_solver = false);
+      Solver(DiscreteProblem<Scalar>* dp, bool force_use_direct_solver = false);
+      Solver(WeakForm<Scalar>* wf, SpaceSharedPtr<Scalar>& space, bool force_use_direct_solver = false);
+      Solver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver = false);
       virtual ~Solver();
 
       /// Basic solve method.
@@ -159,7 +159,7 @@ namespace Hermes
       double UMFPACK_reporting_data[3];
       
     private:
-      void init();
+      void init(bool force_use_direct_solver);
     };
   }
 }
