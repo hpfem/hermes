@@ -491,7 +491,11 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::solve_linear_system(Scalar* coeff_vec)
     {
-      if(this->matrix_solver->solve())
+      // If the solver is iterative, give him the initial guess.
+      Hermes::Solvers::IterSolver<Scalar>* iter_solver = dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(this->matrix_solver);
+      bool solved = iter_solver ? iter_solver->solve(coeff_vec) : matrix_solver->solve();
+
+      if(solved)
       {
         if(this->do_UMFPACK_reporting)
         {
