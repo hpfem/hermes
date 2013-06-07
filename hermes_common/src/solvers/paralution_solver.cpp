@@ -48,9 +48,9 @@ namespace Hermes
     void ParalutionMatrix<Scalar>::free()
     {
       this->paralutionMatrix.Clear();
-      Ap = NULL;
-      Ai = NULL;
-      Ax = NULL;
+      this->Ap = NULL;
+      this->Ai = NULL;
+      this->Ax = NULL;
       CSRMatrix<Scalar>::free();
     }
 
