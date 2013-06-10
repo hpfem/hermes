@@ -101,6 +101,16 @@ namespace Hermes
           add_edge(iv1, iv2, marker);
       }
 
+      int LinearizerBase::get_max_level(double element_area, int polynomial_order)
+      {
+        if(element_area > 1.0 || polynomial_order > 5)
+          return LIN_MAX_LEVEL;
+
+        double ratio = std::log10(1.0 / element_area) * (std::sqrt(polynomial_order - 1));
+
+        return std::min<int>(LIN_MAX_LEVEL, (int)ratio);
+      }
+
       void LinearizerBase::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2, int marker)
       {
         // count the number of hanging mid-edge vertices

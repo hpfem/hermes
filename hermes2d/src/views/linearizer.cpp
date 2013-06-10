@@ -118,7 +118,7 @@ namespace Hermes
       {
         double midval[3][3];
 
-        if(level < LIN_MAX_LEVEL)
+        if(level < LinearizerBase::get_max_level(fns[0]->get_active_element()->get_area(), fns[0]->get_fn_order()))
         {
           int i;
           if(!(level & 1))
@@ -315,7 +315,7 @@ namespace Hermes
         a = (verts[a][2] > verts[b][2]) ? a : b;
         int flip = (a == iv1 || a == iv3) ? 1 : 0;
 
-        if(level < LIN_MAX_LEVEL)
+        if(level < LinearizerBase::get_max_level(fns[0]->get_active_element()->get_area(), fns[0]->get_fn_order()))
         {
           int i;
           if(!(level & 1)) // this is an optimization: do the following only every other time

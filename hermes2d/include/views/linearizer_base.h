@@ -95,6 +95,9 @@ namespace Hermes
 
         /// Frees the instance.
         void free();
+        
+        /// Experimental upper-limiting of the maximum refinement level.
+        static int get_max_level(double element_area, int polynomial_order);
 
       protected:
         LinearizerBase(bool auto_max = true);
