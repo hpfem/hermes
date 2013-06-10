@@ -20,8 +20,9 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    MeshHashGridElement::MeshHashGridElement(double lower_left_x, double lower_left_y, double upper_right_x, double upper_right_y, int depth) : lower_left_x(lower_left_x), lower_left_y(lower_left_y), upper_right_x(upper_right_x), upper_right_y(upper_right_y), m_depth(depth), m_active(true)
+    MeshHashGridElement::MeshHashGridElement(double lower_left_x, double lower_left_y, double upper_right_x, double upper_right_y, int depth) : lower_left_x(lower_left_x), lower_left_y(lower_left_y), upper_right_x(upper_right_x), upper_right_y(upper_right_y), m_depth(depth), m_active(true), element_count(0)
     {
+      this->elements = new Element*[MAX_ELEMENTS];
       for(int i = 0; i < 2; i++)
         for(int j = 0; j < 2; j++)
           m_sons[i][j] = NULL;
@@ -29,6 +30,8 @@ namespace Hermes
 
     MeshHashGridElement::~MeshHashGridElement()
     {
+      if(elements)
+        delete [] elements;
       for(int i = 0; i < 2; i++)
         for(int j = 0; j < 2; j++)
           if(m_sons[i][j])
@@ -46,9 +49,9 @@ namespace Hermes
     {
       if(m_active)
       {
-        m_elements.insert(element);
+        elements[element_count++] = element;
 
-        if((m_elements.size() > MAX_ELEMENTS) && (m_depth < MAX_DEPTH))
+        if((element_count >= MAX_ELEMENTS) && (m_depth < MAX_DEPTH))
         {
           m_active = false;
           double xx[3] = {lower_left_x, (lower_left_x + upper_right_x) / 2., upper_right_x};
@@ -66,15 +69,16 @@ namespace Hermes
 
               m_sons[i][j] = new MeshHashGridElement(x0, y0, x1, y1, m_depth + 1);
 
-              for(std::set<Element*>::iterator it = m_elements.begin(); it != m_elements.end(); it++)
+              for(int elem_i = 0; elem_i < this->element_count; elem_i++)
               {
-                if(m_sons[i][j]->belongs(*it))
-                  m_sons[i][j]->insert(*it);
+                if(m_sons[i][j]->belongs(elements[elem_i]))
+                  m_sons[i][j]->insert(elements[elem_i]);
               }
             }
           }
 
-          m_elements.clear();
+          delete [] elements;
+          elements = NULL;
         }
       }
       else
@@ -100,9 +104,9 @@ namespace Hermes
     {
       if(m_active)
       {
-        for(std::set<Element*>::iterator it = m_elements.begin(); it != m_elements.end(); it++)
-          if(RefMap::is_element_on_physical_coordinates(*it, x, y))
-            return *it;
+        for(int elem_i = 0; elem_i < this->element_count; elem_i++)
+          if(RefMap::is_element_on_physical_coordinates(elements[elem_i], x, y))
+            return elements[elem_i];
 
         return NULL;
       }
@@ -154,7 +158,7 @@ namespace Hermes
       }
     }
 
-    MeshHashGrid::MeshHashGrid(const Mesh* mesh)
+    MeshHashGrid::MeshHashGrid(const Mesh* mesh) : mesh_seq(mesh->get_seq())
     {
       // find bounding box of the whole mesh
       double2 mesh_p1, mesh_p2;
@@ -213,10 +217,6 @@ namespace Hermes
       {
         elementBoundingBox(element, p1, p2);
 
-        for(int i = 0; i < element->get_nvert(); i++)
-          std::cout << "E:" << element->vn[i]->x << ", " << element->vn[i]->y << std::endl;
-
-        std::cout << std::endl;
         x_min = 0;
         while(intervals_x[x_min + 1] < p1[0])
           x_min++;

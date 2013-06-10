@@ -803,7 +803,7 @@ namespace Hermes
       return false;
     }
 
-    Element* RefMap::element_on_physical_coordinates(MeshSharedPtr mesh, double x, double y, double* x_reference, double* y_reference)
+    Element* RefMap::element_on_physical_coordinates(bool use_MeshHashGrid, MeshSharedPtr mesh, double x, double y, double* x_reference, double* y_reference)
     {
       // utility element pointer.
       Element *e;
@@ -811,18 +811,21 @@ namespace Hermes
       // utility reference points that serve for the case when x_reference, y_reference are not passed.
       double xi1, xi2;
 
-      // first try the fastest approach - using the MeshHashGrid grid.
-      if(e = mesh->element_on_physical_coordinates(x, y))
+      // Optionally try the fastest approach for a multitude of successive calls - using the MeshHashGrid grid.
+      if(use_MeshHashGrid)
       {
-        if(x_reference || y_reference)
+        if(e = mesh->element_on_physical_coordinates(x, y))
         {
-          untransform(e, x, y, xi1, xi2);
-          if(x_reference)
-            (*x_reference) = xi1;
-          if(y_reference)
-            (*y_reference) = xi2;
+          if(x_reference || y_reference)
+          {
+            untransform(e, x, y, xi1, xi2);
+            if(x_reference)
+              (*x_reference) = xi1;
+            if(y_reference)
+              (*y_reference) = xi2;
+          }
+          return e;
         }
-        return e;
       }
 
       // vector for curved elements that do not contain the point when considering straightened edges.
