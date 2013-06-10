@@ -37,57 +37,80 @@ namespace Hermes
   /// reused when new items are added to the array. The type 'TYPE' must contain the
   /// members 'id' and 'unused' in order to be usable by this class.
   /// \todo Is this dimension independent?
+
   template<class TYPE>
   class Array
   {
   protected:
-    Hermes::vector<TYPE*> pages; ///< \todo standard array for maximum access speed
-    Hermes::vector<int> unused;
-    int  size, nitems;
+    TYPE** pages; ///< \todo standard array for maximum access speed
+    int* unused;
+    int  page_count, size, nitems, unused_size, nunused;
     bool append_only;
 
-    static const int HERMES_PAGE_BITS = 10;
+    static const int HERMES_PAGE_BITS = 8;
     static const int HERMES_PAGE_SIZE = 1 << HERMES_PAGE_BITS;
     static const int HERMES_PAGE_MASK = HERMES_PAGE_SIZE-1;
-
   public:
 
-    Array()
+    Array(int initial_page_count = 0)
     {
-      size = nitems = 0;
+      size = nitems = nunused = 0;
+      page_count = initial_page_count;
+      unused_size = initial_page_count;
+
+      if(page_count)
+      {
+        this->pages = (TYPE**)malloc(sizeof(TYPE*) * page_count);
+        for (unsigned i = 0; i < this->page_count; i++)
+          this->pages[i] = new TYPE[HERMES_PAGE_SIZE];
+        this->unused = (int*)malloc(sizeof(int));
+      }
+      else
+      {
+        this->pages = NULL;
+        this->unused = NULL;
+      }
       append_only = false;
     }
 
     Array(Array& array) { copy(array); }
 
-    ~Array() { free(); }
+    ~Array()
+    {
+      free();
+      ::free(this->pages);
+      ::free(this->unused);
+    }
 
     /// Makes this array to hold a copy of another one.
     void copy(const Array& array)
     {
       free();
 
-      pages = array.pages;
-      unused = array.unused;
-      size = array.size;
-      nitems = array.nitems;
-      append_only = array.append_only;
+      this->pages = (TYPE**)realloc(this->pages, array.page_count * sizeof(TYPE*));
+      this->unused = (int*)realloc(this->unused, array.unused_size * sizeof(int));
+      
+      this->page_count = array.page_count;
+      this->size = array.size;
+      this->nitems = array.nitems;
+      this->unused_size = array.unused_size;
+      this->nunused = array.nunused;
+      this->append_only = array.append_only;
 
-      for (unsigned i = 0; i < pages.size(); i++)
+      for (unsigned i = 0; i < this->page_count; i++)
       {
         TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
-        memcpy(new_page, pages[i], sizeof(TYPE) * HERMES_PAGE_SIZE);
-        pages[i] = new_page;
+        memcpy(new_page, array.pages[i], sizeof(TYPE) * HERMES_PAGE_SIZE);
+        this->pages[i] = new_page;
       }
     }
 
     /// Removes all elements from the array.
     void free()
     {
-      for (unsigned i = 0; i < pages.size(); i++) delete [] pages[i];
-      pages.clear();
-      unused.clear();
-      size = nitems = 0;
+      for (unsigned i = 0; i < this->page_count; i++)
+        delete [] pages[i];
+      size = nitems = nunused = page_count = unused_size = 0;
     }
 
     /// Sets or resets the append-only mode. In append-only mode new
@@ -115,12 +138,13 @@ namespace Hermes
     TYPE* add()
     {
       TYPE* item;
-      if (unused.empty() || append_only)
+      if (!nunused || append_only)
       {
         if (!(size & HERMES_PAGE_MASK))
         {
+          this->pages = (TYPE**)realloc(this->pages, (this->page_count + 1) * sizeof(TYPE*));
           TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
-          pages.push_back(new_page);
+          pages[this->page_count++] = new_page;
         }
         item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
         item->id = size++;
@@ -128,8 +152,7 @@ namespace Hermes
       }
       else
       {
-        int id = unused.back();
-        unused.pop_back();
+        int id = unused[nunused-- - 1];
         item = pages[id >> HERMES_PAGE_BITS] + (id & HERMES_PAGE_MASK);
         item->used = 1;
       }
@@ -143,11 +166,13 @@ namespace Hermes
     /// \param id [in] Item id number.
     void remove(int id)
     {
-      assert(id >= 0 && id < size);
       TYPE* item = pages[id >> HERMES_PAGE_BITS] + (id & HERMES_PAGE_MASK);
-      assert(item->used);
       item->used = 0;
-      unused.push_back(id);
+      if(nunused >= unused_size)
+      {
+        this->unused = (int*)realloc(this->unused, ++this->unused_size * sizeof(int));
+      }
+      unused[nunused++] = id;
       nitems--;
     }
 
@@ -230,41 +255,15 @@ namespace Hermes
       else return false;
     }
 
-    /// Cleans the array and reserves space for up to 'size' items.
-    /// This is a special-purpose function, used for loading the array
-    /// from file.
-    void force_size(int size)
-    {
-      free();
-      while (size > 0)
-      {
-        TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
-        memset(new_page, 0, sizeof(TYPE) * HERMES_PAGE_SIZE);
-        pages.push_back(new_page);
-        size -= HERMES_PAGE_SIZE;
-      }
-      this->size = pages.size() * HERMES_PAGE_SIZE;
-    }
-
-    /// Counts the items in the array and registers unused items.
-    /// This is a special-purpose function, used after loading the array
-    /// from file.
-    void post_load_scan(int start = 0)
-    {
-      nitems = 0;
-      for (int i = start; i < size; i++)
-        if (get(i).used) nitems++;
-        else unused.push_back(i);
-    }
-
     /// Adds an unused item at the end of the array and skips its ID forever.
     /// This is a special-purpose function used to create empty element slots.
     void skip_slot()
     {
       if (!(size & HERMES_PAGE_MASK))
       {
+        this->pages = (TYPE**)realloc(this->pages, (this->page_count + 1) * sizeof(TYPE*));
         TYPE* new_page = new TYPE[HERMES_PAGE_SIZE];
-        pages.push_back(new_page);
+        pages[this->page_count++] = new_page;
       }
       TYPE* item = pages[size >> HERMES_PAGE_BITS] + (size & HERMES_PAGE_MASK);
       item->id = size++;
@@ -376,7 +375,6 @@ namespace Hermes
     /// After successful check for presence, the value can be retrieved.
     TYPE& get(unsigned int id) const
     {
-      assert(id < size);
       return pages[id >> page_bits][id & page_mask];
     }
 
