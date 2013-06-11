@@ -89,6 +89,8 @@ namespace Hermes
         void close();
         void refresh(); ///< Refreshes views
 
+        /// Returns the title.
+        const char* get_title() const;
         /// Changes the window name (in its title-bar) to 'title'.
         void set_title(const char* title);
 
