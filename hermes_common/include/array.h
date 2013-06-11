@@ -89,6 +89,7 @@ namespace Hermes
 
       this->pages = (TYPE**)realloc(this->pages, array.page_count * sizeof(TYPE*));
       this->unused = (int*)realloc(this->unused, array.unused_size * sizeof(int));
+      memcpy(this->unused, array.unused, array.unused_size * sizeof(int));
       
       this->page_count = array.page_count;
       this->size = array.size;
