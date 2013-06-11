@@ -48,6 +48,7 @@ namespace Hermes
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::exceptionsPrintCallstack,new Parameter(0)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::matrixSolverType, new Parameter(SOLVER_UMFPACK)));
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::directMatrixSolverType, new Parameter(SOLVER_UMFPACK)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::showInternalWarnings, new Parameter(1)));
 
     // Set handlers.
 #ifdef WITH_PARALUTION
