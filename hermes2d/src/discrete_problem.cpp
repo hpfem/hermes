@@ -292,6 +292,9 @@ namespace Hermes
 
       Traverse trav(this->spaces_size);
       states = trav.get_states(meshes, num_states);
+
+      // Init the caught parallel exception message.
+      this->exceptionMessageCaughtInParallelBlock.clear();
     }
 
     template<typename Scalar>
@@ -327,36 +330,43 @@ namespace Hermes
           if(thread_number == this->num_threads_used - 1)
             end = num_states;
 
-          this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);
-
-          DiscreteProblemDGAssembler<Scalar>* dgAssembler;
-          if(is_DG)
-            dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces);
-
-          for(int state_i = start; state_i < end; state_i++)
+          try
           {
-            Traverse::State* current_state = states[state_i];
+            this->threadAssembler[thread_number]->init_assembling(u_ext_sln, spaces, this->nonlinear, this->add_dirichlet_lift);
 
-            this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
-
-            this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache);
-
-            this->threadAssembler[thread_number]->assemble_one_state();
-
+            DiscreteProblemDGAssembler<Scalar>* dgAssembler;
             if(is_DG)
+              dgAssembler = new DiscreteProblemDGAssembler<Scalar>(this->threadAssembler[thread_number], this->spaces);
+
+            for(int state_i = start; state_i < end; state_i++)
             {
-              dgAssembler->init_assembling_one_state(current_state);
-              dgAssembler->assemble_one_state();
-              dgAssembler->deinit_assembling_one_state();
+              Traverse::State* current_state = states[state_i];
+
+              this->threadAssembler[thread_number]->init_assembling_one_state(spaces, current_state);
+
+              this->threadAssembler[thread_number]->handle_cache(spaces, &this->cache);
+
+              this->threadAssembler[thread_number]->assemble_one_state();
+
+              if(is_DG)
+              {
+                dgAssembler->init_assembling_one_state(current_state);
+                dgAssembler->assemble_one_state();
+                dgAssembler->deinit_assembling_one_state();
+              }
+
+              this->threadAssembler[thread_number]->deinit_assembling_one_state();
             }
 
-            this->threadAssembler[thread_number]->deinit_assembling_one_state();
+            if(is_DG)
+              delete dgAssembler;
+
+            this->threadAssembler[thread_number]->deinit_assembling();
           }
-
-          if(is_DG)
-            delete dgAssembler;
-
-          this->threadAssembler[thread_number]->deinit_assembling();
+          catch(std::exception& exception)
+          {
+            this->exceptionMessageCaughtInParallelBlock = exception.what();
+          }
         }
       }
 
@@ -371,6 +381,12 @@ namespace Hermes
         this->current_mat->finish();
       if(this->current_rhs)
         this->current_rhs->finish();
+
+      if(!this->exceptionMessageCaughtInParallelBlock.empty())
+      {
+        throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
+        return;
+      }
 
       Element* e;
       for(unsigned int space_i = 0; space_i < spaces.size(); space_i++)

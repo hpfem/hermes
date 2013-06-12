@@ -128,6 +128,7 @@ namespace Hermes
         Parallel();
       protected:
         int num_threads_used;
+        std::string exceptionMessageCaughtInParallelBlock;
       };
     }
   }

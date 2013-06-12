@@ -231,7 +231,7 @@ namespace Hermes
               int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], val[idx[1]]);
               int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], val[idx[2]]);
 
-              if(this->caughtException != NULL)
+              if(!this->exceptionMessageCaughtInParallelBlock.empty())
                 return;
 
               // recur to sub-elements
@@ -450,7 +450,7 @@ namespace Hermes
               if(split != 2) mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], val[idx[3]]);
               if(split == 3) mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], val[idx[4]]);
 
-              if(this->caughtException != NULL)
+              if(!this->exceptionMessageCaughtInParallelBlock.empty())
                 return;
 
               // recur to sub-elements
@@ -519,8 +519,8 @@ namespace Hermes
 
       void Linearizer::process_solution(MeshFunctionSharedPtr<double> sln, int item_, double eps)
       {
-        // Important, sets the current caughtException to NULL.
-        this->caughtException = NULL;
+        // Init the caught parallel exception message.
+        this->exceptionMessageCaughtInParallelBlock.clear();
 
         lock_data();
         this->tick();
@@ -612,7 +612,7 @@ namespace Hermes
           if(thread_number == num_threads_used - 1)
             end = num_states;
 
-           for(int state_i = start; state_i < end; state_i++)
+          for(int state_i = start; state_i < end; state_i++)
           {
             try
             {
@@ -631,15 +631,9 @@ namespace Hermes
                   this->max = fabs(f);
               }
             }
-            catch(Hermes::Exceptions::Exception& e)
-            {
-              if(this->caughtException == NULL)
-                this->caughtException = e.clone();
-            }
             catch(std::exception& e)
             {
-              if(this->caughtException == NULL)
-                this->caughtException = new std::exception(e);
+              this->exceptionMessageCaughtInParallelBlock = e.what();
             }
           }
 
@@ -697,7 +691,7 @@ namespace Hermes
 
                 iv[i] = this->get_vertex(-fns[thread_number][0]->get_active_element()->vn[i]->id, -fns[thread_number][0]->get_active_element()->vn[i]->id, x_disp, y_disp, f);
 
-                if(this->caughtException != NULL)
+                if(!this->exceptionMessageCaughtInParallelBlock.empty())
                   continue;
               }
 
@@ -710,15 +704,9 @@ namespace Hermes
               for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
                 process_edge(iv[i], iv[current_state->e[0]->next_vert(i)], current_state->e[0]->en[i]->marker);
             }
-            catch(Hermes::Exceptions::Exception& e)
-            {
-              if(this->caughtException == NULL)
-                this->caughtException = e.clone();
-            }
             catch(std::exception& e)
             {
-              if(this->caughtException == NULL)
-                this->caughtException = new std::exception(e);
+              this->exceptionMessageCaughtInParallelBlock = e.what();
             }
           }
         }
@@ -740,12 +728,12 @@ namespace Hermes
         memcpy(this->tris_contours, this->tris, this->triangle_count * sizeof(int3));
         triangle_contours_count = this->triangle_count;
 
-        if(this->caughtException != NULL)
+        if(!this->exceptionMessageCaughtInParallelBlock.empty())
         {
           this->unlock_data();
           ::free(hash_table);
           ::free(info);
-          throw *(this->caughtException);
+          throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
         }
 
         // regularize the linear mesh
@@ -821,11 +809,10 @@ namespace Hermes
           }
           catch(std::exception& e)
           {
-            if(this->caughtException)
-              this->caughtException = new std::exception(e);
+            this->exceptionMessageCaughtInParallelBlock = e.what();
           }
         }
-        if(this->caughtException)
+        if(!this->exceptionMessageCaughtInParallelBlock.empty())
         {
           return -1;
         } 

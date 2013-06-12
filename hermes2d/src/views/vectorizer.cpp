@@ -70,15 +70,14 @@ namespace Hermes
           }
           catch(std::exception& e)
           {
-            if(this->caughtException)
-              this->caughtException = new Hermes::Exceptions::Exception(e.what());
+            this->exceptionMessageCaughtInParallelBlock = e.what();
           }
         }
-        if(this->caughtException)
+        if(!this->exceptionMessageCaughtInParallelBlock.empty())
         {
           return -1;
         }
-        
+
         verts[i][0] = x;
         verts[i][1] = y;
         verts[i][2] = xvalue;
@@ -248,7 +247,7 @@ namespace Hermes
               int mid1 = get_vertex(iv1, iv2, midval[0][1], midval[1][1], xval[idx[1]], yval[idx[1]]);
               int mid2 = get_vertex(iv2, iv0, midval[0][2], midval[1][2], xval[idx[2]], yval[idx[2]]);
 
-              if(this->caughtException != NULL)
+              if(!this->exceptionMessageCaughtInParallelBlock.empty())
                 return;
 
               // recur to sub-elements
@@ -410,7 +409,7 @@ namespace Hermes
             int mid3 = get_vertex(iv3,  iv0,  midval[0][3], midval[1][3], xval[idx[3]], yval[idx[3]]);
             int mid4 = get_vertex(mid0, mid2, midval[0][4], midval[1][4], xval[idx[4]], yval[idx[4]]);
 
-            if(this->caughtException != NULL)
+            if(!this->exceptionMessageCaughtInParallelBlock.empty())
               return;
 
             // recur to sub-elements
@@ -485,8 +484,8 @@ namespace Hermes
 
       void Vectorizer::process_solution(MeshFunctionSharedPtr<double> xsln, MeshFunctionSharedPtr<double> ysln, int xitem_orig, int yitem_orig, double eps)
       {
-        // Important, sets the current caughtException to NULL.
-        this->caughtException = NULL;
+        // Init the caught parallel exception message.
+        this->exceptionMessageCaughtInParallelBlock.clear();      
 
         // sanity check
         if(xsln == NULL || ysln == NULL) 
@@ -632,15 +631,9 @@ namespace Hermes
                   max = fabs(sqrt(fx*fx + fy*fy));
               }
             }
-            catch(Hermes::Exceptions::Exception& e)
-            {
-              if(this->caughtException == NULL)
-                this->caughtException = e.clone();
-            }
             catch(std::exception& e)
             {
-              if(this->caughtException == NULL)
-                this->caughtException = new Hermes::Exceptions::Exception(e.what());
+              this->exceptionMessageCaughtInParallelBlock = e.what();
             }
           }
 
@@ -691,7 +684,7 @@ namespace Hermes
 
                 iv[i] = this->get_vertex(-fns[thread_number][0]->get_active_element()->vn[i]->id, -fns[thread_number][0]->get_active_element()->vn[i]->id, x_disp, y_disp, fx, fy);
 
-                if(this->caughtException != NULL)
+                if(!this->exceptionMessageCaughtInParallelBlock.empty())
                   continue;
               }
 
@@ -704,15 +697,9 @@ namespace Hermes
               for (unsigned int i = 0; i < current_state->e[0]->get_nvert(); i++)
                 process_edge(iv[i], iv[current_state->e[0]->next_vert(i)], current_state->e[0]->en[i]->marker);
             }
-            catch(Hermes::Exceptions::Exception& e)
-            {
-              if(this->caughtException == NULL)
-                this->caughtException = e.clone();
-            }
             catch(std::exception& e)
             {
-              if(this->caughtException == NULL)
-                this->caughtException = new Hermes::Exceptions::Exception(e.what());
+              this->exceptionMessageCaughtInParallelBlock = e.what();
             }
           }
         }
@@ -730,22 +717,25 @@ namespace Hermes
         }
         delete [] fns;
 
-        // regularize the linear mesh
-        for (int i = 0; i < this->triangle_count; i++)
+        if(this->exceptionMessageCaughtInParallelBlock.empty())
         {
-          int iv0 = tris[i][0], iv1 = tris[i][1], iv2 = tris[i][2];
-
-          int mid0 = peek_vertex(iv0, iv1);
-          int mid1 = peek_vertex(iv1, iv2);
-          int mid2 = peek_vertex(iv2, iv0);
-          if(mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
+          // regularize the linear mesh
+          for (int i = 0; i < this->triangle_count; i++)
           {
-            this->del_slot = i;
-            regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2, tri_markers[i]);
-          }
-        }
+            int iv0 = tris[i][0], iv1 = tris[i][1], iv2 = tris[i][2];
 
-        find_min_max();
+            int mid0 = peek_vertex(iv0, iv1);
+            int mid1 = peek_vertex(iv1, iv2);
+            int mid2 = peek_vertex(iv2, iv0);
+            if(mid0 >= 0 || mid1 >= 0 || mid2 >= 0)
+            {
+              this->del_slot = i;
+              regularize_triangle(iv0, iv1, iv2, mid0, mid1, mid2, tri_markers[i]);
+            }
+          }
+
+          find_min_max();
+        }
 
         //if(verbose_mode) print_hash_stats();
         unlock_data();
@@ -761,6 +751,9 @@ namespace Hermes
         // clean up
         ::free(this->hash_table);
         ::free(this->info);
+
+        if(!this->exceptionMessageCaughtInParallelBlock.empty())
+          throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
       }
 
       void Vectorizer::free()

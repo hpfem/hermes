@@ -222,9 +222,6 @@ namespace Hermes
       
       /// Mesh function for postprocessing the information about which elements have been refined.
       MeshFunctionSharedPtr<double> refinementInfoMeshFunction[H2D_MAX_COMPONENTS];
-
-      /// Internal.
-      std::exception* caughtException;
     };
   }
 }
