@@ -1238,8 +1238,15 @@ namespace Hermes
 
       // copy base elements
       Element* e;
-      for_all_base_elements(e, mesh)
+      for (int id = 0; id < mesh->get_num_base_elements(); id++)
       {
+        e = mesh->get_element_fast(id);
+        if(!e->used)
+        {
+          Element* e_temp = elements.add();
+          e_temp->used = false;
+          continue;
+        }
         Element* enew;
         Node *v0 = &nodes[e->vn[0]->id], *v1 = &nodes[e->vn[1]->id], *v2 = &nodes[e->vn[2]->id];
         if(e->is_triangle())

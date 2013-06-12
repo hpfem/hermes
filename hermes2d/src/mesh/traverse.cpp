@@ -856,6 +856,8 @@ namespace Hermes
       // Calculation.
       for (int id = 0; id < meshes[0]->get_num_base_elements(); id++)
       {
+        if(!meshes[0]->get_element(id)->used)
+          continue;
         for (i = 0; i < num; i++)
         {
           e[i] = meshes[i]->get_element(id);
