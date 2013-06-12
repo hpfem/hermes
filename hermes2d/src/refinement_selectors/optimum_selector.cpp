@@ -693,6 +693,9 @@ namespace Hermes
               throw Exceptions::Exception("Triangle processed but the resulting order (%d, %d) of son %d is not uniform", H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), H2D_GET_V_ORDER(refinement.refinement_polynomial_order[i]), i);
 #endif
             refinement.refinement_polynomial_order[i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.refinement_polynomial_order[i]), 0);
+
+            for(int poly_order_type_i = 1; poly_order_type_i < 4; poly_order_type_i++)
+              refinement.best_refinement_polynomial_order_type[poly_order_type_i][i] = H2D_MAKE_QUAD_ORDER(H2D_GET_H_ORDER(refinement.best_refinement_polynomial_order_type[poly_order_type_i][i]), 0);
           }
         }
 
