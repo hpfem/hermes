@@ -49,8 +49,10 @@ namespace Hermes
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::directMatrixSolverType, new Parameter(SOLVER_UMFPACK)));
 
     // Set handlers.
+#ifdef WITH_PARALUTION
     this->setter_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION), &ParalutionInitialization::init_paralution));
     this->change_handlers.insert(std::pair<std::pair<HermesCommonApiParam, int>, typename Api::SetterHandler>(std::pair<HermesCommonApiParam, int>(Hermes::matrixSolverType, SOLVER_PARALUTION), &ParalutionInitialization::deinit_paralution));
+#endif
 
     // Initialize TCMalloc (this line also serves for TCMalloc not to be linker-optimized out).
 #ifdef WITH_TC_MALLOC
