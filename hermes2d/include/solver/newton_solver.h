@@ -79,7 +79,7 @@ namespace Hermes
       virtual ~NewtonSolver();
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
-      using NonlinearSolver<Scalar>::solve;
+      using Solver<Scalar>::solve;
       /// Solve.
       /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
       virtual void solve(Scalar* coeff_vec);

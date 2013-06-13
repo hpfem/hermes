@@ -41,21 +41,6 @@ namespace Hermes
       NonlinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~NonlinearSolver();
 
-      /// Basic solve method.
-      virtual void solve();
-
-      /// Basic solve method.
-      /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
-      virtual void solve(Scalar* coeff_vec) = 0;
-
-      /// Solve.
-      /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
-      virtual void solve(MeshFunctionSharedPtr<Scalar>& initial_guess);
-
-      /// Solve.
-      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
-      virtual void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
-
       /// Set the name of the iterative method employed by AztecOO (ignored
       /// by the other solvers).
       /// \param[in] preconditioner_name See the attribute preconditioner.

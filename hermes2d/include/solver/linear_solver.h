@@ -69,8 +69,11 @@ namespace Hermes
       LinearSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, bool force_use_direct_solver = false);
       virtual ~LinearSolver();
 
-      /// Basic solve method.
-      virtual void solve();
+      // See the base class for details, the following serves only for avoiding C++ name-hiding.
+      using Solver<Scalar>::solve;
+      /// Basic solve method - in linear solvers it serves only as an initial guess for iterative solvers.
+      /// \param[in] coeff_vec initiall guess.
+      virtual void solve(Scalar* coeff_vec);
 
     protected:
       /// State querying helpers.

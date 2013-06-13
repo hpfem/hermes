@@ -54,7 +54,19 @@ namespace Hermes
       virtual ~Solver();
 
       /// Basic solve method.
-      virtual void solve() = 0;
+      virtual void solve();
+
+      /// Basic solve method.
+      /// \param[in] coeff_vec initiall guess as a vector of coefficients wrt. basis functions.
+      virtual void solve(Scalar* coeff_vec) = 0;
+
+      /// Solve.
+      /// \param[in] initial_guess Solution to start from (which is projected to obtain the initial coefficient vector.
+      virtual void solve(MeshFunctionSharedPtr<Scalar>& initial_guess);
+
+      /// Solve.
+      /// \param[in] initial_guess Solutions to start from (which is projected to obtain the initial coefficient vector.
+      virtual void solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess);
 
       /// Experimental
       /// \todo delete this?

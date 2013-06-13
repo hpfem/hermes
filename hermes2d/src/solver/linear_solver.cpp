@@ -69,7 +69,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearSolver<Scalar>::solve()
+    void LinearSolver<Scalar>::solve(Scalar* coeff_vec)
     {
       this->check();
 
@@ -93,7 +93,10 @@ namespace Hermes
       this->process_vector_output(this->residual, 1);
 
       this->info("\tLinear: assembling done. Solving...");
-      if(this->matrix_solver->solve())
+      // If the solver is iterative, give him the initial guess.
+      Hermes::Solvers::IterSolver<Scalar>* iter_solver = dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(this->matrix_solver);
+      bool solved = iter_solver ? iter_solver->solve(coeff_vec) : this->matrix_solver->solve();
+      if(solved)
       {
         if(this->do_UMFPACK_reporting)
         {
