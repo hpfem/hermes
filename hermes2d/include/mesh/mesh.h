@@ -129,6 +129,13 @@ namespace Hermes
 
       /// Returns the number of edge nodes.
       int get_num_edge_nodes() const;
+      
+      /// Get the mesh bounding box.
+      /// \param [out] bottom_left_x Bottom left corner - x coordinate.
+      /// \param [out] bottom_left_y Bottom left corner - y coordinate.
+      /// \param [out] top_right_x Top right corner - x coordinate.
+      /// \param [out] top_right_y Top right corner - y coordinate.
+      void get_bounding_box(double& bottom_left_x, double& bottom_left_y, double& top_right_x, double& top_right_y);
 
       /// For internal use.
       Element* get_element_fast(int id) const;
@@ -328,6 +335,13 @@ namespace Hermes
       int nactive;
       unsigned seq;
 
+      /// Bounding box.
+      double bottom_left_x, bottom_left_y, top_right_x, top_right_y;
+      /// Bounding box calculated.
+      bool bounding_box_calculated;
+      /// Bounding box calculation.
+      void calc_bounding_box();
+
       int nbase, ntopvert;
       int ninitial;
 
@@ -381,6 +395,7 @@ namespace Hermes
       ElementMarkersConversion element_markers_conversion;
       BoundaryMarkersConversion boundary_markers_conversion;
 
+      friend class MeshHashGrid;
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
       friend class MeshReaderH1DXML;

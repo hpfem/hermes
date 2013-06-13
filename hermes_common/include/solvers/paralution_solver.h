@@ -141,7 +141,7 @@ namespace Hermes
   {
     /// Utility class for PARALUTION initialization.
     /// Methods called from HermesCommonApi.
-    class HERMES_API ParalutionInitialization
+    class ParalutionInitialization
     {
     public:
       static void init_paralution()

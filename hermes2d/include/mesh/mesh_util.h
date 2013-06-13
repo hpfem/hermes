@@ -60,7 +60,7 @@ namespace Hermes
     class MeshHashGrid
     {
     public:
-      MeshHashGrid(const Mesh* mesh);
+      MeshHashGrid(Mesh* mesh);
       ~MeshHashGrid();
 
       // smallest box interval_x X interval_y in which element is contained. If element is curvilinear, has to be made larger

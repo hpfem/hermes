@@ -153,19 +153,19 @@ namespace Hermes
       {
         //prepare message
         std::stringstream str;
-        str << "  << ";
         if(text != NULL)
           str << text;
         else
         {
+          str << "  << ";
           switch(wait_event)
           {
-          case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
-          case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
-          default: throw Hermes::Exceptions::Exception("Unknown wait event"); break;
+            case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
+            case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
+            default: throw Hermes::Exceptions::Exception("Unknown wait event"); break;
           }
+          str << " >>" << std::endl;
         }
-        str << " >>" << std::endl;
 
         //do something
         switch(wait_event)
@@ -569,6 +569,11 @@ namespace Hermes
         gettimeofday(&tv, NULL);
         return (double) tv.tv_sec * 1000 + (double) tv.tv_usec / 1000;
 #endif
+      }
+
+      const char* View::get_title() const
+      {
+        return this->title.c_str();
       }
 
       void View::set_title(const char* title)

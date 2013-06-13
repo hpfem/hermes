@@ -20,7 +20,6 @@
 \brief General nonlinear solver functionality.
 */
 #include "solver/nonlinear_solver.h"
-#include "projections/ogprojection.h"
 
 namespace Hermes
 {
@@ -57,32 +56,6 @@ namespace Hermes
       if(max_allowed_iterations_ < 1)
         throw Exceptions::ValueException("max_allowed_iterations", max_allowed_iterations_, 1);
       this->max_allowed_iterations = max_allowed_iterations_;
-    }
-
-    template<typename Scalar>
-    void NonlinearSolver<Scalar>::solve()
-    {
-      this->solve(NULL);
-    }
-
-    template<typename Scalar>
-    void NonlinearSolver<Scalar>::solve(MeshFunctionSharedPtr<Scalar>& initial_guess)
-    {
-      if(this->dp->get_spaces().size() != 1)
-        throw Hermes::Exceptions::ValueException("dp->get_spaces().size()", this->dp->get_spaces().size(), 1);
-      Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
-      OGProjection<Scalar>::project_global(this->dp->get_spaces()[0], initial_guess, coeff_vec);
-      this->solve(coeff_vec);
-      delete [] coeff_vec;
-    }
-
-    template<typename Scalar>
-    void NonlinearSolver<Scalar>::solve(Hermes::vector<MeshFunctionSharedPtr<Scalar> >& initial_guess)
-    {
-      Scalar* coeff_vec = new Scalar[Space<Scalar>::get_num_dofs(this->dp->get_spaces())];
-      OGProjection<Scalar>::project_global(this->dp->get_spaces(), initial_guess, coeff_vec);
-      this->solve(coeff_vec);
-      delete [] coeff_vec;
     }
 
     template<typename Scalar>

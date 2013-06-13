@@ -90,7 +90,7 @@ namespace Hermes
       RefMap* get_refmap(bool update = true);
 
       /// Return the value at the coordinates x,y.
-      virtual Func<Scalar>* get_pt_value(double x, double y, Element* e = NULL) = 0;
+      virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL) = 0;
 
       /// Cloning function - for parallel OpenMP blocks.
       /// Designed to return an identical clone of this instance.

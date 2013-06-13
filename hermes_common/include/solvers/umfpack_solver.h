@@ -123,7 +123,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool);
-      void check_status(const char *fn_name, int status);
+      char* check_status(const char *fn_name, int status);
 
       /// For output (the array Info is filled regardless of the value of the level).
       void set_output_level(double level);

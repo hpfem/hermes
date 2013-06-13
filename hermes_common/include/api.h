@@ -33,7 +33,8 @@ namespace Hermes
     exceptionsPrintCallstack,
     numThreads,
     matrixSolverType,
-    directMatrixSolverType
+    directMatrixSolverType,
+    showInternalWarnings
   };
 
   /// API Class containing settings for the whole HermesCommon.

@@ -238,6 +238,25 @@ namespace Hermes
       Control[UMFPACK_PRL] = level;
     }
 
+    template<typename Scalar>
+    UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
+      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
+    {
+      umfpack_di_defaults(Control);
+    }
+
+    template<typename Scalar>
+    UMFPackLinearMatrixSolver<Scalar>::~UMFPackLinearMatrixSolver()
+    {
+      free_factorization_data();
+    }
+
+    template<typename Scalar>
+    int UMFPackLinearMatrixSolver<Scalar>::get_matrix_size()
+    {
+      return m->get_size();
+    }
+
     template<>
     bool UMFPackLinearMatrixSolver<double>::setup_factorization()
     {
@@ -261,12 +280,10 @@ namespace Hermes
         status = umfpack_real_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), m->get_Ax(), &symbolic, Control, Info);
         if(status != UMFPACK_OK)
         {
-          check_status("umfpack_di_symbolic", status);
-          return false;
+          if(symbolic)
+            umfpack_di_free_symbolic(&symbolic);
+          throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK symbolic factorization", status));
         }
-
-        if(symbolic == NULL)
-          throw Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
@@ -280,38 +297,15 @@ namespace Hermes
         status = umfpack_real_numeric(m->get_Ap(), m->get_Ai(), m->get_Ax(), symbolic, &numeric, Control, Info);
         if(status != UMFPACK_OK)
         {
-          check_status("umfpack_di_numeric", status);
           if(numeric)
             umfpack_di_free_numeric(&numeric);
-          return false;
+          throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK numeric factorization", status));
         }
         else
           umfpack_di_report_info (Control, Info);
-
-        if(numeric == NULL)
-          throw Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
 
       return true;
-    }
-
-    template<typename Scalar>
-    UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
-    {
-      umfpack_di_defaults(Control);
-    }
-
-    template<typename Scalar>
-    UMFPackLinearMatrixSolver<Scalar>::~UMFPackLinearMatrixSolver()
-    {
-      free_factorization_data();
-    }
-
-    template<typename Scalar>
-    int UMFPackLinearMatrixSolver<Scalar>::get_matrix_size()
-    {
-      return m->get_size();
     }
 
     template<>
@@ -334,11 +328,10 @@ namespace Hermes
         status = umfpack_complex_symbolic(m->get_size(), m->get_size(), m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, &symbolic, NULL, NULL);
         if(status != UMFPACK_OK)
         {
-          check_status("umfpack_di_symbolic", status);
-          return false;
+          if(symbolic)
+            umfpack_zi_free_symbolic(&symbolic);
+          throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK symbolic factorization", status));
         }
-        if(symbolic == NULL)
-          throw Exceptions::Exception("umfpack_di_symbolic error: symbolic == NULL");
 
       case HERMES_REUSE_MATRIX_REORDERING:
       case HERMES_REUSE_MATRIX_REORDERING_AND_SCALING:
@@ -348,11 +341,10 @@ namespace Hermes
         status = umfpack_complex_numeric(m->get_Ap(), m->get_Ai(), (double *) m->get_Ax(), NULL, symbolic, &numeric, NULL, NULL);
         if(status != UMFPACK_OK)
         {
-          check_status("umfpack_di_numeric", status);
-          return false;
+          if(numeric)
+            umfpack_zi_free_numeric(&numeric);
+          throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK numeric factorization", status));
         }
-        if(numeric == NULL)
-          throw Exceptions::Exception("umfpack_di_numeric error: numeric == NULL");
       }
 
       return true;
@@ -390,13 +382,14 @@ namespace Hermes
 
       if(sln != NULL)
         delete [] sln;
+
       sln = new double[m->get_size()];
       memset(sln, 0, m->get_size() * sizeof(double));
       int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
       if(status != UMFPACK_OK)
       {
-        check_status("umfpack_di_solve", status);
-        return false;
+        this->free_factorization_data();
+        throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK solution", status));
       }
 
       this->tick();
@@ -425,8 +418,8 @@ namespace Hermes
       int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
       if(status != UMFPACK_OK)
       {
-        check_status("umfpack_di_solve", status);
-        return false;
+        this->free_factorization_data();
+        throw Exceptions::LinearMatrixSolverException(check_status("UMFPACK solution", status));
       }
 
       this->tick();
@@ -436,23 +429,27 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void UMFPackLinearMatrixSolver<Scalar>::check_status(const char *fn_name, int status)
+    char* UMFPackLinearMatrixSolver<Scalar>::check_status(const char *fn_name, int status)
     {
+      char* to_return = new char[100];
+
       switch (status)
       {
       case UMFPACK_OK: break;
-      case UMFPACK_WARNING_singular_matrix:       this->warn("%s: singular matrix!", fn_name); break;
-      case UMFPACK_ERROR_out_of_memory:           this->warn("%s: out of memory!", fn_name); break;
-      case UMFPACK_ERROR_argument_missing:        this->warn("%s: argument missing", fn_name); break;
-      case UMFPACK_ERROR_invalid_Symbolic_object: this->warn("%s: invalid Symbolic object", fn_name); break;
-      case UMFPACK_ERROR_invalid_Numeric_object:  this->warn("%s: invalid Numeric object", fn_name); break;
-      case UMFPACK_ERROR_different_pattern:       this->warn("%s: different pattern", fn_name); break;
-      case UMFPACK_ERROR_invalid_system:          this->warn("%s: invalid system", fn_name); break;
-      case UMFPACK_ERROR_n_nonpositive:           this->warn("%s: n nonpositive", fn_name); break;
-      case UMFPACK_ERROR_invalid_matrix:          this->warn("%s: invalid matrix", fn_name); break;
-      case UMFPACK_ERROR_internal_error:          this->warn("%s: internal error", fn_name); break;
-      default:                                    this->warn("%s: unknown error (%d)", fn_name, status); break;
+      case UMFPACK_WARNING_singular_matrix:       sprintf(to_return, "%s: UMFPACK_WARNING_singular_matrix!", fn_name); break;
+      case UMFPACK_ERROR_out_of_memory:           sprintf(to_return, "%s: UMFPACK_ERROR_out_of_memory!", fn_name); break;
+      case UMFPACK_ERROR_argument_missing:        sprintf(to_return, "%s: UMFPACK_ERROR_argument_missing", fn_name); break;
+      case UMFPACK_ERROR_invalid_Symbolic_object: sprintf(to_return, "%s: UMFPACK_ERROR_invalid_Symbolic_object", fn_name); break;
+      case UMFPACK_ERROR_invalid_Numeric_object:  sprintf(to_return, "%s: UMFPACK_ERROR_invalid_Numeric_object", fn_name); break;
+      case UMFPACK_ERROR_different_pattern:       sprintf(to_return, "%s: UMFPACK_ERROR_different_pattern", fn_name); break;
+      case UMFPACK_ERROR_invalid_system:          sprintf(to_return, "%s: UMFPACK_ERROR_invalid_system", fn_name); break;
+      case UMFPACK_ERROR_n_nonpositive:           sprintf(to_return, "%s: UMFPACK_ERROR_n_nonpositive", fn_name); break;
+      case UMFPACK_ERROR_invalid_matrix:          sprintf(to_return, "%s: UMFPACK_ERROR_invalid_matrix", fn_name); break;
+      case UMFPACK_ERROR_internal_error:          sprintf(to_return, "%s: UMFPACK_ERROR_internal_error", fn_name); break;
+      default:                                    sprintf(to_return, "%s: unknown error (%d)", fn_name, status); break;
       }
+
+      return to_return;
     }
 
     template class HERMES_API UMFPackLinearMatrixSolver<double>;

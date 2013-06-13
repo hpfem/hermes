@@ -14,6 +14,8 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "linearizer_base.h"
+#include "exact_solution.h"
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -29,6 +31,8 @@ namespace Hermes
         tables = lin_tables;
         np = lin_np;
       };
+
+      double LinearizerBase::large_elements_fraction_of_mesh_size_threshold = 1e-2;
 
       LinearizerBase::LinearizerBase(bool auto_max) : auto_max(auto_max), del_slot(-1), empty(true)
       {
@@ -47,6 +51,8 @@ namespace Hermes
         pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
         pthread_mutex_init(&data_mutex, &attr);
         pthread_mutexattr_destroy(&attr);
+
+        this->level_map = NULL;
       }
 
       bool LinearizerBase::is_empty()
@@ -70,6 +76,8 @@ namespace Hermes
 					::free(edge_markers);
 					edge_markers = NULL;
         }
+        if(this->level_map)
+          delete [] level_map;
         this->empty = true;
       }
 
@@ -99,6 +107,42 @@ namespace Hermes
         }
         else
           add_edge(iv1, iv2, marker);
+      }
+
+      void LinearizerBase::init_linearizer_base(MeshFunctionSharedPtr<double> sln)
+      {
+        lock_data();
+        if(this->level_map)
+          delete [] level_map;
+        this->level_map = new int[sln->get_mesh()->get_num_elements()];
+        memset(this->level_map, -1, sizeof(int) * sln->get_mesh()->get_num_elements());
+      }
+
+      void LinearizerBase::deinit_linearizer_base()
+      {
+        unlock_data();
+      }
+      
+      int LinearizerBase::get_max_level(Element* e, int polynomial_order, MeshSharedPtr& mesh)
+      {
+        if(this->level_map[e->id] != -1)
+          return this->level_map[e->id];
+
+        if(e->is_curved())
+          this->level_map[e->id] = LIN_MAX_LEVEL;
+        else
+        {
+          double element_area = e->get_area();
+          double bottom_left_x, bottom_left_y, top_right_x, top_right_y;
+          mesh->get_bounding_box(bottom_left_x, bottom_left_y, top_right_x, top_right_y);
+          double mesh_size_x = top_right_x - bottom_left_x, mesh_size_y = top_right_y - bottom_left_y;
+
+          double mesh_size_times_threshold = LinearizerBase::large_elements_fraction_of_mesh_size_threshold * mesh_size_x * mesh_size_y;
+          double ratio = (LIN_MAX_LEVEL * std::pow(element_area / mesh_size_times_threshold, 0.2)) * (std::sqrt(polynomial_order - 1));
+          this->level_map[e->id] = std::min<int>(LIN_MAX_LEVEL, (int)ratio);
+        }
+
+        return this->level_map[e->id];
       }
 
       void LinearizerBase::regularize_triangle(int iv0, int iv1, int iv2, int mid0, int mid1, int mid2, int marker)

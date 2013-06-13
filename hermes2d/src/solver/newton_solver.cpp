@@ -392,19 +392,7 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::force_reuse_jacobian_values(unsigned int& successful_steps_with_reused_jacobian)
     {
-      int iteration = this->get_parameter_value(p_iteration);
-      if(iteration == 1)
-        return false;
-
-      double residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 1];
-      double previous_residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 2];
-
       if(successful_steps_with_reused_jacobian >= this->max_steps_with_reused_jacobian)
-      {
-        successful_steps_with_reused_jacobian = 0;
-        return false;
-      }
-      if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
       {
         successful_steps_with_reused_jacobian = 0;
         return false;
@@ -657,20 +645,28 @@ namespace Hermes
           // Solve the system.
           this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
           this->solve_linear_system(coeff_vec);
+          // Assemble next residual for both reusage and convergence test.
+          this->assemble_residual(coeff_vec);
+          // Test whether it was okay to reuse the jacobian.
+          if(!this->jacobian_reused_okay(successful_steps_jacobian))
+          {
+            this->info("\tNewton: Reused Jacobian brought residual norm increase - will be recalculated.");
+            this->get_parameter_value(p_residual_norms).pop_back();
+            this->get_parameter_value(p_solution_norms).pop_back();
+            break;
+          }
+
+          // Increase the iteration count.
+          it++;
 
           // Handle the event of end of a step.
+          this->on_reused_jacobian_step_end();
           if(!this->on_step_end())
           {
             this->info("\tNewton: aborted.");
             this->finalize_solving(coeff_vec);
             return;
           }
-
-          // Increase the iteration count.
-          it++;
-
-          // Assemble next residual for convergence test.
-          this->assemble_residual(coeff_vec);
 
           // Test convergence - if in this loop we found a solution.
           if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
@@ -708,12 +704,37 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    bool NewtonSolver<Scalar>::jacobian_reused_okay(unsigned int& successful_steps_with_reused_jacobian)
+    {
+      int iteration = this->get_parameter_value(p_iteration);
+      if(iteration == 1)
+        return false;
+
+      double residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 1];
+      double previous_residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 2];
+
+      
+      if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
+      {
+        successful_steps_with_reused_jacobian = 0;
+        return false;
+      }
+      else
+        return true;
+    }
+
+    template<typename Scalar>
     void NewtonSolver<Scalar>::on_damping_factor_updated()
     {
     }
 
     template<typename Scalar>
     void NewtonSolver<Scalar>::on_reused_jacobian_step_begin()
+    {
+    }
+
+    template<typename Scalar>
+    void NewtonSolver<Scalar>::on_reused_jacobian_step_end()
     {
     }
 

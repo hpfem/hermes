@@ -281,11 +281,9 @@ namespace Hermes
     template<typename Scalar>
     bool ParalutionLinearMatrixSolver<Scalar>::solve()
     {
-      Scalar* initial_guess = new Scalar[this->get_matrix_size()];
-      memset(initial_guess, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
-      bool result = this->solve(initial_guess);
-      delete [] initial_guess;
-      return result;
+      this->sln = new Scalar[this->get_matrix_size()];
+      memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
+      return this->solve(this->sln);
     }
 
     template<typename Scalar>

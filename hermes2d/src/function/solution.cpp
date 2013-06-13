@@ -1589,7 +1589,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Func<Scalar>* Solution<Scalar>::get_pt_value(double x, double y, Element* e)
+    Func<Scalar>* Solution<Scalar>::get_pt_value(double x, double y, bool use_MeshHashGrid, Element* e)
     {
       double xi1, xi2;
 
@@ -1641,7 +1641,7 @@ namespace Hermes
       else // HERMES_SLN
       {
         if(e == NULL)
-          e = RefMap::element_on_physical_coordinates(false, this->mesh, x, y, &xi1, &xi2);
+          e = RefMap::element_on_physical_coordinates(use_MeshHashGrid, this->mesh, x, y, &xi1, &xi2);
         else
           RefMap::untransform(e, x, y, xi1, xi2);
 

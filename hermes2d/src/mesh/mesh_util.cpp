@@ -158,39 +158,16 @@ namespace Hermes
       }
     }
 
-    MeshHashGrid::MeshHashGrid(const Mesh* mesh) : mesh_seq(mesh->get_seq())
+    MeshHashGrid::MeshHashGrid(Mesh* mesh) : mesh_seq(mesh->get_seq())
     {
-      // find bounding box of the whole mesh
-      double2 mesh_p1, mesh_p2;
-      bool first = true;
-      Node* n;
-      for_all_vertex_nodes(n, mesh)
-      {
-        if(first)
-        {
-          mesh_p1[0] = mesh_p2[0] = n->x;
-          mesh_p1[1] = mesh_p2[1] = n->y;
-          first = false;
-        }
-        else
-        {
-          if(n->x > mesh_p2[0])
-            mesh_p2[0] = n->x;
-          if(n->x < mesh_p1[0])
-            mesh_p1[0] = n->x;
-          if(n->y > mesh_p2[1])
-            mesh_p2[1] = n->y;
-          if(n->y < mesh_p1[1])
-            mesh_p1[1] = n->y;
-        }
-      }
+      mesh->calc_bounding_box();
 
       // create grid
-      double interval_len_x = (mesh_p2[0] - mesh_p1[0]) / GRID_SIZE;
-      double interval_len_y = (mesh_p2[1] - mesh_p1[1]) / GRID_SIZE;
+      double interval_len_x = (mesh->top_right_x - mesh->bottom_left_x) / GRID_SIZE;
+      double interval_len_y = (mesh->top_right_y - mesh->bottom_left_y) / GRID_SIZE;
 
-      intervals_x[0] = mesh_p1[0];
-      intervals_y[0] = mesh_p1[1];
+      intervals_x[0] = mesh->bottom_left_x;
+      intervals_y[0] = mesh->bottom_left_y;
 
       for(int i = 1; i < GRID_SIZE; i++)
       {
@@ -198,8 +175,8 @@ namespace Hermes
         intervals_y[i] = intervals_y[i-1] + interval_len_y;
       }
 
-      intervals_x[GRID_SIZE] = mesh_p2[0];
-      intervals_y[GRID_SIZE] = mesh_p2[1];
+      intervals_x[GRID_SIZE] = mesh->top_right_x;
+      intervals_y[GRID_SIZE] = mesh->top_right_y;
 
       for(int i = 0; i < GRID_SIZE; i++)
       {

@@ -181,9 +181,6 @@ namespace Hermes
       // Check.
       this->check();
 
-      // Important, sets the current caughtException to NULL.
-      this->caughtException = NULL;
-
       // Checks.
       if(!this->errorCalculator->elements_stored)
         throw Exceptions::Exception("element errors have to be calculated first, call ErrorCalculator::calculate_errors().");
@@ -207,6 +204,9 @@ namespace Hermes
       for(int i = 0; i < this->num; i++)
         if(this->refinementInfoMeshFunction[i])
           this->refinementInfoMeshFunction[i].reset();
+      
+      // Init the caught parallel exception message.
+      this->exceptionMessageCaughtInParallelBlock.clear();
     }
 
     template<typename Scalar>
@@ -310,15 +310,9 @@ namespace Hermes
             else
               elements_to_refine[id_to_refine] = ElementToRefine(-1, -1);
           }
-          catch(Hermes::Exceptions::Exception& exception)
-          {
-            if(this->caughtException == NULL)   
-              this->caughtException = exception.clone();
-          }
           catch(std::exception& exception)
           {
-            if(this->caughtException == NULL)
-              this->caughtException = new std::exception(exception);
+            this->exceptionMessageCaughtInParallelBlock = exception.what();
           }
         }
 
@@ -327,10 +321,10 @@ namespace Hermes
 
       delete [] rslns;
 
-      if(this->caughtException)
+      if(!this->exceptionMessageCaughtInParallelBlock.empty())
       {
         this->deinit_adapt(element_refinement_location);
-        throw *(this->caughtException);
+        throw Hermes::Exceptions::Exception(this->exceptionMessageCaughtInParallelBlock.c_str());
         return false;
       }
 
