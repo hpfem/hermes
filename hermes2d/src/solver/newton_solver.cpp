@@ -671,6 +671,7 @@ namespace Hermes
 
           // Assemble next residual for convergence test.
           this->assemble_residual(coeff_vec);
+          this->on_reused_jacobian_step_end();
 
           // Test convergence - if in this loop we found a solution.
           if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))

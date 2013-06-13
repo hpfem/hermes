@@ -193,6 +193,8 @@ namespace Hermes
       virtual void on_damping_factor_updated();
       /// \return Whether or not should the processing continue.
       virtual void on_reused_jacobian_step_begin();
+      /// \return Whether or not should the processing continue.
+      virtual void on_reused_jacobian_step_end();
 
       /// State querying helpers.
       virtual bool isOkay() const;
