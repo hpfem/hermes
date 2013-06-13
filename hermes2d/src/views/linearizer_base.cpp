@@ -123,7 +123,7 @@ namespace Hermes
         unlock_data();
       }
       
-      int LinearizerBase::get_max_level(Element* e, int polynomial_order, MeshSharedPtr& mesh)
+      int LinearizerBase::get_max_level(Element* e, int polynomial_order, MeshSharedPtr mesh)
       {
         if(this->level_map[e->id] != -1)
           return this->level_map[e->id];

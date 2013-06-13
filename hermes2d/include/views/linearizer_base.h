@@ -102,7 +102,7 @@ namespace Hermes
         void free();
         
         /// Experimental upper-limiting of the maximum refinement level.
-        int get_max_level(Element* e, int polynomial_order, MeshSharedPtr& mesh);
+        int get_max_level(Element* e, int polynomial_order, MeshSharedPtr mesh);
         static double large_elements_fraction_of_mesh_size_threshold;
         int* level_map;
         
