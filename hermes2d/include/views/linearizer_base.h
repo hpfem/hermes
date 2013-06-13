@@ -18,6 +18,7 @@
 
 #include "global.h"
 #include "../quadrature/quad_all.h"
+#include "../mesh/mesh.h"
 #include "mixins2d.h"
 
 namespace Hermes
@@ -93,12 +94,18 @@ namespace Hermes
         /// the method free() has been called.
         virtual bool is_empty();
 
+        /// Initializing of a linearizing process.
+        virtual void init_linearizer_base(MeshFunctionSharedPtr<double> sln);
+        virtual void deinit_linearizer_base();
+
         /// Frees the instance.
         void free();
         
         /// Experimental upper-limiting of the maximum refinement level.
-        static int get_max_level(double element_area, int polynomial_order);
-
+        int get_max_level(Element* e, int polynomial_order, MeshSharedPtr& mesh);
+        static double large_elements_fraction_of_mesh_size_threshold;
+        int* level_map;
+        
       protected:
         LinearizerBase(bool auto_max = true);
         ~LinearizerBase();
@@ -147,7 +154,7 @@ namespace Hermes
         friend class StreamView;
       };
 
-      const int LIN_MAX_LEVEL = 6;
+      const int LIN_MAX_LEVEL = 5;
     }
   }
 }

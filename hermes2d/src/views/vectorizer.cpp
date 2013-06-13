@@ -140,7 +140,7 @@ namespace Hermes
       {
         double midval[4][3];
 
-        if(level < LIN_MAX_LEVEL)
+        if(level < LinearizerBase::get_max_level(fns[0]->get_active_element(), std::max(fns[0]->get_fn_order(), fns[1]->get_fn_order()), fns[0]->get_mesh()))
         {
           int i;
           if(!(level & 1))
@@ -286,7 +286,7 @@ namespace Hermes
         a = (sqr(verts[a][2]) + sqr(verts[a][3]) > sqr(verts[b][2]) + sqr(verts[b][3])) ? a : b;
         int flip = (a == iv1 || a == iv3) ? 1 : 0;
 
-        if(level < LIN_MAX_LEVEL)
+        if(level < LinearizerBase::get_max_level(fns[0]->get_active_element(), std::max(fns[0]->get_fn_order(), fns[1]->get_fn_order()), fns[0]->get_mesh()))
         {
           int i;
           if(!(level & 1))
@@ -491,7 +491,7 @@ namespace Hermes
         if(xsln == NULL || ysln == NULL) 
           throw Hermes::Exceptions::Exception("One of the solutions is NULL in Vectorizer:process_solution().");
 
-        lock_data();
+        this->init_linearizer_base(xsln);
         this->tick();
 
         // initialization
@@ -741,8 +741,7 @@ namespace Hermes
           find_min_max();
         }
 
-        //if(verbose_mode) print_hash_stats();
-        unlock_data();
+        this->deinit_linearizer_base();
 
         // select old quadratrues
         xsln->set_quad_2d(old_quad_x);
