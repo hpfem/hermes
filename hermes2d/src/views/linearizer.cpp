@@ -614,6 +614,8 @@ namespace Hermes
 
           for(int state_i = start; state_i < end; state_i++)
           {
+            if(!this->exceptionMessageCaughtInParallelBlock.empty())
+              break;
             try
             {
               Traverse::State* current_state = states[state_i];
@@ -639,6 +641,8 @@ namespace Hermes
 
           for(int state_i = start; state_i < end; state_i++)
           {
+            if(!this->exceptionMessageCaughtInParallelBlock.empty())
+              break;
             try
             {
               Traverse::State* current_state = states[state_i];
