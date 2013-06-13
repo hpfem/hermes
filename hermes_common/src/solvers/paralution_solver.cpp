@@ -281,6 +281,8 @@ namespace Hermes
     template<typename Scalar>
     bool ParalutionLinearMatrixSolver<Scalar>::solve()
     {
+      if(this->sln)
+        delete [] this->sln;
       this->sln = new Scalar[this->get_matrix_size()];
       memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
       return this->solve(this->sln);
@@ -290,6 +292,15 @@ namespace Hermes
     bool ParalutionLinearMatrixSolver<Scalar>::solve(Scalar* initial_guess)
     {
       // Create initial guess.
+      if(!initial_guess)
+      {
+        if(this->sln)
+          delete [] this->sln;
+        this->sln = new Scalar[this->get_matrix_size()];
+        memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
+        initial_guess = this->sln;
+      }
+
       paralution::LocalVector<Scalar> x;
       x.SetDataPtr(&initial_guess, "Initial guess", matrix->get_size());
 
