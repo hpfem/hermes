@@ -250,11 +250,14 @@ namespace Hermes
 #pragma endregion
 
 #pragma region jacobian_recalculation-private
-      /// For deciding if the jacobian is constant at this point.
-      bool force_reuse_jacobian_values(unsigned int& successful_steps_with_constant_jacobian);
+      /// For deciding if the jacobian is reused at this point.
+      bool force_reuse_jacobian_values(unsigned int& successful_steps_with_reused_jacobian);
+      /// For deciding if the reused jacobian did not bring residual increase at this point.
+      bool jacobian_reused_okay(unsigned int& successful_steps_with_reused_jacobian);
 
       double sufficient_improvement_factor_jacobian;
       unsigned int max_steps_with_reused_jacobian;
+
 #pragma endregion
 
 #pragma region OutputAttachable
