@@ -29,7 +29,8 @@ namespace Hermes
     static const int H2D_DG_INNER_EDGE_INT = -54125631;
     static const std::string H2D_DG_INNER_EDGE = "-54125631";
 
-    Mesh::Mesh() : HashTable(), meshHashGrid(NULL), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++)
+    Mesh::Mesh() : HashTable(), meshHashGrid(NULL), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++),
+      bounding_box_calculated(0)
     {
     }
 
@@ -264,6 +265,46 @@ namespace Hermes
     unsigned Mesh::get_seq() const
     {
       return seq;
+    }
+
+    void Mesh::calc_bounding_box()
+    {
+      // find bounding box of the whole mesh
+      bool first = true;
+      Node* n;
+      for_all_vertex_nodes(n, this)
+      {
+        if(first)
+        {
+          this->bottom_left_x = this->top_right_x = n->x;
+          this->bottom_left_y = this->top_right_y = n->y;
+          first = false;
+        }
+        else
+        {
+          if(n->x > this->top_right_x)
+            this->top_right_x = n->x;
+          if(n->x < this->bottom_left_x)
+            this->bottom_left_x = n->x;
+          if(n->y > this->top_right_y)
+            this->top_right_y = n->y;
+          if(n->y < this->bottom_left_y)
+            this->bottom_left_y = n->y;
+        }
+      }
+    }
+
+    void Mesh::get_bounding_box(double& bottom_left_x_, double& bottom_left_y_, double& top_right_x_, double& top_right_y_)
+    {
+      if(!this->bounding_box_calculated)
+        this->calc_bounding_box();
+
+      top_right_x_ = this->top_right_x;
+      bottom_left_x_ = this->bottom_left_x;
+      top_right_y_ = this->top_right_y;
+      bottom_left_y_ = this->bottom_left_y;
+
+      bounding_box_calculated = true;
     }
 
     void Mesh::set_seq(unsigned seq)
