@@ -285,9 +285,8 @@ namespace Hermes
         return true;
       }
 
-      int iteration = this->get_parameter_value(p_iteration);
-      double residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 1];
-      double previous_residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 2];
+      double residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 2);
 
       if(residual_norm < previous_residual_norm * this->sufficient_improvement_factor)
       {
@@ -706,13 +705,8 @@ namespace Hermes
     template<typename Scalar>
     bool NewtonSolver<Scalar>::jacobian_reused_okay(unsigned int& successful_steps_with_reused_jacobian)
     {
-      int iteration = this->get_parameter_value(p_iteration);
-      if(iteration == 1)
-        return false;
-
-      double residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 1];
-      double previous_residual_norm = this->get_parameter_value(p_residual_norms)[iteration - 2];
-
+      double residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 1);
+      double previous_residual_norm = *(this->get_parameter_value(p_residual_norms).end() - 2);
       
       if((residual_norm / previous_residual_norm) > this->sufficient_improvement_factor_jacobian)
       {
