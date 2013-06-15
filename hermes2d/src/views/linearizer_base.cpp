@@ -77,7 +77,10 @@ namespace Hermes
 					edge_markers = NULL;
         }
         if(this->level_map)
+        {
           delete [] level_map;
+          level_map = NULL;
+        }
         this->empty = true;
       }
 
@@ -113,7 +116,10 @@ namespace Hermes
       {
         lock_data();
         if(this->level_map)
+        {
           delete [] level_map;
+          level_map = NULL;
+        }
         this->level_map = new int[sln->get_mesh()->get_num_elements()];
         memset(this->level_map, -1, sizeof(int) * sln->get_mesh()->get_num_elements());
       }
