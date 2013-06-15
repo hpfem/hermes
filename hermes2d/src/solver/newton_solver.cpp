@@ -502,32 +502,15 @@ namespace Hermes
         double current_damping_coefficient = this->get_parameter_value(this->p_damping_coefficients).back();
 
         // store the solution norm change.
-        // Iterative solvers directly use coeff_vec, so we have to take this into account.
-        if(iter_solver)
-        {
-          // 1. store the solution.
-          for (int i = 0; i < ndof; i++)
-            coeff_vec[i] *= current_damping_coefficient;
+        // obtain the solution increment.
+        Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
 
-          // 2. store the solution change.
-          Scalar* difference = new Scalar[ndof];
-          for(int i = 0; i < ndof; i++)
-            difference[i] = coeff_vec[i] - coeff_vec_back[i];
-          this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(difference, ndof);
-          delete [] difference;
-        }
-        else
-        {
-          // obtain the solution increment.
-          Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
+        // 1. store the solution.
+        for (int i = 0; i < ndof; i++)
+          coeff_vec[i] += current_damping_coefficient * sln_vector_local[i];
 
-          // 1. store the solution.
-          for (int i = 0; i < ndof; i++)
-            coeff_vec[i] += current_damping_coefficient * sln_vector_local[i];
-
-          // 2. store the solution change.
-          this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(sln_vector_local, ndof);
-        }
+        // 2. store the solution change.
+        this->get_parameter_value(p_solution_change_norm) = current_damping_coefficient * get_l2_norm(sln_vector_local, ndof);
 
         // 3. store the solution norm.
         this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
