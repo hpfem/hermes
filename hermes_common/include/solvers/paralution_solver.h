@@ -229,6 +229,9 @@ namespace Hermes
       // Store num_iters.
       int num_iters;
 
+      // Store final_residual.
+      double final_residual;
+
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
     };
   }

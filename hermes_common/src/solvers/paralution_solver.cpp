@@ -346,6 +346,9 @@ namespace Hermes
       // Store num_iters.
       num_iters = paralutionSolver->GetIterationCount();
 
+      // Store final_residual
+      final_residual = paralutionSolver->GetCurrentResidual();
+
       // Destroy the paralution vector, keeping the data in sln.
       x.LeaveDataPtr(&this->sln);
 
@@ -389,7 +392,7 @@ namespace Hermes
     template<typename Scalar>
     double ParalutionLinearMatrixSolver<Scalar>::get_residual()
     {
-      return 0.;
+      return final_residual;
     }
 
     template<typename Scalar>
