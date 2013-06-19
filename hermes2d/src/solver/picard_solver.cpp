@@ -317,13 +317,15 @@ namespace Hermes
     template<typename Scalar>
     void PicardSolver<Scalar>::solve(Scalar* coeff_vec)
     {
+      unsigned int it = 0;
+      this->set_parameter_value(this->p_iteration, &it);
+      
       this->init_solving(coeff_vec);
 
       this->init_anderson();
 
-      unsigned int it = 1;
+      it++;
       unsigned int vec_in_memory = 1;   // There is already one vector in the memory.
-      this->set_parameter_value(this->p_iteration, &it);
       this->set_parameter_value(this->p_vec_in_memory, &vec_in_memory);
 
       while (true)
