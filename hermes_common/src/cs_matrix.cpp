@@ -616,6 +616,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void CSCMatrix<Scalar>::add_sparse_matrix(SparseMatrix<Scalar>* mat)
+    {
+      CSCMatrix<Scalar> *_mat = dynamic_cast<CSCMatrix<Scalar>* >(mat);
+      if (_mat)
+        this->add_matrix(_mat);
+      else
+        SparseMatrix<Scalar>::add_sparse_matrix(mat);
+    }
+
+    template<typename Scalar>
     void CSCMatrix<Scalar>::add_matrix(CSMatrix<Scalar>* mat)
     {
       assert(this->get_size() == mat->get_size());

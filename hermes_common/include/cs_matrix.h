@@ -157,6 +157,7 @@ namespace Hermes
       /// Add matrix.
       /// @param[in] mat matrix to be added
       virtual void add_matrix(CSMatrix<Scalar>* mat);
+      virtual void add_sparse_matrix(SparseMatrix<Scalar>* mat);
 
       /// Add matrix to specific position.
       /// @param[in] i row in target matrix coresponding with top row of added matrix
