@@ -553,10 +553,15 @@ namespace Hermes
       /// @param[in] y   - value
       virtual void add(unsigned int idx, Scalar y) = 0;
 
+      /// Set values from a user-provided vector.
+      virtual void set_vector(Vector<Scalar>* vec);
+      /// Set values from a user-provided array.
+      virtual void set_vector(Scalar* vec);
+      
       /// Add a vector.
-      virtual void add_vector(Vector<Scalar>* vec) = 0;
+      virtual void add_vector(Vector<Scalar>* vec);
       /// Add a vector.
-      virtual void add_vector(Scalar* vec) = 0;
+      virtual void add_vector(Scalar* vec);
 
       /// update subset of the elements
       ///

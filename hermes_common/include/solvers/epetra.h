@@ -73,6 +73,10 @@ namespace Hermes
       virtual void add_to_diagonal_blocks(int num_stages, EpetraMatrix<Scalar>* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
       virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
+      virtual void multiply_with_Scalar(Scalar value);
+
+      EpetraMatrix* duplicate() { throw Hermes::Exceptions::Exception("EpetraMatrix::duplicate() not implemented yet."); }
+      
       virtual void add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat);
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
@@ -112,8 +116,6 @@ namespace Hermes
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
 
     protected:

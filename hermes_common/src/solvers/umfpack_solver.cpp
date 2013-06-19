@@ -121,6 +121,19 @@ namespace Hermes
     {
       memcpy(v, this->v, this->size * sizeof(Scalar));
     }
+    
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::set_vector(Vector<Scalar>* vec)
+    {
+      assert(this->size == vec->length());
+      for (unsigned int i = 0; i < this->size; i++) this->v[i] = vec->get(i);
+    }
+    
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::set_vector(Scalar* vec)
+    {
+      memcpy(this->v, vec, this->size * sizeof(Scalar));
+    }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::add_vector(Vector<Scalar>* vec)

@@ -401,20 +401,7 @@ namespace Hermes
     {
       vec->ExtractCopy((double *)v); ///< \todo this can't be used with complex numbers
     }
-
-    template<typename Scalar>
-    void EpetraVector<Scalar>::add_vector(Vector<Scalar>* vec)
-    {
-      assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-    }
-
-    template<typename Scalar>
-    void EpetraVector<Scalar>::add_vector(Scalar* vec)
-    {
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-    }
-
+    
     template<typename Scalar>
     bool EpetraVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
