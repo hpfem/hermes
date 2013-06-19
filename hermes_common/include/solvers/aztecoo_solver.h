@@ -53,18 +53,18 @@ namespace Hermes
       /// Set Aztec internal preconditioner
       /// @param[in] name - name of the preconditioner[ none | jacobi | neumann | least-squares ]
       virtual void set_precond(const char *name);
+      
+      /// \brief Set preconditioner from IFPACK or ML.
+      /// @param[in] pc - IFPACK or ML preconditioner
+      virtual void set_precond(Precond<Scalar> *pc);
 
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();
       virtual bool solve();
       virtual int get_matrix_size();
-    protected:
+    
       virtual int get_num_iters();
       virtual double get_residual();
-
-      /// \brief Set preconditioner from IFPACK.
-      /// @param[in] pc - IFPACK preconditioner
-      virtual void set_precond(Precond<Scalar> *pc);
 
       /// Option setting function
       void set_option(int option, int value);
@@ -72,6 +72,7 @@ namespace Hermes
       /// Parameter setting function
       void set_param(int param, double value);
 
+    protected:
       AztecOO aztec;    ///< Instance of the Aztec solver.
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
