@@ -120,7 +120,7 @@ namespace Hermes
       /// Find out the state.
       typename PicardSolver<Scalar>::ConvergenceState get_convergence_state(double relative_error, int iteration);
 
-      void init_solving(Scalar*& coeff_vec);
+      virtual void init_solving(Scalar*& coeff_vec);
       void deinit_solving(Scalar* coeff_vec);
 
       void init_picard();
