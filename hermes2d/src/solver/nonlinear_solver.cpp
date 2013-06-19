@@ -95,6 +95,25 @@ namespace Hermes
       this->warn("Trying to set iterative method without AztecOO present.");
 #endif
     }
+    
+    template<typename Scalar>
+    void NonlinearSolver<Scalar>::set_preconditioner(Hermes::Preconditioners::Precond<Scalar>* pc)
+    {
+#ifdef HAVE_AZTECOO
+      if(Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType) != SOLVER_AZTECOO)
+      {
+        this->warn("Trying to set iterative method for a different solver than AztecOO.");
+        return;
+      }
+      else
+      {
+        dynamic_cast<Hermes::Solvers::AztecOOSolver<Scalar> *>(this->matrix_solver)->set_precond(pc);
+        this->preconditioner = "Hermes::Preconditioners::Precond";
+      }
+#else
+      this->warn("Trying to set iterative method without AztecOO present.");
+#endif
+    }
 
     template class HERMES_API NonlinearSolver<double>;
     template class HERMES_API NonlinearSolver<std::complex<double> >;
