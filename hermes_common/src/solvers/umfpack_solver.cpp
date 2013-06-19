@@ -111,7 +111,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar UMFPackVector<Scalar>::get(unsigned int idx)
+    Scalar UMFPackVector<Scalar>::get(unsigned int idx) const
     {
       return v[idx];
     }

@@ -134,7 +134,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar EpetraMatrix<Scalar>::get(unsigned int m, unsigned int n)
+    Scalar EpetraMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       int n_entries = mat->NumGlobalEntries(m);
       Hermes::vector<double> vals(n_entries);
@@ -248,7 +248,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+    void EpetraMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const
     {
       for (unsigned int i = 0; i<this->size; i++) //probably can be optimized by use native vectors
       {
@@ -391,7 +391,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar EpetraVector<Scalar>::get(unsigned int idx)
+    Scalar EpetraVector<Scalar>::get(unsigned int idx) const
     {
       return (*vec)[idx];
     }

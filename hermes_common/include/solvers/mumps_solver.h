@@ -105,7 +105,7 @@ namespace Hermes
       virtual void add_as_block(unsigned int i, unsigned int j, MumpsMatrix* mat);
 
       /// Applies the matrix to vector_in and saves result to vector_out.
-      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
       /// Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
       /// Creates matrix using size, nnz, and the three arrays.

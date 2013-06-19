@@ -243,7 +243,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+    void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const
     {
       for (unsigned int i = 0;i<this->size;i++)
       {

@@ -65,7 +65,7 @@ namespace Hermes
       virtual ~UMFPackVector();
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx);
+      virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();

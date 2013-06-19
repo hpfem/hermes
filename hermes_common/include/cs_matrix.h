@@ -63,7 +63,7 @@ namespace Hermes
       virtual void add(unsigned int Ai_data_index, unsigned int Ai_index, Scalar v);
       /// Main get method.
       /// Virtual - the method body is 1:1 for CSCMatrix, inverted for CSR.
-      virtual Scalar get(unsigned int Ai_data_index, unsigned int Ai_index);
+      virtual Scalar get(unsigned int Ai_data_index, unsigned int Ai_index) const;
       
       virtual void add_to_diagonal(Scalar v);
       /// Add matrix.
@@ -100,7 +100,7 @@ namespace Hermes
       virtual double get_fill_in() const;
 
       // Applies the matrix to vector_in and saves result to vector_out.
-      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
       // Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
 
@@ -146,7 +146,7 @@ namespace Hermes
 
       virtual ~CSCMatrix();
 
-      virtual Scalar get(unsigned int m, unsigned int n);
+      virtual Scalar get(unsigned int m, unsigned int n) const;
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
@@ -185,7 +185,7 @@ namespace Hermes
 
       virtual ~CSRMatrix();
 
-      virtual Scalar get(unsigned int m, unsigned int n);
+      virtual Scalar get(unsigned int m, unsigned int n) const;
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
