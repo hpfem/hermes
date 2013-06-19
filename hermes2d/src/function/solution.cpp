@@ -866,8 +866,8 @@ namespace Hermes
       double2x2 *mat, *m;
       int i, mstep = 0;
 
-      // H1 space
-      if(space_type == HERMES_H1_SPACE)
+      // H1 space, L2 space
+      if((space_type == HERMES_H1_SPACE)||(space_type == HERMES_L2_SPACE))
       {
 #ifdef H2D_USE_SECOND_DERIVATIVES
         if(((newmask & H2D_SECOND) == H2D_SECOND && (oldmask & H2D_SECOND) != H2D_SECOND))
