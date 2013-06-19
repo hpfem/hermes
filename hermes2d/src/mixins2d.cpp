@@ -49,6 +49,9 @@ namespace Hermes
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_matrix_output(SparseMatrix<Scalar>* matrix, int iteration)
       {
+        if (matrix == NULL)
+          return;
+        
         if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration))
         {
           char* fileName = new char[this->matrixFilename.length() + 5];
@@ -63,10 +66,34 @@ namespace Hermes
           delete [] fileName;
         }
       }
+      
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::process_matrix_output(SparseMatrix<Scalar>* matrix)
+      {
+        if (matrix == NULL)
+          return;
+        
+        if(this->output_matrixOn)
+        {
+          char* fileName = new char[this->matrixFilename.length() + 5];
+          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s.m", this->matrixFilename.c_str());
+          else
+            sprintf(fileName, "%s", this->matrixFilename.c_str());
+          FILE* matrix_file = fopen(fileName, "w+");
+
+          matrix->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+          fclose(matrix_file);
+          delete [] fileName;
+        }
+      }
 
       template<typename Scalar>
       void MatrixRhsOutput<Scalar>::process_vector_output(Vector<Scalar>* rhs, int iteration)
       {
+        if (rhs == NULL)
+          return;
+        
         if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration))
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
@@ -74,6 +101,26 @@ namespace Hermes
             sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), iteration);
           else
             sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+          FILE* rhs_file = fopen(fileName, "w+");
+          rhs->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+          fclose(rhs_file);
+          delete [] fileName;
+        }
+      }
+      
+      template<typename Scalar>
+      void MatrixRhsOutput<Scalar>::process_vector_output(Vector<Scalar>* rhs)
+      {
+        if (rhs == NULL)
+          return;
+        
+        if(this->output_rhsOn)
+        {
+          char* fileName = new char[this->RhsFilename.length() + 5];
+          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
+            sprintf(fileName, "%s.m", this->RhsFilename.c_str());
+          else
+            sprintf(fileName, "%s", this->RhsFilename.c_str());
           FILE* rhs_file = fopen(fileName, "w+");
           rhs->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
           fclose(rhs_file);
