@@ -209,7 +209,7 @@ namespace Hermes
         if(reference_mapping[i]->get_active_element())
         {
           geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-          geometry->diam = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_diameter());
+          geometry->diam = std::min(geometry->diam, reference_mapping[i]->get_active_element()->get_diameter());
         }
 
       jacobian_x_weights = new double[np];
