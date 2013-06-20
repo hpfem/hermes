@@ -67,8 +67,8 @@ namespace Hermes
       void add_error_form(NormFormDG<Scalar>* form);
 
       /// Returns a squared error of an element.
-      /** \param[in] A component index.
-      *  \param[in] An element index.
+      /** \param[in] component  A component index.
+      *  \param[in] element_id  An element index.
       *  \return Squared error. Meaning of the error depends on parameters of the function calc_errors_internal(). */
       double get_element_error_squared(int component, int element_id) const;
       double get_element_norm_squared(int component, int element_id) const;

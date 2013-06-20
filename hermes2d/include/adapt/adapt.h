@@ -41,7 +41,7 @@ namespace Hermes
     *
     */
 
-    /// Class for selecting the stopping criterion of the loop over all elements ordered descending wrt. their error.
+    /// Class for selecting the stopping criterion of the loop over all elements in an descending order wrt. their error.
     /// \ingroup g_adapt
     /// Serves for only inspect such a portion of all elements of all meshes in the system
     /// for potential refinement.
@@ -49,7 +49,7 @@ namespace Hermes
     class AdaptivityStoppingCriterion
     {
     public:
-      /// Main AdaptivityStoppingCriterion method. It is evaluated in the loop over all elements ordered descending wrt. their error.
+      /// Main AdaptivityStoppingCriterion method. It is evaluated in the loop over all elements in an descending order wrt. their error.
       /// The loop ends with the first negative result of a call to this method.
       /// Decide if the refinement at hand will be carried out.
       virtual bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i) = 0;
@@ -76,7 +76,7 @@ namespace Hermes
     };
     
     /// Stopping criterion based on maximum element error.
-    /// The method add_refinement will return false as soon as the particular element carries lower error than AdaptStoppingCriterionCumulative::threshold
+    /// The method add_refinement will return false as soon as the particular element carries lower error than AdaptStoppingCriterionSingleElement::threshold
     /// times the maximum element error.
     template<typename Scalar>
     class HERMES_API AdaptStoppingCriterionSingleElement : public AdaptivityStoppingCriterion<Scalar>
@@ -88,7 +88,7 @@ namespace Hermes
       /// Decide if the refinement at hand will be carried out.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
     private:
-      /// The quantity representing the portion (fraction) of maximum error tha processed elements contain.
+      /// The quantity representing the portion (fraction) of maximum error that the processed elements contain.
       /// See comments above.
       double threshold;
     };
@@ -106,7 +106,7 @@ namespace Hermes
       /// Decide if the refinement at hand will be carried out.
       bool add_refinement(ErrorCalculator<Scalar>* error_calculator, double processed_error_squared, double max_error_squared, int element_inspected_i);
     private:
-      /// The quantity representing the portion (fraction) of the current element error and the previous one for those that will be refined..
+      /// The quantity representing the portion (fraction) of the current element error to the previous one for those that will be refined..
       /// See comments above.
       double threshold;
     };
