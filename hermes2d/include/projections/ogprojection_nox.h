@@ -113,15 +113,15 @@ namespace Hermes
       class ProjectionMatrixFormVol : public MatrixFormVol<Scalar>
       {
       public:
-        ProjectionMatrixFormVol(int i, int j, NormType NormType) : MatrixFormVol<Scalar>(i, j)
+        ProjectionMatrixFormVol(int i, int j, NormType norm_type) : MatrixFormVol<Scalar>(i, j)
         {
-          this->NormType = NormType;
+          this->norm_type = norm_type;
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *u, Func<double> *v,
           Geom<double> *e, Func<Scalar> **ext) const
         {
-          switch (NormType)
+          switch (norm_type)
           {
           case HERMES_L2_NORM:
             return l2_projection_biform<double, Scalar>(n, wt, u_ext, u, v, e, ext);
@@ -142,7 +142,7 @@ namespace Hermes
         Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *u, Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, Func<Ord> **ext) const
         {
-          switch (NormType)
+          switch (norm_type)
           {
           case HERMES_L2_NORM:
             return l2_projection_biform<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, u, v, e, ext);
@@ -166,7 +166,7 @@ namespace Hermes
         }
 
       private:
-        NormType NormType;
+        NormType norm_type;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         static SolFunctionDomain h1_projection_biform(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *u,
@@ -227,15 +227,15 @@ namespace Hermes
       class ProjectionVectorFormVol : public VectorFormVol<Scalar>
       {
       public:
-        ProjectionVectorFormVol(int i, NormType NormType) : VectorFormVol<Scalar>(i)
+        ProjectionVectorFormVol(int i, NormType norm_type) : VectorFormVol<Scalar>(i)
         {
-          this->NormType = NormType;
+          this->norm_type = norm_type;
         }
 
         Scalar value(int n, double *wt, Func<Scalar> *u_ext[], Func<double> *v,
           Geom<double> *e, Func<Scalar> **ext) const
         {
-          switch (NormType)
+          switch (norm_type)
           {
           case HERMES_L2_NORM:
             return l2_projection_residual<double, Scalar>(n, wt, u_ext, v, e, ext);
@@ -256,7 +256,7 @@ namespace Hermes
         Hermes::Ord ord(int n, double *wt, Func<Hermes::Ord> *u_ext[], Func<Hermes::Ord> *v,
           Geom<Hermes::Ord> *e, Func<Ord> **ext) const
         {
-          switch (NormType)
+          switch (norm_type)
           {
           case HERMES_L2_NORM:
             return l2_projection_residual<Hermes::Ord, Hermes::Ord>(n, wt, u_ext, v, e, ext);
@@ -280,7 +280,7 @@ namespace Hermes
         }
 
       private:
-        NormType NormType;
+        NormType norm_type;
 
         template<typename TestFunctionDomain, typename SolFunctionDomain>
         SolFunctionDomain h1_projection_residual(int n, double *wt, Func<SolFunctionDomain> *u_ext[], Func<TestFunctionDomain> *v,
