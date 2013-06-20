@@ -76,6 +76,8 @@ namespace Hermes
       double get_norm_squared(int component) const;
       double get_total_error_squared() const;
       double get_total_norm_squared() const;
+      
+      int get_component_count() const { return this->component_count; }
 
       /// A reference to an element.
       struct ElementReference {
