@@ -124,7 +124,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
       char* check_status(const char *fn_name, int status);
 
       /// For output (the array Info is filled regardless of the value of the level).

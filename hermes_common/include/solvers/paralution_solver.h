@@ -87,7 +87,7 @@ namespace Hermes
       virtual ~ParalutionVector();
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx);
+      virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
@@ -232,7 +232,7 @@ namespace Hermes
       // Store final_residual.
       double final_residual;
 
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };
   }
 }

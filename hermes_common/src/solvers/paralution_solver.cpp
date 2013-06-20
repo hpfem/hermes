@@ -152,7 +152,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar ParalutionVector<Scalar>::get(unsigned int idx)
+    Scalar ParalutionVector<Scalar>::get(unsigned int idx) const
     {
       return v[idx];
     }

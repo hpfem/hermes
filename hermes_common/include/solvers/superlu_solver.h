@@ -253,7 +253,7 @@ namespace Hermes
       equed_t equed;              ///< Form of equilibration that was done on A.
       SuperMatrix AC;             ///< Matrix A permuted by perm_c.
 #endif //SLU_MT
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };
   }
 }

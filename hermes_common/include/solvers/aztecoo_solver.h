@@ -60,7 +60,10 @@ namespace Hermes
 
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();
+      
       virtual bool solve();
+      virtual bool solve(Scalar* initial_guess);
+      
       virtual int get_matrix_size();
     
       virtual int get_num_iters();
@@ -77,9 +80,9 @@ namespace Hermes
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
 
-      Precond<Scalar> *pc;
-
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      EpetraPrecond<Scalar> *pc;
+      
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };
   }
 }
