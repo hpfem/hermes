@@ -9,40 +9,27 @@
 # Femhub by specifying the environment variables MY_MUMPS_LIB_DIRS and 
 # MY_MUMPS_INC_DIRS.
 
-# CMake maybe looks into the following paths by itself, but specifying them 
-# explicitly doesn't hurt either.
+if(WIN64)
+  SET(MUMPS_LIB_SEARCH_PATH ${MUMPS_ROOT}/lib/x64 ${MUMPS_ROOT}/lib)
+else(WIN64)  
+  SET(MUMPS_LIB_SEARCH_PATH ${MUMPS_ROOT}/lib /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64)
+endif(WIN64)
 
-IF(WIN32)
-  MESSAGE(FATAL_ERROR "MUMPS only supported on Linux.")
-ENDIF(WIN32)
+FIND_PATH(MUMPS_INCLUDE_PATH mumps_c_types.h ${MUMPS_ROOT}/include /usr/include /usr/include/mumps_seq /usr/local/include/	/usr/local/include/mumps_seq)
 
-SET(MUMPS_INCLUDE_SEARCH_PATH
-	/usr/include
-	/usr/include/mumps_seq
-	/usr/local/include/
-	/usr/local/include/mumps_seq
-)
+FIND_LIBRARY(MUMPS_MPISEQ_LIBRARY NAMES mpiseq_seq libseq_c PATHS ${MUMPS_LIB_SEARCH_PATH})
+FIND_LIBRARY(MUMPS_COMMON_LIBRARY NAMES mumps_common_seq mumps_common_c PATHS ${MUMPS_LIB_SEARCH_PATH})
+FIND_LIBRARY(MUMPS_PORD_LIBRARY NAMES pord_seq pord_c PATHS ${MUMPS_LIB_SEARCH_PATH})
 
-SET(MUMPS_LIB_SEARCH_PATH
-	/usr/lib64
-	/usr/lib
-	/usr/local/lib/
-)
-
-FIND_PATH(MUMPS_INCLUDE_PATH  mumps_c_types.h ${MUMPS_INCLUDE_SEARCH_PATH})
-
-FIND_LIBRARY(MUMPS_MPISEQ_LIBRARY   mpiseq_seq        ${MUMPS_LIB_SEARCH_PATH})
-FIND_LIBRARY(MUMPS_COMMON_LIBRARY   mumps_common_seq  ${MUMPS_LIB_SEARCH_PATH})
-FIND_LIBRARY(MUMPS_PORD_LIBRARY     pord_seq          ${MUMPS_LIB_SEARCH_PATH})
-
-FIND_PATH(MUMPS_MPISEQ_INCLUDE_PATH  mpi.h    ${MUMPS_INCLUDE_SEARCH_PATH})
+if(WITH_MPI)
+FIND_PATH(MUMPS_MPISEQ_INCLUDE_PATH  mpi.h PATHS ${MUMPS_INCLUDE_SEARCH_PATH})
+endif(WITH_MPI)
 
 SET(MUMPS_INCLUDE_PATH ${MUMPS_INCLUDE_PATH} ${MUMPS_MPISEQ_INCLUDE_PATH})
-
-FIND_LIBRARY(MUMPSD_SEQ_LIBRARY dmumps_seq  ${MUMPS_LIB_SEARCH_PATH})
+FIND_LIBRARY(MUMPSD_SEQ_LIBRARY NAMES dmumps_seq dmumps_c PATHS ${MUMPS_LIB_SEARCH_PATH})
 LIST(APPEND REQUIRED_REAL_LIBRARIES "MUMPSD_SEQ_LIBRARY")
 
-FIND_LIBRARY(MUMPSZ_SEQ_LIBRARY zmumps_seq  ${MUMPS_LIB_SEARCH_PATH})
+FIND_LIBRARY(MUMPSZ_SEQ_LIBRARY NAMES zmumps_seq zmumps_c PATHS ${MUMPS_LIB_SEARCH_PATH})
 LIST(APPEND REQUIRED_CPLX_LIBRARIES "MUMPSZ_SEQ_LIBRARY")
 
 LIST(APPEND REQUIRED_REAL_LIBRARIES "MUMPS_MPISEQ_LIBRARY")
@@ -53,10 +40,7 @@ LIST(APPEND REQUIRED_CPLX_LIBRARIES "MUMPS_COMMON_LIBRARY" "MUMPS_PORD_LIBRARY")
 
 # Test if all the required libraries have been found. If they haven't, end with fatal error...
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(  MUMPS 
-  "MUMPS could not be found. Either disable it by setting WITH_MUMPS to NO in
-   your CMake.vars file, or install it according to instructions at\n
-   <http://hpfem.org/hermes/doc/src/installation/matrix_solvers/mumps.html>."
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(  MUMPS DEFAULT_MSG
    ${REQUIRED_REAL_LIBRARIES} ${REQUIRED_CPLX_LIBRARIES} MUMPS_INCLUDE_PATH
 ) 
 
