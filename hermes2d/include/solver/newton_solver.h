@@ -271,6 +271,7 @@ namespace Hermes
       const OutputParameterDoubleVector& damping_coefficients() const { return this->p_damping_coefficients; };
       const OutputParameterBool& residual_norm_drop() const { return this->p_residual_norm_drop; };
       const OutputParameterUnsignedInt& iteration() const { return this->p_iteration; };
+      const OutputParameterUnsignedInt& iteration_with_recalculated_jacobian() const { return this->p_iteration_with_recalculated_jacobian; };
 
     private:
       // Parameters for OutputAttachable mixin.
@@ -282,6 +283,7 @@ namespace Hermes
       OutputParameterDoubleVector p_damping_coefficients;
       OutputParameterBool p_residual_norm_drop;
       OutputParameterUnsignedInt p_iteration;
+      OutputParameterUnsignedInt p_iteration_with_recalculated_jacobian;
 #pragma endregion
 
     private:
