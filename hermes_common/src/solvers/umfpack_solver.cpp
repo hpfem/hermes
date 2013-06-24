@@ -111,7 +111,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar UMFPackVector<Scalar>::get(unsigned int idx)
+    Scalar UMFPackVector<Scalar>::get(unsigned int idx) const
     {
       return v[idx];
     }
@@ -120,6 +120,19 @@ namespace Hermes
     void UMFPackVector<Scalar>::extract(Scalar *v) const
     {
       memcpy(v, this->v, this->size * sizeof(Scalar));
+    }
+    
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::set_vector(Vector<Scalar>* vec)
+    {
+      assert(this->size == vec->length());
+      for (unsigned int i = 0; i < this->size; i++) this->v[i] = vec->get(i);
+    }
+    
+    template<typename Scalar>
+    void UMFPackVector<Scalar>::set_vector(Scalar* vec)
+    {
+      memcpy(this->v, vec, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>

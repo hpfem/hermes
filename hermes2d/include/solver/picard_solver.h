@@ -77,7 +77,7 @@ namespace Hermes
       PicardSolver(WeakForm<Scalar>* wf, Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
       virtual ~PicardSolver();
 
-      /// Sets the attribute verbose_output for the inner Newton's loop to the paramater passed.
+      /// Sets the attribute verbose_output for the inner Newton's loop to the parameter passed.
       void set_verbose_output_linear_solver(bool verbose_output_to_set);
 
       // See the base class for details, the following serves only for avoiding C++ name-hiding.
@@ -120,7 +120,7 @@ namespace Hermes
       /// Find out the state.
       typename PicardSolver<Scalar>::ConvergenceState get_convergence_state(double relative_error, int iteration);
 
-      void init_solving(Scalar*& coeff_vec);
+      virtual void init_solving(Scalar*& coeff_vec);
       void deinit_solving(Scalar* coeff_vec);
 
       void init_picard();

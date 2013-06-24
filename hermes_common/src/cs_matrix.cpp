@@ -75,7 +75,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CSMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out)
+    void CSMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const
     {
       int n = this->size;
       for (int j = 0; j<n; j++) vector_out[j] = 0;
@@ -324,7 +324,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar CSMatrix<Scalar>::get(unsigned int m, unsigned int n)
+    Scalar CSMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       // Find m-th row in the n-th column.
       int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
@@ -365,7 +365,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar CSCMatrix<Scalar>::get(unsigned int m, unsigned int n)
+    Scalar CSCMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       return CSMatrix<Scalar>::get(m, n);
     }
@@ -616,6 +616,16 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    void CSCMatrix<Scalar>::add_sparse_matrix(SparseMatrix<Scalar>* mat)
+    {
+      CSCMatrix<Scalar> *_mat = dynamic_cast<CSCMatrix<Scalar>* >(mat);
+      if (_mat)
+        this->add_matrix(_mat);
+      else
+        SparseMatrix<Scalar>::add_sparse_matrix(mat);
+    }
+
+    template<typename Scalar>
     void CSCMatrix<Scalar>::add_matrix(CSMatrix<Scalar>* mat)
     {
       assert(this->get_size() == mat->get_size());
@@ -695,7 +705,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar CSRMatrix<Scalar>::get(unsigned int m, unsigned int n)
+    Scalar CSRMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       return CSMatrix<Scalar>::get(n, m);
     }

@@ -129,7 +129,7 @@ namespace Hermes
       virtual void add_as_block(unsigned int i, unsigned int j, SuperLUMatrix* mat);
 
       // Applies the matrix to vector_in and saves result to vector_out.
-      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
       // Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
       /// Creates matrix in SuperLU format using size, nnz, and the three arrays.
@@ -253,7 +253,7 @@ namespace Hermes
       equed_t equed;              ///< Form of equilibration that was done on A.
       SuperMatrix AC;             ///< Matrix A permuted by perm_c.
 #endif //SLU_MT
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };
   }
 }

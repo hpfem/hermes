@@ -50,6 +50,11 @@ namespace Hermes
       /// the other solvers).
       /// \param[in] preconditioner_name See the attribute preconditioner.
       void set_preconditioner(const char* preconditioner_name);
+      
+      /// Set the preconditioner object of Epetra_Operator type employed by AztecOO (ignored by
+      /// the other solvers).
+      /// \param[in] pc Pointer to a wrapper around Epetra_Operator based preconditioners (see precond.h).
+      void set_preconditioner(Hermes::Preconditioners::Precond<Scalar> *pc);
 
       /// Set the maximum number of iterations, thus co-determine when to stop iterations.
       void set_max_allowed_iterations(int max_allowed_iterations);

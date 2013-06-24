@@ -227,6 +227,43 @@ namespace Hermes
     {
     }
 
+    template<typename Scalar>
+    void Vector<Scalar>::set_vector(Hermes::Algebra::Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->set(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void Vector<Scalar>::set_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->set(i, vec[i]);
+    }
+
+    template<typename Scalar>
+    void Vector<Scalar>::add_vector(Hermes::Algebra::Vector<Scalar>* vec)
+    {
+      assert(this->length() == vec->length());
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+    }
+
+    template<typename Scalar>
+    void Vector<Scalar>::add_vector(Scalar* vec)
+    {
+      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+    }
+
+    template HERMES_API void Vector<double>::set_vector(Vector<double>* vec);
+    template HERMES_API void Vector<double>::set_vector(double* vec);
+    template HERMES_API void Vector<double>::add_vector(Vector<double>* vec);
+    template HERMES_API void Vector<double>::add_vector(double* vec);
+
+    template HERMES_API void Vector<std::complex<double> >::set_vector(Vector<std::complex<double> >* vec);
+    template HERMES_API void Vector<std::complex<double> >::set_vector(std::complex<double> * vec);
+    template HERMES_API void Vector<std::complex<double> >::add_vector(Vector<std::complex<double> >* vec);
+    template HERMES_API void Vector<std::complex<double> >::add_vector(std::complex<double> * vec);
+
+
     template<>
     HERMES_API SparseMatrix<double>* create_matrix(bool use_direct_solver)
     {

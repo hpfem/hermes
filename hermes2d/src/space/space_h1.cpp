@@ -198,7 +198,7 @@ namespace Hermes
         {
           typename Space<Scalar>::ElementData* ed = &this->edata[e->id];
           ed->bdof = this->next_dof;
-          ed->n = order ? this->shapeset->get_num_bubbles(ed->order, e->get_mode()) : 0;
+          ed->n = this->shapeset->get_num_bubbles(ed->order, e->get_mode());
           this->next_dof += ed->n * this->stride;
           this->bubble_functions_count += ed->n;
         }
