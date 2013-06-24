@@ -1,0 +1,12 @@
+#
+# BLAS (for Windows)
+#
+
+if(WIN64)
+  SET(BLAS_LIB_SEARCH_PATH	${WINBLAS_ROOT}/lib/x64 ${WINBLAS_ROOT}/lib)
+else(WIN64)
+  SET(BLAS_LIB_SEARCH_PATH	${WINBLAS_ROOT}/lib)
+endif(WIN64)
+
+FIND_LIBRARY(WINBLAS_LIBRARY libblas blas ${BLAS_LIB_SEARCH_PATH})
+find_package_handle_standard_args(WINBLAS DEFAULT_MSG WINBLAS_LIBRARY)

@@ -4,16 +4,25 @@
 
 # Some search paths.
 if (WIN32)
-  set(DEP_ROOT "d:/hpfem/hermes/dependencies")
   set(GLUT_ROOT "d:/hpfem/hermes/dependencies")
   set(GLEW_ROOT "d:/hpfem/hermes/dependencies")
   set(XERCES_ROOT "d:/hpfem/hermes/dependencies")
   set(XSD_ROOT "d:/hpfem/hermes/dependencies")
   set(PTHREAD_ROOT "d:/hpfem/hermes/dependencies")
-  set(PARALUTION_ROOT "d:/hpfem/hermes/dependencies")
   set(TCMALLOC_ROOT "d:/hpfem/hermes/dependencies")
-  set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies")
-  set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies")
+  # if using UMFPACK - set the root
+  if(WITH_UMFPACK)
+    set(UMFPACK_ROOT "d:/hpfem/hermes/dependencies")
+  endif(WITH_UMFPACK)
+  # if using PARALUTION - set the root
+  if(WITH_PARALUTION)
+    set(PARALUTION_ROOT "d:/hpfem/hermes/dependencies")
+  endif(WITH_PARALUTION)
+  # if using MUMPS - set the root and also set where is the Windows BLAS library
+  if(WITH_MUMPS)
+    set(MUMPS_ROOT "d:/hpfem/hermes/dependencies")
+    set(WINBLAS_ROOT "d:/hpfem/hermes/dependencies")
+  endif(WITH_MUMPS)
   
   # Target (installation) path.
   set(TARGET_ROOT "d:/hpfem/hermes/dependencies")
@@ -25,9 +34,11 @@ else()
   #set(CLAPACK_ROOT "/usr/lib/")
 endif()
 
-# Trilinos
+# Trilinos - change "NO" to "YES" to use it, also Trilinos needs CLAPACK, so tell cmake where to find it.
+set(WITH_TRILINOS NO)
 if (WIN32) 
   set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
+  set(CLAPACK_ROOT "d:/hpfem/hermes/dependencies")
 else() 
   set(TRILINOS_ROOT "~/solvers/trilinos")
 endif()

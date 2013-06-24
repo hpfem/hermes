@@ -312,14 +312,17 @@ project(hermes)
     endif(WITH_PARALUTION)
     
     if(MSVC)
-      if(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+      if(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
           # The search for CLAPACK and associated libraries will be performed
           # every time the project is configured in MSVC (TODO: Find out if
           # CLAPACK_LIBRARY, BLAS_LIBRARY, F2C_LIBRARY and CLAPACK_INCLUDE_DIRS
           # could be cached to improve subsequent configuration performance).
           find_package(CLAPACK REQUIRED)
           include_directories(${CLAPACK_INCLUDE_DIRS})
-      endif(WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
+      endif(WITH_PETSC OR WITH_TRILINOS OR WITH_SUPERLU)
+      if(WITH_MUMPS)
+        find_package(WINBLAS REQUIRED)
+      endif(WITH_MUMPS)
     else(MSVC)
       # All third party solvers require BLAS and LAPACK (both found in the package LAPACK).
       # FindLAPACK is Fortran-only so Fortran must be enabled as well.
