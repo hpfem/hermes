@@ -55,9 +55,11 @@ namespace Hermes
     template<typename Scalar>
     Solver<Scalar>::~Solver()
     {
-      delete jacobian;
-      delete residual;
       delete matrix_solver;
+      if(jacobian)
+        delete jacobian;
+      if(residual)
+        delete residual;
       if(own_dp)
         delete this->dp;
       else
@@ -259,12 +261,12 @@ namespace Hermes
           this->info("\tSolver: reusing Jacobian.");
           if(assemble_residual)
             this->dp->assemble(coeff_vec, this->residual);
-          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
         }
         else
         {
           this->info("\tSolver: recalculating a reusable Jacobian.");
-          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
           if(assemble_residual)
             this->dp->assemble(coeff_vec, this->jacobian, this->residual);
           else
@@ -278,7 +280,7 @@ namespace Hermes
           this->dp->assemble(coeff_vec, this->jacobian, this->residual);
         else
           this->dp->assemble(coeff_vec, this->jacobian);
-        this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
         this->jacobian_reusable = true;
       }
     }

@@ -36,7 +36,7 @@ namespace Hermes
   namespace Solvers
   {
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>::LinearMatrixSolver()
+    LinearMatrixSolver<Scalar>::LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme) : reuse_scheme(reuse_scheme)
     {
       sln = NULL;
       time = -1.0;
@@ -62,9 +62,21 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LinearMatrixSolver<Scalar>::set_factorization_scheme()
+    void LinearMatrixSolver<Scalar>::set_reuse_scheme()
     {
-      set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+      set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+    }
+
+    template<typename Scalar>
+    MatrixStructureReuseScheme LinearMatrixSolver<Scalar>::get_used_reuse_scheme() const 
+    { 
+      return reuse_scheme; 
+    }
+
+    template<typename Scalar>
+    void LinearMatrixSolver<Scalar>::set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme) 
+    {
+      this->reuse_scheme = reuse_scheme; 
     }
 
     template<>
@@ -241,10 +253,14 @@ namespace Hermes
       return NULL;
     }
 
-    template<typename Scalar>
-    void DirectSolver<Scalar>::set_factorization_scheme(FactorizationScheme reuse_scheme)
+    template <typename Scalar>
+    DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH) : LinearMatrixSolver<Scalar>(reuse_scheme)
     {
-      factorization_scheme = reuse_scheme;
+    }
+
+    template <typename Scalar>
+    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8), precond_yes(false)
+    {
     }
 
     template<typename Scalar>

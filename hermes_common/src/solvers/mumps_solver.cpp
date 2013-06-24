@@ -722,15 +722,15 @@ namespace Hermes
     {
       // When called for the first time, all three phases (analysis, factorization,
       // solution) must be performed.
-      int eff_fact_scheme = this->factorization_scheme;
+      int eff_fact_scheme = this->reuse_scheme;
       if(!inited)
-        if( this->factorization_scheme == HERMES_REUSE_MATRIX_REORDERING ||
-          this->factorization_scheme == HERMES_REUSE_FACTORIZATION_COMPLETELY )
-          eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+        if( this->reuse_scheme == HERMES_REUSE_MATRIX_REORDERING ||
+          this->reuse_scheme == HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY )
+          eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
 
       switch (eff_fact_scheme)
       {
-      case HERMES_FACTORIZE_FROM_SCRATCH:
+      case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
         // (Re)initialize new instance.
         reinit();
 
@@ -765,7 +765,7 @@ namespace Hermes
           param.job = JOB_FACTORIZE_SOLVE;
         }
         break;
-      case HERMES_REUSE_FACTORIZATION_COMPLETELY:
+      case HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY:
         param.job = JOB_SOLVE;
         break;
       }

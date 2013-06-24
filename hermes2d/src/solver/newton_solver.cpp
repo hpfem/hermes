@@ -420,12 +420,12 @@ namespace Hermes
       // Assemble the system.
       if(this->jacobian_reusable && this->reuse_jacobian_values())
       {
-        this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+        this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
         this->dp->assemble(coeff_vec, this->residual);
       }
       else
       {
-        this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+        this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
         this->dp->assemble(coeff_vec, this->jacobian, this->residual);
         this->get_parameter_value(this->p_iteration_with_recalculated_jacobian)++;
         this->jacobian_reusable = true;
@@ -491,7 +491,7 @@ namespace Hermes
         if(this->do_UMFPACK_reporting)
         {
           UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
-          if(this->matrix_solver->get_used_factorization_scheme() != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+          if(this->matrix_solver->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
           {
             this->UMFPACK_reporting_data[this->FactorizationSize] = std::max(this->UMFPACK_reporting_data[this->FactorizationSize], umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT]);
             this->UMFPACK_reporting_data[this->PeakMemoryUsage] += umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
@@ -628,7 +628,7 @@ namespace Hermes
           this->on_reused_jacobian_step_begin();
 
           // Solve the system.
-          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
           this->solve_linear_system(coeff_vec);
           // Assemble next residual for both reusage and convergence test.
           this->assemble_residual(coeff_vec);
@@ -668,9 +668,9 @@ namespace Hermes
 
         // Set factorization schemes.
         if(this->jacobian_reusable)
-          this->matrix_solver->set_factorization_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
         else
-          this->matrix_solver->set_factorization_scheme(HERMES_FACTORIZE_FROM_SCRATCH);
+          this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
         // Solve the system, state that the jacobian is reusable should it be desirable.
         this->solve_linear_system(coeff_vec);

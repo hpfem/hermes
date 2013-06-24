@@ -559,7 +559,7 @@ namespace Hermes
 
     template<typename Scalar>
     SuperLUSolver<Scalar>::SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
+      : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
       , local_Ax(NULL), local_rhs(NULL)
     {
       R = NULL;
@@ -685,7 +685,7 @@ namespace Hermes
       // keep the (possibly rescaled) matrix from the last factorization, otherwise recreate it
       // from the master SuperLUMatrix<Scalar> pointed to by this->m (this also applies to the case when
       // A does not yet exist).
-      if(!has_A || this->factorization_scheme != HERMES_REUSE_FACTORIZATION_COMPLETELY)
+      if(!has_A || this->reuse_scheme != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
       {
         if(A_changed)
           free_matrix();
@@ -823,7 +823,7 @@ namespace Hermes
     bool SuperLUSolver<Scalar>::setup_factorization()
     {
       unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
-      if(has_A && this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH && A_size != m->size)
+      if(has_A && this->reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && A_size != m->size)
       {
         this->warn("You cannot reuse factorization structures for factorizing matrices of different sizes.");
         return false;
@@ -832,9 +832,9 @@ namespace Hermes
       // Always factorize from scratch for the first time.
       int eff_fact_scheme;
       if(!inited)
-        eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+        eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
       else
-        eff_fact_scheme = this->factorization_scheme;
+        eff_fact_scheme = this->reuse_scheme;
 
       // Prepare factorization structures. In case of a particular reuse scheme, comments are given
       // to clarify which arguments will be reused and which will be reset by the dgssvx (zgssvx) routine.
@@ -847,7 +847,7 @@ namespace Hermes
       // (the PDF documentation is, unfortunately, even less helpful).
       switch (eff_fact_scheme)
       {
-      case HERMES_FACTORIZE_FROM_SCRATCH:
+      case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
         // This case should generally allow for solving a completely new system, i.e. for a change of
         // matrix and rhs size - for simplicity, we reallocate the structures every time.
 
@@ -906,7 +906,7 @@ namespace Hermes
         options.Fact = SamePattern_SameRowPerm;
 #endif
         break;
-      case HERMES_REUSE_FACTORIZATION_COMPLETELY:
+      case HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY:
         // needed from previous:      perm_c, perm_r, equed, L, U
         // not needed from previous:  etree, R, C
 #ifdef SLU_MT

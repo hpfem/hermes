@@ -64,23 +64,23 @@ namespace Hermes
     ///&nbsp;-\c PETSc   - Factorization reuse applies to the construction of PETSc preconditioner.
     ///&nbsp;              Both \c HERMES_REUSE_MATRIX_REORDERING_AND_SCALING and
     ///&nbsp;              \c HERMES_REUSE_MATRIX_REORDERING allow to reuse the non-zero pattern of the
-    ///&nbsp;              previously created preconditioner, \c HERMES_REUSE_FACTORIZATION_COMPLETELY
+    ///&nbsp;              previously created preconditioner, \c HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY
     ///&nbsp;              indicates that the preconditioner may be reused completely for future solves.
     ///
     /// <b>Typical scenario:</b>
     /// When \c rhsonly was set to \c true for the assembly phase,
-    /// \c HERMES_REUSE_FACTORIZATION_COMPLETELY should be set for the following solution phase.
-    enum FactorizationScheme
+    /// \c HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY should be set for the following solution phase.
+    enum MatrixStructureReuseScheme
     {
-      HERMES_FACTORIZE_FROM_SCRATCH,              ///< Perform new factorization, don't reuse
+      HERMES_CREATE_STRUCTURE_FROM_SCRATCH,              ///< Perform new factorization (operator creation), don't reuse
       ///< existing factorization data.
-      HERMES_REUSE_MATRIX_REORDERING,             ///< Factorize matrix with the same sparsity
+      HERMES_REUSE_MATRIX_REORDERING,             ///< Factorize matrix (create operatoer) with the same sparsity
       ///< pattern as the one already factorized.
       HERMES_REUSE_MATRIX_REORDERING_AND_SCALING, ///< Factorize matrix with the same sparsity
       ///< pattern and similar numerical values
       ///< as the one already factorized.
-      HERMES_REUSE_FACTORIZATION_COMPLETELY       ///< Completely reuse the already performed
-      ///< factorization.
+      HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY       ///< Completely reuse the already performed
+      ///< factorization / operator.
     };
 
     /// \brief Abstract class for defining solver interface.
@@ -92,7 +92,7 @@ namespace Hermes
     class LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
     {
     public:
-      LinearMatrixSolver();
+      LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
       virtual ~LinearMatrixSolver();
 
@@ -112,16 +112,19 @@ namespace Hermes
       virtual int get_matrix_size() = 0;
 
       /// Get factorization scheme.
-      virtual FactorizationScheme get_used_factorization_scheme() { return HERMES_FACTORIZE_FROM_SCRATCH; };
+      virtual MatrixStructureReuseScheme get_used_reuse_scheme() const;
 
       /// Set factorization scheme.
       /// @param[in] reuse_scheme factoriztion scheme to set
-      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme) { };
+      virtual void set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme);
 
       /// Set factorization scheme to default.
-      virtual void set_factorization_scheme();
+      virtual void set_reuse_scheme();
 
     protected:
+      /// Factorization scheme
+      MatrixStructureReuseScheme reuse_scheme;
+
       /// Solution vector.
       Scalar *sln;
 
@@ -135,15 +138,7 @@ namespace Hermes
     class DirectSolver : public LinearMatrixSolver<Scalar>
     {
     public:
-      DirectSolver(unsigned int factorization_scheme = HERMES_FACTORIZE_FROM_SCRATCH)
-        : LinearMatrixSolver<Scalar>(), factorization_scheme(factorization_scheme) {};
-
-      virtual FactorizationScheme get_used_factorization_scheme() { return (FactorizationScheme)factorization_scheme; };
-
-    protected:
-      virtual void set_factorization_scheme(FactorizationScheme reuse_scheme);
-
-      unsigned int factorization_scheme;
+      DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
     };
 
     /// \brief  Abstract class for defining interface for iterative solvers.
@@ -152,7 +147,7 @@ namespace Hermes
     class IterSolver : public LinearMatrixSolver<Scalar>
     {
     public:
-      IterSolver() : LinearMatrixSolver<Scalar>(), max_iters(10000), tolerance(1e-8), precond_yes(false) {};
+      IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
       /// Various tolerances.
       /// Not necessarily supported by all iterative solvers used.

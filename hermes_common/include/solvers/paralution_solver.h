@@ -215,6 +215,13 @@ namespace Hermes
       /// Preconditioner.
       Preconditioners::ParalutionPrecond<Scalar> *preconditioner;
 
+      /// Internal solver.
+      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
+      /// Internal solver is not reusable and will have to be re-created.
+      void reset_internal_solver();
+      /// Set internal solver for the current solution.
+      void init_internal_solver();
+
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
@@ -223,8 +230,8 @@ namespace Hermes
       // Paralution solver type.
       ParalutionSolverType paralutionSolverType;
 
-      // Linear Solver.
-      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* create_paralutionSolver();
+      // Linear Solver creation.
+      void init_paralutionSolver();
       
       // Store num_iters.
       int num_iters;

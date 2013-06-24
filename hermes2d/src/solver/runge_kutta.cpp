@@ -450,7 +450,7 @@ namespace Hermes
           matrix_right->finish();
         }
         else
-          solver->set_factorization_scheme(HERMES_REUSE_FACTORIZATION_COMPLETELY);
+          solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
 
         // Solve the linear system.
         if(!solver->solve())

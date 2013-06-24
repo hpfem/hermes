@@ -33,7 +33,7 @@ namespace Hermes
 
     template<typename Scalar>
     AmesosSolver<Scalar>::AmesosSolver(const char *solver_type, EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs)
-      : DirectSolver<Scalar>(HERMES_FACTORIZE_FROM_SCRATCH), m(m), rhs(rhs)
+      : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs)
     {
       solver = factory.Create(solver_type, problem);
       assert(solver != NULL);
@@ -151,16 +151,16 @@ namespace Hermes
     {
       // Perform both factorization phases for the first time.
       int eff_fact_scheme;
-      if(this->factorization_scheme != HERMES_FACTORIZE_FROM_SCRATCH &&
+      if(this->reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH &&
         solver->NumSymbolicFact() == 0 && solver->NumNumericFact() == 0)
-        eff_fact_scheme = HERMES_FACTORIZE_FROM_SCRATCH;
+        eff_fact_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
       else
-        eff_fact_scheme = this->factorization_scheme;
+        eff_fact_scheme = this->reuse_scheme;
 
       int status;
       switch(eff_fact_scheme)
       {
-      case HERMES_FACTORIZE_FROM_SCRATCH:
+      case HERMES_CREATE_STRUCTURE_FROM_SCRATCH:
         //debug_log("Factorizing symbolically.");
         status = solver->SymbolicFactorization();
         if(status != 0)
