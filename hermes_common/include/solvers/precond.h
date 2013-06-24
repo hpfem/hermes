@@ -54,7 +54,7 @@ namespace Hermes
     template <typename Scalar>
     class EpetraPrecond : public Precond<Scalar>
 #ifdef HAVE_EPETRA
-      : public Epetra_Operator
+      , public Epetra_Operator
 #endif
     {
     public:

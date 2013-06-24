@@ -60,7 +60,7 @@ namespace Hermes
       EpetraVector<Scalar> *rhs;
 
       bool setup_factorization();
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };
   }
 }

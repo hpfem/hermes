@@ -64,7 +64,7 @@ namespace Hermes
 
       virtual void alloc();
       virtual void free();
-      virtual Scalar get(unsigned int m, unsigned int n);
+      virtual Scalar get(unsigned int m, unsigned int n) const;
       virtual int get_num_row_entries(unsigned int row);
       virtual void extract_row_copy(unsigned int row, unsigned int len, unsigned int &n_entries, double *vals, unsigned int *idxs);
       virtual void zero();
@@ -72,7 +72,11 @@ namespace Hermes
       virtual void add_to_diagonal(Scalar v);
       virtual void add_to_diagonal_blocks(int num_stages, EpetraMatrix<Scalar>* mat);
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
-      virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out);
+      virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
+      virtual void multiply_with_Scalar(Scalar value);
+
+      EpetraMatrix* duplicate() { throw Hermes::Exceptions::Exception("EpetraMatrix::duplicate() not implemented yet."); }
+      
       virtual void add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat);
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
@@ -105,15 +109,13 @@ namespace Hermes
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx);
+      virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
 
     protected:

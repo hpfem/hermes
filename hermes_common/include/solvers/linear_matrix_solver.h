@@ -87,7 +87,7 @@ namespace Hermes
     ///
     ///\todo Adjust interface to support faster update of matrix and rhs
     ///
-    /// Typical usage is through the function create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs).
+    /// Typical usage is through the function create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs, bool use_direct_solver).
     template <typename Scalar>
     class LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
     {

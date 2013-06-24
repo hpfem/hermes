@@ -65,13 +65,15 @@ namespace Hermes
       virtual ~UMFPackVector();
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx);
+      virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
+      virtual void set_vector(Vector<Scalar>* vec);
+      virtual void set_vector(Scalar* vec);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
       virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
@@ -122,7 +124,7 @@ namespace Hermes
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
       template <typename T> friend class Hermes::Algebra::UMFPackVector;
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool);
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
       char* check_status(const char *fn_name, int status);
 
       /// For output (the array Info is filled regardless of the value of the level).

@@ -324,7 +324,7 @@ namespace Hermes
       /// @return the value from the specified position
       /// @param[in] m - the number of row
       /// @param[in] n - the number of column
-      virtual Scalar get(unsigned int m, unsigned int n) = 0;
+      virtual Scalar get(unsigned int m, unsigned int n) const = 0;
 
       /// Zero the matrix.
       virtual void zero() = 0;
@@ -448,7 +448,7 @@ namespace Hermes
         unsigned int *idxs) { }
 
       /// Multiply with a vector.
-      virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) {
+      virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const {
         throw Hermes::Exceptions::Exception("multiply_with_vector() undefined.");
       };
 
@@ -529,7 +529,7 @@ namespace Hermes
       /// Get the value from a position
       /// @return the value form the specified index
       /// @param[in] idx - index which to obtain the value from
-      virtual Scalar get(unsigned int idx) = 0;
+      virtual Scalar get(unsigned int idx) const = 0;
 
       /// Extract vector values into user-provided array.
       /// @param[out] v - array which will contain extracted values
@@ -553,10 +553,15 @@ namespace Hermes
       /// @param[in] y   - value
       virtual void add(unsigned int idx, Scalar y) = 0;
 
+      /// Set values from a user-provided vector.
+      virtual void set_vector(Vector<Scalar>* vec);
+      /// Set values from a user-provided array.
+      virtual void set_vector(Scalar* vec);
+      
       /// Add a vector.
-      virtual void add_vector(Vector<Scalar>* vec) = 0;
+      virtual void add_vector(Vector<Scalar>* vec);
       /// Add a vector.
-      virtual void add_vector(Scalar* vec) = 0;
+      virtual void add_vector(Scalar* vec);
 
       /// update subset of the elements
       ///
