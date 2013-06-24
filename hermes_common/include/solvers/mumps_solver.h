@@ -81,7 +81,7 @@ namespace Hermes
 
       virtual void alloc();
       virtual void free();
-      virtual Scalar get(unsigned int m, unsigned int n);
+      virtual Scalar get(unsigned int m, unsigned int n) const;
       virtual void zero();
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
@@ -136,7 +136,7 @@ namespace Hermes
 
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx);
+      virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
       virtual void change_sign();

@@ -145,7 +145,7 @@ namespace Hermes
     }
 
     template<>
-    double PetscMatrix<double>::get(unsigned int m, unsigned int n)
+    double PetscMatrix<double>::get(unsigned int m, unsigned int n) const
     {
       double v = 0.0;
       PetscScalar pv;
@@ -155,7 +155,7 @@ namespace Hermes
     }
 
     template<>
-    std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n)
+    std::complex<double> PetscMatrix<std::complex<double> >::get(unsigned int m, unsigned int n) const
     {
       std::complex<double> v = 0.0;
       MatGetValues(matrix, 1, (PetscInt*) &m, 1, (PetscInt*) &n, &v);
@@ -364,7 +364,7 @@ namespace Hermes
     }
 
     template<>
-    double PetscVector<double>::get(unsigned int idx)
+    double PetscVector<double>::get(unsigned int idx) const
     {
       double y = 0;
       PetscScalar py;
@@ -374,7 +374,7 @@ namespace Hermes
     }
 
     template<>
-    std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx)
+    std::complex<double> PetscVector<std::complex<double> >::get(unsigned int idx) const
     {
       std::complex<double> y = 0;
       VecGetValues(vec, 1, (PetscInt*) &idx, &y);

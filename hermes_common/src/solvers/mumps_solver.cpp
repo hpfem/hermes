@@ -145,7 +145,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n)
+    Scalar MumpsMatrix<Scalar>::get(unsigned int m, unsigned int n) const
     {
       // Find m-th row in the n-th column.
       int mid = find_position(Ai + Ap[n], Ap[n + 1] - Ap[n], m);
@@ -494,7 +494,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Scalar MumpsVector<Scalar>::get(unsigned int idx)
+    Scalar MumpsVector<Scalar>::get(unsigned int idx) const
     {
       return v[idx];
     }
