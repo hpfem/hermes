@@ -7,10 +7,8 @@ These installation instructions have been tested with Microsoft Visual Studio 20
 - If you would like to use NMake and you run in troubles, drop us a line to `Hermes2D mailing list <http://groups.google.com/group/hermes2d/>`_.
 - On windows, a crucial file to edit is CMake.vars.example (see further).
 
-Dependency check-list
-~~~~~~~~~~~~~~~~~~~~~
-
-This list works for 32-bit version of Hermes.
+Dependency check-list - overview
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   - You need to install dependent libraries into either common directory, or separate directories. This directory, further called 'dependencies' (stands for the particular directory in the case of particular dependency), has to have three subdirectories as follows. The choice of having a single common directory, or separate ones is up to you.
 
@@ -18,11 +16,23 @@ This list works for 32-bit version of Hermes.
     - 'dependencies'\\lib: Library files (\*.lib) of dependency libraries.   
     - 'dependencies'\\bin: Binary modules (\*.dll) of dependency libraries.
     - be sure to include a directory 'dependecies'\\bin into the 'PATH' environment variable (you need to include all of them if you chose to have separate ones for various dependencies).
+  - For the 64-bit version, if you want to use it side-by-side to the 32-bit one, you can create a subdirectory 'x64' in the 'lib' folder where you will be putting the 64-bit dependency libraries.
+  
+Dependency check-list - 32-bit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This list works for 32-bit version of Hermes. See the section for 64-bit version if that is the one you are interested in.
 
   - PTHREAD(2.8.0)
 
     - Download pthread binaries version 2.8.0 (ftp://sourceware.org/pub/pthreads-win32/prebuilt-dll-2-8-0-release/).
     - Copy 'lib\\pthreadVCE2.dll', 'include\\\*.h' and 'lib\\pthreadVCE2.lib' to 'bin', 'include', and 'lib' dependecy directories respectively.
+    
+  - TCMalloc
+    - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+    - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
+    - Copy Win32\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, Win32\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
+    - Copy the contents of src/google to 'include' dependency directory
 
   - UMFPACK
 
@@ -45,7 +55,7 @@ This list works for 32-bit version of Hermes.
     - Copy UMFPACK\\Lib\\libumfpack.a to 'lib' directory and change its extension to Windows equivalent '.lib'.
 
   - CMAKE
-
+  
     - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
   - CLAPACK
@@ -69,7 +79,7 @@ This list works for 32-bit version of Hermes.
 
       - Download glew Win32 precompiled binaries ver.1.5.4 (http://glew.sourceforge.net/) and unpack it.
       - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
- 	
+  
   - XERCES
 
     - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
@@ -78,7 +88,7 @@ This list works for 32-bit version of Hermes.
     - Copy all header files to 'include' dependencies directory
     - Copy the lib files to 'lib' dependencies directory
 
-	- XSD
+  - XSD
     - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio.
     - Copy all bin files to 'bin' dependencies directory
     - Copy all header files to 'include' dependencies directory
@@ -166,7 +176,60 @@ This list works for 32-bit version of Hermes.
       - Copy 'exoIIv2c.lib' to 'lib' dependency directory structure
       - Copy 'my_exodusii_root\\cbind\\include\\exodusII.h and exodusII_ext.h' to 'include' dependency directory
       
-      
+Dependency check-list - 64-bit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Only the most important dependencies are described here for the 64-bit version. For all others, all you must do is compile the 64-bit version, or get it in any other way and link it to Hermes instead of the 32-bit one.
+  
+  - PTHREAD(2.8.0)
+
+    - Download pthread from http://www.sourceware.org/pthreads-win32/, then navigate to mingw64\pthreads-w64.zip\
+    - Copy 'x86_64-w64-mingw32\\lib\\libpthread.a' to 'lib' and rename to 'pthreadVCE2.lib' , 'x86_64-w64-mingw32\\include\\\*.h' to 'include' and 'bin\\pthreadGC2-w64.dll' to 'bin' dependecy directories respectively.
+
+  - TCMalloc
+    - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
+    - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
+    - Copy x64\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, x64\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
+    - Copy the contents of src/google to 'include' dependency directory
+
+  - UMFPACK
+
+    - MinGW used for compiling AMD and UMFPACK: `Download MinGW <http://sourceforge.net/projects/mingw/>`_.
+    - Just use 64-bit MinGW and provide the flag "-m64", otherwise it is the same as in Win32 version.
+
+  - CMAKE
+
+    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
+
+  - OpenGL support (optional)
+
+    - FREEGLUT 
+
+      - Download freeglut 2.4.0 (http://freeglut.sourceforge.net/) and unpack it.
+      - Open the your_freeglut_2.4.0_root\\freeglut.DSP file in Visual Studio and convert it to a newer format.
+      - Compile Debug or Release version (x64 platform). Debug version is recommended in a case of debugging.
+      - Copy 'freeglut.dll', 'freeglut.h', and 'freeglut.lib' to 'bin', 'include\\GL', and 'lib' dependency directories, respectively/.
+  
+    - GLEW
+
+      - Download glew x64 precompiled binaries (http://glew.sourceforge.net/) and unpack it.
+      - Copy 'my_glew_root\\bin\\glew32.dll', 'my_glew_root\\include\\GL\\\*.h', and 'my_glew_root\\lib\\glew32.lib' to 'bin', 'include\\GL', and 'lib' dependency directories respectively.
+ 	
+  - XERCES
+
+    - Download Xerces 3.1.1 source code from http://xerces.apache.org/xerces-c/download.cgi.
+    - Build using your favorite compiler for 64-bit.
+    - Copy all bin files to 'bin' dependencies directory
+    - Copy all header files to 'include' dependencies directory
+    - Copy the lib files to 'lib' dependencies directory
+    
+    
+  - XSD
+    - Download XSD library from http://www.codesynthesis.com/download/xsd/3.3/windows/i686/xsd-3.3.0-i686-windows.zip, instructions how to build the library are available at http://wiki.codesynthesis.com/Using_XSD_with_Microsoft_Visual_Studio.
+    - Build the x64 version
+    - Copy all bin files to 'bin' dependencies directory
+    - Copy all header files to 'include' dependencies directory
+
 Building Hermes
 ~~~~~~~~~~~~~~~
 
@@ -211,15 +274,14 @@ In order to use Hermes in your project, you need to do the following steps. Step
   - Add directories 'dependencies\\lib' to additional library directories (<right click on your project>\\Properties\\Configuration Properties\\Linker\\Additional Library Directories).
   - Add also the directory where you copied Hermes libraries to as an additional library directory. This would probably be the variable TARGET_ROOT in your CMake.vars file.
   - Add 'include "hermes2d.h"', make sure that your TARGET_ROOT is among Include Directories settings in your compiler.
-  - Add the dependencies\\include directory (and possibly other directories where you copied dependency headers) using  
-  - Project -> Properties -> Configuration Properties -> VC++ Directories -> Include Directories:
-			
+  - Add the dependencies\\include directory (and possibly other directories where you copied dependency headers) using
+  
+    - Project -> Properties -> Configuration Properties -> VC++ Directories -> Include Directories
+
   - Deny (Ignore) warnings that are not indicating anything dangerous:
 
     - Ignore warnings about STL in DLL by denying a warning 4251 (<right click on your project>\\Properties\\Configuration Properties\\C/C++\\Advanced\\Disable Specific Warnings, enter 4251).
     - Ignore warnings about standard functions that are not safe (<right click on your project>\\Properties\\Configuration Properties\\C/C++\\Preprocessor\\Preprocessor Definitions, add _CRT_SECURE_NO_WARNINGS).
     - Also ignore any template instantiation warnings
-  - Resolve LIBCMTD.lib LNK2005 errors when building hermes2D (This only happened once)
-    - http://support.microsoft.com/kb/148652 (Solution # 1)
   - Resolve unresolved linker error in Xerces
     - http://stackoverflow.com/questions/10506582/xerces-c-unresolved-linker-error
