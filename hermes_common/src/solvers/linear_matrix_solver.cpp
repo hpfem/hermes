@@ -254,12 +254,12 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH) : LinearMatrixSolver<Scalar>(reuse_scheme)
+    DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme)
     {
     }
 
     template <typename Scalar>
-    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8), precond_yes(false)
+    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8), precond_yes(false)
     {
     }
 
