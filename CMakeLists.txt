@@ -236,7 +236,7 @@ project(hermes)
 
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Disable all warnings and turn on only important ones:
-    set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS} -fPIC")
     set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
 
     set(RELEASE_FLAGS "-DNDEBUG -O3")
@@ -342,7 +342,6 @@ project(hermes)
         add_definitions(-DWITH_BLAS)  
       endif(WITH_UMFPACK OR WITH_PETSC OR WITH_MUMPS OR WITH_TRILINOS OR WITH_SUPERLU)
     endif(MSVC)
-
     
     if(WITH_PETSC)
       find_package(PETSC REQUIRED)
