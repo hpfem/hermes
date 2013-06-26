@@ -408,7 +408,6 @@ project(hermes)
       include_directories(${MPI_INCLUDE_PATH})
     endif(WITH_MPI)
     
-    
     IF(WITH_STACKTRACE)
       IF(MSVC)
         find_package(STACK_WALKER REQUIRED)
