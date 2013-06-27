@@ -45,7 +45,15 @@ namespace Hermes
       virtual ~MeshReaderH2D();
 
       virtual bool load(const char *filename, MeshSharedPtr mesh);
+      virtual bool load(std::string filename, MeshSharedPtr mesh)
+      {
+        return this->load(filename.c_str(), mesh);
+      }
       virtual bool save(const char *filename, MeshSharedPtr mesh);
+      virtual bool save(std::string filename, MeshSharedPtr mesh)
+      {
+        return this->save(filename.c_str(), mesh);
+      }
 
     protected:
       Nurbs* load_nurbs(MeshSharedPtr mesh, MeshData *m, int id, Node** en, int &p1, int &p2);
