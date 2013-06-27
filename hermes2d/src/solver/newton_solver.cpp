@@ -668,7 +668,7 @@ namespace Hermes
 
         // Set factorization schemes.
         if(this->jacobian_reusable)
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
         else
           this->matrix_solver->set_reuse_scheme(HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 

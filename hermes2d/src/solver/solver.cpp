@@ -266,7 +266,7 @@ namespace Hermes
         else
         {
           this->info("\tSolver: recalculating a reusable Jacobian.");
-          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING_AND_SCALING);
+          this->matrix_solver->set_reuse_scheme(HERMES_REUSE_MATRIX_REORDERING);
           if(assemble_residual)
             this->dp->assemble(coeff_vec, this->jacobian, this->residual);
           else
