@@ -31,7 +31,7 @@ namespace Hermes
     bool NewtonSolverConvergenceMeasurement<Scalar>::converged(NewtonSolver<Scalar>* newton)
     {
       // get iteration.
-      unsigned int iteration = newton->get_parameter_value(newton->iteration());
+      unsigned int iteration = newton->get_current_iteration_number();
       if(iteration < 2)
         return false;
 

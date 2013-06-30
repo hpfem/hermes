@@ -239,6 +239,12 @@ namespace Hermes
 
       bool residual_as_function;
 
+      /// Shortcut method for getting the current iteration.
+      int get_current_iteration_number();
+
+      /// Output info about the step.
+      void step_info();
+
 #pragma region damping-private
       /// Manual / auto.
       bool manual_damping;
@@ -280,11 +286,11 @@ namespace Hermes
       
       const OutputParameterDoubleVector& damping_coefficients() const { return this->p_damping_coefficients; };
       const OutputParameterBool& residual_norm_drop() const { return this->p_residual_norm_drop; };
-      const OutputParameterUnsignedInt& iteration() const { return this->p_iteration; };
-      const OutputParameterUnsignedInt& iteration_with_recalculated_jacobian() const { return this->p_iteration_with_recalculated_jacobian; };
+      const OutputParameterBoolVector& iterations_with_recalculated_jacobian() const { return this->p_iterations_with_recalculated_jacobian; };
 
     private:
       // Parameters for OutputAttachable mixin.
+      OutputParameterBoolVector p_iterations_with_recalculated_jacobian;
       OutputParameterDoubleVector p_residual_norms;
       OutputParameterDoubleVector p_solution_norms;
       OutputParameterDoubleVector p_solution_change_norms;
@@ -292,12 +298,10 @@ namespace Hermes
       OutputParameterUnsignedInt p_successful_steps_jacobian;
       OutputParameterDoubleVector p_damping_coefficients;
       OutputParameterBool p_residual_norm_drop;
-      OutputParameterUnsignedInt p_iteration;
-      OutputParameterUnsignedInt p_iteration_with_recalculated_jacobian;
 #pragma endregion
 
     private:
-      Scalar* coeff_vec_back;
+			Scalar* coeff_vec_back;
       int ndof;
 
       friend class NewtonSolverConvergenceMeasurement<Scalar>;
