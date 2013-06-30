@@ -215,7 +215,7 @@ namespace Hermes
       double calculate_residual_norm();
 
       /// Calculates the new damping coefficient.
-      bool calculate_damping_coefficient(unsigned int& successful_steps);
+      bool calculate_damping_factor(unsigned int& successful_steps);
 
       int current_convergence_measurement;
       
@@ -250,13 +250,13 @@ namespace Hermes
       bool manual_damping;
 
       /// Manual.
-      double manual_damping_coefficient;
+      double manual_damping_factor;
 
       /// Auto.
       /// The ratio between two damping coeffs when changing.
       double auto_damping_ratio;
       /// The initial (and maximum) damping coefficient
-      double initial_auto_damping_coefficient;
+      double initial_auto_damping_factor;
       /// Sufficient improvement for continuing.
       double sufficient_improvement_factor;
       /// necessary number of steps to increase back the damping coeff.
@@ -284,7 +284,7 @@ namespace Hermes
       const OutputParameterUnsignedInt& successful_steps_damping() const { return this->p_successful_steps_damping; };
       const OutputParameterUnsignedInt& successful_steps_jacobian() const { return this->p_successful_steps_jacobian; };
       
-      const OutputParameterDoubleVector& damping_coefficients() const { return this->p_damping_coefficients; };
+      const OutputParameterDoubleVector& damping_factors() const { return this->p_damping_factors; };
       const OutputParameterBool& residual_norm_drop() const { return this->p_residual_norm_drop; };
       const OutputParameterBoolVector& iterations_with_recalculated_jacobian() const { return this->p_iterations_with_recalculated_jacobian; };
 
@@ -296,7 +296,7 @@ namespace Hermes
       OutputParameterDoubleVector p_solution_change_norms;
       OutputParameterUnsignedInt p_successful_steps_damping;
       OutputParameterUnsignedInt p_successful_steps_jacobian;
-      OutputParameterDoubleVector p_damping_coefficients;
+      OutputParameterDoubleVector p_damping_factors;
       OutputParameterBool p_residual_norm_drop;
 #pragma endregion
 
