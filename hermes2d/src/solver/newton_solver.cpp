@@ -85,6 +85,9 @@ namespace Hermes
       this->max_steps_with_reused_jacobian = 3;
 
       this->coeff_vec_back = NULL;
+
+      // Default tolerance.
+      this->set_tolerance(1e-8, ResidualNormAbsolute);
     }
 
     template<typename Scalar>

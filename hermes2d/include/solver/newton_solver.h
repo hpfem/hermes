@@ -102,7 +102,7 @@ namespace Hermes
       void set_residual_as_function();
 
       /// Set the residual norm tolerance for ending the Newton's loop.
-      /// Default: none.
+      /// Default: this->set_tolerance(1e-8, ResidualNormAbsolute);
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
       /// solution as a correct one. If false, only one will be enough.
       void set_tolerance(double newton_tol, NewtonSolverConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = true);
