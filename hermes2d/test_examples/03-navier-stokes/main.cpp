@@ -162,7 +162,7 @@ if(HERMES_VISUALIZATION)
     coeff_vec, Hermes::vector<NormType>(vel_proj_norm, vel_proj_norm, p_proj_norm));
 
   newton.set_max_allowed_iterations(max_allowed_iterations);
-  newton.set_tolerance(NEWTON_TOL);
+  newton.set_tolerance(NEWTON_TOL, ResidualNormAbsolute);
   newton.set_sufficient_improvement_factor_jacobian(1e-2);
   //newton.set_jacobian_constant();
 

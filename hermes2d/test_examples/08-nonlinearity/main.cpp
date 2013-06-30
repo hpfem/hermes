@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 
   // Initialize Newton solver.
   NewtonSolver<double> newton(&dp);
-  newton.set_tolerance(NEWTON_TOL);
+  newton.set_tolerance(NEWTON_TOL, ResidualNormAbsolute);
   newton.set_max_allowed_residual_norm(1e99);
   newton.set_max_allowed_iterations(NEWTON_MAX_ITER);
   

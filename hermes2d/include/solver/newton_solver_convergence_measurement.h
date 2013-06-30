@@ -31,16 +31,19 @@ namespace Hermes
     template<typename Scalar> class NewtonSolver;
 
     /// Convergence measurement strategies.
+    /// Count of the types - for NewtonSolver to hold arrays of such a length.
+    const int NewtonSolverConvergenceMeasurementTypeCount = 7;
+
     /// This specifies the quantity that is compared to newton_tolerance (settable by set_tolerance()).
     enum NewtonSolverConvergenceMeasurementType
     {
-      ResidualNormRelativeToInitial,
-      ResidualNormRelativeToPrevious,
-      ResidualNormRatioToInitial,
-      ResidualNormRatioToPrevious,
-      ResidualNormAbsolute,
-      SolutionDistanceFromPreviousAbsolute,
-      SolutionDistanceFromPreviousRelative
+      ResidualNormRelativeToInitial = 0x0001,
+      ResidualNormRelativeToPrevious = 0x0002,
+      ResidualNormRatioToInitial = 0x0004,
+      ResidualNormRatioToPrevious = 0x0008,
+      ResidualNormAbsolute = 0x0010,
+      SolutionDistanceFromPreviousAbsolute = 0x0020,
+      SolutionDistanceFromPreviousRelative = 0x0040
     };
 
     template<typename Scalar>
