@@ -105,7 +105,7 @@ namespace Hermes
       /// Default: this->set_tolerance(1e-8, ResidualNormAbsolute);
       /// \param[in] handleMultipleTolerancesAnd If true, multiple tolerances defined will have to be all fulfilled in order to proclaim
       /// solution as a correct one. If false, only one will be enough.
-      void set_tolerance(double newton_tol, NewtonSolverConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = true);
+      void set_tolerance(double newton_tol, NewtonSolverConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd = false);
 
 #pragma region damping-public
       /// Sets minimum damping coefficient.

@@ -70,7 +70,7 @@ namespace Hermes
       for(int i = 0; i < NewtonSolverConvergenceMeasurementTypeCount; i++)
         this->newton_tolerance[i] = std::numeric_limits<double>::max();
       memset(this->newton_tolerance_set, 0, sizeof(bool)*NewtonSolverConvergenceMeasurementTypeCount);
-      this->handleMultipleTolerancesAnd = true;
+      this->handleMultipleTolerancesAnd = false;
       this->max_allowed_iterations = 20;
       this->residual_as_function = false;
       this->max_allowed_residual_norm = 1E9;
@@ -107,6 +107,8 @@ namespace Hermes
     template<typename Scalar>
     void NewtonSolver<Scalar>::set_tolerance(double tolerance_, NewtonSolverConvergenceMeasurementType toleranceType, bool handleMultipleTolerancesAnd)
     {
+      this->handleMultipleTolerancesAnd = handleMultipleTolerancesAnd;
+
       if(tolerance_ < 0.0)
         throw Exceptions::ValueException("newton_tolerance", tolerance_, 0.0);
 
@@ -646,7 +648,10 @@ namespace Hermes
       
           // Test convergence - if in this loop we found a solution.
           if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
+          {
+            this->step_info();
             return;
+          }
 
           // Inspect the damping factor.
           try
