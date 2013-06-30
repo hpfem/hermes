@@ -647,11 +647,10 @@ namespace Hermes
           this->assemble_residual(coeff_vec);
       
           // Test convergence - if in this loop we found a solution.
+          this->info("\t\ttest convergence.");
+          this->step_info();
           if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
-          {
-            this->step_info();
             return;
-          }
 
           // Inspect the damping factor.
           try
