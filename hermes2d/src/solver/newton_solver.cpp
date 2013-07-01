@@ -19,6 +19,7 @@
 #include "solver/newton_solver.h"
 #include "projections/ogprojection.h"
 #include "hermes_common.h"
+#include <limits>
 
 namespace Hermes
 {
