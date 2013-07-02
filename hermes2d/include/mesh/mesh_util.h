@@ -81,6 +81,20 @@ namespace Hermes
       int mesh_seq;
     };
 
+    class MarkerArea
+    {
+    public:
+        MarkerArea(Mesh* mesh, int marker);
+        double get_area() const;
+        int get_mesh_seq() const;
+
+    private:
+        void calculate();
+
+        double area;
+        int mesh_seq;
+    };
+
     /*  node and son numbering on a triangle:
 
     -Triangle to triangles refinement

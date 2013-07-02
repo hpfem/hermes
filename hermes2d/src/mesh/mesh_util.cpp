@@ -255,5 +255,29 @@ namespace Hermes
     {
       return this->mesh_seq;
     }
+
+
+    MarkerArea::MarkerArea(Mesh *mesh, int marker) : mesh_seq(mesh->get_seq())
+    {
+        area = 0;
+        Element* elem;
+        for_all_active_elements(elem, mesh)
+        {
+            if(elem->marker == marker)
+            {
+                area += elem->get_area(true);
+            }
+        }
+    }
+
+    int MarkerArea::get_mesh_seq() const
+    {
+      return this->mesh_seq;
+    }
+
+    double MarkerArea::get_area() const
+    {
+      return this->area;
+    }
   }
 }
