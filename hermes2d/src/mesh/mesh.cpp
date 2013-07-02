@@ -1358,6 +1358,30 @@ namespace Hermes
       return this->meshHashGrid->getElement(x, y);
     }
 
+    double Mesh::get_marker_area(int marker)
+    {
+        std::map<int, MarkerArea*>::iterator area = marker_areas.find(marker);
+        bool recalculate = false;
+        if(area == marker_areas.end())
+        {
+            recalculate = true;
+        }
+        else
+        {
+            if(area->second->get_mesh_seq() != this->get_seq())
+            {
+                delete area->second;
+                marker_areas.erase(area);
+                recalculate = true;
+            }
+        }
+
+        if(recalculate)
+            marker_areas.insert(std::pair<int, MarkerArea*>(marker, new MarkerArea(this, marker)));
+
+        return marker_areas.find(marker)->second->get_area();
+    }
+
     void Mesh::copy_converted(MeshSharedPtr mesh)
     {
       free();
