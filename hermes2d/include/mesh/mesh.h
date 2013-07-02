@@ -105,6 +105,12 @@ namespace Hermes
       MeshHashGrid* meshHashGrid;
 #pragma endregion
 
+#pragma region MarkerArea
+      double get_marker_area(int marker);
+
+      std::map<int, MarkerArea*> marker_areas;
+#pragma endregion
+
 #pragma region getters
       /// Retrieves an element by its id number.
       Element* get_element(int id) const;
