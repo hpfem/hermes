@@ -57,7 +57,6 @@ namespace Hermes
 
       /// View palette type.
       enum ViewPaletteType {
-        H2DV_PT_DEFAULT = -1, ///< Default palette. Depends on viewer.
         H2DV_PT_HUESCALE = 0, ///< A palette based on hue scale.
         H2DV_PT_GRAYSCALE = 1, ///< Greyscale.
         H2DV_PT_INVGRAYSCALE = 2, ///< Inverted grayscale.
@@ -92,7 +91,7 @@ namespace Hermes
         /// Returns the title.
         const char* get_title() const;
         /// Changes the window name (in its title-bar) to 'title'.
-        void set_title(const char* title);
+        void set_title(const char* msg, ...);
 
         void set_min_max_range(double min, double max);
         void auto_min_max_range();
@@ -115,7 +114,7 @@ namespace Hermes
         void set_num_palette_steps(int num);
         void set_palette_filter(bool linear);
 
-        void wait_for_keypress(const char* text = NULL); ///< Waits for keypress. Deprecated.
+        static void wait_for_keypress(const char* text = NULL); ///< Waits for keypress. Deprecated.
         void wait_for_close();
         void wait_for_draw();
 
@@ -236,7 +235,7 @@ namespace Hermes
         friend void on_create(int);
       };
 #else
-class HERMES_API View
+      class HERMES_API View
       {
       public:
 
@@ -250,7 +249,7 @@ class HERMES_API View
         void refresh() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         /// Changes the window name (in its title-bar) to 'title'.
-        void set_title(const char* title) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void set_title(const char* msg, ...) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void set_min_max_range(double min, double max) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void auto_min_max_range() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
@@ -273,7 +272,7 @@ class HERMES_API View
         void set_num_palette_steps(int num) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void set_palette_filter(bool linear) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
-        void wait_for_keypress(const char* text = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        static void wait_for_keypress(const char* text = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void wait_for_close() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void wait_for_draw() { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 

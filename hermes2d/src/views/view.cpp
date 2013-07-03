@@ -69,7 +69,7 @@ namespace Hermes
       }
 
       View::View(const char* title, WinGeom* wg) :
-      view_not_reset(true),
+        view_not_reset(true),
         vertices_min_x(0),
         vertices_max_x(0),
         vertices_min_y(0),
@@ -97,7 +97,7 @@ namespace Hermes
       }
 
       View::View(char* title, WinGeom* wg) :
-      view_not_reset(true),
+        view_not_reset(true),
         vertices_min_x(0),
         vertices_max_x(0),
         vertices_min_y(0),
@@ -160,9 +160,9 @@ namespace Hermes
           str << "  << ";
           switch(wait_event)
           {
-            case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
-            case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
-            default: throw Hermes::Exceptions::Exception("Unknown wait event"); break;
+          case HERMES_WAIT_CLOSE: str << HERMES_WAIT_CLOSE_MSG; break;
+          case HERMES_WAIT_KEYPRESS: str << HERMES_WAIT_KEYPRESS_MSG; break;
+          default: throw Hermes::Exceptions::Exception("Unknown wait event"); break;
           }
           str << " >>" << std::endl;
         }
@@ -481,17 +481,6 @@ namespace Hermes
 
         case 'p':
           {
-            // There used to be a type called default, but it caused some weird behavior.
-            /*
-            switch(pal_type)
-            {
-            case H2DV_PT_DEFAULT: pal_type = H2DV_PT_HUESCALE; break;
-            case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
-            case H2DV_PT_GRAYSCALE: pal_type = H2DV_PT_INVGRAYSCALE; break;
-            case H2DV_PT_INVGRAYSCALE: pal_type = H2DV_PT_DEFAULT; break;
-            default: throw Hermes::Exceptions::Exception("Invalid palette type");
-            }
-            */
             switch(pal_type)
             {
             case H2DV_PT_HUESCALE: pal_type = H2DV_PT_GRAYSCALE; break;
@@ -525,7 +514,6 @@ namespace Hermes
 
       void View::wait_for_keypress(const char* text)
       {
-        this->warn("Function View::wait_for_keypress deprecated: use View::wait instead");
         View::wait(HERMES_WAIT_KEYPRESS, text);
       }
 
@@ -539,22 +527,10 @@ namespace Hermes
 
       void View::wait_for_draw()
       {
-        // For some reason, this function removes the signal handlers. So we just
-        // remember them and restore them. Unfortunately, this doesn't work for some
-        // reason:
-        //sighandler_t old_segv, old_abrt;
-        //old_segv = signal(SIGSEGV, SIG_DFL);
-        //old_abrt = signal(SIGABRT, SIG_DFL);
-        
         view_sync.enter();
         if(output_id >= 0 && !frame_ready)
           view_sync.wait_drawing_fisnihed();
         view_sync.leave();
-
-        // Restore the old signal handlers -- doesn't work for some reason:
-        //signal(SIGSEGV, old_segv);
-        //signal(SIGABRT, old_abrt);
-        // So we just restore it by calling the original handler:
       }
 
       double View::get_tick_count()
@@ -576,28 +552,38 @@ namespace Hermes
         return this->title.c_str();
       }
 
-      void View::set_title(const char* title)
+      void View::set_title(const char* msg, ...)
       {
+        char* text_contents = new char[BUF_SZ];
+
+        //print the message
+        va_list arglist;
+        va_start(arglist, msg);
+        vsprintf(text_contents, msg, arglist);
+        va_end(arglist);
+
         bool do_set_title = true;
 
         // Always set the title property.
-        this->title = title;
+        this->title = text_contents;
 
         view_sync.enter();
         if(output_id < 0)
           // If the window does not exist, do nothing else and wait until it is created.
           do_set_title = false;
-
         view_sync.leave();
 
         // If the window already exists, show the new title in its header.
         if(do_set_title)
-          set_view_title(output_id, title);
+          set_view_title(output_id, text_contents);
+
+        delete [] text_contents;
       }
 
       void View::get_palette_color(double x, float* gl_color)
       {
-        if(pal_type == H2DV_PT_HUESCALE || pal_type == H2DV_PT_DEFAULT) { //default color
+        if(pal_type == H2DV_PT_HUESCALE)
+        { //default color
           if(x < 0.0) x = 0.0;
           else if(x > 1.0) x = 1.0;
           x *= num_pal_entries;

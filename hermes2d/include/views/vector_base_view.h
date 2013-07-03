@@ -38,8 +38,6 @@ namespace Hermes
 
         void show(SpaceSharedPtr<Scalar> space);
 
-        virtual void set_title(const char* t);
-
         virtual ~VectorBaseView();
 
       protected:
@@ -70,8 +68,6 @@ namespace Hermes
         VectorBaseView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
 
         void show(SpaceSharedPtr<Scalar> space) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
-
-        virtual void set_title(const char* t) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 
 #endif

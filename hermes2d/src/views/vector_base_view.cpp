@@ -51,13 +51,6 @@ namespace Hermes
         : VectorView(title, wg) { pss = NULL; sln = NULL; this->lines = false; basic_title.assign(title); }
 
       template<typename Scalar>
-      void VectorBaseView<Scalar>::set_title(const char* t) {
-        if(basic_title.length() == 0)
-          basic_title.assign(t);
-        View::set_title(t);
-      }
-
-      template<typename Scalar>
       VectorBaseView<Scalar>::~VectorBaseView()
       {
         free();
