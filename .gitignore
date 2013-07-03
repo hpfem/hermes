@@ -95,3 +95,12 @@ Debug/
 *.ipgset
 *.psess
 *.vsp
+*.th
+*.cs
+*.amplxe
+*.db
+*.trace
+*.sc
+*.unsuccessfulbuild
+*.amplxeproj
+*.diff
