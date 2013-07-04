@@ -529,6 +529,8 @@ namespace Hermes
         // Initialization of 'global' stuff.
         this->item = item_;
         this->eps = eps;
+        this->component = 0;
+        this->value_type = 0;
         //   get the component and desired value from item.
         if(item >= 0x40)
         {
