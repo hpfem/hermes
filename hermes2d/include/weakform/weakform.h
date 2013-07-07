@@ -220,8 +220,10 @@ namespace Hermes
 
       bool warned_nonOverride;
 
-      // Internal
-      virtual void cloneMembers(const WeakForm<Scalar>* otherWf);
+      // Internal.
+      virtual void cloneMembers(const WeakForm<Scalar>* other_wf);
+      // Internal.
+      void cloneMemberExtFunctions(Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_ext, Hermes::vector<MeshFunctionSharedPtr<Scalar> >& cloned_ext);
 
       // Internal - processes markers, translates from strings to ints.
       template<typename FormType>

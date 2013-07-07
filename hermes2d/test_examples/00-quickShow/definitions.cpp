@@ -104,9 +104,7 @@ Ord CustomInitialCondition::ord(Ord x, Ord y) const
   
 MeshFunction<double>* CustomInitialCondition::clone() const
 {
-  if(this->get_type() == HERMES_SLN)
-    return Solution<double>::clone();
-  else return new CustomInitialCondition(mesh);
+  return new CustomInitialCondition(mesh);
 }
 
 CustomInitialCondition::~CustomInitialCondition()
