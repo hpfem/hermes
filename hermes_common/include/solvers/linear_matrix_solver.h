@@ -195,6 +195,59 @@ namespace Hermes
       /// Whether the solver is preconditioned.
       bool precond_yes;
     };
+    
+    /// \brief  Abstract class for defining interface for Algebraic Multigrid solvers.
+    /// Internal, though utilizable for defining interfaces to other algebraic packages.
+    template <typename Scalar>
+    class AMGSolver : public LinearMatrixSolver<Scalar>
+    {
+    public:
+      AMGSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+
+      /// Various tolerances.
+      /// Not necessarily supported by all iterative solvers used.
+      enum ToleranceType
+      {
+        AbsoluteTolerance,
+        RelativeTolerance,
+        DivergenceTolerance
+      };
+
+      /// Solve.
+      /// @return true on succes
+      /// \param[in] initial guess.
+      virtual bool solve(Scalar* initial_guess) = 0;
+
+      /// Get the number of iterations performed.
+      virtual int get_num_iters() = 0;
+      
+      /// Get the final residual.
+      virtual double get_residual() = 0;
+
+      /// Set the convergence tolerance.
+      /// @param[in] tol - the tolerance to set
+      virtual void set_tolerance(double tol);
+
+      /// Set the convergence tolerance.
+      /// @param[in] tolerance - the tolerance to set
+      /// @param[in] toleranceType - the tolerance to set
+      virtual void set_tolerance(double tolerance, ToleranceType toleranceType);
+
+      /// Set maximum number of iterations to perform.
+      /// @param[in] iters - number of iterations
+      virtual void set_max_iters(int iters);
+
+    protected:
+      /// Maximum number of iterations.
+      int max_iters;
+      /// Convergence tolerance.
+      double tolerance;
+      /// Convergence tolerance type.
+      /// See the enum.
+      ToleranceType toleranceType;
+      /// Whether the solver is smoothed.
+      bool precond_yes;
+    };
 
     /// \brief Function returning a solver according to the users's choice.
     /// @param[in] matrix matrix
@@ -203,6 +256,14 @@ namespace Hermes
     template<typename Scalar>
     HERMES_API LinearMatrixSolver<Scalar>*
       create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs, bool use_direct_solver = false);
+
+    /// \brief Function returning solver if it is an iterative one.
+    template<typename Scalar>
+    HERMES_API IterSolver<Scalar>* is_iterative_solver(LinearMatrixSolver<Scalar>* matrix_solver);
+
+    /// \brief Function returning a solver if it is an AMG one.
+    template<typename Scalar>
+    HERMES_API AMGSolver<Scalar>* is_AMG_solver(LinearMatrixSolver<Scalar>* matrix_solver);
   }
 }
 /*@}*/ // End of documentation group Solvers.

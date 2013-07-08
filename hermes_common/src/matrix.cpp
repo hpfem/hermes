@@ -318,7 +318,8 @@ namespace Hermes
 #endif
           break;
         }
-      case Hermes::SOLVER_PARALUTION:
+      case Hermes::SOLVER_PARALUTION_ITERATIVE:
+      case Hermes::SOLVER_PARALUTION_AMG:
         {
           if(use_direct_solver)
             throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
@@ -398,7 +399,8 @@ namespace Hermes
 #endif
           break;
         }
-      case Hermes::SOLVER_PARALUTION:
+      case Hermes::SOLVER_PARALUTION_ITERATIVE:
+      case Hermes::SOLVER_PARALUTION_AMG:
         {
           if(use_direct_solver)
             throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
@@ -478,7 +480,8 @@ namespace Hermes
 #endif
           break;
         }
-      case Hermes::SOLVER_PARALUTION:
+      case Hermes::SOLVER_PARALUTION_ITERATIVE:
+      case Hermes::SOLVER_PARALUTION_AMG:
         {
           if(use_direct_solver)
             throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
@@ -559,7 +562,8 @@ namespace Hermes
 #endif
           break;
         }
-      case Hermes::SOLVER_PARALUTION:
+      case Hermes::SOLVER_PARALUTION_ITERATIVE:
+      case Hermes::SOLVER_PARALUTION_AMG:
         {
           if(use_direct_solver)
             throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");

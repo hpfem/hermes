@@ -131,6 +131,7 @@ namespace Hermes
       ParalutionPrecond(ParalutionPreconditionerType paralutionPrecondType);
       
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
+      static paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionPreconditioner(ParalutionPreconditionerType type);
     private:
       // Paralution preconditioner
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
@@ -157,18 +158,19 @@ namespace Hermes
       }
     };
 
-    /// \brief Encapsulation of PARALUTION linear solver.
+    /// \brief Encapsulation of PARALUTION iterative linear solver.
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API ParalutionLinearMatrixSolver : public IterSolver<Scalar>
+    class HERMES_API IterativeParalutionLinearMatrixSolver : public IterSolver<Scalar>
     {
     public:
       /// Constructor of UMFPack solver.
       /// @param[in] m pointer to matrix
       /// @param[in] rhs pointer to right hand side vector
-      ParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
-      virtual ~ParalutionLinearMatrixSolver();
+      IterativeParalutionLinearMatrixSolver();
+      IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
+      virtual ~IterativeParalutionLinearMatrixSolver();
 
       /// The solver type.
       /// Default: CG
@@ -176,8 +178,7 @@ namespace Hermes
       {
         CG,
         GMRES,
-        BiCGStab,
-        AMG
+        BiCGStab
       };
 
       /// Set current solver type.
@@ -186,16 +187,6 @@ namespace Hermes
 
       virtual bool solve(Scalar* initial_guess);
       virtual bool solve();
-
-      /// Set the convergence tolerance.
-      /// @param[in] tolerance - the tolerance to set
-      /// @param[in] toleranceType - the tolerance to set
-      virtual void set_tolerance(double tolerance, typename IterSolver<Scalar>::ToleranceType toleranceType);
-
-      /// Set maximum number of iterations to perform.
-      /// @param[in] iters - number of iterations
-      /// Default:100.
-      virtual void set_max_iters(int iters);
 
       /// Get number of iterations.
       virtual int get_num_iters();
@@ -211,6 +202,9 @@ namespace Hermes
       /// Utility.
       virtual int get_matrix_size();
 
+      // Linear Solver creation.
+      static paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionSolver(ParalutionSolverType type);
+      
     private:
       /// Preconditioner.
       Preconditioners::ParalutionPrecond<Scalar> *preconditioner;
@@ -219,9 +213,10 @@ namespace Hermes
       paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
       /// Internal solver is not reusable and will have to be re-created.
       void reset_internal_solver();
+
       /// Set internal solver for the current solution.
       void init_internal_solver();
-
+      
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
       /// Right hand side vector.
@@ -229,6 +224,64 @@ namespace Hermes
 
       // Paralution solver type.
       ParalutionSolverType paralutionSolverType;
+
+      // Store num_iters.
+      int num_iters;
+
+      // Store final_residual.
+      double final_residual;
+
+      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
+      template<typename T> friend class AMGParalutionLinearMatrixSolver;
+    };
+
+    /// \brief Encapsulation of PARALUTION AMG linear solver.
+    ///
+    /// @ingroup Solvers
+    template <typename Scalar>
+    class HERMES_API AMGParalutionLinearMatrixSolver : public AMGSolver<Scalar>
+    {
+    public:
+      /// Constructor of UMFPack solver.
+      /// @param[in] m pointer to matrix
+      /// @param[in] rhs pointer to right hand side vector
+      AMGParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
+      virtual ~AMGParalutionLinearMatrixSolver();
+
+      virtual bool solve(Scalar* initial_guess);
+      virtual bool solve();
+
+      /// Get number of iterations.
+      virtual int get_num_iters();
+
+      /// Get the residual value.
+      virtual double get_residual();
+
+      /// Set smoother (another PARALUTION linear matrix solver).
+      virtual void set_smoother(typename IterativeParalutionLinearMatrixSolver<Scalar>::ParalutionSolverType solverType, typename ParalutionPrecond<Scalar>::ParalutionPreconditionerType preconditionerType);
+
+      /// Sets the verboseness.
+      virtual void set_verbose_output(bool to_set);
+
+      /// Utility.
+      virtual int get_matrix_size();
+
+    private:
+      /// Smoother.
+      typename IterativeParalutionLinearMatrixSolver<Scalar>::ParalutionSolverType smootherSolverType;
+      typename ParalutionPrecond<Scalar>::ParalutionPreconditionerType smootherPreconditionerType;
+
+      /// Internal solver.
+      paralution::AMG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
+
+      /// Set internal solver for the current solution.
+      void init_internal_solver();
+      /// Internal solver is not reusable and will have to be re-created.
+      void reset_internal_solver();
+      /// Matrix to solve.
+      ParalutionMatrix<Scalar> *matrix;
+      /// Right hand side vector.
+      ParalutionVector<Scalar> *rhs;
 
       // Linear Solver creation.
       void init_paralutionSolver();

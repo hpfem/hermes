@@ -70,7 +70,7 @@ const double K = 100.;
 
 int main(int argc, char* argv[])
 {
-  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION);
+  HermesCommonApi.set_integral_param_value(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG);
 
   // Time measurement.
   Hermes::Mixins::TimeMeasurable cpu_time;
@@ -134,6 +134,7 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_exact, graph_cpu_exact;
 
   NewtonSolver<double> newton;
+  dynamic_cast<Solvers::AMGParalutionLinearMatrixSolver<double>*>(newton.get_linear_solver())->set_smoother(Solvers::IterativeParalutionLinearMatrixSolver<double>::CG, Preconditioners::ParalutionPrecond<double>::ILU);
 
   newton.set_weak_formulation(&wf);
 

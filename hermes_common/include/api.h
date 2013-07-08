@@ -34,7 +34,8 @@ namespace Hermes
     numThreads,
     matrixSolverType,
     directMatrixSolverType,
-    showInternalWarnings
+    showInternalWarnings,
+    useAccelerators
   };
 
   /// API Class containing settings for the whole HermesCommon.

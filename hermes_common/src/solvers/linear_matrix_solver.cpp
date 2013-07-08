@@ -139,12 +139,23 @@ namespace Hermes
 #endif
           break;
         }
-      case Hermes::SOLVER_PARALUTION:
+      case Hermes::SOLVER_PARALUTION_ITERATIVE:
         {
           if(use_direct_solver)
             throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
 #ifdef WITH_PARALUTION
-          return new ParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
+          return new IterativeParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
+#else
+          throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
+#endif
+          break;
+        }
+      case Hermes::SOLVER_PARALUTION_AMG:
+        {
+          if(use_direct_solver)
+            throw Hermes::Exceptions::Exception("The AMG solver PARALUTION selected as a direct solver.");
+#ifdef WITH_PARALUTION
+					return new AMGParalutionLinearMatrixSolver<double>(static_cast<ParalutionMatrix<double>*>(matrix), static_cast<ParalutionVector<double>*>(rhs));
 #else
           throw Hermes::Exceptions::Exception("PARALUTION was not installed.");
 #endif
@@ -226,7 +237,8 @@ namespace Hermes
 #endif
           break;
         }
-      case Hermes::SOLVER_PARALUTION:
+      case Hermes::SOLVER_PARALUTION_ITERATIVE:
+      case Hermes::SOLVER_PARALUTION_AMG:
         {
           if(use_direct_solver)
             throw Hermes::Exceptions::Exception("The iterative solver PARALUTION selected as a direct solver.");
@@ -251,6 +263,18 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Unknown matrix solver requested in create_linear_solver().");
       }
       return NULL;
+    }
+
+    template <typename Scalar>
+    HERMES_API HERMES_API IterSolver<Scalar>* is_iterative_solver(LinearMatrixSolver<Scalar>* matrix_solver)
+    {
+      return dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(matrix_solver);
+    }
+
+    template <typename Scalar>
+    HERMES_API HERMES_API AMGSolver<Scalar>* is_AMG_solver(LinearMatrixSolver<Scalar>* matrix_solver)
+    {
+      return dynamic_cast<Hermes::Solvers::AMGSolver<Scalar>*>(matrix_solver);
     }
 
     template <typename Scalar>
@@ -283,11 +307,43 @@ namespace Hermes
       this->max_iters = iters;
     }
 
+    template <typename Scalar>
+    AMGSolver<Scalar>::AMGSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8), precond_yes(false)
+    {
+    }
+
+    template<typename Scalar>
+    void AMGSolver<Scalar>::set_tolerance(double tol)
+    {
+      this->tolerance = tol;
+      this->toleranceType = AbsoluteTolerance;
+    }
+
+    template<typename Scalar>
+    void AMGSolver<Scalar>::set_tolerance(double tol, typename AMGSolver<Scalar>::ToleranceType toleranceType)
+    {
+      this->tolerance = tol;
+      this->toleranceType = toleranceType;
+    }
+
+    template<typename Scalar>
+    void AMGSolver<Scalar>::set_max_iters(int iters)
+    {
+      this->max_iters = iters;
+    }
+
     template class HERMES_API LinearMatrixSolver<double>;
     template class HERMES_API LinearMatrixSolver<std::complex<double> >;
     template class HERMES_API DirectSolver<double>;
     template class HERMES_API DirectSolver<std::complex<double> >;
     template class HERMES_API IterSolver<double>;
     template class HERMES_API IterSolver<std::complex<double> >;
+    template class HERMES_API AMGSolver<double>;
+    template class HERMES_API AMGSolver<std::complex<double> >;
+
+    template HERMES_API IterSolver<double>* is_iterative_solver(LinearMatrixSolver<double>* matrix_solver);
+    template HERMES_API IterSolver<std::complex<double> >* is_iterative_solver(LinearMatrixSolver<std::complex<double> >* matrix_solver);
+    template HERMES_API AMGSolver<double>* is_AMG_solver(LinearMatrixSolver<double>* matrix_solver);
+    template HERMES_API AMGSolver<std::complex<double> >* is_AMG_solver(LinearMatrixSolver<std::complex<double> >* matrix_solver);
   }
 }

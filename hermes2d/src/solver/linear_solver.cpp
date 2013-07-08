@@ -93,9 +93,17 @@ namespace Hermes
       this->process_vector_output(this->residual, 1);
 
       this->info("\tLinear: assembling done. Solving...");
-      // If the solver is iterative, give him the initial guess.
-      Hermes::Solvers::IterSolver<Scalar>* iter_solver = dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(this->matrix_solver);
-      bool solved = iter_solver ? iter_solver->solve(coeff_vec) : this->matrix_solver->solve();
+      // Solve, if the solver is iterative, give him the initial guess.
+      bool solved;
+      Hermes::Solvers::IterSolver<Scalar>* iter_solver = Hermes::Solvers::is_iterative_solver(this->matrix_solver);
+      Hermes::Solvers::AMGSolver<Scalar>* AMG_solver = Hermes::Solvers::is_AMG_solver(this->matrix_solver);
+      if(iter_solver)
+        solved = iter_solver->solve(coeff_vec);
+      else if(AMG_solver)
+        solved = AMG_solver->solve(coeff_vec);
+      else
+        solved = this->matrix_solver->solve();
+
       if(solved)
       {
         if(this->do_UMFPACK_reporting)

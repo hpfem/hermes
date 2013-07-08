@@ -32,7 +32,8 @@ namespace Hermes
   enum MatrixSolverType
   {
     SOLVER_UMFPACK = 0,
-    SOLVER_PARALUTION,
+    SOLVER_PARALUTION_ITERATIVE,
+    SOLVER_PARALUTION_AMG,
     SOLVER_PETSC,
     SOLVER_MUMPS,
     SOLVER_SUPERLU,
@@ -53,6 +54,11 @@ namespace Hermes
     ITERATIVE_SOLVER_PARALUTION,
     ITERATIVE_SOLVER_PETSC,
     ITERATIVE_SOLVER_AZTECOO
+  };
+
+  enum AMGMatrixSolverType
+  {
+    AMG_SOLVER_PARALUTION
   };
 
   namespace Solvers
