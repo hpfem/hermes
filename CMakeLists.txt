@@ -49,7 +49,7 @@ project(hermes)
   set(WITH_TC_MALLOC YES)
 
   # Installation path:
-    set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
+  set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
                                             #for include files /usr/local/include
   #### Solvers ###
   # Standard UMFPACK
