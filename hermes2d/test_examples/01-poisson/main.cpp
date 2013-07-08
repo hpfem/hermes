@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
-#ifdef _WITH_PARALUTION
+#ifdef WITH_PARALUTION
   dynamic_cast<Solvers::AMGParalutionLinearMatrixSolver<double>*>(linear_solver.get_linear_solver())->set_smoother(Solvers::IterativeParalutionLinearMatrixSolver<double>::CG, Preconditioners::ParalutionPrecond<double>::MultiColoredSGS);
 #endif
   // Solve the linear problem.

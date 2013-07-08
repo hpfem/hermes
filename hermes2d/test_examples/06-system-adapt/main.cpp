@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   SimpleGraph graph_dof_exact, graph_cpu_exact;
 
   NewtonSolver<double> newton;
-#ifdef _WITH_PARALUTION
+#ifdef WITH_PARALUTION
   dynamic_cast<Solvers::AMGParalutionLinearMatrixSolver<double>*>(newton.get_linear_solver())->set_smoother(Solvers::IterativeParalutionLinearMatrixSolver<double>::CG, Preconditioners::ParalutionPrecond<double>::ILU);
 #endif
   newton.set_weak_formulation(&wf);
