@@ -207,7 +207,6 @@ project(hermes)
 	set(NUM_THREADS 1)
   endif(NOT(WITH_OPENMP))
   
-  
   MESSAGE(STATUS "Hermes will by default be using ${NUM_THREADS} threads for calculation.")
 
   macro (DETERMINE_HERMES_COMMON_RELEASE_DEBUG HXD)
