@@ -41,7 +41,7 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
-#ifdef _WITH_PARALUTION
+#ifdef WITH_PARALUTION
   HermesCommonApi.set_integral_param_value(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG);
 #endif
   // Load the mesh.
