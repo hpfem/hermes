@@ -20,6 +20,10 @@
 #include "api2d.h"
 #include <algorithm>
 
+#ifdef WITH_BSON
+#include "bson.h"
+#endif
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -1243,6 +1247,86 @@ namespace Hermes
       }
     }
 
+#ifdef WITH_BSON
+    template<>
+    void Solution<double>::save_bson(const char* filename) const
+    {
+      if(sln_type == HERMES_UNDEF)
+        throw Exceptions::Exception("Cannot save -- uninitialized solution.");
+
+      // bson
+      bson bw;
+      bson_init(&bw);
+      bson_append_new_oid(&bw, "_id");
+      bson_append_new_oid(&bw, "user_id");
+
+      switch(this->get_space_type())
+      {
+      case HERMES_H1_SPACE:
+        bson_append_string(&bw, "space", "h1");
+        break;
+      case HERMES_HCURL_SPACE:
+        bson_append_string(&bw, "space", "hcurl");
+        break;
+      case HERMES_HDIV_SPACE:
+        bson_append_string(&bw, "space", "hdiv");
+        break;
+      case HERMES_L2_SPACE:
+        bson_append_string(&bw, "space", "l2");
+        break;
+      default:
+        throw Exceptions::Exception("This type of solution can not be saved.");
+      }
+
+      bson_append_bool(&bw, "exact", false);
+
+      bson_append_int(&bw, "coeffs_count", this->num_coeffs);
+      bson_append_int(&bw, "orders_count", this->num_elems);
+      bson_append_int(&bw, "components_count", this->num_components);
+
+      bson_append_start_array(&bw, "coeffs");
+      for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
+          bson_append_double(&bw, "c", mono_coeffs[coeffs_i]);
+      bson_append_finish_array(&bw);
+
+      bson_append_start_array(&bw, "orders");
+      for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+          bson_append_double(&bw, "o", elem_orders[elems_i]);
+      bson_append_finish_array(&bw);
+
+      bson_append_start_array(&bw, "components");
+      for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
+      {
+          bson_append_start_array(&bw, "component");
+          for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+          {
+            bson_append_int(&bw, "c", elem_coeffs[component_i][elems_i]);
+            // std::cout << elem_coeffs[component_i][elems_i] << std::endl;
+          }
+          bson_append_finish_array(&bw);
+      }
+      bson_append_finish_array(&bw);
+
+      bson_finish(&bw);
+
+      // bson_print(&bw);
+
+      FILE *fpw;
+      fpw = fopen(filename, "wb");
+      const char *dataw = (const char *) bson_data(&bw);
+      fwrite(dataw, bson_size(&bw), 1, fpw);
+      fclose(fpw);
+
+      bson_destroy(&bw);
+    }
+
+    template<>
+    void Solution<std::complex<double> >::save_bson(const char* filename) const
+    {
+        assert(0);
+    }
+#endif
+
     template<>
     void Solution<double>::load(const char* filename, SpaceSharedPtr<double> space)
     {
@@ -1439,6 +1523,171 @@ namespace Hermes
         throw Hermes::Exceptions::SolutionLoadFailureException(e.what());
       }
     }
+
+#ifdef WITH_BSON
+    template<>
+    void Solution<double>::load_bson(const char* filename, SpaceSharedPtr<double> space)
+    {
+      free();
+      this->mesh = space->get_mesh();
+      this->space_type = space->get_type();
+
+      FILE *fpr;
+      fpr = fopen(filename, "rb");
+
+      // file size:
+      fseek (fpr, 0, SEEK_END);
+      int size = ftell(fpr);
+      rewind(fpr);
+
+      // allocate memory to contain the whole file:
+      char *datar = (char*) malloc (sizeof(char)*size);
+      fread(datar, size, 1, fpr);
+      fclose(fpr);
+
+      bson br;
+      bson_init_finished_data(&br, datar, 0);
+      // bson_print(&br);
+
+      bson sub;
+      bson_iterator it;
+
+      bson_iterator it_exact;
+      bson_find(&it_exact, &br, "exact");
+      sln_type = bson_iterator_bool(&it_exact) ? HERMES_EXACT : HERMES_SLN;
+
+      bson_iterator it_components;
+      bson_find(&it_components, &br, "components_count");
+      this->num_components = bson_iterator_int(&it_components);
+
+      if (sln_type == HERMES_EXACT)
+      {
+          Hermes::vector<double> values;
+          // values
+          bson_find(&it, &br, "values");
+          bson_iterator_subobject_init(&it, &sub, 0);
+          bson_iterator_init(&it, &sub);
+          while (bson_iterator_next(&it))
+          {
+            values.push_back(bson_iterator_double(&it));
+          }
+
+          double* coeff_vec = new double[space->get_num_dofs()];
+          MeshFunctionSharedPtr<double> sln;
+
+          // TODO: improve
+          switch(this->num_components)
+          {
+          case 1:
+            {
+              sln = MeshFunctionSharedPtr<double>(new ConstantSolution<double>(this->mesh, values[0]));
+            }
+            break;
+          case 2:
+            {
+              sln = MeshFunctionSharedPtr<double>(new ConstantSolutionVector<double>(this->mesh, values[0], values[1]));
+            }
+            break;
+          }
+
+          OGProjection<double>::project_global(space, sln, coeff_vec);
+          this->set_coeff_vector(space, coeff_vec, true, 0);
+          sln_type = HERMES_SLN;
+      }
+      else
+      {
+          // space
+          bson_iterator it_sp;
+          bson_find(&it_sp, &br, "space");
+          const char *sp = bson_iterator_string(&it_sp);
+
+          if(!strcmp(sp, "h1"))
+            if(this->space_type != HERMES_H1_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(sp, "l2"))
+            if(this->space_type != HERMES_L2_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(sp, "hcurl"))
+            if(this->space_type != HERMES_HCURL_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(sp, "hdiv"))
+            if(this->space_type != HERMES_HDIV_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          bson_iterator it_coeffs, it_orders;
+          bson_find(&it_coeffs, &br, "coeffs_count");
+          bson_find(&it_orders, &br, "orders_count");         
+
+          this->num_coeffs = bson_iterator_int(&it_coeffs);
+          this->num_elems = bson_iterator_int(&it_orders);
+
+          this->mono_coeffs = new double[num_coeffs];
+          memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(double));
+
+          for(unsigned int component_i = 0; component_i < num_components; component_i++)
+            this->elem_coeffs[component_i] = new int[num_elems];
+
+          this->elem_orders = new int[num_elems];
+
+          // coeffs
+          bson_find(&it_coeffs, &br, "coeffs");
+          bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+          bson_iterator_init(&it, &sub);
+          int index_coeff = 0;
+          while (bson_iterator_next(&it))
+          {
+            this->mono_coeffs[index_coeff] = bson_iterator_double(&it);
+            index_coeff++;
+          }
+
+          // elem order
+          bson_find(&it_orders, &br, "orders");
+          bson_iterator_subobject_init(&it_orders, &sub, 0);
+          bson_iterator_init(&it, &sub);
+          int index_order = 0;
+          while (bson_iterator_next(&it))
+          {
+            this->elem_orders[index_order] = bson_iterator_int(&it);
+            index_order++;
+          }
+
+          //
+          bson_find(&it_components, &br, "components");
+          bson_iterator_subobject_init(&it_components, &sub, 0);
+          bson_iterator_init(&it, &sub);
+          int index_comp = 0;
+          while (bson_iterator_next(&it))
+          {
+              bson sub_coeffs;
+              bson_iterator_subobject_init(&it, &sub_coeffs, 0);
+              bson_iterator it_coeffs;
+              bson_iterator_init(&it_coeffs, &sub_coeffs);
+
+              int index_coeff = 0;
+              while (bson_iterator_next(&it_coeffs))
+              {
+                  this->elem_coeffs[index_comp][index_coeff] = bson_iterator_int(&it_coeffs);
+                  index_coeff++;
+              }
+
+              index_comp++;
+          }
+      }
+
+      bson_destroy(&br);
+
+      init_dxdy_buffer();
+    }
+
+    template<>
+    void Solution<std::complex<double> >::load_bson(const char* filename, SpaceSharedPtr<std::complex<double> > space)
+    {
+        assert(0);
+    }
+#endif
 
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)

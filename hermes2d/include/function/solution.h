@@ -93,10 +93,16 @@ namespace Hermes
       /// Saves the complete solution (i.e., including the internal copy of the mesh and
       /// element orders) to an XML file.
       virtual void save(const char* filename) const;
+#ifdef WITH_BSON
+      virtual void save_bson(const char* filename) const;
+#endif
 
       /// Loads the solution from a file previously created by Solution::save(). This completely
       /// restores the solution in the memory.
       void load(const char* filename, SpaceSharedPtr<Scalar> space);
+#ifdef WITH_BSON
+      void load_bson(const char* filename, SpaceSharedPtr<Scalar> space);
+#endif
 
       /// Returns solution value or derivatives at element e, in its reference domain point (xi1, xi2).
       /// 'item' controls the returned value: 0 = value, 1 = dx, 2 = dy, 3 = dxx, 4 = dyy, 5 = dxy.

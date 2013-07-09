@@ -48,6 +48,9 @@ project(hermes)
   
   set(WITH_TC_MALLOC YES)
 
+  # BSON 
+  set(WITH_BSON NO)
+
   # Installation path:
   set(TARGET_ROOT             /usr/local) #default installation path for the library will be /usr/local/lib,
                                             #for include files /usr/local/include
@@ -291,6 +294,11 @@ project(hermes)
       include_directories(${TCMALLOC_INCLUDE_DIR})
     endif(WITH_TC_MALLOC)
 
+    if(WITH_BSON)
+      find_package(BSON REQUIRED)
+      include_directories(${BSON_INCLUDE_DIR})
+    endif(WITH_BSON)
+
     find_package(XSD REQUIRED)
     find_package(XERCES REQUIRED)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -444,6 +452,7 @@ project(hermes)
   message("Build with TRILINOS: ${WITH_TRILINOS}")
   message("Build with MPI: ${WITH_MPI}")
   message("Build with EXODUSII: ${WITH_EXODUSII}")
+  message("Build with BSON: ${WITH_BSON}")
   
   message("---------------------")
   message("Hermes common library:")
