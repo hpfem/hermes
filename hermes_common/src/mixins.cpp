@@ -22,12 +22,30 @@ namespace Hermes
   namespace Mixins
   {
     Loggable::LoggerMonitor Loggable::logger_monitor;
-    char Loggable::logFileName[1000];
+    char* Loggable::staticLogFileName = NULL;
 
     std::map<std::string, bool> Loggable::logger_written;
 
-    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) : verbose_output(verbose_output), verbose_callback(verbose_callback)
+    Loggable::Loggable(bool verbose_output, callbackFn verbose_callback) : verbose_output(verbose_output), verbose_callback(verbose_callback), logFileName(NULL)
     {
+    }
+
+    void Loggable::set_logFile_name(const char* filename)
+    {
+    	if(this->logFileName)
+    			delete [] this->logFileName;
+      int strlength = std::strlen(filename);
+    	this->logFileName = new char[strlength];
+      strcpy(this->logFileName, filename);
+    }
+
+    void Loggable::set_static_logFile_name(const char* filename)
+    {
+    	if(Loggable::staticLogFileName)
+    		delete [] Loggable::staticLogFileName;
+      int strlength = std::strlen(filename);
+    	Loggable::staticLogFileName = new char[strlength];
+      strcpy(Loggable::staticLogFileName, filename);
     }
 
     bool Loggable::get_verbose_output() const
@@ -398,7 +416,7 @@ namespace Hermes
 
     Loggable::HermesLogEventInfo* Loggable::hermes_build_log_info(char event) const
     {
-      return new Loggable::HermesLogEventInfo(event, Loggable::logFileName, __CURRENT_FUNCTION, __FILE__, __LINE__);
+      return new Loggable::HermesLogEventInfo(event, __CURRENT_FUNCTION, __FILE__, __LINE__);
     }
 
     void Loggable::hermes_fwrite(const void* ptr, size_t size, size_t nitems, FILE* stream) const
@@ -416,8 +434,8 @@ namespace Hermes
         throw Hermes::Exceptions::Exception("Error reading file: %s", strerror(ferror(stream)));
     }
 
-    Loggable::HermesLogEventInfo::HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line)
-      : code(code), log_file(log_file), src_function(src_function), src_file(src_file), src_line(src_line)
+    Loggable::HermesLogEventInfo::HermesLogEventInfo(const char code, const char* src_function, const char* src_file, const int src_line)
+      : code(code), src_function(src_function), src_file(src_file), src_line(src_line)
     {}
 
     void Loggable::hermes_log_message(const char code, const char* msg) const
@@ -432,33 +450,21 @@ namespace Hermes
       HermesLogEventInfo* info = this->hermes_build_log_info(code);
 
       //print to file
-      if(info->log_file != NULL)
+      char* log_file_name = (this->logFileName ? this->logFileName : Loggable::staticLogFileName);
+      if(log_file_name)
       {
-        FILE* file = fopen(info->log_file, "at");
+        FILE* file = fopen(log_file_name, "at");
         if(file != NULL)
         {
           //check whether log file was already written
-          std::map<std::string, bool>::const_iterator found = logger_written.find(info->log_file);
+          std::map<std::string, bool>::const_iterator found = logger_written.find(log_file_name);
           if(found == logger_written.end()) {  //first write, write delimited to a file
-            logger_written[info->log_file] = true;
+            logger_written[log_file_name] = true;
             fprintf(file, "\n");
             for(int i = 0; i < HERMES_LOG_FILE_DELIM_SIZE; i++)
               fprintf(file, "-");
             fprintf(file, "\n\n");
           }
-
-          //build a long version of location
-          std::ostringstream location;
-          location << '(';
-          if(info->src_function != NULL)
-          {
-            location << info->src_function;
-            if(info->src_file != NULL)
-              location << '@';
-          }
-          if(info->src_file != NULL)
-            location << info->src_file << ':' << info->src_line;
-          location << ')';
 
           //get time
           time_t now;
@@ -468,7 +474,7 @@ namespace Hermes
           strftime(time_buf, BUF_SZ, "%y%m%d-%H:%M", now_tm);
 
           //write
-          fprintf(file, "%s\t%s %s\n", time_buf, msg, location.str().c_str());
+          fprintf(file, "%s\t%s\n", time_buf, msg);
           fclose(file);
 
           if(this->verbose_callback != NULL)

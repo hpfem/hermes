@@ -53,6 +53,9 @@ namespace Hermes
     public:
       Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL);
 
+      void set_logFile_name(const char* filename);
+      static void set_static_logFile_name(const char* filename);
+
       void info(const char* msg, ...) const;
       void info_if(bool cond, const char* msg, ...) const;
       void warn(const char* msg, ...) const;
@@ -85,7 +88,8 @@ namespace Hermes
       };
 
       /// Logfile name.
-      static char logFileName[1000];
+      char* logFileName;
+      static char* staticLogFileName;
     protected:
       
       /* file operations */
@@ -103,9 +107,8 @@ namespace Hermes
       class HERMES_API HermesLogEventInfo
       {
       public:
-        HermesLogEventInfo(const char code, const char* log_file, const char* src_function, const char* src_file, const int src_line);
+        HermesLogEventInfo(const char code, const char* src_function, const char* src_file, const int src_line);
         const char code;          ///< An event code character. For defails see event characters, e.g., ::HERMES_EC_ERROR
-        const char* log_file;     ///< Log file name.
         const char* src_function; ///< A name of a function/method at which the event was generated.
         const char* src_file;     ///< A source file at which the event was generated.
         const int src_line;       ///< A line in the source file at which the event was generated.
