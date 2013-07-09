@@ -213,7 +213,7 @@ namespace Hermes
       template<typename Scalar> friend class L2Space;
       template<typename Scalar> friend class HcurlSpace;
       template<typename Scalar> friend class HdivSpace;
-      template<typename Scalar> friend class L2MaterialWiseConstSpace;
+      template<typename Scalar> friend class L2MarkerWiseConstSpace;
     };
   }
 }

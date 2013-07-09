@@ -81,13 +81,13 @@ namespace Hermes
     };
 
     /// @ingroup spaces
-    /// L2MaterialWiseConstSpace represents a space of material-wise constant functions.
+    /// L2MarkerWiseConstSpace represents a space of material-wise constant functions.
     /// It is, of course, discontinuous, therefore it uses L2Space as a basis.
     template<typename Scalar>
-    class HERMES_API L2MaterialWiseConstSpace : public L2Space<Scalar>
+    class HERMES_API L2MarkerWiseConstSpace : public L2Space<Scalar>
     {
     public:
-      L2MaterialWiseConstSpace(MeshSharedPtr mesh);
+      L2MarkerWiseConstSpace(MeshSharedPtr mesh);
 
     protected:
       virtual SpaceType get_type() const { return HERMES_UTILITY_L2_SPACES; }

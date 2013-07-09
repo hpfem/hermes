@@ -157,12 +157,12 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    L2MaterialWiseConstSpace<Scalar>::L2MaterialWiseConstSpace(MeshSharedPtr mesh) : L2Space<Scalar>(mesh, 0)
+    L2MarkerWiseConstSpace<Scalar>::L2MarkerWiseConstSpace(MeshSharedPtr mesh) : L2Space<Scalar>(mesh, 0)
     {
     }
 
     template<typename Scalar>
-    void L2MaterialWiseConstSpace<Scalar>::assign_bubble_dofs()
+    void L2MarkerWiseConstSpace<Scalar>::assign_bubble_dofs()
     {
       Element* e;
       this->bubble_functions_count = 0;
@@ -181,7 +181,7 @@ namespace Hermes
     template HERMES_API class L2Space<double>;
     template HERMES_API class L2Space<std::complex<double> >;
 
-    template HERMES_API class L2MaterialWiseConstSpace<double>;
-    template HERMES_API class L2MaterialWiseConstSpace<std::complex<double> >;
+    template HERMES_API class L2MarkerWiseConstSpace<double>;
+    template HERMES_API class L2MarkerWiseConstSpace<std::complex<double> >;
   }
 }
