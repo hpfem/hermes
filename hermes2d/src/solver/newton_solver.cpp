@@ -655,10 +655,12 @@ namespace Hermes
           this->assemble_residual(coeff_vec);
       
           // Test convergence - if in this loop we found a solution.
-          this->info("\t\ttest convergence.");
+          this->info("\t\ttest convergence...");
           this->step_info();
           if(this->handle_convergence_state_return_finished(this->get_convergence_state(), coeff_vec))
             return;
+          else
+          this->info("\t\thas not converged.");
 
           // Inspect the damping factor.
           try
@@ -698,8 +700,6 @@ namespace Hermes
 
         // Damping factor was updated, handle the event.
         this->on_damping_factor_updated();
-        // Output.
-        this->step_info();
 
 #pragma region jacobian_reusage_loop
         this->info("\n\tNewton: Jacobian handling:");

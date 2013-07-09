@@ -70,6 +70,8 @@ namespace Hermes
 
       for(int i = 0; i < NewtonSolverConvergenceMeasurementTypeCount; i++)
       {
+        if(!newton->newton_tolerance_set[i])
+          continue;
         bool converged_this_tolerance = (convergence_decision_value[i] < newton->newton_tolerance[i]);
         if(newton->handleMultipleTolerancesAnd)
           converged = converged && converged_this_tolerance;
