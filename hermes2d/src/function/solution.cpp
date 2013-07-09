@@ -1140,6 +1140,9 @@ namespace Hermes
         case HERMES_L2_SPACE:
           xmlsolution.space().set("l2");
           break;
+        case HERMES_L2_MARKERWISE_CONST_SPACE:
+          xmlsolution.space().set("l2-markerwise");
+          break;
         default:
           throw Exceptions::Exception("This type of solution can not be saved.");
         }
@@ -1385,6 +1388,10 @@ namespace Hermes
 
           if(!strcmp(parsed_xml_solution->space().get().c_str(),"hdiv"))
             if(this->space_type != HERMES_HDIV_SPACE)
+              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+          if(!strcmp(parsed_xml_solution->space().get().c_str(),"l2-markerwise"))
+            if(this->space_type != HERMES_L2_MARKERWISE_CONST_SPACE)
               throw Exceptions::Exception("Space types not compliant in Solution::load().");
 
           this->num_coeffs = parsed_xml_solution->nc();
