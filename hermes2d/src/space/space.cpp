@@ -364,7 +364,7 @@ namespace Hermes
 
       resize_tables();
 
-      if(mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && get_type() != HERMES_UTILITY_L2_SPACES && H2D_GET_V_ORDER(order) == 0)
+      if(mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && get_type() != HERMES_L2_MARKERWISE_CONST_SPACE && H2D_GET_V_ORDER(order) == 0)
         order = H2D_MAKE_QUAD_ORDER(order, order);
 
       edata[id].order = order;
@@ -802,7 +802,7 @@ namespace Hermes
     {
       // Adjust wrt. max and min possible orders.
       int mo = shapeset->get_max_order();
-      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_UTILITY_L2_SPACES || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
+      int lower_limit = (get_type() == HERMES_L2_SPACE || get_type() == HERMES_L2_MARKERWISE_CONST_SPACE || get_type() == HERMES_HCURL_SPACE) ? 0 : 1; // L2 and Hcurl may use zero orders.
       int ho = std::max(lower_limit, std::min(H2D_GET_H_ORDER(order), mo));
       int vo = std::max(lower_limit, std::min(H2D_GET_V_ORDER(order), mo));
       order = e->is_triangle() ? ho : H2D_MAKE_QUAD_ORDER(ho, vo);
@@ -1186,6 +1186,9 @@ namespace Hermes
         case HERMES_L2_SPACE:
             xmlspace.spaceType().set("l2");
             break;
+        case HERMES_L2_MARKERWISE_CONST_SPACE:
+            xmlspace.spaceType().set("l2-markerwise");
+            break;
         default:
           throw Exceptions::Exception("This type of space can not be saved.");
           return false;
@@ -1311,21 +1314,30 @@ namespace Hermes
 					static_cast<L2Space<Scalar>* >(space.get())->ldata = NULL;
 					static_cast<L2Space<Scalar>* >(space.get())->lsize = 0;
 				}
+        else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2-markerwise"))
+				{
+					space = new L2MarkerWiseConstSpace<Scalar>(mesh);
+
+					if(shapeset)
+            Hermes::Mixins::Loggable::Static::warn("L2MarkerWiseConstSpace does not need a shapeset when loading.");
+				}
 				else
 				{
 					throw Exceptions::SpaceLoadFailureException("Wrong spaceType in the Solution XML file %s in Space::load.", filename);
 					return NULL;
 				}
 
-				space->essential_bcs = essential_bcs;
 				space->mesh_seq = space->mesh->get_seq();
 
 				// L2 space does not have any (strong) essential BCs.
-				if(essential_bcs != NULL && parsed_xml_space->spaceType().get().c_str() != "l2")
+				if(essential_bcs != NULL && parsed_xml_space->spaceType().get().c_str() != "l2" && parsed_xml_space->spaceType().get().c_str() != "l2-markerwise")
+        {
+				  space->essential_bcs = essential_bcs;
 					for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
 						for(unsigned int i = 0; i < (*it)->markers.size(); i++)
 							if(space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
 								throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
+        }
 
 				space->resize_tables();
 

@@ -90,7 +90,7 @@ namespace Hermes
       L2MarkerWiseConstSpace(MeshSharedPtr mesh);
 
     protected:
-      virtual SpaceType get_type() const { return HERMES_UTILITY_L2_SPACES; }
+      virtual SpaceType get_type() const { return HERMES_L2_MARKERWISE_CONST_SPACE; }
       virtual void assign_bubble_dofs();
     };
   }
