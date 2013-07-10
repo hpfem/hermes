@@ -428,7 +428,7 @@ namespace Hermes
     {
       this->set_max_iters(1000);
       this->set_tolerance(1e-8, AMGSolver<Scalar>::AbsoluteTolerance);
-      this->smootherSolverType = IterativeParalutionLinearMatrixSolver<Scalar>::ParalutionSolverType::CG;
+      this->smootherSolverType = IterativeParalutionLinearMatrixSolver<Scalar>::CG;
       this->smootherPreconditionerType = ParalutionPrecond<Scalar>::MultiColoredSGS;
     }
 
