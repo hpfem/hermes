@@ -63,6 +63,11 @@
   #include "tcmalloc.h"
 #endif
 
+#ifdef WITH_BSON
+#define MONGO_HAVE_STDINT
+#include "bson.h"
+#endif
+
 #ifdef WITH_OPENMP
   #include <omp.h>
 #else

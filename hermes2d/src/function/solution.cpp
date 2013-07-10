@@ -20,10 +20,6 @@
 #include "api2d.h"
 #include <algorithm>
 
-#ifdef WITH_BSON
-#include "bson.h"
-#endif
-
 namespace Hermes
 {
   namespace Hermes2D

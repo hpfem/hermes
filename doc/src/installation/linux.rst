@@ -19,6 +19,13 @@ If you are using a Debian-based system, install the required libraries first:
 (Note: cmake has to be at least version 2.6 or later, matplotlib has to be at
 least 0.98.5.2 or higher.)
 
+If you want to use fast saving / loading of Hermes entities, install
+
+  - BSON
+  
+    - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip: `Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+    - Compile and install using 'make install'
+  
 To obtain the source code, clone the Git repository from Github::
   
     git clone git://github.com/hpfem/hermes.git

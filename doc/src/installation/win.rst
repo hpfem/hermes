@@ -22,6 +22,11 @@ Dependency check-list - 32-bit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This list works for 32-bit version of Hermes. See the section for 64-bit version if that is the one you are interested in.
+Please note that e.g. TCMalloc, BSON, UMFPACK are also 'optional', but to get the most performance out of Hermes, they are recommended.
+
+  - CMAKE
+  
+    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
   - PTHREAD(2.8.0)
 
@@ -33,6 +38,17 @@ This list works for 32-bit version of Hermes. See the section for 64-bit version
     - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
     - Copy Win32\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, Win32\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
     - Copy the contents of src/google to 'include' dependency directory
+    
+  - BSON
+  
+    - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+    
+    - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
+    - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
+    
+      - Use flags --m32 and --c99 ("C:\Python27\Scripts\scons.bat --c99 --m32")
+      
+    - Once compiled (should take seconds at most), copy src/bson.h to your 'include' dependency directory, bson.lib to 'lib', and bson.dll to 'bin' directories.
 
   - UMFPACK
 
@@ -53,18 +69,6 @@ This list works for 32-bit version of Hermes. See the section for 64-bit version
     - Copy AMD\\Include\\amd.h, AMD\\Include\\amd_internal.h, and AMD\\Lib\\libamd.a to 'include', and 'lib' dependecy directories respectively. Change the libamd.a's extension to '.lib'
     - Copy UMFPACK\\Include\\* to 'include'
     - Copy UMFPACK\\Lib\\libumfpack.a to 'lib' directory and change its extension to Windows equivalent '.lib'.
-
-  - CMAKE
-  
-    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
-
-  - CLAPACK
-
-    - First, you need to install CLAPACK/CBLAS:
-    - Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
-    - Use cmake to configure and build the debug version of clapack.
-    - Copy '\\clapack-3.2.1-CMAKE\\BLAS\\SRC\\Debug\\blas.lib', '\\clapack-3.2.1-CMAKE\\F2CLIBS\\libf2c\\Debug\\libf2c.lib', and '\\clapack-3.2.1-CMAKE\\SRC\\Debug\\lapack.lib' to 'lib' dependency directory.
-    - Copy the contains of '\\clapack-3.2.1-CMAKE\\INCLUDE\\' to 'include' dependency directory.
 
   - OpenGL support (optional)
 
@@ -175,31 +179,51 @@ This list works for 32-bit version of Hermes. See the section for 64-bit version
       - Build a project 'exoIIv2c': this will create a LIB file in 'my_exodusii_root\\cbind\\Release'
       - Copy 'exoIIv2c.lib' to 'lib' dependency directory structure
       - Copy 'my_exodusii_root\\cbind\\include\\exodusII.h and exodusII_ext.h' to 'include' dependency directory
-      
+
+    - CLAPACK
+
+      - First, you need to install CLAPACK/CBLAS:
+      - Download the file clapack-3.2.1-CMAKE.tgz from http://www.netlib.org/clapack/.
+      - Use cmake to configure and build the debug version of clapack.
+      - Copy '\\clapack-3.2.1-CMAKE\\BLAS\\SRC\\Debug\\blas.lib', '\\clapack-3.2.1-CMAKE\\F2CLIBS\\libf2c\\Debug\\libf2c.lib', and '\\clapack-3.2.1-CMAKE\\SRC\\Debug\\lapack.lib' to 'lib' dependency directory.
+      - Copy the contains of '\\clapack-3.2.1-CMAKE\\INCLUDE\\' to 'include' dependency directory.
+
+  
 Dependency check-list - 64-bit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   Only the most important dependencies are described here for the 64-bit version. For all others, all you must do is compile the 64-bit version, or get it in any other way and link it to Hermes instead of the 32-bit one.
   
+  - CMAKE
+
+    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
+
   - PTHREAD(2.8.0)
 
     - Download pthread from http://www.sourceware.org/pthreads-win32/, then navigate to mingw64\pthreads-w64.zip\
     - Copy 'x86_64-w64-mingw32\\lib\\libpthread.a' to 'lib' and rename to 'pthreadVCE2.lib' , 'x86_64-w64-mingw32\\include\\\*.h' to 'include' and 'bin\\pthreadGC2-w64.dll' to 'bin' dependecy directories respectively.
 
   - TCMalloc
+  
     - Get TCMalloc from the SVN repository at http://code.google.com/p/gperftools/source/checkout
     - Open gperftools.sln in your Visual Studio, build the appropriate version (default works fine - just select Debug/Release)
     - Copy x64\"Release/Debug"\libtcmalloc_minimal.dll to 'bin' dependency directory, x64\"Release/Debug"\libtcmalloc_minimal.lib to 'lib' dependency directory
     - Copy the contents of src/google to 'include' dependency directory
-
+    
+  - BSON
+  
+    - Clone the BSON Mongo driver git repository from git@github.com:l-korous/mongo-c-driver.git (if you don't know how, here is a tip:`Getting a Git Repository <http://git-scm.com/book/en/Git-Basics-Getting-a-Git-Repository>`_)
+    - Download SCONS build tool from http://sourceforge.net/projects/scons/files/latest/download?source=files
+    - Install SCONS (you need to have PYTHON installed for that), run it (e.g. issuing C:\Python27\Scripts\scons.bat) in the BSON Mongo driver root directory
+    
+      - Use the flag --c99 ("C:\Python27\Scripts\scons.bat --c99")
+      
+    - Once compiled (should take seconds at most), copy src/bson.h to your 'include' dependency directory, bson.lib to 'lib', and bson.dll to 'bin' directories.
+  
   - UMFPACK
 
     - MinGW used for compiling AMD and UMFPACK: `Download MinGW <http://sourceforge.net/projects/mingw/>`_.
     - Just use 64-bit MinGW and provide the flag "-m64", otherwise it is the same as in Win32 version.
-
-  - CMAKE
-
-    - Download CMAKE installer(http://www.cmake.org/files/v2.8/cmake-2.8.3-win32-x86.exe) and install it.
 
   - OpenGL support (optional)
 

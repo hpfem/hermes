@@ -19,6 +19,7 @@
 #cmakedefine WITH_MPI
 
 #cmakedefine WITH_TC_MALLOC
+#cmakedefine WITH_BSON
 #cmakedefine UMFPACK_LONG_INT
 
 // stacktrace
