@@ -26,6 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar> class MeshFunction;
+    template<typename Scalar> class Solution;
   }
 }
 
@@ -42,6 +43,8 @@ public:
   MeshFunctionSharedPtr(const MeshFunctionSharedPtr<Scalar>& other);
 
   void operator=(const MeshFunctionSharedPtr<Scalar>& other);
+
+  Hermes::Hermes2D::Solution<Scalar>* get_solution();
 
   ~MeshFunctionSharedPtr();
 };
@@ -67,7 +70,9 @@ namespace Hermes
     /// (This is an abstract class and cannot be instantiated.)
     ///
     template<typename Scalar>
-    class HERMES_API MeshFunction : public Function<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
+    class HERMES_API MeshFunction : 
+      public Function<Scalar>, 
+      public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
       /// Empty constructor.
@@ -113,7 +118,7 @@ namespace Hermes
       virtual bool isOkay() const;
 
       /// Internal.
-      inline std::string getClassName() const { return "MeshFunction"; }
+      virtual inline std::string getClassName() const { return "MeshFunction"; }
 
       /// Internal.
       virtual void init();

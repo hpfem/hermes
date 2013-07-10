@@ -668,7 +668,7 @@ namespace Hermes
           start_indices_new.push_back(start_indices[i]);
         }
       }
-      
+
       for (int i=0; i < spaces.size(); i++)
       {
         if(Solution<Scalar>::static_verbose_output)
@@ -1120,39 +1120,27 @@ namespace Hermes
     template<>
     void Solution<double>::save(const char* filename) const
     {
-      if(sln_type == HERMES_UNDEF)
-        throw Exceptions::Exception("Cannot save -- uninitialized solution.");
+      // Check.
+      this->check();
 
       try
       {
+        // Init XML.
+        // With counts, exactness.
         XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs, 0, 0);
-        switch(this->get_space_type())
-        {
-        case HERMES_H1_SPACE:
-          xmlsolution.space().set("h1");
-          break;
-        case HERMES_HCURL_SPACE:
-          xmlsolution.space().set("hcurl");
-          break;
-        case HERMES_HDIV_SPACE:
-          xmlsolution.space().set("hdiv");
-          break;
-        case HERMES_L2_SPACE:
-          xmlsolution.space().set("l2");
-          break;
-        case HERMES_L2_MARKERWISE_CONST_SPACE:
-          xmlsolution.space().set("l2-markerwise");
-          break;
-        default:
-          throw Exceptions::Exception("This type of solution can not be saved.");
-        }
 
+        // Space type.
+        xmlsolution.space().set(SpaceTypeString[this->get_space_type()]);
+
+        // Coefficients.
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
           xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i]));
 
+        // Orders.
         for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
           xmlsolution.elem_orders().push_back(XMLSolution::elem_orders(elems_i, elem_orders[elems_i]));
 
+        // Element offsets for each component.
         for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
         {
           xmlsolution.component().push_back(XMLSolution::component());
@@ -1161,6 +1149,7 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
+        // Finish.
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
@@ -1168,10 +1157,9 @@ namespace Hermes
         ::xml_schema::namespace_infomap namespace_info_map;
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
+        // Write to disk.
         std::ofstream out(filename);
-
         ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
-
         XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
         out.close();
       }
@@ -1184,40 +1172,30 @@ namespace Hermes
     template<>
     void Solution<std::complex<double> >::save(const char* filename) const
     {
-      if(sln_type == HERMES_UNDEF)
-        throw Exceptions::Exception("Cannot save -- uninitialized solution.");
+      // Check.
+      this->check();
 
       try
       {
-        XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs, 0, 1);
+        // Init XML.
+        // With counts, exactness.
+        XMLSolution::solution xmlsolution(this->num_components, this->num_elems, this->num_coeffs, 0, 0);
 
-        switch(this->get_space_type())
-        {
-        case HERMES_H1_SPACE:
-          xmlsolution.space().set("h1");
-          break;
-        case HERMES_HCURL_SPACE:
-          xmlsolution.space().set("hcurl");
-          break;
-        case HERMES_HDIV_SPACE:
-          xmlsolution.space().set("hdiv");
-          break;
-        case HERMES_L2_SPACE:
-          xmlsolution.space().set("l2");
-          break;
-        default:
-          throw Exceptions::Exception("This type of solution can not be saved.");
-        }
+        // Space type.
+        xmlsolution.space().set(SpaceTypeString[this->get_space_type()]);
 
+        // Coefficients - this is the only difference wrt. the real method.
         for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
         {
           xmlsolution.mono_coeffs().push_back(XMLSolution::mono_coeffs(coeffs_i, mono_coeffs[coeffs_i].real()));
           xmlsolution.mono_coeffs().back().im() = mono_coeffs[coeffs_i].imag();
         }
 
+        // Orders.
         for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
           xmlsolution.elem_orders().push_back(XMLSolution::elem_orders(elems_i, elem_orders[elems_i]));
 
+        // Element offsets for each component.
         for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
         {
           xmlsolution.component().push_back(XMLSolution::component());
@@ -1226,6 +1204,7 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
+        // Finish.
         std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
         solution_schema_location.append("/solution_h2d_xml.xsd");
         ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
@@ -1233,10 +1212,9 @@ namespace Hermes
         ::xml_schema::namespace_infomap namespace_info_map;
         namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
 
+        // Write to disk.
         std::ofstream out(filename);
-
         ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
-
         XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
         out.close();
       }
@@ -1250,66 +1228,56 @@ namespace Hermes
     template<>
     void Solution<double>::save_bson(const char* filename) const
     {
-      if(sln_type == HERMES_UNDEF)
-        throw Exceptions::Exception("Cannot save -- uninitialized solution.");
+      // Check.
+      this->check();
 
-      // bson
+      // Init bson
       bson bw;
       bson_init(&bw);
       bson_append_new_oid(&bw, "_id");
       bson_append_new_oid(&bw, "user_id");
 
-      switch(this->get_space_type())
-      {
-      case HERMES_H1_SPACE:
-        bson_append_string(&bw, "space", "h1");
-        break;
-      case HERMES_HCURL_SPACE:
-        bson_append_string(&bw, "space", "hcurl");
-        break;
-      case HERMES_HDIV_SPACE:
-        bson_append_string(&bw, "space", "hdiv");
-        break;
-      case HERMES_L2_SPACE:
-        bson_append_string(&bw, "space", "l2");
-        break;
-      default:
-        throw Exceptions::Exception("This type of solution can not be saved.");
-      }
+      // Space type.
+      bson_append_string(&bw, "space", SpaceTypeString[this->get_space_type()]);
 
+      // Exactness.
       bson_append_bool(&bw, "exact", false);
 
+      // Complexness for checking.
+      bson_append_bool(&bw, "complex", false);
+
+      // Counts.
       bson_append_int(&bw, "coeffs_count", this->num_coeffs);
       bson_append_int(&bw, "orders_count", this->num_elems);
       bson_append_int(&bw, "components_count", this->num_components);
 
+      // Coefficients.
       bson_append_start_array(&bw, "coeffs");
       for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
-          bson_append_double(&bw, "c", mono_coeffs[coeffs_i]);
+        bson_append_double(&bw, "c", mono_coeffs[coeffs_i]);
       bson_append_finish_array(&bw);
 
+      // Orders.
       bson_append_start_array(&bw, "orders");
       for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
-          bson_append_double(&bw, "o", elem_orders[elems_i]);
+        bson_append_int(&bw, "o", elem_orders[elems_i]);
       bson_append_finish_array(&bw);
 
+      // Element offsets for each component.
       bson_append_start_array(&bw, "components");
       for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
       {
-          bson_append_start_array(&bw, "component");
-          for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
-          {
-            bson_append_int(&bw, "c", elem_coeffs[component_i][elems_i]);
-            // std::cout << elem_coeffs[component_i][elems_i] << std::endl;
-          }
-          bson_append_finish_array(&bw);
+        bson_append_start_array(&bw, "component");
+        for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+          bson_append_int(&bw, "c", elem_coeffs[component_i][elems_i]);
+        bson_append_finish_array(&bw);
       }
       bson_append_finish_array(&bw);
 
+      // Done.
       bson_finish(&bw);
 
-      // bson_print(&bw);
-
+      // Write to disk.
       FILE *fpw;
       fpw = fopen(filename, "wb");
       const char *dataw = (const char *) bson_data(&bw);
@@ -1322,9 +1290,136 @@ namespace Hermes
     template<>
     void Solution<std::complex<double> >::save_bson(const char* filename) const
     {
-        assert(0);
+      // Check.
+      this->check();
+
+      // Init bson
+      bson bw;
+      bson_init(&bw);
+      bson_append_new_oid(&bw, "_id");
+      bson_append_new_oid(&bw, "user_id");
+
+      // Space type.
+      bson_append_string(&bw, "space", SpaceTypeString[this->get_space_type()]);
+
+      // Exactness.
+      bson_append_bool(&bw, "exact", false);
+
+      // Complexness for checking.
+      bson_append_bool(&bw, "complex", true);
+
+      // Counts.
+      bson_append_int(&bw, "coeffs_count", this->num_coeffs);
+      bson_append_int(&bw, "orders_count", this->num_elems);
+      bson_append_int(&bw, "components_count", this->num_components);
+
+      // Coefficients.
+      bson_append_start_array(&bw, "coeffs-real");
+      for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
+        bson_append_double(&bw, "c", mono_coeffs[coeffs_i].real());
+      bson_append_finish_array(&bw);
+
+      bson_append_start_array(&bw, "coeffs-imag");
+      for(unsigned int coeffs_i = 0; coeffs_i < this->num_coeffs; coeffs_i++)
+        bson_append_double(&bw, "c", mono_coeffs[coeffs_i].imag());
+      bson_append_finish_array(&bw);
+
+      // Orders.
+      bson_append_start_array(&bw, "orders");
+      for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+        bson_append_int(&bw, "o", elem_orders[elems_i]);
+      bson_append_finish_array(&bw);
+
+      // Element offsets for each component.
+      bson_append_start_array(&bw, "components");
+      for (unsigned int component_i = 0; component_i < this->num_components; component_i++)
+      {
+        bson_append_start_array(&bw, "component");
+        for(unsigned int elems_i = 0; elems_i < this->num_elems; elems_i++)
+          bson_append_int(&bw, "c", elem_coeffs[component_i][elems_i]);
+        bson_append_finish_array(&bw);
+      }
+      bson_append_finish_array(&bw);
+
+      // Done.
+      bson_finish(&bw);
+
+      // Write to disk.
+      FILE *fpw;
+      fpw = fopen(filename, "wb");
+      const char *dataw = (const char *) bson_data(&bw);
+      fwrite(dataw, bson_size(&bw), 1, fpw);
+      fclose(fpw);
+
+      bson_destroy(&bw);
     }
 #endif
+
+    template<>
+    void Solution<double>::load_exact_solution(int number_of_components, SpaceSharedPtr<double> space, bool complexness,
+      double x_real, double y_real, double x_complex, double y_complex)
+    {
+      switch(number_of_components)
+      {
+      case 1:
+        if(!complexness)
+        {
+          double* coeff_vec = new double[space->get_num_dofs()];
+          MeshFunctionSharedPtr<double> sln(new ConstantSolution<double>(this->mesh, x_real));
+          OGProjection<double>::project_global(space, sln, coeff_vec);
+          this->set_coeff_vector(space, coeff_vec, true, 0);
+          sln_type = HERMES_SLN;
+        }
+        else
+          throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
+        break;
+      case 2:
+        if(!complexness)
+        {
+          double* coeff_vec = new double[space->get_num_dofs()];
+          MeshFunctionSharedPtr<double> sln(new ConstantSolutionVector<double>(this->mesh, x_real, y_real));
+          OGProjection<double>::project_global(space, sln, coeff_vec);
+          this->set_coeff_vector(space, coeff_vec, true, 0);
+          this->sln_type = HERMES_SLN;
+        }
+        else
+          throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
+        break;
+      }
+    }
+
+    template<>
+    void Solution<std::complex<double> >::load_exact_solution(int number_of_components, SpaceSharedPtr<std::complex<double> > space, bool complexness,
+      double x_real, double y_real, double x_complex, double y_complex)
+    {
+      switch(number_of_components)
+      {
+      case 1:
+        if(complexness)
+        {
+          std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
+          MeshFunctionSharedPtr<std::complex<double> > sln(new ConstantSolution<std::complex<double> >(this->mesh, std::complex<double>(x_real, x_complex)));
+          OGProjection<std::complex<double> >::project_global(space, sln, coeff_vec);
+          this->set_coeff_vector(space, coeff_vec, true, 0);
+          sln_type = HERMES_SLN;
+        }
+        else
+          throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
+        break;
+      case 2:
+        if(complexness == 1)
+        {
+          std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
+          MeshFunctionSharedPtr<std::complex<double> > sln(new ConstantSolutionVector<std::complex<double> >(this->mesh, std::complex<double>(x_real, x_complex), std::complex<double>(y_real, y_complex)));
+          OGProjection<std::complex<double> >::project_global(space, sln, coeff_vec);
+          this->set_coeff_vector(space, coeff_vec, true, 0);
+          sln_type = HERMES_SLN;
+        }
+        else
+          throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
+        break;
+      }
+    }
 
     template<>
     void Solution<double>::load(const char* filename, SpaceSharedPtr<double> space)
@@ -1342,57 +1437,14 @@ namespace Hermes
         std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename, parsing_flags));
         sln_type = parsed_xml_solution->exact() == 0 ? HERMES_SLN : HERMES_EXACT;
 
+        if(parsed_xml_solution->ncmp() != space->get_shapeset()->get_num_components())
+          throw Exceptions::Exception("Mismatched space / saved solution.");
+
         if(sln_type == HERMES_EXACT)
-        {
-          switch(parsed_xml_solution->ncmp())
-          {
-          case 1:
-            if(parsed_xml_solution->exactC() == 0)
-            {
-              double* coeff_vec = new double[space->get_num_dofs()];
-              MeshFunctionSharedPtr<double> sln(new ConstantSolution<double>(this->mesh, parsed_xml_solution->exactCXR().get()));
-              OGProjection<double>::project_global(space, sln, coeff_vec);
-              this->set_coeff_vector(space, coeff_vec, true, 0);
-              sln_type = HERMES_SLN;
-            }
-            else
-              throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
-            break;
-          case 2:
-            if(parsed_xml_solution->exactC() == 0)
-            {
-              double* coeff_vec = new double[space->get_num_dofs()];
-              MeshFunctionSharedPtr<double> sln(new ConstantSolutionVector<double>(this->mesh, parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCYR().get()));
-              OGProjection<double>::project_global(space, sln, coeff_vec);
-              this->set_coeff_vector(space, coeff_vec, true, 0);
-              sln_type = HERMES_SLN;
-            }
-            else
-              throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
-            break;
-          }
-        }
+          this->load_exact_solution(parsed_xml_solution->ncmp(), space, parsed_xml_solution->exactC(), parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCYR().get(), parsed_xml_solution->exactCXC().get(), parsed_xml_solution->exactCYC().get());
         else
         {
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"h1"))
-            if(this->space_type != HERMES_H1_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"l2"))
-            if(this->space_type != HERMES_L2_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hcurl"))
-            if(this->space_type != HERMES_HCURL_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hdiv"))
-            if(this->space_type != HERMES_HDIV_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"l2-markerwise"))
-            if(this->space_type != HERMES_L2_MARKERWISE_CONST_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+          this->check_space_type_compliance(parsed_xml_solution->space().get().c_str());
 
           this->num_coeffs = parsed_xml_solution->nc();
           this->num_elems = parsed_xml_solution->nel();
@@ -1442,53 +1494,14 @@ namespace Hermes
         std::auto_ptr<XMLSolution::solution> parsed_xml_solution(XMLSolution::solution_(filename, parsing_flags));
         sln_type = parsed_xml_solution->exact() == 0 ? HERMES_SLN : HERMES_EXACT;
 
+        if(parsed_xml_solution->ncmp() != space->get_shapeset()->get_num_components())
+          throw Exceptions::Exception("Mismatched space / saved solution.");
+
         if(sln_type == HERMES_EXACT)
-        {
-          switch(parsed_xml_solution->ncmp())
-          {
-          case 1:
-            if(parsed_xml_solution->exactC() == 1)
-            {
-              std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
-              MeshFunctionSharedPtr<std::complex<double> > sln(new ConstantSolution<std::complex<double> >(this->mesh, parsed_xml_solution->exactCXR().get()));
-              OGProjection<std::complex<double> >::project_global(space, sln, coeff_vec);
-              this->set_coeff_vector(space, coeff_vec, true, 0);
-              sln_type = HERMES_SLN;
-            }
-            else
-              throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
-            break;
-          case 2:
-            if(parsed_xml_solution->exactC() == 1)
-            {
-              std::complex<double>* coeff_vec = new std::complex<double>[space->get_num_dofs()];
-              MeshFunctionSharedPtr<std::complex<double> > sln(new ConstantSolutionVector<std::complex<double> >(this->mesh, std::complex<double>(parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCXC().get()), std::complex<double>(parsed_xml_solution->exactCYR().get(), parsed_xml_solution->exactCYC().get())));
-              OGProjection<std::complex<double> >::project_global(space, sln, coeff_vec);
-              this->set_coeff_vector(space, coeff_vec, true, 0);
-              sln_type = HERMES_SLN;
-            }
-            else
-              throw Hermes::Exceptions::SolutionLoadFailureException("Mismatched real - complex exact solutions.");
-            break;
-          }
-        }
+          this->load_exact_solution(parsed_xml_solution->ncmp(), space, parsed_xml_solution->exactC(), parsed_xml_solution->exactCXR().get(), parsed_xml_solution->exactCYR().get(), parsed_xml_solution->exactCXC().get(), parsed_xml_solution->exactCYC().get());
         else
         {
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"h1"))
-            if(this->space_type != HERMES_H1_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"l2"))
-            if(this->space_type != HERMES_L2_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hcurl"))
-            if(this->space_type != HERMES_HCURL_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
-
-          if(!strcmp(parsed_xml_solution->space().get().c_str(),"hdiv"))
-            if(this->space_type != HERMES_HDIV_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+          this->check_space_type_compliance(parsed_xml_solution->space().get().c_str());
 
           ::xml_schema::flags parsing_flags = 0;
           if(!this->validate)
@@ -1559,125 +1572,85 @@ namespace Hermes
       bson_find(&it_exact, &br, "exact");
       sln_type = bson_iterator_bool(&it_exact) ? HERMES_EXACT : HERMES_SLN;
 
+      bson_iterator it_complex;
+      bson_find(&it_complex, &br, "exact");
+      bool complex = bson_iterator_bool(&it_complex);
+
       bson_iterator it_components;
       bson_find(&it_components, &br, "components_count");
-      this->num_components = bson_iterator_int(&it_components);
+      if(bson_iterator_int(&it_components) != space->get_shapeset()->get_num_components())
+        throw Exceptions::Exception("Mismatched space / saved solution.");
+      else
+        this->num_components = bson_iterator_int(&it_components);
 
       if (sln_type == HERMES_EXACT)
       {
-          Hermes::vector<double> values;
-          // values
-          bson_find(&it, &br, "values");
-          bson_iterator_subobject_init(&it, &sub, 0);
-          bson_iterator_init(&it, &sub);
-          while (bson_iterator_next(&it))
-          {
-            values.push_back(bson_iterator_double(&it));
-          }
-
-          double* coeff_vec = new double[space->get_num_dofs()];
-          MeshFunctionSharedPtr<double> sln;
-
-          // TODO: improve
-          switch(this->num_components)
-          {
-          case 1:
-            {
-              sln = MeshFunctionSharedPtr<double>(new ConstantSolution<double>(this->mesh, values[0]));
-            }
-            break;
-          case 2:
-            {
-              sln = MeshFunctionSharedPtr<double>(new ConstantSolutionVector<double>(this->mesh, values[0], values[1]));
-            }
-            break;
-          }
-
-          OGProjection<double>::project_global(space, sln, coeff_vec);
-          this->set_coeff_vector(space, coeff_vec, true, 0);
-          sln_type = HERMES_SLN;
+        Hermes::vector<double> values;
+        // values
+        bson_find(&it, &br, "values");
+        bson_iterator_subobject_init(&it, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        while (bson_iterator_next(&it))
+          values.push_back(bson_iterator_double(&it));
+        this->load_exact_solution(this->num_components, space, complex, values[0], values[1], values[2], values[3]);
       }
       else
       {
-          // space
-          bson_iterator it_sp;
-          bson_find(&it_sp, &br, "space");
-          const char *sp = bson_iterator_string(&it_sp);
+        // space
+        bson_iterator it_sp;
+        bson_find(&it_sp, &br, "space");
+        const char *sp = bson_iterator_string(&it_sp);
 
-          if(!strcmp(sp, "h1"))
-            if(this->space_type != HERMES_H1_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        this->check_space_type_compliance(sp);
 
-          if(!strcmp(sp, "l2"))
-            if(this->space_type != HERMES_L2_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        bson_iterator it_coeffs, it_orders;
+        bson_find(&it_coeffs, &br, "coeffs_count");
+        bson_find(&it_orders, &br, "orders_count");         
 
-          if(!strcmp(sp, "hcurl"))
-            if(this->space_type != HERMES_HCURL_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        this->num_coeffs = bson_iterator_int(&it_coeffs);
+        this->num_elems = bson_iterator_int(&it_orders);
 
-          if(!strcmp(sp, "hdiv"))
-            if(this->space_type != HERMES_HDIV_SPACE)
-              throw Exceptions::Exception("Space types not compliant in Solution::load().");
+        this->mono_coeffs = new double[num_coeffs];
 
-          bson_iterator it_coeffs, it_orders;
-          bson_find(&it_coeffs, &br, "coeffs_count");
-          bson_find(&it_orders, &br, "orders_count");         
+        for(unsigned int component_i = 0; component_i < num_components; component_i++)
+          this->elem_coeffs[component_i] = new int[num_elems];
 
-          this->num_coeffs = bson_iterator_int(&it_coeffs);
-          this->num_elems = bson_iterator_int(&it_orders);
+        this->elem_orders = new int[num_elems];
 
-          this->mono_coeffs = new double[num_coeffs];
-          memset(this->mono_coeffs, 0, this->num_coeffs*sizeof(double));
+        // coeffs
+        bson_find(&it_coeffs, &br, "coeffs");
+        bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_coeff = 0;
+        while (bson_iterator_next(&it))
+          this->mono_coeffs[index_coeff++] = bson_iterator_double(&it);
 
-          for(unsigned int component_i = 0; component_i < num_components; component_i++)
-            this->elem_coeffs[component_i] = new int[num_elems];
+        // elem order
+        bson_find(&it_orders, &br, "orders");
+        bson_iterator_subobject_init(&it_orders, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_order = 0;
+        while (bson_iterator_next(&it))
+          this->elem_orders[index_order++] = bson_iterator_int(&it);
 
-          this->elem_orders = new int[num_elems];
+        //
+        bson_find(&it_components, &br, "components");
+        bson_iterator_subobject_init(&it_components, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_comp = 0;
+        while (bson_iterator_next(&it))
+        {
+          bson sub_coeffs;
+          bson_iterator_subobject_init(&it, &sub_coeffs, 0);
+          bson_iterator it_coeffs;
+          bson_iterator_init(&it_coeffs, &sub_coeffs);
 
-          // coeffs
-          bson_find(&it_coeffs, &br, "coeffs");
-          bson_iterator_subobject_init(&it_coeffs, &sub, 0);
-          bson_iterator_init(&it, &sub);
           int index_coeff = 0;
-          while (bson_iterator_next(&it))
-          {
-            this->mono_coeffs[index_coeff] = bson_iterator_double(&it);
-            index_coeff++;
-          }
+          while (bson_iterator_next(&it_coeffs))
+            this->elem_coeffs[index_comp][index_coeff++] = bson_iterator_int(&it_coeffs);
 
-          // elem order
-          bson_find(&it_orders, &br, "orders");
-          bson_iterator_subobject_init(&it_orders, &sub, 0);
-          bson_iterator_init(&it, &sub);
-          int index_order = 0;
-          while (bson_iterator_next(&it))
-          {
-            this->elem_orders[index_order] = bson_iterator_int(&it);
-            index_order++;
-          }
-
-          //
-          bson_find(&it_components, &br, "components");
-          bson_iterator_subobject_init(&it_components, &sub, 0);
-          bson_iterator_init(&it, &sub);
-          int index_comp = 0;
-          while (bson_iterator_next(&it))
-          {
-              bson sub_coeffs;
-              bson_iterator_subobject_init(&it, &sub_coeffs, 0);
-              bson_iterator it_coeffs;
-              bson_iterator_init(&it_coeffs, &sub_coeffs);
-
-              int index_coeff = 0;
-              while (bson_iterator_next(&it_coeffs))
-              {
-                  this->elem_coeffs[index_comp][index_coeff] = bson_iterator_int(&it_coeffs);
-                  index_coeff++;
-              }
-
-              index_comp++;
-          }
+          index_comp++;
+        }
       }
 
       bson_destroy(&br);
@@ -1688,9 +1661,169 @@ namespace Hermes
     template<>
     void Solution<std::complex<double> >::load_bson(const char* filename, SpaceSharedPtr<std::complex<double> > space)
     {
-        assert(0);
+      free();
+      this->mesh = space->get_mesh();
+      this->space_type = space->get_type();
+
+      FILE *fpr;
+      fpr = fopen(filename, "rb");
+
+      // file size:
+      fseek (fpr, 0, SEEK_END);
+      int size = ftell(fpr);
+      rewind(fpr);
+
+      // allocate memory to contain the whole file:
+      char *datar = (char*) malloc (sizeof(char)*size);
+      fread(datar, size, 1, fpr);
+      fclose(fpr);
+
+      bson br;
+      bson_init_finished_data(&br, datar, 0);
+      // bson_print(&br);
+
+      bson sub;
+      bson_iterator it;
+
+      bson_iterator it_exact;
+      bson_find(&it_exact, &br, "exact");
+      sln_type = bson_iterator_bool(&it_exact) ? HERMES_EXACT : HERMES_SLN;
+
+      bson_iterator it_complex;
+      bson_find(&it_complex, &br, "exact");
+      bool complex = bson_iterator_bool(&it_complex);
+
+      bson_iterator it_components;
+      bson_find(&it_components, &br, "components_count");
+      if(bson_iterator_int(&it_components) != space->get_shapeset()->get_num_components())
+        throw Exceptions::Exception("Mismatched space / saved solution.");
+      else
+        this->num_components = bson_iterator_int(&it_components);
+
+      if (sln_type == HERMES_EXACT)
+      {
+        Hermes::vector<double> values;
+        // values
+        bson_find(&it, &br, "values");
+        bson_iterator_subobject_init(&it, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        while (bson_iterator_next(&it))
+          values.push_back(bson_iterator_double(&it));
+        this->load_exact_solution(this->num_components, space, complex, values[0], values[1], values[2], values[3]);
+      }
+      else
+      {
+        // space
+        bson_iterator it_sp;
+        bson_find(&it_sp, &br, "space");
+        const char *sp = bson_iterator_string(&it_sp);
+
+        this->check_space_type_compliance(sp);
+
+        bson_iterator it_coeffs, it_coeffs_real, it_coeffs_imag, it_orders;
+        bson_find(&it_coeffs, &br, "coeffs_count");
+        bson_find(&it_orders, &br, "orders_count");         
+
+        this->num_coeffs = bson_iterator_int(&it_coeffs);
+        this->num_elems = bson_iterator_int(&it_orders);
+
+        this->mono_coeffs = new std::complex<double>[num_coeffs];
+
+        for(unsigned int component_i = 0; component_i < num_components; component_i++)
+          this->elem_coeffs[component_i] = new int[num_elems];
+
+        this->elem_orders = new int[num_elems];
+
+        // coeffs.
+        Hermes::vector<double> real_coeffs, imag_coeffs;
+        bson_find(&it_coeffs_real, &br, "coeffs-real");
+        bson_iterator_subobject_init(&it_coeffs_real, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        while (bson_iterator_next(&it))
+          real_coeffs.push_back(bson_iterator_double(&it));
+
+        bson_find(&it_coeffs_imag, &br, "coeffs-imag");
+        bson_iterator_subobject_init(&it_coeffs_imag, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        while (bson_iterator_next(&it))
+          imag_coeffs.push_back(bson_iterator_double(&it));
+
+        for(int i = 0; i < imag_coeffs.size(); i++)
+          this->mono_coeffs[i] = std::complex<double>(real_coeffs[i], imag_coeffs[i]);
+
+        // elem order
+        bson_find(&it_orders, &br, "orders");
+        bson_iterator_subobject_init(&it_orders, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_order = 0;
+        while (bson_iterator_next(&it))
+          this->elem_orders[index_order++] = bson_iterator_int(&it);
+
+        //
+        bson_find(&it_components, &br, "components");
+        bson_iterator_subobject_init(&it_components, &sub, 0);
+        bson_iterator_init(&it, &sub);
+        int index_comp = 0;
+        while (bson_iterator_next(&it))
+        {
+          bson sub_coeffs;
+          bson_iterator_subobject_init(&it, &sub_coeffs, 0);
+          bson_iterator it_coeffs;
+          bson_iterator_init(&it_coeffs, &sub_coeffs);
+
+          int index_coeff = 0;
+          while (bson_iterator_next(&it_coeffs))
+            this->elem_coeffs[index_comp][index_coeff++] = bson_iterator_int(&it_coeffs);
+
+          index_comp++;
+        }
+      }
+
+      bson_destroy(&br);
+
+      init_dxdy_buffer();
     }
 #endif
+
+    template<typename Scalar>
+    bool Solution<Scalar>::isOkay() const
+    {
+      bool okay = MeshFunction<Scalar>::isOkay();
+
+      okay = (this->sln_type == HERMES_EXACT || this->get_space_type() != HERMES_INVALID_SPACE) && okay;
+
+      if(sln_type == HERMES_UNDEF)
+      {
+        okay = false;
+        throw Exceptions::Exception("Uninitialized space type.");
+      }
+
+      return okay;
+    }
+
+    template<typename Scalar>
+    void Solution<Scalar>::check_space_type_compliance(const char* space_type_to_check) const
+    {
+      if(!strcmp(space_type_to_check, "h1"))
+        if(this->space_type != HERMES_H1_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+      if(!strcmp(space_type_to_check, "l2"))
+        if(this->space_type != HERMES_L2_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+      if(!strcmp(space_type_to_check, "hcurl"))
+        if(this->space_type != HERMES_HCURL_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+      if(!strcmp(space_type_to_check, "hdiv"))
+        if(this->space_type != HERMES_HDIV_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
+
+      if(!strcmp(space_type_to_check, "l2-markerwise"))
+        if(this->space_type != HERMES_L2_MARKERWISE_CONST_SPACE)
+          throw Exceptions::Exception("Space types not compliant in Solution::load().");
+    }
 
     template<typename Scalar>
     Scalar Solution<Scalar>::get_ref_value(Element* e, double xi1, double xi2, int component, int item)

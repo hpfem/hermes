@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "mesh_function.h"
+#include "solution.h"
 #include "../views/linearizer_base.h"
 #include <limits>
 
@@ -50,6 +50,14 @@ void MeshFunctionSharedPtr<Scalar>::operator=(const MeshFunctionSharedPtr& other
   std::tr1::shared_ptr<Hermes::Hermes2D::MeshFunction<Scalar> >::operator=(other);
 }
 #endif
+
+
+template<typename Scalar>
+Hermes::Hermes2D::Solution<Scalar>* MeshFunctionSharedPtr<Scalar>::get_solution()
+{
+  return dynamic_cast<Hermes::Hermes2D::Solution<Scalar>*>(this->get());
+}
+
 
 template<typename Scalar>
 MeshFunctionSharedPtr<Scalar>::~MeshFunctionSharedPtr()

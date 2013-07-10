@@ -68,6 +68,8 @@ namespace Hermes
 {
   namespace Hermes2D
   {
+    const char* SpaceTypeString[5] = { "h1", "hcurl", "hdiv", "l2", "l2-markerwise" };
+
     unsigned g_space_seq = 0;
 
 		template<>
