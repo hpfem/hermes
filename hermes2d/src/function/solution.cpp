@@ -1234,8 +1234,6 @@ namespace Hermes
       // Init bson
       bson bw;
       bson_init(&bw);
-      bson_append_new_oid(&bw, "_id");
-      bson_append_new_oid(&bw, "user_id");
 
       // Space type.
       bson_append_string(&bw, "space", SpaceTypeString[this->get_space_type()]);
@@ -1296,8 +1294,6 @@ namespace Hermes
       // Init bson
       bson bw;
       bson_init(&bw);
-      bson_append_new_oid(&bw, "_id");
-      bson_append_new_oid(&bw, "user_id");
 
       // Space type.
       bson_append_string(&bw, "space", SpaceTypeString[this->get_space_type()]);
@@ -1573,7 +1569,7 @@ namespace Hermes
       sln_type = bson_iterator_bool(&it_exact) ? HERMES_EXACT : HERMES_SLN;
 
       bson_iterator it_complex;
-      bson_find(&it_complex, &br, "exact");
+      bson_find(&it_complex, &br, "complex");
       bool complex = bson_iterator_bool(&it_complex);
 
       bson_iterator it_components;
@@ -1690,7 +1686,7 @@ namespace Hermes
       sln_type = bson_iterator_bool(&it_exact) ? HERMES_EXACT : HERMES_SLN;
 
       bson_iterator it_complex;
-      bson_find(&it_complex, &br, "exact");
+      bson_find(&it_complex, &br, "complex");
       bool complex = bson_iterator_bool(&it_complex);
 
       bson_iterator it_components;

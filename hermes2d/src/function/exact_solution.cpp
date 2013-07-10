@@ -212,8 +212,6 @@ namespace Hermes
       // bson
       bson bw;
       bson_init(&bw);
-      bson_append_new_oid(&bw, "_id");
-      bson_append_new_oid(&bw, "user_id");
 
       bson_append_bool(&bw, "exact", true);
       bson_append_bool(&bw, "complex", false);
@@ -250,8 +248,6 @@ namespace Hermes
       // bson
       bson bw;
       bson_init(&bw);
-      bson_append_new_oid(&bw, "_id");
-      bson_append_new_oid(&bw, "user_id");
 
       bson_append_bool(&bw, "exact", true);
       bson_append_bool(&bw, "complex", true);
@@ -453,8 +449,6 @@ namespace Hermes
       // bson
       bson bw;
       bson_init(&bw);
-      bson_append_new_oid(&bw, "_id");
-      bson_append_new_oid(&bw, "user_id");
 
       bson_append_bool(&bw, "exact", true);
       bson_append_bool(&bw, "complex", false);
@@ -491,8 +485,6 @@ namespace Hermes
       // bson
       bson bw;
       bson_init(&bw);
-      bson_append_new_oid(&bw, "_id");
-      bson_append_new_oid(&bw, "user_id");
 
       bson_append_bool(&bw, "exact", true);
       bson_append_bool(&bw, "complex", true);
