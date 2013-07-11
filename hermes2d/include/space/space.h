@@ -222,16 +222,21 @@ namespace Hermes
       Shapeset* get_shapeset() const;
 
       /// Saves this space into a file.
-      bool save(const char *filename) const;
+      void save(const char *filename) const;
 #ifdef WITH_BSON
       void save_bson(const char* filename) const;
 #endif
 
-      /// Loads a space from a file.
-      static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      /// Loads a space from a file in XML format.
+      static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate = false, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      /// This method is here for rapid re-loading.
+      void load(const char *filename, bool validate = false);
 
 #ifdef WITH_BSON
-      void load_bson(const char *filename, MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      /// Loads a space from a file in BSON.
+      static SpaceSharedPtr<Scalar> load_bson(const char *filename, MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+      /// This method is here for rapid re-loading.
+      void load_bson(const char *filename);
 #endif
 
       /// Obtains an assembly list for the given element.
@@ -446,6 +451,11 @@ namespace Hermes
       virtual void post_assign();
 
       void free_bc_data();
+
+      /// Internal.
+      /// Returns a new Space according to the type provided.
+      /// Used in loading.
+      static SpaceSharedPtr<Scalar> init_empty_space(const char* spaceType, MeshSharedPtr mesh, Shapeset* shapeset);
 
       template<typename T> friend class OGProjection;
       template<typename T> friend class NewtonSolver;

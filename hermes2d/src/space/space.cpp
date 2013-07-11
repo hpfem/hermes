@@ -72,79 +72,70 @@ namespace Hermes
 
     unsigned g_space_seq = 0;
 
-		template<>
-		void Space<double>::init()
-		{
-			this->default_tri_order = -1;
-			this->default_quad_order = -1;
-			this->ndata = NULL;
-			this->edata = NULL;
-			this->nsize = esize = 0;
-			this->ndata_allocated = 0;
-			this->mesh_seq = -1;
-			this->seq = g_space_seq;
-			this->was_assigned = -1;
-			this->ndof = 0;
+    template<>
+    void Space<double>::init()
+    {
+      this->default_tri_order = -1;
+      this->default_quad_order = -1;
+      this->ndata = NULL;
+      this->edata = NULL;
+      this->nsize = esize = 0;
+      this->ndata_allocated = 0;
+      this->mesh_seq = -1;
+      this->seq = g_space_seq;
+      this->was_assigned = -1;
+      this->ndof = 0;
       this->proj_mat = NULL;
       this->chol_p = NULL;
       this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
-			if(essential_bcs != NULL)
-				for(Hermes::vector<EssentialBoundaryCondition<double>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
-					for(unsigned int i = 0; i < (*it)->markers.size(); i++)
-					{
-						if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
-							throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
-					}
+      if(essential_bcs != NULL)
+        for(Hermes::vector<EssentialBoundaryCondition<double>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+          for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+          {
+            if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
+              throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
+          }
 
-					own_shapeset = (shapeset == NULL);
-		}
+          own_shapeset = (shapeset == NULL);
+    }
 
-		template<>
-		void Space<std::complex<double> >::init()
-		{
-			this->default_tri_order = -1;
-			this->default_quad_order = -1;
-			this->ndata = NULL;
-			this->edata = NULL;
-			this->nsize = esize = 0;
-			this->ndata_allocated = 0;
-			this->mesh_seq = -1;
-			this->seq = g_space_seq;
-			this->was_assigned = -1;
-			this->ndof = 0;
+    template<>
+    void Space<std::complex<double> >::init()
+    {
+      this->default_tri_order = -1;
+      this->default_quad_order = -1;
+      this->ndata = NULL;
+      this->edata = NULL;
+      this->nsize = esize = 0;
+      this->ndata_allocated = 0;
+      this->mesh_seq = -1;
+      this->seq = g_space_seq;
+      this->was_assigned = -1;
+      this->ndof = 0;
       this->proj_mat = NULL;
       this->chol_p = NULL;
       this->vertex_functions_count = this->edge_functions_count = this->bubble_functions_count = 0;
 
-			if(essential_bcs != NULL)
-				for(Hermes::vector<EssentialBoundaryCondition<std::complex<double> >*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
-					for(unsigned int i = 0; i < (*it)->markers.size(); i++)
-					{
-						if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
-							throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
-					}
+      if(essential_bcs != NULL)
+        for(Hermes::vector<EssentialBoundaryCondition<std::complex<double> >*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+          for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+          {
+            if(mesh->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == mesh->boundary_markers_conversion.conversion_table_inverse.end() && (*it)->markers.at(i) != HERMES_ANY)
+              throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker %s.", (*it)->markers.at(i).c_str());
+          }
 
-					own_shapeset = (shapeset == NULL);
-		}
+          own_shapeset = (shapeset == NULL);
+    }
 
-		template<>
-		void Space<double>::free()
-		{
-			free_bc_data();
-			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
-			if(esize) { ::free(edata); edata = 0; edata = NULL; }
-			this->seq = -1;
-		}
-
-		template<>
-		void Space<std::complex<double> >::free()
-		{
-			free_bc_data();
-			if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
-			if(esize) { ::free(edata); edata = 0; edata = NULL; }
-			this->seq = -1;
-		}
+    template<typename Scalar>
+    void Space<Scalar>::free()
+    {
+      free_bc_data();
+      if(nsize) { ::free(ndata); nsize = 0; ndata = NULL; }
+      if(esize) { ::free(edata); edata = 0; edata = NULL; }
+      this->seq = -1;
+    }
 
     template<>
     Space<double>::Space() : shapeset(NULL), essential_bcs(NULL)
@@ -153,12 +144,12 @@ namespace Hermes
     }
 
     template<>
-		Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL)
+    Space<std::complex<double> >::Space() : shapeset(NULL), essential_bcs(NULL)
     {
       this->init();
     }
 
-     template<>
+    template<>
     Space<double>::Space(MeshSharedPtr mesh, Shapeset* shapeset, EssentialBCs<double>* essential_bcs)
       : shapeset(shapeset), essential_bcs(essential_bcs), mesh(mesh)
     {
@@ -175,14 +166,16 @@ namespace Hermes
         throw Hermes::Exceptions::NullException(0);
       this->init();
     }
-    
+
     template<typename Scalar>
     bool Space<Scalar>::isOkay() const
     {
-      if(!mesh)
+      if(this->mesh)
+        this->mesh->check();
+      else
       {
-          throw Hermes::Exceptions::Exception("Mesh not present in Space.");
-          return false;
+        throw Hermes::Exceptions::Exception("Mesh not present in Space.");
+        return false;
       }
 
       if(ndata == NULL || edata == NULL || !nsize || !esize)
@@ -193,16 +186,6 @@ namespace Hermes
 
       if(seq < 0)
         return false;
-      if(this->mesh == NULL)
-        return false;	
-
-      this->mesh->check();
-
-      if(edata == NULL)
-      {
-          throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
-          return false;
-      }
 
       if(!this->is_up_to_date())
       {
@@ -235,7 +218,7 @@ namespace Hermes
         delete [] this->chol_p;
     }
 
-		template<typename Scalar>
+    template<typename Scalar>
     Node* Space<Scalar>::get_mid_edge_vertex_node(Element* e, int i, int j)
     {
       if(e->is_triangle())
@@ -303,7 +286,7 @@ namespace Hermes
       }
 
       this->seq = g_space_seq++;
-      
+
       for_all_active_elements(e, this->mesh)
       {
         if(space->edata[e->id].changed_in_last_adaptation)
@@ -702,7 +685,7 @@ namespace Hermes
         ref_space->update_orders_recurrent(ref_space->mesh->get_element(coarse_element_id), new_order);
       }
     }
-    
+
     template<typename Scalar>
     SpaceSharedPtr<Scalar> Space<Scalar>::ReferenceSpaceCreator::create_ref_space(SpaceSharedPtr<Scalar> coarse_space, MeshSharedPtr ref_mesh, bool assign_dofs)
     {
@@ -924,8 +907,8 @@ namespace Hermes
 
       if(edata == NULL)
       {
-          throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
-          return false;
+        throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
+        return false;
       }
 
       if(first_dof < 0)
@@ -1169,13 +1152,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Space<Scalar>::save(const char *filename) const
+    void Space<Scalar>::save(const char *filename) const
     {
       this->check();
       XMLSpace::space xmlspace;
 
       xmlspace.spaceType().set(SpaceTypeString[this->get_type()]);
-      
+
       // Utility pointer.
       Element *e;
       for_all_elements(e, this->get_mesh())
@@ -1194,49 +1177,172 @@ namespace Hermes
 
       XMLSpace::space_(out, xmlspace, namespace_info_map, "UTF-8", parsing_flags);
       out.close();
-
-      return true;
     }
 
 #ifdef WITH_BSON
     template<typename Scalar>
-    bool Space<Scalar>::save_bson(const char *filename) const
+    void Space<Scalar>::save_bson(const char *filename) const
     {
+      // Check.
       this->check();
-      XMLSpace::space xmlspace;
 
-      xmlspace.spaceType().set(SpaceTypeString[this->get_type()]);
-      
-      // Utility pointer.
-      Element *e;
+      // Init bson
+      bson bw;
+      bson_init(&bw);
+
+      // Space type.
+      bson_append_string(&bw, "type", SpaceTypeString[this->get_type()]);
+
+      // Count.
+      bson_append_int(&bw, "element_data_count", this->mesh->get_max_element_id());
+
+      Element* e;
+
+      // Coefficients.
+      bson_append_start_array(&bw, "orders");
       for_all_elements(e, this->get_mesh())
-        xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n, this->edata[e->id].changed_in_last_adaptation));
+        bson_append_int(&bw, "c", this->edata[e->id].order);
+      bson_append_finish_array(&bw);
 
-      std::string space_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
-      space_schema_location.append("/space_h2d_xml.xsd");
-      ::xml_schema::namespace_info namespace_info_space("XMLSpace", space_schema_location);
+      bson_append_start_array(&bw, "bdofs");
+      for_all_elements(e, this->get_mesh())
+        bson_append_int(&bw, "c", this->edata[e->id].bdof);
+      bson_append_finish_array(&bw);
 
-      ::xml_schema::namespace_infomap namespace_info_map;
-      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("space", namespace_info_space));
+      bson_append_start_array(&bw, "ns");
+      for_all_elements(e, this->get_mesh())
+        bson_append_int(&bw, "c", this->edata[e->id].n);
+      bson_append_finish_array(&bw);
 
-      std::ofstream out(filename);
+      bson_append_start_array(&bw, "changed");
+      for_all_elements(e, this->get_mesh())
+        bson_append_bool(&bw, "c", this->edata[e->id].changed_in_last_adaptation);
+      bson_append_finish_array(&bw);
 
-      ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+      // Done.
+      bson_finish(&bw);
 
-      XMLSpace::space_(out, xmlspace, namespace_info_map, "UTF-8", parsing_flags);
-      out.close();
+      // Write to disk.
+      FILE *fpw;
+      fpw = fopen(filename, "wb");
+      const char *dataw = (const char *) bson_data(&bw);
+      fwrite(dataw, bson_size(&bw), 1, fpw);
+      fclose(fpw);
 
-      return true;
+      bson_destroy(&bw);
     }
 #endif
+
+    template<typename Scalar>
+    SpaceSharedPtr<Scalar> Space<Scalar>::init_empty_space(const char* spaceType, MeshSharedPtr mesh, Shapeset* shapeset)
+    {
+      SpaceSharedPtr<Scalar> space(NULL);
+
+      if(!strcmp(spaceType,"h1"))
+      {
+        space = new H1Space<Scalar>();
+        space->mesh = mesh;
+
+        if(shapeset == NULL)
+        {
+          space->shapeset = new H1Shapeset;
+          space->own_shapeset = true;
+        }
+        else
+        {
+          if(shapeset->get_space_type() != HERMES_H1_SPACE)
+            throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in Space loading subroutine.");
+          else
+            space->shapeset = shapeset;
+        }
+
+        space->precalculate_projection_matrix(2, space->proj_mat, space->chol_p);
+      }
+      else if (!strcmp(spaceType,"hcurl"))
+      {
+        space = new HcurlSpace<Scalar>();
+        space->mesh = mesh;
+
+        if(shapeset == NULL)
+        {
+          space->shapeset = new HcurlShapeset;
+          space->own_shapeset = true;
+        }
+        else
+        {
+          if(shapeset->get_num_components() < 2)
+            throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset in Space::load.");
+          if(shapeset->get_space_type() != HERMES_HCURL_SPACE)
+            throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in Space loading subroutine.");
+          else
+            space->shapeset = shapeset;
+        }
+
+        space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
+      }
+      else if(!!strcmp(spaceType,"hdiv"))
+      {
+        space = new HdivSpace<Scalar>();
+        space->mesh = mesh;
+
+        if(shapeset == NULL)
+        {
+          space->shapeset = new HdivShapeset;
+          space->own_shapeset = true;
+        }
+        else
+        {
+          if(shapeset->get_num_components() < 2)
+            throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset in Space::load.");
+          if(shapeset->get_space_type() != HERMES_HDIV_SPACE)
+            throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in Space loading subroutine.");
+          else
+            space->shapeset = shapeset;
+        }
+
+        space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
+      }
+      else if(strcmp(spaceType,"l2"))
+      {
+        space = new L2Space<Scalar>();
+        space->mesh = mesh;
+
+        if(shapeset == NULL)
+        {
+          space->shapeset = new L2Shapeset;
+          space->own_shapeset = true;
+        }
+        {
+          if(shapeset->get_space_type() != HERMES_L2_SPACE)
+            throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in Space loading subroutine.");
+          else
+            space->shapeset = shapeset;
+        }
+
+        static_cast<L2Space<Scalar>* >(space.get())->ldata = NULL;
+        static_cast<L2Space<Scalar>* >(space.get())->lsize = 0;
+      }
+      else if(strcmp(spaceType,"l2-markerwise"))
+      {
+				space = new L2MarkerWiseConstSpace<Scalar>(mesh);
+
+        if(shapeset)
+          Hermes::Mixins::Loggable::Static::warn("L2MarkerWiseConstSpace does not need a shapeset when loading.");
+      }
+      else
+      {
+        throw Exceptions::SpaceLoadFailureException("Wrong spaceType in Space loading subroutine.");
+        return NULL;
+      }
+
+      return space;
+    }
 
     template<typename Scalar>
     SpaceSharedPtr<Scalar> Space<Scalar>::load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       try
       {
-				SpaceSharedPtr<Scalar> space(NULL);
-
         ::xml_schema::flags parsing_flags = 0;
 
         if(!validate)
@@ -1244,116 +1350,21 @@ namespace Hermes
 
         std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename, parsing_flags));
 
-				if(!strcmp(parsed_xml_space->spaceType().get().c_str(),"h1"))
-				{
-					space = new H1Space<Scalar>();
-					space->mesh = mesh;
+        SpaceSharedPtr<Scalar> space = Space<Scalar>::init_empty_space(parsed_xml_space->spaceType().get().c_str(), mesh, shapeset);
 
-					if(shapeset == NULL)
-					{
-						space->shapeset = new H1Shapeset;
-						space->own_shapeset = true;
-					}
-					else
-					{
-						if(shapeset->get_space_type() != HERMES_H1_SPACE)
-							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
-						else
-							space->shapeset = shapeset;
-					}
+        space->mesh_seq = space->mesh->get_seq();
 
-					space->precalculate_projection_matrix(2, space->proj_mat, space->chol_p);
-				}
-				else if (!strcmp(parsed_xml_space->spaceType().get().c_str(),"hcurl"))
-				{
-					space = new HcurlSpace<Scalar>();
-					space->mesh = mesh;
-
-					if(shapeset == NULL)
-					{
-						space->shapeset = new HcurlShapeset;
-						space->own_shapeset = true;
-					}
-				else
-					{
-						if(shapeset->get_num_components() < 2)
-							throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset in Space::load.");
-						if(shapeset->get_space_type() != HERMES_HCURL_SPACE)
-							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
-						else
-							space->shapeset = shapeset;
-					}
-
-					space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
-				}
-				else if(!!strcmp(parsed_xml_space->spaceType().get().c_str(),"hdiv"))
-				{
-					space = new HdivSpace<Scalar>();
-					space->mesh = mesh;
-
-					if(shapeset == NULL)
-					{
-						space->shapeset = new HdivShapeset;
-						space->own_shapeset = true;
-					}
-					else
-					{
-						if(shapeset->get_num_components() < 2)
-							throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset in Space::load.");
-						if(shapeset->get_space_type() != HERMES_HDIV_SPACE)
-							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
-						else
-							space->shapeset = shapeset;
-					}
-
-					space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
-				}
-				else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2"))
-				{
-					space = new L2Space<Scalar>();
-					space->mesh = mesh;
-
-					if(shapeset == NULL)
-					{
-						space->shapeset = new L2Shapeset;
-						space->own_shapeset = true;
-					}
-					{
-						if(shapeset->get_space_type() != HERMES_L2_SPACE)
-							throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
-						else
-							space->shapeset = shapeset;
-					}
-
-					static_cast<L2Space<Scalar>* >(space.get())->ldata = NULL;
-					static_cast<L2Space<Scalar>* >(space.get())->lsize = 0;
-				}
-        else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2-markerwise"))
-				{
-					space = new L2MarkerWiseConstSpace<Scalar>(mesh);
-
-					if(shapeset)
-            Hermes::Mixins::Loggable::Static::warn("L2MarkerWiseConstSpace does not need a shapeset when loading.");
-				}
-				else
-				{
-					throw Exceptions::SpaceLoadFailureException("Wrong spaceType in the Solution XML file %s in Space::load.", filename);
-					return NULL;
-				}
-
-				space->mesh_seq = space->mesh->get_seq();
-
-				// L2 space does not have any (strong) essential BCs.
-				if(essential_bcs != NULL && parsed_xml_space->spaceType().get().c_str() != "l2" && parsed_xml_space->spaceType().get().c_str() != "l2-markerwise")
+        // L2 space does not have any (strong) essential BCs.
+        if(essential_bcs != NULL && parsed_xml_space->spaceType().get().c_str() != "l2" && parsed_xml_space->spaceType().get().c_str() != "l2-markerwise")
         {
-				  space->essential_bcs = essential_bcs;
-					for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
-						for(unsigned int i = 0; i < (*it)->markers.size(); i++)
-							if(space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
-								throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
+          space->essential_bcs = essential_bcs;
+          for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+            for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+              if(space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
+                throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
         }
 
-				space->resize_tables();
+        space->resize_tables();
 
         // Element data //
         unsigned int elem_data_count = parsed_xml_space->element_data().size();
@@ -1376,6 +1387,196 @@ namespace Hermes
         throw Hermes::Exceptions::SpaceLoadFailureException(e.what());
       }
     }
+
+    template<typename Scalar>
+    void Space<Scalar>::load(const char *filename, bool validate)
+    {
+      try
+      {
+        ::xml_schema::flags parsing_flags = 0;
+
+        if(!validate)
+          parsing_flags = xml_schema::flags::dont_validate;
+
+        std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename, parsing_flags));
+
+        if(strcmp(parsed_xml_space->spaceType().get().c_str(), SpaceTypeString[this->get_type()]))
+          throw Exceptions::Exception("Saved Space is not of the same type as the current one in loading.");
+
+        this->resize_tables();
+
+        // Element data //
+        unsigned int elem_data_count = parsed_xml_space->element_data().size();
+        for (unsigned int elem_data_i = 0; elem_data_i < elem_data_count; elem_data_i++)
+        {
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].order = parsed_xml_space->element_data().at(elem_data_i).ord();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].bdof = parsed_xml_space->element_data().at(elem_data_i).bd();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].n = parsed_xml_space->element_data().at(elem_data_i).n();
+          this->edata[parsed_xml_space->element_data().at(elem_data_i).e_id()].changed_in_last_adaptation = parsed_xml_space->element_data().at(elem_data_i).chgd();
+        }
+
+        this->seq = g_space_seq++;
+
+        this->assign_dofs();
+      }
+      catch (const xml_schema::exception& e)
+      {
+        throw Hermes::Exceptions::SpaceLoadFailureException(e.what());
+      }
+    }
+
+#ifdef WITH_BSON
+    template<typename Scalar>
+    SpaceSharedPtr<Scalar> Space<Scalar>::load_bson(const char *filename, MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
+    {
+      FILE *fpr;
+      fpr = fopen(filename, "rb");
+
+      // file size:
+      fseek (fpr, 0, SEEK_END);
+      int size = ftell(fpr);
+      rewind(fpr);
+
+      // allocate memory to contain the whole file:
+      char *datar = (char*) malloc (sizeof(char)*size);
+      fread(datar, size, 1, fpr);
+      fclose(fpr);
+
+      bson br;
+      bson_init_finished_data(&br, datar, 0);
+
+      bson_iterator it;
+      bson sub;
+      bson_find(&it, &br, "type");
+
+      SpaceSharedPtr<Scalar> space = Space<Scalar>::init_empty_space(bson_iterator_string(&it), mesh, shapeset);
+      space->mesh_seq = space->mesh->get_seq();
+      space->resize_tables();
+
+      // L2 space does not have any (strong) essential BCs.
+      if(essential_bcs != NULL && space->get_type() != HERMES_L2_SPACE && space->get_type() != HERMES_L2_MARKERWISE_CONST_SPACE)
+      {
+        space->essential_bcs = essential_bcs;
+        for(typename Hermes::vector<EssentialBoundaryCondition<Scalar>*>::const_iterator it = essential_bcs->begin(); it != essential_bcs->end(); it++)
+          for(unsigned int i = 0; i < (*it)->markers.size(); i++)
+            if(space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.find((*it)->markers.at(i)) == space->get_mesh()->boundary_markers_conversion.conversion_table_inverse.end())
+              throw Hermes::Exceptions::Exception("A boundary condition defined on a non-existent marker.");
+      }
+
+      // Element count.
+      bson_find(&it, &br, "element_data_count");
+      if(bson_iterator_int(&it) != mesh->get_max_element_id())
+        throw Exceptions::Exception("Mesh and saved space mixed in Space<Scalar>::load_bson.");
+
+      // coeffs
+      bson_iterator it_coeffs;
+      bson_find(&it_coeffs, &br, "orders");
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      int index_coeff = 0;
+      while (bson_iterator_next(&it))
+        space->edata[index_coeff++].order = bson_iterator_int(&it);
+
+      bson_find(&it_coeffs, &br, "bdofs");
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      index_coeff = 0;
+      while (bson_iterator_next(&it))
+        space->edata[index_coeff++].bdof = bson_iterator_int(&it);
+
+      bson_find(&it_coeffs, &br, "ns");
+			bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      index_coeff = 0;
+      while (bson_iterator_next(&it))
+        space->edata[index_coeff++].n = bson_iterator_int(&it);
+
+      bson_find(&it_coeffs, &br, "changed");
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      index_coeff = 0;
+      while (bson_iterator_next(&it))
+        space->edata[index_coeff++].changed_in_last_adaptation = bson_iterator_int(&it);
+
+      bson_destroy(&br);
+
+      space->seq = g_space_seq++;
+
+      space->assign_dofs();
+
+      return space;
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::load_bson(const char *filename)
+    {
+      FILE *fpr;
+      fpr = fopen(filename, "rb");
+
+      // file size:
+      fseek (fpr, 0, SEEK_END);
+      int size = ftell(fpr);
+      rewind(fpr);
+
+      // allocate memory to contain the whole file:
+      char *datar = (char*) malloc (sizeof(char)*size);
+      fread(datar, size, 1, fpr);
+      fclose(fpr);
+
+      bson br;
+      bson_init_finished_data(&br, datar, 0);
+
+      bson_iterator it;
+      bson sub;
+      bson_find(&it, &br, "type");
+
+      if(strcmp(bson_iterator_string(&it), SpaceTypeString[this->get_type()]))
+        throw Exceptions::Exception("Saved Space is not of the same type as the current one in loading.");
+
+      // Element count.
+      bson_find(&it, &br, "element_data_count");
+      if(bson_iterator_int(&it) != mesh->get_max_element_id())
+        throw Exceptions::Exception("Current and saved space mixed in Space<Scalar>::load_bson.");
+
+      this->resize_tables();
+
+      // coeffs
+      bson_iterator it_coeffs;
+      bson_find(&it_coeffs, &br, "orders");
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      int index_coeff = 0;
+      while (bson_iterator_next(&it))
+        this->edata[index_coeff++].order = bson_iterator_int(&it);
+
+      bson_find(&it_coeffs, &br, "bdofs");
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      index_coeff = 0;
+      while (bson_iterator_next(&it))
+        this->edata[index_coeff++].bdof = bson_iterator_int(&it);
+
+      bson_find(&it_coeffs, &br, "ns");
+			bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      index_coeff = 0;
+      while (bson_iterator_next(&it))
+        this->edata[index_coeff++].n = bson_iterator_int(&it);
+
+      bson_find(&it_coeffs, &br, "changed");
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_init(&it, &sub);
+      index_coeff = 0;
+      while (bson_iterator_next(&it))
+        this->edata[index_coeff++].changed_in_last_adaptation = bson_iterator_int(&it);
+
+      bson_destroy(&br);
+
+      this->seq = g_space_seq++;
+
+      this->assign_dofs();
+    }
+#endif
 
     namespace Mixins
     {
