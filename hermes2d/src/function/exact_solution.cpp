@@ -205,7 +205,7 @@ namespace Hermes
     {
       if(this->sln_type == HERMES_SLN)
       {
-        Solution<double>::save(filename);
+        Solution<double>::save_bson(filename);
         return;
       }
 
@@ -241,7 +241,7 @@ namespace Hermes
     {
       if(this->sln_type == HERMES_SLN)
       {
-        Solution<std::complex<double> >::save(filename);
+        Solution<std::complex<double> >::save_bson(filename);
         return;
       }
 
@@ -442,7 +442,7 @@ namespace Hermes
     {
       if(this->sln_type == HERMES_SLN)
       {
-        Solution<double>::save(filename);
+        Solution<double>::save_bson(filename);
         return;
       }
 
@@ -478,7 +478,7 @@ namespace Hermes
     {
       if(this->sln_type == HERMES_SLN)
       {
-        Solution<std::complex<double> >::save(filename);
+        Solution<std::complex<double> >::save_bson(filename);
         return;
       }
 
