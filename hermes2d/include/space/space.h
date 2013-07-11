@@ -223,9 +223,16 @@ namespace Hermes
 
       /// Saves this space into a file.
       bool save(const char *filename) const;
+#ifdef WITH_BSON
+      void save_bson(const char* filename) const;
+#endif
 
       /// Loads a space from a file.
       static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+
+#ifdef WITH_BSON
+      void load_bson(const char *filename, MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
+#endif
 
       /// Obtains an assembly list for the given element.
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;

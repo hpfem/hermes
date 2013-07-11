@@ -1174,28 +1174,8 @@ namespace Hermes
       this->check();
       XMLSpace::space xmlspace;
 
-      switch(this->get_type())
-      {
-        case HERMES_H1_SPACE:
-            xmlspace.spaceType().set("h1");
-            break;
-        case HERMES_HCURL_SPACE:
-            xmlspace.spaceType().set("hcurl");
-            break;
-        case HERMES_HDIV_SPACE:
-            xmlspace.spaceType().set("hdiv");
-            break;
-        case HERMES_L2_SPACE:
-            xmlspace.spaceType().set("l2");
-            break;
-        case HERMES_L2_MARKERWISE_CONST_SPACE:
-            xmlspace.spaceType().set("l2-markerwise");
-            break;
-        default:
-          throw Exceptions::Exception("This type of space can not be saved.");
-          return false;
-      }
-
+      xmlspace.spaceType().set(SpaceTypeString[this->get_type()]);
+      
       // Utility pointer.
       Element *e;
       for_all_elements(e, this->get_mesh())
@@ -1217,6 +1197,38 @@ namespace Hermes
 
       return true;
     }
+
+#ifdef WITH_BSON
+    template<typename Scalar>
+    bool Space<Scalar>::save_bson(const char *filename) const
+    {
+      this->check();
+      XMLSpace::space xmlspace;
+
+      xmlspace.spaceType().set(SpaceTypeString[this->get_type()]);
+      
+      // Utility pointer.
+      Element *e;
+      for_all_elements(e, this->get_mesh())
+        xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n, this->edata[e->id].changed_in_last_adaptation));
+
+      std::string space_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
+      space_schema_location.append("/space_h2d_xml.xsd");
+      ::xml_schema::namespace_info namespace_info_space("XMLSpace", space_schema_location);
+
+      ::xml_schema::namespace_infomap namespace_info_map;
+      namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("space", namespace_info_space));
+
+      std::ofstream out(filename);
+
+      ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
+
+      XMLSpace::space_(out, xmlspace, namespace_info_map, "UTF-8", parsing_flags);
+      out.close();
+
+      return true;
+    }
+#endif
 
     template<typename Scalar>
     SpaceSharedPtr<Scalar> Space<Scalar>::load(const char *filename, MeshSharedPtr mesh, bool validate, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)

@@ -128,6 +128,7 @@ project(hermes2d)
     src/mesh/mesh_reader_exodusii.cpp
     src/mesh/hash.cpp
     src/mesh/mesh_reader_h2d.cpp
+    src/mesh/mesh_reader_h2d_bson.cpp
     src/mesh/mesh_reader_h2d_xml.cpp
     src/mesh/mesh_reader_h1d_xml.cpp
     src/mesh/mesh_h2d_xml.cpp
@@ -253,6 +254,7 @@ project(hermes2d)
     src/mesh/mesh_reader_exodusii.cpp
     src/mesh/hash.cpp
     src/mesh/mesh_reader_h2d.cpp
+    src/mesh/mesh_reader_h2d_bson.cpp
     src/mesh/mesh_reader_h2d_xml.cpp
     src/mesh/mesh_reader_h1d_xml.cpp
     src/mesh/mesh_h2d_xml.cpp
@@ -384,6 +386,7 @@ project(hermes2d)
     include/mesh/mesh_reader_exodusii.h
     include/mesh/hash.h
     include/mesh/mesh_reader_h2d.h
+    include/mesh/mesh_reader_h2d_bson.h
     include/mesh/mesh_reader_h2d_xml.h
     include/mesh/mesh_reader_h1d_xml.h
     include/mesh/mesh_h2d_xml.h
@@ -510,6 +513,7 @@ project(hermes2d)
     include/mesh/mesh_reader_exodusii.h
     include/mesh/hash.h
     include/mesh/mesh_reader_h2d.h
+    include/mesh/mesh_reader_h2d_bson.h
     include/mesh/mesh_reader_h2d_xml.h
     include/mesh/mesh_reader_h1d_xml.h
     include/mesh/mesh_h2d_xml.h

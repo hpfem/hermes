@@ -35,7 +35,7 @@ namespace Hermes
 {
   namespace Hermes2D
   {
-    /// Mesh reader from Hermes2D format
+    /// Mesh reader from Hermes2D XML format
     ///
     /// @ingroup mesh_readers
     /// Typical usage:
