@@ -687,9 +687,8 @@ namespace Hermes
             // Try with the different damping factor.
             // Important thing here is the factor used that must be calculated from the current one and the previous one.
             // This results in the following relation (since the damping factor is only updated one way).
-            double factor = damping_factors.back() * (1 - this->auto_damping_ratio);
             for (int i = 0; i < ndof; i++)
-              coeff_vec[i] = coeff_vec_back[i] + factor * (coeff_vec[i] - coeff_vec_back[i]);
+              coeff_vec[i] = coeff_vec_back[i] + (coeff_vec[i] - coeff_vec_back[i]) / this->auto_damping_ratio;
 
             // Add new solution norm.
             solution_norms.push_back(get_l2_norm(coeff_vec, this->ndof));
