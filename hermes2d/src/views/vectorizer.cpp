@@ -662,9 +662,18 @@ namespace Hermes
               }
 
               if(xdisp != NULL)
+              {
+                fns[thread_number][2]->set_active_element(current_state->e[2]);
+                fns[thread_number][2]->set_transform(current_state->sub_idx[2]);
                 fns[thread_number][2]->set_quad_order(0, H2D_FN_VAL);
+              }
               if(ydisp != NULL)
-                fns[thread_number][xdisp == NULL ? 2 : 3]->set_quad_order(0, H2D_FN_VAL);
+              {
+                int index = (xdisp == NULL ? 2 : 3);
+                fns[thread_number][index]->set_active_element(current_state->e[index]);
+                fns[thread_number][index]->set_transform(current_state->sub_idx[index]);
+                fns[thread_number][index]->set_quad_order(0, H2D_FN_VAL);
+              }
 
               double *dx = NULL;
               double *dy = NULL;
