@@ -32,33 +32,33 @@ namespace Hermes
   enum MatrixSolverType
   {
     SOLVER_UMFPACK = 0,
-    SOLVER_PARALUTION_ITERATIVE,
-    SOLVER_PARALUTION_AMG,
-    SOLVER_PETSC,
-    SOLVER_MUMPS,
-    SOLVER_SUPERLU,
-    SOLVER_AMESOS,
-    SOLVER_AZTECOO
+    SOLVER_PARALUTION_ITERATIVE = 1,
+    SOLVER_PARALUTION_AMG = 2,
+    SOLVER_PETSC = 3,
+    SOLVER_MUMPS = 4,
+    SOLVER_SUPERLU = 5,
+    SOLVER_AMESOS = 6,
+    SOLVER_AZTECOO = 7
   };
 
   enum DirectMatrixSolverType
   {
     DIRECT_SOLVER_UMFPACK = 0,
-    DIRECT_SOLVER_MUMPS,
-    DIRECT_SOLVER_SUPERLU,
-    DIRECT_SOLVER_AMESOS
+    DIRECT_SOLVER_MUMPS = 1,
+    DIRECT_SOLVER_SUPERLU = 2,
+    DIRECT_SOLVER_AMESOS = 3
   };
 
   enum IterativeMatrixSolverType
   {
-    ITERATIVE_SOLVER_PARALUTION,
-    ITERATIVE_SOLVER_PETSC,
-    ITERATIVE_SOLVER_AZTECOO
+    ITERATIVE_SOLVER_PARALUTION = 0,
+    ITERATIVE_SOLVER_PETSC = 1,
+    ITERATIVE_SOLVER_AZTECOO = 2
   };
 
   enum AMGMatrixSolverType
   {
-    AMG_SOLVER_PARALUTION
+    AMG_SOLVER_PARALUTION = 0
   };
 
   namespace Solvers
@@ -291,16 +291,16 @@ namespace Hermes
     /// Format of file matrix and vector output
     enum EMatrixDumpFormat
     {
-      DF_MATLAB_SPARSE, ///< matlab file
+      DF_MATLAB_SPARSE = 0, ///< matlab file
       /// \brief plain ascii file
       /// first line is matrix size
       /// second line in number of nonzero values
       /// next lines contains row column and value
-      DF_PLAIN_ASCII,
+      DF_PLAIN_ASCII = 1,
       /// \brief Hermes binary format
       ///
-      DF_HERMES_BIN,
-      DF_MATRIX_MARKET ///< Matrix Market which can be read by pysparse library
+      DF_HERMES_BIN = 2,
+      DF_MATRIX_MARKET = 3 ///< Matrix Market which can be read by pysparse library
     };
 
     /// \brief General (abstract) matrix representation in Hermes.

@@ -153,9 +153,9 @@ namespace Hermes
       /// Not necessarily supported by all iterative solvers used.
       enum ToleranceType
       {
-        AbsoluteTolerance,
-        RelativeTolerance,
-        DivergenceTolerance
+        AbsoluteTolerance = 0,
+        RelativeTolerance = 1,
+        DivergenceTolerance = 2
       };
 
       /// Solve.
@@ -208,9 +208,9 @@ namespace Hermes
       /// Not necessarily supported by all iterative solvers used.
       enum ToleranceType
       {
-        AbsoluteTolerance,
-        RelativeTolerance,
-        DivergenceTolerance
+        AbsoluteTolerance = 0,
+        RelativeTolerance = 1,
+        DivergenceTolerance = 2
       };
 
       /// Solve.

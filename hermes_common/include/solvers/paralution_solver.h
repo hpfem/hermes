@@ -118,12 +118,12 @@ namespace Hermes
       /// The preconditioner type.
       enum ParalutionPreconditionerType
       {
-        Jacobi,
-        MultiColoredSGS,
-        ILU,
-        MultiColoredILU,
-        IC,
-        AIChebyshev
+        Jacobi = 0,
+        MultiColoredSGS = 1,
+        ILU = 2,
+        MultiColoredILU = 3,
+        IC = 4,
+        AIChebyshev = 5
       };
 
       /// Constructor.
@@ -176,9 +176,9 @@ namespace Hermes
       /// Default: CG
       enum ParalutionSolverType
       {
-        CG,
-        GMRES,
-        BiCGStab
+        CG = 0,
+        GMRES = 1,
+        BiCGStab = 2
       };
 
       /// Set current solver type.
