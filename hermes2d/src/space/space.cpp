@@ -1200,23 +1200,23 @@ namespace Hermes
 
       // Coefficients.
       bson_append_start_array(&bw, "orders");
-      for_all_elements(e, this->get_mesh())
-        bson_append_int(&bw, "c", this->edata[e->id].order);
+      for (int _id = 0, _max = this->get_mesh()->get_max_element_id(); _id < _max; _id++)
+        bson_append_int(&bw, "c", this->edata[_id].order);
       bson_append_finish_array(&bw);
 
       bson_append_start_array(&bw, "bdofs");
-      for_all_elements(e, this->get_mesh())
-        bson_append_int(&bw, "c", this->edata[e->id].bdof);
+      for (int _id = 0, _max = this->get_mesh()->get_max_element_id(); _id < _max; _id++)
+        bson_append_int(&bw, "c", this->edata[_id].bdof);
       bson_append_finish_array(&bw);
 
       bson_append_start_array(&bw, "ns");
-      for_all_elements(e, this->get_mesh())
-        bson_append_int(&bw, "c", this->edata[e->id].n);
+      for (int _id = 0, _max = this->get_mesh()->get_max_element_id(); _id < _max; _id++)
+        bson_append_int(&bw, "c", this->edata[_id].n);
       bson_append_finish_array(&bw);
 
       bson_append_start_array(&bw, "changed");
-      for_all_elements(e, this->get_mesh())
-        bson_append_bool(&bw, "c", this->edata[e->id].changed_in_last_adaptation);
+      for (int _id = 0, _max = this->get_mesh()->get_max_element_id(); _id < _max; _id++)
+        bson_append_bool(&bw, "c", this->edata[_id].changed_in_last_adaptation);
       bson_append_finish_array(&bw);
 
       // Done.
