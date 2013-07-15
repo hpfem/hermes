@@ -36,8 +36,6 @@ namespace Hermes
 
     bool MeshReaderH2DBSON::load(const char *filename, MeshSharedPtr mesh)
     {
-      throw Exceptions::MethodNotImplementedException("MeshReaderH2DBSON::load");
-
       if(!mesh)
         throw Exceptions::NullException(1);
 
@@ -262,14 +260,14 @@ namespace Hermes
       double* angles = new double[arc_count];
 
       // p1s
-      bson_find(&it_coeffs, &br, "arcs-1");
+      bson_find(&it_coeffs, &br, "arcs-p1");
       bson_iterator_subobject_init(&it_coeffs, &sub, 0);
       bson_iterator_init(&it, &sub);
       index_coeff = 0;
       while (bson_iterator_next(&it))
         p1s[index_coeff++] = bson_iterator_int(&it);
       // p2s
-      bson_find(&it_coeffs, &br, "arcs-2");
+      bson_find(&it_coeffs, &br, "arcs-p2");
       bson_iterator_subobject_init(&it_coeffs, &sub, 0);
       bson_iterator_init(&it, &sub);
       index_coeff = 0;
@@ -385,8 +383,6 @@ namespace Hermes
 
     bool MeshReaderH2DBSON::save(const char *filename, MeshSharedPtr mesh)
     {
-      throw Exceptions::MethodNotImplementedException("MeshReaderH2DBSON::save");
-
       // Utility pointer.
       Element* e;
 
@@ -479,11 +475,10 @@ namespace Hermes
       bson_append_finish_array(&bw);
       // - markers
       bson_append_start_array(&bw, "edge-marker");
-      for (int i = 0; i < mesh->get_num_base_elements(); i++)
-      {
-        e = mesh->get_element_fast(i);
-        bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str());
-      }
+      for_all_base_elements(e, mesh)
+        for (unsigned i = 0; i < e->get_nvert(); i++)
+          if(mesh->get_base_edge_node(e, i)->marker)
+            bson_append_string(&bw, "c", mesh->boundary_markers_conversion.get_user_marker(mesh->get_base_edge_node(e, i)->marker).marker.c_str());
       bson_append_finish_array(&bw);
 
       // Save arcs.
