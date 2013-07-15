@@ -38,6 +38,7 @@
 #include "mesh/mesh_reader.h"
 #include "mesh/mesh_reader_h2d.h"
 #include "mesh/mesh_reader_h2d_xml.h"
+#include "mesh/mesh_reader_h2d_bson.h"
 #include "mesh/mesh_reader_h1d_xml.h"
 #include "mesh/mesh_reader_exodusii.h"
 
