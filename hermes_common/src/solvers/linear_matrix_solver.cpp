@@ -283,53 +283,38 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8), precond_yes(false)
+    LoopSolver<Scalar>::LoopSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8)
     {
     }
 
     template<typename Scalar>
-    void IterSolver<Scalar>::set_tolerance(double tol)
+    void LoopSolver<Scalar>::set_tolerance(double tol)
     {
       this->tolerance = tol;
       this->toleranceType = AbsoluteTolerance;
     }
 
     template<typename Scalar>
-    void IterSolver<Scalar>::set_tolerance(double tol, typename IterSolver<Scalar>::ToleranceType toleranceType)
+    void LoopSolver<Scalar>::set_tolerance(double tol, typename LoopSolver<Scalar>::ToleranceType toleranceType)
     {
       this->tolerance = tol;
       this->toleranceType = toleranceType;
     }
 
     template<typename Scalar>
-    void IterSolver<Scalar>::set_max_iters(int iters)
+    void LoopSolver<Scalar>::set_max_iters(int iters)
     {
       this->max_iters = iters;
     }
 
     template <typename Scalar>
-    AMGSolver<Scalar>::AMGSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme), max_iters(10000), tolerance(1e-8), precond_yes(false)
+    IterSolver<Scalar>::IterSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme), precond_yes(false)
     {
     }
 
-    template<typename Scalar>
-    void AMGSolver<Scalar>::set_tolerance(double tol)
+    template <typename Scalar>
+    AMGSolver<Scalar>::AMGSolver(MatrixStructureReuseScheme reuse_scheme) : LoopSolver<Scalar>(reuse_scheme)
     {
-      this->tolerance = tol;
-      this->toleranceType = AbsoluteTolerance;
-    }
-
-    template<typename Scalar>
-    void AMGSolver<Scalar>::set_tolerance(double tol, typename AMGSolver<Scalar>::ToleranceType toleranceType)
-    {
-      this->tolerance = tol;
-      this->toleranceType = toleranceType;
-    }
-
-    template<typename Scalar>
-    void AMGSolver<Scalar>::set_max_iters(int iters)
-    {
-      this->max_iters = iters;
     }
 
     template class HERMES_API LinearMatrixSolver<double>;

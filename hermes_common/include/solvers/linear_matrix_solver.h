@@ -141,13 +141,12 @@ namespace Hermes
       DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
     };
 
-    /// \brief  Abstract class for defining interface for iterative solvers.
-    /// Internal, though utilizable for defining interfaces to other algebraic packages.
+    /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
     template <typename Scalar>
-    class IterSolver : public LinearMatrixSolver<Scalar>
+    class LoopSolver : public LinearMatrixSolver<Scalar>
     {
     public:
-      IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      LoopSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
       /// Various tolerances.
       /// Not necessarily supported by all iterative solvers used.
@@ -157,11 +156,6 @@ namespace Hermes
         RelativeTolerance = 1,
         DivergenceTolerance = 2
       };
-
-      /// Solve.
-      /// @return true on succes
-      /// \param[in] initial guess.
-      virtual bool solve(Scalar* initial_guess) = 0;
 
       /// Get the number of iterations performed.
       virtual int get_num_iters() = 0;
@@ -182,8 +176,6 @@ namespace Hermes
       /// @param[in] iters - number of iterations
       virtual void set_max_iters(int iters);
 
-      virtual void set_precond(Precond<Scalar> *pc) = 0;
-
     protected:
       /// Maximum number of iterations.
       int max_iters;
@@ -192,6 +184,26 @@ namespace Hermes
       /// Convergence tolerance type.
       /// See the enum.
       ToleranceType toleranceType;
+    };
+    
+
+    /// \brief  Abstract class for defining interface for iterative solvers.
+    /// Internal, though utilizable for defining interfaces to other algebraic packages.
+    template <typename Scalar>
+    class IterSolver : public LoopSolver<Scalar>
+    {
+    public:
+      IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+
+      /// Solve.
+      /// @return true on succes
+      /// \param[in] initial guess.
+      virtual bool solve(Scalar* initial_guess) = 0;
+
+      /// Set preconditioner.
+      virtual void set_precond(Precond<Scalar> *pc) = 0;
+
+    protected:
       /// Whether the solver is preconditioned.
       bool precond_yes;
     };
@@ -199,54 +211,15 @@ namespace Hermes
     /// \brief  Abstract class for defining interface for Algebraic Multigrid solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
-    class AMGSolver : public LinearMatrixSolver<Scalar>
+    class AMGSolver : public LoopSolver<Scalar>
     {
     public:
       AMGSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-
-      /// Various tolerances.
-      /// Not necessarily supported by all iterative solvers used.
-      enum ToleranceType
-      {
-        AbsoluteTolerance = 0,
-        RelativeTolerance = 1,
-        DivergenceTolerance = 2
-      };
 
       /// Solve.
       /// @return true on succes
       /// \param[in] initial guess.
       virtual bool solve(Scalar* initial_guess) = 0;
-
-      /// Get the number of iterations performed.
-      virtual int get_num_iters() = 0;
-      
-      /// Get the final residual.
-      virtual double get_residual() = 0;
-
-      /// Set the convergence tolerance.
-      /// @param[in] tol - the tolerance to set
-      virtual void set_tolerance(double tol);
-
-      /// Set the convergence tolerance.
-      /// @param[in] tolerance - the tolerance to set
-      /// @param[in] toleranceType - the tolerance to set
-      virtual void set_tolerance(double tolerance, ToleranceType toleranceType);
-
-      /// Set maximum number of iterations to perform.
-      /// @param[in] iters - number of iterations
-      virtual void set_max_iters(int iters);
-
-    protected:
-      /// Maximum number of iterations.
-      int max_iters;
-      /// Convergence tolerance.
-      double tolerance;
-      /// Convergence tolerance type.
-      /// See the enum.
-      ToleranceType toleranceType;
-      /// Whether the solver is smoothed.
-      bool precond_yes;
     };
 
     /// \brief Function returning a solver according to the users's choice.
