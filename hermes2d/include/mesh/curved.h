@@ -174,6 +174,7 @@ namespace Hermes
       friend class MeshReader;
       friend class MeshReaderH2D;
       friend class MeshReaderH2DXML;
+      friend class MeshReaderH2DBSON;
       friend CurvMap* create_son_curv_map(Element* e, int son);
     };
   }

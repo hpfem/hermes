@@ -57,6 +57,10 @@ namespace Hermes
 
       /// This method saves multiple meshes according to subdomains in the vector meshes.
       bool save(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
+
+      /// Loads one circular arc.
+      /// \param[in] skip_check Skip check that the edge exists, in case of subdomains.
+      Nurbs* load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check = false);
     };
   }
 }
