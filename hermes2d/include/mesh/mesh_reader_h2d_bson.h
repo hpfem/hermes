@@ -18,6 +18,8 @@
 
 #include "mesh_reader.h"
 
+#ifdef WITH_BSON
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -65,3 +67,5 @@ namespace Hermes
   }
 }
 #endif
+#endif
+
