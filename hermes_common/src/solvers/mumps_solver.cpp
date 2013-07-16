@@ -675,7 +675,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool MumpsSolver<Scalar>::solve()
+    void MumpsSolver<Scalar>::solve()
     {
       bool ret = false;
       assert(m != NULL);
@@ -687,9 +687,7 @@ namespace Hermes
       // (according to the chosen factorization reuse strategy), as well as
       // the system matrix.
       if( !setup_factorization() )
-      {
         throw Hermes::Exceptions::LinearMatrixSolverException("LU factorization could not be completed.");
-      }
 
       // Specify the right-hand side (will be replaced by the solution).
       param.rhs = new typename mumps_type<Scalar>::mumps_Scalar[m->size];
@@ -703,18 +701,18 @@ namespace Hermes
       if(ret)
       {
         delete [] this->sln;
-        this->sln = new Scalar[m->size];
+				this->sln = new Scalar[m->size];
         for (unsigned int i = 0; i < rhs->size; i++)
           this->sln[i] = mumps_to_Scalar(param.rhs[i]);
       }
+      else
+        throw Hermes::Exceptions::LinearMatrixSolverException("MUMPS failed.");
 
       this->tick();
       this->time = this->accumulated();
 
       delete [] param.rhs;
       param.rhs = NULL;
-
-      return ret;
     }
 
     template<typename Scalar>

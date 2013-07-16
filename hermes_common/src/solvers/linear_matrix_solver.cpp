@@ -271,9 +271,9 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    bool DirectSolver<Scalar>::solve(Scalar* initial_guess)
+    void DirectSolver<Scalar>::solve(Scalar* initial_guess)
     {
-      return this->solve();
+      this->solve();
     }
 
     template <typename Scalar>

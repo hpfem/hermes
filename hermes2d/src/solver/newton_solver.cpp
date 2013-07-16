@@ -555,43 +555,25 @@ namespace Hermes
       memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
 
       // Solve, if the solver is iterative, give him the initial guess.
-      bool solved = this->matrix_solver->solve(coeff_vec);
+      this->matrix_solver->solve(coeff_vec);
+      this->handle_UMFPACK_reports();
 
-      if(solved)
-      {
-        if(this->do_UMFPACK_reporting)
-        {
-          UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
-          if(this->matrix_solver->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
-          {
-            this->UMFPACK_reporting_data[this->FactorizationSize] = std::max(this->UMFPACK_reporting_data[this->FactorizationSize], umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT]);
-            this->UMFPACK_reporting_data[this->PeakMemoryUsage] += umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] / umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
-            this->UMFPACK_reporting_data[this->Flops] += umfpack_matrix_solver->Info[UMFPACK_FLOPS];
-          }
-        }
+      // Get current damping factor.
+      double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();
 
-        // Get current damping factor.
-        double current_damping_factor = this->get_parameter_value(this->p_damping_factors).back();
+      // store the solution norm change.
+      // obtain the solution increment.
+      Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
 
-        // store the solution norm change.
-        // obtain the solution increment.
-        Scalar* sln_vector_local = this->matrix_solver->get_sln_vector();
+      // 1. store the solution.
+      for (int i = 0; i < ndof; i++)
+        coeff_vec[i] += current_damping_factor * sln_vector_local[i];
 
-        // 1. store the solution.
-        for (int i = 0; i < ndof; i++)
-          coeff_vec[i] += current_damping_factor * sln_vector_local[i];
+      // 2. store the solution change.
+      this->get_parameter_value(p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->ndof));
 
-        // 2. store the solution change.
-        this->get_parameter_value(p_solution_change_norms).push_back(current_damping_factor * get_l2_norm(sln_vector_local, this->ndof));
-
-        // 3. store the solution norm.
-        this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
-      }
-      else
-      {
-        this->deinit_solving(coeff_vec);
-        throw Exceptions::LinearMatrixSolverException();
-      }
+      // 3. store the solution norm.
+      this->get_parameter_value(p_solution_norms).push_back(get_l2_norm(coeff_vec, this->ndof));
     }
 
     template<typename Scalar>

@@ -104,7 +104,7 @@ namespace Hermes
       /// @param[in] rhs pointer to right hand side vector
       UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
       virtual ~UMFPackLinearMatrixSolver();
-      virtual bool solve();
+      virtual void solve();
       virtual int get_matrix_size();
 
       /// Matrix to solve.

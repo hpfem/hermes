@@ -166,6 +166,7 @@ namespace Hermes
 
       /// Switch for UMFPACK reporting.
       bool do_UMFPACK_reporting;
+      void handle_UMFPACK_reports();
 
       /// Data for UMFPACK reporting.
       double UMFPACK_reporting_data[3];

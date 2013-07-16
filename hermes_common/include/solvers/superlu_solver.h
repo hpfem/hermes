@@ -200,7 +200,7 @@ namespace Hermes
       SuperLUSolver(SuperLUMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
       virtual ~SuperLUSolver();
 
-      virtual bool solve();
+      virtual void solve();
       virtual int get_matrix_size();
 
     protected:

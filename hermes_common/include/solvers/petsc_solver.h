@@ -151,7 +151,7 @@ namespace Hermes
       PetscLinearMatrixSolver(PetscMatrix<Scalar> *mat, PetscVector<Scalar> *rhs);
       virtual ~PetscLinearMatrixSolver();
 
-      virtual bool solve();
+      virtual void solve();
       virtual int get_matrix_size();
 
       /// Matrix to solve.

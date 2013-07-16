@@ -382,7 +382,7 @@ namespace Hermes
     }
 
     template<>
-    bool UMFPackLinearMatrixSolver<double>::solve()
+    void UMFPackLinearMatrixSolver<double>::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -406,12 +406,10 @@ namespace Hermes
       }
 
       this->tick();
-
-      return true;
     }
 
     template<>
-    bool UMFPackLinearMatrixSolver<std::complex<double> >::solve()
+    void UMFPackLinearMatrixSolver<std::complex<double> >::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -419,14 +417,12 @@ namespace Hermes
 
       this->tick();
       if( !setup_factorization() )
-      {
         this->warn("LU factorization could not be completed.");
-        return false;
-      }
 
       if(sln)
         delete [] sln;
       sln = new std::complex<double>[m->get_size()];
+
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
       int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
       if(status != UMFPACK_OK)
@@ -437,8 +433,6 @@ namespace Hermes
 
       this->tick();
       time = this->accumulated();
-
-      return true;
     }
 
     template<typename Scalar>

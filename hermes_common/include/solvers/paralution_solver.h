@@ -172,7 +172,7 @@ namespace Hermes
       IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
       virtual ~IterativeParalutionLinearMatrixSolver();
 
-      /// The solver type.
+			/// The solver type.
       /// Default: CG
       enum ParalutionSolverType
       {
@@ -185,8 +185,8 @@ namespace Hermes
       /// This destroys the current solver (NOT the matrix, and rhs).
       void set_solver_type(ParalutionSolverType paralutionSolverType);
 
-      virtual bool solve(Scalar* initial_guess);
-      virtual bool solve();
+      virtual void solve(Scalar* initial_guess);
+      virtual void solve();
 
       /// Get number of iterations.
       virtual int get_num_iters();
@@ -248,8 +248,8 @@ namespace Hermes
       AMGParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
       virtual ~AMGParalutionLinearMatrixSolver();
 
-      virtual bool solve(Scalar* initial_guess);
-      virtual bool solve();
+      virtual void solve(Scalar* initial_guess);
+      virtual void solve();
 
       /// Get number of iterations.
       virtual int get_num_iters();

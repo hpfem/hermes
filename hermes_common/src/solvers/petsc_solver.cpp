@@ -486,7 +486,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscLinearMatrixSolver<Scalar>::solve()
+    void PetscLinearMatrixSolver<Scalar>::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -524,8 +524,6 @@ namespace Hermes
 
       KSPDestroy(ksp);
       VecDestroy(x);
-
-      return true;
     }
 
     template class HERMES_API PetscLinearMatrixSolver<double>;

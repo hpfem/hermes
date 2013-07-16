@@ -126,7 +126,7 @@ namespace Hermes
     }
     
     template<>
-    bool AztecOOSolver<double>::solve()
+    void AztecOOSolver<double>::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -160,13 +160,13 @@ namespace Hermes
       memset(this->sln, 0, m->size * sizeof(double));
 
       // copy the solution into sln vector
-      for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
-      return true;
+      for (unsigned int i = 0; i < m->size; i++)
+        this->sln[i] = x[i];
     }
 
 
     template<>
-    bool AztecOOSolver<double>::solve(double *initial_guess)
+    void AztecOOSolver<double>::solve(double *initial_guess)
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -204,12 +204,12 @@ namespace Hermes
       memset(this->sln, 0, m->size * sizeof(double));
 
       // copy the solution into sln vector
-      for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
-      return true;
+      for (unsigned int i = 0; i < m->size; i++)
+        this->sln[i] = x[i];
     }
 
     template<>
-    bool AztecOOSolver<std::complex<double> >::solve()
+    void AztecOOSolver<std::complex<double> >::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -238,12 +238,12 @@ namespace Hermes
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector
-      for (unsigned int i = 0; i < m->size; i++) this->sln[i] = std::complex<double>(xr[i], xi[i]);
-      return true;
+      for (unsigned int i = 0; i < m->size; i++)
+        this->sln[i] = std::complex<double>(xr[i], xi[i]);
     }
     
     template<>
-    bool AztecOOSolver<std::complex<double> >::solve(std::complex<double>* initial_guess)
+    void AztecOOSolver<std::complex<double> >::solve(std::complex<double>* initial_guess)
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -281,8 +281,8 @@ namespace Hermes
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
 
       // copy the solution into sln vector
-      for (unsigned int i = 0; i < m->size; i++) this->sln[i] = std::complex<double>(xr[i], xi[i]);
-      return true;
+      for (unsigned int i = 0; i < m->size; i++)
+        this->sln[i] = std::complex<double>(xr[i], xi[i]);
     }
 
     template<typename Scalar>

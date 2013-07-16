@@ -74,7 +74,7 @@ namespace Hermes
     }
 
     template<>
-    bool AmesosSolver<double>::solve()
+    void AmesosSolver<double>::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -87,17 +87,11 @@ namespace Hermes
       problem.SetLHS(&x);
 
       if(!setup_factorization())
-      {
         this->warn("AmesosSolver: LU factorization could not be completed");
-        return false;
-      }
 
       int status = solver->Solve();
       if(status != 0)
-      {
         throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
-        return false;
-      }
 
       this->tick();
       this->time = this->accumulated();
@@ -107,13 +101,12 @@ namespace Hermes
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(double));
 
-      for (unsigned int i = 0; i < m->size; i++) this->sln[i] = x[i];
-
-      return true;
+      for (unsigned int i = 0; i < m->size; i++)
+        this->sln[i] = x[i];
     }
 
     template<>
-    bool AmesosSolver<std::complex<double> >::solve()
+    void AmesosSolver<std::complex<double> >::solve()
     {
       assert(m != NULL);
       assert(rhs != NULL);
@@ -123,17 +116,11 @@ namespace Hermes
       throw Hermes::Exceptions::Exception("AmesosSolver<Scalar>::solve() not yet implemented for complex problems");
 
       if(!setup_factorization())
-      {
         this->warn("AmesosSolver: LU factorization could not be completed");
-        return false;
-      }
 
       int status = solver->Solve();
       if(status != 0)
-      {
         throw Hermes::Exceptions::Exception("AmesosSolver: Solution failed.");
-        return false;
-      }
 
       this->tick();
       this->time = this->accumulated();
@@ -142,8 +129,6 @@ namespace Hermes
       this->sln = new std::complex<double>[m->size];
       // copy the solution into sln vector
       memset(this->sln, 0, m->size * sizeof(std::complex<double>));
-
-      return true;
     }
 
     template<typename Scalar>

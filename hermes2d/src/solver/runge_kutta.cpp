@@ -453,8 +453,7 @@ namespace Hermes
           solver->set_reuse_scheme(HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY);
 
         // Solve the linear system.
-        if(!solver->solve())
-          throw Exceptions::LinearMatrixSolverException();
+        solver->solve();
 
         // Add \deltaK^{n + 1} to K^n.
         for (unsigned int i = 0; i < num_stages*ndof; i++)

@@ -61,8 +61,8 @@ namespace Hermes
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();
       
-      virtual bool solve();
-      virtual bool solve(Scalar* initial_guess);
+      virtual void solve();
+      virtual void solve(Scalar* initial_guess);
       
       virtual int get_matrix_size();
     

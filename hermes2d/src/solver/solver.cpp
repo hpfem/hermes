@@ -285,6 +285,23 @@ namespace Hermes
       }
     }
 
+    template<typename Scalar>
+    void Solver<Scalar>::handle_UMFPACK_reports()
+    {
+      if(this->do_UMFPACK_reporting)
+      {
+        UMFPackLinearMatrixSolver<Scalar>* umfpack_matrix_solver = (UMFPackLinearMatrixSolver<Scalar>*)this->matrix_solver;
+        if(this->matrix_solver->get_used_reuse_scheme() != HERMES_REUSE_MATRIX_STRUCTURE_COMPLETELY)
+        {
+          this->UMFPACK_reporting_data[this->FactorizationSize] = umfpack_matrix_solver->Info[UMFPACK_NUMERIC_SIZE] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+          this->UMFPACK_reporting_data[this->PeakMemoryUsage] = umfpack_matrix_solver->Info[UMFPACK_PEAK_MEMORY] * umfpack_matrix_solver->Info[UMFPACK_SIZE_OF_UNIT];
+          this->UMFPACK_reporting_data[this->Flops] = umfpack_matrix_solver->Info[UMFPACK_FLOPS];
+        }
+        else
+          memset(this->UMFPACK_reporting_data, 0, 3 * sizeof(double));
+      }
+    }
+
     template class HERMES_API Solver<double>;
     template class HERMES_API Solver<std::complex<double> >;
   }

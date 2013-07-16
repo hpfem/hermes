@@ -170,7 +170,7 @@ namespace Hermes
       MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
       virtual ~MumpsSolver();
 
-      virtual bool solve();
+      virtual void solve();
       virtual int get_matrix_size();
 
       /// Matrix to solve.

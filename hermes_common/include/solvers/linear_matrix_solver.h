@@ -98,12 +98,12 @@ namespace Hermes
 
       /// Solve.
       /// @return true on succes
-      virtual bool solve() = 0;
+      virtual void solve() = 0;
 
       /// Solve.
       /// @return true on succes
       /// \param[in] initial guess.
-      virtual bool solve(Scalar* initial_guess) = 0;
+      virtual void solve(Scalar* initial_guess) = 0;
 
       /// Get solution vector.
       /// @return solution vector ( #sln )
@@ -145,7 +145,7 @@ namespace Hermes
     public:
       DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
       using LinearMatrixSolver<Scalar>::solve;
-      bool solve(Scalar* initial_guess);
+      void solve(Scalar* initial_guess);
     };
 
     /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
