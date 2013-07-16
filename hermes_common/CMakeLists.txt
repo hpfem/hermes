@@ -70,9 +70,38 @@ project(hermes_common)
     include/solvers/precond_ifpack.h
   )
   
-  #
-  # Subdirectories with CMakeLists.txt
-
+  SOURCE_GROUP(
+    "Source Files\\Matrix Solvers" FILES 
+    src/solvers/linear_matrix_solver.cpp
+    src/solvers/epetra.cpp
+    src/solvers/aztecoo_solver.cpp
+    src/solvers/amesos_solver.cpp
+    src/solvers/mumps_solver.cpp
+    src/solvers/paralution_solver.cpp
+    src/solvers/superlu_solver.cpp
+    src/solvers/superlu_solver_real.cpp
+    src/solvers/superlu_solver_cplx.cpp
+    src/solvers/petsc_solver.cpp
+    src/solvers/umfpack_solver.cpp
+    src/solvers/precond_ml.cpp
+    src/solvers/precond_ifpack.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Matrix Solvers" FILES 
+    include/solvers/linear_matrix_solver.h
+    include/solvers/epetra.h
+    include/solvers/aztecoo_solver.h
+    include/solvers/amesos_solver.h
+    include/solvers/mumps_solver.h
+    include/solvers/paralution_solver.h
+    include/solvers/superlu_solver.h
+    include/solvers/petsc_solver.h
+    include/solvers/umfpack_solver.h
+    include/solvers/precond_ml.h
+    include/solvers/precond_ifpack.h
+  )
+  
   # Create file with preprocessor definitions exposing the build settings to the source code.
   configure_file(
     config.h.cmake
