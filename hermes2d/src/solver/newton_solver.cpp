@@ -555,15 +555,7 @@ namespace Hermes
       memcpy(coeff_vec_back, coeff_vec, sizeof(Scalar)*ndof);
 
       // Solve, if the solver is iterative, give him the initial guess.
-      bool solved;
-      Hermes::Solvers::IterSolver<Scalar>* iter_solver = Hermes::Solvers::is_iterative_solver(this->matrix_solver);
-      Hermes::Solvers::AMGSolver<Scalar>* AMG_solver = Hermes::Solvers::is_AMG_solver(this->matrix_solver);
-      if(iter_solver)
-        solved = iter_solver->solve(coeff_vec);
-      else if(AMG_solver)
-        solved = AMG_solver->solve(coeff_vec);
-      else
-        solved = this->matrix_solver->solve();
+      bool solved = this->matrix_solver->solve(coeff_vec);
 
       if(solved)
       {

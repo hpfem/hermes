@@ -266,20 +266,14 @@ namespace Hermes
     }
 
     template <typename Scalar>
-    HERMES_API HERMES_API IterSolver<Scalar>* is_iterative_solver(LinearMatrixSolver<Scalar>* matrix_solver)
-    {
-      return dynamic_cast<Hermes::Solvers::IterSolver<Scalar>*>(matrix_solver);
-    }
-
-    template <typename Scalar>
-    HERMES_API HERMES_API AMGSolver<Scalar>* is_AMG_solver(LinearMatrixSolver<Scalar>* matrix_solver)
-    {
-      return dynamic_cast<Hermes::Solvers::AMGSolver<Scalar>*>(matrix_solver);
-    }
-
-    template <typename Scalar>
     DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme)
     {
+    }
+
+    template <typename Scalar>
+    bool DirectSolver<Scalar>::solve(Scalar* initial_guess)
+    {
+      return this->solve();
     }
 
     template <typename Scalar>
@@ -325,10 +319,5 @@ namespace Hermes
     template class HERMES_API IterSolver<std::complex<double> >;
     template class HERMES_API AMGSolver<double>;
     template class HERMES_API AMGSolver<std::complex<double> >;
-
-    template HERMES_API IterSolver<double>* is_iterative_solver(LinearMatrixSolver<double>* matrix_solver);
-    template HERMES_API IterSolver<std::complex<double> >* is_iterative_solver(LinearMatrixSolver<std::complex<double> >* matrix_solver);
-    template HERMES_API AMGSolver<double>* is_AMG_solver(LinearMatrixSolver<double>* matrix_solver);
-    template HERMES_API AMGSolver<std::complex<double> >* is_AMG_solver(LinearMatrixSolver<std::complex<double> >* matrix_solver);
   }
 }

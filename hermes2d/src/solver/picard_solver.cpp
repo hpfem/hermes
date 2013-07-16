@@ -343,7 +343,7 @@ namespace Hermes
         this->on_step_end();
 
         // Solve the linear system.
-        if(!this->matrix_solver->solve())
+        if(!this->matrix_solver->solve(coeff_vec))
           throw Exceptions::LinearMatrixSolverException();
 
         memcpy(this->sln_vector, this->matrix_solver->get_sln_vector(), sizeof(Scalar)*ndof);

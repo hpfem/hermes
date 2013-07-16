@@ -100,6 +100,11 @@ namespace Hermes
       /// @return true on succes
       virtual bool solve() = 0;
 
+      /// Solve.
+      /// @return true on succes
+      /// \param[in] initial guess.
+      virtual bool solve(Scalar* initial_guess) = 0;
+
       /// Get solution vector.
       /// @return solution vector ( #sln )
       Scalar *get_sln_vector();
@@ -139,6 +144,8 @@ namespace Hermes
     {
     public:
       DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
+      using LinearMatrixSolver<Scalar>::solve;
+      bool solve(Scalar* initial_guess);
     };
 
     /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
@@ -195,11 +202,6 @@ namespace Hermes
     public:
       IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
 
-      /// Solve.
-      /// @return true on succes
-      /// \param[in] initial guess.
-      virtual bool solve(Scalar* initial_guess) = 0;
-
       /// Set preconditioner.
       virtual void set_precond(Precond<Scalar> *pc) = 0;
 
@@ -215,11 +217,6 @@ namespace Hermes
     {
     public:
       AMGSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-
-      /// Solve.
-      /// @return true on succes
-      /// \param[in] initial guess.
-      virtual bool solve(Scalar* initial_guess) = 0;
     };
 
     /// \brief Function returning a solver according to the users's choice.
@@ -229,14 +226,6 @@ namespace Hermes
     template<typename Scalar>
     HERMES_API LinearMatrixSolver<Scalar>*
       create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs, bool use_direct_solver = false);
-
-    /// \brief Function returning solver if it is an iterative one.
-    template<typename Scalar>
-    HERMES_API IterSolver<Scalar>* is_iterative_solver(LinearMatrixSolver<Scalar>* matrix_solver);
-
-    /// \brief Function returning a solver if it is an AMG one.
-    template<typename Scalar>
-    HERMES_API AMGSolver<Scalar>* is_AMG_solver(LinearMatrixSolver<Scalar>* matrix_solver);
   }
 }
 /*@}*/ // End of documentation group Solvers.
