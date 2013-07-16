@@ -59,25 +59,25 @@ namespace Hermes
       virtual ~MeshReaderH2DXML();
 
       /// This method loads a single mesh from a file.
-      virtual bool load(const char *filename, MeshSharedPtr mesh);
+      virtual void load(const char *filename, MeshSharedPtr mesh);
 
       /// This method saves a single mesh to a file.
-      bool save(const char *filename, MeshSharedPtr mesh);
+      void save(const char *filename, MeshSharedPtr mesh);
 
       /// This method loads multiple meshes according to subdomains described in the meshfile.
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///&nbsp;         also the order is determined by the order in the file.
-      bool load(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
+      void load(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
 
       /// This method saves multiple meshes according to subdomains in the vector meshes.
-      bool save(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
+      void save(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
 
     protected:
       /// Internal method loading contents of parsed_xml_mesh into mesh.
-      bool load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, MeshSharedPtr mesh, std::map<unsigned int, unsigned int>& vertex_is);
+      void load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, MeshSharedPtr mesh, std::map<unsigned int, unsigned int>& vertex_is);
 
       /// Internal method loading contents of parsed_xml_domain's domain into mesh.
-      bool load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is);
+      void load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is);
 
       /// Loads one circular arc.
       /// \param[in] parsed_xml_entity Either XMLSubdomains::domain or XMLMesh::mesh.

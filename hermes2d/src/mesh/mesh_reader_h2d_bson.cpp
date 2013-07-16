@@ -34,7 +34,7 @@ namespace Hermes
     {
     }
 
-    bool MeshReaderH2DBSON::load(const char *filename, MeshSharedPtr mesh)
+    void MeshReaderH2DBSON::load(const char *filename, MeshSharedPtr mesh)
     {
       if(!mesh)
         throw Exceptions::NullException(1);
@@ -377,11 +377,9 @@ namespace Hermes
       delete [] refinement_types;
 
       mesh->initial_single_check();
-
-      return true;
     }
 
-    bool MeshReaderH2DBSON::save(const char *filename, MeshSharedPtr mesh)
+    void MeshReaderH2DBSON::save(const char *filename, MeshSharedPtr mesh)
     {
       // Utility pointer.
       Element* e;
@@ -571,22 +569,16 @@ namespace Hermes
       fclose(fpw);
 
       bson_destroy(&bw);
-
-      return true;
     }
 
-    bool MeshReaderH2DBSON::load(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DBSON::load(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
     {
       throw Exceptions::MethodNotImplementedException("MeshReaderH2DBSON::load");
-
-      return true;
     }
 
-    bool MeshReaderH2DBSON::save(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
+    void MeshReaderH2DBSON::save(const char *filename, Hermes::vector<MeshSharedPtr > meshes)
     {
       throw Exceptions::MethodNotImplementedException("MeshReaderH2DBSON::save");
-
-      return true;
     }
 
     Nurbs* MeshReaderH2DBSON::load_arc(MeshSharedPtr mesh, int id, Node** en, int p1, int p2, double angle, bool skip_check)

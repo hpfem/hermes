@@ -153,7 +153,7 @@ namespace Hermes
       return nurbs;
     }
 
-    bool MeshReaderH2D::load(const char *filename, MeshSharedPtr mesh)
+    void MeshReaderH2D::load(const char *filename, MeshSharedPtr mesh)
     {
       // Check if file exists
       std::ifstream s(filename);
@@ -247,28 +247,28 @@ namespace Hermes
             throw Hermes::Exceptions::MeshLoadFailureException("File %s: error creating element #%d: vertex #%d does not exist.", filename, i, idx[j]);
           }
 
-        Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
+          Node *v0 = &mesh->nodes[idx[0]], *v1 = &mesh->nodes[idx[1]], *v2 = &mesh->nodes[idx[2]];
 
-        int marker;
+          int marker;
 
-        // This functions check if the user-supplied marker on this element has been
-        // already used, and if not, inserts it in the appropriate structure.
-        mesh->element_markers_conversion.insert_marker(el_marker);
-        marker = mesh->element_markers_conversion.get_internal_marker(el_marker).marker;
+          // This functions check if the user-supplied marker on this element has been
+          // already used, and if not, inserts it in the appropriate structure.
+          mesh->element_markers_conversion.insert_marker(el_marker);
+          marker = mesh->element_markers_conversion.get_internal_marker(el_marker).marker;
 
-        if(nv == 4) {
-          Mesh::check_triangle(i, v0, v1, v2);
-          mesh->create_triangle(marker, v0, v1, v2, NULL);
-        }
-        else {
-          Node *v3 = &mesh->nodes[idx[3]];
-          Mesh::check_quad(i, v0, v1, v2, v3);
-          mesh->create_quad(marker, v0, v1, v2, v3, NULL);
-        }
+          if(nv == 4) {
+            Mesh::check_triangle(i, v0, v1, v2);
+            mesh->create_triangle(marker, v0, v1, v2, NULL);
+          }
+          else {
+            Node *v3 = &mesh->nodes[idx[3]];
+            Mesh::check_quad(i, v0, v1, v2, v3);
+            mesh->create_quad(marker, v0, v1, v2, v3, NULL);
+          }
 
-        mesh->nactive++;
+          mesh->nactive++;
 
-        delete [] idx;
+          delete [] idx;
       }
       mesh->nbase = n;
 
@@ -385,7 +385,6 @@ namespace Hermes
 
       mesh->seq = g_mesh_seq++;
       mesh->initial_single_check();
-      return true;
     }
 
     void MeshReaderH2D::save_refinements(MeshSharedPtr mesh, FILE* f, Element* e, int id, bool& first)
@@ -439,7 +438,7 @@ namespace Hermes
       }
     }
 
-    bool MeshReaderH2D::save(const char* filename, MeshSharedPtr mesh)
+    void MeshReaderH2D::save(const char* filename, MeshSharedPtr mesh)
     {
       int i, mrk;
       Element* e;
@@ -473,36 +472,41 @@ namespace Hermes
       fprintf(f, "\n]\n\nboundaries =\n[");
       first = true;
       for_all_base_elements(e, mesh)
+      {
         for (unsigned i = 0; i < e->get_nvert(); i++)
-          if((mrk = mesh->get_base_edge_node(e, i)->marker)) {
+          if((mrk = mesh->get_base_edge_node(e, i)->marker))
+          {
             const char* nl = first ? "\n" : ",\n";  first = false;
             fprintf(f, "%s [ %d, %d, \"%s\" ]", nl, e->vn[i]->id, e->vn[e->next_vert(i)]->id, mesh->boundary_markers_conversion.get_user_marker(mrk).marker.c_str());
           }
-          fprintf(f, "\n]\n\n");
+      }
+      fprintf(f, "\n]\n\n");
 
-          // save curved edges
-          first = true;
-          for_all_base_elements(e, mesh)
-            if(e->is_curved())
-              for (unsigned i = 0; i < e->get_nvert(); i++)
-                if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i)) {
-                  fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
-                  save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
-                }
-                if(!first) fprintf(f, "\n]\n\n");
+      // save curved edges
+      first = true;
+      for_all_base_elements(e, mesh)
+      {
+        if(e->is_curved())
+        {
+          for (unsigned i = 0; i < e->get_nvert(); i++)
+            if(e->cm->nurbs[i] != NULL && !is_twin_nurbs(e, i))
+            {
+              fprintf(f, first ? "curves =\n[\n" : ",\n");  first = false;
+              save_nurbs(mesh, f, e->vn[i]->id, e->vn[e->next_vert(i)]->id, e->cm->nurbs[i]);
+            }
+            if(!first) fprintf(f, "\n]\n\n");
+        }
+      }
+      // save refinements
+      unsigned temp = mesh->seq;
+      mesh->seq = mesh->nbase;
+      first = true;
+      for_all_base_elements(e, mesh)
+        save_refinements(mesh, f, e, e->id, first);
+      if(!first) fprintf(f, "\n]\n\n");
 
-          // save refinements
-          unsigned temp = mesh->seq;
-          mesh->seq = mesh->nbase;
-          first = true;
-          for_all_base_elements(e, mesh)
-            save_refinements(mesh, f, e, e->id, first);
-          if(!first) fprintf(f, "\n]\n\n");
-
-          mesh->seq = temp;
-          fclose(f);
-
-          return true;
+      mesh->seq = temp;
+      fclose(f);
     }
   }
 }

@@ -32,7 +32,7 @@ namespace Hermes
     {
     }
 
-    bool MeshReaderH1DXML::load(const char *filename, MeshSharedPtr mesh)
+    void MeshReaderH1DXML::load(const char *filename, MeshSharedPtr mesh)
     {
       mesh->free();
 
@@ -199,13 +199,11 @@ namespace Hermes
       {
         throw Hermes::Exceptions::MeshLoadFailureException(e.what());
       }
-      return true;
     }
 
-    bool MeshReaderH1DXML::save(const char *filename, MeshSharedPtr mesh)
+    void MeshReaderH1DXML::save(const char *filename, MeshSharedPtr mesh)
     {
       /// \todo Is this necessary? It is a valid H2D mesh afterall.
-      return true;
     }
   }
 }

@@ -44,13 +44,13 @@ namespace Hermes
       MeshReaderH2D();
       virtual ~MeshReaderH2D();
 
-      virtual bool load(const char *filename, MeshSharedPtr mesh);
-      virtual bool load(std::string filename, MeshSharedPtr mesh)
+      virtual void load(const char *filename, MeshSharedPtr mesh);
+      virtual void load(std::string filename, MeshSharedPtr mesh)
       {
         return this->load(filename.c_str(), mesh);
       }
-      virtual bool save(const char *filename, MeshSharedPtr mesh);
-      virtual bool save(std::string filename, MeshSharedPtr mesh)
+      virtual void save(const char *filename, MeshSharedPtr mesh);
+      virtual void save(std::string filename, MeshSharedPtr mesh)
       {
         return this->save(filename.c_str(), mesh);
       }

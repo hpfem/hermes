@@ -14,25 +14,19 @@
 // along with Hermes2D; if not, see <http://www.gnu.prg/licenses/>.
 
 #include "config.h"
+#ifdef WITH_EXODUSII
 
 #include <string.h>
 #include "mesh_reader_exodusii.h"
 #include "mesh.h"
 #include <map>
-
-#ifdef WITH_EXODUSII
 #include <exodusII.h>
-#endif
 namespace Hermes
 {
   namespace Hermes2D
   {
     MeshReaderExodusII::MeshReaderExodusII()
     {
-#ifdef WITH_EXODUSII
-#else
-      throw Hermes::Exceptions::Exception("hermes2d was not compiled with ExodusII support");
-#endif
     }
 
     MeshReaderExodusII::~MeshReaderExodusII()
@@ -59,9 +53,8 @@ namespace Hermes
       }
     };
 
-    bool MeshReaderExodusII::load(const char *file_name, MeshSharedPtr mesh)
+    void MeshReaderExodusII::load(const char *file_name, MeshSharedPtr mesh)
     {
-#ifdef WITH_EXODUSII
       int err;
       int cpu_ws = sizeof(double);    // use float or double
       int io_ws = 8;            // store variables as doubles
@@ -73,11 +66,8 @@ namespace Hermes
       char title[MAX_LINE_LENGTH + 1];
       err = ex_get_init(exoid, title, &n_dims, &n_nodes, &n_elems, &n_eblocks, &n_nodesets, &n_sidesets);
       if(n_dims != 2)
-      {
         throw Hermes::Exceptions::Exception("File '%s' does not contain 2D mesh", file_name);
-        return false;
-      }
-
+        
       // load coordinates
       double *x = new double[n_nodes];
       double *y = new double[n_nodes];
@@ -136,7 +126,6 @@ namespace Hermes
         {
           delete [] vtx;
           throw Hermes::Exceptions::Exception("Unknown type of element");
-          return false;
         }
       }
       int3 *tri = n_tri > 0 ? new int3[n_tri] : NULL;    // triangles
@@ -198,7 +187,6 @@ namespace Hermes
           {
             delete [] vtx;
             throw Hermes::Exceptions::Exception("Unknown type of element");
-            return false;
           }
           iel++;
         }
@@ -273,11 +261,7 @@ namespace Hermes
       delete [] vtx;
       delete [] el_nv;
       delete [] els;
-
-      return true;
-#else
-      return false;
-#endif
     }
   }
 }
+#endif
