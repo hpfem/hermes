@@ -23,7 +23,6 @@
 #include "space_hdiv.h"
 #include "space_h2d_xml.h"
 #include "api2d.h"
-#include <iostream>
 
 #ifdef _WINDOWS
 template<typename Scalar>

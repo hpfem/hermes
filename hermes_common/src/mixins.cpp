@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes; if not, see <http://www.gnu.prg/licenses/>.
 #include "mixins.h"
-#include <map>
-#include <string>
 #include "common.h"
 
 namespace Hermes

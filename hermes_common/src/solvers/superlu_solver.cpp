@@ -19,7 +19,6 @@
 /*! \file superlu_solver.cpp
 \brief SuperLU solver interface.
 */
-#include <algorithm>
 #include "config.h"
 #ifdef WITH_SUPERLU
 #include "superlu_solver.h"

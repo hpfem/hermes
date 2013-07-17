@@ -20,7 +20,6 @@
 \brief EpetraMatrix and EpetraVector storage classes for Amesos, AztecOO, ... .
 */
 #include "config.h"
-#include <vector>
 #ifdef HAVE_EPETRA
 #include "epetra.h"
 #include "callstack.h"

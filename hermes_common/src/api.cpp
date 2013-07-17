@@ -19,7 +19,7 @@
 
 #include "api.h"
 #include "config.h"
-#include <utility>
+
 #include "callstack.h"
 #include "common.h"
 #include "exceptions.h"

@@ -18,7 +18,6 @@
 #include "solution_h2d_xml.h"
 #include "ogprojection.h"
 #include "api2d.h"
-#include <algorithm>
 
 namespace Hermes
 {

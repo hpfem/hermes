@@ -14,7 +14,6 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "element.h"
-#include <algorithm>
 #include "refmap.h"
 #include "global.h"
 #include "forms.h"

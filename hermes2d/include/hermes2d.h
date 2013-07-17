@@ -112,3 +112,7 @@
 
 #include "doxygen_first_page.h"
 #endif
+
+#undef assert
+#define assert(x) \
+(x) ? (void)0 : throw Hermes::Exceptions::Exception("Failed assertion: %s in %s (%d)", #x, __FILE__, __LINE__)

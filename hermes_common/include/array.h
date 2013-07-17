@@ -18,11 +18,7 @@
 #ifndef __HERMES_COMMON_ARRAY_H
 #define __HERMES_COMMON_ARRAY_H
 
-#include <vector>
-#include <limits.h>
-#ifdef WITH_TC_MALLOC
-  #include "tcmalloc.h"
-#endif
+#include "common.h"
 
 #ifndef INVALID_IDX
 #define INVALID_IDX      INT_MAX

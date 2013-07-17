@@ -13,10 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D; if not, see <http://www.gnu.prg/licenses/>.
 
-#include <string.h>
 #include "mesh.h"
-#include <map>
-#include <iostream>
 #include "mesh_reader_h2d.h"
 
 namespace Hermes

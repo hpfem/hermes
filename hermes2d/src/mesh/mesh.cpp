@@ -15,7 +15,6 @@
 
 #include "mesh_util.h"
 #include "refmap.h"
-#include <algorithm>
 #include "global.h"
 #include "api2d.h"
 #include "mesh_reader_h2d.h"

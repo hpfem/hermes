@@ -17,7 +17,6 @@
 #define __H2D_WEAKFORM_H
 
 #include "../function/solution.h"
-#include <string>
 
 namespace Hermes
 {

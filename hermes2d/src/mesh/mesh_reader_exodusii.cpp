@@ -16,10 +16,8 @@
 #include "config.h"
 #ifdef WITH_EXODUSII
 
-#include <string.h>
 #include "mesh_reader_exodusii.h"
 #include "mesh.h"
-#include <map>
 #include <exodusII.h>
 namespace Hermes
 {

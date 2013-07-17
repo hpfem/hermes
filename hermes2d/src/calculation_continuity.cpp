@@ -19,7 +19,6 @@
 #include "space_hdiv.h"
 #include "space_hcurl.h"
 #include "space_l2.h"
-#include <fstream>
 
 namespace Hermes
 {
