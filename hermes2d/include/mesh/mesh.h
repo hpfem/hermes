@@ -414,7 +414,6 @@ namespace Hermes
       friend class WeakForm<std::complex<double> >;
       template<typename Scalar> friend class Adapt;
       friend class KellyTypeAdapt<double>;
-      template<typename Scalar> friend class Global;
       friend class KellyTypeAdapt<std::complex<double> >;
       template<typename Scalar> friend class Solution;
       template<typename Scalar> friend class Filter;

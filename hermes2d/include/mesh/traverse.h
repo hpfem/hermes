@@ -108,7 +108,6 @@ namespace Hermes
       friend class Views::Vectorizer;
       template<typename T> friend class DiscreteProblemCache;
       template<typename Scalar> friend class DiscreteProblem;
-      template<typename T> friend class DiscreteProblemAssemblyData;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemThreadAssembler;
       };
@@ -160,10 +159,8 @@ namespace Hermes
       template<typename T> friend class DiscreteProblemCache;
       template<typename T> friend class DiscreteProblemDGAssembler;
       template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
-      template<typename T> friend class DiscreteProblemAssemblyData;
       template<typename T> friend class Filter;
       template<typename T> friend class SimpleFilter;
-      template<typename T> friend class Global;
       friend class Views::Orderizer;
       friend class Views::Vectorizer;
       friend class Views::Linearizer;

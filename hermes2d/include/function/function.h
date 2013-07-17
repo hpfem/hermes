@@ -243,7 +243,6 @@ namespace Hermes
 
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class DiscreteProblem;
-      template<typename T> friend class Global;
       friend class CurvMap;
 
       template<typename T> friend class Func;
