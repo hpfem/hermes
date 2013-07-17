@@ -285,10 +285,12 @@ namespace Hermes
           bson_find(&sub_it, &sub, "refinements");
           bson_iterator_subobject_init(&sub_it, &sub_sub, 0);
           bson_iterator_init(&sub_sub_it, &sub_sub);
+          bson b_sub_sub;
           while (bson_iterator_next(&sub_sub_it))
           {
             refinement_BSON refinement;
-            refinement.load_from_BSON(sub_sub);
+            bson_iterator_subobject_init(&sub_sub_it, &b_sub_sub, 0);
+            refinement.load_from_BSON(b_sub_sub);
             this->refinements.push_back(refinement);
           }
         }

@@ -170,17 +170,17 @@ namespace Hermes
         load(parsed_xml_domain, global_mesh, vertex_is, element_is, edge_is);
         
         int max_vertex_i = -1;
-        for(int i = 0; i < parsed_xml_domain->vertices().v().size(); i++)
-          if(vertex_is[i] > max_vertex_i)
-            max_vertex_i = vertex_is[i];
+        for(std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); it++)
+          if(it->first > max_vertex_i)
+            max_vertex_i = it->first;
         int max_element_i = -1;
-        for(int i = 0; i < parsed_xml_domain->elements().el().size(); i++)
-          if(element_is[i] > max_element_i)
-            max_element_i = element_is[i];
+        for(std::map<int, int>::iterator it = element_is.begin(); it != element_is.end(); it++)
+          if(it->first > max_element_i)
+            max_element_i = it->first;
         int max_edge_i = -1;
-        for(int i = 0; i < parsed_xml_domain->edges().ed().size(); i++)
-          if(edge_is[i] > max_edge_i)
-            max_edge_i = edge_is[i];
+        for(std::map<int, int>::iterator it = edge_is.begin(); it != edge_is.end(); it++)
+          if(it->first > max_edge_i)
+            max_edge_i = it->first;
 
         // Subdomains //
         unsigned int subdomains_count = parsed_xml_domain->subdomains().subdomain().size();
