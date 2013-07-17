@@ -30,6 +30,7 @@
 #include <math.h>
 #include <time.h>
 #include <float.h>
+#include <limits>
 #include <errno.h>
 #include <cmath>
 
@@ -57,6 +58,8 @@
 #include <iostream>
 #include <signal.h>
 #include <utility>
+
+#include "config.h"
 
 #ifdef WITH_TC_MALLOC
   #include "tcmalloc.h"
@@ -88,12 +91,7 @@ typedef unsigned __int64 uint64_t;
 #else
 #include <inttypes.h>
 #endif
-  
-#undef assert
-#define assert(x) \
-(x) ? (void)0 : throw Hermes::Exceptions::Exception("Failed assertion: %s in %s (%d)", #x, __FILE__, __LINE__)
 
-#include "config.h"
 
 typedef int int2[2];
 typedef int int3[3];

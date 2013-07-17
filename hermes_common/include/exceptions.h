@@ -25,6 +25,10 @@
 #include "common.h"
 #include "compat.h"
 
+#undef assert
+#define assert(x) \
+(x) ? (void)0 : throw Hermes::Exceptions::Exception("Failed assertion: %s in %s (%d)", #x, __FILE__, __LINE__)
+
 namespace Hermes
 {
   namespace Exceptions

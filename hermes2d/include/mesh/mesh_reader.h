@@ -17,7 +17,6 @@
 #define _MESHLOADER_H_
 
 #include "mesh.h"
-
 namespace Hermes
 {
   namespace Hermes2D

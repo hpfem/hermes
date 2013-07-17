@@ -19,7 +19,7 @@
 #include "mesh_reader.h"
 
 #ifdef WITH_BSON
-
+#include "bson.h"
 namespace Hermes
 {
   namespace Hermes2D
