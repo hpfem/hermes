@@ -57,6 +57,10 @@
 #include <iostream>
 #include <signal.h>
 
+#undef assert
+#define assert(x) \
+(x) ? (void)0 : throw Hermes::Exceptions::Exception("Failed assertion: %s in %s (%d)", #x, __FILE__, __LINE__)
+
 #include "config.h"
 
 #ifdef WITH_TC_MALLOC
