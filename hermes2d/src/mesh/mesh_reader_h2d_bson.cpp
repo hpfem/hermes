@@ -635,9 +635,9 @@ namespace Hermes
           if(!baseElementsSaved[e->id])
           {
             if(e->nvert == 3)
-              elements.push_back(element_BSON(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, -1, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id));
+              elements.push_back(element_BSON(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, -1, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker, e->id));
             else
-              elements.push_back(element_BSON(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, vertices_to_vertices.find(e->vn[3]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker.c_str(), e->id));
+              elements.push_back(element_BSON(vertices_to_vertices.find(e->vn[0]->id)->second, vertices_to_vertices.find(e->vn[1]->id)->second, vertices_to_vertices.find(e->vn[2]->id)->second, vertices_to_vertices.find(e->vn[3]->id)->second, meshes[meshes_i]->get_element_markers_conversion().get_user_marker(e->marker).marker, e->id));
             baseElementsSaved[e->id] = true;
           }
 
@@ -657,7 +657,7 @@ namespace Hermes
               {
                 unsigned int edge_i = edges.size();
                 vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
-                edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker.c_str(), edge_i));
+                edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker, edge_i));
               }
               if(!hasAllElements)
                 subdomain.boundary_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
@@ -678,7 +678,7 @@ namespace Hermes
                 {
                   unsigned int edge_i = edges.size();
                   vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
-                  edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker.c_str(), edge_i));
+                  edges.push_back(edge_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker, edge_i));
                 }
                 if(!hasAllElements)
                   subdomain.inner_edges.push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
@@ -927,7 +927,7 @@ namespace Hermes
               continue;
             }
 
-            element_BSON element(-1,-1,-1,-1, NULL, -1);
+            element_BSON element(-1,-1,-1,-1, "", -1);
             for(int searched_element_i = 0; searched_element_i < element_count; searched_element_i++)
             {
               element = elements.at(searched_element_i);
@@ -958,7 +958,7 @@ namespace Hermes
 
           for (int boundary_edge_number_i = 0; boundary_edge_number_i < boundary_edge_number_count; boundary_edge_number_i++)
           {
-            edge_BSON edge(-1,-1, NULL, -1);
+            edge_BSON edge(-1,-1, "", -1);
             int domain_edge_count = edges.size();
             for(unsigned int to_find_i = 0; to_find_i < domain_edge_count; to_find_i++)
             {
@@ -997,7 +997,7 @@ namespace Hermes
           // Inner Edge numbers //
           for (int inner_edge_number_i = 0; inner_edge_number_i < inner_edge_number_count; inner_edge_number_i++)
           {
-            edge_BSON edge(-1,-1,NULL,-1);
+            edge_BSON edge(-1, -1, "", -1);
 
             for(unsigned int to_find_i = 0; to_find_i < edges.size(); to_find_i++)
             {
@@ -1110,44 +1110,60 @@ namespace Hermes
     void MeshReaderH2DBSON::load_domain(bson& br, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is,
       Hermes::vector<element_BSON>& elements, Hermes::vector<edge_BSON>& edges, Hermes::vector<vertex_BSON>& vertices, Hermes::vector<arc_BSON>& arcs, Hermes::vector<subdomain_BSON>& subdomains)
     {
-      bson_iterator it;
+      bson_iterator it, it_sub;
+      bson b_sub, b_sub_sub;
       bson_find(&it, &br, "vertices");
-      while (bson_iterator_next(&it))
+      bson_iterator_subobject_init(&it, &b_sub, 0);
+      bson_iterator_init(&it_sub, &b_sub);
+      while (bson_iterator_next(&it_sub))
       {
         vertex_BSON vertex;
-        vertex.load_from_BSON(br, it);
+        bson_iterator_subobject_init(&it_sub, &b_sub_sub, 0);
+        vertex.load_from_BSON(b_sub_sub);
         vertices.push_back(vertex);
       }
 
       bson_find(&it, &br, "elements");
-      while (bson_iterator_next(&it))
+      bson_iterator_subobject_init(&it, &b_sub, 0);
+      bson_iterator_init(&it_sub, &b_sub);
+      while (bson_iterator_next(&it_sub))
       {
         element_BSON element;
-        element.load_from_BSON(br, it);
+        bson_iterator_subobject_init(&it_sub, &b_sub_sub, 0);
+        element.load_from_BSON(b_sub_sub);
         elements.push_back(element);
       }
 
       bson_find(&it, &br, "edges");
-      while (bson_iterator_next(&it))
+      bson_iterator_subobject_init(&it, &b_sub, 0);
+      bson_iterator_init(&it_sub, &b_sub);
+      while (bson_iterator_next(&it_sub))
       {
         edge_BSON edge;
-        edge.load_from_BSON(br, it);
+        bson_iterator_subobject_init(&it_sub, &b_sub_sub, 0);
+        edge.load_from_BSON(b_sub_sub);
         edges.push_back(edge);
       }
 
       bson_find(&it, &br, "arcs");
-      while (bson_iterator_next(&it))
+      bson_iterator_subobject_init(&it, &b_sub, 0);
+      bson_iterator_init(&it_sub, &b_sub);
+      while (bson_iterator_next(&it_sub))
       {
         arc_BSON arc;
-        arc.load_from_BSON(br, it);
+        bson_iterator_subobject_init(&it_sub, &b_sub_sub, 0);
+        arc.load_from_BSON(b_sub_sub);
         arcs.push_back(arc);
       }
 
       bson_find(&it, &br, "subdomains");
-      while (bson_iterator_next(&it))
+      bson_iterator_subobject_init(&it, &b_sub, 0);
+      bson_iterator_init(&it_sub, &b_sub);
+      while (bson_iterator_next(&it_sub))
       {
         subdomain_BSON subdomain;
-        subdomain.load_from_BSON(br, it);
+        bson_iterator_subobject_init(&it_sub, &b_sub_sub, 0);
+        subdomain.load_from_BSON(b_sub_sub);
         subdomains.push_back(subdomain);
       }
 

@@ -34,7 +34,8 @@ namespace Hermes
       if(type == HERMES_TYPE_EDGE)
       {
         // store the element pointer in a free slot of 'elem'
-        if(elem[0] == NULL) elem[0] = e;
+        if(elem[0] == NULL)
+          elem[0] = e;
         else
         {
           if(elem[1] == NULL)
