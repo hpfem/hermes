@@ -44,7 +44,7 @@ namespace Hermes
         OrderView(char* title, WinGeom* wg = NULL);
 
         template<typename Scalar>
-        void show(SpaceSharedPtr<Scalar> space);
+        void show(SpaceSharedPtr<Scalar> space, bool show_edge_orders = true);
         void set_b_orders(bool set);
       protected:
 

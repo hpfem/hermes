@@ -64,13 +64,13 @@ namespace Hermes
       };
 
       template<typename Scalar>
-      void OrderView::show(SpaceSharedPtr<Scalar> space)
+      void OrderView::show(SpaceSharedPtr<Scalar> space, bool show_edge_orders)
       {
         if(!space->is_up_to_date())
           throw Hermes::Exceptions::Exception("The space is not up to date.");
 
         ord.lock_data();
-        ord.process_space(space);
+        ord.process_space(space, show_edge_orders);
         ord.calc_vertices_aabb(&vertices_min_x, &vertices_max_x, &vertices_min_y, &vertices_max_y);
         init_order_palette(ord.get_vertices());
         ord.unlock_data();

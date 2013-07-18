@@ -35,7 +35,7 @@ namespace Hermes
         ~Orderizer();
 
         template<typename Scalar>
-        void process_space(SpaceSharedPtr<Scalar> space);
+        void process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders = true);
 
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
         template<typename Scalar>
@@ -57,14 +57,13 @@ namespace Hermes
         char  buffer[1000];
         char* labels[11][11];
 
-        int* tris_orders;
         double3* verts;  ///< vertices: (x, y, value) triplets
-        int  label_size, label_count, cl1, cl2, cl3;
+        int  label_size, label_count;
         int* lvert;
         char** ltext;
         double2* lbox;
 
-        void add_triangle(int iv0, int iv1, int iv2, int order, int marker);
+        void add_triangle(int iv0, int iv1, int iv2, int marker);
 
         void add_edge(int iv1, int iv2, int marker);
 

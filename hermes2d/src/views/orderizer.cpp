@@ -16,7 +16,7 @@
 #include "orderizer.h"
 #include "space.h"
 #include "refmap.h"
-#include "linear_data.cpp"
+#include "orderizer_quad.cpp"
 
 namespace Hermes
 {
@@ -42,6 +42,24 @@ namespace Hermes
       static int3*     ord_edge_quad[2]   = { edge_quad0,  edge_quad1 };
       static int3**    ord_edge[2]        = { ord_edge_tri, ord_edge_quad };
 
+      // vertices_simple
+      static int*      ord_np_simple[2]          = { num_vert_tri_simple, num_vert_quad_simple };
+      static double3*  ord_tables_tri_simple[2]  = { vert_tri_simple, vert_tri_simple };
+      static double3*  ord_tables_quad_simple[2] = { vert_quad_simple, vert_quad_simple };
+      static double3** ord_tables_simple[2]      = { ord_tables_tri_simple, ord_tables_quad_simple };
+
+      // triangles
+      static int*      num_elem_simple[2]        = { num_elem_tri_simple, num_elem_quad_simple};
+      static int3*     ord_elem_tri_simple[2]    = { elem_tri_simple, elem_tri_simple };
+      static int3*     ord_elem_quad_simple[2]   = { elem_quad_simple,  elem_quad_simple };
+      static int3**    ord_elem_simple[2]        = { ord_elem_tri_simple, ord_elem_quad_simple };
+
+      // edges
+      static int*      num_edge_simple[2]        = { num_edge_tri_simple, num_edge_quad_simple};
+      static int3*     ord_edge_tri_simple[2]    = { edge_tri_simple, edge_tri_simple };
+      static int3*     ord_edge_quad_simple[2]   = { edge_quad_simple,  edge_quad_simple };
+      static int3**    ord_edge_simple[2]        = { ord_edge_tri_simple, ord_edge_quad_simple };
+
       static class Quad2DOrd : public Quad2D
       {
       public:
@@ -53,9 +71,20 @@ namespace Hermes
           tables = ord_tables;
           np = ord_np;
         };
-
-        virtual void dummy_fn() {}
       } quad_ord;
+
+      static class Quad2DOrdSimple : public Quad2D
+      {
+      public:
+
+        Quad2DOrdSimple()
+        {
+          max_order[0] = max_order[1] = 1;
+          num_tables[0] = num_tables[1] = 2;
+          tables = ord_tables_simple;
+          np = ord_np_simple;
+        };
+      } quad_ord_simple;
 
       Orderizer::Orderizer() : LinearizerBase()
       {
@@ -64,9 +93,8 @@ namespace Hermes
         ltext = NULL;
         lvert = NULL;
         lbox = NULL;
-        tris_orders = NULL;
 
-        label_count = cl1 = cl2 = cl3 = 0;
+        label_count = 0;
 
         for (int i = 0, p = 0; i <= 10; i++)
         {
@@ -89,7 +117,6 @@ namespace Hermes
         {
           this->vertex_size *= 2;
           verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
-          this->info = (int4*) realloc(info, sizeof(int4) * vertex_size);
         }
         return this->vertex_count++;
       }
@@ -103,15 +130,15 @@ namespace Hermes
       }
 
       template<typename Scalar>
-      void Orderizer::process_space(SpaceSharedPtr<Scalar> space)
+      void Orderizer::process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders)
       {
         // sanity check
-        if(space == NULL) throw Hermes::Exceptions::Exception("Space is NULL in Orderizer:process_space().");
+        if(space == NULL)
+          throw Hermes::Exceptions::Exception("Space is NULL in Orderizer:process_space().");
 
         if(!space->is_up_to_date())
           throw Hermes::Exceptions::Exception("The space is not up to date.");
 
-        int type = 1;
         label_count = 0;
         vertex_count = 0;
         triangle_count = 0;
@@ -124,7 +151,6 @@ namespace Hermes
         this->triangle_size = std::max(this->triangle_size, 64 * nn);
         this->edges_size = std::max(this->edges_size, 16 * nn);
         this->label_size = std::max(this->label_size, nn + 10);
-        cl1 = cl2 = cl3 = label_size;
 
         // reuse or allocate vertex, triangle and edge arrays
         verts = (double3*) realloc(verts, sizeof(double3) * vertex_size);
@@ -132,32 +158,59 @@ namespace Hermes
 				this->tri_markers = (int*) realloc(this->tri_markers, sizeof(int) * this->triangle_size);
 				this->edges = (int2*) realloc(this->edges, sizeof(int2) * this->edges_size);
 				this->edge_markers = (int*) realloc(this->edge_markers, sizeof(int) * this->edges_size);
-        tris_orders = (int*) realloc(tris_orders, sizeof(int) * triangle_size);
-        info = NULL;
         this->empty = false;
         lvert = (int*) realloc(lvert, sizeof(int) * label_size);
         ltext = (char**) realloc(ltext, sizeof(char*) * label_size);
         lbox = (double2*) realloc(lbox, sizeof(double2) * label_size);
 
-        int oo, o[6];
-
         RefMap refmap;
-        refmap.set_quad_2d(&quad_ord);
+        int type = 1;
+
+        int oo, o[6];
 
         // make a mesh illustrating the distribution of polynomial orders over the space
         Element* e;
         for_all_active_elements(e, mesh)
         {
           oo = o[4] = o[5] = space->get_element_order(e->id);
-          for (unsigned int k = 0; k < e->get_nvert(); k++)
-            o[k] = space->get_edge_order(e, k);
+          if(show_edge_orders)
+            for (unsigned int k = 0; k < e->get_nvert(); k++)
+              o[k] = space->get_edge_order(e, k);
+          else if(e->is_curved())
+          {
+            if(e->is_triangle())
+              for (unsigned int k = 0; k < e->get_nvert(); k++)
+                o[k] = oo;
+            else
+              for (unsigned int k = 0; k < e->get_nvert(); k++)
+                o[k] = H2D_GET_H_ORDER(oo);
+          }
 
-          refmap.set_active_element(e);
-          double* x = refmap.get_phys_x(type);
-          double* y = refmap.get_phys_y(type);
+          double3* pt;
+          int np;
+          double* x;
+          double* y;
+          if(show_edge_orders || e->is_curved())
+          {
+            refmap.set_quad_2d(&quad_ord);
+            refmap.set_active_element(e);
+            x = refmap.get_phys_x(type);
+            y = refmap.get_phys_y(type);
 
-          double3* pt = quad_ord.get_points(type, e->get_mode());
-          int np = quad_ord.get_num_points(type, e->get_mode());
+            pt = quad_ord.get_points(type, e->get_mode());
+            np = quad_ord.get_num_points(type, e->get_mode());
+          }
+          else
+          {
+            refmap.set_quad_2d(&quad_ord_simple);
+            refmap.set_active_element(e);
+            x = refmap.get_phys_x(type);
+            y = refmap.get_phys_y(type);
+
+            pt = quad_ord_simple.get_points(type, e->get_mode());
+            np = quad_ord_simple.get_num_points(type, e->get_mode());
+          }
+
           int id[80];
           assert(np <= 80);
 
@@ -167,21 +220,40 @@ namespace Hermes
             o[4] = H2D_GET_H_ORDER(oo);
             o[5] = H2D_GET_V_ORDER(oo);
           }
-          make_vert(lvert[label_count], x[0], y[0], o[4]);
-
-          for (int i = 1; i < np; i++)
-            make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
-
-          for (int i = 0; i < num_elem[mode][type]; i++)
-            this->add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]], o[4], e->marker);
-
-          for (int i = 0; i < num_edge[mode][type]; i++)
+          if(show_edge_orders || e->is_curved())
           {
-            if(e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
-              ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
-              (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
+            make_vert(lvert[label_count], x[0], y[0], o[4]);
+
+            for (int i = 1; i < np; i++)
+              make_vert(id[i-1], x[i], y[i], o[(int) pt[i][2]]);
+
+            for (int i = 0; i < num_elem[mode][type]; i++)
+              this->add_triangle(id[ord_elem[mode][type][i][0]], id[ord_elem[mode][type][i][1]], id[ord_elem[mode][type][i][2]], e->marker);
+
+            for (int i = 0; i < num_edge[mode][type]; i++)
             {
-              LinearizerBase::add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], e->en[ord_edge[mode][type][i][2]]->marker);
+              if(e->en[ord_edge[mode][type][i][2]]->bnd || (y[ord_edge[mode][type][i][0] + 1] < y[ord_edge[mode][type][i][1] + 1]) ||
+                ((y[ord_edge[mode][type][i][0] + 1] == y[ord_edge[mode][type][i][1] + 1]) &&
+                (x[ord_edge[mode][type][i][0] + 1] < x[ord_edge[mode][type][i][1] + 1])))
+              {
+                LinearizerBase::add_edge(id[ord_edge[mode][type][i][0]], id[ord_edge[mode][type][i][1]], e->en[ord_edge[mode][type][i][2]]->marker);
+              }
+            }
+          }
+          else
+          {
+            make_vert(lvert[label_count], x[0], y[0], o[4]);
+            make_vert(lvert[label_count], x[0], y[0], o[5]);
+
+            for (int i = 0; i < np; i++)
+              make_vert(id[i], x[i], y[i], o[(int) pt[i][2]]);
+
+            for (int i = 0; i < num_elem_simple[mode][type]; i++)
+              this->add_triangle(id[ord_elem_simple[mode][type][i][0]], id[ord_elem_simple[mode][type][i][1]], id[ord_elem_simple[mode][type][i][2]], e->marker);
+
+            for (int i = 0; i < num_edge_simple[mode][type]; i++)
+            {
+              LinearizerBase::add_edge(id[ord_edge_simple[mode][type][i][0]], id[ord_edge_simple[mode][type][i][1]], e->en[ord_edge_simple[mode][type][i][2]]->marker);
             }
           }
 
@@ -201,7 +273,7 @@ namespace Hermes
         refmap.set_quad_2d(&g_quad_2d_std);
       }
 
-      void Orderizer::add_triangle(int iv0, int iv1, int iv2, int order, int marker)
+      void Orderizer::add_triangle(int iv0, int iv1, int iv2, int marker)
       {
         int index;
 #pragma omp critical(realloc_triangles)
@@ -216,14 +288,12 @@ namespace Hermes
             {
 							tri_markers = (int*) realloc(tri_markers, sizeof(int) * (triangle_size * 2));
               tris = (int3*) realloc(tris, sizeof(int3) * (triangle_size * 2));
-              tris_orders = (int*) realloc(tris_orders, sizeof(int) * (triangle_size = triangle_size * 2));
             }
             index = triangle_count++;
 
             tris[index][0] = iv0;
             tris[index][1] = iv1;
             tris[index][2] = iv2;
-						tris_orders[index] = order;
             tri_markers[index] = marker;
           }
         }
@@ -250,11 +320,6 @@ namespace Hermes
         {
           ::free(lbox);
           lbox = NULL;
-        }
-        if(tris_orders != NULL)
-        {
-          ::free(tris_orders);
-          tris_orders = NULL;
         }
 
         LinearizerBase::free();
@@ -301,17 +366,6 @@ namespace Hermes
         for (int i = 0; i < this->triangle_count; i++)
         {
           fprintf(f, "5\n");    // The "5" means triangle in VTK.
-        }
-
-        // This outputs double solution values. Look into Hermes2D/src/output/vtk.cpp
-        // for how it is done for vectors.
-        fprintf(f, "\n");
-        fprintf(f, "CELL_DATA %d\n", this->triangle_count);
-        fprintf(f, "SCALARS %s %s %d\n", "Mesh", "float", 1);
-        fprintf(f, "LOOKUP_TABLE %s\n", "default");
-        for (int i = 0; i < this->triangle_count; i++)
-        {
-          fprintf(f, "%i\n", this->tris_orders[i]);
         }
 
         unlock_data();
@@ -391,8 +445,8 @@ namespace Hermes
       template HERMES_API void Orderizer::save_orders_vtk<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, const char* file_name);
       template HERMES_API void Orderizer::save_mesh_vtk<double>(const SpaceSharedPtr<double> space, const char* file_name);
       template HERMES_API void Orderizer::save_mesh_vtk<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, const char* file_name);
-      template HERMES_API void Orderizer::process_space<double>(const SpaceSharedPtr<double> space);
-      template HERMES_API void Orderizer::process_space<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space);
+      template HERMES_API void Orderizer::process_space<double>(const SpaceSharedPtr<double> space, bool);
+      template HERMES_API void Orderizer::process_space<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, bool);
     }
   }
 }
