@@ -335,13 +335,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::set_element_order(int id, int order)
+    void Space<Scalar>::set_element_order(int id, int order, int order_v)
     {
-      set_element_order_internal(id, order);
+      set_element_order_internal(id, order, order_v);
     }
 
     template<typename Scalar>
-    void Space<Scalar>::set_element_order_internal(int id, int order)
+    void Space<Scalar>::set_element_order_internal(int id, int order, int order_v)
     {
       if(id < 0 || id >= mesh->get_max_element_id())
         throw Hermes::Exceptions::Exception("Space<Scalar>::set_element_order_internal: Invalid element id.");
@@ -349,7 +349,10 @@ namespace Hermes
       resize_tables();
 
       if(mesh->get_element(id)->is_quad() && get_type() != HERMES_L2_SPACE && get_type() != HERMES_L2_MARKERWISE_CONST_SPACE && H2D_GET_V_ORDER(order) == 0)
-        order = H2D_MAKE_QUAD_ORDER(order, order);
+        if(order_v != -1)
+          order = H2D_MAKE_QUAD_ORDER(order, order_v);
+        else
+          order = H2D_MAKE_QUAD_ORDER(order, order);
 
       edata[id].order = order;
       seq = g_space_seq++;
@@ -1323,7 +1326,7 @@ namespace Hermes
       }
       else if(strcmp(spaceType,"l2-markerwise"))
       {
-				space = new L2MarkerWiseConstSpace<Scalar>(mesh);
+        space = new L2MarkerWiseConstSpace<Scalar>(mesh);
 
         if(shapeset)
           Hermes::Mixins::Loggable::Static::warn("L2MarkerWiseConstSpace does not need a shapeset when loading.");
@@ -1484,7 +1487,7 @@ namespace Hermes
         space->edata[index_coeff++].bdof = bson_iterator_int(&it);
 
       bson_find(&it_coeffs, &br, "ns");
-			bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
       bson_iterator_init(&it, &sub);
       index_coeff = 0;
       while (bson_iterator_next(&it))
@@ -1556,7 +1559,7 @@ namespace Hermes
         this->edata[index_coeff++].bdof = bson_iterator_int(&it);
 
       bson_find(&it_coeffs, &br, "ns");
-			bson_iterator_subobject_init(&it_coeffs, &sub, 0);
+      bson_iterator_subobject_init(&it_coeffs, &sub, 0);
       bson_iterator_init(&it, &sub);
       index_coeff = 0;
       while (bson_iterator_next(&it))

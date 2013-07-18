@@ -163,7 +163,7 @@ namespace Hermes
 
       /// Sets element polynomial order. Can be called by the user. Should not be called
       /// for many elements at once, since assign_dofs() is called at the end of this function.
-      virtual void set_element_order(int id, int order);
+      virtual void set_element_order(int id, int order, int order_v = -1);
 
       /// Sets polynomial order to all elements.
       virtual void set_element_orders(int* elem_orders);
@@ -284,7 +284,7 @@ namespace Hermes
 
       /// Sets element polynomial order. This version does not call assign_dofs() and is
       /// intended primarily for internal use.
-      virtual void set_element_order_internal(int id, int order);
+      virtual void set_element_order_internal(int id, int order, int order_v = -1);
 
       /// \brief Builds basis functions and assigns DOF numbers to them.
       /// \details This functions must be called \b after assigning element orders, and \b before
