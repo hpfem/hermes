@@ -61,6 +61,9 @@ namespace Hermes
       /// This method loads a single mesh from a file.
       virtual void load(const char *filename, MeshSharedPtr mesh);
 
+      /// This method loads a single mesh from a XML structure.
+      virtual void load(std::auto_ptr<XMLMesh::mesh> & parsed_xml_mesh, MeshSharedPtr mesh);
+
       /// This method saves a single mesh to a file.
       void save(const char *filename, MeshSharedPtr mesh);
 
@@ -68,6 +71,11 @@ namespace Hermes
       /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the file.
       ///&nbsp;         also the order is determined by the order in the file.
       void load(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
+
+      /// This method loads multiple meshes according to subdomains described in the meshfile.
+      /// \param[in] meshes Meshes to be loaded, the number must correspond to the subdomains described in the provided XML structure.
+      ///&nbsp;         also the order is determined by the order in the file.
+      void load(std::auto_ptr<XMLSubdomains::domain> & parsed_xml_domain, Hermes::vector<MeshSharedPtr > meshes);
 
       /// This method saves multiple meshes according to subdomains in the vector meshes.
       void save(const char *filename, Hermes::vector<MeshSharedPtr > meshes);
