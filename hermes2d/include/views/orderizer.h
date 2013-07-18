@@ -35,7 +35,7 @@ namespace Hermes
         ~Orderizer();
 
         template<typename Scalar>
-        void process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders = true);
+        void process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders = false);
 
         /// Saves a MeshFunction (Solution, Filter) in VTK format.
         template<typename Scalar>
