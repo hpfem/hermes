@@ -144,8 +144,8 @@ namespace Hermes
     {
     public:
       DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-      using LinearMatrixSolver<Scalar>::solve;
-      void solve(Scalar* initial_guess);
+      virtual void solve() = 0;
+      virtual void solve(Scalar* initial_guess);
     };
 
     /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
