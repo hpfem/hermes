@@ -695,6 +695,9 @@ namespace Hermes
                 {
                   if(e->cm->nurbs[i]->arc)
                     arcs.push_back(arc_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i]->angle));
+                  else
+                    throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
+                  
                   vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
                 }
 
