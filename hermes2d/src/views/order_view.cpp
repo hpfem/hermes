@@ -248,8 +248,8 @@ namespace Hermes
           "  Esc, Q - quit";
       }
 
-      template HERMES_API void OrderView::show<double>(const SpaceSharedPtr<double> space);
-      template HERMES_API void OrderView::show<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space);
+      template HERMES_API void OrderView::show<double>(const SpaceSharedPtr<double> space, bool);
+      template HERMES_API void OrderView::show<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, bool);
     }
   }
 }
