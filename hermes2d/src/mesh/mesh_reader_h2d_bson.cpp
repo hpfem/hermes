@@ -363,6 +363,7 @@ namespace Hermes
         refinement_types[index_coeff++] = bson_iterator_int(&it);
 
       bson_destroy(&br);
+      ::free(datar);
 
       // perform initial refinements
       for (unsigned int refinement_i = 0; refinement_i < refinement_count; refinement_i++)
@@ -1110,6 +1111,7 @@ namespace Hermes
           meshes[subdomains_i]->initial_single_check();
       }
       bson_destroy(&br);
+      ::free(datar);
     }
 
     void MeshReaderH2DBSON::load_domain(bson& br, MeshSharedPtr mesh, std::map<int, int>& vertex_is, std::map<int, int>& element_is, std::map<int, int>& edge_is,

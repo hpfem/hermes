@@ -1649,6 +1649,7 @@ namespace Hermes
       }
 
       bson_destroy(&br);
+      ::free(datar);
 
       init_dxdy_buffer();
     }
@@ -1775,6 +1776,7 @@ namespace Hermes
       }
 
       bson_destroy(&br);
+      ::free(datar);
 
       init_dxdy_buffer();
     }
