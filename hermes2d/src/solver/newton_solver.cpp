@@ -684,7 +684,7 @@ namespace Hermes
         // The whole loop is skipped if the jacobian is not suitable for being reused at all.
         while(this->jacobian_reusable && (this->reuse_jacobian_values() || force_reuse_jacobian_values(successful_steps_jacobian)))
         {
-          residual_back->set_vector(residual);
+          this->residual_back->set_vector(this->residual);
 
           // Info & handle the situation as necessary.
           this->info("\t\treusing Jacobian.");
