@@ -54,6 +54,7 @@ namespace Hermes
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::showInternalWarnings, new Parameter(0)));
 #endif
     this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::useAccelerators, new Parameter(1)));
+    this->parameters.insert(std::pair<HermesCommonApiParam, Parameter*> (Hermes::checkMeshesOnLoad, new Parameter(1)));
     
     // Set handlers.
 #ifdef WITH_PARALUTION

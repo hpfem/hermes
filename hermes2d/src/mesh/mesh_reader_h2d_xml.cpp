@@ -41,7 +41,7 @@ namespace Hermes
 
         // init
         std::auto_ptr<XMLMesh::mesh> parsed_xml_mesh(XMLMesh::mesh_(filename, parsing_flags));
-        
+
         // load
         load(parsed_xml_mesh, mesh);
       }
@@ -64,7 +64,7 @@ namespace Hermes
 
         // load
         load(parsed_xml_mesh, mesh, vertex_is);
-        
+
         // refinements.
         if(parsed_xml_mesh->refinements().present() && parsed_xml_mesh->refinements()->ref().size() > 0)
         {
@@ -79,7 +79,8 @@ namespace Hermes
               mesh->refine_element_id(element_id, refinement_type);
           }
         }
-        mesh->initial_single_check();
+        if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+          mesh->initial_single_check();
       }
       catch (const xml_schema::exception& e)
       {
@@ -192,7 +193,7 @@ namespace Hermes
 
         // load
         load(parsed_xml_domain, global_mesh, vertex_is, element_is, edge_is);
-        
+
         int max_vertex_i = -1;
         for(std::map<int, int>::iterator it = vertex_is.begin(); it != vertex_is.end(); it++)
           if(it->first > max_vertex_i)
@@ -383,7 +384,7 @@ namespace Hermes
             {
               int elementI = parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i);
               if(elementI > max_element_i)
-                  throw Exceptions::MeshLoadFailureException("Wrong element number:%i in subdomain %u.", elementI, subdomains_i);
+                throw Exceptions::MeshLoadFailureException("Wrong element number:%i in subdomain %u.", elementI, subdomains_i);
 
               elements_existing[element_is[parsed_xml_domain->subdomains().subdomain().at(subdomains_i).elements()->i().at(element_number_i)]] = elementI;
             }
@@ -459,7 +460,7 @@ namespace Hermes
               }
 
               if(edge == NULL)
-                  throw Exceptions::MeshLoadFailureException("Wrong boundary-edge number:%i in subdomain %u.", parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i), subdomains_i);
+                throw Exceptions::MeshLoadFailureException("Wrong boundary-edge number:%i in subdomain %u.", parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(boundary_edge_number_i), subdomains_i);
 
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if(en == NULL)
@@ -487,7 +488,7 @@ namespace Hermes
               }
 
               if(edge == NULL)
-                  throw Exceptions::MeshLoadFailureException("Wrong inner-edge number:%i in subdomain %u.", parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(inner_edge_number_i), subdomains_i);
+                throw Exceptions::MeshLoadFailureException("Wrong inner-edge number:%i in subdomain %u.", parsed_xml_domain->subdomains().subdomain().at(subdomains_i).boundary_edges()->i().at(inner_edge_number_i), subdomains_i);
 
               Node* en = meshes[subdomains_i]->peek_edge_node(vertex_vertex_numbers.find(edge->v1())->second, vertex_vertex_numbers.find(edge->v2())->second);
               if(en == NULL)
@@ -600,7 +601,8 @@ namespace Hermes
             delete [] elements_existing;
           }
           meshes[subdomains_i]->seq = g_mesh_seq++;
-          meshes[subdomains_i]->initial_single_check();
+          if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+            meshes[subdomains_i]->initial_single_check();
         }
       }
       catch (const xml_schema::exception& e)
@@ -644,7 +646,7 @@ namespace Hermes
 
         // Refinements.
         XMLMesh::refinements_type refinements;
-        
+
         // Mapping of top vertices of subdomains to the global mesh.
         std::map<unsigned int, unsigned int> vertices_to_vertices;
 
@@ -739,8 +741,8 @@ namespace Hermes
                   vertices_to_boundaries.insert(std::pair<std::pair<unsigned int, unsigned int>, unsigned int>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), edge_i));
                   edges.ed().push_back(XMLSubdomains::ed(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, meshes[meshes_i]->boundary_markers_conversion.get_user_marker(meshes[meshes_i]->get_base_edge_node(e, i)->marker).marker.c_str(), edge_i));
                 }
-              if(!hasAllElements)
-                subdomain.inner_edges()->i().push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
+                if(!hasAllElements)
+                  subdomain.inner_edges()->i().push_back(vertices_to_boundaries.find(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)))->second);
               }
             }
         }
@@ -759,12 +761,12 @@ namespace Hermes
                   vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
                 }
 
-        // save refinements
-        for(unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
-          refinements.ref().push_back(XMLMesh::ref(meshes[meshes_i]->refinements[refinement_i].first, meshes[meshes_i]->refinements[refinement_i].second));
+                // save refinements
+                for(unsigned int refinement_i = 0; refinement_i < meshes[meshes_i]->refinements.size(); refinement_i++)
+                  refinements.ref().push_back(XMLMesh::ref(meshes[meshes_i]->refinements[refinement_i].first, meshes[meshes_i]->refinements[refinement_i].second));
 
-        subdomain.refinements().set(refinements);
-        subdomains.subdomain().push_back(subdomain);
+                subdomain.refinements().set(refinements);
+                subdomains.subdomain().push_back(subdomain);
       }
 
       delete [] baseElementsSaved;

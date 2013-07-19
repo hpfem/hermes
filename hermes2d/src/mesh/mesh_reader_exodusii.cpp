@@ -65,7 +65,7 @@ namespace Hermes
       err = ex_get_init(exoid, title, &n_dims, &n_nodes, &n_elems, &n_eblocks, &n_nodesets, &n_sidesets);
       if(n_dims != 2)
         throw Hermes::Exceptions::Exception("File '%s' does not contain 2D mesh", file_name);
-        
+
       // load coordinates
       double *x = new double[n_nodes];
       double *y = new double[n_nodes];

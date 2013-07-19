@@ -378,7 +378,8 @@ namespace Hermes
       delete [] refined_elements;
       delete [] refinement_types;
 
-      mesh->initial_single_check();
+      if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+        mesh->initial_single_check();
     }
 
     void MeshReaderH2DBSON::save(const char *filename, MeshSharedPtr mesh)
@@ -697,7 +698,7 @@ namespace Hermes
                     arcs.push_back(arc_BSON(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second, e->cm->nurbs[i]->angle));
                   else
                     throw Exceptions::Exception("BSON mesh loader can not operate with general NURBS so far.");
-                  
+
                   vertices_to_curves.insert(std::pair<std::pair<unsigned int, unsigned int>, bool>(std::pair<unsigned int, unsigned int>(std::min(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second), std::max(vertices_to_vertices.find(e->vn[i]->id)->second, vertices_to_vertices.find(e->vn[e->next_vert(i)]->id)->second)), true));
                 }
 
@@ -1105,7 +1106,8 @@ namespace Hermes
           delete [] elements_existing;
         }
         meshes[subdomains_i]->seq = g_mesh_seq++;
-        meshes[subdomains_i]->initial_single_check();
+        if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+          meshes[subdomains_i]->initial_single_check();
       }
       bson_destroy(&br);
     }

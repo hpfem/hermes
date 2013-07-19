@@ -381,7 +381,8 @@ namespace Hermes
       mesh->ninitial = mesh->elements.get_num_items();
 
       mesh->seq = g_mesh_seq++;
-      mesh->initial_single_check();
+      if(HermesCommonApi.get_integral_param_value(checkMeshesOnLoad))
+        mesh->initial_single_check();
     }
 
     void MeshReaderH2D::save_refinements(MeshSharedPtr mesh, FILE* f, Element* e, int id, bool& first)
