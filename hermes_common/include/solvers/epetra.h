@@ -30,6 +30,9 @@
 #include <Epetra_Vector.h>
 #include <Epetra_CrsGraph.h>
 #include <Epetra_CrsMatrix.h>
+#include <EpetraExt_MatrixMatrix.h>
+#include <EpetraExt_RowMatrixOut.h>
+#include <EpetraExt_VectorOut.h>
 
 namespace Hermes
 {
@@ -55,6 +58,7 @@ namespace Hermes
     {
     public:
       EpetraMatrix();
+      EpetraMatrix(const EpetraMatrix &mat);
       EpetraMatrix(Epetra_RowMatrix &mat);
       virtual ~EpetraMatrix();
 
@@ -74,8 +78,10 @@ namespace Hermes
       virtual void add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat);
       virtual void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
       virtual void multiply_with_Scalar(Scalar value);
+      
+      virtual void add_sparse_matrix(SparseMatrix<Scalar>* mat);
 
-      EpetraMatrix* duplicate() { throw Hermes::Exceptions::Exception("EpetraMatrix::duplicate() not implemented yet."); }
+      EpetraMatrix* duplicate() { return new EpetraMatrix<Scalar>(*this); }
       
       virtual void add_as_block(unsigned int i, unsigned int j, EpetraMatrix<Scalar>* mat);
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
@@ -83,13 +89,14 @@ namespace Hermes
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
-
+      
     protected:
       Epetra_BlockMap *std_map;
       Epetra_CrsGraph *grph;
       Epetra_CrsMatrix *mat;
       /// \brief Imaginary part of the matrix, mat holds the real part.
       Epetra_CrsMatrix *mat_im;
+            
       bool owner;
 
       friend class Hermes::Solvers::AmesosSolver<Scalar>;
