@@ -61,6 +61,7 @@ namespace Hermes
       virtual void create(Matrix<Scalar> *mat) = 0;
       virtual void destroy() = 0;
       virtual void compute() = 0;
+      virtual void recompute() = 0;
 
 #ifdef HAVE_EPETRA
       virtual Epetra_Operator *get_obj() = 0;
