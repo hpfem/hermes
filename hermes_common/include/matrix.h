@@ -310,7 +310,7 @@ namespace Hermes
     public:
       /// get size of matrix
       /// @return size of matrix
-      unsigned int get_size() { return this->size;};
+      unsigned int get_size() const { return this->size;};
 
       /// constructor of matrix
       /// @param[in] size size of matrix
@@ -385,6 +385,7 @@ namespace Hermes
       /// Constructor of sparse matrix
       /// @param[in] size size of matrix
       SparseMatrix(unsigned int size);
+      SparseMatrix(const SparseMatrix<Scalar>& mat);
       virtual ~SparseMatrix();
 
       /// prepare memory
@@ -400,8 +401,6 @@ namespace Hermes
 
       /// Finish manipulation with matrix (called before solving)
       virtual void finish() { }
-
-      virtual unsigned int get_size() { return this->size; }
 
       /// Add matrix
       /// @param mat matrix to add
