@@ -36,7 +36,7 @@ namespace Hermes
     ///
     /// @ingroup preconds
     template <typename Scalar>
-    class HERMES_API MlPrecond : public Precond<Scalar>
+    class HERMES_API MlPrecond : public EpetraPrecond<Scalar>
     {
     public:
       /// @param[in] type - type of the preconditioner[ sa | dd ]
@@ -49,6 +49,7 @@ namespace Hermes
 
       void set_param(const char *name, const char *value);
       void set_param(const char *name, int value);
+      void set_param(const char *name, bool value);
       void set_param(const char *name, double value);
     protected:
       virtual Epetra_Operator *get_obj() { return prec; }
@@ -59,6 +60,8 @@ namespace Hermes
       virtual void destroy();
       /// Compute the preconditioner.
       virtual void compute();
+      /// Cheaply recompute the preconditioner if matrix values have changed but not their non-zero structure.
+      virtual void recompute();
 
       void print_unused();
 

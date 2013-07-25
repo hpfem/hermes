@@ -37,7 +37,7 @@ namespace Hermes
     ///
     /// @ingroup preconds
     template <typename Scalar>
-    class HERMES_API IfpackPrecond: public Precond<Scalar>
+    class HERMES_API IfpackPrecond: public EpetraPrecond<Scalar>
     {
     public:
       /// Constructor for relaxation methods.
@@ -64,6 +64,7 @@ namespace Hermes
       virtual void create(Matrix<Scalar> *mat);
       virtual void destroy() { }
       virtual void compute();
+      virtual void recompute() { destroy(); compute(); }
 
       // Epetra_Operator interface
       virtual int ApplyInverse(const Epetra_MultiVector &r, Epetra_MultiVector &z) const;

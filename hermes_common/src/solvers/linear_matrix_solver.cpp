@@ -40,6 +40,8 @@ namespace Hermes
     {
       sln = NULL;
       time = -1.0;
+      n_eq = 1;
+      node_wise_ordering = false;
     }
 
     template<typename Scalar>
@@ -77,6 +79,21 @@ namespace Hermes
     void LinearMatrixSolver<Scalar>::set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme) 
     {
       this->reuse_scheme = reuse_scheme; 
+    }
+    
+    template<typename Scalar>
+    void LinearMatrixSolver<Scalar>::use_node_wise_ordering(unsigned int num_pdes)
+    {
+      this->reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH;
+      this->n_eq = num_pdes;
+      this->node_wise_ordering = true;
+    }
+    
+    template<typename Scalar>
+    void LinearMatrixSolver<Scalar>::use_equations_wise_ordering()
+    {
+      this->reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH; 
+      this->node_wise_ordering = false;
     }
 
     template<>

@@ -146,6 +146,35 @@ namespace Hermes
       row_storage = false;
       col_storage = false;
     }
+    
+    template<typename Scalar>
+    SparseMatrix<Scalar>::SparseMatrix(const SparseMatrix<Scalar>& mat)
+    {
+      this->size = mat.get_size();
+      
+      if (mat.pages)
+      {
+        this->pages = new Page *[this->size];
+        memset(this->pages, 0, this->size * sizeof(Page *));
+      
+        for (int col = 0; col < this->size; col++)
+        {
+          Page *page = mat.pages[col];
+          Page *new_page = new Page;
+          new_page->count = page->count;
+          memcpy(new_page->idx, page->idx, sizeof(int) * page->count);
+          new_page->next = this->pages[col];
+          this->pages[col] = new_page; 
+        }
+      }
+      else
+      {
+        this->pages = NULL;
+      }
+      
+      row_storage = false;
+      col_storage = false;
+    }
 
     template<typename Scalar>
     SparseMatrix<Scalar>::~SparseMatrix()

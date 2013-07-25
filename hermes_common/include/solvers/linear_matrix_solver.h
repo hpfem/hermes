@@ -125,6 +125,10 @@ namespace Hermes
 
       /// Set factorization scheme to default.
       virtual void set_reuse_scheme();
+      
+      /// Set matrix ordering in the case of a system of PDEs.
+      virtual void use_node_wise_ordering(unsigned int num_pdes);
+      virtual void use_equations_wise_ordering();
 
     protected:
       /// Factorization scheme
@@ -135,6 +139,11 @@ namespace Hermes
 
       ///< Time spent on solving (in secs).
       double time;
+      
+      /// Number of equations in a system of PDEs.
+      unsigned int n_eq;
+      
+      bool node_wise_ordering;
     };
 
     /// \brief Base class for defining interface for direct linear solvers.

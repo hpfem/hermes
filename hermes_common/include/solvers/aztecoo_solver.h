@@ -26,7 +26,9 @@
 #include "epetra.h"
 #include "linear_matrix_solver.h"
 #include "precond_ifpack.h"
+#include "precond_ml.h"
 #include <AztecOO.h>
+#include <EpetraExt_Permutation.h>
 
 namespace Hermes
 {
@@ -57,6 +59,11 @@ namespace Hermes
       /// \brief Set preconditioner from IFPACK or ML.
       /// @param[in] pc - IFPACK or ML preconditioner
       virtual void set_precond(Precond<Scalar> *pc);
+      
+      virtual void set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme);
+      
+      virtual void use_node_wise_ordering(unsigned int num_pdes);
+      virtual void use_equations_wise_ordering();
 
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();
@@ -79,6 +86,15 @@ namespace Hermes
       AztecOO aztec;    ///< Instance of the Aztec solver.
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
+      
+      int *row_perm;
+      int *col_perm;
+      EpetraExt::Permutation<Epetra_CrsMatrix> *P;
+      EpetraExt::Permutation<Epetra_CrsMatrix> *Q;
+      EpetraMatrix<Scalar> *final_matrix;
+      
+      void create_permutation_vectors();
+      void free_permutation_data();
 
       EpetraPrecond<Scalar> *pc;
       

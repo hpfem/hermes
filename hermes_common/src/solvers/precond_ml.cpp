@@ -31,6 +31,7 @@ namespace Hermes
       this->mat = NULL;
 
       if(strcmp(type, "sa") == 0) ML_Epetra::SetDefaults("SA", mlist);
+      else if(strcmp(type, "nssa") == 0) ML_Epetra::SetDefaults("NSSA", mlist);
       else if(strcmp(type, "dd") == 0) ML_Epetra::SetDefaults("DD", mlist);
     }
 
@@ -59,6 +60,12 @@ namespace Hermes
     {
       mlist.set(name, value);
     }
+    
+    template<typename Scalar>
+    void MlPrecond<Scalar>::set_param(const char *name, bool value)
+    {
+      mlist.set(name, value);
+    }
 
     template<typename Scalar>
     void MlPrecond<Scalar>::set_param(const char *name, double value)
@@ -72,7 +79,7 @@ namespace Hermes
       EpetraMatrix<Scalar> *mt = static_cast<EpetraMatrix<Scalar> *>(m);
       assert(mt != NULL);
       mat = mt;
-      delete prec;
+      if (prec) delete prec;
       prec = new ML_Epetra::MultiLevelPreconditioner(*mat->mat, mlist, false);
     }
 
@@ -88,6 +95,14 @@ namespace Hermes
     {
       assert(prec != NULL);
       prec->ComputePreconditioner();
+    }
+    
+    template<typename Scalar>
+    void MlPrecond<Scalar>::recompute()
+    {
+      assert(prec != NULL);
+      assert(prec->IsPreconditionerComputed());
+      prec->ReComputePreconditioner();
     }
 
     template<typename Scalar>
