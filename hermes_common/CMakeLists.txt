@@ -1,7 +1,9 @@
 project(hermes_common)
     
   # Check for stacktrace and math library.
-  include(CMakeCommon.txt)
+  include(CheckFunctionExists)
+  CHECK_FUNCTION_EXISTS(fmemopen HAVE_FMEMOPEN)
+  CHECK_FUNCTION_EXISTS(log2 HAVE_LOG2)
 
   # Additional building steps required by MSVC.
   include(BuildAndInstallScripts)
