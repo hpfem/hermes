@@ -84,7 +84,7 @@ namespace Hermes
         void set_matrix_varname(std::string name);
         /// Sets varname for the matrix
         /// Default: "DF_MATLAB_SPARSE - matlab file".
-        void set_matrix_E_matrix_dump_format(EMatrixDumpFormat format);
+        void set_matrix_dump_format(EMatrixDumpFormat format);
         /// Sets number format for the matrix output.
         /// Default: "%lf".
         void set_matrix_number_format(char* number_format);

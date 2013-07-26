@@ -121,14 +121,14 @@ namespace Hermes
     {
       memcpy(v, this->v, this->size * sizeof(Scalar));
     }
-    
+
     template<typename Scalar>
     void UMFPackVector<Scalar>::set_vector(Vector<Scalar>* vec)
     {
       assert(this->size == vec->length());
       for (unsigned int i = 0; i < this->size; i++) this->v[i] = vec->get(i);
     }
-    
+
     template<typename Scalar>
     void UMFPackVector<Scalar>::set_vector(Scalar* vec)
     {
@@ -174,6 +174,13 @@ namespace Hermes
           hermes_fwrite("HERMESR\001", 1, 8, file);
           int ssize = sizeof(double);
           hermes_fwrite(&ssize, sizeof(int), 1, file);
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(v, sizeof(double), this->size, file);
+          return true;
+        }
+
+      case DF_HERMES_MATLAB_BIN:
+        {
           hermes_fwrite(&this->size, sizeof(int), 1, file);
           hermes_fwrite(v, sizeof(double), this->size, file);
           return true;

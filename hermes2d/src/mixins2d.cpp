@@ -152,7 +152,7 @@ namespace Hermes
         this->matrixVarname = name;
       }
       template<typename Scalar>
-      void MatrixRhsOutput<Scalar>::set_matrix_E_matrix_dump_format(EMatrixDumpFormat format)
+      void MatrixRhsOutput<Scalar>::set_matrix_dump_format(EMatrixDumpFormat format)
       {
         this->matrixFormat = format;
       }

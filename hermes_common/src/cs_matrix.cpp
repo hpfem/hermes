@@ -379,25 +379,30 @@ namespace Hermes
         fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
           this->size, this->size, nnz, nnz);
         for (unsigned int j = 0; j < this->size; j++)
+        {
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
             Hermes::Helpers::fprint_num(file, Ax[i], number_format);
             fprintf(file, "\n");
           }
-          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+        }
+        fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
-          return true;
+        return true;
 
       case DF_MATRIX_MARKET:
         {
           fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
           int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
+          {
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               if((int)j <= Ai[i]) nnz_sym++;
+          }
           fprintf(file, "%d %d %d\n", this->size, this->size, nnz_sym);
           for (unsigned int j = 0; j < this->size; j++)
+          {
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               // The following line was replaced with the one below, because it gave a warning
                 // to cause code abort at runtime.
@@ -408,8 +413,8 @@ namespace Hermes
                       Hermes::Helpers::fprint_num(file, Ax[i], number_format);
                       fprintf(file, "\n");
                     }
-
-                    return true;
+          }
+          return true;
         }
 
       case DF_HERMES_BIN:
@@ -425,8 +430,22 @@ namespace Hermes
           return true;
         }
 
+        case DF_HERMES_MATLAB_BIN:
+        {
+          int ssize = sizeof(double);
+          int njc = this->size+1;
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&njc, sizeof(int), 1, file); 
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file); 
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(double), nnz, file);
+          return true;
+        }
+
       case DF_PLAIN_ASCII:
-        exit(1);
         {
           const double zero_cutoff = Hermes::epsilon;
           double *ascii_entry_buff = new double[nnz];
@@ -484,15 +503,17 @@ namespace Hermes
         fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
           this->size, this->size, nnz, nnz);
         for (unsigned int j = 0; j < this->size; j++)
+        {
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
             Hermes::Helpers::fprint_num(file, Ax[i], number_format);
             fprintf(file, "\n");
           }
-          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+        }
+        fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
-          return true;
+        return true;
 
       case DF_MATRIX_MARKET:
         {
@@ -503,6 +524,7 @@ namespace Hermes
               if((int)j <= Ai[i]) nnz_sym++;
           fprintf(file, "%d %d %d\n", this->size, this->size, nnz_sym);
           for (unsigned int j = 0; j < this->size; j++)
+          {
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               // The following line was replaced with the one below, because it gave a warning
                 // to cause code abort at runtime.
@@ -513,8 +535,8 @@ namespace Hermes
                       Hermes::Helpers::fprint_num(file, Ax[i], number_format);
                       fprintf(file, "\n");
                     }
-
-                    return true;
+          }
+          return true;
         }
 
       case DF_HERMES_BIN:
@@ -530,8 +552,22 @@ namespace Hermes
           return true;
         }
 
+        case DF_HERMES_MATLAB_BIN:
+        {
+          int ssize = sizeof(double);
+          int njc = this->size+1;
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&njc, sizeof(int), 1, file); 
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file); 
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(double), nnz, file);
+          return true;
+        }
+
       case DF_PLAIN_ASCII:
-        exit(1);
         {
           const double zero_cutoff = Hermes::epsilon;
           std::complex<double> *ascii_entry_buff = new std::complex<double>[nnz];
@@ -719,25 +755,30 @@ namespace Hermes
         fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
           this->size, this->size, nnz, nnz);
         for (unsigned int j = 0; j < this->size; j++)
+        {
           for (int i = Ap[j]; i < Ap[j + 1]; i++)
           {
             fprintf(file, "%d %d ", j + 1, Ai[i] + 1);
             Hermes::Helpers::fprint_num(file, Ax[i], number_format);
             fprintf(file, "\n");
           }
-          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+        }
+        fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
 
-          return true;
+        return true;
 
       case DF_MATRIX_MARKET:
         {
           fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
           int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
+          {
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               if((int)j <= Ai[i]) nnz_sym++;
+          }
           fprintf(file, "%d %d %d\n", this->size, this->size, nnz_sym);
           for (unsigned int j = 0; j < this->size; j++)
+          {
             for (int i = Ap[j]; i < Ap[j + 1]; i++)
               // The following line was replaced with the one below, because it gave a warning
                 // to cause code abort at runtime.
@@ -748,8 +789,8 @@ namespace Hermes
                       Hermes::Helpers::fprint_num(file, Ax[i], number_format);
                       fprintf(file, "\n");
                     }
-
-                    return true;
+          }
+          return true;
         }
 
       case DF_HERMES_BIN:
@@ -765,8 +806,22 @@ namespace Hermes
           return true;
         }
 
+        case DF_HERMES_MATLAB_BIN:
+        {
+          int ssize = sizeof(double);
+          int njc = this->size+1;
+          hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&njc, sizeof(int), 1, file); 
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file); 
+          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
+          hermes_fwrite(Ai, sizeof(int), nnz, file);
+          hermes_fwrite(Ax, sizeof(double), nnz, file);
+          return true;
+        }
+
       case DF_PLAIN_ASCII:
-        exit(1);
         {
           const double zero_cutoff = Hermes::epsilon;
           double *ascii_entry_buff = new double[nnz];
