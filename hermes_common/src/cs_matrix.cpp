@@ -419,10 +419,14 @@ namespace Hermes
 
       case DF_HERMES_BIN:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
+          //hermes_fwrite("HERMESX\001", 1, 8, file);
           int ssize = sizeof(double);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          int njc = this->size+1;
+          //hermes_fwrite(&ssize, sizeof(int), 1, file);
           hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&njc, sizeof(int), 1, file); 
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
           hermes_fwrite(&nnz, sizeof(int), 1, file);
           hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
           hermes_fwrite(Ai, sizeof(int), nnz, file);
@@ -541,10 +545,14 @@ namespace Hermes
 
       case DF_HERMES_BIN:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
+          //hermes_fwrite("HERMESX\001", 1, 8, file);
           int ssize = sizeof(std::complex<double>);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          int njc = this->size+1;
+          //hermes_fwrite(&ssize, sizeof(int), 1, file);
           hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&njc, sizeof(int), 1, file); 
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
           hermes_fwrite(&nnz, sizeof(int), 1, file);
           hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
           hermes_fwrite(Ai, sizeof(int), nnz, file);
@@ -795,10 +803,14 @@ namespace Hermes
 
       case DF_HERMES_BIN:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
+          //hermes_fwrite("HERMESX\001", 1, 8, file);
           int ssize = sizeof(double);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
+          int njc = this->size+1;
+          //hermes_fwrite(&ssize, sizeof(int), 1, file);
           hermes_fwrite(&this->size, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
+          hermes_fwrite(&njc, sizeof(int), 1, file);
+          hermes_fwrite(&nnz, sizeof(int), 1, file);
           hermes_fwrite(&nnz, sizeof(int), 1, file);
           hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
           hermes_fwrite(Ai, sizeof(int), nnz, file);
