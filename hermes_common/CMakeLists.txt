@@ -201,5 +201,5 @@ project(hermes_common)
 
   file(GLOB INC_COMMON    "include/*.h")
   file(GLOB INC_SOLVER    "include/solvers/*.h")
-  install(FILES ${INC_COMMON}    DESTINATION ${TARGET_ROOT}/include/hermes_common)
-  install(FILES ${INC_SOLVER}    DESTINATION ${TARGET_ROOT}/include/hermes_common/solvers)
+  install(FILES ${INC_COMMON}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common)
+  install(FILES ${INC_SOLVER}    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/hermes_common/solvers)
