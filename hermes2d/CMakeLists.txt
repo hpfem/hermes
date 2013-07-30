@@ -1,8 +1,17 @@
 project(hermes2d)
   # Generating classes for XML mesh parsing according to your version of XSD.
-  message("Hermes2D: Generating classes for XML mesh parsing according to your version of XSD.")
+  
+  set(MESH_FILE_H "include/mesh/mesh_h2d_xml.h")
+  set(MESH_FILE_CPP "src/mesh/mesh_h2d_xml.cpp")
+  
+  add_custom_target(meshFilesXSD ALL DEPENDS ${MESH_FILE_H} ${MESH_FILE_CPP})
+  
   if(WIN32)
-    execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_win.bat" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
+    ADD_CUSTOM_COMMAND(
+    OUTPUT ${MESH_FILE_H} ${MESH_FILE_CPP}
+    COMMAND "xsd" ARGS "cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/mesh xml_schemas/mesh_h2d_xml.xsd"
+    DEPENDS
+    ${PROJECT_SOURCE_DIR}/xml_schemas/mesh_h2d_xml.xsd ${MESH_FILE_H} ${MESH_FILE_CPP})
   else(WIN32)
     execute_process(COMMAND "chmod" "700" "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/")
     execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
