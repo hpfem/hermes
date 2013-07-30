@@ -1,22 +1,31 @@
 project(hermes2d)
+
   # Generating classes for XML mesh parsing according to your version of XSD.
-  
-  set(MESH_FILE_H "include/mesh/mesh_h2d_xml.h")
-  set(MESH_FILE_CPP "src/mesh/mesh_h2d_xml.cpp")
-  
-  add_custom_target(meshFilesXSD ALL DEPENDS ${MESH_FILE_H} ${MESH_FILE_CPP})
+  include(BuildAndInstallScripts)
+
+  set(MESH_2D_XML_H "include/mesh/mesh_h2d_xml.h")
+  set(MESH_2D_XML_CPP "src/mesh/mesh_h2d_xml.cpp")
+  GENERATE_XSD_FILES(XSDMesh2D ${MESH_2D_XML_H} ${MESH_2D_XML_CPP} xml_schemas/mesh_h2d_xml.xsd mesh)
+  set(MESH_1D_XML_H "include/mesh/mesh_h1d_xml.h")
+  set(MESH_1D_XML_CPP "src/mesh/mesh_h1d_xml.cpp")
+  GENERATE_XSD_FILES(XSDMesh1D ${MESH_1D_XML_H} ${MESH_1D_XML_CPP} xml_schemas/mesh_h1d_xml.xsd mesh)
+  set(SOLUTION_XML_H "include/mesh/solution_h2d_xml.h")
+  set(SOLUTION_XML_CPP "src/mesh/solution_h2d_xml.cpp")
+  GENERATE_XSD_FILES(XSDSolution2D ${SOLUTION_XML_H} ${SOLUTION_XML_CPP} xml_schemas/solution_h2d_xml.xsd solution)
+  set(SPACE_XML_H "include/mesh/space_h2d_xml.h")
+  set(SPACE_XML_CPP "src/mesh/space_h2d_xml.cpp")
+  GENERATE_XSD_FILES(XSDSpace2D ${SPACE_XML_H} ${SPACE_XML_CPP} xml_schemas/space_h2d_xml.xsd space)
+  set(SUBDOMAINS_XML_H "include/mesh/subdomains_h2d_xml.h")
+  set(SUBDOMAINS_XML_CPP "src/mesh/subdomains_h2d_xml.cpp")
+  GENERATE_XSD_FILES(XSDSubdomains2D ${SUBDOMAINS_XML_H} ${SUBDOMAINS_XML_CPP} xml_schemas/subdomains_h2d_xml.xsd mesh)
   
   if(WIN32)
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${MESH_FILE_H} ${MESH_FILE_CPP}
-    COMMAND "xsd" ARGS "cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/mesh xml_schemas/mesh_h2d_xml.xsd"
-    DEPENDS
-    ${PROJECT_SOURCE_DIR}/xml_schemas/mesh_h2d_xml.xsd ${MESH_FILE_H} ${MESH_FILE_CPP})
+    #execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/move_source_files.bat" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
   else(WIN32)
-    execute_process(COMMAND "chmod" "700" "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/")
-    execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/xml_schemas_generate_linux.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
+    execute_process(COMMAND "chmod" "700" "${PROJECT_SOURCE_DIR}/xml_schemas/move_source_files.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/")
+    execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/move_source_files.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
   endif(WIN32)
-
+  
   SET(H2D_XML_SCHEMAS_DIRECTORY "\"${PROJECT_SOURCE_DIR}/xml_schemas\"")
   SET(H2D_PRECALCULATED_FORMS_DIRECTORY "\"${PROJECT_SOURCE_DIR}/precalculated_forms\"")
 
@@ -620,8 +629,7 @@ project(hermes2d)
   #
   # Build and install the library.
   #
-  include(BuildAndInstallScripts)
-
+  
   # Add a target for a specified version of the Hermes library,
   # and set its build properties (compile and link flags, installation directories). Due to
   # different optional libraries for H1D, H2D and H3D, this macro is dimension-specific.
