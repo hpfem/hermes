@@ -19,13 +19,6 @@ project(hermes2d)
   set(SUBDOMAINS_XML_CPP "src/mesh/subdomains_h2d_xml.cpp")
   GENERATE_XSD_FILES(XSDSubdomains2D ${SUBDOMAINS_XML_H} ${SUBDOMAINS_XML_CPP} xml_schemas/subdomains_h2d_xml.xsd mesh)
   
-  if(WIN32)
-    #execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/move_source_files.bat" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
-  else(WIN32)
-    execute_process(COMMAND "chmod" "700" "${PROJECT_SOURCE_DIR}/xml_schemas/move_source_files.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/")
-    execute_process(COMMAND "${PROJECT_SOURCE_DIR}/xml_schemas/move_source_files.sh" WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/xml_schemas/" OUTPUT_QUIET)
-  endif(WIN32)
-  
   SET(H2D_XML_SCHEMAS_DIRECTORY "\"${PROJECT_SOURCE_DIR}/xml_schemas\"")
   SET(H2D_PRECALCULATED_FORMS_DIRECTORY "\"${PROJECT_SOURCE_DIR}/precalculated_forms\"")
 
