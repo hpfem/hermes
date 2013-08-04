@@ -371,28 +371,13 @@ namespace Hermes
     }
 
     template<>
-    bool CSCMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool CSCMatrix<double>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
-      {
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
-          this->size, this->size, nnz, nnz);
-        for (unsigned int j = 0; j < this->size; j++)
-        {
-          for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          {
-            fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-            Hermes::Helpers::fprint_num(file, Ax[i], number_format);
-            fprintf(file, "\n");
-          }
-        }
-        fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
-
-        return true;
-
+      {      
       case DF_MATRIX_MARKET:
         {
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
           int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
@@ -414,34 +399,43 @@ namespace Hermes
                       fprintf(file, "\n");
                     }
           }
+          fclose(file);
           return true;
         }
 
-      case DF_HERMES_BIN:
+        case DF_MATLAB_MAT:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
           int ssize = sizeof(double);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(double), nnz, file);
-          return true;
-        }
 
-        case DF_HERMES_MATLAB_BIN:
+#ifdef WITH_MATIO
+        mat_sparse_t sparse;
+        sparse.nzmax = this->nnz;
+        sparse.nir = this->nnz;
+        sparse.ir = Ai;
+        sparse.njc = this->size + 1;
+        sparse.jc = (int *) Ap;
+        sparse.ndata = this->nnz;
+        sparse.data = Ax;
+
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = this->size;
+
+        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+        matvar_t *matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+        if (matvar)
         {
-          int ssize = sizeof(double);
-          int njc = this->size+1;
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(&njc, sizeof(int), 1, file); 
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file); 
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(double), nnz, file);
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        Mat_Close(mat);
+#endif
           return true;
         }
 
@@ -471,10 +465,10 @@ namespace Hermes
             }
           }
 
-          fprintf(file, "%d\n", size);
-          fprintf(file, "%d\n", nnz);
+          FILE* file = fopen(filename, "w+");
           for (unsigned int k = 0; k < nnz; k++)
             fprintf(file, "%d %d %f\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k]);
+          fclose(file);
 
           //Free memory
           delete [] ascii_entry_buff;
@@ -495,28 +489,13 @@ namespace Hermes
     }
 
     template<>
-    bool CSCMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool CSCMatrix<std::complex<double> >::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
-      {
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
-          this->size, this->size, nnz, nnz);
-        for (unsigned int j = 0; j < this->size; j++)
-        {
-          for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          {
-            fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-            Hermes::Helpers::fprint_num(file, Ax[i], number_format);
-            fprintf(file, "\n");
-          }
-        }
-        fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
-
-        return true;
-
+      {      
       case DF_MATRIX_MARKET:
         {
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
           int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
@@ -536,35 +515,43 @@ namespace Hermes
                       fprintf(file, "\n");
                     }
           }
+          fclose(file);
+
           return true;
         }
 
-      case DF_HERMES_BIN:
+        case DF_MATLAB_MAT:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
-          int ssize = sizeof(std::complex<double>);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(std::complex<double>), nnz, file);
-          return true;
-        }
+#ifdef WITH_MATIO
+        mat_sparse_t sparse;
+        sparse.nzmax = this->nnz;
+        sparse.nir = this->nnz;
+        sparse.ir = Ai;
+        sparse.njc = this->size + 1;
+        sparse.jc = (int *) Ap;
+        sparse.ndata = this->nnz;
+        sparse.data = Ax;
 
-        case DF_HERMES_MATLAB_BIN:
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = this->size;
+
+        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+        matvar_t *matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+        if (matvar)
         {
-          int ssize = sizeof(double);
-          int njc = this->size+1;
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(&njc, sizeof(int), 1, file); 
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file); 
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(double), nnz, file);
-          return true;
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        Mat_Close(mat);
+#endif
+        return false;
         }
 
       case DF_PLAIN_ASCII:
@@ -593,10 +580,12 @@ namespace Hermes
             }
           }
 
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "%d\n", size);
           fprintf(file, "%d\n", nnz);
           for (unsigned int k = 0; k < nnz; k++)
             fprintf(file, "%d %d %E %E\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k].real(), ascii_entry_buff[k].imag());
+          fclose(file);
 
           //Free memory
           delete [] ascii_entry_buff;
@@ -747,28 +736,13 @@ namespace Hermes
     }
 
     template<>
-    bool CSRMatrix<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool CSRMatrix<double>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
-      {
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n",
-          this->size, this->size, nnz, nnz);
-        for (unsigned int j = 0; j < this->size; j++)
-        {
-          for (int i = Ap[j]; i < Ap[j + 1]; i++)
-          {
-            fprintf(file, "%d %d ", j + 1, Ai[i] + 1);
-            Hermes::Helpers::fprint_num(file, Ax[i], number_format);
-            fprintf(file, "\n");
-          }
-        }
-        fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
-
-        return true;
-
+      {      
       case DF_MATRIX_MARKET:
         {
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real symmetric\n");
           int nnz_sym = 0;
           for (unsigned int j = 0; j < this->size; j++)
@@ -790,35 +764,42 @@ namespace Hermes
                       fprintf(file, "\n");
                     }
           }
+          fclose(file);
           return true;
         }
 
-      case DF_HERMES_BIN:
+        case DF_MATLAB_MAT:
         {
-          hermes_fwrite("HERMESX\001", 1, 8, file);
-          int ssize = sizeof(double);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(double), nnz, file);
-          return true;
-        }
+#ifdef WITH_MATIO
+        mat_sparse_t sparse;
+        sparse.nzmax = this->nnz;
+        sparse.nir = this->nnz;
+        sparse.ir = Ai;
+        sparse.njc = this->size + 1;
+        sparse.jc = (int *) Ap;
+        sparse.ndata = this->nnz;
+        sparse.data = Ax;
 
-        case DF_HERMES_MATLAB_BIN:
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = this->size;
+
+        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+        matvar_t *matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+        if (matvar)
         {
-          int ssize = sizeof(double);
-          int njc = this->size+1;
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(&njc, sizeof(int), 1, file); 
-          hermes_fwrite(&nnz, sizeof(int), 1, file);
-          hermes_fwrite(&nnz, sizeof(int), 1, file); 
-          hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          hermes_fwrite(Ai, sizeof(int), nnz, file);
-          hermes_fwrite(Ax, sizeof(double), nnz, file);
-          return true;
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        Mat_Close(mat);
+#endif
+        return false;
         }
 
       case DF_PLAIN_ASCII:
@@ -847,10 +828,12 @@ namespace Hermes
             }
           }
 
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "%d\n", size);
           fprintf(file, "%d\n", nnz);
           for (unsigned int k = 0; k < nnz; k++)
             fprintf(file, "%d %d %f\n", ascii_entry_i[k], ascii_entry_j[k], ascii_entry_buff[k]);
+          fclose(file);
 
           //Free memory
           delete [] ascii_entry_buff;
@@ -884,7 +867,7 @@ namespace Hermes
     }
 
     template<>
-    bool CSRMatrix<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool CSRMatrix<std::complex<double> >::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       throw Exceptions::MethodNotImplementedException("CSRMatrix<double>::dump");
       return false;

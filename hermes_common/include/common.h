@@ -70,6 +70,10 @@
 #include "bson.h"
 #endif
 
+#ifdef WITH_MATIO
+#include "matio.h"
+#endif
+
 #ifdef WITH_OPENMP
   #include <omp.h>
 #else

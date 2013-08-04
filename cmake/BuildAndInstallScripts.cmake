@@ -1,21 +1,27 @@
 # Macro for generating classes for XML mesh parsing according to XSD
 macro(GENERATE_XSD_FILES PROJECT_NAME HEADER_XML_FILE_OUTPUT SOURCE_XML_FILE_OUTPUT XSD_FILE TARGET_DIR)
   add_custom_target(${PROJECT_NAME} ALL DEPENDS ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT})
-  
-  IF(WIN32)
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT}
-    COMMAND ${XSD_BIN} ARGS cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/${TARGET_DIR} ${XSD_FILE}
-    COMMAND move ARGS "/Y" "${PROJECT_SOURCE_DIR}\\include\\${TARGET_DIR}\\*.cpp" "${PROJECT_SOURCE_DIR}\\src\\${TARGET_DIR}"
-    DEPENDS ${XSD_FILE} ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT})
-  ELSE()
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT}
-    COMMAND ${XSD_BIN} ARGS cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/${TARGET_DIR} ${XSD_FILE}
-    COMMAND mv ARGS "-f" "${PROJECT_SOURCE_DIR}/include/${TARGET_DIR}/*.cpp" "${PROJECT_SOURCE_DIR}/src/${TARGET_DIR}/"
-    DEPENDS ${XSD_FILE} ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT})
-  ENDIF()
-  
+
+IF(WIN32)
+  ADD_CUSTOM_COMMAND(
+        SOURCE    ${XSD_FILE}
+        COMMAND   ${XSD_BIN} ARGS cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/${TARGET_DIR} ${XSD_FILE}
+        COMMAND   move ARGS "/Y" "${PROJECT_SOURCE_DIR}\\include\\${TARGET_DIR}\\*.cpp" "${PROJECT_SOURCE_DIR}\\src\\${TARGET_DIR}"
+        TARGET    ${PROJECT_NAME}
+        OUTPUTS   ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT})
+ELSE()
+  ADD_CUSTOM_COMMAND(
+        SOURCE    ${XSD_FILE}
+        COMMAND   ${XSD_BIN} ARGS cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/${TARGET_DIR} ${XSD_FILE}
+        COMMAND   mv ARGS "-f" "${PROJECT_SOURCE_DIR}/include/${TARGET_DIR}/*.cpp" "${PROJECT_SOURCE_DIR}/src/${TARGET_DIR}/"
+        TARGET    ${PROJECT_NAME}
+        OUTPUTS   ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT})
+ENDIF()
+ADD_CUSTOM_COMMAND(
+      SOURCE    ${PROJECT_NAME}
+      TARGET    ${PROJECT_NAME}
+      DEPENDS   ${HEADER_XML_FILE_OUTPUT} ${SOURCE_XML_FILE_OUTPUT})
+
 endmacro(GENERATE_XSD_FILES)
 
 # MSVC (Win) helper macros
@@ -40,11 +46,11 @@ endmacro(ADD_MSVC_BUILD_FLAGS)
 # Installs a library to directories relative to CMAKE_INSTALL_PREFIX.
 macro(INSTALL_LIB LIB)
 	install(TARGETS ${LIB} 
-				RUNTIME DESTINATION ${TARGET_ROOT}/bin 
-				LIBRARY DESTINATION ${TARGET_ROOT}/lib 
-				ARCHIVE DESTINATION ${TARGET_ROOT}/lib)
+                RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+                LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+                ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 	if (MSVC)
-	  MAKE_PATH(TARGET_DIR "${TARGET_ROOT}/bin")
+      MAKE_PATH(TARGET_DIR "${CMAKE_INSTALL_PREFIX}/bin")
     get_target_property(SOURCE_DEBUG_FILE ${LIB} LOCATION_Debug)
     MAKE_PATH(SOURCE_DEBUG_FILE ${SOURCE_DEBUG_FILE})
     get_target_property(SOURCE_RELEASE_FILE ${LIB} LOCATION_Release)

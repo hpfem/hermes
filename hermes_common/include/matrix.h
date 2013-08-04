@@ -38,7 +38,8 @@ namespace Hermes
     SOLVER_MUMPS = 4,
     SOLVER_SUPERLU = 5,
     SOLVER_AMESOS = 6,
-    SOLVER_AZTECOO = 7
+    SOLVER_AZTECOO = 7,
+    SOLVER_EMPTY = 100
   };
 
   enum DirectMatrixSolverType
@@ -292,17 +293,12 @@ namespace Hermes
     enum EMatrixDumpFormat
     {
       /// \brief Plain ascii file
-      /// first line is matrix size
-      /// second line in number of nonzero values
-      /// next lines contains row column and value
-      DF_MATLAB_SPARSE = 0,
+      /// lines contains row column and value
       DF_PLAIN_ASCII = 1,
-      /// \brief Hermes binary format
-      DF_HERMES_BIN = 2,
-      /// \brief Matrix Market which can be read by pysparse library
-      DF_MATRIX_MARKET = 3,
       /// Binary MATio format
-      DF_HERMES_MATLAB_BIN = 4
+      DF_MATLAB_MAT = 4,
+      /// \brief Matrix Market which can be read by pysparse library
+      DF_MATRIX_MARKET = 3
     };
 
     /// \brief General (abstract) matrix representation in Hermes.
@@ -368,7 +364,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf") = 0;
+      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
       /// Get size of matrix
       /// @return size of matrix
@@ -585,8 +581,8 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool dump(FILE *file, const char *var_name,
-        EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf") = 0;
+      virtual bool dump(char *filename, const char *var_name,
+        EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
     protected:
       /// size of vector

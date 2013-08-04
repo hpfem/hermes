@@ -70,7 +70,7 @@ namespace Hermes
       for(int i = 0; i < NewtonSolverConvergenceMeasurementTypeCount; i++)
         this->newton_tolerance[i] = std::numeric_limits<double>::max();
       memset(this->newton_tolerance_set, 0, sizeof(bool)*NewtonSolverConvergenceMeasurementTypeCount);
-      this->handleMultipleTolerancesAnd = true;
+      this->handleMultipleTolerancesAnd = false;
       this->max_allowed_iterations = 20;
       this->residual_as_function = false;
       this->max_allowed_residual_norm = 1E9;

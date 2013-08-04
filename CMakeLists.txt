@@ -51,6 +51,9 @@ project(hermes)
   # BSON 
   set(WITH_BSON NO)
 
+  # MATIO
+  set(WITH_MATIO NO)
+
   #### Solvers ###
   # Standard UMFPACK
     # UMFPACK is chosen by default.
@@ -303,6 +306,19 @@ project(hermes)
       endif(WITH_BSON)
     ENDIF()
 
+    IF(DEFINED MATIO_LIBRARY)
+      IF(DEFINED MATIO_INCLUDE_DIR)
+        include_directories(${MATIO_INCLUDE_DIR})
+      ELSE()
+        MESSAGE(FATAL_ERROR When MATIO_LIBRARY is defined, so must be MATIO_INCLUDE_DIR.)
+      ENDIF()
+    ELSE()
+      if(WITH_MATIO)
+        find_package(MATIO REQUIRED)
+        include_directories(${MATIO_INCLUDE_DIR})
+      endif(WITH_MATIO)
+    ENDIF()
+
     find_package(XSD REQUIRED)
     find_package(XERCES REQUIRED)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -465,6 +481,7 @@ project(hermes)
   message("Build with MPI: ${WITH_MPI}")
   message("Build with EXODUSII: ${WITH_EXODUSII}")
   message("Build with BSON: ${WITH_BSON}")
+  message("Build with MATIO: ${WITH_MATIO}")
   
   message("---------------------")
   message("Hermes common library:")
