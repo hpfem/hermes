@@ -211,7 +211,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool PetscMatrix<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
@@ -446,7 +446,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool PetscVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {

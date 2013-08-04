@@ -155,45 +155,46 @@ namespace Hermes
     }
 
     template<>
-    bool UMFPackVector<double>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool UMFPackVector<double>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
-        for (unsigned int i = 0; i < this->size; i++)
-        {
-          Hermes::Helpers::fprint_num(file, v[i], number_format);
-          fprintf(file, "\n");
-        }
-        fprintf(file, " ];\n");
-        return true;
 
-      case DF_HERMES_BIN:
-        {
-          hermes_fwrite("HERMESR\001", 1, 8, file);
-          int ssize = sizeof(double);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(v, sizeof(double), this->size, file);
-          return true;
-        }
+      case DF_MATLAB_MAT:
+      {
+#ifdef WITH_MATIO
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = 1;
 
-      case DF_HERMES_MATLAB_BIN:
+        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+        matvar_t *matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+        if (matvar)
         {
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(v, sizeof(double), this->size, file);
-          return true;
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+
+            return true;
         }
+        else
+        {
+            return false;
+        }
+        Mat_Close(mat);
+#endif
+        return false;
+      }
 
       case DF_PLAIN_ASCII:
         {
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "\n");
           for (unsigned int i = 0; i < size; i++)
           {
             Hermes::Helpers::fprint_num(file, v[i], number_format);
             fprintf(file, "\n");
           }
+          fclose(file);
 
           return true;
         }
@@ -204,37 +205,19 @@ namespace Hermes
     }
 
     template<>
-    bool UMFPackVector<std::complex<double> >::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool UMFPackVector<std::complex<double> >::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
-        for (unsigned int i = 0; i < this->size; i++)
-        {
-          Hermes::Helpers::fprint_num(file, v[i], number_format);
-          fprintf(file, "\n");
-        }
-        fprintf(file, " ];\n");
-        return true;
-
-      case DF_HERMES_BIN:
-        {
-          hermes_fwrite("HERMESR\001", 1, 8, file);
-          int ssize = sizeof(std::complex<double>);
-          hermes_fwrite(&ssize, sizeof(int), 1, file);
-          hermes_fwrite(&this->size, sizeof(int), 1, file);
-          hermes_fwrite(v, sizeof(std::complex<double>), this->size, file);
-          return true;
-        }
-
       case DF_PLAIN_ASCII:
         {
+          FILE* file = fopen(filename, "w+");
           fprintf(file, "\n");
           for (unsigned int i = 0; i < size; i++)
           {
             fprintf(file, "%E %E\n", v[i].real(), v[i].imag());
           }
+          fclose(file);
 
           return true;
         }

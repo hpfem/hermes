@@ -91,7 +91,7 @@ namespace Hermes
       virtual void set_row_zero(unsigned int n);
 
       /// Utility method.
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf") = 0;
+      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf") = 0;
       /// Utility method.
       virtual unsigned int get_matrix_size() const;
       /// Utility method.
@@ -150,7 +150,7 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
+      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
 
       friend class Hermes::Solvers::CSCIterator<Scalar>;
 
@@ -190,7 +190,7 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      virtual bool dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt = DF_MATLAB_SPARSE, char* number_format = "%lf");
+      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
 
       friend class Hermes::Solvers::CSCIterator<Scalar>;
 
