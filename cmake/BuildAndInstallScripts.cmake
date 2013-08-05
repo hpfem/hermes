@@ -5,21 +5,16 @@ macro(GENERATE_XSD_FILES PROJECT_NAME HEADER_XML_FILE_OUTPUT SOURCE_XML_FILE_OUT
 IF(WIN32)
   MAKE_PATH(PATH_FOR_MOVE "${PROJECT_SOURCE_DIR}/include/${SOURCE_XML_FILE_OUTPUT}")
   ADD_CUSTOM_COMMAND(
-        SOURCE    ${XSD_FILE}
         COMMAND   ${XSD_BIN} ARGS cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/${TARGET_DIR} ${XSD_FILE}
         COMMAND   move ARGS "/Y" "${PATH_FOR_MOVE}" "${PROJECT_SOURCE_DIR}\\src\\${TARGET_DIR}"
-        TARGET    ${PROJECT_NAME}
-        OUTPUTS   ${HEADER_XML_FILE_OUTPUT} "src/${SOURCE_XML_FILE_OUTPUT}")
+        OUTPUT   ${HEADER_XML_FILE_OUTPUT} "src/${SOURCE_XML_FILE_OUTPUT}")
 ELSE()
   ADD_CUSTOM_COMMAND(
-        SOURCE    ${XSD_FILE}
         COMMAND   ${XSD_BIN} ARGS cxx-tree --generate-doxygen --generate-ostream --hxx-suffix .h --cxx-suffix .cpp --root-element-first --generate-polymorphic --generate-serialization --output-dir include/${TARGET_DIR} ${XSD_FILE}
         COMMAND   mv ARGS "-f" "${PROJECT_SOURCE_DIR}/include/${SOURCE_XML_FILE_OUTPUT}" "${PROJECT_SOURCE_DIR}/src/${TARGET_DIR}/"
-        TARGET    ${PROJECT_NAME}
-        OUTPUTS   ${HEADER_XML_FILE_OUTPUT} "src/${SOURCE_XML_FILE_OUTPUT}")
+        OUTPUT   ${HEADER_XML_FILE_OUTPUT} "src/${SOURCE_XML_FILE_OUTPUT}")
 ENDIF()
 ADD_CUSTOM_COMMAND(
-      SOURCE    ${PROJECT_NAME}
       TARGET    ${PROJECT_NAME}
       DEPENDS   ${HEADER_XML_FILE_OUTPUT} "src/${SOURCE_XML_FILE_OUTPUT}")
 
