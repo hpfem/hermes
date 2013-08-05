@@ -16,7 +16,6 @@
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_SUPERLU
 #cmakedefine WITH_PETSC
-#cmakedefine WITH_HDF5
 #cmakedefine WITH_MATIO
 #cmakedefine WITH_EXODUSII
 #cmakedefine WITH_MPI
@@ -41,9 +40,6 @@
 #cmakedefine HAVE_ML
 #cmakedefine HAVE_NOX
 #cmakedefine HAVE_KOMPLEX
-
-// no logo
-#cmakedefine HERMES_NO_LOGO
 
 // GLUT
 #cmakedefine NOGLUT
