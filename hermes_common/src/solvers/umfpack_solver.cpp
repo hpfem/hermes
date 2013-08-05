@@ -22,6 +22,7 @@
 #include "config.h"
 #ifdef WITH_UMFPACK
 #include "umfpack_solver.h"
+#include "common.h"
 
 #define umfpack_real_symbolic umfpack_di_symbolic
 #define umfpack_real_numeric umfpack_di_numeric
@@ -154,12 +155,11 @@ namespace Hermes
       return this->v;
     }
 
-    template<>
-    bool UMFPackVector<double>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    template<typename Scalar>
+    bool UMFPackVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
-
       case DF_MATLAB_MAT:
         {
 #ifdef WITH_MATIO
@@ -168,18 +168,21 @@ namespace Hermes
           dims[1] = 1;
 
           mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
-          matvar_t *matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+          matvar_t *matvar;
+
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+          else
+            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+          
           if (matvar)
           {
             Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
             Mat_VarFree(matvar);
-
             return true;
           }
           else
-          {
             return false;
-          }
           Mat_Close(mat);
 #endif
           return false;
@@ -193,29 +196,6 @@ namespace Hermes
           {
             Hermes::Helpers::fprint_num(file, v[i], number_format);
             fprintf(file, "\n");
-          }
-          fclose(file);
-
-          return true;
-        }
-
-      default:
-        return false;
-      }
-    }
-
-    template<>
-    bool UMFPackVector<std::complex<double> >::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
-    {
-      switch (fmt)
-      {
-      case DF_PLAIN_ASCII:
-        {
-          FILE* file = fopen(filename, "w+");
-          fprintf(file, "\n");
-          for (unsigned int i = 0; i < size; i++)
-          {
-            fprintf(file, "%E %E\n", v[i].real(), v[i].imag());
           }
           fclose(file);
 

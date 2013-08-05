@@ -14,7 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 /*! \file common.h
-    \brief File containing common definitions, and basic global enums etc. for HermesCommon.
+\brief File containing common definitions, and basic global enums etc. for HermesCommon.
 */
 #ifndef __HERMES_COMMON_COMMON_H
 #define __HERMES_COMMON_COMMON_H
@@ -43,9 +43,9 @@
 #include <stdarg.h>
 #include <sstream>
 #ifdef _WINDOWS
-  #include <memory>
+#include <memory>
 #else
-  #include <tr1/memory>
+#include <tr1/memory>
 #endif
 #include <algorithm>
 #include <vector>
@@ -62,7 +62,7 @@
 #include "config.h"
 
 #ifdef WITH_TC_MALLOC
-  #include "tcmalloc.h"
+#include "tcmalloc.h"
 #endif
 
 #ifdef WITH_BSON
@@ -75,10 +75,10 @@
 #endif
 
 #ifdef WITH_OPENMP
-  #include <omp.h>
+#include <omp.h>
 #else
-  inline int omp_get_num_threads( ) { return 1; }
-  inline int omp_get_thread_num( ) { return 0; }
+inline int omp_get_num_threads( ) { return 1; }
+inline int omp_get_thread_num( ) { return 0; }
 #endif
 
 /// Int types handling.
@@ -170,32 +170,32 @@ namespace Hermes
   inline double log(double x) { return std::log(x); }
 
   /* event codes */
-  #define HERMES_EC_ERROR 'E' ///< An event code: warnings. \internal
-  #define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
-  #define HERMES_EC_INFO 'I' ///< An event code: info about results. \internal
+#define HERMES_EC_ERROR 'E' ///< An event code: warnings. \internal
+#define HERMES_EC_WARNING 'W' ///< An event code: warnings. \internal
+#define HERMES_EC_INFO 'I' ///< An event code: info about results. \internal
 
   /// A size of a delimiter in a log file. \internal \ingroup g_logging
-  #define HERMES_LOG_FILE_DELIM_SIZE 80
-  #define BUF_SZ 2048
+#define HERMES_LOG_FILE_DELIM_SIZE 80
+#define BUF_SZ 2048
 
   /* function name */
   /** \def __CURRENT_FUNCTION
   *  \brief A platform-dependent string defining a current function. \internal */
-  #ifdef _WINDOWS
-  # ifdef __MINGW32__ //MinGW
-  #   define __CURRENT_FUNCTION __func__
-  # else //MSVC and other compilers
-  #   define __CURRENT_FUNCTION __FUNCTION__
-  # endif
-  #else //Linux and Mac
-  # define __CURRENT_FUNCTION __PRETTY_FUNCTION__
-  #endif
+#ifdef _WINDOWS
+# ifdef __MINGW32__ //MinGW
+#   define __CURRENT_FUNCTION __func__
+# else //MSVC and other compilers
+#   define __CURRENT_FUNCTION __FUNCTION__
+# endif
+#else //Linux and Mac
+# define __CURRENT_FUNCTION __PRETTY_FUNCTION__
+#endif
 
   // Represents "any" part of the boundary when deciding where (on which elements) to assemble the form at hand.
   const std::string HERMES_ANY = "-1234";
   // For internal use.
   const int HERMES_ANY_INT = -1234;
-  
+
   namespace Helpers
   {
     inline void fprint_num(FILE*f, double x, char* number_format)
@@ -205,10 +205,35 @@ namespace Hermes
 
     inline void fprint_num(FILE*f, std::complex<double> x, char* number_format)
     {
-	  char* number_formatComplex = new char[20];
-	  sprintf(number_formatComplex, "(%s, %s)", number_format, number_format); 
+      char* number_formatComplex = new char[20];
+      sprintf(number_formatComplex, "(%s, %s)", number_format, number_format); 
       fprintf(f, number_formatComplex, x.real(), x.imag());
     }
+
+    // Type deductors.
+    template<typename Scalar>
+    struct TypeIsReal
+    {
+      static const bool value = false;
+    };
+
+    template<typename Scalar>
+    struct TypeIsComplex
+    {
+      static const bool value = false;
+    };
+
+    template<>
+    struct TypeIsReal<double>
+    {
+      static const bool value = true;
+    };
+
+    template<>
+    struct TypeIsComplex<std::complex<double> >
+    {
+      static const bool value = true;
+    };
   }
 
   namespace BLAS
