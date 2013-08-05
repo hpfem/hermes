@@ -118,7 +118,12 @@ project(hermes_common)
   # Add a target for a specified version of the Hermes library (REAL/COMPLEX, RELEASE/DEBUG),
   # and set its build properties (compile and link flags, installation directories).
   macro(BUILD_COMMON_LIB HERMES_COMMON_LIB BUILD_FLAGS)
-    add_library(${HERMES_COMMON_LIB} SHARED ${SRC} ${HEADERS})
+    if(${HERMES_STATIC_LIBS})
+      add_library(${HERMES_COMMON_LIB} ${SRC} ${HEADERS})
+    else()
+      add_library(${HERMES_COMMON_LIB} SHARED ${SRC} ${HEADERS})
+    endif()
+    
     add_definitions(-DHERMES_COMMON)
     set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
 
@@ -168,7 +173,7 @@ project(hermes_common)
   #
   if(MSVC)
     if(${HERMES_COMMON_DEBUG})
-      BUILD_COMMON_LIB(${HERMES_COMMON_LIB_DEBUG} ${DEBUG_FLAGS})
+      BUILD_COMMON_LIB(${HERMES_COMMON_LIB_DEBUG} ${HERMES_DEBUG_FLAGS})
       ADD_MSVC_BUILD_FLAGS(${HERMES_COMMON_LIB_DEBUG}
                          ${HERMES_COMMON_LIB_DEBUG}
                          ${HERMES_COMMON_LIB_RELEASE})
@@ -177,7 +182,7 @@ project(hermes_common)
     endif(${HERMES_COMMON_DEBUG})
     
     if(${HERMES_COMMON_RELEASE})
-      BUILD_COMMON_LIB(${HERMES_COMMON_LIB_RELEASE} ${RELEASE_FLAGS})
+      BUILD_COMMON_LIB(${HERMES_COMMON_LIB_RELEASE} ${HERMES_RELEASE_FLAGS})
       ADD_MSVC_BUILD_FLAGS(${HERMES_COMMON_LIB_RELEASE}
                          ${HERMES_COMMON_LIB_RELEASE}
                          ${HERMES_COMMON_LIB_RELEASE})
@@ -186,13 +191,13 @@ project(hermes_common)
     endif(${HERMES_COMMON_RELEASE})
   else(MSVC)
     if(HERMES_COMMON_DEBUG)
-      set(BUILD_FLAGS "${DEBUG_FLAGS}")
+      set(BUILD_FLAGS "${HERMES_DEBUG_FLAGS}")
       BUILD_COMMON_LIB(${HERMES_COMMON_LIB_DEBUG} ${BUILD_FLAGS})
       INSTALL_LIB(${HERMES_COMMON_LIB_DEBUG})
     endif(HERMES_COMMON_DEBUG)
     
     if(HERMES_COMMON_RELEASE)
-      set(BUILD_FLAGS "${RELEASE_FLAGS}")
+      set(BUILD_FLAGS "${HERMES_RELEASE_FLAGS}")
       BUILD_COMMON_LIB(${HERMES_COMMON_LIB_RELEASE} ${BUILD_FLAGS})
       INSTALL_LIB(${HERMES_COMMON_LIB_RELEASE})
     endif(HERMES_COMMON_RELEASE)

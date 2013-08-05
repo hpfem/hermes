@@ -11,8 +11,9 @@ project(hermes)
   # if you want to override them, set them in CMake.vars
 
   # Global
-    # Optional stacktrace
-    set(WITH_STACKTRACE NO)
+  # Generate static libs (instead of dynamic)
+  set(HERMES_STATIC_LIBS NO)
+  
     # For Win64
     if(${CMAKE_CL_64})
       set(WIN64 YES)
@@ -60,6 +61,10 @@ project(hermes)
     set(WITH_UMFPACK YES)
     # PARALUTION is chosen by default.
     set(WITH_PARALUTION YES)
+    
+  # Optional stacktrace - in development
+    set(WITH_STACKTRACE NO)
+    
     
   ################################## CURRENTLY NOT SUPPORTED ###################################
   #  \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/   \/
@@ -240,11 +245,11 @@ project(hermes)
     set(CMAKE_CXX_FLAGS "-w ${CMAKE_CXX_FLAGS} -fPIC")
     set(CMAKE_CXX_FLAGS "-Wuninitialized -Wvla -Wsign-compare ${CMAKE_CXX_FLAGS}")
 
-    set(RELEASE_FLAGS "-DNDEBUG -O3")
-    set(FLAGS ${RELEASE_FLAGS})
-    set(DEBUG_FLAGS   "-g")
+    set(HERMES_RELEASE_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG -O3")
+    set(HERMES_FLAGS ${HERMES_RELEASE_FLAGS})
+    set(HERMES_DEBUG_FLAGS   "${CMAKE_CXX_FLAGS} -g")
     if(H2D_DEBUG)
-      set(FLAGS ${DEBUG_FLAGS})
+      set(HERMES_FLAGS ${HERMES_DEBUG_FLAGS})
     endif(H2D_DEBUG)
   endif()
 
@@ -263,11 +268,11 @@ project(hermes)
     else(WIN64)
       set(MSVC_DEFINES "/DWIN32 /D_WINDOWS /Dpopen=_popen /Dpclose=_pclose /D__value=_value /Dfinite=_finite /Dhypot=_hypot /Disatty=_isatty /Dfileno=_fileno /D_CRT_SECURE_NO_WARNINGS /DYY_NO_UNISTD_H /D_USE_MATH_DEFINES /DIMPLEMENT_C99 /wd4275 /wd4251")
     endif(WIN64)
-    set(CMAKE_CXX_FLAGS_DEBUG_INIT          "/D_DEBUG /Od /Ob2 /MDd /Zi /RTC1 ${MSVC_DEFINES}")
-    set(DEBUG_FLAGS ${DEBUG_FLAGS} "${CMAKE_CXX_FLAGS_DEBUG_INIT}")
+    set(CMAKE_CXX_FLAGS_DEBUG_INIT          "/D_DEBUG /Od /Ob2 /MDd /Zi ${MSVC_DEFINES}")
+    set(HERMES_DEBUG_FLAGS ${HERMES_DEBUG_FLAGS} "${CMAKE_CXX_FLAGS_DEBUG_INIT}")
     set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     "/O2 /Ob2 /MD ${MSVC_DEFINES}")
     set(CMAKE_CXX_FLAGS_RELEASE_INIT        "/DNDEBUG /O2 /Ob2 /MD ${MSVC_DEFINES}")
-    set(RELEASE_FLAGS ${RELEASE_FLAGS} "${CMAKE_CXX_FLAGS_RELEASE_INIT}")
+    set(HERMES_RELEASE_FLAGS ${HERMES_RELEASE_FLAGS} "${CMAKE_CXX_FLAGS_RELEASE_INIT}")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/DNDEBUG /O2 /Ob2 /MD /Zi ${MSVC_DEFINES}")
     
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
@@ -466,8 +471,9 @@ project(hermes)
   #------------------------------------------------------------------------------
   # Report.
   #~~~~~~~~
-  message("\nConfiguration results")
+  message("\nHERMES Configuration results")
   message("---------------------")
+  message("Build static libs: ${HERMES_STATIC_LIBS}")
   message("Build with UMFPACK: ${WITH_UMFPACK}")
   message("Build with PARALUTION: ${WITH_PARALUTION}")
   if(WIN32)

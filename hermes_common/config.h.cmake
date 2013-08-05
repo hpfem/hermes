@@ -1,6 +1,8 @@
 #ifndef __HERMES_CONFIG_H_
 #define __HERMES_CONFIG_H_
 
+#cmakedefine HERMES_STATIC_LIBS
+
 // OpenMP
 #cmakedefine NUM_THREADS ${NUM_THREADS}
 #cmakedefine WITH_OPENMP
@@ -20,6 +22,7 @@
 
 #cmakedefine WITH_TC_MALLOC
 #cmakedefine WITH_BSON
+#cmakedefine MONGO_STATIC_BUILD
 #cmakedefine UMFPACK_LONG_INT
 
 // stacktrace
