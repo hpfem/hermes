@@ -41,8 +41,8 @@ namespace Hermes
 
       template<typename Scalar>
       MatrixRhsOutput<Scalar>::MatrixRhsOutput() : output_matrixOn(false), output_matrixIterations(-1), matrixFilename("Matrix_"),
-        matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_MATLAB_SPARSE), matrix_number_format("%lf"), output_rhsOn(false), output_rhsIterations(-1),
-        RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::DF_MATLAB_SPARSE), rhs_number_format("%lf")
+        matrixVarname("A"), matrixFormat(Hermes::Algebra::DF_PLAIN_ASCII), matrix_number_format("%lf"), output_rhsOn(false), output_rhsIterations(-1),
+        RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::DF_PLAIN_ASCII), rhs_number_format("%lf")
       {
       }
 
@@ -55,14 +55,8 @@ namespace Hermes
         if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration))
         {
           char* fileName = new char[this->matrixFilename.length() + 5];
-          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
-            sprintf(fileName, "%s%i.m", this->matrixFilename.c_str(), iteration);
-          else
-            sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
-          FILE* matrix_file = fopen(fileName, "w+");
-
-          matrix->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          fclose(matrix_file);
+          sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
+          matrix->dump(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
           delete [] fileName;
         }
       }
@@ -76,14 +70,8 @@ namespace Hermes
         if(this->output_matrixOn)
         {
           char* fileName = new char[this->matrixFilename.length() + 5];
-          if(this->matrixFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
-            sprintf(fileName, "%s.m", this->matrixFilename.c_str());
-          else
-            sprintf(fileName, "%s", this->matrixFilename.c_str());
-          FILE* matrix_file = fopen(fileName, "w+");
-
-          matrix->dump(matrix_file, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
-          fclose(matrix_file);
+          sprintf(fileName, "%s", this->matrixFilename.c_str());
+          matrix->dump(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
           delete [] fileName;
         }
       }
@@ -97,13 +85,8 @@ namespace Hermes
         if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration))
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
-          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
-            sprintf(fileName, "%s%i.m", this->RhsFilename.c_str(), iteration);
-          else
-            sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
-          FILE* rhs_file = fopen(fileName, "w+");
-          rhs->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-          fclose(rhs_file);
+          sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+          rhs->dump(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
           delete [] fileName;
         }
       }
@@ -117,13 +100,8 @@ namespace Hermes
         if(this->output_rhsOn)
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
-          if(this->RhsFormat == Hermes::Algebra::DF_MATLAB_SPARSE)
-            sprintf(fileName, "%s.m", this->RhsFilename.c_str());
-          else
-            sprintf(fileName, "%s", this->RhsFilename.c_str());
-          FILE* rhs_file = fopen(fileName, "w+");
-          rhs->dump(rhs_file, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
-          fclose(rhs_file);
+          sprintf(fileName, "%s", this->RhsFilename.c_str());
+          rhs->dump(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
           delete [] fileName;
         }
       }

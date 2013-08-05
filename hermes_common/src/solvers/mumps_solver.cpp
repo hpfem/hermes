@@ -93,7 +93,7 @@ namespace Hermes
       assert(this->pages != NULL);
 
       // initialize the arrays Ap and Ai
-      Ap = new unsigned int[this->size + 1];
+      Ap = new int[this->size + 1];
       int aisize = this->get_num_indices();
       Ai = new int[aisize];
 
@@ -210,47 +210,58 @@ namespace Hermes
     /// dumping matrix and right-hand side
     ///
     template<typename Scalar>
-    bool MumpsMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool MumpsMatrix<Scalar>::dump(char* filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       // TODO
       switch (fmt)
       {
       case DF_PLAIN_ASCII:
-        fprintf(file, "%d\n", this->size);
-        fprintf(file, "%d\n", nnz);
+      {
+        FILE* file = fopen(filename, "w+");
+        // fprintf(file, "%d\n", this->size);
+        // fprintf(file, "%d\n", nnz);
         for (unsigned int i = 0; i < nnz; i++)
         {
-          fprintf(file, "%d %d ", irn[i], jcn[i]);
+          fprintf(file, "%d %d ", irn[i]-1, jcn[i]-1);
           Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]), number_format);
           fprintf(file, "\n");
         }
+        fclose(file);
         return true;
+      }
+      case DF_MATLAB_MAT:
+      {
+#ifdef WITH_MATIO
+        mat_sparse_t sparse;
+        sparse.nzmax = this->nnz;
+        sparse.nir = this->nnz;
+        sparse.ir = Ai;
+        sparse.njc = this->size + 1;
+        sparse.jc = (int *) Ap;
+        sparse.ndata = this->nnz;
+        sparse.data = Ax;
 
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx%d\n%% Nonzeros: %d\ntemp = zeros(%d, 3);\ntemp =[\n", this->size, this->size, Ap[this->size], Ap[this->size]);
-        for (unsigned int j = 0; j < this->size; j++)
-          for (unsigned int i = Ap[j]; i < Ap[j + 1]; i++)
-          {
-            fprintf(file, "%d %d ", Ai[i] + 1, j + 1);
-            Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]), number_format);
-            fprintf(file, "\n");
-          }
-          fprintf(file, "];\n%s = spconvert(temp);\n", var_name);
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = this->size;
 
-          return true;
-
-      case DF_HERMES_BIN:
+        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+        matvar_t *matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+        if (matvar)
         {
-          this->hermes_fwrite("HERMESX\001", 1, 8, file);
-          int ssize = sizeof(Scalar);
-          this->hermes_fwrite(&ssize, sizeof(int), 1, file);
-          this->hermes_fwrite(&this->size, sizeof(int), 1, file);
-          this->hermes_fwrite(&nnz, sizeof(int), 1, file);
-          this->hermes_fwrite(Ap, sizeof(int), this->size + 1, file);
-          this->hermes_fwrite(Ai, sizeof(int), nnz, file);
-          this->hermes_fwrite(Ax, sizeof(Scalar), nnz, file);
-          return true;
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+
+            return true;
         }
+        else
+        {
+            return false;
+        }
+        Mat_Close(mat);
+#endif
+        return false;
+      }
 
       default:
         return false;
@@ -381,7 +392,7 @@ namespace Hermes
     {
       this->nnz = nnz;
       this->size = size;
-      this->Ap = new unsigned int[this->size + 1]; assert(this->Ap != NULL);
+      this->Ap = new int[this->size + 1]; assert(this->Ap != NULL);
       this->Ai = new int[nnz];    assert(this->Ai != NULL);
       this->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(this->Ax != NULL);
       irn = new int[nnz];           assert(this->irn !=NULL);     // Row indices.
@@ -408,7 +419,7 @@ namespace Hermes
 
       nmat->nnz = nnz;
       nmat->size = this->size;
-      nmat->Ap = new unsigned int[this->size + 1]; assert(nmat->Ap != NULL);
+      nmat->Ap = new int[this->size + 1]; assert(nmat->Ap != NULL);
       nmat->Ai = new int[nnz];    assert(nmat->Ai != NULL);
       nmat->Ax = new typename mumps_type<Scalar>::mumps_Scalar[nnz]; assert(nmat->Ax != NULL);
       nmat->irn = new int[nnz];           assert(nmat->irn !=NULL);     // Row indices.
@@ -519,38 +530,47 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool MumpsVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool MumpsVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
       case DF_PLAIN_ASCII:
+      {
+        FILE* file = fopen(filename, "w+");
         for (unsigned int i = 0; i < this->size; i++)
         {
           Hermes::Helpers::fprint_num(file, v[i], number_format);
           fprintf(file, "\n");
         }
+        fclose(file);
 
         return true;
+      }
 
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
-        for (unsigned int i = 0; i < this->size; i++)
-        {
-          Hermes::Helpers::fprint_num(file, v[i], number_format);
-          fprintf(file, "\n");
-        }
-        fprintf(file, " ];\n");
-        return true;
+      case DF_MATLAB_MAT:
+      {
+#ifdef WITH_MATIO
+        size_t dims[2];
+        dims[0] = this->size;
+        dims[1] = 1;
 
-      case DF_HERMES_BIN:
+        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+        matvar_t *matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+        if (matvar)
         {
-          this->hermes_fwrite("HERMESR\001", 1, 8, file);
-          int ssize = sizeof(Scalar);
-          this->hermes_fwrite(&ssize, sizeof(int), 1, file);
-          this->hermes_fwrite(&this->size, sizeof(int), 1, file);
-          this->hermes_fwrite(v, sizeof(Scalar), this->size, file);
-          return true;
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+
+            return true;
         }
+        else
+        {
+            return false;
+        }
+        Mat_Close(mat);
+#endif
+        return false;
+      }
 
       default:
         return false;

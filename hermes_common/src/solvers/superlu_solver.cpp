@@ -222,7 +222,7 @@ namespace Hermes
     /// Save matrix and right-hand side to a file.
     ///
     template<typename Scalar>
-    bool SuperLUMatrix<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool SuperLUMatrix<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       // TODO
       switch (fmt)
@@ -482,7 +482,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool SuperLUVector<Scalar>::dump(FILE *file, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool SuperLUVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
       switch (fmt)
       {
