@@ -192,7 +192,7 @@ namespace Hermes
         {
           FILE* file = fopen(filename, "w+");
           fprintf(file, "\n");
-          for (unsigned int i = 0; i < size; i++)
+          for (unsigned int i = 0; i < this->size; i++)
           {
             Hermes::Helpers::fprint_num(file, v[i], number_format);
             fprintf(file, "\n");
