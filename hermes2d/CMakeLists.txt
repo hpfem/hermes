@@ -70,15 +70,11 @@ project(hermes2d)
   endif(H2D_WITH_GLUT)
 
   # Mesh format.
-  if(WITH_HDF5)
-    find_package(HDF5 REQUIRED)
-    include_directories(${HDF5_INCLUDE_DIR})
-  endif(WITH_HDF5)
-
   if(WITH_EXODUSII)
     find_package(EXODUSII REQUIRED)
     include_directories(${EXODUSII_INCLUDE_DIR})
   endif(WITH_EXODUSII)
+  
   include_directories(${XSD_INCLUDE_DIR})
   include_directories(${XERCES_INCLUDE_DIR})
   

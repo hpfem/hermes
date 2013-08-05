@@ -17,6 +17,7 @@
 #cmakedefine WITH_SUPERLU
 #cmakedefine WITH_PETSC
 #cmakedefine WITH_HDF5
+#cmakedefine WITH_MATIO
 #cmakedefine WITH_EXODUSII
 #cmakedefine WITH_MPI
 

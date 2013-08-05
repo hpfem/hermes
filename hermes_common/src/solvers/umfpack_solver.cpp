@@ -161,29 +161,29 @@ namespace Hermes
       {
 
       case DF_MATLAB_MAT:
-      {
-#ifdef WITH_MATIO
-        size_t dims[2];
-        dims[0] = this->size;
-        dims[1] = 1;
-
-        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
-        matvar_t *matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
-        if (matvar)
         {
+#ifdef WITH_MATIO
+          size_t dims[2];
+          dims[0] = this->size;
+          dims[1] = 1;
+
+          mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+          matvar_t *matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+          if (matvar)
+          {
             Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
             Mat_VarFree(matvar);
 
             return true;
-        }
-        else
-        {
+          }
+          else
+          {
             return false;
-        }
-        Mat_Close(mat);
+          }
+          Mat_Close(mat);
 #endif
-        return false;
-      }
+          return false;
+        }
 
       case DF_PLAIN_ASCII:
         {

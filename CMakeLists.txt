@@ -54,6 +54,7 @@ project(hermes)
 
   # MATIO
   set(WITH_MATIO NO)
+  set(MATIO_WITH_HDF5 NO)
 
   #### Solvers ###
   # Standard UMFPACK
@@ -337,7 +338,12 @@ project(hermes)
       find_package(UMFPACK REQUIRED)
       include_directories(${UMFPACK_INCLUDE_DIRS})
     endif(WITH_UMFPACK)
-
+    
+    if(MATIO_WITH_HDF5)
+      find_package(HDF5 REQUIRED)
+      include_directories(${HDF5_INCLUDE_DIR})
+    endif()
+    
     IF(DEFINED PARALUTION_LIBRARY)
       IF(DEFINED PARALUTION_INCLUDE_DIR)
         include_directories(${PARALUTION_INCLUDE_DIR})
@@ -488,6 +494,7 @@ project(hermes)
   message("Build with EXODUSII: ${WITH_EXODUSII}")
   message("Build with BSON: ${WITH_BSON}")
   message("Build with MATIO: ${WITH_MATIO}")
+  message("Build with HDF5: ${MATIO_WITH_HDF5}")
   
   message("---------------------")
   message("Hermes common library:")
