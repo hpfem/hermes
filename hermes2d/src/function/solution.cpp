@@ -1148,15 +1148,8 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
-        // Finish.
-        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
-        solution_schema_location.append("/solution_h2d_xml.xsd");
-        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
-
-        ::xml_schema::namespace_infomap namespace_info_map;
-        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
-
         // Write to disk.
+        ::xml_schema::namespace_infomap namespace_info_map;
         std::ofstream out(filename);
         ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
         XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
@@ -1203,15 +1196,8 @@ namespace Hermes
             xmlsolution.component().back().elem_coeffs().push_back(XMLSolution::elem_coeffs(elems_i, elem_coeffs[component_i][elems_i]));
         }
 
-        // Finish.
-        std::string solution_schema_location(Hermes2DApi.get_text_param_value(xmlSchemasDirPath));
-        solution_schema_location.append("/solution_h2d_xml.xsd");
-        ::xml_schema::namespace_info namespace_info_solution("XMLSolution", solution_schema_location);
-
-        ::xml_schema::namespace_infomap namespace_info_map;
-        namespace_info_map.insert(std::pair<std::basic_string<char>, xml_schema::namespace_info>("solution", namespace_info_solution));
-
         // Write to disk.
+        ::xml_schema::namespace_infomap namespace_info_map;
         std::ofstream out(filename);
         ::xml_schema::flags parsing_flags = ::xml_schema::flags::dont_pretty_print;
         XMLSolution::solution_(out, xmlsolution, namespace_info_map, "UTF-8", parsing_flags);
