@@ -376,7 +376,7 @@ namespace Hermes
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
           sprintf(fileName, "%s%i", this->RhsFilename.c_str(), it);
-          vector_right->export(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+          vector_right->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
         }
 
         // Measure the residual norm.
@@ -433,7 +433,7 @@ namespace Hermes
           {
             char* fileName = new char[this->matrixFilename.length() + 5];
             sprintf(fileName, "%s%i", this->matrixFilename.c_str(), it);
-            matrix_right->export(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+            matrix_right->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
           }
 
           matrix_right->finish();

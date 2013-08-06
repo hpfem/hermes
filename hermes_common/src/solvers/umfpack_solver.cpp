@@ -39,7 +39,6 @@ namespace Hermes
     template<typename Scalar>
     UMFPackVector<Scalar>::UMFPackVector() : Vector<Scalar>()
     {
-      v = NULL;
       this->size = 0;
     }
 
@@ -60,61 +59,62 @@ namespace Hermes
     {
       free();
       this->size = n;
-      v = new Scalar[n];
+      this->v = new Scalar[n];
       this->zero();
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::zero()
     {
-      memset(v, 0, this->size * sizeof(Scalar));
+      memset(this->v, 0, this->size * sizeof(Scalar));
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::change_sign()
     {
-      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
+      for (unsigned int i = 0; i < this->size; i++)
+        this->v[i] *= -1.;
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::free()
     {
-      delete [] v;
-      v = NULL;
+      delete [] this->v;
+      this->v = NULL;
       this->size = 0;
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::set(unsigned int idx, Scalar y)
     {
-      v[idx] = y;
+      this->v[idx] = y;
     }
 
     template<>
     void UMFPackVector<double>::add(unsigned int idx, double y)
     {
 #pragma omp atomic
-      v[idx] += y;
+      this->v[idx] += y;
     }
 
     template<>
     void UMFPackVector<std::complex<double> >::add(unsigned int idx, std::complex<double> y)
     {
 #pragma omp critical(UMFPackVector_add)
-      v[idx] += y;
+      this->v[idx] += y;
     }
 
     template<typename Scalar>
     void UMFPackVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
     {
       for (unsigned int i = 0; i < n; i++)
-        v[idx[i]] += y[i];
+        this->v[idx[i]] += y[i];
     }
 
     template<typename Scalar>
     Scalar UMFPackVector<Scalar>::get(unsigned int idx) const
     {
-      return v[idx];
+      return this->v[idx];
     }
 
     template<typename Scalar>
@@ -127,7 +127,8 @@ namespace Hermes
     void UMFPackVector<Scalar>::set_vector(Vector<Scalar>* vec)
     {
       assert(this->size == vec->length());
-      for (unsigned int i = 0; i < this->size; i++) this->v[i] = vec->get(i);
+      for (unsigned int i = 0; i < this->size; i++)
+        this->v[i] = vec->get(i);
     }
 
     template<typename Scalar>

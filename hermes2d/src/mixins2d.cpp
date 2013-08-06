@@ -56,7 +56,7 @@ namespace Hermes
         {
           char* fileName = new char[this->matrixFilename.length() + 5];
           sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
-          matrix->export(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+          matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
           delete [] fileName;
         }
       }
@@ -71,7 +71,7 @@ namespace Hermes
         {
           char* fileName = new char[this->matrixFilename.length() + 5];
           sprintf(fileName, "%s", this->matrixFilename.c_str());
-          matrix->export(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+          matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
           delete [] fileName;
         }
       }
@@ -86,7 +86,7 @@ namespace Hermes
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
           sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
-          rhs->export(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+          rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
           delete [] fileName;
         }
       }
@@ -101,7 +101,7 @@ namespace Hermes
         {
           char* fileName = new char[this->RhsFilename.length() + 5];
           sprintf(fileName, "%s", this->RhsFilename.c_str());
-          rhs->export(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+          rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
           delete [] fileName;
         }
       }
