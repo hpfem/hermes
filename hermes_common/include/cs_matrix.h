@@ -95,7 +95,7 @@ namespace Hermes
 
       /// Matrix export method.
       /// \param[in] invert_storage Used to distinguish between Column (no inversion) and Row (with inversion) format.
-      bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf", bool invert_storage = false);
+      bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf", bool invert_storage = false);
       
       /// Utility method.
       virtual unsigned int get_matrix_size() const;
@@ -155,7 +155,7 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
 
       friend class Hermes::Solvers::CSCIterator<Scalar>;
 
@@ -195,7 +195,7 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
 
       friend class Hermes::Solvers::CSCIterator<Scalar>;
 

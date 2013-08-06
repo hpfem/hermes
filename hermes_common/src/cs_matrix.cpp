@@ -423,14 +423,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool CSMatrix<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format, bool invert_storage)
+    bool CSMatrix<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format, bool invert_storage)
     {
       switch (fmt)
       {
-      case DF_MATRIX_MARKET:
+      case EXPORT_FORMAT_MATRIX_MARKET:
         {
           FILE* file = fopen(filename, "w");
-          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+          else
+            fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate complex\n");
+
           fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
 
           for (unsigned int j = 0; j < this->size; j++)
@@ -446,7 +450,7 @@ namespace Hermes
           return true;
         }
 
-      case DF_MATLAB_MAT:
+      case EXPORT_FORMAT_MATLAB_MATIO:
         {
 #ifdef WITH_MATIO
           mat_sparse_t sparse;
@@ -454,18 +458,33 @@ namespace Hermes
           if(invert_storage)
             this->switch_orientation();
 
+          // For complex.
+          double* Ax_re = new double[this->nnz];
+          double* Ax_im = new double[this->nnz];
+          struct mat_complex_split_t z = {Ax_re, Ax_im};
+
           sparse.nir = this->nnz;
           sparse.ir = Ai;
           sparse.njc = this->size + 1;
           sparse.jc = (int *) Ap;
           sparse.ndata = this->nnz;
-          sparse.data = Ax;
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            sparse.data = Ax;
+          else
+          {
+            for(int i = 0; i < this->nnz; i++)
+            {
+              Ax_re[i] = ((std::complex<double>)(this->Ax[i])).real();
+              Ax_im[i] = ((std::complex<double>)(this->Ax[i])).imag();
+              sparse.data = &z;
+            }
+          } 
 
           size_t dims[2];
           dims[0] = this->size;
           dims[1] = this->size;
 
-          mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+          mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
 
           matvar_t *matvar;
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
@@ -479,12 +498,17 @@ namespace Hermes
             Mat_VarFree(matvar);
             if(invert_storage)
               this->switch_orientation();
+            delete [] Ax_re;
+            delete [] Ax_im;
+         
             return true;
           }
           else
           {
             if(invert_storage)
               this->switch_orientation();
+            delete [] Ax_re;
+            delete [] Ax_im;
             return false;
           }
 
@@ -493,7 +517,7 @@ namespace Hermes
           return false;
         }
 
-      case DF_PLAIN_ASCII:
+      case EXPORT_FORMAT_PLAIN_ASCII:
         {
           FILE* file = fopen(filename, "w");
 
@@ -516,15 +540,15 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool CSCMatrix<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool CSCMatrix<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
-      return CSMatrix<Scalar>::dump(filename, var_name, fmt, number_format, false);
+      return CSMatrix<Scalar>::export(filename, var_name, fmt, number_format, false);
     }
 
     template<typename Scalar>
-    bool CSRMatrix<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool CSRMatrix<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
-      return CSMatrix<Scalar>::dump(filename, var_name, fmt, number_format, true);
+      return CSMatrix<Scalar>::export(filename, var_name, fmt, number_format, true);
     }
 
     template<typename Scalar>

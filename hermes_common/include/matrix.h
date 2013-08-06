@@ -290,15 +290,15 @@ namespace Hermes
     }
 
     /// Format of file matrix and vector output
-    enum EMatrixDumpFormat
+    enum EMatrixExportFormat
     {
       /// \brief Plain ascii file
       /// lines contains row column and value
-      DF_PLAIN_ASCII = 1,
+      EXPORT_FORMAT_PLAIN_ASCII = 1,
       /// Binary MATio format
-      DF_MATLAB_MAT = 4,
+      EXPORT_FORMAT_MATLAB_MATIO = 4,
       /// \brief Matrix Market which can be read by pysparse library
-      DF_MATRIX_MARKET = 3
+      EXPORT_FORMAT_MATRIX_MARKET = 3
     };
 
     /// \brief General (abstract) matrix representation in Hermes.
@@ -364,7 +364,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      virtual bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
       /// Get size of matrix
       /// @return size of matrix
@@ -581,7 +581,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
 
     protected:
       /// Raw data - the implementation does not have to use this.

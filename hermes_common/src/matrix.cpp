@@ -283,7 +283,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Vector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool Vector<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       if(!v)
       {
@@ -293,35 +293,81 @@ namespace Hermes
 
       switch (fmt)
       {
-      case DF_MATLAB_MAT:
+        case EXPORT_FORMAT_MATRIX_MARKET:
+        {
+          FILE* file = fopen(filename, "w");
+           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+          else
+            fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate complex\n");
+          
+          fprintf(file, "%d 1 %d\n", this->size, this->size);
+
+          for (unsigned int j = 0; j < this->size; j++)
+          {
+            Hermes::Helpers::fprint_coordinate_num(file, j + 1, 1, v[j], number_format);
+            fprintf(file, "\n");
+          }
+
+          fclose(file);
+          return true;
+        }
+
+      case EXPORT_FORMAT_MATLAB_MATIO:
         {
 #ifdef WITH_MATIO
           size_t dims[2];
           dims[0] = this->size;
           dims[1] = 1;
 
-          mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+          // For complex.
+          double* v_re = new double[this->size];
+          double* v_im = new double[this->size];
+          struct mat_complex_split_t z = {v_re, v_im};
+
+          void* data;
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            data = v;
+          else
+          {
+            for(int i = 0; i < this->size; i++)
+            {
+              v_re[i] = ((std::complex<double>)(this->v[i])).real();
+              v_im[i] = ((std::complex<double>)(this->v[i])).imag();
+              data = &z;
+            }
+          } 
+
+
+          mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
           matvar_t *matvar;
 
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
-            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA);
           else
-            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
           
           if (matvar)
           {
             Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
             Mat_VarFree(matvar);
+            delete [] v_re;
+            delete [] v_im;
             return true;
           }
           else
+          {
+            delete [] v_re;
+            delete [] v_im;
             return false;
+          }
+
           Mat_Close(mat);
 #endif
           return false;
         }
 
-      case DF_PLAIN_ASCII:
+      case EXPORT_FORMAT_PLAIN_ASCII:
         {
           FILE* file = fopen(filename, "w");
           for (unsigned int i = 0; i < this->size; i++)

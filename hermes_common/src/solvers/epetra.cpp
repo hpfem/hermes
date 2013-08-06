@@ -327,12 +327,12 @@ namespace Hermes
     }
    
     template<>
-    bool EpetraMatrix<double>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool EpetraMatrix<double>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
       {
       case DF_MATLAB_SPARSE:
-      case DF_PLAIN_ASCII:
+      case EXPORT_FORMAT_PLAIN_ASCII:
         EpetraExt::RowMatrixToHandle(file, *this->mat);
         return true;
       }
@@ -341,7 +341,7 @@ namespace Hermes
     }
     
     template<>
-    bool EpetraMatrix<std::complex<double> >::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool EpetraMatrix<std::complex<double> >::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       return false;
     }
@@ -474,12 +474,12 @@ namespace Hermes
     }
     
     template<>
-    bool EpetraVector<double>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool EpetraVector<double>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
       {
       case DF_MATLAB_SPARSE:
-      case DF_PLAIN_ASCII:
+      case EXPORT_FORMAT_PLAIN_ASCII:
         EpetraExt::VectorToHandle(file, *this->vec);
         return true;
       }
@@ -488,7 +488,7 @@ namespace Hermes
     }
     
     template<>
-    bool EpetraVector<std::complex<double> >::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    bool EpetraVector<std::complex<double> >::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       return false;
     }

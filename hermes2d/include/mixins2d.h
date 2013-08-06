@@ -84,7 +84,7 @@ namespace Hermes
         void set_matrix_varname(std::string name);
         /// Sets varname for the matrix
         /// Default: "DF_MATLAB_SPARSE - matlab file".
-        void set_matrix_dump_format(EMatrixDumpFormat format);
+        void set_matrix_dump_format(EMatrixExportFormat format);
         /// Sets number format for the matrix output.
         /// Default: "%lf".
         void set_matrix_number_format(char* number_format);
@@ -101,7 +101,7 @@ namespace Hermes
         void set_rhs_varname(std::string name);
         /// Sets varname for the rhs
         /// Default: "DF_MATLAB_SPARSE - matlab file".
-        void set_rhs_E_matrix_dump_format(EMatrixDumpFormat format);
+        void set_rhs_E_matrix_dump_format(EMatrixExportFormat format);
         /// Sets number format for the vector output.
         /// Default: "%lf".
         void set_rhs_number_format(char* number_format);
@@ -112,14 +112,14 @@ namespace Hermes
         int output_matrixIterations;
         std::string matrixFilename;
         std::string matrixVarname;
-        EMatrixDumpFormat matrixFormat;
+        EMatrixExportFormat matrixFormat;
         char* matrix_number_format;
 
         bool output_rhsOn;
         int output_rhsIterations;
         std::string RhsFilename;
         std::string RhsVarname;
-        EMatrixDumpFormat RhsFormat;
+        EMatrixExportFormat RhsFormat;
         char* rhs_number_format;
       };
 
