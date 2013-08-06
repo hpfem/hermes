@@ -90,7 +90,7 @@ namespace Hermes
     {
       free();
       this->size = n;
-      v = new Scalar[n];
+      this->v = new Scalar[n];
       this->zero();
       this->paralutionVector.SetDataPtr(&this->v, "vector", this->size);
     }
@@ -105,7 +105,7 @@ namespace Hermes
     void ParalutionVector<Scalar>::free()
     {
       this->paralutionVector.Clear();
-      v = NULL;
+      this->v = NULL;
       this->size = 0;
     }
 
@@ -118,27 +118,28 @@ namespace Hermes
     template<typename Scalar>
     void ParalutionVector<Scalar>::zero()
     {
-      memset(v, 0, this->size * sizeof(Scalar));
+      memset(this->v, 0, this->size * sizeof(Scalar));
       this->paralutionVector.Zeros();
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::change_sign()
     {
-      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
+      for (unsigned int i = 0; i < this->size; i++)
+        this->v[i] *= -1.;
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::set(unsigned int idx, Scalar y)
     {
-      v[idx] = y;
+      this->v[idx] = y;
     }
 
     template<>
     void ParalutionVector<double>::add(unsigned int idx, double y)
     {
 #pragma omp atomic
-      v[idx] += y;
+      this->v[idx] += y;
     }
 
 
@@ -146,13 +147,13 @@ namespace Hermes
     void ParalutionVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
     {
       for (unsigned int i = 0; i < n; i++)
-        v[idx[i]] += y[i];
+        this->v[idx[i]] += y[i];
     }
 
     template<typename Scalar>
     Scalar ParalutionVector<Scalar>::get(unsigned int idx) const
     {
-      return v[idx];
+      return this->v[idx];
     }
 
     template<typename Scalar>
@@ -165,7 +166,8 @@ namespace Hermes
     void ParalutionVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
       assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
+      for (unsigned int i = 0; i < this->length(); i++)
+        this->v[i] += vec->get(i);
     }
 
     template<typename Scalar>
