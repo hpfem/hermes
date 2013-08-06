@@ -1,6 +1,8 @@
 # This is a sample CMake.vars file for Hermes.
 #set(H2D_WITH_GLUT NO)
 #set(WITH_TRILINOS NO)
+#set(WITH_MATIO YES)
+#set(MATIO_WITH_HDF5 YES)
 
 # Some search paths.
 if (WIN32)
