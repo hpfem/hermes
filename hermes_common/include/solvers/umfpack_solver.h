@@ -76,15 +76,7 @@ namespace Hermes
       virtual void set_vector(Scalar* vec);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
-      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
-
-      /// @return pointer to array with vector data
-      /// \sa #v
-      Scalar *get_c_array();
-
-    protected:
-      /// UMFPack specific data structures for storing the rhs.
-      Scalar *v;
+      
       template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
       template <typename T> friend class Hermes::Solvers::CSCIterator;
       template<typename T> friend Vector<T>* Hermes::Algebra::create_vector(bool);

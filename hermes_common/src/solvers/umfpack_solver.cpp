@@ -44,7 +44,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    UMFPackVector<Scalar>::UMFPackVector(unsigned int size) : Vector<Scalar>(size), v(NULL)
+    UMFPackVector<Scalar>::UMFPackVector(unsigned int size) : Vector<Scalar>(size)
     {
       this->alloc(size);
     }
@@ -147,64 +147,6 @@ namespace Hermes
     void UMFPackVector<Scalar>::add_vector(Scalar* vec)
     {
       for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
-    }
-
-    template<typename Scalar>
-    Scalar *UMFPackVector<Scalar>::get_c_array()
-    {
-      return this->v;
-    }
-
-    template<typename Scalar>
-    bool UMFPackVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
-    {
-      switch (fmt)
-      {
-      case DF_MATLAB_MAT:
-        {
-#ifdef WITH_MATIO
-          size_t dims[2];
-          dims[0] = this->size;
-          dims[1] = 1;
-
-          mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
-          matvar_t *matvar;
-
-          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
-            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
-          else
-            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
-          
-          if (matvar)
-          {
-            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
-            Mat_VarFree(matvar);
-            return true;
-          }
-          else
-            return false;
-          Mat_Close(mat);
-#endif
-          return false;
-        }
-
-      case DF_PLAIN_ASCII:
-        {
-          FILE* file = fopen(filename, "w+");
-          fprintf(file, "\n");
-          for (unsigned int i = 0; i < this->size; i++)
-          {
-            Hermes::Helpers::fprint_num(file, v[i], number_format);
-            fprintf(file, "\n");
-          }
-          fclose(file);
-
-          return true;
-        }
-
-      default:
-        return false;
-      }
     }
 
     template class HERMES_API UMFPackMatrix<double>;
@@ -368,7 +310,7 @@ namespace Hermes
 
       sln = new double[m->get_size()];
       memset(sln, 0, m->get_size() * sizeof(double));
-      int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->get_c_array(), numeric, NULL, NULL);
+      int status = umfpack_real_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), m->get_Ax(), sln, rhs->v, numeric, NULL, NULL);
       if(status != UMFPACK_OK)
       {
         this->free_factorization_data();
@@ -394,7 +336,7 @@ namespace Hermes
       sln = new std::complex<double>[m->get_size()];
 
       memset(sln, 0, m->get_size() * sizeof(std::complex<double>));
-      int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->get_c_array(), NULL, numeric, NULL, NULL);
+      int status = umfpack_complex_solve(UMFPACK_A, m->get_Ap(), m->get_Ai(), (double *)m->get_Ax(), NULL, (double*) sln, NULL, (double *)rhs->v, NULL, numeric, NULL, NULL);
       if(status != UMFPACK_OK)
       {
         this->free_factorization_data();

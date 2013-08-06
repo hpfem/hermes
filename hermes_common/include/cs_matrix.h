@@ -58,6 +58,9 @@ namespace Hermes
       CSMatrix(unsigned int size);
       virtual ~CSMatrix();
 
+      /// Switches CSR / CSC arrays.
+      void switch_orientation();
+
       /// Main addition method.
       /// Virtual - the method body is 1:1 for CSCMatrix, inverted for CSR.
       virtual void add(unsigned int Ai_data_index, unsigned int Ai_index, Scalar v);
@@ -90,8 +93,10 @@ namespace Hermes
       /// Utility method.
       virtual void set_row_zero(unsigned int n);
 
-      /// Utility method.
-      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      /// Matrix export method.
+      /// \param[in] invert_storage Used to distinguish between Column (no inversion) and Row (with inversion) format.
+      bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf", bool invert_storage = false);
+      
       /// Utility method.
       virtual unsigned int get_matrix_size() const;
       /// Utility method.
@@ -99,25 +104,25 @@ namespace Hermes
       /// Utility method.
       virtual double get_fill_in() const;
 
-      // Applies the matrix to vector_in and saves result to vector_out.
+      /// Applies the matrix to vector_in and saves result to vector_out.
       void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
-      // Multiplies matrix with a Scalar.
+      /// Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
 
-      // Duplicates a matrix (including allocation).
+      /// Duplicates a matrix (including allocation).
       virtual CSMatrix* duplicate();
-      // Exposes pointers to the CS arrays.
+      /// Exposes pointers to the CS arrays.
       /// @return pointer to #Ap
       int *get_Ap();
-      // Exposes pointers to the CS arrays.
+      /// Exposes pointers to the CS arrays.
       /// @return pointer to #Ai
       int *get_Ai();
-      // Exposes pointers to the CS arrays.
+      /// Exposes pointers to the CS arrays.
       /// @return pointer to #Ax
       Scalar *get_Ax();
 
     protected:
-      // UMFPack specific data structures for storing the system matrix (CSC format).
+      /// UMFPack specific data structures for storing the system matrix (CSC format).
       /// Matrix entries (column-wise).
       Scalar *Ax;
       /// Row / Column indices of values in Ax.
@@ -165,7 +170,7 @@ namespace Hermes
       /// @param[in] mat added matrix
       virtual void add_as_block(unsigned int i, unsigned int j, CSMatrix<Scalar>* mat);
 
-      // Duplicates a matrix (including allocation).
+      /// Duplicates a matrix (including allocation).
       virtual CSMatrix<Scalar>* duplicate();
     };
 
@@ -204,7 +209,7 @@ namespace Hermes
       /// @param[in] mat added matrix
       virtual void add_as_block(unsigned int i, unsigned int j, CSMatrix<Scalar>* mat);
 
-      // Duplicates a matrix (including allocation).
+      /// Duplicates a matrix (including allocation).
       virtual CSMatrix<Scalar>* duplicate();
 
       /// Important - normal SparseMatrix has the pages structure suitable for CSC matrix, so we need

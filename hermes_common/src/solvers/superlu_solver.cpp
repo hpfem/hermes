@@ -481,45 +481,6 @@ namespace Hermes
       for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
     }
 
-    template<typename Scalar>
-    bool SuperLUVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
-    {
-      switch (fmt)
-      {
-      case DF_PLAIN_ASCII:
-        for (unsigned int i = 0; i < this->size; i++)
-        {
-          Hermes::Helpers::fprint_num(file, v[i], number_format);
-          fprintf(file, "\n");
-        }
-
-        return true;
-
-      case DF_MATLAB_SPARSE:
-        fprintf(file, "%% Size: %dx1\n%s =[\n", this->size, var_name);
-        for (unsigned int i = 0; i < this->size; i++)
-        {
-          Hermes::Helpers::fprint_num(file, v[i], number_format);
-          fprintf(file, "\n");
-        }
-        fprintf(file, " ];\n");
-        return true;
-
-      case DF_HERMES_BIN:
-        {
-          this->hermes_fwrite("HERMESR\001", 1, 8, file);
-          int ssize = sizeof(Scalar);
-          this->hermes_fwrite(&ssize, sizeof(int), 1, file);
-          this->hermes_fwrite(&this->size, sizeof(int), 1, file);
-          this->hermes_fwrite(v, sizeof(Scalar), this->size, file);
-          return true;
-        }
-
-      default:
-        return false;
-      }
-    }
-
     template class HERMES_API SuperLUMatrix<double>;
     template class HERMES_API SuperLUMatrix<std::complex<double> >;
     template class HERMES_API SuperLUVector<double>;

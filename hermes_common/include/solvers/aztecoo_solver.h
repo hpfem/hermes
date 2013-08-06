@@ -55,24 +55,24 @@ namespace Hermes
       /// Set Aztec internal preconditioner
       /// @param[in] name - name of the preconditioner[ none | jacobi | neumann | least-squares ]
       virtual void set_precond(const char *name);
-      
+
       /// \brief Set preconditioner from IFPACK or ML.
       /// @param[in] pc - IFPACK or ML preconditioner
       virtual void set_precond(Precond<Scalar> *pc);
-      
+
       virtual void set_reuse_scheme(MatrixStructureReuseScheme reuse_scheme);
-      
+
       virtual void use_node_wise_ordering(unsigned int num_pdes);
       virtual void use_equations_wise_ordering();
 
       AztecOOSolver(EpetraMatrix<Scalar> *m, EpetraVector<Scalar> *rhs);
       virtual ~AztecOOSolver();
-      
+
       virtual void solve();
       virtual void solve(Scalar* initial_guess);
-      
+
       virtual int get_matrix_size();
-    
+
       virtual int get_num_iters();
       virtual double get_residual();
 
@@ -86,18 +86,18 @@ namespace Hermes
       AztecOO aztec;    ///< Instance of the Aztec solver.
       EpetraMatrix<Scalar> *m;
       EpetraVector<Scalar> *rhs;
-      
+
       int *row_perm;
       int *col_perm;
       EpetraExt::Permutation<Epetra_CrsMatrix> *P;
       EpetraExt::Permutation<Epetra_CrsMatrix> *Q;
       EpetraMatrix<Scalar> *final_matrix;
-      
+
       void create_permutation_vectors();
       void free_permutation_data();
 
       EpetraPrecond<Scalar> *pc;
-      
+
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver = false);
     };
   }

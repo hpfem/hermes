@@ -581,10 +581,13 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool dump(char *filename, const char *var_name,
-        EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
 
     protected:
+      /// Raw data - the implementation does not have to use this.
+      /// For the purpose of sharing functionality among MANY implementations that DO use this.s
+      Scalar *v;
+
       /// size of vector
       unsigned int size;
     };

@@ -196,8 +196,6 @@ namespace Hermes
             add(rows[i], cols[j], mat[i][j]);
     }
 
-    /// Add a number to each diagonal entry.
-
     template<typename Scalar>
     void MumpsMatrix<Scalar>::add_to_diagonal(Scalar v)
     {
@@ -207,61 +205,85 @@ namespace Hermes
       }
     };
 
-    /// dumping matrix and right-hand side
-    ///
     template<typename Scalar>
     bool MumpsMatrix<Scalar>::dump(char* filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
     {
-      // TODO
       switch (fmt)
       {
-      case DF_PLAIN_ASCII:
-      {
-        FILE* file = fopen(filename, "w+");
-        // fprintf(file, "%d\n", this->size);
-        // fprintf(file, "%d\n", nnz);
-        for (unsigned int i = 0; i < nnz; i++)
+      case DF_MATRIX_MARKET:
         {
-          fprintf(file, "%d %d ", irn[i]-1, jcn[i]-1);
-          Hermes::Helpers::fprint_num(file, mumps_to_Scalar(Ax[i]), number_format);
-          fprintf(file, "\n");
+          FILE* file = fopen(filename, "w");
+          fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
+          fprintf(file, "%d %d %d\n", this->size, this->size, this->nnz);
+
+          for (unsigned int j = 0; j < this->size; j++)
+          {
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            {
+              Helpers::fprint_coordinate_num(file, irn[i]-1, jcn[i]-1, mumps_to_Scalar(Ax[i]), number_format);
+              fprintf(file, "\n");
+            }
+          }
+
+          fclose(file);
+          return true;
         }
-        fclose(file);
-        return true;
-      }
+
       case DF_MATLAB_MAT:
-      {
-#ifdef WITH_MATIO
-        mat_sparse_t sparse;
-        sparse.nzmax = this->nnz;
-        sparse.nir = this->nnz;
-        sparse.ir = Ai;
-        sparse.njc = this->size + 1;
-        sparse.jc = (int *) Ap;
-        sparse.ndata = this->nnz;
-        sparse.data = Ax;
-
-        size_t dims[2];
-        dims[0] = this->size;
-        dims[1] = this->size;
-
-        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
-        matvar_t *matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
-        if (matvar)
         {
+#ifdef WITH_MATIO
+          mat_sparse_t sparse;
+          sparse.nzmax = this->nnz;
+
+          sparse.nir = this->nnz;
+          sparse.ir = Ai;
+          sparse.njc = this->size + 1;
+          sparse.jc = (int *) Ap;
+          sparse.ndata = this->nnz;
+          sparse.data = Ax;
+
+          size_t dims[2];
+          dims[0] = this->size;
+          dims[1] = this->size;
+
+          mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+
+          matvar_t *matvar;
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+          else
+            matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+
+          if (matvar)
+          {
             Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
             Mat_VarFree(matvar);
-
             return true;
-        }
-        else
-        {
+          }
+          else
             return false;
-        }
-        Mat_Close(mat);
+
+          Mat_Close(mat);
 #endif
-        return false;
-      }
+          return false;
+        }
+
+      case DF_PLAIN_ASCII:
+        {
+          FILE* file = fopen(filename, "w");
+
+          for (unsigned int j = 0; j < this->size; j++)
+          {
+            for (int i = Ap[j]; i < Ap[j + 1]; i++)
+            {
+              Helpers::fprint_coordinate_num(file, irn[i]-1, jcn[i]-1, mumps_to_Scalar(Ax[i]), number_format);
+              fprintf(file, "\n");
+            }
+          }
+
+          fclose(file);
+          return true;
+        }
 
       default:
         return false;
@@ -491,7 +513,7 @@ namespace Hermes
     template<typename Scalar>
     void MumpsVector<Scalar>::add(unsigned int idx, Scalar y)
     {
-      #pragma omp critical (MumpsVector_add)
+#pragma omp critical (MumpsVector_add)
       v[idx] += y;
     }
 
@@ -527,54 +549,6 @@ namespace Hermes
     void MumpsVector<Scalar>::add_vector(Scalar* vec)
     {
       for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-    }
-
-    template<typename Scalar>
-    bool MumpsVector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
-    {
-      switch (fmt)
-      {
-      case DF_PLAIN_ASCII:
-      {
-        FILE* file = fopen(filename, "w+");
-        for (unsigned int i = 0; i < this->size; i++)
-        {
-          Hermes::Helpers::fprint_num(file, v[i], number_format);
-          fprintf(file, "\n");
-        }
-        fclose(file);
-
-        return true;
-      }
-
-      case DF_MATLAB_MAT:
-      {
-#ifdef WITH_MATIO
-        size_t dims[2];
-        dims[0] = this->size;
-        dims[1] = 1;
-
-        mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
-        matvar_t *matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
-        if (matvar)
-        {
-            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
-            Mat_VarFree(matvar);
-
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-        Mat_Close(mat);
-#endif
-        return false;
-      }
-
-      default:
-        return false;
-      }
     }
 
     template class HERMES_API MumpsMatrix<double>;
@@ -664,7 +638,7 @@ namespace Hermes
 
     template<typename Scalar>
     MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :
-    DirectSolver<Scalar>(), m(m), rhs(rhs)
+      DirectSolver<Scalar>(), m(m), rhs(rhs)
     {
       inited = false;
 
@@ -721,7 +695,7 @@ namespace Hermes
       if(ret)
       {
         delete [] this->sln;
-				this->sln = new Scalar[m->size];
+        this->sln = new Scalar[m->size];
         for (unsigned int i = 0; i < rhs->size; i++)
           this->sln[i] = mumps_to_Scalar(param.rhs[i]);
       }

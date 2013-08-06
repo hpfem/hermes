@@ -198,6 +198,7 @@ namespace Hermes
 
   namespace Helpers
   {
+    /// Number printers.
     inline void fprint_num(FILE*f, double x, char* number_format)
     {
       fprintf(f, number_format, x);
@@ -210,7 +211,14 @@ namespace Hermes
       fprintf(f, number_formatComplex, x.real(), x.imag());
     }
 
-    // Type deductors.
+    template<typename Scalar>
+    inline void fprint_coordinate_num(FILE*f, int i, int j, Scalar x, char* number_format)
+    {
+      fprintf(f, "%d %d ", i, j);
+      fprint_num(f, x, number_format);
+    }
+
+    /// Type deductors.
     template<typename Scalar>
     struct TypeIsReal
     {

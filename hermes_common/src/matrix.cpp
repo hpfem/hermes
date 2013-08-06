@@ -146,17 +146,17 @@ namespace Hermes
       row_storage = false;
       col_storage = false;
     }
-    
+
     template<typename Scalar>
     SparseMatrix<Scalar>::SparseMatrix(const SparseMatrix<Scalar>& mat)
     {
       this->size = mat.get_size();
-      
+
       if (mat.pages)
       {
         this->pages = new Page *[this->size];
         memset(this->pages, 0, this->size * sizeof(Page *));
-      
+
         for (int col = 0; col < this->size; col++)
         {
           Page *page = mat.pages[col];
@@ -171,7 +171,7 @@ namespace Hermes
       {
         this->pages = NULL;
       }
-      
+
       row_storage = false;
       col_storage = false;
     }
@@ -247,12 +247,12 @@ namespace Hermes
 
 
     template<typename Scalar>
-    Vector<Scalar>::Vector() : size(0)
+    Vector<Scalar>::Vector() : size(0), v(NULL)
     {
     }
 
     template<typename Scalar>
-    Vector<Scalar>::Vector(unsigned int size) : size(size)
+    Vector<Scalar>::Vector(unsigned int size) : size(size), v(NULL)
     {
     }
 
@@ -280,6 +280,63 @@ namespace Hermes
     void Vector<Scalar>::add_vector(Scalar* vec)
     {
       for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+    }
+
+    template<typename Scalar>
+    bool Vector<Scalar>::dump(char *filename, const char *var_name, EMatrixDumpFormat fmt, char* number_format)
+    {
+      if(!v)
+      {
+        throw Exceptions::MethodNotOverridenException("Vector<Scalar>::dump");
+        return false;
+      }
+
+      switch (fmt)
+      {
+      case DF_MATLAB_MAT:
+        {
+#ifdef WITH_MATIO
+          size_t dims[2];
+          dims[0] = this->size;
+          dims[1] = 1;
+
+          mat_t *mat = Mat_CreateVer(filename, NULL, MAT_FT_MAT5);
+          matvar_t *matvar;
+
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA);
+          else
+            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, v, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+          
+          if (matvar)
+          {
+            Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+            Mat_VarFree(matvar);
+            return true;
+          }
+          else
+            return false;
+          Mat_Close(mat);
+#endif
+          return false;
+        }
+
+      case DF_PLAIN_ASCII:
+        {
+          FILE* file = fopen(filename, "w");
+          for (unsigned int i = 0; i < this->size; i++)
+          {
+            Hermes::Helpers::fprint_num(file, v[i], number_format);
+            fprintf(file, "\n");
+          }
+          fclose(file);
+
+          return true;
+        }
+
+      default:
+        return false;
+      }
     }
 
     template HERMES_API void Vector<double>::set_vector(Vector<double>* vec);

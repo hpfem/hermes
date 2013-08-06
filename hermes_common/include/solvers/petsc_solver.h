@@ -131,7 +131,7 @@ namespace Hermes
       virtual bool dump(char *filename, const char *var_name, EMatrixDumpFormat fmt = DF_PLAIN_ASCII, char* number_format = "%lf");
 
     protected:
-      /// Petsc vectore data structure.
+      /// Petsc vector data structure.
       Vec vec;
       /// Is vector initiated (allocated)?
       bool inited;
