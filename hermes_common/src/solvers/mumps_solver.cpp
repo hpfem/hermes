@@ -206,7 +206,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    bool MumpsMatrix<Scalar>::export(char* filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool MumpsMatrix<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
       {

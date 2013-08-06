@@ -222,7 +222,7 @@ namespace Hermes
     /// Save matrix and right-hand side to a file.
     ///
     template<typename Scalar>
-    bool SuperLUMatrix<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool SuperLUMatrix<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       // TODO
       switch (fmt)

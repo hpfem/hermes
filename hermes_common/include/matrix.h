@@ -364,7 +364,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
       /// Get size of matrix
       /// @return size of matrix
@@ -581,7 +581,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool export(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
 
     protected:
       /// Raw data - the implementation does not have to use this.

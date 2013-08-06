@@ -211,7 +211,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscMatrix<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool PetscMatrix<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
       {
@@ -446,7 +446,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscVector<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool PetscVector<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
       {

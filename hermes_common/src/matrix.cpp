@@ -283,7 +283,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool Vector<Scalar>::export(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool Vector<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
     {
       if(!v)
       {
