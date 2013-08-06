@@ -28,20 +28,21 @@ IF(WIN32)
 ENDIF(WIN32)
 
 SET(COMMON_PETSC_INCLUDE_DIRS
-    /usr/lib/petscdir/3.1/include
+    ${PETSC_ROOT}/include
+    ${PETSC_ROOT}/${PETSC_ARCH}/include
     /usr/include
     /usr/local/include
 )
 
 SET(COMMON_PETSC_LIB_DIRS
-    /usr/lib/petscdir/3.1/linux-gnu-cxx-opt
-    /usr/lib/petscdir/3.1/linux-gnu-c-opt/lib
+    ${PETSC_ROOT}/${PETSC_ARCH}/lib
     /usr/lib
     /usr/local/lib
     /usr/lib/petscdir/3.1/lib
 )
 
 FIND_PATH(PETSC_INCLUDE_DIRS petsc.h ${COMMON_PETSC_INCLUDE_DIRS})
+FIND_PATH(PETSC_CONF_INCLUDE_DIRS petscconf.h ${COMMON_PETSC_INCLUDE_DIRS})
 
 # PETSc 3.1    
 FIND_LIBRARY(PETSC_LIB_C petsc ${COMMON_PETSC_LIB_DIRS})
