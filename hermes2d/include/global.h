@@ -95,7 +95,7 @@ namespace Hermes
     double get_l2_norm(Vector<Scalar>* vec)
     {
       Scalar val = 0;
-      for (unsigned int i = 0; i < vec->length(); i++)
+      for (unsigned int i = 0; i < vec->get_size(); i++)
       {
         Scalar inc = vec->get(i);
         val = val + inc*conj(inc);

@@ -75,7 +75,7 @@ namespace Hermes
 
     /// \brief Class representing the vector for UMFPACK.
     template <typename Scalar>
-    class HERMES_API ParalutionVector : public Vector<Scalar>
+    class HERMES_API ParalutionVector : public SimpleVector<Scalar>
     {
     public:
       /// Default constructor.
@@ -86,15 +86,7 @@ namespace Hermes
       virtual ~ParalutionVector();
       virtual void alloc(unsigned int ndofs);
       virtual void free();
-      virtual Scalar get(unsigned int idx) const;
-      virtual void extract(Scalar *v) const;
       virtual void zero();
-      virtual void change_sign();
-      virtual void set(unsigned int idx, Scalar y);
-      virtual void add(unsigned int idx, Scalar y);
-      virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
 
       paralution::LocalVector<Scalar>& get_paralutionVector();
 

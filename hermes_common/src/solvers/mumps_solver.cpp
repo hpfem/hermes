@@ -481,101 +481,14 @@ namespace Hermes
       return nmat;
     }
 
-    // MumpsVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////
+    // SimpleVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////
 
-    template<typename Scalar>
-    MumpsVector<Scalar>::MumpsVector()
-    {
-      v = NULL;
-      this->size = 0;
-    }
-
-    template<typename Scalar>
-    MumpsVector<Scalar>::~MumpsVector()
-    {
-      free();
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::alloc(unsigned int n)
-    {
-      free();
-      this->size = n;
-      v = new Scalar[n];
-      zero();
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::change_sign()
-    {
-      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::zero()
-    {
-      memset(v, 0, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::free()
-    {
-      delete [] v;
-      v = NULL;
-      this->size = 0;
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::set(unsigned int idx, Scalar y)
-    {
-      v[idx] = y;
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::add(unsigned int idx, Scalar y)
-    {
-#pragma omp critical (MumpsVector_add)
-      v[idx] += y;
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
-    {
-      for (unsigned int i = 0; i < n; i++)
-      {
-        v[idx[i]] += y[i];
-      }
-    }
-
-    template<typename Scalar>
-    Scalar MumpsVector<Scalar>::get(unsigned int idx) const
-    {
-      return v[idx];
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::extract(Scalar *v) const
-    {
-      memcpy(v, this->v, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::add_vector(Vector<Scalar>* vec)
-    {
-      assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-    }
-
-    template<typename Scalar>
-    void MumpsVector<Scalar>::add_vector(Scalar* vec)
-    {
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-    }
+    
 
     template class HERMES_API MumpsMatrix<double>;
     template class HERMES_API MumpsMatrix<std::complex<double> >;
-    template class HERMES_API MumpsVector<double>;
-    template class HERMES_API MumpsVector<std::complex<double> >;
+    template class HERMES_API SimpleVector<double>;
+    template class HERMES_API SimpleVector<std::complex<double> >;
   }
   namespace Solvers
   {
@@ -658,7 +571,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs) :
+    MumpsSolver<Scalar>::MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) :
       DirectSolver<Scalar>(), m(m), rhs(rhs)
     {
       inited = false;
@@ -717,7 +630,7 @@ namespace Hermes
       {
         delete [] this->sln;
         this->sln = new Scalar[m->size];
-        for (unsigned int i = 0; i < rhs->size; i++)
+        for (unsigned int i = 0; i < rhs->get_size(); i++)
           this->sln[i] = mumps_to_Scalar(param.rhs[i]);
       }
       else

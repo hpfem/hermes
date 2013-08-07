@@ -319,7 +319,7 @@ namespace Hermes
       if(vec == NULL) throw Exceptions::NullException(2);
 
       space_type = space->get_type();
-      Scalar* coeffs = new Scalar[vec->length()];
+      Scalar* coeffs = new Scalar[vec->get_size()];
       vec->extract(coeffs);
       this->set_coeff_vector(space, coeffs, add_dir_lift, start_index);
       delete [] coeffs;

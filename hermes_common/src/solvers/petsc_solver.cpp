@@ -435,14 +435,16 @@ namespace Hermes
     template<typename Scalar>
     void PetscVector<Scalar>::add_vector(Vector<Scalar>* vec)
     {
-      assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
+      assert(this->->get_size() == vec->->get_size());
+      for (unsigned int i = 0; i < this->->get_size(); i++)
+        this->add(i, vec->get(i));
     }
 
     template<typename Scalar>
     void PetscVector<Scalar>::add_vector(Scalar* vec)
     {
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
+      for (unsigned int i = 0; i < this->->get_size(); i++)
+        this->add(i, vec[i]);
     }
 
     template<typename Scalar>

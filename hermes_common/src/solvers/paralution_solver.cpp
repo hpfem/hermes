@@ -74,12 +74,12 @@ namespace Hermes
 
 
     template<typename Scalar>
-    ParalutionVector<Scalar>::ParalutionVector() : Vector<Scalar>()
+    ParalutionVector<Scalar>::ParalutionVector() : SimpleVector<Scalar>()
     {
     }
 
     template<typename Scalar>
-    ParalutionVector<Scalar>::ParalutionVector(unsigned int size) : Vector<Scalar>(size)
+    ParalutionVector<Scalar>::ParalutionVector(unsigned int size) : SimpleVector<Scalar>(size)
     {
       this->alloc(size);
       this->paralutionVector.SetDataPtr(&this->v, "paralutionVector", this->size);
@@ -120,61 +120,6 @@ namespace Hermes
     {
       memset(this->v, 0, this->size * sizeof(Scalar));
       this->paralutionVector.Zeros();
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::change_sign()
-    {
-      for (unsigned int i = 0; i < this->size; i++)
-        this->v[i] *= -1.;
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::set(unsigned int idx, Scalar y)
-    {
-      this->v[idx] = y;
-    }
-
-    template<>
-    void ParalutionVector<double>::add(unsigned int idx, double y)
-    {
-#pragma omp atomic
-      this->v[idx] += y;
-    }
-
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
-    {
-      for (unsigned int i = 0; i < n; i++)
-        this->v[idx[i]] += y[i];
-    }
-
-    template<typename Scalar>
-    Scalar ParalutionVector<Scalar>::get(unsigned int idx) const
-    {
-      return this->v[idx];
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::extract(Scalar *v) const
-    {
-      memcpy(v, this->v, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::add_vector(Vector<Scalar>* vec)
-    {
-      assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++)
-        this->v[i] += vec->get(i);
-    }
-
-    template<typename Scalar>
-    void ParalutionVector<Scalar>::add_vector(Scalar* vec)
-    {
-      for (unsigned int i = 0; i < this->length(); i++)
-        this->v[i] += vec[i];
     }
 
     template class HERMES_API ParalutionMatrix<double>;

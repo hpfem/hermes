@@ -574,22 +574,44 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y) = 0;
 
       /// Get vector length.
-      unsigned int length() const {return this->size;}
+      unsigned int get_size() const {return this->size;}
 
       /// Write to file.
       /// @param[in] file file handle
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
     protected:
-      /// Raw data - the implementation does not have to use this.
-      /// For the purpose of sharing functionality among MANY implementations that DO use this.s
-      Scalar *v;
-
       /// size of vector
       unsigned int size;
+    };
+
+    /** \brief Vector used with MUMPS solver */
+    template <typename Scalar>
+    class SimpleVector : public Vector<Scalar>
+    {
+    public:
+      SimpleVector();
+      SimpleVector(unsigned int size);
+      virtual ~SimpleVector();
+
+      virtual void alloc(unsigned int ndofs);
+      virtual void free();
+      virtual Scalar get(unsigned int idx) const;
+      virtual void extract(Scalar *v) const;
+      virtual void zero();
+      virtual void change_sign();
+      virtual void set(unsigned int idx, Scalar y);
+      virtual void add(unsigned int idx, Scalar y);
+      virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
+      virtual void add_vector(Vector<Scalar>* vec);
+      virtual void add_vector(Scalar* vec);
+      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+
+      /// Raw data.
+      Scalar *v;
     };
 
     /// \brief Function returning a vector according to the users's choice.

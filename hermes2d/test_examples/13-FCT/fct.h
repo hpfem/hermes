@@ -19,18 +19,18 @@ public:
 	
 	void init(SpaceSharedPtr<double> new_space);
 
-	UMFPackMatrix<double>* artificialDiffusion( UMFPackMatrix<double>* conv_matrix);
-	UMFPackMatrix<double>* massLumping( UMFPackMatrix<double>* mass_matrix);
+	CSCMatrix<double>* artificialDiffusion( CSCMatrix<double>* conv_matrix);
+	CSCMatrix<double>* massLumping( CSCMatrix<double>* mass_matrix);
 
-	void antidiffusiveFlux(UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix,UMFPackMatrix<double>* conv_matrix,UMFPackMatrix<double>* diffusion,double* u_high, double* u_L, double* u_old,double* flux_scalar,double time_step, Regularity_Estimator* regEst=NULL);
+	void antidiffusiveFlux(CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix,CSCMatrix<double>* conv_matrix,CSCMatrix<double>* diffusion,double* u_high, double* u_L, double* u_old,double* flux_scalar,double time_step, Regularity_Estimator* regEst=NULL);
 
 	
-	void project_FCT(MeshFunctionSharedPtr<double> sln, double* coeff_vec, double* coeff_vec_2,UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double time_step, OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst=NULL);
+	void project_FCT(MeshFunctionSharedPtr<double> sln, double* coeff_vec, double* coeff_vec_2,CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix, double time_step, OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst=NULL);
 	
 	SpaceSharedPtr<double> get_space(){return space;}
 
 protected:
-		void lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double* u_L, double* u_H,double time_step, int* smooth_dof=NULL);
+		void lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix, double* u_L, double* u_H,double time_step, int* smooth_dof=NULL);
 
 double theta;
 	bool* fct;

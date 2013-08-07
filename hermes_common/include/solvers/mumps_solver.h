@@ -125,30 +125,8 @@ namespace Hermes
       friend class Solvers::MumpsSolver<Scalar>;
       template<typename T> friend SparseMatrix<T>*  create_matrix();
     };
-
-    /** \brief Vector used with MUMPS solver */
-    template <typename Scalar>
-    class MumpsVector : public Vector<Scalar>
-    {
-    public:
-      MumpsVector();
-      virtual ~MumpsVector();
-
-      virtual void alloc(unsigned int ndofs);
-      virtual void free();
-      virtual Scalar get(unsigned int idx) const;
-      virtual void extract(Scalar *v) const;
-      virtual void zero();
-      virtual void change_sign();
-      virtual void set(unsigned int idx, Scalar y);
-      virtual void add(unsigned int idx, Scalar y);
-      virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
-
-      friend class Solvers::MumpsSolver<Scalar>;
-    };
   }
+
   namespace Solvers
   {
     /// Encapsulation of MUMPS linear solver.
@@ -161,7 +139,7 @@ namespace Hermes
       /// Constructor of MumpsSolver.
       /// @param[in] m matrix pointer
       /// @param[in] rhs right hand side pointer
-      MumpsSolver(MumpsMatrix<Scalar> *m, MumpsVector<Scalar> *rhs);
+      MumpsSolver(MumpsMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
       virtual ~MumpsSolver();
 
       virtual void solve();
@@ -170,7 +148,7 @@ namespace Hermes
       /// Matrix to solve.
       MumpsMatrix<Scalar> *m;
       /// Right hand side.
-      MumpsVector<Scalar> *rhs;
+      SimpleVector<Scalar> *rhs;
 
       /// \todo document
       bool setup_factorization();

@@ -4,8 +4,8 @@ using namespace Hermes;
 
 Low_Order::Low_Order(double theta): theta(theta)
 {
-	lowmat_rhs = new UMFPackMatrix<double> ; 
-	low_matrix = new UMFPackMatrix<double> ; 
+	lowmat_rhs = new CSCMatrix<double> ; 
+	low_matrix = new CSCMatrix<double> ; 
 	u_L =NULL;
 	rhs = NULL;
 	u_new = NULL;
@@ -24,7 +24,7 @@ Low_Order::~Low_Order()
 
 //low-order: (M_L/tau - theta (K+D)) u_n+1 = (M_L/tau - theta (K+D)) u_n
 //lowmat_rhs = (M_L/tau - theta (K+D)) u_n; low_matrix: (M_L/tau - theta (K+D)) ; M_L/tau = lumped_matrix; K = conv_matrix, D = diffusion
-void Low_Order::assemble_Low_Order(UMFPackMatrix<double> * conv_matrix,UMFPackMatrix<double>* diffusion, UMFPackMatrix<double> * lumped_matrix)
+void Low_Order::assemble_Low_Order(CSCMatrix<double> * conv_matrix,CSCMatrix<double>* diffusion, CSCMatrix<double> * lumped_matrix)
 {
 	if(low_matrix!=NULL) low_matrix->free();	 		
 	if(lowmat_rhs!=NULL) lowmat_rhs->free();
@@ -47,7 +47,7 @@ void Low_Order::assemble_Low_Order(UMFPackMatrix<double> * conv_matrix,UMFPackMa
 
 // solve: (M_L/tau) u_L = (M_L/tau - theta (K+D)) u_n
 //lumped_matrix = M_L !!!!!
-double* Low_Order::solve_Low_Order(UMFPackMatrix<double> * lumped_matrix, double* u_n, double time_step  )
+double* Low_Order::solve_Low_Order(CSCMatrix<double> * lumped_matrix, double* u_n, double time_step  )
 {
 			if((low_matrix==NULL)||(lowmat_rhs==NULL) )
 				throw Exceptions::Exception("matrices have to be calculated first, call  Low_Order::assemble_Low_Order.");
@@ -56,7 +56,7 @@ double* Low_Order::solve_Low_Order(UMFPackMatrix<double> * lumped_matrix, double
 			u_L = new double[ndof];
 			if(rhs!=NULL) delete [] rhs;
 			rhs = new double[ndof];
-			UMFPackVector<double>* vec_rhs = new UMFPackVector<double> (ndof); 
+			SimpleVector<double>* vec_rhs = new SimpleVector<double> (ndof); 
 			
 						lumped_matrix->multiply_with_Scalar(1./time_step); //M_L/tau
 				//----------vec_rhs = (M_L/tau - theta (K+D)) u_n  --------
@@ -92,7 +92,7 @@ double* Low_Order::explicit_Correction(double* flux_correction )
 			if(u_new!=NULL) delete [] u_new;
 			int ndof = low_matrix->get_size();
 			u_new = new double[ndof];
-			UMFPackVector<double>* vec_rhs = new UMFPackVector<double> (ndof); 
+			SimpleVector<double>* vec_rhs = new SimpleVector<double> (ndof); 
 			//rhs = (M_L/tau - theta (K+D)) u_n 			
 			vec_rhs->add_vector(rhs);
 			vec_rhs->add_vector(flux_correction);

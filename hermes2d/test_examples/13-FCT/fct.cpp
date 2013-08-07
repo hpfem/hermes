@@ -107,14 +107,14 @@ void Flux_Correction::init(SpaceSharedPtr<double> new_space)
 
 
 
-UMFPackMatrix<double>* Flux_Correction::artificialDiffusion(UMFPackMatrix<double>* conv_matrix)
+CSCMatrix<double>* Flux_Correction::artificialDiffusion(CSCMatrix<double>* conv_matrix)
 {
   if(fct==NULL) 
     throw Exceptions::Exception("fct-list=NULL");
   int size = conv_matrix->get_size();
   int nnz = conv_matrix->get_nnz();
   double a,b;
-  UMFPackMatrix<double>* diffusion = new UMFPackMatrix<double>;  
+  CSCMatrix<double>* diffusion = new CSCMatrix<double>;  
   diffusion->create(size, nnz, conv_matrix->get_Ap(), conv_matrix->get_Ai(),conv_matrix->get_Ax());
   diffusion->zero();  
 
@@ -157,11 +157,11 @@ UMFPackMatrix<double>* Flux_Correction::artificialDiffusion(UMFPackMatrix<double
 }
 
 
-UMFPackMatrix<double>* Flux_Correction::massLumping(UMFPackMatrix<double>* mass_matrix)
+CSCMatrix<double>* Flux_Correction::massLumping(CSCMatrix<double>* mass_matrix)
 {  
   if(fct==NULL)
     throw Exceptions::Exception("fct-list=NULL");
-  UMFPackMatrix<double>* lumped_matrix = new UMFPackMatrix<double>;   //M_L
+  CSCMatrix<double>* lumped_matrix = new CSCMatrix<double>;   //M_L
   int size = mass_matrix->get_size();
   int nnz = mass_matrix->get_nnz();
   lumped_matrix->create(size, nnz, mass_matrix->get_Ap(), mass_matrix->get_Ai(),mass_matrix->get_Ax());
@@ -196,7 +196,7 @@ UMFPackMatrix<double>* Flux_Correction::massLumping(UMFPackMatrix<double>* mass_
 
 
 //Assemble antidiffusive fluxes & limit these
-void Flux_Correction::antidiffusiveFlux(UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix,UMFPackMatrix<double>* conv_matrix,UMFPackMatrix<double>* diffusion,double* u_high, double* u_L, double* u_old,double* flux_scalar,double time_step,Regularity_Estimator* regEst)
+void Flux_Correction::antidiffusiveFlux(CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix,CSCMatrix<double>* conv_matrix,CSCMatrix<double>* diffusion,double* u_high, double* u_L, double* u_old,double* flux_scalar,double time_step,Regularity_Estimator* regEst)
 { 
   if(fct==NULL) throw Exceptions::Exception("fct-list=NULL");
 
@@ -297,7 +297,7 @@ void Flux_Correction::antidiffusiveFlux(UMFPackMatrix<double>* mass_matrix,UMFPa
 }
 
 //FCT for projection 
-void Flux_Correction::lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double* u_L, double* u_H, double time_step, int* smooth_dof)
+void Flux_Correction::lumped_flux_limiter(CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix, double* u_L, double* u_H, double time_step, int* smooth_dof)
 {	
   if(fct==NULL) 
     throw Exceptions::Exception("fct-list=NULL");
@@ -395,7 +395,7 @@ void Flux_Correction::lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMF
 
 
 
-  UMFPackVector<double>* vec_rhs = new UMFPackVector<double>(ndof);	
+  SimpleVector<double>* vec_rhs = new SimpleVector<double>(ndof);	
   vec_rhs->zero(); vec_rhs->add_vector(rhs);
   double* sol =NULL;
   UMFPackLinearMatrixSolver<double>* lowOrd = new UMFPackLinearMatrixSolver<double>(lumped_matrix,vec_rhs);	
@@ -415,7 +415,7 @@ void Flux_Correction::lumped_flux_limiter(UMFPackMatrix<double>* mass_matrix,UMF
   delete [] rhs;
 }
 
-void Flux_Correction::project_FCT(MeshFunctionSharedPtr<double> sln,double* coeff_vec, double* coeff_vec_2,UMFPackMatrix<double>* mass_matrix,UMFPackMatrix<double>* lumped_matrix, double time_step,OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst)
+void Flux_Correction::project_FCT(MeshFunctionSharedPtr<double> sln,double* coeff_vec, double* coeff_vec_2,CSCMatrix<double>* mass_matrix,CSCMatrix<double>* lumped_matrix, double time_step,OGProjection<double>* ogProjection,	Lumped_Projection* lumpedProjection, Regularity_Estimator* regEst)
 {
   if(sln==NULL)
     throw Exceptions::Exception("project_FCT: sln=NULL");

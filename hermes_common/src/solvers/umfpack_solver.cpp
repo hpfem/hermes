@@ -34,128 +34,6 @@
 
 namespace Hermes
 {
-  namespace Algebra
-  {
-    template<typename Scalar>
-    UMFPackVector<Scalar>::UMFPackVector() : Vector<Scalar>()
-    {
-      this->size = 0;
-    }
-
-    template<typename Scalar>
-    UMFPackVector<Scalar>::UMFPackVector(unsigned int size) : Vector<Scalar>(size)
-    {
-      this->alloc(size);
-    }
-
-    template<typename Scalar>
-    UMFPackVector<Scalar>::~UMFPackVector()
-    {
-      free();
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::alloc(unsigned int n)
-    {
-      free();
-      this->size = n;
-      this->v = new Scalar[n];
-      this->zero();
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::zero()
-    {
-      memset(this->v, 0, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::change_sign()
-    {
-      for (unsigned int i = 0; i < this->size; i++)
-        this->v[i] *= -1.;
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::free()
-    {
-      delete [] this->v;
-      this->v = NULL;
-      this->size = 0;
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::set(unsigned int idx, Scalar y)
-    {
-      this->v[idx] = y;
-    }
-
-    template<>
-    void UMFPackVector<double>::add(unsigned int idx, double y)
-    {
-#pragma omp atomic
-      this->v[idx] += y;
-    }
-
-    template<>
-    void UMFPackVector<std::complex<double> >::add(unsigned int idx, std::complex<double> y)
-    {
-#pragma omp critical(UMFPackVector_add)
-      this->v[idx] += y;
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
-    {
-      for (unsigned int i = 0; i < n; i++)
-        this->v[idx[i]] += y[i];
-    }
-
-    template<typename Scalar>
-    Scalar UMFPackVector<Scalar>::get(unsigned int idx) const
-    {
-      return this->v[idx];
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::extract(Scalar *v) const
-    {
-      memcpy(v, this->v, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::set_vector(Vector<Scalar>* vec)
-    {
-      assert(this->size == vec->length());
-      for (unsigned int i = 0; i < this->size; i++)
-        this->v[i] = vec->get(i);
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::set_vector(Scalar* vec)
-    {
-      memcpy(this->v, vec, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::add_vector(Vector<Scalar>* vec)
-    {
-      assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec->get(i);
-    }
-
-    template<typename Scalar>
-    void UMFPackVector<Scalar>::add_vector(Scalar* vec)
-    {
-      for (unsigned int i = 0; i < this->length(); i++) this->v[i] += vec[i];
-    }
-
-    template class HERMES_API UMFPackMatrix<double>;
-    template class HERMES_API UMFPackMatrix<std::complex<double> >;
-    template class HERMES_API UMFPackVector<double>;
-    template class HERMES_API UMFPackVector<std::complex<double> >;
-  }
-
   namespace Solvers
   {
     template<typename Scalar>
@@ -165,7 +43,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs)
+    UMFPackLinearMatrixSolver<Scalar>::UMFPackLinearMatrixSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs), symbolic(NULL), numeric(NULL)
     {
       umfpack_di_defaults(Control);
@@ -299,7 +177,7 @@ namespace Hermes
     {
       assert(m != NULL);
       assert(rhs != NULL);
-      assert(m->get_size() == rhs->length());
+      assert(m->get_size() == rhs->get_size());
 
       this->tick();
 
@@ -326,7 +204,7 @@ namespace Hermes
     {
       assert(m != NULL);
       assert(rhs != NULL);
-      assert(m->get_size() == rhs->length());
+      assert(m->get_size() == rhs->get_size());
 
       this->tick();
       if( !setup_factorization() )

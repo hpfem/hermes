@@ -42,11 +42,11 @@ void Regularity_Estimator::set_space(SpaceSharedPtr<double> new_space)
   int ndof = space->get_num_dofs(); 
   smooth_dof = new int[ndof];  
   smooth_elem_patch = new int[new_space->get_mesh()->get_max_element_id()];
-  rhs_1 = new UMFPackVector<double>(ndof);
-  rhs_2 = new UMFPackVector<double>(ndof);
+  rhs_1 = new SimpleVector<double>(ndof);
+  rhs_2 = new SimpleVector<double>(ndof);
 }
 
-int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix)
+int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix)
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
   if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
@@ -57,7 +57,7 @@ int* Regularity_Estimator::get_smooth_elems(SpaceSharedPtr<double> new_space,dou
   return smooth_elem_patch;
 }
 
-int* Regularity_Estimator::get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,UMFPackMatrix<double> * mass_matrix)
+int* Regularity_Estimator::get_smooth_dofs(SpaceSharedPtr<double> new_space,double* coeff_vec,CSCMatrix<double> * mass_matrix)
 {
   if(new_space == NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: space =NULL");
   if(coeff_vec==NULL) throw Hermes::Exceptions::Exception("smoothness_indicator: coeff_vec=NULL");
@@ -120,7 +120,7 @@ double Regularity_Estimator::linear_approx_dy(Element* e, double x_i, double y_i
 
 
 
-void Regularity_Estimator::smoothness_indicator(UMFPackMatrix<double> * mass_matrix)
+void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
 {
   int ndof = space->get_num_dofs(); 
   if((mass_matrix!=NULL)&&(mass_matrix->get_matrix_size() != ndof)) 
@@ -134,7 +134,7 @@ void Regularity_Estimator::smoothness_indicator(UMFPackMatrix<double> * mass_mat
   bool own_mass_matrix = false;
   if(mass_matrix ==NULL) 
   {
-    mass_matrix = new UMFPackMatrix<double> ; 	
+    mass_matrix = new CSCMatrix<double> ; 	
     dp_1->assemble(mass_matrix,rhs_1);
     own_mass_matrix = true; 
   }

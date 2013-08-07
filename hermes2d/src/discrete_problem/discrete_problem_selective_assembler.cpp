@@ -112,7 +112,7 @@ namespace Hermes
 
       if(vector_structure_reusable && rhs)
       {
-        if(rhs->length() == 0)
+        if(rhs->get_size() == 0)
           rhs->alloc(ndof);
         else
           rhs->zero();

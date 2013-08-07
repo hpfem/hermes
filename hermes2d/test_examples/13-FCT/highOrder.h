@@ -11,14 +11,14 @@ public:
 	//Destructor
 	~High_Order();
 
-	void assemble_High_Order(UMFPackMatrix<double> * conv_matrix, UMFPackMatrix<double> * mass_matrix);
+	void assemble_High_Order(CSCMatrix<double> * conv_matrix, CSCMatrix<double> * mass_matrix);
 	double* solve_High_Order(double* u_n);
 
 
 protected:
 
-	UMFPackMatrix<double> * high_matrix;  
-	UMFPackMatrix<double> * highmat_rhs;
+	CSCMatrix<double> * high_matrix;  
+	CSCMatrix<double> * highmat_rhs;
 	double* u_H;
 	double theta;
 

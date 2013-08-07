@@ -40,48 +40,6 @@ namespace Hermes
     template <typename Scalar> class HERMES_API UMFPackLinearMatrixSolver;
   }
 
-  namespace Algebra
-  {
-    /// \brief This class is to be used with UMFPack solver only.
-    template <typename Scalar>
-    class HERMES_API UMFPackMatrix : public CSCMatrix<Scalar>
-    {
-      // Friends.
-      template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
-      template <typename T> friend class Hermes::Solvers::CSCIterator;
-      template<typename T> friend SparseMatrix<T>*  create_matrix();
-    };
-
-    /// \brief Class representing the vector for UMFPACK.
-    template <typename Scalar>
-    class HERMES_API UMFPackVector : public Vector<Scalar>
-    {
-    public:
-      /// Default constructor.
-      UMFPackVector();
-      /// Constructor of vector with specific size.
-      /// @param[in] size size of vector
-      UMFPackVector(unsigned int size);
-      virtual ~UMFPackVector();
-      virtual void alloc(unsigned int ndofs);
-      virtual void free();
-      virtual Scalar get(unsigned int idx) const;
-      virtual void extract(Scalar *v) const;
-      virtual void zero();
-      virtual void change_sign();
-      virtual void set(unsigned int idx, Scalar y);
-      virtual void add(unsigned int idx, Scalar y);
-      virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void set_vector(Vector<Scalar>* vec);
-      virtual void set_vector(Scalar* vec);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
-      
-      template <typename T> friend class Hermes::Solvers::UMFPackLinearMatrixSolver;
-      template <typename T> friend class Hermes::Solvers::CSCIterator;
-      template<typename T> friend Vector<T>* Hermes::Algebra::create_vector(bool);
-    };
-  }
   namespace Solvers
   {
     /// \brief Encapsulation of UMFPACK linear solver.
@@ -94,15 +52,15 @@ namespace Hermes
       /// Constructor of UMFPack solver.
       /// @param[in] m pointer to matrix
       /// @param[in] rhs pointer to right hand side vector
-      UMFPackLinearMatrixSolver(UMFPackMatrix<Scalar> *m, UMFPackVector<Scalar> *rhs);
+      UMFPackLinearMatrixSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
       virtual ~UMFPackLinearMatrixSolver();
       virtual void solve();
       virtual int get_matrix_size();
 
       /// Matrix to solve.
-      UMFPackMatrix<Scalar> *m;
+      CSCMatrix<Scalar> *m;
       /// Right hand side vector.
-      UMFPackVector<Scalar> *rhs;
+      SimpleVector<Scalar> *rhs;
 
       /// \brief Reusable factorization information (A denotes matrix represented by the pointer 'm').
       /// Reordering of matrix A to reduce fill-in during factorization.
@@ -114,8 +72,8 @@ namespace Hermes
       /// \todo document
       bool setup_factorization();
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
-      template <typename T> friend class Hermes::Algebra::UMFPackMatrix;
-      template <typename T> friend class Hermes::Algebra::UMFPackVector;
+      template <typename T> friend class Hermes::Algebra::CSCMatrix;
+      template <typename T> friend class Hermes::Algebra::SimpleVector;
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
       char* check_status(const char *fn_name, int status);
 

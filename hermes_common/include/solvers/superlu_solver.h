@@ -93,29 +93,6 @@ namespace Hermes
 
 namespace Hermes
 {
-  namespace Algebra
-  {
-    /** \brief Vector used with SuperLU solver */
-    template <typename Scalar>
-    class SuperLUVector : public Vector<Scalar>
-    {
-    public:
-      SuperLUVector();
-      virtual ~SuperLUVector();
-
-      virtual void alloc(unsigned int ndofs);
-      virtual void free();
-      virtual Scalar get(unsigned int idx) const;
-      virtual void extract(Scalar *v) const;
-      virtual void zero();
-      virtual void change_sign();
-      virtual void set(unsigned int idx, Scalar y);
-      virtual void add(unsigned int idx, Scalar y);
-      virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
-    };
-  }
   namespace Solvers
   {
     /// Encapsulation of SUPERLU linear solver.
@@ -128,7 +105,7 @@ namespace Hermes
       /// Constructor of SuperLU solver.
       /// @param[in] m pointer to matrix
       /// @param[in] rhs pointer to right hand side vector
-      SuperLUSolver(CSCMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs);
+      SuperLUSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
       virtual ~SuperLUSolver();
 
       virtual void solve();
@@ -139,7 +116,7 @@ namespace Hermes
       CSCMatrix<Scalar> *m;
 
       /// Right hand side vector.
-      SuperLUVector<Scalar> *rhs;
+      SimpleVector<Scalar> *rhs;
 
       bool has_A, has_B;            ///<  Have the native SuperLU matrices been created?
       bool inited;                  ///< Have the factorization structures been allocated?

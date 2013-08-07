@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
   H1ProjBasedSelector<double> selector(CAND_LIST);
 
   //Initialize
-  UMFPackMatrix<double> * mass_matrix = new UMFPackMatrix<double> ;   //M_c/tau
-  UMFPackMatrix<double> * conv_matrix = new UMFPackMatrix<double> ;   //K
+  CSCMatrix<double> * mass_matrix = new CSCMatrix<double> ;   //M_c/tau
+  CSCMatrix<double> * conv_matrix = new CSCMatrix<double> ;   //K
   double* u_L = NULL; 
   double* u_H =NULL;
   double* ref_sln_double =NULL;
@@ -272,8 +272,8 @@ int main(int argc, char* argv[])
       dp_convection.assemble(conv_matrix, NULL);		//K
 
       //----------------------MassLumping  & Artificial Diffusion --------------------------------------------------------------------	
-      UMFPackMatrix<double>* lumped_matrix = fluxCorrection.massLumping(mass_matrix); // M_L/tau
-      UMFPackMatrix<double>* diffusion = fluxCorrection.artificialDiffusion(conv_matrix);	
+      CSCMatrix<double>* lumped_matrix = fluxCorrection.massLumping(mass_matrix); // M_L/tau
+      CSCMatrix<double>* diffusion = fluxCorrection.artificialDiffusion(conv_matrix);	
 
       //-----------------Assembling of matrices ---------------------------------------------------------------------	
       lowOrder.assemble_Low_Order(conv_matrix,diffusion,lumped_matrix);	

@@ -1,7 +1,7 @@
 #include "lumped_projection.h"
 
 
-void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, UMFPackMatrix<double>*  mat)
+void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, CSCMatrix<double>*  mat)
 {
 
   if(space == NULL) printf("this->space == NULL in Lumped_Projection::project_internal().");
@@ -12,12 +12,12 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<
 
   // Initialize DiscreteProblem.
   DiscreteProblem<double>* dp = new DiscreteProblem<double>(wf, space);
-  UMFPackMatrix<double>* matrix = new UMFPackMatrix<double>;	
-  UMFPackVector<double>* rhs = new UMFPackVector<double>(ndof);
+  CSCMatrix<double>* matrix = new CSCMatrix<double>;	
+  SimpleVector<double>* rhs = new SimpleVector<double>(ndof);
   double* coeff_vec =NULL; 
   if(mat==NULL) 		//=> masslumping	
   {
-    UMFPackMatrix<double>* lumped_matrix = new UMFPackMatrix<double>;   //M_L 
+    CSCMatrix<double>* lumped_matrix = new CSCMatrix<double>;   //M_L 
     dp->assemble(matrix, rhs);  		 
     int size = matrix->get_size();
     double* diag = new double[size];
@@ -85,7 +85,7 @@ void Lumped_Projection::project_internal(SpaceSharedPtr<double> space, WeakForm<
 }
 
 void Lumped_Projection::project_lumped( const  SpaceSharedPtr<double> space, MeshFunctionSharedPtr<double> source_meshfn,
-  double* target_vec, UMFPackMatrix<double>*  mat )
+  double* target_vec, CSCMatrix<double>*  mat )
 {
   // Sanity checks.
   if (target_vec == NULL) throw Exceptions::NullException(3);

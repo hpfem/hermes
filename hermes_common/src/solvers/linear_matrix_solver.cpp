@@ -127,8 +127,8 @@ namespace Hermes
       case Hermes::SOLVER_MUMPS:
         {
 #ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<MumpsVector<double>*>(rhs));
-          else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<MumpsVector<double>*>(rhs_dummy));
+          if(rhs != NULL) return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+          else return new MumpsSolver<double>(static_cast<MumpsMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
@@ -149,8 +149,8 @@ namespace Hermes
       case Hermes::SOLVER_UMFPACK:
         {
 #ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<double>(static_cast<UMFPackMatrix<double>*>(matrix), static_cast<UMFPackVector<double>*>(rhs));
-          else return new UMFPackLinearMatrixSolver<double>(static_cast<UMFPackMatrix<double>*>(matrix), static_cast<UMFPackVector<double>*>(rhs_dummy));
+          if(rhs != NULL) return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+          else return new UMFPackLinearMatrixSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
@@ -181,8 +181,8 @@ namespace Hermes
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs));
-          else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs_dummy));
+          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs));
+          else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SimpleVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
@@ -225,8 +225,8 @@ namespace Hermes
       case Hermes::SOLVER_MUMPS:
         {
 #ifdef WITH_MUMPS
-          if(rhs != NULL) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<MumpsVector<std::complex<double> >*>(rhs));
-          else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<MumpsVector<std::complex<double> >*>(rhs_dummy));
+          if(rhs != NULL) return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+          else return new MumpsSolver<std::complex<double> >(static_cast<MumpsMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("MUMPS was not installed.");
 #endif
@@ -247,8 +247,8 @@ namespace Hermes
       case Hermes::SOLVER_UMFPACK:
         {
 #ifdef WITH_UMFPACK
-          if(rhs != NULL) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<UMFPackMatrix<std::complex<double> >*>(matrix), static_cast<UMFPackVector<std::complex<double> >*>(rhs));
-          else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<UMFPackMatrix<std::complex<double> >*>(matrix), static_cast<UMFPackVector<std::complex<double> >*>(rhs_dummy));
+          if(rhs != NULL) return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+          else return new UMFPackLinearMatrixSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("UMFPACK was not installed.");
 #endif
@@ -269,8 +269,8 @@ namespace Hermes
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs));
-          else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs_dummy));
+          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs));
+          else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SimpleVector<std::complex<double> >*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif

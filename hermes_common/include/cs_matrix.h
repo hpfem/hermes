@@ -136,7 +136,7 @@ namespace Hermes
 
     /// \brief General CSC Matrix class.
     /// (can be used in umfpack, in that case use the
-    /// UMFPackMatrix subclass, or with EigenSolver, or anything else).
+    /// CSCMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
     class HERMES_API CSCMatrix : public CSMatrix<Scalar>
     {
@@ -176,7 +176,7 @@ namespace Hermes
 
     /// \brief General CSR Matrix class.
     /// (can be used in umfpack, in that case use the
-    /// UMFPackMatrix subclass, or with EigenSolver, or anything else).
+    /// CSCMatrix subclass, or with EigenSolver, or anything else).
     template <typename Scalar>
     class HERMES_API CSRMatrix : public CSMatrix<Scalar>
     {

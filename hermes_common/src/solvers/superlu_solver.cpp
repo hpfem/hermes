@@ -82,102 +82,7 @@ namespace Hermes
       return dquerySpace (a, b, mu);
     }
 #endif
-  }
-  namespace Algebra
-  {
-    template<typename Scalar>
-    SuperLUVector<Scalar>::SuperLUVector()
-    {
-      v = NULL;
-      this->size = 0;
-    }
 
-    template<typename Scalar>
-    SuperLUVector<Scalar>::~SuperLUVector()
-    {
-      this->free();
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::alloc(unsigned int n)
-    {
-      this->free();
-      this->size = n;
-      v = new Scalar[n];
-      zero();
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::zero()
-    {
-      memset(v, 0, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::change_sign()
-    {
-      for (unsigned int i = 0; i < this->size; i++) v[i] *= -1.;
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::free()
-    {
-      delete [] v;
-      v = NULL;
-      this->size = 0;
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::set(unsigned int idx, Scalar y)
-    {
-      v[idx] = y;
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::add(unsigned int idx, Scalar y)
-    {
-      v[idx] += y;
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::add(unsigned int n, unsigned int *idx, Scalar *y)
-    {
-      for (unsigned int i = 0; i < n; i++)
-      {
-        v[idx[i]] += y[i];
-      }
-    }
-
-    template<typename Scalar>
-    Scalar SuperLUVector<Scalar>::get(unsigned int idx)
-    {
-      return v[idx];
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::extract(Scalar *v) const
-    {
-      memcpy(v, this->v, this->size * sizeof(Scalar));
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::add_vector(Vector<Scalar>* vec)
-    {
-      assert(this->length() == vec->length());
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec->get(i));
-    }
-
-    template<typename Scalar>
-    void SuperLUVector<Scalar>::add_vector(Scalar* vec)
-    {
-      for (unsigned int i = 0; i < this->length(); i++) this->add(i, vec[i]);
-    }
-
-    template class HERMES_API SuperLUVector<double>;
-    template class HERMES_API SuperLUVector<std::complex<double> >;
-  }
-  namespace Solvers
-  {
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::check_status(unsigned int info)
     {
@@ -186,21 +91,21 @@ namespace Hermes
         // Success.
         return true;
       }
-      else if(info <= m->size)
+      else if(info <= m->get_size())
       {
         this->warn("SuperLU: Factor U is singular, solution could not be computed.");
         return false;
       }
-      else if(info == m->size + 1)
+      else if(info == m->get_size() + 1)
       {
         this->warn("SuperLU: RCOND is less than machine precision "
           "(system matrix is singular to working precision).");
         return true;
       }
-      else if(info > m->size + 1)
+      else if(info > m->get_size() + 1)
       {
         this->warn("SuperLU: Not enough memory.\n Failure when %.3f MB were allocated.",
-          (info - m->size)/1e6);
+          (info - m->get_size())/1e6);
         return false;
       }
 
@@ -208,7 +113,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    SuperLUSolver<Scalar>::SuperLUSolver(CSCMatrix<Scalar> *m, SuperLUVector<Scalar> *rhs)
+    SuperLUSolver<Scalar>::SuperLUSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs)
       : DirectSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs), local_Ai(NULL), local_Ap(NULL)
       , local_Ax(NULL), local_rhs(NULL)
     {
@@ -292,7 +197,7 @@ namespace Hermes
     template<typename Scalar>
     int SuperLUSolver<Scalar>::get_matrix_size()
     {
-      return m->size;
+      return m->get_size();
     }
 
     template<typename Scalar>
@@ -326,7 +231,7 @@ namespace Hermes
 #endif
 
       if( !setup_factorization() )
-        this->warn("LU factorization could not be completed.");
+        throw Exceptions::Exception("SuperLU: LU factorization could not be completed.");
 
       // If the previous factorization of A is to be fully reused as an input for the solver driver,
       // keep the (possibly rescaled) matrix from the last factorization, otherwise recreate it
@@ -342,20 +247,20 @@ namespace Hermes
           // A will be created from the local copy of the value and index arrays, because these
           // may be modified by the solver driver.
           if(local_Ai) delete [] local_Ai;
-          local_Ai = new int[m->nnz];
-          memcpy(local_Ai, m->Ai, m->nnz * sizeof(int));
+          local_Ai = new int[m->get_nnz()];
+          memcpy(local_Ai, m->get_Ai(), m->get_nnz() * sizeof(int));
 
           if(local_Ap) delete [] local_Ap;
-          local_Ap = new int[m->size + 1];
-          memcpy(local_Ap, m->Ap, (m->size + 1) * sizeof(int));
+          local_Ap = new int[m->get_size() + 1];
+          memcpy(local_Ap, m->get_Ap(), (m->get_size() + 1) * sizeof(int));
 
           if(local_Ax) delete [] local_Ax;
-          local_Ax = new typename SuperLuType<Scalar>::Scalar[m->nnz];
-          for (unsigned int i = 0;i<m->nnz;i++)
-            to_superlu(local_Ax[i], m->Ax[i]);
+          local_Ax = new typename SuperLuType<Scalar>::Scalar[m->get_nnz()];
+          for (unsigned int i = 0;i<m->get_nnz();i++)
+            to_superlu(local_Ax[i], m->get_Ax()[i]);
 
           // Create new general (non-symmetric), column-major, non-supernodal, size X size matrix.
-          create_csc_matrix(&A, m->size, m->size, m->nnz, local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
+          create_csc_matrix(&A, m->get_size(), m->get_size(), m->get_nnz(), local_Ax, local_Ai, local_Ap, SLU_NC, SLU_DTYPE, SLU_GE);
 
           has_A = true;
         }
@@ -365,20 +270,20 @@ namespace Hermes
       free_rhs();
 
       if(local_rhs) delete [] local_rhs;
-      local_rhs = new typename SuperLuType<Scalar>::Scalar[rhs->size];
-      for (unsigned int i = 0;i<rhs->size;i++)
+      local_rhs = new typename SuperLuType<Scalar>::Scalar[rhs->get_size()];
+      for (unsigned int i = 0;i<rhs->get_size();i++)
         to_superlu(local_rhs[i], rhs->v[i]);
 
-      create_dense_matrix(&B, rhs->size, 1, local_rhs, rhs->size, SLU_DN, SLU_DTYPE, SLU_GE);
+      create_dense_matrix(&B, rhs->get_size(), 1, local_rhs, rhs->get_size(), SLU_DN, SLU_DTYPE, SLU_GE);
 
       has_B = true;
 
       // Initialize the solution variable.
       SuperMatrix X;
       typename SuperLuType<Scalar>::Scalar *x;
-      if( !(x = new typename SuperLuType<Scalar>::Scalar[m->size]) )
+      if( !(x = new typename SuperLuType<Scalar>::Scalar[m->get_size()]) )
         throw Hermes::Exceptions::Exception("Malloc fails for x[].");
-      create_dense_matrix(&X, m->size, 1, x, m->size, SLU_DN, SLU_DTYPE, SLU_GE);
+      create_dense_matrix(&X, m->get_size(), 1, x, m->get_size(), SLU_DN, SLU_DTYPE, SLU_GE);
 
       // Solve the system.
       int info;
@@ -443,16 +348,17 @@ namespace Hermes
       if(factorized)
       {
         delete [] this->sln;
-        this->sln = new Scalar[m->size];
+        this->sln = new Scalar[m->get_size()];
 
         Scalar *sol = (Scalar*) ((DNformat*) X.Store)->nzval;
 
-        for (unsigned int i = 0; i < rhs->size; i++)
+        for (unsigned int i = 0; i < rhs->get_size(); i++)
           this->sln[i] = sol[i];
       }
 
       // If required, print statistics.
-      if( options.PrintStat ) SLU_PRINT_STAT(&stat);
+      if( options.PrintStat )
+        SLU_PRINT_STAT(&stat);
 
       // Free temporary local variables.
       StatFree(&stat);
@@ -463,14 +369,15 @@ namespace Hermes
       this->tick();
       this->time = this->accumulated();
 
-      return factorized;
+      if(!factorized)
+        throw Exceptions::LinearMatrixSolverException("SuperLU failed.");
     }
 
     template<typename Scalar>
     bool SuperLUSolver<Scalar>::setup_factorization()
     {
       unsigned int A_size = A.nrow < 0 ? 0 : A.nrow;
-      if(has_A && this->reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && A_size != m->size)
+      if(has_A && this->reuse_scheme != HERMES_CREATE_STRUCTURE_FROM_SCRATCH && A_size != m->get_size())
       {
         this->warn("You cannot reuse factorization structures for factorizing matrices of different sizes.");
         return false;
@@ -502,15 +409,15 @@ namespace Hermes
         free_factorization_data();
 
         // Allocate the row/column reordering vectors.
-        if( !(perm_c = intMalloc(m->size)) )
+        if( !(perm_c = intMalloc(m->get_size())) )
           throw Hermes::Exceptions::Exception("Malloc fails for perm_c[].");
-        if( !(perm_r = intMalloc(m->size)) )
+        if( !(perm_r = intMalloc(m->get_size())) )
           throw Hermes::Exceptions::Exception("Malloc fails for perm_r[].");
 
         // Allocate vectors with row/column scaling factors.
-        if( !(R = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
+        if( !(R = (double *) SUPERLU_MALLOC(m->get_size() * sizeof(double))) )
           throw Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for R[].");
-        if( !(C = (double *) SUPERLU_MALLOC(m->size * sizeof(double))) )
+        if( !(C = (double *) SUPERLU_MALLOC(m->get_size() * sizeof(double))) )
           throw Hermes::Exceptions::Exception("SUPERLU_MALLOC fails for C[].");
 
 #ifdef SLU_MT
@@ -521,7 +428,7 @@ namespace Hermes
 #else
         // Allocate additional structures used by the driver routine of sequential SuperLU.
         // Elimination tree is contained in the options structure in SuperLU_MT.
-        if( !(etree = intMalloc(m->size)) )
+        if( !(etree = intMalloc(m->get_size())) )
           throw Hermes::Exceptions::Exception("Malloc fails for etree[].");
 
         options.Fact = DOFACT;

@@ -12,12 +12,12 @@ class Lumped_Projection
 {
 public:
   static void project_lumped(SpaceSharedPtr<double> space, MeshFunctionSharedPtr<double> source_meshfn,
-                             double* target_vec,UMFPackMatrix<double>*  mat  = NULL);
+                             double* target_vec,CSCMatrix<double>*  mat  = NULL);
 
 
 
 protected:
-  static void project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, UMFPackMatrix<double>*  mat = NULL);
+  static void project_internal(SpaceSharedPtr<double> space, WeakForm<double>* wf, double* target_vec, CSCMatrix<double>*  mat = NULL);
 
 
 
