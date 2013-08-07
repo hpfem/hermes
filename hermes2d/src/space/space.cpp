@@ -1383,13 +1383,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::load(const char *filename, bool validate)
+    void Space<Scalar>::load(const char *filename)
     {
       try
       {
         ::xml_schema::flags parsing_flags = 0;
 
-        if(!validate)
+        if(!this->validate)
           parsing_flags = xml_schema::flags::dont_validate;
 
         std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename, parsing_flags));

@@ -230,7 +230,7 @@ namespace Hermes
       /// Loads a space from a file in XML format.
       static SpaceSharedPtr<Scalar> load(const char *filename, MeshSharedPtr mesh, bool validate = false, EssentialBCs<Scalar>* essential_bcs = NULL, Shapeset* shapeset = NULL);
       /// This method is here for rapid re-loading.
-      void load(const char *filename, bool validate = false);
+      void load(const char *filename);
 
 #ifdef WITH_BSON
       /// Loads a space from a file in BSON.
