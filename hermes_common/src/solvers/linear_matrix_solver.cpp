@@ -181,8 +181,8 @@ namespace Hermes
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<SuperLUMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs));
-          else return new SuperLUSolver<double>(static_cast<SuperLUMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs_dummy));
+          if(rhs != NULL) return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs));
+          else return new SuperLUSolver<double>(static_cast<CSCMatrix<double>*>(matrix), static_cast<SuperLUVector<double>*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
@@ -269,8 +269,8 @@ namespace Hermes
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<SuperLUMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs));
-          else return new SuperLUSolver<std::complex<double> >(static_cast<SuperLUMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs_dummy));
+          if(rhs != NULL) return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs));
+          else return new SuperLUSolver<std::complex<double> >(static_cast<CSCMatrix<std::complex<double> >*>(matrix), static_cast<SuperLUVector<std::complex<double> >*>(rhs_dummy));
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif

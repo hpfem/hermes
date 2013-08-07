@@ -465,7 +465,7 @@ namespace Hermes
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          return new SuperLUMatrix<double>;
+          return new CSCMatrix<double>;
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
@@ -627,7 +627,7 @@ namespace Hermes
       case Hermes::SOLVER_SUPERLU:
         {
 #ifdef WITH_SUPERLU
-          return new SuperLUMatrix<std::complex<double> >;
+          return new CSCMatrix<std::complex<double> >;
 #else
           throw Hermes::Exceptions::Exception("SuperLU was not installed.");
 #endif
