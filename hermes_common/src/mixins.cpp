@@ -14,6 +14,7 @@
 // along with Hermes; if not, see <http://www.gnu.prg/licenses/>.
 #include "mixins.h"
 #include "common.h"
+#include "matrix.h"
 
 namespace Hermes
 {
@@ -30,19 +31,19 @@ namespace Hermes
 
     void Loggable::set_logFile_name(const char* filename)
     {
-    	if(this->logFileName)
-    			delete [] this->logFileName;
+      if(this->logFileName)
+        delete [] this->logFileName;
       int strlength = std::strlen(filename);
-    	this->logFileName = new char[strlength];
+      this->logFileName = new char[strlength];
       strcpy(this->logFileName, filename);
     }
 
     void Loggable::set_static_logFile_name(const char* filename)
     {
-    	if(Loggable::staticLogFileName)
-    		delete [] Loggable::staticLogFileName;
+      if(Loggable::staticLogFileName)
+        delete [] Loggable::staticLogFileName;
       int strlength = std::strlen(filename);
-    	Loggable::staticLogFileName = new char[strlength];
+      Loggable::staticLogFileName = new char[strlength];
       strcpy(Loggable::staticLogFileName, filename);
     }
 
@@ -495,6 +496,136 @@ namespace Hermes
       this->verbose_callback = callback;
     }
 
+    template<typename Scalar>
+    MatrixRhsOutput<Scalar>::MatrixRhsOutput() : output_matrixOn(false), output_matrixIterations(-1), matrixFilename("Matrix_"),
+      matrixVarname("A"), matrixFormat(Hermes::Algebra::EXPORT_FORMAT_PLAIN_ASCII), matrix_number_format("%lf"), output_rhsOn(false), output_rhsIterations(-1),
+      RhsFilename("Rhs_"), RhsVarname("b"), RhsFormat(Hermes::Algebra::EXPORT_FORMAT_PLAIN_ASCII), rhs_number_format("%lf")
+    {
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::process_matrix_output(Hermes::Algebra::SparseMatrix<Scalar>* matrix, int iteration)
+    {
+      if (matrix == NULL)
+        return;
+
+      if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration))
+      {
+        char* fileName = new char[this->matrixFilename.length() + 5];
+        sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
+        matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+        delete [] fileName;
+      }
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::process_matrix_output(Hermes::Algebra::SparseMatrix<Scalar>* matrix)
+    {
+      if (matrix == NULL)
+        return;
+
+      if(this->output_matrixOn)
+      {
+        char* fileName = new char[this->matrixFilename.length() + 5];
+        sprintf(fileName, "%s", this->matrixFilename.c_str());
+        matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
+        delete [] fileName;
+      }
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs, int iteration)
+    {
+      if (rhs == NULL)
+        return;
+
+      if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration))
+      {
+        char* fileName = new char[this->RhsFilename.length() + 5];
+        sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+        rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+        delete [] fileName;
+      }
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs)
+    {
+      if (rhs == NULL)
+        return;
+
+      if(this->output_rhsOn)
+      {
+        char* fileName = new char[this->RhsFilename.length() + 5];
+        sprintf(fileName, "%s", this->RhsFilename.c_str());
+        rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
+        delete [] fileName;
+      }
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::output_matrix(int firstIterations)
+    {
+      output_matrixOn = true;
+      this->output_matrixIterations = firstIterations;
+    }
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_matrix_filename(std::string name)
+    {
+      this->matrixFilename = name;
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_print_zero_matrix_entries(bool to_set)
+    {
+      this->print_matrix_zero_values = to_set;
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_matrix_varname(std::string name)
+    {
+      this->matrixVarname = name;
+    }
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_matrix_dump_format(Hermes::Algebra::MatrixExportFormat format)
+    {
+      this->matrixFormat = format;
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_matrix_number_format(char* number_format)
+    {
+      this->matrix_number_format = number_format;
+    }
+
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::output_rhs(int firstIterations)
+    {
+      this->output_rhsOn = true;
+      this->output_rhsIterations = firstIterations;
+    }
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_rhs_filename(std::string name)
+    {
+      this->RhsFilename = name;
+    }
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_rhs_varname(std::string name)
+    {
+      this->RhsVarname = name;
+    }
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_rhs_E_matrix_dump_format(Hermes::Algebra::MatrixExportFormat format)
+    {
+      this->RhsFormat = format;
+    }
+    template<typename Scalar>
+    void MatrixRhsOutput<Scalar>::set_rhs_number_format(char* number_format)
+    {
+      this->rhs_number_format = number_format;
+    }
+
+
     TimeMeasurable::TimeMeasurable(const char *name) : period_name(name == NULL ? "unnamed" : name)
     {
       //initialization
@@ -699,13 +830,16 @@ namespace Hermes
       parameter.value = value;
     }
 
+    template HERMES_API class MatrixRhsOutput<double>;
+    template HERMES_API class MatrixRhsOutput<std::complex<double> >;
+
     template HERMES_API const unsigned int& OutputAttachable::get_parameter_value<unsigned int>(const Parameter<unsigned int>& parameter);
     template HERMES_API const double& OutputAttachable::get_parameter_value<double>(const Parameter<double>& parameter);
     template HERMES_API const bool& OutputAttachable::get_parameter_value<bool>(const Parameter<bool>& parameter);
     template HERMES_API const Hermes::vector<unsigned int>& OutputAttachable::get_parameter_value<Hermes::vector<unsigned int> >(const Parameter<Hermes::vector<unsigned int> >& parameter);
     template HERMES_API const Hermes::vector<double>& OutputAttachable::get_parameter_value<Hermes::vector<double> >(const Parameter<Hermes::vector<double> >& parameter);
     template HERMES_API const Hermes::vector<bool>& OutputAttachable::get_parameter_value<Hermes::vector<bool> >(const Parameter<Hermes::vector<bool> >& parameter);
-    
+
     template HERMES_API unsigned int& OutputAttachable::get_parameter_value<unsigned int>(Parameter<unsigned int>& parameter);
     template HERMES_API double& OutputAttachable::get_parameter_value<double>(Parameter<double>& parameter);
     template HERMES_API bool& OutputAttachable::get_parameter_value<bool>(Parameter<bool>& parameter);

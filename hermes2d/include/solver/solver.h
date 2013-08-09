@@ -40,7 +40,7 @@ namespace Hermes
       public Hermes::Mixins::SettableComputationTime, 
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>, 
       public Hermes::Mixins::OutputAttachable,
-      public Hermes::Hermes2D::Mixins::MatrixRhsOutput<Scalar>, 
+      public Hermes::Mixins::MatrixRhsOutput<Scalar>, 
       public Hermes::Mixins::IntegrableWithGlobalOrder, 
       public Hermes::Hermes2D::Mixins::StateQueryable, 
       public Hermes::Hermes2D::Mixins::DiscreteProblemCacheSettings,
