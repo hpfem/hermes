@@ -702,9 +702,6 @@ namespace Hermes
       parameter.value = value;
     }
 
-    template HERMES_API class MatrixRhsOutput<double>;
-    template HERMES_API class MatrixRhsOutput<std::complex<double> >;
-
     template HERMES_API const unsigned int& OutputAttachable::get_parameter_value<unsigned int>(const Parameter<unsigned int>& parameter);
     template HERMES_API const double& OutputAttachable::get_parameter_value<double>(const Parameter<double>& parameter);
     template HERMES_API const bool& OutputAttachable::get_parameter_value<bool>(const Parameter<bool>& parameter);

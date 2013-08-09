@@ -989,5 +989,8 @@ namespace Hermes
     {
       this->rhs_number_format = number_format;
     }
+   
+    template HERMES_API class MatrixRhsOutput<double>;
+    template HERMES_API class MatrixRhsOutput<std::complex<double> >;
   }
 }
