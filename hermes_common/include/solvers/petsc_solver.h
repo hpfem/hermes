@@ -59,7 +59,7 @@ namespace Hermes
       virtual void add(unsigned int m, unsigned int n, Scalar v);
       virtual void add_to_diagonal(Scalar v);
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
-      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
       virtual double get_fill_in() const;
@@ -128,7 +128,7 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
-      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
 
     protected:
       /// Petsc vector data structure.

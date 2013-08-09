@@ -282,6 +282,25 @@ namespace Hermes
       return NULL;
     }
 
+
+    template <typename Scalar>
+    ExternalSolver<Scalar>::ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs) : LinearMatrixSolver<Scalar>(HERMES_CREATE_STRUCTURE_FROM_SCRATCH), m(m), rhs(rhs)
+    {
+    }
+
+    template <typename Scalar>
+    void ExternalSolver<Scalar>::solve()
+    {
+      // Output.
+      this->process_matrix_output();
+      this->process_vector_output();
+
+      // External process.
+      std::string resultFileName = this->command();
+
+      this->rhs->import_from_file(resultFileName.c_str());
+    }
+
     template <typename Scalar>
     DirectSolver<Scalar>::DirectSolver(MatrixStructureReuseScheme reuse_scheme) : LinearMatrixSolver<Scalar>(reuse_scheme)
     {

@@ -39,6 +39,7 @@ namespace Hermes
     SOLVER_SUPERLU = 5,
     SOLVER_AMESOS = 6,
     SOLVER_AZTECOO = 7,
+    SOLVER_EXTERNAL = 8,
     SOLVER_EMPTY = 100
   };
 
@@ -47,7 +48,9 @@ namespace Hermes
     DIRECT_SOLVER_UMFPACK = 0,
     DIRECT_SOLVER_MUMPS = 1,
     DIRECT_SOLVER_SUPERLU = 2,
-    DIRECT_SOLVER_AMESOS = 3
+    DIRECT_SOLVER_AMESOS = 3,
+    // Solver external is here, because direct solvers are used in projections.
+    DIRECT_SOLVER_EXTERNAL = 4
   };
 
   enum IterativeMatrixSolverType
@@ -290,7 +293,7 @@ namespace Hermes
     }
 
     /// Format of file matrix and vector output
-    enum EMatrixExportFormat
+    enum MatrixExportFormat
     {
       /// \brief Plain ascii file
       /// lines contains row column and value
@@ -364,7 +367,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
       /// Get size of matrix
       /// @return size of matrix
@@ -581,7 +584,7 @@ namespace Hermes
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
       /// @return true on succes
-      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
 
     protected:
       /// size of vector
@@ -608,7 +611,8 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
-      virtual bool export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      virtual void import_from_file(char *filename);
 
       /// Raw data.
       Scalar *v;

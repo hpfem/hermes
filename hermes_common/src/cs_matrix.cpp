@@ -423,7 +423,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool CSMatrix<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format, bool invert_storage)
+    bool CSMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format, bool invert_storage)
     {
       switch (fmt)
       {
@@ -540,13 +540,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool CSCMatrix<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool CSCMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       return CSMatrix<Scalar>::export_to_file(filename, var_name, fmt, number_format, false);
     }
 
     template<typename Scalar>
-    bool CSRMatrix<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool CSRMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       return CSMatrix<Scalar>::export_to_file(filename, var_name, fmt, number_format, true);
     }

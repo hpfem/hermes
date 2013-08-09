@@ -283,7 +283,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool SimpleVector<Scalar>::export_to_file(char *filename, const char *var_name, EMatrixExportFormat fmt, char* number_format)
+    bool SimpleVector<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       if(!v)
       {
@@ -293,14 +293,14 @@ namespace Hermes
 
       switch (fmt)
       {
-        case EXPORT_FORMAT_MATRIX_MARKET:
+      case EXPORT_FORMAT_MATRIX_MARKET:
         {
           FILE* file = fopen(filename, "w");
-           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
             fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
           else
             fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate complex\n");
-          
+
           fprintf(file, "%d 1 %d\n", this->size, this->size);
 
           for (unsigned int j = 0; j < this->size; j++)
@@ -346,7 +346,7 @@ namespace Hermes
             matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA);
           else
             matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
-          
+
           if (matvar)
           {
             Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
@@ -383,6 +383,25 @@ namespace Hermes
       default:
         return false;
       }
+    }
+    
+    template<typename Scalar>
+    void SimpleVector<Scalar>::import_from_file(char *filename)
+    {
+      std::vector<Scalar> data;
+      std::ifstream input (filename);
+      std::string lineData;
+
+      while(getline(input, lineData))
+      {
+        Scalar d;
+        std::stringstream lineStream(lineData);
+        lineStream >> d;
+        data.push_back(d);
+      }
+
+      this->alloc(data.size());
+      memcpy(this->v, &data[0], sizeof(Scalar)*data.size());
     }
 
     template<typename Scalar>
@@ -493,6 +512,11 @@ namespace Hermes
     {
       switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
+      case Hermes::SOLVER_EXTERNAL:
+        {
+          return new CSCMatrix<double>;
+        }
+
       case Hermes::SOLVER_AMESOS:
         {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
@@ -574,6 +598,10 @@ namespace Hermes
     {
       switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
+      case Hermes::SOLVER_EXTERNAL:
+        {
+          return new SimpleVector<double>;
+        }
       case Hermes::SOLVER_AMESOS:
         {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
@@ -655,6 +683,10 @@ namespace Hermes
     {
       switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
+      case Hermes::SOLVER_EXTERNAL:
+        {
+          return new CSCMatrix<std::complex<double> >;
+        }
       case Hermes::SOLVER_AMESOS:
         {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA
@@ -736,6 +768,11 @@ namespace Hermes
     {
       switch (use_direct_solver ? Hermes::HermesCommonApi.get_integral_param_value(Hermes::directMatrixSolverType) : Hermes::HermesCommonApi.get_integral_param_value(Hermes::matrixSolverType))
       {
+      case Hermes::SOLVER_EXTERNAL:
+        {
+          return new SimpleVector<std::complex<double> >;
+        }
+
       case Hermes::SOLVER_AMESOS:
         {
 #if defined HAVE_AMESOS && defined HAVE_EPETRA

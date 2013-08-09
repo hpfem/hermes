@@ -24,6 +24,7 @@
 
 #include "precond.h"
 #include "exceptions.h"
+#include "cs_matrix.h"
 #include "mixins.h"
 
 using namespace Hermes::Algebra;
@@ -144,6 +145,26 @@ namespace Hermes
       unsigned int n_eq;
       
       bool node_wise_ordering;
+    };
+
+    /// \brief Special-purpose class for using external solvers.
+    template <typename Scalar>
+    class ExternalSolver : public LinearMatrixSolver<Scalar>, public Mixins::MatrixRhsOutput<Scalar>
+    {
+    public:
+      ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
+      void solve();
+
+      /// External command call.
+      /// \return Filepath to the result vector in the raw text format (just numbers, one per line).
+      /// Can destroy the matrix and rhs files, those are not needed anymore.
+      virtual std::string command() = 0;
+
+    protected:
+      /// Matrix to solve.
+      CSCMatrix<Scalar> *m;
+      /// Right hand side vector.
+      SimpleVector<Scalar> *rhs;
     };
 
     /// \brief Base class for defining interface for direct linear solvers.
