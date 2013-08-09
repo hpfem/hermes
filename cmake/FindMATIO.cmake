@@ -6,7 +6,7 @@
 FIND_PATH(MATIO_INCLUDE_DIR matio.h ${MATIO_ROOT}/src ${MATIO_ROOT}/include /usr/local/include /usr/include)
 
 if(WIN64)
-  FIND_LIBRARY(MATIO_LIBRARY NAMES agros2d_3rd_party_matio matio libmatio PATHS ${MATIO_ROOT} ${MATIO_ROOT}/lib/x64)
+  FIND_LIBRARY(MATIO_LIBRARY NAMES agros2d_3rd_party_matio matio libmatio PATHS ${MATIO_ROOT} ${MATIO_ROOT}/lib/x64 ${MATIO_ROOT}/lib)
 else(WIN64)
   FIND_LIBRARY(MATIO_LIBRARY NAMES agros2d_3rd_party_matio matio libmatio PATHS ${MATIO_ROOT} ${MATIO_ROOT}/lib /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64)
 endif(WIN64)
