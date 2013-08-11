@@ -147,7 +147,7 @@ namespace Hermes
       bool node_wise_ordering;
     };
 
-    /// \brief Special-purpose class for using external solvers.
+    /// \brief Special-purpose abstract class for using external solvers.
     template <typename Scalar>
     class ExternalSolver : public LinearMatrixSolver<Scalar>, public Mixins::MatrixRhsOutput<Scalar>
     {
@@ -162,7 +162,7 @@ namespace Hermes
       SimpleVector<Scalar> *rhs;
     };
 
-    /// \brief Special-purpose class for using external solvers.
+    /// \brief An example class for using external solvers that run a command and store the result in a file.
     template <typename Scalar>
     class SimpleExternalSolver : public ExternalSolver<Scalar>
     {
