@@ -153,18 +153,28 @@ namespace Hermes
     {
     public:
       ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
-      void solve();
-
-      /// External command call.
-      /// \return Filepath to the result vector in the raw text format (just numbers, one per line).
-      /// Can destroy the matrix and rhs files, those are not needed anymore.
-      virtual std::string command() = 0;
+      virtual void solve() = 0;
 
     protected:
       /// Matrix to solve.
       CSCMatrix<Scalar> *m;
       /// Right hand side vector.
       SimpleVector<Scalar> *rhs;
+    };
+
+    /// \brief Special-purpose class for using external solvers.
+    template <typename Scalar>
+    class SimpleExternalSolver : public ExternalSolver<Scalar>
+    {
+    public:
+      SimpleExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
+      void solve();
+
+    protected:
+      /// External command call.
+      /// \return Filepath to the result vector in the raw text format (just numbers, one per line).
+      /// Can destroy the matrix and rhs files, those are not needed anymore.
+      virtual std::string command() = 0;
     };
 
     /// \brief Base class for defining interface for direct linear solvers.
