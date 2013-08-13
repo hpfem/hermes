@@ -593,7 +593,7 @@ namespace Hermes
 
     /** \brief Vector used with MUMPS solver */
     template <typename Scalar>
-    class SimpleVector : public Vector<Scalar>
+    class HERMES_API SimpleVector : public Vector<Scalar>
     {
     public:
       SimpleVector();

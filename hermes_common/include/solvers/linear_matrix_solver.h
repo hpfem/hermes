@@ -90,7 +90,7 @@ namespace Hermes
     ///
     /// Typical usage is through the function create_linear_solver(Matrix<Scalar>* matrix, Vector<Scalar>* rhs, bool use_direct_solver).
     template <typename Scalar>
-    class LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
+    class HERMES_API LinearMatrixSolver : public Hermes::Mixins::Loggable, public Hermes::Mixins::TimeMeasurable
     {
     public:
       LinearMatrixSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
@@ -148,12 +148,18 @@ namespace Hermes
     };
 
     /// \brief Special-purpose abstract class for using external solvers.
+    /// For examples implementation, see the class SimpleExternalSolver.
     template <typename Scalar>
-    class ExternalSolver : public LinearMatrixSolver<Scalar>, public Mixins::MatrixRhsOutput<Scalar>
+    class HERMES_API ExternalSolver : public LinearMatrixSolver<Scalar>, public Mixins::MatrixRhsOutput<Scalar>
     {
     public:
+      typedef ExternalSolver<Scalar>* (*creation)(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
+      static creation create_external_solver;
+
       ExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
-      virtual void solve() = 0;
+      virtual void solve() { throw Exceptions::MethodNotOverridenException("ExternalSolver::solve()."); };
+      virtual void solve(Scalar* initial_guess) { throw Exceptions::MethodNotOverridenException("ExternalSolver::solve()."); };
+      virtual int get_matrix_size() { return this->m->get_size(); };
 
     protected:
       /// Matrix to solve.
@@ -164,11 +170,11 @@ namespace Hermes
 
     /// \brief An example class for using external solvers that run a command and store the result in a file.
     template <typename Scalar>
-    class SimpleExternalSolver : public ExternalSolver<Scalar>
+    class HERMES_API SimpleExternalSolver : public ExternalSolver<Scalar>
     {
     public:
       SimpleExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
-      void solve();
+      void solve(Scalar* initial_guess);
 
     protected:
       /// External command call.
@@ -180,7 +186,7 @@ namespace Hermes
     /// \brief Base class for defining interface for direct linear solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
-    class DirectSolver : public LinearMatrixSolver<Scalar>
+    class HERMES_API DirectSolver : public LinearMatrixSolver<Scalar>
     {
     public:
       DirectSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
@@ -190,7 +196,7 @@ namespace Hermes
 
     /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
     template <typename Scalar>
-    class LoopSolver : public LinearMatrixSolver<Scalar>
+    class HERMES_API LoopSolver : public LinearMatrixSolver<Scalar>
     {
     public:
       LoopSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
@@ -237,7 +243,7 @@ namespace Hermes
     /// \brief  Abstract class for defining interface for iterative solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
-    class IterSolver : public LoopSolver<Scalar>
+    class HERMES_API IterSolver : public LoopSolver<Scalar>
     {
     public:
       IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
@@ -253,7 +259,7 @@ namespace Hermes
     /// \brief  Abstract class for defining interface for Algebraic Multigrid solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
-    class AMGSolver : public LoopSolver<Scalar>
+    class HERMES_API AMGSolver : public LoopSolver<Scalar>
     {
     public:
       AMGSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
