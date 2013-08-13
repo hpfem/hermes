@@ -41,9 +41,6 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
-#ifdef WITH_PARALUTION
-  HermesCommonApi.set_integral_param_value(Hermes::matrixSolverType, SOLVER_PARALUTION_AMG);
-#endif
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
@@ -72,9 +69,7 @@ int main(int argc, char* argv[])
 
   // Initialize linear solver.
   Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
-#ifdef WITH_PARALUTION
-  dynamic_cast<Solvers::AMGParalutionLinearMatrixSolver<double>*>(linear_solver.get_linear_solver())->set_smoother(Solvers::IterativeParalutionLinearMatrixSolver<double>::CG, Preconditioners::ParalutionPrecond<double>::MultiColoredSGS);
-#endif
+  
   // Solve the linear problem.
   try
   {
