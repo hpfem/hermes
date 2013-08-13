@@ -445,7 +445,8 @@ namespace Hermes
     template<typename Scalar>
     void SimpleVector<Scalar>::free()
     {
-      delete [] this->v;
+      if (this->v)
+        delete [] this->v;
       this->v = NULL;
       this->size = 0;
     }
