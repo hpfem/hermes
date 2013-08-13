@@ -46,23 +46,23 @@ namespace Hermes
   enum DirectMatrixSolverType
   {
     DIRECT_SOLVER_UMFPACK = 0,
-    DIRECT_SOLVER_MUMPS = 1,
-    DIRECT_SOLVER_SUPERLU = 2,
-    DIRECT_SOLVER_AMESOS = 3,
+    DIRECT_SOLVER_MUMPS = 4,
+    DIRECT_SOLVER_SUPERLU = 5,
+    DIRECT_SOLVER_AMESOS = 6,
     // Solver external is here, because direct solvers are used in projections.
-    DIRECT_SOLVER_EXTERNAL = 4
+    DIRECT_SOLVER_EXTERNAL = 8
   };
 
   enum IterativeMatrixSolverType
   {
-    ITERATIVE_SOLVER_PARALUTION = 0,
-    ITERATIVE_SOLVER_PETSC = 1,
-    ITERATIVE_SOLVER_AZTECOO = 2
+    ITERATIVE_SOLVER_PARALUTION = 1,
+    ITERATIVE_SOLVER_PETSC = 3,
+    ITERATIVE_SOLVER_AZTECOO = 7
   };
 
   enum AMGMatrixSolverType
   {
-    AMG_SOLVER_PARALUTION = 0
+    AMG_SOLVER_PARALUTION = 2
   };
 
   namespace Solvers
