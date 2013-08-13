@@ -98,7 +98,7 @@ namespace Hermes
     template<typename Scalar>
     ParalutionVector<Scalar>::~ParalutionVector()
     {
-      this->paralutionVector.Clear();
+      free();
     }
 
     template<typename Scalar>
