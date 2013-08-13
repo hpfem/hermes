@@ -160,6 +160,12 @@ namespace Hermes
       virtual void solve() { throw Exceptions::MethodNotOverridenException("ExternalSolver::solve()."); };
       virtual void solve(Scalar* initial_guess) { throw Exceptions::MethodNotOverridenException("ExternalSolver::solve()."); };
       virtual int get_matrix_size() { return this->m->get_size(); };
+      /// Matrix to solve.
+      ///template <typename Scalar>
+      CSCMatrix<Scalar> *get_matrix() { return this->m; }
+      /// Right hand side vector.
+      ///template <typename Scalar>
+      SimpleVector<Scalar> *get_rhs() { return this->rhs; }
 
     protected:
       /// Matrix to solve.
@@ -174,6 +180,7 @@ namespace Hermes
     {
     public:
       SimpleExternalSolver(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);
+      void solve();
       void solve(Scalar* initial_guess);
 
     protected:

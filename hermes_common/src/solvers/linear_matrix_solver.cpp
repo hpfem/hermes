@@ -317,6 +317,12 @@ namespace Hermes
     }
 
     template <typename Scalar>
+    void SimpleExternalSolver<Scalar>::solve()
+    {
+      solve(NULL);
+    }
+
+    template <typename Scalar>
     void SimpleExternalSolver<Scalar>::solve(Scalar* initial_guess)
     {
       // Output.
