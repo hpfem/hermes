@@ -103,7 +103,9 @@ namespace Hermes
       return NULL;
     }
 
+    template<>
     ExternalSolver<double>::creation ExternalSolver<double>::create_external_solver = static_create_external_solver<double>;
+    template<>
     ExternalSolver<std::complex<double> >::creation ExternalSolver<std::complex<double> >::create_external_solver = static_create_external_solver<std::complex<double> >;
 
     template<>
