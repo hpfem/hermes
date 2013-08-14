@@ -158,7 +158,6 @@ namespace Hermes
         delete this->paralutionSolver;
       if(preconditioner)
         delete preconditioner;
-      this->sln = NULL;
     }
 
     template<typename Scalar>
@@ -198,11 +197,7 @@ namespace Hermes
     template<typename Scalar>
     void IterativeParalutionLinearMatrixSolver<Scalar>::solve()
     {
-      if(this->sln)
-        delete [] this->sln;
-      this->sln = new Scalar[this->get_matrix_size()];
-      memset(this->sln, Scalar(0), this->get_matrix_size() * sizeof(Scalar));
-      this->solve(this->sln);
+      this->solve(NULL);
     }
 
     template<typename Scalar>

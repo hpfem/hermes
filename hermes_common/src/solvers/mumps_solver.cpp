@@ -593,7 +593,8 @@ namespace Hermes
         mumps_c(&param);
       }
 
-      if(param.rhs != NULL) delete [] param.rhs;
+      if(param.rhs != NULL)
+        delete [] param.rhs;
     }
 
     template<typename Scalar>
