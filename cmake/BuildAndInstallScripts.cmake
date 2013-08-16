@@ -35,8 +35,10 @@ endmacro(MAKE_PATH)
 macro(ADD_MSVC_BUILD_FLAGS LIB LIB_DEBUG LIB_RELEASE)
   get_target_property(FLAGS ${LIB} COMPILE_FLAGS)  
   set_target_properties(${LIB} PROPERTIES COMPILE_FLAGS "-DEXPORT_HERMES_DLL ${HERMES_FLAGS}")
-  set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME "${LIB_DEBUG}")
-  set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB_RELEASE})
+  IF(${AGROS_DEBUG} OR NOT(${AGROS_BUILD}))
+    set_target_properties(${LIB} PROPERTIES DEBUG_OUTPUT_NAME ${LIB_DEBUG})
+    set_target_properties(${LIB} PROPERTIES RELEASE_OUTPUT_NAME ${LIB_RELEASE})
+  ENDIF()
 endmacro(ADD_MSVC_BUILD_FLAGS)
 
 # Installs a library to directories relative to CMAKE_INSTALL_PREFIX.
