@@ -88,10 +88,10 @@ namespace Hermes
       virtual void free();
       virtual void zero();
 
-      paralution::LocalVector<Scalar>& get_paralutionVector();
+      paralution::LocalVector<Scalar>* get_paralutionVector();
 
     private:
-      paralution::LocalVector<Scalar> paralutionVector;
+      paralution::LocalVector<Scalar>* paralutionVector;
     };
   }
 

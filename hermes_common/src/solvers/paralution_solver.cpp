@@ -73,40 +73,47 @@ namespace Hermes
 
 
     template<typename Scalar>
-    ParalutionVector<Scalar>::ParalutionVector() : SimpleVector<Scalar>()
+    ParalutionVector<Scalar>::ParalutionVector() : SimpleVector<Scalar>(), paralutionVector(new paralution::LocalVector<Scalar>)
     {
     }
 
     template<typename Scalar>
-    ParalutionVector<Scalar>::ParalutionVector(unsigned int size) : SimpleVector<Scalar>(size)
+    ParalutionVector<Scalar>::ParalutionVector(unsigned int size) : SimpleVector<Scalar>(size), paralutionVector(new paralution::LocalVector<Scalar>)
     {
       this->alloc(size);
-      this->paralutionVector.SetDataPtr(&this->v, "paralutionVector", this->size);
+      this->paralutionVector->SetDataPtr(&this->v, "paralutionVector", this->size);
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::alloc(unsigned int n)
     {
       SimpleVector<Scalar>::alloc(n);
-      this->paralutionVector.SetDataPtr(&this->v, "vector", this->size);
+      this->paralutionVector->Clear();
+      this->paralutionVector->SetDataPtr(&this->v, "vector", this->size);
     }
 
     template<typename Scalar>
     ParalutionVector<Scalar>::~ParalutionVector()
     {
       free();
+      /*
+         Temporarily suspended - introduced a memory leak
+         Reason: heap corruption upon/after execution in Agros.
+         Temporarily suspended - so far attempts to replicate in Hermes failed.
+      */
+      // delete this->paralutionVector;
     }
 
     template<typename Scalar>
     void ParalutionVector<Scalar>::free()
     {
-      this->paralutionVector.Clear();
+      this->paralutionVector->Clear();
       this->v = NULL;
       SimpleVector<Scalar>::free();
     }
 
     template<typename Scalar>
-    paralution::LocalVector<Scalar>& ParalutionVector<Scalar>::get_paralutionVector()
+    paralution::LocalVector<Scalar>* ParalutionVector<Scalar>::get_paralutionVector()
     {
       return this->paralutionVector;
     }
@@ -149,8 +156,13 @@ namespace Hermes
     template<typename Scalar>
     IterativeParalutionLinearMatrixSolver<Scalar>::~IterativeParalutionLinearMatrixSolver()
     {
-      if(this->paralutionSolver)
-        delete this->paralutionSolver;
+      /*
+         Temporarily suspended - introduced a memory leak
+         Reason: heap corruption upon/after execution in Agros.
+         Temporarily suspended - so far attempts to replicate in Hermes failed.
+      */
+      // if(this->paralutionSolver)
+      //   delete this->paralutionSolver;
       if(preconditioner)
         delete preconditioner;
     }
@@ -254,7 +266,7 @@ namespace Hermes
       x.SetDataPtr(&this->sln, "Initial guess", matrix->get_size());
 
       // Handle the situation when rhs == 0(vector).
-      if(std::abs(rhs->get_paralutionVector().Norm()) < Hermes::epsilon)
+      if(std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::epsilon)
       {
         x.LeaveDataPtr(&this->sln);
       }
@@ -263,7 +275,7 @@ namespace Hermes
       this->init_internal_solver();
 
       // Solve.
-      paralutionSolver->Solve(rhs->get_paralutionVector(), &x);
+      paralutionSolver->Solve(*rhs->get_paralutionVector(), &x);
 
       // Store num_iters.
       num_iters = paralutionSolver->GetIterationCount();
@@ -407,7 +419,7 @@ namespace Hermes
       {
         this->paralutionSolver->MoveToAccelerator();
         this->matrix->get_paralutionMatrix().MoveToAccelerator();
-        this->rhs->get_paralutionVector().MoveToAccelerator();
+        this->rhs->get_paralutionVector()->MoveToAccelerator();
       }
     }
 
@@ -429,7 +441,7 @@ namespace Hermes
       x.SetDataPtr(&this->sln, "Initial guess", matrix->get_size());
 
       // Handle the situation when rhs == 0(vector).
-      if(std::abs(rhs->get_paralutionVector().Norm()) < Hermes::epsilon)
+      if(std::abs(rhs->get_paralutionVector()->Norm()) < Hermes::epsilon)
       {
         x.LeaveDataPtr(&this->sln);
         x.Clear();
@@ -439,7 +451,7 @@ namespace Hermes
       this->init_internal_solver();
 
       // Solve.
-      paralutionSolver->Solve(rhs->get_paralutionVector(), &x);
+      paralutionSolver->Solve(*rhs->get_paralutionVector(), &x);
 
       // Store num_iters.
       num_iters = paralutionSolver->GetIterationCount();
