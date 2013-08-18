@@ -56,7 +56,6 @@ namespace Hermes
     void ParalutionMatrix<Scalar>::zero()
     {
       CSRMatrix<Scalar>::zero();
-      this->paralutionMatrix.Zeros();
     }
 
     template<typename Scalar>
@@ -88,10 +87,7 @@ namespace Hermes
     template<typename Scalar>
     void ParalutionVector<Scalar>::alloc(unsigned int n)
     {
-      free();
-      this->size = n;
-      this->v = new Scalar[n];
-      this->zero();
+      SimpleVector<Scalar>::alloc(n);
       this->paralutionVector.SetDataPtr(&this->v, "vector", this->size);
     }
 
@@ -106,7 +102,7 @@ namespace Hermes
     {
       this->paralutionVector.Clear();
       this->v = NULL;
-      this->size = 0;
+      SimpleVector<Scalar>::free();
     }
 
     template<typename Scalar>
@@ -119,7 +115,6 @@ namespace Hermes
     void ParalutionVector<Scalar>::zero()
     {
       memset(this->v, 0, this->size * sizeof(Scalar));
-      this->paralutionVector.Zeros();
     }
 
     template class HERMES_API ParalutionMatrix<double>;
@@ -245,7 +240,7 @@ namespace Hermes
     void IterativeParalutionLinearMatrixSolver<Scalar>::solve(Scalar* initial_guess)
     {
       // Handle sln.
-      if(this->sln)
+      if(this->sln && this->sln != initial_guess)
         delete [] this->sln;
       this->sln = new Scalar[this->get_matrix_size()];
 
@@ -262,7 +257,6 @@ namespace Hermes
       if(std::abs(rhs->get_paralutionVector().Norm()) < Hermes::epsilon)
       {
         x.LeaveDataPtr(&this->sln);
-        x.Clear();
       }
 
       // Init.
