@@ -1,4 +1,3 @@
-#define HERMES_REPORT_ALL
 #include "definitions.h"
 
 using namespace Hermes;
@@ -30,8 +29,8 @@ using namespace Hermes::Hermes2D;
 
 const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
 const bool VTK_VISUALIZATION = false;     // Set to "true" to enable VTK output.
-const int P_INIT = 1;                     // Uniform polynomial degree of mesh elements.
-const int INIT_REF_NUM = 2;               // Number of initial uniform mesh refinements.
+const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
+const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
 
 // Problem parameters.
 const double LAMBDA_AL = 236.0;            // Thermal cond. of Al for temperatures around 20 deg Celsius.
@@ -41,8 +40,6 @@ const double FIXED_BDY_TEMP = 20.0;        // Fixed temperature on the boundary.
 
 int main(int argc, char* argv[])
 {
-  HermesCommonApi.set_integral_param_value(matrixSolverType, SOLVER_PARALUTION_ITERATIVE);
-
   // Load the mesh.
   MeshSharedPtr mesh(new Mesh);
   Hermes::Hermes2D::MeshReaderH2DXML mloader;
@@ -68,40 +65,21 @@ int main(int argc, char* argv[])
 
   // Initialize the solution.
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
-  {
-      // Initialize linear solver.
-      Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
-      ((IterativeParalutionLinearMatrixSolver<double>*)linear_solver.get_linear_solver())->set_solver_type(IterativeParalutionLinearMatrixSolver<double>::BiCGStab);
-      ((IterativeParalutionLinearMatrixSolver<double>*)linear_solver.get_linear_solver())->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::ParalutionPrecond<double>::ILU));
-      double* initial_guess = (double*)calloc(space->get_num_dofs(), sizeof(double));
-      linear_solver.output_matrix();
-      linear_solver.set_matrix_dump_format(Algebra::EXPORT_FORMAT_MATLAB_MATIO);
-      linear_solver.solve(initial_guess);
-      ::free(initial_guess);
-      // Get the solution vector.
-      double* sln_vector = linear_solver.get_sln_vector();
 
-      // Translate the solution vector into the previously initialized Solution.
-      Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
-    }
-    {
-      // Initialize linear solver.
-      Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
-      ((IterativeParalutionLinearMatrixSolver<double>*)linear_solver.get_linear_solver())->set_solver_type(IterativeParalutionLinearMatrixSolver<double>::BiCGStab);
-      ((IterativeParalutionLinearMatrixSolver<double>*)linear_solver.get_linear_solver())->set_precond(new Preconditioners::ParalutionPrecond<double>(Preconditioners::ParalutionPrecond<double>::ILU));
-      double* initial_guess = (double*)calloc(space->get_num_dofs(), sizeof(double));
-      linear_solver.solve(initial_guess);
-      // Get the solution vector.
-      double* sln_vector = linear_solver.get_sln_vector();
-
-      // Translate the solution vector into the previously initialized Solution.
-      Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
-      ::free(initial_guess);
-    }
-
+  // Initialize linear solver.
+  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
+  
   // Solve the linear problem.
   try
   {
+    linear_solver.solve();
+
+    // Get the solution vector.
+    double* sln_vector = linear_solver.get_sln_vector();
+
+    // Translate the solution vector into the previously initialized Solution.
+    Hermes::Hermes2D::Solution<double>::vector_to_solution(sln_vector, space, sln);
+
     // VTK output.
     if(VTK_VISUALIZATION)
     {
