@@ -34,20 +34,27 @@ namespace Hermes
         Orderizer();
         ~Orderizer();
 
-        template<typename Scalar>
-        void process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders = false);
-
-        /// Saves a MeshFunction (Solution, Filter) in VTK format.
+        /// Saves the polynomial orders.
         template<typename Scalar>
         void save_orders_vtk(SpaceSharedPtr<Scalar> space, const char* file_name);
 
+        /// Saves the mesh with markers.
+        template<typename Scalar>
+        void save_markers_vtk(SpaceSharedPtr<Scalar> space, const char* file_name);
+
+        /// Saves the mesh - edges.
         template<typename Scalar>
         void save_mesh_vtk(SpaceSharedPtr<Scalar> space, const char* file_name);
 
-        int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
-
+        /// Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
         void calc_vertices_aabb(double* min_x, double* max_x,
-          double* min_y, double* max_y) const; ///< Returns axis aligned bounding box (AABB) of vertices. Assumes lock.
+          double* min_y, double* max_y) const;
+
+        /// Internal.
+        template<typename Scalar>
+        void process_space(SpaceSharedPtr<Scalar> space, bool show_edge_orders = false);
+
+        int get_labels(int*& lvert, char**& ltext, double2*& lbox) const;
 
         int get_num_vertices();
         double3* get_vertices();
