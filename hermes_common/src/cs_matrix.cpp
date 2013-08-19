@@ -276,12 +276,12 @@ namespace Hermes
       }
 
       tempAp[this->size] = this->nnz;
-      delete [] this->Ai;
-      delete [] this->Ap;
-      delete [] this->Ax;
-      this->Ai = tempAi;
-      this->Ax = tempAx;
-      this->Ap = tempAp;
+      memcpy(this->Ai, tempAi, sizeof(int) * nnz);
+      memcpy(this->Ap, tempAp, sizeof(int) * (this->size + 1));
+      memcpy(this->Ax, tempAx, sizeof(Scalar) * nnz);
+      delete [] tempAi;
+      delete [] tempAx;
+      delete [] tempAp;
     }
 
     template<typename Scalar>
