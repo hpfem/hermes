@@ -72,7 +72,6 @@ namespace Hermes
       /// \todo document
       bool setup_factorization();
       template <typename T> friend class Hermes::Algebra::CSCMatrix;
-      template <typename T> friend class Hermes::Algebra::CSCMatrix;
       template <typename T> friend class Hermes::Algebra::SimpleVector;
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
       char* check_status(const char *fn_name, int status);
