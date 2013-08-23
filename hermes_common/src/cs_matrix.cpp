@@ -500,7 +500,7 @@ namespace Hermes
               this->switch_orientation();
             delete [] Ax_re;
             delete [] Ax_im;
-         
+            Mat_Close(mat);
             return true;
           }
           else
@@ -509,10 +509,10 @@ namespace Hermes
               this->switch_orientation();
             delete [] Ax_re;
             delete [] Ax_im;
+            Mat_Close(mat);
             return false;
           }
 
-          Mat_Close(mat);
 #endif
           return false;
         }
