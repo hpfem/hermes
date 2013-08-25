@@ -15,6 +15,9 @@
 #include "mixins.h"
 #include "common.h"
 #include "matrix.h"
+#ifdef WIN32
+  #include <Windows.h>
+#endif
 
 namespace Hermes
 {
