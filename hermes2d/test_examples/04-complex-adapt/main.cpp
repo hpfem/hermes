@@ -1,7 +1,5 @@
 #include "definitions.h"
 
-using namespace Hermes::Hermes2D::RefinementSelectors;
-
 typedef std::complex<double> complex;
 
 //  This problem describes the distribution of the vector potential in
