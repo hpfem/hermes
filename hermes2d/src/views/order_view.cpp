@@ -12,16 +12,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
 // $Id: view4.cpp 1086 2008-10-21 09:05:44Z jakub $
 
-#ifndef NOGLUT
+#include "order_view.h"
 
+#ifndef NOGLUT
 #include <GL/freeglut.h>
 #include "global.h"
-#include "order_view.h"
 #include "space.h"
-
 namespace Hermes
 {
   namespace Hermes2D
@@ -247,10 +245,19 @@ namespace Hermes
           "  F1 - this help\n"
           "  Esc, Q - quit";
       }
+    }
+  }
+}
+#endif
 
+namespace Hermes
+{
+  namespace Hermes2D
+  {
+    namespace Views
+    {
       template HERMES_API void OrderView::show<double>(const SpaceSharedPtr<double> space, bool);
       template HERMES_API void OrderView::show<std::complex<double> >(const SpaceSharedPtr<std::complex<double> > space, bool);
     }
   }
 }
-#endif
