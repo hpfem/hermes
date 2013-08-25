@@ -1,4 +1,6 @@
-add_subdirectory("00-quickShow")
+if(H2D_WITH_GLUT)
+  add_subdirectory("00-quickShow")
+endif()
 
 add_subdirectory("01-poisson")
 
