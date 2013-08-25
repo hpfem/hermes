@@ -165,9 +165,6 @@ namespace Hermes
           "  * - increase Z scale\n"
           "  / - decrease Z scale";
       }
-
-      template class HERMES_API BaseView<double>;
-      template class HERMES_API BaseView<std::complex<double> >;
     }
   }
 }
