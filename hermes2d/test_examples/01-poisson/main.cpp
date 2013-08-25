@@ -98,9 +98,11 @@ int main(int argc, char* argv[])
     if(HERMES_VISUALIZATION)
     {
       // Visualize the solution.
-      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
+      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
+      Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
 
       viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      viewSp.show(space);
 
       viewS.wait_for_close();
     }

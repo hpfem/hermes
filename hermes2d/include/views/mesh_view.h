@@ -74,10 +74,10 @@ namespace Hermes
       class HERMES_API MeshView : public View
       {
       public:
-
         MeshView(const char* title = "MeshView", WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         MeshView(char* title, WinGeom* wg = NULL) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
         void show(MeshSharedPtr mesh) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
+        void set_b_elem_mrk(bool set) { throw Hermes::Exceptions::Exception("GLUT disabled."); }
       };
 #endif
     }

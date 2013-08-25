@@ -86,9 +86,7 @@ int main(int argc, char* argv[])
   // Perform Newton's iteration and translate the resulting coefficient vector into a Solution.
   Hermes::Hermes2D::NewtonSolver<complex> newton(&dp);
   SimpleGraph graph_dof_est;
-    
-  Views::MeshView m1, m2;
-  Views::OrderView o1, o2;
+  
   // Adaptivity loop:
   int as = 1; bool done = false;
   adaptivity.set_space(space);
