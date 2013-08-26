@@ -1,8 +1,28 @@
 # This is a sample CMake.vars file for Hermes.
-#set(H2D_WITH_GLUT NO)
-#set(WITH_TRILINOS NO)
-#set(WITH_MATIO YES)
-#set(MATIO_WITH_HDF5 YES)
+
+# Target path
+set(CMAKE_INSTALL_PREFIX "d:/hpfem/hermes/dependencies")
+
+# Optional features.
+set(H2D_WITH_GLUT YES)
+set(WITH_BSON YES)
+set(WITH_MATIO YES)
+set(MATIO_WITH_HDF5 YES)
+set(WITH_TC_MALLOC NO)
+SET(WITH_PARALUTION YES)
+SET(WITH_MUMPS YES)
+
+# Trilinos
+SET(WITH_TRILINOS NO)
+if (WIN32) 
+  set(TRILINOS_ROOT "d:/hpfem/hermes/dependencies/trilinos")
+else() 
+  set(TRILINOS_ROOT "~/solvers/trilinos")
+endif()
+
+# Debug / release
+set(HERMES_COMMON_RELEASE   NO)
+set(H2D_RELEASE             NO)
 
 # Some search paths.
 if (WIN32)
