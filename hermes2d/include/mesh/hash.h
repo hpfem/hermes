@@ -29,7 +29,6 @@ namespace Hermes
       class MeshView;
       class ScalarView;
       class Linearizer;
-      class Vectorizer;
       class Orderizer;
     };
 
@@ -119,8 +118,6 @@ namespace Hermes
       template<typename Scalar> friend class L2Space;
       template<typename Scalar> friend class HcurlSpace;
       template<typename Scalar> friend class HdivSpace;
-      friend class Views::ScalarView;
-      friend class Views::Linearizer;
     };
   }
 }
