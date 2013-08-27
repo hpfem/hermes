@@ -28,7 +28,7 @@ using namespace Hermes::Hermes2D;
 // The following parameters can be changed:
 
 const bool HERMES_VISUALIZATION = true;   // Set to "false" to suppress Hermes OpenGL visualization.
-const bool VTK_VISUALIZATION = false;     // Set to "true" to enable VTK output.
+const bool VTK_VISUALIZATION = true;     // Set to "true" to enable VTK output.
 const int P_INIT = 3;                     // Uniform polynomial degree of mesh elements.
 const int INIT_REF_NUM = 3;               // Number of initial uniform mesh refinements.
 
@@ -92,14 +92,17 @@ int main(int argc, char* argv[])
       Hermes::Hermes2D::Views::Orderizer ord;
       ord.save_mesh_vtk(space, "mesh.vtk");
       ord.save_orders_vtk(space, "ord.vtk");
+      ord.save_markers_vtk(space, "markers.vtk");
     }
 
     if(HERMES_VISUALIZATION)
     {
       // Visualize the solution.
-      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(50, 50, 1000, 800));
+      Hermes::Hermes2D::Views::ScalarView viewS("Solution", new Hermes::Hermes2D::Views::WinGeom(0, 0, 500, 400));
+      Hermes::Hermes2D::Views::OrderView viewSp("Space", new Hermes::Hermes2D::Views::WinGeom(0, 400, 500, 400));
 
       viewS.show(sln, Hermes::Hermes2D::Views::HERMES_EPS_LOW);
+      viewSp.show(space);
 
       viewS.wait_for_close();
     }

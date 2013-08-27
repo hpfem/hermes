@@ -12,14 +12,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
 // $Id: view4.cpp 1086 2008-10-21 09:05:44Z jakub $
+
+#include "base_view.h"
 
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
 #include "global.h"
-#include "base_view.h"
 #include "filter.h"
 
 namespace Hermes
@@ -101,7 +101,7 @@ namespace Hermes
           Solution<std::complex<double> >::vector_to_solution(coeffs, space, sln, pss, true);
         }
 
-        
+
         complex_filter = MeshFunctionSharedPtr<double>(new Hermes::Hermes2D::RealFilter(sln.get()));
         ScalarView::show(complex_filter, eps, item);
         update_title();
@@ -165,14 +165,11 @@ namespace Hermes
           "  * - increase Z scale\n"
           "  / - decrease Z scale";
       }
-
-      template class HERMES_API BaseView<double>;
-      template class HERMES_API BaseView<std::complex<double> >;
     }
   }
 }
-#else
-#include "base_view.h"
+#endif
+
 namespace Hermes
 {
   namespace Hermes2D
@@ -184,5 +181,3 @@ namespace Hermes
     }
   }
 }
-#endif // NOGLUT
-

@@ -338,7 +338,6 @@ namespace Hermes
             }
           } 
 
-
           mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
           matvar_t *matvar;
 
@@ -353,15 +352,16 @@ namespace Hermes
             Mat_VarFree(matvar);
             delete [] v_re;
             delete [] v_im;
+            Mat_Close(mat);
             return true;
           }
           else
           {
             delete [] v_re;
             delete [] v_im;
+            Mat_Close(mat);
             return false;
           }
-
           Mat_Close(mat);
 #endif
           return false;

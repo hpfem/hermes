@@ -617,5 +617,4 @@ namespace Hermes
     }
   }
 }
-
 #endif

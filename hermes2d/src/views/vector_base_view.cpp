@@ -12,14 +12,14 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
-
 // $Id: view4.cpp 1086 2008-10-21 09:05:44Z jakub $
+
+#include "vector_base_view.h"
 
 #ifndef NOGLUT
 
 #include <GL/freeglut.h>
 #include "global.h"
-#include "vector_base_view.h"
 #include "space.h"
 #include "precalc.h"
 #include "filter.h"
@@ -144,15 +144,10 @@ namespace Hermes
           "  F1 - this help\n"
           "  Esc, Q - quit";
       }
-
-      template class HERMES_API VectorBaseView<double>;
-      template class HERMES_API VectorBaseView<std::complex<double> >;
     }
   }
 }
-#else
-
-#include "vector_base_view.h"
+#endif
 
 namespace Hermes
 {
@@ -165,4 +160,3 @@ namespace Hermes
     }
   }
 }
-#endif

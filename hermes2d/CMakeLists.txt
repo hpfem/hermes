@@ -35,6 +35,9 @@ project(hermes2d)
 
   if(MSVC)
     set(HERMES2D "hermes2d")              # Base name of the library.
+    if(WIN64)
+      set(HERMES2D "hermes2d_64")
+    endif()
     set(HERMES2D_RELEASE ${HERMES2D})     # Name of the release version.
     set(HERMES2D_DEBUG ${HERMES2D}-debug) # Name of the debug version.
     if(H2D_DEBUG)

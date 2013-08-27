@@ -137,7 +137,11 @@ project(hermes)
   ### END DEFAULT CONFIGURATION ###
     
   set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-  set(HERMES_COMMON_LIB  hermes_common)
+  if(WIN64)
+    set(HERMES_COMMON_LIB  hermes_common_64)
+  else()
+    set(HERMES_COMMON_LIB  hermes_common)
+  endif()
   
   if(${H2D_MAX_HANGING_NODES_LEVEL} MATCHES "[1-20]")
   else(${H2D_MAX_HANGING_NODES_LEVEL} MATCHES "[1-20]")
