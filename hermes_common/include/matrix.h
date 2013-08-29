@@ -650,8 +650,9 @@ namespace Hermes
       void process_vector_output(Hermes::Algebra::Vector<Scalar>* rhs);
 
       /// Sets this instance to output the matrix in several first iterations.
+      /// \param[in] only_last_iteration If true, only the last iteration is outputted, and the next parameter is ignored.
       /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the matrix will be saved.
-      void output_matrix(int firstIterations = -1);
+      void output_matrix(bool only_last_iteration = true, int firstIterations = -1);
       /// Sets this instance to output matrix entries even though they are zero or not.
       void set_print_zero_matrix_entries(bool to_set);
       /// Sets filename for the matrix
@@ -669,8 +670,9 @@ namespace Hermes
       void set_matrix_number_format(char* number_format);
 
       /// Sets this instance to output the rhs in several first iterations.
+      /// \param[in] only_last_iteration If true, only the last iteration is outputted, and the next parameter is ignored.
       /// \param[in] firstIterations Only during so many first iterations. Default: -1 meaning, that during all iterations, the rhs will be saved.
-      void output_rhs(int firstIterations = -1);
+      void output_rhs(bool only_last_iteration = true, int firstIterations = -1);
       /// Sets filename for the rhs
       /// Default: Rhs_'iteration number' with the ".m" extension in the case of matlab format.
       /// \param[in] name sets the main part of the name, i.e. replacement for "Rhs_" in the default name.
@@ -688,6 +690,7 @@ namespace Hermes
     protected:
       bool print_matrix_zero_values;
       bool output_matrixOn;
+      bool only_lastMatrixIteration;
       int output_matrixIterations;
       std::string matrixFilename;
       std::string matrixVarname;
@@ -695,6 +698,7 @@ namespace Hermes
       char* matrix_number_format;
 
       bool output_rhsOn;
+      bool only_lastRhsIteration;
       int output_rhsIterations;
       std::string RhsFilename;
       std::string RhsVarname;
