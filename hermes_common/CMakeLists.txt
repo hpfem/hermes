@@ -125,8 +125,10 @@ project(hermes_common)
     endif()
     
     add_definitions(-DHERMES_COMMON)
-    set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
-
+    if(NOT MSVC)
+      set_target_properties(${HERMES_COMMON_LIB} PROPERTIES COMPILE_FLAGS ${BUILD_FLAGS})
+    endif()
+    
     # Link with all third party libraries corresponding to selected configuration
     # options. Linking of optional libraries for the different Hermeses ({1, 2, 3}D)
     # is controled in their respective CMakeLists.txt. Note that for unselected
