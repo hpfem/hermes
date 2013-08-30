@@ -362,12 +362,18 @@ namespace Hermes
       /// @param[in] cols      - array with column indexes
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols) = 0;
 
-      /// dumping matrix and right-hand side
-      /// @param[in] file file handle
+      /// writing matrix.
+      /// @param[in] filename obvious
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
-      /// @return true on succes
-      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      /// @param[in] number_format specifies the number format where possible
+      virtual void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf") = 0;
+      
+      /// reading matrix
+      /// @param[in] filename obvious
+      /// @param[in] var_name name of variable (will be searched for to output file)
+      /// @param[in] fmt input file format
+      virtual void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt) { throw Exceptions::MethodNotOverridenException("Matrix<Scalar>::import_from_file"); };
 
       /// Get size of matrix
       /// @return size of matrix
@@ -579,12 +585,18 @@ namespace Hermes
       /// Get vector length.
       unsigned int get_size() const {return this->size;}
 
-      /// Write to file.
-      /// @param[in] file file handle
+      /// writing matrix.
+      /// @param[in] filename obvious
       /// @param[in] var_name name of variable (will be written to output file)
       /// @param[in] fmt output file format
-      /// @return true on succes
-      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf") = 0;
+      /// @param[in] number_format specifies the number format where possible
+      virtual void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf") = 0;
+      
+      /// reading matrix
+      /// @param[in] filename obvious
+      /// @param[in] var_name name of variable (will be searched for to output file)
+      /// @param[in] fmt input file format
+      virtual void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt) = 0;
 
     protected:
       /// size of vector
@@ -611,8 +623,8 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
-      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
-      virtual void import_from_file(char *filename);
+      virtual void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      virtual void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Raw data.
       Scalar *v;
@@ -664,7 +676,7 @@ namespace Hermes
       void set_matrix_varname(std::string name);
       /// Sets varname for the matrix
       /// Default: "DF_MATLAB_SPARSE - matlab file".
-      void set_matrix_dump_format(Hermes::Algebra::MatrixExportFormat format);
+      void set_matrix_export_format(Hermes::Algebra::MatrixExportFormat format);
       /// Sets number format for the matrix output.
       /// Default: "%lf".
       void set_matrix_number_format(char* number_format);
@@ -682,7 +694,7 @@ namespace Hermes
       void set_rhs_varname(std::string name);
       /// Sets varname for the rhs
       /// Default: "DF_MATLAB_SPARSE - matlab file".
-      void set_rhs_E_matrix_dump_format(Hermes::Algebra::MatrixExportFormat format);
+      void set_rhs_export_format(Hermes::Algebra::MatrixExportFormat format);
       /// Sets number format for the vector output.
       /// Default: "%lf".
       void set_rhs_number_format(char* number_format);

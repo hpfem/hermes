@@ -283,19 +283,18 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool SimpleVector<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void SimpleVector<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       if(!v)
-      {
-        throw Exceptions::MethodNotOverridenException("Vector<Scalar>::dump");
-        return false;
-      }
+        throw Exceptions::MethodNotOverridenException("Vector<Scalar>::export_to_file");
 
       switch (fmt)
       {
       case EXPORT_FORMAT_MATRIX_MARKET:
         {
           FILE* file = fopen(filename, "w");
+          if(!file)
+            throw Exceptions::IOException(Exceptions::IOException::Write, filename);
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
             fprintf(file, "%%%%Matrix<Scalar>Market matrix coordinate real\n");
           else
@@ -310,8 +309,8 @@ namespace Hermes
           }
 
           fclose(file);
-          return true;
         }
+        break;
 
       case EXPORT_FORMAT_MATLAB_MATIO:
         {
@@ -320,88 +319,136 @@ namespace Hermes
           dims[0] = this->size;
           dims[1] = 1;
 
+          mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
+          matvar_t *matvar;
+
           // For complex.
-          double* v_re = new double[this->size];
-          double* v_im = new double[this->size];
-          struct mat_complex_split_t z = {v_re, v_im};
+          double* v_re = NULL;
+          double* v_im = NULL;
 
           void* data;
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+          {
             data = v;
+            matvar = Mat_VarCreate(var_name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA);
+          }
           else
           {
+            v_re = new double[this->size];
+            v_im = new double[this->size];
+            struct mat_complex_split_t z = {v_re, v_im};
+
             for(int i = 0; i < this->size; i++)
             {
               v_re[i] = ((std::complex<double>)(this->v[i])).real();
               v_im[i] = ((std::complex<double>)(this->v[i])).imag();
               data = &z;
             }
+            matvar = Mat_VarCreate(var_name, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
           } 
-
-          mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
-          matvar_t *matvar;
-
-          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
-            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA);
-          else
-            matvar = Mat_VarCreate("rhs", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
 
           if (matvar)
           {
             Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
             Mat_VarFree(matvar);
-            delete [] v_re;
-            delete [] v_im;
-            Mat_Close(mat);
-            return true;
           }
-          else
-          {
+
+          if(v_re)
             delete [] v_re;
+          if(v_im)
             delete [] v_im;
-            Mat_Close(mat);
-            return false;
-          }
           Mat_Close(mat);
+
+          if(!matvar)
+            throw Exceptions::IOException(Exceptions::IOException::Write, filename);
+#else
+          throw Exceptions::Exceptions("MATIO not included.");
 #endif
-          return false;
         }
+        break;
 
       case EXPORT_FORMAT_PLAIN_ASCII:
         {
           FILE* file = fopen(filename, "w");
+          if(!file)
+            throw Exceptions::IOException(Exceptions::IOException::Write, filename);
           for (unsigned int i = 0; i < this->size; i++)
           {
             Hermes::Helpers::fprint_num(file, v[i], number_format);
             fprintf(file, "\n");
           }
           fclose(file);
-
-          return true;
         }
-
-      default:
-        return false;
       }
     }
 
     template<typename Scalar>
-    void SimpleVector<Scalar>::import_from_file(char *filename)
+    void SimpleVector<Scalar>::import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt)
     {
-      std::vector<Scalar> data;
-      std::ifstream input (filename);
-      std::string lineData;
-
-      while(getline(input, lineData))
+      switch (fmt)
       {
-        Scalar d;
-        std::stringstream lineStream(lineData);
-        lineStream >> d;
-        data.push_back(d);
+      case EXPORT_FORMAT_PLAIN_ASCII:
+        {
+          std::vector<Scalar> data;
+          std::ifstream input (filename);
+          if(input.bad())
+            throw Exceptions::IOException(Exceptions::IOException::Read, filename);
+          std::string lineData;
+
+          while(getline(input, lineData))
+          {
+            Scalar d;
+            std::stringstream lineStream(lineData);
+            lineStream >> d;
+            data.push_back(d);
+          }
+
+          this->alloc(data.size());
+          memcpy(this->v, &data[0], sizeof(Scalar)*data.size());
+        }
+        break;
+      case EXPORT_FORMAT_MATLAB_MATIO:
+#ifdef WITH_MATIO
+        mat_t    *matfp;
+        matvar_t *matvar;
+
+        matfp = Mat_Open(filename,MAT_ACC_RDONLY);
+
+        if (!matfp )
+        {
+          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
+          return;
+        }
+
+        matvar = Mat_VarRead(matfp, var_name);
+        if (matvar)
+        {
+          this->alloc(matvar->dims[0]);
+          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+            memcpy(this->v, matvar->data, sizeof(Scalar)*this->size);
+          else
+          {
+            std::complex<double>* complex_data = new std::complex<double>[this->size];
+            double* real_array = (double*)((mat_complex_split_t*)matvar->data)->Re;
+            double* imag_array = (double*)((mat_complex_split_t*)matvar->data)->Im;
+            for(int i = 0; i < this->size; i++)
+              complex_data[i] = std::complex<double>(real_array[i], imag_array[i]);
+            memcpy(this->v, complex_data, sizeof(Scalar)*this->size);
+            delete [] complex_data;
+          }
+        }
+
+        Mat_Close(matfp);
+        if(!matvar)
+          throw Exceptions::IOException(Exceptions::IOException::Read, filename);
+#else
+        throw Exceptions::Exceptions("MATIO not included.");
+#endif
+        break;
+      case EXPORT_FORMAT_MATRIX_MARKET:
+        throw Hermes::Exceptions::MethodNotImplementedException("SimpleVector<Scalar>::import_from_file - Matrix Market");
       }
 
-      this->alloc(data.size());
-      memcpy(this->v, &data[0], sizeof(Scalar)*data.size());
     }
 
     template<typename Scalar>
@@ -974,7 +1021,7 @@ namespace Hermes
       this->matrixVarname = name;
     }
     template<typename Scalar>
-    void MatrixRhsOutput<Scalar>::set_matrix_dump_format(Hermes::Algebra::MatrixExportFormat format)
+    void MatrixRhsOutput<Scalar>::set_matrix_export_format(Hermes::Algebra::MatrixExportFormat format)
     {
       this->matrixFormat = format;
     }
@@ -1003,7 +1050,7 @@ namespace Hermes
       this->RhsVarname = name;
     }
     template<typename Scalar>
-    void MatrixRhsOutput<Scalar>::set_rhs_E_matrix_dump_format(Hermes::Algebra::MatrixExportFormat format)
+    void MatrixRhsOutput<Scalar>::set_rhs_export_format(Hermes::Algebra::MatrixExportFormat format)
     {
       this->RhsFormat = format;
     }

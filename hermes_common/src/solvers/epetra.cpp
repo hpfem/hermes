@@ -327,23 +327,23 @@ namespace Hermes
     }
    
     template<>
-    bool EpetraMatrix<double>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void EpetraMatrix<double>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
+      throw Exceptions::MethodNotImplementedException("EpetraMatrix<double>::export_to_file");
+      /*
       switch (fmt)
       {
       case DF_MATLAB_SPARSE:
       case EXPORT_FORMAT_PLAIN_ASCII:
         EpetraExt::RowMatrixToHandle(file, *this->mat);
-        return true;
       }
-      
-      return false;
+      */
     }
     
     template<>
-    bool EpetraMatrix<std::complex<double> >::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void EpetraMatrix<std::complex<double> >::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
-      return false;
+      throw Exceptions::MethodNotImplementedException("EpetraMatrix<double>::export_to_file");
     }
 
     template<typename Scalar>

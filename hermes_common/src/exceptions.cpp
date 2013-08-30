@@ -64,6 +64,32 @@ namespace Hermes
       return messageWithReturn;
     }
 
+
+    IOException::IOException(ReadWrite readWrite, char* filename_) : Exception(), readWrite(readWrite), filename(NULL)
+    {
+      this->filename = (char*)malloc(sizeof(char*) * strlen(filename_));
+      ::strcpy(this->filename, filename_);
+    }
+
+    IOException::~IOException() throw()
+    {
+      if(this->filename)
+        ::free(filename);
+    }
+
+    IOException::IOException(const IOException & e)
+    {
+      this->readWrite = e.readWrite;
+      this->filename = (char*)malloc(sizeof(char*) * strlen(e.filename));
+      ::strcpy(this->filename, e.filename);
+    }
+
+    Exception* IOException::clone()
+    {
+      return new IOException(this->readWrite, this->filename);
+    }
+
+
     NullException::NullException(int param_idx) : Exception()
     {
       this->param_idx = param_idx;
@@ -125,7 +151,7 @@ namespace Hermes
       this->right = second;
       char * msg = new char[110];
       sprintf(msg, "Parameter number %d have length %d and parameter number %d have length %d. The lengths should be same",
-            fst_param_idx, wrong, snd_param_idx, right);
+        fst_param_idx, wrong, snd_param_idx, right);
       message = msg;
     }
 
@@ -390,7 +416,7 @@ namespace Hermes
       strcpy(msg, e.what());
       message = msg;
     }
-    
+
     Exception* SolutionLoadFailureException::clone()
     {
       return new SolutionLoadFailureException(*this);

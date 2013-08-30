@@ -213,6 +213,8 @@ namespace Hermes
     template<typename Scalar>
     bool PetscMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
+      throw Exceptions::MethodNotImplementedException("PetscVector<double>::export_to_file");
+      /*
       switch (fmt)
       {
       case DF_MATLAB_SPARSE: //only to stdout
@@ -221,7 +223,7 @@ namespace Hermes
         MatView(matrix, viewer);
         return true;
       }
-      return false;
+      */
     }
 
     template<typename Scalar>
@@ -448,8 +450,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    bool PetscVector<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void PetscVector<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
+      throw Exceptions::MethodNotImplementedException("PetscVector<double>::export_to_file");
+      /*
       switch (fmt)
       {
       case DF_MATLAB_SPARSE: //only to stdout
@@ -458,7 +462,7 @@ namespace Hermes
         VecView(vec, viewer);
         return true;
       }
-      return false;
+      */
     }
 
     template class HERMES_API PetscMatrix<double>;

@@ -94,8 +94,14 @@ namespace Hermes
       virtual void set_row_zero(unsigned int n);
 
       /// Matrix export method.
-      /// \param[in] invert_storage Used to distinguish between Column (no inversion) and Row (with inversion) format.
-      bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf", bool invert_storage = false);
+      /// Utility version
+      /// \See Matrix<Scalar>::export_to_file.
+      void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf", bool invert_storage = false);
+      
+      /// Reading matrix
+      /// Utility version
+      /// \See Matrix<Scalar>::import_from_file.
+      void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage = false);
       
       /// Utility method.
       virtual unsigned int get_matrix_size() const;
@@ -155,7 +161,8 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt);
 
       friend class Hermes::Solvers::CSCIterator<Scalar>;
 
@@ -195,7 +202,8 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      virtual bool export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt = EXPORT_FORMAT_PLAIN_ASCII, char* number_format = "%lf");
+      void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt);
 
       friend class Hermes::Solvers::CSCIterator<Scalar>;
 

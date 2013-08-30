@@ -338,7 +338,7 @@ namespace Hermes
       this->sln = new Scalar[this->m->get_size()];
       SimpleVector<Scalar> temp;
       temp.alloc(this->m->get_size());
-      temp.import_from_file((char*)resultFileName.c_str());
+      temp.import_from_file((char*)resultFileName.c_str(), "x", EXPORT_FORMAT_PLAIN_ASCII );
       memcpy(this->sln, temp.v, this->m->get_size() * sizeof(Scalar));
     }
 

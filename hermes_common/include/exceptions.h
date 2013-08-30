@@ -65,6 +65,31 @@ namespace Hermes
       protected:
         char * message;
     };
+    
+    /// \brief IO exception.
+    /// Internal.
+    /// Exception occurs when something fails to be written to / read from the disk.
+    class HERMES_API IOException : public Exception
+    {
+      public:
+        /// Read or Write.
+        enum ReadWrite
+        {
+          Read,
+          Write
+        };
+        /// Constructor
+        /// \param[in] readWrite obvious.
+        /// \param[in] filename obvious.
+        IOException(ReadWrite readWrite, char* filename);
+
+        ~IOException() throw();
+        IOException(const IOException & e);
+        virtual Exception* clone();
+      private:
+        ReadWrite readWrite;
+        char* filename;
+    };
 
     /// \brief Null parameter exception.
     /// Internal.
