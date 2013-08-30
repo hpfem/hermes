@@ -875,10 +875,20 @@ namespace Hermes
       if (matrix == NULL)
         return;
 
-      if(this->output_matrixOn && (this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration))
+      char* fileName = new char[this->matrixFilename.length() + 5];
+
+      if(this->output_matrixOn)
       {
-        char* fileName = new char[this->matrixFilename.length() + 5];
-        sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
+        if(this->only_lastMatrixIteration)
+          sprintf(fileName, "%s", this->matrixFilename.c_str());
+        else if(this->output_matrixIterations == -1 || this->output_matrixIterations >= iteration)
+          sprintf(fileName, "%s%i", this->matrixFilename.c_str(), iteration);
+        else
+        {
+          delete [] fileName;
+          return;
+        }
+
         matrix->export_to_file(fileName, this->matrixVarname.c_str(), this->matrixFormat, this->matrix_number_format);
         delete [] fileName;
       }
@@ -905,10 +915,20 @@ namespace Hermes
       if (rhs == NULL)
         return;
 
-      if(this->output_rhsOn && (this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration))
+      char* fileName = new char[this->RhsFilename.length() + 5];
+
+      if(this->output_rhsOn)
       {
-        char* fileName = new char[this->RhsFilename.length() + 5];
-        sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+        if(this->only_lastRhsIteration)
+          sprintf(fileName, "%s", this->RhsFilename.c_str());
+        else if(this->output_rhsIterations == -1 || this->output_rhsIterations >= iteration)
+          sprintf(fileName, "%s%i", this->RhsFilename.c_str(), iteration);
+        else
+        {
+          delete [] fileName;
+          return;
+        }
+
         rhs->export_to_file(fileName, this->RhsVarname.c_str(), this->RhsFormat, this->rhs_number_format);
         delete [] fileName;
       }
@@ -930,9 +950,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MatrixRhsOutput<Scalar>::output_matrix(int firstIterations)
+    void MatrixRhsOutput<Scalar>::output_matrix(bool only_last_iteration, int firstIterations)
     {
       output_matrixOn = true;
+      this->only_lastMatrixIteration = only_last_iteration;
       this->output_matrixIterations = firstIterations;
     }
     template<typename Scalar>
@@ -965,9 +986,10 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MatrixRhsOutput<Scalar>::output_rhs(int firstIterations)
+    void MatrixRhsOutput<Scalar>::output_rhs(bool only_last_iteration, int firstIterations)
     {
       this->output_rhsOn = true;
+      this->only_lastRhsIteration = only_last_iteration;
       this->output_rhsIterations = firstIterations;
     }
     template<typename Scalar>
@@ -990,7 +1012,7 @@ namespace Hermes
     {
       this->rhs_number_format = number_format;
     }
-   
+
     template HERMES_API class MatrixRhsOutput<double>;
     template HERMES_API class MatrixRhsOutput<std::complex<double> >;
   }

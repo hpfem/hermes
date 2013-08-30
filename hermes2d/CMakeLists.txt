@@ -632,9 +632,10 @@ project(hermes2d)
       add_library(${HERMES_LIB} SHARED ${SRC} ${HEADERS})
     endif()
 
-    set(_FLAGS ${BUILD_FLAGS})
-
-    set_target_properties(${HERMES_LIB} PROPERTIES COMPILE_FLAGS ${_FLAGS})
+    if(NOT MSVC)
+      set(_FLAGS ${BUILD_FLAGS})
+      set_target_properties(${HERMES_LIB} PROPERTIES COMPILE_FLAGS ${_FLAGS})
+    endif()
 
     target_link_libraries(  ${HERMES_LIB}
       ${HERMES_COMMON_LIB}
