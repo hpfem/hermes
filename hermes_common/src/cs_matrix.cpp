@@ -458,28 +458,12 @@ namespace Hermes
           if(invert_storage)
             this->switch_orientation();
 
-          // For complex.
-          double* Ax_re = new double[this->nnz];
-          double* Ax_im = new double[this->nnz];
-          struct mat_complex_split_t z = {Ax_re, Ax_im};
-
           sparse.nir = this->nnz;
           sparse.ir = Ai;
           sparse.njc = this->size + 1;
           sparse.jc = (int *) Ap;
           sparse.ndata = this->nnz;
-          if(Hermes::Helpers::TypeIsReal<Scalar>::value)
-            sparse.data = Ax;
-          else
-          {
-            for(int i = 0; i < this->nnz; i++)
-            {
-              Ax_re[i] = ((std::complex<double>)(this->Ax[i])).real();
-              Ax_im[i] = ((std::complex<double>)(this->Ax[i])).imag();
-              sparse.data = &z;
-            }
-          } 
-
+          
           size_t dims[2];
           dims[0] = this->size;
           dims[1] = this->size;
@@ -487,10 +471,32 @@ namespace Hermes
           mat_t *mat = Mat_CreateVer(filename, "", MAT_FT_MAT5);
 
           matvar_t *matvar;
+          
+          // For complex. No allocation here.
+          double* Ax_re = NULL;
+          double* Ax_im = NULL;
+
+          // For real.
           if(Hermes::Helpers::TypeIsReal<Scalar>::value)
+          {
+            sparse.data = Ax;
             matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA);
+          }
           else
+          {
+            // For complex.
+            Ax_re = new double[this->nnz];
+            Ax_im = new double[this->nnz];
+            struct mat_complex_split_t z = {Ax_re, Ax_im};
+
+            for(int i = 0; i < this->nnz; i++)
+            {
+              Ax_re[i] = ((std::complex<double>)(this->Ax[i])).real();
+              Ax_im[i] = ((std::complex<double>)(this->Ax[i])).imag();
+              sparse.data = &z;
+            }
             matvar = Mat_VarCreate("matrix", MAT_C_SPARSE, MAT_T_DOUBLE, 2, dims, &sparse, MAT_F_DONT_COPY_DATA | MAT_F_COMPLEX);
+          }
 
           if (matvar)
           {
@@ -498,8 +504,10 @@ namespace Hermes
             Mat_VarFree(matvar);
             if(invert_storage)
               this->switch_orientation();
-            delete [] Ax_re;
-            delete [] Ax_im;
+            if(Ax_re)
+              delete [] Ax_re;
+            if(Ax_im)
+              delete [] Ax_im;
             Mat_Close(mat);
             return true;
           }
@@ -507,12 +515,13 @@ namespace Hermes
           {
             if(invert_storage)
               this->switch_orientation();
-            delete [] Ax_re;
-            delete [] Ax_im;
+            if(Ax_re)
+              delete [] Ax_re;
+            if(Ax_im)
+              delete [] Ax_im;
             Mat_Close(mat);
             return false;
           }
-
 #endif
           return false;
         }
