@@ -362,7 +362,7 @@ namespace Hermes
           if(!matvar)
             throw Exceptions::IOException(Exceptions::IOException::Write, filename);
 #else
-          throw Exceptions::Exceptions("MATIO not included.");
+          throw Exceptions::Exception("MATIO not included.");
 #endif
         }
         break;
@@ -442,7 +442,7 @@ namespace Hermes
         if(!matvar)
           throw Exceptions::IOException(Exceptions::IOException::Read, filename);
 #else
-        throw Exceptions::Exceptions("MATIO not included.");
+        throw Exceptions::Exception("MATIO not included.");
 #endif
         break;
       case EXPORT_FORMAT_MATRIX_MARKET:
