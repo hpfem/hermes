@@ -410,6 +410,8 @@ namespace Hermes
     template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_H1_NORM>;
     template HERMES_API class DefaultErrorCalculator<double, HERMES_L2_NORM>;
     template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_L2_NORM>;
+    template HERMES_API class DefaultErrorCalculator<double, HERMES_H1_SEMINORM>;
+    template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_H1_SEMINORM>;
     template HERMES_API class DefaultErrorCalculator<double, HERMES_HCURL_NORM>;
     template HERMES_API class DefaultErrorCalculator<std::complex<double>, HERMES_HCURL_NORM>;
     template HERMES_API class DefaultErrorCalculator<double, HERMES_HDIV_NORM>;
@@ -419,6 +421,8 @@ namespace Hermes
     template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_H1_NORM>;
     template HERMES_API class DefaultNormCalculator<double, HERMES_L2_NORM>;
     template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_L2_NORM>;
+    template HERMES_API class DefaultNormCalculator<double, HERMES_H1_SEMINORM>;
+    template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_H1_SEMINORM>;
     template HERMES_API class DefaultNormCalculator<double, HERMES_HCURL_NORM>;
     template HERMES_API class DefaultNormCalculator<std::complex<double>, HERMES_HCURL_NORM>;
     template HERMES_API class DefaultNormCalculator<double, HERMES_HDIV_NORM>;
