@@ -1,0 +1,4 @@
+?package(hermes2d): \
+   needs="text" \
+   section="Applications/Education" \
+   title="Hermes2D" \
