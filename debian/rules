@@ -30,6 +30,7 @@ install: build
 	dh_install
 	dh_installdirs
 	$(MAKE) install
+	$(MAKE) --directory doc html
 
 binary-indep: build install
 
@@ -65,3 +66,4 @@ binary-arch: build install
 
 binary: binary-arch
 .PHONY: build clean binary-arch binary install configure
+
