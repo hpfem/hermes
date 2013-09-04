@@ -1,11 +1,8 @@
 #!/usr/bin/make -f
 
-export DH_VERBOSE=1
-
 configure: configure-stamp
 
 configure-stamp:
-	dh_testdir
 	-$(MAKE) distclean
 	cmake -DCMAKE_INSTALL_PREFIX=$(CURDIR)/debian/hermes2d/usr .
 	touch configure-stamp
@@ -13,57 +10,13 @@ configure-stamp:
 build: configure-stamp build-stamp
 
 build-stamp: configure-stamp
-	dh_testdir	
 	$(MAKE)
 	touch build-stamp
 
 clean:
-	dh_testdir
-	dh_testroot
 	rm -f build-stamp configure-stamp
 	dh_clean
 
 install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_install
-	dh_installdirs
 	$(MAKE) install
 	$(MAKE) --directory doc html
-
-binary-indep: build install
-
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
-	dh_install
-	dh_installmenu
-#	dh_installdebconf
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-	dh_installmime
-#	dh_python
-#	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_perl
-	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-arch
-.PHONY: build clean binary-arch binary install configure
-
