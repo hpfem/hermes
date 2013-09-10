@@ -413,6 +413,13 @@ namespace Hermes
           GeomType gt = HERMES_PLANAR);
       };
 
+      template<typename Scalar>
+      class HERMES_API DefaultWeakFormLaplaceLinear : public WeakForm<Scalar>
+      {
+      public:
+        DefaultWeakFormLaplaceLinear(std::string area = HERMES_ANY, GeomType gt = HERMES_PLANAR);
+      };
+
       /* Default weak form for the Poisson equation -div(const_coeff spline_coeff(u) grad u) - rhs = 0. */
 
       template<typename Scalar>
@@ -427,7 +434,7 @@ namespace Hermes
       class HERMES_API DefaultWeakFormPoissonLinear : public WeakForm<Scalar>
       {
       public:
-        DefaultWeakFormPoissonLinear(std::string area, Hermes2DFunction<Scalar>* f, GeomType gt = HERMES_PLANAR);
+        DefaultWeakFormPoissonLinear(std::string area, Hermes2DFunction<Scalar>* f = NULL, GeomType gt = HERMES_PLANAR);
       };
     };
   }

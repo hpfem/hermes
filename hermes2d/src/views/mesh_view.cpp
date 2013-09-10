@@ -156,7 +156,7 @@ namespace Hermes
 
           float* color = get_marker_color(mrk);
           glColor3f(color[0], color[1], color[2]);
-          glLineWidth(mrk ? 1.5f : 1.0f);
+          glLineWidth(mrk ? 3.0f : 1.0f);
           glBegin(GL_LINES);
           glVertex2d(tvert[edges[i][0]][0], tvert[edges[i][0]][1]);
           glVertex2d(tvert[edges[i][1]][0], tvert[edges[i][1]][1]);

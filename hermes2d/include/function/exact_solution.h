@@ -229,6 +229,29 @@ namespace Hermes
       virtual Ord ord(Ord x, Ord y) const;
       virtual MeshFunction<Scalar>* clone() const;
     };
+
+    /// @ingroup meshFunctions
+    /// Eggshell function.
+    class HERMES_API ExactSolutionEggShell : public ExactSolutionScalar<double>
+    {
+    public:
+      /// \param[in] polynomialOrder The polynomial order used for the space where the solution of the
+      /// internal Laplace equation is sought.
+      ExactSolutionEggShell(MeshSharedPtr mesh, int polynomialOrder);
+      virtual ~ExactSolutionEggShell() {};
+
+      /// Function returning the value.
+      virtual double value (double x, double y) const;
+
+      /// Function returning the derivatives.
+      virtual void derivatives (double x, double y, double& dx, double& dy) const;
+
+      /// Function returning the integration order that
+      /// should be used when integrating the function.
+      virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const;
+
+      MeshFunction<double>* clone() const;
+    };
   }
 }
 #endif

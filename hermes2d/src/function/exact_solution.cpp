@@ -16,6 +16,9 @@
 #include "solution_h2d_xml.h"
 #include "exact_solution.h"
 #include "api2d.h"
+#include "../weakform_library/weakforms_h1.h"
+#include "space_h1.h"
+#include "../solver/linear_solver.h"
 
 #ifdef WITH_BSON
 #include "bson.h"
@@ -538,6 +541,41 @@ namespace Hermes
       if(this->sln_type == HERMES_SLN)
         return Solution<Scalar>::clone();
       ZeroSolutionVector<Scalar>* sln = new ZeroSolutionVector<Scalar>(this->mesh);
+      return sln;
+    }
+
+    ExactSolutionEggShell::ExactSolutionEggShell(MeshSharedPtr mesh, int polynomialOrder) : ExactSolutionScalar<double>(mesh)
+    {
+      Hermes2D::WeakFormsH1::DefaultWeakFormLaplaceLinear<double> wf;
+      SpaceSharedPtr<double> space(new H1SpaceEggShell(mesh, polynomialOrder));
+      Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
+      MeshFunctionSharedPtr<double> sln(new Solution<double>());
+      linear_solver.solve();
+      Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), space, sln);
+      this->copy(sln.get());
+    }
+
+    double ExactSolutionEggShell::value (double x, double y) const
+    {
+      throw Exceptions::Exception("ExactSolutionEggShell::value should never be called.");
+      return 0.;
+    }
+
+    void ExactSolutionEggShell::derivatives (double x, double y, double& dx, double& dy) const
+    {
+      throw Exceptions::Exception("ExactSolutionEggShell::derivatives should never be called.");
+    }
+
+    Hermes::Ord ExactSolutionEggShell::ord(Hermes::Ord x, Hermes::Ord y) const
+    {
+      throw Exceptions::Exception("ExactSolutionEggShell::ord should never be called.");
+      return Hermes::Ord(0);
+    }
+
+    MeshFunction<double>* ExactSolutionEggShell::clone() const
+    {
+      Solution<double> * sln = new Solution<double>;
+      sln->copy(this);
       return sln;
     }
 

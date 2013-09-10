@@ -1083,6 +1083,13 @@ namespace Hermes
       };
 
       template<typename Scalar>
+      DefaultWeakFormLaplaceLinear<Scalar>::DefaultWeakFormLaplaceLinear(std::string area, GeomType gt) : WeakForm<Scalar>()
+      {
+        // Jacobian.
+        this->add_matrix_form(new DefaultMatrixFormDiffusion<Scalar>(0, 0, area, NULL, HERMES_SYM, gt));
+      };
+
+      template<typename Scalar>
       DefaultWeakFormPoisson<Scalar>::DefaultWeakFormPoisson() : WeakForm<Scalar>()
       {
       };
@@ -1136,6 +1143,8 @@ namespace Hermes
       template class HERMES_API DefaultJacobianFormSurf<std::complex<double> >;
       template class HERMES_API DefaultWeakFormLaplace<double>;
       template class HERMES_API DefaultWeakFormLaplace<std::complex<double> >;
+      template class HERMES_API DefaultWeakFormLaplaceLinear<double>;
+      template class HERMES_API DefaultWeakFormLaplaceLinear<std::complex<double> >;
       template class HERMES_API DefaultWeakFormPoisson<double>;
       template class HERMES_API DefaultWeakFormPoisson<std::complex<double> >;
       template class HERMES_API DefaultWeakFormPoissonLinear<double>;

@@ -359,7 +359,7 @@ namespace Hermes
 
       // update refmap coeffs of curvilinear elements
       Element* e;
-      for_all_elements(e, mesh)
+      for_all_used_elements(e, mesh)
         if(e->cm != NULL)
           e->cm->update_refmap_coeffs(e);
 

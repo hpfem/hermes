@@ -454,7 +454,7 @@ namespace Hermes
 
       Element* e;
       int counter = 0;
-      for_all_elements(e, mesh)
+      for_all_used_elements(e, mesh)
       {
         assert(elem_orders_[counter] >= 0 && elem_orders_[counter] <= shapeset->get_max_order());
         ElementData* ed = &edata[e->id];
@@ -1163,7 +1163,7 @@ namespace Hermes
 
       // Utility pointer.
       Element *e;
-      for_all_elements(e, this->get_mesh())
+      for_all_used_elements(e, this->get_mesh())
         xmlspace.element_data().push_back(XMLSpace::space::element_data_type(e->id, this->edata[e->id].order, this->edata[e->id].bdof, this->edata[e->id].n, this->edata[e->id].changed_in_last_adaptation));
 
       ::xml_schema::namespace_infomap namespace_info_map;

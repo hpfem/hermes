@@ -18,6 +18,7 @@
 #include "global.h"
 #include "api2d.h"
 #include "mesh_reader_h2d.h"
+#include "neighbor_search.h"
 #include "forms.h"
 
 namespace Hermes
@@ -27,6 +28,10 @@ namespace Hermes
     unsigned g_mesh_seq = 0;
     static const int H2D_DG_INNER_EDGE_INT = -54125631;
     static const std::string H2D_DG_INNER_EDGE = "-54125631";
+
+    const std::string Mesh::eggShellInnerMarker = "Eggshell-inner";
+    const std::string Mesh::eggShell1Marker = "Eggshell-1";
+    const std::string Mesh::eggShell0Marker = "Eggshell-0";
 
     Mesh::Mesh() : HashTable(), meshHashGrid(NULL), nbase(0), nactive(0), ntopvert(0), ninitial(0), seq(g_mesh_seq++),
       bounding_box_calculated(0)
@@ -156,6 +161,155 @@ namespace Hermes
 
       nbase = nactive = ninitial = nt + nq;
       seq = g_mesh_seq++;
+    }
+
+    MeshSharedPtr Mesh::get_egg_shell(MeshSharedPtr mesh, std::string marker, unsigned int levels, int n_element_guess)
+    {
+      MeshSharedPtr target_mesh(new Mesh);
+      target_mesh->copy(mesh);
+
+      Element** elements = NULL;
+      int n_elements;
+
+      get_egg_shell_structures(target_mesh, elements, n_elements, marker, levels, n_element_guess);
+      make_egg_shell_mesh(target_mesh, elements, n_elements);
+
+      return target_mesh;
+    }
+
+    void Mesh::get_egg_shell_structures(MeshSharedPtr target_mesh, Element**& elements, int& n_elements, std::string marker, unsigned int levels, int n_element_guess)
+    {
+      int eggShell_marker_1 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell1Marker);
+      int eggShell_marker_inner = target_mesh->get_boundary_markers_conversion().insert_marker(eggShellInnerMarker);
+
+      // Check.
+      if(levels < 1)
+        throw Exceptions::ValueException("levels", levels, 1);
+
+      // Marker translation.
+      MarkersConversion::IntValid int_marker = target_mesh->element_markers_conversion.get_internal_marker(marker);
+      if(!int_marker.valid)
+        throw Exceptions::Exception("Marker not valid in target_mesh::get_egg_shell.");
+
+      // Initial allocation
+      int n_elements_alloc = n_element_guess == -1 ? (int)std::sqrt(target_mesh->get_num_active_elements()) : n_element_guess;
+      elements = (Element**)malloc(n_elements_alloc * sizeof(Element*));
+      n_elements = 0;
+
+      // Initial setup.
+      int* neighbors_target = (int*)calloc(target_mesh->get_max_element_id(), sizeof(int));
+      int* neighbors_target_local = (int*)calloc(target_mesh->get_max_element_id(), sizeof(int));
+      Element* e;
+      for_all_active_elements(e, target_mesh)
+      {
+        if(e->marker == int_marker.marker)
+          neighbors_target_local[e->id] = 1;
+      }
+
+      // And calculation.
+      for(int level = 1; level <= levels; level++)
+      {
+        memcpy(neighbors_target, neighbors_target_local, target_mesh->get_max_element_id() * sizeof(int));
+        for_all_active_elements(e, target_mesh)
+        {
+          if(neighbors_target[e->id] == level)
+          {
+            NeighborSearch<double> ns(e, target_mesh);
+            ns.set_ignore_errors(true);
+            for(int edge = 0; edge < e->get_nvert(); edge++)
+            {
+              ns.set_active_edge(edge);
+              for(int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+              {
+                ns.set_active_segment(neighbor);
+                Element* neighbor_el = ns.get_neighb_el();
+                if(neighbors_target_local[neighbor_el->id] > 0)
+                  continue;
+                e->en[edge]->marker = eggShell_marker_1;
+                neighbor_el->en[ns.get_neighbor_edge().local_num_of_edge]->marker = eggShell_marker_1;
+                if(n_elements == n_elements_alloc)
+                {
+                  int new_n_elements_alloc = std::max(n_elements_alloc * 2, n_elements_alloc + 1);
+                  elements = (Element**)realloc(elements, new_n_elements_alloc * sizeof(Element*));
+                  memset(elements + new_n_elements_alloc - n_elements_alloc, 0, sizeof(Element*));
+                  n_elements_alloc = new_n_elements_alloc;
+                }
+                elements[n_elements++] = ns.get_neighb_el();
+                neighbors_target_local[ns.get_neighb_el()->id] = level + 1;
+              }
+            }
+          }
+        }
+        for_all_active_elements(e, target_mesh)
+        {
+          if(neighbors_target_local[e->id] == level + 1)
+          {
+            NeighborSearch<double> ns(e, target_mesh);
+            ns.set_ignore_errors(true);
+            for(int edge = 0; edge < e->get_nvert(); edge++)
+            {
+              ns.set_active_edge(edge);
+              for(int neighbor = 0; neighbor < ns.get_num_neighbors(); neighbor++)
+              {
+                ns.set_active_segment(neighbor);
+                Element* neighbor_el = ns.get_neighb_el();
+                if(neighbors_target_local[neighbor_el->id] > 1)
+                {
+                  if(e->en[edge]->marker != eggShell_marker_inner)
+                    e->en[edge]->marker = eggShell_marker_inner;
+                  if(neighbor_el->en[ns.get_neighbor_edge().local_num_of_edge]->marker != eggShell_marker_inner)
+                    neighbor_el->en[ns.get_neighbor_edge().local_num_of_edge]->marker = eggShell_marker_inner;
+                }
+              }
+            }
+          }
+        }
+      }
+      ::free(neighbors_target);
+      ::free(neighbors_target_local);
+    }
+
+    void Mesh::make_egg_shell_mesh(MeshSharedPtr target_mesh, Element** elements, int n_elements)
+    {
+      Element* elem;
+
+      for_all_active_elements(elem, target_mesh)
+      {
+        elem->used = false;
+      }
+
+      bool* info = new bool[target_mesh->get_max_element_id()];
+      memset(info, 0, target_mesh->get_max_element_id());
+      for(int i = 0; i < n_elements; i++)
+      {
+        info[elements[i]->id] = true;
+        target_mesh->get_element(elements[i]->id)->used = true;
+      }
+
+      int marker_temp = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShellInnerMarker).marker;
+      int marker_1 = target_mesh->get_boundary_markers_conversion().get_internal_marker(eggShell1Marker).marker;
+      int marker_0 = target_mesh->get_boundary_markers_conversion().insert_marker(eggShell0Marker);
+
+      for_all_active_elements(elem, target_mesh)
+      {
+        for(int edge = 0; edge < elem->get_nvert(); edge++)
+        {
+          if(elem->en[edge]->marker != marker_1 && elem->en[edge]->marker != marker_temp)
+            elem->en[edge]->marker = marker_0;
+          if(elem->en[edge]->marker == marker_1 || elem->en[edge]->marker == marker_0)
+          {
+            elem->en[edge]->bnd = true;
+            elem->vn[edge]->bnd = true;
+            elem->vn[(edge+1)%elem->get_nvert()]->bnd = true;
+            if(elem->en[edge]->elem[0])
+              if(elem->en[edge]->elem[0]->id != elem->id)
+                elem->en[edge]->elem[0] = NULL;
+            if(elem->en[edge]->elem[1])
+              if(elem->en[edge]->elem[1]->id != elem->id)
+                elem->en[edge]->elem[1] = NULL;
+          }
+        }
+      }
     }
 
     int Mesh::get_num_elements() const
@@ -1172,7 +1326,7 @@ namespace Hermes
 
       // If curvilinear, throw an exception.
       Element* e;
-      for_all_elements(e, this)
+      for_all_used_elements(e, this)
         if(e->cm != NULL)
         {
           throw CurvedException(e->id);
@@ -1194,7 +1348,7 @@ namespace Hermes
       this->refinements = mesh->refinements;
 
       Element* e;
-      for_all_elements(e, this)
+      for_all_used_elements(e, this)
       {
         // update vertex node pointers
         for (i = 0; i < e->get_nvert(); i++)
@@ -1317,7 +1471,7 @@ namespace Hermes
     void Mesh::free()
     {
       Element* e;
-      for_all_elements(e, this)
+      for_all_used_elements(e, this)
       {
         if(e->cm != NULL)
         {
@@ -1359,26 +1513,26 @@ namespace Hermes
 
     double Mesh::get_marker_area(int marker)
     {
-        std::map<int, MarkerArea*>::iterator area = marker_areas.find(marker);
-        bool recalculate = false;
-        if(area == marker_areas.end())
+      std::map<int, MarkerArea*>::iterator area = marker_areas.find(marker);
+      bool recalculate = false;
+      if(area == marker_areas.end())
+      {
+        recalculate = true;
+      }
+      else
+      {
+        if(area->second->get_mesh_seq() != this->get_seq())
         {
-            recalculate = true;
+          delete area->second;
+          marker_areas.erase(area);
+          recalculate = true;
         }
-        else
-        {
-            if(area->second->get_mesh_seq() != this->get_seq())
-            {
-                delete area->second;
-                marker_areas.erase(area);
-                recalculate = true;
-            }
-        }
+      }
 
-        if(recalculate)
-            marker_areas.insert(std::pair<int, MarkerArea*>(marker, new MarkerArea(this, marker)));
+      if(recalculate)
+        marker_areas.insert(std::pair<int, MarkerArea*>(marker, new MarkerArea(this, marker)));
 
-        return marker_areas.find(marker)->second->get_area();
+      return marker_areas.find(marker)->second->get_area();
     }
 
     void Mesh::copy_converted(MeshSharedPtr mesh)

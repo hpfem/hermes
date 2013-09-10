@@ -602,6 +602,50 @@ namespace Hermes
       }
     }
 
+    H1SpaceEggShell::H1SpaceEggShell(MeshSharedPtr mesh, int p_init, Shapeset* shapeset) : H1Space<double>(mesh, NULL, p_init, shapeset)
+    {
+      // Initialize essential boundary conditions.
+      this->essential_bcs = new EssentialBCs<double>(Hermes::vector<EssentialBoundaryCondition<double>*>(new DefaultEssentialBCConst<double>(Mesh::eggShell0Marker, 0.), new DefaultEssentialBCConst<double>(Mesh::eggShell1Marker, 1.)));
+      this->was_assigned = -1;
+      this->assign_dofs();
+    }
+
+    H1SpaceEggShell::~H1SpaceEggShell()
+    {
+      delete this->essential_bcs;
+    }
+
+    void H1SpaceEggShell::post_assign()
+    {
+      H1Space<double>::post_assign();
+
+      int marker_0 = this->mesh->get_boundary_markers_conversion().get_internal_marker(Mesh::eggShell0Marker).marker;
+      Element* e;
+      for_all_active_elements(e, this->mesh)
+      {
+        for(int edge = 0; edge < e->get_nvert(); edge++)
+        {
+          if(e->en[edge]->marker == marker_0)
+          {
+            Space<double>::NodeData* nd = &this->ndata[e->en[edge]->id];
+            SurfPos surf_pos;
+            surf_pos.marker = marker_0;
+            surf_pos.surf_num = edge;
+            surf_pos.base = e;
+            surf_pos.v1 = e->vn[edge]->id;
+            surf_pos.v2 = e->vn[(edge+1)%e->nvert]->id;
+            surf_pos.t = .5;
+            surf_pos.lo = .1;
+            surf_pos.hi = .9;
+            nd->edge_bc_proj = this->get_bc_projection(&surf_pos, 10, this->essential_bcs->get_boundary_condition(Mesh::eggShell0Marker));
+            this->bc_data.push_back(nd->edge_bc_proj);
+            this->ndata[e->vn[edge]->id].vertex_bc_coef = nd->edge_bc_proj + 0;
+            this->ndata[e->vn[(edge+1)%e->nvert]->id].vertex_bc_coef = nd->edge_bc_proj + 1;
+          }
+        }
+      }
+    }
+
     template HERMES_API class H1Space<double>;
     template HERMES_API class H1Space<std::complex<double> >;
   }

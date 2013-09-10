@@ -363,7 +363,7 @@ namespace Hermes
         for (i = 0; i < num; i++)
         {
           // ..where the element is used ..
-          if(s->e[i] != NULL)
+          if(s->e[i] != NULL && s->e[i]->used)
             if(s->sub_idx[i] == 0 && s->e[i]->active)
               if(!s->e[i]->is_triangle())
                 init_transforms(s, i);
@@ -373,7 +373,7 @@ namespace Hermes
         bool leaf = true;
         for (i = 0; i < num; i++)
         {
-          if(s->e[i] != NULL)
+          if(s->e[i] != NULL && s->e[i]->used)
             if(!s->e[i]->active)
             {
               leaf = false;
@@ -398,7 +398,7 @@ namespace Hermes
           // The reason is not to include states that only have elements
           // on meshes that are not a part of the weak form.
           for(int j = 0; j < this->spaces_size; j++)
-            if(s->e[j] != NULL)
+            if(s->e[j] != NULL && s->e[j]->used)
             {
               s->rep = s->e[j];
               s->rep_subidx = s->sub_idx[j];
@@ -420,7 +420,7 @@ namespace Hermes
             for (i = 0; i < num; i++)
             {
               // ..if the element is not used.
-              if(s->e[i] == NULL)
+              if(s->e[i] == NULL || !s->e[i]->used)
               {
                 ns->e[i] = NULL;
               }
@@ -479,7 +479,7 @@ namespace Hermes
 
               for (i = 0; i < num; i++)
               {
-                if(s->e[i] == NULL)
+                if(s->e[i] == NULL || !s->e[i]->used)
                 {
                   ns->e[i] = NULL;
                 }
@@ -517,7 +517,7 @@ namespace Hermes
               int j = (son == 4 || son == 6) ? 0 : 2;
               for (i = 0; i < num; i++)
               {
-                if(s->e[i] == NULL)
+                if(s->e[i] == NULL || !s->e[i]->used)
                 {
                   ns->e[i] = NULL;
                 }
@@ -549,7 +549,7 @@ namespace Hermes
 
             for (i = 0; i < num; i++)
             {
-              if(s->e[i] == NULL)
+              if(s->e[i] == NULL || !s->e[i]->used)
               {
                 ns->e[i] = NULL;
               }

@@ -333,7 +333,7 @@ namespace Hermes
       }
 
       // update refmap coeffs of curvilinear elements
-      for_all_elements(e, mesh)
+      for_all_used_elements(e, mesh)
         if(e->cm != NULL)
           e->cm->update_refmap_coeffs(e);
 
@@ -1085,7 +1085,7 @@ namespace Hermes
           }
 
           // update refmap coeffs of curvilinear elements
-          for_all_elements(e, meshes[subdomains_i])
+          for_all_used_elements(e, meshes[subdomains_i])
             if(e->cm != NULL)
               e->cm->update_refmap_coeffs(e);
 
@@ -1340,7 +1340,7 @@ namespace Hermes
       }
 
       // update refmap coeffs of curvilinear elements
-      for_all_elements(e, mesh)
+      for_all_used_elements(e, mesh)
         if(e->cm != NULL)
           e->cm->update_refmap_coeffs(e);
 
