@@ -86,8 +86,6 @@ namespace Hermes
       /// Utility method.
       virtual double get_fill_in() const;
 
-      /// Applies the matrix to vector_in and saves result to vector_out.
-      void multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const;
       /// Multiplies matrix with a Scalar.
       void multiply_with_Scalar(Scalar value);
 
