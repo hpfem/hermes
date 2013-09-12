@@ -188,28 +188,6 @@ namespace Hermes
       }
     }
 
-    /// Add a number to each diagonal entry.
-
-    template<typename Scalar>
-    void PetscMatrix<Scalar>::add_to_diagonal(Scalar v)
-    {
-      for (unsigned int i = 0; i<this->size; i++)
-      {
-        add(i, i, v);
-      }
-    };
-
-    template<typename Scalar>
-    void PetscMatrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
-    {
-      /// \todo pass in just the block of the matrix without HERMES_DIRICHLET_DOFs (so that can use MatSetValues directly without checking
-      // row and cols for -1)
-      for (unsigned int i = 0; i < m; i++)        // rows
-        for (unsigned int j = 0; j < n; j++)      // cols
-          if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
-            add(rows[i], cols[j], mat[i][j]);
-    }
-
     template<typename Scalar>
     bool PetscMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
@@ -227,12 +205,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    unsigned int PetscMatrix<Scalar>::get_matrix_size() const
-    {
-      return this->size;
-    }
-
-    template<typename Scalar>
     unsigned int PetscMatrix<Scalar>::get_nnz() const
     {
       return nnz;
@@ -245,56 +217,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void PetscMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const
-    {
-      for (unsigned int i = 0;i<this->size;i++)
-      {
-        vector_out[i] = 0;
-        for (unsigned int j = 0; j<this->size; j++)
-        {
-          vector_out[i] +=vector_in[j]*get(i, j);
-        }
-      }
-    }
-
-    template<typename Scalar>
-    void PetscMatrix<Scalar>::add_matrix(PetscMatrix<Scalar>* mat)
+    void PetscMatrix<Scalar>::add_petsc_matrix(PetscMatrix<Scalar>* mat)
     {
       MatAXPY(matrix, 1, mat->matrix, DIFFERENT_NONZERO_PATTERN);    //matrix = 1*mat + matrix (matrix and mat have different nonzero structure)
     }
 
     template<typename Scalar>
-    void PetscMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, PetscMatrix<Scalar>* mat)
+    void PetscMatrix<Scalar>::add_sparse_matrix(SparseMatrix<Scalar>* mat)
     {
-      int ndof = mat->get_size();
-      if(this->get_size() != (unsigned int) num_stages * ndof)
-        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
-
-      for (int i = 0; i < num_stages; i++)
-      {
-        this->add_as_block(ndof*i, ndof*i, mat);
-      }
-    }
-
-    template<typename Scalar>
-    void PetscMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
-    {
-      add_to_diagonal_blocks(num_stages, static_cast<PetscMatrix<Scalar>*>(mat));
-    }
-
-    template<typename Scalar>
-    void PetscMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, PetscMatrix<Scalar>* mat)
-    {
-      if((this->get_size() < i + mat->get_size() )||(this->get_size() < j + mat->get_size() ))
-        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_as_block()");
-      unsigned int block_size = mat->get_size();
-      for (unsigned int r = 0;r<block_size;r++)
-      {
-        for (unsigned int c = 0;c<block_size;c++)
-        {
-          this->add(i + r, j + c, mat->get(r, c));
-        }
-      }
+      PetscMatrix<Scalar>* mat_petsc = (PetscMatrix<Scalar>*)mat;
+      if(mat_petsc)
+        this->add_petsc_matrix(mat_petsc);
+      else
+        SparseMatrix<Scalar>::add_sparse_matrix(mat);
     }
 
     // Multiplies matrix with a Scalar.
@@ -304,7 +239,6 @@ namespace Hermes
     {
       MatScale(matrix, to_petsc(value));
     }
-    // Creates matrix in PETSC format using size, nnz, and the three arrays.
 
     template<typename Scalar>
     void PetscMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
@@ -319,7 +253,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate()
+    PetscMatrix<Scalar>* PetscMatrix<Scalar>::duplicate() const
     {
       PetscMatrix<Scalar>*ptscmatrix = new PetscMatrix<Scalar>();
       MatDuplicate(matrix, MAT_COPY_VALUES, &(ptscmatrix->matrix));

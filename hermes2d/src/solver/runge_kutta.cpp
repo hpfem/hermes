@@ -270,7 +270,9 @@ namespace Hermes
       int size = matrix->get_size();
       for (int i = 0; i < num_blocks; i++)
       {
-        matrix->multiply_with_vector(source_vec + i*size, target_vec + i*size);
+        Scalar* temp = target_vec + i * size;
+        Scalar** temp_for_pass = &temp;
+        matrix->multiply_with_vector(source_vec + i*size, *temp_for_pass, true);
       }
     }
 

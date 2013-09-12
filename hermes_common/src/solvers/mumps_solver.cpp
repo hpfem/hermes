@@ -197,15 +197,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void MumpsMatrix<Scalar>::add_to_diagonal(Scalar v)
-    {
-      for (unsigned int i = 0; i < this->size; i++)
-      {
-        add(i, i, v);
-      }
-    };
-
-    template<typename Scalar>
     void MumpsMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
@@ -313,12 +304,6 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    unsigned int MumpsMatrix<Scalar>::get_matrix_size() const
-    {
-      return this->size;
-    }
-
-    template<typename Scalar>
     unsigned int MumpsMatrix<Scalar>::get_nnz() const
     {
       return nnz;
@@ -328,31 +313,6 @@ namespace Hermes
     double MumpsMatrix<Scalar>::get_fill_in() const
     {
       return Ap[this->size] / (double) (this->size * this->size);
-    }
-
-    template<typename Scalar>
-    void MumpsMatrix<Scalar>::add_matrix(MumpsMatrix<Scalar>* mat)
-    {
-      add_as_block(0, 0, mat);
-    };
-
-    template<typename Scalar>
-    void MumpsMatrix<Scalar>::add_to_diagonal_blocks(int num_stages, MumpsMatrix<Scalar>* mat)
-    {
-      int ndof = mat->get_size();
-      if(this->get_size() != (unsigned int) num_stages * ndof)
-        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in PetscMatrix<Scalar>::add_to_diagonal_blocks()");
-
-      for (int i = 0; i < num_stages; i++)
-      {
-        this->add_as_block(ndof*i, ndof*i, mat);
-      }
-    }
-
-    template<typename Scalar>
-    void MumpsMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
-    {
-      add_to_diagonal_blocks(num_stages, static_cast<MumpsMatrix*>(mat));
     }
 
     inline ZMUMPS_COMPLEX& operator +=(ZMUMPS_COMPLEX &a, ZMUMPS_COMPLEX b)
@@ -366,42 +326,42 @@ namespace Hermes
     void MumpsMatrix<Scalar>::add_as_block(unsigned int i, unsigned int j, MumpsMatrix<Scalar>* mat)
     {
       int idx;
-      for (unsigned int col = 0;col<mat->get_size();col++)
+      for (unsigned int col = 0; col<mat->get_size(); col++)
       {
-        for (unsigned int n = mat->Ap[col];n<mat->Ap[col + 1];n++)
+        for (unsigned int n = mat->Ap[col]; n < mat->Ap[col + 1]; n++)
         {
           idx = find_position(Ai + Ap[col + j], Ap[col + 1 + j] - Ap[col + j], mat->Ai[n] + i);
-          if(idx<0)
+          if(idx < 0)
             throw Hermes::Exceptions::Exception("Sparse matrix entry not found");
-          idx +=Ap[col + j];
-          Ax[idx] +=mat->Ax[n];
+          idx += Ap[col + j];
+          Ax[idx] += mat->Ax[n];
         }
       }
     }
 
     // Applies the matrix to vector_in and saves result to vector_out.
     template<typename Scalar>
-    void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar* vector_out) const
+    void MumpsMatrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
     {
-      for(unsigned int i = 0;i<this->size;i++)
-      {
-        vector_out[i] = 0;
-      }
+      if(!vector_out_initialized)
+        vector_out = new Scalar[this->size];
+      for(unsigned int i = 0; i < this->size; i++)
+        vector_out[i] = Scalar(0.);
       Scalar a;
       for (unsigned int i = 0;i<nnz;i++)
       {
         a = mumps_to_Scalar(Ax[i]);
-        vector_out[jcn[i]-1] +=vector_in[irn[i]-1]*a;
+        vector_out[jcn[i] - 1] += vector_in[irn[i] - 1] * a;
       }
     }
-    // Multiplies matrix with a Scalar.
+
     template<>
     void MumpsMatrix<double>::multiply_with_Scalar(double value)
     {
       int n = nnz;
       for(int i = 0;i<n;i++)
       {
-        Ax[i] = Ax[i]*value;
+        Ax[i] = Ax[i] * value;
       }
     }
 
@@ -430,7 +390,6 @@ namespace Hermes
       a = b;
     }
 
-    // Creates matrix using size, nnz, and the three arrays.
     template<typename Scalar>
     void MumpsMatrix<Scalar>::create(unsigned int size, unsigned int nnz, int* ap, int* ai, Scalar* ax)
     {
@@ -457,7 +416,7 @@ namespace Hermes
     }
     // Duplicates a matrix (including allocation).
     template<typename Scalar>
-    MumpsMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate()
+    SparseMatrix<Scalar>* MumpsMatrix<Scalar>::duplicate() const
     {
       MumpsMatrix<Scalar> * nmat = new MumpsMatrix<Scalar>();
 
@@ -482,14 +441,8 @@ namespace Hermes
       return nmat;
     }
 
-    // SimpleVector<Scalar> /////////////////////////////////////////////////////////////////////////////////////
-
-
-
     template class HERMES_API MumpsMatrix<double>;
     template class HERMES_API MumpsMatrix<std::complex<double> >;
-    template class HERMES_API SimpleVector<double>;
-    template class HERMES_API SimpleVector<std::complex<double> >;
   }
   namespace Solvers
   {

@@ -122,9 +122,58 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Matrix<Scalar>::Matrix(unsigned int size)
+    {
+      this->size = size;
+    }
+
+    template<typename Scalar>
     void Matrix<Scalar>::set_row_zero(unsigned int n)
     {
-      throw Hermes::Exceptions::MethodNotOverridenException("Matrix<Scalar>::set");
+      throw Hermes::Exceptions::MethodNotOverridenException("Matrix<Scalar>::set_row_zero");
+    }
+
+    template<typename Scalar>
+    void Matrix<Scalar>::add_to_diagonal(Scalar v)
+    {
+      for (unsigned int i = 0; i < this->size; i++)
+      {
+        add(i, i, v);
+      }
+    };
+
+    template<typename Scalar>
+    void Matrix<Scalar>::multiply_with_vector(Scalar* vector_in, Scalar*& vector_out, bool vector_out_initialized) const
+    {
+      if(!vector_out_initialized)
+        vector_out = new Scalar[this->size];
+      for(int i = 0; i < this->size; i++)
+      {
+        vector_out[i] = Scalar(0.);
+        for(int j = 0; j < this->size; j++)
+          vector_out[i] += this->get(i, j) * vector_in[j];
+      }
+    }
+
+    template<typename Scalar>
+    void Matrix<Scalar>::multiply_with_Scalar(Scalar value)
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("multiply_with_Scalar()");
+    }
+
+    template<typename Scalar>
+    unsigned int Matrix<Scalar>::get_size() const
+    {
+      return this->size;
+    };
+
+    template<typename Scalar>
+    void Matrix<Scalar>::add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols)
+    {
+      for (unsigned int i = 0; i < m; i++)       // rows
+        for (unsigned int j = 0; j < n; j++)     // cols
+          if(rows[i] >= 0 && cols[j] >= 0) // not Dir. dofs.
+            add(rows[i], cols[j], mat[i][j]);
     }
 
     template<typename Scalar>
@@ -186,6 +235,82 @@ namespace Hermes
             delete pages[i];
         delete [] pages;
       }
+    }
+
+    template<typename Scalar>
+    void SparseMatrix<Scalar>::finish()
+    {
+    }
+
+    template<typename Scalar>
+    int SparseMatrix<Scalar>::get_num_row_entries(unsigned int row) const
+    {
+      return -1;
+    }
+
+    template<typename Scalar>
+    void SparseMatrix<Scalar>::extract_row_copy(unsigned int row, unsigned int len,
+      unsigned int &n_entries, double *vals,
+      unsigned int *idxs) const
+    {
+    }
+
+    template<typename Scalar>
+    int SparseMatrix<Scalar>::get_num_col_entries(unsigned int col) const
+    {
+      return -1;
+    }
+
+    template<typename Scalar>
+    void SparseMatrix<Scalar>::extract_col_copy(unsigned int col, unsigned int len,
+      unsigned int &n_entries, double *vals,
+      unsigned int *idxs) const
+    {
+    }
+
+    template<typename Scalar>
+    void SparseMatrix<Scalar>::add_sparse_matrix(SparseMatrix<Scalar>* mat)
+    {
+      add_as_block(0, 0, mat);
+    }
+
+    template<typename Scalar>
+    void SparseMatrix<Scalar>::add_sparse_to_diagonal_blocks(int num_stages, SparseMatrix<Scalar>* mat)
+    {
+      int ndof = mat->get_size();
+      if(this->get_size() != (unsigned int) num_stages * ndof)
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in SparseMatrix<Scalar>::add_to_diagonal_blocks()");
+
+      for (int i = 0; i < num_stages; i++)
+        this->add_as_block(ndof*i, ndof*i, mat);
+    }
+
+    template<typename Scalar>
+    void SparseMatrix<Scalar>::add_as_block(unsigned int offset_i, unsigned int offset_j, SparseMatrix<Scalar>* mat)
+    {
+      if((this->get_size() < offset_i + mat->get_size() )||(this->get_size() < offset_j + mat->get_size() ))
+        throw Hermes::Exceptions::Exception("Incompatible matrix sizes in SparseMatrix<Scalar>::add_as_block()");
+      unsigned int block_size = mat->get_size();
+      for (unsigned int r = 0; r < block_size; r++)
+      {
+        for (unsigned int c = 0; c < block_size; c++)
+        {
+          this->add(offset_i + r, offset_j + c, mat->get(r, c));
+        }
+      }
+    }
+
+    template<typename Scalar>
+    SparseMatrix<Scalar>* SparseMatrix<Scalar>::duplicate() const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("SparseMatrix* duplicate()");
+    }
+
+    template<typename Scalar>
+    unsigned int SparseMatrix<Scalar>::get_nnz() const
+    {
+      throw Hermes::Exceptions::MethodNotOverridenException("get_nnz()");
+      return 0;
     }
 
     template<typename Scalar>
@@ -897,6 +1022,9 @@ namespace Hermes
       }
       return NULL;
     }
+
+    template class Matrix<double>;
+    template class Matrix<std::complex<double> >;
 
     template class SparseMatrix<double>;
     template class SparseMatrix<std::complex<double> >;
