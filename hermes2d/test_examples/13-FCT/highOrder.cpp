@@ -26,11 +26,11 @@ void High_Order::assemble_High_Order(CSCMatrix<double> * conv_matrix, CSCMatrix<
     highmat_rhs->free();
   high_matrix->create(conv_matrix->get_size(),conv_matrix->get_nnz(), conv_matrix->get_Ap(), conv_matrix->get_Ai(),conv_matrix->get_Ax());
   high_matrix->multiply_with_Scalar(-theta);
-  high_matrix->add_matrix(mass_matrix);  
+  high_matrix->add_sparse_matrix(mass_matrix);  
   highmat_rhs->create(conv_matrix->get_size(),conv_matrix->get_nnz(), conv_matrix->get_Ap(), conv_matrix->get_Ai(),conv_matrix->get_Ax());
   if(theta!=0.) 
     highmat_rhs->multiply_with_Scalar((1.0-theta));
-  highmat_rhs->add_matrix(mass_matrix); 
+  highmat_rhs->add_sparse_matrix(mass_matrix); 
 }
 
 // (M\tau -theta K) u_H   = (M\tau + (1-theta) K) u_n 

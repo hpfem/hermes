@@ -118,12 +118,10 @@ double Regularity_Estimator::linear_approx_dy(Element* e, double x_i, double y_i
 }
 
 
-
-
 void Regularity_Estimator::smoothness_indicator(CSCMatrix<double> * mass_matrix)
 {
   int ndof = space->get_num_dofs(); 
-  if((mass_matrix!=NULL)&&(mass_matrix->get_matrix_size() != ndof)) 
+  if((mass_matrix!=NULL)&&(mass_matrix->get_size() != ndof)) 
     throw Hermes::Exceptions::Exception("smoothness_indicator: mass_matrix size unequal ndof");
 
 

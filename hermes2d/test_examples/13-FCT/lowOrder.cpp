@@ -30,7 +30,7 @@ void Low_Order::assemble_Low_Order(CSCMatrix<double> * conv_matrix,CSCMatrix<dou
 	if(lowmat_rhs!=NULL) lowmat_rhs->free();
 
 	lowmat_rhs->create(conv_matrix->get_size(),conv_matrix->get_nnz(), conv_matrix->get_Ap(), conv_matrix->get_Ai(),conv_matrix->get_Ax());
-	lowmat_rhs->add_matrix(diffusion); 
+	lowmat_rhs->add_sparse_matrix(diffusion); 
 	low_matrix->create(lowmat_rhs->get_size(),lowmat_rhs->get_nnz(), lowmat_rhs->get_Ap(), lowmat_rhs->get_Ai(),lowmat_rhs->get_Ax());
 
 	//(-theta)(K+D)
@@ -40,9 +40,9 @@ void Low_Order::assemble_Low_Order(CSCMatrix<double> * conv_matrix,CSCMatrix<dou
 	if(theta ==1) lowmat_rhs->zero();
 	else lowmat_rhs->multiply_with_Scalar((1.0-theta));
 	//M_L/tau - theta(D+K)
-	low_matrix->add_matrix(lumped_matrix);  
+	low_matrix->add_sparse_matrix(lumped_matrix);  
 	//M_L/tau+(1-theta)(K+D)
-	lowmat_rhs->add_matrix(lumped_matrix);	
+	lowmat_rhs->add_sparse_matrix(lumped_matrix);	
 }
 
 // solve: (M_L/tau) u_L = (M_L/tau - theta (K+D)) u_n
