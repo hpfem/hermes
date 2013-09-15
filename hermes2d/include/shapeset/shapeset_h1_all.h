@@ -32,11 +32,8 @@ namespace Hermes
       virtual Shapeset* clone() { return new H1ShapesetOrtho(*this); };
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
       virtual int get_max_index(ElementMode2D mode);
-    private:
       virtual int get_id() const { return 0; }
-      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
-      template<typename Scalar> friend class VectorForm;
-      template<typename Scalar> friend class MatrixForm;
+
       static const int max_index[H2D_NUM_MODES];
     };
 
@@ -47,14 +44,11 @@ namespace Hermes
     public:
       H1ShapesetJacobi();
       virtual Shapeset* clone() { return new H1ShapesetJacobi(*this); };
-      virtual int get_max_index(ElementMode2D mode);
-    private:
-      virtual int get_id() const { return 1; }
-      static const int max_index[H2D_NUM_MODES];
-      template<typename Scalar> friend class VectorForm;
-      template<typename Scalar> friend class MatrixForm;
       virtual SpaceType get_space_type() const { return HERMES_H1_SPACE; }
-      template<typename Scalar> friend class DiscreteProblem; template<typename Scalar> friend class Solution; friend class CurvMap; friend class RefMap; template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector; template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      virtual int get_max_index(ElementMode2D mode);
+      virtual int get_id() const { return 1; }
+      
+      static const int max_index[H2D_NUM_MODES];
     };
 
     /// @ingroup spaces

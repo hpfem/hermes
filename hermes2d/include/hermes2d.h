@@ -60,13 +60,13 @@
 
 #include "weakform/weakform.h"
 #include "discrete_problem.h"
-#include "discrete_problem.h"
 #include "forms.h"
 
 #include "function/exact_solution.h"
 #include "function/solution.h"
 #include "function/mesh_function.h"
 #include "function/filter.h"
+#include "function/postprocessing.h"
 
 #include "graph.h"
 

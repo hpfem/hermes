@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   MeshSharedPtr mesh(new Mesh), basemesh(new Mesh);
   MeshReaderH2D mloader;
   mloader.load("domain.mesh", basemesh);
-  
+
   /*  MeshView meshview("mesh", new WinGeom(0, 0, 500, 400));
   meshview.show(basemesh);
   View::wait();*/
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 
   int ref_ndof, ndof; double err_est_rel_total;
   DefaultErrorCalculator<double, HERMES_L2_NORM> error_calculator(RelativeErrorToGlobalNorm, 1);
-  
+
   Adapt<double> adaptivity(space, &error_calculator);
   AdaptStoppingCriterionCumulative<double> stoppingCriterion(THRESHOLD);
   adaptivity.set_strategy(&stoppingCriterion);
@@ -162,7 +162,6 @@ int main(int argc, char* argv[])
   // Time stepping loop:
   double current_time = 0.0; 
   int ts = 1;
-
   do
   { 
     Hermes::Mixins::Loggable::Static::info("Time step %d, time %3.5f", ts, current_time);
@@ -192,31 +191,6 @@ int main(int argc, char* argv[])
     {
       Hermes::Mixins::Loggable::Static::info("Time step %i, adap_step %i", ts, as);			
       ndof = space->get_num_dofs(); 
-
-      //Unrefinement step
-      /*	if(as==1)
-      {
-      double* coeff_vec_smooth = new double[ndof];	
-      if(ts==1)		
-      ogProjection.project_global(space,&initial_condition, coeff_vec_smooth,  HERMES_L2_NORM);	
-      else		
-      ogProjection.project_global(space,&u_prev_time, coeff_vec_smooth,  HERMES_L2_NORM);										  
-      Solution<double>::vector_to_solution(coeff_vec_smooth, space, &low_sln);
-      // Calculate element errors and total error estimate.
-      if(ts==1)
-      err_est_rel_total = adaptivity.calc_err_est(&low_sln, &initial_condition) * 100; 
-      else 
-      err_est_rel_total = adaptivity.calc_err_est(&low_sln, &u_prev_time) * 100;  
-      adaptivity.unrefine(THRESHOLD_UNREF);		
-      delete [] coeff_vec_smooth; 
-      // Visualize the solution.
-      if(HERMES_VISUALIZATION)
-      {
-      sprintf(title, "unrefined Mesh: Time %3.2f,timestep %i", current_time,ts);
-      mview.set_title(title); 
-      mview.show(space);
-      }
-      }	*/
 
       ndof = space->get_num_dofs();  	    		
       double* coeff_vec_smooth = new double[ndof];

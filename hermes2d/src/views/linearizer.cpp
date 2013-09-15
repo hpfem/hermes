@@ -588,17 +588,40 @@ namespace Hermes
         for(unsigned int i = 0; i < num_threads_used; i++)
         {
           fns[i] = new MeshFunction<double>*[3];
-          fns[i][0] = sln->clone(); 
+          Solution<double>* solution = dynamic_cast<Solution<double>*>(sln.get());
+          if(solution && solution->get_type() == HERMES_SLN)
+          {
+            fns[i][0] = new Solution<double>();
+            fns[i][0]->copy(sln);
+          }
+          else
+            fns[i][0] = sln->clone(); 
           fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
           if(xdisp != NULL)
           {
-            fns[i][1] = xdisp->clone();
+            Solution<double>* xdisp_solution = dynamic_cast<Solution<double>*>(xdisp.get());
+            if(xdisp_solution && xdisp_solution->get_type() == HERMES_SLN)
+            {
+              fns[i][1] = new Solution<double>();
+              fns[i][1]->copy(xdisp);
+            }
+            else
+              fns[i][1] = xdisp->clone(); 
+
             fns[i][1]->set_quad_2d(&g_quad_lin);
           }
           if(ydisp != NULL)
           {
-            fns[i][xdisp == NULL ? 1 : 2] = ydisp->clone();
+            Solution<double>* ydisp_solution = dynamic_cast<Solution<double>*>(ydisp.get());
+            if(ydisp_solution && ydisp_solution->get_type() == HERMES_SLN)
+            {
+              fns[i][xdisp == NULL ? 1 : 2] = new Solution<double>();
+              fns[i][xdisp == NULL ? 1 : 2]->copy(ydisp);
+            }
+            else
+              fns[i][xdisp == NULL ? 1 : 2] = ydisp->clone(); 
+
             fns[i][xdisp == NULL ? 1 : 2]->set_quad_2d(&g_quad_lin);
           }
         }

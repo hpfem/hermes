@@ -26,9 +26,11 @@ namespace Hermes
   namespace Hermes2D
   {
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
+    template<typename Scalar>
+    unsigned int DiscreteProblemDGAssembler<Scalar>::dg_order = 20;
 
     template<typename Scalar>
-    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces)
+    DiscreteProblemDGAssembler<Scalar>::DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Hermes::vector<MeshSharedPtr>& meshes)
       : pss(threadAssembler->pss),
       refmaps(threadAssembler->refmaps),
       u_ext(threadAssembler->u_ext),
@@ -42,7 +44,8 @@ namespace Hermes
       current_state(NULL),
       selectiveAssembler(threadAssembler->selectiveAssembler),
       do_not_use_cache(threadAssembler->do_not_use_cache),
-      spaces(spaces)
+      spaces(spaces),
+      meshes(meshes)
     {
       this->DG_matrix_forms_present = false;
       this->DG_vector_forms_present = false;
@@ -128,7 +131,12 @@ namespace Hermes
 
             // Create a multimesh tree;
             MultimeshDGNeighborTree<Scalar>::process_edge(neighbor_searches[current_state->isurf], this->current_state->num, this->num_neighbors[current_state->isurf], this->processed[current_state->isurf]);
-
+          }
+        }
+        for(current_state->isurf = 0; current_state->isurf < current_state->rep->nvert; current_state->isurf++)
+        {
+          if(!current_state->bnd[current_state->isurf])
+          {
 #ifdef DEBUG_DG_ASSEMBLING
             debug();
 #endif
@@ -142,6 +150,8 @@ namespace Hermes
 
               assemble_one_neighbor(processed[current_state->isurf][neighbor_i], neighbor_i, neighbor_searches[current_state->isurf]);
             }
+
+            deinit_neighbors(neighbor_searches[current_state->isurf], current_state);
           }
           else
             processed[current_state->isurf] = NULL;
@@ -185,7 +195,7 @@ namespace Hermes
       for(unsigned int fns_i = 0; fns_i < current_state->num; fns_i++)
       {
         NeighborSearch<Scalar>* ns = current_neighbor_searches[fns_i];
-        if(ns->central_transformations[neighbor_i])
+        if(neighbor_i < ns->central_transformations_alloc_size && ns->central_transformations[neighbor_i])
           ns->central_transformations[neighbor_i]->apply_on(fns[fns_i]);
       }
 
@@ -196,7 +206,7 @@ namespace Hermes
         {
           NeighborSearch<Scalar>* ns = current_neighbor_searches[idx_i];
           npss[idx_i]->set_active_element((*ns->get_neighbors())[neighbor_i]);
-          if(ns->neighbor_transformations[neighbor_i])
+          if(neighbor_i < ns->neighbor_transformations_alloc_size && ns->neighbor_transformations[neighbor_i])
             ns->neighbor_transformations[neighbor_i]->apply_on(npss[idx_i]);
         }
       }
@@ -224,8 +234,8 @@ namespace Hermes
       DiscontinuousFunc<double>*** testFunctions = new DiscontinuousFunc<double>**[this->spaces_size];
 
       // Create the extended shapeset on the union of the central element and its current neighbor.
-      int order = 20;
-      int order_base = 20;
+        int order = DiscreteProblemDGAssembler<Scalar>::dg_order;
+      int order_base = DiscreteProblemDGAssembler<Scalar>::dg_order;
       for (unsigned int i = 0; i < this->spaces_size; i++)
       {
         current_neighbor_searches[i]->set_quad_order(order);
@@ -437,7 +447,7 @@ namespace Hermes
 
     template<typename Scalar>
     DiscontinuousFunc<Scalar>** DiscreteProblemDGAssembler<Scalar>::init_ext_fns(Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext,
-        NeighborSearch<Scalar>** current_neighbor_searches, int order)
+      NeighborSearch<Scalar>** current_neighbor_searches, int order)
     {
       DiscontinuousFunc<Scalar>** ext_fns = new DiscontinuousFunc<Scalar>*[ext.size()];
       for(unsigned int j = 0; j < ext.size(); j++)
@@ -465,20 +475,36 @@ namespace Hermes
             existing_ns = true;
             break;
           }
-        if(!existing_ns)
-        {
-          NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(current_state->e[i], spaces[i]->get_mesh());
-          ns->original_central_el_transform = current_state->sub_idx[i];
-          current_neighbor_searches[i] = ns;
-          if(current_neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf) && spaces[i]->get_type() == HERMES_L2_SPACE)
-            DG_intra = true;
-          current_neighbor_searches[i]->clear_initial_sub_idx();
-        }
+          if(!existing_ns)
+          {
+            NeighborSearch<Scalar>* ns = new NeighborSearch<Scalar>(current_state->e[i], this->meshes[i]);
+            ns->original_central_el_transform = current_state->sub_idx[i];
+            current_neighbor_searches[i] = ns;
+            if(current_neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf) && (i >= this->spaces_size || spaces[i]->get_type() == HERMES_L2_SPACE))
+              DG_intra = true;
+            current_neighbor_searches[i]->clear_initial_sub_idx();
+          }
       }
 
       return DG_intra;
     }
 
+    template<typename Scalar>
+    void DiscreteProblemDGAssembler<Scalar>::deinit_neighbors(NeighborSearch<Scalar>** current_neighbor_searches, Traverse::State* current_state)
+    {
+      for(unsigned int i = 0; i < current_state->num; i++)
+      {
+        bool existing_ns = false;
+        for(int j = i - 1; j >= 0; j--)
+          if(current_state->e[i] == current_state->e[j])
+          {
+            existing_ns = true;
+            break;
+          }
+          if(!existing_ns)
+            delete current_neighbor_searches[i];
+      }
+    }
 
 
 #ifdef DEBUG_DG_ASSEMBLING
@@ -491,10 +517,9 @@ namespace Hermes
         bool pass = true;
         if(DEBUG_DG_ASSEMBLING_ELEMENT != -1)
         {
-          for(unsigned int i = 0; i < (*neighbor_searches[current_state->isurf]).get_size(); i++)
-            if((*neighbor_searches[current_state->isurf]).present(i))
-              if((*neighbor_searches[current_state->isurf]).get(i)->central_el->id == DEBUG_DG_ASSEMBLING_ELEMENT)
-                pass = false;
+          for(unsigned int i = 0; i < this->current_state->num; i++)
+            if(neighbor_searches[current_state->isurf][i]->central_el->id == DEBUG_DG_ASSEMBLING_ELEMENT)
+              pass = false;
         }
         else
           pass = false;
@@ -506,27 +531,25 @@ namespace Hermes
 
         if(!pass)
         {
-          for(unsigned int i = 0; i < (*neighbor_searches[current_state->isurf]).get_size(); i++)
+          for(unsigned int i = 0; i < this->current_state->num; i++)
           {
-            if((*neighbor_searches[current_state->isurf]).present(i))
+            NeighborSearch<Scalar>* ns = neighbor_searches[current_state->isurf][i];
+            std::cout << "The " << ++id << "-th Neighbor search: " << ns->n_neighbors << " neighbors." << std::endl;
+            std::cout << "\tCentral element: " << ns->central_el->id << ", Isurf: " << current_state->isurf << ", Original sub_idx: " << ns->original_central_el_transform << std::endl;
+            for(int j = 0; j < ns->n_neighbors; j++)
             {
-              NeighborSearch<Scalar>* ns = (*neighbor_searches[current_state->isurf]).get(i);
-              std::cout << (std::string)"The " << ++id << (std::string)"-th Neighbor search:: " << (std::string)"Central element: " << ns->central_el->id << (std::string)", Isurf: " << current_state->isurf << (std::string)", Original sub_idx: " << ns->original_central_el_transform << std::endl;
-              for(int j = 0; j < ns->n_neighbors; j++)
+              std::cout << '\t' << "The " << j << "-th neighbor element: " << ns->neighbors[j]->id << std::endl;
+              if(ns->central_transformations[j])
               {
-                std::cout << '\t' << (std::string)"The " << j << (std::string)"-th neighbor element: " << ns->neighbors[j]->id << std::endl;
-                if(ns->central_transformations.present(j))
-                {
-                  std::cout << '\t' << (std::string)"Central transformations: " << std::endl;
-                  for(int k = 0; k < ns->central_transformations.get(j)->num_levels; k++)
-                    std::cout << '\t' << '\t' << ns->central_transformations.get(j)->transf[k] << std::endl;
-                }
-                if(ns->neighbor_transformations.present(j))
-                {
-                  std::cout << '\t' << (std::string)"Neighbor transformations: " << std::endl;
-                  for(int k = 0; k < ns->neighbor_transformations.get(j)->num_levels; k++)
-                    std::cout << '\t' << '\t' << ns->neighbor_transformations.get(j)->transf[k] << std::endl;
-                }
+                std::cout << '\t' << "Central transformations: " << std::endl;
+                for(int k = 0; k < ns->central_transformations[j]->num_levels; k++)
+                  std::cout << '\t' << '\t' << ns->central_transformations[j]->transf[k] << std::endl;
+              }
+              if(ns->neighbor_transformations[j])
+              {
+                std::cout << '\t' << "Neighbor transformations: " << std::endl;
+                for(int k = 0; k < ns->neighbor_transformations[j]->num_levels; k++)
+                  std::cout << '\t' << '\t' << ns->neighbor_transformations[j]->transf[k] << std::endl;
               }
             }
           }

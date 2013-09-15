@@ -142,7 +142,7 @@ void CustomInitialCondition::derivatives(double x, double y, double& dx, double&
        return result;
 };
 
- Ord CustomInitialCondition::ord(Ord x, Ord y) const 
+ Ord CustomInitialCondition::ord(double x, double y) const 
  {
       return Ord(10);
 	};

@@ -108,33 +108,24 @@ namespace Hermes
     void ErrorThreadCalculator<Scalar>::DGErrorCalculator::assemble_one_edge()
     {
       this->neighbor_searches = new NeighborSearch<Scalar>*[this->current_state->num];
-      this->processed = NULL;
 
-#pragma omp critical (DG)
+      // If this edge is an inter-element one on all meshes.
+      if(init_neighbors())
       {
-        for(unsigned int i = 0; i < current_state->num; i++)
-          current_state->e[i]->visited = true;
+        bool* dummy_processed;
 
-        // If this edge is an inter-element one on all meshes.
-        if(init_neighbors())
-        {
+        // Create a multimesh tree;
+        MultimeshDGNeighborTree<Scalar>::process_edge(this->neighbor_searches, this->current_state->num, this->num_neighbors, dummy_processed);
 
-          // Create a multimesh tree;
-          MultimeshDGNeighborTree<Scalar>::process_edge(this->neighbor_searches, this->current_state->num, this->num_neighbors, this->processed);
+        for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++)
+          this->assemble_one_neighbor(neighbor_i);
 
-          for(unsigned int neighbor_i = 0; neighbor_i < num_neighbors; neighbor_i++)
-          {
-            if(processed[neighbor_i])
-              continue;
-
-            this->assemble_one_neighbor(processed[neighbor_i], neighbor_i);
-          }
-        }
+        if(dummy_processed)
+          delete [] dummy_processed;
       }
 
-      delete [] neighbor_searches;
-      if(processed)
-        delete [] processed;
+      // Deinit neighbors.
+      deinit_neighbors();
     }
 
     template<typename Scalar>
@@ -152,31 +143,89 @@ namespace Hermes
             existing_ns = true;
             break;
           }
-        if(!existing_ns)
-        {
-          NeighborSearch<Scalar>* ns;
-          if(i < this->errorThreadCalculator->errorCalculator->component_count)
-            ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->slns[i]->get_mesh());
-          else
-            ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->rslns[i - this->errorThreadCalculator->errorCalculator->component_count]->get_mesh());
+          if(!existing_ns)
+          {
+            NeighborSearch<Scalar>* ns;
+            if(i < this->errorThreadCalculator->errorCalculator->component_count)
+              ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->slns[i]->get_mesh());
+            else
+              ns = new NeighborSearch<Scalar>(current_state->e[i], this->errorThreadCalculator->rslns[i - this->errorThreadCalculator->errorCalculator->component_count]->get_mesh());
 
-          ns->original_central_el_transform = current_state->sub_idx[i];
-          neighbor_searches[i] = ns;
-          if(neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf))
-            DG_intra = true;
-          neighbor_searches[i]->clear_initial_sub_idx();
-        }
+            ns->original_central_el_transform = current_state->sub_idx[i];
+            neighbor_searches[i] = ns;
+            if(neighbor_searches[i]->set_active_edge_multimesh(current_state->isurf))
+              DG_intra = true;
+            neighbor_searches[i]->clear_initial_sub_idx();
+          }
       }
 
       return DG_intra;
     }
 
     template<typename Scalar>
-    void ErrorThreadCalculator<Scalar>::DGErrorCalculator::assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i)
+    void ErrorThreadCalculator<Scalar>::DGErrorCalculator::deinit_neighbors()
     {
-      if(edge_processed)
-        return;
+      // Initialize the NeighborSearches.
+      for(unsigned int i = 0; i < current_state->num; i++)
+      {
+        bool existing_ns = false;
+        for(int j = i - 1; j >= 0; j--)
+          if(current_state->e[i] == current_state->e[j])
+          {
+            existing_ns = true;
+            break;
+          }
+          if(!existing_ns)
+            delete this->neighbor_searches[i];
+      }
+      delete [] neighbor_searches;
+    }
 
+    template<typename Scalar>
+    void ErrorThreadCalculator<Scalar>::DGErrorCalculator::initialize_error_and_norm_functions(NormFormDG<Scalar>* mfs, DiscontinuousFunc<Scalar>* error_func[2], DiscontinuousFunc<Scalar>* norm_func[2])
+    {
+      switch(mfs->get_function_type())
+      {
+      case CoarseSolutions:
+        error_func[0] = neighbor_searches[mfs->i]->init_ext_fn(this->errorThreadCalculator->slns[mfs->i]);
+        if(mfs->i != mfs->j)
+          error_func[1] = neighbor_searches[mfs->j]->init_ext_fn(this->errorThreadCalculator->slns[mfs->j]);
+        else
+          error_func[1] = error_func[0];
+        norm_func[0] = error_func[0];
+        norm_func[1] = error_func[1];
+        break;
+      case FineSolutions:
+        error_func[0] = neighbor_searches[mfs->i + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[mfs->i]);
+        if(mfs->i != mfs->j)
+          error_func[1] = neighbor_searches[mfs->j + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[mfs->j]);
+        else
+          error_func[1] = error_func[0];
+        norm_func[0] = error_func[0];
+        norm_func[1] = error_func[1];
+        break;
+      case SolutionsDifference:
+        error_func[0] = neighbor_searches[mfs->i]->init_ext_fn(this->errorThreadCalculator->slns[mfs->i]);
+        norm_func[0] = neighbor_searches[mfs->i + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[mfs->i]);
+        error_func[0]->subtract(*norm_func[0]);
+        if(mfs->j != mfs->i)
+        {
+          error_func[1] = neighbor_searches[mfs->j]->init_ext_fn(this->errorThreadCalculator->slns[mfs->j]);
+          norm_func[1] = neighbor_searches[mfs->j + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[mfs->j]);
+          error_func[1]->subtract(*norm_func[1]);
+        }
+        else
+        {
+          error_func[1] = error_func[0];
+          norm_func[1] = norm_func[0];
+        }
+        break;
+      }
+    }
+
+    template<typename Scalar>
+    void ErrorThreadCalculator<Scalar>::DGErrorCalculator::assemble_one_neighbor(unsigned int neighbor_i)
+    {
       // Set the active segment in all NeighborSearches
       for(unsigned int i = 0; i < this->current_state->num; i++)
       {
@@ -218,32 +267,22 @@ namespace Hermes
       this->errorThreadCalculator->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorThreadCalculator->errorCalculator->component_count, order_base, current_state->isurf, current_state->rep->marker, this->errorThreadCalculator->geometry, this->errorThreadCalculator->jacobian_x_weights);
       delete [] refmaps;
 
-      DiscontinuousFunc<Scalar>** difference_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
-      DiscontinuousFunc<Scalar>** rsln_funcs = new DiscontinuousFunc<Scalar>*[this->errorThreadCalculator->errorCalculator->component_count];
-      for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
-      {
-        difference_funcs[i] = neighbor_searches[i]->init_ext_fn(this->errorThreadCalculator->slns[i]);
-        rsln_funcs[i] = neighbor_searches[i + this->errorThreadCalculator->errorCalculator->component_count]->init_ext_fn(this->errorThreadCalculator->rslns[i]);
-        difference_funcs[i]->subtract(*rsln_funcs[i]);
-      }
-
       for(int current_mfDG_i = 0; current_mfDG_i < this->errorThreadCalculator->errorCalculator->mfDG.size(); current_mfDG_i++)
       {
         NormFormDG<Scalar>* mfs = this->errorThreadCalculator->errorCalculator->mfDG[current_mfDG_i];
 
         double* error = &this->errorThreadCalculator->errorCalculator->errors[mfs->i][current_state->e[mfs->i]->id];
         double* norm = &this->errorThreadCalculator->errorCalculator->norms[mfs->i][current_state->e[mfs->i]->id];
-        
-        this->errorThreadCalculator->evaluate_DG_form(mfs, difference_funcs[mfs->i], difference_funcs[mfs->j], rsln_funcs[mfs->i], rsln_funcs[mfs->j], error, norm);
-      }
 
-      // deinitialize Funcs
-      for(int i = 0; i < this->errorThreadCalculator->errorCalculator->component_count; i++)
-      {
-        difference_funcs[i]->free_fn();
-        delete difference_funcs[i];
-        rsln_funcs[i]->free_fn();
-        delete rsln_funcs[i];
+        DiscontinuousFunc<Scalar>* error_func[2];
+        DiscontinuousFunc<Scalar>* norm_func[2];
+
+        this->initialize_error_and_norm_functions(mfs, error_func, norm_func);
+
+        this->errorThreadCalculator->evaluate_DG_form(mfs, error_func[mfs->i], error_func[mfs->j], norm_func[mfs->i], norm_func[mfs->j], error, norm);
+
+        // deinitialize Funcs
+        this->errorThreadCalculator->deinitialize_error_and_norm_functions(mfs, error_func, norm_func);
       }
 
       delete [] this->errorThreadCalculator->jacobian_x_weights;
@@ -260,6 +299,81 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    template<typename NormFormType>
+    void ErrorThreadCalculator<Scalar>::initialize_error_and_norm_functions(NormFormType* mf, Func<Scalar>* error_func[2], Func<Scalar>* norm_func[2], int order)
+    {
+      switch(mf->get_function_type())
+      {
+      case CoarseSolutions:
+        error_func[0] = init_fn(slns[mf->i], order);
+        if(mf->i != mf->j)
+          error_func[1] = init_fn(slns[mf->j], order);
+        else
+          error_func[1] = error_func[0];
+        norm_func[0] = error_func[0];
+        norm_func[1] = error_func[1];
+        break;
+      case FineSolutions:
+        error_func[0] = init_fn(rslns[mf->i], order);
+        if(mf->i != mf->j)
+          error_func[1] = init_fn(rslns[mf->j], order);
+        else
+          error_func[1] = error_func[0];
+        norm_func[0] = error_func[0];
+        norm_func[1] = error_func[1];
+        break;
+      case SolutionsDifference:
+        error_func[0] = init_fn(slns[mf->i], order);
+        norm_func[0] = init_fn(rslns[mf->i], order);
+        error_func[0]->subtract(norm_func[mf->i]);
+        if(mf->j != mf->i)
+        {
+          error_func[1] = init_fn(slns[mf->j], order);
+          norm_func[1] = init_fn(rslns[mf->j], order);
+          error_func[1]->subtract(norm_func[mf->j]);
+        }
+        else
+        {
+          error_func[1] = error_func[0];
+          norm_func[1] = norm_func[0];
+        }
+        break;
+      }
+    }
+
+    template<typename Scalar>
+    template<typename NormFormType, typename FuncType>
+    void ErrorThreadCalculator<Scalar>::deinitialize_error_and_norm_functions(NormFormType* mf, FuncType* error_func[2], FuncType* norm_func[2])
+    {
+      switch(mf->get_function_type())
+      {
+      case CoarseSolutions:
+      case FineSolutions:
+        error_func[0]->free_fn();
+        delete error_func[0];
+        if(mf->i != mf->j)
+        {
+          error_func[1]->free_fn();
+          delete error_func[1];
+        }
+        break;
+      case SolutionsDifference:
+        error_func[0]->free_fn();
+        delete error_func[0];
+        norm_func[0]->free_fn();
+        delete norm_func[0];
+        if(mf->i != mf->j)
+        {
+          error_func[1]->free_fn();
+          delete error_func[1];
+          delete norm_func[1];
+          norm_func[1]->free_fn();
+        }
+        break;
+      }
+    }
+
+    template<typename Scalar>
     void ErrorThreadCalculator<Scalar>::evaluate_volumetric_forms(Traverse::State* current_state, int order)
     {
       // initialize points & geometry & jacobian times weights.
@@ -268,37 +382,20 @@ namespace Hermes
         refmaps[i] = slns[i]->get_refmap();
       this->n_quadrature_points = init_geometry_points(refmaps, this->errorCalculator->component_count, order, this->geometry, this->jacobian_x_weights);
       delete [] refmaps;
-      
-      // initialize Funcs
-      Func<Scalar>** difference_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
-      Func<Scalar>** rsln_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
-      for(int i = 0; i < this->errorCalculator->component_count; i++)
-      {
-        difference_funcs[i] = init_fn(slns[i], order);
-        rsln_funcs[i] = init_fn(rslns[i], order);
-        difference_funcs[i]->subtract(rsln_funcs[i]);
-      }
 
       for(int i = 0; i < this->errorCalculator->mfvol.size(); i++)
       {
         NormFormVol<Scalar>* form = this->errorCalculator->mfvol[i];
-
         double* error = &this->errorCalculator->errors[form->i][current_state->e[form->i]->id];
         double* norm = &this->errorCalculator->norms[form->i][current_state->e[form->i]->id];
 
-        this->evaluate_volumetric_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], error, norm);
-      }
+        Func<Scalar>* error_func[2];
+        Func<Scalar>* norm_func[2];
 
-      // deinitialize Funcs
-      for(int i = 0; i < this->errorCalculator->component_count; i++)
-      {
-        difference_funcs[i]->free_fn();
-        delete difference_funcs[i];
-        rsln_funcs[i]->free_fn();
-        delete rsln_funcs[i];
+        this->initialize_error_and_norm_functions(form, error_func, norm_func, order);
+        this->evaluate_volumetric_form(form, error_func[form->i], error_func[form->j], norm_func[form->i], norm_func[form->j], error, norm);
+        this->deinitialize_error_and_norm_functions(form, error_func, norm_func);
       }
-      delete [] difference_funcs;
-      delete [] rsln_funcs;
 
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
@@ -315,36 +412,50 @@ namespace Hermes
       this->n_quadrature_points = init_surface_geometry_points(refmaps, this->errorCalculator->component_count, order, current_state->isurf, current_state->rep->marker, this->geometry, this->jacobian_x_weights);
       delete [] refmaps;
 
-      // initialize Funcs
-      Func<Scalar>** difference_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
-      Func<Scalar>** rsln_funcs = new Func<Scalar>*[this->errorCalculator->component_count];
-      for(int i = 0; i < this->errorCalculator->component_count; i++)
-      {
-        difference_funcs[i] = init_fn(slns[i], order);
-        rsln_funcs[i] = init_fn(rslns[i], order);
-        difference_funcs[i]->subtract(rsln_funcs[i]);
-      }
-
       for(int i = 0; i < this->errorCalculator->mfsurf.size(); i++)
       {
         NormFormSurf<Scalar>* form = this->errorCalculator->mfsurf[i];
-     
+
+        bool assemble = false;
+        if(form->get_area() == HERMES_ANY)
+          assemble = true;
+        else
+        {
+          if(this->slns[form->i])
+          {
+            Mesh::MarkersConversion::StringValid marker_to_check = this->slns[form->i]->get_mesh()->get_boundary_markers_conversion().get_user_marker(current_state->e[form->i]->en[current_state->isurf]->marker);
+            if(marker_to_check.valid)
+            {
+              std::string marker = marker_to_check.marker;
+              if(form->get_area() == marker)
+                assemble = true;
+            }
+          }
+          if(this->rslns[form->i])
+          {
+            Mesh::MarkersConversion::StringValid marker_to_check = this->rslns[form->i]->get_mesh()->get_boundary_markers_conversion().get_user_marker(current_state->e[form->i]->en[current_state->isurf]->marker);
+            if(marker_to_check.valid)
+            {
+              std::string marker = marker_to_check.marker;
+              if(form->get_area() == marker)
+                assemble = true;
+            }
+          }
+        }
+
+        if(!assemble)
+          continue;
+
         double* error = &this->errorCalculator->errors[form->i][current_state->e[form->i]->id];
         double* norm = &this->errorCalculator->norms[form->i][current_state->e[form->i]->id];
 
-        this->evaluate_surface_form(form, difference_funcs[form->i], difference_funcs[form->j], rsln_funcs[form->i], rsln_funcs[form->j], error, norm);
-      }
+        Func<Scalar>* error_func[2];
+        Func<Scalar>* norm_func[2];
 
-      // deinitialize Funcs
-      for(int i = 0; i < this->errorCalculator->component_count; i++)
-      {
-        difference_funcs[i]->free_fn();
-        delete difference_funcs[i];
-        rsln_funcs[i]->free_fn();
-        delete rsln_funcs[i];
+        this->initialize_error_and_norm_functions(form, error_func, norm_func, order);
+        this->evaluate_surface_form(form, error_func[form->i], error_func[form->j], norm_func[form->i], norm_func[form->j], error, norm);
+        this->deinitialize_error_and_norm_functions(form, error_func, norm_func);
       }
-      delete [] difference_funcs;
-      delete [] rsln_funcs;
 
       // deinitialize points & geometry & jacobian times weights
       geometry->free();
@@ -360,7 +471,7 @@ namespace Hermes
       (*error) += error_value;
 
       double norm_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, rsln_i, rsln_j, this->geometry));
-        
+
 #pragma omp atomic
       (*norm) += norm_value;
     }
@@ -369,7 +480,7 @@ namespace Hermes
     void ErrorThreadCalculator<Scalar>::evaluate_surface_form(NormFormSurf<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm)
     {
       double error_value = std::abs(form->value(this->n_quadrature_points, this->jacobian_x_weights, difference_func_i, difference_func_j, this->geometry));
-      
+
       // 1D quadrature has the weights summed to 2.
       error_value *= 0.5;
 

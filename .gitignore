@@ -82,6 +82,7 @@ Debug/
 *.vtk
 
 # Misc
+!CMakeLists.txt
 *.exe
 *.dat
 *.lastbuildstate

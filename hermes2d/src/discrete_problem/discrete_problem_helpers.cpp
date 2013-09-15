@@ -205,13 +205,8 @@ namespace Hermes
       // Init geometry and jacobian*weights.
       double3* tan;
       geometry = init_geom_surf(rep_reference_mapping, isurf, marker, eo, tan);
-      for(int i = 0; i < reference_mapping_count; i++)
-        if(reference_mapping[i]->get_active_element())
-        {
-          geometry->area = std::min(geometry->area, reference_mapping[i]->get_active_element()->get_area());
-          geometry->diam = std::min(geometry->diam, reference_mapping[i]->get_active_element()->get_diameter());
-        }
-
+      geometry->area = rep_reference_mapping->get_active_element()->get_area();
+      geometry->diam = rep_reference_mapping->get_active_element()->get_diameter();
       jacobian_x_weights = new double[np];
       for(int i = 0; i < np; i++)
         jacobian_x_weights[i] = pt[i][2] * tan[i][2];

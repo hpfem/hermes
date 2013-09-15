@@ -197,9 +197,9 @@ namespace Hermes
       void refine_towards_boundary(std::string marker, int depth = 1, bool aniso = true, bool mark_as_initial = false);
 
       /// Refines all element sharing the marker passed.
-      void refine_in_area(std::string marker, int depth = 1, bool mark_as_initial = false);
+      void refine_in_area(std::string marker, int depth = 1, int refinement = 0, bool mark_as_initial = false);
       /// Refines all element sharing the markers passed.
-      void refine_in_areas(Hermes::vector<std::string> markers, int depth = 1, bool mark_as_initial = false);
+      void refine_in_areas(Hermes::vector<std::string> markers, int depth = 1, int refinement = 0, bool mark_as_initial = false);
 
       /// Regularizes the mesh by refining elements with hanging nodes of
       /// degree more than 'n'. As a result, n-irregular mesh is obtained.

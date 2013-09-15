@@ -106,7 +106,7 @@ namespace Hermes
     }
 
     template<typename Scalar, typename ValueType>
-    Ord ExactSolutionConstantArray<Scalar, ValueType>::ord(Ord x, Ord y) const {
+    Ord ExactSolutionConstantArray<Scalar, ValueType>::ord(double x, double y) const {
       return Ord(0);
     }
 
@@ -302,7 +302,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Ord ConstantSolution<Scalar>::ord(Ord x, Ord y) const {
+    Ord ConstantSolution<Scalar>::ord(double x, double y) const {
       return Ord(0);
     }
 
@@ -332,7 +332,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Ord ZeroSolution<Scalar>::ord(Ord x, Ord y) const {
+    Ord ZeroSolution<Scalar>::ord(double x, double y) const {
       return Ord(0);
     }
 
@@ -435,7 +435,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Ord ConstantSolutionVector<Scalar>::ord(Ord x, Ord y) const {
+    Ord ConstantSolutionVector<Scalar>::ord(double x, double y) const {
       return Ord(0);
     }
 
@@ -531,7 +531,7 @@ namespace Hermes
     };
 
     template<typename Scalar>
-    Ord ZeroSolutionVector<Scalar>::ord(Ord x, Ord y) const {
+    Ord ZeroSolutionVector<Scalar>::ord(double x, double y) const {
       return Ord(0);
     }
 

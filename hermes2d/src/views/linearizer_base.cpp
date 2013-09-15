@@ -120,8 +120,8 @@ namespace Hermes
           delete [] level_map;
           level_map = NULL;
         }
-        this->level_map = new int[sln->get_mesh()->get_num_elements()];
-        memset(this->level_map, -1, sizeof(int) * sln->get_mesh()->get_num_elements());
+        this->level_map = new int[sln->get_mesh()->get_max_element_id()];
+        memset(this->level_map, -1, sizeof(int) * sln->get_mesh()->get_max_element_id());
       }
 
       void LinearizerBase::deinit_linearizer_base()
@@ -148,6 +148,8 @@ namespace Hermes
           this->level_map[e->id] = std::min<int>(LIN_MAX_LEVEL, (int)ratio);
         }
 
+        if(e->is_quad() && polynomial_order == 1)
+          this->level_map[e->id] = 2;
         return this->level_map[e->id];
       }
 

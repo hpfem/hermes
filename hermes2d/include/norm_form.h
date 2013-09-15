@@ -29,19 +29,34 @@ namespace Hermes
   /// Namespace containing definitions specific for Hermes2D.
   namespace Hermes2D
   {
+    /// Enum passed to the class NormForm specifying the functions the form acts upon.
+    enum FunctionsEvaluatedType
+    {
+      CoarseSolutions,
+      FineSolutions,
+      SolutionsDifference
+    };
+
     class HERMES_API NormForm
     {
     public:
-      NormForm(int i, int j);
+      NormForm(int i, int j, FunctionsEvaluatedType functionType = SolutionsDifference);
 
       /// set area
       /// \todo use this - it is not used so far.
       void set_area(std::string area);
+      inline std::string get_area() const { return this->area; };
 
       /// Coordinates.
       int i, j;
 
+      /// Get the function type.
+      inline FunctionsEvaluatedType get_function_type() const { return this->functionType; };
+
     protected:
+      /// Function type.
+      FunctionsEvaluatedType functionType;
+
       std::string area;
     };
 
@@ -77,6 +92,18 @@ namespace Hermes
     {
     public:
       DefaultNormFormVol(int i, int j, NormType normType);
+      
+      Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
+
+    protected:
+      NormType normType;
+    };
+
+    template <typename Scalar>
+    class HERMES_API DefaultNormFormSurf : public NormFormSurf<Scalar>
+    {
+    public:
+      DefaultNormFormSurf(int i, int j, NormType normType);
       
       Scalar value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const;
 

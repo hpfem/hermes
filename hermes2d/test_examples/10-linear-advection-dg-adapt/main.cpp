@@ -1,5 +1,3 @@
-#define HERMES_REPORT_ALL
-#define HERMES_REPORT_FILE "application.log"
 #include "definitions.h"
 
 //  This example solves a linear advection equation using Dicontinuous Galerkin (DG) method.
@@ -15,12 +13,12 @@
 //  The following parameters can be changed:
 
 // Number of initial uniform mesh refinements.
-const int INIT_REF = 2;
+const int INIT_REF = 3;
 // Initial polynomial degrees of mesh elements in vertical and horizontal directions.
-const int P_INIT = 1;
+const int P_INIT = 2;
 // This is a quantitative parameter of the adapt(...) function and
 // it has different meanings for various adaptive strategies.
-const double THRESHOLD = 0.9;
+const double THRESHOLD = 0.5;
 
 // Error calculation & adaptivity.
 DefaultErrorCalculator<double, HERMES_L2_NORM> errorCalculator(RelativeErrorToGlobalNorm, 1);
@@ -29,9 +27,9 @@ AdaptStoppingCriterionSingleElement<double> stoppingCriterion(THRESHOLD);
 // Adaptivity processor class.
 Adapt<double> adaptivity(&errorCalculator, &stoppingCriterion);
 // Predefined list of element refinement candidates.
-const CandList CAND_LIST = H2D_HP_ANISO;
+const CandList CAND_LIST = H2D_H_ANISO;
 // Stopping criterion for adaptivity.
-const double ERR_STOP = 1e-1;
+const double ERR_STOP = 1e-2;
 
 int main(int argc, char* args[])
 {
@@ -44,30 +42,26 @@ int main(int argc, char* args[])
   for (int i=0; i<INIT_REF; i++)
     mesh->refine_all_elements();
 
-  // Create an L2 space->
-  SpaceSharedPtr<double> space(new L2Space<double>(mesh, P_INIT));
+  // Create an L2 space.
+  SpaceSharedPtr<double> fine_space(new L2Space<double>(mesh, P_INIT, new L2ShapesetTaylor));
 
   // Initialize refinement selector.
   L2ProjBasedSelector<double> selector(CAND_LIST);
-
-  // DOF and CPU convergence graphs.
-  SimpleGraph graph_dof_est, graph_cpu_est;
-
-  // Display the mesh->
-  OrderView oview("Coarse mesh", new WinGeom(0, 0, 440, 350));
-  oview.show(space);
+  selector.set_error_weights(1.,1.,1.);
 
   MeshFunctionSharedPtr<double> sln(new Solution<double>);
-  MeshFunctionSharedPtr<double> ref_sln(new Solution<double>);
+  MeshFunctionSharedPtr<double> refsln(new Solution<double>);
 
   // Initialize the weak formulation.
   CustomWeakForm wf("Bdy_bottom_left", mesh);
-
   ScalarView view1("Solution", new WinGeom(900, 0, 450, 350));
   view1.fix_scale_width(60);
 
   // Initialize linear solver.
-  Hermes::Hermes2D::LinearSolver<double> linear_solver(&wf, space);
+  Hermes::Hermes2D::LinearSolver<double> linear_solver;
+  linear_solver.set_weak_formulation(&wf);
+
+  adaptivity.set_space(fine_space);
 
   int as = 1; bool done = false;
   do
@@ -76,42 +70,38 @@ int main(int argc, char* args[])
     // and setup reference space->
     Mesh::ReferenceMeshCreator ref_mesh_creator(mesh);
     MeshSharedPtr ref_mesh = ref_mesh_creator.create_ref_mesh();
-    Space<double>::ReferenceSpaceCreator ref_space_creator(space, ref_mesh);
-    SpaceSharedPtr<double> ref_space = ref_space_creator.create_ref_space();
 
-    linear_solver.set_space(ref_space);
+    Space<double>::ReferenceSpaceCreator refspace_creator(fine_space, ref_mesh, 0);
+    SpaceSharedPtr<double> refspace = refspace_creator.create_ref_space();
 
-    // Solve the linear system. If successful, obtain the solution.
     try
     {
+      linear_solver.set_space(refspace);
       linear_solver.solve();
-      Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), ref_space, ref_sln);
+
+      if(P_INIT < 3)
+      {
+        PostProcessing::VertexBasedLimiter limiter(refspace, linear_solver.get_sln_vector(), P_INIT);
+        refsln = limiter.get_solution();
+      }
+      else
+      {
+        Solution<double>::vector_to_solution(linear_solver.get_sln_vector(), refspace, refsln);
+      }
+
+      view1.show(refsln);
+      OGProjection<double>::project_global(fine_space, refsln, sln, HERMES_L2_NORM);
     }
     catch(std::exception& e)
     {
       std::cout << e.what();
     }
-    // Project the fine mesh solution onto the coarse mesh.
-    OGProjection<double> ogProjection;
-    ogProjection.project_global(space, ref_sln, sln, HERMES_L2_NORM);
-
-    MeshFunctionSharedPtr<double> val_filter(new ValFilter(ref_sln, 0.0, 1.0));
-
-    // View the coarse mesh solution.
-    view1.show(val_filter);
-    oview.show(space);
 
     // Calculate element errors and total error estimate.
-    errorCalculator.calculate_errors(sln, ref_sln);
+    errorCalculator.calculate_errors(sln, refsln);
     double err_est_rel = errorCalculator.get_total_error_squared() * 100;
 
-    adaptivity.set_space(space);
-
     std::cout << "Error: " << err_est_rel << "%." << std::endl;
-
-    // Add entry to DOF and CPU convergence graphs.
-    graph_dof_est.add_values(Space<double>::get_num_dofs(space), err_est_rel);
-    graph_dof_est.save("conv_dof_est.dat");
 
     // If err_est_rel too large, adapt the mesh->
     if(err_est_rel < ERR_STOP)

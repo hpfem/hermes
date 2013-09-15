@@ -139,7 +139,7 @@ namespace Hermes
             if(current_state->e[i])
               spaces[i]->get_element_assembly_list(current_state->e[i], &(al[i]));
 
-          if(this->wf->is_DG())
+          if(this->wf->is_DG() && !this->wf->mfDG.empty())
           {
             // Number of edges ( =  number of vertices).
             int num_edges = current_state->e[0]->nvert;

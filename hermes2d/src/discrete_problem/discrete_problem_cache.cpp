@@ -81,10 +81,8 @@ namespace Hermes
         for (current_state->isurf = 0; current_state->isurf < this->nvert; current_state->isurf++)
         {
           if(!current_state->bnd[current_state->isurf])
-          {
-            this->fnsSurface[current_state->isurf] = NULL;
             continue;
-          }
+
           this->n_quadrature_pointsSurface[current_state->isurf] = init_surface_geometry_points(current_refmaps, this->spaceCnt, order, current_state->isurf, current_state->rep->marker, this->geometrySurface[current_state->isurf], this->jacobian_x_weightsSurface[current_state->isurf]);
           this->orderSurface[current_state->isurf] = order;
           order = this->order;
@@ -96,17 +94,18 @@ namespace Hermes
 
           for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
           {
-            if(current_state->e[space_i] == NULL)
+            if(!current_state->e[space_i])
               continue;
 
 #ifdef _DEBUG
             assert(current_alsSurface[space_i][current_state->isurf]);
 #endif
 
-            this->asmlistSurfaceCnt[current_state->isurf][space_i] = current_alsSurface[space_i][current_state->isurf]->cnt;
+            unsigned int func_count = current_alsSurface[space_i][current_state->isurf]->cnt;
+            this->asmlistSurfaceCnt[current_state->isurf][space_i] = func_count;
 
-            this->fnsSurface[current_state->isurf][space_i] = new Func<double>*[current_alsSurface[space_i][current_state->isurf]->cnt];
-            for (unsigned int j = 0; j < current_alsSurface[space_i][current_state->isurf]->cnt; j++)
+            this->fnsSurface[current_state->isurf][space_i] = new Func<double>*[func_count];
+            for (unsigned int j = 0; j < func_count; j++)
             {
               current_pss[space_i]->set_active_shape(current_alsSurface[space_i][current_state->isurf]->idx[j]);
               this->fnsSurface[current_state->isurf][space_i][j] = init_fn(current_pss[space_i], current_refmaps[space_i], this->orderSurface[current_state->isurf]);
@@ -133,8 +132,9 @@ namespace Hermes
     {
       for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
       {
-        if(this->fns[space_i] == NULL)
+        if(!this->fns[space_i])
           continue;
+
         for(unsigned int i = 0; i < this->asmlistCnt[space_i]; i++)
         {
           this->fns[space_i][i]->free_fn();
@@ -155,7 +155,7 @@ namespace Hermes
       {
         for(unsigned int edge_i = 0; edge_i < nvert; edge_i++)
         {
-          if(this->fnsSurface[edge_i] == NULL)
+          if(!this->fnsSurface[edge_i])
             continue;
 
           this->geometrySurface[edge_i]->free();
@@ -164,7 +164,7 @@ namespace Hermes
 
           for(unsigned int space_i = 0; space_i < spaceCnt; space_i++)
           {
-            if(this->fnsSurface[edge_i][space_i] == NULL)
+            if(!this->fnsSurface[edge_i][space_i])
               continue;
             for(unsigned int i = 0; i < this->asmlistSurfaceCnt[edge_i][space_i]; i++)
             {

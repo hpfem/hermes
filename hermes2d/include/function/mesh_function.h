@@ -18,7 +18,7 @@
 
 #include "function.h"
 #include "../mesh/refmap.h"
-#include "../mesh/mesh.h"
+#include "../space/space.h"
 #include "exceptions.h"
 
 namespace Hermes
@@ -26,7 +26,6 @@ namespace Hermes
   namespace Hermes2D
   {
     template<typename Scalar> class MeshFunction;
-    template<typename Scalar> class Solution;
   }
 }
 
@@ -43,9 +42,7 @@ public:
   MeshFunctionSharedPtr(const MeshFunctionSharedPtr<Scalar>& other);
 
   void operator=(const MeshFunctionSharedPtr<Scalar>& other);
-
-  Hermes::Hermes2D::Solution<Scalar>* get_solution();
-
+      
   ~MeshFunctionSharedPtr();
 };
 
@@ -70,9 +67,7 @@ namespace Hermes
     /// (This is an abstract class and cannot be instantiated.)
     ///
     template<typename Scalar>
-    class HERMES_API MeshFunction : 
-      public Function<Scalar>, 
-      public Hermes::Hermes2D::Mixins::StateQueryable
+    class HERMES_API MeshFunction : public Function<Scalar>, public Hermes::Hermes2D::Mixins::StateQueryable
     {
     public:
       /// Empty constructor.
@@ -108,6 +103,10 @@ namespace Hermes
       /// Multiplies the function represented by this class by the given coefficient.
       virtual void multiply(Scalar coef);
 
+      /// Adds another mesh function on the given space.
+      /// ! Resulting mesh function is a solution.
+      virtual void add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space);
+
       /// Return the approximate maximum value of this instance.
       virtual Scalar get_approx_max_value(int item = H2D_FN_VAL_0);
 
@@ -118,7 +117,7 @@ namespace Hermes
       virtual bool isOkay() const;
 
       /// Internal.
-      virtual inline std::string getClassName() const { return "MeshFunction"; }
+      inline std::string getClassName() const { return "MeshFunction"; }
 
       /// Internal.
       virtual void init();

@@ -43,22 +43,32 @@ namespace Hermes
 
         /// Initialize neighbors.
         bool init_neighbors();
+        void deinit_neighbors();
 
-        void assemble_one_neighbor(bool edge_processed, unsigned int neighbor_i);
+        void assemble_one_neighbor(unsigned int neighbor_i);
       private:
+        void initialize_error_and_norm_functions(NormFormDG<Scalar>* mfs, DiscontinuousFunc<Scalar>* error_func[2], DiscontinuousFunc<Scalar>* norm_func[2]);
+
         ErrorThreadCalculator* errorThreadCalculator;
         Traverse::State* current_state;
 
         NeighborSearch<Scalar>** neighbor_searches;
         int num_neighbors;
-        bool* processed;
       };
     private:
       void evaluate_volumetric_forms(Traverse::State* current_state, int order);
       void evaluate_surface_forms_one_edge(Traverse::State* current_state, int order);
       
       void evaluate_volumetric_form(NormFormVol<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm);
+      
       void evaluate_surface_form(NormFormSurf<Scalar>* form, Func<Scalar>* difference_func_i, Func<Scalar>* difference_func_j, Func<Scalar>* rsln_i, Func<Scalar>* rsln_j, double* error, double* norm);
+      void initialize_error_and_norm_functions_surf(NormFormSurf<Scalar>* mfs, Func<Scalar>* error_func[2], Func<Scalar>* norm_func[2]);
+      
+      template<typename NormFormType>
+      void initialize_error_and_norm_functions(NormFormType* mf, Func<Scalar>* error_func[2], Func<Scalar>* norm_func[2], int order);
+      template<typename NormFormType, typename FuncType>
+      void deinitialize_error_and_norm_functions(NormFormType* mf, FuncType* error_func[2], FuncType* norm_func[2]);
+      
       void evaluate_DG_form(NormFormDG<Scalar>* form, DiscontinuousFunc<Scalar>* difference_func_i, DiscontinuousFunc<Scalar>* difference_func_j, DiscontinuousFunc<Scalar>* rsln_i, DiscontinuousFunc<Scalar>* rsln_j, double* error, double* norm);
 
       int n_quadrature_points;

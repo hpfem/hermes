@@ -66,7 +66,7 @@ namespace Hermes
       return result;
     }
 
-    NormForm::NormForm(int i, int j) : i(i), j(j)
+    NormForm::NormForm(int i, int j, FunctionsEvaluatedType functionType) : i(i), j(j), functionType(functionType)
     {
     }
 
@@ -89,7 +89,7 @@ namespace Hermes
     NormFormDG<Scalar>::NormFormDG(int i, int j) : NormForm(i, j)
     {
     }
-
+    
     template<typename Scalar>
     DefaultNormFormVol<Scalar>::DefaultNormFormVol(int i, int j, NormType normType) : NormFormVol<Scalar>(i, j), normType(normType)
     {
@@ -115,6 +115,33 @@ namespace Hermes
         return 0.0;
       }
     }
+    template<typename Scalar>
+    DefaultNormFormSurf<Scalar>::DefaultNormFormSurf(int i, int j, NormType normType) : NormFormSurf<Scalar>(i, j), normType(normType)
+    {
+    }
+
+    template<typename Scalar>
+    Scalar DefaultNormFormSurf<Scalar>::value(int n, double *wt, Func<Scalar> *u, Func<Scalar> *v, Geom<double> *e) const
+    {
+      switch(this->normType)
+      {
+      case HERMES_L2_NORM:
+        return l2_norm<Scalar, Scalar>(n, wt, u, v);
+      case HERMES_H1_NORM:
+        return h1_norm<Scalar, Scalar>(n, wt, u, v);
+      case HERMES_H1_SEMINORM:
+        return h1_seminorm<Scalar, Scalar>(n, wt, u, v);
+      case HERMES_HCURL_NORM:
+        return hcurl_norm<Scalar, Scalar>(n, wt, u, v);
+      case HERMES_HDIV_NORM:
+        return hdiv_norm<Scalar, Scalar>(n, wt, u, v);
+      default:
+        throw Hermes::Exceptions::Exception("Unknown norm in DefaultNormFormSurf<Scalar>::value.");
+        return 0.0;
+      }
+    }
+
+
     template<typename Scalar>
     MatrixDefaultNormFormVol<Scalar>::MatrixDefaultNormFormVol(int i, int j, NormType normType) : MatrixFormVol<Scalar>(i, j), normType(normType)
     {
@@ -233,6 +260,8 @@ namespace Hermes
     template HERMES_API class NormFormDG<std::complex<double> >;
     template HERMES_API class DefaultNormFormVol<double>;
     template HERMES_API class DefaultNormFormVol<std::complex<double> >;
+    template HERMES_API class DefaultNormFormSurf<double>;
+    template HERMES_API class DefaultNormFormSurf<std::complex<double> >;
     template HERMES_API class MatrixDefaultNormFormVol<double>;
     template HERMES_API class MatrixDefaultNormFormVol<std::complex<double> >;
     template HERMES_API class VectorDefaultNormFormVol<double>;

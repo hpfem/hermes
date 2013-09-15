@@ -277,7 +277,7 @@ namespace Hermes
       unsigned int get_neighbor_transformations(unsigned int index_1, unsigned int index_2) const;
 
       /// Transformations of an element to one of its neighbors.
-      struct Transformations
+      class HERMES_API Transformations
       {
       public:
         static const int max_level = Transformable::H2D_MAX_TRN_LEVEL; ///< Number of allowed transformations (or equiv. number of neighbors
@@ -313,7 +313,6 @@ namespace Hermes
         template<typename T> friend class MultimeshDGNeighborTree;
       };
 
-    private:
 
       MeshSharedPtr mesh;
 
@@ -339,6 +338,7 @@ namespace Hermes
       Element* central_el;          ///< Central (currently assembled) element.
       Element* neighb_el;           ///< Currently selected neighbor element (on the other side of active segment).
 
+    private:
       int active_edge;               ///< Local number of the currently assembled edge, w.r.t. the central element.
       NeighborEdgeInfo neighbor_edge;///< Assembled edge, w.r.t. the element on the other side.
       int active_segment;            ///< Part of the active edge shared by central and neighbor elements.

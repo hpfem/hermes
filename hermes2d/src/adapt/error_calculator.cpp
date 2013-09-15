@@ -297,8 +297,6 @@ namespace Hermes
       
       if(component >= this->component_count)
         throw Hermes::Exceptions::ValueException("component", component, this->component_count);
-      if(element_id >= element_count[component])
-        throw Hermes::Exceptions::ValueException("element_id", element_id, this->element_count[component]);
 
       return this->errors[component][element_id];
     }
@@ -310,8 +308,6 @@ namespace Hermes
         return 0.0;
       if(component >= this->component_count)
         throw Hermes::Exceptions::ValueException("component", component, this->component_count);
-      if(element_id >= element_count[component])
-        throw Hermes::Exceptions::ValueException("element_id", element_id, this->element_count[component]);
 
       return this->norms[component][element_id];
     }

@@ -1111,14 +1111,14 @@ namespace Hermes
       }
     }
 
-    void Mesh::refine_in_area(std::string marker, int depth, bool mark_as_initial)
+    void Mesh::refine_in_area(std::string marker, int depth, int refinement, bool mark_as_initial)
     {
       Hermes::vector<std::string> markers;
       markers.push_back(marker);
-      this->refine_in_areas(markers, depth, mark_as_initial);
+      this->refine_in_areas(markers, depth, refinement, mark_as_initial);
     }
 
-    void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, bool mark_as_initial)
+    void Mesh::refine_in_areas(Hermes::vector<std::string> markers, int depth, int refinement, bool mark_as_initial)
     {
       Hermes::vector<int> internal_markers;
       bool any_marker = false;
@@ -1143,7 +1143,7 @@ namespace Hermes
         {
           for_all_active_elements(e, this)
           {
-            this->refine_element(e, 0);
+            this->refine_element(e, refinement);
             refined = true;
           }
         }
@@ -1154,7 +1154,7 @@ namespace Hermes
             for(unsigned int marker_i = 0; marker_i < internal_markers.size(); marker_i++)
               if(e->marker == internal_markers[marker_i])
               {
-                this->refine_element(e, 0);
+                this->refine_element(e, refinement);
                 refined = true;
               }
           }

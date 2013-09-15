@@ -65,7 +65,7 @@ void CustomExactSolutionScalar::derivatives(double x, double y, double& dx, doub
   dy = 0.0;
 }
 
-Ord CustomExactSolutionScalar::ord(Ord x, Ord y) const 
+Ord CustomExactSolutionScalar::ord(double x, double y) const 
 {
   return Ord(1);
 }

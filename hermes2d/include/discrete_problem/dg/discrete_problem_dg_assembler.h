@@ -42,7 +42,7 @@ namespace Hermes
     {
     public:
       /// Constructor copying data from DiscreteProblemThreadAssembler.
-      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces);
+      DiscreteProblemDGAssembler(DiscreteProblemThreadAssembler<Scalar>* threadAssembler, const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Hermes::vector<MeshSharedPtr>& meshes);
       
       /// Destructor.
       ~DiscreteProblemDGAssembler();
@@ -53,6 +53,8 @@ namespace Hermes
       void assemble_one_state();
       /// Deinitialize assembling for a state.
       void deinit_assembling_one_state();
+
+      static unsigned int dg_order;
 
     private:
       /// There is a matrix form set on DG_INNER_EDGE area or not.
@@ -74,6 +76,8 @@ namespace Hermes
 
       /// Initialize neighbors.
       bool init_neighbors(NeighborSearch<Scalar>** neighbor_searches, Traverse::State* current_state);
+      /// Deinitialize neighbors.
+      void deinit_neighbors(NeighborSearch<Scalar>** neighbor_searches, Traverse::State* current_state);
 
       /// Finds the correct NeighborSearch.
       NeighborSearch<Scalar>* get_neighbor_search_ext(NeighborSearch<Scalar>** neighbor_searches, int index);
@@ -103,6 +107,7 @@ namespace Hermes
       Traverse::State* current_state;
 
       const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces;
+      const Hermes::vector<MeshSharedPtr>& meshes;
 
       template<typename T> friend class DiscreteProblem;
 

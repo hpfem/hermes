@@ -184,7 +184,13 @@ namespace Hermes
 
       /// Recursively removes all son elements of the given element and
       /// makes it active. Also handles element orders.
+      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
+      /// this parameter serves to prevent taking them back with this method.
       void unrefine_all_mesh_elements(bool keep_initial_refinements = true);
+      
+      /// Recursively removes all son elements of the given element and
+      /// Version for more spaces sharing the mesh
+      static void unrefine_all_mesh_elements(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements = true);
 
       /// Updates element orders when the underlying mesh has been refined.
       void update_element_orders_after_refinement();
@@ -243,6 +249,7 @@ namespace Hermes
       virtual void get_element_assembly_list(Element* e, AsmList<Scalar>* al) const;
 
       /// Copy from Space instance 'space'
+      /// \param[in] new_mesh Mesh where data will be copied to.
       virtual void copy(SpaceSharedPtr<Scalar> space, MeshSharedPtr new_mesh);
 
       /// Class for creating reference space.
@@ -412,6 +419,14 @@ namespace Hermes
 
       virtual int get_edge_order_internal(Node* en) const;
 
+      /// Recursively removes all son elements of the given element and
+      /// makes it active. Also handles element orders.
+      /// \param[in] keep_initial_refinements Refinements in Mesh can be marked as initial (to prevent taking them back), 
+      /// this parameter serves to prevent taking them back with this method.
+      /// \param[in] only_unrefine_space_data Useful when more spaces share the mesh if one wants to unrefine the underlying
+      /// Mesh only once, but wants other spaces know about the change.
+      void unrefine_all_mesh_elements_internal(bool keep_initial_refinements, bool only_unrefine_space_data);
+      
       /// \brief Updates internal node and element tables.
       /// \details Since meshes only contain geometric information, the Space class keeps two
       /// tables with FEM-related information. The first one, 'ndata', contains DOF numbers

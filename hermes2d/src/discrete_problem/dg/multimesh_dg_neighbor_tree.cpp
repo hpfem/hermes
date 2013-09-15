@@ -72,7 +72,7 @@ namespace Hermes
         if(ns->n_neighbors == 1 && (ns->central_transformations_size == 0 || ns->central_transformations[0]->num_levels == 0))
           continue;
         for(unsigned int j = 0; j < ns->n_neighbors; j++)
-          if(ns->central_transformations[j])
+          if(j < ns->central_transformations_alloc_size && ns->central_transformations[j])
             insert_into_multimesh_tree(root, ns->central_transformations[j]->transf, ns->central_transformations[j]->num_levels);
       }
     }
@@ -178,15 +178,18 @@ namespace Hermes
       {
         // Find the node corresponding to this neighbor in the tree.
         MultimeshDGNeighborTreeNode* node;
-        if(ns->central_transformations[i])
+        if(i < ns->central_transformations_alloc_size && ns->central_transformations[i])
           node = find_node(ns->central_transformations[i]->transf, ns->central_transformations[i]->num_levels, multimesh_tree);
         else
           node = multimesh_tree;
 
         // Update the NeighborSearch.
         int added = update_ns_subtree(ns, node, i);
-        i -= added;
-        num_neighbors -= added;
+        if(added >= 0)
+        {
+          i--;
+          num_neighbors--;
+        }
       }
     }
 
@@ -229,7 +232,7 @@ namespace Hermes
       {
         if(node->get_right_son())
           throw Hermes::Exceptions::Exception("Only one son (right) not null in MultimeshDGNeighborTree<Scalar>::update_ns_subtree.");
-        return 0;
+        return -1;
       }
 
       // Key part.
@@ -241,14 +244,14 @@ namespace Hermes
       Hermes::vector<Hermes::vector<unsigned int>*> running_central_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_DOWN neighborhood).
       running_central_transformations.push_back(new Hermes::vector<unsigned int>);
-      if(ns->central_transformations[ith_neighbor])
+      if(ith_neighbor < ns->central_transformations_alloc_size && ns->central_transformations[ith_neighbor])
         ns->central_transformations[ith_neighbor]->copy_to(running_central_transformations.back());
 
       // Initialize the vector for neighbor transformations->
       Hermes::vector<Hermes::vector<unsigned int>*> running_neighbor_transformations;
       // Prepare the first new neighbor's vector. Push back the current transformations (in case of GO_UP/NO_TRF neighborhood).
       running_neighbor_transformations.push_back(new Hermes::vector<unsigned int>);
-      if(ns->neighbor_transformations[ith_neighbor])
+      if(ith_neighbor < ns->neighbor_transformations_alloc_size && ns->neighbor_transformations[ith_neighbor])
         ns->neighbor_transformations[ith_neighbor]->copy_to(running_neighbor_transformations.back());
 
       // Delete the current neighbor.
@@ -276,10 +279,10 @@ namespace Hermes
         ns->neighbors.push_back(neighbor);
         ns->neighbor_edges.push_back(edge_info);
 
-        if(!ns->central_transformations[ns->n_neighbors])
+        if((ns->n_neighbors >= ns->central_transformations_alloc_size) || !ns->central_transformations[ns->n_neighbors])
           ns->add_central_transformations(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
 
-        if(!ns->neighbor_transformations[ns->n_neighbors])
+        if((ns->n_neighbors >= ns->neighbor_transformations_alloc_size) || !ns->neighbor_transformations[ns->n_neighbors])
           ns->add_neighbor_transformations(new typename NeighborSearch<Scalar>::Transformations, ns->n_neighbors);
 
         ns->central_transformations[ns->n_neighbors]->copy_from(*running_central_transformations[i]);

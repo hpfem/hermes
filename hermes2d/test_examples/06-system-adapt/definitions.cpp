@@ -104,7 +104,7 @@ void ExactSolutionFitzHughNagumo1::derivatives(double x, double y, double& dx, d
   dy = cef1->val(x)*cef1->dx(y);
 }
 
-Ord ExactSolutionFitzHughNagumo1::ord(Ord x, Ord y) const 
+Ord ExactSolutionFitzHughNagumo1::ord(double x, double y) const 
 {
   return Ord(10);
 }
@@ -142,7 +142,7 @@ void ExactSolutionFitzHughNagumo2::derivatives(double x, double y, double& dx, d
   dy = cef2->val(x)*cef2->dx(y);
 }
 
-Ord ExactSolutionFitzHughNagumo2::ord(Ord x, Ord y) const 
+Ord ExactSolutionFitzHughNagumo2::ord(double x, double y) const 
 {
   return Ord(10);
 }

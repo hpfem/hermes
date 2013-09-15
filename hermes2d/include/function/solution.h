@@ -133,6 +133,10 @@ namespace Hermes
       /// slow. Prefer Solution::get_ref_value if possible.
       virtual Func<Scalar>* get_pt_value(double x, double y, bool use_MeshHashGrid = false, Element* e = NULL);
 
+      /// Adds another mesh function on the given space.
+      /// See method of parent class.
+      virtual void add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space);
+
       /// Multiplies the function represented by this class by the given coefficient.
       virtual void multiply(Scalar coef);
 
@@ -143,36 +147,36 @@ namespace Hermes
 
       /// Passes solution components calculated from solution vector as Solutions.
       static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
-          Hermes::vector<int> start_indices = Hermes::vector<int>());
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
+        Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
-          bool add_dir_lift = true, int start_index = 0);
+        bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, Solution<Scalar>* solution,
-          bool add_dir_lift = true, int start_index = 0);
+        bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
-          Hermes::vector<int> start_indices = Hermes::vector<int>());
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
+        Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       static void vector_to_solutions_common_dir_lift(const Vector<Scalar>* vec, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          bool add_dir_lift = false);
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        bool add_dir_lift = false);
 
       static void vector_to_solutions_common_dir_lift(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
-          bool add_dir_lift = false);
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions,
+        bool add_dir_lift = false);
 
       static void vector_to_solution(const Vector<Scalar>* vec, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
-          bool add_dir_lift = true, int start_index = 0);
+        bool add_dir_lift = true, int start_index = 0);
 
       static void vector_to_solutions(const Scalar* solution_vector, Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
-          Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
-          Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
-          Hermes::vector<int> start_indices = Hermes::vector<int>());
+        Hermes::vector<MeshFunctionSharedPtr<Scalar> > solutions, Hermes::vector<PrecalcShapeset *> pss,
+        Hermes::vector<bool> add_dir_lift = Hermes::vector<bool>(),
+        Hermes::vector<int> start_indices = Hermes::vector<int>());
 
       /// Internal.
       virtual void set_active_element(Element* e);
@@ -183,9 +187,19 @@ namespace Hermes
 
       void set_type(SolutionType type) { sln_type = type; };
 
+      /// Monomial coefficient array
+      Scalar* mono_coeffs;
+      /// Stored element orders in the mathematical sense.
+      /// The polynomial degree of the highest basis function + increments due to the element shape, etc.  .
+      int* elem_orders;
+      // Calculate derivative wrt. x of mono into result.
+      static void make_dx_coeffs(int mode, int o, Scalar* mono, Scalar* result);
+      // Calculate derivative wrt. y of mono into result.
+      static void make_dy_coeffs(int mode, int o, Scalar* mono, Scalar* result);
+
     protected:
       static void vector_to_solution(const Scalar* solution_vector, SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> solution,
-          PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
+        PrecalcShapeset* pss, bool add_dir_lift = true, int start_index = 0);
 
       static bool static_verbose_output;
 
@@ -226,10 +240,7 @@ namespace Hermes
       Element* elems[H2D_MAX_QUADRATURES][H2D_SOLUTION_ELEMENT_CACHE_SIZE];
       int cur_elem, oldest[H2D_SOLUTION_ELEMENT_CACHE_SIZE];
 
-      Scalar* mono_coeffs;  ///< monomial coefficient array
       int* elem_coeffs[H2D_MAX_SOLUTION_COMPONENTS];  ///< array of pointers into mono_coeffs
-      /// Stored element orders in the mathematical sense. The polynomial degree of the highest basis function + increments due to the element shape, etc.  .
-      int* elem_orders;
       int num_coeffs, num_elems;
       int num_dofs;
 

@@ -48,6 +48,7 @@
 #include <tr1/memory>
 #endif
 #include <algorithm>
+#include <limits>
 #include <vector>
 #include <map>
 #include <set>
@@ -152,8 +153,8 @@ public:
 
 namespace Hermes
 {
-  const double epsilon = 1e-12;
-  const double Epsilon = 1e-8;
+  const double epsilon = std::numeric_limits<double>::epsilon() * 1e3;
+  const double Epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
 
   inline double sqr(int x) { return x*x; }
   inline double sqr(double x) { return x*x; }

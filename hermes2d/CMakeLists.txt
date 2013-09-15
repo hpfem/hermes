@@ -132,6 +132,7 @@ project(hermes2d)
     src/function/filter.cpp
     src/function/mesh_function.cpp
     src/function/solution_h2d_xml.cpp
+    src/function/postprocessing.cpp
 
     src/mesh/refmap.cpp
     src/mesh/curved.cpp
@@ -158,6 +159,7 @@ project(hermes2d)
     src/shapeset/shapeset_hc_gradleg.cpp
     src/shapeset/shapeset_hd_legendre.cpp
     src/shapeset/shapeset_l2_legendre.cpp
+    src/shapeset/shapeset_l2_taylor.cpp
     src/shapeset/precalc.cpp
 
     src/space/space.cpp
@@ -254,7 +256,8 @@ project(hermes2d)
     src/function/solution.cpp
     src/function/filter.cpp
     src/function/mesh_function.cpp
-    src/function/solution_h2d_xml.cpp 
+    src/function/solution_h2d_xml.cpp
+    src/function/postprocessing.cpp
   )
   
   SOURCE_GROUP(
@@ -305,6 +308,7 @@ project(hermes2d)
     src/shapeset/shapeset_hc_gradleg.cpp
     src/shapeset/shapeset_hd_legendre.cpp
     src/shapeset/shapeset_l2_legendre.cpp
+    src/shapeset/shapeset_l2_taylor.cpp
     src/shapeset/precalc.cpp
 
     src/space/space.cpp
@@ -390,6 +394,7 @@ project(hermes2d)
     include/function/filter.h
     include/function/mesh_function.h
     include/function/solution_h2d_xml.h
+    include/function/postprocessing.h
 
     include/mesh/refmap.h
     include/mesh/curved.h
@@ -514,6 +519,7 @@ project(hermes2d)
     include/function/filter.h
     include/function/mesh_function.h
     include/function/solution_h2d_xml.h
+    include/function/postprocessing.h
   )
     
   SOURCE_GROUP(
@@ -721,5 +727,6 @@ project(hermes2d)
 IF(EXISTS "hermes2d/test_examples")
   if(H2D_WITH_TEST_EXAMPLES)
     add_subdirectory(test_examples)
+    add_subdirectory(test_examples_DG)
   endif(H2D_WITH_TEST_EXAMPLES)
 ENDIF(EXISTS "hermes2d/test_examples")

@@ -551,20 +551,54 @@ namespace Hermes
         for(unsigned int i = 0; i < this->num_threads_used; i++)
         {
           fns[i] = new MeshFunction<double>*[4];
-          fns[i][0] = xsln->clone();
+
+          Solution<double>* xsolution = dynamic_cast<Solution<double>*>(xsln.get());
+          if(xsolution && xsolution->get_type() == HERMES_SLN)
+          {
+            fns[i][0] = new Solution<double>();
+            fns[i][0]->copy(xsln);
+          }
+          else
+            fns[i][0] = xsln->clone(); 
+
           fns[i][0]->set_refmap(new RefMap);
           fns[i][0]->set_quad_2d(&g_quad_lin);
-          fns[i][1] = ysln->clone();
+
+          Solution<double>* ysolution = dynamic_cast<Solution<double>*>(ysln.get());
+          if(ysolution && ysolution->get_type() == HERMES_SLN)
+          {
+            fns[i][1] = new Solution<double>();
+            fns[i][1]->copy(ysln);
+          }
+          else
+            fns[i][1] = ysln->clone();
+
           fns[i][1]->set_refmap(new RefMap);
           fns[i][1]->set_quad_2d(&g_quad_lin);
           if(xdisp != NULL)
           {
-            fns[i][2] = xdisp->clone();
+            Solution<double>* xdispsolution = dynamic_cast<Solution<double>*>(xdisp.get());
+            if(xdispsolution && xdispsolution->get_type() == HERMES_SLN)
+            {
+              fns[i][2] = new Solution<double>();
+              fns[i][2]->copy(xdisp);
+            }
+            else
+              fns[i][2] = xdisp->clone();
+
             fns[i][2]->set_quad_2d(&g_quad_lin);
           }
           if(ydisp != NULL)
           {
-            fns[i][xdisp == NULL ? 2 : 3] = ydisp->clone();
+            Solution<double>* ydispsolution = dynamic_cast<Solution<double>*>(ydisp.get());
+            if(ydispsolution && ydispsolution->get_type() == HERMES_SLN)
+            {
+              fns[i][xdisp == NULL ? 2 : 3] = new Solution<double>();
+              fns[i][xdisp == NULL ? 2 : 3]->copy(ydisp);
+            }
+            else
+              fns[i][xdisp == NULL ? 2 : 3] = ydisp->clone();
+
             fns[i][xdisp == NULL ? 2 : 3]->set_quad_2d(&g_quad_lin);
           }
         }

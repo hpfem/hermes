@@ -126,6 +126,7 @@ namespace Hermes
       ///
       DiscontinuousFunc(Func<T>* fn_c, Func<T>* fn_n, bool reverse = false);
 
+      using Func<T>::subtract;
       void subtract(const DiscontinuousFunc<T>& func);
 
       /// Default destructor may be used. Deallocation is done using the following functions.

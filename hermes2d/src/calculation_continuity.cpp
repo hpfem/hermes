@@ -376,7 +376,7 @@ namespace Hermes
       for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::mesh_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::mesh_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
         try
         {
           reader.save(filename.str().c_str(), meshes[i]);
@@ -392,7 +392,7 @@ namespace Hermes
     {
       MeshReaderH2DXML reader;
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::mesh_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::mesh_file_name << 0 << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         reader.save(filename.str().c_str(), mesh);
@@ -409,7 +409,7 @@ namespace Hermes
       for(unsigned int i = 0; i < spaces.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
         try
         {
           spaces[i]->save(filename.str().c_str());
@@ -425,7 +425,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::save_space(SpaceSharedPtr<Scalar> space)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         space->save(filename.str().c_str());
@@ -442,7 +442,7 @@ namespace Hermes
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::solution_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::solution_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
 
         try
         {
@@ -462,7 +462,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::save_solution(MeshFunctionSharedPtr<Scalar> solution)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::solution_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::solution_file_name << 0 << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
@@ -481,7 +481,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::save_time_step_length(double time_step_length_to_save)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::time_step_file_name << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::time_step_file_name << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         std::ofstream out(filename.str().c_str());
@@ -498,7 +498,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::save_time_step_length_n_minus_one(double time_step_length_to_save)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::time_stepNMinusOne_file_name << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::time_stepNMinusOne_file_name << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         std::ofstream out(filename.str().c_str());
@@ -515,7 +515,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::save_error(double error)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::error_file_name << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::error_file_name << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         std::ofstream out(filename.str().c_str());
@@ -535,7 +535,7 @@ namespace Hermes
       for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::mesh_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::mesh_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
         try
         {
           reader.load(filename.str().c_str(), meshes[i]);
@@ -551,7 +551,7 @@ namespace Hermes
     {
       MeshReaderH2DXML reader;
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::mesh_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::mesh_file_name << 0 << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
 
       try
       {
@@ -575,7 +575,7 @@ namespace Hermes
       for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
 
         try
         {
@@ -606,7 +606,7 @@ namespace Hermes
       for(unsigned int i = 0; i < meshes.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::space_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
 
         try
         {
@@ -629,7 +629,7 @@ namespace Hermes
     SpaceSharedPtr<Scalar> CalculationContinuity<Scalar>::Record::load_space(MeshSharedPtr mesh, EssentialBCs<Scalar>* essential_bcs, Shapeset* shapeset)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::space_file_name << 0 << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
 
       try
       {
@@ -653,7 +653,7 @@ namespace Hermes
       for(unsigned int i = 0; i < solutions.size(); i++)
       {
         std::stringstream filename;
-        filename << CalculationContinuity<Scalar>::solution_file_name << i << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+        filename << CalculationContinuity<Scalar>::solution_file_name << i << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
         try
         {
           Solution<Scalar>* solution = dynamic_cast<Solution<Scalar>*>(solutions[i].get());
@@ -677,7 +677,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::load_solution(MeshFunctionSharedPtr<Scalar> solution, SpaceSharedPtr<Scalar> space)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::solution_file_name << 0 << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::solution_file_name << 0 << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         Solution<Scalar>* sln = dynamic_cast<Solution<Scalar>*>(solution.get());
@@ -701,7 +701,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::load_time_step_length(double & time_step_length)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::time_step_file_name << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::time_step_file_name << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         std::ifstream in(filename.str().c_str());
@@ -718,7 +718,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::load_time_step_length_n_minus_one(double & time_step_length)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::time_stepNMinusOne_file_name << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::time_stepNMinusOne_file_name << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         std::ifstream in(filename.str().c_str());
@@ -735,7 +735,7 @@ namespace Hermes
     void CalculationContinuity<Scalar>::Record::load_error(double & error)
     {
       std::stringstream filename;
-      filename << CalculationContinuity<Scalar>::error_file_name << '_' << (std::string)"t = " << this->time << (std::string)"n = " << this->number << (std::string)".h2d";
+      filename << CalculationContinuity<Scalar>::error_file_name << '_' << "t = " << this->time << "n = " << this->number << ".h2d";
       try
       {
         std::ifstream in(filename.str().c_str());

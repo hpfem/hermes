@@ -244,7 +244,15 @@ namespace Hermes
       if(fn_central != NULL && func.fn_central != NULL)
         fn_central->subtract(func.fn_central);
       if(fn_neighbor != NULL && func.fn_neighbor != NULL)
+      {
         fn_neighbor->subtract(func.fn_neighbor);
+        if(reverse_neighbor_side)
+        {
+          Func<T>::subtract(this->val_neighbor, func.val_neighbor);
+          Func<T>::subtract(this->dx_neighbor, func.dx_neighbor);
+          Func<T>::subtract(this->dy_neighbor, func.dy_neighbor);
+        }
+      }
     }
 
     template<typename T>

@@ -143,6 +143,12 @@ namespace Hermes
     }
     
     template<typename Scalar>
+    void MeshFunction<Scalar>::add(MeshFunctionSharedPtr<Scalar> other_mesh_function, SpaceSharedPtr<Scalar> target_space)
+    {
+      throw Exceptions::MethodNotOverridenException("MeshFunction<Scalar>::add");
+    }
+
+    template<typename Scalar>
     void MeshFunction<Scalar>::multiply(Scalar coef)
     {
       throw Exceptions::MethodNotOverridenException("MeshFunction<Scalar>::multiply");

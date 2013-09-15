@@ -102,7 +102,7 @@ namespace Hermes
 
     protected:
       /// Initialize states.
-      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln);
+      void init_assembling(Traverse::State**& states, int& num_states, Solution<Scalar>** u_ext_sln, Hermes::vector<MeshSharedPtr>& meshes);
       void deinit_assembling(Traverse::State** states, int num_states);
 
       /// RungeKutta helpers.

@@ -397,6 +397,8 @@ namespace Hermes
       // Set verbose_level.
       if(this->get_verbose_output())
         this->paralutionSolver->Verbose(10);
+      else
+        this->paralutionSolver->Verbose(0);
 
       // Set tolerances.
       switch(this->toleranceType)

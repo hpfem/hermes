@@ -186,6 +186,12 @@ namespace Hermes
       if(seq < 0)
         return false;
 
+      if(edata == NULL)
+      {
+        throw Hermes::Exceptions::Exception("NULL edata detected in Space<Scalar>::get_element_order().");
+        return false;
+      }
+
       if(!this->is_up_to_date())
       {
         throw Hermes::Exceptions::Exception("Space is not up to date.");
@@ -273,8 +279,13 @@ namespace Hermes
       this->essential_bcs = space->essential_bcs;
       this->shapeset = space->shapeset->clone();
 
-      new_mesh->copy(space->get_mesh());
-      this->mesh = new_mesh;
+      if(new_mesh->get_seq() != space->get_mesh()->get_seq())
+      {
+        new_mesh->copy(space->get_mesh());
+        this->mesh = new_mesh;
+      }
+      else
+        this->mesh = space->get_mesh();
 
       this->resize_tables();
 
@@ -524,9 +535,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Space<Scalar>::unrefine_all_mesh_elements(bool keep_initial_refinements)
+    void Space<Scalar>::unrefine_all_mesh_elements_internal(bool keep_initial_refinements, bool only_unrefine_space_data)
     {
-      check();
       // find inactive elements with active sons
       Hermes::vector<int> list;
       Element* e;
@@ -624,13 +634,29 @@ namespace Hermes
         else
           edata[list[i]].order = H2D_MAKE_QUAD_ORDER(h_order, v_order);
 
-        this->mesh->unrefine_element_id(list[i]);
+        if(!only_unrefine_space_data)
+          this->mesh->unrefine_element_id(list[i]);
       }
 
       // Recalculate all integrals, do not use previous adaptivity step.
       for_all_active_elements(e, this->mesh)
         this->edata[e->id].changed_in_last_adaptation = true;
+    }
 
+    template<typename Scalar>
+    void Space<Scalar>::unrefine_all_mesh_elements(bool keep_initial_refinements)
+    {
+      this->check();
+      this->unrefine_all_mesh_elements_internal(keep_initial_refinements, false);
+    }
+
+    template<typename Scalar>
+    void Space<Scalar>::unrefine_all_mesh_elements(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, bool keep_initial_refinements)
+    {
+      for(int i = 0; i < spaces.size() - 1; i++)
+        spaces[i]->unrefine_all_mesh_elements_internal(keep_initial_refinements, true);
+
+      spaces[spaces.size() - 1]->unrefine_all_mesh_elements_internal(keep_initial_refinements, false);
     }
 
     template<typename Scalar>
@@ -716,7 +742,7 @@ namespace Hermes
       /// Call to the OVERRIDABLE handling method.
       this->handle_orders(ref_space);
 
-      /// Finish - MUST BE CALLED BEFOR E RETURN.
+      /// Finish - MUST BE CALLED BEFORE RETURN.
       this->finish_construction(ref_space);
 
       // Assign dofs?
@@ -919,21 +945,6 @@ namespace Hermes
         throw Hermes::Exceptions::ValueException("stride", stride, 1);
 
       resize_tables();
-
-      Element* e;
-
-      //check validity of orders
-      for_all_active_elements(e, mesh)
-      {
-        if(e->id >= esize || edata[e->id].order < 0)
-        {
-          printf("e->id = %d\n", e->id);
-          printf("esize = %d\n", esize);
-          printf("edata[%d].order = %d\n", e->id, edata[e->id].order);
-          throw
-            Hermes::Exceptions::Exception("Uninitialized element order in Space::assign_dofs().");
-        }
-      }
 
       this->first_dof = next_dof = first_dof;
       this->stride = stride;
@@ -1337,6 +1348,8 @@ namespace Hermes
     {
       try
       {
+        SpaceSharedPtr<Scalar> space(NULL);
+
         ::xml_schema::flags parsing_flags = 0;
 
         if(!validate)
@@ -1344,7 +1357,102 @@ namespace Hermes
 
         std::auto_ptr<XMLSpace::space> parsed_xml_space (XMLSpace::space_(filename, parsing_flags));
 
-        SpaceSharedPtr<Scalar> space = Space<Scalar>::init_empty_space(parsed_xml_space->spaceType().get().c_str(), mesh, shapeset);
+        if(!strcmp(parsed_xml_space->spaceType().get().c_str(),"h1"))
+        {
+          space = new H1Space<Scalar>();
+          space->mesh = mesh;
+
+          if(shapeset == NULL)
+          {
+            space->shapeset = new H1Shapeset;
+            space->own_shapeset = true;
+          }
+          else
+          {
+            if(shapeset->get_space_type() != HERMES_H1_SPACE)
+              throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+            else
+              space->shapeset = shapeset;
+          }
+
+          space->precalculate_projection_matrix(2, space->proj_mat, space->chol_p);
+        }
+        else if (!strcmp(parsed_xml_space->spaceType().get().c_str(),"hcurl"))
+        {
+          space = new HcurlSpace<Scalar>();
+          space->mesh = mesh;
+
+          if(shapeset == NULL)
+          {
+            space->shapeset = new HcurlShapeset;
+            space->own_shapeset = true;
+          }
+          else
+          {
+            if(shapeset->get_num_components() < 2)
+              throw Hermes::Exceptions::Exception("HcurlSpace requires a vector shapeset in Space::load.");
+            if(shapeset->get_space_type() != HERMES_HCURL_SPACE)
+              throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+            else
+              space->shapeset = shapeset;
+          }
+
+          space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
+        }
+        else if(!!strcmp(parsed_xml_space->spaceType().get().c_str(),"hdiv"))
+        {
+          space = new HdivSpace<Scalar>();
+          space->mesh = mesh;
+
+          if(shapeset == NULL)
+          {
+            space->shapeset = new HdivShapeset;
+            space->own_shapeset = true;
+          }
+          else
+          {
+            if(shapeset->get_num_components() < 2)
+              throw Hermes::Exceptions::Exception("HdivSpace requires a vector shapeset in Space::load.");
+            if(shapeset->get_space_type() != HERMES_HDIV_SPACE)
+              throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+            else
+              space->shapeset = shapeset;
+          }
+
+          space->precalculate_projection_matrix(0, space->proj_mat, space->chol_p);
+        }
+        else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2"))
+        {
+          space = new L2Space<Scalar>();
+          space->mesh = mesh;
+
+          if(shapeset == NULL)
+          {
+            space->shapeset = new L2Shapeset;
+            space->own_shapeset = true;
+          }
+          {
+            if(shapeset->get_space_type() != HERMES_L2_SPACE)
+              throw Hermes::Exceptions::SpaceLoadFailureException("Wrong shapeset / Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+            else
+              space->shapeset = shapeset;
+          }
+
+          static_cast<L2Space<Scalar>* >(space.get())->ldata = NULL;
+          static_cast<L2Space<Scalar>* >(space.get())->lsize = 0;
+        }
+        else if(strcmp(parsed_xml_space->spaceType().get().c_str(),"l2-markerwise"))
+        {
+          space = new L2MarkerWiseConstSpace<Scalar>(mesh);
+
+          if(shapeset)
+            Hermes::Mixins::Loggable::Static::warn("L2MarkerWiseConstSpace does not need a shapeset when loading.");
+        }
+        else
+        {
+          throw Exceptions::SpaceLoadFailureException("Wrong spaceType in the Solution XML file %s in Space::load.", filename);
+          return NULL;
+        }
 
         space->mesh_seq = space->mesh->get_seq();
 

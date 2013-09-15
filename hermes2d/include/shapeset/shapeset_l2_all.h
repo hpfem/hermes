@@ -33,17 +33,30 @@ namespace Hermes
       virtual Shapeset* clone() { return new L2ShapesetLegendre(*this); };
       virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
       virtual int get_max_index(ElementMode2D mode);
-    protected:
       virtual int get_id() const { return 30; }
-      template<typename Scalar> friend class DiscreteProblem;
-      template<typename Scalar> friend class VectorForm;
-      template<typename Scalar> friend class MatrixForm;
-      template<typename Scalar> friend class Solution;
-      friend class CurvMap; friend class RefMap;
-      template<typename Scalar> friend class RefinementSelectors::H1ProjBasedSelector;
-      template<typename Scalar> friend class RefinementSelectors::L2ProjBasedSelector;
-      template<typename Scalar> friend class RefinementSelectors::HcurlProjBasedSelector;
-      template<typename Scalar> friend class RefinementSelectors::OptimumSelector; friend class PrecalcShapeset;
+      
+      static const int max_index[H2D_NUM_MODES];
+    };
+
+    /// L2 Taylor shapeset - Taylor basis functions as proposed by Kuzmin, Luo
+    /// @ingroup spaces
+    class HERMES_API L2ShapesetTaylor : public Shapeset
+    {
+    public:
+      L2ShapesetTaylor(bool contains_means = true);
+      virtual Shapeset* clone() { return new L2ShapesetTaylor(*this); };
+      virtual SpaceType get_space_type() const { return HERMES_L2_SPACE; }
+      virtual int get_max_index(ElementMode2D mode);
+      virtual int get_id() const { return 31; }
+
+      /// Returns a complete set of indices of bubble functions for an element of the given order.
+      /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
+      int* get_bubble_indices(int order, ElementMode2D mode) const;
+
+      /// Returns the number of bubble functions for an element of the given order.
+      /// Reimplemented because this shapeset uses linear (not bi-linear), quadratic (not bi-quadratic) etc. polynomials.
+      virtual int get_num_bubbles(int order, ElementMode2D mode) const;
+      
       static const int max_index[H2D_NUM_MODES];
     };
 

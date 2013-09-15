@@ -47,7 +47,11 @@ namespace Hermes
 #ifdef WITH_BSON
       virtual void save_bson(const char* filename) const;
 #endif
-    protected:
+      /// Function returning the integration order that
+      /// should be used when integrating the function.
+      virtual Hermes::Ord ord(double x, double y) const = 0;
+
+      protected:
       /// For scaling of the solution.
       Scalar exact_multiplicator;
       template<typename T> friend class Solution;
@@ -77,10 +81,6 @@ namespace Hermes
         derivatives (x, y, dx, dy);
         return value (x, y);
       };
-
-      /// Function returning the integration order that
-      /// should be used when integrating the function.
-      virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
     };
 
 
@@ -100,7 +100,7 @@ namespace Hermes
 
       /// Function returning the value.
       virtual Scalar value (double x, double y) const;
-      virtual Ord ord(Ord x, Ord y) const;
+      virtual Ord ord(double x, double y) const;
 
       /// Function returning the derivatives.
       virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
@@ -142,10 +142,6 @@ namespace Hermes
         derivatives (x, y, dx, dy);
         return value (x, y);
       };
-
-      /// Function returning the integration order that
-      /// should be used when integrating the function.
-      virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const = 0;
     };
     
     /// @ingroup meshFunctions
@@ -160,7 +156,7 @@ namespace Hermes
 
       virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
 
-      virtual Ord ord(Ord x, Ord y) const;
+      virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
 
       /// Saves the exact solution to an XML file.
@@ -185,7 +181,7 @@ namespace Hermes
 
       virtual void derivatives (double x, double y, Scalar& dx, Scalar& dy) const;
 
-      virtual Ord ord(Ord x, Ord y) const;
+      virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
     };
 
@@ -201,7 +197,7 @@ namespace Hermes
 
       virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
-      virtual Ord ord(Ord x, Ord y) const;
+      virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
 
       /// Saves the exact solution to an XML file.
@@ -226,7 +222,7 @@ namespace Hermes
 
       virtual void derivatives (double x, double y, Scalar2<Scalar>& dx, Scalar2<Scalar>& dy) const;
 
-      virtual Ord ord(Ord x, Ord y) const;
+      virtual Ord ord(double x, double y) const;
       virtual MeshFunction<Scalar>* clone() const;
     };
 

@@ -2,6 +2,7 @@
 
 using namespace Hermes;
 using namespace Hermes::Hermes2D;
+using namespace Hermes::Hermes2D::RefinementSelectors;
 using namespace Hermes::Hermes2D::WeakFormsH1;
 using namespace Hermes::Hermes2D::Views;
 
@@ -37,7 +38,7 @@ public:
 
   virtual void derivatives(double x, double y, double& dx, double& dy) const;
 
-  virtual Ord ord(Ord x, Ord y) const;
+  virtual Ord ord(double x, double y) const;
   MeshFunction<double>* clone() const;
 };
 
