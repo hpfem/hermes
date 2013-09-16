@@ -26,6 +26,7 @@ namespace Hermes
   namespace Hermes2D
   {
     static const std::string H2D_DG_INNER_EDGE = "-1234567";
+
     template<typename Scalar>
     unsigned int DiscreteProblemDGAssembler<Scalar>::dg_order = 20;
 
@@ -506,7 +507,6 @@ namespace Hermes
       }
     }
 
-
 #ifdef DEBUG_DG_ASSEMBLING
     template<typename Scalar>
     void DiscreteProblemDGAssembler<Scalar>::debug()
@@ -557,7 +557,6 @@ namespace Hermes
       }
     }
 #endif
-
 
     template class HERMES_API DiscreteProblemDGAssembler<double>;
     template class HERMES_API DiscreteProblemDGAssembler<std::complex<double> >;
