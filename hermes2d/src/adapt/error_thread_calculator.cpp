@@ -325,12 +325,12 @@ namespace Hermes
       case SolutionsDifference:
         error_func[0] = init_fn(slns[mf->i], order);
         norm_func[0] = init_fn(rslns[mf->i], order);
-        error_func[0]->subtract(norm_func[mf->i]);
+        error_func[0]->subtract(norm_func[0]);
         if(mf->j != mf->i)
         {
           error_func[1] = init_fn(slns[mf->j], order);
           norm_func[1] = init_fn(rslns[mf->j], order);
-          error_func[1]->subtract(norm_func[mf->j]);
+          error_func[1]->subtract(norm_func[1]);
         }
         else
         {
