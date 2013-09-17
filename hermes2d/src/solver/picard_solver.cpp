@@ -20,6 +20,9 @@
 #include "projections/ogprojection.h"
 #include "exact_solution.h"
 
+using namespace Hermes::Algebra;
+using namespace Hermes::Solvers;
+
 namespace Hermes
 {
   namespace Hermes2D

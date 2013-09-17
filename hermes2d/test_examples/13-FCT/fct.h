@@ -5,6 +5,8 @@
 #include "lumped_projection.h"
 #include "reg_estimator.h"
 using namespace Hermes;
+using namespace Hermes::Solvers;
+using namespace Hermes::Algebra;
 using namespace Hermes::Hermes2D;
 
 class Flux_Correction

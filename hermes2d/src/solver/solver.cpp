@@ -23,6 +23,7 @@
 #include "projections/ogprojection.h"
 
 using namespace Hermes::Algebra;
+using namespace Hermes::Solvers;
 
 namespace Hermes
 {
@@ -212,7 +213,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    LinearMatrixSolver<Scalar>* Solver<Scalar>::get_linear_solver()
+    Hermes::Solvers::LinearMatrixSolver<Scalar>* Solver<Scalar>::get_linear_solver()
     {
       return this->matrix_solver;
     }

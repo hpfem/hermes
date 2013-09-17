@@ -17,6 +17,10 @@
 #include "discrete_problem.h"
 #include "projections/ogprojection.h"
 #include "norm_form.h"
+
+using namespace Hermes::Algebra;
+using namespace Hermes::Solvers;
+
 namespace Hermes
 {
   namespace Hermes2D

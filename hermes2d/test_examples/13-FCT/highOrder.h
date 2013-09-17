@@ -3,6 +3,11 @@
 
 #include "hermes2d.h"
 
+using namespace Hermes;
+using namespace Hermes::Solvers;
+using namespace Hermes::Algebra;
+using namespace Hermes::Hermes2D;
+
 class High_Order{
 public:
 	//Constructor

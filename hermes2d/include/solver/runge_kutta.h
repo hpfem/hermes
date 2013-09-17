@@ -164,14 +164,14 @@ namespace Hermes
       void prepare_u_ext_vec();
 
       /// Matrix for the time derivative part of the equation (left-hand side).
-      SparseMatrix<Scalar>* matrix_left;
+      Hermes::Algebra::SparseMatrix<Scalar>* matrix_left;
 
       /// Matrix and vector for the rest (right-hand side).
-      SparseMatrix<Scalar>* matrix_right;
-      Vector<Scalar>* vector_right;
+      Hermes::Algebra::SparseMatrix<Scalar>* matrix_right;
+      Hermes::Algebra::Vector<Scalar>* vector_right;
 
       /// Matrix solver.
-      LinearMatrixSolver<Scalar>* solver;
+      Hermes::Solvers::LinearMatrixSolver<Scalar>* solver;
 
       /// Weak formulation.
       const WeakForm<Scalar>* wf;

@@ -102,10 +102,10 @@ namespace Hermes
       void set_jacobian_constant(bool to_set = true);
 
       /// Get the Jacobian.
-      SparseMatrix<Scalar>* get_jacobian();
+      Hermes::Algebra::SparseMatrix<Scalar>* get_jacobian();
 
       /// Get the Residual.
-      Vector<Scalar>* get_residual();
+      Hermes::Algebra::Vector<Scalar>* get_residual();
 
       /// Get the Linear solver (thus influence its behavior).
       Hermes::Solvers::LinearMatrixSolver<Scalar>* get_linear_solver();
@@ -150,13 +150,13 @@ namespace Hermes
       Scalar* sln_vector;
 
       /// Jacobian.
-      SparseMatrix<Scalar>* jacobian;
+      Hermes::Algebra::SparseMatrix<Scalar>* jacobian;
 
       /// Residual.
       Vector<Scalar>* residual;
 
       /// Linear solver.
-      LinearMatrixSolver<Scalar>* matrix_solver;
+      Hermes::Solvers::LinearMatrixSolver<Scalar>* matrix_solver;
       
       /// This instance owns its DP.
       const bool own_dp;

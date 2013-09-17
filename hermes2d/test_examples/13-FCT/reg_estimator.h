@@ -7,6 +7,8 @@
 
 
 using namespace Hermes;
+using namespace Hermes::Solvers;
+using namespace Hermes::Algebra;
 using namespace Hermes::Hermes2D;
 
 

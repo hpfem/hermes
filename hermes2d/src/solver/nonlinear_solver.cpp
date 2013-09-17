@@ -21,6 +21,9 @@
 */
 #include "solver/nonlinear_solver.h"
 
+using namespace Hermes::Algebra;
+using namespace Hermes::Solvers;
+
 namespace Hermes
 {
   namespace Hermes2D
