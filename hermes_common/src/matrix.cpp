@@ -584,6 +584,9 @@ namespace Hermes
     template<typename Scalar>
     SimpleVector<Scalar>::SimpleVector(unsigned int size) : Vector<Scalar>(size), v(NULL)
     {
+      if(this->size == 0)
+        throw Exceptions::ValueException("size", this->size, 1);
+      this->alloc(this->size);
     }
 
     template<typename Scalar>
