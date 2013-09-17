@@ -331,9 +331,9 @@ namespace Hermes
 
         // Set operator, preconditioner, build.
         if(this->preconditioner)
-          paralutionSolver->SetPreconditioner(this->preconditioner->get_paralutionPreconditioner());
-        paralutionSolver->SetOperator(this->matrix->get_paralutionMatrix());
-        paralutionSolver->Build();
+          this->paralutionSolver->SetPreconditioner(this->preconditioner->get_paralutionPreconditioner());
+        this->paralutionSolver->SetOperator(this->matrix->get_paralutionMatrix());
+        this->paralutionSolver->Build();
       }
     }
 
