@@ -366,7 +366,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void LoopSolver<Scalar>::set_tolerance(double tol, typename LoopSolver<Scalar>::ToleranceType toleranceType)
+    void LoopSolver<Scalar>::set_tolerance(double tol, LoopSolverToleranceType toleranceType)
     {
       this->tolerance = tol;
       this->toleranceType = toleranceType;

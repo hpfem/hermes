@@ -200,21 +200,21 @@ namespace Hermes
       virtual void solve(Scalar* initial_guess);
     };
 
+    /// Various tolerances.
+    /// Not necessarily supported by all iterative solvers used.
+    enum LoopSolverToleranceType
+    {
+      AbsoluteTolerance = 0,
+      RelativeTolerance = 1,
+      DivergenceTolerance = 2
+    };
+
     /// \brief Abstract middle-class for solvers that work in a loop of a kind (iterative, multigrid, ...)
     template <typename Scalar>
     class HERMES_API LoopSolver : public LinearMatrixSolver<Scalar>
     {
     public:
       LoopSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
-
-      /// Various tolerances.
-      /// Not necessarily supported by all iterative solvers used.
-      enum ToleranceType
-      {
-        AbsoluteTolerance = 0,
-        RelativeTolerance = 1,
-        DivergenceTolerance = 2
-      };
 
       /// Get the number of iterations performed.
       virtual int get_num_iters() = 0;
@@ -229,7 +229,7 @@ namespace Hermes
       /// Set the convergence tolerance.
       /// @param[in] tolerance - the tolerance to set
       /// @param[in] toleranceType - the tolerance to set
-      virtual void set_tolerance(double tolerance, ToleranceType toleranceType);
+      virtual void set_tolerance(double tolerance, LoopSolverToleranceType toleranceType);
 
       /// Set maximum number of iterations to perform.
       /// @param[in] iters - number of iterations
@@ -242,14 +242,22 @@ namespace Hermes
       double tolerance;
       /// Convergence tolerance type.
       /// See the enum.
-      ToleranceType toleranceType;
+      LoopSolverToleranceType toleranceType;
     };
     
+    /// The solver type.
+    /// Default: CG
+    enum IterSolverType
+    {
+      CG = 0,
+      GMRES = 1,
+      BiCGStab = 2
+    };
 
     /// \brief  Abstract class for defining interface for iterative solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
-    class HERMES_API IterSolver : public LoopSolver<Scalar>
+    class HERMES_API IterSolver : public virtual LoopSolver<Scalar>
     {
     public:
       IterSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);
@@ -265,7 +273,7 @@ namespace Hermes
     /// \brief  Abstract class for defining interface for Algebraic Multigrid solvers.
     /// Internal, though utilizable for defining interfaces to other algebraic packages.
     template <typename Scalar>
-    class HERMES_API AMGSolver : public LoopSolver<Scalar>
+    class HERMES_API AMGSolver : public virtual LoopSolver<Scalar>
     {
     public:
       AMGSolver(MatrixStructureReuseScheme reuse_scheme = HERMES_CREATE_STRUCTURE_FROM_SCRATCH);

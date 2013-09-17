@@ -38,6 +38,18 @@ namespace Hermes
   /// Namespace containing objects for preconditioners.
   namespace Preconditioners
   {
+    /// @ingroup preconds
+    /// The preconditioner type.
+    enum PreconditionerType
+    {
+      Jacobi = 0,
+      MultiColoredSGS = 1,
+      ILU = 2,
+      MultiColoredILU = 3,
+      IC = 4,
+      AIChebyshev = 5
+    };
+
     /// \brief Abstract class to define interface for preconditioners.
     ///
     /// @ingroup preconds

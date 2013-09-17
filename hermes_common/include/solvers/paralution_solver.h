@@ -104,23 +104,12 @@ namespace Hermes
     class ParalutionPrecond : public Hermes::Preconditioners::Precond<Scalar>
     {
     public:
-      /// The preconditioner type.
-      enum ParalutionPreconditionerType
-      {
-        Jacobi = 0,
-        MultiColoredSGS = 1,
-        ILU = 2,
-        MultiColoredILU = 3,
-        IC = 4,
-        AIChebyshev = 5
-      };
-
       /// Constructor.
-      /// \param[in] paralutionPrecondType The preconditioner type to create.
-      ParalutionPrecond(ParalutionPreconditionerType paralutionPrecondType);
+      /// \param[in] preconditionerType The preconditioner type to create.
+      ParalutionPrecond(PreconditionerType preconditionerType);
 
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>& get_paralutionPreconditioner();
-      static paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionPreconditioner(ParalutionPreconditionerType type);
+      static paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionPreconditioner(PreconditionerType preconditionerType);
     private:
       // Paralution preconditioner
       paralution::Preconditioner<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionPreconditioner;
@@ -147,33 +136,13 @@ namespace Hermes
       }
     };
 
-    /// \brief Encapsulation of PARALUTION iterative linear solver.
+    /// \brief ABSTRACT class containing common functionality of both PARALUTION iterative and AMG linear solver.
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API IterativeParalutionLinearMatrixSolver : public IterSolver<Scalar>
+    class HERMES_API AbstractParalutionLinearMatrixSolver : public virtual LoopSolver<Scalar>
     {
     public:
-      /// Constructor of UMFPack solver.
-      /// @param[in] m pointer to matrix
-      /// @param[in] rhs pointer to right hand side vector
-      IterativeParalutionLinearMatrixSolver();
-      IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
-      virtual ~IterativeParalutionLinearMatrixSolver();
-
-      /// The solver type.
-      /// Default: CG
-      enum ParalutionSolverType
-      {
-        CG = 0,
-        GMRES = 1,
-        BiCGStab = 2
-      };
-
-      /// Set current solver type.
-      /// This destroys the current solver (NOT the matrix, and rhs).
-      void set_solver_type(ParalutionSolverType paralutionSolverType);
-
       virtual void solve(Scalar* initial_guess);
       virtual void solve();
 
@@ -182,37 +151,32 @@ namespace Hermes
 
       /// Get the residual value.
       virtual double get_residual();
-
-      virtual void set_precond(Precond<Scalar> *pc);
-
+      
       /// Sets the verboseness.
       virtual void set_verbose_output(bool to_set);
 
       /// Utility.
       virtual int get_matrix_size();
 
-      // Linear Solver creation.
-      static paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionSolver(ParalutionSolverType type);
+    protected:
+      /// Constructor of Abstract PARALUTION solver.
+      /// @param[in] m pointer to matrix
+      /// @param[in] rhs pointer to right hand side vector
+      AbstractParalutionLinearMatrixSolver();
+      AbstractParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
+      virtual ~AbstractParalutionLinearMatrixSolver();
 
-    private:
-      /// Preconditioner.
-      Preconditioners::ParalutionPrecond<Scalar> *preconditioner;
-
-      /// Internal solver.
-      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
       /// Internal solver is not reusable and will have to be re-created.
       void reset_internal_solver();
 
       /// Set internal solver for the current solution.
-      void init_internal_solver();
+      virtual void init_internal_solver() = 0;
 
       /// Matrix to solve.
       ParalutionMatrix<Scalar> *matrix;
+
       /// Right hand side vector.
       ParalutionVector<Scalar> *rhs;
-
-      // Paralution solver type.
-      ParalutionSolverType paralutionSolverType;
 
       // Store num_iters.
       int num_iters;
@@ -220,15 +184,57 @@ namespace Hermes
       // Store final_residual.
       double final_residual;
 
+      /// Internal solver.
+      paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
+
+    private:
+      /// Reset verboseness, tolerances, max iterations, ...
+      void presolve_init();
+
       template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
       template<typename T> friend class AMGParalutionLinearMatrixSolver;
+    };
+
+
+    /// \brief Encapsulation of PARALUTION iterative linear solver.
+    ///
+    /// @ingroup Solvers
+    template <typename Scalar>
+    class HERMES_API IterativeParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual IterSolver<Scalar>
+    {
+    public:
+      /// Constructor of Iterative PARALUTION solver.
+      /// @param[in] m pointer to matrix
+      /// @param[in] rhs pointer to right hand side vector
+      IterativeParalutionLinearMatrixSolver();
+      IterativeParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
+      virtual ~IterativeParalutionLinearMatrixSolver();
+
+      /// Set current solver type.
+      /// This destroys the current solver (NOT the matrix, and rhs).
+      void set_solver_type(IterSolverType iterSolverType);
+      
+      /// Set internal solver for the current solution.
+      virtual void init_internal_solver();
+
+      virtual void set_precond(Precond<Scalar> *pc);
+      
+      // Linear Solver creation.
+      static paralution::IterativeLinearSolver<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* return_paralutionSolver(IterSolverType type);
+
+    private:
+      /// Preconditioner.
+      Preconditioners::ParalutionPrecond<Scalar> *preconditioner;
+      
+      // Paralution solver type.
+      IterSolverType iterSolverType;
     };
 
     /// \brief Encapsulation of PARALUTION AMG linear solver.
     ///
     /// @ingroup Solvers
     template <typename Scalar>
-    class HERMES_API AMGParalutionLinearMatrixSolver : public AMGSolver<Scalar>
+    class HERMES_API AMGParalutionLinearMatrixSolver : public AbstractParalutionLinearMatrixSolver<Scalar>, public virtual AMGSolver<Scalar>
     {
     public:
       /// Constructor of UMFPack solver.
@@ -237,51 +243,16 @@ namespace Hermes
       AMGParalutionLinearMatrixSolver(ParalutionMatrix<Scalar> *m, ParalutionVector<Scalar> *rhs);
       virtual ~AMGParalutionLinearMatrixSolver();
 
-      virtual void solve(Scalar* initial_guess);
-      virtual void solve();
-
-      /// Get number of iterations.
-      virtual int get_num_iters();
-
-      /// Get the residual value.
-      virtual double get_residual();
-
       /// Set smoother (another PARALUTION linear matrix solver).
-      virtual void set_smoother(typename IterativeParalutionLinearMatrixSolver<Scalar>::ParalutionSolverType solverType, typename ParalutionPrecond<Scalar>::ParalutionPreconditionerType preconditionerType);
-
-      /// Sets the verboseness.
-      virtual void set_verbose_output(bool to_set);
-
-      /// Utility.
-      virtual int get_matrix_size();
+      virtual void set_smoother(IterSolverType solverType, PreconditionerType preconditionerType);
+      
+      /// Set internal solver for the current solution.
+      virtual void init_internal_solver();
 
     private:
       /// Smoother.
-      typename IterativeParalutionLinearMatrixSolver<Scalar>::ParalutionSolverType smootherSolverType;
-      typename ParalutionPrecond<Scalar>::ParalutionPreconditionerType smootherPreconditionerType;
-
-      /// Internal solver.
-      paralution::AMG<paralution::LocalMatrix<Scalar>, paralution::LocalVector<Scalar>, Scalar>* paralutionSolver;
-
-      /// Set internal solver for the current solution.
-      void init_internal_solver();
-      /// Internal solver is not reusable and will have to be re-created.
-      void reset_internal_solver();
-      /// Matrix to solve.
-      ParalutionMatrix<Scalar> *matrix;
-      /// Right hand side vector.
-      ParalutionVector<Scalar> *rhs;
-
-      // Linear Solver creation.
-      void init_paralutionSolver();
-
-      // Store num_iters.
-      int num_iters;
-
-      // Store final_residual.
-      double final_residual;
-
-      template<typename T> friend LinearMatrixSolver<T>* create_linear_solver(Matrix<T>* matrix, Vector<T>* rhs, bool use_direct_solver);
+      IterSolverType smootherSolverType;
+      PreconditionerType smootherPreconditionerType;
     };
   }
 }
