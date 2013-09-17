@@ -408,7 +408,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SimpleVector<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void SimpleVector<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       if(!v)
         throw Exceptions::MethodNotOverridenException("Vector<Scalar>::export_to_file");
@@ -508,7 +508,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SimpleVector<Scalar>::import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt)
+    void SimpleVector<Scalar>::import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt)
     {
       switch (fmt)
       {
@@ -1191,7 +1191,33 @@ namespace Hermes
       this->rhs_number_format = number_format;
     }
 
+    template<typename Scalar>
+    void MatrixRhsImportExport<Scalar>::export_to_file(std::string filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    {
+      this->export_to_file(filename.c_str(), var_name, fmt, number_format);
+    }
+
+    template<typename Scalar>
+    void MatrixRhsImportExport<Scalar>::export_to_file(std::string filename, std::string var_name, MatrixExportFormat fmt, char* number_format)
+    {
+      this->export_to_file(filename.c_str(), var_name.c_str(), fmt, number_format);
+    }
+
+    template<typename Scalar>
+    void MatrixRhsImportExport<Scalar>::import_from_file(std::string filename, const char *var_name, MatrixExportFormat fmt)
+    {
+      this->import_from_file(filename.c_str(), var_name, fmt);
+    }
+
+    template<typename Scalar>
+    void MatrixRhsImportExport<Scalar>::import_from_file(std::string filename, std::string var_name, MatrixExportFormat fmt)
+    {
+      this->import_from_file(filename.c_str(), var_name.c_str(), fmt);
+    }
+
     template HERMES_API class MatrixRhsOutput<double>;
     template HERMES_API class MatrixRhsOutput<std::complex<double> >;
+    template HERMES_API class MatrixRhsImportExport<double>;
+    template HERMES_API class MatrixRhsImportExport<std::complex<double> >;
   }
 }

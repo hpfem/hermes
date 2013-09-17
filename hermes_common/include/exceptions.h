@@ -81,7 +81,8 @@ namespace Hermes
         /// Constructor
         /// \param[in] readWrite obvious.
         /// \param[in] filename obvious.
-        IOException(ReadWrite readWrite, char* filename);
+        IOException(ReadWrite readWrite, const char* filename);
+        IOException(ReadWrite readWrite, std::string filename);
 
         ~IOException() throw();
         IOException(const IOException & e);

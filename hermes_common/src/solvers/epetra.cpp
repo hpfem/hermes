@@ -276,7 +276,7 @@ namespace Hermes
     }
    
     template<>
-    void EpetraMatrix<double>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void EpetraMatrix<double>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       throw Exceptions::MethodNotImplementedException("EpetraMatrix<double>::export_to_file");
       /*
@@ -290,7 +290,7 @@ namespace Hermes
     }
     
     template<>
-    void EpetraMatrix<std::complex<double> >::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void EpetraMatrix<std::complex<double> >::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       throw Exceptions::MethodNotImplementedException("EpetraMatrix<double>::export_to_file");
     }
@@ -423,7 +423,7 @@ namespace Hermes
     }
     
     template<>
-    bool EpetraVector<double>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    bool EpetraVector<double>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       switch (fmt)
       {
@@ -437,7 +437,7 @@ namespace Hermes
     }
     
     template<>
-    bool EpetraVector<std::complex<double> >::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    bool EpetraVector<std::complex<double> >::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       return false;
     }

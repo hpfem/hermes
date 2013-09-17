@@ -28,7 +28,6 @@
 #include "mixins.h"
 
 using namespace Hermes::Algebra;
-using namespace Hermes::Solvers;
 
 /// \brief General namespace for the Hermes library.
 namespace Hermes

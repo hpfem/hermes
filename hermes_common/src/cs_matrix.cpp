@@ -346,7 +346,7 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CSMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format, bool invert_storage)
+    void CSMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format, bool invert_storage)
     {
       switch (fmt)
       {
@@ -471,19 +471,19 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CSCMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void CSCMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       CSMatrix<Scalar>::export_to_file(filename, var_name, fmt, number_format, false);
     }
 
     template<typename Scalar>
-    void CSRMatrix<Scalar>::export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
+    void CSRMatrix<Scalar>::export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format)
     {
       CSMatrix<Scalar>::export_to_file(filename, var_name, fmt, number_format, true);
     }
 
     template<typename Scalar>
-    void CSMatrix<Scalar>::import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage)
+    void CSMatrix<Scalar>::import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage)
     {
       switch (fmt)
       {
@@ -555,13 +555,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void CSCMatrix<Scalar>::import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt)
+    void CSCMatrix<Scalar>::import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt)
     {
       CSMatrix<Scalar>::import_from_file(filename, var_name, fmt, false);
     }
 
     template<typename Scalar>
-    void CSRMatrix<Scalar>::import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt)
+    void CSRMatrix<Scalar>::import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt)
     {
       CSMatrix<Scalar>::import_from_file(filename, var_name, fmt, true);
     }

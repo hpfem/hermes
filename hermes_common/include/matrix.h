@@ -65,9 +65,9 @@ namespace Hermes
     AMG_SOLVER_PARALUTION = 2
   };
 
-  namespace Solvers
+  namespace Mixins
   {
-    template <typename Scalar> class HERMES_API CSCIterator;
+    template <typename Scalar> class HERMES_API MatrixRhsImportExport;
   }
 
   /// \brief Namespace containing classes for vector / matrix operations.
@@ -306,7 +306,7 @@ namespace Hermes
 
     /// \brief General (abstract) matrix representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Matrix : public Hermes::Mixins::Loggable
+    class HERMES_API Matrix : public Hermes::Mixins::Loggable, public Hermes::Mixins::MatrixRhsImportExport<Scalar>
     {
     public:
       /// constructor of matrix
@@ -360,19 +360,6 @@ namespace Hermes
 
       /// Multiply with a Scalar.
       virtual void multiply_with_Scalar(Scalar value);
-
-      /// writing matrix.
-      /// @param[in] filename obvious
-      /// @param[in] var_name name of variable (will be written to output file)
-      /// @param[in] fmt output file format
-      /// @param[in] number_format specifies the number format where possible
-      virtual void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf") = 0;
-      
-      /// reading matrix
-      /// @param[in] filename obvious
-      /// @param[in] var_name name of variable (will be searched for to output file)
-      /// @param[in] fmt input file format
-      virtual void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt) { throw Exceptions::MethodNotOverridenException("Matrix<Scalar>::import_from_file"); };
 
       /// Get size of matrix
       /// @return size of matrix
@@ -502,7 +489,7 @@ namespace Hermes
 
     /// \brief General (abstract) vector representation in Hermes.
     template<typename Scalar>
-    class HERMES_API Vector : public Hermes::Mixins::Loggable
+    class HERMES_API Vector : public Hermes::Mixins::Loggable, public Hermes::Mixins::MatrixRhsImportExport<Scalar>
     {
     public:
       /// Default constructor.
@@ -567,20 +554,7 @@ namespace Hermes
 
       /// Get vector length.
       unsigned int get_size() const {return this->size;}
-
-      /// writing matrix.
-      /// @param[in] filename obvious
-      /// @param[in] var_name name of variable (will be written to output file)
-      /// @param[in] fmt output file format
-      /// @param[in] number_format specifies the number format where possible
-      virtual void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf") = 0;
       
-      /// reading matrix
-      /// @param[in] filename obvious
-      /// @param[in] var_name name of variable (will be searched for to output file)
-      /// @param[in] fmt input file format
-      virtual void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt) = 0;
-
     protected:
       /// size of vector
       unsigned int size;
@@ -606,8 +580,8 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
-      virtual void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      virtual void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt);
+      virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      virtual void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Raw data.
       Scalar *v;
@@ -627,7 +601,7 @@ namespace Hermes
   namespace Mixins
   {
     /// \ingroup g_mixins2d
-    /// Mixin that interfaces linear algebra structures output.
+    /// Mixin that interfaces linear algebra structures output on higher levels (for solvers).
     template<typename Scalar>
     class HERMES_API MatrixRhsOutput
     {
@@ -699,6 +673,30 @@ namespace Hermes
       std::string RhsVarname;
       Hermes::Algebra::MatrixExportFormat RhsFormat;
       char* rhs_number_format;
+    };
+
+    /// \ingroup g_mixins2d
+    /// Mixin that interfaces basic linear algebra structures output.
+    template<typename Scalar>
+    class HERMES_API MatrixRhsImportExport
+    {
+    public:
+      /// writing matrix.
+      /// @param[in] filename obvious
+      /// @param[in] var_name name of variable (will be written to output file)
+      /// @param[in] fmt output file format
+      /// @param[in] number_format specifies the number format where possible
+      virtual void export_to_file(const char* filename, const char* var_name, Algebra::MatrixExportFormat fmt, char* number_format = "%lf") = 0;
+      void export_to_file(std::string filename, const char* var_name, Algebra::MatrixExportFormat fmt, char* number_format = "%lf");
+      void export_to_file(std::string filename, std::string var_name, Algebra::MatrixExportFormat fmt, char* number_format = "%lf");
+      
+      /// reading matrix
+      /// @param[in] filename obvious
+      /// @param[in] var_name name of variable (will be searched for to output file)
+      /// @param[in] fmt input file format
+      virtual void import_from_file(const char* filename, const char* var_name, Algebra::MatrixExportFormat fmt) { throw Exceptions::MethodNotOverridenException("MatrixRhsImportExport<Scalar>::import_from_file"); };
+      void import_from_file(std::string filename, const char* var_name, Algebra::MatrixExportFormat fmt);
+      void import_from_file(std::string filename, std::string var_name, Algebra::MatrixExportFormat fmt);
     };
   }
 }

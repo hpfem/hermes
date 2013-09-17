@@ -74,12 +74,12 @@ namespace Hermes
       /// Matrix export method.
       /// Utility version
       /// \See Matrix<Scalar>::export_to_file.
-      void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf", bool invert_storage = false);
+      void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf", bool invert_storage = false);
       
       /// Reading matrix
       /// Utility version
       /// \See Matrix<Scalar>::import_from_file.
-      void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage = false);
+      void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt, bool invert_storage = false);
       
       /// Utility method.
       virtual unsigned int get_nnz() const;
@@ -133,8 +133,8 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt);
+      void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Duplicates a matrix (including allocation).
       virtual CSMatrix<Scalar>* duplicate() const;
@@ -161,8 +161,8 @@ namespace Hermes
 
       virtual void add(unsigned int m, unsigned int n, Scalar v);
 
-      void export_to_file(char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
-      void import_from_file(char *filename, const char *var_name, MatrixExportFormat fmt);
+      void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
+      void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 
       /// Duplicates a matrix (including allocation).
       virtual SparseMatrix<Scalar>* duplicate() const;

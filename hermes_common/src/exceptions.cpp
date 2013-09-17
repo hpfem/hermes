@@ -65,10 +65,16 @@ namespace Hermes
     }
 
 
-    IOException::IOException(ReadWrite readWrite, char* filename_) : Exception(), readWrite(readWrite), filename(NULL)
+    IOException::IOException(ReadWrite readWrite, const char* filename_) : Exception(), readWrite(readWrite), filename(NULL)
     {
       this->filename = (char*)malloc(sizeof(char*) * strlen(filename_));
       ::strcpy(this->filename, filename_);
+    }
+
+    IOException::IOException(ReadWrite readWrite, std::string filename_) : Exception(), readWrite(readWrite), filename(NULL)
+    {
+      this->filename = (char*)malloc(sizeof(char*) * filename_.length());
+      ::strcpy(this->filename, filename_.c_str());
     }
 
     IOException::~IOException() throw()
