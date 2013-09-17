@@ -81,6 +81,7 @@ namespace Hermes
       EpetraMatrix* duplicate() { return new EpetraMatrix<Scalar>(*this); }
       
       virtual void add(unsigned int m, unsigned int n, Scalar **mat, int *rows, int *cols);
+      using Matrix<Scalar>::export_to_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
       virtual unsigned int get_matrix_size() const;
       virtual unsigned int get_nnz() const;
@@ -119,6 +120,7 @@ namespace Hermes
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
+      using Vector<Scalar>::export_to_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
 
     protected:

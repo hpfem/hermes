@@ -554,7 +554,6 @@ namespace Hermes
 
       /// Get vector length.
       unsigned int get_size() const {return this->size;}
-      
     protected:
       /// size of vector
       unsigned int size;
@@ -580,6 +579,9 @@ namespace Hermes
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
       virtual void add_vector(Vector<Scalar>* vec);
       virtual void add_vector(Scalar* vec);
+      
+      using Vector<Scalar>::export_to_file;
+      using Vector<Scalar>::import_from_file;
       virtual void export_to_file(const char *filename, const char *var_name, MatrixExportFormat fmt, char* number_format = "%lf");
       virtual void import_from_file(const char *filename, const char *var_name, MatrixExportFormat fmt);
 

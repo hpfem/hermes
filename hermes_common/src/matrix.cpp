@@ -122,9 +122,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    Matrix<Scalar>::Matrix(unsigned int size)
+    Matrix<Scalar>::Matrix(unsigned int size) : size(size)
     {
-      this->size = size;
     }
 
     template<typename Scalar>
