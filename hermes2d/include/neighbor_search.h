@@ -432,6 +432,7 @@ namespace Hermes
       template<typename T> friend class DiscontinuousFunc;
       template<typename T> friend class MultimeshDGNeighborTree;
       template<typename T> friend class DiscreteProblemDGAssembler;
+      template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
       template<typename T> friend class ErrorThreadCalculator<T>::DGErrorCalculator;
     };
   }

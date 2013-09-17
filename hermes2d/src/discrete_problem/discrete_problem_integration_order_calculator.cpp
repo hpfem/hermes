@@ -14,6 +14,7 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "discrete_problem.h"
+#include "discrete_problem/dg/discrete_problem_dg_assembler.h"
 #include "function/exact_solution.h"
 #include "global.h"
 #include "quadrature/limit_order.h"
@@ -110,10 +111,12 @@ namespace Hermes
       // order of solutions from the previous Newton iteration etc..
       Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = NULL;
-      int ext_size = std::max(form->ext.size(), form->wf->ext.size());
+      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       if(ext_size > 0)
+      {
         ext_ord = new Func<Hermes::Ord>*[ext_size];
-      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+      }
 
       // Order of shape functions.
       int max_order_j = spaces[form->j]->get_element_order(current_state->e[form->j]->id);
@@ -166,10 +169,13 @@ namespace Hermes
       // order of solutions from the previous Newton iteration etc..
       Func<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new Func<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset];
       Func<Hermes::Ord>** ext_ord = NULL;
-      int ext_size = std::max(form->ext.size(), form->wf->ext.size());
+      
+      int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       if(ext_size > 0)
+      {
         ext_ord = new Func<Hermes::Ord>*[ext_size];
-      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
+      }
 
       // Order of shape functions.
       int max_order_i = spaces[form->i]->get_element_order(current_state->e[form->i]->id);
@@ -238,7 +244,8 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext)
+    template<typename FormType>
+    void DiscreteProblemIntegrationOrderCalculator<Scalar>::deinit_ext_orders(Form<Scalar> *form, FormType** oi, FormType** oext)
     {
       unsigned int prev_size = oi ? (this->rungeKutta ? this->RK_original_spaces_count : form->wf->get_neq() - form->u_ext_offset) : 0;
       for(int i = 0; i < prev_size; i++)
@@ -279,18 +286,138 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form(MatrixFormDG<Scalar>* mfDG, PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u)
+    DiscontinuousFunc<Ord>* DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunctionSharedPtr<Scalar> fu)
     {
-      throw Hermes::Exceptions::Exception("DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form not implemented.");
-      return -1;
+      int inc = (fu->get_num_components() == 2) ? 1 : 0;
+      int central_order = fu->get_edge_fn_order(ns->active_edge) + inc;
+      int neighbor_order = fu->get_edge_fn_order(ns->neighbor_edge.local_num_of_edge) + inc;
+      return new DiscontinuousFunc<Ord>(init_fn_ord(central_order), init_fn_ord(neighbor_order));
     }
 
     template<typename Scalar>
-    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<Solution<Scalar> > u_ext,
-      PrecalcShapeset* fv, RefMap* ru, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v)
+    DiscontinuousFunc<Hermes::Ord>** DiscreteProblemIntegrationOrderCalculator<Scalar>::init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext, 
+      NeighborSearch<Scalar>** neighbor_searches)
     {
-      throw Hermes::Exceptions::Exception("DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form not implemented.");
-      return -1;
+      DiscontinuousFunc<Ord>** fake_ext_fns = new DiscontinuousFunc<Ord>*[ext.size()];
+      for (unsigned int j = 0; j < ext.size(); j++)
+        fake_ext_fns[j] = init_ext_fn_ord(DiscreteProblemDGAssembler<Scalar>::get_neighbor_search_ext(this->selectiveAssembler->get_weak_formulation(), neighbor_searches, j), ext[j]);
+
+      return fake_ext_fns;
+    }
+
+    template<typename Scalar>
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
+    {
+      NeighborSearch<Scalar>* nbs_u = neighbor_searches[mfDG->j];
+
+      unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset;
+
+      // Order to return.
+      int order = 0;
+
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : mfDG->wf->get_neq() - mfDG->u_ext_offset];
+
+      if(current_u_ext)
+        for(int i = 0; i < prev_size; i++)
+          if(current_u_ext[i + mfDG->u_ext_offset])
+            u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + mfDG->u_ext_offset]);
+          else
+            u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
+
+      // Order of additional external functions.
+      DiscontinuousFunc<Ord>** ext_ord;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
+      if(ext_ord_fns.size() > 0)
+        ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
+
+      // Order of shape functions.
+      int max_order_j = spaces[mfDG->j]->get_element_order(current_state->e[mfDG->j]->id);
+      int max_order_i = spaces[mfDG->i]->get_element_order(current_state->e[mfDG->i]->id);
+      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+        max_order_i = H2D_GET_V_ORDER(max_order_i);
+      else
+        max_order_i = H2D_GET_H_ORDER(max_order_i);
+      if(H2D_GET_V_ORDER(max_order_j) > H2D_GET_H_ORDER(max_order_j))
+        max_order_j = H2D_GET_V_ORDER(max_order_j);
+      else
+        max_order_j = H2D_GET_H_ORDER(max_order_j);
+
+      // Order of shape functions.
+      DiscontinuousFunc<Ord>* ou = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_j), neighbor_supp_u);
+      DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
+
+      // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      double fake_wt = 1.0;
+
+      // Total order of the matrix form.
+      Ord o = mfDG->ord(1, &fake_wt, u_ext_ord, ou, ov, tmp, ext_ord);
+      delete tmp;
+
+      adjust_order_to_refmaps(mfDG, order, &o, current_refmaps);
+
+      // Cleanup.
+      deinit_ext_orders(mfDG, u_ext_ord, ext_ord);
+      ou->free_ord();
+      delete ou;
+      ov->free_ord();
+      delete ov;
+
+      return order;
+    }
+
+    template<typename Scalar>
+    int DiscreteProblemIntegrationOrderCalculator<Scalar>::calc_order_dg_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* current_state, VectorFormDG<Scalar>* vfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches)
+    {
+      NeighborSearch<Scalar>* nbs_u = neighbor_searches[vfDG->i];
+
+      unsigned int prev_size = this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset;
+
+      // Order to return.
+      int order = 0;
+
+      DiscontinuousFunc<Hermes::Ord>** u_ext_ord = current_u_ext == NULL ? NULL : new DiscontinuousFunc<Hermes::Ord>*[this->rungeKutta ? this->RK_original_spaces_count : vfDG->wf->get_neq() - vfDG->u_ext_offset];
+
+      if(current_u_ext)
+        for(int i = 0; i < prev_size; i++)
+          if(current_u_ext[i + vfDG->u_ext_offset])
+            u_ext_ord[i] = init_ext_fn_ord(nbs_u, current_u_ext[i + vfDG->u_ext_offset]);
+          else
+            u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
+
+      // Order of additional external functions.
+      DiscontinuousFunc<Ord>** ext_ord;
+      Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
+      if(ext_ord_fns.size() > 0)
+        ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
+
+      // Order of shape functions.
+      int max_order_i = spaces[vfDG->i]->get_element_order(current_state->e[vfDG->i]->id);
+      if(H2D_GET_V_ORDER(max_order_i) > H2D_GET_H_ORDER(max_order_i))
+        max_order_i = H2D_GET_V_ORDER(max_order_i);
+      else
+        max_order_i = H2D_GET_H_ORDER(max_order_i);
+
+      // Order of shape functions.
+      DiscontinuousFunc<Ord>* ov = new DiscontinuousFunc<Ord>(init_fn_ord(max_order_i), neighbor_supp_v);
+
+      // Order of geometric attributes (eg. for multiplication of a solution with coordinates, normals, etc.).
+      Geom<Hermes::Ord> *tmp = init_geom_ord();
+      double fake_wt = 1.0;
+
+      // Total order of the matrix form.
+      Ord o = vfDG->ord(1, &fake_wt, u_ext_ord, ov, tmp, ext_ord);
+
+      delete tmp;
+
+      adjust_order_to_refmaps(vfDG, order, &o, current_refmaps);
+
+      // Cleanup.
+      deinit_ext_orders(vfDG, u_ext_ord, ext_ord);
+      ov->free_ord();
+      delete ov;
+
+      return order;
     }
 
     template class HERMES_API DiscreteProblemIntegrationOrderCalculator<double>;

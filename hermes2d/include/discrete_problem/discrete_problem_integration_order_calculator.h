@@ -60,23 +60,21 @@ namespace Hermes
       void init_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext, Solution<Scalar>** current_u_ext, Traverse::State* current_state);
       /// \ingroup Helper methods inside {calc_order_*, assemble_*}
       /// Cleans up after init_ext_orders.
-      void deinit_ext_orders(Form<Scalar> *form, Func<Hermes::Ord>** oi, Func<Hermes::Ord>** oext);
+      template<typename FormType>
+      void deinit_ext_orders(Form<Scalar> *form, FormType** oi, FormType** oext);
 
       /// Calculates integration order for DG matrix forms.
-      /// NOT IMPLEMENTED.
-      int calc_order_dg_matrix_form(MatrixFormDG<Scalar>* mfDG, PrecalcShapeset* fu, PrecalcShapeset* fv, RefMap* ru, 
-        bool neighbor_supp_u, bool neighbor_supp_v, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_u);
+      int calc_order_dg_matrix_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, MatrixFormDG<Scalar>* mfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_u, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches);
 
       /// Calculates integration order for DG vector forms.
-      /// NOT IMPLEMENTED.
-      int calc_order_dg_vector_form(VectorFormDG<Scalar>* vfDG, Hermes::vector<Solution<Scalar> > u_ext,
-        PrecalcShapeset* fv, RefMap* ru, LightArray<NeighborSearch<Scalar>*>& neighbor_searches, int neighbor_index_v);
+      int calc_order_dg_vector_form(const Hermes::vector<SpaceSharedPtr<Scalar> >& spaces, Traverse::State* state, VectorFormDG<Scalar>* vfDG, RefMap** current_refmaps, Solution<Scalar>** current_u_ext, bool neighbor_supp_v, NeighborSearch<Scalar>** neighbor_searches);
 
-      DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunction<Scalar>* fu);
+      /// One external function for DG.
+      DiscontinuousFunc<Hermes::Ord>* init_ext_fn_ord(NeighborSearch<Scalar>* ns, MeshFunctionSharedPtr<Scalar> fu);
 
       /// Initialize orders of external functions for DG forms.
-      Func<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
-        LightArray<NeighborSearch<Scalar>*>& neighbor_searches);
+      DiscontinuousFunc<Hermes::Ord>** init_ext_fns_ord(Hermes::vector<MeshFunctionSharedPtr<Scalar> > &ext,
+        NeighborSearch<Scalar>** neighbor_searches);
 
       /// For selective assembling.
       DiscreteProblemSelectiveAssembler<Scalar>* selectiveAssembler;

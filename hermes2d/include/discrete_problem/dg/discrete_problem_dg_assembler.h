@@ -55,7 +55,6 @@ namespace Hermes
       void deinit_assembling_one_state();
 
       static unsigned int dg_order;
-
     private:
       /// There is a matrix form set on DG_INNER_EDGE area or not.
       bool DG_matrix_forms_present;
@@ -79,9 +78,6 @@ namespace Hermes
       /// Deinitialize neighbors.
       void deinit_neighbors(NeighborSearch<Scalar>** neighbor_searches, Traverse::State* current_state);
 
-      /// Finds the correct NeighborSearch.
-      NeighborSearch<Scalar>* get_neighbor_search_ext(NeighborSearch<Scalar>** neighbor_searches, int index);
-      
       NeighborSearch<Scalar>*** neighbor_searches;
       int* num_neighbors;
       bool** processed;
@@ -110,6 +106,10 @@ namespace Hermes
       const Hermes::vector<MeshSharedPtr>& meshes;
 
       template<typename T> friend class DiscreteProblem;
+      template<typename T> friend class DiscreteProblemIntegrationOrderCalculator;
+
+      /// Finds the correct NeighborSearch.
+      static NeighborSearch<Scalar>* get_neighbor_search_ext(WeakForm<Scalar>* wf, NeighborSearch<Scalar>** neighbor_searches, int index);
 
 #ifdef DEBUG_DG_ASSEMBLING
       void debug();

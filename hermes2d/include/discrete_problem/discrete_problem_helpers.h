@@ -53,12 +53,13 @@ namespace Hermes
       template<typename Scalar>
       class HERMES_API DiscreteProblemWeakForm
       {
+      public:
+        WeakForm<Scalar>* get_weak_formulation() const;
+
       protected:
         DiscreteProblemWeakForm(WeakForm<Scalar>* wf = NULL);
 
         virtual void set_weak_formulation(WeakForm<Scalar>* wf);
-
-        WeakForm<Scalar>* get_weak_formulation() const;
         
         /// Weak formulation.
         WeakForm<Scalar>* wf;
