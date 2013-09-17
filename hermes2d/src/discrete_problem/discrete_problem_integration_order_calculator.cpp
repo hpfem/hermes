@@ -113,10 +113,8 @@ namespace Hermes
       Func<Hermes::Ord>** ext_ord = NULL;
       int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       if(ext_size > 0)
-      {
         ext_ord = new Func<Hermes::Ord>*[ext_size];
-        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
-      }
+      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
       // Order of shape functions.
       int max_order_j = spaces[form->j]->get_element_order(current_state->e[form->j]->id);
@@ -172,10 +170,8 @@ namespace Hermes
       
       int ext_size = form->ext.size() ? form->ext.size() : form->wf->ext.size();
       if(ext_size > 0)
-      {
         ext_ord = new Func<Hermes::Ord>*[ext_size];
-        init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
-      }
+      init_ext_orders(form, u_ext_ord, ext_ord, current_u_ext, current_state);
 
       // Order of shape functions.
       int max_order_i = spaces[form->i]->get_element_order(current_state->e[form->i]->id);
@@ -325,7 +321,7 @@ namespace Hermes
             u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
-      DiscontinuousFunc<Ord>** ext_ord;
+      DiscontinuousFunc<Ord>** ext_ord = NULL;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = mfDG->ext.size() ? mfDG->ext.size() : mfDG->wf->ext.size();
       if(ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
@@ -386,7 +382,7 @@ namespace Hermes
             u_ext_ord[i] = new DiscontinuousFunc<Ord>(init_fn_ord(0), false, false);
 
       // Order of additional external functions.
-      DiscontinuousFunc<Ord>** ext_ord;
+      DiscontinuousFunc<Ord>** ext_ord = NULL;
       Hermes::vector<MeshFunctionSharedPtr<Scalar> > ext_ord_fns = vfDG->ext.size() ? vfDG->ext.size() : vfDG->wf->ext.size();
       if(ext_ord_fns.size() > 0)
         ext_ord = init_ext_fns_ord(ext_ord_fns, neighbor_searches);
