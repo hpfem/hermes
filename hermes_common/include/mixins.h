@@ -54,7 +54,9 @@ namespace Hermes
       Loggable(bool verbose_output = false, callbackFn verbose_callback = NULL);
 
       void set_logFile_name(const char* filename);
+      void set_logFile_name(std::string filename);
       static void set_static_logFile_name(const char* filename);
+      static void set_static_logFile_name(std::string filename);
 
       void info(const char* msg, ...) const;
       void info_if(bool cond, const char* msg, ...) const;

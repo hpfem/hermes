@@ -41,6 +41,11 @@ namespace Hermes
       strcpy(this->logFileName, filename);
     }
 
+    void Loggable::set_logFile_name(std::string filename)
+    {
+      this->set_logFile_name(filename.c_str());
+    }
+
     void Loggable::set_static_logFile_name(const char* filename)
     {
       if(Loggable::staticLogFileName)
@@ -48,6 +53,11 @@ namespace Hermes
       int strlength = std::strlen(filename);
       Loggable::staticLogFileName = new char[strlength];
       strcpy(Loggable::staticLogFileName, filename);
+    }
+
+    void Loggable::set_static_logFile_name(std::string filename)
+    {
+      Loggable::set_static_logFile_name(filename.c_str());
     }
 
     bool Loggable::get_verbose_output() const
