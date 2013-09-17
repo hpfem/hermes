@@ -244,7 +244,7 @@ namespace Hermes
 
       /// Function returning the integration order that
       /// should be used when integrating the function.
-      virtual Hermes::Ord ord(Hermes::Ord x, Hermes::Ord y) const;
+      virtual Hermes::Ord ord(double x, double y) const;
 
       MeshFunction<double>* clone() const;
     };

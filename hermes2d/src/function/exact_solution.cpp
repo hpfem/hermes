@@ -566,7 +566,7 @@ namespace Hermes
       throw Exceptions::Exception("ExactSolutionEggShell::derivatives should never be called.");
     }
 
-    Hermes::Ord ExactSolutionEggShell::ord(Hermes::Ord x, Hermes::Ord y) const
+    Hermes::Ord ExactSolutionEggShell::ord(double x, double y) const
     {
       throw Exceptions::Exception("ExactSolutionEggShell::ord should never be called.");
       return Hermes::Ord(0);
