@@ -396,6 +396,8 @@ namespace Hermes
     template class HERMES_API ExternalSolver<std::complex<double> >;
     template class HERMES_API DirectSolver<double>;
     template class HERMES_API DirectSolver<std::complex<double> >;
+    template class HERMES_API LoopSolver<double>;
+    template class HERMES_API LoopSolver<std::complex<double> >;
     template class HERMES_API IterSolver<double>;
     template class HERMES_API IterSolver<std::complex<double> >;
     template class HERMES_API AMGSolver<double>;
