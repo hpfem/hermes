@@ -359,10 +359,13 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void EpetraVector<Scalar>::change_sign()
+    Vector<Scalar>* EpetraVector<Scalar>::change_sign()
     {
-      for (unsigned int i = 0; i < this->size; i++) (*vec)[i] *= -1.;
-      for (unsigned int i = 0; i < this->size; i++) (*vec_im)[i] *= -1.;
+      for (unsigned int i = 0; i < this->size; i++)
+        (*vec)[i] *= -1.;
+      for (unsigned int i = 0; i < this->size; i++)
+        (*vec_im)[i] *= -1.;
+      return this;
     }
 
     template<typename Scalar>

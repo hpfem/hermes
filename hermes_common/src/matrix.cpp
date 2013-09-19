@@ -381,29 +381,37 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void Vector<Scalar>::set_vector(Hermes::Algebra::Vector<Scalar>* vec)
+    Vector<Scalar>* Vector<Scalar>::set_vector(Hermes::Algebra::Vector<Scalar>* vec)
     {
       assert(this->get_size() == vec->get_size());
-      for (unsigned int i = 0; i < this->get_size(); i++) this->set(i, vec->get(i));
+      for (unsigned int i = 0; i < this->get_size(); i++)
+        this->set(i, vec->get(i));
+      return this;
     }
 
     template<typename Scalar>
-    void Vector<Scalar>::set_vector(Scalar* vec)
+    Vector<Scalar>* Vector<Scalar>::set_vector(Scalar* vec)
     {
-      for (unsigned int i = 0; i < this->get_size(); i++) this->set(i, vec[i]);
+      for (unsigned int i = 0; i < this->get_size(); i++)
+        this->set(i, vec[i]);
+      return this;
     }
 
     template<typename Scalar>
-    void Vector<Scalar>::add_vector(Hermes::Algebra::Vector<Scalar>* vec)
+    Vector<Scalar>* Vector<Scalar>::add_vector(Hermes::Algebra::Vector<Scalar>* vec)
     {
       assert(this->get_size() == vec->get_size());
-      for (unsigned int i = 0; i < this->get_size(); i++) this->add(i, vec->get(i));
+      for (unsigned int i = 0; i < this->get_size(); i++)
+        this->add(i, vec->get(i));
+      return this;
     }
 
     template<typename Scalar>
-    void Vector<Scalar>::add_vector(Scalar* vec)
+    Vector<Scalar>* Vector<Scalar>::add_vector(Scalar* vec)
     {
-      for (unsigned int i = 0; i < this->get_size(); i++) this->add(i, vec[i]);
+      for (unsigned int i = 0; i < this->get_size(); i++)
+        this->add(i, vec[i]);
+      return this;
     }
 
     template<typename Scalar>
@@ -595,6 +603,25 @@ namespace Hermes
     }
 
     template<typename Scalar>
+    Vector<Scalar>* SimpleVector<Scalar>::set_vector(Hermes::Algebra::Vector<Scalar>* vec)
+    {
+      assert(this->get_size() == vec->get_size());
+      SimpleVector<Scalar>* simple_vec = (SimpleVector<Scalar>*)vec;
+      if(simple_vec)
+        memcpy(this->v, simple_vec->v, sizeof(Scalar)*this->size);
+      else
+        Vector<Scalar>::set_vector(vec);
+      return this;
+    }
+
+    template<typename Scalar>
+    Vector<Scalar>* SimpleVector<Scalar>::set_vector(Scalar* vec)
+    {
+      memcpy(this->v, vec, sizeof(Scalar)*this->size);
+      return this;
+    }
+
+    template<typename Scalar>
     void SimpleVector<Scalar>::alloc(unsigned int n)
     {
       free();
@@ -604,10 +631,11 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SimpleVector<Scalar>::change_sign()
+    Vector<Scalar>* SimpleVector<Scalar>::change_sign()
     {
       for (unsigned int i = 0; i < this->size; i++)
         v[i] *= -1.;
+      return this;
     }
 
     template<typename Scalar>
@@ -658,29 +686,32 @@ namespace Hermes
     }
 
     template<typename Scalar>
-    void SimpleVector<Scalar>::add_vector(Vector<Scalar>* vec)
-    {
+    Vector<Scalar>* SimpleVector<Scalar>::add_vector(Vector<Scalar>* vec)
+		{
       assert(this->get_size() == vec->get_size());
       for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec->get(i));
+      return this;
+
     }
 
     template<typename Scalar>
-    void SimpleVector<Scalar>::add_vector(Scalar* vec)
+    Vector<Scalar>* SimpleVector<Scalar>::add_vector(Scalar* vec)
     {
       for (unsigned int i = 0; i < this->get_size(); i++)
         this->add(i, vec[i]);
+      return this;
     }
 
-    template HERMES_API void Vector<double>::set_vector(Vector<double>* vec);
-    template HERMES_API void Vector<double>::set_vector(double* vec);
-    template HERMES_API void Vector<double>::add_vector(Vector<double>* vec);
-    template HERMES_API void Vector<double>::add_vector(double* vec);
+    template HERMES_API Vector<double>* Vector<double>::set_vector(Vector<double>* vec);
+    template HERMES_API Vector<double>* Vector<double>::set_vector(double* vec);
+    template HERMES_API Vector<double>* Vector<double>::add_vector(Vector<double>* vec);
+    template HERMES_API Vector<double>* Vector<double>::add_vector(double* vec);
 
-    template HERMES_API void Vector<std::complex<double> >::set_vector(Vector<std::complex<double> >* vec);
-    template HERMES_API void Vector<std::complex<double> >::set_vector(std::complex<double> * vec);
-    template HERMES_API void Vector<std::complex<double> >::add_vector(Vector<std::complex<double> >* vec);
-    template HERMES_API void Vector<std::complex<double> >::add_vector(std::complex<double> * vec);
+    template HERMES_API Vector<std::complex<double> >* Vector<std::complex<double> >::set_vector(Vector<std::complex<double> >* vec);
+    template HERMES_API Vector<std::complex<double> >* Vector<std::complex<double> >::set_vector(std::complex<double> * vec);
+    template HERMES_API Vector<std::complex<double> >* Vector<std::complex<double> >::add_vector(Vector<std::complex<double> >* vec);
+    template HERMES_API Vector<std::complex<double> >* Vector<std::complex<double> >::add_vector(std::complex<double> * vec);
 
     template<>
     HERMES_API SparseMatrix<double>* create_matrix(bool use_direct_solver)

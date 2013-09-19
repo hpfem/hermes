@@ -521,7 +521,7 @@ namespace Hermes
       virtual void zero() = 0;
 
       /// Multiply by minus one.
-      virtual void change_sign() = 0;
+      virtual Vector<Scalar>* change_sign() = 0;
 
       /// set the entry on a specified position
       ///
@@ -536,14 +536,14 @@ namespace Hermes
       virtual void add(unsigned int idx, Scalar y) = 0;
 
       /// Set values from a user-provided vector.
-      virtual void set_vector(Vector<Scalar>* vec);
+      virtual Vector<Scalar>* set_vector(Vector<Scalar>* vec);
       /// Set values from a user-provided array.
-      virtual void set_vector(Scalar* vec);
+      virtual Vector<Scalar>* set_vector(Scalar* vec);
 
       /// Add a vector.
-      virtual void add_vector(Vector<Scalar>* vec);
+      virtual Vector<Scalar>* add_vector(Vector<Scalar>* vec);
       /// Add a vector.
-      virtual void add_vector(Scalar* vec);
+      virtual Vector<Scalar>* add_vector(Scalar* vec);
 
       /// update subset of the elements
       ///
@@ -573,12 +573,14 @@ namespace Hermes
       virtual Scalar get(unsigned int idx) const;
       virtual void extract(Scalar *v) const;
       virtual void zero();
-      virtual void change_sign();
+      virtual Vector<Scalar>* change_sign();
       virtual void set(unsigned int idx, Scalar y);
       virtual void add(unsigned int idx, Scalar y);
       virtual void add(unsigned int n, unsigned int *idx, Scalar *y);
-      virtual void add_vector(Vector<Scalar>* vec);
-      virtual void add_vector(Scalar* vec);
+      virtual Vector<Scalar>* add_vector(Vector<Scalar>* vec);
+      virtual Vector<Scalar>* add_vector(Scalar* vec);
+      virtual Vector<Scalar>* set_vector(Vector<Scalar>* vec);
+      virtual Vector<Scalar>* set_vector(Scalar* vec);
       
       using Vector<Scalar>::export_to_file;
       using Vector<Scalar>::import_from_file;
