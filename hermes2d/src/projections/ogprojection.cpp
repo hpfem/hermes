@@ -126,6 +126,20 @@ namespace Hermes
 
     template<typename Scalar>
     void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
+      MeshFunctionSharedPtr<Scalar> source_meshfn, Hermes::Algebra::Vector<Scalar>* target_vec,
+      NormType proj_norm)
+    {
+      if(target_vec->get_size() != space->get_num_dofs())
+        throw Exceptions::ValueException("target_vec->size", target_vec->get_size(), space->get_num_dofs());
+
+      Scalar* vec = new Scalar[target_vec->get_size()];
+      project_global(space, source_meshfn, vec, proj_norm);
+      target_vec->set_vector(vec);
+      delete [] vec;
+    }
+
+    template<typename Scalar>
+    void OGProjection<Scalar>::project_global(SpaceSharedPtr<Scalar> space,
       MeshFunctionSharedPtr<Scalar> source_meshfn, Scalar* target_vec,
       NormType proj_norm)
     {
@@ -220,6 +234,19 @@ namespace Hermes
           project_global(spaces[i], source_slns[i], target_vec + start_index, proj_norms[i]);
         start_index += spaces[i]->get_num_dofs();
       }
+    }
+
+    template<typename Scalar>
+    void OGProjection<Scalar>::project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns,
+      Hermes::Algebra::Vector<Scalar>* target_vec, Hermes::vector<NormType> proj_norms)
+    {
+      if(target_vec->get_size() != Space<Scalar>::get_num_dofs(spaces))
+        throw Exceptions::ValueException("target_vec->size", target_vec->get_size(), Space<Scalar>::get_num_dofs(spaces));
+
+      Scalar* vec = new Scalar[target_vec->get_size()];
+      project_global(spaces, source_slns, vec, proj_norms);
+      target_vec->set_vector(vec);
+      delete [] vec;
     }
 
     template<typename Scalar>

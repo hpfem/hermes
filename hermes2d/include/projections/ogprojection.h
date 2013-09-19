@@ -77,6 +77,9 @@ namespace Hermes
       static void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
         Scalar* target_vec, NormType proj_norm = HERMES_UNSET_NORM);
 
+      static void project_global(SpaceSharedPtr<Scalar> space, MeshFunctionSharedPtr<Scalar> source_meshfn,
+        Hermes::Algebra::Vector<Scalar>* target_vec, NormType proj_norm = HERMES_UNSET_NORM);
+
       /// Wrapper that delivers a Solution instead of coefficient vector.
       static void project_global(SpaceSharedPtr<Scalar> space,
         MeshFunctionSharedPtr<Scalar> source_sln, MeshFunctionSharedPtr<Scalar>  target_sln,
@@ -86,6 +89,9 @@ namespace Hermes
       static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
         Scalar* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
 
+      static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces, Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_meshfns,
+        Hermes::Algebra::Vector<Scalar>* target_vec, Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>());
+      
       static void project_global(Hermes::vector<SpaceSharedPtr<Scalar> > spaces,
         Hermes::vector<MeshFunctionSharedPtr<Scalar> > source_slns, Hermes::vector<MeshFunctionSharedPtr<Scalar> > target_slns,
         Hermes::vector<NormType> proj_norms = Hermes::vector<NormType>(), bool delete_old_mesh = false);
