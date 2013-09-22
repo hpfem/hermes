@@ -18,6 +18,7 @@
 #include "solution_h2d_xml.h"
 #include "ogprojection.h"
 #include "api2d.h"
+#include "algebra/dense_matrix_operations.h"
 
 namespace Hermes
 {
@@ -448,7 +449,7 @@ namespace Hermes
           // solve for the monomial coefficients
           if(mono_lu.mat[this->mode][o] == NULL)
             mono_lu.mat[this->mode][o] = calc_mono_matrix(o, mono_lu.perm[this->mode][o]);
-          lubksb(mono_lu.mat[this->mode][o], np, mono_lu.perm[this->mode][o], val);
+          lubksb<double, Scalar>(mono_lu.mat[this->mode][o], np, mono_lu.perm[this->mode][o], val);
         }
       }
 

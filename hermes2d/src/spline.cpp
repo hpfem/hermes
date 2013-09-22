@@ -14,8 +14,10 @@
 // along with Hermes2D.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "spline.h"
+#include "algebra/dense_matrix_operations.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
+
 namespace Hermes
 {
   namespace Hermes2D

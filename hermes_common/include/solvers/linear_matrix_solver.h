@@ -25,6 +25,7 @@
 #include "precond.h"
 #include "exceptions.h"
 #include "cs_matrix.h"
+#include "vector.h"
 #include "mixins.h"
 
 using namespace Hermes::Algebra;
@@ -149,7 +150,7 @@ namespace Hermes
     /// \brief Special-purpose abstract class for using external solvers.
     /// For examples implementation, see the class SimpleExternalSolver.
     template <typename Scalar>
-    class HERMES_API ExternalSolver : public LinearMatrixSolver<Scalar>, public Mixins::MatrixRhsOutput<Scalar>
+    class HERMES_API ExternalSolver : public LinearMatrixSolver<Scalar>, public Algebra::Mixins::MatrixRhsOutput<Scalar>
     {
     public:
       typedef ExternalSolver<Scalar>* (*creation)(CSCMatrix<Scalar> *m, SimpleVector<Scalar> *rhs);

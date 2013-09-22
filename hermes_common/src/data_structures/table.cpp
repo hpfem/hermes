@@ -17,6 +17,7 @@
 */
 #include "table.h"
 #include "matrix.h"
+#include "dense_matrix_operations.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 

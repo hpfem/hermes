@@ -22,8 +22,10 @@
 #include "mesh.h"
 #include "quad_all.h"
 #include "matrix.h"
+#include "algebra/dense_matrix_operations.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
+
 namespace Hermes
 {
   namespace Hermes2D

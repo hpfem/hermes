@@ -77,7 +77,7 @@ namespace Hermes
       public Hermes::Mixins::IntegrableWithGlobalOrder,
       public Hermes::Mixins::SettableComputationTime,
       public Hermes::Hermes2D::Mixins::SettableSpaces<Scalar>,
-      public Hermes::Mixins::MatrixRhsOutput<Scalar>
+      public Hermes::Algebra::Mixins::MatrixRhsOutput<Scalar>
     {
     public:
       /// Constructor.

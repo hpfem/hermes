@@ -16,6 +16,7 @@
 #include "global.h"
 #include "shapeset.h"
 #include "matrix.h"
+#include "algebra/dense_matrix_operations.h"
 
 using namespace Hermes::Algebra::DenseMatrixOperations;
 

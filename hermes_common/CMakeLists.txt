@@ -10,6 +10,9 @@ project(hermes_common)
 
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/algebra)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/data_structures)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/util)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/solvers)
   
   #
@@ -17,17 +20,21 @@ project(hermes_common)
   #
   set(SRC
     src/mixins.cpp
-    src/callstack.cpp
-    src/matrix.cpp
-    src/cs_matrix.cpp
-    src/api.cpp
-    src/range.cpp
-    src/table.cpp
-    src/qsort.cpp
-    src/c99_functions.cpp
     src/ord.cpp
     src/hermes_function.cpp
     src/exceptions.cpp
+    src/api.cpp
+    src/algebra/algebra_utilities.cpp
+    src/algebra/matrix.cpp
+    src/algebra/vector.cpp
+    src/algebra/algebra_mixins.cpp
+    src/algebra/dense_matrix_operations.cpp
+    src/algebra/cs_matrix.cpp
+    src/util/callstack.cpp
+    src/util/qsort.cpp
+    src/util/c99_functions.cpp
+    src/data_structures/range.cpp
+    src/data_structures/table.cpp
     src/solvers/linear_matrix_solver.cpp
     src/solvers/epetra.cpp
     src/solvers/aztecoo_solver.cpp
@@ -45,20 +52,25 @@ project(hermes_common)
 
   set(HEADERS
     include/mixins.h
-    include/callstack.h
     include/common.h
-    include/matrix.h
-    include/cs_matrix.h
     include/api.h
-    include/array.h
-    include/range.h
-    include/table.h
-    include/qsort.h
-    include/c99_functions.h
     include/ord.h
     include/hermes_function.h
     include/exceptions.h
-    include/vector.h
+    include/util/c99_functions.h
+    include/util/compat.h
+    include/util/callstack.h
+    include/util/qsort.h
+    include/algebra/algebra_utilities.h
+    include/algebra/matrix.h
+    include/algebra/vector.h
+    include/algebra/cs_matrix.h
+    include/algebra/algebra_mixins.h
+    include/algebra/dense_matrix_operations.h
+    include/data_structures/array.h
+    include/data_structures/range.h
+    include/data_structures/table.h
+    include/data_structures/hermes_vector.h
     include/solvers/linear_matrix_solver.h
     include/solvers/epetra.h
     include/solvers/aztecoo_solver.h
@@ -90,6 +102,29 @@ project(hermes_common)
   )
   
   SOURCE_GROUP(
+    "Source Files\\Algebra" FILES 
+    src/algebra/algebra_utilities.cpp
+    src/algebra/matrix.cpp
+    src/algebra/vector.cpp
+    src/algebra/algebra_mixins.cpp
+    src/algebra/dense_matrix_operations.cpp
+    src/algebra/cs_matrix.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Data Structures" FILES 
+    src/data_structures/range.cpp
+    src/data_structures/table.cpp
+  )
+  
+  SOURCE_GROUP(
+    "Source Files\\Utilities" FILES 
+    src/util/callstack.cpp
+    src/util/qsort.cpp
+    src/util/c99_functions.cpp
+  )
+  
+  SOURCE_GROUP(
     "Header Files\\Matrix Solvers" FILES 
     include/solvers/linear_matrix_solver.h
     include/solvers/epetra.h
@@ -102,6 +137,32 @@ project(hermes_common)
     include/solvers/umfpack_solver.h
     include/solvers/precond_ml.h
     include/solvers/precond_ifpack.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Algebra" FILES 
+    include/algebra/algebra_utilities.h
+    include/algebra/matrix.h
+    include/algebra/vector.h
+    include/algebra/cs_matrix.h
+    include/algebra/algebra_mixins.h
+    include/algebra/dense_matrix_operations.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Data Structures" FILES 
+    include/data_structures/array.h
+    include/data_structures/range.h
+    include/data_structures/table.h
+    include/data_structures/hermes_vector.h
+  )
+  
+  SOURCE_GROUP(
+    "Header Files\\Utilities" FILES 
+    include/util/c99_functions.h
+    include/util/compat.h
+    include/util/callstack.h
+    include/util/qsort.h
   )
   
   # Create file with preprocessor definitions exposing the build settings to the source code.

@@ -85,6 +85,9 @@ project(hermes2d)
   # Header files location for the Hermes2d library.
   #
   include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include)
+  include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/algebra)
+  include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/data_structures)
+  include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/util)
   include_directories(${PROJECT_SOURCE_DIR}/../hermes_common/include/solvers)
   include_directories(${PROJECT_SOURCE_DIR})
   include_directories(${PROJECT_SOURCE_DIR}/include)

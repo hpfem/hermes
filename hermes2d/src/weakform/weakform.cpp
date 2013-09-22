@@ -22,7 +22,10 @@
 #include "shapeset_hc_all.h"
 #include "shapeset_hd_all.h"
 #include "shapeset_h1_all.h"
+#include "algebra/dense_matrix_operations.h"
+
 using namespace Hermes::Algebra::DenseMatrixOperations;
+
 namespace Hermes
 {
   namespace Hermes2D
